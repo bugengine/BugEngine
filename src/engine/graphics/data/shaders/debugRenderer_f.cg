@@ -1,0 +1,27 @@
+struct Output
+{
+    float4 color    : COLOR;
+};
+
+
+Output main(            float4 color    : COLOR0,
+                        float4 uv       : TEXCOORD0,
+             uniform    float2 __screen,
+             uniform    sampler2D font)
+{
+    Output OUT;
+    if(uv.z == 0)
+        OUT.color = color;
+    else
+    {
+        float a = tex2D(font, uv.xy).r;
+        if(a > 0)
+        {
+            OUT.color = color;
+            OUT.color.a *= a;
+        }
+        else
+            discard;
+    }
+    return OUT;
+}

@@ -1,0 +1,166 @@
+#set general options for building
+
+import os
+import re
+import Options
+from Logs import warn
+from TaskGen import taskgen,feature,before,after
+import Task
+import Node
+import misc
+
+optims    = [ 'debug', 'release', 'genprofile', 'final']
+platforms = [ 'win32', 'posix', 'psp', 'gp2x', 'nds' ]
+archs     = [ 'amd64', 'x86', 'alpha', 'arm', 'hppa', 'ia64', 'mips', 'ppc', 's390', 's390x', 'sparc' ]
+
+def set_options(opt):
+    opt.sub_options(os.path.join('host', os.name))
+    opt.add_option( '--toolchains',
+                    action='store',
+                    default='',
+                    help='build for the selected toolchains; default is the most adapted toolchain, version release, static')
+    opt.add_option( '--master',
+                    action='store_true',
+                    default=True,
+                    help='build with master files')
+    
+def configure(conf):
+    conf.env['ARCHITECTURES'] = archs
+    conf.env['PLATFORMS']     = platforms
+    conf.env['OPTIMS']        = optims
+
+    conf.check_tool('bison flex', tooldir='mak/tools')
+    conf.sub_config(os.path.join('host', os.name))
+
+    conf.env['DEFAULT_BUILD_TOOL'] = conf.env['BUILD_VARIANTS'][-1]
+
+    selectedvariants = []
+    for optim in optims:
+        for envname in conf.env['BUILD_VARIANTS']:
+            name = optim+'-'+envname
+            env = conf.set_env_name(name, conf.all_envs[envname].copy())
+            env.set_variant(name)
+            env['OPTIMISATION'] = optim
+            env['PREFIX'] = name
+            selectedvariants.append(name)
+                
+    conf.env['BUILD_VARIANTS'] = selectedvariants
+
+    for envname, env in conf.all_envs.iteritems():
+        try: os.mkdir(os.path.join(conf.blddir, envname))
+        except: pass
+
+
+def build(bld):
+    import Options
+    if not Options.options.toolchains:
+        doIt = True
+        for p,pname in bld.env['PROJECTS']:
+            doIt = doIt and not getattr(Options.options, p)
+        if doIt:
+            Options.options.toolchains = 'debug-'+bld.env['DEFAULT_BUILD_TOOL']
+        else:
+            Options.options.toolchains = 'none'
+    selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
+    allvariants = bld.env['BUILD_VARIANTS']
+    selectedvariants = []
+    for v in allvariants:
+        for e in selectedtoolchains:
+            if e.match(v):
+                selectedvariants.append(v)
+                print 'selected variant',v,'for build'
+    bld.env['BUILD_VARIANTS'] = selectedvariants
+
+@taskgen
+@feature('cc','cxx')
+@before('apply_core')
+def filter_sources(self):
+    v = self.env
+    self.source = self.to_list(self.source)
+    rejectedsources = []
+    self.allsources = {}
+    for source in self.source:
+        head,tail = os.path.split(source)
+        while tail:
+            head,tail = os.path.split(head)
+            if tail in v['ARCHITECTURES']:
+                if tail != v['ARCHITECTURE']:
+                    try: self.allsources[tail].append(source)
+                    except KeyError: self.allsources[tail] = [source]
+                    rejectedsources.append(source)
+                    continue
+            if tail in v['PLATFORMS']:
+                if tail != v['PLATFORM']:
+                    try: self.allsources[tail].append(source)
+                    except KeyError: self.allsources[tail] = [source]
+                    rejectedsources.append(source)
+                    continue
+    for src in rejectedsources:
+        self.source.remove(src)
+
+@taskgen
+@feature('cprogram', 'cshlib', 'cstaticlib')
+@after('apply_link')
+@before('apply_lib_vars')
+def add_extra_libs(self):
+	env = self.env
+	for lib in getattr(self,'extralibs',[]):
+		env.append_value('LIB', lib)
+	for libpath in getattr(self,'extralibdirs',[]):
+		libpath = self.path.find_dir(libpath)
+		if not libpath.srcpath(self.env) in env['LIBPATH']: env.append_value('LIBPATH', libpath.srcpath(self.env))
+
+
+def createmasterfile(task):
+    f = open(task.outputs[0].bldpath(task.env), 'w')
+    for src in task.inputs:
+        f.write('#include "../%s"\n' % src.srcpath(task.env).replace('\\','/'))
+    f.close()
+
+MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
+
+@taskgen
+@feature('cc','cxx')
+@before('apply_core')
+@after(filter_sources)
+def make_masterfiles(self):
+    if Options.options.master and self.usemaster and self.source:
+        self.originalsources = self.source
+        self.originalsources.sort()
+        self.mastertasks = []
+        self.source = []
+        mastertask = None
+        cindex   = 0
+        cppindex = 0
+        cnumleft = 0
+        cppnumleft = 0
+        for f in self.originalsources:
+            if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx']:
+                self.source.append(f)
+                continue
+            srcnode = self.path.find_resource(f)
+            if os.path.splitext(f)[1] == '.c':
+                if cnumleft == 0:
+                    cnumleft = 30
+                    masterfile = self.target+'-c-master%d.c' % cindex
+                    cindex = cindex + 1
+                    self.source.append(masterfile)
+                    mastertask = MasterTask(self.env,)
+                    node = self.path.find_or_declare(masterfile)
+                    mastertask.set_outputs(node)
+                    self.mastertasks.append(mastertask)
+                cnumleft = cnumleft - 1
+                mastertask.set_inputs(srcnode)
+            else:
+                if cppnumleft == 0:
+                    cppnumleft = 30
+                    masterfile = self.target+'-cpp-master%d.cpp' % cppindex
+                    cppindex = cppindex + 1
+                    self.source.append(masterfile)
+                    mastertask = MasterTask(self.env,)
+                    node = self.path.find_or_declare(masterfile)
+                    mastertask.set_outputs(node)
+                    self.mastertasks.append(mastertask)
+                cppnumleft = cppnumleft - 1
+                mastertask.set_inputs(srcnode)
+

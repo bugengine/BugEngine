@@ -1,0 +1,33 @@
+struct Output
+{
+    float4 position : POSITION;
+    float4 color    : COLOR0;
+    float4 uv       : TEXCOORD0;
+};
+
+
+Output main(            float2 position : POSITION,
+                        float4 color    : COLOR0,
+                        float3 uv       : TEXCOORD0,
+             uniform    float2 __screen,
+             uniform    float4 fontdim)
+{
+    Output OUT;
+    OUT.position.x = (position.x  - __screen.x/2) / (__screen.x/2);
+    OUT.position.y = (__screen.y/2 - position.y) / (__screen.y/2);
+    OUT.position.z = 0;
+    OUT.position.w = 1;
+    OUT.color    = color;
+    if(uv.z > 0.0f)
+    {
+        OUT.uv.x = (fmod(uv.z,fontdim.w)*fontdim.x + uv.x*fontdim.z)/127.0f;
+        OUT.uv.y = (floor(uv.z/fontdim.w)*fontdim.y + uv.y*fontdim.y)/255.0f;
+        OUT.uv.z = uv.z;
+    }
+    else
+    {
+        OUT.uv.xyz = uv.xyz;
+    }
+    
+    return OUT;
+}

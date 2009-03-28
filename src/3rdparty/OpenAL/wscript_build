@@ -1,0 +1,10 @@
+if not m.has_key(name):
+    exparchoptions = {
+        'win32-x86': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.x86')], libs=['openal32']),
+        'win32-amd64': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.amd64')], libs=['openal32'])
+        }
+    m[name] = util( name, [], '3rdparty', coptions(), coptions(), {}, exparchoptions)
+    m[name].deploy( 'bin.x86/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+    m[name].deploy( 'bin.x86/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+    m[name].deploy( 'bin.amd64/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
+    m[name].deploy( 'bin.amd64/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
