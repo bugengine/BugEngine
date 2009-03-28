@@ -1,0 +1,125 @@
+# set win32 specific options
+# detect tools : msvc, mingw
+
+
+import _winreg
+import os
+import re
+import Tools.msvc
+import Utils
+from Logs import warn
+
+
+tools       = [ 'gcc', 'msvc']
+projects    = [('vs2005', 'Visual Studio 2005'), ('vs2008', 'Visual Studio 2008'), ('vs2005e', 'Visual Studio 2005 Express'), ('vs2008e', 'Visual Studio 2008 Express')]
+
+
+# gets a list of all the Platform SDKs installed (msvc not needed)
+def get_available_platform_sdk(conf = None, selected=[]):
+    pass
+
+
+# adds MSVC vars to environment
+def add_msvc_to_env(conf, version, target, tname):
+    name = 'msvc-win32-%s-%s' %(target,version)
+    Utils.pprint('NORMAL', 'configure for tool %s' % name)
+    newenv = conf.set_env_name(name, conf.env.copy())
+    newenv.set_variant(name)
+    tool,platform,arch,version = name.split('-')
+    newenv['PLATFORM'] = platform
+    newenv['ARCHITECTURE'] = tname
+    newenv['MSVC_VERSIONS'] = version
+    newenv['MSVC_TARGETS'] = target
+    conf.setenv(name)
+    conf.check_tool('msvc')
+    conf.sub_config(os.path.join('..', '..', 'target', 'win32'))
+    conf.sub_config(os.path.join('..', '..', 'target', tname))
+    conf.setenv('default')
+    conf.env['BUILD_VARIANTS'].append(name)
+
+# gets a list of all the MSVC complete suites installed
+def get_available_msvc( conf):
+    allversions = conf.get_msvc_versions()
+    for (version,targets) in allversions:
+        for (target, (tname, paths)) in targets:
+            add_msvc_to_env(conf, version, target, tname)
+
+# adds GCC vars to environment
+gccPlatforms = {
+    'mingw32' : [('win32','x86')],
+    'x86_64-pc-mingw32' : [('win32','amd64')],
+    'powerpc-gekko': [('wii','powerpc')],
+    'psp': [('psp','mips')],
+    'arm-eabi': [('nds', 'arm')]
+}
+    
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
+    import subprocess
+    try: supportedPlatforms = gccPlatforms[gcc_target]
+    except KeyError: supportedPlatforms = []
+    for platform,arch in supportedPlatforms:
+        name = 'gcc-'+platform + '-' + arch + '-' + version
+        Utils.pprint('NORMAL', 'configure for tool %s' % name)
+        newenv = conf.set_env_name(name, conf.env.copy())
+        newenv.set_variant(name)
+        tool,platform,arch,version = name.split('-')
+        newenv['PLATFORM']      = platform
+        newenv['ARCHITECTURE']  = arch
+        newenv['GCC_VERSION']   = version
+        newenv['GCC_TARGET']    = gcc_target
+        conf.setenv(name)
+        conf.env['PATH'] = [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+                            os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+
+        conf.env['CC'] = conf.find_program('%s-gcc-%s' %(gcc_target, version), path_list = conf.env['PATH'], var='CC')
+        conf.env['CPP'] = conf.find_program('%s-cpp' %gcc_target, path_list = conf.env['PATH'], var='CPP')
+        conf.env['CXX'] = conf.find_program('%s-g++' %gcc_target, path_list = conf.env['PATH'], var='CXX')
+        conf.env['AS'] = conf.find_program('%s-as' %gcc_target, path_list = conf.env['PATH'], var='AS')
+        conf.env['AR'] = conf.find_program('%s-ar' %gcc_target, path_list = conf.env['PATH'], var='AR')
+        conf.env['RANLIB'] = conf.find_program('%s-ranlib' %gcc_target, path_list = conf.env['PATH'], var='RANLIB')
+        conf.check_tool('gcc')
+        conf.check_tool('gxx')
+        conf.check_tool('gas')
+        if platform=='win32':
+            conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
+            conf.check_tool('winres')
+        conf.sub_config(os.path.join('..', '..', 'target', platform))
+        conf.sub_config(os.path.join('..', '..', 'target', arch))
+        conf.setenv('default')
+        conf.env['BUILD_VARIANTS'].append(name)
+
+# gets a list of the GCC toolchains installed
+def get_available_gcc(conf):
+    toolchaindir = '../..'
+    if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
+        for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
+            if target in ['.svn', '.cvs']:
+                continue
+            for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+                if version in ['.svn', '.cvs']:
+                    continue
+                name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
+
+
+def set_options(opt):
+    Utils.pprint('NORMAL', 'Host system is Win32')
+    for p,pname in projects:
+        opt.add_option( '--%s'%p,
+                        action='store_true',
+                        default=False,
+                        dest=p,
+                        help='generate solutions for %s'%pname)
+                        
+def configure(conf):
+    import Options
+    conf.env['PROJECTS'] = projects
+    
+    conf.check_tool('msvc_projects', tooldir='mak/tools')
+    
+    conf.env['BUILD_VARIANTS'] = []
+    get_available_gcc(conf)
+    get_available_platform_sdk(conf)
+    get_available_msvc(conf)
+
+    if len(conf.env['BUILD_VARIANTS']) == 0:
+        raise SystemExit("no match found : make sure you selected a valid toolchain")

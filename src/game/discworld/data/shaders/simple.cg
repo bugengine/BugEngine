@@ -1,0 +1,14 @@
+struct Output
+{
+    float4 position : POSITION;
+};
+
+uniform float4x4 transform;
+
+Output main( float4 position : POSITION )
+{
+    Output OUT;
+    OUT.position = mul(transform, position);
+
+    return OUT;
+}

@@ -1,0 +1,139 @@
+/*****************************************************************************\
+* BugEngine                                                                   *
+* Copyright (C) 2005-2008  screetch <screetch@gmail.com>                      *
+*                                                                             *
+* This library is free software; you can redistribute it and/or modify it     *
+* under the terms of the GNU Lesser General Public License as published by    *
+* the Free Software Foundation; either version 2.1 of the License, or (at     *
+* your option) any later version.                                             *
+*                                                                             *
+* This library is distributed in the hope that it will be useful, but WITHOUT *
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
+* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public        *
+* License for more details.                                                   *
+*                                                                             *
+* You should have received a copy of the GNU Lesser General Public License    *
+* along with this library; if not, write to                                   *
+* the Free Software Foundation, Inc.,                                         *
+* 51 Franklin St,                                                             *
+* Fifth Floor,                                                                *
+* Boston, MA 02110-1301                                                       *
+* USA                                                                         *
+\*****************************************************************************/
+
+#ifndef BE_MINITL_INTERLOCKED_INTERLOCKED_
+#define BE_MINITL_INTERLOCKED_INTERLOCKED_
+/*****************************************************************************/
+#if defined(_MSC_VER)
+# if defined(_X86)
+#  include <minitl/interlocked/msvc/x86/interlocked.inl>
+# elif defined(_AMD64)
+#  include <minitl/interlocked/msvc/amd64/interlocked.inl>
+# else
+#  error Architecture not implemented on MSVC
+# endif
+#elif defined(__GNUC__)
+# if defined(_X86)
+#  include <minitl/interlocked/gcc/x86/interlocked.inl>
+# elif defined(_AMD64)
+#  include <minitl/interlocked/gcc/amd64/interlocked.inl>
+# else
+#  error Architecture not implemented on GCC
+# endif
+#else
+# error Compiler not implemented
+#endif
+
+
+namespace minitl
+{
+
+template< typename T >
+class BE_SET_ALIGNMENT(16) interlocked
+{
+private:
+    typedef typename interlocked_::InterlockedType<sizeof(T)>::type   type; 
+    volatile type m_value;
+public:
+    interlocked()                                   {}
+    interlocked(T value) : m_value(value)           {}
+    ~interlocked()                                  {}
+
+    operator T() const                              { return (T)m_value; }
+    T operator=(T value)                            { return (T)interlocked_::set_and_fetch(&m_value, value); }
+    T exchange(T value)                             { return (T)interlocked_::fetch_and_set(&m_value, value); }
+    T addExchange(T value)                          { return (T)interlocked_::fetch_and_add(&m_value, value); }
+
+    T operator++()                                  { return (T)interlocked_::add_and_fetch(&m_value, 1); }
+    T operator++(int)                               { return (T)interlocked_::fetch_and_add(&m_value, 1); }
+    T operator+=(T value)                           { return (T)interlocked_::add_and_fetch(&m_value, value); }
+    T operator--()                                  { return (T)interlocked_::add_and_fetch(&m_value, -1); }
+    T operator--(int)                               { return (T)interlocked_::fetch_and_add(&m_value, -1); }
+    T operator-=(T value)                           { return (T)interlocked_::sub_and_fetch(&m_value, value); }
+    T operator|=(T value)                           { return (T)interlocked_::or_and_fetch(&m_value, value); }
+    T operator&=(T value)                           { return (T)interlocked_::and_and_fetch(&m_value, value); }
+    T operator^=(T value)                           { return (T)interlocked_::xor_and_fetch(&m_value, value); }
+
+    T setConditional(T value, T condition)          { return (T)interlocked_::set_conditional(&m_value, value, condition); }
+};
+
+
+template< typename T >
+class BE_SET_ALIGNMENT(16) iptr
+{
+private:
+    typedef typename interlocked_::InterlockedType<sizeof(T*)>::type  type; 
+    T* volatile m_value;
+public:
+    iptr()                                          {}
+    iptr(T* value) : m_value(value)                 {}
+    ~iptr()                                         {}
+
+    operator const T*() const                       { return m_value; }
+    operator T*()                                   { return m_value; }
+    T* operator->()                                 { return m_value; }
+    const T* operator->() const                     { return m_value; }
+
+    T* operator=(T* value)                          { return (T*)interlocked_::set_and_fetch((type*)&m_value, (type)value); }
+    T* exchange(T* value)                           { return (T*)interlocked_::fetch_and_set((type*)&m_value, (type)value); }
+
+    T* setConditional(T* value, T* condition)       { return (T*)interlocked_::set_conditional((type*)&m_value, (type)value, (type)condition); }
+};
+
+template< typename T >
+class BE_SET_ALIGNMENT(16) itaggedptr
+{
+private:
+    typedef typename interlocked_::TaggedValue  type; 
+    type volatile m_value;
+public:
+    typedef type::TagType   Ticket;
+    itaggedptr()                                    {}
+    itaggedptr(T* value) : m_value(value)           {}
+    ~itaggedptr()                                   {}
+
+    operator const T*() const                       { return (T*)m_value.value; }
+    operator T*()                                   { return (T*)m_value.value; }
+    T* operator->()                                 { return (T*)m_value.value; }
+    const T* operator->() const                     { return (T*)m_value.value; }
+
+    Ticket getTicket()                              { return interlocked_::get_ticket(&m_value); }
+    bool setConditional(T* value, Ticket& condition){ return interlocked_::set_conditional(&m_value, (type::ValueType)value, condition); }
+};
+
+}
+
+
+typedef minitl::interlocked<bool>   i_bool;
+typedef minitl::interlocked<u8>     i_u8;
+typedef minitl::interlocked<u16>    i_u16;
+typedef minitl::interlocked<u32>    i_u32;
+typedef minitl::interlocked<u64>    i_u64;
+typedef minitl::interlocked<i8>     i_i8;
+typedef minitl::interlocked<i16>    i_i16;
+typedef minitl::interlocked<i32>    i_i32;
+typedef minitl::interlocked<i64>    i_i64;
+typedef minitl::interlocked<size_t> i_size_t;
+
+/*****************************************************************************/
+#endif

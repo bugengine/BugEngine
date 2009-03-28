@@ -1,0 +1,7 @@
+if not m.has_key(name):
+    exparchoptions = {
+        'win32': coptions(libs= ['kernel32', 'user32', 'gdi32', 'winspool', 'comdlg32', 'advapi32',
+                                'shell32', 'ole32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32', 'Winmm', 
+                                'userenv', 'ws2_32']),
+        }
+    m[name] = util( name, [], '3rdparty', coptions(), coptions(), {}, exparchoptions)

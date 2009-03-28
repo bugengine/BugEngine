@@ -1,0 +1,64 @@
+/*****************************************************************************\
+* BugEngine                                                                   *
+* Copyright (C) 2005-2008  screetch <screetch@gmail.com>                      *
+*                                                                             *
+* This library is free software; you can redistribute it and/or modify it     *
+* under the terms of the GNU Lesser General Public License as published by    *
+* the Free Software Foundation; either version 2.1 of the License, or (at     *
+* your option) any later version.                                             *
+*                                                                             *
+* This library is distributed in the hope that it will be useful, but WITHOUT *
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
+* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public        *
+* License for more details.                                                   *
+*                                                                             *
+* You should have received a copy of the GNU Lesser General Public License    *
+* along with this library; if not, write to                                   *
+* the Free Software Foundation, Inc.,                                         *
+* 51 Franklin St,                                                             *
+* Fifth Floor,                                                                *
+* Boston, MA 02110-1301                                                       *
+* USA                                                                         *
+\*****************************************************************************/
+
+#ifndef BE_MINITL_TYPE_CAST_
+#define BE_MINITL_TYPE_CAST_
+/*****************************************************************************/
+#include    <core/debug/assert.hh>
+#include    <minitl/ptr/refptr>
+
+namespace minitl
+{
+
+template< typename U, typename T >
+BE_ALWAYSINLINE U checked_cast(T value)
+{
+    Assert(dynamic_cast<U>(value));
+    Assert(dynamic_cast<U>(value) == static_cast<U>(value));
+    return static_cast<U>(value);
+}
+
+template< typename U, typename T >
+BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
+{
+    Assert(dynamic_cast<U*>(value.get()));
+    Assert(dynamic_cast<U*>(value.get()) == static_cast<U*>(value.get()));
+    return refptr<U>(static_cast<U*>(value.get()));
+}
+
+#pragma warning(push)
+#pragma warning(disable:4800)
+
+template< typename U, typename T >
+BE_ALWAYSINLINE U checked_numcast(T value)
+{
+    Assert(static_cast<T>(static_cast<U>(value)) == value);
+    return static_cast<U>(value);
+}
+
+#pragma warning(pop)
+
+}
+
+/*****************************************************************************/
+#endif

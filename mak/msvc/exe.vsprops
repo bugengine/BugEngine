@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="exe"
+	>
+	<Tool
+		Name="VCLinkerTool"
+		IgnoreImportLibrary="true"
+		UseLibraryDependencyInputs="true"
+		AdditionalDependencies="opengl32.lib version.lib winmm.lib Ws2_32.lib"
+		AdditionalLibraryDirectories="$(OutDir)\lib\"
+		SubSystem="2"
+		ImportLibrary="$(OutDir)\lib\$(ProjectName).lib"
+	/>
+</VisualStudioPropertySheet>
