@@ -176,35 +176,35 @@ struct VertexDescription<void>
 #define MAKEVERTEXLIST1(t0, s0)    \
     VertexSemanticList<t0,s0,void>
 #define MAKEVERTEXLIST2(t0, s0, t1, s1)    \
-    VertexSemanticList<t1,s1,MAKEVERTEXLIST1(t0, s0)>
+    VertexSemanticList< t1,s1,MAKEVERTEXLIST1(t0, s0) > 
 #define MAKEVERTEXLIST3(t0, s0, t1, s1, t2, s2)    \
-    VertexSemanticList<t2,s2,MAKEVERTEXLIST2(t0, s0, t1, s1)>
+    VertexSemanticList< t2,s2,MAKEVERTEXLIST2(t0, s0, t1, s1) > 
 #define MAKEVERTEXLIST4(t0, s0, t1, s1, t2, s2, t3, s3)    \
-    VertexSemanticList<t3,s3,MAKEVERTEXLIST3(t0, s0, t1, s1, t2, s2)>
+    VertexSemanticList< t3,s3,MAKEVERTEXLIST3(t0, s0, t1, s1, t2, s2) > 
 #define MAKEVERTEXLIST5(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4)    \
-    VertexSemanticList<t4,s4,MAKEVERTEXLIST4(t0, s0, t1, s1, t2, s2, t3, s3)>
+    VertexSemanticList< t4,s4,MAKEVERTEXLIST4(t0, s0, t1, s1, t2, s2, t3, s3) > 
 #define MAKEVERTEXLIST6(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5)    \
-    VertexSemanticList<t5,s5,MAKEVERTEXLIST5(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4)>
+    VertexSemanticList< t5,s5,MAKEVERTEXLIST5(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4) > 
 #define MAKEVERTEXLIST7(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6)    \
-    VertexSemanticList<t6,s6,MAKEVERTEXLIST6(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5)>
+    VertexSemanticList< t6,s6,MAKEVERTEXLIST6(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5) > 
 #define MAKEVERTEXLIST8(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7)    \
-    VertexSemanticList<t7,s7,MAKEVERTEXLIST7(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6)>
+    VertexSemanticList< t7,s7,MAKEVERTEXLIST7(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6) > 
 #define MAKEVERTEXLIST9(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8)    \
-    VertexSemanticList<t8,s8,MAKEVERTEXLIST8(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7)>
+    VertexSemanticList< t8,s8,MAKEVERTEXLIST8(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7) > 
 #define MAKEVERTEXLIST10(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9)    \
-    VertexSemanticList<t9,s9,MAKEVERTEXLIST9(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8)>
+    VertexSemanticList< t9,s9,MAKEVERTEXLIST9(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8) > 
 #define MAKEVERTEXLIST11(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10)    \
-    VertexSemanticList<t10,s10,MAKEVERTEXLIST10(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9)>
+    VertexSemanticList< t10,s10,MAKEVERTEXLIST10(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9) > 
 #define MAKEVERTEXLIST12(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11)    \
-    VertexSemanticList<t11,s11,MAKEVERTEXLIST11(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10)>
+    VertexSemanticList< t11,s11,MAKEVERTEXLIST11(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10) > 
 #define MAKEVERTEXLIST13(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12)    \
-    VertexSemanticList<t2,s12,MAKEVERTEXLIST12(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11)>
+    VertexSemanticList< t2,s12,MAKEVERTEXLIST12(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11) > 
 #define MAKEVERTEXLIST14(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13)    \
-    VertexSemanticList<t13,s13,MAKEVERTEXLIST13(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12)>
+    VertexSemanticList< t13,s13,MAKEVERTEXLIST13(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12) > 
 #define MAKEVERTEXLIST15(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13, t14, s14)    \
-    VertexSemanticList<t14,s14,MAKEVERTEXLIST14(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13)>
+    VertexSemanticList< t14,s14,MAKEVERTEXLIST14(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13) > 
 #define MAKEVERTEXLIST16(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13, t14, s14, t15, s15)    \
-    VertexSemanticList<t15,s15,MAKEVERTEXLIST15(t0, s0,t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13, t14, s14)>
+    VertexSemanticList< t15,s15,MAKEVERTEXLIST15(t0, s0,t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8, t9, s9, t10, s10, t11, s11, t12, s12, t13, s13, t14, s14) > 
 
 
 
