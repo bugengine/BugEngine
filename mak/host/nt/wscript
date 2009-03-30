@@ -20,16 +20,16 @@ def get_available_platform_sdk(conf = None, selected=[]):
 
 
 # adds MSVC vars to environment
-def add_msvc_to_env(conf, version, target, tname):
-    name = 'msvc-win32-%s-%s' %(target,version)
+def add_msvc_to_env(conf, compiler, version, target, tname):
+    name = '%s-win32-%s-%s' %(compiler,target,version)
     Utils.pprint('NORMAL', 'configure for tool %s' % name)
     newenv = conf.set_env_name(name, conf.env.copy())
     newenv.set_variant(name)
     tool,platform,arch,version = name.split('-')
     newenv['PLATFORM'] = platform
     newenv['ARCHITECTURE'] = tname
-    newenv['MSVC_VERSIONS'] = version
-    newenv['MSVC_TARGETS'] = target
+    newenv['MSVC_VERSIONS'] = [compiler+' '+version]
+    newenv['MSVC_TARGETS'] = [target]
     conf.setenv(name)
     conf.check_tool('msvc')
     conf.sub_config(os.path.join('..', '..', 'target', 'win32'))
@@ -40,9 +40,10 @@ def add_msvc_to_env(conf, version, target, tname):
 # gets a list of all the MSVC complete suites installed
 def get_available_msvc( conf):
     allversions = conf.get_msvc_versions()
-    for (version,targets) in allversions:
+    for (compiler, targets) in allversions:
+        compiler,version = compiler.split()
         for (target, (tname, paths)) in targets:
-            add_msvc_to_env(conf, version, target, tname)
+            add_msvc_to_env(conf, compiler, version, target, tname)
 
 # adds GCC vars to environment
 gccPlatforms = {
