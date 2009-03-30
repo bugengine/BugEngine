@@ -51,6 +51,8 @@ gccPlatforms = {
     'x86_64-pc-mingw32' : [('win32','amd64')],
     'powerpc-gekko': [('wii','powerpc')],
     'psp': [('psp','mips')],
+    'ppu-lv2': [('ps3_ppu', 'powerpc')],
+    'spu-lv2': [('ps3_spu', 'powerpc')],
     'arm-eabi': [('nds', 'arm')]
 }
     
