@@ -13,33 +13,27 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef COLLISION_CREATE_FUNC
-#define COLLISION_CREATE_FUNC
+#ifndef _BT_ACTION_INTERFACE_H
+#define _BT_ACTION_INTERFACE_H
 
-#include "LinearMath/btAlignedObjectArray.h"
-class btCollisionAlgorithm;
-class btCollisionObject;
+class btIDebugDraw;
+class btCollisionWorld;
 
-struct btCollisionAlgorithmConstructionInfo;
+#include "LinearMath/btScalar.h"
 
-///Used by the btCollisionDispatcher to register and create instances for btCollisionAlgorithm
-struct btCollisionAlgorithmCreateFunc
+///Basic interface to allow actions such as vehicles and characters to be updated inside a btDynamicsWorld
+class btActionInterface
 {
-	bool m_swapped;
-	
-	btCollisionAlgorithmCreateFunc()
-		:m_swapped(false)
-	{
-	}
-	virtual ~btCollisionAlgorithmCreateFunc(){};
+	public:
 
-	virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& , btCollisionObject* body0,btCollisionObject* body1)
+	virtual ~btActionInterface()
 	{
-		
-		(void)body0;
-		(void)body1;
-		return 0;
 	}
+
+	virtual void updateAction( btCollisionWorld* collisionWorld, btScalar deltaTimeStep)=0;
+
+	virtual void debugDraw(btIDebugDraw* debugDrawer) = 0;
+
 };
-#endif //COLLISION_CREATE_FUNC
 
+#endif //_BT_ACTION_INTERFACE_H
