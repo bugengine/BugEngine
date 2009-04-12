@@ -34,29 +34,31 @@ pool<T>::pool(size_t capacity, size_t alignment)
 :   m_pool(BugEngine::Malloc::internalAllocArray<T>(capacity, alignment))
 ,   m_end((char*)m_pool + BE_ALIGN(sizeof(T),alignment)*capacity)
 {
+    const size_t aligned_size = BE_ALIGN(sizeof(T),alignment);
     for(size_t i = 0; i < capacity-1; ++i)
-        m_items.push((inode*)((char*)m_pool+i*BE_ALIGN(sizeof(T),alignment)));
+        m_items.push((inode*)((char*)m_pool+i*aligned_size));
 }
 
 template< typename T >
 pool<T>::~pool()
 {
-    BugEngine::Malloc::internalFree(m_pool);
+    //BugEngine::Malloc::internalFree(m_pool);
 }
 
 template< typename T >
 T* pool<T>::allocate()
 {
-    T* result = (T*)m_items.pop();
+    /*T* result = (T*)m_items.pop();
     Assert(result >= m_pool && result < m_end);
-    return result;
+    return result;*/
+    return 0;
 }
 
 template< typename T >
 void pool<T>::release(T* t)
 {
-    Assert(t >= m_pool && t < m_end);
-    m_items.push((inode*)t);
+    /*Assert(t >= m_pool && t < m_end);
+    m_items.push((inode*)t);*/
 }
 
 }
