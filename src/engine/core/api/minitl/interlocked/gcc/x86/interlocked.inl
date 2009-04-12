@@ -92,7 +92,7 @@ struct BE_SET_ALIGNMENT(4) TaggedValue
 inline long set_conditional(volatile long* dst, long compare, long value)
 {
     long prev;
-    asm volatile ("lock; cmpxchgl %1, %2"
+    __asm__ __volatile__ ("lock; cmpxchgl %1, %2"
                   : "=a" (prev)
                   : "r" (value), "m" (*(dst)), "0"(compare)
                   : "memory", "cc");
@@ -109,19 +109,19 @@ inline long long set_conditional(volatile long long* dst, long long compare, lon
             "movl  4(%%ecx),%%ecx\n\t"
             "lock\n\t cmpxchg8b %1\n\t"
             "popl  %%ebx"
-             : "=A"(result), "=m"(*(int64_t *)dst)
-             : "m"(*(int64_t *)dst)
+             : "=A"(result), "=m"(*(i64 *)dst)
+             : "m"(*(i64 *)dst)
              , "0"(compare)
              , "c"(&value)
              : "memory", "esp"
-#if __INTEL_COMPILER
+#if defined(BE_COMPILER_INTEL)
              ,"ebx"
 #endif
     );
 #else
     union {
-        int64_t i64;
-        int32_t i32[2];
+        i64 i64;
+        i32 i32[2];
     };
     i64 = value;
     __asm__ __volatile__ (
@@ -139,7 +139,7 @@ inline long long set_conditional(volatile long long* dst, long long compare, lon
 inline void* set_conditional(void* volatile* dst, void* compare, void* value)
 {
     void* prev;
-    asm volatile ("lock; cmpxchgl %1, %2"
+    __asm__ volatile ("lock; cmpxchgl %1, %2"
                   : "=a" (prev)
                   : "r" (value), "m" (*(dst)), "0"(compare)
                   : "memory", "cc");
@@ -181,7 +181,7 @@ inline void* set_and_fetch(void * volatile * dst, void* value)
 inline long fetch_and_set(volatile long* dst, long value)
 {
     long prev;
-    asm volatile ("xchgl %0, %1"
+    __asm__ __volatile__ ("xchgl %0, %1"
                   : "=a" (prev), "+m" (*dst)
                   : "r" (value));
     return prev;
@@ -196,7 +196,7 @@ inline long long fetch_and_set(volatile long long* dst, long long value)
 inline void* fetch_and_set(void * volatile * dst, void* value)
 {
     void* prev;
-    asm volatile ("xchgl %0, %1"
+    __asm__ __volatile__ ("xchgl %0, %1"
                   : "=a" (prev), "+m" (*dst)
                   : "r" (value));
     return prev;
@@ -206,7 +206,7 @@ inline void* fetch_and_set(void * volatile * dst, void* value)
 inline long fetch_and_add(volatile long* dst, long value)
 {
     long old;
-    asm volatile ("lock; xaddl %0,%1"
+    __asm__ __volatile__ ("lock; xaddl %0,%1"
                   : "=a" (old), "=m" (*dst)
                   : "a" (value), "m" (*dst)
                   : "memory", "cc");
@@ -223,7 +223,7 @@ inline long long fetch_and_add(volatile long long* dst, long long value)
 inline long add_and_fetch(volatile long* dst, long value)
 {
     long old;
-    asm volatile ("lock; xaddl %0,%1"
+    __asm__ __volatile__ ("lock; xaddl %0,%1"
                   : "=a" (old), "=m" (*dst)
                   : "a" (value), "m" (*dst)
                   : "memory", "cc");

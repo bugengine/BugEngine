@@ -26,7 +26,10 @@
 #define BE_CORE_COMPILERS_H_
 /*****************************************************************************/
 
-#ifdef _MSC_VER
+#if defined(__INTEL_COMPILER)
+# define BE_COMPILER_INTEL      1
+# define BE_COMPILER_NAME       "INTEL"
+#elif defined(_MSC_VER)
 # define BE_COMPILER_MSVC       1
 # define BE_COMPILER_NAME       "MSVC"
 #elif defined(__GNUC__)
@@ -39,6 +42,9 @@
 #ifdef BE_COMPILER_MSVC
 # define BE_ALIGNOF(t)          __alignof(t)
 # define BE_SET_ALIGNMENT(n)    __declspec(align(n))
+#elif defined(BE_COMPILER_INTEL)
+# define BE_ALIGNOF(t)          __alignof(t)
+# define BE_SET_ALIGNMENT(n)    __declspec(align(n))
 #else
 # define BE_ALIGNOF(t)          __alignof__(t)
 # define BE_SET_ALIGNMENT(n)    __attribute__ ((aligned(n)))
@@ -47,7 +53,7 @@
 
 
 
-#ifdef BE_COMPILER_MSVC
+#if defined(BE_COMPILER_MSVC) || defined(BE_COMPILER_INTEL)
 typedef signed __int8          i8;
 typedef signed __int16         i16;
 typedef signed __int32         i32;
@@ -56,7 +62,7 @@ typedef unsigned __int8        u8;
 typedef unsigned __int16       u16;
 typedef unsigned __int32       u32;
 typedef unsigned __int64       u64;
-#elif defined BE_COMPILER_GCC
+#elif defined(BE_COMPILER_GCC)
 # include <stdint.h>
 # include <stdlib.h>
 typedef int8_t                 i8;
@@ -72,7 +78,7 @@ typedef uint64_t               u64;
 #endif
 typedef u8                      byte;
 
-#ifdef BE_COMPILER_MSVC
+#if defined(BE_COMPILER_MSVC) || defined(BE_COMPILER_INTEL)
 # define _CRT_SECURE_NO_WARNINGS 1
 # define _CRT_SECURE_NO_DEPRECATE 1
 # pragma warning(disable:4275)
@@ -95,7 +101,7 @@ typedef u8                      byte;
 # define    override
 # define BE_THREAD_LOCAL        __thread
 # define BE_NOINLINE            __attribute__((noinline))
-# define BE_ALWAYSINLINE            __attribute__((always_inline))
+# define BE_ALWAYSINLINE        __attribute__((always_inline))
 #endif
 
 #define NOTHROW     throw()
