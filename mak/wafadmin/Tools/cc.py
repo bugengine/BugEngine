@@ -4,9 +4,10 @@
 
 "Base for c programs/libraries"
 
+import os
 import TaskGen, Build, Utils, Task
 from Logs import debug
-import ccroot # <- do not remove
+import ccroot
 from TaskGen import feature, before, extension, after
 
 g_cc_flag_vars = [
@@ -16,10 +17,9 @@ g_cc_flag_vars = [
 
 EXT_CC = ['.c']
 
-TaskGen.bind_feature('cc', ['apply_core'])
-
 g_cc_type_vars = ['CCFLAGS', 'LINKFLAGS']
 
+# TODO remove in waf 1.6
 class cc_taskgen(ccroot.ccroot_abstract):
 	pass
 
@@ -34,7 +34,9 @@ def init_cc(self):
 		raise Utils.WafError("At least one compiler (gcc, ..) must be selected")
 
 @feature('cc')
+@after('apply_incpaths')
 def apply_obj_vars_cc(self):
+	"""after apply_incpaths for INC_PATHS"""
 	env = self.env
 	app = env.append_unique
 	cpppath_st = env['CPPPATH_ST']
@@ -50,7 +52,9 @@ def apply_obj_vars_cc(self):
 		app('_CCINCFLAGS', cpppath_st % i)
 
 @feature('cc')
+@after('apply_lib_vars')
 def apply_defines_cc(self):
+	"""after uselib is set for CCDEFINES"""
 	self.defines = getattr(self, 'defines', [])
 	lst = self.to_list(self.defines) + self.to_list(self.env['CCDEFINES'])
 	milst = []
@@ -84,18 +88,13 @@ def c_hook(self, node):
 	return task
 
 cc_str = '${CC} ${CCFLAGS} ${CPPFLAGS} ${_CCINCFLAGS} ${_CCDEFFLAGS} ${CC_SRC_F}${SRC} ${CC_TGT_F}${TGT}'
-link_str = '${LINK_CC} ${CCLNK_SRC_F}${SRC} ${CCLNK_TGT_F}${TGT} ${LINKFLAGS}'
-vnum_link_str = '${LINK_CC} ${CCLNK_SRC_F}${SRC} ${CCLNK_TGT_F}${TGT[1].bldpath(env)} ${LINKFLAGS} && ln -sf ${TGT[1].name} ${TGT[0].bldpath(env)}'
-
-cls = Task.simple_task_type('cc', cc_str, 'GREEN', ext_out='.o', ext_in='.c')
+cls = Task.simple_task_type('cc', cc_str, 'GREEN', ext_out='.o', ext_in='.c', shell=False)
 cls.scan = ccroot.scan
 cls.vars.append('CCDEPS')
 
-cls = Task.simple_task_type('cc_link', link_str, color='YELLOW', ext_in='.o')
+link_str = '${LINK_CC} ${CCLNK_SRC_F}${SRC} ${CCLNK_TGT_F}${TGT} ${LINKFLAGS}'
+cls = Task.simple_task_type('cc_link', link_str, color='YELLOW', ext_in='.o', shell=False)
 cls.maxjobs = 1
-cls = Task.simple_task_type('vnum_cc_link', vnum_link_str, color='YELLOW', ext_in='.o')
-cls.maxjobs = 1
-
-
-TaskGen.declare_order('apply_incpaths', 'apply_defines_cc', 'apply_core', 'apply_lib_vars', 'apply_obj_vars_cc', 'apply_obj_vars')
+cls2 = Task.task_type_from_func('vnum_cc_link', ccroot.link_vnum, cls.vars, color='CYAN', ext_in='.o')
+cls2.maxjobs = 1
 

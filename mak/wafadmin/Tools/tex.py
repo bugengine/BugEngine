@@ -18,9 +18,7 @@ def scan(self):
 	names = []
 	if not node: return (nodes, names)
 
-	fi = open(node.abspath(env), 'r')
-	code = fi.read()
-	fi.close()
+	code = Utils.readf(node.abspath(env))
 
 	curdirnode = self.curdirnode
 	abs = curdirnode.abspath()
@@ -79,9 +77,7 @@ def tex_build(task, command='LATEX'):
 
 	# look in the .aux file if there is a bibfile to process
 	try:
-		file = open(aux_node.abspath(env), 'r')
-		ct = file.read()
-		file.close()
+		ct = Utils.readf(aux_node.abspath(env))
 	except (OSError, IOError):
 		error('error bibtex scan')
 	else:
@@ -228,11 +224,11 @@ def detect(conf):
 	v['DVIPSFLAGS'] = '-Ppdf'
 
 b = Task.simple_task_type
-b('tex', '${TEX} ${TEXFLAGS} ${SRC}', color='BLUE')
-b('bibtex', '${BIBTEX} ${BIBTEXFLAGS} ${SRC}', color='BLUE')
-b('dvips', '${DVIPS} ${DVIPSFLAGS} ${SRC} -o ${TGT}', color='BLUE', after="latex pdflatex tex bibtex")
-b('dvipdf', '${DVIPDF} ${DVIPDFFLAGS} ${SRC} ${TGT}', color='BLUE', after="latex pdflatex tex bibtex")
-b('pdf2ps', '${PDF2PS} ${PDF2PSFLAGS} ${SRC} ${TGT}', color='BLUE', after="dvipdf pdflatex")
+b('tex', '${TEX} ${TEXFLAGS} ${SRC}', color='BLUE', shell=False)
+b('bibtex', '${BIBTEX} ${BIBTEXFLAGS} ${SRC}', color='BLUE', shell=False)
+b('dvips', '${DVIPS} ${DVIPSFLAGS} ${SRC} -o ${TGT}', color='BLUE', after="latex pdflatex tex bibtex", shell=False)
+b('dvipdf', '${DVIPDF} ${DVIPDFFLAGS} ${SRC} ${TGT}', color='BLUE', after="latex pdflatex tex bibtex", shell=False)
+b('pdf2ps', '${PDF2PS} ${PDF2PSFLAGS} ${SRC} ${TGT}', color='BLUE', after="dvipdf pdflatex", shell=False)
 b = Task.task_type_from_func
 cls = b('latex', latex_build, vars=latex_vardeps)
 cls.scan = scan

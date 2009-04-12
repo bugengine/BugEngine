@@ -11,7 +11,7 @@ from TaskGen import extension, taskgen, after, before
 EXT_ASM = ['.s', '.S', '.asm', '.ASM', '.spp', '.SPP']
 
 as_str = '${AS} ${ASFLAGS} ${_ASINCFLAGS} ${SRC} -o ${TGT}'
-Task.simple_task_type('asm', as_str, 'PINK', ext_out='.o')
+Task.simple_task_type('asm', as_str, 'PINK', ext_out='.o', shell=False)
 
 @extension(EXT_ASM)
 def asm_hook(self, node):
@@ -35,8 +35,7 @@ def asm_incflags(self):
 	else: self.env['_ASINCFLAGS'] = self.env['_CCINCFLAGS']
 
 def detect(conf):
-	comp = os.environ.get('AS', '')
-	if not comp: comp = conf.env['AS']
+	comp = conf.environ.get('AS', '')
 	if not comp: comp = conf.find_program('as', var='AS')
 	if not comp: comp = conf.find_program('gas', var='AS')
 	if not comp: comp = conf.env['CC']

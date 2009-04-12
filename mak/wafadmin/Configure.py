@@ -19,12 +19,18 @@ logic. The data files (Environments) must contain configuration data only (flags
 Note: the c/c++ related code is in the module config_c
 """
 
-import os, shlex
+import os, shlex, sys, time
 try: import cPickle
 except ImportError: import pickle as cPickle
 import Environment, Utils, Options
 from Logs import warn
 from Constants import *
+
+conf_template = '''# project %(app)s configured on %(now)s by
+# waf %(wafver)s (abi %(abi)s, python %(pyver)x on %(systype)s)
+# using %(args)s
+#
+'''
 
 class ConfigurationError(Utils.WscriptError):
 	pass
@@ -43,7 +49,7 @@ def find_file(filename, path_list):
 			return directory
 	return ''
 
-def find_program_impl(env, filename, path_list=[], var=None):
+def find_program_impl(env, filename, path_list=[], var=None, environ=None):
 	"""find a program in folders path_lst, and sets env[var]
 	@param env: environment
 	@param filename: name of the program to search for
@@ -52,14 +58,18 @@ def find_program_impl(env, filename, path_list=[], var=None):
 	@return: either the value that is referenced with [var] in env or os.environ
          or the first occurrence filename or '' if filename could not be found
 """
+
+	if not environ:
+		environ = os.environ
+
 	try: path_list = path_list.split()
 	except AttributeError: pass
 
 	if var:
-		if var in os.environ: env[var] = os.environ[var]
+		if var in environ: env[var] = environ[var]
 		if env[var]: return env[var]
 
-	if not path_list: path_list = os.environ['PATH'].split(os.pathsep)
+	if not path_list: path_list = environ['PATH'].split(os.pathsep)
 
 	ext = (Options.platform == 'win32') and '.exe,.com,.bat,.cmd' or ''
 	for y in [filename+x for x in ext.split(',')]:
@@ -70,22 +80,23 @@ def find_program_impl(env, filename, path_list=[], var=None):
 				return x
 	return ''
 
-class ConfigurationContext(object):
+class ConfigurationContext(Utils.Context):
 	tests = {}
 	error_handlers = []
 	def __init__(self, env=None, blddir='', srcdir=''):
-		self.env       = None
+		self.env = None
 		self.envname = ''
+
+		self.environ = dict(os.environ)
 
 		self.line_just = 40
 
 		self.blddir = blddir
 		self.srcdir = srcdir
-		self.cachedir = os.path.join(blddir, CACHE_DIR)
-
 		self.all_envs = {}
-		self.defines = {}
-		self.cwd = os.getcwd()
+
+		# curdir: necessary for recursion
+		self.cwd = self.curdir = os.getcwd()
 
 		self.tools = [] # tools loaded in the configuration, and that will be loaded when building
 
@@ -96,15 +107,39 @@ class ConfigurationContext(object):
 		self.hash = 0
 		self.files = []
 
+		self.tool_cache = []
+
+		if self.blddir:
+			self.post_init()
+
+	def post_init(self):
+
+		self.cachedir = os.path.join(self.blddir, CACHE_DIR)
+
 		path = os.path.join(self.blddir, WAF_CONFIG_LOG)
 		try: os.unlink(path)
 		except (OSError, IOError): pass
-		self.log = open(path, 'wb')
+		self.log = open(path, 'w')
+		print getattr(Utils.g_module, 'APPNAME', '')
+
+		app = getattr(Utils.g_module, 'APPNAME', '')
+		if app:
+			ver = getattr(Utils.g_module, 'VERSION', '')
+			if ver:
+				app = "%s (%s)" % (app, ver)
+
+		now = time.ctime()
+		pyver = sys.hexversion
+		systype = sys.platform
+		args = " ".join(sys.argv)
+		wafver = WAFVERSION
+		abi = ABI
+		self.log.write(conf_template % vars())
 
 	def __del__(self):
 		"""cleanup function: close config.log"""
 
-		# may be ran by the gc, not always after initiazliation
+		# may be ran by the gc, not always after initialization
 		if hasattr(self, 'log') and self.log:
 			self.log.close()
 
@@ -113,10 +148,19 @@ class ConfigurationContext(object):
 
 	def check_tool(self, input, tooldir=None, funs=None):
 		"load a waf tool"
+
 		tools = Utils.to_list(input)
 		if tooldir: tooldir = Utils.to_list(tooldir)
 		for tool in tools:
 			tool = tool.replace('++', 'xx')
+			# avoid loading the same tool more than once with the same functions
+			# used by composite projects
+
+			mag = (tool, id(self.env), funs)
+			if mag in self.tool_cache:
+				continue
+			self.tool_cache.append(mag)
+
 			module = Utils.load_tool(tool, tooldir)
 			func = getattr(module, 'detect', None)
 			if func:
@@ -125,25 +169,18 @@ class ConfigurationContext(object):
 
 			self.tools.append({'tool':tool, 'tooldir':tooldir, 'funs':funs})
 
-	def sub_config(self, dir):
+	def sub_config(self, k):
 		"executes the configure function of a wscript module"
+		self.recurse(k, name='configure')
 
-		current = self.cwd
+	def pre_recurse(self, name_or_mod, path, nexdir):
+		return {'conf': self, 'ctx': self}
 
-		self.cwd = os.path.join(self.cwd, dir)
-		cur = os.path.join(self.cwd, WSCRIPT_FILE)
-
-		mod = Utils.load_module(cur)
-		if not hasattr(mod, 'configure'):
-			self.fatal('the module %s has no configure function; make sure such a function is defined' % cur)
-
-		ret = mod.configure(self)
-		global autoconfig
-		if autoconfig:
-			self.hash = Utils.hash_function_with_globals(self.hash, mod.configure)
-			self.files.append(os.path.abspath(cur))
-		self.cwd = current
-		return ret
+	def post_recurse(self, name_or_mod, path, nexdir):
+		if not autoconfig:
+			return
+		self.hash = hash((self.hash, getattr(name_or_mod, 'waf_hash_val', name_or_mod)))
+		self.files.append(path)
 
 	def store(self, file=''):
 		"save the config results into the cache file"
@@ -187,7 +224,7 @@ class ConfigurationContext(object):
 	def add_os_flags(self, var, dest=None):
 		if not dest: dest = var
 		# do not use 'get' to make certain the variable is not defined
-		try: self.env[dest] = Utils.to_list(os.environ[var])
+		try: self.env[dest] = Utils.to_list(self.environ[var])
 		except KeyError: pass
 
 	def check_message_1(self, sr):
@@ -199,23 +236,22 @@ class ConfigurationContext(object):
 		Utils.pprint(color, sr)
 
 	def check_message(self, th, msg, state, option=''):
-		"print an checking message. This function is used by other checking functions"
 		sr = 'Checking for %s %s' % (th, msg)
 		self.check_message_1(sr)
 		p = self.check_message_2
 		if state: p('ok ' + option)
 		else: p('not found', 'YELLOW')
 
+	# FIXME remove in waf 1.6
 	# the parameter 'option' is not used (kept for compatibility)
 	def check_message_custom(self, th, msg, custom, option='', color='PINK'):
-		"""print an checking message. This function is used by other checking functions"""
 		sr = 'Checking for %s %s' % (th, msg)
 		self.check_message_1(sr)
 		self.check_message_2(custom, color)
 
 	def find_program(self, filename, path_list=[], var=None, mandatory=False):
 		"wrapper that adds a configuration message"
-		ret = find_program_impl(self.env, filename, path_list, var)
+		ret = find_program_impl(self.env, filename, path_list, var, environ=self.environ)
 		self.check_message('program', filename, ret, ret)
 		self.log.write('find program=%r paths=%r var=%r -> %r\n\n' % (filename, path_list, var, ret))
 		if not ret and mandatory:
@@ -254,6 +290,7 @@ class ConfigurationContext(object):
 		self.rules = Utils.to_list(rules)
 		for x in self.rules:
 			f = getattr(self, x)
+			if not f: self.fatal("No such method '%s'." % x)
 			try:
 				f()
 			except Exception, e:
@@ -263,7 +300,7 @@ class ConfigurationContext(object):
 				elif ret == CONTINUE:
 					continue
 				else:
-					raise
+					self.fatal(e)
 
 	def err_handler(self, fun, error):
 		pass

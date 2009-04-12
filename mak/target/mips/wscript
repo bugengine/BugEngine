@@ -9,3 +9,6 @@ def configure(conf):
     conf.env.append_unique('CCDEFINES', ['_MIPS'])
     conf.env.append_unique('CXXDEFINES', ['_MIPS'])
 
+def build(bld):
+    pass
+

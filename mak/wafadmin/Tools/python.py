@@ -7,10 +7,9 @@
 
 import os, sys
 import TaskGen, Utils, Utils, Runner, Options, Build
-from Logs import debug, warn
+from Logs import debug, warn, info
 from TaskGen import extension, taskgen, before, after, feature
 from Configure import conf
-import pproc
 
 EXT_PY = ['.py']
 FRAG_2 = '''
@@ -56,11 +55,9 @@ def init_pyembed(self):
 	if not 'PYEMBED' in self.uselib:
 		self.uselib.append('PYEMBED')
 
-TaskGen.bind_feature('py', ['apply_core'])
-
 @extension(EXT_PY)
 def process_py(self, node):
-	if Options.is_install and self.install_path:
+	if self.bld.is_install and self.install_path:
 		if not hasattr(self, '_py_installed_files'):
 			self._py_installed_files = []
 		installed_files = self.bld.install_files(
@@ -71,14 +68,13 @@ def process_py(self, node):
 		self._py_installed_files.extend(installed_files)
 
 @feature('py')
-@after('install')
 def byte_compile_py(self):
-	if Options.is_install and self.install_path:
+	if self.bld.is_install and self.install_path:
 		installed_files = self._py_installed_files
 		if not installed_files:
 			return
-		if Options.commands['uninstall']:
-			print "* removing byte compiled python files"
+		if self.bld.is_install > 0:
+			info("* removing byte compiled python files")
 			for fname in installed_files:
 				try:
 					os.remove(fname + 'c')
@@ -89,9 +85,9 @@ def byte_compile_py(self):
 				except OSError:
 					pass
 
-		if Options.commands['install']:
+		if self.bld.is_install < 0:
 			if self.env['PYC'] or self.env['PYO']:
-				print "* byte compiling python files"
+				info("* byte compiling python files")
 
 			if self.env['PYC']:
 				program = ("""
@@ -101,7 +97,7 @@ for pyfile in sys.argv[1:]:
 """)
 				argv = [self.env['PYTHON'], "-c", program ]
 				argv.extend(installed_files)
-				retval = pproc.Popen(argv).wait()
+				retval = Utils.pproc.Popen(argv).wait()
 				if retval:
 					raise Utils.WafError("bytecode compilation failed")
 
@@ -114,7 +110,7 @@ for pyfile in sys.argv[1:]:
 """)
 				argv = [self.env['PYTHON'], self.env['PYFLAGS_OPT'], "-c", program ]
 				argv.extend(installed_files)
-				retval = pproc.Popen(argv).wait()
+				retval = Utils.pproc.Popen(argv).wait()
 				if retval:
 					raise Utils.WafError("bytecode compilation failed")
 
@@ -140,7 +136,7 @@ def _get_python_variables(python_exe, variables, imports=['import sys']):
 		del os_env['MACOSX_DEPLOYMENT_TARGET'] # see comments in the OSX tool
 	except KeyError:
 		pass
-	proc = pproc.Popen([python_exe, "-c", '\n'.join(program)], stdout=pproc.PIPE, env=os_env)
+	proc = Utils.pproc.Popen([python_exe, "-c", '\n'.join(program)], stdout=Utils.pproc.PIPE, env=os_env)
 	output = proc.communicate()[0].split("\n")
 	if proc.returncode:
 		if Options.options.verbose:
@@ -172,6 +168,9 @@ def check_python_headers(conf):
 
 	Note: this test requires that check_python_version was previously
 	executed and successful."""
+
+	if not conf.env['CC_NAME'] and not conf.env['CXX_NAME']:
+		conf.fatal('load a compiler first (gcc, g++, ..)')
 
 	env = conf.env
 	python = env['PYTHON']
@@ -208,7 +207,7 @@ MACOSX_DEPLOYMENT_TARGET = %r
 
 	if python_MACOSX_DEPLOYMENT_TARGET:
 		conf.env['MACOSX_DEPLOYMENT_TARGET'] = python_MACOSX_DEPLOYMENT_TARGET
-		os.environ['MACOSX_DEPLOYMENT_TARGET'] = python_MACOSX_DEPLOYMENT_TARGET
+		conf.environ['MACOSX_DEPLOYMENT_TARGET'] = python_MACOSX_DEPLOYMENT_TARGET
 
 	env['pyext_PATTERN'] = '%s'+python_SO
 
@@ -330,7 +329,7 @@ def check_python_version(conf, minver=None):
 	# Get python version string
 	cmd = [python, "-c", "import sys\nfor x in sys.version_info: print(str(x))"]
 	debug('python: Running python command %r' % cmd)
-	proc = pproc.Popen(cmd, stdout=pproc.PIPE)
+	proc = Utils.pproc.Popen(cmd, stdout=Utils.pproc.PIPE)
 	lines = proc.communicate()[0].split()
 	assert len(lines) == 5, "found %i lines, expected 5: %r" % (len(lines), lines)
 	pyver_tuple = (int(lines[0]), int(lines[1]), int(lines[2]), lines[3], int(lines[4]))
@@ -343,8 +342,8 @@ def check_python_version(conf, minver=None):
 		pyver = '.'.join([str(x) for x in pyver_tuple[:2]])
 		conf.env['PYTHON_VERSION'] = pyver
 
-		if 'PYTHONDIR' in os.environ:
-			pydir = os.environ['PYTHONDIR']
+		if 'PYTHONDIR' in conf.environ:
+			pydir = conf.environ['PYTHONDIR']
 		else:
 			if sys.platform == 'win32':
 				(python_LIBDEST,) = \
@@ -379,8 +378,8 @@ def check_python_module(conf, module_name):
 	"""
 	Check if the selected python interpreter can import the given python module.
 	"""
-	result = not pproc.Popen([conf.env['PYTHON'], "-c", "import %s" % module_name],
-			   stderr=pproc.PIPE, stdout=pproc.PIPE).wait()
+	result = not Utils.pproc.Popen([conf.env['PYTHON'], "-c", "import %s" % module_name],
+			   stderr=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE).wait()
 	conf.check_message('Python module', module_name, result)
 	if not result:
 		conf.fatal("Python module not found.")

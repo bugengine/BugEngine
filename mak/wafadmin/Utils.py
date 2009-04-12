@@ -22,7 +22,7 @@ Utilities, the stable ones are the following:
 		m.update(filename)
 		return m.digest()
 
-    To replace the function in your project, use something like this:
+	To replace the function in your project, use something like this:
 	import Utils
 	Utils.h_file = h_file
 
@@ -33,7 +33,8 @@ Utilities, the stable ones are the following:
 
 """
 
-import os, sys, imp, string, errno, traceback, inspect, re
+import os, sys, imp, string, errno, traceback, inspect, re, shutil
+
 try: from UserDict import UserDict
 except ImportError: from collections import UserDict
 if sys.hexversion >= 0x2060000:
@@ -119,7 +120,7 @@ except ImportError:
 		from md5 import md5
 
 	def h_file(filename):
-		f = file(filename,'rb')
+		f = open(filename, 'rb')
 		m = md5()
 		readBytes = 100000
 		while (filename):
@@ -147,8 +148,11 @@ def exec_command(s, **kw):
 		del(kw['log'])
 	kw['shell'] = isinstance(s, str)
 
-	proc = pproc.Popen(s, **kw)
-	return proc.wait()
+	try:
+		proc = pproc.Popen(s, **kw)
+		return proc.wait()
+	except WindowsError:
+		return -1
 
 if is_win32:
 	old_log = exec_command
@@ -170,7 +174,7 @@ if is_win32:
 listdir = os.listdir
 if is_win32:
 	def listdir_win32(s):
-		if re.match('^[A-Z]:$', s):
+		if re.match('^[A-Za-z]:$', s):
 			# os.path.isdir fails if s contains only the drive name... (x:)
 			s += os.sep
 		if not os.path.isdir(s):
@@ -228,17 +232,16 @@ def load_module(file_path, name=WSCRIPT_FILE):
 	module = imp.new_module(name)
 
 	try:
-		file = open(file_path, 'r')
+		code = readf(file_path)
 	except (IOError, OSError):
 		raise WscriptError('The file %s could not be opened!' % file_path)
 
+	module.waf_hash_val = code
+
 	module_dir = os.path.dirname(file_path)
 	sys.path.insert(0, module_dir)
-	# Python 3.0 will be a pain to support
-	# exec(file.read(), module.__dict__)
-	exec file in module.__dict__
+	exec(code, module.__dict__)
 	sys.path.remove(module_dir)
-	if file: file.close()
 
 	g_loaded_modules[file_path] = module
 
@@ -248,6 +251,7 @@ def set_main_module(file_path):
 	"Load custom options, if defined"
 	global g_module
 	g_module = load_module(file_path, 'wscript_main')
+	g_module.root_path = file_path
 
 	# note: to register the module globally, use the following:
 	# sys.modules['wscript_main'] = g_module
@@ -270,7 +274,7 @@ try:
 except ImportError:
 	pass
 else:
-	if sys.stderr.isatty():
+	if sys.stderr.isatty() and os.environ['TERM'] != 'dumb':
 		def myfun():
 			dummy_lines, cols = struct.unpack("HHHH", \
 			fcntl.ioctl(sys.stderr.fileno(),termios.TIOCGWINSZ , \
@@ -360,55 +364,6 @@ def h_fun(fun):
 			pass
 		return h
 
-_hash_whitelist_types = (
-	str,
-	unicode,
-	int,
-	bool,
-	long,
-	float,
-	# tuple handled separately
-	)
-
-try:
-    all
-except NameError: # for compatibility with Python < 2.5
-    def all(iterable):
-        "Returns True if all elements are true"
-        for element in iterable:
-            if not element:
-                return False
-        return True
-
-def _type_hash_is_stable(value):
-	if isinstance(value, _hash_whitelist_types):
-		return True
-	if isinstance(value, tuple):
-		# (for Python >= 2.4 you can remove the [])
-		return all([_type_hash_is_stable(item) for item in value])
-	return False
-
-
-def hash_function_with_globals(prevhash, func):
-	"""
-	hash a function (object) and the global vars needed from outside
-	ignore unhashable global variables (lists)
-
-	prevhash: previous hash value to be combined with this one;
-	if there is no previous value, zero should be used here
-
-	func: a Python function object.
-	"""
-	assert type(func) is type(h_fun)
-	for name, value in func.func_globals.iteritems():
-		# check in the whitelist
-		if not _type_hash_is_stable(value):
-			#print "NOT hashed: ", name, " (type ", type(value), ")"
-			continue
-		prevhash = hash( (prevhash, name, value) )
-		#print "hashed: ", name, " => ", value, " => ", hash(value)
-	return hash( (prevhash, inspect.getsource(func)) )
-
 def pprint(col, str, label='', sep=os.linesep):
 	"print messages in color"
 	sys.stderr.write("%s%s%s %s%s" % (Logs.colors(col), str, Logs.colors.NORMAL, label, sep))
@@ -440,8 +395,11 @@ def cmd_output(cmd, **kw):
 	if silent:
 		kw['stderr'] = pproc.PIPE
 
-	p = pproc.Popen(cmd, **kw)
-	output = p.communicate()[0]
+	try:
+		p = pproc.Popen(cmd, **kw)
+		output = p.communicate()[0]
+	except WindowsError, e:
+		raise ValueError(str(e))
 
 	if p.returncode:
 		if not silent:
@@ -494,7 +452,97 @@ def load_tool(tool, tooldir=None):
 			for d in tooldir:
 				sys.path.remove(d)
 
+def readf(fname, m='r'):
+	"get the contents of a file, it is not used anywhere for the moment"
+	f = None
+	try:
+		f = open(fname, m)
+		txt = f.read()
+	finally:
+		if f: f.close()
+	return txt
+
 def nada(*k, **kw):
 	"""A function that does nothing"""
 	pass
+
+class Context(object):
+	"""A base class for commands to be executed from Waf scripts"""
+	def recurse(self, dirs, name=''):
+		"""The function for calling scripts from folders, it tries to call wscript + function_name
+		and if that file does not exist, it will call the method 'function_name' from a file named wscript
+		the dirs can be a list of folders or a string containing space-separated folder paths
+		"""
+		if not name:
+			name = inspect.stack()[1][3]
+
+		if isinstance(dirs, str):
+			dirs = to_list(dirs)
+
+		if not getattr(self, 'curdir', None):
+			self.curdir = os.getcwd()
+
+		for x in dirs:
+			if os.path.isabs(x):
+				nexdir = x
+			else:
+				nexdir = os.path.join(self.curdir, x)
+
+			base = os.path.join(nexdir, WSCRIPT_FILE)
+
+			try:
+				txt = readf(base + '_' + name)
+			except (OSError, IOError):
+				try:
+					module = load_module(base)
+				except OSError:
+					raise WscriptError('No such script %s' % base)
+
+				try:
+					f = module.__dict__[name]
+				except KeyError:
+					raise WscriptError('No function %s defined in %s' % (name, base))
+
+				if getattr(self.__class__, 'pre_recurse', None):
+					self.pre_recurse(f, base, nexdir)
+				old = self.curdir
+				self.curdir = nexdir
+				try:
+					f(self)
+				finally:
+					self.curdir = old
+				if getattr(self.__class__, 'post_recurse', None):
+					self.post_recurse(module, base, nexdir)
+			else:
+				dc = {'ctx': self}
+				if getattr(self.__class__, 'pre_recurse', None):
+					dc = self.pre_recurse(txt, base + '_' + name, nexdir)
+				old = self.curdir
+				self.curdir = nexdir
+				try:
+					exec (txt, dc)
+				finally:
+					self.curdir = old
+				if getattr(self.__class__, 'post_recurse', None):
+					self.post_recurse(txt, base + '_' + name, nexdir)
+
+def jar_regexp(regex):
+	if regex.endswith('/'):
+		regex += '**'
+	regex = (re.escape(regex).replace(r"\*\*\/", ".*")
+		.replace(r"\*\*", ".*")
+		.replace(r"\*","[^/]*")
+		.replace(r"\?","[^/]"))
+	if regex.endswith(r'\/.*'):
+		regex = regex[:-4] + '([/].*)*'
+	regex += '$'
+	#print regex
+	return re.compile(regex)
+
+if is_win32:
+	old = shutil.copy2
+	def copy2(src, dst):
+		old(src, dst)
+		shutil.copystat(src, src)
+	setattr(shutil, 'copy2', copy2)
 

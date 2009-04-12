@@ -3,9 +3,9 @@ import sources
 import Options
 import misc
 
-#TODO find a common place so that this is not duplicated
-allplatforms = [ 'win32', 'posix', 'darwin', 'psp', 'gp2x', 'nds' ]
-allarchs     = [ 'amd64', 'x86', 'alpha', 'arm', 'hppa', 'ia64', 'mips', 'ppc', 's390', 's390x', 'sparc' ]
+alloptims    = [ 'debug', 'release', 'genprofile', 'final']
+allplatforms = [ 'win32', 'posix', 'darwin', 'psp', 'gp2x', 'nds', 'wii', 'ogc', 'gba' ]
+allarchs     = [ 'amd64', 'x86', 'alpha', 'arm', 'arm7', 'arm9', 'hppa', 'ia64', 'mips', 'ppc', 's390', 's390x', 'sparc' ]
 
 
 class coptions:
@@ -64,7 +64,7 @@ class module:
         self.platforms = platforms
         self.archs = archs
         self.projects = {}
-        
+
         self.localoptions = coptions()
         self.localoptions.merge(localoptions)
         self.localoptions.defines |= set([ 'building_'+name,
@@ -212,7 +212,7 @@ class module:
                 
 
                 newexts = { '.ll':('.lex.cc','.hh'), '.yy': ('.bison.cc','.bison.hh'), '.l':('.lex.c', '.h'), '.y':('.bison.c', '.bison.h') }
-                if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C']):
+                if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
                     result.addFile(sources.cppsource(file, platforms, archs, process, self.usepch))
                 elif ext in set(['.rc']):
                     result.addFile(sources.source(file, platforms, archs, process))

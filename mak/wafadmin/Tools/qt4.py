@@ -34,12 +34,20 @@ EXT_QT4 = ['.cpp', '.cc', '.cxx', '.C']
 class MTask_task(Task.Task):
 	"A cpp task that may create a moc task dynamically"
 
-	scan = ccroot.scan
 	before = ['cxx_link', 'ar_link_static']
 
 	def __init__(self, *k, **kw):
 		Task.Task.__init__(self, *k, **kw)
 		self.moc_done = 0
+
+	def scan(self):
+		(nodes, names) = ccroot.scan(self)
+		# for some reasons (variants) the moc node may end in the list of node deps
+		for x in nodes:
+			if x.name.endswith('.moc'):
+				nodes.remove(x)
+				names.append(x.relpath_gen(self.generator.path))
+		return (nodes, names)
 
 	def runnable_status(self):
 		if self.moc_done:
@@ -213,7 +221,7 @@ def create_uic_task(self, node):
 	"hook for uic tasks"
 	uictask = self.create_task('ui4')
 	uictask.inputs  = [node]
-	uictask.outputs = [self.path.find_or_declare(self.env['ui_PATTERN'] % node.name.rstrip('.ui'))]
+	uictask.outputs = [self.path.find_or_declare(self.env['ui_PATTERN'] % node.name[:-3])]
 
 class qt4_taskgen(cxx.cxx_taskgen):
 	def __init__(self, *k, **kw):
@@ -291,11 +299,11 @@ def process_qm2rcc(task):
 	f.close()
 
 b = Task.simple_task_type
-b('moc', '${QT_MOC} ${MOC_FLAGS} ${SRC} ${MOC_ST} ${TGT}', color='BLUE', vars=['QT_MOC', 'MOC_FLAGS'])
-cls = b('rcc', '${QT_RCC} -name ${SRC[0].name} ${SRC[0].abspath(env)} ${RCC_ST} -o ${TGT}', color='BLUE', before='cxx moc MTask_task', after="qm2rcc")
+b('moc', '${QT_MOC} ${MOC_FLAGS} ${SRC} ${MOC_ST} ${TGT}', color='BLUE', vars=['QT_MOC', 'MOC_FLAGS'], shell=False)
+cls = b('rcc', '${QT_RCC} -name ${SRC[0].name} ${SRC[0].abspath(env)} ${RCC_ST} -o ${TGT}', color='BLUE', before='cxx moc MTask_task', after="qm2rcc", shell=False)
 cls.scan = scan
-b('ui4', '${QT_UIC} ${SRC} -o ${TGT}', color='BLUE', before='cxx moc MTask_task')
-b('ts2qm', '${QT_LRELEASE} ${QT_LRELEASE_FLAGS} ${SRC} -qm ${TGT}', color='BLUE', before='qm2rcc')
+b('ui4', '${QT_UIC} ${SRC} -o ${TGT}', color='BLUE', before='cxx moc MTask_task', shell=False)
+b('ts2qm', '${QT_LRELEASE} ${QT_LRELEASE_FLAGS} ${SRC} -qm ${TGT}', color='BLUE', before='qm2rcc', shell=False)
 
 Task.task_type_from_func('qm2rcc', vars=[], func=process_qm2rcc, color='BLUE', before='rcc', after='ts2qm')
 
@@ -309,7 +317,7 @@ def detect_qt4(conf):
 	useframework = getattr(opt, 'use_qt4_osxframework', True)
 	qtdir = getattr(opt, 'qtdir', '')
 
-	if not qtdir: qtdir = os.environ.get('QT4_ROOT', '')
+	if not qtdir: qtdir = conf.environ.get('QT4_ROOT', '')
 
 	if not qtdir:
 		try:
@@ -323,15 +331,15 @@ def detect_qt4(conf):
 
 	if not qtdir:
 		try:
-			path = os.environ['PATH'].split(':')
+			path = conf.environ['PATH'].split(':')
 			for qmk in ['qmake-qt4', 'qmake4', 'qmake']:
 				qmake = conf.find_program(qmk, path)
 				if qmake:
-					version = Utils.cmd_output(qmake+" -query QT_VERSION").strip().split('.')
+					version = Utils.cmd_output([qmake, '-query', 'QT_VERSION']).strip().split('.')
 					if version[0] == "4":
-						qtincludes = Utils.cmd_output(qmake+" -query QT_INSTALL_HEADERS").strip()
-						qtdir = Utils.cmd_output(qmake + " -query QT_INSTALL_PREFIX").strip()+"/"
-						qtbin = Utils.cmd_output(qmake + " -query QT_INSTALL_BINS").strip()+"/"
+						qtincludes = Utils.cmd_output([qmake, '-query', 'QT_INSTALL_HEADERS']).strip()
+						qtdir = Utils.cmd_output([qmake, '-query', 'QT_INSTALL_PREFIX']).strip()+"/"
+						qtbin = Utils.cmd_output([qmake, '-query', 'QT_INSTALL_BINS']).strip()+"/"
 						break
 		except (OSError, ValueError):
 			pass
@@ -339,7 +347,7 @@ def detect_qt4(conf):
 	# check for the qt libraries
 	if not qtlibs: qtlibs = os.path.join(qtdir, 'lib')
 
-	vars = "QtCore QtGui QtNetwork QtOpenGL QtSql QtSvg QtTest QtXml QtWebKit Qt3Support".split()
+	vars = "QtCore QtGui QtUiTools QtNetwork QtOpenGL QtSql QtSvg QtTest QtXml QtWebKit Qt3Support".split()
 
 	framework_ok = False
 	if sys.platform == "darwin" and useframework:
@@ -364,14 +372,11 @@ def detect_qt4(conf):
 #				env['CXXFLAGS_' + i.upper ()] += [incflag]
 
 		# now we add some static depends.
-		if conf.is_defined("HAVE_QTOPENGL") and not '-framework OpenGL' in env["LINKFLAGS_QTOPENGL"]:
-			env["LINKFLAGS_QTOPENGL"] += ['-framework OpenGL']
+		if conf.is_defined('HAVE_QTOPENGL'):
+			env.append_unique('FRAMEWORK_QTOPENGL', 'OpenGL')
 
-		if conf.is_defined("HAVE_QTGUI"):
-			if not '-framework AppKit' in env["LINKFLAGS_QTGUI"]:
-				env["LINKFLAGS_QTGUI"] += ['-framework AppKit']
-			if not '-framework ApplicationServices' in env["LINKFLAGS_QTGUI"]:
-				env["LINKFLAGS_QTGUI"] += ['-framework ApplicationServices']
+		if conf.is_defined('HAVE_QTGUI'):
+			env.append_unique('FRAMEWORK_QTGUI', ['AppKit', 'ApplicationServices'])
 
 		framework_ok = True
 
@@ -386,7 +391,7 @@ def detect_qt4(conf):
 	# check for the qtbinaries
 	if not qtbin: qtbin = os.path.join(qtdir, 'bin')
 
-	binpath = [qtbin, '/usr/share/qt4/bin/'] + os.environ['PATH'].split(':')
+	binpath = [qtbin, '/usr/share/qt4/bin/'] + conf.environ['PATH'].split(':')
 	def find_bin(lst, var):
 		for f in lst:
 			ret = conf.find_program(f, path_list=binpath)

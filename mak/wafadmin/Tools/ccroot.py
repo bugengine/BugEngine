@@ -5,12 +5,15 @@
 "base for all c/c++ programs and libraries"
 
 import os, sys, re
-import TaskGen, Utils, preproc, Logs, Build, Options
+import TaskGen, Task, Utils, preproc, Logs, Build, Options
 from Logs import error, debug, warn
 from Utils import md5
 from TaskGen import taskgen, after, before, feature
 from Constants import *
-from cStringIO import StringIO
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from io import StringIO
 
 import config_c # <- necessary for the configuration, do not touch
 
@@ -19,11 +22,6 @@ USE_TOP_LEVEL = False
 def get_cc_version(conf, cc, gcc=False, icc=False):
 
 	cmd = cc + ['-dM', '-E', '-']
-	#print os.environ['TERM']
-
-	#os.environ['TERM'] = 'dumb'
-
-	#print env
 	try:
 		p = Utils.pproc.Popen(cmd, stdin=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE)
 		p.stdin.write('\n')
@@ -31,6 +29,7 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 	except:
 		conf.fatal('could not determine the compiler version %r' % cmd)
 
+	# PY3K: do not touch
 	out = str(out)
 
 	if gcc:
@@ -91,27 +90,12 @@ def scan(self):
 class ccroot_abstract(TaskGen.task_gen):
 	"Parent class for programs and libraries in languages c, c++ and moc (Qt)"
 	def __init__(self, *k, **kw):
-		# COMPAT
+		# COMPAT remove in waf 1.6 TODO
 		if len(k) > 1:
 			k = list(k)
 			if k[1][0] != 'c':
 				k[1] = 'c' + k[1]
 		TaskGen.task_gen.__init__(self, *k, **kw)
-
-@feature('cc', 'cxx')
-@before('init_cc', 'init_cxx')
-def default_cc(self):
-	Utils.def_attrs(self,
-		includes = '',
-		defines= '',
-		rpaths = '',
-		uselib = '',
-		uselib_local = '',
-		add_objects = '',
-		p_flag_vars = [],
-		p_type_vars = [],
-		compiled_tasks = [],
-		link_task = None)
 
 def get_target_name(self):
 	tp = 'program'
@@ -124,13 +108,6 @@ def get_target_name(self):
 
 	dir, name = os.path.split(self.target)
 	return os.path.join(dir, pattern % name)
-
-@feature('cprogram', 'dprogram', 'cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
-def apply_verif(self):
-	if not (self.source or getattr(self, 'add_objects', None)):
-		raise Utils.WafError('no source files specified for %s' % self)
-	if not self.target:
-		raise Utils.WafError('no target for %s' % self)
 
 def install_shlib(self):
 	nums = self.vnum.split('.')
@@ -149,16 +126,40 @@ def install_shlib(self):
 	bld.symlink_as(os.path.join(path, name2), name3)
 	bld.symlink_as(os.path.join(path, name1), name3)
 
+@feature('cc', 'cxx')
+@before('apply_core')
+def default_cc(self):
+	"""compiled_tasks attribute must be set before the '.c->.o' tasks can be created"""
+	Utils.def_attrs(self,
+		includes = '',
+		defines= '',
+		rpaths = '',
+		uselib = '',
+		uselib_local = '',
+		add_objects = '',
+		p_flag_vars = [],
+		p_type_vars = [],
+		compiled_tasks = [],
+		link_task = None)
+
+@feature('cprogram', 'dprogram', 'cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
+def apply_verif(self):
+	"""no particular order, used for diagnostic"""
+	if not (self.source or getattr(self, 'add_objects', None)):
+		raise Utils.WafError('no source files specified for %s' % self)
+	if not self.target:
+		raise Utils.WafError('no target for %s' % self)
+
 # TODO reference the d programs, shlibs in d.py, not here
 
 @feature('cprogram', 'dprogram')
-@before('apply_core')
+@before('apply_core') # ?
 def vars_target_cprogram(self):
 	self.default_install_path = self.env['BINDIR'] or '${PREFIX}/bin'
 	self.default_chmod = O755
 
 @feature('cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
-@before('apply_core')
+@before('apply_core') # ?
 def vars_target_cstaticlib(self):
 	self.default_install_path = self.env['LIBDIR'] or '${PREFIX}/lib${LIB_EXT}'
 	if sys.platform in ['win32', 'cygwin']:
@@ -167,24 +168,29 @@ def vars_target_cstaticlib(self):
 		self.default_chmod = O755
 
 @feature('cprogram', 'dprogram', 'cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
-@after('apply_objdeps', 'apply_link')
+@after('apply_objdeps', 'apply_link') # ?
 def install_target_cstaticlib(self):
-	if not Options.is_install: return
+	if not self.bld.is_install: return
 	self.link_task.install_path = self.install_path
 
 @feature('cshlib', 'dshlib')
-@after('apply_objdeps', 'apply_link')
+@after('apply_link')
 def install_target_cshlib(self):
+	"""execute after the link task (apply_link)"""
 	if getattr(self, 'vnum', '') and sys.platform != 'win32':
 		tsk = self.link_task
 		tsk.vnum = self.vnum
 		tsk.install = install_shlib
 
 @feature('cc', 'cxx')
-@after('apply_type_vars')
+@after('apply_type_vars', 'apply_lib_vars', 'apply_core')
 def apply_incpaths(self):
-	"used by the scanner"
+	"""used by the scanner
+	after processing the uselib for CPPPATH
+	after apply_core because some processing may add include paths
+	"""
 	lst = []
+	# TODO move the uselib processing out of here
 	for lib in self.to_list(self.uselib):
 		for path in self.env['CPPPATH_' + lib]:
 			if not path in lst:
@@ -221,7 +227,12 @@ def apply_incpaths(self):
 		self.env.append_value('INC_PATHS', self.bld.srcnode)
 
 @feature('cc', 'cxx')
+@after('init_cc', 'init_cxx')
+@before('apply_lib_vars')
 def apply_type_vars(self):
+	"""before apply_lib_vars because we modify uselib
+	after init_cc and init_cxx because web need p_type_vars
+	"""
 	for x in self.features:
 		if not x in ['cprogram', 'cstaticlib', 'cshlib']:
 			continue
@@ -242,7 +253,8 @@ def apply_type_vars(self):
 @feature('cprogram', 'cshlib', 'cstaticlib')
 @after('apply_core')
 def apply_link(self):
-	# use a custom linker if specified (self.link='name-of-custom-link-task')
+	"""executes after apply_core for collecting 'compiled_tasks'
+	use a custom linker if specified (self.link='name-of-custom-link-task')"""
 	link = getattr(self, 'link', None)
 	if not link:
 		if 'cstaticlib' in self.features: link = 'ar_link_static'
@@ -250,23 +262,26 @@ def apply_link(self):
 		else: link = 'cc_link'
 		# that's something quite ugly for unix platforms
 		# both the .so and .so.x must be present in the build dir
-		# for darwin the version number is forcibly undefined for a lack of specs
+		# for darwin the version number is ?
 		if 'cshlib' in self.features and getattr(self, 'vnum', None):
 			if sys.platform == 'darwin' or sys.platform == 'win32':
 				self.vnum = ''
 			else:
 				link = 'vnum_' + link
-	linktask = self.create_task(link)
-	outputs = [t.outputs[0] for t in self.compiled_tasks]
-	linktask.set_inputs(outputs)
-	linktask.set_outputs(self.path.find_or_declare(get_target_name(self)))
-	linktask.chmod = self.chmod
 
-	self.link_task = linktask
+	tsk = self.create_task(link)
+	outputs = [t.outputs[0] for t in self.compiled_tasks]
+	tsk.set_inputs(outputs)
+	tsk.set_outputs(self.path.find_or_declare(get_target_name(self)))
+	tsk.chmod = self.chmod
+
+	self.link_task = tsk
 
 @feature('cc', 'cxx')
-@after('apply_link', 'apply_vnum')
+@after('apply_link', 'init_cc', 'init_cxx')
 def apply_lib_vars(self):
+	"""after apply_link because of 'link_task'
+	after default_cc because of the attribute 'uselib'"""
 	env = self.env
 
 	# 1. the case of the libs defined in the project (visit ancestors first)
@@ -376,6 +391,7 @@ def apply_objdeps(self):
 @feature('cprogram', 'cshlib', 'cstaticlib')
 @after('apply_lib_vars')
 def apply_obj_vars(self):
+	"""after apply_lib_vars for uselib"""
 	v = self.env
 	lib_st           = v['LIB_ST']
 	staticlib_st     = v['STATICLIB_ST']
@@ -410,8 +426,11 @@ def apply_obj_vars(self):
 
 @feature('cshlib')
 @after('apply_link')
+@before('apply_lib_vars')
 def apply_vnum(self):
-	"use self.vnum and self.soname to modify the command line (un*x)"
+	"""use self.vnum and self.soname to modify the command line (un*x)
+	before adding the uselib and uselib_local LINKFLAGS (apply_lib_vars)
+	"""
 	# this is very unix-specific
 	if sys.platform != 'darwin' and sys.platform != 'win32':
 		try:
@@ -451,16 +470,40 @@ c_attrs = {
 'staticlib': 'STATICLIB',
 'staticlibpath': 'STATICLIBPATH',
 'rpath' : 'RPATH',
+'framework' : 'FRAMEWORK',
+'frameworkpath' : 'FRAMEWORKPATH'
 }
 
 @feature('cc', 'cxx')
-@before('init_cxx', 'init_cc')
+@before('init_cxx', 'init_cc') # TODO not certain why
+@before('apply_lib_vars', 'apply_obj_vars', 'apply_incpaths', 'init_cc')
 def add_extra_flags(self):
-	"case and plural insensitive"
+	"""case and plural insensitive
+	before apply_obj_vars for processing the library attributes
+	"""
 	for x in self.__dict__.keys():
 		y = x.lower()
 		if y[-1] == 's':
 			y = y[:-1]
 		if c_attrs.get(y, None):
 			self.env.append_unique(c_attrs[y], getattr(self, x))
+
+def link_vnum(self):
+	"""special case for versioned libraries on unix platforms"""
+	clsname = self.__class__.__name__.replace('vnum_', '')
+	out = self.outputs
+	self.outputs = out[1:]
+	ret = Task.TaskBase.classes[clsname].__dict__['run'](self)
+	self.outputs = out
+	if ret:
+		return ret
+	try:
+		os.remove(self.outputs[0].abspath(self.env))
+	except OSError:
+		pass
+
+	try:
+		os.symlink(self.outputs[1].name, self.outputs[0].bldpath(self.env))
+	except:
+		return 1
 

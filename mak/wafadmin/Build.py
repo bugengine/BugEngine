@@ -39,7 +39,7 @@ class BuildError(Utils.WafError):
 			if txt: lst.append(txt)
 		return '\n'.join(lst)
 
-class BuildContext(object):
+class BuildContext(Utils.Context):
 	"holds the dependency tree"
 	def __init__(self):
 
@@ -51,6 +51,7 @@ class BuildContext(object):
 
 		# instead of hashing the nodes, we assign them a unique id when they are created
 		self.id_nodes = 0
+		self.idx = {}
 
 		# map names to environments, the 'default' must be defined
 		self.all_envs = {}
@@ -109,6 +110,8 @@ class BuildContext(object):
 		self.node_class.__name__ = "Nodu"
 		self.node_class.bld = self
 
+		self.is_install = None
+
 	def __copy__(self):
 		"nodes are not supposed to be copied"
 		raise Utils.WafError('build contexts are not supposed to be cloned')
@@ -165,7 +168,7 @@ class BuildContext(object):
 		file = open(db + '.tmp', 'wb')
 		data = {}
 		for x in SAVED_ATTRS: data[x] = getattr(self, x)
-		cPickle.dump(data, file, -1) # remove the '-1' for unoptimized version
+		cPickle.dump(data, file, -1)
 		file.close()
 
 		# do not use shutil.move
@@ -179,7 +182,15 @@ class BuildContext(object):
 
 	def clean(self):
 		debug('build: clean called')
-		# does not clean files created during the configuration dep_files
+
+		# does not clean files created during the configuration
+		precious = set([])
+		for env in self.all_envs.values():
+			for x in env[CFG_FILES]:
+				node = self.srcnode.find_resource(x)
+				if node:
+					precious.add(node.id)
+
 		def clean_rec(node):
 			for x in node.childs.keys():
 				nd = node.childs[x]
@@ -188,22 +199,16 @@ class BuildContext(object):
 				if tp == Node.DIR:
 					clean_rec(nd)
 				elif tp == Node.BUILD:
+					if nd.id in precious: continue
 					for env in self.all_envs.values():
-						pt = nd.abspath(env)
-						if pt in env['waf_config_files']: continue
-						try: os.remove(pt)
+						try: os.remove(nd.abspath(env))
 						except OSError: pass
 					node.childs.__delitem__(x)
 
-		# take the node of current dir, or the root node if failed to get the current
-		node = self.srcnode
-		clean_rec(node)
+		clean_rec(self.srcnode)
 
-		# when cleaning all, remove cache, depedencies and signatures
-		if node == self.srcnode:
-			for v in 'node_sigs node_deps task_sigs raw_deps cache_node_abspath'.split():
-				var = {}
-				setattr(self, v, var)
+		for v in 'node_sigs node_deps task_sigs raw_deps cache_node_abspath'.split():
+			setattr(self, v, {})
 
 	def compile(self):
 		"""The cache file is not written if nothing was build at all (build is up to date)"""
@@ -236,9 +241,7 @@ class BuildContext(object):
 			os.chdir(self.srcnode.abspath())
 			if self.generator.consumers:
 				self.save()
-			Utils.pprint('RED', 'Build interrupted')
-			if Logs.verbose > 1: raise
-			else: sys.exit(68)
+			raise
 		except Exception:
 			dw()
 			# do not store anything, for something bad happened
@@ -261,7 +264,7 @@ class BuildContext(object):
 		self.flush()
 
 		# remove empty folders after uninstalling
-		if Options.commands['uninstall']:
+		if self.is_install < 0:
 			lst = []
 			for x in self.uninstall:
 				dir = os.path.dirname(x)
@@ -282,18 +285,18 @@ class BuildContext(object):
 				try: os.rmdir(x)
 				except OSError: pass
 
-	def add_subdirs(self, dirs):
-		for dir in Utils.to_list(dirs):
-			if dir: Scripting.add_subdir(dir, self)
-
 	def new_task_gen(self, *k, **kw):
 		kw['bld'] = self
-		if len(k) == 0: return TaskGen.task_gen(*k, **kw)
-		cls_name = k[0]
-		try: cls = TaskGen.task_gen.classes[cls_name]
-		except KeyError: raise Utils.WscriptError('%s is not a valid task generator -> %s' %
-			(cls_name, [x for x in TaskGen.task_gen.classes]))
-		else: return cls(*k, **kw)
+		if len(k) == 0:
+			ret = TaskGen.task_gen(*k, **kw)
+		else:
+			cls_name = k[0]
+
+			try: cls = TaskGen.task_gen.classes[cls_name]
+			except KeyError: raise Utils.WscriptError('%s is not a valid task generator -> %s' %
+				(cls_name, [x for x in TaskGen.task_gen.classes]))
+			ret = cls(*k, **kw)
+		return ret
 
 	def load_envs(self):
 		try:
@@ -310,15 +313,15 @@ class BuildContext(object):
 		for file in lst:
 			if file.endswith(CACHE_SUFFIX):
 				env = Environment.Environment(os.path.join(self.cachedir, file))
-				name = '.'.join(file.split('.')[:-2])
+				name = file[:-len(CACHE_SUFFIX)]
 
 				self.all_envs[name] = env
 
 		self.init_variants()
 
 		for env in self.all_envs.values():
-			for f in env['dep_files']:
-				newnode = self.srcnode.find_or_declare(f)
+			for f in env[CFG_FILES]:
+				newnode = self.path.find_or_declare(f)
 				try:
 					hash = Utils.h_file(newnode.abspath(env))
 				except (IOError, AttributeError):
@@ -412,14 +415,14 @@ class BuildContext(object):
 
 		#debug('build: rescanning %s' % str(src_dir_node))
 
-		# TODO undocumented hook
+		# FIXME remove in waf 1.6
 		if hasattr(self, 'repository'): self.repository(src_dir_node)
 
 		# list the files in the build dirs
 		# remove the existing timestamps if the build files are removed
 		if sys.platform == "win32" and not src_dir_node.name:
 			return
-		self.listdir_src(src_dir_node, src_dir_node.abspath())
+		self.listdir_src(src_dir_node)
 
 		# first obtain the differences between srcnode and src_dir_node
 		#lst = self.srcnode.difflst(src_dir_node)
@@ -453,39 +456,77 @@ class BuildContext(object):
 				os.makedirs(sub_path)
 
 	# ======================================= #
-	def listdir_src(self, parent_node, path):
-		"""
-		@param parent_node [Node]: parent node of path to scan.
-		@param path [string]: path to folder to scan."""
+	def listdir_src(self, parent_node):
+		"""@param parent_node [Node]: parent node of path to scan."""
+		parent_path = parent_node.abspath()
 
-		lst = set(Utils.listdir(path))
+		try:
+			lst = set(Utils.listdir(parent_path))
+		except OSError:
+			# this is only for folders created in the build directory by ill-behaving compilers
+			# WARNING: experimental
+			if not parent_node.childs:
+				raise
+			for x in parent_node.childs.values():
+				if x.id & 3 == Node.FILE:
+					# if there are files, this means this node was not eliminated automatically
+					# so this is a grave error
+					raise
+			lst = set([])
 
 		self.cache_dir_contents[parent_node.id] = lst
 		debug('build: folder contents %r' % lst)
 
-		node_names = set([x.name for x in parent_node.childs.values() if x.id & 3 == Node.FILE])
+		node_names = set([x.name for x in parent_node.childs.values() if x.id & 3 in (Node.FILE, Node.DIR)])
 		cache = self.node_sigs[0]
 
-		# nodes to keep
+		# update the sigs of the nodes to keep
 		to_keep = lst & node_names
 		for x in to_keep:
 			node = parent_node.childs[x]
+			if node.id & 3 == Node.DIR: continue
 			try:
 				# do not call node.abspath here
-				cache[node.id] = Utils.h_file(path + os.sep + node.name)
+				cache[node.id] = Utils.h_file(parent_path + os.sep + node.name)
 			except IOError:
 				raise Utils.WafError("The file %s is not readable or has become a dir" % node.abspath())
+
 
 		# remove both nodes and signatures
 		to_remove = node_names - lst
 		if to_remove:
-			# infrequent scenario
-			cache = self.node_sigs[0]
+
 			for name in to_remove:
 				nd = parent_node.childs[name]
-				if nd.id in cache:
-					cache.__delitem__(nd.id)
-				parent_node.childs.__delitem__(name)
+
+				if nd.id & 3 == Node.DIR:
+					for x in nd.childs.values():
+						if x.id & 3 == Node.FILE:
+							break
+					else:
+						# TODO for now we do not think this is recursive
+						# folder contains only build files, do not remove it
+						continue
+
+				self.remove_node(nd)
+
+	def remove_node(self, node):
+		if node.id & 3 == Node.DIR:
+			# eliminate the leaves before the branches
+			for x in node.childs.values():
+				self.remove_node(x)
+			# paranoid
+			if node.id != self.bldnode.id:
+				node.parent.childs.__delitem__(node.name)
+		elif node.id & 3 == Node.FILE:
+			if node.id in self.node_sigs[0]:
+				self.node_sigs[0].__delitem__(node.id)
+			node.parent.childs.__delitem__(node.name)
+		else:
+			for variant in self.lst_variants:
+				if node.id in self.node_sigs[variant]:
+					self.node_sigs[variant].__delitem__(node.id)
+			node.parent.childs.__delitem__(node.name)
 
 	def listdir_bld(self, parent_node, path, variant):
 		"""in this function we do not add timestamps but we remove them
@@ -541,9 +582,8 @@ class BuildContext(object):
 
 	## the following methods are candidates for the stable apis ##
 
-	def add_group(self):
-		self.flush(all=0)
-		self.task_manager.add_group()
+	def add_group(self, *k):
+		self.task_manager.add_group(*k)
 
 	def hash_env_vars(self, env, vars_lst):
 		"""hash environment variables
@@ -558,7 +598,7 @@ class BuildContext(object):
 
 		lst = [str(env[a]) for a in vars_lst]
 		ret = Utils.h_list(lst)
-		debug("envhash: %s %r" % (ret.encode('hex'), lst))
+		debug("envhash: %r %r" % (ret, lst))
 
 		# next time
 		self.cache_sig_vars[idx] = ret
@@ -610,9 +650,17 @@ class BuildContext(object):
 				if not target_name in target_objects and all:
 					raise Utils.WafError("target '%s' does not exist" % target_name)
 
-			for target_obj in target_objects.values():
-				for x in target_obj:
-					x.post()
+			target_objects = [id(x) for x in target_objects]
+
+			# tasks must be posted in order of declaration
+			# we merely apply a filter to discard the ones we are not interested in
+			for i in xrange(len(self.task_manager.groups)):
+				g = self.task_manager.groups[i]
+				self.task_manager.current_group = i
+				for tg in g.tasks_gen:
+					if id(x) in target_objects:
+						tg.post()
+
 		else:
 			debug('task_gen: posting objects (normal)')
 			ln = self.launch_node()
@@ -620,14 +668,22 @@ class BuildContext(object):
 			# for the pretty-printing (Node.py), the two lines below cannot be moved to Build::launch_node
 			if ln.is_child_of(self.bldnode) or not ln.is_child_of(self.srcnode):
 				ln = self.srcnode
-			for obj in self.all_task_gen:
-				if not obj.path.is_child_of(ln): continue
-				obj.post()
+
+			# if the project file is located under the source directory, build all targets by default
+			proj_node = self.root.find_dir(os.path.split(Utils.g_module.root_path)[0])
+			if proj_node.id != self.srcnode.id:
+				ln = self.srcnode
+
+			# in theory this is fine
+			for i in xrange(len(self.task_manager.groups)):
+				g = self.task_manager.groups[i]
+				self.task_manager.current_group = i
+				for tg in g.tasks_gen:
+					if not tg.path.is_child_of(ln):
+						continue
+					tg.post()
 
 	def env_of_name(self, name):
-		if not name:
-			error('env_of_name called with no name!')
-			return None
 		try:
 			return self.all_envs[name]
 		except KeyError:
@@ -662,7 +718,7 @@ class BuildContext(object):
 	# do_install is not used anywhere
 	def do_install(self, src, tgt, chmod=O644):
 		"""returns true if the file was effectively installed or uninstalled, false otherwise"""
-		if Options.commands['install']:
+		if self.is_install > 0:
 			if not Options.options.force:
 				# check if the file is already there to avoid a copy
 				try:
@@ -693,7 +749,7 @@ class BuildContext(object):
 				raise Utils.WafError('Could not install the file %r' % tgt)
 			return True
 
-		elif Options.commands['uninstall']:
+		elif self.is_install < 0:
 			info("* uninstalling %s" % tgt)
 
 			self.uninstall.append(tgt)
@@ -716,7 +772,7 @@ class BuildContext(object):
 		if env:
 			assert isinstance(env, Environment.Environment), "invalid parameter"
 
-		if not Options.is_install: return []
+		if not self.is_install: return []
 		if not path: return []
 
 		node = self.path
@@ -756,7 +812,7 @@ class BuildContext(object):
 		if env:
 			assert isinstance(env, Environment.Environment), "invalid parameter"
 
-		if not Options.is_install: return False
+		if not self.is_install: return False
 		if not path: return False
 
 		if not env: env = self.env
@@ -777,7 +833,7 @@ class BuildContext(object):
 		return self.do_install(src, destpath, chmod)
 
 	def symlink_as(self, path, src, env=None):
-		if not Options.is_install: return
+		if not self.is_install: return
 		if not path: return
 
 		tgt = self.get_install_path(path, env)
@@ -785,15 +841,21 @@ class BuildContext(object):
 		dir, name = os.path.split(tgt)
 		Utils.check_dir(dir)
 
-		if Options.commands['install']:
-			try:
-				if not os.path.islink(tgt) or os.readlink(tgt) != src:
-					info("* symlink %s (-> %s)" % (tgt, src))
-					os.symlink(src, tgt)
-				return 0
-			except OSError:
-				return 1
-		elif Options.commands['uninstall']:
+		if self.is_install > 0:
+			link = False
+			if not os.path.islink(tgt):
+				link = True
+			elif os.readlink(tgt) != src:
+				link = True
+				try: os.remove(tgt)
+				except OSError: pass
+
+			if link:
+				info('* symlink %s (-> %s)' % (tgt, src))
+				os.symlink(src, tgt)
+			return 0
+
+		else: # UNINSTALL
 			try:
 				info("* removing %s" % (tgt))
 				os.remove(tgt)
@@ -817,4 +879,37 @@ class BuildContext(object):
 		f = self.log or sys.stderr
 		f.write(s)
 		f.flush()
+
+	def add_subdirs(self, dirs):
+		self.recurse(dirs, 'build')
+
+	def pre_recurse(self, name_or_mod, path, nexdir):
+		if not hasattr(self, 'oldpath'):
+			self.oldpath = []
+		self.oldpath.append(self.path)
+		self.path = self.root.find_dir(nexdir)
+		return {'bld': self, 'ctx': self}
+
+	def post_recurse(self, name_or_mod, path, nexdir):
+		self.path = self.oldpath.pop()
+
+	###### user-defined behaviour
+
+	def pre_build(self):
+		if hasattr(self, 'pre_funs'):
+			for m in self.pre_funs:
+				m(self)
+
+	def post_build(self):
+		if hasattr(self, 'post_funs'):
+			for m in self.post_funs:
+				m(self)
+
+	def add_pre_fun(self, meth):
+		try: self.pre_funs.append(meth)
+		except AttributeError: self.pre_funs = [meth]
+
+	def add_post_fun(self, meth):
+		try: self.post_funs.append(meth)
+		except AttributeError: self.post_funs = [meth]
 

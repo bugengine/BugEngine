@@ -7,8 +7,8 @@
 import TaskGen
 
 def decide_ext(self, node):
-	c_ext = '.bison.c'
-	if node.name.endswith('.yc') or node.name.endswith('.yy'): c_ext = '.bison.cc'
+	c_ext = '.c'
+	if node.name.endswith('.yc') or node.name.endswith('.yy'): c_ext = '.cc'
 	if '-d' in self.env['BISONFLAGS']:
 		return [c_ext, c_ext.replace('.cc', '.hh').replace('.c','.h')]
 	else:

@@ -10,7 +10,7 @@ Javac is one of the few compilers that behaves very badly:
 * it recompiles files silently behind your back
 * it outputs an undefined amount of files (inner classes)
 
-Fortunately, the convention makes it possible to use th build dir without
+Fortunately, the convention makes it possible to use the build dir without
 too many problems for the moment
 
 Inner classes must be located and cleaned when a problem arise,
@@ -23,13 +23,51 @@ change is only annoying for the compilation times
 import os, re
 from Configure import conf
 import TaskGen, Task, Utils
-from TaskGen import feature, before
+from TaskGen import feature, before, taskgen
 
-class java_taskgen(TaskGen.task_gen):
-	def __init__(self, *k, **kw):
-		TaskGen.task_gen.__init__(self, *k, **kw)
+class_check_source = '''
+public class Test {
+	public static void main(String[] argv) {
+		Class lib;
+		if (argv.length < 1) {
+			System.err.println("Missing argument");
+			System.exit(77);
+		}
+		try {
+			lib = Class.forName(argv[0]);
+		} catch (ClassNotFoundException e) {
+			System.err.println("ClassNotFoundException");
+			System.exit(1);
+		}
+		lib = null;
+		System.exit(0);
+	}
+}
+'''
 
-@feature('java')
+@feature('jar')
+@before('apply_core')
+def jar_files(self):
+	basedir = getattr(self, 'basedir', '.')
+	destfile = getattr(self, 'destfile', 'test.jar')
+	jaropts = getattr(self, 'jaropts', [])
+
+	dir = self.path.find_dir(basedir)
+	if not dir: raise
+
+	jaropts.append('-C')
+	jaropts.append(dir.abspath(self.env))
+	jaropts.append('.')
+
+	out = self.path.find_or_declare(destfile)
+
+	tsk = self.create_task('jar_create')
+	tsk.set_outputs(out)
+	tsk.inputs = [x for x in self.path.find_iter(src=0, bld=1) if x.id != out.id]
+	tsk.env['JAROPTS'] = jaropts
+	tsk.env['JARCREATE'] = 'cf'
+
+@feature('javac')
 @before('apply_core')
 def apply_java(self):
 	Utils.def_attrs(self, jarname='', jaropts='', classpath='',
@@ -75,7 +113,7 @@ def apply_java(self):
 				self.env['JAROPTS'] = ['-C', ''.join(self.env['OUTDIR']), dirs]
 
 Task.simple_task_type('jar_create', '${JAR} ${JARCREATE} ${TGT} ${JAROPTS}', color='GREEN')
-cls = Task.simple_task_type('javac', '${JAVAC} -classpath ${CLASSPATH} -d ${OUTDIR} ${SRC}', before='jar_create')
+cls = Task.simple_task_type('javac', '${JAVAC} -classpath ${CLASSPATH} -d ${OUTDIR} ${JAVACFLAGS} ${SRC}')
 cls.color = 'BLUE'
 def post_run_javac(self):
 	"""this is for cleaning the folder
@@ -105,20 +143,20 @@ cls.post_run = post_run_javac
 
 def detect(conf):
 	# If JAVA_PATH is set, we prepend it to the path list
-	java_path = os.environ['PATH'].split(os.pathsep)
+	java_path = conf.environ['PATH'].split(os.pathsep)
 	v = conf.env
 
-	if 'JAVA_HOME' in os.environ:
-		java_path = [os.path.join(os.environ['JAVA_HOME'], 'bin')] + java_path
-		conf.env['JAVA_HOME'] = [os.environ['JAVA_HOME']]
+	if 'JAVA_HOME' in conf.environ:
+		java_path = [os.path.join(conf.environ['JAVA_HOME'], 'bin')] + java_path
+		conf.env['JAVA_HOME'] = [conf.environ['JAVA_HOME']]
 
 	for x in 'javac java jar'.split():
 		conf.find_program(x, var=x.upper(), path_list=java_path)
 		conf.env[x.upper()] = conf.cmd_to_list(conf.env[x.upper()])
 	v['JAVA_EXT'] = ['.java']
 
-	if 'CLASSPATH' in os.environ:
-		v['CLASSPATH'] = os.environ['CLASSPATH']
+	if 'CLASSPATH' in conf.environ:
+		v['CLASSPATH'] = conf.environ['CLASSPATH']
 
 	if not v['JAR']: conf.fatal('jar is required for making java packages')
 	if not v['JAVAC']: conf.fatal('javac is required for compiling java classes')
@@ -128,25 +166,6 @@ def detect(conf):
 def check_java_class(self, classname, with_classpath=None):
 	"""Check if the specified java class is installed"""
 
-	class_check_source = """
-public class Test {
-	public static void main(String[] argv) {
-		Class lib;
-		if (argv.length < 1) {
-			System.err.println("Missing argument");
-			System.exit(77);
-		}
-		try {
-			lib = Class.forName(argv[0]);
-		} catch (ClassNotFoundException e) {
-			System.err.println("ClassNotFoundException");
-			System.exit(1);
-		}
-		lib = null;
-		System.exit(0);
-	}
-}
-"""
 	import shutil
 
 	javatestdir = '.waf-javatest'
@@ -177,4 +196,39 @@ public class Test {
 	shutil.rmtree(javatestdir, True)
 
 	return found
+
+"""
+def test_re(reg, ts, expected=True):
+	regexp = Utils.jar_regexp(reg)
+	if regexp.match(ts):
+		b = True
+	else:
+		b = False
+
+	if b == expected:
+		Utils.pprint("GREEN", "ok!")
+	else:
+		Utils.pprint("RED", "bad %r %r" % (reg, ts))
+
+r = '**/CVS/*'
+test_re(r, 'CVS/Repository')
+test_re(r, 'org/apache/CVS/Entries')
+test_re(r, 'org/apache/jakarta/tools/ant/CVS/Entries')
+test_re(r, 'org/apache/CVS/foo/bar/Entries', False)
+r = 'org/apache/jakarta/**'
+test_re(r, 'org/apache/jakarta/tools/ant/docs/index.html')
+test_re(r, 'org/apache/jakarta/test.xml')
+test_re(r, 'org/apache/xyz.java', False)
+r = 'org/apache/**/CVS/*'
+test_re(r, 'org/apache/CVS/Entries')
+test_re(r, 'org/apache/jakarta/tools/ant/CVS/Entries')
+test_re(r, 'org/apache/CVS/foo/bar/Entries', False)
+r = '**/test/**'
+test_re(r, 'test')
+test_re(r, 'foo/bar/test/bar')
+test_re(r, 'foo/bar/test')
+test_re(r, 'test/bar')
+r = '**/test/'
+test_re(r, 'foo/bar/test/bar')
+"""
 

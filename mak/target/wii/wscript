@@ -21,4 +21,6 @@ def configure(conf):
                                     'lib':      os.path.join('dev','lib'),
                                     'data':     'data',
                                     'plugin':   os.path.join('data', 'plugins') }
-                                    
+
+def build(bld):
+    pass

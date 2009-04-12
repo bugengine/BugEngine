@@ -20,7 +20,7 @@ def copy_func(tsk):
 	outfile = tsk.outputs[0].abspath(env)
 	try:
 		shutil.copy2(infile, outfile)
-	except OSError, IOError:
+	except (OSError, IOError):
 		return 1
 	else:
 		if tsk.chmod: os.chmod(outfile, tsk.chmod)
@@ -88,9 +88,7 @@ def subst_func(tsk):
 	infile = tsk.inputs[0].abspath(env)
 	outfile = tsk.outputs[0].abspath(env)
 
-	file = open(infile, 'r')
-	code = file.read()
-	file.close()
+	code = Utils.readf(infile)
 
 	# replace all % by %% to prevent errors by % signs in the input file while string formatting
 	code = code.replace('%', '%%')
@@ -130,6 +128,11 @@ def apply_subst(self):
 			newnode = self.path.find_or_declare(self.target)
 		else:
 			newnode = node.change_ext('')
+
+		try:
+			self.dict = self.dict.get_merged_dict()
+		except AttributeError:
+			pass
 
 		if self.dict and not self.env['DICT_HASH']:
 			self.env = self.env.copy()

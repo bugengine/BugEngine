@@ -1,0 +1,77 @@
+# set posix (linux) specific options
+# detect tools : gcc
+
+
+import os
+import re
+import Utils
+from Logs import warn
+
+# adds GCC vars to environment
+gccPlatforms = {
+    'i586-mingw32msvc' : [('win32','x86')],
+    'x86-linux-gnu' : [('posix','x86')],
+    'x86_64-linux-gnu' : [('posix','amd64')],
+    'powerpc-gekko': [('wii','powerpc')],
+    'psp': [('psp','mips')],
+    'arm-eabi': [('nds', 'arm')]
+}
+    
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
+    import subprocess
+    try: supportedPlatforms = gccPlatforms[gcc_target]
+    except KeyError: supportedPlatforms = []
+    for platform,arch in supportedPlatforms:
+        name = 'gcc-'+platform + '-' + arch + '-' + version
+        Utils.pprint('NORMAL', 'configure for tool %s' % name)
+        newenv = conf.set_env_name(name, conf.env.copy())
+        newenv.set_variant(name)
+        newenv['PLATFORM']      = 'gcc'
+        newenv['ARCHITECTURE']  = arch
+        newenv['GCC_VERSION']   = version
+        newenv['GCC_TARGET']    = gcc_target
+        newenv['PATH']          = [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+                                   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+        conf.setenv(name)
+        conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir = 'mak/tools')
+        if platform=='win32':
+            conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
+            conf.check_tool('winres')
+        conf.sub_config(os.path.join('..', '..', 'target', platform))
+        conf.sub_config(os.path.join('..', '..', 'target', arch))
+        conf.setenv('default')
+        conf.env['BUILD_VARIANTS'].append(name)
+
+# gets a list of the GCC toolchains installed
+def get_available_gcc(conf):
+    toolchaindirs = ['/opt/', '/usr/', '/usr/local/', '/']
+    for toolchaindir in toolchaindirs:
+        if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
+            for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
+                if target in ['.svn', '.cvs']:
+                    continue
+                if not os.path.isdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+                    continue
+                if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+                    continue
+                for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target))[::-1]:
+                    if not os.path.isdir(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
+                        continue
+                    if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
+                        continue
+                    if version in ['.svn', '.cvs']:
+                        continue
+                    name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
+
+
+def set_options(opt):
+    Utils.pprint('NORMAL', 'Host system is Posix/Linux')
+                        
+def configure(conf):
+    import Options
+    
+    conf.env['BUILD_VARIANTS'] = []
+    get_available_gcc(conf)
+
+    if len(conf.env['BUILD_VARIANTS']) == 0:
+        raise SystemExit("no match found : make sure you selected a valid toolchain")

@@ -13,9 +13,7 @@ EXT_D = ['.d', '.di', '.D']
 D_METHS = ['apply_core', 'apply_vnum', 'apply_objdeps'] # additional d methods
 
 def filter_comments(filename):
-	f = open(filename, 'r')
-	txt = f.read()
-	f.close()
+	txt = Utils.readf(filename)
 	buf = []
 
 	i = 0
@@ -221,7 +219,7 @@ def get_target_name(self):
 	return v['D_%s_PATTERN' % tp] % self.target
 
 d_params = {
-'dflags': {'gdc':'', 'dmd':''},
+'dflags': '',
 'importpaths':'',
 'libs':'',
 'libpaths':'',
@@ -249,7 +247,7 @@ TaskGen.bind_feature('d', D_METHS)
 @before('apply_d_libs')
 def init_d(self):
 	Utils.def_attrs(self,
-		dflags={'gdc':'', 'dmd':''},
+		dflags='',
 		importpaths='',
 		libs='',
 		libpaths='',
@@ -298,8 +296,11 @@ def apply_d_libs(self):
 		y.post()
 		seen.append(x)
 
+		libname = y.target[y.target.rfind(os.sep) + 1:]
 		if 'dshlib' in y.features or 'dstaticlib' in y.features:
-			libs.append(y.target)
+			#libs.append(y.target)
+			env.append_unique('DLINKFLAGS', env['DLIBPATH_ST'] % y.link_task.outputs[0].parent.bldpath(env))
+			env.append_unique('DLINKFLAGS', env['DLIB_ST'] % libname)
 
 		# add the link path too
 		tmp_path = y.path.bldpath(env)
@@ -341,23 +342,15 @@ def apply_d_vars(self):
 	lib_st     = env['DLIB_ST']
 	libpath_st = env['DLIBPATH_ST']
 
-	dflags = {'gdc':[], 'dmd':[]}
+	#dflags = []
 	importpaths = self.to_list(self.importpaths)
 	libpaths = []
 	libs = []
 	uselib = self.to_list(self.uselib)
 
-	# add compiler flags
 	for i in uselib:
 		if env['DFLAGS_' + i]:
-			for dflag in self.to_list(env['DFLAGS_' + i][env['COMPILER_D']]):
-				if not dflag in dflags[env['COMPILER_D']]:
-					dflags[env['COMPILER_D']] += [dflag]
-	dflags[env['COMPILER_D']] = self.to_list(self.dflags[env['COMPILER_D']]) + dflags[env['COMPILER_D']]
-
-	for dflag in dflags[env['COMPILER_D']]:
-		if not dflag in env['DFLAGS'][env['COMPILER_D']]:
-			env['DFLAGS'][env['COMPILER_D']] += [dflag]
+			env.append_unique('DFLAGS', env['DFLAGS_' + i])
 
 	for x in self.features:
 		if not x in ['dprogram', 'dstaticlib', 'dshlib']:
@@ -365,11 +358,7 @@ def apply_d_vars(self):
 		x.lstrip('d')
 		d_shlib_dflags = env['D_' + x + '_DFLAGS']
 		if d_shlib_dflags:
-			for dflag in d_shlib_dflags:
-				if not dflag in env['DFLAGS'][env['COMPILER_D']]:
-					env['DFLAGS'][env['COMPILER_D']] += [dflag]
-
-	env['_DFLAGS'] = env['DFLAGS'][env['COMPILER_D']]
+			env.append_unique('DFLAGS', d_shlib_dflags)
 
 	# add import paths
 	for i in uselib:
@@ -440,17 +429,17 @@ def d_hook(self, node):
 		header_node = node.change_ext(self.env['DHEADER_ext'])
 		task.outputs += [header_node]
 
-d_str = '${D_COMPILER} ${_DFLAGS} ${_DIMPORTFLAGS} ${D_SRC_F}${SRC} ${D_TGT_F}${TGT}'
-d_with_header_str = '${D_COMPILER} ${_DFLAGS} ${_DIMPORTFLAGS} \
+d_str = '${D_COMPILER} ${DFLAGS} ${_DIMPORTFLAGS} ${D_SRC_F}${SRC} ${D_TGT_F}${TGT}'
+d_with_header_str = '${D_COMPILER} ${DFLAGS} ${_DIMPORTFLAGS} \
 ${D_HDR_F}${TGT[1].bldpath(env)} \
 ${D_SRC_F}${SRC} \
 ${D_TGT_F}${TGT[0].bldpath(env)}'
 link_str = '${D_LINKER} ${DLNK_SRC_F}${SRC} ${DLNK_TGT_F}${TGT} ${DLINKFLAGS}'
 
-cls = Task.simple_task_type('d', d_str, 'GREEN')
+cls = Task.simple_task_type('d', d_str, 'GREEN', before='ar_link_static d_link', shell=False)
 cls.scan = scan
-Task.simple_task_type('d_with_header', d_with_header_str, 'GREEN')
-Task.simple_task_type('d_link', link_str, color='YELLOW', after=['d'])
+Task.simple_task_type('d_with_header', d_with_header_str, 'GREEN', before='ar_link_static d_link', shell=False)
+Task.simple_task_type('d_link', link_str, color='YELLOW', shell=False)
 
 # for feature request #104
 @taskgen
@@ -473,7 +462,7 @@ def process_header(self):
 		task.set_outputs(node.change_ext('.di'))
 
 d_header_str = '${D_COMPILER} ${D_HEADER} ${SRC}'
-Task.simple_task_type('d_header', d_header_str, color='BLUE')
+Task.simple_task_type('d_header', d_header_str, color='BLUE', shell=False)
 
 # quick test #
 if __name__ == "__main__":
@@ -482,7 +471,7 @@ if __name__ == "__main__":
 	try: arg = sys.argv[1]
 	except IndexError: arg = "file.d"
 
-	print "".join(filter_comments(arg))
+	print("".join(filter_comments(arg)))
 	# TODO
 	paths = ['.']
 

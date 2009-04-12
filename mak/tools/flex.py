@@ -8,8 +8,8 @@
 import TaskGen
 
 def decide_ext(self, node):
-	if node.name.endswith('.ll'): return '.lex.cc'
-	else: return '.lex.c'
+	if node.name.endswith('.ll'): return '.cc'
+	else: return '.c'
 
 TaskGen.declare_chain(
 	name = 'flex',
