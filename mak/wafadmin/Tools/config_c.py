@@ -4,14 +4,11 @@
 
 """
 c/c++ configuration routines
-
-The code is being written, so do not complain about trunk being broken :-)
 """
 
 import os, imp, sys, shlex, shutil
-import pproc
 from Utils import md5
-import Build, Utils, Configure, Task, Options, Logs
+import Build, Utils, Configure, Task, Options, Logs, TaskGen
 from Constants import *
 from Configure import conf, conftest
 
@@ -20,6 +17,27 @@ cfg_ver = {
 	'exact-version': '==',
 	'max-version': '<=',
 }
+
+SNIP1 = '''
+	int main() {
+	void *p;
+	p=(void*)(%s);
+	return 0;
+}
+'''
+
+SNIP2 = '''
+int main() {
+	if ((%(type_name)s *) 0) return 0;
+	if (sizeof (%(type_name)s)) return 0;
+}
+'''
+
+SNIP3 = '''
+int main() {
+	return 0;
+}
+'''
 
 def parse_flags(line, uselib, env):
 	"""stupidest thing ever"""
@@ -52,6 +70,13 @@ def parse_flags(line, uselib, env):
 			env.append_unique('LINKFLAGS_' + uselib, x)
 		elif x.startswith('-Wl'):
 			env.append_unique('LINKFLAGS_' + uselib, x)
+
+@conf
+def ret_msg(self, f, kw):
+	"""execute a function, when provided"""
+	if isinstance(f, str):
+		return f
+	return f(kw)
 
 @conf
 def validate_cfg(self, kw):
@@ -91,8 +116,12 @@ def cmd_and_log(self, cmd, kw):
 	Logs.debug('runner: %s\n' % cmd)
 	if self.log: self.log.write('%s\n' % cmd)
 
-	p = pproc.Popen(cmd, stdout=pproc.PIPE, shell=True)
-	output = p.communicate()[0]
+	try:
+		p = Utils.pproc.Popen(cmd, stdout=Utils.pproc.PIPE, shell=True)
+		output = p.communicate()[0]
+	except WindowsError:
+		self.fatal('fail')
+
 	if p.returncode:
 		if not kw.get('errmsg', ''):
 			if kw.get('mandatory', False):
@@ -120,7 +149,7 @@ def exec_cfg(self, kw):
 			self.cmd_and_log('%s --%s=%s %s' % (kw['path'], x, kw[y], kw['package']), kw)
 			if not 'okmsg' in kw:
 				kw['okmsg'] = 'ok'
-			self.define('HAVE_%s' % Utils.quote_define_name(kw.get('uselib_store', kw['package'])), 1, 0)
+			self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
 			break
 
 	# retrieving the version of a module
@@ -142,7 +171,7 @@ def exec_cfg(self, kw):
 	if not 'okmsg' in kw:
 		kw['okmsg'] = 'ok'
 
-	self.define('HAVE_%s' % Utils.quote_define_name(kw.get('uselib_store', kw['package'])), 1, 0)
+	self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
 	parse_flags(ret, kw.get('uselib_store', kw['package'].upper()), kw.get('env', self.env))
 	return ret
 
@@ -163,8 +192,9 @@ def check_cfg(self, *k, **kw):
 			else:
 				self.fatal('the configuration failed (see %r)' % self.log.name)
 	else:
+		kw['success'] = ret
 		if 'okmsg' in kw:
-			self.check_message_2(kw['okmsg'])
+			self.check_message_2(self.ret_msg(kw['okmsg'], kw))
 
 	return ret
 
@@ -173,8 +203,6 @@ def check_cfg(self, *k, **kw):
 # easy to put all the logic in one function
 #
 # this should prevent code duplication (ita)
-
-simple_c_code = 'int main() {return 0;}\n'
 
 # env: an optional environment (modified -> provide a copy)
 # compiler: cc or cxx - it tries to guess what is best
@@ -222,40 +250,53 @@ def validate_c(self, kw):
 
 	#OSX
 	if 'framework_name' in kw:
-		if not kw.get('header_name'):
-			kw['header_name'] = []
+		try: TaskGen.task_gen.create_task_macapp
+		except AttributeError: self.fatal('frameworks require the osx tool')
+
+		fwkname = kw['framework_name']
+		if not 'uselib_store' in kw:
+			kw['uselib_store'] = fwkname.upper()
+
+		if not kw.get('no_header', False):
+			if not 'header_name' in kw:
+				kw['header_name'] = []
+			fwk = '%s/%s.h' % (fwkname, fwkname)
+			if kw.get('remove_dot_h', None):
+				fwk = fwk[:-2]
+			kw['header_name'] = Utils.to_list(kw['header_name']) + [fwk]
+
+		kw['msg'] = 'Checking for framework %s' % fwkname
+		kw['framework'] = fwkname
+		#kw['frameworkpath'] = set it yourself
 
 	if 'function_name' in kw:
 		fu = kw['function_name']
 		if not 'msg' in kw:
 			kw['msg'] = 'Checking for function %s' % fu
-		kw['code'] = to_header(kw) + 'int main(){\nvoid *p;\np=(void*)(%s);\nreturn 0;\n}\n' % fu
+		kw['code'] = to_header(kw) + SNIP1 % fu
 		if not 'uselib_store' in kw:
 			kw['uselib_store'] = fu.upper()
 		if not 'define_name' in kw:
 			kw['define_name'] = self.have_define(fu)
 
+	elif 'type_name' in kw:
+		tu = kw['type_name']
+		if not 'msg' in kw:
+			kw['msg'] = 'Checking for type %s' % tu
+		if not 'header_name' in kw:
+			kw['header_name'] = 'stdint.h'
+		kw['code'] = to_header(kw) + SNIP2 % {'type_name' : tu}
+		if not 'define_name' in kw:
+			kw['define_name'] = self.have_define(tu.upper())
+
 	elif 'header_name' in kw:
 		if not 'msg' in kw:
 			kw['msg'] = 'Checking for header %s' % kw['header_name']
 
-		# OSX
-		if 'framework_name' in kw:
-			fwkname = kw['framework_name']
-			if not 'uselib_store' in kw:
-				kw['uselib_store'] = fwkname.upper()
-			fwk = '%s/%s.h' % (fwkname, fwkname)
-			if kw.get('remove_dot_h', None):
-				fwk = fwk[:-2]
-			kw['header_name'] = Utils.to_list(kw['header_name']) + [fwk]
-			kw['msg'] = 'Checking for framework %s' % fwkname
-			kw['framework'] = fwkname
-			#kw['frameworkpath'] = set it yourself
-
 		l = Utils.to_list(kw['header_name'])
 		assert len(l)>0, 'list of headers in header_name is empty'
 
-		kw['code'] = to_header(kw) + simple_c_code
+		kw['code'] = to_header(kw) + SNIP3
 
 		if not 'uselib_store' in kw:
 			kw['uselib_store'] = l[0].upper()
@@ -301,7 +342,7 @@ def validate_c(self, kw):
 		kw['okmsg'] = 'ok'
 
 	if not 'code' in kw:
-		kw['code'] = simple_c_code
+		kw['code'] = SNIP3
 
 	if not kw.get('success'): kw['success'] = None
 
@@ -326,7 +367,7 @@ def post_check(self, *k, **kw):
 			self.define_cond(kw['define_name'], is_success)
 
 	if 'define_name' in kw:
-		if 'header_name' in kw or 'function_name' in kw or 'fragment' in kw:
+		if 'header_name' in kw or 'function_name' in kw or 'type_name' in kw or 'fragment' in kw:
 			define_or_stuff()
 
 	if is_success and 'uselib_store' in kw:
@@ -361,8 +402,8 @@ def check(self, *k, **kw):
 			else:
 				self.fatal('the configuration failed (see %r)' % self.log.name)
 	else:
-		self.check_message_2(kw['okmsg'])
 		kw['success'] = ret
+		self.check_message_2(self.ret_msg(kw['okmsg'], kw))
 
 	self.post_check(*k, **kw)
 	if not kw.get('execute', False):
@@ -417,7 +458,7 @@ def run_c_code(self, *k, **kw):
 	# compile the program
 	try:
 		bld.compile()
-	except:
+	except Utils.WafError:
 		ret = Utils.ex_stack()
 	else:
 		ret = 0
@@ -526,37 +567,30 @@ def get_define(self, define):
 @conf
 def have_define(self, name):
 	"prefix the define with 'HAVE_' and make sure it has valid characters."
-	return "HAVE_%s" % Utils.quote_define_name(name)
+	return self.__dict__.get('HAVE_PAT', 'HAVE_%s') % Utils.quote_define_name(name)
 
 @conf
 def write_config_header(self, configfile='', env='', guard=''):
 	"save the defines into a file"
 	if not configfile: configfile = WAF_CONFIG_H
-
-	lst = Utils.split_path(configfile)
-	base = lst[:-1]
-
-	if not env: env = self.env
-	base = [self.blddir, env.variant()]+base
-	dir = os.path.join(*base)
-	if not os.path.exists(dir):
-		os.makedirs(dir)
-
-	dir = os.path.join(dir, lst[-1])
-
-	self.env.append_unique('waf_config_files', os.path.abspath(dir))
-
 	waf_guard = guard or '_%s_WAF' % Utils.quote_define_name(configfile)
 
-	dest = open(dir, 'w')
+	# configfile -> absolute path
+	if not env: env = self.env
+	full = os.sep.join([self.blddir, env.variant(), configfile])
+	(dir, base) = os.path.split(full)
+
+	try: os.makedirs(dir)
+	except: pass
+
+	dest = open(full, 'w')
 	dest.write('/* Configuration header created by Waf - do not edit */\n')
 	dest.write('#ifndef %s\n#define %s\n\n' % (waf_guard, waf_guard))
 
-	dest.write( self.get_config_header() )
+	dest.write(self.get_config_header())
 
 	# config files are not removed on "waf clean"
-	if not configfile in self.env['dep_files']:
-		self.env['dep_files'] += [configfile]
+	self.env.append_value(CFG_FILES, configfile)
 
 	dest.write('\n#endif /* %s */\n' % waf_guard)
 	dest.close()
@@ -577,4 +611,35 @@ def get_config_header(self):
 			config_header.append('#define %s %s' % (key, value))
 
 	return "\n".join(config_header)
+
+@conftest
+def find_cpp(conf):
+	v = conf.env
+	cpp = None
+	if v['CPP']: cpp = v['CPP']
+	elif 'CPP' in conf.environ: cpp = conf.environ['CPP']
+	if not cpp: cpp = conf.find_program('cpp', var='CPP')
+	if not cpp: cpp = v['CC']
+	if not cpp: cpp = v['CXX']
+	v['CPP'] = cpp
+
+@conftest
+def cc_add_flags(conf):
+	conf.add_os_flags('CFLAGS', 'CCFLAGS')
+	conf.add_os_flags('CPPFLAGS')
+	conf.add_os_flags('LINKFLAGS')
+
+@conftest
+def cxx_add_flags(conf):
+	conf.add_os_flags('CXXFLAGS')
+	conf.add_os_flags('CPPFLAGS')
+	conf.add_os_flags('LINKFLAGS')
+
+@conftest
+def cc_load_tools(conf):
+	conf.check_tool('cc')
+
+@conftest
+def cxx_load_tools(conf):
+	conf.check_tool('cxx')
 

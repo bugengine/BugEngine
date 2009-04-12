@@ -8,10 +8,11 @@ from TaskGen import taskgen,feature,before,after
 import Task
 import Node
 import misc
+import module
 
-optims    = [ 'debug', 'release', 'genprofile', 'final']
-platforms = [ 'win32', 'posix', 'psp', 'gp2x', 'nds' ]
-archs     = [ 'amd64', 'x86', 'alpha', 'arm', 'hppa', 'ia64', 'mips', 'ppc', 's390', 's390x', 'sparc' ]
+optims    = module.alloptims
+platforms = module.allplatforms
+archs     = module.allarchs
 
 def set_options(opt):
     opt.sub_options(os.path.join('host', os.name))
@@ -61,12 +62,13 @@ def configure(conf):
     else:
         conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
         print 'selected variant',conf.env['SELECTED_TOOLCHAINS'],'for build'
-    for envname, env in conf.all_envs.iteritems():
-        try: os.mkdir(os.path.join(conf.blddir, envname))
-        except: pass
+
 
 
 def build(bld):
+    for target in os.listdir(os.path.join('mak', 'target')):
+        if target not in ['.svn', '.cvs']:
+            bld.add_subdirs(os.path.join('target', target))
     import Options
     if not Options.options.toolchains:
         doIt = True
@@ -134,10 +136,10 @@ def createmasterfile(task):
 
 MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
 
-@taskgen
+"""@taskgen
 @feature('cc','cxx')
 @before('apply_core')
-@after(filter_sources)
+@after('filter_sources')
 def make_masterfiles(self):
     if Options.options.master and self.usemaster and self.source:
         self.originalsources = self.source
@@ -178,4 +180,4 @@ def make_masterfiles(self):
                     self.mastertasks.append(mastertask)
                 cppnumleft = cppnumleft - 1
                 mastertask.set_inputs(srcnode)
-
+"""

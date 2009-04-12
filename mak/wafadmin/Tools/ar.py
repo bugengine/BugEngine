@@ -9,23 +9,28 @@ import os, sys
 import Task
 from Configure import conftest
 
-ar_str = '${AR} ${ARFLAGS} ${TGT} ${SRC} && ${RANLIB} ${RANLIBFLAGS} ${TGT}'
-
-cls = Task.simple_task_type('ar_link_static', ar_str, color='YELLOW', ext_in='.o')
+ar_str = '${AR} ${ARFLAGS} ${TGT} ${SRC}'
+cls = Task.simple_task_type('ar_link_static', ar_str, color='YELLOW', ext_in='.o', shell=False)
 cls.maxjobs = 1
 
+# remove the output in case it already exists
+old = cls.run
+def wrap(self):
+	try: os.remove(self.outputs[0].abspath(self.env))
+	except OSError: pass
+	return old(self)
+setattr(cls, 'run', wrap)
+
 def detect(conf):
-	comp = conf.env['AR']
-	if not comp: comp = conf.find_program('ar', var='AR')
+	comp = conf.find_program('ar', var='AR')
 	if not comp: return
 
-	ranlib = conf.env['RANLIB']
-	if not ranlib: ranlib = conf.find_program('ranlib', var='RANLIB')
+	ranlib = conf.find_program('ranlib', var='RANLIB')
 	if not ranlib: return
 
 	v = conf.env
 	v['AR']          = comp
-	v['ARFLAGS']     = 'src'
+	v['ARFLAGS']     = 'rcs'
 	v['RANLIB']      = ranlib
 	v['RANLIBFLAGS'] = ''
 
@@ -35,33 +40,4 @@ def find_ar(conf):
 	conf.check_tool('ar')
 	if not v['AR']: conf.fatal('ar is required for static libraries - not found')
 
-@conftest
-def find_cpp(conf):
-	v = conf.env
-	cpp = None
-	if v['CPP']: cpp = v['CPP']
-	elif 'CPP' in os.environ: cpp = os.environ['CPP']
-	if not cpp: cpp = conf.find_program('cpp', var='CPP')
-	if not cpp: cpp = v['CC']
-	if not cpp: cpp = v['CXX']
-	v['CPP'] = cpp
 
-@conftest
-def cc_add_flags(conf):
-	conf.add_os_flags('CFLAGS', 'CCFLAGS')
-	conf.add_os_flags('CPPFLAGS')
-	conf.add_os_flags('LINKFLAGS')
-
-@conftest
-def cxx_add_flags(conf):
-	conf.add_os_flags('CXXFLAGS')
-	conf.add_os_flags('CPPFLAGS')
-	conf.add_os_flags('LINKFLAGS')
-
-@conftest
-def cc_load_tools(conf):
-	conf.check_tool('cc')
-
-@conftest
-def cxx_load_tools(conf):
-	conf.check_tool('cxx')

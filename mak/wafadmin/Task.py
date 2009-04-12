@@ -45,7 +45,7 @@ The role of the Task Manager is to give the tasks in order (groups of task that 
 import os, shutil, sys, re, random, time
 from Utils import md5
 import Build, Runner, Utils, Node, Logs, Options
-from Logs import debug
+from Logs import debug, warn, error
 from Constants import *
 
 algotype = NORMAL
@@ -57,7 +57,7 @@ def f(task):
 	env = task.env
 	wd = getattr(task, 'cwd', None)
 	p = env.get_flat
-	cmd = \'\'\'%s\'\'\' % s
+	cmd = \'\'\' %s \'\'\' % s
 	return task.exec_command(cmd, cwd=wd)
 '''
 
@@ -94,6 +94,7 @@ class TaskManager(object):
 		self.groups = []
 		self.tasks_done = []
 		self.current_group = 0
+		self.groups_names = {}
 
 	def get_next_set(self):
 		"""return the next set of tasks to execute
@@ -105,14 +106,27 @@ class TaskManager(object):
 			else: self.current_group += 1
 		return (None, None)
 
-	def add_group(self):
-		if self.groups and not self.groups[0].tasks:
-			warn('add_group: an empty group is already present')
-		self.groups.append(TaskGroup())
+	def add_group(self, name=None):
+		#if self.groups and not self.groups[0].tasks:
+		#	error('add_group: an empty group is already present')
+		g = TaskGroup()
+
+		if name in self.groups_names:
+			error('add_group: name %s already present' % name)
+		self.groups_names[name] = g
+		self.groups.append(g)
+
+	def set_current_group(self, idx):
+		# TODO by name too
+		self.current_group = idx
+
+	def add_task_gen(self, tgen):
+		if not self.groups: self.add_group()
+		self.groups[-1].tasks_gen.append(tgen)
 
 	def add_task(self, task):
 		if not self.groups: self.add_group()
-		self.groups[-1].tasks.append(task)
+		self.groups[self.current_group].tasks.append(task)
 
 	def total(self):
 		total = 0
@@ -124,7 +138,7 @@ class TaskManager(object):
 	def add_finished(self, tsk):
 		self.tasks_done.append(tsk)
 		bld = tsk.generator.bld
-		if Options.is_install:
+		if bld.is_install:
 			f = None
 			if 'install' in tsk.__dict__:
 				f = tsk.__dict__['install']
@@ -136,6 +150,7 @@ class TaskGroup(object):
 	"the compilation of one group does not begin until the previous group has finished (in the manager)"
 	def __init__(self):
 		self.tasks = [] # this list will be consumed
+		self.tasks_gen = []
 
 		self.cstr_groups = Utils.DefaultDict(list) # tasks having equivalent constraints
 		self.cstr_order = Utils.DefaultDict(set) # partial order between the cstr groups
@@ -713,7 +728,7 @@ class Task(TaskBase):
 					d = additional_deps[x.id]
 				except KeyError:
 					continue
-				if callable(d):
+				if hasattr(d, '__call__'):
 					d = d() # dependency is a function, call it
 
 				for v in d:
@@ -763,9 +778,10 @@ class Task(TaskBase):
 		prev_sigs = bld.task_sigs.get(key, ())
 		if prev_sigs:
 			try:
+				# for issue #379
 				if prev_sigs[2] == self.compute_sig_implicit_deps():
 					return prev_sigs[2]
-			except KeyError:
+			except (KeyError, OSError):
 				pass
 
 		# no previous run or the signature of the dependencies has changed, rescan the dependencies
@@ -783,7 +799,7 @@ class Task(TaskBase):
 		return sig
 
 	def compute_sig_implicit_deps(self):
-		"""it is intented for .cpp and inferred .h files
+		"""it is intended for .cpp and inferred .h files
 		there is a single list (no tree traversal)
 		this is the hot spot so ... do not touch"""
 		m = md5()
@@ -796,8 +812,10 @@ class Task(TaskBase):
 		for k in bld.node_deps.get(self.unique_id(), []):
 			# unlikely but necessary if it happens
 			if not k.parent.id in bld.cache_scanned_folders:
+				# if the parent folder is removed, and OSError may be thrown
 				bld.rescan(k.parent)
 
+			# if the parent folder is removed, a KeyError will be thrown
 			if k.id & 3 == 2: # Node.FILE:
 				upd(tstamp[0][k.id])
 			else:
@@ -888,6 +906,7 @@ def compile_fun_noshell(name, line):
 			app("lst.extend(%r)" % params[-1].split())
 
 	fun = COMPILE_TEMPLATE_NOSHELL % "\n\t".join(buf)
+	debug('action: %s' % fun)
 	return (funex(fun), dvars)
 
 def compile_fun(name, line, shell=None):

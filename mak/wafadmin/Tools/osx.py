@@ -16,7 +16,6 @@ import TaskGen, Task, Build, Options
 from TaskGen import taskgen, feature, after, before
 from Logs import error, debug
 
-
 # see WAF issue 285
 # and also http://trac.macports.org/ticket/17059
 @feature('cc', 'cxx')
@@ -28,18 +27,17 @@ def set_macosx_deployment_target(self):
 		if sys.platform == 'darwin':
 			os.environ['MACOSX_DEPLOYMENT_TARGET'] = '.'.join(platform.mac_ver()[0].split('.')[:2])
 
-
-
 @feature('cc', 'cxx')
 @after('apply_lib_vars')
 def apply_framework(self):
 	for x in self.to_list(self.env['FRAMEWORKPATH']):
-		self.env.append_unique('CXXFLAGS', x)
-		self.env.append_unique('CCFLAGS', x)
-		self.env.append_unique('LINKFLAGS', x)
+		frameworkpath_st = '-F%s'
+		self.env.append_unique('CXXFLAGS', frameworkpath_st % x)
+		self.env.append_unique('CCFLAGS', frameworkpath_st % x)
+		self.env.append_unique('LINKFLAGS', frameworkpath_st % x)
 
 	for x in self.to_list(self.env['FRAMEWORK']):
-		self.env.append_unique('LINKFLAGS', x)
+		self.env.append_value('LINKFLAGS', ['-framework', x])
 
 @taskgen
 def create_task_macapp(self):
@@ -80,7 +78,10 @@ def apply_bundle(self):
 def apply_bundle_remove_dynamiclib(self):
 	if self.env['MACBUNDLE'] or getattr(self, 'mac_bundle', False):
 		if not getattr(self, 'vnum', None):
-			self.env['LINKFLAGS'].remove('-dynamiclib')
+			try:
+				self.env['LINKFLAGS'].remove('-dynamiclib')
+			except ValueError:
+				pass
 
 app_dirs = ['Contents', os.path.join('Contents','MacOS'), os.path.join('Contents','Resources')]
 
@@ -157,7 +158,7 @@ def install_shlib(task):
 @feature('osx')
 @after('install_target_cshlib')
 def install_target_osx_cshlib(self):
-	if not Options.is_install: return
+	if not self.bld.is_install: return
 	if getattr(self, 'vnum', '') and sys.platform != 'win32':
 		self.link_task.install = install_shlib
 

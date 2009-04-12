@@ -30,7 +30,7 @@ ${TGT[0].abspath(env)} -> /path/to/dir/to/file.ext
 
 """
 
-import os, sys, fnmatch
+import os, sys, fnmatch, re
 import Utils
 
 UNDEFINED = 0
@@ -39,6 +39,38 @@ FILE = 2
 BUILD = 3
 
 type_to_string = {UNDEFINED: "unk", DIR: "dir", FILE: "src", BUILD: "bld"}
+
+exclude_regs = '''
+**/*~
+**/#*#
+**/.#*
+**/%*%
+**/._*
+**/CVS
+**/CVS/**
+**/.cvsignore
+**/SCCS
+**/SCCS/**
+**/vssver.scc
+**/.svn
+**/.svn/**
+**/.DS_Store'''.split()
+
+exc_fun = None
+def default_excludes():
+	global exc_fun
+	if exc_fun:
+		return exc_fun
+
+	regs = [Utils.jar_regexp(x) for x in exclude_regs]
+	def mat(path):
+		for x in regs:
+			if x.match(path):
+				return True
+		return False
+
+	exc_fun = mat
+	return exc_fun
 
 class Node(object):
 	__slots__ = ("name", "parent", "id", "childs")
@@ -199,7 +231,8 @@ class Node(object):
 				current = prev.childs.get(name, None)
 				if current is None:
 					dir_cont = self.__class__.bld.cache_dir_contents
-					if prev.id in dir_cont and name in dir_cont[prev.id]:
+					# we use rescan above, so dir_cont[prev.id *is* defined]
+					if name in dir_cont[prev.id]:
 						if not os.path.isdir(prev.abspath() + os.sep + name):
 							# paranoid os.stat
 							return None
@@ -211,6 +244,7 @@ class Node(object):
 						return None
 		return current
 
+	# FIXME: remove in waf 1.6
 	def ensure_dir_node_from_path(self, lst):
 		"used very rarely, force the construction of a branch of node instance for representing folders"
 
@@ -232,6 +266,7 @@ class Node(object):
 					current = self.__class__(name, prev, DIR)
 		return current
 
+	# FIXME: remove in waf 1.6
 	def exclusive_build_node(self, path):
 		"""
 		create a hierarchy in the build dir (no source folders) for ill-behaving compilers
@@ -361,9 +396,6 @@ class Node(object):
 		"""
 		## absolute path - hot zone, so do not touch
 
-		if not self.name:
-			return '/'
-
 		# less expensive
 		variant = (env and (self.id & 3 != FILE) and env.variant()) or 0
 		#variant = self.variant(env)
@@ -391,7 +423,7 @@ class Node(object):
 		else:
 			name = name + ext
 
-		return self.parent.childs.get(name, None) or self.__class__(name, self.parent, BUILD)
+		return self.parent.find_or_declare([name])
 
 	def src_dir(self, env):
 		"src path without the file name"
@@ -422,11 +454,7 @@ class Node(object):
 
 	def read(self, env):
 		"get the contents of a file, it is not used anywhere for the moment"
-		try:
-			file = open(self.abspath(env), 'rb')
-			return file.read()
-		finally:
-			if file: file.close()
+		return Utils.readf(self.abspath(env))
 
 	def dir(self, env):
 		"scons-like"
@@ -444,36 +472,6 @@ class Node(object):
 		"scons-like - hot zone so do not touch"
 		k = max(0, self.name.rfind('.'))
 		return self.name[k:]
-
-	def find_iter(self, in_pat=['*'], ex_pat=[], prune_pat=['.svn'], src=True, bld=True, dir=False, maxdepth=25):
-		"find nodes recursively, this returns everything but folders by default"
-
-		if not (src or bld or dir):
-			raise StopIteration
-
-		if self.id & 3 != DIR:
-			raise StopIteration
-
-		in_pat = Utils.to_list(in_pat)
-		ex_pat = Utils.to_list(ex_pat)
-		prune_pat = Utils.to_list(prune_pat)
-
-		def accept_name(node, name):
-			for pat in ex_pat:
-				if fnmatch.fnmatchcase(name, pat):
-					return False
-			for pat in in_pat:
-				if fnmatch.fnmatchcase(name, pat):
-					return True
-			return False
-
-		def is_prune(node, name):
-			for pat in prune_pat:
-				if fnmatch.fnmatchcase(name, pat):
-					return True
-			return False
-
-		return self.find_iter_impl(src, bld, dir, accept_name, is_prune, maxdepth=maxdepth)
 
 	def find_iter_impl(self, src=True, bld=True, dir=True, accept_name=None, is_prune=None, maxdepth=25):
 		"find nodes in the filesystem hierarchy, try to instanciate the nodes passively"
@@ -514,6 +512,64 @@ class Node(object):
 					if accept_name(self, node.name):
 						yield node
 		raise StopIteration
+
+	def find_iter(self, in_pat=['*'], ex_pat=[], prune_pat=['.svn'], src=True, bld=True, dir=False, maxdepth=25, flat=False):
+		"find nodes recursively, this returns everything but folders by default"
+
+		if not (src or bld or dir):
+			raise StopIteration
+
+		if self.id & 3 != DIR:
+			raise StopIteration
+
+		in_pat = Utils.to_list(in_pat)
+		ex_pat = Utils.to_list(ex_pat)
+		prune_pat = Utils.to_list(prune_pat)
+
+		def accept_name(node, name):
+			for pat in ex_pat:
+				if fnmatch.fnmatchcase(name, pat):
+					return False
+			for pat in in_pat:
+				if fnmatch.fnmatchcase(name, pat):
+					return True
+			return False
+
+		def is_prune(node, name):
+			for pat in prune_pat:
+				if fnmatch.fnmatchcase(name, pat):
+					return True
+			return False
+
+		ret = self.find_iter_impl(src, bld, dir, accept_name, is_prune, maxdepth=maxdepth)
+		if flat:
+			return " ".join([x.relpath_gen(self) for x in ret])
+
+		return ret
+
+	def ant_glob(self, *k, **kw):
+		regex = Utils.jar_regexp(k[0])
+		def accept(node, name):
+			ts = node.relpath_gen(self) + '/' + name
+			return regex.match(ts)
+
+		def reject(node, name):
+			ts = node.relpath_gen(self) + '/' + name
+			return default_excludes()(ts)
+
+		ret = [x for x in self.find_iter_impl(
+			accept_name=accept,
+			is_prune=reject,
+			src=kw.get('src', 1),
+			bld=kw.get('bld', 1),
+			dir=kw.get('dir', 0),
+			maxdepth=kw.get('maxdepth', 25)
+			)]
+
+		if kw.get('flat', True):
+			return " ".join([x.relpath_gen(self) for x in ret])
+
+		return ret
 
 # win32 fixes follow
 if sys.platform == "win32":

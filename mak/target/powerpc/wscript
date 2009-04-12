@@ -9,3 +9,6 @@ def configure(conf):
     conf.env.append_unique('CCDEFINES', ['_POWERPC', '_PPC'])
     conf.env.append_unique('CXXDEFINES', ['_POWERPC', '_PPC'])
 
+def build(bld):
+    pass
+

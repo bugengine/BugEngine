@@ -9,7 +9,7 @@
 
 using namespace BugEngine::Data::Parse;
 
-#include "dataparser.bison.hh"
+#include "dataparser.hh"
 
 
 #pragma warning(disable:4127 4244 4267 4996 4505)

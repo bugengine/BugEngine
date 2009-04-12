@@ -229,8 +229,7 @@ Scheduler::Scheduler()
 ,   m_running(true)
 ,   m_end()
 {
-    static size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
-
+    const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
     for(size_t i = 0; i < g_numWorkers; ++i)
     {
         m_workers.push_back(new Worker(this, i));

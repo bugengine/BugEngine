@@ -24,7 +24,7 @@ def apply_msgfmt(self):
 		task.set_inputs(node)
 		task.set_outputs(node.change_ext('.mo'))
 
-		if not Options.is_install: continue
+		if not self.bld.is_install: continue
 		langname = lang.split('/')
 		langname = langname[-1]
 		task.install_path = self.install_path + os.sep + langname + os.sep + 'LC_MESSAGES'
@@ -44,9 +44,7 @@ def detect(conf):
 		except OSError: conf.fatal('could not open %s' % file)
 
 	try:
-		f = open(file, 'r')
-		txt = f.read()
-		f.close()
+		txt = Utils.readf(file)
 	except (OSError, IOError):
 		conf.fatal('could not read %s' % file)
 
@@ -74,5 +72,5 @@ def detect(conf):
 
 	conf.env['MSGFMT'] = conf.find_program('msgfmt')
 
-Task.simple_task_type('msgfmt', '${MSGFMT} ${SRC} -o ${TGT}', color='BLUE')
+Task.simple_task_type('msgfmt', '${MSGFMT} ${SRC} -o ${TGT}', color='BLUE', shell=False)
 

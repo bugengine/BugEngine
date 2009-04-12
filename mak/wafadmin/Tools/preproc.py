@@ -106,9 +106,7 @@ def repl(m):
 
 def filter_comments(filename):
 	# return a list of tuples : keyword, line
-	f = open(filename, "r")
-	code = f.read()
-	f.close()
+	code = Utils.readf(filename)
 	if use_trigraphs:
 		for (a, b) in trig_def: code = code.split(a).join(b)
 	code = re_nl.sub('', code)
@@ -175,7 +173,7 @@ def get_num(lst):
 						count_par += 1
 				i += 1
 			else:
-				raise PreprocError, "rparen expected %r" % lst
+				raise PreprocError("rparen expected %r" % lst)
 
 			(num, _) = get_term(lst[1:i])
 			return (num, lst[i+1:])
@@ -191,7 +189,7 @@ def get_num(lst):
 		elif v == '~':
 			return (~ int(num), lst)
 		else:
-			raise PreprocError("invalid token %r for get_num" % lst)
+			raise PreprocError("invalid op token %r for get_num" % lst)
 	elif p == NUM:
 		return v, lst[1:]
 	else:
@@ -204,7 +202,11 @@ def get_term(lst):
 		return (num, [])
 	(p, v) = lst[0]
 	if p == OP:
-		if v == ',':
+		if v == '&&' and not num:
+			return (num, [])
+		elif v == '||' and num:
+			return (num, [])
+		elif v == ',':
 			# skip
 			return get_term(lst[1:])
 		elif v == '?':
@@ -252,7 +254,7 @@ def get_term(lst):
 				return get_term([(NUM, num), (p, v), (NUM, num3)] + lst)
 
 
-	raise PreprocError("Cannot reduce %r" % lst)
+	raise PreprocError("cannot reduce %r" % lst)
 
 def reduce_eval(lst):
 	"""take a list of tokens and output true or false (#if/#elif conditions)"""
@@ -475,7 +477,7 @@ def extract_macro(txt):
 				elif p == OP and v == ')':
 					break
 				else:
-					raise PreprocError("unexpected token")
+					raise PreprocError("unexpected token (3)")
 			elif prev == IDENT:
 				if p == OP and v == ',':
 					prev = v
@@ -489,11 +491,11 @@ def extract_macro(txt):
 					pindex += 1
 					prev = p
 				elif p == OP and v == '...':
-					raise PreprocError("not implemented")
+					raise PreprocError("not implemented (1)")
 				else:
-					raise PreprocError("comma or ... expected")
+					raise PreprocError("comma or ... expected (2)")
 			elif prev == '...':
-				raise PreprocError("not implemented")
+				raise PreprocError("not implemented (2)")
 			else:
 				raise PreprocError("unexpected else")
 
@@ -525,7 +527,7 @@ def extract_include(txt, defs):
 		if toks[0][1] == '<' and toks[-1][1] == '>':
 			return stringize(toks).lstrip('<').rstrip('>')
 
-	raise PreprocError("could not parse include %s" % txt)
+	raise PreprocError("could not parse include %s." % txt)
 
 def parse_char(txt):
 	if not txt: raise PreprocError("attempted to parse a null char")
@@ -573,8 +575,10 @@ def tokenize(s):
 				elif name == OP:
 					if v == '%:': v = '#'
 					elif v == '%:%:': v = '##'
-
-				ret.append((name, v.strip('"')))
+				elif name == STR:
+					# remove the quotes around the string
+					v = v[1:-1]
+				ret.append((name, v))
 				break
 	return ret
 
@@ -629,7 +633,7 @@ class c_parser(object):
 		filepath = node.abspath(self.env)
 
 		self.count_files += 1
-		if self.count_files > 30000: raise PreprocError("recursion limit exceeded, bailing out")
+		if self.count_files > 30000: raise PreprocError("recursion limit exceeded")
 		pc = self.parse_cache
 		debug('preproc: reading file %r' % filepath)
 		try:
@@ -677,8 +681,7 @@ class c_parser(object):
 				self.process_line(kind, line)
 			except Exception, e:
 				if Logs.verbose:
-					error("line parsing failed (%s): %s" % (str(e), line))
-					traceback.print_exc()
+					debug('preproc: line parsing failed (%s): %s %s' % (e, line, Utils.ex_stack()))
 
 	def process_line(self, token, line):
 		ve = Logs.verbose

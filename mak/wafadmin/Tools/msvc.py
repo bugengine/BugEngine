@@ -4,14 +4,13 @@
 # Tamas Pal, 2007 (folti)
 # Nicolas Mercier, 2009
 # Microsoft Visual C++/Intel C++ compiler support - beta, needs more testing
-# TODO: add intel specific options
-# TODO: itanium completely untested
 
 # usage:
 #
 # conf.env['MSVC_VERSIONS'] = ['msvc 9.0', 'msvc 8.0', 'intel 11']
 # conf.env['MSVC_TARGETS'] = ['x64']
 # conf.check_tool('msvc')
+# OR conf.check_tool('msvc', funs='no_autodetect')
 # conf.check_lib_msvc('gdi32')
 # conf.check_libs_msvc('kernel32 user32', mandatory=true)
 # ...
@@ -455,10 +454,16 @@ Task.task_type_from_func('msvc_link_static', vars=['STLIBLINK', 'STLINKFLAGS'], 
 Task.task_type_from_func('msvc_cc_link', vars=['LINK', 'LINK_SRC_F', 'LINKFLAGS', 'MT', 'MTFLAGS'] , color='YELLOW', func=msvc_linker, ext_in='.o')
 Task.task_type_from_func('msvc_cxx_link', vars=['LINK', 'LINK_SRC_F', 'LINKFLAGS', 'MT', 'MTFLAGS'] , color='YELLOW', func=msvc_linker, ext_in='.o')
 
-rc_str='${RC} ${RCFLAGS} /fo${TGT} ${SRC}'
-Task.simple_task_type('rc', rc_str, color='GREEN', before='cc cxx')
+rc_str='${RC} ${RCFLAGS} /fo ${TGT} ${SRC}'
+Task.simple_task_type('rc', rc_str, color='GREEN', before='cc cxx', shell=False)
+
+@conftest
+def no_autodetect(conf):
+	conf.eval_rules(detect.replace('autodetect', ''))
+
 
 detect = '''
+autodetect
 find_msvc
 msvc_common_flags
 cc_load_tools
@@ -468,6 +473,16 @@ cxx_add_flags
 '''
 
 @conftest
+def autodetect(conf):
+	v = conf.env
+	compiler,path, includes, libdirs = detect_msvc(conf)
+	v['PATH'] = path
+	v['CPPPATH'] = includes
+	v['LIBPATH'] = libdirs
+	v['MSVC_COMPILER'] = compiler
+
+
+@conftest
 def find_msvc(conf):
 	# due to path format limitations, limit operation only to native Win32. Yeah it sucks.
 	if sys.platform != 'win32':
@@ -475,10 +490,8 @@ def find_msvc(conf):
 
 	v = conf.env
 
-	compiler,path, includes, libdirs = detect_msvc(conf)
-	v['PATH'] = path
-	v['CPPPATH'] = includes
-	v['LIBPATH'] = libdirs
+	compiler = v['MSVC_COMPILER'] or 'msvc'
+	path = v['PATH']
 	if compiler=='msvc':
 		compiler_name = 'CL'
 		linker_name = 'LINK'
@@ -491,13 +504,13 @@ def find_msvc(conf):
 	# compiler
 	cxx = None
 	if v['CXX']: cxx = v['CXX']
-	elif 'CXX' in os.environ: cxx = os.environ['CXX']
+	elif 'CXX' in conf.environ: cxx = conf.environ['CXX']
 	if not cxx: cxx = conf.find_program(compiler_name, var='CXX', path_list=path)
 	if not cxx: conf.fatal('%s was not found (compiler)' % compiler_name)
 	cxx = conf.cmd_to_list(cxx)
 
 	# before setting anything, check if the compiler is really msvc
-	env = dict(os.environ)
+	env = dict(conf.environ)
 	env.update(PATH = ';'.join(path))
 	if not Utils.cmd_output([cxx, '/nologo', '/?'], silent=True, env=env):
 		conf.fatal('the msvc compiler could not be identified')
@@ -505,6 +518,10 @@ def find_msvc(conf):
 	# c/c++ compiler
 	v['CC'] = v['CXX'] = cxx
 	v['CC_NAME'] = v['CXX_NAME'] = 'msvc'
+
+	# environment flags
+	v.prepend_value('CPPPATH', conf.environ['INCLUDE'])
+	v.prepend_value('LIBPATH', conf.environ['LIB'])
 
 	# linker
 	if not v['LINK_CXX']:
@@ -620,7 +637,7 @@ def msvc_common_flags(conf):
 	v['CCDEFINES_ST']     = '/D%s'
 	v['CXXDEFINES_ST']    = '/D%s'
 
-	v['LINKFLAGS']        = ['/NOLOGO', '/ERRORREPORT:PROMPT', '/MANIFEST']
+	v['LINKFLAGS']        = ['/NOLOGO', '/MANIFEST']
 
 	# shared library
 	v['shlib_CCFLAGS']  = ['']

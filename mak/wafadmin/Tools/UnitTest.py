@@ -19,7 +19,6 @@ Each object to use as a unit test must be a program and must have X{obj.unit_tes
 """
 import os, sys
 import Build, TaskGen, Utils, Options, Logs
-import pproc
 
 class unit_test(object):
 	"Unit test representation"
@@ -107,19 +106,20 @@ class unit_test(object):
 				sys.stderr.flush()
 			try:
 				kwargs = {}
+				kwargs['env'] = os.environ.copy()
 				if self.change_to_testfile_dir:
 					kwargs['cwd'] = srcdir
 				if not self.want_to_see_test_output:
-					kwargs['stdout'] = pproc.PIPE  # PIPE for ignoring output
+					kwargs['stdout'] = Utils.pproc.PIPE  # PIPE for ignoring output
 				if not self.want_to_see_test_error:
-					kwargs['stderr'] = pproc.PIPE  # PIPE for ignoring output
+					kwargs['stderr'] = Utils.pproc.PIPE  # PIPE for ignoring output
 				if ld_library_path:
 					if sys.platform == 'win32':
-						kwargs['env'] = {'PATH': ';'.join(ld_library_path)}
+						kwargs['env']['PATH'] = ';'.join(ld_library_path + [os.environ.get('PATH', '')])
 					else:
-						kwargs['env'] = {'LD_LIBRARY_PATH': ':'.join(ld_library_path)}
+						kwargs['env']['LD_LIBRARY_PATH'] = ':'.join(ld_library_path + [os.environ.get('LD_LIBRARY_PATH', '')])
 
-				pp = pproc.Popen(filename, **kwargs)
+				pp = Utils.pproc.Popen(filename, **kwargs)
 				pp.wait()
 
 				result = int(pp.returncode == self.returncode_ok)
@@ -150,7 +150,7 @@ class unit_test(object):
 			p('YELLOW', 'No unit tests present')
 			return
 		p('GREEN', 'Running unit tests')
-		print
+		p('NORMAL', '')
 
 		for label in self.unit_tests.allkeys:
 			filename = self.unit_tests[label]
@@ -170,22 +170,21 @@ class unit_test(object):
 
 			line = '%s %s' % (label, '.' * n)
 
-			print line,
-			if err: p('RED', 'ERROR')
-			elif result: p('GREEN', 'OK')
-			else: p('YELLOW', 'FAILED')
+			if err: p('RED', '%sERROR' % line)
+			elif result: p('GREEN', '%sOK' % line)
+			else: p('YELLOW', '%sFAILED' % line)
 
 		percentage_ok = float(self.num_tests_ok) / float(self.total_num_tests) * 100.0
 		percentage_failed = float(self.num_tests_failed) / float(self.total_num_tests) * 100.0
 		percentage_erroneous = float(self.num_tests_err) / float(self.total_num_tests) * 100.0
 
-		print '''
+		p('NORMAL', '''
 Successful tests:      %i (%.1f%%)
 Failed tests:          %i (%.1f%%)
 Erroneous tests:       %i (%.1f%%)
 
 Total number of tests: %i
 ''' % (self.num_tests_ok, percentage_ok, self.num_tests_failed, percentage_failed,
-		self.num_tests_err, percentage_erroneous, self.total_num_tests)
+		self.num_tests_err, percentage_erroneous, self.total_num_tests))
 		p('GREEN', 'Unit tests finished')
 

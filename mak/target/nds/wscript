@@ -1,19 +1,24 @@
 # set NintendoDS specific options
 
 import os
+from TaskGen import taskgen, feature, after
+import Task
 
 def set_options(opt):
     pass
 
 def configure(conf):
-    conf.env['dstool'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
-    if not conf.env['dstool']: conf.fatal('ndstool was not found')
+    conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
+    if not conf.env['NDSTOOL']: conf.fatal('ndstool was not found')
+    conf.env['OBJCOPY'] = conf.find_program('arm-eabi-objcopy', conf.env['PATH'], var='OBJCOPY')
+    if not conf.env['OBJCOPY']: conf.fatal('objcopy was not found')
     
     conf.env['library_PATTERN'] = '%s.a'
     #conf.env['shlib_PATTERN']   = '%s.so'
-    conf.env['program_PATTERN'] = '%s.arm9'
-    conf.env['job_PATTERN'] = '%s.arm7'
-    
+    conf.env['program_PATTERN'] = '%s.elf'
+
+    conf.env.append_unique('CXXFLAGS', [ '-fno-rtti', '-fno-exceptions' ])
+    conf.env.append_unique('LINKFLAGS', [ '-mthumb', '-mthumb-interwork', '-mno-fpu' ])
     conf.env.append_unique('CCDEFINES', ['NDS', '_NDS', '_NDS_', '__NDS__'])
     conf.env.append_unique('CXXDEFINES', ['NDS', '_NDS', '_NDS_', '__NDS__'])
     conf.env['PREFIX']          = conf.env['_VARIANT_']
@@ -24,4 +29,22 @@ def configure(conf):
                                     'api':      os.path.join('dev','include'),
                                     'lib':      os.path.join('dev','lib'),
                                     'data':     'data' }
-                                    
+
+    conf.check_tool('bin2c', tooldir='mak/tools')
+    conf.check_tool('grit', tooldir='mak/tools')
+
+def build(bld):
+    pass
+
+cls = Task.simple_task_type('objcopy', '${OBJCOPY} -O binary ${SRC} ${TGT}', color='YELLOW', ext_in='.o')
+
+@taskgen
+@feature('cprogram')
+@after('apply_link')
+def objcopy_step(self):
+    if self.env['ARCHITECTURE'] == 'arm7' or self.env['ARCHITECTURE'] == 'arm9':
+        task = self.link_task
+        self.link_task = self.create_task('objcopy')
+        self.link_task.set_run_after(task)
+        self.link_task.inputs = task.outputs
+        self.link_task.outputs = [t.change_ext('.'+self.env['ARCHITECTURE']) for t in task.outputs]
