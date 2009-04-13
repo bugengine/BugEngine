@@ -11,20 +11,6 @@ import Configure
 import Logs
 from Logs import info,warn
 
-Logs.colors_lst = {
-'USE' : True,
-'BOLD'  :'\x1b[01;1m',
-'RED'   :'\x1b[01;91m',
-'GREEN' :'\x1b[32m',
-'YELLOW':'\x1b[33m',
-'PINK'  :'\x1b[35m',
-'BLUE'  :'\x1b[01;34m',
-'CYAN'  :'\x1b[36m',
-'NORMAL':'\x1b[0m',
-'cursor_on'  :'\x1b[?25h',
-'cursor_off' :'\x1b[?25l',
-}
-
 tools       = [ 'gcc', 'msvc']
 projects    = [('vs2005', 'Visual Studio 2005'), ('vs2008', 'Visual Studio 2008'), ('vs2005e', 'Visual Studio 2005 Express'), ('vs2008e', 'Visual Studio 2008 Express')]
 
