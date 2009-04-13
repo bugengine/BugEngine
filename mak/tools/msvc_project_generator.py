@@ -221,7 +221,7 @@ class Project:
     lexconf = """					<Tool
     						Name=\"VCCustomBuildTool\"
     						Description=\"flex &quot;$(InputPath)&quot;...\"
-    						CommandLine=\"set PATH=%%PATH%%;&quot;$(SolutionDir)..\\bin\\&quot;&#x0D;&#x0A;flex.exe -o&quot;%(FILECPP)s&quot; &quot;$(InputPath)&quot;\"
+    						CommandLine=\"set PATH=%%PATH%%;&quot;$(SolutionDir)..\\..\\bin\\&quot;&#x0D;&#x0A;flex.exe -o&quot;%(FILECPP)s&quot; &quot;$(InputPath)&quot;\"
     						Outputs=\"&quot;%(FILECPP)s&quot;\"
     					/>
 """
@@ -229,7 +229,7 @@ class Project:
     bisonconf = """					<Tool
     						Name=\"VCCustomBuildTool\"
     						Description=\"bison &quot;$(InputPath)&quot;...\"
-    						CommandLine=\"set PATH=%%PATH%%;&quot;$(SolutionDir)..\\bin\\&quot;&#x0D;&#x0A;bison.exe -o&quot;%(FILECPP)s&quot; -d --no-lines &quot;$(InputPath)&quot; \"
+    						CommandLine=\"set PATH=%%PATH%%;&quot;$(SolutionDir)..\\..\\bin\\&quot;&#x0D;&#x0A;bison.exe -o&quot;%(FILECPP)s&quot; -d --no-lines &quot;$(InputPath)&quot; \"
     						Outputs=\"&quot;%(FILECPP)s&quot;;&quot;%(FILEH)s&quot;\"
     					/>
 """
@@ -325,7 +325,7 @@ class Project:
 
     def addDllConfig(self, optim):
         for platid,plat,opts in self.platforms:
-            defines = ";".join([xmlify(d) for d in opts.defines])
+            defines = ";".join([xmlify(d.replace('"','\\"')) for d in opts.defines])
             apidirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.includedir])
             libdirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.libdir])
             libs    = " ".join([xmlify("\""+str(d)+".lib\"") for d in opts.libs])
@@ -371,7 +371,7 @@ class Project:
 
     def addPluginConfig(self,optim):
         for platid,plat,opts in self.platforms:
-            defines = ";".join([xmlify(d) for d in opts.defines])
+            defines = ";".join([xmlify(d.replace('"','\\"')) for d in opts.defines])
             apidirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.includedir])
             libdirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.libdir])
             libs    = " ".join([xmlify("\""+str(d)+".lib\"") for d in opts.libs])
@@ -413,7 +413,7 @@ class Project:
 
     def addExeConfig(self,optim):
         for platid,plat,opts in self.platforms:
-            defines = ";".join([xmlify(d) for d in opts.defines])
+            defines = ";".join([xmlify(d.replace('"','\\"')) for d in opts.defines])
             apidirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.includedir])
             libdirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.libdir])
             libs    = " ".join([xmlify("\""+str(d)+".lib\"") for d in opts.libs])
@@ -472,7 +472,7 @@ class Project:
 
     def addLibConfig(self,optim):
         for platid,plat,opts in self.platforms:
-            defines = ";".join([xmlify(d )for d in opts.defines])
+            defines = ";".join([xmlify(d.replace('"','\\"'))for d in opts.defines])
             apidirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.includedir])
             libdirs = ";".join([xmlify("\"..\\"+d+"\"") for d in opts.libdir])
             libs    = "" #" ".join([xmlify("\""+str(d)+".lib\"") for d in opts.libs])

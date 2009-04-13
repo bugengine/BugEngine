@@ -211,7 +211,7 @@ class module:
                 fullname = os.path.join(path, file)
                 
 
-                newexts = { '.ll':('.lex.cc','.hh'), '.yy': ('.bison.cc','.bison.hh'), '.l':('.lex.c', '.h'), '.y':('.bison.c', '.bison.h') }
+                newexts = { '.ll':('.cc','.hh'), '.yy': ('.cc','.hh'), '.l':('.c', '.h'), '.y':('.c', '.h') }
                 if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
                     result.addFile(sources.cppsource(file, platforms, archs, process, self.usepch))
                 elif ext in set(['.rc']):
