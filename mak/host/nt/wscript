@@ -11,13 +11,7 @@ import Configure
 import Logs
 from Logs import info,warn
 
-tools       = [ 'gcc', 'msvc']
 projects    = [('vs2005', 'Visual Studio 2005'), ('vs2008', 'Visual Studio 2008'), ('vs2005e', 'Visual Studio 2005 Express'), ('vs2008e', 'Visual Studio 2008 Express')]
-
-
-# gets a list of all the Platform SDKs installed (msvc not needed)
-def get_available_platform_sdk(conf = None, selected=[]):
-    pass
 
 
 # adds MSVC vars to environment
@@ -116,7 +110,6 @@ def configure(conf):
     
     conf.env['BUILD_VARIANTS'] = []
     get_available_gcc(conf)
-    get_available_platform_sdk(conf)
     get_available_msvc(conf)
 
     if len(conf.env['BUILD_VARIANTS']) == 0:
