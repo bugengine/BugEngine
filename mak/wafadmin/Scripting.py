@@ -4,7 +4,7 @@
 
 "Module called for configuring, compiling and installing targets"
 
-import os, sys, shutil, traceback, time, inspect
+import os, sys, shutil, traceback, datetime, inspect
 
 import Utils, Configure, Build, Logs, Options, Environment, Task
 from Logs import error, warn, info
@@ -27,9 +27,8 @@ def prepare_impl(t, cwd, ver, wafdir):
 	# now find the wscript file
 	msg1 = 'Waf: *** Nothing to do! Please run waf from a directory containing a file named "%s"' % WSCRIPT_FILE
 
-	# Some people want to configure their projects gcc-style:
+	# in theory projects can be configured in a gcc manner:
 	# mkdir build && cd build && ../waf configure && ../waf
-	# check that this is really what is wanted
 	build_dir_override = None
 	candidate = None
 
@@ -40,9 +39,9 @@ def prepare_impl(t, cwd, ver, wafdir):
 	search_for_candidate = True
 	if WSCRIPT_FILE in lst:
 		candidate = cwd
+
 	elif 'configure' in sys.argv and not WSCRIPT_BUILD_FILE in lst:
-		# gcc-style configuration
-		# look in the calling directory for a wscript file "/foo/bar/configure"
+		# gcc-like configuration
 		calldir = os.path.abspath(os.path.dirname(sys.argv[0]))
 		if WSCRIPT_FILE in os.listdir(calldir):
 			candidate = calldir
@@ -51,7 +50,6 @@ def prepare_impl(t, cwd, ver, wafdir):
 			error('arg[0] directory does not contain a wscript file')
 			sys.exit(1)
 		build_dir_override = cwd
-
 
 	# climb up to find a script if it is not found
 	while search_for_candidate:
@@ -63,6 +61,9 @@ def prepare_impl(t, cwd, ver, wafdir):
 		if 'configure' in sys.argv and candidate:
 			break
 		if Options.lockfile in dirlst:
+			env = Environment.Environment()
+			env.load(os.path.join(cwd, Options.lockfile))
+			candidate = env['cwd']
 			break
 		cwd = os.path.dirname(cwd) # climb up
 
@@ -176,8 +177,7 @@ def main():
 	while commands:
 		x = commands.pop(0)
 
-		ini = time.time()
-		#info('Configuration finished successfully%s; project is ready to build.' % ela)
+		ini = datetime.datetime.now()
 		if x == 'configure':
 			fun = configure
 		elif x == 'build':
@@ -201,7 +201,7 @@ def main():
 
 		ela = ''
 		if not Options.options.progress_bar:
-			ela = time.strftime(' (%H:%M:%S)', time.gmtime(time.time() - ini))
+			ela = ' (%s)' % Utils.get_elapsed_time(ini)
 
 		if x != 'init' and x != 'shutdown':
 			info('%r finished successfully%s' % (x, ela))
@@ -210,11 +210,12 @@ def main():
 			commands.append('shutdown')
 
 def configure(conf):
-	err = 'The %s is not given in %s:\n * define a top level attribute named "%s"\n * run waf configure --%s=xxx'
 
 	src = getattr(Options.options, SRCDIR, None)
 	if not src: src = getattr(Utils.g_module, SRCDIR, None)
-	if not src: raise Utils.WscriptError(err % (SRCDIR, os.path.abspath('.'), SRCDIR, SRCDIR))
+	if not src:
+		src = '.'
+		incomplete_src = 1
 	src = os.path.abspath(src)
 
 	bld = getattr(Options.options, BLDDIR, None)
@@ -222,15 +223,30 @@ def configure(conf):
 		bld = getattr(Utils.g_module, BLDDIR, None)
 		if bld == '.':
 			raise Utils.WafError('Setting blddir="." may cause distclean problems')
-	if not bld: raise Utils.WscriptError(err % (BLDDIR, os.path.abspath('.'), BLDDIR, BLDDIR))
+	if not bld:
+		bld = 'build'
+		incomplete_bld = 1
 	bld = os.path.abspath(bld)
 
 	try: os.makedirs(bld)
 	except OSError: pass
 
+	# It is not possible to compile specific targets in the configuration
+	# this may cause configuration errors if autoconfig is set
+	targets = Options.options.compile_targets
+	Options.options.compile_targets = None
+	Options.is_install = False
+
 	conf.srcdir = src
 	conf.blddir = bld
 	conf.post_init()
+
+	if 'incomplete_src' in vars():
+		conf.check_message_1('Setting srcdir to')
+		conf.check_message_2(src)
+	if 'incomplete_bld' in vars():
+		conf.check_message_1('Setting blddir to')
+		conf.check_message_2(bld)
 
 	# calling to main wscript's configure()
 	conf.sub_config([''])
@@ -252,7 +268,15 @@ def configure(conf):
 	env['hash'] = conf.hash
 	env['files'] = conf.files
 	env['environ'] = dict(conf.environ)
+	env['cwd'] = os.path.split(Utils.g_module.root_path)[0]
+
+	if Utils.g_module.root_path != src:
+		# in case the source dir is somewhere else
+		env.store(os.path.join(src, Options.lockfile))
+
 	env.store(Options.lockfile)
+
+	Options.options.compile_targets = targets
 
 def clean(bld):
 	'''removes the build files'''
@@ -276,42 +300,46 @@ def clean(bld):
 
 def check_configured(bld):
 	if not Configure.autoconfig:
-		return
+		return bld
+
+	conf_cls = getattr(Utils.g_module, 'configure_context', Utils.Context)
+	bld_cls = getattr(Utils.g_module, 'build_context', Utils.Context)
 
 	def reconf(proj):
-		back = (Options.commands, Options.options, Logs.zones, Logs.verbose)
+		back = (Options.commands, Options.options.__dict__, Logs.zones, Logs.verbose)
 
 		Options.commands = proj['commands']
 		Options.options.__dict__ = proj['options']
-		conf = Configure.ConfigurationContext()
+		conf = conf_cls()
 		conf.environ = proj['environ']
 		configure(conf)
 
-		(Options.commands, Options.options, Logs.zones, Logs.verbose) = back
+		(Options.commands, Options.options.__dict__, Logs.zones, Logs.verbose) = back
 
-	for k in xrange(3):
-		try:
-			proj = Environment.Environment(Options.lockfile)
-		except IOError:
-			conf = Configure.ConfigurationContext()
-			configure(conf)
-		else:
-			try:
-				bld = Build.BuildContext()
-				bld.load_dirs(proj[SRCDIR], proj[BLDDIR])
-				bld.load_envs()
-			except Utils.WafError:
-				reconf(proj)
-				return
-			break
+	try:
+		proj = Environment.Environment(Options.lockfile)
+	except IOError:
+		conf = conf_cls()
+		configure(conf)
 	else:
+		try:
+			bld = bld_cls()
+			bld.load_dirs(proj[SRCDIR], proj[BLDDIR])
+			bld.load_envs()
+		except Utils.WafError:
+			reconf(proj)
+			return bld_cls()
+
+	try:
+		proj = Environment.Environment(Options.lockfile)
+	except IOError:
 		raise Utils.WafError('Auto-config: project does not configure (bug)')
 
 	h = 0
 	try:
 		for file in proj['files']:
 			if file.endswith('configure'):
-				h = hash((h, readf(file)))
+				h = hash((h, Utils.readf(file)))
 			else:
 				mod = Utils.load_module(file)
 				h = hash((h, mod.waf_hash_val))
@@ -323,6 +351,8 @@ def check_configured(bld):
 			warn('Reconfiguring the project: the configuration has changed')
 			reconf(proj)
 
+	return bld_cls()
+
 def install(bld):
 	'''installs the build files'''
 	Options.commands['install'] = True
@@ -331,7 +361,7 @@ def install(bld):
 
 	bld.is_install = INSTALL
 
-	check_configured(bld)
+	bld = check_configured(bld)
 	build_impl(bld)
 	bld.install()
 
@@ -361,7 +391,7 @@ def build(bld):
 
 	bld.is_install = 0 # False
 
-	check_configured(bld)
+	bld = check_configured(bld)
 	return build_impl(bld)
 
 def build_impl(bld):
@@ -380,16 +410,14 @@ def build_impl(bld):
 	# execute something immediately before the build starts
 	bld.pre_build()
 
-	ini = time.time()
 	try:
 		bld.compile()
 	finally:
+		if Options.options.progress_bar: print('')
 		info("Waf: Leaving directory `%s'" % bld.bldnode.abspath())
 
 	# execute something immediately after a successful build
 	bld.post_build()
-
-	if Options.options.progress_bar: print('')
 
 	bld.install()
 
@@ -481,12 +509,13 @@ def dist(appname='', version=''):
 	# undocumented hook for additional cleanup
 	dist_hook = getattr(Utils.g_module, 'dist_hook', None)
 	if dist_hook:
+		back = os.getcwd()
 		os.chdir(tmp_folder)
 		try:
 			dist_hook()
 		finally:
 			# go back to the root directory
-			os.chdir('..')
+			os.chdir(back)
 
 	tar = tarfile.open(arch_name, 'w:' + g_gz)
 	tar.add(tmp_folder)

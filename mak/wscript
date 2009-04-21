@@ -127,6 +127,10 @@ def add_extra_libs(self):
 		libpath = self.path.find_dir(libpath)
 		if not libpath.srcpath(self.env) in env['LIBPATH']: env.append_value('LIBPATH', libpath.srcpath(self.env))
 
+@taskgen
+@feature('cobjects')
+def add_cobjects_method(self):
+    pass
 
 def createmasterfile(task):
     f = open(task.outputs[0].bldpath(task.env), 'w')

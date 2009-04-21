@@ -576,8 +576,11 @@ def write_config_header(self, configfile='', env='', guard=''):
 	waf_guard = guard or '_%s_WAF' % Utils.quote_define_name(configfile)
 
 	# configfile -> absolute path
+	# there is a good reason to concatenate first and to split afterwards
 	if not env: env = self.env
-	full = os.sep.join([self.blddir, env.variant(), configfile])
+	diff = Utils.diff_path(self.srcdir, self.curdir)
+	full = os.sep.join([self.blddir, env.variant(), diff, configfile])
+	full = os.path.normpath(full)
 	(dir, base) = os.path.split(full)
 
 	try: os.makedirs(dir)
@@ -590,7 +593,7 @@ def write_config_header(self, configfile='', env='', guard=''):
 	dest.write(self.get_config_header())
 
 	# config files are not removed on "waf clean"
-	self.env.append_value(CFG_FILES, configfile)
+	env.append_value(CFG_FILES, os.path.join(diff, configfile))
 
 	dest.write('\n#endif /* %s */\n' % waf_guard)
 	dest.close()

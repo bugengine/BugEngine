@@ -88,10 +88,6 @@ class Node(object):
 		# use the id to find out: type = id & 3
 		# for setting: new type = type + x - type & 3
 
-		# Node name must contain only one level
-		if Utils.split_path(name)[0] != name:
-			raise Utils.WafError('name %r forbidden ' % name)
-
 		if parent and name in parent.childs:
 			raise Utils.WafError('node %s exists in the parent files %r already' % (name, parent))
 
@@ -231,11 +227,22 @@ class Node(object):
 				current = prev.childs.get(name, None)
 				if current is None:
 					dir_cont = self.__class__.bld.cache_dir_contents
-					# we use rescan above, so dir_cont[prev.id *is* defined]
-					if name in dir_cont[prev.id]:
-						if not os.path.isdir(prev.abspath() + os.sep + name):
-							# paranoid os.stat
+					if prev.id in dir_cont and name in dir_cont[prev.id]:
+						if not prev.name:
+							if os.sep == '/':
+								# cygwin //machine/share
+								dirname = os.sep + name
+							else:
+								# windows c:
+								dirname = name
+						else:
+							# regular path
+							dirname = prev.abspath() + os.sep + name
+						if not os.path.isdir(dirname):
 							return None
+						current = self.__class__(name, prev, DIR)
+					elif (not prev.name and len(name) == 2 and name[1] == ':') or name.startswith('\\\\'):
+						# drive letter or \\ path for windows
 						current = self.__class__(name, prev, DIR)
 					else:
 						return None
@@ -244,7 +251,7 @@ class Node(object):
 						return None
 		return current
 
-	# FIXME: remove in waf 1.6
+	# FIXME: remove in waf 1.6 ?
 	def ensure_dir_node_from_path(self, lst):
 		"used very rarely, force the construction of a branch of node instance for representing folders"
 
@@ -404,9 +411,9 @@ class Node(object):
 
 		if not variant:
 			if not self.parent:
-				val = os.sep
-			elif not self.parent.name:
-				val = os.sep + self.name
+				val = os.sep == '/' and os.sep or ''
+			elif not self.parent.name: # root
+				val = (os.sep == '/' and os.sep or '') + self.name
 			else:
 				val = self.parent.abspath() + os.sep + self.name
 		else:
@@ -570,59 +577,6 @@ class Node(object):
 			return " ".join([x.relpath_gen(self) for x in ret])
 
 		return ret
-
-# win32 fixes follow
-if sys.platform == "win32":
-	def find_dir_win32(self, lst):
-
-		if isinstance(lst, str):
-			lst = Utils.split_path(lst)
-
-		current = self
-		for name in lst:
-			self.__class__.bld.rescan(current)
-			prev = current
-
-			if not current.parent and name == current.name:
-				continue
-			if not name:
-				continue
-			elif name == '.':
-				continue
-			elif name == '..':
-				current = current.parent or current
-			else:
-				current = prev.childs.get(name, None)
-				if current is None:
-					if (name in self.__class__.bld.cache_dir_contents[prev.id]
-						or (not prev.parent and name[1] == ":")):
-						current = self.__class__(name, prev, DIR)
-					else:
-						return None
-		return current
-	Node.find_dir = find_dir_win32
-
-	def abspath_win32(self, env=None):
-		variant = self.variant(env)
-		ret = self.__class__.bld.cache_node_abspath[variant].get(self.id, None)
-		if ret: return ret
-
-		if not variant:
-			cur = self
-			lst = []
-			while cur:
-				lst.append(cur.name)
-				cur = cur.parent
-			lst.reverse()
-			val = os.sep.join(lst)
-		else:
-			val = os.sep.join((self.__class__.bld.bldnode.abspath(), env.variant(), self.path_to_parent(self.__class__.bld.srcnode)))
-		if val.startswith("\\"): val = val[1:]
-		if val.startswith("\\"): val = val[1:]
-		self.__class__.bld.cache_node_abspath[variant][self.id] = val
-		return val
-	Node.abspath = abspath_win32
-
 
 class Nodu(Node):
 	pass

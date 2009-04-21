@@ -40,7 +40,7 @@ def postinstall_icons():
 def postinstall_scrollkeeper(prog_name):
 	if Build.bld.is_install:
 		# now the scrollkeeper update if we can write to the log file
-		if os.path.iswriteable('/var/log/scrollkeeper.log'):
+		if os.access('/var/log/scrollkeeper.log', os.W_OK):
 			dir1 = Build.bld.get_install_path('${PREFIX}/var/scrollkeeper')
 			dir2 = Build.bld.get_install_path('${DATADIR}/omf/%s' % prog_name)
 			command = 'scrollkeeper-update -q -p %s -o %s' % (dir1, dir2)
@@ -56,7 +56,7 @@ class gnome_doc_taskgen(TaskGen.task_gen):
 	def __init__(self, *k, **kw):
 		TaskGen.task_gen.__init__(self, *k, **kw)
 
-@feature('gmome_doc')
+@feature('gnome_doc')
 def init_gnome_doc(self):
 	self.default_install_path = '${PREFIX}/share'
 

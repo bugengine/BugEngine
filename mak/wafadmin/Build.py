@@ -12,7 +12,7 @@ The class Build holds all the info related to a build:
 There is only one Build object at a time (bld singleton)
 """
 
-import os, sys, errno, re, glob, gc, time, shutil
+import os, sys, errno, re, glob, gc, datetime, shutil
 try: import cPickle
 except: import pickle as cPickle
 import Runner, TaskGen, Node, Scripting, Utils, Environment, Task, Logs, Options
@@ -214,8 +214,6 @@ class BuildContext(Utils.Context):
 		"""The cache file is not written if nothing was build at all (build is up to date)"""
 		debug('build: compile called')
 
-		os.chdir(self.bdir)
-
 		"""
 		import cProfile, pstats
 		cProfile.run("import Build\nBuild.bld.flush()", 'profi.txt')
@@ -233,29 +231,33 @@ class BuildContext(Utils.Context):
 				else: sys.stderr.write(Logs.colors.cursor_off)
 
 		debug('build: executor starting')
+
+		back = os.getcwd()
+		os.chdir(self.bldnode.abspath())
+
 		try:
-			dw(on=False)
-			self.generator.start()
-		except KeyboardInterrupt:
-			dw()
-			os.chdir(self.srcnode.abspath())
-			if self.generator.consumers:
-				self.save()
-			raise
-		except Exception:
-			dw()
-			# do not store anything, for something bad happened
-			raise
-		else:
-			dw()
-			if self.generator.consumers:
-				self.save()
+			try:
+				dw(on=False)
+				self.generator.start()
+			except KeyboardInterrupt:
+				dw()
+				if self.generator.consumers:
+					self.save()
+				raise
+			except Exception:
+				dw()
+				# do not store anything, for something bad happened
+				raise
+			else:
+				dw()
+				if self.generator.consumers:
+					self.save()
 
-		if self.generator.error:
-			os.chdir(self.srcnode.abspath())
-			raise BuildError(self, self.task_manager.tasks_done)
+			if self.generator.error:
+				raise BuildError(self, self.task_manager.tasks_done)
 
-		os.chdir(self.srcnode.abspath())
+		finally:
+			os.chdir(back)
 
 	def install(self):
 		"this function is called for both install and uninstall"
@@ -585,6 +587,9 @@ class BuildContext(Utils.Context):
 	def add_group(self, *k):
 		self.task_manager.add_group(*k)
 
+	def set_group(self, *k, **kw):
+		self.task_manager.set_group(*k, **kw)
+
 	def hash_env_vars(self, env, vars_lst):
 		"""hash environment variables
 		['CXX', ..] -> [env['CXX'], ..] -> md5()"""
@@ -627,7 +632,7 @@ class BuildContext(Utils.Context):
 	def flush(self, all=1):
 		"""tell the task generators to create the tasks"""
 
-		self.ini = time.time()
+		self.ini = datetime.datetime.now()
 		# force the initialization of the mapping name->object in flush
 		# name_to_obj can be used in userland scripts, in that case beware of incomplete mapping
 		self.task_gen_cache_names = {}
@@ -650,7 +655,10 @@ class BuildContext(Utils.Context):
 				if not target_name in target_objects and all:
 					raise Utils.WafError("target '%s' does not exist" % target_name)
 
-			target_objects = [id(x) for x in target_objects]
+			to_compile = []
+			for x in target_objects.values():
+				for y in x:
+					to_compile.append(id(y))
 
 			# tasks must be posted in order of declaration
 			# we merely apply a filter to discard the ones we are not interested in
@@ -658,7 +666,7 @@ class BuildContext(Utils.Context):
 				g = self.task_manager.groups[i]
 				self.task_manager.current_group = i
 				for tg in g.tasks_gen:
-					if id(x) in target_objects:
+					if id(tg) in to_compile:
 						tg.post()
 
 		else:
@@ -699,7 +707,7 @@ class BuildContext(Utils.Context):
 		ini = self.ini
 
 		pc = (100.*state)/total
-		eta = time.strftime('%H:%M:%S', time.gmtime(time.time() - ini))
+		eta = Utils.get_elapsed_time(ini)
 		fs = "[%%%dd/%%%dd][%%s%%2d%%%%%%s][%s][" % (n, n, ind)
 		left = fs % (state, total, col1, pc, col2)
 		right = '][%s%s%s]' % (col1, eta, col2)
@@ -870,7 +878,8 @@ class BuildContext(Utils.Context):
 			self.log.write('%s\n' % cmd)
 			kw['log'] = self.log
 		try:
-			if not 'cwd' in kw: kw['cwd'] = self.cwd
+			if not kw.get('cwd', None):
+				kw['cwd'] = self.cwd
 		except AttributeError:
 			self.cwd = kw['cwd'] = self.bldnode.abspath()
 		return Utils.exec_command(cmd, **kw)

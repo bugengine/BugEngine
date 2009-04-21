@@ -11,6 +11,7 @@ Utilities, the stable ones are the following:
 
   For large projects (projects with more than 15000 files) it is possible to use
   a hashing based on the path and the size (may give broken cache results)
+  The method h_file MUST raise an OSError if the file is a folder
 
 	import stat
 	def h_file(filename):
@@ -33,7 +34,7 @@ Utilities, the stable ones are the following:
 
 """
 
-import os, sys, imp, string, errno, traceback, inspect, re, shutil
+import os, sys, imp, string, errno, traceback, inspect, re, shutil, datetime
 
 try: from UserDict import UserDict
 except ImportError: from collections import UserDict
@@ -232,7 +233,7 @@ def load_module(file_path, name=WSCRIPT_FILE):
 	module = imp.new_module(name)
 
 	try:
-		code = readf(file_path)
+		code = readf(file_path, m='rU')
 	except (IOError, OSError):
 		raise WscriptError('The file %s could not be opened!' % file_path)
 
@@ -274,7 +275,7 @@ try:
 except ImportError:
 	pass
 else:
-	if sys.stderr.isatty() and os.environ['TERM'] != 'dumb':
+	if Logs.got_tty:
 		def myfun():
 			dummy_lines, cols = struct.unpack("HHHH", \
 			fcntl.ioctl(sys.stderr.fileno(),termios.TIOCGWINSZ , \
@@ -292,22 +293,29 @@ rot_idx = 0
 rot_chr = ['\\', '|', '/', '-']
 "the rotation character in the progress bar"
 
+
 def split_path(path):
-	if not path: return ['']
 	return path.split('/')
 
-if is_win32:
-	def split_path(path):
-		h,t = os.path.splitunc(path)
-		if not h: return __split_dirs(t)
-		return [h] + __split_dirs(t)[1:]
+def split_path_cygwin(path):
+	if path.startswith('//'):
+		ret = path.split('/')[2:]
+		ret[0] = '/' + ret[0]
+		return ret
+	return path.split('/')
 
-	def __split_dirs(path):
-		h,t = os.path.split(path)
-		if not h: return [t]
-		if h == path: return [h.replace('\\', '')]
-		if not t: return __split_dirs(h)
-		else: return __split_dirs(h) + [t]
+re_sp = re.compile('[/\\\\]')
+def split_path_win32(path):
+	if path.startswith('\\\\'):
+		ret = re.split(re_sp, path)[2:]
+		ret[0] = '\\' + ret[0]
+		return ret
+	return re.split(re_sp, path)
+
+if sys.platform == 'cygwin':
+	split_path = split_path_cygwin
+elif is_win32:
+	split_path = split_path_win32
 
 def copy_attrs(orig, dest, names, only_if_set=False):
 	for a in to_list(names):
@@ -466,8 +474,29 @@ def nada(*k, **kw):
 	"""A function that does nothing"""
 	pass
 
+def diff_path(top, subdir):
+	"""difference between two absolute paths"""
+	diff = []
+	while not os.path.samefile(top, subdir):
+		(subdir, d) = os.path.split(subdir)
+		diff.insert(0, d)
+	return "".join(diff)
+
 class Context(object):
 	"""A base class for commands to be executed from Waf scripts"""
+
+	def set_curdir(self, dir):
+		self.curdir_ = dir
+
+	def get_curdir(self):
+		try:
+			return self.curdir_
+		except AttributeError:
+			self.curdir_ = os.getcwd()
+			return self.get_curdir()
+
+	curdir = property(get_curdir, set_curdir)
+
 	def recurse(self, dirs, name=''):
 		"""The function for calling scripts from folders, it tries to call wscript + function_name
 		and if that file does not exist, it will call the method 'function_name' from a file named wscript
@@ -479,9 +508,6 @@ class Context(object):
 		if isinstance(dirs, str):
 			dirs = to_list(dirs)
 
-		if not getattr(self, 'curdir', None):
-			self.curdir = os.getcwd()
-
 		for x in dirs:
 			if os.path.isabs(x):
 				nexdir = x
@@ -491,7 +517,7 @@ class Context(object):
 			base = os.path.join(nexdir, WSCRIPT_FILE)
 
 			try:
-				txt = readf(base + '_' + name)
+				txt = readf(base + '_' + name, m='rU')
 			except (OSError, IOError):
 				try:
 					module = load_module(base)
@@ -545,4 +571,21 @@ if is_win32:
 		old(src, dst)
 		shutil.copystat(src, src)
 	setattr(shutil, 'copy2', copy2)
+
+def get_elapsed_time(start):
+	"Format a time delta (datetime.timedelta) using the format DdHhMmS.MSs"
+	delta = datetime.datetime.now() - start
+	days = delta.days
+	hours = delta.seconds / 3600
+	minutes = (delta.seconds - hours * 3600) / 60
+	seconds = delta.seconds - hours * 3600 - minutes * 60 \
+		+ float(delta.microseconds) / 1000 / 1000
+	result = ''
+	if days:
+		result += '%dd' % days
+	if days or hours:
+		result += '%dh' % hours
+	if days or hours or minutes:
+		result += '%dm' % minutes
+	return '%s%.3fs' % (result, seconds)
 

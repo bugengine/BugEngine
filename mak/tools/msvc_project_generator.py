@@ -3,7 +3,7 @@ import os
 
 
 import string
-import md5
+import hashlib
 
          
 def _hexdigest(s):
@@ -30,7 +30,7 @@ def _generateGUID(slnfile, name):
     based on the MD5 signatures of the sln filename plus the name of
     the project.  It basically just needs to be unique, and not
     change with each invocation."""
-    solution = _hexdigest(md5.new(str(slnfile)+str(name)).digest()).upper()
+    solution = _hexdigest(hashlib.new(str(slnfile)+str(name)).digest()).upper()
     # convert most of the signature to GUID form (discard the rest)
     solution = "{" + solution[:8] + "-" + solution[8:12] + "-" + solution[12:16] + "-" + solution[16:20] + "-" + solution[20:32] + "}"
     return solution
@@ -81,8 +81,9 @@ class Solution:
                 if dep not in seen:
                     seen.add(dep)
                     #depends += dep.depends
-                    filename,name = self.getProjectName(dep)
-                    self.file.write('\t\t%s = %s\n' % (_generateGUID(filename,name),_generateGUID(filename,name)))
+                    if 'win32-x86' in dep.platforms or 'win32-amd64' in dep.platforms:
+                        filename,name = self.getProjectName(dep)
+                        self.file.write('\t\t%s = %s\n' % (_generateGUID(filename,name),_generateGUID(filename,name)))
             self.file.write('\tEndProjectSection\n')
         self.file.write('EndProject\n')
         for dep in project.depends:
@@ -160,6 +161,8 @@ class Project:
             
     def addConfigurations(self, confs, type):
         self.configs = confs
+        if 'win32-x86' not in self.platforms and 'win32-amd64' not in self.platforms:
+            type = 'util'
         self.file.write("""
 	<Configurations>
 """)
