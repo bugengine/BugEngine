@@ -14,5 +14,5 @@ TaskGen.declare_chain(
 )
 
 def detect(conf):
-	bin2c = conf.find_program('bin2c', var='BIN2C', mandatory=True)
+	bin2c = conf.find_program('bin2c', var='BIN2C', path_list=conf.env['GCC_PATH'], mandatory=True)
 

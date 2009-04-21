@@ -273,8 +273,8 @@ class module:
                     task.type           = self.__class__.__name__
                     task.category       = self.category
                     platforms = {}
-                    for platform in allplatforms:
-                        for arch in allarchs:
+                    for platform in self.platforms or allplatforms:
+                        for arch in self.archs or allarchs:
                             options = self.getoptions(platform, arch)
                             platforms[platform+'-'+arch] = options
                     task.platforms      = platforms

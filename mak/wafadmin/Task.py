@@ -42,7 +42,7 @@ The role of the Task Manager is to give the tasks in order (groups of task that 
 
 """
 
-import os, shutil, sys, re, random, time
+import os, shutil, sys, re, random, datetime
 from Utils import md5
 import Build, Runner, Utils, Node, Logs, Options
 from Logs import debug, warn, error
@@ -106,23 +106,30 @@ class TaskManager(object):
 			else: self.current_group += 1
 		return (None, None)
 
-	def add_group(self, name=None):
+	def add_group(self, name=None, set=True):
 		#if self.groups and not self.groups[0].tasks:
 		#	error('add_group: an empty group is already present')
 		g = TaskGroup()
 
-		if name in self.groups_names:
+		if name and name in self.groups_names:
 			error('add_group: name %s already present' % name)
 		self.groups_names[name] = g
 		self.groups.append(g)
+		if set:
+			self.current_group = len(self.groups) - 1
 
-	def set_current_group(self, idx):
-		# TODO by name too
-		self.current_group = idx
+	def set_group(self, idx):
+		if isinstance(idx, str):
+			g = self.groups_names[idx]
+			for x in xrange(len(self.groups)):
+				if id(g) == id(self.groups[x]):
+					self.current_group = x
+		else:
+			self.current_group = idx
 
 	def add_task_gen(self, tgen):
 		if not self.groups: self.add_group()
-		self.groups[-1].tasks_gen.append(tgen)
+		self.groups[self.current_group].tasks_gen.append(tgen)
 
 	def add_task(self, task):
 		if not self.groups: self.add_group()
@@ -142,7 +149,8 @@ class TaskManager(object):
 			f = None
 			if 'install' in tsk.__dict__:
 				f = tsk.__dict__['install']
-				f(tsk)
+				# install=0 to prevent installation
+				if f: f(tsk)
 			else:
 				tsk.install()
 
@@ -409,8 +417,7 @@ class TaskBase(object):
 			return self.generator.bld.progress_line(self.position[0], self.position[1], col1, col2)
 
 		if Options.options.progress_bar == 2:
-			ini = self.generator.bld.ini
-			ela = time.strftime('%H:%M:%S', time.gmtime(time.time() - ini))
+			ela = Utils.get_elapsed_time(self.generator.bld.ini)
 			try:
 				ins  = ','.join([n.name for n in self.inputs])
 			except AttributeError:
@@ -512,7 +519,7 @@ class Task(TaskBase):
 		tgt_str = ' '.join([a.nice_path(env) for a in self.outputs])
 		if self.outputs: sep = ' -> '
 		else: sep = ''
-		return '%s: %s%s%s\n' % (self.__class__.__name__, src_str, sep, tgt_str)
+		return '%s: %s%s%s\n' % (self.__class__.__name__.replace('_task', ''), src_str, sep, tgt_str)
 
 	def __repr__(self):
 		return "".join(['\n\t{task: ', self.__class__.__name__, " ", ",".join([x.name for x in self.inputs]), " -> ", ",".join([x.name for x in self.outputs]), '}'])

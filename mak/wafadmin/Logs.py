@@ -2,7 +2,7 @@
 # encoding: utf-8
 # Thomas Nagy, 2005 (ita)
 
-import os, re, logging, traceback, sys, Utils
+import os, re, logging, traceback, sys
 from Constants import *
 
 zones = ''
@@ -22,10 +22,17 @@ colors_lst = {
 'cursor_off' :'\x1b[?25l',
 }
 
-if (sys.platform=='win32') or ('NOCOLOR' in os.environ) \
-	or (os.environ.get('TERM', 'dumb') in ['dumb', 'emacs']) \
-	or (not sys.stderr.isatty()):
-		colors_lst['USE'] = False
+got_tty = not os.environ.get('TERM', 'dumb') in ['dumb', 'emacs']
+if got_tty:
+	try:
+		got_tty = sys.stderr.isatty()
+	except AttributeError:
+		got_tty = False
+
+import Utils
+
+if not got_tty or sys.platform == 'win32' or 'NOCOLOR' in os.environ:
+	colors_lst['USE'] = False
 
 def get_color(cl):
 	if not colors_lst['USE']: return ''
@@ -86,7 +93,7 @@ def debug(msg):
 
 def error(msg):
 	logging.error(msg)
-	if verbose:
+	if verbose > 1:
 		if isinstance(msg, Utils.WafError):
 			st = msg.stack
 		else:

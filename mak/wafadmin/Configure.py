@@ -120,7 +120,6 @@ class ConfigurationContext(Utils.Context):
 		try: os.unlink(path)
 		except (OSError, IOError): pass
 		self.log = open(path, 'w')
-		print getattr(Utils.g_module, 'APPNAME', '')
 
 		app = getattr(Utils.g_module, 'APPNAME', '')
 		if app:
@@ -222,9 +221,8 @@ class ConfigurationContext(Utils.Context):
 		self.envname = name
 
 	def add_os_flags(self, var, dest=None):
-		if not dest: dest = var
 		# do not use 'get' to make certain the variable is not defined
-		try: self.env[dest] = Utils.to_list(self.environ[var])
+		try: self.env.append_value(dest or var, Utils.to_list(self.environ[var]))
 		except KeyError: pass
 
 	def check_message_1(self, sr):

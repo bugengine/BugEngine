@@ -51,7 +51,7 @@ def filterplatforms(type,platforms,depends):
             if d.type == 'game':
                 common_options.libs.append('game.'+d.name)
 
-    return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()]
+    return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()] or [('win32-x86', 'Win32', common_options),('win32-amd64', 'x64', common_options)]
 
 
 from TaskGen import taskgen, extension, feature, before, after
@@ -88,7 +88,7 @@ def create_msvc_solution(self):
     task.category       = self.category
     task.name           = self.name
     task.depends        = self.depends
-    task.platforms      = filterplatforms(self.type,self.platforms, self.depends)
+    task.platforms      = filterplatforms(self.type, self.platforms, self.depends)
     task.install_path   = os.path.join(self.path.srcpath(self.env), '.projects')
     task.env['MSVC_PROJECT_SOURCES'] = self.sourcetree
     task.env['MSVC_PROJECT_FLAGS'] = self.platforms

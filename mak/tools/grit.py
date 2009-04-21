@@ -17,5 +17,5 @@ TaskGen.declare_chain(
 )
 
 def detect(conf):
-	grit = conf.find_program('grit', var='GRIT', mandatory=True)
+	grit = conf.find_program('grit', var='GRIT', path_list=conf.env['GCC_PATH'], mandatory=True)
 
