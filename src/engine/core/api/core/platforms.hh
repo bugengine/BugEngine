@@ -57,8 +57,11 @@ static void displayError()
 #  define BE_PLATFORM_NAME  Win32
 #  define BE_PLATFORM_WIN32 1
 # endif
+#elif defined __sun
+# define BE_PLATFORM_NAME   SunOS
+# define BE_PLATFORM_SUN    1
 #else
-#  error "unknown platform"
+# error "unknown platform"
 #endif
 
 /*****************************************************************************/

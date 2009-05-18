@@ -3,16 +3,16 @@
 import os
 
 def set_options(opt):
-    pass
+	pass
 
 def configure(conf):
-    conf.env.append_unique('CCDEFINES', ['ARM9', '_ARM9', '__ARM9__'])
-    conf.env.append_unique('CXXDEFINES', ['ARM9', '_ARM9', '__ARM9__'])
-    conf.env['AS'] = conf.env['CC']
-    conf.env.append_unique('ASFLAGS', ['-c', '-x', 'assembler-with-cpp', '-mthumb', '-mthumb-interwork', '-march=armv5te', '-DARM9', '-DSYS_NDS', '-DSYS_NDS9'])
-    conf.env.append_unique('CCFLAGS', ['-mthumb', '-mthumb-interwork', '-march=armv5te', '-mtune=arm946e-s'])
-    conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mthumb-interwork', '-march=armv5te', '-mtune=arm946e-s'])
-    conf.env.append_unique('LINKFLAGS', ['-specs=ds_arm9.specs'])
+	conf.env.append_unique('CCDEFINES', ['ARM9', '_ARM9', '__ARM9__'])
+	conf.env.append_unique('CXXDEFINES', ['ARM9', '_ARM9', '__ARM9__'])
+	conf.env['AS'] = conf.env['CC']
+	conf.env.append_unique('ASFLAGS', ['-c', '-x', 'assembler-with-cpp', '-mthumb', '-mthumb-interwork', '-march=armv5te', '-DARM9', '-DSYS_NDS', '-DSYS_NDS9'])
+	conf.env.append_unique('CCFLAGS', ['-mthumb', '-mthumb-interwork', '-march=armv5te', '-mtune=arm946e-s'])
+	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mthumb-interwork', '-march=armv5te', '-mtune=arm946e-s'])
+	conf.env.append_unique('LINKFLAGS', ['-specs=ds_arm9.specs'])
 
 def build(bld):
-    pass
+	pass

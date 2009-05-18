@@ -20,7 +20,7 @@ TaskGen.declare_chain(
 	ext_in = '.y .yc .yy',
 	decider = decide_ext,
 	before = 'cc cxx',
-        shell=True
+		shell=True
 )
 
 def detect(conf):
