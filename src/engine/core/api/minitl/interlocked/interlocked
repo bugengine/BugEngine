@@ -40,6 +40,8 @@
 # else
 #  error Architecture not implemented on GCC
 # endif
+#elif defined(BE_COMPILER_SUNCC)
+# include <minitl/interlocked/suncc/interlocked.inl>
 #else
 # error Compiler not implemented
 #endif

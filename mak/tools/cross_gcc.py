@@ -1,5 +1,6 @@
 from Configure import conftest
 import Options
+import re
 
 def set_options(opt):
 	opt.add_option('--target', action='store', default='', help='select target for GCC')
@@ -19,7 +20,7 @@ def get_native_gcc_target(conf):
 		for line in out:
 			if line.startswith('Target:'):
 				conf.env['GCC_NATIVE_TARGET'] = line.plit()[1]
-
+ 
 @conftest
 def find_cross_gcc(conf):
 	try: target = Options.options.target

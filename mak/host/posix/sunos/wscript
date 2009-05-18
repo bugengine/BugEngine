@@ -1,0 +1,33 @@
+# set SunOS/Solaris specific options
+# detect tools : gcc, suncc
+
+import os
+import Utils
+from Logs import warn
+
+def get_available_suncc(conf):
+	newenv = conf.env.copy()
+	conf.set_env_name('temp',newenv)
+	conf.setenv('temp')
+	conf.check_tool('cross_suncc', tooldir='mak/tools')
+	name = 'suncc-sunos-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
+	Utils.pprint('NORMAL', '=> configured for tool %s' % name)
+	conf.set_env_name(name, newenv)
+	newenv.set_variant(name)
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'posix', 'sunos'))
+	conf.sub_config(os.path.join('..', '..', '..', 'target', conf.env['SUNCC_TARGET']))
+	del conf.all_envs['temp']
+	conf.setenv('default')
+	conf.env['BUILD_VARIANTS'].append(name)
+
+def set_options(opt):
+	Utils.pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
+						
+def configure(conf):
+	conf.env['BUILD_VARIANTS'] = []
+	conf.check_tool('bison flex', tooldir='mak/tools')
+	get_available_suncc(conf)
+	#get_available_gcc(conf)
+
+	if len(conf.env['BUILD_VARIANTS']) == 0:
+		raise SystemExit("no match found : make sure you selected a valid toolchain")

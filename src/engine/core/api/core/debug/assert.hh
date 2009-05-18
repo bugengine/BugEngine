@@ -41,7 +41,7 @@ enum AssertionResult
     Abort,
     Ignore,
     IgnoreAll,
-    Break,
+    Break
 };
 
 
