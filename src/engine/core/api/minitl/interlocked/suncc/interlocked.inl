@@ -21,10 +21,11 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
-#define BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
+#ifndef BE_MINITL_INTERLOCKED_SUNCC_INTERLOCKED_INL_
+#define BE_MINITL_INTERLOCKED_SUNCC_INTERLOCKED_INL_
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
+#include    <atomic.h>
 
 namespace minitl { namespace interlocked_
 {
