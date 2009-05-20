@@ -12,6 +12,8 @@ def find_cross_gxx(conf):
 	version = conf.env['GCC_VERSION']
 	if target:
 		v = conf.env
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+version, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+version, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
