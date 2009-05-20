@@ -65,9 +65,10 @@ def configure(conf):
 
 
 def build(bld):
-	for target in os.listdir(os.path.join('mak', 'target')):
-		if target not in ['.svn', '.cvs']:
-			bld.add_subdirs(os.path.join('target', target))
+	for l in 'platforms','archs':
+		for target in os.listdir(os.path.join('mak', 'target', l)):
+			if target not in ['.svn', '.cvs']:
+				bld.add_subdirs(os.path.join('target', l, target))
 	import Options
 	if not Options.options.toolchains:
 		doIt = True

@@ -14,8 +14,8 @@ def get_available_suncc(conf):
 	Utils.pprint('NORMAL', '=> configured for tool %s' % name)
 	conf.set_env_name(name, newenv)
 	newenv.set_variant(name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'posix', 'sunos'))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', conf.env['SUNCC_TARGET']))
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'sunos'))
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['SUNCC_TARGET']))
 	del conf.all_envs['temp']
 	conf.setenv('default')
 	conf.env['BUILD_VARIANTS'].append(name)

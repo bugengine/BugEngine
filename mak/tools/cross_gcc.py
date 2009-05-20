@@ -1,5 +1,6 @@
 from Configure import conftest
 import Options
+import Utils
 import re
 
 def set_options(opt):
@@ -11,7 +12,7 @@ def get_native_gcc_target(conf):
 		cmd = ['gcc', '-v']
 		try:
 			p = Utils.pproc.Popen(cmd, stdin=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE)
-			out = p.communicate()[0]
+			out = p.communicate()[1]
 		except:
 			return
 
@@ -19,7 +20,30 @@ def get_native_gcc_target(conf):
 
 		for line in out:
 			if line.startswith('Target:'):
-				conf.env['GCC_NATIVE_TARGET'] = line.plit()[1]
+				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
+				print conf.env['GCC_NATIVE_TARGET']
+
+def parse_gcc_target(target):
+	os = [ ('mingw', 'win32'),
+		   ('linux', 'linux'),
+		   ('psp', 'psp'),
+		   ('gekko', 'wii') ]
+	archs = [ ('i386', 'x86'),
+			  ('i486', 'x86'),
+			  ('i586', 'x86'),
+			  ('i686', 'x86'),
+			  ('x86_64', 'amd64'),
+			  ('psp', 'mips')]
+	foundpname = None
+	foundaname = None
+	for gccname,pname in os:
+		if target.find(gccname) != -1:
+			foundpname = pname
+	for gccname,aname in archs:
+		if target.find(gccname) != -1:
+			foundaname = aname
+	return foundpname,foundaname
+
  
 @conftest
 def find_cross_gcc(conf):
@@ -30,22 +54,23 @@ def find_cross_gcc(conf):
 	version = conf.env['GCC_VERSION']
 	if target:
 		v = conf.env
-		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc', var='CC', path_list=v['GCC_PATH'])
+		v['GCC_CONFIGURED_PLATFORM'],v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
+		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
+		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
-		if not v['AR'] and target == v['GCC_DEFAULT_TARGET']:
+		if not v['AR'] and target == v['GCC_NATIVE_TARGET']:
 			v['AR'] = conf.find_program('ar', var='AR')
 		if not v['AR']: conf.fatal('unable to find ar for target %s' % target)
 
 		if not v['RANLIB']: v['RANLIB'] = conf.find_program(target+'-ranlib', var='RANLIB', path_list=v['GCC_PATH'])
-		if not v['RANLIB'] and target == v['GCC_DEFAULT_TARGET']:
+		if not v['RANLIB'] and target == v['GCC_NATIVE_TARGET']:
 			v['RANLIB'] = conf.find_program('ar', var='RANLIB')
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
-
 
 	conf.check_tool('gcc')
 
