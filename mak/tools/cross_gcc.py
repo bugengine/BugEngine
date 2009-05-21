@@ -21,7 +21,6 @@ def get_native_gcc_target(conf):
 		for line in out:
 			if line.startswith('Target:'):
 				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
-				print conf.env['GCC_NATIVE_TARGET']
 
 def parse_gcc_target(target):
 	os = [ ('mingw', 'win32'),
