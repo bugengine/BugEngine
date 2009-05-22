@@ -9,9 +9,10 @@ def set_options(opt):
 
 def configure(conf):
 	conf.env['PLATFORM'] = 'nds'
-	conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
-	if not conf.env['NDSTOOL']: conf.fatal('ndstool was not found')
-	conf.env['OBJCOPY'] = conf.find_program('arm-eabi-objcopy', conf.env['PATH'], var='OBJCOPY')
+	ndstool = conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
+	if not ndstool: ndstool = conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['GCC_PATH'], var='NDSTOOL')
+	if not ndstool: conf.fatal('ndstool was not found')
+	conf.env['OBJCOPY'] = conf.find_program('arm-eabi-objcopy', conf.env['GCC_PATH'], var='OBJCOPY')
 	if not conf.env['OBJCOPY']: conf.fatal('objcopy was not found')
 	
 	conf.env['library_PATTERN'] = '%s.a'
