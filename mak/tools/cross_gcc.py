@@ -26,11 +26,14 @@ def parse_gcc_target(target):
 	os = [ ('mingw', 'win32'),
 		   ('linux', 'linux'),
 		   ('psp', 'psp'),
+		   ('arm-eabi', 'nds'),
 		   ('gekko', 'wii') ]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
 			  ('i686', 'x86'),
+			  ('arm-eabi', 'arm7'),
+			  ('gekko', 'mips'),
 			  ('x86_64', 'amd64'),
 			  ('psp', 'mips')]
 	foundpname = None

@@ -54,7 +54,9 @@ template< typename T >
 class BE_SET_ALIGNMENT(16) interlocked
 {
 private:
-    typedef typename interlocked_::InterlockedType<sizeof(T)>::type   type; 
+    typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
+    typedef impl::type                                      type; 
+private:
     volatile type m_value;
 public:
     interlocked()                                   {}
@@ -62,21 +64,21 @@ public:
     ~interlocked()                                  {}
 
     operator T() const                              { return (T)m_value; }
-    T operator=(T value)                            { return (T)interlocked_::set_and_fetch(&m_value, value); }
-    T exchange(T value)                             { return (T)interlocked_::fetch_and_set(&m_value, value); }
-    T addExchange(T value)                          { return (T)interlocked_::fetch_and_add(&m_value, value); }
+    T operator=(T value)                            { return (T)impl::set_and_fetch(&m_value, value); }
+    T exchange(T value)                             { return (T)impl::fetch_and_set(&m_value, value); }
+    T addExchange(T value)                          { return (T)impl::fetch_and_add(&m_value, value); }
 
-    T operator++()                                  { return (T)interlocked_::add_and_fetch(&m_value, 1); }
-    T operator++(int)                               { return (T)interlocked_::fetch_and_add(&m_value, 1); }
-    T operator+=(T value)                           { return (T)interlocked_::add_and_fetch(&m_value, value); }
-    T operator--()                                  { return (T)interlocked_::add_and_fetch(&m_value, -1); }
-    T operator--(int)                               { return (T)interlocked_::fetch_and_add(&m_value, -1); }
-    T operator-=(T value)                           { return (T)interlocked_::sub_and_fetch(&m_value, value); }
-    T operator|=(T value)                           { return (T)interlocked_::or_and_fetch(&m_value, value); }
-    T operator&=(T value)                           { return (T)interlocked_::and_and_fetch(&m_value, value); }
-    T operator^=(T value)                           { return (T)interlocked_::xor_and_fetch(&m_value, value); }
+    T operator++()                                  { return (T)impl::fetch_and_add(&m_value, 1)+1; }
+    T operator++(int)                               { return (T)impl::fetch_and_add(&m_value, 1); }
+    T operator+=(T value)                           { return (T)impl::fetch_and_add(&m_value, value)+value; }
+    T operator--()                                  { return (T)impl::fetch_and_sub(&m_value, 1)-1; }
+    T operator--(int)                               { return (T)impl::fetch_and_sub(&m_value, 1); }
+    T operator-=(T value)                           { return (T)impl::fetch_and_sub(&m_value, value)-value; }
+    T operator|=(T value)                           { return (T)impl::fetch_and_or(&m_value, value) | value; }
+    T operator&=(T value)                           { return (T)impl::fetch_and_and(&m_value, value) & value; }
+    T operator^=(T value)                           { return (T)impl::fetch_and_xor(&m_value, value) ^ value; }
 
-    T setConditional(T value, T condition)          { return (T)interlocked_::set_conditional(&m_value, value, condition); }
+    T setConditional(T value, T condition)          { return (T)impl::set_conditional(&m_value, value, condition); }
 };
 
 
@@ -84,7 +86,9 @@ template< typename T >
 class BE_SET_ALIGNMENT(16) iptr
 {
 private:
-    typedef typename interlocked_::InterlockedType<sizeof(T*)>::type  type; 
+    typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
+    typedef impl::type                                      type; 
+private:
     T* volatile m_value;
 public:
     iptr()                                          {}
@@ -96,17 +100,19 @@ public:
     T* operator->()                                 { return m_value; }
     const T* operator->() const                     { return m_value; }
 
-    T* operator=(T* value)                          { return (T*)interlocked_::set_and_fetch((type*)&m_value, (type)value); }
-    T* exchange(T* value)                           { return (T*)interlocked_::fetch_and_set((type*)&m_value, (type)value); }
+    T* operator=(T* value)                          { return (T*)impl::set_and_fetch((type*)&m_value, (type)value); }
+    T* exchange(T* value)                           { return (T*)impl::fetch_and_set((type*)&m_value, (type)value); }
 
-    T* setConditional(T* value, T* condition)       { return (T*)interlocked_::set_conditional((type*)&m_value, (type)value, (type)condition); }
+    T* setConditional(T* value, T* condition)       { return (T*)impl::set_conditional((type*)&m_value, (type)value, (type)condition); }
 };
 
 template< typename T >
 class BE_SET_ALIGNMENT(16) itaggedptr
 {
 private:
-    typedef typename interlocked_::TaggedValue  type; 
+    typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
+    typedef impl::taggedtype                                type; 
+private:
     type volatile m_value;
 public:
     typedef type::TagType   Ticket;
@@ -119,8 +125,8 @@ public:
     T* operator->()                                 { return (T*)m_value.value; }
     const T* operator->() const                     { return (T*)m_value.value; }
 
-    Ticket getTicket()                              { return interlocked_::get_ticket(&m_value); }
-    bool setConditional(T* value, Ticket& condition){ return interlocked_::set_conditional(&m_value, (type::ValueType)value, condition); }
+    Ticket getTicket()                              { return impl::get_ticket(&m_value); }
+    bool setConditional(T* value, Ticket& condition){ return impl::set_conditional(&m_value, (type::ValueType)value, condition); }
 };
 
 }

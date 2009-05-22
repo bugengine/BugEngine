@@ -2,7 +2,7 @@ from Configure import conftest
 import Utils
 import re
 
-format = re.compile('^cc: Sun Ceres C (..?\..?.?) SunOS_([^ ]+) .*')
+format = re.compile('^cc: Sun Ceres C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 
 @conftest
 def get_suncc_target(conf):
@@ -17,7 +17,8 @@ def get_suncc_target(conf):
 	line = out[0]
 	result = format.match(line)
 	if result:
-		conf.env['SUNCC_TARGET'] = result.group(2)
+		conf.env['SUNCC_TARGET'] = result.group(3)
+		conf.env['SUNCC_PLATFORM'] = result.group(2)
 		conf.env['SUNCC_VERSION'] = result.group(1)
 	else:
 		conf.fatal('Unable to retrieve SunCC version')

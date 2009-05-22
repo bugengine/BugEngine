@@ -24,6 +24,7 @@
 #ifndef BE_CORE_MEMORY_MALLOC_HH_
 #define BE_CORE_MEMORY_MALLOC_HH_
 /*****************************************************************************/
+#include <cstring>
 
 namespace BugEngine
 {
