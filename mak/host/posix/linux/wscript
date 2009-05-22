@@ -10,6 +10,21 @@ import Logs
 import Options
 from Logs import info,warn
 
+def get_available_suncc(conf):
+	newenv = conf.env.copy()
+	conf.set_env_name('temp',newenv)
+	conf.setenv('temp')
+	conf.check_tool('cross_suncc', tooldir='mak/tools')
+	name = 'suncc-linux-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
+	Utils.pprint('NORMAL', '=> configured for tool %s' % name)
+	conf.set_env_name(name, newenv)
+	newenv.set_variant(name)
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'linux'))
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['SUNCC_TARGET']))
+	del conf.all_envs['temp']
+	conf.setenv('default')
+	conf.env['BUILD_VARIANTS'].append(name)
+
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.set_env_name('temp', conf.env.copy())
 	newenv['GCC_VERSION']	= version
@@ -57,6 +72,7 @@ def set_options(opt):
 def configure(conf):
 	conf.env['BUILD_VARIANTS'] = []
 	conf.check_tool("bison flex", tooldir='mak/tools')
+	get_available_suncc(conf)
 	get_available_gcc(conf)
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:
