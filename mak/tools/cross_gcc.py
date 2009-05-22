@@ -27,6 +27,7 @@ def parse_gcc_target(target):
 		   ('linux', 'linux'),
 		   ('psp', 'psp'),
 		   ('arm-eabi', 'nds'),
+		   ('darwin', 'darwin'),
 		   ('gekko', 'wii') ]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
@@ -35,7 +36,8 @@ def parse_gcc_target(target):
 			  ('arm-eabi', 'arm7'),
 			  ('gekko', 'mips'),
 			  ('x86_64', 'amd64'),
-			  ('psp', 'mips')]
+			  ('powerpc', 'powerpc'),
+			  ('psp', 'powerpc')]
 	foundpname = None
 	foundaname = None
 	for gccname,pname in os:
@@ -62,16 +64,18 @@ def find_cross_gcc(conf):
 
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
-		if not v['AR'] and target == v['GCC_NATIVE_TARGET']:
-			v['AR'] = conf.find_program('ar', var='AR')
+		if not v['AR']:
+			v['AR'] = conf.find_program('ar', var='AR', path_list=v['GCC_PATH'])
 		if not v['AR']: conf.fatal('unable to find ar for target %s' % target)
 
 		if not v['RANLIB']: v['RANLIB'] = conf.find_program(target+'-ranlib', var='RANLIB', path_list=v['GCC_PATH'])
-		if not v['RANLIB'] and target == v['GCC_NATIVE_TARGET']:
-			v['RANLIB'] = conf.find_program('ar', var='RANLIB')
+		if not v['RANLIB']:
+			v['RANLIB'] = conf.find_program('ar', var='RANLIB', path_list=v['GCC_PATH'])
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc')

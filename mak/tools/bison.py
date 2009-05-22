@@ -24,7 +24,8 @@ TaskGen.declare_chain(
 )
 
 def detect(conf):
-	bison = conf.find_program('bison', var='BISON', mandatory=True)
+	bison = conf.find_program('bison', var='BISON')
+	if not bison: bison = conf.find_program('bison', var='BISON', path_list=conf.env['DEV_PATH'], mandatory=True)
 	v = conf.env
 	v['BISONFLAGS'] = '-d'
 
