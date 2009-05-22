@@ -6,6 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
+	conf.env['ARCHITECTURE'] = 'mips'
 	conf.env.append_unique('CCDEFINES', ['_MIPS'])
 	conf.env.append_unique('CXXDEFINES', ['_MIPS'])
 
