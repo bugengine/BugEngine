@@ -8,6 +8,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
+	conf.env['PLATFORM'] = 'nds'
 	conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
 	if not conf.env['NDSTOOL']: conf.fatal('ndstool was not found')
 	conf.env['OBJCOPY'] = conf.find_program('arm-eabi-objcopy', conf.env['PATH'], var='OBJCOPY')
