@@ -9,6 +9,8 @@ import Logs
 import Options
 from Logs import info,warn
 
+os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
+
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.set_env_name('temp', conf.env.copy())
 	newenv['GCC_VERSION']	= version

@@ -1,15 +1,24 @@
-# set win32 specific options
+# set MacOS specific options
 
 import os
 import Utils
 
 def set_options(opt):
-	pass
+	sdks = os.listdir(os.path.join('/Developer', 'SDKs'))
+	opt.add_option( '--darwin-sdk',
+					action='store',
+					default=sdks[-1],
+					dest='darwin_sdk',
+					help='Use MacOS sdk')
 
 def configure(conf):
+	import Options
 	conf.env['PLATFORM'] = 'darwin'
+	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk, 'usr', 'include')])
+	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
+	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']	= '%s.so'
+	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
 	
 	conf.env.append_unique('CCDEFINES', ['POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
