@@ -57,6 +57,9 @@ static void displayError()
 #  define BE_PLATFORM_NAME  Win32
 #  define BE_PLATFORM_WIN32 1
 # endif
+#elif defined __APPLE__
+# define BE_PLATFORM_NAME   MacOSX
+# define BE_PLATFORM_MACOS  1
 #elif defined __linux__
 # define BE_PLATFORM_NAME   Linux
 # define BE_PLATFORM_LINUX  1

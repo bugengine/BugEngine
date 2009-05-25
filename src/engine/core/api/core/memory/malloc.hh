@@ -74,7 +74,11 @@ T* Malloc::systemAllocArray(size_t count, size_t alignment)
 #define be_realloc(p,s)         BugEngine::Malloc::internalRealloc(p,s,16)
 #define be_free(p)              BugEngine::Malloc::internalFree(p)
 
-#include    <malloc.h>
+#ifdef BE_PLATFORM_MACOS
+# include   <malloc/malloc.h>
+#else
+# include   <malloc.h>
+#endif
 #include    <new>
 
 #ifdef _MSC_VER
