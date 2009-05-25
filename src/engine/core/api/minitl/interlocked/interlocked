@@ -51,8 +51,9 @@ namespace minitl
 {
 
 template< typename T >
-class BE_SET_ALIGNMENT(16) interlocked
+class interlocked
 {
+    BE_SET_ALIGNMENT(16);
 private:
     typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
     typedef impl::type                                      type; 

@@ -27,7 +27,6 @@
 /*****************************************************************************/
 
 #define BE_ALIGNOF(t)          __alignof__(t)
-#define BE_SET_ALIGNMENT(n)    __attribute__ ((aligned(n)))
 #define BE_ALIGN(size, align)   (align==size?size:(((size)+((align)-1)) & ~(align-1)))
 
 #include <stdint.h>
@@ -46,6 +45,11 @@ typedef u8                      byte;
 #define BE_THREAD_LOCAL        __thread
 #define BE_NOINLINE            __attribute__((noinline))
 #define BE_ALWAYSINLINE        __attribute__((always_inline))
+
+struct AlignmentHelper__
+{
+};
+#define BE_SET_ALIGNMENT(n)     AlignmentHelper__ h__ __attribute__ ((aligned(n)))
 
 /*****************************************************************************/
 #endif
