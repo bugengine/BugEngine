@@ -26,34 +26,28 @@
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
 
-namespace minitl { namespace interlocked_
+namespace minitl { namespace interlocked_impl
 {
 
 template< unsigned size >
 struct InterlockedType;
 
 template<>
-struct InterlockedType<1>
-{
-    typedef long type;
-};
-template<>
-struct InterlockedType<2>
-{
-    typedef long type;
-};
-template<>
 struct InterlockedType<4>
 {
     typedef long type;
 };
 template<>
-struct InterlockedType<8>
+struct InterlockedType<1> : InterlockedType<4>
 {
-    typedef long long type;
 };
-struct BE_SET_ALIGNMENT(4) TaggedValue
+template<>
+struct InterlockedType<2> : InterlockedType<4>
 {
+};
+struct TaggedValue
+{
+    BE_SET_ALIGNMENT(16);
     typedef long        ValueType;
     typedef TaggedValue TagType;
     union
