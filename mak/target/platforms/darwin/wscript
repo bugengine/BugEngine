@@ -4,12 +4,15 @@ import os
 import Utils
 
 def set_options(opt):
-	sdks = os.listdir(os.path.join('/Developer', 'SDKs'))
-	opt.add_option( '--darwin-sdk',
-					action='store',
-					default=sdks[-1],
-					dest='darwin_sdk',
-					help='Use MacOS sdk')
+	try:
+		sdks = os.listdir(os.path.join('/Developer', 'SDKs'))
+		opt.add_option( '--darwin-sdk',
+						action='store',
+						default=sdks[-1],
+						dest='darwin_sdk',
+						help='Use MacOS sdk')
+	except OSError:
+		pass
 
 def configure(conf):
 	import Options

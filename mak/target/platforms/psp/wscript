@@ -6,6 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
+	conf.env['PLATFORM'] = 'psp'
 	conf.env['library_PATTERN'] = '%s.a'
 	#conf.env['shlib_PATTERN']	 = '%s.so'
 	conf.env['program_PATTERN'] = '%s.psp'

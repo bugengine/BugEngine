@@ -44,6 +44,7 @@ class Solution:
 		'vs2005e': ('9.00', 'Visual C++ Express 2005'),
 		'vs2008': ('10.00', 'Visual Studio 2008'),
 		'vs2008e': ('10.00', 'Visual C++ Express 2008'),
+		'vs2010': ('11.00', 'Visual Studio 2010'),
 	}
 	
 	def __init__(self,name,v,filename):
