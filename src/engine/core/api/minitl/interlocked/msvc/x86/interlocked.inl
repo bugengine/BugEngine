@@ -66,8 +66,9 @@ struct InterlockedType<8>
 {
     typedef long long type;
 };
-struct BE_SET_ALIGNMENT(8) TaggedValue
+struct TaggedValue
 {
+    BE_SET_ALIGNMENT(8);
     typedef long        ValueType;
     typedef TaggedValue TagType;
     union
