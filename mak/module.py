@@ -2,11 +2,11 @@ import os
 import sources
 import Options
 import misc
+import mak
 
-alloptims	 = [ 'debug', 'release', 'genprofile', 'final']
-allplatforms = [ 'win32', 'linux', 'sunos', 'darwin', 'psp', 'gp2x', 'nds', 'wii', 'ogc', 'gba' ]
-allarchs	 = [ 'amd64', 'x86', 'alpha', 'arm', 'arm7', 'arm9', 'hppa', 'ia64', 'mips', 'ppc', 's390', 's390x', 'sparc' ]
-
+alloptims		= mak.alloptims
+allplatforms	= mak.allplatforms
+allarchs		= mak.allarchs
 
 class coptions:
 	def __init__( self, 
@@ -119,6 +119,7 @@ class module:
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, allplatforms, [arch]), 'lib.'+arch)
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, allplatforms, [arch]), 'bin.'+arch)
+		self.post(mak.builder)
 
 	def getoptions(self, platform, arch):
 		options = coptions()
@@ -260,25 +261,24 @@ class module:
 				self.deploy(os.path.join(dirname,file),outputdir,deploytype,platforms, archs)
 
 	def makeproject(self, bld):
-		for p,pname in bld.env['PROJECTS']:
-			if getattr(Options.options,p):
-				if not self.projects.has_key(p):
-					task = bld.new_task_gen()
-					task.features		= [p]
-					task.depends		= [d.projects[p] for d in self.depends]
-					task.target			= self.name+'.'+p
-					task.name			= self.name
-					task.env			= bld.env
-					task.sourcetree		= self.sourcetree
-					task.type			= self.__class__.__name__
-					task.category		= self.category
-					platforms = {}
-					for platform in self.platforms or allplatforms:
-						for arch in self.archs or allarchs:
-							options = self.getoptions(platform, arch)
-							platforms[platform+'-'+arch] = options
-					task.platforms		= platforms
-					self.projects[p] = task
+		for p in bld.env['PROJECTS']:
+			if not self.projects.has_key(p):
+				task = bld.new_task_gen()
+				task.features		= [p]
+				task.depends		= [d.projects[p] for d in self.depends]
+				task.target			= self.name+'.'+p
+				task.name			= self.name
+				task.env			= bld.env
+				task.sourcetree		= self.sourcetree
+				task.type			= self.__class__.__name__
+				task.category		= self.category
+				platforms = {}
+				for platform in self.platforms or allplatforms:
+					for arch in self.archs or allarchs:
+						options = self.getoptions(platform, arch)
+						platforms[platform+'-'+arch] = options
+				task.platforms		= platforms
+				self.projects[p] = task
 
 """ simple objects """
 class library(module):
