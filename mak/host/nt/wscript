@@ -11,9 +11,6 @@ import Configure
 import Logs
 from Logs import info,warn
 
-projects	= [('vs2005', 'Visual Studio 2005'), ('vs2008', 'Visual Studio 2008'), ('vs2005e', 'Visual Studio 2005 Express'), ('vs2008e', 'Visual Studio 2008 Express')]
-
-
 # adds MSVC vars to environment
 def add_msvc_to_env(conf, compiler, version, target, tname):
 	name = '%s-win32-%s-%s' %(compiler,target,version)
@@ -95,19 +92,12 @@ def get_available_gcc(conf):
 
 def set_options(opt):
 	Utils.pprint('NORMAL', 'Host system is Win32')
-	for p,pname in projects:
-		opt.add_option( '--%s'%p,
-						action='store_true',
-						default=False,
-						dest=p,
-						help='generate solutions for %s'%pname)
-						
+
 def configure(conf):
 	import Options
-	conf.env['PROJECTS'] = projects
-	
-	conf.check_tool('msvc_projects', tooldir='mak/tools')
-	
+
+	conf.check_tool("bison flex", tooldir='mak/tools')
+
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
 	get_available_msvc(conf)

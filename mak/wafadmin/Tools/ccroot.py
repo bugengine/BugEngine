@@ -318,7 +318,7 @@ def apply_lib_vars(self):
 			env.append_value('STATICLIB', libname)
 
 		# set the dependency over the link task
-		if y.link_task is not None:
+		if self.link_task is not None and y.link_task is not None:
 			self.link_task.set_run_after(y.link_task)
 			dep_nodes = getattr(self.link_task, 'dep_nodes', [])
 			self.link_task.dep_nodes = dep_nodes + y.link_task.outputs

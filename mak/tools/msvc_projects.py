@@ -64,8 +64,8 @@ def create_msvc_solution(self):
 	toolName = self.features[0]
 	if not solutions.has_key(toolName):
 		solution = GenerateSolution(self.env)
-		filename = appname = getattr(Utils.g_module, 'APPNAME', 'noname')
-		outname = filename+'.'+toolName+'.sln'
+		appname = getattr(Utils.g_module, 'APPNAME', 'noname')
+		outname = appname+'.'+toolName+'.sln'
 		solution.set_outputs(self.path.find_or_declare(outname))
 		solution.install_path	= self.path.srcpath(self.env)
 		solution.depends = []

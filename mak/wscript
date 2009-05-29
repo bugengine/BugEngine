@@ -9,10 +9,9 @@ import Task
 import Node
 import misc
 import module
+import mak
 
-optims	  = module.alloptims
-platforms = module.allplatforms
-archs	  = module.allarchs
+projects	= "vs2005 vs2008 vs2010 xcode sunstudio"
 
 def set_options(opt):
 	opt.sub_options(os.path.join('host', os.name))
@@ -20,6 +19,10 @@ def set_options(opt):
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
 				opt.sub_options(os.path.join('target', l, target))
+	opt.add_option( '--projects',
+					action='store',
+					default='',
+					help='build projects for the selected IDEs, supported IDEs are '+projects)
 	opt.add_option( '--toolchains',
 					action='store',
 					default='',
@@ -30,16 +33,18 @@ def set_options(opt):
 					help='build with master files')
 
 def configure(conf):
-	conf.env['ARCHITECTURES'] = archs
-	conf.env['PLATFORMS']	  = platforms
-	conf.env['OPTIMS']		  = optims
+	conf.env['ARCHITECTURES'] = mak.allarchs
+	conf.env['PLATFORMS']	  = mak.allplatforms
+	conf.env['OPTIMS']		  = mak.alloptims
+	
+	conf.check_tool(projects, tooldir="mak/tools/IDE")
 
 	conf.sub_config(os.path.join('host', os.name))
 
 	conf.env['DEFAULT_BUILD_TOOL'] = conf.env['BUILD_VARIANTS'][-1]
 
 	selectedvariants = []
-	for optim in optims:
+	for optim in mak.alloptims:
 		for envname in conf.env['BUILD_VARIANTS']:
 			name = optim+'-'+envname
 			env = conf.set_env_name(name, conf.all_envs[envname].copy())
@@ -75,22 +80,21 @@ def build(bld):
 				bld.add_subdirs(os.path.join('target', l, target))
 	import Options
 	if not Options.options.toolchains:
-		doIt = True
-		for p,pname in bld.env['PROJECTS']:
-			doIt = doIt and not getattr(Options.options, p)
-		if doIt:
-			Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
-		else:
-			Options.options.toolchains = 'none'
+		Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
 	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
-	allvariants = bld.env['BUILD_VARIANTS']
 	selectedvariants = []
-	for v in allvariants:
-		for e in selectedtoolchains:
-			if e.match(v):
-				selectedvariants.append(v)
-				print 'selected variant',v,'for build'
+	if Options.options.projects:
+		bld.env['PROJECTS'] = Options.options.projects.split(',')
+	else:
+		allvariants = bld.env['BUILD_VARIANTS']
+		for v in allvariants:
+			for e in selectedtoolchains:
+				if e.match(v):
+					selectedvariants.append(v)
+					print 'selected variant',v,'for build'
 	bld.env['BUILD_VARIANTS'] = selectedvariants
+	global builder
+	mak.builder = bld
 
 @taskgen
 @feature('cc','cxx')

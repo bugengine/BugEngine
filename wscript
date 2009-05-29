@@ -50,9 +50,4 @@ def build(bld):
 	
 
 	testsuite		= module.library('testsuite', category='test')
-	atomic_test		= module.test('atomic', [core, testsuite])
-	
-	discworld.post(bld)
-	renderDx9.post(bld)
-	#renderOpenGL.post(bld)
-	#atomic_test.post(bld)
+	#atomic_test		= module.test('atomic', [core, testsuite])
