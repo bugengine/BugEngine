@@ -37,15 +37,18 @@ def parse_gcc_target(target):
 			  ('gekko', 'mips'),
 			  ('x86_64', 'amd64'),
 			  ('powerpc', 'powerpc'),
-			  ('psp', 'powerpc')]
+			  ('psp', 'powerpc'),
+			  ('mingw32', 'x86')]
 	foundpname = None
 	foundaname = None
 	for gccname,pname in os:
 		if target.find(gccname) != -1:
 			foundpname = pname
+			break
 	for gccname,aname in archs:
 		if target.find(gccname) != -1:
 			foundaname = aname
+			break
 	return foundpname,foundaname
 
  
