@@ -36,6 +36,7 @@ typos = {
 'install_subdir':'install_path',
 'inst_var':'install_path',
 'inst_dir':'install_path',
+'feature':'features',
 }
 
 class register_obj(type):
@@ -320,10 +321,10 @@ class task_gen(object):
 
 def declare_extension(var, func):
 	try:
-		for x in var:
+		for x in Utils.to_list(var):
 			task_gen.mappings[x] = func
 	except:
-		raise Utils.WscriptError('declare extension takes either a list or a string %s' % str(var))
+		raise Utils.WscriptError('declare_extension takes either a list or a string %r' % var)
 	task_gen.mapped[func.__name__] = func
 
 def declare_order(*k):
@@ -344,7 +345,7 @@ def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=1, color=
 
 	action = action or rule
 	if isinstance(action, str):
-		act = Task.simple_task_type(name, action, color=color, shell=shell)
+		act = Task.simple_task_type(name, action, shell=shell, color=color)
 	else:
 		act = Task.task_type_from_func(name, action, color=color)
 	act.ext_in = tuple(Utils.to_list(ext_in))
@@ -428,17 +429,13 @@ def after(*k):
 	return deco
 
 def extension(var):
-	if isinstance(var, list):
-		pass
-	elif isinstance(var, str):
-		var = [var]
-	else:
-		raise Utils.WafError('declare extension takes either a list or a string %s' % str(var))
-
 	def deco(func):
 		setattr(task_gen, func.__name__, func)
-		for x in var:
-			task_gen.mappings[x] = func
+		try:
+			for x in Utils.to_list(var):
+				task_gen.mappings[x] = func
+		except:
+			raise Utils.WafError('extension takes either a list or a string %r' % var)
 		task_gen.mapped[func.__name__] = func
 		return func
 	return deco
@@ -468,8 +465,8 @@ def apply_core(self):
 		x = self.get_hook(node.suffix())
 
 		if not x:
-			raise Utils.WafError("Do not know how to process %s in %s, mappings are %s" % \
-				(str(node), str(self.__class__), str(self.__class__.mappings)))
+			raise Utils.WafError("Cannot guess how to process %s (got mappings %r in %r) -> try conf.check_tool(..)?" % \
+				(str(node), self.__class__.mappings.keys(), self.__class__))
 		x(self, node)
 feature('*')(apply_core)
 

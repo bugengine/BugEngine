@@ -436,10 +436,29 @@ ${D_SRC_F}${SRC} \
 ${D_TGT_F}${TGT[0].bldpath(env)}'
 link_str = '${D_LINKER} ${DLNK_SRC_F}${SRC} ${DLNK_TGT_F}${TGT} ${DLINKFLAGS}'
 
+def override_exec(cls):
+	"""stupid dmd wants -of stuck to the file name"""
+	old_exec = cls.exec_command
+	def exec_command(self, *k, **kw):
+		if self.env['COMPILER_D'] == 'dmd' and isinstance(k[0], list):
+			lst = k[0]
+			for i in xrange(len(lst)):
+				if lst[i] == '-of':
+					del lst[i]
+					lst[i] = '-of' + lst[i]
+					break
+		return old_exec(self, *k, **kw)
+	cls.exec_command = exec_command
+
 cls = Task.simple_task_type('d', d_str, 'GREEN', before='ar_link_static d_link', shell=False)
 cls.scan = scan
-Task.simple_task_type('d_with_header', d_with_header_str, 'GREEN', before='ar_link_static d_link', shell=False)
-Task.simple_task_type('d_link', link_str, color='YELLOW', shell=False)
+override_exec(cls)
+
+cls = Task.simple_task_type('d_with_header', d_with_header_str, 'GREEN', before='ar_link_static d_link', shell=False)
+override_exec(cls)
+
+cls = Task.simple_task_type('d_link', link_str, color='YELLOW', shell=False)
+override_exec(cls)
 
 # for feature request #104
 @taskgen

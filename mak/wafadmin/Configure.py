@@ -69,7 +69,7 @@ def find_program_impl(env, filename, path_list=[], var=None, environ=None):
 		if var in environ: env[var] = environ[var]
 		if env[var]: return env[var]
 
-	if not path_list: path_list = environ['PATH'].split(os.pathsep)
+	if not path_list: path_list = environ.get('PATH', '').split(os.pathsep)
 
 	ext = (Options.platform == 'win32') and '.exe,.com,.bat,.cmd' or ''
 	for y in [filename+x for x in ext.split(',')]:
@@ -152,6 +152,7 @@ class ConfigurationContext(Utils.Context):
 		if tooldir: tooldir = Utils.to_list(tooldir)
 		for tool in tools:
 			tool = tool.replace('++', 'xx')
+			if tool == 'java': tool = 'javaw'
 			# avoid loading the same tool more than once with the same functions
 			# used by composite projects
 

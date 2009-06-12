@@ -139,7 +139,8 @@ class Parallel(object):
 				self.outstanding += self.frozen
 				self.frozen = []
 			elif not self.count:
-				(self.maxjobs, tmp) = self.manager.get_next_set()
+				(jobs, tmp) = self.manager.get_next_set()
+				if jobs != None: self.maxjobs = jobs
 				if tmp: self.outstanding += tmp
 				break
 
@@ -179,6 +180,7 @@ class Parallel(object):
 				# if the task is marked as "run", just skip it
 				self.processed += 1
 				self.manager.add_finished(tsk)
+				continue
 
 			try:
 				st = tsk.runnable_status()

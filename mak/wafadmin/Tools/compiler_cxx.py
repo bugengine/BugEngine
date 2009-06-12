@@ -5,6 +5,7 @@
 import os, sys, imp, types, ccroot
 import optparse
 import Utils, Configure, Options
+from Logs import debug
 
 cxx_compiler = {
 'win32':  ['msvc', 'g++'],
@@ -12,7 +13,7 @@ cxx_compiler = {
 'darwin': ['g++'],
 'aix5':   ['g++'],
 'linux':  ['g++', 'icpc', 'sunc++'],
-'sunos':  ['sunc++', 'g++'],
+'sunos':  ['g++', 'sunc++'],
 'irix':   ['g++'],
 'hpux':   ['g++'],
 'default': ['g++']
@@ -27,19 +28,17 @@ def __list_possible_compiler(platform):
 def detect(conf):
 	try: test_for_compiler = Options.options.check_cxx_compiler
 	except AttributeError: raise Configure.ConfigurationError("Add set_options(opt): opt.tool_options('compiler_cxx')")
-	for cxx_compiler in test_for_compiler.split():
+	for compiler in test_for_compiler.split():
 		try:
-			conf.check_tool(cxx_compiler)
-		except Configure.ConfigurationError:
-			pass
+			conf.check_tool(compiler)
+		except Configure.ConfigurationError, e:
+			debug('compiler_cxx: %r' % e)
 		else:
 			if conf.env['CXX']:
-				conf.check_message("%s" %cxx_compiler, '', True)
-				conf.env["COMPILER_CXX"] = "%s" %cxx_compiler #store the selected c++ compiler
-				return
-			conf.check_message("%s" %cxx_compiler, '', False)
-			break
-	conf.env["COMPILER_CXX"] = None
+				conf.check_message(compiler, '', True)
+				conf.env['COMPILER_CXX'] = compiler
+				break
+			conf.check_message(compiler, '', False)
 
 def set_options(opt):
 	detected_platform = Options.platform
@@ -60,4 +59,5 @@ def set_options(opt):
 		help = "Specify the debug level, does nothing if CXXFLAGS is set in the environment. [Allowed Values: '%s']" % "', '".join(ccroot.DEBUG_LEVELS.ALL),
 		choices = ccroot.DEBUG_LEVELS.ALL,
 		dest = 'debug_level')"""
+
 

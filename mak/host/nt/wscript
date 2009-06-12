@@ -35,12 +35,13 @@ def add_msvc_to_env(conf, compiler, version, target, tname):
 	conf.env['BUILD_VARIANTS'].append(name)
 
 # gets a list of all the MSVC complete suites installed
-def get_available_msvc( conf):
+def get_available_msvc(conf):
 	allversions = conf.get_msvc_versions()
 	for (compiler, targets) in allversions:
 		compiler,version = compiler.split()
 		for (target, (tname, paths)) in targets:
-			add_msvc_to_env(conf, compiler, version, target, tname)
+			if tname in conf.env['ARCHITECTURES']:
+				add_msvc_to_env(conf, compiler, version, target, tname)
 
 # adds GCC vars to environment
 gccPlatforms = {

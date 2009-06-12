@@ -5,6 +5,7 @@
 import os, sys, imp, types, ccroot
 import optparse
 import Utils, Configure, Options
+from Logs import debug
 
 c_compiler = {
 	'win32':  ['msvc', 'gcc'],
@@ -12,7 +13,7 @@ c_compiler = {
 	'darwin': ['gcc'],
 	'aix5':   ['gcc'],
 	'linux':  ['gcc', 'icc', 'suncc'],
-	'sunos':  ['suncc', 'gcc'],
+	'sunos':  ['gcc', 'suncc'],
 	'irix':   ['gcc'],
 	'hpux':   ['gcc'],
 	'default': ['gcc']
@@ -27,24 +28,22 @@ def __list_possible_compiler(platform):
 def detect(conf):
 	"""
 	for each compiler for the platform, try to configure the compiler
-	in thory the tools should raise a configuration error if the compiler
+	in theory the tools should raise a configuration error if the compiler
 	pretends to be something it is not (setting CC=icc and trying to configure gcc)
 	"""
 	try: test_for_compiler = Options.options.check_c_compiler
 	except AttributeError: conf.fatal("Add set_options(opt): opt.tool_options('compiler_cc')")
-	for c_compiler in test_for_compiler.split():
+	for compiler in test_for_compiler.split():
 		try:
-			conf.check_tool(c_compiler)
-		except Configure.ConfigurationError:
-			pass
+			conf.check_tool(compiler)
+		except Configure.ConfigurationError, e:
+			debug('compiler_cc: %r' % e)
 		else:
 			if conf.env['CC']:
-				conf.check_message("%s" %c_compiler, '', True)
-				conf.env["COMPILER_CC"] = "%s" % c_compiler #store the selected c compiler
-				return
-			conf.check_message("%s" %c_compiler, '', False)
-			break
-	conf.env["COMPILER_CC"] = None
+				conf.check_message(compiler, '', True)
+				conf.env['COMPILER_CC'] = compiler
+				break
+			conf.check_message(compiler, '', False)
 
 def set_options(opt):
 	detected_platform = Options.platform
@@ -65,4 +64,5 @@ def set_options(opt):
 	help = "Specify the debug level, does nothing if CFLAGS is set in the environment. [Allowed Values: '%s']" % "', '".join(ccroot.DEBUG_LEVELS.ALL),
 	choices = ccroot.DEBUG_LEVELS.ALL,
 	dest = 'debug_level')"""
+
 

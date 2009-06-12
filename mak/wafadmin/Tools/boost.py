@@ -47,7 +47,7 @@ STATIC_ONLYSTATIC = 'onlystatic'
 is_versiontag = re.compile('^\d+_\d+_?\d*$')
 is_threadingtag = re.compile('^mt$')
 is_abitag = re.compile('^[sgydpn]+$')
-is_toolsettag = re.compile('^(acc|borland|como|cw|dmc|darwin|gcc|hp_cxx|intel|kylix|msvc|qcc|sun|vacpp)\d*$')
+is_toolsettag = re.compile('^(acc|borland|como|cw|dmc|darwin|gcc|hp_cxx|intel|kylix|vc|mgw|qcc|sun|vacpp)\d*$')
 
 def set_options(opt):
 	opt.add_option('--boost-includes', type='string', default='', dest='boostincludes', help='path to the boost directory where the includes are e.g. /usr/local/include/boost-1_35')
@@ -252,11 +252,11 @@ def find_boost_library(self, lib, kw):
 		files = libfiles(lib, staticLibPattern, lib_paths)
 		(libname, file) = find_library_from_list(lib, files)
 	if libname is not None:
-		v['LIBPATH_BOOST_' + lib.upper()] = os.path.split(file)[0]
+		v['LIBPATH_BOOST_' + lib.upper()] = [os.path.split(file)[0]]
 		if self.env['CC_NAME'] == 'msvc' and os.path.splitext(file)[1] == '.lib':
-			v[st_env_prefix + '_BOOST_' + lib.upper()] = 'libboost_'+libname
+			v[st_env_prefix + '_BOOST_' + lib.upper()] = ['libboost_'+libname]
 		else:
-			v[st_env_prefix + '_BOOST_' + lib.upper()] = 'boost_'+libname
+			v[st_env_prefix + '_BOOST_' + lib.upper()] = ['boost_'+libname]
 		return
 	self.fatal('lib boost_' + lib + ' not found!')
 
@@ -313,6 +313,7 @@ def check_boost(self, *k, **kw):
 		try:
 			self.find_boost_library(lib, kw)
 		except Configure.ConfigurationError, e:
+			ret = False
 			if 'errmsg' in kw:
 				self.check_message_2(kw['errmsg'], 'YELLOW')
 			if 'mandatory' in kw:

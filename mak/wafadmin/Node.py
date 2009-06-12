@@ -40,6 +40,16 @@ BUILD = 3
 
 type_to_string = {UNDEFINED: "unk", DIR: "dir", FILE: "src", BUILD: "bld"}
 
+# These fnmatch expressions are used by default to prune the directory tree
+# while doing the recursive traversal in the find_iter method of the Node class.
+prune_pats = '.git .bzr .hg .svn _MTN _darcs CVS SCCS'.split()
+
+# These fnmatch expressions are used by default to exclude files and dirs
+# while doing the recursive traversal in the find_iter method of the Node class.
+exclude_pats = prune_pats + '*~ #*# .#* %*% ._* .gitignore .cvsignore vssver.scc .DS_Store'.split()
+
+# These Utils.jar_regexp expressions are used by default to exclude files and dirs and also prune the directory tree
+# while doing the recursive traversal in the ant_glob method of the Node class.
 exclude_regs = '''
 **/*~
 **/#*#
@@ -54,23 +64,18 @@ exclude_regs = '''
 **/vssver.scc
 **/.svn
 **/.svn/**
-**/.DS_Store'''.split()
-
-exc_fun = None
-def default_excludes():
-	global exc_fun
-	if exc_fun:
-		return exc_fun
-
-	regs = [Utils.jar_regexp(x) for x in exclude_regs]
-	def mat(path):
-		for x in regs:
-			if x.match(path):
-				return True
-		return False
-
-	exc_fun = mat
-	return exc_fun
+**/.git
+**/.git/**
+**/.gitignore
+**/.bzr
+**/.bzr/**
+**/.hg
+**/.hg/**
+**/_MTN
+**/_MTN/**
+**/_darcs
+**/_darcs/**
+**/.DS_Store'''
 
 class Node(object):
 	__slots__ = ("name", "parent", "id", "childs")
@@ -341,20 +346,20 @@ class Node(object):
 			cursor = cursor.parent
 			if cand == cursor: return cand
 
-	def relpath_gen(self, going_to):
+	def relpath_gen(self, from_node):
 		"string representing a relative path between self to another node"
 
-		if self == going_to: return '.'
-		if going_to.parent == self: return '..'
+		if self == from_node: return '.'
+		if from_node.parent == self: return '..'
 
 		# up_path is '../../../' and down_path is 'dir/subdir/subdir/file'
-		ancestor = self.find_ancestor(going_to)
+		ancestor = self.find_ancestor(from_node)
 		lst = []
 		cand = self
 		while not cand.id == ancestor.id:
 			lst.append(cand.name)
 			cand = cand.parent
-		cand = going_to
+		cand = from_node
 		while not cand.id == ancestor.id:
 			lst.append('..')
 			cand = cand.parent
@@ -505,8 +510,6 @@ class Node(object):
 						# not a file, it is a dir
 						node = self.find_dir(name)
 						if node and node.id != self.__class__.bld.bldnode.id:
-							if dir:
-								yield node
 							if maxdepth:
 								for k in node.find_iter_impl(src, bld, dir, accept_name, is_prune, maxdepth=maxdepth - 1):
 									yield k
@@ -520,7 +523,7 @@ class Node(object):
 						yield node
 		raise StopIteration
 
-	def find_iter(self, in_pat=['*'], ex_pat=[], prune_pat=['.svn'], src=True, bld=True, dir=False, maxdepth=25, flat=False):
+	def find_iter(self, in_pat=['*'], ex_pat=exclude_pats, prune_pat=prune_pats, src=True, bld=True, dir=False, maxdepth=25, flat=False):
 		"find nodes recursively, this returns everything but folders by default"
 
 		if not (src or bld or dir):
@@ -555,23 +558,87 @@ class Node(object):
 		return ret
 
 	def ant_glob(self, *k, **kw):
-		regex = Utils.jar_regexp(k[0])
-		def accept(node, name):
-			ts = node.relpath_gen(self) + '/' + name
-			return regex.match(ts)
 
-		def reject(node, name):
-			ts = node.relpath_gen(self) + '/' + name
-			return default_excludes()(ts)
+		src=kw.get('src', 1)
+		bld=kw.get('bld', 1)
+		dir=kw.get('dir', 0)
+		excl = kw.get('excl', exclude_regs)
+		incl = k and k[0] or kw.get('incl', '**')
 
-		ret = [x for x in self.find_iter_impl(
-			accept_name=accept,
-			is_prune=reject,
-			src=kw.get('src', 1),
-			bld=kw.get('bld', 1),
-			dir=kw.get('dir', 0),
-			maxdepth=kw.get('maxdepth', 25)
-			)]
+		def to_pat(s):
+			lst = Utils.to_list(s)
+			ret = []
+			for x in lst:
+				x = x.replace('//', '/')
+				if x.endswith('/'):
+					x += '**'
+				lst2 = x.split('/')
+				accu = []
+				for k in lst2:
+					if k == '**':
+						accu.append(k)
+					else:
+						k = k.replace('.', '[.]').replace('*', '.*').replace('?', '.')
+						k = '^%s$' % k
+						#print "pattern", k
+						accu.append(re.compile(k))
+				ret.append(accu)
+			return ret
+
+		def filtre(name, nn):
+			ret = []
+			for lst in nn:
+				if not lst:
+					pass
+				elif lst[0] == '**':
+					ret.append(lst)
+					if len(lst) > 1:
+						if lst[1].match(name):
+							ret.append(lst[2:])
+					else:
+						ret.append([])
+				elif lst[0].match(name):
+					ret.append(lst[1:])
+			return ret
+
+		def accept(name, pats):
+			nacc = filtre(name, pats[0])
+			nrej = filtre(name, pats[1])
+			if [] in nrej:
+				nacc = []
+			return [nacc, nrej]
+
+		def ant_iter(nodi, maxdepth=25, pats=[]):
+			nodi.__class__.bld.rescan(nodi)
+			for name in nodi.__class__.bld.cache_dir_contents[nodi.id]:
+				npats = accept(name, pats)
+				if npats and npats[0]:
+					accepted = [] in npats[0]
+					#print accepted, nodi, name
+
+					node = nodi.find_resource(name)
+					if node and accepted:
+						if src and node.id & 3 == FILE:
+							yield node
+					else:
+						node = nodi.find_dir(name)
+						if node and node.id != nodi.__class__.bld.bldnode.id:
+							if accepted and dir:
+								yield node
+							if maxdepth:
+								for k in ant_iter(node, maxdepth=maxdepth - 1, pats=npats):
+									yield k
+			if bld:
+				for node in nodi.childs.values():
+					if node.id == nodi.__class__.bld.bldnode.id:
+						continue
+					if node.id & 3 == BUILD:
+						npats = accept(node.name, pats)
+						if npats and npats[0] and [] in npats[0]:
+							yield node
+			raise StopIteration
+
+		ret = [x for x in ant_iter(self, pats=[to_pat(incl), to_pat(excl)])]
 
 		if kw.get('flat', True):
 			return " ".join([x.relpath_gen(self) for x in ret])

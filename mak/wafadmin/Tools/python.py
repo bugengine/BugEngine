@@ -16,15 +16,13 @@ FRAG_2 = '''
 #ifdef __cplusplus
 extern "C" {
 #endif
- void Py_Initialize(void);
- void Py_Finalize(void);
+	void Py_Initialize(void);
+	void Py_Finalize(void);
 #ifdef __cplusplus
 }
 #endif
-int main(int argc, char *argv[])
+int main()
 {
-   argc++; /* avoid unused variable warning */
-   argv++; /* avoid unused variable warning */
    Py_Initialize();
    Py_Finalize();
    return 0;
@@ -161,16 +159,16 @@ def _get_python_variables(python_exe, variables, imports=['import sys']):
 def check_python_headers(conf):
 	"""Check for headers and libraries necessary to extend or embed python.
 
-	If successful, xxx_PYEXT and xxx_PYEMBED variables are defined in the
-	environment (for uselib). PYEXT should be used for compiling
-	python extensions, while PYEMBED should be used by programs that
-	need to embed a python interpreter.
+	On success the environment variables xxx_PYEXT and xxx_PYEMBED are added for uselib
 
-	Note: this test requires that check_python_version was previously
-	executed and successful."""
+	PYEXT: for compiling python extensions
+	PYEMBED: for embedding a python interpreter"""
 
 	if not conf.env['CC_NAME'] and not conf.env['CXX_NAME']:
 		conf.fatal('load a compiler first (gcc, g++, ..)')
+
+	if not conf.env['PYTHON_VERSION']:
+		conf.check_python_version()
 
 	env = conf.env
 	python = env['PYTHON']
@@ -346,17 +344,22 @@ def check_python_version(conf, minver=None):
 			pydir = conf.environ['PYTHONDIR']
 		else:
 			if sys.platform == 'win32':
-				(python_LIBDEST,) = \
-						_get_python_variables(python, ["get_config_var('LIBDEST')"],
-						['from distutils.sysconfig import get_config_var'])
+				(python_LIBDEST, pydir) = \
+						_get_python_variables(python,
+											  ["get_config_var('LIBDEST')",
+											   "get_python_lib(standard_lib=0, prefix=%r)" % conf.env['PREFIX']],
+											  ['from distutils.sysconfig import get_config_var, get_python_lib'])
 			else:
 				python_LIBDEST = None
+				(pydir,) = \
+						_get_python_variables(python,
+											  ["get_python_lib(standard_lib=0, prefix=%r)" % conf.env['PREFIX']],
+											  ['from distutils.sysconfig import get_config_var, get_python_lib'])
 			if python_LIBDEST is None:
 				if conf.env['LIBDIR']:
 					python_LIBDEST = os.path.join(conf.env['LIBDIR'], "python" + pyver)
 				else:
 					python_LIBDEST = os.path.join(conf.env['PREFIX'], "lib", "python" + pyver)
-			pydir = os.path.join(python_LIBDEST, "site-packages")
 
 		if hasattr(conf, 'define'): # conf.define is added by the C tool, so may not exist
 			conf.define('PYTHONDIR', pydir)
