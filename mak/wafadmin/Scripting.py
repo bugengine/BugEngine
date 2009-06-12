@@ -25,15 +25,13 @@ def prepare_impl(t, cwd, ver, wafdir):
 		sys.exit(0)
 
 	# now find the wscript file
-	msg1 = 'Waf: *** Nothing to do! Please run waf from a directory containing a file named "%s"' % WSCRIPT_FILE
+	msg1 = 'Waf: Please run waf from a directory containing a file named "%s" or run distclean' % WSCRIPT_FILE
 
 	# in theory projects can be configured in a gcc manner:
 	# mkdir build && cd build && ../waf configure && ../waf
 	build_dir_override = None
 	candidate = None
 
-	# TODO something weird - cwd is the input
-	cwd = Options.launch_dir
 	lst = os.listdir(cwd)
 
 	search_for_candidate = True
@@ -63,7 +61,12 @@ def prepare_impl(t, cwd, ver, wafdir):
 		if Options.lockfile in dirlst:
 			env = Environment.Environment()
 			env.load(os.path.join(cwd, Options.lockfile))
-			candidate = env['cwd']
+			try:
+				os.stat(env['cwd'])
+			except:
+				candidate = cwd
+			else:
+				candidate = env['cwd']
 			break
 		cwd = os.path.dirname(cwd) # climb up
 
@@ -79,7 +82,10 @@ def prepare_impl(t, cwd, ver, wafdir):
 		sys.exit(0)
 
 	# We have found wscript, but there is no guarantee that it is valid
-	os.chdir(candidate)
+	try:
+		os.chdir(candidate)
+	except OSError:
+		raise Utils.WafError("the folder %r is unreadable" % candidate)
 
 	# define the main module containing the functions init, shutdown, ..
 	Utils.set_main_module(os.path.join(candidate, WSCRIPT_FILE))
@@ -92,41 +98,20 @@ def prepare_impl(t, cwd, ver, wafdir):
 			warn(msg)
 		Utils.g_module.blddir = build_dir_override
 
-	#def set_def(obj, name=''):
-	#	if not obj.__name__ in Utils.g_module.__dict__:
-	#		setattr(Utils.g_module, obj.__name__, obj)
+	# bind a few methods and classes by default
 
-	if not 'dist' in Utils.g_module.__dict__:
-		Utils.g_module.dist = dist
-	if not 'distclean' in Utils.g_module.__dict__:
-		Utils.g_module.distclean = distclean
-	if not 'distcheck' in Utils.g_module.__dict__:
-		Utils.g_module.distcheck = distcheck
+	def set_def(obj, name=''):
+		n = name or obj.__name__
+		if not n in Utils.g_module.__dict__:
+			setattr(Utils.g_module, n, obj)
 
-	#if not 'build' in Utils.g_module.__dict__:
-	#	Utils.g_module.build = build
-	if not 'build_context' in Utils.g_module.__dict__:
-		Utils.g_module.build_context = Build.BuildContext
+	for k in [dist, distclean, distcheck, build, clean, install, uninstall]:
+		set_def(k)
 
-	if not 'clean' in Utils.g_module.__dict__:
-		Utils.g_module.clean = clean
-	if not 'clean_context' in Utils.g_module.__dict__:
-		Utils.g_module.clean_context = Build.BuildContext
+	set_def(Configure.ConfigurationContext, 'configure_context')
 
-	if not 'install' in Utils.g_module.__dict__:
-		Utils.g_module.install = install
-	if not 'install_context' in Utils.g_module.__dict__:
-		Utils.g_module.install_context = Build.BuildContext
-
-	if not 'uninstall' in Utils.g_module.__dict__:
-		Utils.g_module.uninstall = uninstall
-	if not 'uninstall_context' in Utils.g_module.__dict__:
-		Utils.g_module.uninstall_context = Build.BuildContext
-
-	#if not 'configure' in Utils.g_module.__dict__:
-	#	Utils.g_module.configure = configure
-	if not 'configure_context' in Utils.g_module.__dict__:
-		Utils.g_module.configure_context = Configure.ConfigurationContext
+	for k in ['build', 'clean', 'install', 'uninstall']:
+		set_def(Build.BuildContext, k + '_context')
 
 	# now parse the options from the user wscript file
 	opt_obj = Options.Handler(Utils.g_module)
@@ -156,7 +141,7 @@ def prepare(t, cwd, ver, wafdir):
 	try:
 		prepare_impl(t, cwd, ver, wafdir)
 	except Utils.WafError, e:
-		error(e)
+		error(str(e))
 		sys.exit(1)
 	except KeyboardInterrupt:
 		Utils.pprint('RED', 'Interrupted')
@@ -355,13 +340,14 @@ def check_configured(bld):
 
 def install(bld):
 	'''installs the build files'''
+	bld = check_configured(bld)
+
 	Options.commands['install'] = True
 	Options.commands['uninstall'] = False
 	Options.is_install = True
 
 	bld.is_install = INSTALL
 
-	bld = check_configured(bld)
 	build_impl(bld)
 	bld.install()
 
@@ -385,13 +371,14 @@ def uninstall(bld):
 		setattr(Task.Task, 'runnable_status', Task.Task.runnable_status_back)
 
 def build(bld):
+	bld = check_configured(bld)
+
 	Options.commands['install'] = False
 	Options.commands['uninstall'] = False
 	Options.is_install = False
 
 	bld.is_install = 0 # False
 
-	bld = check_configured(bld)
 	return build_impl(bld)
 
 def build_impl(bld):
@@ -421,7 +408,7 @@ def build_impl(bld):
 
 	bld.install()
 
-excludes = '.bzr .bzrignore .git .gitignore .svn CVS .cvsignore .arch-ids {arch} SCCS BitKeeper .hg Makefile Makefile.in config.log'.split()
+excludes = '.bzr .bzrignore .git .gitignore .svn CVS .cvsignore .arch-ids {arch} SCCS BitKeeper .hg _MTN _darcs Makefile Makefile.in config.log'.split()
 dist_exts = '~ .rej .orig .pyc .pyo .bak .tar.bz2 tar.gz .zip .swp'.split()
 def dont_dist(name, src, build_dir):
 	global excludes, dist_exts
@@ -520,7 +507,15 @@ def dist(appname='', version=''):
 	tar = tarfile.open(arch_name, 'w:' + g_gz)
 	tar.add(tmp_folder)
 	tar.close()
-	info('The archive is ready: %s' % arch_name)
+
+	try: from hashlib import sha1 as sha
+	except ImportError: from sha import sha
+	try:
+		digest = " (sha=%r)" % sha(Utils.readf(arch_name)).hexdigest()
+	except:
+		digest = ''
+
+	info('New archive created: %s%s' % (arch_name, digest))
 
 	if os.path.exists(tmp_folder): shutil.rmtree(tmp_folder)
 	return arch_name

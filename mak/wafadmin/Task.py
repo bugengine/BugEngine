@@ -642,10 +642,6 @@ class Task(TaskBase):
 		cnt = 0
 		variant = env.variant()
 		for node in self.outputs:
-			#if node in bld.node_sigs[variant]:
-			#	print "variant is ", variant
-			#	print "self sig is ", Utils.view_sig(bld.node_sigs[variant][node])
-
 			# check if the node exists ..
 			try:
 				os.stat(node.abspath(env))
@@ -735,8 +731,6 @@ class Task(TaskBase):
 					d = additional_deps[x.id]
 				except KeyError:
 					continue
-				if hasattr(d, '__call__'):
-					d = d() # dependency is a function, call it
 
 				for v in d:
 					if isinstance(v, Node.Node):
@@ -746,6 +740,8 @@ class Task(TaskBase):
 							v = bld.node_sigs[variant][v.id]
 						except KeyError: # make it fatal?
 							v = ''
+					elif hasattr(v, '__call__'):
+						v = v() # dependency is a function, call it
 					m.update(v)
 		return m.digest()
 

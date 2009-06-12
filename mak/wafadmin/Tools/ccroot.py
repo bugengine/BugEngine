@@ -18,6 +18,7 @@ except ImportError:
 import config_c # <- necessary for the configuration, do not touch
 
 USE_TOP_LEVEL = False
+win_platform = sys.platform in ('win32', 'cygwin')
 
 def get_cc_version(conf, cc, gcc=False, icc=False):
 
@@ -68,21 +69,28 @@ class DEBUG_LEVELS:
 def scan(self):
 	"look for .h the .cpp need"
 	debug('ccroot: _scan_preprocessor(self, node, env, path_lst)')
+
+	# TODO waf 1.6 - assume the default input has exactly one file
+
+	if len(self.inputs) == 1:
+		node = self.inputs[0]
+		(nodes, names) = preproc.get_deps(node, self.env, nodepaths = self.env['INC_PATHS'])
+		if Logs.verbose:
+			debug('deps: deps for %s: %r; unresolved %r' % (str(node), nodes, names))
+		return (nodes, names)
+
 	all_nodes = []
 	all_names = []
 	seen = []
 	for node in self.inputs:
-		# TODO need to pass the defines
-		gruik = preproc.c_parser(nodepaths = self.env['INC_PATHS'])
-		gruik.start(node, self.env)
+		(nodes, names) = preproc.get_deps(node, self.env, nodepaths = self.env['INC_PATHS'])
 		if Logs.verbose:
-			debug('deps: deps for %s: %s; unresolved %s' % (str(node), str(gruik.nodes), str(gruik.names)))
-		for x in gruik.nodes:
+			debug('deps: deps for %s: %r; unresolved %r' % (str(node), nodes, names))
+		for x in nodes:
 			if id(x) in seen: continue
 			seen.append(id(x))
 			all_nodes.append(x)
-		# TODO: use a set ?
-		for x in gruik.names:
+		for x in names:
 			if not x in all_names:
 				all_names.append(x)
 	return (all_nodes, all_names)
@@ -107,9 +115,37 @@ def get_target_name(self):
 	if not pattern: pattern = '%s'
 
 	dir, name = os.path.split(self.target)
+
+	if win_platform and getattr(self, 'vnum', '') and 'cshlib' in self.features:
+		# include the version in the dll file name,
+		# the import lib file name stays unversionned.
+		name = name + '-' + self.vnum.split('.')[0]
+
 	return os.path.join(dir, pattern % name)
 
+def install_implib(self):
+	bld = self.outputs[0].__class__.bld
+	# install the dll in the bindir
+	bindir = self.install_path
+
+	if not len(self.outputs) == 2:
+		raise ValueError('fail')
+
+	dll = self.outputs[0]
+	bld.install_as(bindir + os.sep + dll.name, dll.abspath(self.env), chmod=self.chmod, env=self.env)
+
+	implib = self.outputs[1]
+	libdir = '${LIBDIR}'
+	if not self.env['LIBDIR']:
+			libdir = '${PREFIX}/lib'
+	if sys.platform == 'cygwin':
+		bld.symlink_as(libdir + '/' + implib.name, bindir + os.sep + dll.name, env=self.env)
+	else:
+		bld.install_as(libdir + '/' + implib.name, implib.abspath(self.env), env=self.env)
+
 def install_shlib(self):
+	"""it is called install_shlib but its real name is install_vnum_shlib"""
+	bld = self.outputs[0].__class__.bld
 	nums = self.vnum.split('.')
 
 	path = self.install_path
@@ -121,7 +157,6 @@ def install_shlib(self):
 	name1 = libname
 
 	filename = self.outputs[0].abspath(self.env)
-	bld = self.outputs[0].__class__.bld
 	bld.install_as(os.path.join(path, name3), filename, env=self.env)
 	bld.symlink_as(os.path.join(path, name2), name3)
 	bld.symlink_as(os.path.join(path, name1), name3)
@@ -158,14 +193,21 @@ def vars_target_cprogram(self):
 	self.default_install_path = self.env['BINDIR'] or '${PREFIX}/bin'
 	self.default_chmod = O755
 
-@feature('cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
+@feature('cstaticlib', 'dstaticlib')
 @before('apply_core') # ?
 def vars_target_cstaticlib(self):
 	self.default_install_path = self.env['LIBDIR'] or '${PREFIX}/lib${LIB_EXT}'
-	if sys.platform in ['win32', 'cygwin']:
+
+@feature('cshlib', 'dshlib')
+@before('apply_core') # ?
+def vars_target_cshlib(self):
+	if win_platform:
+		self.default_install_path = self.env['BINDIR'] or '${PREFIX}/bin'
 		# on win32, libraries need the execute bit, else we
 		# get 'permission denied' when using them (issue 283)
 		self.default_chmod = O755
+	else:
+		self.default_install_path = self.env['LIBDIR'] or '${PREFIX}/lib${LIB_EXT}'
 
 @feature('cprogram', 'dprogram', 'cstaticlib', 'dstaticlib', 'cshlib', 'dshlib')
 @after('apply_objdeps', 'apply_link') # ?
@@ -177,10 +219,9 @@ def install_target_cstaticlib(self):
 @after('apply_link')
 def install_target_cshlib(self):
 	"""execute after the link task (apply_link)"""
-	if getattr(self, 'vnum', '') and sys.platform != 'win32':
-		tsk = self.link_task
-		tsk.vnum = self.vnum
-		tsk.install = install_shlib
+	if getattr(self, 'vnum', '') and not win_platform:
+		self.link_task.vnum = self.vnum
+		self.link_task.install = install_shlib
 
 @feature('cc', 'cxx')
 @after('apply_type_vars', 'apply_lib_vars', 'apply_core')
@@ -263,11 +304,14 @@ def apply_link(self):
 		# that's something quite ugly for unix platforms
 		# both the .so and .so.x must be present in the build dir
 		# for darwin the version number is ?
-		if 'cshlib' in self.features and getattr(self, 'vnum', None):
-			if sys.platform == 'darwin' or sys.platform == 'win32':
-				self.vnum = ''
-			else:
-				link = 'vnum_' + link
+		if 'cshlib' in self.features:
+			if win_platform:
+				link = 'dll_' + link
+			elif getattr(self, 'vnum', ''):
+				if sys.platform == 'darwin':
+					self.vnum = ''
+				else:
+					link = 'vnum_' + link
 
 	tsk = self.create_task(link)
 	outputs = [t.outputs[0] for t in self.compiled_tasks]
@@ -350,7 +394,7 @@ def apply_lib_vars(self):
 			if val: self.env.append_value(v, val)
 
 @feature('cprogram', 'cstaticlib', 'cshlib')
-@after('apply_obj_vars', 'apply_vnum', 'apply_link')
+@after('apply_obj_vars', 'apply_vnum', 'apply_implib', 'apply_link')
 def apply_objdeps(self):
 	"add the .o files produced by some other object files in the same manner as uselib_local"
 	if not getattr(self, 'add_objects', None): return
@@ -431,8 +475,8 @@ def apply_vnum(self):
 	"""use self.vnum and self.soname to modify the command line (un*x)
 	before adding the uselib and uselib_local LINKFLAGS (apply_lib_vars)
 	"""
-	# this is very unix-specific
-	if sys.platform != 'darwin' and sys.platform != 'win32':
+	if sys.platform not in ('win32', 'cygwin', 'darwin'):
+		# this is very unix-specific
 		try:
 			nums = self.vnum.split('.')
 		except AttributeError:
@@ -442,6 +486,28 @@ def apply_vnum(self):
 			except AttributeError: name3 = self.link_task.outputs[0].name + '.' + nums[0]
 			self.link_task.outputs.append(self.link_task.outputs[0].parent.find_or_declare(name3))
 			self.env.append_value('LINKFLAGS', (self.env['SONAME_ST'] % name3).split())
+
+@feature('implib')
+@after('apply_link')
+@before('apply_lib_vars')
+def apply_implib(self):
+	"""On mswindows, handle dlls and their import libs
+	the .dll.a is the import lib and it is required for linking so it is installed too
+
+	the feature nicelibs would be bound to something that enable dlopenable libs on macos
+	"""
+	if win_platform:
+		# this is very windows-specific
+		# handle dll import lib
+		dll = self.link_task.outputs[0]
+		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
+		self.link_task.outputs.append(implib)
+		if sys.platform == 'cygwin':
+			pass # don't create any import lib, a symlink is used instead
+		elif sys.platform == 'win32':
+			self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
+
+		self.link_task.install = install_implib
 
 @after('apply_link')
 def process_obj_files(self):
@@ -501,9 +567,21 @@ def link_vnum(self):
 		os.remove(self.outputs[0].abspath(self.env))
 	except OSError:
 		pass
-
 	try:
 		os.symlink(self.outputs[1].name, self.outputs[0].bldpath(self.env))
 	except:
 		return 1
+
+def post_dll_link(self):
+	"""On cygwin make a symlink that points to the dll (no need for import libs)"""
+	if sys.platform == 'cygwin':
+		# create the import lib as a symlink to the dll
+		try:
+			os.remove(self.outputs[1].abspath(self.env))
+		except OSError:
+			pass
+		try:
+			os.symlink(self.outputs[0].name, self.outputs[1].bldpath(self.env))
+		except:
+			return 1
 

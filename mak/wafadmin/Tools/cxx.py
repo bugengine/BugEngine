@@ -88,7 +88,10 @@ def cxx_hook(self, node):
 
 	task.inputs = [node]
 	task.outputs = [node.change_ext(obj_ext)]
-	self.compiled_tasks.append(task)
+	try:
+		self.compiled_tasks.append(task)
+	except AttributeError:
+		raise Utils.WafError('Have you forgotten to set the feature "cxx" on %s?' % str(self))
 	return task
 
 cxx_str = '${CXX} ${CXXFLAGS} ${CPPFLAGS} ${_CXXINCFLAGS} ${_CXXDEFFLAGS} ${CXX_SRC_F}${SRC} ${CXX_TGT_F}${TGT}'
@@ -101,4 +104,11 @@ cls = Task.simple_task_type('cxx_link', link_str, color='YELLOW', ext_in='.o', s
 cls.maxjobs = 1
 cls2 = Task.task_type_from_func('vnum_cxx_link', ccroot.link_vnum, cls.vars, color='CYAN', ext_in='.o')
 cls2.maxjobs = 1
+
+link_str = '${LINK_CXX} ${CXXLNK_SRC_F}${SRC} ${CXXLNK_TGT_F}${TGT[0].abspath(env)} ${LINKFLAGS}'
+cls = Task.simple_task_type('dll_cxx_link', link_str, color='YELLOW', ext_in='.o', shell=False)
+cls.maxjobs = 1
+old = cls.run
+def run(self): return old(self) or ccroot.post_dll_link(self)
+cls.run = run
 

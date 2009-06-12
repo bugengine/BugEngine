@@ -40,7 +40,7 @@ int main() {
 '''
 
 def parse_flags(line, uselib, env):
-	"""stupidest thing ever"""
+	"""pkg-config still has bugs on some platforms, and there are many -config programs, parsing flags is necessary :-/"""
 
 	lst = shlex.split(line)
 	while lst:
@@ -70,6 +70,9 @@ def parse_flags(line, uselib, env):
 			env.append_unique('LINKFLAGS_' + uselib, x)
 		elif x.startswith('-Wl'):
 			env.append_unique('LINKFLAGS_' + uselib, x)
+		elif x.startswith('-m') or x.startswith('-f'):
+			env.append_unique('CCFLAGS_' + uselib, x)
+			env.append_unique('CXXFLAGS_' + uselib, x)
 
 @conf
 def ret_msg(self, f, kw):
@@ -225,6 +228,11 @@ def validate_c(self, kw):
 		kw['compiler'] = 'cc'
 		if env['CXX_NAME'] and Task.TaskBase.classes.get('cxx', None):
 			kw['compiler'] = 'cxx'
+			if not self.env['CXX']:
+				self.fatal('a c++ compiler is required')
+		else:
+			if not self.env['CC']:
+				self.fatal('a c compiler is required')
 
 	if not 'type' in kw:
 		kw['type'] = 'cprogram'
@@ -346,7 +354,7 @@ def validate_c(self, kw):
 
 	if not kw.get('success'): kw['success'] = None
 
-	assert('msg' in kw)
+	assert 'msg' in kw, 'invalid parameters, read http://freehackers.org/~tnagy/wafbook/single.html#config_helpers_c'
 
 @conf
 def post_check(self, *k, **kw):
@@ -362,7 +370,7 @@ def post_check(self, *k, **kw):
 	def define_or_stuff():
 		nm = kw['define_name']
 		if kw['execute'] and kw.get('define_ret', None) and isinstance(is_success, str):
-			self.define(kw['define_name'], is_success)
+			self.define(kw['define_name'], is_success, quote=kw.get('quote', 1))
 		else:
 			self.define_cond(kw['define_name'], is_success)
 
@@ -414,15 +422,33 @@ def check(self, *k, **kw):
 def run_c_code(self, *k, **kw):
 	test_f_name = kw['compile_filename']
 
-	# create a small folder for testing
-	dir = os.path.join(self.blddir, '.wscript-trybuild')
+	k = 0
+	while k < 10000:
+		# make certain to use a fresh folder - necessary for win32
+		dir = os.path.join(self.blddir, '.conf_check_%d' % k)
 
-	# if the folder already exists, remove it
+		# if the folder already exists, remove it
+		try:
+			shutil.rmtree(dir)
+		except OSError:
+			pass
+
+		try:
+			os.stat(dir)
+		except OSError:
+			break
+
+		k += 1
+
 	try:
-		shutil.rmtree(dir)
-	except OSError:
-		pass
-	os.makedirs(dir)
+		os.makedirs(dir)
+	except:
+		self.fatal('cannot create a configuration test folder %r' % dir)
+
+	try:
+		os.stat(dir)
+	except:
+		self.fatal('cannot use the configuration test folder %r' % dir)
 
 	bdir = os.path.join(dir, 'testbuild')
 
@@ -509,7 +535,7 @@ def define(self, define, value, quote=1):
 
 	# the user forgot to tell if the value is quoted or not
 	if isinstance(value, str):
-		if quote == 1:
+		if quote:
 			tbl[define] = '"%s"' % str(value)
 		else:
 			tbl[define] = value
@@ -570,7 +596,7 @@ def have_define(self, name):
 	return self.__dict__.get('HAVE_PAT', 'HAVE_%s') % Utils.quote_define_name(name)
 
 @conf
-def write_config_header(self, configfile='', env='', guard=''):
+def write_config_header(self, configfile='', env='', guard='', top=False):
 	"save the defines into a file"
 	if not configfile: configfile = WAF_CONFIG_H
 	waf_guard = guard or '_%s_WAF' % Utils.quote_define_name(configfile)
@@ -578,7 +604,10 @@ def write_config_header(self, configfile='', env='', guard=''):
 	# configfile -> absolute path
 	# there is a good reason to concatenate first and to split afterwards
 	if not env: env = self.env
-	diff = Utils.diff_path(self.srcdir, self.curdir)
+	if top:
+		diff = ''
+	else:
+		diff = Utils.diff_path(self.srcdir, self.curdir)
 	full = os.sep.join([self.blddir, env.variant(), diff, configfile])
 	full = os.path.normpath(full)
 	(dir, base) = os.path.split(full)

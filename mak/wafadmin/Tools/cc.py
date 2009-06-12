@@ -84,7 +84,10 @@ def c_hook(self, node):
 
 	task.inputs = [node]
 	task.outputs = [node.change_ext(obj_ext)]
-	self.compiled_tasks.append(task)
+	try:
+		self.compiled_tasks.append(task)
+	except AttributeError:
+		raise Utils.WafError('Have you forgotten to set the feature "cc" on %s?' % str(self))
 	return task
 
 cc_str = '${CC} ${CCFLAGS} ${CPPFLAGS} ${_CCINCFLAGS} ${_CCDEFFLAGS} ${CC_SRC_F}${SRC} ${CC_TGT_F}${TGT}'
@@ -97,4 +100,12 @@ cls = Task.simple_task_type('cc_link', link_str, color='YELLOW', ext_in='.o', sh
 cls.maxjobs = 1
 cls2 = Task.task_type_from_func('vnum_cc_link', ccroot.link_vnum, cls.vars, color='CYAN', ext_in='.o')
 cls2.maxjobs = 1
+
+# no re-use possible
+link_str = '${LINK_CC} ${CCLNK_SRC_F}${SRC} ${CCLNK_TGT_F}${TGT[0].abspath(env)} ${LINKFLAGS}'
+cls = Task.simple_task_type('dll_cc_link', link_str, color='YELLOW', ext_in='.o', shell=False)
+cls.maxjobs = 1
+old = cls.run
+def run(self): return old(self) or ccroot.post_dll_link(self)
+cls.run = run
 

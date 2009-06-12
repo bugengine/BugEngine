@@ -43,7 +43,7 @@ class BuildContext(Utils.Context):
 	"holds the dependency tree"
 	def __init__(self):
 
-		# there should be only one build dir in use at a time
+		# not a singleton, but provided for compatibility
 		global bld
 		bld = self
 
@@ -678,11 +678,11 @@ class BuildContext(Utils.Context):
 				ln = self.srcnode
 
 			# if the project file is located under the source directory, build all targets by default
+			# else 'waf configure build' does nothing
 			proj_node = self.root.find_dir(os.path.split(Utils.g_module.root_path)[0])
 			if proj_node.id != self.srcnode.id:
 				ln = self.srcnode
 
-			# in theory this is fine
 			for i in xrange(len(self.task_manager.groups)):
 				g = self.task_manager.groups[i]
 				self.task_manager.current_group = i
@@ -777,6 +777,11 @@ class BuildContext(Utils.Context):
 		return destpath
 
 	def install_files(self, path, files, env=None, chmod=O644, relative_trick=False):
+		"""To install files only after they have been built, put the calls in a method named
+		post_build on the top-level wscript
+		
+		The relative_trick flag can be set to install folders, use bld.path.ant_glob() with it
+		"""
 		if env:
 			assert isinstance(env, Environment.Environment), "invalid parameter"
 
@@ -921,4 +926,8 @@ class BuildContext(Utils.Context):
 	def add_post_fun(self, meth):
 		try: self.post_funs.append(meth)
 		except AttributeError: self.post_funs = [meth]
+
+	def use_the_magic(self):
+		Task.algotype = Task.MAXPARALLEL
+		Task.file_deps = Task.extract_deps
 

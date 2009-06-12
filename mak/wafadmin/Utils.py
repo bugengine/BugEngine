@@ -34,11 +34,12 @@ Utilities, the stable ones are the following:
 
 """
 
-import os, sys, imp, string, errno, traceback, inspect, re, shutil, datetime
+import os, sys, imp, string, errno, traceback, inspect, re, shutil, datetime, gc
 
+# In python 3.0 we can get rid of all this
 try: from UserDict import UserDict
 except ImportError: from collections import UserDict
-if sys.hexversion >= 0x2060000:
+if sys.hexversion >= 0x2060000 or os.name == 'java':
 	import subprocess as pproc
 else:
 	import pproc
@@ -152,7 +153,7 @@ def exec_command(s, **kw):
 	try:
 		proc = pproc.Popen(s, **kw)
 		return proc.wait()
-	except WindowsError:
+	except OSError:
 		return -1
 
 if is_win32:
@@ -388,9 +389,9 @@ def check_dir(dir):
 
 def cmd_output(cmd, **kw):
 
-	# the following is for backward compatibility
-	silent = kw.get('silent', False)
-	if silent:
+	silent = False
+	if 'silent' in kw:
+		silent = kw['silent']
 		del(kw['silent'])
 
 	if 'e' in kw:
@@ -406,7 +407,7 @@ def cmd_output(cmd, **kw):
 	try:
 		p = pproc.Popen(cmd, **kw)
 		output = p.communicate()[0]
-	except WindowsError, e:
+	except OSError, e:
 		raise ValueError(str(e))
 
 	if p.returncode:
@@ -476,11 +477,11 @@ def nada(*k, **kw):
 
 def diff_path(top, subdir):
 	"""difference between two absolute paths"""
-	diff = []
-	while not os.path.samefile(top, subdir):
-		(subdir, d) = os.path.split(subdir)
-		diff.insert(0, d)
-	return "".join(diff)
+	top = os.path.normpath(top).replace('\\', '/').split('/')
+	subdir = os.path.normpath(subdir).replace('\\', '/').split('/')
+	if len(top) == len(subdir): return ''
+	diff = subdir[len(top) - len(subdir):]
+	return os.path.join(*diff)
 
 class Context(object):
 	"""A base class for commands to be executed from Waf scripts"""
@@ -552,19 +553,6 @@ class Context(object):
 				if getattr(self.__class__, 'post_recurse', None):
 					self.post_recurse(txt, base + '_' + name, nexdir)
 
-def jar_regexp(regex):
-	if regex.endswith('/'):
-		regex += '**'
-	regex = (re.escape(regex).replace(r"\*\*\/", ".*")
-		.replace(r"\*\*", ".*")
-		.replace(r"\*","[^/]*")
-		.replace(r"\?","[^/]"))
-	if regex.endswith(r'\/.*'):
-		regex = regex[:-4] + '([/].*)*'
-	regex += '$'
-	#print regex
-	return re.compile(regex)
-
 if is_win32:
 	old = shutil.copy2
 	def copy2(src, dst):
@@ -575,9 +563,10 @@ if is_win32:
 def get_elapsed_time(start):
 	"Format a time delta (datetime.timedelta) using the format DdHhMmS.MSs"
 	delta = datetime.datetime.now() - start
-	days = delta.days
-	hours = delta.seconds / 3600
-	minutes = (delta.seconds - hours * 3600) / 60
+	# cast to int necessary for python 3.0
+	days = int(delta.days)
+	hours = int(delta.seconds / 3600)
+	minutes = int((delta.seconds - hours * 3600) / 60)
 	seconds = delta.seconds - hours * 3600 - minutes * 60 \
 		+ float(delta.microseconds) / 1000 / 1000
 	result = ''
@@ -588,4 +577,12 @@ def get_elapsed_time(start):
 	if days or hours or minutes:
 		result += '%dm' % minutes
 	return '%s%.3fs' % (result, seconds)
+
+if os.name == 'java':
+	# For Jython (they should really fix the inconsistency)
+	try:
+		gc.disable()
+		gc.enable()
+	except NotImplementedError:
+		gc.disable = gc.enable
 
