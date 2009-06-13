@@ -98,7 +98,7 @@ echo LIB=%%LIB%%
 	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH)
 	import pproc
 	try:
-		p = pproc.Popen([cxx], env=env, stdout=pproc.PIPE, stderr=pproc.PIPE)
+		p = pproc.Popen([cxx, '/help'], env=env, stdout=pproc.PIPE, stderr=pproc.PIPE)
 		out, err = p.communicate()
 		if p.returncode != 0:
 			raise Exception('return code: ' + str(p.returncode) + ': ' + err)
