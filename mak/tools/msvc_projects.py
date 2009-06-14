@@ -97,4 +97,4 @@ def create_msvc_solution(self):
 	solution.env['MSVC_PROJECT_DEPENDS'] += [task.name, str([d.name for d in task.depends])]
 	solution.set_inputs(task.outputs)
 	solution.set_run_after(task)
-	solution.depends.append(self)
+	solution.depends.append(t)

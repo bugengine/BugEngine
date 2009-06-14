@@ -120,8 +120,6 @@ EndGlobal
 
 
 
-
-		
 def getFileDeployPath(type):
 	if type == 'data':
 		return 'data'

@@ -11,7 +11,7 @@ import misc
 import module
 import mak
 
-projects	= "vs2005 vs2008 vs2010 xcode sunstudio"
+from mak.tools.IDE import visualstudio,sunstudio,xcode
 
 def set_options(opt):
 	opt.sub_options(os.path.join('host', os.name))
@@ -22,7 +22,7 @@ def set_options(opt):
 	opt.add_option( '--projects',
 					action='store',
 					default='',
-					help='build projects for the selected IDEs, supported IDEs are '+projects)
+					help='build projects for the selected IDEs')
 	opt.add_option( '--toolchains',
 					action='store',
 					default='',
@@ -36,8 +36,6 @@ def configure(conf):
 	conf.env['ARCHITECTURES'] = mak.allarchs
 	conf.env['PLATFORMS']	  = mak.allplatforms
 	conf.env['OPTIMS']		  = mak.alloptims
-	
-	conf.check_tool(projects, tooldir="mak/tools/IDE")
 
 	conf.sub_config(os.path.join('host', os.name))
 
@@ -63,7 +61,6 @@ def configure(conf):
 		for v in allvariants:
 			for e in selectedtoolchains:
 				if e.match(v):
-					selectedvariants.append(v)
 					print 'selected variant',v,'for build'
 		if not selectedvariants:
 			conf.fatal('No toolchain matches the pattern %s' % Options.options.toolchains)
