@@ -21,7 +21,7 @@ def build(bld):
 	directx10		= module.external('DirectX10')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
-	
+
 	freetype		= module.external('freetype')
 
 	openal			= module.external('OpenAL')
@@ -43,11 +43,10 @@ def build(bld):
 	mobile			= module.library('mobile',[core,rtti,system,graphics, sound, physics, input] )
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main])
-	
+
 	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
 	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32'])
 	#renderOpenGL	 = module.plugin('renderOpenGL', [discworld, w32, cgGL, openGL])
-	
 
-	testsuite		= module.library('testsuite', category='test')
+	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite])
