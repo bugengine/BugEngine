@@ -26,7 +26,9 @@ class coptions:
 		self.includedir |= other.includedir
 		self.libdir		|= other.libdir
 		self.defines	|= other.defines
-		self.libs		+= other.libs
+		for lib in other.libs:
+			if lib not in self.libs:
+				self.libs.append(lib)
 		if not self.pchname: self.pchname = other.pchname
 		if not self.pchstop: self.pchstop = other.pchstop
 		if not self.deffile: self.deffile = other.deffile
