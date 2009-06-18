@@ -81,9 +81,9 @@ class hsource(source):
 	def make_source(self, bld, env, prefix, relative, result):
 		pass
 
-class generatedhsource(source):
+class generatedhsource(hsource):
 	def __init__( self, filename, platforms, archs, process ):
-		source.__init__( self, filename, platforms, archs, process )
+		hsource.__init__( self, filename, platforms, archs, process )
 	def make_source(self, bld, env, prefix, relative, result):
 		pass
 	def generated(self):
