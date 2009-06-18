@@ -61,12 +61,12 @@ class source:
 		return self.filename
 	def generated(self):
 		return False
-		
+
 class cppsource(source):
 	def __init__( self, filename, platforms, archs, process, usepch = True ):
 		source.__init__( self, filename, platforms, archs, process )
 		self.usepch = usepch
-		
+
 class generatedcppsource(cppsource):
 	def __init__( self, filename, platforms, archs, process):
 		cppsource.__init__( self, filename, platforms, archs, process, False )
@@ -103,13 +103,12 @@ class deployedsource(source):
 	def make_source(self, bld, env, prefix, relative, result):
 		if self.process and env['PLATFORM'] in self.platforms and env['ARCHITECTURE'] in self.archs:
 			bld.install_files(os.path.join(env['PREFIX'], env['DEPLOY']['prefix'], env['DEPLOY'][self.type], self.outdir), os.path.join(prefix, self.filename), env=env)
-		
+
 class lexsource(source):
 	def __init__( self, filename, generatedcpp, platforms, archs, process ):
 		source.__init__( self, filename, platforms, archs, process )
 		self.generatedcpp = generatedcpp
 
-		
 class yaccsource(source):
 	def __init__( self, filename, generatedcpp, generatedh, platforms, archs, process ):
 		source.__init__( self, filename,platforms, archs, process )
