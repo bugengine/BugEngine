@@ -99,6 +99,21 @@ class VCxproj:
 		self.filters.write('      <Filter>%s</Filter>\n' % path)
 		self.filters.write('    </ClCompile>\n')
 
+	def addHFile(self, path, filename, source):
+		self.output.write('    <None Include="%s" />\n' % filename)
+		self.filters.write('    <None Include="%s">\n' % filename)
+		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('    </None>\n')
+
+	def addBisonFile(self, path, filename, source):
+		self.output.write('    <CustomBuild Include="%s">\n' % filename)
+		self.output.write('      <Command>set PATH=%%PATH%%;&quot;$(SolutionDir)..\\..\\bin\\&quot;&#x0D;&#x0A;bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(InputPath)&quot;</Command>\n' % os.path.join('$(IntDir)',source.generatedcpp))
+		self.output.write('      <Outputs>&quot;%s&quot;;&quot;%s&quot;</Outputs>\n' % (os.path.join('$(IntDir)',source.generatedcpp), os.path.join('$(IntDir)',source.generatedh)))
+		self.output.write('    </CustomBuild>\n')
+		self.filters.write('    <None Include="%s">\n' % filename)
+		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('    </None>\n')
+
 	def addFiles(self, path, directory):
 		for subname,subdir in directory.directories.iteritems():
 			self.addFiles(os.path.join(path, subname), subdir)
@@ -109,6 +124,10 @@ class VCxproj:
 				filename = os.path.join('$(IntDir)', 'src', self.category, self.name, path, source.filename)
 			if isinstance(source, mak.sources.cppsource):
 				self.addCppFile(path, filename, source)
+			elif isinstance(source, mak.sources.hsource):
+				self.addHFile(path, filename, source)
+			elif isinstance(source, mak.sources.yaccsource):
+				self.addBisonFile(path, filename, source)
 
 	def addDirectory(self, sources):
 		self.output.write('  <ItemGroup>\n')
