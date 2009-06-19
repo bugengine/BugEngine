@@ -5,7 +5,7 @@ from mak import module
 import os
 
 srcdir = '.'
-blddir = '.build'
+blddir = '.build/waf'
 
 def set_options(opt):
 	opt.sub_options('mak')

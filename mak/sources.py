@@ -62,6 +62,10 @@ class source:
 	def generated(self):
 		return False
 
+class rcsource(source):
+	def __init__( self, filename, platforms, archs, process ):
+		source.__init__( self, filename, platforms, archs, process )
+
 class cppsource(source):
 	def __init__( self, filename, platforms, archs, process, usepch = True ):
 		source.__init__( self, filename, platforms, archs, process )

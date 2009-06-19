@@ -14,6 +14,8 @@
 
 #ifdef _MSC_VER
 # include <malloc.h>
+# pragma warning(push)
+# pragma warning(disable:4065) // switch contains 'default' but no 'case' label
 #endif
 
 #define YYSTACK_USE_ALLOCA 1

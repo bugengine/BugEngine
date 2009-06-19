@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_X64;_AMD64;_AMD64_;WIN32;_WIN32;_WIN64;WIN64;_M_AMD64;_WIN32_WINNT=0x0502</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X64;_AMD64;_AMD64_;WIN32;_WIN32;_WIN64;WIN64;_M_AMD64;_WIN32_WINNT=0x0502;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>

@@ -62,11 +62,18 @@ def configure(conf):
 			for e in selectedtoolchains:
 				if e.match(v):
 					print 'selected variant',v,'for build'
+					selectedvariants.append(v)
 		if not selectedvariants:
-			conf.fatal('No toolchain matches the pattern %s' % Options.options.toolchains)
+			conf.fatal('No toolchain matches the pattern %s, available : %s' % (Options.options.toolchains,str(allvariants)))
 	else:
 		conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
 		print 'selected variant',conf.env['SELECTED_TOOLCHAINS'],'for build'
+	unusedvariants = []
+	for envname,env in conf.all_envs.iteritems():
+		if not envname in conf.env['BUILD_VARIANTS'] and envname != 'default':
+			unusedvariants.append(envname)
+	for envname in unusedvariants:
+		del conf.all_envs[envname]
 
 
 

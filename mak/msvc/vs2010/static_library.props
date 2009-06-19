@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <OutDir>$(SolutionDir)deploy\vc2010\$(Platform)\$(Configuration)\lib\</OutDir>
-    <IntDir>$(SolutionDir).temp\vc2010\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <OutDir>$(SolutionDir)deploy\vs2010\$(Platform)\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir).build\vs2010\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
 </Project>
