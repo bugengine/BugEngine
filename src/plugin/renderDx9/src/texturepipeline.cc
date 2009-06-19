@@ -52,13 +52,13 @@ _Texture* TexturePipeline::load(const ifilename& filename)
         i8  idLength;
         i8  colormapType;
         i8  imageType;
-        BE_SET_ALIGNMENT(1) struct
+        struct
         {
             i16 firstEntryIndex;
             i16 length;
             i8  entrySize;
         } colormapSpec;
-        BE_SET_ALIGNMENT(1) struct
+        struct
         {
             i16 offsetX;
             i16 offsetY;

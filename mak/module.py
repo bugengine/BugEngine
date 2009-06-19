@@ -21,7 +21,7 @@ class coptions:
 		self.deffile	= ''
 		self.pchname	= ''
 		self.pchstop	= ''
-		
+
 	def merge(self, other):
 		self.includedir |= other.includedir
 		self.libdir		|= other.libdir
@@ -33,7 +33,7 @@ class coptions:
 		if not self.pchstop: self.pchstop = other.pchstop
 		if not self.deffile: self.deffile = other.deffile
 		return self
-		
+
 	def __repr__(self):
 		return (str(self.includedir)+','+
 				str(self.libdir)+','+
@@ -42,7 +42,7 @@ class coptions:
 				self.deffile+','+
 				self.pchname+','+
 				self.pchstop)
-		
+
 class module:
 	def __init__( self,
 				  name,
@@ -218,7 +218,7 @@ class module:
 				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
 					result.addFile(sources.cppsource(file, platforms, archs, process, self.usepch))
 				elif ext in set(['.rc']):
-					result.addFile(sources.source(file, platforms, archs, process))
+					result.addFile(sources.rcsource(file, platforms, archs, process))
 				elif ext in set(['.y', '.yy']):
 					cext, hext = newexts[ext]
 					generatedcfile = os.path.join(path, filename+cext)

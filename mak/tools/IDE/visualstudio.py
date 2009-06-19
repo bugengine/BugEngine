@@ -16,7 +16,7 @@ projects = {
 	'vs2010':	(('Visual Studio 10', '11.00'),(vstudio.vcxproj.VCxproj, '4.0')),
 }
 
-allconfigs = ['debug','release','genprofile','final']
+allconfigs = ['debug','release','profile','final']
 allplatforms = ['Win32', 'x64']
 
 def generateSolution(task):
@@ -94,11 +94,13 @@ def create_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extension
-	project.install_path	= os.path.join(t.path.srcpath(t.env), '.projects', toolName)
+	project.install_path	= os.path.join(t.path.srcpath(t.env), '.build', toolName)
 
-	t.outname = os.path.join('.projects', toolName, outname)
-	project.set_outputs([t.path.find_or_declare(outname),t.path.find_or_declare(outname+'.filters')])
+	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]
+	t.outname = os.path.join('.build', toolName, outname)
+	for extension in projectClass.extensions:
+		outname = t.category+'.'+t.name+'.'+toolName+extension
+		project.set_outputs([t.path.find_or_declare(outname)])
 	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree
 	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
 	project.dep_vars = ['MSVC_PROJECT_SOURCES','MSVC_PROJECT_FLAGS']

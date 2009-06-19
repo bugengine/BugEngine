@@ -61,7 +61,7 @@ template< typename T >
 void istack<T>::push(T* t)
 {
     Assert(((size_t)t & 15) == 0);
-    itaggedptr<inode>::Ticket ticket;
+    itaggedptr<inode>::ticket_t ticket;
     do
     {
         ticket = m_head.getTicket();
@@ -72,7 +72,7 @@ void istack<T>::push(T* t)
 template< typename T >
 T* istack<T>::pop()
 {
-    itaggedptr<inode>::Ticket ticket;
+    itaggedptr<inode>::ticket_t ticket;
     T* result;
     do
     {

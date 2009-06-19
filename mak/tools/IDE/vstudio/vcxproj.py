@@ -3,7 +3,7 @@ import solution
 import mak.sources
 
 class VCxproj:
-	extension = '.vcxproj'
+	extensions = ['.vcxproj', '.vcxproj.filters']
 
 	def __init__(self, filename, name, category, versionName, versionNumber, type):
 		self.versionName = versionName
@@ -12,7 +12,7 @@ class VCxproj:
 		self.category = category
 		self.output = open(filename, 'w')
 		self.filters = open(filename+'.filters', 'w')
-		self.targetName = os.path.join('.projects', versionName, category+'.'+name+'.'+versionName+self.extension)
+		self.targetName = os.path.join('.build', versionName, category+'.'+name+'.'+versionName+self.extensions[0])
 		self.type = type
 		if type == 'game':
 			self.projectType = 'Win32proj'
@@ -25,7 +25,7 @@ class VCxproj:
 		elif type == 'library':
 			self.projectType = 'StaticLibrary'
 		elif type == 'util':
-			self.projectType = 'Application'
+			self.projectType = 'Utility'
 		elif type == 'test':
 			self.projectType = 'Application'
 		else:
@@ -63,6 +63,7 @@ class VCxproj:
 			for config in configs:
 				self.output.write('  <PropertyGroup Condition="\'$(Configuration)|$(Platform)\'==\'%s|%s\'" Label="Configuration">\n' % (config,platform))
 				self.output.write('    <ConfigurationType>%s</ConfigurationType>\n' % self.projectType)
+				self.output.write('    <TargetName>%s</TargetName>\n' % self.name)
 				self.output.write('  </PropertyGroup>\n')
 		self.output.write('  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />\n')
 		for (platform, pname, options) in options:
@@ -70,12 +71,17 @@ class VCxproj:
 			libdirs = ';'.join([os.path.join('$(SolutionDir)', i) for i in options.libdir])
 			self.output.write('  <ItemDefinitionGroup Condition="\'$(Platform)\'==\'%s\'">\n' % (pname))
 			self.output.write('    <ClCompile>\n')
-			self.output.write('      <PreprocessorDefinitions>%s</PreprocessorDefinitions>\n' % ';'.join(options.defines))
-			self.output.write('      <AdditionalIncludeDirectories>%s</AdditionalIncludeDirectories>\n' % includedirs)
+			self.output.write('      <PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>\n' % ';'.join(options.defines))
+			self.output.write('      <AdditionalIncludeDirectories>%s;%%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n' % includedirs)
+			if self.category == '3rdparty':
+				self.output.write('      <WarningLevel>Level1</WarningLevel>\n')
 			self.output.write('    </ClCompile>\n')
+			self.output.write('    <ResourceCompile>\n')
+			self.output.write('      <AdditionalIncludeDirectories>%s;%%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n' % includedirs)
+			self.output.write('    </ResourceCompile>\n')
 			self.output.write('    <Link>\n')
-			self.output.write('      <AdditionalDependencies>%s</AdditionalDependencies>\n' % libdirs)
-			self.output.write('      <AdditionalLibraryDirectories>%s</AdditionalLibraryDirectories>\n' % ';'.join(options.libdir))
+			self.output.write('      <AdditionalDependencies>%s;%%(AdditionalDependencies)</AdditionalDependencies>\n' % libdirs)
+			self.output.write('      <AdditionalLibraryDirectories>%s;%%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n' % ';'.join(options.libdir))
 			self.output.write('    </Link>\n')
 			self.output.write('  </ItemDefinitionGroup>\n')
 
@@ -99,35 +105,47 @@ class VCxproj:
 		self.filters.write('      <Filter>%s</Filter>\n' % path)
 		self.filters.write('    </ClCompile>\n')
 
-	def addHFile(self, path, filename, source):
-		self.output.write('    <None Include="%s" />\n' % filename)
-		self.filters.write('    <None Include="%s">\n' % filename)
+	def addRcFile(self, path, filename, source):
+		self.output.write('    <ResourceCompile Include="%s" />\n' % filename)
+		self.filters.write('    <ResourceCompile Include="%s">\n' % filename)
 		self.filters.write('      <Filter>%s</Filter>\n' % path)
-		self.filters.write('    </None>\n')
+		self.filters.write('    </ResourceCompile>\n')
+
+	def addHFile(self, path, filename, source):
+		self.output.write('    <ClInclude Include="%s" />\n' % filename)
+		self.filters.write('    <ClInclude Include="%s">\n' % filename)
+		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('    </ClInclude>\n')
 
 	def addBisonFile(self, path, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
-		self.output.write('      <Command>set PATH=%%PATH%%;&quot;$(SolutionDir)..\\..\\bin\\&quot;&#x0D;&#x0A;bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(InputPath)&quot;</Command>\n' % os.path.join('$(IntDir)',source.generatedcpp))
-		self.output.write('      <Outputs>&quot;%s&quot;;&quot;%s&quot;</Outputs>\n' % (os.path.join('$(IntDir)',source.generatedcpp), os.path.join('$(IntDir)',source.generatedh)))
+		self.output.write('      <Command>set PATH="$(SolutionDir)../../bin";%%PATH%% &amp;&amp; (if not exist "%s" mkdir "%s") &amp;&amp; bison.exe -o"%s" -d --no-lines "%s"</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+		self.output.write('      <Outputs>%s;%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp, '$(IntDir)'+source.generatedh))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <None Include="%s">\n' % filename)
 		self.filters.write('      <Filter>%s</Filter>\n' % path)
 		self.filters.write('    </None>\n')
 
-	def addFiles(self, path, directory):
+	def addFlexFile(self, path, filename, source):
+		self.output.write('    <CustomBuild Include="%s">\n' % filename)
+		self.output.write('      <Command>set PATH="$(SolutionDir)../../bin";%%PATH%% &amp;&amp; (if not exist "%s" mkdir "%s") &amp;&amp; flex.exe -o"%s" "%s"</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
+		self.output.write('    </CustomBuild>\n')
+		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
+		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('    </CustomBuild>\n')
+
+	def addFiles(self, path, directory, runtypes):
 		for subname,subdir in directory.directories.iteritems():
-			self.addFiles(os.path.join(path, subname), subdir)
+			self.addFiles(os.path.join(path, subname), subdir, runtypes)
 		for source in directory.files:
 			if not source.generated():
 				filename = os.path.join('..', '..', 'src', self.category, self.name, path, source.filename)
 			else:
 				filename = os.path.join('$(IntDir)', 'src', self.category, self.name, path, source.filename)
-			if isinstance(source, mak.sources.cppsource):
-				self.addCppFile(path, filename, source)
-			elif isinstance(source, mak.sources.hsource):
-				self.addHFile(path, filename, source)
-			elif isinstance(source, mak.sources.yaccsource):
-				self.addBisonFile(path, filename, source)
+			for type,function in runtypes:
+				if isinstance(source, type):
+					function(path, filename, source)
 
 	def addDirectory(self, sources):
 		self.output.write('  <ItemGroup>\n')
@@ -135,9 +153,29 @@ class VCxproj:
 		for name,subdir in sources.directories.iteritems():
 			self.addFilter(name, subdir)
 		self.output.write('  </ItemGroup>\n')
-		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles('', sources)
+		self.addFiles('', sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
+		self.filters.write('  <ItemGroup>\n')
+		self.addFiles('', sources, [(mak.sources.cppsource, self.addCppFile)])
+		self.output.write('  </ItemGroup>\n')
+		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
+		self.filters.write('  <ItemGroup>\n')
+		self.addFiles('', sources, [(mak.sources.rcsource, self.addRcFile)])
+		self.output.write('  </ItemGroup>\n')
+		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
+		self.filters.write('  <ItemGroup>\n')
+		self.addFiles('', sources, [(mak.sources.hsource, self.addHFile)])
+		self.output.write('  </ItemGroup>\n')
+		self.filters.write('  </ItemGroup>\n')
+

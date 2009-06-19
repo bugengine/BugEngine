@@ -46,14 +46,6 @@ struct InterlockedType<1>
                             : "memory");
         return result;
     }
-    static inline value_t fetch_and_or(volatile value_t* p, value_t incr)
-    {
-        value_t result;
-        __asm__ __volatile__ ("lock; orq %1, %0"
-                            : "=m" (*p)
-                            : "r" (incr), "m" (*p)
-                            : "memory");
-    }
 };
 
 template<>
@@ -97,46 +89,8 @@ struct InterlockedType<8>
                             : "memory");
         return result;
     }
-
 };
 
-struct TaggedValue
-{
-    BE_SET_ALIGNMENT(16)
-    typedef long        ValueType;
-    typedef TaggedValue TagType;
-    union
-    {
-        struct
-        {
-            long    tag;
-            long    value;
-        };
-        long long asLongLong;
-    };
-    TaggedValue(long value = 0)
-        :   tag(0)
-        ,   value(value)
-    {
-    }
-    TaggedValue(const volatile TaggedValue& other)
-        :   tag(other.tag)
-        ,   value(other.value)
-    {
-    }
-    TaggedValue(const TaggedValue& other)
-        :   tag(other.tag)
-        ,   value(other.value)
-    {
-    }
-    TaggedValue& operator=(const TaggedValue& other)
-    {
-        tag = other.tag;
-        value = other.value;
-        return *this;
-    }
-    inline bool operator==(TaggedValue& other) { return tag == other.tag && value == other.value; }
-};
 
 inline long set_conditional(volatile long* dst, long compare, long value)
 {
