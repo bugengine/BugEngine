@@ -1,4 +1,7 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-  </PropertyGroup>
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>_WIN32;WIN32;_X86;_M_IX86=600;_WIN32_WINNT=0x0502</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
 </Project>
