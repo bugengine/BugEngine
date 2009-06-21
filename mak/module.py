@@ -140,11 +140,11 @@ class module:
 		try: options.merge(self.globalarchoptions[platform+'-'+arch])
 		except KeyError: pass
 		return options
-		
-	
+
+
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions()):
 		if not self.tasks.has_key(variant):
-			if type=='dummy' or not env['PLATFORM'] in self.platforms or not env['ARCHITECTURE'] in self.archs:
+			if type=='dummy' or not (set(env['PLATFORM'] ) & set(self.platforms)) or not (set(env['ARCHITECTURE']) & set(self.archs)):
 				task = None
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
@@ -174,7 +174,7 @@ class module:
 							task.uselib_local.append(d.name)
 						task.inheritedoptions.merge(t.inheritedoptions)
 						dps += [dep for dep in d.depends if dep not in seen]
-				task.options			= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
+				task.options			= self.getoptions(env['PLATFORM'][0], env['ARCHITECTURE'][0])
 				task.options.merge(options)
 				task.options.merge(task.inheritedoptions)
 				try:
@@ -203,16 +203,15 @@ class module:
 			elif file == '.cvs':
 				continue
 			elif os.path.isdir(os.path.join(path,file)):
-				if file in platforms:
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, [file], archs), file )
-				elif file in archs:
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, [file]), file )
+				if file[0:9] == 'platform=':
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs), file )
+				elif file[0:5] == 'arch=':
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(',')), file )
 				else:
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs), file )
 			else:
 				filename, ext = os.path.splitext(file)
 				fullname = os.path.join(path, file)
-				
 
 				newexts = { '.ll':('.cc','.hh'), '.yy': ('.cc','.hh'), '.l':('.c', '.h'), '.y':('.c', '.h') }
 				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
@@ -238,9 +237,8 @@ class module:
 					result.addFile(sources.hsource(file,platforms,archs, process))
 				elif ext in set(['.ogg', '.lua', '.nut', '.dd', '.cg', '.pcf', '.ttf', '.fon', '.tga']):
 					result.addFile( sources.deployedsource(file, local, 'data', platforms, archs, process ) )
-
 		return result
-		
+
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):
 		if not platforms: platforms=allplatforms
 		if not archs: archs=allarchs
@@ -253,10 +251,10 @@ class module:
 			elif file == '.cvs':
 				continue
 			if os.path.isdir(os.path.join(self.root,dirname,file)):
-				if file in allarchs:
-					self.deployDirectory(os.path.join(dirname,file),os.path.join(outputdir,file),deploytype, platforms,[file])
-				elif file in allplatforms:
-					self.deployDirectory(os.path.join(dirname,file),os.path.join(outputdir,file),deploytype, [file],archs)
+				if file[0:9] == 'platform=':
+					self.deployDirectory(os.path.join(dirname,file),os.path.join(outputdir,file),deploytype, file[9:].split(','), archs)
+				elif file[0:5] == 'arch=':
+					self.deployDirectory(os.path.join(dirname,file),os.path.join(outputdir,file),deploytype, platforms, file[5:].split(','))
 				else:
 					self.deployDirectory(os.path.join(dirname,file),os.path.join(outputdir,file),deploytype, platforms,archs)
 			else:

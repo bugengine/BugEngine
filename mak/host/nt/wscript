@@ -18,8 +18,6 @@ def add_msvc_to_env(conf, compiler, version, target, tname):
 	newenv = conf.set_env_name(name, conf.env.copy())
 	newenv.set_variant(name)
 	tool,platform,arch,version = name.split('-')
-	newenv['PLATFORM'] = platform
-	newenv['ARCHITECTURE'] = tname
 	newenv['MSVC_VERSIONS'] = [compiler+' '+version]
 	newenv['MSVC_TARGETS'] = [target]
 	conf.setenv(name)
@@ -62,8 +60,6 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 		newenv = conf.set_env_name(name, conf.env.copy())
 		newenv.set_variant(name)
 		tool,platform,arch,version = name.split('-')
-		newenv['PLATFORM']		= platform
-		newenv['ARCHITECTURE']	= arch
 		newenv['GCC_VERSION']	= version
 		newenv['GCC_TARGET']	= gcc_target
 		newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),

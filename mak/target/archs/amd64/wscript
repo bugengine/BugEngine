@@ -6,7 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['ARCHITECTURE'] = 'amd64'
+	conf.env['ARCHITECTURE'] = ['amd64']
 	conf.env.append_unique('CCDEFINES', ['_AMD64', '_X64', '_AMD64_', '_M_AMD64'])
 	conf.env.append_unique('CXXDEFINES', ['_AMD64', '_X64', '_AMD64_', '_M_AMD64'])
 

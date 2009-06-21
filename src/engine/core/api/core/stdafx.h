@@ -59,6 +59,7 @@
 #  define   COREEXPORT          __declspec(dllexport)
 # elif defined(core_dll)
 #  define   COREEXPORT          __declspec(dllimport)
+#  error
 # else
 #  define   COREEXPORT
 # endif

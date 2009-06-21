@@ -8,7 +8,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['PLATFORM'] = 'nds'
+	conf.env['PLATFORM'] = ['nds']
 	ndstool = conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['PATH'], var='NDSTOOL')
 	if not ndstool: ndstool = conf.env['NDSTOOL'] = conf.find_program('ndstool', conf.env['GCC_PATH'], var='NDSTOOL')
 	if not ndstool: conf.fatal('ndstool was not found')
@@ -44,9 +44,9 @@ cls = Task.simple_task_type('objcopy', '${OBJCOPY} -O binary ${SRC} ${TGT}', col
 @feature('cprogram')
 @after('apply_link')
 def objcopy_step(self):
-	if self.env['ARCHITECTURE'] == 'arm7' or self.env['ARCHITECTURE'] == 'arm9':
+	if self.env['ARCHITECTURE'][0] == 'arm7' or self.env['ARCHITECTURE'][0] == 'arm9':
 		task = self.link_task
 		self.link_task = self.create_task('objcopy')
 		self.link_task.set_run_after(task)
 		self.link_task.inputs = task.outputs
-		self.link_task.outputs = [t.change_ext('.'+self.env['ARCHITECTURE']) for t in task.outputs]
+		self.link_task.outputs = [t.change_ext('.'+self.env['ARCHITECTURE'][0]) for t in task.outputs]
