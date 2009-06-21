@@ -112,14 +112,18 @@ def filter_sources(self):
 		head,tail = os.path.split(source)
 		while tail:
 			head,tail = os.path.split(head)
-			if tail in v['ARCHITECTURES']:
-				if tail != v['ARCHITECTURE']:
+			if tail[0:5] == 'arch=':
+				archs=set(tail[5:].split(','))
+				if not set(v['ARCHITECTURE']) & archs:
+					print 'excluding source :',source
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]
 					rejectedsources.append(source)
 					continue
-			if tail in v['PLATFORMS']:
-				if tail != v['PLATFORM']:
+			if tail[0:9] == 'platform=':
+				platforms=set(tail[9:].split(','))
+				if not set(v['PLATFORMS']) & platforms:
+					print 'excluding source :',source
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]
 					rejectedsources.append(source)

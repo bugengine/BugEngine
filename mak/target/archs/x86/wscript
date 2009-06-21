@@ -6,7 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['ARCHITECTURE'] = 'x86'
+	conf.env['ARCHITECTURE'] = ['x86']
 	conf.env.append_unique('CCDEFINES', ['_X86', '_M_IX86=400'])
 	conf.env.append_unique('CXXDEFINES', ['_X86', '_M_IX86=400'])
 

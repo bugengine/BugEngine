@@ -6,7 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['ARCHITECTURE'] = 'arm7'
+	conf.env['ARCHITECTURE'] = ['arm7', 'arm']
 	conf.env.append_unique('CCDEFINES', ['ARM7', '_ARM7', '__ARM7__'])
 	conf.env.append_unique('CXXDEFINES', ['ARM7', '_ARM7', '__ARM7__'])
 	conf.env['AS'] = conf.env['CC']

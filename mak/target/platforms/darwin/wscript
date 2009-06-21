@@ -16,7 +16,7 @@ def set_options(opt):
 
 def configure(conf):
 	import Options
-	conf.env['PLATFORM'] = 'darwin'
+	conf.env['PLATFORM'] = ['darwin', 'posix']
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk, 'usr', 'include')])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
