@@ -266,6 +266,8 @@ class VCproj:
 				self.addHFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.cppsource):
 				self.addCppFile(path, filename, source, tabs)
+			elif isinstance(source, mak.sources.rcsource):
+				self.addRcFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.lexsource):
 				self.addFlexFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.yaccsource):
