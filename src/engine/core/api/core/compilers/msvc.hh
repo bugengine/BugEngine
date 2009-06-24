@@ -41,8 +41,13 @@ typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
 
-#define _CRT_SECURE_NO_WARNINGS 1
-#define _CRT_SECURE_NO_DEPRECATE 1
+#ifndef _CRT_SECURE_NO_WARNINGS
+# define _CRT_SECURE_NO_WARNINGS 1
+#endif
+#ifndef _CRT_SECURE_NO_DEPRECATE
+# define _CRT_SECURE_NO_DEPRECATE 1
+#endif
+
 #pragma warning(disable:4275)
 #ifdef NDEBUG
 # pragma warning(error:4541)   // 'dynamic_cast' used on polymorphic type with '/GR-'
