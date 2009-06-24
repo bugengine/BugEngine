@@ -64,14 +64,7 @@ typedef u8                      byte;
 #define BE_ALWAYSINLINE        __forceinline
 #define NOTHROW     throw()
 
-namespace _
-{
-struct AlignmentHelper
-{
-};
-}
-
-#define BE_SET_ALIGNMENT(n)     __declspec(align(n)) ::_::AlignmentHelper h__
+#define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
 
 /*****************************************************************************/
 #endif

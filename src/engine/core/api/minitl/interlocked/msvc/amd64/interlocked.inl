@@ -27,15 +27,9 @@
 #include    <intrin.h>
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
-#pragma intrinsic(_InterlockedOr)
-#pragma intrinsic(_InterlockedAnd)
-#pragma intrinsic(_InterlockedXor)
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedExchange64)
 #pragma intrinsic(_InterlockedExchangeAdd64)
-#pragma intrinsic(_InterlockedOr64)
-#pragma intrinsic(_InterlockedAnd64)
-#pragma intrinsic(_InterlockedXor64)
 #pragma intrinsic(_InterlockedCompareExchange64)
 #if _MSC_VER >= 1500
 # define TAG_LONG 1
@@ -49,241 +43,137 @@
 #include    <core/debug/assert.hh>
 
 
-namespace minitl { namespace interlocked_
+#pragma warning(push)
+#pragma warning(disable:4521) //multiple copy constructor
+
+namespace minitl { namespace interlocked_impl
 {
 
 template< unsigned size >
 struct InterlockedType;
 
 template<>
-struct InterlockedType<1>
-{
-    typedef long type;
-};
-template<>
-struct InterlockedType<2>
-{
-    typedef long type;
-};
-template<>
 struct InterlockedType<4>
 {
-    typedef long type;
+    typedef long value_t;
+    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    {
+        return _InterlockedExchangeAdd(p, incr);
+    }
+    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    {
+        return InterlockedExchangeAdd(p, -incr);
+    }
+    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    {
+        return _InterlockedExchange(p, v);
+    }
+    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    {
+        return _InterlockedCompareExchange(p, v, condition);
+    }
+    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    {
+        _InterlockedExchange(p, v);
+        return v;
+    }
+};
+template<>
+struct InterlockedType<1> : public InterlockedType<4>
+{
+};
+template<>
+struct InterlockedType<2> : public InterlockedType<4>
+{
 };
 template<>
 struct InterlockedType<8>
 {
-    typedef long long type;
+    typedef long long value_t;
+    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    {
+        return InterlockedExchangeAdd64(p, incr);
+    }
+    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    {
+        return InterlockedExchangeAdd64(p, -incr);
+    }
+    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    {
+        return _InterlockedExchange64(p, v);
+    }
+    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    {
+        return _InterlockedCompareExchange64(p, v, condition);
+    }
+    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    {
+        _InterlockedExchange64(p, v);
+        return v;
+    }
+
+
+
+    struct tagged_t
+    {
+        typedef long long   value_t;
+        typedef long long   counter_t;
+    #ifdef TAG_LONG
+        typedef tagged_t    tag_t;
+    #else
+        typedef counter_t   tag_t;
+    #endif
+        BE_SET_ALIGNMENT(16)    counter_t   tag;
+        BE_SET_ALIGNMENT(8)     value_t     value;
+        tagged_t(value_t value = 0)
+            :   tag(0)
+            ,   value(value)
+        {
+        }
+        tagged_t(counter_t tag, value_t value)
+            :   tag(0)
+            ,   value(value)
+        {
+        }
+        tagged_t(const tagged_t& other)
+            :   tag(other.tag)
+            ,   value(other.value)
+        {
+        }
+        tagged_t(const volatile tagged_t& other)
+            :   tag(other.tag)
+            ,   value(other.value)
+        {
+        }
+        tagged_t& operator=(const tagged_t& other)
+        {
+            tag = other.tag;
+            value = other.value;
+            return *this;
+        }
+        inline bool operator==(tagged_t& other) { return tag == other.tag && value == other.value; }
+    };
+    static inline tagged_t::tag_t get_ticket(const volatile tagged_t &p)
+    {
+        #ifdef TAG_LONG
+            return p;
+        #else
+            return p.tag;
+        #endif
+    }
+    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    {
+        #ifdef TAG_LONG
+            return _InterlockedCompareExchange128((volatile i64*)p, v, r.tag+1, (i64*)&condition);
+        #else
+            return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1, condition) == condition;
+        #endif
+    }
 };
-struct BE_SET_ALIGNMENT(16) TaggedValue
-{
-    typedef long long   ValueType;
-#   ifdef TAG_LONG
-    typedef TaggedValue TagType;
-#   else
-    typedef long long   TagType;
-#   endif
-    long long   tag;
-    long long   value;
-    TaggedValue(long long value = 0)
-        :   tag(0)
-        ,   value(value)
-    {
-    }
-    TaggedValue(const volatile TaggedValue& other)
-        :   tag(other.tag)
-        ,   value(other.value)
-    {
-    }
-    TaggedValue& operator=(const TaggedValue& other)
-    {
-        tag = other.tag;
-        value = other.value;
-        return *this;
-    }
-    inline bool operator==(TaggedValue other) { return tag == other.tag && value == other.value; }
-};
 
-
-
-inline long set_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    _InterlockedExchange(dst, value);
-    return value;
-}
-
-inline long long set_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    _InterlockedExchange64(dst, value);
-    return value;
-}
-
-inline void* set_and_fetch(void * volatile * dst, void* value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    _InterlockedExchange((long volatile *)dst, (long)value);
-    return value;
-}
-
-
-inline long fetch_and_set(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchange(dst, value);
-}
-
-inline long long fetch_and_set(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchange64(dst, value);
-}
-
-inline void* fetch_and_set(void * volatile * dst, void* value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return (void*)_InterlockedExchange((long volatile *)dst, (long)value);
-}
-
-
-inline long fetch_and_add(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd(dst, value);
-}
-
-inline long long fetch_and_add(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd64(dst, value);
-}
-
-
-inline long add_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd(dst, value)+value;
-}
-
-inline long long add_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd64(dst, value)+value;
-}
-
-
-inline long fetch_and_sub(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd(dst, -value);
-}
-
-inline long long fetch_and_sub(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd64(dst, -value)-value;
-}
-
-
-inline long sub_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd(dst, -value)-value;
-}
-
-inline long long sub_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedExchangeAdd64(dst, -value)-value;
-}
-
-
-inline long or_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedOr(dst, value);
-}
-
-inline long long or_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedOr64(dst, value);
-}
-
-
-inline long xor_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedXor(dst, value);
-}
-
-inline long long xor_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedXor64(dst, value);
-}
-
-
-inline long and_and_fetch(volatile long* dst, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedAnd(dst, value);
-}
-
-inline long long and_and_fetch(volatile long long* dst, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedAnd64(dst, value);
-}
-
-
-inline long set_conditional(volatile long* dst, long compare, long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedCompareExchange(dst, compare, value);
-}
-
-inline long long set_conditional(volatile long long* dst, long long compare, long long value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return _InterlockedCompareExchange64(dst, compare, value);
-}
-
-inline void* set_conditional(void* volatile* dst, void* compare, void* value)
-{
-    Assert((((size_t)dst) & 15) == 0);
-    return (void*)_InterlockedCompareExchange((long volatile *)dst, (long)compare, (long)value);
-}
-
-#ifdef TAG_LONG
-inline TaggedValue get_ticket(volatile TaggedValue* t)
-{
-    Assert((((size_t)t) & 15) == 0);
-    return *t;
-}
-
-inline bool set_conditional(volatile TaggedValue* t, long long value, TaggedValue ticket)
-{
-    Assert((((size_t)t) & 15) == 0);
-    return _InterlockedCompareExchange128((volatile long long*)t, value, ticket.tag+1, (long long*)&ticket) == 1;
-}
-#else
-inline long long get_ticket(volatile TaggedValue* t)
-{
-    Assert((((size_t)t) & 15) == 0);
-    return t->tag;
-}
-
-inline bool set_conditional(volatile TaggedValue* t, long long value, long long ticket)
-{
-    Assert((((size_t)t) & 15) == 0);
-    return _InterlockedCompare64Exchange128((volatile long long*)t, value, ticket+1, ticket) == ticket;
-}
-#endif
-
+StaticAssert(sizeof(interlocked_impl::InterlockedType<8>::tagged_t) == 16);
 
 }}
-
+#pragma warning(pop)
 /*****************************************************************************/
 #endif

@@ -121,10 +121,10 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline tagged_t set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
         tagged_t r(condition.tag+1, v);
-        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong);
+        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong) == condition.asLongLong;
     }
 };
 template<>
