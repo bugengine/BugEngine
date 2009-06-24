@@ -69,8 +69,8 @@ class VCproj:
 			for config in configs:
 				self.output.write('		<Configuration\n')
 				self.output.write('			Name="%s|%s"\n' % (config,platform))
-				self.output.write('			OutputDirectory="$(SolutionDir)deploy\\vs2010\\$(PlatformName)\\$(ConfigurationName)\\"\n')
-				self.output.write('			IntermediateDirectory="$(SolutionDir).build\\vs2010\\$(PlatformName)\\$(ConfigurationName)\\$(ProjectName)\\"\n')
+				self.output.write('			OutputDirectory="$(SolutionDir)deploy\\%s\\$(PlatformName)\\$(ConfigurationName)\\"\n' % self.versionName)
+				self.output.write('			IntermediateDirectory="$(SolutionDir).build\\%s\\$(PlatformName)\\$(ConfigurationName)\\$(ProjectName)\\"\n' % self.versionName)
 				self.output.write('			ConfigurationType="%s"\n' % self.projectType)
 				self.output.write('			InheritedPropertySheets="$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops;$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops;$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops"\n' % (config,platform,self.type))
 				self.output.write('			CharacterSet="2"\n')
