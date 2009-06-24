@@ -52,6 +52,17 @@
 #include    <core/platforms.hh>
 #include    <core/features.hh>
 
+template< bool p >
+struct StaticAssert_;
+
+template< >
+struct StaticAssert_<true>
+{
+	struct Defined
+	{};
+};
+
+#define StaticAssert(expr) StaticAssert_<expr>::Defined ;
 
 #if BE_PLATFORM_WIN32 == 1
 # define    FORCEEXPORT         __declspec(dllexport)

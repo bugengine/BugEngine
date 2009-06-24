@@ -46,19 +46,17 @@
 # error Compiler not implemented
 #endif
 
-
 namespace minitl
 {
 
 template< typename T >
 class interlocked
 {
-    BE_SET_ALIGNMENT(16);
 private:
     typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
     typedef typename impl::value_t                          value_t; 
 private:
-    volatile value_t m_value;
+    BE_SET_ALIGNMENT(4) volatile value_t m_value;
 public:
     interlocked()                                   {}
     interlocked(T value) : m_value(value)           {}
@@ -83,12 +81,11 @@ public:
 template< typename T >
 class iptr
 {
-    BE_SET_ALIGNMENT(16);
 private:
     typedef interlocked_impl::InterlockedType< sizeof(T*) > impl;
     typedef typename impl::value_t                          value_t;
 private:
-    T* volatile m_value;
+    BE_SET_ALIGNMENT(4) T* volatile m_value;
 public:
     iptr()                                          {}
     iptr(T* value) : m_value(value)                 {}
@@ -108,7 +105,6 @@ public:
 template< typename T >
 class itaggedptr
 {
-    BE_SET_ALIGNMENT(16);
 private:
     typedef interlocked_impl::InterlockedType< sizeof(T*) > impl;
     typedef typename impl::tagged_t                         type_t;
@@ -128,7 +124,7 @@ public:
     const T* operator->() const                     { return (T*)m_value.value; }
 
     ticket_t getTicket()                              { return impl::get_ticket(m_value); }
-    bool setConditional(T* value, ticket_t& condition){ return impl::set_conditional(&m_value, (value_t)value, condition) == condition; }
+    bool setConditional(T* value, ticket_t& condition){ return impl::set_conditional(&m_value, (value_t)value, condition); }
 };
 
 }
