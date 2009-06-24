@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Win32"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="_WIN32;WIN32;_X86;_M_IX86=600;_WIN32_WINNT=0x0502"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		TargetMachine="1"
+	/>
+</VisualStudioPropertySheet>

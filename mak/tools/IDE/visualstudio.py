@@ -9,10 +9,10 @@ import vstudio.vcproj
 import vstudio.vcxproj
 
 projects = {
-	'vs2005':	(('Visual Studio 2005', '9.00'),(vstudio.vcproj.VCproj)),
-	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj)),
-	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj)),
-	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj)),
+	'vs2005':	(('Visual Studio 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00')),
+	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00')),
+	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
+	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
 	'vs2010':	(('Visual Studio 10', '11.00'),(vstudio.vcxproj.VCxproj, '4.0')),
 }
 
@@ -62,7 +62,7 @@ def filterplatforms(type,platforms,depends):
 	if type == 'plugin':
 		for d in depends:
 			if d.type == 'game':
-				common_options.libs.append('game.'+d.name)
+				common_options.libs.append(d.name)
 
 	return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()] or [('win32-x86', 'Win32', common_options),('win32-amd64', 'x64', common_options)]
 
