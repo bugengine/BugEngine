@@ -149,6 +149,7 @@ class module:
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
 			else:
+				optim,compiler,platform,architecture,version = variant.split('-')
 				task					= bld.new_task_gen()
 				task.target				= self.name
 				task.env				= env.copy()
@@ -158,6 +159,7 @@ class module:
 				
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
+				task.uselib = [optim]
 				task.uselib_local = []
 				task.add_objects = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
