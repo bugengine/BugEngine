@@ -2,6 +2,8 @@ from Configure import conftest
 import Options
 import Utils
 import re
+from TaskGen import feature, before, extension, after
+import os
 
 def set_options(opt):
 	opt.add_option('--target', action='store', default='', help='select target for GCC')
@@ -62,6 +64,7 @@ def find_cross_gcc(conf):
 	if target:
 		v = conf.env
 		v['GCC_CONFIGURED_PLATFORM'],v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
+		conf.env['TARGET_PLATFORM'] = v['GCC_CONFIGURED_PLATFORM']
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
@@ -82,6 +85,37 @@ def find_cross_gcc(conf):
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc')
+
+
+	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['LINKFLAGS_debug'] = ['-g']
+
+	conf.env['CCFLAGS_release'] = ['-g', '-O1']
+	conf.env['CXXFLAGS_release'] = ['-g', '-O1']
+	conf.env['LINKFLAGS_release'] = ['-g', '-O1']
+
+	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3']
+	conf.env['LINKFLAGS_profile'] = []
+
+	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3']
+	conf.env['LINKFLAGS_final'] = []
+
+@feature('cshlib', 'cprogram')
+@after('apply_link')
+@before('apply_lib_vars')
+def apply_implib(self):
+	"""On mswindows, handle dlls and their import libs
+	the .dll.a is the import lib and it is required for linking so it is installed too
+
+	the feature nicelibs would be bound to something that enable dlopenable libs on macos
+	"""
+	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':
+		dll = self.link_task.outputs[0]
+		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
+		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
 
 detect = '''
 get_native_gcc_target
