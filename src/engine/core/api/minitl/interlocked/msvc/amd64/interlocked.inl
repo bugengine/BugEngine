@@ -164,7 +164,7 @@ struct InterlockedType<8>
     static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
         #ifdef TAG_LONG
-            return _InterlockedCompareExchange128((volatile i64*)p, v, r.tag+1, (i64*)&condition);
+            return _InterlockedCompareExchange128((volatile i64*)p, v, p->tag+1, (i64*)&condition) != 0;
         #else
             return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1, condition) == condition;
         #endif
