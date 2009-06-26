@@ -32,264 +32,179 @@ namespace minitl { namespace interlocked_impl
 template< unsigned size >
 struct InterlockedType;
 
+
+template<>
+struct InterlockedType<8>
+{
+    typedef long long value_t;
+    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    {
+        value_t old;
+        __asm__ __volatile__ ("lock; xaddq %0,%1"
+                      : "=a" (old), "=m" (*p)
+                      : "a" (incr), "m" (*p)
+                      : "memory", "cc");
+        return old;
+    }
+    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    {
+        return fetch_and_add(p, -incr);
+    }
+    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    {
+        value_t prev;
+        __asm__ __volatile__ ("xchgw %0, %1"
+                      : "=a" (prev), "+m" (*p)
+                      : "r" (v));
+        return prev;
+    }
+    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    {
+        value_t result;
+    #if __PIC__
+        __asm__ __volatile__ (
+                "pushl %%ebx\n\t"
+                "movl  (%%ecx),%%ebx\n\t"
+                "movl  4(%%ecx),%%ecx\n\t"
+                "lock\n\t cmpxchg8b %1\n\t"
+                "popl  %%ebx"
+                 : "=A"(result), "=m"(*(i64 *)p)
+                 : "m"(*(i64 *)p), "0"(condition), "c"(&v)
+                 : "memory", "esp"
+    #if defined(BE_COMPILER_INTEL)
+                 ,"ebx"
+    #endif
+        );
+    #else
+        union {
+            i64 asI64;
+            i32 asI32[2];
+        };
+        asI64 = v;
+        __asm__ __volatile__ (
+                "lock\n\t cmpxchg8b %1\n\t"
+                 : "=A"(result), "=m"(*p)
+                 : "m"(*p), "0"(condition), "b"(asI32[0]), "c"(asI32[1])
+                 : "memory"
+        );
+    #endif
+        return result;
+    }
+    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    {
+        fetch_and_set(p, v);
+        return v;
+    }
+};
+
+
 template<>
 struct InterlockedType<4>
 {
-    typedef long type;
-};
-template<>
-struct InterlockedType<1> : InterlockedType<4>
-{
-};
-template<>
-struct InterlockedType<2> : InterlockedType<4>
-{
-};
-struct TaggedValue
-{
-    BE_SET_ALIGNMENT(16);
-    typedef long        ValueType;
-    typedef TaggedValue TagType;
-    union
+    typedef long value_t;
+    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
-        struct
+        value_t old;
+        __asm__ __volatile__ ("lock; xaddl %0,%1"
+                      : "=a" (old), "=m" (*p)
+                      : "a" (incr), "m" (*p)
+                      : "memory", "cc");
+        return old;
+    }
+    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    {
+        return fetch_and_add(p, -incr);
+    }
+    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    {
+        long prev;
+        __asm__ __volatile__ ("xchgl %0, %1"
+                      : "=a" (prev), "+m" (*p)
+                      : "r" (v));
+        return prev;
+    }
+    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    {
+        long prev;
+        __asm__ __volatile__ ("lock; cmpxchgl %1, %2"
+                      : "=a" (prev)
+                      : "r" (v), "m" (*(p)), "0"(condition)
+                      : "memory", "cc");
+        return prev;
+    }
+    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    {
+        fetch_and_set(p, v);
+        return v;
+    }
+
+
+    struct tagged_t
+    {
+        typedef long        value_t;
+        typedef long        counter_t;
+        typedef tagged_t    tag_t;
+        union
         {
-            long    tag;
-            long    value;
+            BE_SET_ALIGNMENT(8) struct
+            {
+                counter_t   tag;
+                value_t     value;
+            };
+            BE_SET_ALIGNMENT(8) long long asLongLong;
         };
-        long long asLongLong;
+        tagged_t(long long value)
+            :   asLongLong(value)
+        {
+        }
+        tagged_t(value_t value = 0)
+            :   tag(0)
+            ,   value(value)
+        {
+        }
+        tagged_t(counter_t tag, value_t value)
+            :   tag(0)
+            ,   value(value)
+        {
+        }
+        tagged_t(const tagged_t& other)
+            :   tag(other.tag)
+            ,   value(other.value)
+        {
+        }
+        tagged_t(const volatile tagged_t& other)
+            :   tag(other.tag)
+            ,   value(other.value)
+        {
+        }
+        tagged_t& operator=(const tagged_t& other)
+        {
+            tag = other.tag;
+            value = other.value;
+            return *this;
+        }
+        inline bool operator==(tagged_t& other) { return tag == other.tag && value == other.value; }
     };
-    TaggedValue(long value = 0)
-        :   tag(0)
-        ,   value(value)
+    static inline tagged_t::tag_t get_ticket(const volatile tagged_t &p)
     {
+        return p;
     }
-    TaggedValue(const volatile TaggedValue& other)
-        :   tag(other.tag)
-        ,   value(other.value)
+    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
+        return InterlockedType<8>::set_conditional((i64*)p, v, condition.asLongLong) == condition.asLongLong;
     }
-    TaggedValue(const TaggedValue& other)
-        :   tag(other.tag)
-        ,   value(other.value)
-    {
-    }
-    TaggedValue& operator=(const TaggedValue& other)
-    {
-        tag = other.tag;
-        value = other.value;
-        return *this;
-    }
-    inline bool operator==(TaggedValue& other) { return tag == other.tag && value == other.value; }
 };
 
-inline long set_conditional(volatile long* dst, long compare, long value)
+template<>
+struct InterlockedType<1> : public InterlockedType<4>
 {
-    long prev;
-    __asm__ __volatile__ ("lock; cmpxchgl %1, %2"
-                  : "=a" (prev)
-                  : "r" (value), "m" (*(dst)), "0"(compare)
-                  : "memory", "cc");
-    return prev;
-}
+};
 
-inline long long set_conditional(volatile long long* dst, long long compare, long long value)
+template<>
+struct InterlockedType<2> : public InterlockedType<4>
 {
-    long long result;
-#if __PIC__
-    __asm__ __volatile__ (
-            "pushl %%ebx\n\t"
-            "movl  (%%ecx),%%ebx\n\t"
-            "movl  4(%%ecx),%%ecx\n\t"
-            "lock\n\t cmpxchg8b %1\n\t"
-            "popl  %%ebx"
-             : "=A"(result), "=m"(*(i64 *)dst)
-             : "m"(*(i64 *)dst)
-             , "0"(compare)
-             , "c"(&value)
-             : "memory", "esp"
-#if defined(BE_COMPILER_INTEL)
-             ,"ebx"
-#endif
-    );
-#else
-    union {
-        i64 i64;
-        i32 i32[2];
-    };
-    i64 = value;
-    __asm__ __volatile__ (
-            "lock\n\t cmpxchg8b %1\n\t"
-             : "=A"(result), "=m"(*dst)
-             : "m"(*dst)
-             , "0"(compare)
-             , "b"(i32[0]), "c"(i32[1])
-             : "memory"
-    );
-#endif
-    return result;
-}
+};
 
-inline void* set_conditional(void* volatile* dst, void* compare, void* value)
-{
-    void* prev;
-    __asm__ volatile ("lock; cmpxchgl %1, %2"
-                  : "=a" (prev)
-                  : "r" (value), "m" (*(dst)), "0"(compare)
-                  : "memory", "cc");
-    return prev;
-}
-
-inline TaggedValue get_ticket(volatile TaggedValue* t)
-{
-    Assert((((size_t)t) & 7) == 0);
-    return *t;
-}
-
-inline bool set_conditional(volatile TaggedValue* t, long value, TaggedValue& ticket)
-{
-    Assert((((size_t)t) & 7) == 0);
-    long long m = (((long long)value) << 32) + ticket.tag+1;
-    return set_conditional((volatile long long*)t, ticket.asLongLong, m) == ticket.asLongLong;
-}
-
-inline long set_and_fetch(volatile long* dst, long value)
-{
-    *dst = value;
-    return value;
-}
-
-inline long long set_and_fetch(volatile long long* dst, long long value)
-{
-    *dst = value;
-    return value;
-}
-
-inline void* set_and_fetch(void * volatile * dst, void* value)
-{
-    *dst = value;
-    return value;
-}
-
-
-inline long fetch_and_set(volatile long* dst, long value)
-{
-    long prev;
-    __asm__ __volatile__ ("xchgl %0, %1"
-                  : "=a" (prev), "+m" (*dst)
-                  : "r" (value));
-    return prev;
-}
-
-inline long long fetch_and_set(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
-
-inline void* fetch_and_set(void * volatile * dst, void* value)
-{
-    void* prev;
-    __asm__ __volatile__ ("xchgl %0, %1"
-                  : "=a" (prev), "+m" (*dst)
-                  : "r" (value));
-    return prev;
-}
-
-
-inline long fetch_and_add(volatile long* dst, long value)
-{
-    long old;
-    __asm__ __volatile__ ("lock; xaddl %0,%1"
-                  : "=a" (old), "=m" (*dst)
-                  : "a" (value), "m" (*dst)
-                  : "memory", "cc");
-    return old;
-}
-
-inline long long fetch_and_add(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
-
-
-inline long add_and_fetch(volatile long* dst, long value)
-{
-    long old;
-    __asm__ __volatile__ ("lock; xaddl %0,%1"
-                  : "=a" (old), "=m" (*dst)
-                  : "a" (value), "m" (*dst)
-                  : "memory", "cc");
-    return old+value;
-}
-
-inline long long add_and_fetch(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
-
-
-inline long fetch_and_sub(volatile long* dst, long value)
-{
-    return fetch_and_add(dst, -value);
-}
-
-inline long long fetch_and_sub(volatile long long* dst, long long value)
-{
-    return fetch_and_add(dst, -value);
-}
-
-
-inline long sub_and_fetch(volatile long* dst, long value)
-{
-    return add_and_fetch(dst, -value);
-}
-
-inline long long sub_and_fetch(volatile long long* dst, long long value)
-{
-    return add_and_fetch(dst, -value);
-}
-
-
-inline long or_and_fetch(volatile long* dst, long value)
-{
-    Assert(false);
-    return 0;
-}
-
-inline long long or_and_fetch(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
-
-
-inline long xor_and_fetch(volatile long* dst, long value)
-{
-    Assert(false);
-    return 0;
-}
-
-inline long long xor_and_fetch(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
-
-
-inline long and_and_fetch(volatile long* dst, long value)
-{
-    Assert(false);
-    return 0;
-}
-
-inline long long and_and_fetch(volatile long long* dst, long long value)
-{
-    Assert(false);
-    return 0;
-}
 
 }}
 

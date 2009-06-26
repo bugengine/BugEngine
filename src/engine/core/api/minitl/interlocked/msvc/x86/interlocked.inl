@@ -72,18 +72,17 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        BE_SET_ALIGNMENT(8);
         typedef long        value_t;
         typedef long        counter_t;
         typedef tagged_t    tag_t;
         union
         {
-            struct
+            BE_SET_ALIGNMENT(8) struct
             {
                 counter_t   tag;
                 value_t     value;
             };
-            long long asLongLong;
+            BE_SET_ALIGNMENT(8) long long asLongLong;
         };
         tagged_t(long long value)
             :   asLongLong(value)
@@ -161,6 +160,8 @@ struct InterlockedType<8>
         return v;
     }
 };
+
+StaticAssert(sizeof(interlocked_impl::InterlockedType<4>::tagged_t) == 8);
 
 }}
 #pragma warning(pop)

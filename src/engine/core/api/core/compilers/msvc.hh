@@ -29,8 +29,6 @@
 #define BE_ALIGNOF(t)          __alignof(t)
 #define BE_ALIGN(size, align)   (align==size?size:(((size)+((align)-1)) & ~(align-1)))
 
-
-
 typedef signed __int8           i8;
 typedef signed __int16          i16;
 typedef signed __int32          i32;
