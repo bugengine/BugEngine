@@ -103,6 +103,11 @@ def find_cross_gcc(conf):
 	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3']
 	conf.env['LINKFLAGS_final'] = []
 
+@feature('cc', 'cxx')
+def static_libgcc(self):
+	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':
+		self.env.append_unique('LINKFLAGS', '-static-libgcc')
+
 @feature('cshlib', 'cprogram')
 @after('apply_link')
 @before('apply_lib_vars')
