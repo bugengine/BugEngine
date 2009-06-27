@@ -121,7 +121,6 @@ class module:
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, allplatforms, [arch]), 'lib.'+arch)
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, allplatforms, [arch]), 'bin.'+arch)
-		self.post(mak.builder)
 
 	def getoptions(self, platform, arch):
 		options = coptions()
@@ -316,6 +315,7 @@ class library(module):
 			options = coptions()
 			ioptions = coptions()
 			task = self.gentask(builder, env, envname, 'cobjects', options, ioptions)
+		return self
 			
 """ shared lib """
 class shared_library(module):
@@ -353,6 +353,7 @@ class shared_library(module):
 			options.defines.add('_USRDLL')
 			ioptions = coptions( defines = [self.name+'_dll'] )
 			task = self.gentask(builder, env, envname, 'cshlib', options, ioptions)
+		return self
 
 """ static lib """
 class static_library(module):
@@ -387,6 +388,7 @@ class static_library(module):
 			env = builder.all_envs[envname]
 			options = coptions()
 			task = self.gentask(builder, env, envname, 'cstaticlib', options, coptions())
+		return self
 			
 """ plugin """
 class plugin(module):
@@ -425,6 +427,7 @@ class plugin(module):
 			task = self.gentask(builder, env, envname, 'cshlib', options, coptions())
 			if task:
 				task.install_bindir = os.path.join(env['DEPLOY']['plugin'])
+		return self
 
 """ game """
 class game(module):
@@ -463,6 +466,7 @@ class game(module):
 				if env['STATIC'] and d.__class__.__name__ == 'library':
 					ioptions.defines.add(d.name + '_dll')
 			task = self.gentask(builder, env, envname, 'cprogram', options, ioptions)
+		return self
 
 """ unit test """
 class test(module):
@@ -499,6 +503,7 @@ class test(module):
 			task.subsystem = 'console'
 			task.do_install = 0
 			task.features.append("unittest")
+		return self
 
 """ barely a C option holder """
 class util(module):
@@ -531,7 +536,8 @@ class util(module):
 		for envname in builder.env['BUILD_VARIANTS']:
 			env = builder.all_envs[envname]
 			task = self.gentask(builder, env, envname, 'dummy')
-	
+		return self
+
 m={}
 def external( name,
 			  depends = [],

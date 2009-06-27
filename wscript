@@ -42,11 +42,11 @@ def build(bld):
 	physics			= module.library('physics',[core,rtti,system, bullet] )
 	mobile			= module.library('mobile',[core,rtti,system,graphics, sound, physics, input] )
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
-	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main])
+	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
 	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
-	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32'])
-	#renderOpenGL	 = module.plugin('renderOpenGL', [discworld, w32, cgGL, openGL])
+	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32']).post(bld)
+	#renderOpenGL	 = module.plugin('renderOpenGL', [discworld, w32, cgGL, openGL]).post(bld)
 
 	#testsuite		= module.library('testsuite', category='test')
-	#atomic_test		= module.test('atomic', [core, testsuite])
+	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)
