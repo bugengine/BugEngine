@@ -21,44 +21,38 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <rtti/stdafx.h>
+#ifndef BE_LUA_CONTEXT_H_
+#define BE_LUA_CONTEXT_H_
+/*****************************************************************************/
 
-#include    <rtti/test.hh>
-
-namespace TestNS
+namespace BugEngine { namespace Lua
 {
 
-METACLASS_IMPL("",Test);
-METACLASS_IMPL("",Test2);
-u8 s_value;
-
-Test::Test()
-:   m_value(14)
+class Context
 {
-}
+private:
+    lua_State*  m_state;
+public:
+    Context();
+    ~Context();
 
-Test::~Test()
-{
-}
+    void doFile(const char *filename);
 
-u8& Test::prop() const
-{
-    return s_value;
-}
+private:
+    static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 
-void Test::setProp(u8 value)
-{
-    s_value = value;
-}
 
-void Test::setValue(int v)
-{
-    m_value = v;
-}
+    static const luaL_Reg Context::s_objectMetaTable[];
+    static void push(lua_State* state, refptr<Object> o);
+    static void push(lua_State* state, Object* o);
+    static void push(lua_State* state, const Value& v);
 
-void Test::setValue2(const int& v)
-{
-    m_value = v;
-}
+    static int objectGC(lua_State* state);
+    static int objectToString(lua_State *state);
+    static int objectGet(lua_State *state);
+};
 
-}
+}}
+
+/*****************************************************************************/
+#endif

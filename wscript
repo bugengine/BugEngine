@@ -31,6 +31,9 @@ def build(bld):
 
 	win32			= module.external('win32')
 
+	lualib			= module.external('lualib')
+	squirellib		= module.external('squirrellib')
+	
 	core			= module.library('core',[dbghelp, win32])
 	network			= module.library('network',[core])
 	rtti			= module.library('rtti',[core,network] )
@@ -46,6 +49,8 @@ def build(bld):
 
 	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
 	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32']).post(bld)
+	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
+	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)
 	#renderOpenGL	 = module.plugin('renderOpenGL', [discworld, w32, cgGL, openGL]).post(bld)
 
 	#testsuite		= module.library('testsuite', category='test')

@@ -271,7 +271,7 @@ bool istring::operator!=(const istring& other) const NOTHROW
 
 bool istring::operator<(const istring& other) const NOTHROW
 {
-    return strcmp(c_str(), other.c_str()) < 0;
+    return m_index < other.m_index;
 }
 
 //-----------------------------------------------------------------------------

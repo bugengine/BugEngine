@@ -37,12 +37,13 @@ from TaskGen import after, before, feature
 from Configure import conftest, conf
 import ccroot, cc, cxx, ar, winres
 from libtool import read_la_file
+import math
 
 import _winreg
 
 all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86_amd64', 'amd64'), ('x86_ia64', 'ia64') ]
 all_wince_platforms = [ ('armv4', 'arm'), ('armv4i', 'arm'), ('mipsii', 'mips'), ('mipsii_fp', 'mips'), ('mipsiv', 'mips'), ('mipsiv_fp', 'mips'), ('sh4', 'sh'), ('x86', 'cex86') ]
-all_icl_platforms = [ ('Itanium', 'ia64'), ('intel64', 'amd64'), ('em64t', 'amd64'), ('ia32', 'x86')]
+all_icl_platforms = [ ('Itanium', 'ia64'), ('ia64', 'ia64'), ('intel64', 'amd64'), ('em64t', 'amd64'), ('em64t_native', 'amd64'), ('ia32', 'x86'), ('ia32_intel64', 'amd64'), ('ia32_ia64', 'ia64')]
 
 def setup_msvc(conf, versions):
 	platforms = Utils.to_list(conf.env['MSVC_TARGETS']) or [i for i,j in all_msvc_platforms+all_icl_platforms+all_wince_platforms]
@@ -77,17 +78,22 @@ echo LIB=%%LIB%%
 	f.close()
 	sout = Utils.cmd_output(['cmd', '/E:on', '/V:on', '/C', batfile])
 	lines = sout.splitlines()
-	if lines[0].find("Setting environment") == -1 and lines[0].find("Setting SDK environment") == -1 and lines[1].find('Intel(R) C++ Compiler') == -1:
+	valid = False
+	for line in lines:
+		if not valid:
+			if (line.find("Setting environment") >= 0) or (line.find("Setting SDK environment") >= 0) or (line.find('Intel(R) C++') >= 0):
+				valid = True
+		else:
+			if line.startswith('PATH='):
+				path = line[5:]
+				MSVC_PATH = path.split(';')
+			elif line.startswith('INCLUDE='):
+				MSVC_INCDIR = [i for i in line[8:].split(';') if i]
+			elif line.startswith('LIB='):
+				MSVC_LIBDIR = [i for i in line[4:].split(';') if i]
+	if not valid:
 		debug('msvc: get_msvc_version: ' + compiler + ' ' + version + ' ' + target + ' -> not found')
 		conf.fatal('msvc: Impossible to find a valid architecture for building (in get_msvc_version)')
-	for line in lines[1:]:
-		if line.startswith('PATH='):
-			path = line[5:]
-			MSVC_PATH = path.split(';')
-		elif line.startswith('INCLUDE='):
-			MSVC_INCDIR = [i for i in line[8:].split(';') if i]
-		elif line.startswith('LIB='):
-			MSVC_LIBDIR = [i for i in line[4:].split(';') if i]
 
 	# Check if the compiler is usable at all.
 	# The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
@@ -95,10 +101,13 @@ echo LIB=%%LIB%%
 	env.update(os.environ)
 	env.update(PATH = path)
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
-	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH)
 	import pproc
+	for p in path.split(';'):
+		if os.path.isfile(os.path.join(p, compiler_name+'.exe')):
+			compiler_name = os.path.join(p, compiler_name+'.exe')
+			break
 	try:
-		p = pproc.Popen([cxx, '/help'], env=env, stdout=pproc.PIPE, stderr=pproc.PIPE)
+		p = pproc.Popen([compiler_name, '/help'], env=env, stdout=pproc.PIPE, stderr=pproc.PIPE)
 		out, err = p.communicate()
 		if p.returncode != 0:
 			raise Exception('return code: ' + str(p.returncode) + ': ' + err)
@@ -201,15 +210,15 @@ def gather_msvc_versions(conf, versions):
 				if os.path.isfile(os.path.join(path, 'VC', 'vcvarsall.bat')):
 					for target,realtarget in all_msvc_platforms[::-1]:
 						try:
-							targets.append((target, (realtarget, conf.get_msvc_version('msvc', version, target, os.path.join(path, 'VC', 'vcvarsall.bat')))))
+							targets.append((target, (realtarget, conf.get_msvc_version('msvc', version+vcvar, target, os.path.join(path, 'VC', 'vcvarsall.bat')))))
 						except:
 							pass
 				elif os.path.isfile(os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')):
 					try:
-						targets.append(('x86', ('x86', conf.get_msvc_version('msvc', version, 'x86', os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')))))
+						targets.append(('x86', ('x86', conf.get_msvc_version('msvc', version+vcvar, 'x86', os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')))))
 					except Configure.ConfigurationError:
 						pass
-				versions.append(('msvc '+version, targets))
+				versions.append(('msvc '+version+vcvar, targets))
 				if ce_sdk:
 					for device,platforms in supported_wince_platforms:
 						cetargets = []
@@ -228,7 +237,6 @@ def gather_msvc_versions(conf, versions):
 
 @conf
 def gather_icl_versions(conf, versions):
-	version_pattern = re.compile('^...?.?\....?.?')
 	try:
 		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Compilers\\C++')
 	except WindowsError:
@@ -243,8 +251,6 @@ def gather_icl_versions(conf, versions):
 		except WindowsError:
 			break
 		index = index + 1
-		if not version_pattern.match(version):
-			continue
 		targets = []
 		for target,arch in all_icl_platforms:
 			try:
@@ -257,8 +263,45 @@ def gather_icl_versions(conf, versions):
 						pass
 			except WindowsError:
 				continue
-		major = version[0:2]
-		versions.append(('intel ' + major, targets))
+		major = float(version)
+		versions.append(('intel ' + str(math.floor(major/10)), targets))
+	try:
+		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Suites')
+	except WindowsError:
+		try:
+			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Suites')
+		except WindowsError:
+			return
+	index1 = 0
+	while 1:
+		try:
+			version = _winreg.EnumKey(all_versions, index1)
+		except WindowsError:
+			break
+		index1 = index1 + 1
+		index2 = 0
+		while 1:
+			all_minors = _winreg.OpenKey(all_versions, version)
+			try:
+				minor = _winreg.EnumKey(all_minors, index2)
+			except WindowsError:
+				break
+			index2 = index2+1
+			targets = []
+			for target,arch in all_icl_platforms:
+				try:
+					icl_version = _winreg.OpenKey(all_minors, minor+'\\C++')
+					path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
+					if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
+						try:
+							targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
+						except Configure.ConfigurationError:
+							pass
+				except WindowsError:
+					continue
+			major = float(version)
+			versions.append(('intel ' + str(math.floor(major)), targets))
+
 
 @conf
 def get_msvc_versions(conf):
