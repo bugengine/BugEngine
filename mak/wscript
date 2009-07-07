@@ -11,7 +11,7 @@ import misc
 import module
 import mak
 
-from mak.tools.IDE import visualstudio,sunstudio,xcode
+from mak.tools.IDE import visualstudio,netbeans,xcode
 
 def set_options(opt):
 	opt.sub_options(os.path.join('host', os.name))
