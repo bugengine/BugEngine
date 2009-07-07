@@ -21,44 +21,12 @@
 * USA                                                                         *
 \*****************************************************************************/
 
+#ifndef BE_SQUIRREL_STDAFX_H_
+#define BE_SQUIRREL_STDAFX_H_
+/*****************************************************************************/
+
+#include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#include    <rtti/test.hh>
-
-namespace TestNS
-{
-
-METACLASS_IMPL("",Test);
-METACLASS_IMPL("",Test2);
-u8 s_value;
-
-Test::Test()
-:   m_value(14)
-{
-}
-
-Test::~Test()
-{
-}
-
-u8& Test::prop() const
-{
-    return s_value;
-}
-
-void Test::setProp(u8 value)
-{
-    s_value = value;
-}
-
-void Test::setValue(int v)
-{
-    m_value = v;
-}
-
-void Test::setValue2(const int& v)
-{
-    m_value = v;
-}
-
-}
+/*****************************************************************************/
+#endif
