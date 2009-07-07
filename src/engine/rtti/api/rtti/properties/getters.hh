@@ -29,56 +29,72 @@
 namespace BugEngine { namespace RTTI
 {
 
-template< typename T,
-          typename OWNER >
+template< typename OWNER,
+          typename T >
 class GetImpossible
 {
 public:
     typedef T PropertyType;
     typedef OWNER   Owner;
-    enum { RefPossible = 0 };
+    enum
+    {
+        Read = 0,
+        Ref = 0
+    };
     static inline T get(OWNER* from);
 };
 
 //-----------------------------------------------------------------------------
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           T (OWNER::*GETTER)() >
 class GetFromGetter
 {
 public:
-    typedef T       PropertyType;
-    typedef OWNER   Owner;
-    enum { RefPossible = minitl::is_reference<T>::Value };
+    typedef typename minitl::remove_const< typename minitl::remove_reference<T>::type >::type   PropertyType;
+    typedef OWNER                                                                               Owner;
+    enum
+    {
+        Read = 1,
+        Ref = minitl::is_reference<T>::Value
+    };
     static inline T get(OWNER* from);
 };
 
 //-----------------------------------------------------------------------------
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           T (OWNER::*GETTER)() const >
 class GetFromGetterConst
 {
 public:
-    typedef T       PropertyType;
-    typedef OWNER   Owner;
-    enum { RefPossible = minitl::is_reference<T>::Value };
+    typedef typename minitl::remove_const< typename minitl::remove_reference<T>::type >::type   PropertyType;
+    typedef OWNER                                                                               Owner;
+    enum
+    {
+        Read = 1,
+        Ref = minitl::is_reference<T>::Value && ! minitl::is_const<T>::Value
+    };
     static inline T get(OWNER* from);
 };
 
 //-----------------------------------------------------------------------------
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           size_t offset >
 class GetFromField
 {
 public:
     typedef T PropertyType;
     typedef OWNER   Owner;
-    enum { RefPossible = 1 };
+    enum
+    {
+        Read = 1,
+        Ref = 1
+    };
     static inline T& get(OWNER* from);
 };
 

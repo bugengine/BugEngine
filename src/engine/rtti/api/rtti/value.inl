@@ -60,7 +60,20 @@ Value::~Value()
 
 Value& Value::operator=(const Value& other)
 {
-    m_value = other.m_value;
+    if(m_value.typeindex() != minitl::indexof<RTTI::ValueRef, typelist>::Value)
+        m_value = other.m_value;
+    else
+        m_value.as<RTTI::ValueRef>() = other;
+    return *this;
+}
+
+template< typename T >
+Value& Value::operator=(const T& other)
+{
+    if(m_value.typeindex() != minitl::indexof<RTTI::ValueRef, typelist>::Value)
+        m_value.as<RTTI::ValueCopy>() = other;
+    else
+        m_value.as<RTTI::ValueRef>() = Value(other);
     return *this;
 }
 

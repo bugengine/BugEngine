@@ -38,13 +38,13 @@ public:
     static void* systemRealloc(void* ptr, size_t size, size_t alignment);
     static void  systemFree(void* pointer);
     template< typename T >
-    static T* systemAllocArray(size_t count, size_t alignment = BE_ALIGNOF(T));
+    static inline T* systemAllocArray(size_t count, size_t alignment = BE_ALIGNOF(T));
 public:
     static void*    internalAlloc(size_t size, size_t alignment, size_t skipStack = 1);
     static void*    internalRealloc(void* ptr, size_t size, size_t alignment, size_t skipStack = 1);
     static void     internalFree(void* ptr, size_t skipStack = 1);
     template< typename T >
-    static T* internalAllocArray(size_t count, size_t alignment = BE_ALIGNOF(T));
+    static inline T* internalAllocArray(size_t count, size_t alignment = BE_ALIGNOF(T));
 
     static void     frameUpdate();
 };

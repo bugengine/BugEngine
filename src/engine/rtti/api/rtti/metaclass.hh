@@ -38,6 +38,7 @@ private:
 public:
     typedef minitl::map< istring, refptr<const Property> >      PropertyMap;
     typedef PropertyMap::iterator                               PropertyIterator;
+    typedef PropertyMap::const_iterator                         PropertyConstIterator;
 private:
     static MetaMetaClass*   s_metaMetaClass;
     istring                 m_name;
@@ -53,6 +54,7 @@ public:
     virtual const MetaClass* parent() const;
 
     void addProperty(const istring& name, refptr<const Property> property);
+    const Property* getProperty(const istring& name) const;
 protected:
     static void init(MetaClass* mc);
 private:

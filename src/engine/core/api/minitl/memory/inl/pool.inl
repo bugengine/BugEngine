@@ -42,7 +42,7 @@ pool<T>::pool(size_t capacity, size_t alignment)
 template< typename T >
 pool<T>::~pool()
 {
-    //BugEngine::Malloc::internalFree(m_pool);
+    BugEngine::Malloc::internalFree(m_pool);
 }
 
 template< typename T >

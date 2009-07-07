@@ -35,9 +35,15 @@ inline ValueCopy::ValueCopy(const T& value) :
 }
 
 template< typename T >
+inline void ValueCopy::operator=(const T& value)
+{
+    m_value = value;
+}
+
+template< typename T >
 inline T ValueCopy::as() const
 {
-    return T();
+    return m_value.as<T>();
 }
 
 template< typename T >

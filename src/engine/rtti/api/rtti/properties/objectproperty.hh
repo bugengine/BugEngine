@@ -32,10 +32,10 @@
 namespace BugEngine { namespace RTTI
 {
 
-template< typename T,
-          typename OWNER,
-          typename ValueGetter = GetImpossible<T,OWNER>,
-          typename ValueSetter = SetImpossible<T,OWNER> >
+template< typename OWNER,
+          typename T,
+          typename ValueGetter = GetImpossible<OWNER,T>,
+          typename ValueSetter = SetImpossible<OWNER,T> >
 class ObjectProperty : public Property
 {
 protected:

@@ -28,7 +28,6 @@
 #include    <rtti/metaclass.hh>
 #include    <rtti/method.hh>
 #include    <rtti/autoregistration.hh>
-#include    <rtti/properties/objectproperty.hh>
 #include    <rtti/properties/propertybuilder.hh>
 
 #define METACLASS(exportrule,_name,_parent)                                             \
@@ -59,16 +58,16 @@ private:                                                                        
 
 
 #define READ_FIELD(_field)                                                              \
-    .setReader(BugEngine::RTTI::PropertyBuilder<void,void>::createReadFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field)))
-#define READ_METHOD(_method)                                                            \
-    .setReader(BugEngine::RTTI::PropertyBuilder<void,void>::createReadFieldFromMethod(&self_t::_method).operator()<&self_t::_method>())
+    BugEngine::RTTI::_::createReadFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
+#define READ_GET(_method)                                                            \
+    BugEngine::RTTI::_::createHelperFromGetter<>(&self_t::_method).operator()<&self_t::_method>()
 #define WRITE_FIELD(_field)                                                             \
-    .setWriter(BugEngine::RTTI::PropertyBuilder<void,void>::createWriteFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field)))
-#define WRITE_METHOD(_method)                                                           \
-    .setWriter(BugEngine::RTTI::PropertyBuilder<void,void>::createWriteFieldFromMethod(&self_t::_method).operator()<&self_t::_method>())
+    BugEngine::RTTI::_::createWriteFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
+#define WRITE_SET(_method)                                                           \
+    BugEngine::RTTI::_::createHelperFromSetter<>(&self_t::_method).operator()<&self_t::_method>()
 
-#define PROPERTY(_name,_access)                                                         \
-                mc->addProperty(#_name, (BugEngine::RTTI::PropertyBuilder<void,void>() _access).buildProperty());
+#define PROPERTY(_name)                                                                 \
+    BugEngine::RTTI::_::PropertyBuilder<void, void>(mc, #_name)
 
 #define METHOD(name)
 #define CLASSMETHOD(name)

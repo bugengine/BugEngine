@@ -48,6 +48,7 @@ public:
     inline ValueRef(void* m_data, const AbstractMarshaller* m_marshaller);
     inline ValueRef(const ValueRef& other);
     inline ~ValueRef();
+    inline void operator=(const Value& v);
 
     template< typename T >
     inline T as() const;

@@ -45,6 +45,11 @@ ValueRef::~ValueRef()
 {
 }
 
+void ValueRef::operator=(const Value& v)
+{
+    m_marshaller->set(v, m_data);
+}
+
 template< typename T >
 T ValueRef::as() const
 {

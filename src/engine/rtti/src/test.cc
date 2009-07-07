@@ -30,16 +30,24 @@ namespace TestNS
 
 METACLASS_IMPL("",Test);
 METACLASS_IMPL("",Test2);
+u8 s_value;
 
-
-u8 Test::prop() const
+Test::Test()
 {
-    return m_value;
+}
+
+Test::~Test()
+{
+}
+
+u8& Test::prop() const
+{
+    return s_value;
 }
 
 void Test::setProp(u8 value)
 {
-    m_value = value;
+    s_value = value;
 }
 
 }
