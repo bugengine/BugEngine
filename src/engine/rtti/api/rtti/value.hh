@@ -47,6 +47,8 @@ public:
     inline explicit Value(const T& immediate);
     inline ~Value();
     inline Value& operator=(const Value& other);
+    template< typename T >
+    inline Value& operator=(const T& other);
 
     template< typename T >
     inline T as() const;

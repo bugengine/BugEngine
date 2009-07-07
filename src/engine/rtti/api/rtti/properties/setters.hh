@@ -29,33 +29,46 @@ namespace BugEngine { namespace RTTI
 {
 
 
-template< typename T,
-          typename OWNER >
+template< typename OWNER,
+          typename T >
 class SetImpossible
 {
 public:
     typedef T PropertyType;
     typedef OWNER   Owner;
+    enum
+    {
+        Write = 0,
+        Ref = 0
+    };
     static inline void set(OWNER* from, const T& value);
 };
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           void (OWNER::*SETTER)(T value) >
 class SetFromSetter
 {
 public:
-    typedef T PropertyType;
-    typedef OWNER   Owner;
-    static inline void set(OWNER* from, const T& value);
+    typedef typename minitl::remove_const< typename minitl::remove_reference<T>::type >::type   PropertyType;
+    typedef OWNER                                                                               Owner;
+    enum
+    {
+        Write = 1,
+    };
+    static inline void set(OWNER* from, const PropertyType& value);
 };
 
-template< typename T, typename OWNER, size_t offset >
+template< typename OWNER, typename T, size_t offset >
 class SetFromField
 {
 public:
     typedef T PropertyType;
     typedef OWNER   Owner;
+    enum
+    {
+        Write = 1,
+    };
     static inline void set(OWNER* from, const T& value);
 };
 

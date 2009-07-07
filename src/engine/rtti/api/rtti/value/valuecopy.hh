@@ -38,6 +38,8 @@ private:
 public:
     template< typename T >
     inline explicit ValueCopy(const T& value);
+    template< typename T >
+    inline void operator=(const T& value);
 
     template< typename T >
     T as() const;

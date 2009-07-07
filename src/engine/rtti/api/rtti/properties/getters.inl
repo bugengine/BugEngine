@@ -28,31 +28,31 @@
 namespace BugEngine { namespace RTTI
 {
 
-template< typename T,
-          typename OWNER >
-inline T GetImpossible<T,OWNER>::get(OWNER* from)
+template< typename OWNER,
+          typename T >
+inline T GetImpossible<OWNER,T>::get(OWNER* from)
 {
     throw 0;
 }
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           T (OWNER::*GETTER)() >
-T GetFromGetter<T,OWNER,GETTER>::get(OWNER* from)
+T GetFromGetter<OWNER,T,GETTER>::get(OWNER* from)
 {
     return (from->*GETTER)();
 }
 
-template< typename T,
-          typename OWNER,
+template< typename OWNER,
+          typename T,
           T (OWNER::*GETTER)() const >
-T GetFromGetterConst<T,OWNER,GETTER>::get(OWNER* from)
+T GetFromGetterConst<OWNER,T,GETTER>::get(OWNER* from)
 {
     return (from->*GETTER)();
 }
 
-template< typename T, typename OWNER, size_t offset >
-T& GetFromField<T,OWNER,offset>::get(OWNER* from)
+template< typename OWNER, typename T, size_t offset >
+T& GetFromField<OWNER,T,offset>::get(OWNER* from)
 {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(from)+offset);
 }

@@ -38,17 +38,25 @@ public:
     Test();
     ~Test();
 
-    u8 prop() const;
+    u8& prop() const;
     void setProp(u8 value);
+    void setValue(int v);
+    void setValue2(const int& v);
 
     METACLASS(RTTIEXPORT,Test,BugEngine::Object)
     PROPERTIES
-        /*PROPERTY(Value)
-            [DESCRIPTION=""]
-            [READ_FIELD=m_value]
-            [WRITE_FIELD=m_value];
-        PROPERTY(ValueU8,      READ_METHOD(prop) WRITE_METHOD(setProp));
-        PROPERTY(ValueObject,  READ_FIELD(m_other) WRITE_FIELD(m_other));*/
+        PROPERTY(Value)
+            [READ_FIELD(m_value)]
+            [WRITE_SET(setValue)]
+            ;
+        PROPERTY(Value2)
+            [READ_FIELD(m_value)]
+            [WRITE_SET(setValue2)]
+            ;
+        PROPERTY(prop)
+            [READ_GET(prop)]
+            [WRITE_SET(setProp)]
+            ;
     END
 };
 

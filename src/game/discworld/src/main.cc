@@ -29,9 +29,19 @@
 
 #include    <core/threads/thread.hh>
 
+#include    <rtti/test.hh>
+
 /*---------------------------------------------------------------------------*/
 int be_main (BugEngine::Application* app)
 {
+    TestNS::Test t;
+    t.setProp(2);
+    const BugEngine::Object::MetaClass *m = t.metaclass();
+    const BugEngine::Property* p = m->getProperty("prop");
+    BugEngine::Value v(p->get(&t));
+    v = (u64)15;
+    t.prop();
+
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);
     f.size = BugEngine::uint2(1280,800);

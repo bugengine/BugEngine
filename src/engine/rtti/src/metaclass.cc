@@ -93,6 +93,15 @@ void Object::MetaClass::addProperty(const istring& name, refptr<const Property> 
     Assert(result.second);
 }
 
+const Property* Object::MetaClass::getProperty(const istring& name) const
+{
+    PropertyConstIterator it = m_properties.find(name);
+    if(it != m_properties.end())
+        return it->second.get();
+    else
+        return 0;
+}
+
 void Object::MetaClass::init(MetaClass* mc)
 {
 }
