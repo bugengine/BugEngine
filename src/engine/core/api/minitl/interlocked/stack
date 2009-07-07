@@ -60,7 +60,6 @@ istack<T>::~istack()
 template< typename T >
 void istack<T>::push(T* t)
 {
-    Assert(((size_t)t & 15) == 0);
     itaggedptr<inode>::ticket_t ticket;
     do
     {
@@ -80,7 +79,6 @@ T* istack<T>::pop()
         result = static_cast<T*>((inode*)m_head);
     }
     while(!m_head.setConditional((inode*)result->next, ticket));
-    Assert(((size_t)result & 15) == 0);
     return result;
 }
 

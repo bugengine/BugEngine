@@ -61,13 +61,15 @@ Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
 
 Window::~Window()
 {
+	close();
 }
 
 void Window::close()
 {
     HWND hWnd = m_window;
     m_window = 0;
-    m_renderer->destroyWindowImplementation(hWnd);
+	if(hWnd)
+		m_renderer->destroyWindowImplementation(hWnd);
 }
 
 uint2 Window::getDimensions() const
