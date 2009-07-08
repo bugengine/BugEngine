@@ -37,9 +37,9 @@ public:
     Mouse(size_t numButtons);
     ~Mouse();
 
-    METACLASS(INPUTEXPORT,Mouse,Device)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,Mouse,Device)
+    be_properties
+    be_end
 };
 
 }}

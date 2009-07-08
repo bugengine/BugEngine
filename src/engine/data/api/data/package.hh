@@ -42,10 +42,10 @@ public:
 
     virtual const Namespace*    getNamespace() const override;
 
-    METACLASS(DATAEXPORT, Package, RTTI::Package)
+    be_metaclass(DATAEXPORT, Package, RTTI::Package)
         refptr<RTTI::Package> create(const ipath& name) const override;
-    PROPERTIES
-    END
+    be_properties
+    be_end
 };
 
 }

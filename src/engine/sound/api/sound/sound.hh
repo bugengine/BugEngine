@@ -53,9 +53,9 @@ public:
 
     size_t read(void* buffer, size_t size, int& frequency, int& channels) const;
 
-    METACLASS(SOUNDEXPORT,SoundObject,Object)
-    PROPERTIES
-    END
+    be_metaclass(SOUNDEXPORT,SoundObject,Object)
+    be_properties
+    be_end
 private:
     SoundObject(const SoundObject& other);
     SoundObject& operator=(const SoundObject& other);

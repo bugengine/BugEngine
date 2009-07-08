@@ -54,18 +54,18 @@ public:
     bool    active() const;
     void    setActive(bool active);
 
-    METACLASS(INPUTEXPORT,InputMap,Object)
+    be_metaclass(INPUTEXPORT,InputMap,Object)
     private:
         scopedptr<Manager>  m_manager;
         static void init(MetaClass* mc);
     public:
         const Manager* getManager() const;
-    PROPERTIES
-        METHOD(mapAction);
-        METHOD(isDown);
-        METHOD(wentDown);
-        METHOD(axisValue);
-    END
+    be_properties
+        be_method(mapAction);
+        be_method(isDown);
+        be_method(wentDown);
+        be_method(axisValue);
+    be_end
 };
 
 }}

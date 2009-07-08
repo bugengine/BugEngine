@@ -35,11 +35,13 @@ namespace BugEngine { namespace RTTI { namespace _
 template<typename Owner, size_t offset, typename T>
 static inline GetFromField<Owner, T, offset> createReadFieldFromOffset(T* t)
 {
+    UNUSED(t);
     return GetFromField<Owner, T, offset>();
 }
 template<typename Owner, size_t offset, typename T>
 static inline SetFromField<Owner, T, offset> createWriteFieldFromOffset(T* t)
 {
+    UNUSED(t);
     return SetFromField<Owner, T, offset>();
 }
 
@@ -136,21 +138,21 @@ public:
     }
 
     template< typename Owner, typename T, size_t offset >
-    inline PropertyBuilder<GetFromField<Owner, T, offset>, void> operator[](const GetFromField<Owner, T, offset>& o)
+    inline PropertyBuilder<GetFromField<Owner, T, offset>, void> operator[](const GetFromField<Owner, T, offset>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<GetFromField<Owner, T, offset>, void>(mc, m_name);
     }
     template< typename Owner, typename T, T (Owner::*Getter)() >
-    inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& o)
+    inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<GetFromGetter<Owner, T, Getter>, void>(mc, m_name);
     }
     template< typename Owner, typename T, T (Owner::*Getter)() const >
-    inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& o)
+    inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
@@ -158,14 +160,14 @@ public:
     }
 
     template< typename Owner, typename T, size_t offset >
-    inline PropertyBuilder<void, SetFromField<Owner, T, offset> > operator[](const SetFromField<Owner, T, offset>& o)
+    inline PropertyBuilder<void, SetFromField<Owner, T, offset> > operator[](const SetFromField<Owner, T, offset>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<void, SetFromField<Owner, T, offset> >(mc, m_name);
     }
     template< typename Owner, typename T, void (Owner::*Setter)(T) >
-    inline PropertyBuilder<void, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& o)
+    inline PropertyBuilder<void, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
@@ -192,14 +194,14 @@ public:
     }
 
     template< typename Owner, typename T, size_t offset >
-    inline PropertyBuilder<Getter, SetFromField<Owner, T, offset>> operator[](const SetFromField<Owner, T, offset>& o)
+    inline PropertyBuilder<Getter, SetFromField<Owner, T, offset> > operator[](const SetFromField<Owner, T, offset>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<Getter, SetFromField<Owner, T, offset> >(mc, m_name);
     }
     template< typename Owner, typename T, void (Owner::*Setter)(T) >
-    inline PropertyBuilder<Getter, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& o)
+    inline PropertyBuilder<Getter, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
@@ -225,21 +227,21 @@ public:
     }
 
     template< size_t offset >
-    inline PropertyBuilder<GetFromField<Owner, T, offset>, Setter> operator[](const GetFromField<Owner, T, offset>& o)
+    inline PropertyBuilder<GetFromField<Owner, T, offset>, Setter> operator[](const GetFromField<Owner, T, offset>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<GetFromField<Owner, T, offset>, Setter>(mc, m_name);
     }
     template< T (Owner::*Getter)() >
-    inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& o)
+    inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& /*just for type detection*/)
     {
         Object::MetaClass* mc = m_metaclass;
         m_metaclass = 0;
         return PropertyBuilder<GetFromGetter<Owner, T, Getter>, Setter>(mc, m_name);
 	}
 	template< T (Owner::*Getter)() const >
-	inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& o)
+	inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& /*just for type detection*/)
 	{
 		Object::MetaClass* mc = m_metaclass;
 		m_metaclass = 0;

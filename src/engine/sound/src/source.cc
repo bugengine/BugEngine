@@ -32,7 +32,7 @@
 namespace BugEngine { namespace Sound
 {
 
-METACLASS_IMPL("Sound",Source);
+be_metaclass_impl("Sound",Source);
 
 #if 0
 
@@ -222,11 +222,13 @@ float Source::volume() const
 
 void Source::setVolume(float volume)
 {
+    UNUSED(volume);
 //  static_cast<_ALData*>(m_data)->setVolume(volume);
 }
 
 void Source::setSound(SoundObject* sound)
 {
+    UNUSED(sound);
 /*    Sequencer* current = 0;
     if(m_sound)
     {

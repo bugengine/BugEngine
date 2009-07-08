@@ -148,44 +148,38 @@ struct InterlockedType<4>
         {
             BE_SET_ALIGNMENT(8) struct
             {
-                counter_t   tag;
-                value_t     value;
-            };
-            BE_SET_ALIGNMENT(8) long long asLongLong;
+                volatile counter_t   tag;
+                volatile value_t     value;
+            } taggedvalue;
+            BE_SET_ALIGNMENT(8) volatile long long asLongLong;
         };
         tagged_t(long long value)
             :   asLongLong(value)
         {
         }
         tagged_t(value_t value = 0)
-            :   tag(0)
-            ,   value(value)
         {
+            taggedvalue.tag = 0;
+            taggedvalue.value = value;
         }
         tagged_t(counter_t tag, value_t value)
-            :   tag(0)
-            ,   value(value)
         {
+            taggedvalue.tag = tag;
+            taggedvalue.value = value;
         }
         tagged_t(const tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
-        {
-        }
-        tagged_t(const volatile tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
+            :   asLongLong(other.asLongLong)
         {
         }
         tagged_t& operator=(const tagged_t& other)
         {
-            tag = other.tag;
-            value = other.value;
+            asLongLong = other.asLongLong;
             return *this;
         }
-        inline bool operator==(tagged_t& other) { return tag == other.tag && value == other.value; }
+        inline value_t value() { return taggedvalue.value; }
+        inline bool operator==(tagged_t& other) { return asLongLong == other.asLongLong; }
     };
-    static inline tagged_t::tag_t get_ticket(const volatile tagged_t &p)
+    static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p;
     }

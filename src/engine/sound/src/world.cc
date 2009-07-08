@@ -33,7 +33,7 @@
 namespace BugEngine { namespace Sound
 {
 
-METACLASS_IMPL("Sound",World);
+be_metaclass_impl("Sound",World);
 
 World::World() :
     m_system(alcOpenDevice(0)),

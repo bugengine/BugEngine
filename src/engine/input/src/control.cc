@@ -28,7 +28,7 @@
 namespace BugEngine { namespace Input
 {
 
-ABSTRACTMETACLASS_IMPL("Input",Control);
+be_abstractmetaclass_impl("Input",Control);
 
 Control::Control(const istring& name)
 :   m_name(name)

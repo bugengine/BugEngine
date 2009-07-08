@@ -88,8 +88,8 @@ MAKETYPEINDEX(short4, short4);
 
 struct VertexBufferFlags
 {
-    size_t                    vertexSize;
-    size_t                    elementCount;
+    u32                       vertexSize;
+    u32                       elementCount;
     const VertexElementInfo*  info;
 };
 

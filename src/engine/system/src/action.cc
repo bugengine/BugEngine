@@ -96,7 +96,7 @@ Value& ActionContext::StackFrame::operator[](int index)
 
 //-----------------------------------------------------------------------------
 
-ABSTRACTMETACLASS_IMPL("",Action);
+be_abstractmetaclass_impl("",Action);
 
 Action::Action()
 {

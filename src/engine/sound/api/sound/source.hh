@@ -51,20 +51,22 @@ public:
 
     virtual void step() const;
 
-    METACLASS(SOUNDEXPORT,Source,Action)
+    be_metaclass(SOUNDEXPORT,Source,Action)
         refptr<Source> createFromSound(SoundObject* sound);
-    PROPERTIES
-        CLASSMETHOD(createFromSound);
+    be_properties
+        be_classmethod(createFromSound);
 
-        METHOD(setSound);
+        be_method(setSound);
 
-        METHOD(volume);
-        METHOD(setVolume);
-        METHOD(play);
-        METHOD(pause);
+        be_method(volume);
+        be_method(setVolume);
+        be_method(play);
+        be_method(pause);
 
-        PROPERTY(Volume, READ_METHOD(volume) WRITE_METHOD(setVolume));
-    END
+        be_property(Volume)
+            [be_get(volume)]
+            [be_set(setVolume)];
+    be_end
 };
 
 }}

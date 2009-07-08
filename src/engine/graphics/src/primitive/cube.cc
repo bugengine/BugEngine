@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-METACLASS_IMPL("Graphics",Cube)
+be_metaclass_impl("Graphics",Cube)
 
 Cube::Cube(const RenderBackend* renderer)
 :   Primitive(renderer)

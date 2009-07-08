@@ -61,10 +61,10 @@ public:
 
     static Package* get(const inamespace& name);
 
-    METACLASS(RTTIEXPORT,Package,Object)
+    be_metaclass(RTTIEXPORT,Package,Object)
         virtual refptr<Package> create(const ipath& name) const;
-    PROPERTIES
-    END
+    be_properties
+    be_end
 };
 
 }}

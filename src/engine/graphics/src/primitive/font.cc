@@ -32,7 +32,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-METACLASS_IMPL("Graphics",Font);
+be_metaclass_impl("Graphics",Font);
 
 struct FreetypeLibrary
 {
@@ -69,16 +69,12 @@ struct Font::VertexBuilder
     }
 };
 
-Font::Font(const RenderBackend* renderer, const ifilename& font)
+Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
 {
     refptr<AbstractMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
     FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
     OutputDebugString(font.str().c_str());
     OutputDebugString(": ");
-
-    int numVertices = 0;
-    int vertexCapacity = 0;
-    VertexFormat* vertices = 0;
 
     if(m_face->face_flags & FT_FACE_FLAG_SCALABLE)
     {

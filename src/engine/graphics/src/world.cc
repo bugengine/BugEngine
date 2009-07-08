@@ -31,7 +31,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-METACLASS_IMPL("Graphics",World);
+be_metaclass_impl("Graphics",World);
 
 class World::UpdateWindowManagement
 {
@@ -49,11 +49,11 @@ public:
     }
 
     range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& r)
+    void operator()(range_onestep& /*r*/)
     {
         m_world->step();
     }
-    void operator()(range_onestep& myRange, UpdateWindowManagement& with, range_onestep& withRange)
+    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
     {
     }
 };

@@ -29,13 +29,12 @@
 namespace BugEngine
 {
 
-class Property;
-
 class RTTIEXPORT Object::MetaClass : public Object
 {
 private:
     class MetaMetaClass;
 public:
+    class Property;
     typedef minitl::map< istring, refptr<const Property> >      PropertyMap;
     typedef PropertyMap::iterator                               PropertyIterator;
     typedef PropertyMap::const_iterator                         PropertyConstIterator;

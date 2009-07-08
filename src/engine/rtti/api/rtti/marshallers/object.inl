@@ -140,13 +140,13 @@ ValueCopy Marshaller<T*>::get(void* source) const
 }
 
 template< typename T >
-ValueCopy Marshaller<T*>::get(void* source, size_t index) const
+ValueCopy Marshaller<T*>::get(void* /*source*/, size_t /*index*/) const
 {
     throw 0;
 }
 
 template< typename T >
-ValueCopy Marshaller<T*>::get(void* source, const Value& key) const
+ValueCopy Marshaller<T*>::get(void* /*source*/, const Value& /*key*/) const
 {
     throw 0;
 }
@@ -158,37 +158,37 @@ void Marshaller<T*>::set(const Value& value, void* dst) const
 }
 
 template< typename T >
-void Marshaller<T*>::set(const Value& value, void* dst, size_t index) const
+void Marshaller<T*>::set(const Value& /*value*/, void* /*dst*/, size_t /*index*/) const
 {
     throw 0;
 }
 
 template< typename T >
-void Marshaller<T*>::set(const Value& value, void* dst, const Value& key) const
+void Marshaller<T*>::set(const Value& /*value*/, void* /*dst*/, const Value& /*key*/) const
 {
     throw 0;
 }
 
 template< typename T >
-void Marshaller<T*>::push_back(const Value& value, void* dst) const
+void Marshaller<T*>::push_back(const Value& /*value*/, void* /*dst*/) const
 {
     throw 0;
 }
 
 template< typename T >
-void Marshaller<T*>::push_front(const Value& value, void* dst) const
+void Marshaller<T*>::push_front(const Value& /*value*/, void* /*dst*/) const
 {
     throw 0;
 }
 
 template< typename T >
-void Marshaller<T*>::pop_back(const Value& value, void* dst) const
+void Marshaller<T*>::pop_back(const Value& /*value*/, void* /*dst*/) const
 {
     throw 0;
 }
 
 template< typename T >
-void Marshaller<T*>::pop_front(const Value& value, void* dst) const
+void Marshaller<T*>::pop_front(const Value& /*value*/, void* /*dst*/) const
 {
     throw 0;
 }

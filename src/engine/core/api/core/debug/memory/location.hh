@@ -93,6 +93,10 @@ private:
     LocationInfo*       m_sibling;
 private:
     mutable size_t      m_flags;
+
+private:
+    LocationInfo& operator=(const LocationInfo& other);
+    LocationInfo(const LocationInfo& other);
 };
 
 }

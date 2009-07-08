@@ -48,17 +48,16 @@ pool<T>::~pool()
 template< typename T >
 T* pool<T>::allocate()
 {
-    /*T* result = (T*)m_items.pop();
+    T* result = (T*)m_items.pop();
     Assert(result >= m_pool && result < m_end);
-    return result;*/
-    return 0;
+    return result;
 }
 
 template< typename T >
 void pool<T>::release(T* t)
 {
-    /*Assert(t >= m_pool && t < m_end);
-    m_items.push((inode*)t);*/
+    Assert(t >= m_pool && t < m_end);
+    m_items.push((inode*)t);
 }
 
 }

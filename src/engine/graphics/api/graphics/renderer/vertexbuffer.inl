@@ -31,7 +31,7 @@ namespace BugEngine { namespace Graphics
 {
 
 template< typename T >
-VertexBuffer<T>::VertexBuffer(const RenderBackend* owner, size_t vertexCount, VertexUsage usage)
+VertexBuffer<T>::VertexBuffer(const RenderBackend* owner, u32 vertexCount, VertexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createVertexBuffer(vertexCount, usage, T::getFlags()))
 {
@@ -44,9 +44,9 @@ VertexBuffer<T>::~VertexBuffer()
 }
 
 template< typename T >
-T* VertexBuffer<T>::map(size_t count, size_t offset)
+T* VertexBuffer<T>::map(u32 count, u32 offset)
 {
-    return static_cast<T*>(m_buffer->map(GpuMapFlags(), count*sizeof(T), offset*sizeof(T)));
+    return static_cast<T*>(m_buffer->map(GpuMapFlags(), count*(u32)sizeof(T), offset*(u32)sizeof(T)));
 }
 
 template< typename T >

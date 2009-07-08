@@ -40,7 +40,7 @@ protected:
     class MetaClass : public Object::MetaClass
     {
     private:
-        class Property : public BugEngine::Property
+        class Property : public Object::MetaClass::Property
         {
         private:
             mutable Value   m_value;

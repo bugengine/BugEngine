@@ -30,7 +30,7 @@ namespace BugEngine { namespace RTTI
 
 template< typename OWNER,
           typename T >
-inline T GetImpossible<OWNER,T>::get(OWNER* from)
+inline T GetImpossible<OWNER,T>::get(OWNER* /*from*/)
 {
     throw 0;
 }

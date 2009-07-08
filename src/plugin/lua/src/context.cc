@@ -37,6 +37,7 @@ const luaL_Reg Context::s_objectMetaTable[] = {
     {"__gc",       Context::objectGC},
     {"__tostring", Context::objectToString},
     {"__index", Context::objectGet},
+    {"__call", Context::objectCall},
     {0, 0}
 };
 
@@ -170,7 +171,7 @@ int Context::objectGet(lua_State *state)
         return 1;
     }
     const char *name = lua_tostring(state, -1);
-    const Property* p = (*userdata)->metaclass()->getProperty(name);
+    const Object::MetaClass::Property* p = (*userdata)->metaclass()->getProperty(name);
     if(!p)
     {
         lua_pushnil(state);
@@ -179,6 +180,11 @@ int Context::objectGet(lua_State *state)
     Value v = p->get(*userdata);
     push(state, v);
     return 1;
+}
+
+int Context::objectCall(lua_State * /*state*/)
+{
+    return 0;
 }
 
 }}

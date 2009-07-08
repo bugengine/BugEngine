@@ -58,12 +58,12 @@ RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene
     return m_renderBackend->createRenderWindow(flags, scene);
 }
 
-GpuBuffer* Renderer::createVertexBuffer(size_t vertexCount, VertexUsage usage, VertexBufferFlags flags) const
+GpuBuffer* Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
     return m_renderBackend->createVertexBuffer(vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createIndexBuffer(size_t vertexCount, IndexUsage usage, IndexBufferFlags flags) const
+GpuBuffer* Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
     return m_renderBackend->createIndexBuffer(vertexCount, usage, flags);
 }

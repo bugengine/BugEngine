@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Pop);
+be_abstractmetaclass_impl("Actions",Pop);
 
 Pop::Pop()
 {
@@ -37,8 +37,9 @@ Pop::~Pop()
 {
 }
 
-void Pop::initialize(ActionContext* context) const
+void Pop::initialize(ActionContext* /*context*/) const
 {
+    AssertNotReached();
 }
 
 bool Pop::oneturn(ActionContext* context) const

@@ -45,9 +45,9 @@ public:
 
     void add(Control* ctrl);
 
-    METACLASS(INPUTEXPORT,GroupControl,Control)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,GroupControl,Control)
+    be_properties
+    be_end
 };
 
 }}

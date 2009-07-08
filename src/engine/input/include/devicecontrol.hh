@@ -47,9 +47,9 @@ public:
     bool            wentUp() const override;
     size_t          index() const { return m_index; }
 
-    METACLASS(INPUTEXPORT,DeviceControl,Control)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,DeviceControl,Control)
+    be_properties
+    be_end
 };
 
 }}

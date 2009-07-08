@@ -30,7 +30,7 @@
 namespace BugEngine { namespace Input
 {
 
-METACLASS_IMPL("Input",Action);
+be_metaclass_impl("Input",Action);
 
 Action::Action(const istring& name, const InputMap* owner)
 :   m_name(name)

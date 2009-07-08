@@ -93,7 +93,7 @@ void Object::MetaClass::addProperty(const istring& name, refptr<const Property> 
     Assert(result.second);
 }
 
-const Property* Object::MetaClass::getProperty(const istring& name) const
+const Object::MetaClass::Property* Object::MetaClass::getProperty(const istring& name) const
 {
     PropertyConstIterator it = m_properties.find(name);
     if(it != m_properties.end())
@@ -102,7 +102,7 @@ const Property* Object::MetaClass::getProperty(const istring& name) const
         return 0;
 }
 
-void Object::MetaClass::init(MetaClass* mc)
+void Object::MetaClass::init(MetaClass* /*mc*/)
 {
 }
 

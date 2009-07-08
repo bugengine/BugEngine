@@ -63,17 +63,17 @@ public:
     void pause();
     void resume();
 
-    METACLASS(SYSTEMEXPORT,Sequencer,Object)
-    PROPERTIES
-        METHOD(init);
-        METHOD(addSequencer);
-        METHOD(oneturn);
-        METHOD(pause);
-        METHOD(resume);
+    be_metaclass(SYSTEMEXPORT,Sequencer,Object)
+    be_properties
+        be_method(init);
+        be_method(addSequencer);
+        be_method(oneturn);
+        be_method(pause);
+        be_method(resume);
 
-        METHOD(run);
-        METHOD(stop);
-    END
+        be_method(run);
+        be_method(stop);
+    be_end
 };
 
 }

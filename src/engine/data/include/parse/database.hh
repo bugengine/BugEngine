@@ -80,6 +80,9 @@ private:
     private:
         void  dolink(Context& context) const override;
         Value doeval(Context& context) const override;
+    private:
+        DatabaseElement& operator=(const DatabaseElement& other);
+        DatabaseElement(const DatabaseElement& other);
     };
     refptr<DatabaseElement> m_root;
     DatabaseElement*        m_current;

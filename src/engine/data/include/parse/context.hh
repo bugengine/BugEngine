@@ -45,6 +45,9 @@ public:
 
     void warning(const ifilename& file, int line, int column, const char *message);
     void error(const ifilename& file, int line, int column, const char *message);
+private:
+    Context& operator=(const Context& other);
+    Context(const Context& other);
 };
 
 }}}

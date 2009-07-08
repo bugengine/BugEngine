@@ -27,7 +27,7 @@
 namespace BugEngine
 {
 
-METACLASS_IMPL("",Frame);
+be_metaclass_impl("",Frame);
 
 Frame::Frame()
 {

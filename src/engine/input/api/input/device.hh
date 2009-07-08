@@ -55,9 +55,9 @@ public:
     const istring& name() const             { return m_name; }
     const Namespace* getNamespace() const   { return m_deviceNamespace.get(); }
 
-    METACLASS(INPUTEXPORT,Device,Object)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,Device,Object)
+    be_properties
+    be_end
 };
 
 }}

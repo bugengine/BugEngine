@@ -47,6 +47,9 @@ private:
 public:
     inline ScopedCriticalSection(CriticalSection& s) : m_section(s) { m_section.enter(); }
     inline ~ScopedCriticalSection()                                 { m_section.leave(); }
+private:
+    ScopedCriticalSection& operator=(const ScopedCriticalSection& other);
+    ScopedCriticalSection(const ScopedCriticalSection& other);
 };
 
 }

@@ -39,9 +39,9 @@ public:
 
     int run();
 
-    METACLASS(,Frame, Object)
-    PROPERTIES
-    END
+    be_metaclass(,Frame, Object)
+    be_properties
+    be_end
 };
 
 }

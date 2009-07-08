@@ -30,7 +30,7 @@
 namespace BugEngine
 {
 
-METACLASS_IMPL("",Package);
+be_metaclass_impl("",Package);
 
 static Package* getParent(ipath name)
 {

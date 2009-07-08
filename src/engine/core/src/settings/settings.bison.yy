@@ -16,6 +16,9 @@
 # include <malloc.h>
 # pragma warning(push)
 # pragma warning(disable:4065) // switch contains 'default' but no 'case' label
+# pragma warning(disable:4244) // conversion from 'type1' to 'type2' : possible loss of data
+# pragma warning(disable:4100) // param : unreferenced formal parameter
+# pragma warning(disable:4702) // unreachable code
 #endif
 
 #define YYSTACK_USE_ALLOCA 1
@@ -107,4 +110,6 @@ variable:
 
 %%
 
-
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif

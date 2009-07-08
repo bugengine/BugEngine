@@ -46,9 +46,9 @@ public:
 
     const GpuBuffer* vertices() const;
 
-    METACLASS(GRAPHICSEXPORT, Font, Object)
-    PROPERTIES
-    END
+    be_metaclass(GRAPHICSEXPORT, Font, Object)
+    be_properties
+    be_end
 };
 
 

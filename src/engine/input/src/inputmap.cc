@@ -30,7 +30,7 @@
 namespace BugEngine { namespace Input
 {
 
-METACLASS_IMPL("Input",InputMap);
+be_metaclass_impl("Input",InputMap);
 void InputMap::MetaClass::init(MetaClass* mc)
 {
     super_t::init(mc);

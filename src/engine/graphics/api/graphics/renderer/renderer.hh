@@ -48,8 +48,8 @@ public:
     TexturePipeline*    getTexturePipeline() override;
 
     RenderTarget*       createRenderWindow(WindowFlags flags, const Scene* scene) override;
-    GpuBuffer*          createVertexBuffer(size_t vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    GpuBuffer*          createIndexBuffer(size_t vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
+    GpuBuffer*          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
+    GpuBuffer*          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     GpuBuffer*          createTextureBuffer(TextureBufferFlags flags) const override;
 
     void drawBatch(const Batch& batch) override;

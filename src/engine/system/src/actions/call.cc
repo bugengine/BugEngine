@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Call);
+be_abstractmetaclass_impl("Actions",Call);
 
 Call::Call() :
     m_method(0)
@@ -48,8 +48,9 @@ refptr<Call> Call::MetaClass::createWithMethod(Method* method)
     return new Call(method);
 }
 
-void Call::initialize(ActionContext* context) const
+void Call::initialize(ActionContext* /*context*/) const
 {
+    AssertNotReached();
 }
 
 bool Call::oneturn(ActionContext* context) const

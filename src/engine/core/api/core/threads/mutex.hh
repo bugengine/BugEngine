@@ -45,6 +45,9 @@ private:
 public:
     inline ScopedMutexLock(Mutex& m) : m_mutex(m)   { m_mutex.wait(); }
     inline ~ScopedMutexLock()                       { m_mutex.release(); }
+private:
+    ScopedMutexLock& operator=(const ScopedMutexLock& other);
+    ScopedMutexLock(const ScopedMutexLock& other);
 };
 
 }

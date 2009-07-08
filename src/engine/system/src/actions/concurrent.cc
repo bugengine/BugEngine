@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Concurrent);
+be_abstractmetaclass_impl("Actions",Concurrent);
 
 Concurrent::Concurrent()
 {
@@ -37,13 +37,14 @@ Concurrent::~Concurrent()
 {
 }
 
-void Concurrent::initialize(ActionContext* context) const
+void Concurrent::initialize(ActionContext* /*context*/) const
 {
+    AssertNotReached();
 }
 
-bool Concurrent::oneturn(ActionContext* context) const
+bool Concurrent::oneturn(ActionContext* /*context*/) const
 {
-    ActionContext::StackFrame* frame = context->thisframe();
+    AssertNotReached();
     return true;
 }
 

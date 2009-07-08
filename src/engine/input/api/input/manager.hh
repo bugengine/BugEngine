@@ -48,6 +48,9 @@ public:
     Device* getDevice(void* handle);
 
     void update() const;
+private:
+    Manager& operator=(const Manager& other);
+    Manager(const Manager& other);
 };
 
 }}

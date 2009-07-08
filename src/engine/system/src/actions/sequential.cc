@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Sequential);
+be_abstractmetaclass_impl("Actions",Sequential);
 
 Sequential::Sequential()
 {
@@ -42,9 +42,9 @@ void Sequential::initialize(ActionContext* context) const
     UNUSED(context);
 }
 
-bool Sequential::oneturn(ActionContext* context) const
+bool Sequential::oneturn(ActionContext* /*context*/) const
 {
-    ActionContext::StackFrame* frame = context->thisframe();
+    AssertNotReached();
     return true;
 }
 

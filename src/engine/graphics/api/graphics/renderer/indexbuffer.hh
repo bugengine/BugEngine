@@ -39,10 +39,10 @@ private:
     const RenderBackend*    m_owner;
     refptr<GpuBuffer>       m_buffer;
 public:
-    IndexBuffer(const RenderBackend* owner, size_t vertexCount, IndexUsage usage);
+    IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage);
     ~IndexBuffer();
 
-    T*  map(size_t count = 0, size_t offset = 0);
+    T*  map(u32 count = 0, u32 offset = 0);
     void unmap();
 
     const GpuBuffer* buffer() const;

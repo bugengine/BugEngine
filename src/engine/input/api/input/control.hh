@@ -43,9 +43,9 @@ public:
     virtual bool            wentDown() const = 0;
     virtual bool            wentUp() const = 0;
 
-    METACLASS(INPUTEXPORT,Control,Object)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,Control,Object)
+    be_properties
+    be_end
 };
 
 }}

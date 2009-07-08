@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-VertexBuffer::VertexBuffer(const Renderer* renderer, size_t vertexCount, VertexUsage usage, VertexBufferFlags flags)
+VertexBuffer::VertexBuffer(const Renderer* renderer, u32 vertexCount, VertexUsage usage, VertexBufferFlags flags)
 {
     DWORD fvf = 0;
     size_t i;
@@ -143,7 +143,7 @@ VertexBuffer::~VertexBuffer()
     m_buffer->Release();
 }
 
-void* VertexBuffer::map(GpuMapFlags flags, size_t byteCount, size_t byteOffset)
+void* VertexBuffer::map(GpuMapFlags /*flags*/, u32 byteCount, u32 byteOffset)
 {
     void* data;
     D3D_CHECKRESULT(m_buffer->Lock(byteOffset, byteCount, &data, D3DLOCK_DISCARD));

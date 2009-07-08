@@ -32,7 +32,7 @@
 namespace BugEngine
 {
 
-class RTTIEXPORT Property : public Object
+class RTTIEXPORT Object::MetaClass::Property : public Object
 {
 protected:
     class RTTIEXPORT MetaClass : public Object::MetaClass

@@ -40,11 +40,11 @@ public:
     
     void step(float time);
 
-    METACLASS(PHYSICSEXPORT,World,Object)
+    be_metaclass(PHYSICSEXPORT,World,Object)
         refptr<World> createWithSize(float worldExtentX, float worldExtentY, float worldExtentZ);
-    PROPERTIES
-        CLASSMETHOD(createWithSize);
-    END
+    be_properties
+        be_classmethod(createWithSize);
+    be_end
 };
 
 }}

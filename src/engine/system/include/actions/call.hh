@@ -42,13 +42,15 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    METACLASS(SYSTEMEXPORT,Call,Action)
+    be_metaclass(SYSTEMEXPORT,Call,Action)
         refptr<Call> createWithMethod(Method* method);
-    PROPERTIES
-        CLASSMETHOD(createWithMethod);
+    be_properties
+        be_classmethod(createWithMethod);
 
-        //PROPERTY(method, READ_FIELD(m_method) WRITE_FIELD(m_method));
-    END
+        be_property(method)
+            [be_read(m_method)]
+            [be_write(m_method)];
+    be_end
 };
 
 }}

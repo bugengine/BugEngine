@@ -46,7 +46,7 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-static void onCgError(CGcontext ctx, CGerror err, void* data)
+static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
 {
     if(err == cgD3D9Failed)
     {
@@ -114,17 +114,17 @@ RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene
     return new Window(this, flags, scene);
 }
 
-GpuBuffer* Renderer::createVertexBuffer(size_t vertexCount, VertexUsage usage, VertexBufferFlags flags) const
+GpuBuffer* Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
     return new VertexBuffer(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createIndexBuffer(size_t vertexCount, IndexUsage usage, IndexBufferFlags flags) const
+GpuBuffer* Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
     return new IndexBuffer(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createTextureBuffer(TextureBufferFlags flags) const
+GpuBuffer* Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
 {
     return 0;
 }
