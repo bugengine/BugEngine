@@ -46,7 +46,7 @@
         {                                                                                                   \
             friend class _name;                                                                             \
             friend class _name::MetaClass;                                                                  \
-        protected:                                                                                          \
+        public:                                                                                             \
             MetaMetaClass(const BugEngine::inamespace& name, const BugEngine::Object::MetaClass* parent);   \
             ~MetaMetaClass();                                                                               \
         };                                                                                                  \
