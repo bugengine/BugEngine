@@ -31,61 +31,6 @@ namespace BugEngine { namespace RTTI
 {
 
 
-template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) >
-class ObjectMethod2 : public Object::MetaClass::Method
-{
-private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
-    {
-    public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
-
-        virtual Value call(Value* values, size_t numvalues) const override
-        {
-            Assert(numvalues == 2);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
-            const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
-            (o->*Func)(v1, v2);
-            return Value();
-        }
-    };
-public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
-};
-
-
-
-
-template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) const >
-class ObjectMethodC2 : public Object::MetaClass::Method
-{
-
-private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
-    {
-    public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
-
-        virtual Value call(Value* values, size_t numvalues) const override
-        {
-            Assert(numvalues == 2);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
-            const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
-            (o->*Func)(v1, v2);
-            return Value();
-        }
-    };
-public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
-};
-
-
-
-
 template< typename OWNER, typename R, typename T1, typename T2, R(OWNER::*Func)(T1,T2) >
 class ObjectMethodR2 : public Object::MetaClass::Method
 {
@@ -136,6 +81,61 @@ public:
     virtual const MetaClass* metaclass() const override { return static_metaclass(); }
     static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
 };
+
+
+
+
+template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) >
+class ObjectMethodR2<OWNER, void, T1, T2, Func> : public Object::MetaClass::Method
+{
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 2);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            (o->*Func)(v1, v2);
+            return Value();
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
+
+
+
+template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) const >
+class ObjectMethodCR2<OWNER, void, T1, T2, Func> : public Object::MetaClass::Method
+{
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 2);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            (o->*Func)(v1, v2);
+            return Value();
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
 
 }}
 
