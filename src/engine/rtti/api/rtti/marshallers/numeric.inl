@@ -121,7 +121,18 @@ ValueCopy NumericMarshaller<FROM, TO>::castfrom(FROM value) const
 template< typename FROM, typename TO >
 FROM NumericMarshaller<FROM, TO>::castto(const Value& value) const
 {
-    return checked_numcast<FROM>(value.member<TO>());
+    switch(value.type())
+    {
+    case RTTI::PropertyTypeFloat:
+        return checked_numcast<FROM>(value.member<double>());
+    case RTTI::PropertyTypeUnsigned:
+        return checked_numcast<FROM>(value.member<u64>());
+    case RTTI::PropertyTypeInteger:
+        return checked_numcast<FROM>(value.member<i64>());
+    default:
+        AssertNotReached();
+        return 0;
+    }
 }
 
 }}

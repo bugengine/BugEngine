@@ -196,7 +196,7 @@ void Marshaller<T*>::pop_front(const Value& /*value*/, void* /*dst*/) const
 template< typename T >
 ValueCopy Marshaller<T*>::castfrom(T* value) const
 {
-    return ValueCopy(static_cast<Object*>(value));
+    return ValueCopy(const_cast<Object*>(static_cast<const Object*>(value)));
 }
 
 template< typename T >

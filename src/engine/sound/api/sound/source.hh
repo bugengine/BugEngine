@@ -51,7 +51,7 @@ public:
 
     virtual void step() const;
 
-    be_metaclass(SOUNDEXPORT,Source,Action)
+    be_metaclass(SOUNDEXPORT,Source,Object)
         refptr<Source> createFromSound(SoundObject* sound);
     be_properties
         be_classmethod(createFromSound);

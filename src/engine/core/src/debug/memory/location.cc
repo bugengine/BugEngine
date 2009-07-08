@@ -143,7 +143,7 @@ LocationInfo::Storage::~Storage()
             }
         }
     }
-    debugPrint("-<        be_end       >-\n");
+    debugPrint("-<        END       >-\n");
     Malloc::systemFree(m_indexedLocations);
 }
 

@@ -32,7 +32,7 @@
 namespace BugEngine
 {
 
-class RTTIEXPORT Method : public Object
+class RTTIEXPORT Object::MetaClass::Method : public Object
 {
 protected:
     class RTTIEXPORT MetaClass : public Object::MetaClass
@@ -48,8 +48,6 @@ public:
 
     virtual const MetaClass* metaclass() const override;
     static  const MetaClass* static_metaclass();
-
-    virtual Value call(Value* values, size_t numvalues) = 0;
 private:
     Method(const Method& other);
     Method& operator=(const Method& other);

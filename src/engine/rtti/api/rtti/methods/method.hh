@@ -25,33 +25,9 @@
 #define BE_RTTI_METHODS_METHOD_HH_
 /*****************************************************************************/
 
-namespace BugEngine { namespace RTTI
-{
-
-class RTTIEXPORT ObjectMethod : public Method
-{
-protected:
-    class RTTIEXPORT MetaClass : public Method::MetaClass
-    {
-    public:
-        MetaClass();
-        MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass);
-        ~MetaClass();
-    };
-public:
-    ObjectMethod();
-    virtual ~ObjectMethod();
-
-    virtual const MetaClass* metaclass() const override;
-    static  const MetaClass* static_metaclass();
-
-    virtual Value call(Value* values, size_t numvalues) override;
-private:
-    ObjectMethod(const ObjectMethod& other);
-    ObjectMethod& operator=(const ObjectMethod& other);
-};
-
-}
+#include <rtti/methods/0.hh>
+#include <rtti/methods/1.hh>
+#include <rtti/methods/2.hh>
 
 /*****************************************************************************/
 #endif

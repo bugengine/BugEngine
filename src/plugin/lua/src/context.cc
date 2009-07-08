@@ -120,7 +120,6 @@ void Context::push(lua_State* state, Object* o)
 
 void Context::push(lua_State* state, const Value& v)
 {
-
     switch(v.type())
     {
     case RTTI::PropertyTypeBool:
@@ -145,7 +144,33 @@ void Context::push(lua_State* state, const Value& v)
         push(state, v.as< Object* >());
         break;
     }
+}
 
+Value Context::get(lua_State *state, int index)
+{
+    int t = lua_type(state, index);
+    switch (t)
+    {
+    case LUA_TSTRING:
+        {
+            return Value(std::string(lua_tostring(state, index)));
+        }
+    case LUA_TBOOLEAN:
+        {
+            return Value(lua_toboolean(state, index)?true:false);
+        }
+    case LUA_TNUMBER:
+        {
+            return Value(double(lua_tonumber(state, index)));
+        }
+    case LUA_TUSERDATA:
+        {
+            Object** userdata = (Object**)lua_touserdata(state, index);
+            return Value(*userdata);
+        }
+    default:
+        return Value();
+    }
 }
 
 int Context::objectGC(lua_State *state)
@@ -182,9 +207,76 @@ int Context::objectGet(lua_State *state)
     return 1;
 }
 
-int Context::objectCall(lua_State * /*state*/)
+int Context::objectCall(lua_State *state)
 {
-    return 0;
+    int i;
+    int top = lua_gettop(state);
+    Object** userdata = (Object**)lua_touserdata(state, 1);
+
+    void* v = 0;
+    Value* values = 0;
+    if(top > 1)
+    {
+        v = malloca(sizeof(Value)*(top));
+        values = new(v) Value[top-1];
+
+        for (i = 2; i <= top; i++)
+        {
+            values[i-2] = get(state, i);
+        }
+    }
+    Value result = (*userdata)->metaclass()->call(values, top-1);
+
+    if(top-1)
+    {
+        ::operator delete[](values, v);
+        freea(v);
+    }
+
+    if(result)
+    {
+        push(state, result);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void Context::printStack(lua_State* l)
+{
+    int i;
+    int top = lua_gettop(l);
+
+    printf("total in stack %d\n",top);
+
+    for (i = 1; i <= top; i++)
+    {
+        int t = lua_type(l, -i);
+        printf("%4d  %4d  ", -i, top-i+1);
+        switch (t)
+        {
+        case LUA_TSTRING:
+            printf("string: '%s'\n", lua_tostring(l, -i));
+            break;  
+        case LUA_TBOOLEAN:
+            printf("boolean %s\n",lua_toboolean(l, -i) ? "true" : "false");
+            break;  
+        case LUA_TNUMBER:
+            printf("number: %g\n", lua_tonumber(l, -i));
+            break;
+        case LUA_TUSERDATA:
+            {
+                Object** userdata = (Object**)lua_touserdata(l, -i);
+                printf("object : [%s object @0x%p]\n", (*userdata)->metaclass()->name().c_str(), (*userdata));
+            }
+            break;
+        default:
+            printf("%s\n", lua_typename(l, t));
+            break;
+        }
+    }
 }
 
 }}

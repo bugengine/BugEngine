@@ -32,11 +32,15 @@ Environment::Environment()
 :   m_homeDirectory("")
 ,   m_rootDirectory("")
 ,   m_game("")
+,   m_user("")
 {
     HANDLE token;
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
     char profile[MAX_PATH];
     DWORD size = sizeof(profile);
+    GetUserName(profile, &size);
+    m_user = profile;
+    size = sizeof(profile);
     GetUserProfileDirectory(token, profile, &size);
     m_homeDirectory = profile;
     m_homeDirectory += "BugEngine";
@@ -83,6 +87,10 @@ const istring& Environment::getGame() const
     return m_game;
 }
 
+const istring& Environment::getUser() const
+{
+    return m_user;
+}
 size_t Environment::getProcessorCount() const
 {
     SYSTEM_INFO i;

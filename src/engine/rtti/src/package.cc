@@ -29,7 +29,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-be_metaclass_impl("",Package);
+be_abstractmetaclass_impl("",Package);
 
 Package::Package()
 :   m_refcount(0)

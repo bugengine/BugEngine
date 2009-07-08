@@ -38,67 +38,9 @@ ValueCopy Marshaller<std::string>::get(void* source) const
     return castfrom(*reinterpret_cast<std::string*>(source));
 }
 
-ValueCopy Marshaller<std::string>::get(void* source, size_t index) const
-{
-    UNUSED(source);
-    UNUSED(index);
-    throw 0;
-}
-
-ValueCopy Marshaller<std::string>::get(void* source, const Value& key) const
-{
-    UNUSED(source);
-    UNUSED(key);
-    throw 0;
-}
-
 void Marshaller<std::string>::set(const Value& value, void* dst) const
 {
     *reinterpret_cast<std::string*>(dst) = castto(value);
-}
-
-void Marshaller<std::string>::set(const Value& value, void* dst, size_t index) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    UNUSED(index);
-    throw 0;
-}
-
-void Marshaller<std::string>::set(const Value& value, void* dst, const Value& key) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    UNUSED(key);
-    throw 0;
-}
-
-void Marshaller<std::string>::push_back(const Value& value, void* dst) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
-}
-
-void Marshaller<std::string>::push_front(const Value& value, void* dst) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
-}
-
-void Marshaller<std::string>::pop_back(const Value& value, void* dst) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
-}
-
-void Marshaller<std::string>::pop_front(const Value& value, void* dst) const
-{
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -113,67 +55,60 @@ ValueCopy Marshaller<istring>::get(void* source) const
     return castfrom(*reinterpret_cast<istring*>(source));
 }
 
-ValueCopy Marshaller<istring>::get(void* source, size_t index) const
-{
-    UNUSED(source);
-    UNUSED(index);
-    throw 0;
-}
-
-ValueCopy Marshaller<istring>::get(void* source, const Value& key) const
-{
-    UNUSED(source);
-    UNUSED(key);
-    throw 0;
-}
-
 void Marshaller<istring>::set(const Value& value, void* dst) const
 {
     *reinterpret_cast<istring*>(dst) = castto(value);
 }
 
-void Marshaller<istring>::set(const Value& value, void* dst, size_t index) const
+//-----------------------------------------------------------------------------
+
+ValueTypeIndex Marshaller<inamespace>::type() const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    UNUSED(index);
-    throw 0;
+    return ValueTypeIndex(minitl::indexof< std::string, ValueTypes >::Value);
 }
 
-void Marshaller<istring>::set(const Value& value, void* dst, const Value& key) const
+ValueCopy Marshaller<inamespace>::get(void* source) const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    UNUSED(key);
-    throw 0;
+    return castfrom(*reinterpret_cast<inamespace*>(source));
 }
 
-void Marshaller<istring>::push_back(const Value& value, void* dst) const
+void Marshaller<inamespace>::set(const Value& value, void* dst) const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
+    *reinterpret_cast<inamespace*>(dst) = castto(value);
 }
 
-void Marshaller<istring>::push_front(const Value& value, void* dst) const
+//-----------------------------------------------------------------------------
+
+ValueTypeIndex Marshaller<ipath>::type() const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
+    return ValueTypeIndex(minitl::indexof< std::string, ValueTypes >::Value);
 }
 
-void Marshaller<istring>::pop_back(const Value& value, void* dst) const
+ValueCopy Marshaller<ipath>::get(void* source) const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
+    return castfrom(*reinterpret_cast<ipath*>(source));
 }
 
-void Marshaller<istring>::pop_front(const Value& value, void* dst) const
+void Marshaller<ipath>::set(const Value& value, void* dst) const
 {
-    UNUSED(value);
-    UNUSED(dst);
-    throw 0;
+    *reinterpret_cast<ipath*>(dst) = castto(value);
+}
+
+//-----------------------------------------------------------------------------
+
+ValueTypeIndex Marshaller<ifilename>::type() const
+{
+    return ValueTypeIndex(minitl::indexof< std::string, ValueTypes >::Value);
+}
+
+ValueCopy Marshaller<ifilename>::get(void* source) const
+{
+    return castfrom(*reinterpret_cast<ifilename*>(source));
+}
+
+void Marshaller<ifilename>::set(const Value& value, void* dst) const
+{
+    *reinterpret_cast<ifilename*>(dst) = castto(value);
 }
 
 }}

@@ -36,7 +36,7 @@
 namespace BugEngine { namespace Physics
 {
 
-be_metaclass_impl("Physics",World);
+be_abstractmetaclass_impl("Physics",World);
 
 class World::WorldImplementation
 {

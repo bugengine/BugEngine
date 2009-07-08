@@ -52,6 +52,41 @@ istring Marshaller<istring>::castto(const Value& value) const
     return istring(value.member<std::string>());
 }
 
+//-----------------------------------------------------------------------------
+
+ValueCopy Marshaller<inamespace>::castfrom(const inamespace& value) const
+{
+    return ValueCopy(value.str());
+}
+
+inamespace Marshaller<inamespace>::castto(const Value& value) const
+{
+    return inamespace(value.member<std::string>());
+}
+
+//-----------------------------------------------------------------------------
+
+ValueCopy Marshaller<ifilename>::castfrom(const ifilename& value) const
+{
+    return ValueCopy(value.str());
+}
+
+ifilename Marshaller<ifilename>::castto(const Value& value) const
+{
+    return ifilename(value.member<std::string>());
+}
+
+//-----------------------------------------------------------------------------
+
+ValueCopy Marshaller<ipath>::castfrom(const ipath& value) const
+{
+    return ValueCopy(value.str());
+}
+
+ipath Marshaller<ipath>::castto(const Value& value) const
+{
+    return ipath(value.member<std::string>());
+}
 
 }}
 

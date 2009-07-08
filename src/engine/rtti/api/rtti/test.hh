@@ -43,20 +43,23 @@ public:
     void setValue(int v);
     void setValue2(const int& v);
 
+    void test(const std::string& str) const;
+
     be_metaclass(RTTIEXPORT,Test,BugEngine::Object)
     be_properties
         be_property(Value)
             [be_read(m_value)]
-            [be_write(m_value)]
-            ;
+            [be_write(m_value)];
+
         be_property(Value2)
             [be_read(m_value)]
-            [be_set(setValue2)]
-            ;
+            [be_set(setValue2)];
+
         be_property(prop)
             [be_get(prop)]
-            [be_set(setProp)]
-            ;
+            [be_set(setProp)];
+
+        be_method(test);
     be_end
 };
 

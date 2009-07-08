@@ -34,7 +34,7 @@ Call::Call() :
 {
 }
 
-Call::Call(Method* method) :
+Call::Call(Object::MetaClass::Method* method) :
     m_method(method)
 {
 }
@@ -43,7 +43,7 @@ Call::~Call()
 {
 }
 
-refptr<Call> Call::MetaClass::createWithMethod(Method* method)
+refptr<Call> Call::MetaClass::createWithMethod(Object::MetaClass::Method* method)
 {
     return new Call(method);
 }
@@ -58,7 +58,7 @@ bool Call::oneturn(ActionContext* context) const
     ActionContext::StackFrame* frame = context->thisframe();
     size_t stackspace = frame->args();
     Value* wrapper = &(*frame)[0];
-    Value result = m_method->call(wrapper, stackspace);
+    Value result = m_method->metaclass()->call(wrapper, stackspace);
     frame->popall();
     frame->push(result);
     return true;

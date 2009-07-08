@@ -25,40 +25,59 @@
 #define BE_RTTI_METACLASS_HH_
 /*****************************************************************************/
 #include    <rtti/object.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine
 {
 
 class RTTIEXPORT Object::MetaClass : public Object
 {
-private:
+    friend class Object;
+protected:
     class MetaMetaClass;
 public:
     class Property;
+    class StaticProperty;
+    class Method;
     typedef minitl::map< istring, refptr<const Property> >      PropertyMap;
     typedef PropertyMap::iterator                               PropertyIterator;
     typedef PropertyMap::const_iterator                         PropertyConstIterator;
 private:
-    static MetaMetaClass*   s_metaMetaClass;
     istring                 m_name;
     refptr<const MetaClass> m_parent;
 protected:
+    refptr<MetaMetaClass>   m_metaclass;
     PropertyMap             m_properties;
 public:
-    MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass = true);
+    MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass = true);
     virtual ~MetaClass();
 
     const istring& name() const;
     virtual const MetaClass* metaclass() const override;
     virtual const MetaClass* parent() const;
 
+    virtual Value call(Value* params, size_t nbParams) const;
+
     void addProperty(const istring& name, refptr<const Property> property);
+    void addMethod(const istring& name, refptr<Method> method);
     const Property* getProperty(const istring& name) const;
+
+    virtual refptr<Object> create() const;
 protected:
     static void init(MetaClass* mc);
 private:
     MetaClass(const MetaClass& other);
     MetaClass& operator=(const MetaClass& other);
+};
+
+class Object::MetaClass::MetaMetaClass : public Object::MetaClass
+{
+public:
+    MetaMetaClass(const inamespace& name, const MetaClass* parent);
+    ~MetaMetaClass();
+private:
+    MetaMetaClass(const MetaMetaClass& other);
+    MetaMetaClass& operator=(const MetaMetaClass& other);
 };
 
 }

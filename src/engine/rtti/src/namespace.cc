@@ -67,7 +67,7 @@ Value Namespace::MetaClass::Property::get(Object* from) const
 //-----------------------------------------------------------------------------
 
 Namespace::MetaClass::MetaClass() :
-    Object::MetaClass(inamespace("meta.namespace"), 0, false)
+    Object::MetaClass(inamespace("meta.namespace"), 0, 0, false)
 {
 }
 

@@ -35,7 +35,7 @@
 #include    <cstdio>
 #include    <cstdlib>
 
-#include <core/memory/new.inl>
+#include    <core/memory/new.inl>
 
 #ifdef _GP2X
 #include    <unistd.h>
@@ -60,6 +60,27 @@ struct NamespaceScope
     ~NamespaceScope() { BugEngine::Namespace::root()->clear(); }
 };
 
+namespace
+{
+    class Environment : public BugEngine::Object
+    {
+        be_metaclass(,Environment,Object)
+            const BugEngine::ipath& getHomeDirectory() { return BugEngine::Environment::getEnvironment().getHomeDirectory(); }
+            const BugEngine::ipath& getRootDirectory() { return BugEngine::Environment::getEnvironment().getRootDirectory(); }
+            const BugEngine::istring& getGame() { return BugEngine::Environment::getEnvironment().getGame(); }
+            const BugEngine::istring& getUser() { return BugEngine::Environment::getEnvironment().getUser(); }
+            size_t getProcessorCount() { return BugEngine::Environment::getEnvironment().getProcessorCount(); }
+        be_properties
+            be_classmethod(getHomeDirectory);
+            be_classmethod(getRootDirectory);
+            be_classmethod(getGame);
+            be_classmethod(getUser);
+            be_classmethod(getProcessorCount);
+        be_end
+    };
+
+    be_abstractmetaclass_impl("", Environment);
+}
 
 /*****************************************************************************/
 static int __main(int argc, const char *argv[])

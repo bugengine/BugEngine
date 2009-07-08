@@ -29,12 +29,12 @@ namespace BugEngine
 {
 
 Object::MetaClass::Property::MetaClass::MetaClass() :
-    BugEngine::Object::MetaClass("meta.property", 0, true)
+    BugEngine::Object::MetaClass("meta.property", 0, 0, true)
 {
 }
 
 Object::MetaClass::Property::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass) :
-    BugEngine::Object::MetaClass(name, parent, registerClass)
+BugEngine::Object::MetaClass(name, parent, 0, registerClass)
 {
 }
 
