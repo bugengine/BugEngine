@@ -33,8 +33,6 @@ class RTTIEXPORT Object : public minitl::refcountable<void>
 {
 public:
     class MetaClass;
-private:
-    static Object::MetaClass* s_metaclass;
 public:
     Object();
     virtual ~Object();

@@ -37,12 +37,14 @@ private:
     ipath   m_homeDirectory;
     ipath   m_rootDirectory;
     istring m_game;
+    istring m_user;
 public:
     static const Environment& getEnvironment();
 
     const ipath&    getHomeDirectory() const;
     const ipath&    getRootDirectory() const;
     const istring&  getGame() const;
+    const istring&  getUser() const;
     size_t          getProcessorCount() const;
 };
 

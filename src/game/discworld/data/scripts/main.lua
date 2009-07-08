@@ -1,4 +1,4 @@
-print(BugEngine)
-print(BugEngine.Sub1.Sub2.test.Value)
-print(BugEngine.Sub1.Sub2.test.Value2)
-print(BugEngine.Sub1.Sub2.test.Prop)
+print("Hello, "..BugEngine.Environment:getUser().."!!")
+print("Welcome to "..BugEngine.Environment:getGame())
+print("Your home is "..BugEngine.Environment:getHomeDirectory())
+print("Holy crap, you have "..tostring(BugEngine.Environment:getProcessorCount()).." cores!!")

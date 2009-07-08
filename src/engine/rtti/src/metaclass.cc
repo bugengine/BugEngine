@@ -25,24 +25,44 @@
 
 #include    <rtti/metaclass.hh>
 #include    <rtti/property.hh>
+#include    <rtti/method.hh>
 #include    <rtti/namespace.hh>
+#include    <rtti/helper.hh>
 
 namespace BugEngine
 {
 
-class Object::MetaClass::MetaMetaClass : public MetaClass
+class Object::MetaClass::StaticProperty : public Object::MetaClass::Property
 {
-public:
-    MetaMetaClass();
-    ~MetaMetaClass();
 private:
-    MetaMetaClass(const MetaMetaClass& other);
-    MetaMetaClass& operator=(const MetaMetaClass& other);
+    Value   m_value;
+public:
+    StaticProperty(Value v);
+    ~StaticProperty();
+
+    virtual bool                readable(Object* /*from*/) const                    { return true; };
+    virtual bool                writable(Object* /*from*/) const                    { return false; };
+    virtual void                set(Object* /*dest*/, const Value& /*value*/) const { AssertNotReached(); }
+    virtual Value               get(Object* /*from*/) const                         { return m_value; }
 };
 
-Object::MetaClass::MetaMetaClass::MetaMetaClass() :
-    MetaClass("meta.metaclass", 0)
+Object::MetaClass::StaticProperty::StaticProperty(Value v)
+    :   m_value(v)
 {
+}
+
+Object::MetaClass::StaticProperty::~StaticProperty()
+{
+}
+
+Object::MetaClass::MetaMetaClass::MetaMetaClass(const inamespace& name, const Object::MetaClass* parent)
+    :   MetaClass(name, parent, 0, false)
+{
+    if(!parent)
+    {
+        addMethod("name", BugEngine::RTTI::_::createMethodBuilder(&Object::MetaClass::name).buildMethod<&Object::MetaClass::name>());
+        addMethod("create", BugEngine::RTTI::_::createMethodBuilder(&Object::MetaClass::create).buildMethod<&Object::MetaClass::create>());
+    }
 }
 
 Object::MetaClass::MetaMetaClass::~MetaMetaClass()
@@ -51,15 +71,17 @@ Object::MetaClass::MetaMetaClass::~MetaMetaClass()
 
 //-----------------------------------------------------------------------------
 
-Object::MetaClass::MetaMetaClass* Object::MetaClass::s_metaMetaClass = 0;
-
-Object::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass) :
-    m_name(name[name.size()-1]),
-    m_parent(parent),
-    m_properties()
+Object::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass)
+    :   m_name(name[name.size()-1])
+    ,   m_parent(parent)
+    ,   m_metaclass(mc)
+    ,   m_properties()
 {
     if(parent)
         m_properties = parent->m_properties;
+    else if(m_metaclass)
+        addMethod("metaclass", BugEngine::RTTI::_::createMethodBuilder(&Object::metaclass).buildMethod<&Object::metaclass>());
+
     if(registerClass)
     {
         Namespace::root()->insert(name, Value(static_cast< refptr<Object> >(this)));
@@ -77,9 +99,7 @@ const istring& Object::MetaClass::name() const
 
 const Object::MetaClass* Object::MetaClass::metaclass() const
 {
-    if(! s_metaMetaClass)
-        s_metaMetaClass = new MetaMetaClass();
-    return s_metaMetaClass;
+    return m_metaclass.get();
 }
 
 const Object::MetaClass* Object::MetaClass::parent() const
@@ -93,6 +113,11 @@ void Object::MetaClass::addProperty(const istring& name, refptr<const Property> 
     Assert(result.second);
 }
 
+void Object::MetaClass::addMethod(const istring& name, refptr<Method> method)
+{
+    addProperty(name, new StaticProperty(Value(refptr<Object>(method))));
+}
+
 const Object::MetaClass::Property* Object::MetaClass::getProperty(const istring& name) const
 {
     PropertyConstIterator it = m_properties.find(name);
@@ -102,8 +127,20 @@ const Object::MetaClass::Property* Object::MetaClass::getProperty(const istring&
         return 0;
 }
 
+Value Object::MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
+{
+    AssertNotReached();
+    return Value();
+}
+
 void Object::MetaClass::init(MetaClass* /*mc*/)
 {
+}
+
+refptr<Object> Object::MetaClass::create() const
+{
+    AssertNotReached();
+    return 0;
 }
 
 }

@@ -61,4 +61,17 @@ void Test::setValue2(const int& v)
     m_value = v;
 }
 
+void Test::test(const std::string& str) const
+{
+    printf("Hello, %s!!!\n", str.c_str());
+}
+
+Test2::Test2()
+{
+}
+
+Test2::~Test2()
+{
+}
+
 }

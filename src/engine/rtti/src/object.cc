@@ -30,8 +30,6 @@
 namespace BugEngine
 {
 
-Object::MetaClass* Object::s_metaclass = 0;
-
 Object::Object()
 {
 }
@@ -42,13 +40,13 @@ Object::~Object()
 
 const Object::MetaClass* Object::static_metaclass()
 {
-    return s_metaclass;
+    static refptr<Object::MetaClass> s_metaclass(new Object::MetaClass("Object", 0, new MetaClass::MetaMetaClass("ObjectClass", 0), true));
+    return s_metaclass.get();
 }
 
 void Object::registerMetaClass()
 {
-    if(! s_metaclass)
-        s_metaclass = new Object::MetaClass("Object", 0, true);
+    static_metaclass();
 }
 
 }

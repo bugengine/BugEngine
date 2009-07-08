@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_metaclass_impl("Graphics",Text)
+be_abstractmetaclass_impl("Graphics",Text)
 
 Text::Text(const RenderBackend* renderer, const Font* font, const char * /*message*/)
 :   Primitive(renderer)

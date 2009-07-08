@@ -43,7 +43,7 @@ public:
     be_metaclass(PHYSICSEXPORT,World,Object)
         refptr<World> createWithSize(float worldExtentX, float worldExtentY, float worldExtentZ);
     be_properties
-        be_classmethod(createWithSize);
+        //be_classmethod(createWithSize);
     be_end
 };
 

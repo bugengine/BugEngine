@@ -61,10 +61,6 @@ public:
     public:
         const Manager* getManager() const;
     be_properties
-        be_method(mapAction);
-        be_method(isDown);
-        be_method(wentDown);
-        be_method(axisValue);
     be_end
 };
 

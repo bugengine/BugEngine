@@ -32,7 +32,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_metaclass_impl("Graphics",Font);
+be_abstractmetaclass_impl("Graphics",Font);
 
 struct FreetypeLibrary
 {

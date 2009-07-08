@@ -36,15 +36,7 @@ class RTTIEXPORT Marshaller<std::string> : public AbstractMarshaller
 public:
     virtual ValueTypeIndex type() const;
     virtual ValueCopy   get(void* source)                                       const override;
-    virtual ValueCopy   get(void* source, size_t index)                         const override;
-    virtual ValueCopy   get(void* source, const Value& key)                     const override;
     virtual void        set(const Value& value, void* dst)                      const override;
-    virtual void        set(const Value& value, void* dst, size_t index)        const override;
-    virtual void        set(const Value& value, void* dst, const Value& key)    const override;
-    virtual void        push_back(const Value& value, void* dst)                const override;
-    virtual void        push_front(const Value& value, void* dst)               const override;
-    virtual void        pop_back(const Value& value, void* dst)                 const override;
-    virtual void        pop_front(const Value& value, void* dst)                const override;
 
     inline ValueCopy    castfrom(const std::string& value)                      const;
     inline std::string  castto(const Value& value)                              const;
@@ -57,18 +49,46 @@ class RTTIEXPORT Marshaller<istring> : public AbstractMarshaller
 public:
     virtual ValueTypeIndex type() const;
     virtual ValueCopy   get(void* source)                                       const override;
-    virtual ValueCopy   get(void* source, size_t index)                         const override;
-    virtual ValueCopy   get(void* source, const Value& key)                     const override;
     virtual void        set(const Value& value, void* dst)                      const override;
-    virtual void        set(const Value& value, void* dst, size_t index)        const override;
-    virtual void        set(const Value& value, void* dst, const Value& key)    const override;
-    virtual void        push_back(const Value& value, void* dst)                const override;
-    virtual void        push_front(const Value& value, void* dst)               const override;
-    virtual void        pop_back(const Value& value, void* dst)                 const override;
-    virtual void        pop_front(const Value& value, void* dst)                const override;
 
     inline ValueCopy    castfrom(const istring& value)                          const;
     inline istring      castto(const Value& value)                              const;
+};
+
+template< >
+class RTTIEXPORT Marshaller<inamespace> : public AbstractMarshaller
+{
+public:
+    virtual ValueTypeIndex type() const;
+    virtual ValueCopy   get(void* source)                                       const override;
+    virtual void        set(const Value& value, void* dst)                      const override;
+
+    inline ValueCopy    castfrom(const inamespace& value)                          const;
+    inline inamespace   castto(const Value& value)                              const;
+};
+
+template< >
+class RTTIEXPORT Marshaller<ifilename> : public AbstractMarshaller
+{
+public:
+    virtual ValueTypeIndex type() const;
+    virtual ValueCopy   get(void* source)                                       const override;
+    virtual void        set(const Value& value, void* dst)                      const override;
+
+    inline ValueCopy    castfrom(const ifilename& value)                          const;
+    inline ifilename    castto(const Value& value)                              const;
+};
+
+template< >
+class RTTIEXPORT Marshaller<ipath> : public AbstractMarshaller
+{
+public:
+    virtual ValueTypeIndex type() const;
+    virtual ValueCopy   get(void* source)                                       const override;
+    virtual void        set(const Value& value, void* dst)                      const override;
+
+    inline ValueCopy    castfrom(const ipath& value)                          const;
+    inline ipath        castto(const Value& value)                              const;
 };
 
 }}

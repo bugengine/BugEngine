@@ -1,0 +1,125 @@
+/*****************************************************************************\
+* BugEngine                                                                   *
+* Copyright (C) 2005-2008  screetch <screetch@gmail.com>                      *
+*                                                                             *
+* This library is free software; you can redistribute it and/or modify it     *
+* under the terms of the GNU Lesser General Public License as published by    *
+* the Free Software Foundation; either version 2.1 of the License, or (at     *
+* your option) any later version.                                             *
+*                                                                             *
+* This library is distributed in the hope that it will be useful, but WITHOUT *
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
+* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public        *
+* License for more details.                                                   *
+*                                                                             *
+* You should have received a copy of the GNU Lesser General Public License    *
+* along with this library; if not, write to                                   *
+* the Free Software Foundation, Inc.,                                         *
+* 51 Franklin St,                                                             *
+* Fifth Floor,                                                                *
+* Boston, MA 02110-1301                                                       *
+* USA                                                                         *
+\*****************************************************************************/
+
+#ifndef BE_RTTI_METHODS_0_HH_
+#define BE_RTTI_METHODS_0_HH_
+/*****************************************************************************/
+#include    <typeinfo>
+
+namespace BugEngine { namespace RTTI
+{
+
+
+template< typename OWNER, void(OWNER::*Func)() >
+class ObjectMethod0 : public Object::MetaClass::Method
+{
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 1);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            (o->*Func)();
+            return Value();
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
+template< typename OWNER, void(OWNER::*Func)() const >
+class ObjectMethodC0 : public Object::MetaClass::Method
+{
+
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 1);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            (o->*Func)();
+            return Value();
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
+template< typename OWNER, typename R, R(OWNER::*Func)() >
+class ObjectMethodR0 : public Object::MetaClass::Method
+{
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 1);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            const typename minitl::remove_reference<R>::type& v = (o->*Func)();
+            return Value(Marshaller<R>().castfrom(v));
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
+template< typename OWNER, typename R, R(OWNER::*Func)() const >
+class ObjectMethodCR0 : public Object::MetaClass::Method
+{
+private:
+    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    {
+    public:
+        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+
+        virtual Value call(Value* values, size_t numvalues) const override
+        {
+            Assert(numvalues == 1);
+            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            const typename minitl::remove_reference<R>::type& v = (o->*Func)();
+            return Value(Marshaller<R>().castfrom(v));
+        }
+    };
+public:
+    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
+    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+};
+
+}}
+
+/*****************************************************************************/
+#endif
