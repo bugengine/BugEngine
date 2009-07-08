@@ -61,13 +61,15 @@ private :
     Application(const Application&);
     const Application& operator=(const Application&);
 
-    METACLASS(,Application,Object)
+    be_metaclass(,Application,Object)
         Application* instance() const { return Application::instance(); }
-    PROPERTIES
-        CLASSMETHOD(instance);
+    be_properties
+        be_classmethod(instance);
 
-        PROPERTY(world, READ_FIELD(m_world) WRITE_FIELD(m_world));
-    END
+        be_property(world)
+            [be_read(m_world)]
+            [be_write(m_world)];
+    be_end
 };
 
 }

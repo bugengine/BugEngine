@@ -38,10 +38,10 @@ class IndexBuffer : public GpuBuffer
 private:
     LPDIRECT3DINDEXBUFFER9 m_buffer;
 public:
-    IndexBuffer(const Renderer* renderer, size_t count, IndexUsage usage, IndexBufferFlags flags);
+    IndexBuffer(const Renderer* renderer, u32 count, IndexUsage usage, IndexBufferFlags flags);
     ~IndexBuffer();
 protected:
-    virtual void* map(GpuMapFlags flags, size_t byteCount, size_t byteOffset) override;
+    virtual void* map(GpuMapFlags flags, u32 byteCount, u32 byteOffset) override;
     virtual void  unmap() override;
 };
 

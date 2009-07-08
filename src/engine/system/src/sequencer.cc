@@ -29,7 +29,7 @@ namespace BugEngine
 
 const double Sequencer::s_maxFrameTime = 1.0/30.0;
 
-METACLASS_IMPL("",Sequencer);
+be_metaclass_impl("",Sequencer);
 
 Sequencer::Sequencer() :
     m_children(),

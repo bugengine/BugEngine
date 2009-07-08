@@ -42,12 +42,17 @@ InternalDebugger::~InternalDebugger()
 
 void InternalDebugger::registerAllocation(void* pointer, size_t size, int threadid, Callstack::Address* from, size_t adressSize)
 {
+    UNUSED(threadid);
+    UNUSED(adressSize);
     LocationInfo* l = LocationInfo::location(from[0]);
-    MemoryTag* t = MemoryTag::create(pointer, size, l);
+    MemoryTag::create(pointer, size, l);
 }
 
 void InternalDebugger::registerDeallocation(void* pointer, int threadid, Callstack::Address* from, size_t adressSize)
 {
+    UNUSED(threadid);
+    UNUSED(adressSize);
+    UNUSED(from);
     MemoryTag::MemoryTagInfo i;
     MemoryTag::release(pointer, i);
 }

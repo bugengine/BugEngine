@@ -40,9 +40,9 @@ public:
     virtual const GpuBuffer* vertices() const = 0;
     virtual unsigned         nbVertices() const = 0;
 
-    METACLASS(GRAPHICSEXPORT,Primitive,Object)
-    PROPERTIES
-    END
+    be_metaclass(GRAPHICSEXPORT,Primitive,Object)
+    be_properties
+    be_end
 };
 
 }}

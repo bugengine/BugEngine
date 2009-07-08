@@ -57,6 +57,7 @@ typedef u8                      byte;
 #pragma warning(disable:4290)  // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 #pragma warning(disable:4481)  // use of "override" extension
 #pragma warning(disable:4127)
+#pragma warning(disable:4709)  // comma operator used in []
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline

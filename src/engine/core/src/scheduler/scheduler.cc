@@ -69,6 +69,9 @@ public:
     void draw(DebugRenderer* renderer, int2 start, int2 end, u64 currentTick, u64 ticksPerSecond);
 
     static intptr_t work(intptr_t p1, intptr_t p2);
+private:
+    Worker& operator=(const Worker& other);
+    Worker(const Worker& other);
 };
 
 Scheduler::Worker::Worker(Scheduler* scheduler, size_t workerId)

@@ -32,7 +32,7 @@
 namespace BugEngine
 {
 
-ABSTRACTMETACLASS_IMPL("",Application);
+be_abstractmetaclass_impl("",Application);
 
 class Application::UpdateInput
 {
@@ -48,11 +48,11 @@ public:
     }
 
     range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& r)
+    void operator()(range_onestep& /*r*/)
     {
         Input::InputMap::static_metaclass()->getManager()->update();
     }
-    void operator()(range_onestep& myRange, UpdateInput& with, range_onestep& withRange)
+    void operator()(range_onestep& /*myRange*/, UpdateInput& /*with*/, range_onestep& /*withRange*/)
     {
     }
 };
@@ -71,11 +71,11 @@ public:
     }
 
     range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& r)
+    void operator()(range_onestep& /*r*/)
     {
         Malloc::frameUpdate();
     }
-    void operator()(range_onestep& myRange, UpdateMemory& with, range_onestep& withRange)
+    void operator()(range_onestep& /*myRange*/, UpdateMemory& /*with*/, range_onestep& /*withRange*/)
     {
     }
 };
@@ -96,11 +96,11 @@ public:
     }
 
     range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& r)
+    void operator()(range_onestep& /*r*/)
     {
         m_scheduler->frameUpdate();
     }
-    void operator()(range_onestep& myRange, UpdateScheduler& with, range_onestep& withRange)
+    void operator()(range_onestep& /*myRange*/, UpdateScheduler& /*with*/, range_onestep& /*withRange*/)
     {
     }
 };

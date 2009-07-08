@@ -44,9 +44,9 @@ public:
     virtual const GpuBuffer* vertices() const override;
     virtual unsigned         nbVertices() const override;
 
-    METACLASS(GRAPHICSEXPORT,Text,Primitive)
-    PROPERTIES
-    END
+    be_metaclass(GRAPHICSEXPORT,Text,Primitive)
+    be_properties
+    be_end
 };
 
 }}

@@ -29,7 +29,7 @@
 namespace BugEngine { namespace Input
 {
 
-ABSTRACTMETACLASS_IMPL("Input",Device);
+be_abstractmetaclass_impl("Input",Device);
 
 
 Device::Device(const istring& name, size_t numControls)

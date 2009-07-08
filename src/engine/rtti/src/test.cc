@@ -28,8 +28,8 @@
 namespace TestNS
 {
 
-METACLASS_IMPL("",Test);
-METACLASS_IMPL("",Test2);
+be_metaclass_impl("",Test);
+be_metaclass_impl("",Test2);
 u8 s_value;
 
 Test::Test()

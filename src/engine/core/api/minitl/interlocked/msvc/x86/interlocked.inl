@@ -77,52 +77,47 @@ struct InterlockedType<4>
         typedef tagged_t    tag_t;
         union
         {
-            BE_SET_ALIGNMENT(8) struct
+            BE_SET_ALIGNMENT(8) struct _taggedvalue
             {
-                counter_t   tag;
-                value_t     value;
-            };
-            BE_SET_ALIGNMENT(8) long long asLongLong;
+                volatile counter_t   tag;
+                volatile value_t     value;
+            } taggedvalue;
+            BE_SET_ALIGNMENT(8) volatile long long asLongLong;
         };
         tagged_t(long long value)
             :   asLongLong(value)
         {
         }
         tagged_t(value_t value = 0)
-            :   tag(0)
-            ,   value(value)
         {
+            taggedvalue.tag = 0;
+            taggedvalue.value = value;
         }
         tagged_t(counter_t tag, value_t value)
-            :   tag(0)
-            ,   value(value)
         {
+            taggedvalue.tag = tag;
+            taggedvalue.value = value;
         }
         tagged_t(const tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
+            :   asLongLong(other.asLongLong)
         {
         }
-        tagged_t(const volatile tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
-        {
-        }
+        inline value_t value() { return taggedvalue.value; }
         tagged_t& operator=(const tagged_t& other)
         {
-            tag = other.tag;
-            value = other.value;
+            taggedvalue.tag = other.taggedvalue.tag;
+            taggedvalue.value = other.taggedvalue.value;
             return *this;
         }
-        inline bool operator==(tagged_t& other) { return tag == other.tag && value == other.value; }
+        inline bool operator==(tagged_t& other) { return asLongLong == other.asLongLong; }
     };
-    static inline tagged_t::tag_t get_ticket(const volatile tagged_t &p)
+    static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
-        tagged_t r(condition.tag+1, v);
+        tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong) == condition.asLongLong;
     }
 };

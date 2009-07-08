@@ -37,9 +37,9 @@ public:
     Keyboard(size_t numKeys);
     ~Keyboard();
 
-    METACLASS(INPUTEXPORT,Keyboard,Device)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,Keyboard,Device)
+    be_properties
+    be_end
 };
 
 }}

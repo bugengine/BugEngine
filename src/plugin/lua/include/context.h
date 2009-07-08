@@ -42,7 +42,7 @@ private:
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 
 
-    static const luaL_Reg Context::s_objectMetaTable[];
+    static const luaL_Reg s_objectMetaTable[];
     static void push(lua_State* state, refptr<Object> o);
     static void push(lua_State* state, Object* o);
     static void push(lua_State* state, const Value& v);
@@ -50,6 +50,7 @@ private:
     static int objectGC(lua_State* state);
     static int objectToString(lua_State *state);
     static int objectGet(lua_State *state);
+    static int objectCall(lua_State *state);
 };
 
 }}

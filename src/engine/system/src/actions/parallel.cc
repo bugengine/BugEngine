@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Parallel);
+be_abstractmetaclass_impl("Actions",Parallel);
 
 Parallel::Parallel()
 {
@@ -37,13 +37,13 @@ Parallel::~Parallel()
 {
 }
 
-void Parallel::initialize(ActionContext* context) const
+void Parallel::initialize(ActionContext* /*context*/) const
 {
+    AssertNotReached();
 }
 
-bool Parallel::oneturn(ActionContext* context) const
+bool Parallel::oneturn(ActionContext* /*context*/) const
 {
-    ActionContext::StackFrame* frame = context->thisframe();
     return true;
 }
 

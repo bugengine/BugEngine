@@ -24,13 +24,19 @@
 #include    <physics/stdafx.h>
 #include    <physics/world.hh>
 
+#ifdef BE_COMPILER_MSVC
+#pragma warning(push,1)
+#endif
 #include    <btBulletDynamicsCommon.h>
 #include    <LinearMath/btAlignedAllocator.h>
+#ifdef BE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace BugEngine { namespace Physics
 {
 
-METACLASS_IMPL("Physics",World);
+be_metaclass_impl("Physics",World);
 
 class World::WorldImplementation
 {

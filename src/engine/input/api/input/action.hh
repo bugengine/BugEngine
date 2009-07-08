@@ -55,9 +55,9 @@ public:
     bool            wentUp() const;
 
 
-    METACLASS(INPUTEXPORT,Action,Object)
-    PROPERTIES
-    END
+    be_metaclass(INPUTEXPORT,Action,Object)
+    be_properties
+    be_end
 };
 
 }}

@@ -36,7 +36,7 @@ template< typename OWNER,
           typename T,
           typename ValueGetter = GetImpossible<OWNER,T>,
           typename ValueSetter = SetImpossible<OWNER,T> >
-class ObjectProperty : public Property
+class ObjectProperty : public Object::MetaClass::Property
 {
 protected:
     class MetaClass : public Property::MetaClass

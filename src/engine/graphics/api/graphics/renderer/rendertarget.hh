@@ -46,6 +46,9 @@ public:
     virtual bool            closed() const = 0;
 
     const Scene* scene() const;
+private:
+    RenderTarget& operator=(const RenderTarget& other);
+    RenderTarget(const RenderTarget& other);
 };
 
 }}

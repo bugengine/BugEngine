@@ -31,7 +31,7 @@ namespace BugEngine { namespace RTTI
 
 template< typename OWNER,
           typename T >
-void SetImpossible<OWNER,T>::set(OWNER* from, const T& value)
+void SetImpossible<OWNER,T>::set(OWNER* /*from*/, const T& /*value*/)
 {
     throw 0;
 }

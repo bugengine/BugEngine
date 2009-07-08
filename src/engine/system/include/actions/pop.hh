@@ -39,9 +39,9 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    METACLASS(SYSTEMEXPORT,Pop,Action)
-    PROPERTIES
-    END
+    be_metaclass(SYSTEMEXPORT,Pop,Action)
+    be_properties
+    be_end
 };
 
 }}

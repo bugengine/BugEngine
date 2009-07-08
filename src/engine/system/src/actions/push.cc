@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Push);
+be_abstractmetaclass_impl("Actions",Push);
 
 Push::Push() :
     m_value()

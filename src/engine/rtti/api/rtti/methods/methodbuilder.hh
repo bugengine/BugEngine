@@ -21,30 +21,18 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_SYSTEM_CONCURRENT_HH_
-#define BE_SYSTEM_CONCURRENT_HH_
+#ifndef BE_RTTI_METHODS_METHODBUILDER_HH_
+#define BE_RTTI_METHODS_METHODBUILDER_HH_
 /*****************************************************************************/
-#include    <system/action.hh>
 
-namespace BugEngine { namespace Actions
+namespace BugEngine { namespace RTTI { namespace _
 {
 
-
-class SYSTEMEXPORT Concurrent : public Action
+class MethodProperty : public Object::MetaClass::Property
 {
-public:
-    Concurrent();
-    ~Concurrent();
-
-    virtual void initialize(ActionContext* context) const override;
-    virtual bool oneturn(ActionContext* context) const override;
-
-    be_metaclass(SYSTEMEXPORT,Concurrent,Action)
-    be_properties
-    be_end
 };
 
-}}
+}}}
 
 /*****************************************************************************/
 #endif

@@ -137,7 +137,7 @@ refptr<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMod
         HANDLE file = CreateFile(fullname.c_str(), GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
         if(file == INVALID_HANDLE_VALUE)
         {
-            DWORD err = GetLastError();
+            //DWORD err = GetLastError();
             throw EFileNotFound(filename);
         }
         else

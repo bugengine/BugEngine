@@ -32,8 +32,6 @@
 namespace BugEngine
 {
 
-class Property;
-
 class RTTIEXPORT Method : public Object
 {
 protected:

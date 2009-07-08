@@ -27,9 +27,9 @@
 namespace BugEngine { namespace Graphics
 {
 
-ABSTRACTMETACLASS_IMPL("Graphics", Primitive);
+be_abstractmetaclass_impl("Graphics", Primitive);
 
-Primitive::Primitive(const RenderBackend* renderer)
+Primitive::Primitive(const RenderBackend* /*renderer*/)
 {
 }
 

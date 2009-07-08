@@ -123,48 +123,44 @@ struct InterlockedType<8>
     #else
         typedef counter_t   tag_t;
     #endif
-        BE_SET_ALIGNMENT(16)    counter_t   tag;
-        BE_SET_ALIGNMENT(8)     value_t     value;
+        BE_SET_ALIGNMENT(16)    volatile counter_t   m_tag;
+        BE_SET_ALIGNMENT(8)     volatile value_t     m_value;
         tagged_t(value_t value = 0)
-            :   tag(0)
-            ,   value(value)
+            :   m_tag(0)
+            ,   m_value(value)
         {
         }
         tagged_t(counter_t tag, value_t value)
-            :   tag(0)
-            ,   value(value)
+            :   m_tag(tag)
+            ,   m_value(value)
         {
         }
         tagged_t(const tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
-        {
-        }
-        tagged_t(const volatile tagged_t& other)
-            :   tag(other.tag)
-            ,   value(other.value)
+            :   m_tag(other.m_tag)
+            ,   m_value(other.m_value)
         {
         }
         tagged_t& operator=(const tagged_t& other)
         {
-            tag = other.tag;
-            value = other.value;
+            m_tag = other.m_tag;
+            m_value = other.m_value;
             return *this;
         }
-        inline bool operator==(tagged_t& other) { return tag == other.tag && value == other.value; }
+        inline value_t value() { return m_value; }
+        inline bool operator==(tagged_t& other) { return m_tag == other.m_tag && m_value == other.m_value; }
     };
-    static inline tagged_t::tag_t get_ticket(const volatile tagged_t &p)
+    static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         #ifdef TAG_LONG
             return p;
         #else
-            return p.tag;
+            return p.m_tag;
         #endif
     }
     static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
         #ifdef TAG_LONG
-            return _InterlockedCompareExchange128((volatile i64*)p, v, p->tag+1, (i64*)&condition) != 0;
+            return _InterlockedCompareExchange128((volatile i64*)p, v, p->m_tag+1, (i64*)&condition) != 0;
         #else
             return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1, condition) == condition;
         #endif

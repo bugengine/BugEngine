@@ -30,6 +30,7 @@
 # define WIN32_LEAN_AND_MEAN
 # define NOMINMAX
 # include <windows.h>
+# pragma warning(disable:4505)
 static void displayError()
 {
     char* msg;

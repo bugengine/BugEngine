@@ -27,7 +27,7 @@
 namespace BugEngine
 {
 
-METACLASS_IMPL("",World);
+be_metaclass_impl("",World);
 
 World::World(float3 worldExtents)
 :   m_graphicsSystem(new Graphics::World())

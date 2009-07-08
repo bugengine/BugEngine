@@ -100,8 +100,8 @@ public:
     virtual TexturePipeline*    getTexturePipeline() = 0;
 
     virtual RenderTarget*   createRenderWindow(WindowFlags flags, const Scene* scene) = 0;
-    virtual GpuBuffer*      createVertexBuffer(size_t vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
-    virtual GpuBuffer*      createIndexBuffer(size_t vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
+    virtual GpuBuffer*      createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
+    virtual GpuBuffer*      createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
     virtual GpuBuffer*      createTextureBuffer(TextureBufferFlags flags) const = 0;
 
     virtual void            drawBatch(const Batch& batch) = 0;

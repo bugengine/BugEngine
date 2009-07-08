@@ -49,9 +49,9 @@ public:
     BaseTask* getStartWorldUpdate();
     BaseTask* getEndWorldUpdate();
 
-    METACLASS(MOBILEEXPORT,World,Object)
-    PROPERTIES
-    END
+    be_metaclass(MOBILEEXPORT,World,Object)
+    be_properties
+    be_end
 };
 
 }

@@ -29,8 +29,9 @@
 #include    <rtti/method.hh>
 #include    <rtti/autoregistration.hh>
 #include    <rtti/properties/propertybuilder.hh>
+#include    <rtti/methods/methodbuilder.hh>
 
-#define METACLASS(exportrule,_name,_parent)                                             \
+#define be_metaclass(exportrule,_name,_parent)                                          \
     public:                                                                             \
     typedef _name   self_t;                                                             \
     typedef _parent super_t;                                                            \
@@ -45,7 +46,7 @@
         MetaClass(const BugEngine::inamespace& name, const MetaClass* parent);          \
         ~MetaClass();
 
-#define PROPERTIES                                                                      \
+#define be_properties                                                                   \
     };                                                                                  \
     static BugEngine::RTTI::AutoRegister<self_t> s_autoRegistration;                    \
     static const BugEngine::inamespace& getClassName();                                 \
@@ -56,26 +57,25 @@ private:                                                                        
     {                                                                                   \
         self_t::MetaClass::init(mc);
 
-
-#define READ_FIELD(_field)                                                              \
-    BugEngine::RTTI::_::createReadFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
-#define READ_GET(_method)                                                            \
+#define be_read(_field)                                                                 \
+    BugEngine::RTTI::_::createReadFieldFromOffset<self_t, static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
+#define be_get(_method)                                                                 \
     BugEngine::RTTI::_::createHelperFromGetter<>(&self_t::_method).operator()<&self_t::_method>()
-#define WRITE_FIELD(_field)                                                             \
-    BugEngine::RTTI::_::createWriteFieldFromOffset<self_t,static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
-#define WRITE_SET(_method)                                                           \
+#define be_write(_field)                                                                \
+    BugEngine::RTTI::_::createWriteFieldFromOffset<self_t, static_cast<size_t>(offsetof(self_t,_field))>(&(reinterpret_cast<self_t*>(0)->_field))
+#define be_set(_method)                                                                 \
     BugEngine::RTTI::_::createHelperFromSetter<>(&self_t::_method).operator()<&self_t::_method>()
-
-#define PROPERTY(_name)                                                                 \
+#define be_property(_name)                                                              \
     BugEngine::RTTI::_::PropertyBuilder<void, void>(mc, #_name)
 
-#define METHOD(name)
-#define CLASSMETHOD(name)
+#define be_method(name)                                                                 \
 
-#define END                                                                             \
+#define be_classmethod(name)
+
+#define be_end                                                                          \
     }
 
-#define METACLASS_IMPL(_namespace,_cls)                                                                     \
+#define be_metaclass_impl(_namespace,_cls)                                                                  \
     BugEngine::RTTI::AutoRegister<_cls> _cls::s_autoRegistration;                                           \
     _cls::MetaClass::MetaClass() :                                                                          \
         _cls::super_t::MetaClass( _cls::self_t::getClassName(),                                             \
@@ -99,10 +99,10 @@ private:                                                                        
         static self_t::MetaClass* s_metaclass;                                                              \
         if(!s_metaclass)                                                                                    \
         {                                                                                                   \
-            const super_t::MetaClass* parent = super_t::static_metaclass();                                 \
+            super_t::static_metaclass();                                                                    \
             if(!s_metaclass)                                                                                \
             {                                                                                               \
-                s_metaclass = new self_t::MetaClass();                                                   \
+                s_metaclass = new self_t::MetaClass();                                                      \
                 self_t::registerMetaClass(s_metaclass);                                                     \
             }                                                                                               \
         }                                                                                                   \
@@ -114,7 +114,7 @@ private:                                                                        
     }
 
 
-#define ABSTRACTMETACLASS_IMPL(_namespace,_cls) METACLASS_IMPL(_namespace,_cls)
+#define be_abstractmetaclass_impl(_namespace,_cls) be_metaclass_impl(_namespace,_cls)
 
 /*****************************************************************************/
 #endif

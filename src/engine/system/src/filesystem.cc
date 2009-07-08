@@ -170,18 +170,21 @@ refptr<AbstractMemoryStream> FileSystem::open(const ifilename& file, FileOpenMod
     return bestmatch->component()->open(suffix, mode);
 }
 
-size_t FileSystem::age(const ifilename& file) const
+size_t FileSystem::age(const ifilename& /*file*/) const
 {
+    AssertNotReached();
     return 0;
 }
 
-std::set<ifilename> FileSystem::listFiles(const ipath& prefix, const char* extension)
+std::set<ifilename> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
 {
+    AssertNotReached();
     return std::set<ifilename>();
 }
 
-std::set<ipath> FileSystem::listDirectories(const ipath& prefix)
+std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
 {
+    AssertNotReached();
     return std::set<ipath>();
 }
 

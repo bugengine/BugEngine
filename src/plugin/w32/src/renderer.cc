@@ -147,7 +147,7 @@ int Renderer::step() const
     return (int)m_exit;
 }
 
-intptr_t Renderer::updateWindows(intptr_t p1, intptr_t p2)
+intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
 {
     MSG msg;
     bool& shouldQuit = *(bool*)p1;

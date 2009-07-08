@@ -36,8 +36,8 @@ static const size_t g_maxDebuggerCount = 4;
 class NullDebugger : public Debugger
 {
 private:
-    virtual void registerAllocation(void* pointer, size_t size, int threadid, Callstack::Address* from, size_t adressSize) override {};
-    virtual void registerDeallocation(void* pointer, int threadid, Callstack::Address* from, size_t adressSize) override {};
+    virtual void registerAllocation(void*, size_t, int, Callstack::Address*, size_t) override {};
+    virtual void registerDeallocation(void*, int, Callstack::Address*, size_t) override {};
     virtual void frameUpdate() override {};
 public:
     NullDebugger();

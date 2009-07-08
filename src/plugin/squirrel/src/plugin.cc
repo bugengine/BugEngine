@@ -31,6 +31,6 @@ extern "C" FORCEEXPORT void _finiplugin(void)
 {
 }
 
-extern "C" FORCEEXPORT void doFile(const char *filename)
+extern "C" FORCEEXPORT void doFile(const char * /*filename*/)
 {
 }

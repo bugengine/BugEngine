@@ -27,7 +27,7 @@
 namespace BugEngine { namespace Actions
 {
 
-ABSTRACTMETACLASS_IMPL("Actions",Sleep);
+be_abstractmetaclass_impl("Actions",Sleep);
 
 Sleep::Sleep()
 {

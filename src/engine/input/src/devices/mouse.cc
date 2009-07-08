@@ -29,7 +29,7 @@
 namespace BugEngine { namespace Input
 {
 
-ABSTRACTMETACLASS_IMPL("Input",Mouse);
+be_abstractmetaclass_impl("Input",Mouse);
 
 size_t Mouse::s_miceCount = 0;
 

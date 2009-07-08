@@ -69,6 +69,9 @@ public:
 
     void run(Scheduler* sc) const;
     void end(Scheduler* sc) const;
+private:
+    BaseTask& operator=(const BaseTask& other);
+    BaseTask(const BaseTask& other);
 };
 
 class COREEXPORT ChainTaskCallback : public BaseTask::Callback

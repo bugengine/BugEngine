@@ -29,7 +29,7 @@
 namespace BugEngine { namespace Input
 {
 
-ABSTRACTMETACLASS_IMPL("Input",Keyboard);
+be_abstractmetaclass_impl("Input",Keyboard);
 
 size_t Keyboard::s_keyboardCount = 0;
 
@@ -39,7 +39,7 @@ static Device& getKeyboard()
     return s_keyboard;
 }
 
-Keyboard::Keyboard(size_t numControls)
+Keyboard::Keyboard(size_t /*numControls*/)
 :   Device((minitl::format<>("Keyboard%u") | s_keyboardCount++).c_str(), 256)
 {
     HKL oldLayout = GetKeyboardLayout(GetCurrentThreadId());

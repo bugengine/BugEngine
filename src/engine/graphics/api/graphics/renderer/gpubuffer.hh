@@ -40,7 +40,7 @@ protected:
 public:
     virtual ~GpuBuffer();
 
-    virtual void* map(GpuMapFlags flags, size_t byteCount, size_t byteOffset) = 0;
+    virtual void* map(GpuMapFlags flags, u32 byteCount, u32 byteOffset) = 0;
     virtual void  unmap() = 0;
 };
 

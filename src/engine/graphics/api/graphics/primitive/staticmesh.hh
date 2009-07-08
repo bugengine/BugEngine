@@ -35,9 +35,9 @@ public:
     StaticMesh();
     ~StaticMesh();
 
-    METACLASS(GRAPHICSEXPORT,StaticMesh,Primitive)
-    PROPERTIES
-    END
+    be_metaclass(GRAPHICSEXPORT,StaticMesh,Primitive)
+    be_properties
+    be_end
 };
 
 }}

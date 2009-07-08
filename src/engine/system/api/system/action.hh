@@ -88,9 +88,9 @@ public:
     virtual void initialize(ActionContext* context) const = 0;
     virtual bool oneturn(ActionContext* context) const = 0;
 
-    METACLASS(SYSTEMEXPORT,Action,Object)
-    PROPERTIES
-    END
+    be_metaclass(SYSTEMEXPORT,Action,Object)
+    be_properties
+    be_end
 };
 
 }

@@ -37,11 +37,11 @@ Reference::~Reference()
 {
 }
 
-void Reference::dolink(Context& context) const
+void Reference::dolink(Context& /*context*/) const
 {
 }
 
-Value Reference::doeval(Context& context) const
+Value Reference::doeval(Context& /*context*/) const
 {
     return Value();
 }

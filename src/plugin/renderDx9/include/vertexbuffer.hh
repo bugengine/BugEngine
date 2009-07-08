@@ -40,12 +40,12 @@ private:
     LPDIRECT3DVERTEXBUFFER9         m_buffer;
     D3DVERTEXELEMENT9               m_vertexElements[MAXD3DDECLLENGTH];
     LPDIRECT3DVERTEXDECLARATION9    m_vertexDecl;
-    size_t                          m_vertexStride;
+    u32                             m_vertexStride;
 public:
-    VertexBuffer(const Renderer* renderer, size_t count, VertexUsage usage, VertexBufferFlags flags);
+    VertexBuffer(const Renderer* renderer, u32 count, VertexUsage usage, VertexBufferFlags flags);
     ~VertexBuffer();
 protected:
-    virtual void* map(GpuMapFlags flags, size_t byteCount, size_t byteOffset) override;
+    virtual void* map(GpuMapFlags flags, u32 byteCount, u32 byteOffset) override;
     virtual void  unmap() override;
 };
 

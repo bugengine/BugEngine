@@ -31,6 +31,10 @@
 #include    <graphics/stdafx.h>
 #include    <win32/stdafx.h>
 
+#ifdef BE_COMPILER_MSVC
+# pragma warning(disable:4985)
+#endif
+
 #include    <d3d9.h>
 #include    <dxerr.h>
 #include    <Cg/cg.h>

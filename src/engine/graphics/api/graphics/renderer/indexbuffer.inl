@@ -31,14 +31,14 @@ namespace BugEngine { namespace Graphics
 {
 
 template< >
-inline IndexBuffer<u16>::IndexBuffer(const RenderBackend* owner, size_t vertexCount, IndexUsage usage)
+inline IndexBuffer<u16>::IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Short)))
 {
 }
 
 template< >
-inline IndexBuffer<u32>::IndexBuffer(const RenderBackend* owner, size_t vertexCount, IndexUsage usage)
+inline IndexBuffer<u32>::IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Long)))
 {
@@ -50,9 +50,9 @@ IndexBuffer<T>::~IndexBuffer()
 }
 
 template< typename T >
-T* IndexBuffer<T>::map(size_t count, size_t offset)
+T* IndexBuffer<T>::map(u32 count, u32 offset)
 {
-    return static_cast<T*>(m_buffer->map(GpuMapFlags(), count*sizeof(T), offset*sizeof(T)));
+    return static_cast<T*>(m_buffer->map(GpuMapFlags(), count*(u32)sizeof(T), offset*(u32)sizeof(T)));
 }
 
 template< typename T >

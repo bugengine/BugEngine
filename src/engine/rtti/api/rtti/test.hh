@@ -43,21 +43,21 @@ public:
     void setValue(int v);
     void setValue2(const int& v);
 
-    METACLASS(RTTIEXPORT,Test,BugEngine::Object)
-    PROPERTIES
-        PROPERTY(Value)
-            [READ_FIELD(m_value)]
-            [WRITE_SET(setValue)]
+    be_metaclass(RTTIEXPORT,Test,BugEngine::Object)
+    be_properties
+        be_property(Value)
+            [be_read(m_value)]
+            [be_write(m_value)]
             ;
-        PROPERTY(Value2)
-            [READ_FIELD(m_value)]
-            [WRITE_SET(setValue2)]
+        be_property(Value2)
+            [be_read(m_value)]
+            [be_set(setValue2)]
             ;
-        PROPERTY(prop)
-            [READ_GET(prop)]
-            [WRITE_SET(setProp)]
+        be_property(prop)
+            [be_get(prop)]
+            [be_set(setProp)]
             ;
-    END
+    be_end
 };
 
 class RTTIEXPORT Test2 : public Test
@@ -66,9 +66,9 @@ public:
     Test2();
     ~Test2();
 
-    METACLASS(RTTIEXPORT,Test2,Test)
-    PROPERTIES
-    END
+    be_metaclass(RTTIEXPORT,Test2,Test)
+    be_properties
+    be_end
 };
 }
 

@@ -45,9 +45,9 @@ public:
 
     void step() const;
 
-    METACLASS(SOUNDEXPORT,World,Object)
-    PROPERTIES
-    END
+    be_metaclass(SOUNDEXPORT,World,Object)
+    be_properties
+    be_end
 };
 
 }}

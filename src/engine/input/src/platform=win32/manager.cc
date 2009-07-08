@@ -74,10 +74,6 @@ Manager::Manager()
 
     unsigned int numDevices = 0;
 
-    int kbIndex = 0;
-    int mIndex = 0;
-    int pasIndex = 0;
-
     BE_WIN32_CHECKRESULT(GetRawInputDeviceList(0, &numDevices, sizeof(RAWINPUTDEVICELIST)));
     RAWINPUTDEVICELIST* lst = (RAWINPUTDEVICELIST*)malloca(numDevices*sizeof(RAWINPUTDEVICELIST));
     BE_WIN32_CHECKRESULT(GetRawInputDeviceList(lst, &numDevices, sizeof(RAWINPUTDEVICELIST)));
@@ -184,7 +180,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 }
 
 
-intptr_t Manager::waitInput(intptr_t p1, intptr_t p2)
+intptr_t Manager::waitInput(intptr_t /*p1*/, intptr_t /*p2*/)
 {
     WindowCommunication& comm = WindowCommunication::getCommunication();
     WNDCLASSEX wndClassEx;

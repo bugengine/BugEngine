@@ -26,7 +26,13 @@
 
 #include    <sound/world.hh>
 
+#ifdef BE_COMPILER_MSVC
+#pragma warning(push,1)
+#endif
 #include    <vorbis/vorbisfile.h>
+#ifdef BE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace BugEngine { namespace Sound
 {
@@ -53,7 +59,7 @@ static long vorbis_tell(void *datasource)
 
 static ov_callbacks be_callbacks_vorbis = { vorbis_read, vorbis_seek, 0, vorbis_tell };
 
-ABSTRACTMETACLASS_IMPL("Sound",SoundObject);
+be_abstractmetaclass_impl("Sound",SoundObject);
 
 SoundObject::SoundObject(World* owner, refptr<AbstractMemoryStream> soundfile) :
     m_owner(owner),

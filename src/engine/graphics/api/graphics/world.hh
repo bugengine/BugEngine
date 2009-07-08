@@ -56,9 +56,9 @@ public:
 
     void createWindow(WindowFlags f, refptr<Scene> scene);
 
-    METACLASS(GRAPHICSEXPORT,World, Object)
-    PROPERTIES
-    END
+    be_metaclass(GRAPHICSEXPORT,World, Object)
+    be_properties
+    be_end
 };
 
 }}

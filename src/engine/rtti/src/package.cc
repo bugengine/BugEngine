@@ -29,7 +29,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-METACLASS_IMPL("",Package);
+be_metaclass_impl("",Package);
 
 Package::Package()
 :   m_refcount(0)
@@ -78,6 +78,7 @@ void Package::unload()
 
 Package* Package::get(const inamespace& name)
 {
+    UNUSED(name);
 /*  static Package s_root;
     Package* result = &s_root;
     for(size_t i = 0; i < name.size(); ++i)

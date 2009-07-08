@@ -29,7 +29,7 @@
 namespace BugEngine { namespace Input
 {
 
-ABSTRACTMETACLASS_IMPL("Input",GroupControl);
+be_abstractmetaclass_impl("Input",GroupControl);
 
 GroupControl::GroupControl(const istring& name)
 :   Control(name)
