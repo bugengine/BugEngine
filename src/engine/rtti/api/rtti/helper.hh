@@ -57,7 +57,7 @@
 
 #define be_properties                                                                                       \
     };                                                                                                      \
-    static BugEngine::RTTI::AutoRegister<self_t> s_autoRegistration;                                        \
+    static BugEngine::RTTI::_::AutoRegister<self_t> s_autoRegistration;                                     \
     static const BugEngine::inamespace& getClassName();                                                     \
     static const self_t::MetaClass* static_metaclass();                                                     \
     const self_t::MetaClass* metaclass() const override;                                                    \
@@ -86,7 +86,7 @@ private:                                                                        
     }
 
 #define be_metaclass_impl_(_namespace,_cls,_code)                                                           \
-    BugEngine::RTTI::AutoRegister<_cls> _cls::s_autoRegistration;                                           \
+    BugEngine::RTTI::_::AutoRegister<_cls> _cls::s_autoRegistration;                                        \
     _cls::MetaClass::MetaMetaClass::MetaMetaClass( const BugEngine::inamespace& name,                       \
                                                    const BugEngine::Object::MetaClass* parent) :            \
         _cls::super_t::MetaClass::MetaMetaClass( name, parent )                                             \

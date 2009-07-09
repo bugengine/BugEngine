@@ -27,7 +27,7 @@
 #include    <parse/database.hh>
 #include    <system/filesystem.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Data
 {
 
 be_abstractmetaclass_impl("",Package);
@@ -72,9 +72,9 @@ void Package::dounload()
     m_namespace = 0;
 }
 
-const Namespace* Package::getNamespace() const
+const RTTI::Namespace* Package::getNamespace() const
 {
     return m_namespace.get();
 }
 
-}
+}}

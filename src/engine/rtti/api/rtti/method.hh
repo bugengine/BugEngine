@@ -29,13 +29,13 @@
 
 #include    <rtti/value.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class RTTIEXPORT Object::MetaClass::Method : public Object
+class RTTIEXPORT Method : public Object
 {
 protected:
-    class RTTIEXPORT MetaClass : public Object::MetaClass
+    class RTTIEXPORT MetaClass : public RTTI::MetaClass
     {
     public:
         MetaClass();
@@ -53,7 +53,7 @@ private:
     Method& operator=(const Method& other);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

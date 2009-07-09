@@ -27,18 +27,20 @@
 #include    <rtti/object.hh>
 #include    <rtti/value.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class RTTIEXPORT Object::MetaClass : public Object
+class MetaMetaClass;
+class Property;
+class Method;
+
+class RTTIEXPORT MetaClass : public Object
 {
     friend class Object;
-protected:
-    class MetaMetaClass;
-public:
-    class Property;
+private:
     class StaticProperty;
-    class Method;
+public:
+    typedef RTTI::MetaMetaClass MetaMetaClass;
     typedef minitl::map< istring, refptr<const Property> >      PropertyMap;
     typedef PropertyMap::iterator                               PropertyIterator;
     typedef PropertyMap::const_iterator                         PropertyConstIterator;
@@ -70,7 +72,7 @@ private:
     MetaClass& operator=(const MetaClass& other);
 };
 
-class Object::MetaClass::MetaMetaClass : public Object::MetaClass
+class MetaMetaClass : public MetaClass
 {
 public:
     MetaMetaClass(const inamespace& name, const MetaClass* parent);
@@ -80,7 +82,7 @@ private:
     MetaMetaClass& operator=(const MetaMetaClass& other);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

@@ -34,13 +34,13 @@ template< typename Owner, typename R >
 struct MethodBuilderR0
 {
     template< R (Owner::*Func)() >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodR0<Owner, R, Func >(); }
+    Method* buildMethod() { return new MethodR0<Owner, R, Func >(); }
 };
 template< typename Owner, typename R >
 struct MethodBuilderCR0
 {
     template< R (Owner::*Func)() const >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodCR0<Owner, R, Func >(); }
+    Method* buildMethod() { return new MethodCR0<Owner, R, Func >(); }
 };
 
 template< typename Owner, typename R >
@@ -55,13 +55,13 @@ template< typename Owner, typename R, typename T1 >
 struct MethodBuilderR1
 {
     template< R (Owner::*Func)(T1) >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodR1<Owner, R, T1, Func >(); }
+    Method* buildMethod() { return new MethodR1<Owner, R, T1, Func >(); }
 };
 template< typename Owner, typename R, typename T1 >
 struct MethodBuilderCR1
 {
     template< R (Owner::*Func)(T1) const >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodCR1<Owner, R, T1, Func >(); }
+    Method* buildMethod() { return new MethodCR1<Owner, R, T1, Func >(); }
 };
 
 template< typename Owner, typename R, typename T1 >
@@ -76,13 +76,13 @@ template< typename Owner, typename R, typename T1, typename T2 >
 struct MethodBuilderR2
 {
     template< R (Owner::*Func)(T1, T2) >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodR2<Owner, R, T1, T2, Func >(); }
+    Method* buildMethod() { return new MethodR2<Owner, R, T1, T2, Func >(); }
 };
 template< typename Owner, typename R, typename T1, typename T2 >
 struct MethodBuilderCR2
 {
     template< R (Owner::*Func)(T1, T2) const >
-    Object::MetaClass::Method* buildMethod() { return new ObjectMethodCR2<Owner, R, T1, T2, Func >(); }
+    Method* buildMethod() { return new MethodCR2<Owner, R, T1, T2, Func >(); }
 };
 
 template< typename Owner, typename R, typename T1, typename T2 >

@@ -75,7 +75,7 @@ Context::Context()
     luaL_register(m_state, "bugrefobject", s_objectMetaTable);
     luaL_register(m_state, "bugweakobject", &s_objectMetaTable[1]);
 
-    push(m_state, Namespace::root());
+    push(m_state, RTTI::Namespace::root());
     lua_setglobal(m_state, "BugEngine");
     lua_pop(m_state, 1);
 }
@@ -196,7 +196,7 @@ int Context::objectGet(lua_State *state)
         return 1;
     }
     const char *name = lua_tostring(state, -1);
-    const Object::MetaClass::Property* p = (*userdata)->metaclass()->getProperty(name);
+    const RTTI::Property* p = (*userdata)->metaclass()->getProperty(name);
     if(!p)
     {
         lua_pushnil(state);

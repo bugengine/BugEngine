@@ -33,7 +33,7 @@ namespace BugEngine { namespace Input
 class INPUTEXPORT Device : public Object
 {
 private:
-    refptr<Namespace>               m_deviceNamespace;
+    refptr<RTTI::Namespace>         m_deviceNamespace;
     istring                         m_name;
     size_t                          m_numControls;
     float*                          m_active;
@@ -52,8 +52,8 @@ public:
 
     void update();
 
-    const istring& name() const             { return m_name; }
-    const Namespace* getNamespace() const   { return m_deviceNamespace.get(); }
+    const istring& name() const                 { return m_name; }
+    const RTTI::Namespace* getNamespace() const { return m_deviceNamespace.get(); }
 
     be_metaclass(INPUTEXPORT,Device,Object)
     be_properties

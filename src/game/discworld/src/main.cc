@@ -36,7 +36,7 @@
 int be_main (BugEngine::Application* app)
 {
     TestNS::Test* t = new TestNS::Test;
-    BugEngine::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
+    BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
     BugEngine::Plugin p("lua");
     void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
     (*doFile)("data/scripts/main.lua");
