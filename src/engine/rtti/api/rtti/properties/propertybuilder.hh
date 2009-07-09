@@ -92,10 +92,10 @@ static inline CreateWriteFieldFromSetterHelper< Owner, T > createHelperFromSette
 class BasePropertyBuilder
 {
 protected:
-    Object::MetaClass * m_metaclass;
-    const char *        m_name;
+    MetaClass *     m_metaclass;
+    const char *    m_name;
 protected:
-    inline BasePropertyBuilder(Object::MetaClass* metaclass, const char *name)
+    inline BasePropertyBuilder(MetaClass* metaclass, const char *name)
         :   m_metaclass(metaclass)
         ,   m_name(name)
     {
@@ -112,7 +112,7 @@ private:
     typedef typename Setter::Owner          Owner;
     typedef typename Setter::PropertyType   T;
 public:
-    inline PropertyBuilder(Object::MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(MetaClass* metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
@@ -128,7 +128,7 @@ template<>
 class PropertyBuilder<void, void> : public BasePropertyBuilder
 {
 public:
-    inline PropertyBuilder(Object::MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(MetaClass* metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
@@ -182,7 +182,7 @@ private:
     typedef typename Getter::Owner          Owner;
     typedef typename Getter::PropertyType   T;
 public:
-    inline PropertyBuilder(Object::MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(MetaClass* metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
@@ -216,7 +216,7 @@ private:
     typedef typename Setter::Owner          Owner;
     typedef typename Setter::PropertyType   T;
 public:
-    inline PropertyBuilder(Object::MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(MetaClass* metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }

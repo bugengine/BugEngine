@@ -25,43 +25,43 @@
 
 #include    <rtti/property.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-Object::MetaClass::Property::MetaClass::MetaClass() :
-    BugEngine::Object::MetaClass("meta.property", 0, 0, true)
+Property::MetaClass::MetaClass()
+:   RTTI::MetaClass("meta.property", 0, 0, true)
 {
 }
 
-Object::MetaClass::Property::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass) :
+Property::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass) :
 BugEngine::Object::MetaClass(name, parent, 0, registerClass)
 {
 }
 
-Object::MetaClass::Property::MetaClass::~MetaClass()
+Property::MetaClass::~MetaClass()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-Object::MetaClass::Property::Property() :
+Property::Property() :
     Object()
 {
 }
 
-Object::MetaClass::Property::~Property()
+Property::~Property()
 {
 }
 
-const Object::MetaClass::Property::MetaClass* Object::MetaClass::Property::metaclass() const
+const Property::MetaClass* Property::metaclass() const
 {
     return static_metaclass();
 }
 
-const Object::MetaClass::Property::MetaClass* Object::MetaClass::Property::static_metaclass()
+const Property::MetaClass* Property::static_metaclass()
 {
     static const Property::MetaClass*  s_metaclass = new Property::MetaClass();
     return s_metaclass;
 }
 
-}
+}}

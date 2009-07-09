@@ -34,7 +34,7 @@ Call::Call() :
 {
 }
 
-Call::Call(Object::MetaClass::Method* method) :
+Call::Call(RTTI::Method* method) :
     m_method(method)
 {
 }
@@ -43,7 +43,7 @@ Call::~Call()
 {
 }
 
-refptr<Call> Call::MetaClass::createWithMethod(Object::MetaClass::Method* method)
+refptr<Call> Call::MetaClass::createWithMethod(RTTI::Method* method)
 {
     return new Call(method);
 }

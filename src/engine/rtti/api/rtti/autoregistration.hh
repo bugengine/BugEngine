@@ -25,7 +25,7 @@
 #define BE_RTTI_AUTOREGISTRATION_HH_
 /*****************************************************************************/
 
-namespace BugEngine { namespace RTTI
+namespace BugEngine { namespace RTTI { namespace _
 {
 
 template<typename T>
@@ -36,7 +36,7 @@ public:
     ~AutoRegister() {}
 };
 
-}}
+}}}
 
 /*****************************************************************************/
 #endif

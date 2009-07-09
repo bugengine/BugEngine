@@ -33,17 +33,17 @@ namespace BugEngine { namespace Actions
 class SYSTEMEXPORT Call : public Action
 {
 private:
-    Object::MetaClass::Method*   m_method;
+    RTTI::Method*   m_method;
 public:
     Call();
-    Call(Object::MetaClass::Method* method);
+    Call(RTTI::Method* method);
     ~Call();
 
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
     be_metaclass(SYSTEMEXPORT,Call,Action)
-        refptr<Call> createWithMethod(Object::MetaClass::Method* method);
+        refptr<Call> createWithMethod(RTTI::Method* method);
     be_properties
         be_classmethod(createWithMethod);
 

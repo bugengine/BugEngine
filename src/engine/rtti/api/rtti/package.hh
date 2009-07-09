@@ -27,20 +27,17 @@
 #include    <rtti/helper.hh>
 #include    <core/utils/singleton.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
-    
-class Namespace;
 
-namespace RTTI
-{
+class Namespace;
 
 class RTTIEXPORT Package : public Object
 {
 protected:
     size_t                                  m_refcount;
     istring                                 m_name;
-    refptr<Namespace>                       m_namespace;
+    refptr<RTTI::Namespace>                 m_namespace;
     Package*                                m_parent;
     minitl::map< istring, refptr<Package> > m_children;
 private:

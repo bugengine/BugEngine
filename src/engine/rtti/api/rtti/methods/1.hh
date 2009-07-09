@@ -27,19 +27,19 @@
 #include    <typeinfo>
 #include    <minitl/type/typemanipulation>
 
-namespace BugEngine { namespace RTTI
+namespace BugEngine { namespace RTTI { namespace _
 {
 
 
 
 template< typename OWNER, typename R, typename T1, R(OWNER::*Func)(T1) >
-class ObjectMethodR1 : public Object::MetaClass::Method
+class MethodR1 : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    class RTTIEXPORT MetaClass : public  Method::MetaClass
     {
     public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+        MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
@@ -59,13 +59,13 @@ public:
 
 
 template< typename OWNER, typename R, typename T1, R(OWNER::*Func)(T1) const >
-class ObjectMethodCR1 : public Object::MetaClass::Method
+class MethodCR1 : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    class RTTIEXPORT MetaClass : public  Method::MetaClass
     {
     public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+        MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
@@ -84,13 +84,13 @@ public:
 
 
 template< typename OWNER, typename T1, void(OWNER::*Func)(T1) >
-class ObjectMethodR1<OWNER, void, T1, Func> : public Object::MetaClass::Method
+class MethodR1<OWNER, void, T1, Func> : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    class RTTIEXPORT MetaClass : public  Method::MetaClass
     {
     public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+        MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
@@ -110,14 +110,13 @@ public:
 
 
 template< typename OWNER, typename T1, void(OWNER::*Func)(T1) const >
-class ObjectMethodCR1<OWNER, void, T1, Func> : public Object::MetaClass::Method
+class MethodCR1<OWNER, void, T1, Func> : public Method
 {
-
 private:
-    class RTTIEXPORT MetaClass : public  Object::MetaClass::Method::MetaClass
+    class RTTIEXPORT MetaClass : public  Method::MetaClass
     {
     public:
-        MetaClass() : Object::MetaClass::Method::MetaClass(typeid(Func).name(), Object::MetaClass::Method::static_metaclass(), false) {}
+        MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
@@ -135,7 +134,7 @@ public:
 
 
 
-}}
+}}}
 
 /*****************************************************************************/
 #endif

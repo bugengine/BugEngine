@@ -25,7 +25,7 @@
 
 #include    <rtti/namespace.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 
@@ -218,4 +218,4 @@ void Namespace::clear()
     m_metaClass = 0;
 }
 
-}
+}}

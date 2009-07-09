@@ -95,7 +95,7 @@ public:
     void pop(const istring& name);
 
     void parse(const ifilename& file);
-    refptr<Namespace> commit();
+    refptr<RTTI::Namespace> commit();
 };
 
 }}}

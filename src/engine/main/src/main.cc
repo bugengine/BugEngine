@@ -57,7 +57,7 @@ struct SingletonScope
 struct NamespaceScope
 {
     NamespaceScope()  { }
-    ~NamespaceScope() { BugEngine::Namespace::root()->clear(); }
+    ~NamespaceScope() { BugEngine::RTTI::Namespace::root()->clear(); }
 };
 
 namespace

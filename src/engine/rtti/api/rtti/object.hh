@@ -29,17 +29,21 @@
 namespace BugEngine
 {
 
+namespace RTTI
+{
+class MetaClass;
+}
+
 class RTTIEXPORT Object : public minitl::refcountable<void>
 {
 public:
-    class MetaClass;
-public:
+    typedef RTTI::MetaClass MetaClass;
     Object();
     virtual ~Object();
 
-    virtual const MetaClass*  metaclass() const = 0;
-    static const MetaClass*   static_metaclass();
-    static void               registerMetaClass();
+    virtual const RTTI::MetaClass*  metaclass() const = 0;
+    static const RTTI::MetaClass*   static_metaclass();
+    static void                     registerMetaClass();
 private:
     Object(const Object& other);
     Object& operator=(const Object& other);

@@ -31,16 +31,16 @@
 
 #include    <rtti/value.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 class RTTIEXPORT Namespace : public Object
 {
 protected:
-    class MetaClass : public Object::MetaClass
+    class MetaClass : public RTTI::MetaClass
     {
     private:
-        class Property : public Object::MetaClass::Property
+        class Property : public RTTI::Property
         {
         private:
             mutable Value   m_value;
@@ -90,7 +90,7 @@ private:
     Namespace& operator=(const Namespace& other);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

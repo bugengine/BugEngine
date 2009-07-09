@@ -70,7 +70,7 @@ void Database::DatabaseElement::dolink(Context& context) const
 
 Value Database::DatabaseElement::doeval(Context& context) const
 {
-    Namespace* ns = new Namespace();
+    RTTI::Namespace* ns = new RTTI::Namespace();
     for(ChildrenContainer::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
         if(it->second.first == Export)
             ns->set(it->first, it->second.second->eval(context));
@@ -78,7 +78,7 @@ Value Database::DatabaseElement::doeval(Context& context) const
     {
         Value v = it->second->eval(context);
         Assert(v.type() == RTTI::PropertyTypeObject);
-        Namespace* ns = v.as< Namespace* >();
+        RTTI::Namespace* ns = v.as< RTTI::Namespace* >();
         ns->mount(it->first, ns);
     }
 
@@ -127,13 +127,13 @@ void Database::parse(const ifilename& file)
     g_parseStream = 0;
 }
 
-refptr<Namespace> Database::commit()
+refptr<RTTI::Namespace> Database::commit()
 {
     Context ctx(*this);
     m_root->dolink(ctx);
     Value value = m_root->doeval(ctx);
     Assert(value.type() == RTTI::PropertyTypeObject);
-    return value.as< refptr<Namespace> >();
+    return value.as< refptr<RTTI::Namespace> >();
 }
 
 

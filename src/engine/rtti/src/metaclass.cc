@@ -29,10 +29,10 @@
 #include    <rtti/namespace.hh>
 #include    <rtti/helper.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class Object::MetaClass::StaticProperty : public Object::MetaClass::Property
+class MetaClass::StaticProperty : public Property
 {
 private:
     Value   m_value;
@@ -46,16 +46,18 @@ public:
     virtual Value               get(Object* /*from*/) const                         { return m_value; }
 };
 
-Object::MetaClass::StaticProperty::StaticProperty(Value v)
+MetaClass::StaticProperty::StaticProperty(Value v)
     :   m_value(v)
 {
 }
 
-Object::MetaClass::StaticProperty::~StaticProperty()
+MetaClass::StaticProperty::~StaticProperty()
 {
 }
 
-Object::MetaClass::MetaMetaClass::MetaMetaClass(const inamespace& name, const Object::MetaClass* parent)
+//-----------------------------------------------------------------------------
+
+MetaMetaClass::MetaMetaClass(const inamespace& name, const Object::MetaClass* parent)
     :   MetaClass(name, parent, 0, false)
 {
     if(!parent)
@@ -65,13 +67,13 @@ Object::MetaClass::MetaMetaClass::MetaMetaClass(const inamespace& name, const Ob
     }
 }
 
-Object::MetaClass::MetaMetaClass::~MetaMetaClass()
+MetaMetaClass::~MetaMetaClass()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-Object::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass)
+MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass)
     :   m_name(name[name.size()-1])
     ,   m_parent(parent)
     ,   m_metaclass(mc)
@@ -88,37 +90,37 @@ Object::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, Me
     }
 }
 
-Object::MetaClass::~MetaClass()
+MetaClass::~MetaClass()
 {
 }
 
-const istring& Object::MetaClass::name() const
+const istring& MetaClass::name() const
 {
     return m_name;
 }
 
-const Object::MetaClass* Object::MetaClass::metaclass() const
+const MetaClass* MetaClass::metaclass() const
 {
     return m_metaclass.get();
 }
 
-const Object::MetaClass* Object::MetaClass::parent() const
+const MetaClass* MetaClass::parent() const
 {
     return m_parent.get();
 }
 
-void Object::MetaClass::addProperty(const istring& name, refptr<const Property> prop)
+void MetaClass::addProperty(const istring& name, refptr<const Property> prop)
 {
     std::pair<PropertyIterator,bool> result = m_properties.insert(std::make_pair(name, prop));
     Assert(result.second);
 }
 
-void Object::MetaClass::addMethod(const istring& name, refptr<Method> method)
+void MetaClass::addMethod(const istring& name, refptr<Method> method)
 {
     addProperty(name, new StaticProperty(Value(refptr<Object>(method))));
 }
 
-const Object::MetaClass::Property* Object::MetaClass::getProperty(const istring& name) const
+const Property* Object::MetaClass::getProperty(const istring& name) const
 {
     PropertyConstIterator it = m_properties.find(name);
     if(it != m_properties.end())
@@ -127,20 +129,20 @@ const Object::MetaClass::Property* Object::MetaClass::getProperty(const istring&
         return 0;
 }
 
-Value Object::MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
+Value MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
 {
     AssertNotReached();
     return Value();
 }
 
-void Object::MetaClass::init(MetaClass* /*mc*/)
+void MetaClass::init(MetaClass* /*mc*/)
 {
 }
 
-refptr<Object> Object::MetaClass::create() const
+refptr<Object> MetaClass::create() const
 {
     AssertNotReached();
     return 0;
 }
 
-}
+}}
