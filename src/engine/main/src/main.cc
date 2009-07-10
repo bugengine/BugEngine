@@ -80,6 +80,41 @@ namespace
     };
 
     be_abstractmetaclass_impl("", Environment);
+
+
+    class LogListener : public BugEngine::ILogListener
+    {
+    private:
+        FILE* m_logFile;
+    public:
+        LogListener(const char *logname)
+            :   m_logFile(fopen(logname, "w"))
+        {
+        }
+        ~LogListener()
+        {
+            fclose(m_logFile);
+        }
+    protected:
+        virtual bool log(const BugEngine::istring& logname, BugEngine::eLogLevel level, const char *filename, int line, const char *msg)
+        {
+            fprintf(m_logFile, "%s(%d): %s\n"
+                               "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
+            fflush(m_logFile);
+            #ifdef _WIN32
+                OutputDebugString(filename);
+                OutputDebugString(minitl::format<>("(%d): ") | line);
+                OutputDebugString(logname.c_str());
+                OutputDebugString("\n");
+                OutputDebugString("\t(");
+                OutputDebugString(s_logNames[level]);
+                OutputDebugString(") ");
+                OutputDebugString(msg);
+                OutputDebugString("\n");
+            #endif
+            return true;
+        }
+    };
 }
 
 /*****************************************************************************/
@@ -92,6 +127,7 @@ static int __main(int argc, const char *argv[])
 
     try
     {
+        BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
         SingletonScope<BugEngine::FileSystem> fs;
         BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getRootDirectory()+BugEngine::ipath("data"), true));
 

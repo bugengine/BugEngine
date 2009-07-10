@@ -24,19 +24,19 @@
 #ifndef BE_CORE_LOG_HH_
 #define BE_CORE_LOG_HH_
 /*****************************************************************************/
+#include <core/string/istring.hh>
 
 namespace BugEngine
 {
 
 enum eLogLevel
 {
-    logSpam,
-    logAssert,
-    logDebug,
-    logInfo,
-    logWarning,
-    logError,
-    logFatal
+    logSpam = 0,
+    logDebug = 1,
+    logInfo = 2,
+    logWarning = 3,
+    logError = 4,
+    logFatal = 5
 };
 
 class Logger;
@@ -45,6 +45,7 @@ class ILogListener
 {
     friend class Logger;
 protected:
+    static COREEXPORT const char* s_logNames[];
     virtual ~ILogListener() {}
     virtual bool log(const istring& logname, eLogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
 };
@@ -54,6 +55,7 @@ class COREEXPORT Logger
 private:
     std::vector< ILogListener* >    m_listeners;
     std::map< istring, Logger* >    m_children;
+    Logger*                         m_parent;
     istring                         m_name;
 private:
     Logger();

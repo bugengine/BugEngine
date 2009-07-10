@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include    <core/stdafx.h>
+#include    <core/log/logger.hh>
 #include    <core/debug/assert.hh>
 #include    <core/debug/callstack.hh>
 
@@ -76,6 +77,8 @@ namespace BugEngine
                                               const char *message,
                                               ...)
     {
+        Logger::root()->log(logError, file, line, message);
+
         {
             va_list l;
             va_start(l,message);

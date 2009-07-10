@@ -41,6 +41,39 @@ const luaL_Reg Context::s_objectMetaTable[] = {
     {0, 0}
 };
 
+static int luaPrint (lua_State *L)
+{
+    static Logger* logger;
+    if(!logger)
+    {
+        logger = Logger::instance("lua");
+    }
+
+    int n = lua_gettop(L);  /* number of arguments */
+    int i;
+    lua_getglobal(L, "tostring");
+    for (i=1; i<=n; i++) 
+    {
+        const char *s;
+        lua_pushvalue(L, -1);  /* function to be called */
+        lua_pushvalue(L, i);   /* value to print */
+        lua_call(L, 1, 1);
+        s = lua_tostring(L, -1);  /* get result */
+        if (s == NULL)
+            return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                                 LUA_QL("print"));
+        if (i>1) logger->log(logInfo, "", 0, "\t");
+        logger->log(logInfo, "", 0, s);
+        lua_pop(L, 1);  /* pop result */
+    }
+    return 0;
+}
+static const luaL_Reg base_funcs[] = {
+  {"print", luaPrint},
+  {NULL, NULL}
+};
+
+
 void* Context::luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize)
 {
     UNUSED(ud);
@@ -72,6 +105,7 @@ Context::Context()
     luaopen_math(m_state);
     luaopen_debug(m_state);
 
+    luaL_register(m_state, "_G", base_funcs);
     luaL_register(m_state, "bugrefobject", s_objectMetaTable);
     luaL_register(m_state, "bugweakobject", &s_objectMetaTable[1]);
 
@@ -89,6 +123,7 @@ void Context::doFile(const char *filename)
 {
     BugEngine::FileSystem* fs = BugEngine::FileSystem::instance();
     refptr<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
+    printf("loading file %s\n", filename);
     if(file)
     {
         int result;
@@ -98,6 +133,10 @@ void Context::doFile(const char *filename)
             result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
         }
         AssertMsg(result == 0, lua_tostring(m_state, -1));
+    }
+    else
+    {
+        printf("file not found : %s\n", filename);
     }
 }
 
