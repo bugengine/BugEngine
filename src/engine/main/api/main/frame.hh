@@ -24,15 +24,13 @@
 #ifndef BE_MAIN_FRAME_HH_
 #define BE_MAIN_FRAME_HH_
 /*****************************************************************************/
-#include <core/scheduler/task.hh>
+#include <system/scheduler/task.hh>
 
 namespace BugEngine
 {
 
 class Frame : public Object
 {
-private:
-    scopedptr<BaseTask>	m_entryPoint;
 public:
     Frame();
     ~Frame();

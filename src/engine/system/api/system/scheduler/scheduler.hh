@@ -21,8 +21,8 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_SCHEDULER_HH_
-#define BE_CORE_THREAD_SCHEDULER_SCHEDULER_HH_
+#ifndef BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
+#define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
 #include    <core/threads/thread.hh>
 #include    <core/utils/singleton.hh>

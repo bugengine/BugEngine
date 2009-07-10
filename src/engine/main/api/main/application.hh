@@ -66,6 +66,8 @@ private :
     be_properties
         be_classmethod(instance);
 
+        be_method(run);
+
         be_property(world)
             [be_read(m_world)]
             [be_write(m_world)];

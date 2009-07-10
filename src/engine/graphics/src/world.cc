@@ -26,7 +26,7 @@
 #include    <graphics/scene/scene3d.hh>
 #include    <rtti/namespace.hh>
 #include    <input/action.hh>
-#include    <core/scheduler/range/onestep.hh>
+#include    <system/scheduler/range/onestep.hh>
 
 namespace BugEngine { namespace Graphics
 {

@@ -21,33 +21,34 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_TASK_INL_
-#define BE_CORE_THREAD_SCHEDULER_TASK_INL_
+#ifndef BE_SYSTEM_SCHEDULER_RANGE_SEQUENCE_HH_
+#define BE_SYSTEM_SCHEDULER_RANGE_SEQUENCE_HH_
 /*****************************************************************************/
-#include    <core/scheduler/scheduler.hh>
-#include    <core/scheduler/taskitem.hh>
 
 namespace BugEngine
 {
 
-template< typename Body >
-Task< Body >::Task(const istring& name, color32 color, const Body& body, bool simultaneous)
-:   BaseTask(name, color, simultaneous)
-,   m_body(body)
+template< typename T >
+class range_sequence
 {
+private:
+    T       m_begin;
+    T       m_end;
+    size_t  m_grain;
+public:
+    range_sequence(T begin, T end, size_t grain = 1);
+    ~range_sequence();
+
+    inline T&                   begin();
+    inline T&                   end();
+    inline size_t               size() const;
+    inline range_sequence<T>    split();
+    inline bool                 atomic() const;
+};
+
 }
 
-template< typename Body >
-void Task< Body >::runTask(Scheduler* sc) const
-{
-    typedef typename Body::Range Range;
-    Range r = m_body.prepare();
-    void* item = sc->allocate_task< ScheduledTasks::TaskItem<Range, Body > >();
-    sc->queue(new(item) ScheduledTasks::TaskItem<Range, Body >(this, r, m_body));
-}
-
-}
-
+#include    "sequence.inl"
 
 /*****************************************************************************/
 #endif

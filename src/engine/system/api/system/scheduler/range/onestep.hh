@@ -21,38 +21,27 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_RANGE_ONESTEP_INL_
-#define BE_CORE_THREAD_SCHEDULER_RANGE_ONESTEP_INL_
+#ifndef BE_SYSTEM_SCHEDULER_RANGE_ONESTEP_HH_
+#define BE_SYSTEM_SCHEDULER_RANGE_ONESTEP_HH_
 /*****************************************************************************/
 
 namespace BugEngine
 {
 
-inline range_onestep::range_onestep()
+class range_onestep
 {
-}
+public:
+    range_onestep();
+    ~range_onestep();
 
-inline range_onestep::~range_onestep()
-{
-}
-
-inline size_t range_onestep::size() const
-{
-    return 1;
-}
-
-inline bool range_onestep::atomic() const
-{
-    return true;
-}
-
-inline range_onestep range_onestep::split()
-{
-    AssertNotReached();
-    return *this;
-}
+    inline size_t               size() const;
+    inline range_onestep        split();
+    inline bool                 atomic() const;
+};
 
 }
+
+#include    "onestep.inl"
 
 /*****************************************************************************/
 #endif

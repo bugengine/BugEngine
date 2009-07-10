@@ -21,27 +21,33 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_RANGE_ONESTEP_HH_
-#define BE_CORE_THREAD_SCHEDULER_RANGE_ONESTEP_HH_
+#ifndef BE_SYSTEM_SCHEDULER_TASK_INL_
+#define BE_SYSTEM_SCHEDULER_TASK_INL_
 /*****************************************************************************/
+#include    <system/scheduler/scheduler.hh>
+#include    <system/scheduler/taskitem.hh>
 
 namespace BugEngine
 {
 
-class range_onestep
+template< typename Body >
+Task< Body >::Task(const istring& name, color32 color, const Body& body, bool simultaneous)
+:   BaseTask(name, color, simultaneous)
+,   m_body(body)
 {
-public:
-    range_onestep();
-    ~range_onestep();
+}
 
-    inline size_t               size() const;
-    inline range_onestep        split();
-    inline bool                 atomic() const;
-};
+template< typename Body >
+void Task< Body >::runTask(Scheduler* sc) const
+{
+    typedef typename Body::Range Range;
+    Range r = m_body.prepare();
+    void* item = sc->allocate_task< ScheduledTasks::TaskItem<Range, Body > >();
+    sc->queue(new(item) ScheduledTasks::TaskItem<Range, Body >(this, r, m_body));
+}
 
 }
 
-#include    "onestep.inl"
 
 /*****************************************************************************/
 #endif

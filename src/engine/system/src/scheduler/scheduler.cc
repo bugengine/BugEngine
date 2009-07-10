@@ -21,14 +21,14 @@
 * 02110-1301  USA                                                             *
 \*****************************************************************************/
 
-#include    <core/stdafx.h>
+#include    <system/stdafx.h>
 #include    <core/environment.hh>
 #include    <core/settings/manager.hh>
-#include    <core/scheduler/scheduler.hh>
+#include    <system/scheduler/scheduler.hh>
 #include    <core/threads/mutex.hh>
-#include    <core/scheduler/task.hh>
-#include    <core/scheduler/taskitem.hh>
-#include    <core/scheduler/range/sequence.hh>
+#include    <system/scheduler/task.hh>
+#include    <system/scheduler/taskitem.hh>
+#include    <system/scheduler/range/sequence.hh>
 #include    <minitl/interlocked/stack>
 #include    <maths/vector.hh>
 #include    <core/debugrenderer/debugrenderer.hh>
