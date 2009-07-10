@@ -38,7 +38,15 @@ EException::EException(const std::string& msg) :
     Logger::root()->log(logFatal, "", 0, msg.c_str());
 }
 
-
+const char* ILogListener::s_logNames[] =
+{
+    " SPAM  ",
+    " DEBUG ",
+    " INFO  ",
+    "WARNING",
+    " ERROR ",
+    " FATAL "
+};
 
 
 Logger::Logger() :
@@ -50,10 +58,11 @@ Logger::Logger() :
 
 
 
-Logger::Logger(Logger*parent, const istring& name) :
-    m_listeners(),
-    m_children(),
-    m_name(name)
+Logger::Logger(Logger*parent, const istring& name)
+    :   m_listeners()
+    ,   m_children()
+    ,   m_parent(parent)
+    ,   m_name(name)
 {
     Assert(parent);
     parent->m_children.insert(std::make_pair( name, this ));
@@ -106,9 +115,9 @@ bool Logger::log(eLogLevel level, const char *filename, int line, const char *ms
         result |= (*it)->log(m_name, level, filename, line, msg);
     }
 
-    for(std::map< istring, Logger* >::iterator it = m_children.begin(); it != m_children.end(); ++it)
+    if(m_parent)
     {
-        result |= it->second->log(level, filename, line, msg);
+        result |= m_parent->log(level, filename, line, msg);
     }
 
     return result;

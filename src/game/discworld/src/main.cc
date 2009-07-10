@@ -36,11 +36,13 @@
 /*---------------------------------------------------------------------------*/
 int be_main (BugEngine::Application* app)
 {
+    printf("Test\n");
     TestNS::Test* t = new TestNS::Test;
     BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
     BugEngine::Plugin p("lua");
     void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
     (*doFile)("data/scripts/main.lua");
+    printf("Done\n");
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);

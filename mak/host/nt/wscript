@@ -23,6 +23,23 @@ def add_msvc_to_env(conf, compiler, version, target, tname):
 	conf.setenv(name)
 	try:
 		conf.check_tool('msvc')
+		
+		conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
+		conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
+		conf.env['LINKFLAGS_debug'] = ['/DEBUG']
+
+		conf.env['CCFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
+		conf.env['CXXFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
+		conf.env['LINKFLAGS_release'] = ['/DEBUG']
+
+		conf.env['CCFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+		conf.env['CXXFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+		conf.env['LINKFLAGS_profile'] = []
+
+		conf.env['CCFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+		conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+		conf.env['LINKFLAGS_final'] = []
+
 	except Configure.ConfigurationError:
 		conf.setenv('default')
 		warn('configuration fail for tool %s' % name)

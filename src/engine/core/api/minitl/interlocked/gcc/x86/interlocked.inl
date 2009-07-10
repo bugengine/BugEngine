@@ -53,7 +53,7 @@ struct InterlockedType<8>
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
         value_t prev;
-        __asm__ __volatile__ ("xchgw %0, %1"
+        __asm__ __volatile__ ("lock; xchgw %0, %1"
                       : "=a" (prev), "+m" (*p)
                       : "r" (v));
         return prev;
@@ -118,7 +118,7 @@ struct InterlockedType<4>
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
         long prev;
-        __asm__ __volatile__ ("xchgl %0, %1"
+        __asm__ __volatile__ ("lock; xchgl %0, %1"
                       : "=a" (prev), "+m" (*p)
                       : "r" (v));
         return prev;

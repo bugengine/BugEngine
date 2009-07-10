@@ -98,6 +98,7 @@ struct StaticAssert_<true>
 
 #include    <core/debug/assert.hh>
 #include    <core/string/istring.hh>
+#include    <core/log/logger.hh>
 #include    <core/string/message.hh>
 
 #include    <maths/float.hh>

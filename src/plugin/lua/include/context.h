@@ -32,6 +32,7 @@ class Context
 {
 private:
     lua_State*  m_state;
+    Logger*     m_logger;
 public:
     Context();
     ~Context();
