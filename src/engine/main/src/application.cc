@@ -25,7 +25,7 @@
 #include    <main/application.hh>
 
 #include    <rtti/namespace.hh>
-#include    <core/scheduler/range/onestep.hh>
+#include    <system/scheduler/range/onestep.hh>
 #include    <input/inputmap.hh>
 #include    <input/manager.hh>
 

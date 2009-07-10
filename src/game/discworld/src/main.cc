@@ -32,6 +32,7 @@
 #include    <rtti/test.hh>
 #include    <rtti/namespace.hh>
 
+
 /*---------------------------------------------------------------------------*/
 int be_main (BugEngine::Application* app)
 {

@@ -27,7 +27,7 @@
 #include    <graphics/renderer/renderer.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/scene/scene.hh>
-#include    <core/scheduler/task.hh>
+#include    <system/scheduler/task.hh>
 
 namespace BugEngine
 {

@@ -21,11 +21,11 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_RANGE_HH_
-#define BE_CORE_THREAD_SCHEDULER_RANGE_HH_
+#ifndef BE_SYSTEM_SCHEDULER_RANGE_HH_
+#define BE_SYSTEM_SCHEDULER_RANGE_HH_
 /*****************************************************************************/
 
-#include    <core/scheduler/range/sequence.hh>
+#include    <system/scheduler/range/sequence.hh>
 
 /*****************************************************************************/
 #endif

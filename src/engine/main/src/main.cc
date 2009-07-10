@@ -29,7 +29,7 @@
 #include    <system/filesystem.hh>
 #include    <system/diskfs.hh>
 #include    <input/inputmap.hh>
-#include    <core/scheduler/scheduler.hh>
+#include    <system/scheduler/scheduler.hh>
 #include    <core/environment.hh>
 
 #include    <cstdio>

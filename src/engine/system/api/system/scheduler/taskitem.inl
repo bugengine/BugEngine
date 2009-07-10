@@ -21,59 +21,54 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_RANGE_SEQUENCE_INL_
-#define BE_CORE_THREAD_SCHEDULER_RANGE_SEQUENCE_INL_
+#ifndef BE_SYSTEM_SCHEDULER_TASKITEM_INL_
+#define BE_SYSTEM_SCHEDULER_TASKITEM_INL_
 /*****************************************************************************/
+#include    <system/scheduler/scheduler.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace ScheduledTasks
 {
 
-template< typename T >
-range_sequence<T>::range_sequence(T begin, T end, size_t grain)
-:   m_begin(begin)
-,   m_end(end)
-,   m_grain(grain)
-{
-}
-
-template< typename T >
-range_sequence<T>::~range_sequence()
+template< typename Range, typename Body >
+TaskItem<Range, Body>::TaskItem(const BaseTask* owner, const Range& r, const Body& b)
+:   BaseTaskItem(owner)
+,   m_range(r)
+,   m_body(b)
 {
 }
 
-template< typename T >
-T& range_sequence<T>::begin()
+template< typename Range, typename Body >
+TaskItem<Range, Body>::TaskItem(TaskItem& split)
+:   BaseTaskItem(split)
+,   m_range(split.m_range.split())
+,   m_body(split.m_body)
 {
-    return m_begin;
 }
 
-template< typename T >
-T& range_sequence<T>::end()
+template< typename Range, typename Body >
+void TaskItem<Range, Body>::run(Scheduler* sc)
 {
-    return m_end;
+    Assert(m_currentState == Executing);
+    m_body(m_range);
+    postrun(sc);
+    sc->release_task(this);
 }
 
-template< typename T >
-size_t range_sequence<T>::size() const
+template< typename Range, typename Body >
+BaseTaskItem* TaskItem<Range, Body>::split(Scheduler* sc)
 {
-    return m_end-m_begin;
+    void* mem = sc->allocate_task< TaskItem<Range, Body> >();
+    BaseTaskItem* result = new(mem) TaskItem<Range, Body>(*this);
+    return result;
 }
 
-template< typename T >
-bool range_sequence<T>::atomic() const
+template< typename Range, typename Body >
+bool TaskItem<Range, Body>::atomic() const
 {
-    return size() <= m_grain;
+    return m_range.atomic();
 }
 
-template< typename T >
-range_sequence<T> range_sequence<T>::split()
-{
-    T oldbegin = m_begin;
-    m_begin = m_begin + (m_end-m_begin)/2;
-    return range_sequence<T>(oldbegin, m_begin);
-}
-
-}
+}}
 
 /*****************************************************************************/
 #endif

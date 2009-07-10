@@ -21,8 +21,8 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_THREAD_SCHEDULER_TASK_HH_
-#define BE_CORE_THREAD_SCHEDULER_TASK_HH_
+#ifndef BE_SYSTEM_SCHEDULER_TASK_HH_
+#define BE_SYSTEM_SCHEDULER_TASK_HH_
 /*****************************************************************************/
 #include    <core/threads/event.hh>
 #include    <maths/vector.hh>
@@ -101,7 +101,7 @@ public:
 
 }
 
-#include    <core/scheduler/task.inl>
+#include    <system/scheduler/task.inl>
 
 /*****************************************************************************/
 #endif
