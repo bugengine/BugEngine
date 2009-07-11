@@ -84,7 +84,7 @@ def create_project(t):
 	solution = solutions[toolName]
 	projectClass,versionNumber = projects[toolName][1]
 
-	project = GenerateProject(env=t.env)
+	project = GenerateProject(env=t.env.copy())
 	project.type			= t.type
 	project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
 	project.version 		= toolName
@@ -103,7 +103,7 @@ def create_project(t):
 		project.set_outputs([t.path.find_or_declare(outname)])
 	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree
 	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
-	project.dep_vars = ['MSVC_PROJECT_SOURCES','MSVC_PROJECT_FLAGS']
+	project.dep_vars = ['MSVC_PROJECT_SOURCES', 'MSVC_PROJECT_FLAGS']
 
 	solution.depends.append(t)
 	solution.env['MSVC_PROJECT_DEPENDS'].append(outname)
