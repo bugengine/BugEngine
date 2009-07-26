@@ -29,17 +29,35 @@ namespace BugEngine
 {
 
 Semaphore::Semaphore(int initialCount, int maxCount)
-:   Waitable(CreateSemaphore(NULL, initialCount, maxCount, NULL))
+:   m_data(CreateSemaphore(NULL, initialCount, maxCount, NULL))
 {
 }
 
 Semaphore::~Semaphore()
 {
+    CloseHandle((HANDLE)m_data);
 }
 
 void Semaphore::release(int count)
 {
     ReleaseSemaphore((HANDLE)m_data, count, NULL);
+}
+
+Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
+{
+    DWORD rcode = WaitForSingleObject((HANDLE)m_data, timeout);
+    switch(rcode)
+    {
+    case WAIT_OBJECT_0:
+        return Finished;
+    case WAIT_TIMEOUT:
+        return TimeOut;
+    case WAIT_FAILED:
+        Assert(false);
+    case WAIT_ABANDONED:
+    default:
+        return Abandoned;
+    }
 }
 
 

@@ -31,12 +31,15 @@ namespace BugEngine
 
 class COREEXPORT Event : public Threads::Waitable
 {
+private:
+    void*           m_data;
 public:
     Event();
     ~Event();
 
     void reset();
     void set();
+    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
 };
 
 }

@@ -36,7 +36,7 @@
 #endif
 
 #include    <d3d9.h>
-#include    <dxerr.h>
+#include    <DxErr.h>
 #include    <Cg/cg.h>
 
 #define D3D_CHECKRESULT(operation)                          \

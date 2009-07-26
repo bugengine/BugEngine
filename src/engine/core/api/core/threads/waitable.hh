@@ -30,11 +30,9 @@ namespace BugEngine { namespace Threads
 
 class COREEXPORT Waitable
 {
-protected:
-    void*           m_data;
 public:
-    Waitable(void* data);
-    virtual ~Waitable();
+    Waitable()          {}
+    virtual ~Waitable() {}
 
 
     enum WaitResult
@@ -47,7 +45,7 @@ public:
     {
         Forever = 0xffffffff
     };
-    WaitResult wait(unsigned int waitTime = Forever);
+    virtual WaitResult wait(unsigned int waitTime = Forever) = 0;
 };
 
 }}
