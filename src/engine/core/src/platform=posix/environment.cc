@@ -21,58 +21,85 @@
 * USA                                                                         *
 \*****************************************************************************/
 
+#include    <core/stdafx.h>
+#include    <core/environment.hh>
+#include    <core/log/logger.hh>
 
-#ifndef BE_CORE_PLATFORMS_H_
-#define BE_CORE_PLATFORMS_H_
-/*****************************************************************************/
-
-#ifdef _WIN32
-# define WIN32_LEAN_AND_MEAN
-# define NOMINMAX
-# include <windows.h>
-# pragma warning(disable:4505)
-static void displayError()
+namespace BugEngine
 {
-    char* msg;
-    ::FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
-                      0,
-                      ::GetLastError(),
-                      0,
-                      (char*)&msg,
-                      0,
-                      0 );
-    MessageBox(0, msg, "Win32 error", MB_OK);
-    ::LocalFree(msg);
+
+Environment::Environment()
+:   m_homeDirectory(getenv("HOME"))
+,   m_rootDirectory("")
+,   m_game("")
+,   m_user(getenv("USER"))
+{
+    FILE* cmdline = fopen("/proc/self/cmdline", "r");
+    if(!cmdline)
+        return;
+    char exe[4096];
+    fread(exe, 1, 4096, cmdline);
+    char* filename = exe;
+    while(*filename != 0)
+    {
+        filename++;
+    }
+    while(*filename != '/' && filename != exe)
+    {
+        filename--;
+    }
+    m_game = filename;
+    m_rootDirectory = (minitl::format<>("../share/%s") | filename).c_str();
 }
-#define BE_WIN32_PRINTERROR()       displayError()
-#define BE_WIN32_CHECKRESULT(x)     if((x) == -1) BE_WIN32_PRINTERROR()
-#endif
 
-#ifndef _WIN32
-# define OutputDebugString(s) printf("%s", s)
-#endif
+Environment::~Environment()
+{
+}
 
-#ifdef _WIN32
-# ifdef _AMD64
-#  define BE_PLATFORM_NAME  Win64
-#  define BE_PLATFORM_WIN32 1
-#  define BE_PLATFORM_WIN64 1
-# else
-#  define BE_PLATFORM_NAME  Win32
-#  define BE_PLATFORM_WIN32 1
-# endif
-#elif defined __APPLE__
-# define BE_PLATFORM_NAME   MacOSX
-# define BE_PLATFORM_MACOS  1
-#elif defined __linux__
-# define BE_PLATFORM_NAME   Linux
-# define BE_PLATFORM_LINUX  1
-#elif defined __sun
-# define BE_PLATFORM_NAME   SunOS
-# define BE_PLATFORM_SUN    1
-#else
-# error "unknown platform"
-#endif
+const Environment& Environment::getEnvironment()
+{
+    static Environment s_environment;
+    return s_environment;
+}
 
-/*****************************************************************************/
-#endif
+const ipath& Environment::getRootDirectory() const
+{
+    return m_rootDirectory;
+}
+
+const ipath& Environment::getHomeDirectory() const
+{
+    return m_homeDirectory;
+}
+
+const istring& Environment::getGame() const
+{
+    return m_game;
+}
+
+const istring& Environment::getUser() const
+{
+    return m_user;
+}
+size_t Environment::getProcessorCount() const
+{
+    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+    if(!cpuinfo)
+    {
+        be_warning("cpuinfo not available; assuming 1 cpu");
+        return 1;
+    }
+    int i = 0;
+    while(!feof(cpuinfo))
+    {
+        char line[256];
+        fgets(line, 256, cpuinfo);
+        if(strncmp(line, "processor", 9) == 0)
+        {
+            sscanf(line, "processor : %d", &i);
+        }
+    }
+    return i+1;
+}
+
+}

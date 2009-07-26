@@ -15,7 +15,8 @@ def find_scc(conf):
 	if v['CC']: cc = v['CC']
 	elif 'CC' in conf.environ: cc = conf.environ['CC']
 	#if not cc: cc = conf.find_program('gcc', var='CC')
-	if not cc: cc = conf.find_program('cc', var='CC')
+	#if not cc: cc = conf.find_program('cc', var='CC')
+	if not cc: cc = conf.find_program('suncc', var='CC')
 	if not cc: conf.fatal('suncc was not found')
 
 	try:

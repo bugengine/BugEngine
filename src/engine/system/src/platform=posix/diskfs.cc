@@ -23,7 +23,7 @@
     
 #include    <system/stdafx.h>
 #include    <system/diskfs.hh>
-#include    <core/streams.hh>
+#include    <core/memory/streams.hh>
 
 #include    <unistd.h>
 #include    <sys/mman.h>

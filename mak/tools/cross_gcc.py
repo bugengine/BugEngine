@@ -88,19 +88,19 @@ def find_cross_gcc(conf):
 
 
 	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_debug'] = ['-g']
 
 	conf.env['CCFLAGS_release'] = ['-g', '-O1']
-	conf.env['CXXFLAGS_release'] = ['-g', '-O1']
+	conf.env['CXXFLAGS_release'] = ['-g', '-O1', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_release'] = ['-g', '-O1']
 
 	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_profile'] = []
 
 	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_final'] = []
 
 @feature('cc', 'cxx')
