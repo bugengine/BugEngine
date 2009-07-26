@@ -29,12 +29,13 @@ namespace BugEngine
 {
 
 Event::Event()
-:   Waitable(CreateEvent(0, TRUE, FALSE, 0))
+:   m_data(CreateEvent(0, TRUE, FALSE, 0))
 {
 }
 
 Event::~Event()
 {
+    CloseHandle((HANDLE)m_data);
 }
 
 void Event::reset()
@@ -45,6 +46,23 @@ void Event::reset()
 void Event::set()
 {
     SetEvent((HANDLE)m_data);
+}
+
+Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
+{
+    DWORD rcode = WaitForSingleObject((HANDLE)m_data, timeout);
+    switch(rcode)
+    {
+    case WAIT_OBJECT_0:
+        return Finished;
+    case WAIT_TIMEOUT:
+        return TimeOut;
+    case WAIT_FAILED:
+        Assert(false);
+    case WAIT_ABANDONED:
+    default:
+        return Abandoned;
+    }
 }
 
 

@@ -27,6 +27,7 @@
 #include    <core/debug/callstack.hh>
 #include    <core/threads/mutex.hh>
 
+#ifndef _WIN32
 static int strnicmp(const char *s1, const char *s2, size_t len)
 {
     unsigned char c1, c2;
@@ -51,6 +52,7 @@ static int strnicmp(const char *s1, const char *s2, size_t len)
     }
     return (int)c1 - (int)c2;
 }
+#endif
 
 #ifdef BE_PLATFORM_WIN32
 # define debugPrint(msg)    OutputDebugString((msg))

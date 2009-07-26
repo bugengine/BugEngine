@@ -27,7 +27,7 @@
 #include    <winnt.h>
 #include    <tlhelp32.h>
 #include    <psapi.h>
-#include    <dbghelp.h>
+#include    <DbgHelp.h>
 
 
 namespace BugEngine

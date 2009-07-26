@@ -31,11 +31,14 @@ namespace BugEngine
 
 class COREEXPORT Mutex : public Threads::Waitable
 {
+private:
+    void*           m_data;
 public:
     Mutex();
     ~Mutex();
 
     void release();
+    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
 };
 
 class ScopedMutexLock

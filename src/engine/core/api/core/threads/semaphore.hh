@@ -31,11 +31,14 @@ namespace BugEngine
 
 class COREEXPORT Semaphore : public Threads::Waitable
 {
+private:
+    void*           m_data;
 public:
     Semaphore(int initialCount, int maxCount);
     ~Semaphore();
 
     void release(int count);
+    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
 };
 
 }

@@ -53,7 +53,7 @@ public:
 
         be_property(Value2)
             [be_read(m_value)]
-            [be_set(setValue2)];
+            [be_set(setValue)];
 
         be_property(prop)
             [be_get(prop)]
