@@ -122,7 +122,8 @@ def filter_sources(self):
 					continue
 			if tail[0:9] == 'platform=':
 				platforms=set(tail[9:].split(','))
-				if not set(v['PLATFORMS']) & platforms:
+				if not set(v['PLATFORM']) & platforms:
+					print v['PLATFORMS']
 					print 'excluding source :',source
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]

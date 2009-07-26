@@ -17,43 +17,65 @@
 * the Free Software Foundation, Inc.,                                         *
 * 51 Franklin St,                                                             *
 * Fifth Floor,                                                                *
-* Boston, MA                                                                  *
-* 02110-1301  USA                                                             *
+* Boston, MA 02110-1301                                                       *
+* USA                                                                         *
 \*****************************************************************************/
-    
-#include    <system/stdafx.h>
-#include    <system/plugin.hh>
-#include    <core/environment.hh>
 
-#include    <stdexcept>
-#include    <dlfcn.h>
+#include    <input/stdafx.h>
+#include    <input/manager.hh>
 
-namespace BugEngine
+
+namespace BugEngine { namespace Input
 {
 
-Plugin::Plugin(const istring &pluginName)
+
+class Manager::WindowCommunication
 {
-    minitl::format<> f = (minitl::format<>("%s.so") | pluginName.c_str());
-    FPluginHandle = dlopen((Environment::getEnvironment().getRootDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
-    if(! FPluginHandle)
-        throw std::runtime_error(std::string("failed to load plugin ") + pluginName.c_str());
-    void (*_init)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_initplugin"));
-    Assert(_init);
-    (*_init)();
+public:
+    WindowCommunication();
+    ~WindowCommunication();
+
+    static WindowCommunication& getCommunication();
+};
+
+Manager::WindowCommunication::WindowCommunication()
+{
 }
 
-Plugin::~Plugin(void)
+Manager::WindowCommunication::~WindowCommunication()
 {
-    void (*_fini)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_finiplugin"));
-    if(_fini)
-        _fini(); 
-    dlclose(FPluginHandle);
 }
 
-Plugin::generic Plugin::_get(const std::string& symbol)
+Manager::WindowCommunication& Manager::WindowCommunication::getCommunication()
 {
-    return reinterpret_cast<generic>(dlsym(FPluginHandle,symbol.c_str()));
+    static WindowCommunication  s_communication;
+    return s_communication;
 }
 
+
+Manager::Manager()
+:   m_communication(WindowCommunication::getCommunication())
+,   m_inputThread("Input", &Manager::waitInput, 0, 0, Thread::Critical, false)
+{
 }
+
+Manager::~Manager()
+{
+}
+
+Device* Manager::getDevice(void* handle)
+{
+    return 0;
+}
+
+void Manager::update() const
+{
+}
+
+intptr_t Manager::waitInput(intptr_t /*p1*/, intptr_t /*p2*/)
+{
+    return 0;
+}
+
+}}
 

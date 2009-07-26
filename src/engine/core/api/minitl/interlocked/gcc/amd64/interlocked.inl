@@ -138,9 +138,9 @@ struct InterlockedType<8>
     }
     static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
-        int result;
+        unsigned char result;
         __asm__ __volatile__ (
-                   "lock\n\t cmpxchg16b %1; setz(%0)\n\t"
+                   "lock\n\t cmpxchg16b %1; setz %0\n\t"
                  : "=A"(result), "=m"(*p)
                  : "m"(*p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
                  : "memory"
@@ -157,7 +157,7 @@ struct InterlockedType<4>
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;
-        __asm__ __volatile__ ("lock; xaddl %0,%1"
+        __asm__ __volatile__ ("lock; xadd %0,%1"
                       : "=a" (old), "=m" (*p)
                       : "a" (incr), "m" (*p)
                       : "memory", "cc");
@@ -170,7 +170,7 @@ struct InterlockedType<4>
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
         long prev;
-        __asm__ __volatile__ ("lock; xchgl %0, %1"
+        __asm__ __volatile__ ("lock; xchg %0, %1"
                       : "=a" (prev), "+m" (*p)
                       : "r" (v));
         return prev;
@@ -178,7 +178,7 @@ struct InterlockedType<4>
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
         long prev;
-        __asm__ __volatile__ ("lock; cmpxchgl %1, %2"
+        __asm__ __volatile__ ("lock; cmpxchg %1, %2"
                       : "=a" (prev)
                       : "r" (v), "m" (*(p)), "0"(condition)
                       : "memory", "cc");

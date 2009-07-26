@@ -75,31 +75,22 @@ private:
 };
 
 #ifdef _DEBUG
-# define  lspam(msg)        log(logSpam, __FILE__,__LINE__,msg)
-# define _lspam(ns,msg)     BugEngine::Logger::instance(ns)->lspam(msg)
-# define  ldebug(msg)       log(logDebug, __FILE__,__LINE__,msg)
-# define _ldebug(ns,msg)    BugEngine::Logger::instance(ns)->ldebug(msg)
+# define  be_spam(msg)        Logger::root()->log(logSpam, __FILE__,__LINE__,msg)
+# define  be_debug(msg)       Logger::root()->log(logDebug, __FILE__,__LINE__,msg)
 #else
-# define  lspam(msg)
-# define _lspam(ns,msg)
-# define  ldebug(msg)
-# define _ldebug(ns,msg)
+# define  be_spam(msg)
+# define  be_debug(msg)
 #endif
 
 #ifndef NDEBUG
-# define  linfo(msg)        log(logInfo, __FILE__,__LINE__,msg)
-# define _linfo(ns,msg)     BugEngine::Logger::instance(ns)->lspam(msg)
+# define  be_info(msg)        Logger::root()->log(logInfo, __FILE__,__LINE__,msg)
 #else
-# define  linfo(msg)
-# define _linfo(ns,msg)
+# define  be_info(msg)
 #endif
 
-#define  lwarning(msg)      log(logWarning, __FILE__,__LINE__,msg)
-#define _lwarning(ns,msg)   BugEngine::Logger::instance(ns)->lwarning(msg)
-#define  lerror(msg)        log(logError, __FILE__,__LINE__,msg)
-#define _lerror(ns,msg)     BugEngine::Logger::instance(ns)->lerror(msg)
-#define  lfatal(msg)        log(logFatal, __FILE__,__LINE__,msg)
-#define _lfatal(ns,msg)     BugEngine::Logger::instance(ns)->lfatal(msg)
+#define  be_warning(msg)      Logger::root()->log(logWarning, __FILE__,__LINE__,msg)
+#define  be_error(msg)        Logger::root()->log(logError, __FILE__,__LINE__,msg)
+#define  be_fatal(msg)        Logger::root()->log(logFatal, __FILE__,__LINE__,msg)
 
 }
 

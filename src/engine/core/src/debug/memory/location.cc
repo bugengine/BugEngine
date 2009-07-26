@@ -27,6 +27,31 @@
 #include    <core/debug/callstack.hh>
 #include    <core/threads/mutex.hh>
 
+static int strnicmp(const char *s1, const char *s2, size_t len)
+{
+    unsigned char c1, c2;
+
+    c1 = c2 = 0;
+    while(len--)
+    {
+        c1 = *s1;
+        c2 = *s2;
+        s1++;
+        s2++;
+        if (!c1)
+            break;
+        if (!c2)
+            break;
+        if (c1 == c2)
+            continue;
+        c1 = tolower(c1);
+        c2 = tolower(c2);
+        if (c1 != c2)
+            break;
+    }
+    return (int)c1 - (int)c2;
+}
+
 #ifdef BE_PLATFORM_WIN32
 # define debugPrint(msg)    OutputDebugString((msg))
 #else
@@ -139,7 +164,7 @@ LocationInfo::Storage::~Storage()
             if(i->stats.aliveAllocs)
             {
                 dumpName(i->parent());
-                debugPrint(minitl::format<>("%s : %u blocks\n") | i->filename | i->stats.aliveAllocs);
+                debugPrint((minitl::format<>("%s : %u blocks\n") | i->filename | i->stats.aliveAllocs).c_str());
             }
         }
     }

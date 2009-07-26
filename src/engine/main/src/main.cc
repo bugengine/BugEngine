@@ -96,7 +96,7 @@ namespace
             fclose(m_logFile);
         }
     protected:
-        virtual bool log(const BugEngine::istring& logname, BugEngine::eLogLevel level, const char *filename, int line, const char *msg)
+        virtual bool log(const BugEngine::istring& logname, BugEngine::eLogLevel level, const char *filename, int line, const char *msg) throw()
         {
             fprintf(m_logFile, "%s(%d): %s\n"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
