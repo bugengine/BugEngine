@@ -64,8 +64,8 @@ struct InterlockedType<8>
     #ifdef __PIC__
         __asm__ __volatile__ (
                 "push %%rbx\n\t"
-                "movl  (%%ecx),%%ebx\n\t"
-                "movl  4(%%ecx),%%ecx\n\t"
+                "mov  (%%rcx),%%rbx\n\t"
+                "mov  8(%%rcx),%%rcx\n\t"
                 "lock;  cmpxchg8b %1\n\t"
                 "pop  %%rbx"
                  : "=A"(result), "=m"(*(i64 *)p)

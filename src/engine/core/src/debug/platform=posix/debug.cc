@@ -39,6 +39,7 @@ AssertionResult defaultAssertionCallback( const char *file,
     va_start(l, message);
     vfprintf(stderr, message, l);
     va_end(l);
+    return Break;
 }
 
 static AssertionCallback_t g_callback = defaultAssertionCallback;
