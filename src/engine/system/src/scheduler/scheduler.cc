@@ -237,7 +237,6 @@ Scheduler::Scheduler()
     {
         m_workers.push_back(new Worker(this, i));
     }
-    m_end.reset();
 }
 
 Scheduler::~Scheduler()
@@ -300,7 +299,12 @@ ScheduledTasks::BaseTaskItem* Scheduler::pop()
 
 void Scheduler::wait()
 {
-    m_end.wait();
+    while(m_runningTasks)
+    {
+        m_end.lock();
+        m_end.wait();
+        m_end.unlock();
+    }
 }
 
 }
