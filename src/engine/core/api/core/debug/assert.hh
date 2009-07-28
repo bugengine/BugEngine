@@ -26,10 +26,10 @@
 /*****************************************************************************/
 
 #include <cstdlib>
-#if defined(_MSC_VER)
+#if defined(BE_COMPILER_MSVC)
 # include <intrin.h>
 # define BREAKPOINT __debugbreak()
-#elif defined(__GNUC__)
+#elif defined(BE_COMPILER_GCC)
 # define BREAKPOINT __asm("int3")
 #endif
 
