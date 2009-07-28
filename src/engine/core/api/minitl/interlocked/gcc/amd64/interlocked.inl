@@ -61,13 +61,13 @@ struct InterlockedType<8>
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
         value_t result;
-    #if __PIC__
+    #ifdef __PIC__
         __asm__ __volatile__ (
-                "pushl %%ebx\n\t"
+                "push %%rbx\n\t"
                 "movl  (%%ecx),%%ebx\n\t"
                 "movl  4(%%ecx),%%ecx\n\t"
                 "lock;  cmpxchg8b %1\n\t"
-                "popl  %%ebx"
+                "pop  %%rbx"
                  : "=A"(result), "=m"(*(i64 *)p)
                  : "m"(*(i64 *)p), "0"(condition), "c"(&v)
                  : "memory", "esp"
