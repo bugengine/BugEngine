@@ -28,8 +28,9 @@
 namespace BugEngine
 {
 
+/* condition variables are only supported in Vista+ */
 Event::Event()
-:   m_data(CreateEvent(0, TRUE, FALSE, 0))
+:   m_data(CreateEvent(0, FALSE, FALSE, 0))
 {
 }
 
@@ -38,14 +39,17 @@ Event::~Event()
     CloseHandle((HANDLE)m_data);
 }
 
-void Event::reset()
-{
-    ResetEvent((HANDLE)m_data);
-}
-
 void Event::set()
 {
     SetEvent((HANDLE)m_data);
+}
+
+void Event::lock()
+{
+}
+
+void Event::unlock()
+{
 }
 
 Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
