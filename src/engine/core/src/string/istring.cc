@@ -298,7 +298,6 @@ static void parse(const char *str, const char *end, const char *sep, istring* bu
         while(*ss && ss < end)
         {
             ss = findnext(str, sep, numsep);
-            Assert(ss != str);    
             buffer[size++] = istring(str,ss);
             if(*ss) ss++;
             str=ss;

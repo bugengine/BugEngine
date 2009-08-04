@@ -21,8 +21,8 @@ def configure(conf):
 									'runbin':	'bin',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
-									'plugin':	os.path.join('data', 'plugins') }
+									'data':		os.path.join('share', 'bugengine'),
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 									
 
 def build(bld):

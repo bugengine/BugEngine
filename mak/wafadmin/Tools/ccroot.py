@@ -356,7 +356,7 @@ def apply_lib_vars(self):
 
 		# WARNING some linkers can link against programs
 		libname = y.target[y.target.rfind(os.sep) + 1:]
-		if 'cshlib' in y.features or 'cprogram' in y.features:
+		if 'cshlib' in y.features:
 			env.append_value('LIB', libname)
 		elif 'cstaticlib' in y.features:
 			env.append_value('STATICLIB', libname)

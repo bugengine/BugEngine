@@ -89,19 +89,19 @@ def find_cross_gcc(conf):
 
 	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG', '-fPIC']
 	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-g']
+	conf.env['LINKFLAGS_debug'] = ['-rdynamic', '-g', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_release'] = ['-g', '-O1', '-fPIC']
 	conf.env['CXXFLAGS_release'] = ['-g', '-O1', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_release'] = ['-g', '-O1']
+	conf.env['LINKFLAGS_release'] = ['-rdynamic', '-g', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fPIC']
 	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_profile'] = []
+	conf.env['LINKFLAGS_profile'] = ['-rdynamic', '-s', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3', '-fPIC']
 	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_final'] = []
+	conf.env['LINKFLAGS_final'] = ['-rdynamic', '-s', '-Wl,-x', '-Wl,-O2']
 
 @feature('cc', 'cxx')
 def static_libgcc(self):

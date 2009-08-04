@@ -60,33 +60,28 @@ struct InterlockedType<8>
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
-        value_t result;
     #ifdef __PIC__
-        __asm__ __volatile__ (
-                "push %%rbx\n\t"
-                "mov  (%%rcx),%%rbx\n\t"
-                "mov  8(%%rcx),%%rcx\n\t"
-                "lock;  cmpxchg8b %1\n\t"
-                "pop  %%rbx"
-                 : "=A"(result), "=m"(*(i64 *)p)
-                 : "m"(*(i64 *)p), "0"(condition), "c"(&v)
-                 : "memory", "esp"
-    #if defined(BE_COMPILER_INTEL)
-                 ,"ebx"
+        __asm__ __volatile__("push %%rbx\n\t" : : : "esp");
     #endif
-        );
-    #else
-        union {
+        value_t result;
+        union split {
             i64 asI64;
             i32 asI32[2];
         };
-        asI64 = v;
+        split dst;
+        dst.asI64 = v;
+        split src;
+        src.asI64 = condition;
+
         __asm__ __volatile__ (
                 "lock;  cmpxchg8b %1\n\t"
                  : "=A"(result), "=m"(*p)
-                 : "m"(*p), "0"(condition), "b"(asI32[0]), "c"(asI32[1])
+                 : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
                  : "memory"
+
         );
+    #ifdef __PIC__
+        __asm__ __volatile__("pop %%rbx\n\t" : : : "esp");
     #endif
         return result;
     }

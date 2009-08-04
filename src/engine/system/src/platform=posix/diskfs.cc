@@ -139,6 +139,7 @@ refptr<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMod
         int file = ::open(fullname.c_str(), O_RDONLY);
         if(file == -1)
         {
+            printf("%s\n", fullname.c_str());
             throw EFileNotFound(filename);
         }
         else
