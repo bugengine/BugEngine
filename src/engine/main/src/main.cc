@@ -24,6 +24,7 @@
 #include    <main/stdafx.h>
 #include    <main/main.hh>
 #include    <rtti/namespace.hh>
+#include    <rtti/test.hh>
 #include    <rtti/autoregistration.hh>
 #include    <rtti/mono.hh>
 #include    <system/filesystem.hh>
@@ -66,13 +67,15 @@ namespace
     {
         be_metaclass(,Environment,Object)
             const BugEngine::ipath& getHomeDirectory() { return BugEngine::Environment::getEnvironment().getHomeDirectory(); }
-            const BugEngine::ipath& getRootDirectory() { return BugEngine::Environment::getEnvironment().getRootDirectory(); }
+            const BugEngine::ipath& getDataDirectory() { return BugEngine::Environment::getEnvironment().getDataDirectory(); }
+            const BugEngine::ipath& getPluginDirectory() { return BugEngine::Environment::getEnvironment().getPluginDirectory(); }
             const BugEngine::istring& getGame() { return BugEngine::Environment::getEnvironment().getGame(); }
             const BugEngine::istring& getUser() { return BugEngine::Environment::getEnvironment().getUser(); }
             size_t getProcessorCount() { return BugEngine::Environment::getEnvironment().getProcessorCount(); }
         be_properties
             be_classmethod(getHomeDirectory);
-            be_classmethod(getRootDirectory);
+            be_classmethod(getDataDirectory);
+            be_classmethod(getPluginDirectory);
             be_classmethod(getGame);
             be_classmethod(getUser);
             be_classmethod(getProcessorCount);
@@ -129,9 +132,16 @@ static int __main(int argc, const char *argv[])
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
         SingletonScope<BugEngine::FileSystem> fs;
-        BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getRootDirectory()+BugEngine::ipath("data"), true));
+        BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
         //NamespaceScope ns;
+        printf("Test\n");
+        TestNS::Test* t = new TestNS::Test;
+        BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
+        BugEngine::Plugin p("lua");
+        void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
+        (*doFile)("data/scripts/main.lua");
+        printf("Done\n");
 
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());

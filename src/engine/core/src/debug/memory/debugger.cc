@@ -58,6 +58,7 @@ public:
     bool set(Debugger* d);
     void clear();
     Debugger* operator->();
+    operator const void*() const;
     bool operator==(const Debugger*) const;
 };
 
@@ -102,7 +103,8 @@ void Debugger::onFrameUpdate()
     for(size_t i = 0; i < g_maxDebuggerCount; ++i)
     {
         RefPointer r = debuggers[i];
-        r->frameUpdate();
+        if(r)
+            r->frameUpdate();
     }
 }
 
@@ -176,6 +178,11 @@ void Debugger::RefPointer::clear()
 }
 
 Debugger* Debugger::RefPointer::operator->()
+{
+    return m_debugger;
+}
+
+Debugger::RefPointer::operator const void*() const
 {
     return m_debugger;
 }

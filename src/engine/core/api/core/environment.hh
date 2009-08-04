@@ -35,14 +35,16 @@ private:
     ~Environment();
 private:
     ipath   m_homeDirectory;
-    ipath   m_rootDirectory;
+    ipath   m_dataDirectory;
+    ipath   m_pluginDirectory;
     istring m_game;
     istring m_user;
 public:
     static const Environment& getEnvironment();
 
     const ipath&    getHomeDirectory() const;
-    const ipath&    getRootDirectory() const;
+    const ipath&    getDataDirectory() const;
+    const ipath&    getPluginDirectory() const;
     const istring&  getGame() const;
     const istring&  getUser() const;
     size_t          getProcessorCount() const;

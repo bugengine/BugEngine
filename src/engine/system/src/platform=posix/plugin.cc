@@ -34,9 +34,11 @@ namespace BugEngine
 Plugin::Plugin(const istring &pluginName)
 {
     minitl::format<> f = (minitl::format<>("%s.so") | pluginName.c_str());
-    FPluginHandle = dlopen((Environment::getEnvironment().getRootDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
+    FPluginHandle = dlopen((Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
     if(! FPluginHandle)
-        throw std::runtime_error(std::string("failed to load plugin ") + pluginName.c_str());
+    {
+        throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + dlerror());
+    }
     void (*_init)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_initplugin"));
     Assert(_init);
     (*_init)();
