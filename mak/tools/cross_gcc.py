@@ -86,41 +86,30 @@ def find_cross_gcc(conf):
 
 	conf.check_tool('gcc')
 
+	if v['GCC_CONFIGURED_PLATFORM'] == 'linux':
+		conf.env['CCFLAGS'].append_unique(['-fPIC'])
+		conf.env['CXXFLAGS'].append_unique(['-fPIC'])
 
-	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG', '-fPIC']
-	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-rdynamic', '-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_debug'] = ['-g', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_release'] = ['-g', '-O1', '-fPIC']
-	conf.env['CXXFLAGS_release'] = ['-g', '-O1', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_release'] = ['-rdynamic', '-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_release'] = ['-g', '-O1']
+	conf.env['CXXFLAGS_release'] = ['-g', '-O1', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_release'] = ['-g', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fPIC']
-	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_profile'] = ['-rdynamic', '-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_profile'] = ['-s', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3', '-fPIC']
-	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-fPIC', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_final'] = ['-rdynamic', '-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_final'] = ['-s', '-Wl,-x', '-Wl,-O2']
 
 @feature('cc', 'cxx')
 def static_libgcc(self):
 	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':
 		self.env.append_unique('LINKFLAGS', '-static-libgcc')
-
-@feature('cshlib', 'cprogram')
-@after('apply_link')
-@before('apply_lib_vars')
-def apply_implib(self):
-	"""On mswindows, handle dlls and their import libs
-	the .dll.a is the import lib and it is required for linking so it is installed too
-
-	the feature nicelibs would be bound to something that enable dlopenable libs on macos
-	"""
-	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':
-		dll = self.link_task.outputs[0]
-		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
-		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
 
 detect = '''
 get_native_gcc_target

@@ -13,6 +13,7 @@ import mak
 
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
+
 def set_options(opt):
 	opt.sub_options(os.path.join('host', os.name))
 	for l in 'platforms','archs':
@@ -157,6 +158,18 @@ def createmasterfile(task):
 
 MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
 
+@feature('cprogram', 'cshlib')
+@after('apply_link')
+@before('apply_link_vars')
+def add_extra_outputs(self):
+	if self.env['CC_NAME'] == 'msvc':
+		self.link_task.outputs.append(self.link_task.outputs[0].change_ext('.pdb'))
+	if 'win32' in self.env['PLATFORM']:
+		dll = self.link_task.outputs[0]
+		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
+		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
+		self.link_task.outputs.append(implib)
+		
 """@taskgen
 @feature('cc','cxx')
 @before('apply_core')
