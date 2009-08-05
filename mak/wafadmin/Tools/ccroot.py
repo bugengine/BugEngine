@@ -358,8 +358,6 @@ def apply_lib_vars(self):
 		libname = y.target[y.target.rfind(os.sep) + 1:]
 		if 'cshlib' in y.features:
 			env.append_value('LIB', libname)
-		elif 'cprogram' in y.features and self.link_task is not None:
-			self.link_task.inputs.append(y.link_task.outputs[-1])
 		elif 'cstaticlib' in y.features:
 			env.append_value('STATICLIB', libname)
 

@@ -169,8 +169,62 @@ def add_extra_outputs(self):
 		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
 		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
 		self.link_task.outputs.append(implib)
-		
-"""@taskgen
+	
+@feature('cc', 'cxx')
+@after('apply_link', 'init_cc', 'init_cxx')
+@before('apply_lib_vars')
+def apply_lib_vars_cprogram(self):
+	env = self.env
+
+	uselib = self.to_list(self.uselib)
+	seen = []
+	names = self.to_list(self.uselib_local)[:] # consume a copy of the list of names
+	while names:
+		x = names.pop(0)
+		# visit dependencies only once
+		if x in seen:
+			continue
+
+		y = self.name_to_obj(x)
+		if not y:
+			raise Utils.WafError("object '%s' was not found in uselib_local (required by '%s')" % (x, self.name))
+
+		# object has ancestors to process: add them to the end of the list
+		if getattr(y, 'uselib_local', None):
+			lst = y.to_list(y.uselib_local)
+			for u in lst:
+				if not u in seen:
+					names.append(u)
+
+		# safe to process the current object
+		y.post()
+		seen.append(x)
+
+		libname = y.target[y.target.rfind(os.sep) + 1:]
+		if 'cprogram' in y.features:
+			if 'win32' in env['PLATFORM']:
+				env.append_value('LIB', libname)
+			else:
+				y.link_task.env.append_unique('LINKFLAGS', '-Wl,-E')
+
+		# set the dependency over the link task
+		if self.link_task is not None and y.link_task is not None:
+			self.link_task.set_run_after(y.link_task)
+			dep_nodes = getattr(self.link_task, 'dep_nodes', [])
+			self.link_task.dep_nodes = dep_nodes + y.link_task.outputs
+
+			# add the link path too
+			tmp_path = y.link_task.outputs[0].parent.bldpath(self.env)
+			if not tmp_path in env['LIBPATH']: env.prepend_value('LIBPATH', tmp_path)
+
+		# add ancestors uselib too
+		morelibs = y.to_list(y.uselib)
+		for v in morelibs:
+			if v in uselib: continue
+			uselib = [v]+uselib
+
+
+@taskgen
 @feature('cc','cxx')
 @before('apply_core')
 @after('filter_sources')
@@ -214,4 +268,4 @@ def make_masterfiles(self):
 					self.mastertasks.append(mastertask)
 				cppnumleft = cppnumleft - 1
 				mastertask.set_inputs(srcnode)
-"""
+
