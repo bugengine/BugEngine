@@ -358,6 +358,8 @@ def apply_lib_vars(self):
 		libname = y.target[y.target.rfind(os.sep) + 1:]
 		if 'cshlib' in y.features:
 			env.append_value('LIB', libname)
+		elif 'cprogram' in y.features and self.link_task is not None:
+			self.link_task.inputs.append(y.link_task.outputs[-1])
 		elif 'cstaticlib' in y.features:
 			env.append_value('STATICLIB', libname)
 
@@ -394,7 +396,8 @@ def apply_lib_vars(self):
 			if val: self.env.append_value(v, val)
 
 @feature('cprogram', 'cstaticlib', 'cshlib')
-@after('apply_obj_vars', 'apply_vnum', 'apply_implib', 'apply_link')
+@after('apply_vnum', 'apply_implib', 'apply_link')
+@before('apply_obj_vars')
 def apply_objdeps(self):
 	"add the .o files produced by some other object files in the same manner as uselib_local"
 	if not getattr(self, 'add_objects', None): return

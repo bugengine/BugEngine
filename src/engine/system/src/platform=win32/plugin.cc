@@ -23,6 +23,7 @@
     
 #include    <system/stdafx.h>
 #include    <system/plugin.hh>
+#include    <core/environment.hh>
 
 #include    <stdexcept>
 
@@ -32,7 +33,8 @@ namespace BugEngine
 Plugin::Plugin(const istring &pluginName)
 {
     SetLastError(0);
-    FPluginHandle = LoadLibrary( (std::string("data/plugins/") + pluginName.c_str() + ".dll").c_str());
+	std::string pluginDir = Environment::getEnvironment().getPluginDirectory().str();
+    FPluginHandle = LoadLibrary( (pluginDir + "/" + pluginName.c_str() + ".dll").c_str());
     if(FPluginHandle != 0)
     {
         void (CALLBACK *_init)(void) = reinterpret_cast<void (CALLBACK*)(void)>(GetProcAddress(static_cast<HINSTANCE>(FPluginHandle), "_initplugin"));
