@@ -87,8 +87,9 @@ def find_cross_gcc(conf):
 	conf.check_tool('gcc')
 
 	if v['GCC_CONFIGURED_PLATFORM'] == 'linux':
-		conf.env['CCFLAGS'].append_unique(['-fPIC'])
-		conf.env['CXXFLAGS'].append_unique(['-fPIC'])
+		conf.env.append_unique('CCFLAGS', ['-fPIC'])
+		conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+		conf.env.append_unique('LINKFLAGS', ['-rdynamic'])
 
 	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
