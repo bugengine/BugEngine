@@ -21,8 +21,8 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef _WIN32_WINDOW_HH_
-#define _WIN32_WINDOW_HH_
+#ifndef BE_WIN32_WINDOW_HH_
+#define BE_WIN32_WINDOW_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/rendertarget.hh>
 
