@@ -26,7 +26,6 @@
 /*****************************************************************************/
 #include    <graphics/renderer/debugrenderer.hh>
 #include    <cgshaderparam.hh>
-#include    <d3d9.h>
 #include    <Cg/cg.h>
 #include    <Cg/cgGL.h>
 
@@ -56,7 +55,11 @@ private:
         SystemParamCount
     };
 private:
+#   ifdef BE_PLATFORM_WIN32
     HGLRC                       m_glContext;
+#   else
+    GLXContext                  m_glContext;
+#   endif
     CGcontext                   m_context;
     scopedptr<DebugRenderer>    m_debugRenderer;
     ShaderPipeline              m_shaderPipeline;

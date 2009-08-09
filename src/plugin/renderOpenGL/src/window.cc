@@ -26,11 +26,6 @@
 #include    <renderer.hh>
 #include    <cgshaderparam.hh>
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
@@ -38,7 +33,6 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
 :   Windowing::Window(renderer, flags, scene)
 ,   m_owner(renderer)
-,   m_dc(GetDC(m_window))
 {
     m_owner->attachWindow(this);
 }
@@ -58,13 +52,13 @@ void Window::setCurrent()
 #ifdef BE_PLATFORM_WIN32
     wglMakeCurrent(m_dc, m_owner->m_glContext);
 #else
-    #error
+    glXMakeCurrent(m_owner->m_display, m_window, m_owner->m_glContext);
 #endif
 }
 
 void Window::close()
 {
-    Win32::Window::close();
+    Windowing::Window::close();
 }
 
 void Window::begin()
@@ -79,7 +73,7 @@ void Window::end()
 #ifdef BE_PLATFORM_WIN32
     SwapBuffers(m_dc);
 #else
-    #error
+    glXSwapBuffers(m_owner->m_display, m_window);
 #endif
 }
 

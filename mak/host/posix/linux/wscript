@@ -25,7 +25,8 @@ def get_available_suncc(conf):
 		del conf.all_envs['temp']
 		conf.setenv('default')
 		conf.env['BUILD_VARIANTS'].append(name)
-	except:
+	except Exception, e:
+		warn('suncc not available: '+str(e)) 
 		conf.setenv('default')
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):

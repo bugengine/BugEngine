@@ -21,61 +21,40 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-
-#ifndef BE_CORE_PLATFORMS_H_
-#define BE_CORE_PLATFORMS_H_
+#ifndef BE_X_RENDERER_HH_
+#define BE_X_RENDERER_HH_
 /*****************************************************************************/
+#include    <graphics/renderer/renderbackend.hh>
+#include    <core/threads/thread.hh>
 
-#ifdef _WIN32
-# define WIN32_LEAN_AND_MEAN
-# define NOMINMAX
-# include <windows.h>
-# pragma warning(disable:4505)
-static void displayError()
+namespace BugEngine { namespace Graphics { namespace X
 {
-    char* msg;
-    ::FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
-                      0,
-                      ::GetLastError(),
-                      0,
-                      (char*)&msg,
-                      0,
-                      0 );
-    MessageBox(0, msg, "Win32 error", MB_OK);
-    ::LocalFree(msg);
-}
-#define BE_WIN32_PRINTERROR()       displayError()
-#define BE_WIN32_CHECKRESULT(x)     if((x) == -1) BE_WIN32_PRINTERROR()
-#endif
 
-#ifndef _WIN32
-# define OutputDebugString(s) printf("%s", s)
-#endif
+class Window;
 
-#ifdef _WIN32
-# ifdef _AMD64
-#  define BE_PLATFORM_NAME  Win64
-#  define BE_PLATFORM_WIN32 1
-#  define BE_PLATFORM_WIN64 1
-# else
-#  define BE_PLATFORM_NAME  Win32
-#  define BE_PLATFORM_WIN32 1
-# endif
-#elif defined __APPLE__
-# define BE_PLATFORM_NAME   MacOSX
-# define BE_PLATFORM_MACOS  1
-#elif defined __linux__
-# define BE_PLATFORM_NAME   Linux
-# define BE_PLATFORM_LINUX  1
-# include   <strings.h>
-# define    stricmp strcasecmp
-# define    strnicmp strncasecmp
-#elif defined __sun
-# define BE_PLATFORM_NAME   SunOS
-# define BE_PLATFORM_SUN    1
-#else
-# error "unknown platform"
-#endif
+class XEXPORT Renderer : public RenderBackend
+{
+    friend class Window;
+private:
+    Thread          m_windowManagementThread;
+    volatile bool   m_exit;
+protected:
+    Display*        m_display;
+private:
+    static intptr_t updateWindows(intptr_t p1, intptr_t p2);
+public:
+    Renderer();
+    ~Renderer();
+
+    uint2           getScreenSize() override;
+    const istring&  getWindowClassName() const;
+
+    int             step() const override;
+
+    Display*        display()                       { return m_display; }
+};
+
+}}}
 
 /*****************************************************************************/
 #endif

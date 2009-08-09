@@ -37,7 +37,9 @@ Plugin::Plugin(const istring &pluginName)
     FPluginHandle = dlopen((Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
     if(! FPluginHandle)
     {
-        throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + dlerror());
+        const char* error = dlerror();
+        fprintf(stderr, "%s\n", error);
+        throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + error);
     }
     void (*_init)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_initplugin"));
     Assert(_init);

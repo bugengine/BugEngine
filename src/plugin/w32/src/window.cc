@@ -52,6 +52,7 @@ Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
     if(flags.border)
         AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
     m_window = renderer->createWindowImplementation(&f);
+    m_dc = GetDC(m_window);
     if(!m_window)
     {
         BE_WIN32_PRINTERROR();

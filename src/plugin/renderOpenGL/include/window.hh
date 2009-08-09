@@ -34,10 +34,9 @@ class Renderer;
 
 class Window : public Windowing::Window
 {
-    friend Renderer;
+    friend class Renderer;
 private:
     Renderer*               m_owner;
-    HDC                     m_dc;
 public:
     Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
     ~Window();

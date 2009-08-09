@@ -22,6 +22,7 @@ def build(bld):
 	opengl			= module.external('OpenGL')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
+	X11				= module.external('X11')
 
 	freetype		= module.external('freetype')
 
@@ -50,7 +51,8 @@ def build(bld):
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
 	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, w32, cgGL, opengl]).post(bld)
+	X				= module.library('X', [discworld,X11], category='plugin', platforms=['posix'])
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, w32, X, cgGL, opengl]).post(bld)
 	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32']).post(bld)
 	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)

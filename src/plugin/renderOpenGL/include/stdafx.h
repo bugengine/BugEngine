@@ -42,13 +42,14 @@ namespace BugEngine { namespace Graphics
 namespace Windowing = Win32;
 }}
 #else
-# include   <glx/stdafx.h>
-# include   <glx/window.hh>
-# include   <glx/renderer.hh>
+# include   <X/stdafx.h>
+# include   <X/window.hh>
+# include   <X/renderer.hh>
+# include   <GL/glx.h>
 # include   <GL/glxext.h>
 namespace BugEngine { namespace Graphics
 {
-namespace Windowing = GLX;
+namespace Windowing = X;
 }}
 #endif
 
