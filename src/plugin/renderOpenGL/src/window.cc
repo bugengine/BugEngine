@@ -21,66 +21,71 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <stdafx.h>
+#include    <window.hh>
+#include    <renderer.hh>
+#include    <cgshaderparam.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine
+{
+    extern HINSTANCE hDllInstance;
+}
+
+
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
+:   Windowing::Window(renderer, flags, scene)
+,   m_owner(renderer)
+,   m_dc(GetDC(m_window))
 {
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
+    m_owner->attachWindow(this);
+}
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
+Window::~Window()
 {
 }
 
-World::~World()
+bool Window::closed() const
 {
+    AssertNotReached();
+    return false;
 }
 
-int World::step()
+void Window::setCurrent()
 {
-    return m_renderer->step();
+#ifdef BE_PLATFORM_WIN32
+    wglMakeCurrent(m_dc, m_owner->m_glContext);
+#else
+    #error
+#endif
 }
 
-void World::flush()
+void Window::close()
 {
+    Win32::Window::close();
 }
 
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
+void Window::begin()
 {
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
+    setCurrent();
+    uint2 size = getDimensions();
+    m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(checked_numcast<float>(size.x()), checked_numcast<float>(size.y())));
 }
 
-}}
+void Window::end()
+{
+#ifdef BE_PLATFORM_WIN32
+    SwapBuffers(m_dc);
+#else
+    #error
+#endif
+}
+
+DebugRenderer* Window::debugRenderer()
+{
+    return m_owner->debugRenderer();
+}
+
+}}}

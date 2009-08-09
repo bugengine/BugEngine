@@ -21,66 +21,62 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <stdafx.h>
+#include    <renderer.hh>
+#include    <window.hh>
 
-namespace BugEngine { namespace Graphics
+
+namespace BugEngine
+{
+    extern HINSTANCE hDllInstance;
+}
+
+
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+static HGLRC initContext(HDC dc)
 {
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
+    PIXELFORMATDESCRIPTOR pfd =
     {
-    }
-    ~UpdateWindowManagement()
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        PFD_TYPE_RGBA,
+        32,
+        0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0, 0, 0, 0,
+        24,
+        0,
+        0,
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0
+    };
+    GLuint pixelFormat = ChoosePixelFormat(dc, &pfd);
+    SetPixelFormat(dc, pixelFormat, &pfd);
+
+    return wglCreateContext(dc);
+}
+
+Renderer::~Renderer()
+{
+    m_debugRenderer.reset(0);
+    cgDestroyContext(m_context);
+}
+
+void Renderer::attachWindow(Window* w)
+{
+#ifdef BE_PLATFORM_WIN32
+    HDC hDC = GetDC(w->m_window);
+    if(!m_glContext)
     {
+        initContext(hDC);
     }
-
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
+#endif
 }
 
-World::~World()
-{
-}
-
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+}}}

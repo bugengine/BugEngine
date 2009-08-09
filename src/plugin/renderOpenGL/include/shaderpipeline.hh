@@ -21,66 +21,44 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#ifndef BE_OPENGL_SHADERPIPELINE_HH_
+#define BE_OPENGL_SHADERPIPELINE_HH_
+/*****************************************************************************/
+#include    <graphics/material/shaderpipeline.hh>
+#include    <graphics/material/shaderparam.hh>
+#include    <Cg/cg.h>
+#include    <Cg/cgGL.h>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
+class Renderer;
+class CgShaderParam;
 
-class World::UpdateWindowManagement
+class ShaderPipeline : public Graphics::ShaderPipeline
 {
-    friend class Task<UpdateWindowManagement>;
 private:
-    typedef range_onestep   Range;
-    World*                  m_world;
+    Renderer*                                   m_owner;
+    CGprofile                                   m_vertexProfile;
+    CGprofile                                   m_fragmentProfile;
+    std::map< istring, refptr<CgShaderParam> >  m_systemParams;
 public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
+    ShaderPipeline(Renderer* owner);
+    ~ShaderPipeline();
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
+    _Shader*                load(const ifilename& file) override;
+    void                    unload(_Shader* s) override;
+
+    ShaderParam::Type       getTypeByName(const char *type) override;
+    const char *            getTypeName(ShaderParam::Type type) override;
+
+    refptr<CgShaderParam>   createSystemParameter(const istring& name, ShaderParam::Type type);
+private:
+    bool                    isSystemParameter(const char *name);
+    CgShaderParam*          getSystemParameter(const char *name);
 };
 
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
-}
+}}}
 
-World::~World()
-{
-}
-
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+/*****************************************************************************/
+#endif

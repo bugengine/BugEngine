@@ -21,66 +21,46 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <stdafx.h>
+#include    <cgshader.hh>
+#include    <renderer.hh>
+#include    <core/memory/streams.hh>
+#include    <system/filesystem.hh>
+#include    <graphics/material/shaderparam.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+CgShader::CgShader(CGprogram program)
+:   _Shader()
+,   m_program(program)
 {
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
+}
+
+CgShader::~CgShader()
+{
+    cgDestroyProgram(m_program);
+}
+
+void CgShader::set() const
+{
+    cgGLBindProgram(m_program);
+}
+
+void CgShader::addParam(ShaderParam* p)
+{
+    m_params.push_back(p);
+}
+
+ShaderParam* CgShader::getParam(const BugEngine::istring &name) const
+{
+    const char *str = name.c_str();
+    for(std::vector< refptr<ShaderParam> >::const_iterator it = m_params.begin(); it != m_params.end(); ++it)
     {
+        if(strcmp((*it)->name(), str) == 0)
+            return it->get();
     }
-    ~UpdateWindowManagement()
-    {
-    }
-
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
+    return 0;
 }
 
-World::~World()
-{
-}
-
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+}}}
