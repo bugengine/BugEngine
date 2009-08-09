@@ -21,66 +21,40 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#ifndef BE_OPENGL_WINDOW_HH_
+#define BE_OPENGL_WINDOW_HH_
+/*****************************************************************************/
+#include    <graphics/renderer/renderbackend.hh>
 
-namespace BugEngine { namespace Graphics
+
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
+class Renderer;
 
-class World::UpdateWindowManagement
+class Window : public Windowing::Window
 {
-    friend class Task<UpdateWindowManagement>;
+    friend Renderer;
 private:
-    typedef range_onestep   Range;
-    World*                  m_world;
+    Renderer*               m_owner;
+    HDC                     m_dc;
 public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
+    Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
+    ~Window();
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
+    void setCurrent() override;
+
+    void begin();
+    void end();
+
+    void close() override;
+
+    bool closed() const override;
+
+    DebugRenderer* debugRenderer() override;
 };
 
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
-}
+}}}
 
-World::~World()
-{
-}
-
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+/*****************************************************************************/
+#endif

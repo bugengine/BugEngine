@@ -134,15 +134,6 @@ static int __main(int argc, const char *argv[])
         SingletonScope<BugEngine::FileSystem> fs;
         BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-        //NamespaceScope ns;
-        printf("Test\n");
-        TestNS::Test* t = new TestNS::Test;
-        BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
-        BugEngine::Plugin p("lua");
-        void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
-        (*doFile)("data/scripts/main.lua");
-        printf("Done\n");
-
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());
     }

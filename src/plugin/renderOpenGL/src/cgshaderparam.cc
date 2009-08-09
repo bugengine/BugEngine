@@ -21,66 +21,41 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <stdafx.h>
+#include    <cgshaderparam.hh>
+#include    <texture.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
-{
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
-
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
+CgShaderParam::CgShaderParam(CGparameter param)
+    :   m_shaderParam(param)
 {
 }
 
-World::~World()
+CgShaderParam::~CgShaderParam()
 {
 }
 
-int World::step()
+void CgShaderParam::setValue(BugEngine::float4 value)
 {
-    return m_renderer->step();
+    cgSetParameterValuefr(m_shaderParam, 4, &value[0]);
 }
 
-void World::flush()
+void CgShaderParam::setValue(_Texture* /*value*/)
 {
+    AssertNotReached();
+    //cgD3D9SetTexture(m_shaderParam, checked_cast<Texture*>(value)->textureObject());
 }
 
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
+ShaderParam::Type CgShaderParam::type() const
 {
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
+    return (int) cgGetParameterType(m_shaderParam);
 }
 
-}}
+const char* CgShaderParam::name() const
+{
+    return cgGetParameterName(m_shaderParam);
+}
+
+}}}

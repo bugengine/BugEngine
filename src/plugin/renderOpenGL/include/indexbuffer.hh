@@ -21,66 +21,29 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#ifndef BE_OPENGL_INDEXBUFFER_HH_
+#define BE_OPENGL_INDEXBUFFER_HH_
+/*****************************************************************************/
+#include    <graphics/renderer/gpubuffer.hh>
+#include    <renderer.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+class IndexBuffer : public GpuBuffer
 {
-    friend class Task<UpdateWindowManagement>;
+    friend class Renderer;
 private:
-    typedef range_onestep   Range;
-    World*                  m_world;
+    //LPDIRECT3DINDEXBUFFER9 m_buffer;
 public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
-
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
+    IndexBuffer(const Renderer* renderer, u32 count, IndexUsage usage, IndexBufferFlags flags);
+    ~IndexBuffer();
+protected:
+    virtual void* map(GpuMapFlags flags, u32 byteCount, u32 byteOffset) override;
+    virtual void  unmap() override;
 };
 
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
-}
+}}}
 
-World::~World()
-{
-}
-
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+/*****************************************************************************/
+#endif

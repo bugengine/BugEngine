@@ -21,66 +21,86 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <stdafx.h>
+#include    <vertexbuffer.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+VertexBuffer::VertexBuffer(const Renderer* /*renderer*/, u32 /*vertexCount*/, VertexUsage /*usage*/, VertexBufferFlags flags)
 {
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
+    size_t i;
+    for(i = 0; i < flags.elementCount; ++i)
     {
+        switch(flags.info[i].type)
+        {
+        case VertexElementInfo::float1:
+            break;
+        case VertexElementInfo::float2:
+            break;
+        case VertexElementInfo::float3:
+            break;
+        case VertexElementInfo::float4:
+            break;
+        case VertexElementInfo::color32:
+            break;
+        case VertexElementInfo::byte4:
+            break;
+        case VertexElementInfo::short2:
+            break;
+        case VertexElementInfo::short4:
+            break;
+        case VertexElementInfo::ushort2:
+            break;
+        case VertexElementInfo::ushort4:
+            break;
+        default:
+            AssertNotReached();
+        };
+        switch(flags.info[i].semantic)
+        {
+        case gPosition:
+            break;
+        case gNormal:
+            break;
+        case gDiffuse:
+            break;
+        case gSpecular:
+            break;
+        case gUV0:
+            break;
+        case gUV1:
+            break;
+        case gUV2:
+            break;
+        case gUV3:
+            break;
+        case gUV4:
+            break;
+        case gUV5:
+            break;
+        case gUV6:
+            break;
+        case gUV7:
+            break;
+        default:
+            AssertNotReached();
+        }
     }
-    ~UpdateWindowManagement()
-    {
-    }
+}
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
+VertexBuffer::~VertexBuffer()
 {
 }
 
-World::~World()
+void* VertexBuffer::map(GpuMapFlags /*flags*/, u32 /*byteCount*/, u32 /*byteOffset*/)
+{
+    return 0;
+}
+
+void VertexBuffer::unmap()
 {
 }
 
-int World::step()
-{
-    return m_renderer->step();
-}
 
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+}}}

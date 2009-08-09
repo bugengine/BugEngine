@@ -21,66 +21,28 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <graphics/stdafx.h>
-#include    <graphics/world.hh>
-#include    <graphics/scene/scene3d.hh>
-#include    <rtti/namespace.hh>
-#include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#ifndef BE_OPENGL_TEXTURE_HH_
+#define BE_OPENGL_TEXTURE_HH_
+/*****************************************************************************/
+#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/material/texture.hh>
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-be_metaclass_impl("Graphics",World);
-
-class World::UpdateWindowManagement
+class Texture : public _Texture
 {
-    friend class Task<UpdateWindowManagement>;
 private:
-    typedef range_onestep   Range;
-    World*                  m_world;
+    //LPDIRECT3DTEXTURE9 m_texture;
 public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
+    Texture(/*LPDIRECT3DTEXTURE9 texture*/);
+    ~Texture();
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
+    //LPDIRECT3DTEXTURE9 textureObject() const { return m_texture; }
 };
 
-World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
-{
-}
 
-World::~World()
-{
-}
+}}}
 
-int World::step()
-{
-    return m_renderer->step();
-}
-
-void World::flush()
-{
-}
-
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
-{
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
-    m_scenes.push_back(w);
-}
-
-}}
+/*****************************************************************************/
+#endif

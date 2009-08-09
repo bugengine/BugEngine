@@ -19,6 +19,7 @@ def build(bld):
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
 	directx10		= module.external('DirectX10')
+	opengl			= module.external('OpenGL')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
 
@@ -49,10 +50,10 @@ def build(bld):
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
 	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, w32, cgGL, opengl]).post(bld)
 	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32']).post(bld)
 	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)
-	#renderOpenGL	 = module.plugin('renderOpenGL', [discworld, w32, cgGL, openGL]).post(bld)
 
 	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)
