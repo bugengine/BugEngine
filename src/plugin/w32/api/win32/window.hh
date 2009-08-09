@@ -36,6 +36,7 @@ class Window : public RenderTarget
 protected:
     Renderer*   m_renderer;
     HWND        m_window;
+    HDC         m_dc;
 public:
     Window(Renderer* renderer,WindowFlags flags, const Scene* scene);
     ~Window();

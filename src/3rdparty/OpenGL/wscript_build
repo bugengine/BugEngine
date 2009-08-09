@@ -1,4 +1,5 @@
 if not m.has_key(name):
-    expoptions = coptions(libs=['OpenGL32'])
-    m[name] = util( name, [], '3rdparty', coptions(), expoptions)
+	glwin   = util(name+'-win32', [], '3rdparty', coptions(), coptions(libs=['OpenGL32']), platforms=['win32'])
+	glposix = util(name+'-posix', [], '3rdparty', coptions(), coptions(libs=['GL']), platforms=['posix'])
+	m[name] = util(name, [glwin, glposix], '3rdparty')
 

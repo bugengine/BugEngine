@@ -70,9 +70,9 @@ class module:
 		self.localoptions = coptions()
 		self.localoptions.merge(localoptions)
 		self.localoptions.defines |= set([ 'building_'+name,
-											'BE_PROJECTCATEGORY="'+category+'"',
-											'BE_PROJECTNAME="'+name+'"',
-											'BE_SOURCEDIR="'+os.path.abspath('src').replace('\\','\\\\')+'"'])
+										   'BE_PROJECTCATEGORY="'+category+'"',
+										   'BE_PROJECTNAME="'+name+'"',
+										   'BE_SOURCEDIR="'+os.path.abspath('src').replace('\\','\\\\')+'"'])
 		self.globaloptions = coptions()
 		self.globaloptions.merge(globaloptions)
 		self.localarchoptions = localarchoptions
@@ -82,12 +82,7 @@ class module:
 		for k in globalarchoptions.keys():
 			self.globalarchoptions[k] = coptions()
 			self.globalarchoptions[k].merge(globalarchoptions[k])
-		for d in depends:
-			self.globaloptions.merge(d.globaloptions)
-			for arch in d.globalarchoptions.keys():
-				if not self.globalarchoptions.has_key(arch):
-					self.globalarchoptions[arch] = coptions()
-				self.globalarchoptions[arch].merge(d.globalarchoptions[arch])
+
 
 		self.usepch = 0
 		if os.path.isfile(os.path.join('src', category, self.name, 'src', 'stdafx.cpp')):
@@ -122,24 +117,40 @@ class module:
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, allplatforms, [arch]), 'bin.'+arch)
 
-	def getoptions(self, platform, arch):
+	def getoptions(self, platforms, archs):
 		options = coptions()
 		options.merge(self.localoptions)
-		options.merge(self.globaloptions)
-		try: options.merge(self.localarchoptions[arch])
-		except KeyError: pass
-		try: options.merge(self.globalarchoptions[arch])
-		except KeyError: pass
-		try: options.merge(self.localarchoptions[platform])
-		except KeyError: pass
-		try: options.merge(self.globalarchoptions[platform])
-		except KeyError: pass
-		try: options.merge(self.localarchoptions[platform+'-'+arch])
-		except KeyError: pass
-		try: options.merge(self.globalarchoptions[platform+'-'+arch])
-		except KeyError: pass
+		options.merge(self.getglobaloptions(platforms, archs))
+		for arch in archs:
+			try: options.merge(self.globalarchoptions[arch])
+			except KeyError: pass
+		for platform in platforms:
+			try: options.merge(self.localarchoptions[platform])
+			except KeyError: pass
+		for platform in platforms:
+			for arch in archs:
+				try: options.merge(self.localarchoptions[platform+'-'+arch])
+				except KeyError: pass
 		return options
 
+	def getglobaloptions(self, platforms, archs):
+		options = coptions()
+		if not (set(platforms) & set(self.platforms)) or not (set(archs) & set(self.archs)):
+			return options
+		options.merge(self.globaloptions)
+		for d in self.depends:
+			options.merge(d.getglobaloptions(platforms, archs))
+		for platform in platforms:
+			try: options.merge(self.globalarchoptions[platform])
+			except KeyError: pass
+		for arch in archs:
+			try: options.merge(self.globalarchoptions[arch])
+			except KeyError: pass
+		for platform in platforms:
+			for arch in archs:
+				try: options.merge(self.globalarchoptions[platform+'-'+arch])
+				except KeyError: pass
+		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions()):
 		if not self.tasks.has_key(variant):
@@ -175,7 +186,7 @@ class module:
 							task.uselib_local.append(d.name)
 						task.inheritedoptions.merge(t.inheritedoptions)
 						dps += [dep for dep in d.depends if dep not in seen]
-				task.options			= self.getoptions(env['PLATFORM'][0], env['ARCHITECTURE'][0])
+				task.options			= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
 				task.options.merge(options)
 				task.options.merge(task.inheritedoptions)
 				try:
@@ -276,7 +287,7 @@ class module:
 				platforms = {}
 				for platform in self.platforms or allplatforms:
 					for arch in self.archs or allarchs:
-						options = self.getoptions(platform, arch)
+						options = self.getoptions([platform], [arch])
 						platforms[platform+'-'+arch] = options
 				task.platforms		= platforms
 				self.projects[p] = task

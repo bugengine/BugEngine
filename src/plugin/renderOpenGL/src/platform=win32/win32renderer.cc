@@ -70,13 +70,11 @@ Renderer::~Renderer()
 
 void Renderer::attachWindow(Window* w)
 {
-#ifdef BE_PLATFORM_WIN32
     HDC hDC = GetDC(w->m_window);
     if(!m_glContext)
     {
         initContext(hDC);
     }
-#endif
 }
 
 }}}

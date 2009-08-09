@@ -2,7 +2,7 @@ from Configure import conftest
 import Utils
 import re
 
-format = re.compile('^cc: Sun Ceres C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
+format = re.compile('^cc: Sun.*C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 
 @conftest
 def get_suncc_target(conf):
