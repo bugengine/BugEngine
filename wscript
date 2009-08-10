@@ -50,10 +50,10 @@ def build(bld):
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
-	w32				= module.library('w32', [discworld], category='plugin', platforms=['win32'])
+	win32			= module.library('win32', [discworld], category='plugin', platforms=['win32'])
 	X				= module.library('X', [discworld,X11], category='plugin', platforms=['posix'])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, w32, X, cgGL, opengl]).post(bld)
-	renderDx9		= module.plugin('renderDx9', [discworld, w32, cgDx, directx9], platforms=['win32']).post(bld)
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, cgGL, opengl]).post(bld)
+	renderDx9		= module.plugin('renderDx9', [discworld, win32, cgDx, directx9], platforms=['win32']).post(bld)
 	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)
 
