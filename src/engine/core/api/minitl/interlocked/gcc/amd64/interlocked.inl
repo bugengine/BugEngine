@@ -36,7 +36,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<8>
 {
-    typedef long long value_t;
+    typedef i64 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;
@@ -94,8 +94,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef long long   value_t;
-        typedef long long   counter_t;
+        typedef i64         value_t;
+        typedef i64         counter_t;
         typedef tagged_t    tag_t;
         BE_SET_ALIGNMENT(16) struct
         {
@@ -131,7 +131,7 @@ struct InterlockedType<8>
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         unsigned char result;
         __asm__ __volatile__ (
@@ -148,7 +148,7 @@ struct InterlockedType<8>
 template<>
 struct InterlockedType<4>
 {
-    typedef long value_t;
+    typedef i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;

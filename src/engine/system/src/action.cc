@@ -28,12 +28,12 @@ namespace BugEngine
 {
 
 static const size_t g_nbStackSlots = 30000;
-ActionContext::ActionContext() :
-    m_stack(g_nbStackSlots),
-    m_deltaTime(0.0),
-    m_currentFrame(0),
-    m_frameSize(30000),
-    m_frame(0)
+ActionContext::ActionContext()
+:   m_stack(g_nbStackSlots)
+,   m_deltaTime(0.0)
+,   m_currentFrame(0)
+,   m_frameSize(30000)
+,   m_frame(0)
 {
 }
 
@@ -43,14 +43,14 @@ ActionContext::~ActionContext()
 
 //-----------------------------------------------------------------------------
 
-ActionContext::StackFrame::StackFrame(ActionContext* context, size_t nbargs, size_t locals) :
-    m_context(context),
-    m_previous(context->m_frame),
-    m_start(context->m_currentFrame),
-    m_size(context->m_frameSize),
-    m_local(locals),
-    m_callee(nbargs),
-    m_caller(0)
+ActionContext::StackFrame::StackFrame(ActionContext* context, size_t nbargs, size_t locals)
+:   m_context(context)
+,   m_previous(context->m_frame)
+,   m_start(context->m_currentFrame)
+,   m_size(context->m_frameSize)
+,   m_local(locals)
+,   m_caller(0)
+,   m_callee(nbargs)
 {
     Assert(m_callee == m_previous->m_caller);
     Assert(m_start+m_size <= context->m_stack.size());

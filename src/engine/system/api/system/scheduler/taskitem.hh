@@ -51,7 +51,7 @@ protected:
         Ready,      // task is ready to be executed, but may be waiting for a dependancy
         // everything above task ready is a temporary state
         // the scheduler can wait for the state to return to ready in a loop
-        Reserved,   // It's being temporarily accessed
+        Reserved    // It's being temporarily accessed
     };
     BaseTaskItem* volatile              m_next;
     minitl::interlocked<TaskState>      m_currentState;

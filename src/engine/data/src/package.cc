@@ -32,13 +32,6 @@ namespace BugEngine { namespace Data
 
 be_abstractmetaclass_impl("",Package);
 
-static Package* getParent(ipath name)
-{
-    name.pop_back();
-    //return Package::get(name);
-    return 0;
-}
-
 Package::Package(const ipath& name)
 :   RTTI::Package(name[name.size()-1], 0)
 ,   m_namespace(0)

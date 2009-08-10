@@ -137,7 +137,8 @@ private:                                                                        
     refptr<BugEngine::Object> _cls::MetaClass::create() const                                               \
     {                                                                                                       \
         _code;                                                                                              \
-    }
+    }                                                                                                       \
+    class _cls
 
 
 #define be_metaclass_impl(_namespace,_cls)          be_metaclass_impl_(_namespace,_cls,return new _cls)

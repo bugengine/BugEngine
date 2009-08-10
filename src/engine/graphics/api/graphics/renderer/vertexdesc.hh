@@ -42,7 +42,7 @@ enum VertexSemantics
     gUV4,
     gUV5,
     gUV6,
-    gUV7,
+    gUV7
 };
 
 enum VertexUsage
@@ -101,7 +101,7 @@ template<typename T> struct VertexSemantic<T,sem>                               
 {                                                                                   \
     T _name;                                                                        \
     static const char *name() { return #_name; }                                    \
-};
+}
 
 MAKESEMANTIC(gPosition, position);
 MAKESEMANTIC(gNormal,   normal);

@@ -95,7 +95,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
 
     ScheduledTasks::BaseTaskItem* target = sc->pop();
     target->m_currentState = ScheduledTasks::BaseTaskItem::Executing;
-    if(!target->atomic() && 1ll << target->m_splitCount <= s_taskCount)
+    if(!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
         ScheduledTasks::BaseTaskItem* newTarget = target->split(sc);
         sc->queue(newTarget);
@@ -225,12 +225,12 @@ Scheduler::Scheduler()
 ,   m_synchro(0, 65535)
 ,   m_taskPool(65535, 16)
 ,   m_frameCount(0)
-,   m_currentFrameTick(tick())
 ,   m_lastFrameTick(m_currentFrameTick)
+,   m_currentFrameTick(tick())
+,   m_end()
 ,   m_tasks()
 ,   m_runningTasks(0)
 ,   m_running(true)
-,   m_end()
 {
     const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
     for(size_t i = 0; i < g_numWorkers; ++i)
@@ -268,7 +268,7 @@ void Scheduler::draw(DebugRenderer* renderer, int2 start, int2 stop, float frame
     int x = width - 2*csize.x();
     for(unsigned i = 0; i < m_workers.size(); ++i)
     {
-        renderer->drawText(minitl::format<>("%u") | i+1, start + int2(x+csize.x(),1), color32());
+        renderer->drawText(minitl::format<>("%u") | (i+1), start + int2(x+csize.x(),1), color32());
         int2 p1 = start;
         int2 p2 = start+int2(width, 0);
         int2 p3 = p1+int2(x, 1);

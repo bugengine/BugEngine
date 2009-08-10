@@ -33,8 +33,8 @@ be_abstractmetaclass_impl("Input",Device);
 
 
 Device::Device(const istring& name, size_t numControls)
-:   m_name(name)
-,   m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
+:   m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
+,   m_name(name)
 ,   m_numControls(numControls)
 ,   m_active((float*)be_malloc(sizeof(float)*numControls))
 ,   m_lastFrame((float*)be_malloc(sizeof(float)*numControls))

@@ -54,7 +54,7 @@ public:
     typedef OWNER                                                                               Owner;
     enum
     {
-        Write = 1,
+        Write = 1
     };
     static inline void set(OWNER* from, const PropertyType& value);
 };
@@ -67,7 +67,7 @@ public:
     typedef OWNER   Owner;
     enum
     {
-        Write = 1,
+        Write = 1
     };
     static inline void set(OWNER* from, const T& value);
 };

@@ -52,8 +52,8 @@ public:
         size_t          m_start;
         size_t          m_size;
 
-        const size_t    m_caller;
         const size_t    m_local;
+        const size_t    m_caller;
         size_t          m_callee;
     public:
         StackFrame(ActionContext* context, size_t nbargs, size_t locals);
