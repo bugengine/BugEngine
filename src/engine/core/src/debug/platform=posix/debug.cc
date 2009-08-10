@@ -34,7 +34,7 @@ AssertionResult defaultAssertionCallback( const char *file,
                                           const char *message,
                                           ...)
 {
-    fprintf(stderr, "%s:%d\n");
+    fprintf(stderr, "%s:%d\n", file, line);
     va_list l;
     va_start(l, message);
     vfprintf(stderr, message, l);

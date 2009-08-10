@@ -56,7 +56,7 @@ enum ValueTypeIndex
     PropertyTypeWeakObject  = minitl::indexof< Object*, ValueTypes >::Value,
     //PropertyTypeVector        = Meta::IndexOf< PublishedVector, ValueTypes >::Value,
     //PropertyTypeMap           = Meta::IndexOf< PublishedMap, ValueTypes >::Value,
-    PropertyTypeVariant     = 255,
+    PropertyTypeVariant     = 255
 };
 
 

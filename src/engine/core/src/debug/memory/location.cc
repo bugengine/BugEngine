@@ -58,8 +58,8 @@ private:
         size_t      m_capacity;
     public:
         LinearAllocator(size_t capacity)
-            :   m_buffer(Malloc::systemAllocArray<T>(capacity))
-            ,   m_size(0)
+            :   m_size(0)
+            ,   m_buffer(Malloc::systemAllocArray<T>(capacity))
             ,   m_capacity(capacity)
         {
         }
@@ -186,7 +186,7 @@ LocationInfo* LocationInfo::Storage::getLocationForAdress(const Callstack::Addre
     }
 
     u32 tries = 0;
-    while(m_indexedLocations[ (hash+tries) & g_adressTranslationCapacity-1 ].m_owner.setConditional(address.pointer(), 0) != 0)
+    while(m_indexedLocations[ (hash+tries) & (g_adressTranslationCapacity-1) ].m_owner.setConditional(address.pointer(), 0) != 0)
     {
         tries++;
     }
@@ -246,8 +246,8 @@ LocationInfo::Storage& LocationInfo::getStorage()
 LocationInfo::LocationInfo()
     :   filename("$")
     ,   m_parent(0)
-    ,   m_sibling(0)
     ,   m_child(0)
+    ,   m_sibling(0)
     ,   m_flags(0)
 {
 }
@@ -255,8 +255,8 @@ LocationInfo::LocationInfo()
 LocationInfo::LocationInfo(LocationInfo* parent, const char *file)
     :   filename(file)
     ,   m_parent(parent)
-    ,   m_sibling(0)
     ,   m_child(0)
+    ,   m_sibling(0)
     ,   m_flags(0)
 {
 }

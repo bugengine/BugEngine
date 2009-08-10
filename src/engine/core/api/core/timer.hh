@@ -33,20 +33,20 @@ typedef u64 tick_type;
 inline tick_type tick(){ u64 result; QueryPerformanceCounter((LARGE_INTEGER*)&result); return result; }
 #elif defined __GNUC__
 # if defined(_X86_)
-typedef unsigned long long tick_type;
+typedef u64 tick_type;
 static inline tick_type tick(void)
 {
-    unsigned long long int x;
+    u64 x;
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
     return x;
 }
 # elif defined(_AMD64_)
-typedef unsigned long long tick_type;
+typedef u64 tick_type;
 static inline tick_type tick(void)
 {
     unsigned hi, lo;
     __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
-    return ((unsigned long long)lo) | (((unsigned long long)hi)<<32);
+    return ((u64)lo) | (((u64)hi)<<32);
 }
 # elif defined(__powerpc__)
 typedef unsigned long long tick_type;
