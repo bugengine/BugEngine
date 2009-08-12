@@ -104,18 +104,18 @@ class module:
 
 		self.sourcetree		   = sources.directory()
 		if os.path.isdir(os.path.join('src', category, name, 'include')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, allplatforms, allarchs), 'include')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, platforms, archs), 'include')
 		if os.path.isdir(os.path.join('src', category, name, 'api')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, allplatforms, allarchs), 'api')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, platforms, archs), 'api')
 		if os.path.isdir(os.path.join('src', category, name, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, allplatforms, allarchs), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, platforms, archs), 'data')
 		if os.path.isdir(os.path.join('src', category, name, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, allplatforms, allarchs), 'src')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, platforms, archs), 'src')
 		for arch in allarchs:
 			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, allplatforms, [arch]), 'lib.'+arch)
+				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, platforms, [arch]), 'lib.'+arch)
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, allplatforms, [arch]), 'bin.'+arch)
+				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, platforms, [arch]), 'bin.'+arch)
 
 	def getoptions(self, platforms, archs):
 		options = coptions()
