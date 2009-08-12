@@ -52,7 +52,7 @@ public:
 template< typename T >
 T* Malloc::internalAllocArray(size_t count, size_t alignment)
 {
-    size_t size = BE_ALIGN(sizeof(T),alignment)*count;
+    size_t size = be_align(sizeof(T),alignment)*count;
     void* r = internalAlloc(size, alignment);
     memset(r, 0, size);
     return reinterpret_cast<T*>(r);
@@ -61,7 +61,7 @@ T* Malloc::internalAllocArray(size_t count, size_t alignment)
 template< typename T >
 T* Malloc::systemAllocArray(size_t count, size_t alignment)
 {
-    size_t size = BE_ALIGN(sizeof(T),alignment)*count;
+    size_t size = be_align(sizeof(T),alignment)*count;
     void* r = systemAlloc(size, alignment);
     memset(r, 0, size);
     return reinterpret_cast<T*>(r);

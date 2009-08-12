@@ -21,47 +21,64 @@
 * USA                                                                         *
 \*****************************************************************************/
 
+#include    <core/stdafx.h>
 
-#ifndef BE_CORE_COMPILERS_INTEL_H_
-#define BE_CORE_COMPILERS_INTEL_H_
-/*****************************************************************************/
-
-#define BE_ALIGNOF(t)          __alignof(t)
-
-typedef signed __int8           i8;
-typedef signed __int16          i16;
-typedef signed __int32          i32;
-typedef signed __int64          i64;
-typedef unsigned __int8         u8;
-typedef unsigned __int16        u16;
-typedef unsigned __int32        u32;
-typedef unsigned __int64        u64;
-typedef u8                      byte;
-
-#ifndef _CRT_SECURE_NO_WARNINGS
-# define _CRT_SECURE_NO_WARNINGS 1
-#endif
-#ifndef _CRT_SECURE_NO_DEPRECATE
-# define _CRT_SECURE_NO_DEPRECATE 1
+#include    <core/debug/callstack.hh>
+#ifdef BE_COMPILER_MSVC
+# include <intrin.h>
 #endif
 
-#pragma warning(disable:4275)
-#ifdef NDEBUG
-# pragma warning(error:4541)   // 'dynamic_cast' used on polymorphic type with '/GR-'
-# pragma warning(disable:4530) // C++ exception handler used, but unwind semantics are not enabled
-# pragma warning(disable:4100) // unreferenced formal parameter
-#endif
-#pragma warning(disable:4251)
-#pragma warning(disable:4355)  // this used in base member initialization list
-#pragma warning(disable:4290)  // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#pragma warning(disable:4481)  // use of "override" extension
-#pragma warning(disable:4127)
-#define BE_THREAD_LOCAL        __declspec(thread)
-#define BE_NOINLINE            __declspec(noinline)
-#define BE_ALWAYSINLINE        __forceinline
-#define NOTHROW     throw()
+namespace BugEngine { namespace Debug
+{
 
-#define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
+static inline void** st_next(void** stack_pointer)
+{
+    void** nextStackPointer = reinterpret_cast<void**>(*stack_pointer);
+    if(nextStackPointer <= stack_pointer)
+    {
+        return 0;
+    }
+    if(reinterpret_cast<char*>(nextStackPointer) >= reinterpret_cast<char*>(stack_pointer) + 2*1024*1024)
+    {
+        return 0;
+    }
+    return nextStackPointer;
+}
 
-/*****************************************************************************/
+BE_NOINLINE size_t Callstack::backtrace(void** buffer, size_t count, size_t skip)
+{
+    void** stackPointer;
+#ifdef __llvm__
+    stackPointer = __builtin_frame_address(0);
+#elif defined(__GNUC__)
+# ifdef _X64
+    __asm__ volatile ("mov %%rbp, %0" : "=r" (stackPointer));
+# else
+    __asm__ volatile ("mov %%ebp, %0" : "=r" (stackPointer));
+# endif
+#else
+    stackPointer = (void**)(&buffer)-2;
 #endif
+    size_t result = 0;
+    while(stackPointer && result < count)
+    {
+        if(skip > 0)
+        {
+            skip--;
+        }
+        else
+        {
+#ifdef _X64
+            // stack frame is aligned on a 16 bytes boundary in x64
+            buffer[result] = *(be_align(stackPointer, 16)+1);
+#else
+            buffer[result] = *(stackPointer+1);
+#endif
+            result++;
+        }
+        stackPointer = st_next(stackPointer);
+    }
+    return result;
+}
+
+}}

@@ -29,9 +29,6 @@
 #include    <core/debugrenderer/debugrenderer.hh>
 
 #include    <malloc.h>
-#include    <core/debug/callstack.hh>
-
-#include    <malloc.h>
 
 
 namespace BugEngine

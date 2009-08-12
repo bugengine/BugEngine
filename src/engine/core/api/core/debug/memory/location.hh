@@ -64,7 +64,7 @@ private:
 
     void            _frameUpdate();
 public:
-    static COREEXPORT LocationInfo* location(const Callstack::Address& from);
+    static COREEXPORT LocationInfo* location(const Debug::Callstack::Address& from);
     static COREEXPORT LocationInfo* location(const char* filename, const char *desc);
 
     void add(Memory::MemoryTag *tag);

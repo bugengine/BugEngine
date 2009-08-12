@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include    <core/stdafx.h>
+
 #include    <core/debug/callstack.hh>
 
 #include    <winnt.h>
@@ -30,13 +31,11 @@
 #include    <DbgHelp.h>
 
 
-namespace BugEngine
+namespace BugEngine { namespace Debug
 {
 
 static bool     g_symbolsInitalized;
 static size_t   g_loadedModules = 0;
-typedef USHORT (WINAPI* fCaptureStackBackTrace)(ULONG, ULONG, PVOID*, PULONG);
-fCaptureStackBackTrace  CaptureStackBackTrace;
 
 static void loadModules()
 {
@@ -79,9 +78,6 @@ static void initSymbols()
     SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_DEFERRED_LOADS); // load line number information as well
     SymInitialize(handle, symPath, false);
     loadModules();
-
-    HMODULE lib = LoadLibraryA("kernel32.dll");
-    CaptureStackBackTrace = (fCaptureStackBackTrace)GetProcAddress(lib, "RtlCaptureStackBackTrace");
 
     g_symbolsInitalized = true;
 }
@@ -201,12 +197,8 @@ void* Callstack::Address::pointer() const
 
 BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
-    if(!g_symbolsInitalized)
-        initSymbols();
     void** _buffer = (void**)malloca(sizeof(void*)*count);
-    if(count + skip > 61)
-        count = 61 - skip;
-    size_t result = (*CaptureStackBackTrace)((ULONG)skip+1, (ULONG)count, _buffer, 0);
+    size_t result = backtrace(_buffer, (ULONG)count, (ULONG)skip+1);
     for(size_t i = 0; i < result; ++i)
         buffer[i] = Address(_buffer[i]);
     freea(_buffer);
@@ -220,4 +212,4 @@ BE_NOINLINE Callstack::Address Callstack::backtrace(size_t depth)
     return result;
 }
 
-}
+}}

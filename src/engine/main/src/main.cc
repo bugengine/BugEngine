@@ -133,6 +133,7 @@ static int __main(int argc, const char *argv[])
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
         SingletonScope<BugEngine::FileSystem> fs;
         BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
+        Assert(false);
 
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());

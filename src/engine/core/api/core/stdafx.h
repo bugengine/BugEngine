@@ -64,6 +64,13 @@ struct StaticAssert_<true>
 
 #define StaticAssert(expr) StaticAssert_<expr>::Defined ;
 
+template< typename T >
+T be_align(T value, size_t alignment)
+{
+    size_t v = (size_t)(value);
+    return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
+}
+
 #if BE_PLATFORM_WIN32 == 1
 # define    FORCEEXPORT         __declspec(dllexport)
 # if defined(building_core) || defined(CORE_EXPORTS)

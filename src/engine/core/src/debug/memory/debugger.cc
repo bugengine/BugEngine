@@ -36,8 +36,8 @@ static const size_t g_maxDebuggerCount = 4;
 class NullDebugger : public Debugger
 {
 private:
-    virtual void registerAllocation(void*, size_t, int, Callstack::Address*, size_t) override {};
-    virtual void registerDeallocation(void*, int, Callstack::Address*, size_t) override {};
+    virtual void registerAllocation(void*, size_t, int, Debug::Callstack::Address*, size_t) override {};
+    virtual void registerDeallocation(void*, int, Debug::Callstack::Address*, size_t) override {};
     virtual void frameUpdate() override {};
 public:
     NullDebugger();
@@ -74,8 +74,8 @@ Debugger::RefPointer* Debugger::getDebuggers()
 void Debugger::onAllocation(void *pointer, size_t size, size_t skipStack)
 {
     static const size_t depth = 128;
-    Callstack::Address callstack[depth];
-    Callstack::backtrace(callstack, 128, skipStack);
+    Debug::Callstack::Address callstack[depth];
+    Debug::Callstack::backtrace(callstack, 128, skipStack);
     RefPointer* debuggers = getDebuggers();
     for(size_t i = 0; i < g_maxDebuggerCount; ++i)
     {
@@ -87,8 +87,8 @@ void Debugger::onAllocation(void *pointer, size_t size, size_t skipStack)
 void Debugger::onRelease(void *pointer, size_t skipStack)
 {
     static const size_t depth = 128;
-    Callstack::Address callstack[depth];
-    Callstack::backtrace(callstack, 128, skipStack);
+    Debug::Callstack::Address callstack[depth];
+    Debug::Callstack::backtrace(callstack, 128, skipStack);
     RefPointer* debuggers = getDebuggers();
     for(size_t i = 0; i < g_maxDebuggerCount; ++i)
     {
