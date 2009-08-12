@@ -34,8 +34,8 @@ namespace BugEngine { namespace Memory
 class InternalDebugger : public Debugger
 {
 protected:
-    virtual void registerAllocation(void* pointer, size_t size, int threadid, Callstack::Address* from, size_t adressSize) override;
-    virtual void registerDeallocation(void* pointer, int threadid, Callstack::Address* from, size_t adressSize) override;
+    virtual void registerAllocation(void* pointer, size_t size, int threadid, Debug::Callstack::Address* from, size_t adressSize) override;
+    virtual void registerDeallocation(void* pointer, int threadid, Debug::Callstack::Address* from, size_t adressSize) override;
     virtual void frameUpdate() override;
 public:
     InternalDebugger();

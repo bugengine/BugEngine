@@ -108,7 +108,7 @@ StringCache::Buffer::~Buffer()
 
 StringCache* StringCache::Buffer::reserve(size_t size)
 {
-    size_t allsize = BE_ALIGN(size+1+sizeof(StringCache), BE_ALIGNOF(StringCache));
+    size_t allsize = be_align(size+1+sizeof(StringCache), BE_ALIGNOF(StringCache));
     Assert(allsize < s_capacity);
     if(m_used > s_capacity)
     {
@@ -117,7 +117,7 @@ StringCache* StringCache::Buffer::reserve(size_t size)
     size_t offset = m_used.addExchange(allsize);
     if(offset+allsize < s_capacity)
     {
-        Assert(BE_ALIGN(offset, BE_ALIGNOF(StringCache)) == offset);
+        Assert(be_align(offset, BE_ALIGNOF(StringCache)) == offset);
         return (StringCache*)(m_buffer+offset);
     }
     else

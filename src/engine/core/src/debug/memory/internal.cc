@@ -40,7 +40,7 @@ InternalDebugger::~InternalDebugger()
 {
 }
 
-void InternalDebugger::registerAllocation(void* pointer, size_t size, int threadid, Callstack::Address* from, size_t adressSize)
+void InternalDebugger::registerAllocation(void* pointer, size_t size, int threadid, Debug::Callstack::Address* from, size_t adressSize)
 {
     UNUSED(threadid);
     UNUSED(adressSize);
@@ -48,7 +48,7 @@ void InternalDebugger::registerAllocation(void* pointer, size_t size, int thread
     MemoryTag::create(pointer, size, l);
 }
 
-void InternalDebugger::registerDeallocation(void* pointer, int threadid, Callstack::Address* from, size_t adressSize)
+void InternalDebugger::registerDeallocation(void* pointer, int threadid, Debug::Callstack::Address* from, size_t adressSize)
 {
     UNUSED(threadid);
     UNUSED(adressSize);

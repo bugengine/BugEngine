@@ -36,7 +36,6 @@
 # define BE_ALIGNOF(t)          __alignof__(t)
 # define BE_SET_ALIGNMENT(n)    __attribute__ ((aligned(n)))
 #endif
-#define BE_ALIGN(size, align)   (align==size?size:(((size)+((align)-1)) & ~(align-1)))
 
 
 

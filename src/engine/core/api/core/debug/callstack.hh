@@ -25,7 +25,7 @@
 #define BE_CORE_DEBUG_CALLSTACK_HH_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace Debug
 {
 
 class Callstack
@@ -57,9 +57,11 @@ public:
 public:
     static size_t   backtrace(Address* buffer, size_t count, size_t skip = 0);
     static Address  backtrace(size_t depth);
+private:
+    static size_t   backtrace(void** buffer, size_t count, size_t skip);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

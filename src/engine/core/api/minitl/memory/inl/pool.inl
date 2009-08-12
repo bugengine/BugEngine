@@ -32,9 +32,9 @@ namespace minitl
 template< typename T >
 pool<T>::pool(size_t capacity, size_t alignment)
 :   m_pool(BugEngine::Malloc::internalAllocArray<T>(capacity, alignment))
-,   m_end((char*)m_pool + BE_ALIGN(sizeof(T),alignment)*capacity)
+,   m_end((char*)m_pool + be_align(sizeof(T),alignment)*capacity)
 {
-    const size_t aligned_size = BE_ALIGN(sizeof(T),alignment);
+    const size_t aligned_size = be_align(sizeof(T),alignment);
     for(size_t i = 0; i < capacity-1; ++i)
         m_items.push((inode*)((char*)m_pool+i*aligned_size));
 }

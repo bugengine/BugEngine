@@ -97,9 +97,9 @@ namespace BugEngine
         char *dlgParams[2] = { outmessage, callstack };
 
         {
-            Callstack::Address address[128];
-            size_t result = Callstack::backtrace(address, 128, 1);
-            for(Callstack::Address* a = address; a < address+result; ++a)
+            Debug::Callstack::Address address[128];
+            size_t result = Debug::Callstack::backtrace(address, 128, 1);
+            for(Debug::Callstack::Address* a = address; a < address+result; ++a)
             {
                 (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", a->filename(), a->line(), a->function());
                 strcat(callstack, buffer);

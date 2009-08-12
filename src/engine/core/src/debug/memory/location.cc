@@ -98,7 +98,7 @@ public:
     const char *  storeString(const char *string, size_t size);
     LocationInfo* allocateLocation();
     LocationInfo* createLocation(const char *filename, const char *desc);
-    LocationInfo* getLocationForAdress(const Callstack::Address& a);
+    LocationInfo* getLocationForAdress(const Debug::Callstack::Address& a);
 
     const LocationInfo* root() const;
     void update();
@@ -175,7 +175,7 @@ LocationInfo* LocationInfo::Storage::createLocation(const char *filename, const 
     return m_root->insert(filename)->insert(desc);
 }
 
-LocationInfo* LocationInfo::Storage::getLocationForAdress(const Callstack::Address& address)
+LocationInfo* LocationInfo::Storage::getLocationForAdress(const Debug::Callstack::Address& address)
 {
     size_t hash = hashPointer(address.pointer());
 
@@ -265,7 +265,7 @@ LocationInfo::~LocationInfo()
 {
 }
 
-LocationInfo* LocationInfo::location(const Callstack::Address& address)
+LocationInfo* LocationInfo::location(const Debug::Callstack::Address& address)
 {
     return getStorage().getLocationForAdress(address);
 }
