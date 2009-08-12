@@ -26,7 +26,6 @@
 
 #include    <input/inputmap.hh>
 
-#include    <resource.h>
 #include    <window.hh>
 #include    <texture.hh>
 #include    <vertexbuffer.hh>

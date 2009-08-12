@@ -29,6 +29,8 @@
 #include    <rtti/stdafx.h>
 #include    <graphics/stdafx.h>
 
+#include    <win32/resource.h>
+
 #if defined(_WIN32)
 # if defined(building_w32) || defined(W32_EXPORTS)
 #  define   W32EXPORT         __declspec(dllexport)

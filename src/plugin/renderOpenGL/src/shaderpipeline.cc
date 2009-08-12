@@ -104,7 +104,6 @@ const char *ShaderPipeline::getTypeName(ShaderParam::Type t)
 ShaderParam::Type ShaderPipeline::getTypeByName(const char *name)
 {
     CGtype t = cgGetType(name);
-    const char *tname = cgGetTypeString(t);
     return t;
 }
 
