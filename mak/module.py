@@ -54,6 +54,7 @@ class module:
 				  globalarchoptions,
 				  platforms,
 				  archs,
+				  sourcelist,
 				):
 				
 		while None in depends:
@@ -66,6 +67,7 @@ class module:
 		self.platforms = platforms
 		self.archs = archs
 		self.projects = {}
+		sourcelist = [os.path.normpath(i) for i in sourcelist]
 
 		self.localoptions = coptions()
 		self.localoptions.merge(localoptions)
@@ -108,9 +110,9 @@ class module:
 		if os.path.isdir(os.path.join('src', category, name, 'api')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, platforms, archs), 'api')
 		if os.path.isdir(os.path.join('src', category, name, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, platforms, archs), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, platforms, archs, sourcelist), 'data')
 		if os.path.isdir(os.path.join('src', category, name, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, platforms, archs), 'src')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, platforms, archs, sourcelist), 'src')
 		for arch in allarchs:
 			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, platforms, [arch]), 'lib.'+arch)
@@ -208,7 +210,7 @@ class module:
 			self.tasks[variant]		= task
 		return self.tasks[variant]
 		
-	def scandir(self, path, local, process, platforms, archs):
+	def scandir(self, path, local, process, platforms, archs, sourcelist = []):
 		result = sources.directory()
 		
 		for file in os.listdir(path):
@@ -218,39 +220,46 @@ class module:
 				continue
 			elif os.path.isdir(os.path.join(path,file)):
 				if file[0:9] == 'platform=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs, sourcelist), file )
 				elif file[0:5] == 'arch=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(',')), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(','), sourcelist), file )
 				else:
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs, sourcelist), file )
 			else:
 				filename, ext = os.path.splitext(file)
 				fullname = os.path.join(path, file)
+				if sourcelist:
+					if fullname in sourcelist or os.path.join(local,file) in sourcelist:
+						doprocess = process
+					else:
+						doprocess = False
+				else:
+					doprocess = process
 
 				newexts = { '.ll':('.cc','.hh'), '.yy': ('.cc','.hh'), '.l':('.c', '.h'), '.y':('.c', '.h') }
 				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
-					result.addFile(sources.cppsource(file, platforms, archs, process, self.usepch))
+					result.addFile(sources.cppsource(file, platforms, archs, doprocess, self.usepch))
 				elif ext in set(['.rc']):
-					result.addFile(sources.rcsource(file, platforms, archs, process))
+					result.addFile(sources.rcsource(file, platforms, archs, doprocess))
 				elif ext in set(['.y', '.yy']):
 					cext, hext = newexts[ext]
 					generatedcfile = os.path.join(path, filename+cext)
 					generatedhfile = os.path.join(path, filename+hext)
-					result.addFile(sources.yaccsource(file, generatedcfile, generatedhfile, platforms, archs, process))
-					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, process))
-					result.addFile(sources.generatedhsource(filename+hext, platforms, archs, process))
+					result.addFile(sources.yaccsource(file, generatedcfile, generatedhfile, platforms, archs, doprocess))
+					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, doprocess))
+					result.addFile(sources.generatedhsource(filename+hext, platforms, archs, doprocess))
 				elif ext in set(['.l', '.ll']):
 					cext, hext = newexts[ext]
 					generatedcfile = os.path.join(path, filename+cext)
-					result.addFile(sources.lexsource(file, generatedcfile, platforms, archs, process))
-					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, process))
+					result.addFile(sources.lexsource(file, generatedcfile, platforms, archs, doprocess))
+					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, doprocess))
 				elif ext in set(['.def']):
 					self.localoptions.deffile = fullname
-					result.addFile(sources.source(file,platforms,archs, process))
+					result.addFile(sources.source(file,platforms,archs, doprocess))
 				elif ext in set(['.h', '.hpp', '.inl','.hh', '.hxx', '']):
-					result.addFile(sources.hsource(file,platforms,archs, process))
+					result.addFile(sources.hsource(file,platforms,archs, doprocess))
 				elif ext in set(['.ogg', '.lua', '.nut', '.dd', '.cg', '.pcf', '.ttf', '.fon', '.tga']):
-					result.addFile( sources.deployedsource(file, local, 'data', platforms, archs, process ) )
+					result.addFile( sources.deployedsource(file, local, 'data', platforms, archs, doprocess ) )
 		return result
 
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):
@@ -306,6 +315,7 @@ class library(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		self.install_path = 'lib'
 		module.__init__(self,
@@ -317,7 +327,8 @@ class library(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -342,6 +353,7 @@ class shared_library(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		self.install_path = 'bin'
 		module.__init__(self,
@@ -353,7 +365,8 @@ class shared_library(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -380,6 +393,7 @@ class static_library(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		self.install_path = 'lib'
 		module.__init__(self,
@@ -391,7 +405,8 @@ class static_library(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -415,6 +430,7 @@ class plugin(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		self.install_path = 'plugin'
 		module.__init__(self,
@@ -426,7 +442,8 @@ class plugin(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -454,6 +471,7 @@ class game(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		self.install_path = 'bin'
 		module.__init__(self,
@@ -465,7 +483,8 @@ class game(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -493,6 +512,7 @@ class test(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		module.__init__(self,
 						name,
@@ -503,7 +523,8 @@ class test(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
@@ -530,6 +551,7 @@ class util(module):
 				  globalarchoptions = {},
 				  platforms = allplatforms,
 				  archs = allarchs,
+				  sources=[],
 				):
 		module.__init__(self,
 						name,
@@ -540,7 +562,8 @@ class util(module):
 						localarchoptions,
 						globalarchoptions,
 						platforms,
-						archs)
+						archs,
+						sources)
 
 	def post(self, builder):
 		for d in self.depends:
