@@ -91,7 +91,10 @@ def find_cross_gcc(conf):
 		conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 		conf.env.append_unique('LINKFLAGS', ['-rdynamic'])
 
-	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+
+	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_debug'] = ['-g', '-Wl,-x', '-Wl,-O2']
 
@@ -100,11 +103,11 @@ def find_cross_gcc(conf):
 	conf.env['LINKFLAGS_release'] = ['-g', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
+	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_profile'] = ['-s', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-Wno-invalid-offsetof']
+	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_final'] = ['-s', '-Wl,-x', '-Wl,-O2']
 
 @feature('cc', 'cxx')

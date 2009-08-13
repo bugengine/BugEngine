@@ -34,6 +34,7 @@ public:
     class Address
     {
         friend class Callstack;
+        friend class SymbolResolver;
     private:
         void*                   m_address;
         mutable unsigned int    m_line;
@@ -65,3 +66,4 @@ private:
 
 /*****************************************************************************/
 #endif
+

@@ -37,7 +37,7 @@ public:
 
     int run();
 
-    be_metaclass(,Frame, Object)
+    be_metaclass(NOEXPORT,Frame, Object)
     be_properties
     be_end
 };
