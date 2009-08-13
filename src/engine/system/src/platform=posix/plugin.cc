@@ -41,14 +41,14 @@ Plugin::Plugin(const istring &pluginName)
         fprintf(stderr, "%s\n", error);
         throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + error);
     }
-    void (*_init)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_initplugin"));
+    void (*_init)(void) = reinterpret_cast<void (*)(void)>(reinterpret_cast<size_t>(dlsym(FPluginHandle, "_initplugin")));
     Assert(_init);
     (*_init)();
 }
 
 Plugin::~Plugin(void)
 {
-    void (*_fini)(void) = reinterpret_cast<void (*)(void)>(dlsym(FPluginHandle, "_finiplugin"));
+    void (*_fini)(void) = reinterpret_cast<void (*)(void)>(reinterpret_cast<size_t>(dlsym(FPluginHandle, "_finiplugin")));
     if(_fini)
         _fini(); 
     dlclose(FPluginHandle);
@@ -56,7 +56,7 @@ Plugin::~Plugin(void)
 
 Plugin::generic Plugin::_get(const std::string& symbol)
 {
-    return reinterpret_cast<generic>(dlsym(FPluginHandle,symbol.c_str()));
+    return reinterpret_cast<generic>(reinterpret_cast<size_t>(dlsym(FPluginHandle,symbol.c_str())));
 }
 
 }

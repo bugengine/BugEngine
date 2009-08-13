@@ -170,6 +170,8 @@ class module:
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
 				task.uselib = [optim]
+				if self.category != '3rdparty':
+					task.uselib.append('warnall')
 				task.uselib_local = []
 				task.add_objects = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))

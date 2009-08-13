@@ -65,7 +65,7 @@ namespace
 {
     class Environment : public BugEngine::Object
     {
-        be_metaclass(,Environment,Object)
+        be_metaclass(NOEXPORT,Environment,Object)
             const BugEngine::ipath& getHomeDirectory() { return BugEngine::Environment::getEnvironment().getHomeDirectory(); }
             const BugEngine::ipath& getDataDirectory() { return BugEngine::Environment::getEnvironment().getDataDirectory(); }
             const BugEngine::ipath& getPluginDirectory() { return BugEngine::Environment::getEnvironment().getPluginDirectory(); }

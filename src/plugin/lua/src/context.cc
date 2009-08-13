@@ -182,6 +182,10 @@ void Context::push(lua_State* state, const Value& v)
     case RTTI::PropertyTypeWeakObject:
         push(state, v.as< Object* >());
         break;
+    case RTTI::PropertyTypeVariant:
+    case RTTI::PropertyTypeNotSet:
+        AssertNotReached();
+        break;
     }
 }
 

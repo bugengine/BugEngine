@@ -25,7 +25,7 @@
 #include    <core/debug/memory/location.hh>
 #include    <core/debug/memory/tag.hh>
 #include    <core/debug/callstack.hh>
-#include    <core/threads/mutex.hh>
+#include    <core/threads/criticalsection.hh>
 
 
 #ifdef BE_PLATFORM_WIN32
@@ -289,6 +289,12 @@ void LocationInfo::insert(LocationInfo* child, LocationInfo* left)
     }
 }
 
+static CriticalSection& getLock()
+{
+    static CriticalSection s_locationLock;
+    return s_locationLock;
+}
+
 LocationInfo* LocationInfo::insert(const char* file)
 {
     const char* segment = file;
@@ -296,8 +302,7 @@ LocationInfo* LocationInfo::insert(const char* file)
         segment++;
     size_t segmentLength = segment-file;
 
-    static Mutex s_locationLock;
-    ScopedMutexLock lock(s_locationLock);
+    ScopedCriticalSection lock(getLock());
 
     LocationInfo *child = this->m_child;
     LocationInfo* prev  = 0;

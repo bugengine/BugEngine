@@ -85,6 +85,7 @@ T be_align(T value, size_t alignment)
 # define    FORCEEXPORT
 # define    COREEXPORT
 #endif
+#define     NOEXPORT
 
 #include    <core/memory/malloc.hh>
 #include    <cstdlib>

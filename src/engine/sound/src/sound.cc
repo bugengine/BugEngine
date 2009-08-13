@@ -67,6 +67,10 @@ SoundObject::SoundObject(World* owner, refptr<AbstractMemoryStream> soundfile) :
     m_data(0),
     m_locked(false)
 {
+    UNUSED(OV_CALLBACKS_DEFAULT);
+    UNUSED(OV_CALLBACKS_NOCLOSE);
+    UNUSED(OV_CALLBACKS_STREAMONLY);
+    UNUSED(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 }
 
 SoundObject::~SoundObject()

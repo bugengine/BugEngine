@@ -21,27 +21,25 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#include    <core/stdafx.h>
-
-#include    <symbols.hh>
-
-#if !(defined(BE_COMPILER_MSVC) || (defined(BE_COMPILER_INTEL) && defined(BE_PLATFORM_WIN32)))
+#ifndef BE_CORE_DEBUG_SYMBOLRESOLVER_HH_
+#define BE_CORE_DEBUG_SYMBOLRESOLVER_HH_
+/*****************************************************************************/
+#include    <core/debug/callstack.hh>
 
 namespace BugEngine { namespace Debug
 {
 
-SymbolResolver::SymbolResolver()
+class SymbolResolver
 {
-}
-
-SymbolResolver::~SymbolResolver()
-{
-}
-
-void SymbolResolver::fill(const Callstack::Address& a)
-{
-}
+public:
+    SymbolResolver();
+    ~SymbolResolver();
+public:
+    void fill(const Callstack::Address& a);
+};
 
 }}
+
+/*****************************************************************************/
 #endif
 

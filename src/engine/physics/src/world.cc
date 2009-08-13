@@ -92,8 +92,8 @@ World::WorldImplementation::WorldImplementation(float3 worldExtents)
 :   m_setup()
 ,   m_configuration(new btDefaultCollisionConfiguration)
 ,   m_dispatcher(new btCollisionDispatcher(m_configuration.get()))
-,   m_broadphase(new btAxisSweep3(btVector3(-worldExtents.x(),-worldExtents.y(),-worldExtents.z()),btVector3(worldExtents.x(),worldExtents.y(),worldExtents.z())))
 ,   m_solver(new btSequentialImpulseConstraintSolver)
+,   m_broadphase(new btAxisSweep3(btVector3(-worldExtents.x(),-worldExtents.y(),-worldExtents.z()),btVector3(worldExtents.x(),worldExtents.y(),worldExtents.z())))
 ,   m_world(new btDiscreteDynamicsWorld(m_dispatcher.get(),m_broadphase.get(),m_solver.get(),m_configuration.get()))
 {
 }
