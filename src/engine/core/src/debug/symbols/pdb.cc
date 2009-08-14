@@ -21,62 +21,7 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_DEBUG_MEMORY_DEBUGGER_HH_
-#define BE_CORE_DEBUG_MEMORY_DEBUGGER_HH_
-/*****************************************************************************/
+#include    <core/stdafx.h>
 
-#ifdef BE_ENABLE_MEMORY_TRACKING
-
-#include    <core/debug/callstack.hh>
-#include    <core/threads/thread.hh>
-
-namespace BugEngine { namespace Memory
-{
-
-class Debugger
-{
-private:
-    class RefPointer;
-private:
-    static RefPointer* getDebuggers();
-public:
-    static void onAllocation(void* pointer, size_t size, size_t skipStack);
-    static void onRelease(void* pointer, size_t skipStack);
-    static void onFrameUpdate();
-protected:
-    virtual void registerAllocation(void* pointer, size_t size, int threadid, Debug::Callstack::Address* from, size_t adressSize) = 0;
-    virtual void registerDeallocation(void* pointer, int threadid, Debug::Callstack::Address* from, size_t adressSize) = 0;
-    virtual void frameUpdate() = 0;
-protected:
-    i_u32       m_refCount;
-    Debugger();
-public:
-    ~Debugger();
-
-    void connect();
-    void disconnect();
-
-    class Scope
-    {
-    private:
-        Debugger*   m_debugger;
-    public:
-        Scope(Debugger* d)
-            :   m_debugger(d)
-        {
-            m_debugger->connect();
-        }
-        ~Scope()
-        {
-            m_debugger->disconnect();
-        }
-    };
-};
-
-}}
-
-#endif
-
-/*****************************************************************************/
-#endif
+#include    <core/debug/symbols.hh>
 

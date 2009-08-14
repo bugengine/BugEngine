@@ -21,54 +21,7 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_DEBUG_MEMORYTAG_HH_
-#define BE_CORE_DEBUG_MEMORYTAG_HH_
-/*****************************************************************************/
-#include    <minitl/interlocked/interlocked>
+#include    <core/stdafx.h>
 
-namespace BugEngine
-{
-class Malloc;
-class LocationInfo;
-}
-
-namespace BugEngine { namespace Memory
-{
-
-class MemoryTag
-{
-    friend class ::BugEngine::Malloc;
-    friend class ::BugEngine::LocationInfo;
-public:
-    struct MemoryTagInfo
-    {
-        LocationInfo*       location;
-        minitl::iptr<void>  memory;
-        size_t              size;
-    };
-private:
-    class Storage;
-    static Storage& getStorage();
-private:
-    MemoryTagInfo   m_info;
-private:
-    MemoryTag(void* memory, size_t size);
-    ~MemoryTag();
-public:
-    static COREEXPORT MemoryTag*   create(void* memory, size_t size, LocationInfo* location);
-    static COREEXPORT MemoryTag*   reserve(void* memory, LocationInfo *lock);
-    static COREEXPORT MemoryTag*   find(void* memory);
-    static COREEXPORT bool         release(void* memory, MemoryTagInfo& target);
-public:
-    static COREEXPORT MemoryTag*   begin();
-    static COREEXPORT MemoryTag*   end();
-    static COREEXPORT size_t       usage();
-
-    bool peek(MemoryTag::MemoryTagInfo& i, LocationInfo* owner = 0) const;
-};
-
-}}
-
-/*****************************************************************************/
-#endif
+#include    <core/debug/symbols.hh>
 

@@ -101,8 +101,7 @@ void Thread::sleep(int milliseconds)
 {
     timespec abstime, r;
     clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += milliseconds % 1000;
-    abstime.tv_sec += milliseconds / 1000;
+    abstime.tv_nsec += milliseconds * 10000000;
     abstime.tv_sec += abstime.tv_nsec % 1000000000;
     abstime.tv_nsec = abstime.tv_nsec % 1000000000;
     while(clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &abstime, &r) == -1)

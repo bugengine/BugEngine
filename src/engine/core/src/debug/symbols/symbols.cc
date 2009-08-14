@@ -23,25 +23,26 @@
 
 #include    <core/stdafx.h>
 
-#include    <symbols.hh>
+#include    <core/debug/symbols.hh>
 
-#if !(defined(BE_COMPILER_MSVC) || (defined(BE_COMPILER_INTEL) && defined(BE_PLATFORM_WIN32)))
 
 namespace BugEngine { namespace Debug
 {
 
-SymbolResolver::SymbolResolver()
+Symbols::Symbols()
 {
 }
 
-SymbolResolver::~SymbolResolver()
+Symbols::~Symbols()
 {
 }
 
-void SymbolResolver::fill(const Callstack::Address& a)
+Symbols& Symbols::runningSymbols()
 {
+    static Symbols s;
+    return s;
 }
 
 }}
-#endif
+
 

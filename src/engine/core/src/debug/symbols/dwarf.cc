@@ -22,9 +22,6 @@
 \*****************************************************************************/
 
 #include    <core/stdafx.h>
-#include    <core/debug/memory/network.hh>
 
-namespace BugEngine { namespace Memory
-{
+#include    <core/debug/symbols.hh>
 
-}}

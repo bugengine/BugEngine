@@ -51,21 +51,25 @@ Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
 {
     timespec abstime;
     clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += timeout % 1000;
-    abstime.tv_sec += timeout / 1000;
-    abstime.tv_sec += abstime.tv_nsec % 1000000000;
+    abstime.tv_nsec += (timeout * 1000000);
+    abstime.tv_sec += abstime.tv_nsec / 1000000000;
     abstime.tv_nsec = abstime.tv_nsec % 1000000000;
     int result = sem_timedwait( reinterpret_cast<sem_t*>(m_data),
                                 &abstime);
-    switch(result)
+    if(result == 0)
     {
-    case 0:
         return Finished;
-    case ETIMEDOUT:
-        return TimeOut;
-    default:
-        Assert(false);
-        return Abandoned;
+    }
+    else
+    {
+        switch(errno)
+        {
+        case ETIMEDOUT:
+            return TimeOut;
+        default:
+            Assert(false);
+            return Abandoned;
+        }
     }
 }
 
