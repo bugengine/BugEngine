@@ -45,7 +45,7 @@ static inline void** st_next(void** stack_pointer)
     return nextStackPointer;
 }
 
-BE_NOINLINE size_t Callstack::backtrace(void** buffer, size_t count, size_t skip)
+BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
     void** stackPointer;
 #ifdef __llvm__
@@ -70,9 +70,9 @@ BE_NOINLINE size_t Callstack::backtrace(void** buffer, size_t count, size_t skip
         {
 #ifdef _X64
             // stack frame is aligned on a 16 bytes boundary in x64
-            buffer[result] = *(be_align(stackPointer, 16)+1);
+            buffer[result].m_address = *(be_align(stackPointer, 16)+1);
 #else
-            buffer[result] = *(stackPointer+1);
+            buffer[result].m_address = *(stackPointer+1);
 #endif
             result++;
         }

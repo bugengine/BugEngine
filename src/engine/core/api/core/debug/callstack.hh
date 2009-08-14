@@ -34,32 +34,20 @@ public:
     class Address
     {
         friend class Callstack;
-        friend class SymbolResolver;
     private:
-        void*                   m_address;
-        mutable unsigned int    m_line;
-        mutable char            m_filename[256];
-        mutable char            m_function[256];
+        const void* m_address;
     private:
-        explicit Address(void* address);
-    private:
-        void fill() const;
+        explicit Address(const void* address);
     public:
         Address();
         Address(const Address& other);
         ~Address();
         Address& operator=(const Address& other);
-
-        const char *filename() const;
-        unsigned int line() const;
-        const char *function() const;
-        void* pointer() const;
+        const void* pointer() const;
     };
 public:
-    static size_t   backtrace(Address* buffer, size_t count, size_t skip = 0);
     static Address  backtrace(size_t depth);
-private:
-    static size_t   backtrace(void** buffer, size_t count, size_t skip);
+    static size_t   backtrace(Address* buffer, size_t count, size_t skip);
 };
 
 }}

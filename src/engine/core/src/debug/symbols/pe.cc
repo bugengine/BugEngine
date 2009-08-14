@@ -21,25 +21,7 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_DEBUG_SYMBOLRESOLVER_HH_
-#define BE_CORE_DEBUG_SYMBOLRESOLVER_HH_
-/*****************************************************************************/
-#include    <core/debug/callstack.hh>
+#include    <core/stdafx.h>
 
-namespace BugEngine { namespace Debug
-{
-
-class SymbolResolver
-{
-public:
-    SymbolResolver();
-    ~SymbolResolver();
-public:
-    void fill(const Callstack::Address& a);
-};
-
-}}
-
-/*****************************************************************************/
-#endif
+#include    <core/debug/symbols.hh>
 

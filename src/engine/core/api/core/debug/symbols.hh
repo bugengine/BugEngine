@@ -21,30 +21,49 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_CORE_DEBUG_MEMORY_INTERNAL_HH_
-#define BE_CORE_DEBUG_MEMORY_INTERNAL_HH_
+#ifndef BE_CORE_DEBUG_SYMBOLS_HH_
+#define BE_CORE_DEBUG_SYMBOLS_HH_
 /*****************************************************************************/
-#include    <core/debug/memory/debugger.hh>
+#include    <core/debug/callstack.hh>
 
-#ifdef BE_ENABLE_MEMORY_TRACKING
-
-namespace BugEngine { namespace Memory
+namespace BugEngine { namespace Debug
 {
 
-class InternalDebugger : public Debugger
+class Symbols
 {
-protected:
-    virtual void registerAllocation(void* pointer, size_t size, int threadid, Debug::Callstack::Address* from, size_t adressSize) override;
-    virtual void registerDeallocation(void* pointer, int threadid, Debug::Callstack::Address* from, size_t adressSize) override;
-    virtual void frameUpdate() override;
 public:
-    InternalDebugger();
-    ~InternalDebugger();
+    class Symbol
+    {
+        friend class Symbols;
+    private:
+        char    filename[4096];
+        char    function[4096];
+        int     line;
+    public:
+        Symbol();
+        ~Symbol();
+    };
+public:
+    class Module
+    {
+    public:
+        Module(const char *filename);
+        Module(const void* data, size_t size);
+        ~Module();
+
+        virtual void resolve(const Callstack::Address& address, Symbol& result) const;
+    };
+public:
+    Symbols();
+    ~Symbols();
+
+    void addModule(const Module* m);
+    void resolve(const Callstack::Address& address, Symbol& result);
+
+    static Symbols& runningSymbols();
 };
 
 }}
-
-#endif
 
 /*****************************************************************************/
 #endif
