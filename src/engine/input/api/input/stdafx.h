@@ -31,14 +31,10 @@
 #include    <rtti/helper.hh>
 
 
-#if defined(_WIN32)
-# if defined(building_input) || defined(INPUT_EXPORTS)
-#  define   INPUTEXPORT         __declspec(dllexport)
-# elif defined(input_dll)
-#  define   INPUTEXPORT         __declspec(dllimport)
-# else
-#  define   INPUTEXPORT
-# endif
+#if defined(building_input) || defined(INPUT_EXPORTS)
+# define    INPUTEXPORT         BE_EXPORT
+#elif defined(input_dll)
+# define    INPUTEXPORT         BE_IMPORT
 #else
 # define    INPUTEXPORT
 #endif

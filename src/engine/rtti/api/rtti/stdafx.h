@@ -31,16 +31,12 @@
 #include    <maths/matrix.hh>
 
 
-#if defined(_WIN32)
-# if defined(building_rtti) || defined(RTTI_EXPORTS)
-#  define   RTTIEXPORT          __declspec(dllexport)
-# elif defined(rtti_dll)
-#  define   RTTIEXPORT          __declspec(dllimport)
-# else
-#  define    RTTIEXPORT
-# endif
+#if defined(building_rtti) || defined(RTTI_EXPORTS)
+# define     RTTIEXPORT          BE_EXPORT
+#elif defined(rtti_dll)
+# define     RTTIEXPORT          BE_IMPORT
 #else
-# define    RTTIEXPORT
+# define     RTTIEXPORT
 #endif
 
 /*****************************************************************************/

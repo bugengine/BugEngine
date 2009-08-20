@@ -24,7 +24,7 @@
 #ifndef BE_GRAPHICS_SCENE_SCENE_HH_
 #define BE_GRAPHICS_SCENE_SCENE_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable>
+#include    <minitl/ptr/refcountable.hh>
 #include    <input/inputmap.hh>
 
 namespace BugEngine { namespace Graphics

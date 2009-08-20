@@ -21,38 +21,21 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_MINITL_MEMORY_POOL_
-#define BE_MINITL_MEMORY_POOL_
+#ifndef BE_EDITOR_STDAFX_H_
+#define BE_EDITOR_STDAFX_H_
 /*****************************************************************************/
-#include    <minitl/interlocked/interlocked>
-#include    <core/threads/criticalsection.hh>
-#include    <minitl/interlocked/stack>
 
-namespace minitl
-{
+#include    <core/stdafx.h>
+#include    <rtti/stdafx.h>
+#include    <system/stdafx.h>
+#include    <input/stdafx.h>
+#include    <graphics/stdafx.h>
+#include    <physics/stdafx.h>
+#include    <sound/stdafx.h>
+#include    <mobile/stdafx.h>
+#include    <data/stdafx.h>
 
-template< typename T >
-class pool
-{
-private:
-    enum
-    {
-        ElementSize = sizeof(T)
-    };
-    istack<inode>               m_items;
-    void*                       m_pool;
-    void*                       m_end;
-public:
-    pool(size_t capacity, size_t alignment = BE_ALIGNOF(T));
-    ~pool();
-    
-    T* allocate();
-    void release(T* t);
-};
-
-}
-
-#include    "inl/pool.inl"
+#include    <rtti/helper.hh>
 
 /*****************************************************************************/
 #endif

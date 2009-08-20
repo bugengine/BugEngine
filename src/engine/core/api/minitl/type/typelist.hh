@@ -24,7 +24,7 @@
 #ifndef BE_MINITL_TYPE_TYPELIST_
 #define BE_MINITL_TYPE_TYPELIST_
 /*****************************************************************************/
-#include    <minitl/maths/minmax>
+#include    <minitl/maths/minmax.hh>
 
 namespace minitl
 {

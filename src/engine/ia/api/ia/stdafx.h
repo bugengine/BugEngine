@@ -21,25 +21,24 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef _VGEIA_STDAFX_H_
-#define _VGEIA_STDAFX_H_
+#ifndef BE_IA_STDAFX_H_
+#define BE_IA_STDAFX_H_
 /*****************************************************************************/
 
-#include <vge/core/stdafx.h>
-#include <vge/rtti/stdafx.h>
+#include <core/stdafx.h>
+#include <rtti/stdafx.h>
 
-#include <vge/rtti/helper.hh>
+#include <rtti/helper.hh>
 
 
-#if defined(WIN32)
-# if defined(building_vgeia) || defined(IA_EXPORTS)
-#  define   IAEXPORT            __declspec(dllexport)
-# else  /* ! building_vgecore */
-#  define   IAEXPORT            __declspec(dllimport)
-# endif /* building_vgecore */
-#else   /* ! WIN32, ! _DLL */
+
+#if defined(building_ia) || defined(IA_EXPORTS)
+# define    IAEXPORT            BE_EXPORT
+#elif defined(ia_dll)
+# define    IAEXPORT            BE_IMPORT
+#else
 # define    IAEXPORT
-#endif  /* MSVC */
+#endif
 
 /*****************************************************************************/
 #endif

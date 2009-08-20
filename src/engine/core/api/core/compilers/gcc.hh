@@ -47,6 +47,8 @@ typedef u8                      byte;
 #define NOTHROW                 throw()
 
 #define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
+#define BE_EXPORT               __attribute__ ((visibility("default")))
+#define BE_IMPORT
 
 /*****************************************************************************/
 #endif

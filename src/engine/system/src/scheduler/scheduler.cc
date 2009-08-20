@@ -29,7 +29,7 @@
 #include    <system/scheduler/task.hh>
 #include    <system/scheduler/taskitem.hh>
 #include    <system/scheduler/range/sequence.hh>
-#include    <minitl/interlocked/stack>
+#include    <minitl/interlocked/stack.hh>
 #include    <maths/vector.hh>
 #include    <core/debugrenderer/debugrenderer.hh>
 

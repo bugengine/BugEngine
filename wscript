@@ -57,5 +57,7 @@ def build(bld):
 	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)
 
+	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['win32', 'posix']).post(bld)
+
 	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)

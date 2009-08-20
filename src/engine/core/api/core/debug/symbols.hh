@@ -32,35 +32,48 @@ namespace BugEngine { namespace Debug
 class Symbols
 {
 public:
+    class Symbol;
+    class Module;
+public:
     class Symbol
     {
         friend class Symbols;
+        friend class Module;
     private:
-        char    filename[4096];
-        char    function[4096];
-        int     line;
+        char    m_filename[4096];
+        char    m_function[4096];
+        int     m_line;
     public:
         Symbol();
         ~Symbol();
+
+        const char *filename() const    { return m_filename; }
+        int         line() const        { return m_line; }
+        const char *function() const    { return m_function; }
     };
 public:
     class Module
     {
     public:
-        Module(const char *filename);
-        Module(const void* data, size_t size);
+        Module(const char *filename, u64 baseAddress);
         ~Module();
 
-        virtual void resolve(const Callstack::Address& address, Symbol& result) const;
+        static std::vector<Module> enumerate();
+        bool resolve(const Callstack::Address& address, Symbol& result) const;
     };
+private:
+    enum _TargetSelf { Self };
+    Symbols(_TargetSelf self);
 public:
     Symbols();
     ~Symbols();
 
-    void addModule(const Module* m);
-    void resolve(const Callstack::Address& address, Symbol& result);
+    void addModule(const Module& m);
+    void resolve(const Callstack::Address& address, Symbol& result) const;
 
-    static Symbols& runningSymbols();
+    static const Symbols& runningSymbols();
+private:
+    std::vector<Module> m_modules;
 };
 
 }}

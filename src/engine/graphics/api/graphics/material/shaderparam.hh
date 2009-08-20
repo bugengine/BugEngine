@@ -24,7 +24,7 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADERPARAM_HH_
 #define BE_GRAPHICS_MATERIAL_SHADERPARAM_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable>
+#include    <minitl/ptr/refcountable.hh>
 #include    <graphics/material/texture.hh>
 
 namespace BugEngine { namespace Graphics

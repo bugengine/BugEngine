@@ -21,44 +21,38 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_MINITL_TYPE_CAST_
-#define BE_MINITL_TYPE_CAST_
+#ifndef BE_MINITL_MEMORY_POOL_
+#define BE_MINITL_MEMORY_POOL_
 /*****************************************************************************/
-#include    <core/debug/assert.hh>
-#include    <minitl/ptr/refptr>
+#include    <minitl/interlocked/interlocked.hh>
+#include    <core/threads/criticalsection.hh>
+#include    <minitl/interlocked/stack.hh>
 
 namespace minitl
 {
 
-template< typename U, typename T >
-BE_ALWAYSINLINE U checked_cast(T value)
+template< typename T >
+class pool
 {
-    Assert(dynamic_cast<U>(value));
-    Assert(dynamic_cast<U>(value) == static_cast<U>(value));
-    return static_cast<U>(value);
-}
-
-template< typename U, typename T >
-BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
-{
-    Assert(dynamic_cast<U*>(value.get()));
-    Assert(dynamic_cast<U*>(value.get()) == static_cast<U*>(value.get()));
-    return refptr<U>(static_cast<U*>(value.get()));
-}
-
-#pragma warning(push)
-#pragma warning(disable:4800)
-
-template< typename U, typename T >
-BE_ALWAYSINLINE U checked_numcast(T value)
-{
-    Assert(static_cast<T>(static_cast<U>(value)) == value);
-    return static_cast<U>(value);
-}
-
-#pragma warning(pop)
+private:
+    enum
+    {
+        ElementSize = sizeof(T)
+    };
+    istack<inode>               m_items;
+    void*                       m_pool;
+    void*                       m_end;
+public:
+    pool(size_t capacity, size_t alignment = BE_ALIGNOF(T));
+    ~pool();
+    
+    T* allocate();
+    void release(T* t);
+};
 
 }
+
+#include    "inl/pool.inl"
 
 /*****************************************************************************/
 #endif

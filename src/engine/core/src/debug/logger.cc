@@ -26,7 +26,7 @@
 #include    <core/log/logger.hh>
 #include    <core/log/exception.hh>
 
-#include    <minitl/ptr/scopedptr>
+#include    <minitl/ptr/scopedptr.hh>
 
 
 namespace BugEngine
@@ -97,7 +97,7 @@ Logger* Logger::root()
     return &s_rootLogger;
 }
 
-bool Logger::log(const inamespace& name, eLogLevel level, const char *filename, int line, const char *msg)
+bool Logger::log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg)
 {
     return instance(name)->log(level, filename, line, msg);
 }
@@ -107,7 +107,7 @@ void Logger::addListener(ILogListener* listener)
     m_listeners.push_back(listener);
 }
 
-bool Logger::log(eLogLevel level, const char *filename, int line, const char *msg)
+bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
     for(std::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)

@@ -24,7 +24,7 @@
 #ifndef BE_RTTI_PROPERTYGETTERS_HH_
 #define BE_RTTI_PROPERTYGETTERS_HH_
 /*****************************************************************************/
-#include    <minitl/type/typemanipulation>
+#include    <minitl/type/typemanipulation.hh>
 
 namespace BugEngine { namespace RTTI
 {

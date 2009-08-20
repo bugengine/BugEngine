@@ -63,6 +63,8 @@ typedef u8                      byte;
 #define NOTHROW     throw()
 
 #define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
+#define BE_EXPORT               __declspec(dllexport)
+#define BE_IMPORT               __declspec(dllimport)
 
 /*****************************************************************************/
 #endif

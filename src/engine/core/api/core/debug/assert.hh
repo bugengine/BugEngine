@@ -33,7 +33,7 @@
 # define BREAKPOINT __asm("int3")
 #endif
 
-namespace BugEngine
+namespace BugEngine { namespace Debug
 {
 
 enum AssertionResult
@@ -57,57 +57,57 @@ COREEXPORT AssertionCallback_t getAssertionCallback();
 # ifdef      assert
 #  undef     assert
 # endif      /*assert*/
-# define    Assert(cond)                                                                    \
-    {                                                                                       \
-        static bool ignore = false;                                                         \
-        if(!ignore && !(cond))                                                              \
-        {                                                                                   \
-            BugEngine::AssertionResult r;                                                   \
-            r = BugEngine::getAssertionCallback()(__FILE__,__LINE__,#cond);                 \
-            switch(r)                                                                       \
-            {                                                                               \
-            case BugEngine::Abort:         std::abort(); break;                             \
-            case BugEngine::IgnoreAll:     ignore = true; break;                            \
-            case BugEngine::Break:         BREAKPOINT; break;                               \
-            default:;                                                                       \
-            }                                                                               \
-        }                                                                                   \
+# define    Assert(cond)                                                                        \
+    {                                                                                           \
+        static bool ignore = false;                                                             \
+        if(!ignore && !(cond))                                                                  \
+        {                                                                                       \
+            BugEngine::Debug::AssertionResult r;                                                \
+            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,#cond);              \
+            switch(r)                                                                           \
+            {                                                                                   \
+                case BugEngine::Debug::Abort:         std::abort(); break;                      \
+            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
+            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
+            default:;                                                                           \
+            }                                                                                   \
+        }                                                                                       \
     }
-# define    AssertMsg(cond,message)                                                         \
-    {                                                                                       \
-        static bool ignore = false;                                                         \
-        if(!ignore && !(cond))                                                              \
-        {                                                                                   \
-            BugEngine::AssertionResult r;                                                   \
-            r = BugEngine::getAssertionCallback()(__FILE__,__LINE__,message);               \
-            switch(r)                                                                       \
-            {                                                                               \
-            case BugEngine::Abort:         std::abort(); break;                             \
-            case BugEngine::IgnoreAll:     ignore = true; break;                            \
-            case BugEngine::Break:         BREAKPOINT; break;                               \
-            default:;                                                                       \
-            }                                                                               \
-        }                                                                                   \
+# define    AssertMsg(cond,message)                                                             \
+    {                                                                                           \
+        static bool ignore = false;                                                             \
+        if(!ignore && !(cond))                                                                  \
+        {                                                                                       \
+            BugEngine::Debug::AssertionResult r;                                                \
+            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,message);            \
+            switch(r)                                                                           \
+            {                                                                                   \
+            case BugEngine::Debug::Abort:         std::abort(); break;                          \
+            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
+            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
+            default:;                                                                           \
+            }                                                                                   \
+        }                                                                                       \
     }
-# define    AssertNotReached()                                                              \
-    {                                                                                       \
-        static bool ignore = false;                                                         \
-        if(!ignore)                                                                         \
-        {                                                                                   \
-            BugEngine::AssertionResult r;                                                   \
-            r = BugEngine::getAssertionCallback()(__FILE__,__LINE__,"Unreachable code");    \
-            switch(r)                                                                       \
-            {                                                                               \
-            case BugEngine::Abort:         std::abort(); break;                             \
-            case BugEngine::IgnoreAll:     ignore = true; break;                            \
-            case BugEngine::Break:         BREAKPOINT; break;                               \
-            default:;                                                                       \
-            }                                                                               \
-        }                                                                                   \
+# define    AssertNotReached()                                                                  \
+    {                                                                                           \
+        static bool ignore = false;                                                             \
+        if(!ignore)                                                                             \
+        {                                                                                       \
+            BugEngine::Debug::AssertionResult r;                                                \
+            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,"Unreachable code"); \
+            switch(r)                                                                           \
+            {                                                                                   \
+            case BugEngine::Debug::Abort:         std::abort(); break;                          \
+            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
+            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
+            default:;                                                                           \
+            }                                                                                   \
+        }                                                                                       \
     }
 #endif
 
-}
+}}
 
 /*****************************************************************************/
 #endif

@@ -71,33 +71,27 @@ T be_align(T value, size_t alignment)
     return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
 }
 
-#if BE_PLATFORM_WIN32 == 1
-# define    FORCEEXPORT         __declspec(dllexport)
-# if defined(building_core) || defined(CORE_EXPORTS)
-#  define   COREEXPORT          __declspec(dllexport)
-# elif defined(core_dll)
-#  define   COREEXPORT          __declspec(dllimport)
-#  error
-# else
-#  define   COREEXPORT
-# endif
+#if defined(building_core) || defined(CORE_EXPORTS)
+# define    COREEXPORT          BE_EXPORT
+#elif defined(core_dll)
+# define    COREEXPORT          BE_IMPORT
 #else
-# define    FORCEEXPORT
 # define    COREEXPORT
 #endif
 #define     NOEXPORT
+#define     FORCEEXPORT         BE_EXPORT
 
 #include    <core/memory/malloc.hh>
 #include    <cstdlib>
 #include    <cstdio>
 #include    <cstring>
 #include    <string>
-#include    <minitl/container/vector>
-#include    <minitl/container/list>
-#include    <minitl/container/stack>
-#include    <minitl/container/hash_map>
-#include    <minitl/container/hash_set>
-#include    <minitl/interlocked/interlocked>
+#include    <minitl/container/vector.hh>
+#include    <minitl/container/list.hh>
+#include    <minitl/container/stack.hh>
+#include    <minitl/container/hash_map.hh>
+#include    <minitl/container/hash_set.hh>
+#include    <minitl/interlocked/interlocked.hh>
 #include    <minitl/string/format.hh>
 
 
@@ -111,10 +105,11 @@ T be_align(T value, size_t alignment)
 
 #include    <maths/float.hh>
 
-#include    <minitl/ptr/refcountable>
-#include    <minitl/ptr/scopedptr>
-#include    <minitl/ptr/refptr>
-#include    <minitl/type/cast>
+#include    <minitl/ptr/refcountable.hh>
+#include    <minitl/ptr/scopedptr.hh>
+#include    <minitl/ptr/refptr.hh>
+#include    <minitl/type/cast.hh>
+#include    <core/endianness.hh>
 
 using minitl::refptr;
 using minitl::scopedptr;

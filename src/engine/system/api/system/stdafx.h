@@ -31,14 +31,10 @@
 #include    <rtti/helper.hh>
 
 
-#if defined(_WIN32)
-# if defined(building_system) || defined(SYSTEM_EXPORTS)
-#  define   SYSTEMEXPORT        __declspec(dllexport)
-# elif defined(system_dll)
-#  define   SYSTEMEXPORT      __declspec(dllimport)
-# else
-#  define   SYSTEMEXPORT
-# endif
+#if defined(building_system) || defined(SYSTEM_EXPORTS)
+# define    SYSTEMEXPORT        BE_EXPORT
+#elif defined(system_dll)
+# define    SYSTEMEXPORT        BE_IMPORT
 #else
 # define    SYSTEMEXPORT
 #endif

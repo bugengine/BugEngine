@@ -99,7 +99,7 @@ namespace
             fclose(m_logFile);
         }
     protected:
-        virtual bool log(const BugEngine::istring& logname, BugEngine::eLogLevel level, const char *filename, int line, const char *msg) throw()
+        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
         {
             fprintf(m_logFile, "%s(%d): %s\n"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
@@ -136,6 +136,7 @@ static int __main(int argc, const char *argv[])
 
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());
+        Assert(false);
     }
     catch(std::runtime_error& er)
     {

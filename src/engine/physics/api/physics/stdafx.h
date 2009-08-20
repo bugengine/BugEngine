@@ -32,14 +32,10 @@
 #include    <rtti/helper.hh>
 
 
-#if defined(_WIN32)
-# if defined(building_physics) || defined(PHYSICS_EXPORTS)
-#  define   PHYSICSEXPORT       __declspec(dllexport)
-# elif defined(physics_dll)
-#  define   PHYSICSEXPORT       __declspec(dllimport)
-# else
-#  define   PHYSICSEXPORT
-# endif
+#if defined(building_physics) || defined(PHYSICS_EXPORTS)
+# define    PHYSICSEXPORT       BE_EXPORT
+#elif defined(physics_dll)
+# define    PHYSICSEXPORT       BE_IMPORT
 #else
 # define    PHYSICSEXPORT
 #endif
