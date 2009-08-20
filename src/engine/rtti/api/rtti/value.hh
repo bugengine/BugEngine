@@ -24,7 +24,7 @@
 #ifndef BE_RTTI_VALUE_HH_
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
-#include    <minitl/type/variant>
+#include    <minitl/type/variant.hh>
 #include    <rtti/value/valuetypes.hh>
 #include    <rtti/value/valuecopy.hh>
 #include    <rtti/value/valueref.hh>

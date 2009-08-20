@@ -500,6 +500,49 @@ class game(module):
 			task = self.gentask(builder, env, envname, 'cprogram', options, ioptions)
 		return self
 
+
+""" game """
+class tool(module):
+	def __init__( self,
+				  name,
+				  depends = [],
+				  category = 'tool',
+				  localoptions = coptions(),
+				  globaloptions = coptions(),
+				  localarchoptions = {},
+				  globalarchoptions = {},
+				  platforms = allplatforms,
+				  archs = allarchs,
+				  sources=[],
+				):
+		self.install_path = 'bin'
+		module.__init__(self,
+						name,
+						depends,
+						category,
+						localoptions,
+						globaloptions,
+						localarchoptions,
+						globalarchoptions,
+						platforms,
+						archs,
+						sources)
+
+	def post(self, builder):
+		for d in self.depends:
+			d.post(builder)
+		self.makeproject(builder)
+		for envname in builder.env['BUILD_VARIANTS']:
+			env = builder.all_envs[envname]
+			options = coptions()
+			ioptions = coptions( )
+			for d in self.depends:
+				if env['STATIC'] and d.__class__.__name__ == 'library':
+					ioptions.defines.add(d.name + '_dll')
+			task = self.gentask(builder, env, envname, 'cprogram', options, ioptions)
+		return self
+
+
 """ unit test """
 class test(module):
 	def __init__( self,

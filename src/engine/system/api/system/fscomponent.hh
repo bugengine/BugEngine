@@ -24,7 +24,7 @@
 #ifndef BE_SYSTEM_FILESYSTEM_COMPONENT_HH_
 #define BE_SYSTEM_FILESYSTEM_COMPONENT_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable>
+#include    <minitl/ptr/refcountable.hh>
 #include    <system/filesystem.hh>
 
 

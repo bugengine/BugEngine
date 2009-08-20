@@ -21,27 +21,44 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_MOBILE_STDAFX_H_
-#define BE_MOBILE_STDAFX_H_
+#ifndef BE_MINITL_TYPE_CAST_
+#define BE_MINITL_TYPE_CAST_
 /*****************************************************************************/
+#include    <core/debug/assert.hh>
+#include    <minitl/ptr/refptr.hh>
 
-#include    <core/stdafx.h>
-#include    <system/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <graphics/stdafx.h>
-#include    <physics/stdafx.h>
-#include    <sound/stdafx.h>
+namespace minitl
+{
 
-#include    <rtti/helper.hh>
+template< typename U, typename T >
+BE_ALWAYSINLINE U checked_cast(T value)
+{
+    Assert(dynamic_cast<U>(value));
+    Assert(dynamic_cast<U>(value) == static_cast<U>(value));
+    return static_cast<U>(value);
+}
 
+template< typename U, typename T >
+BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
+{
+    Assert(dynamic_cast<U*>(value.get()));
+    Assert(dynamic_cast<U*>(value.get()) == static_cast<U*>(value.get()));
+    return refptr<U>(static_cast<U*>(value.get()));
+}
 
-#if defined(building_mobile) || defined(MOBILE_EXPORTS)
-# define    MOBILEEXPORT        BE_EXPORT
-#elif defined(mobile_dll)
-# define    MOBILEEXPORT        BE_IMPORT
-#else
-# define    MOBILEEXPORT
-#endif
+#pragma warning(push)
+#pragma warning(disable:4800)
+
+template< typename U, typename T >
+BE_ALWAYSINLINE U checked_numcast(T value)
+{
+    Assert(static_cast<T>(static_cast<U>(value)) == value);
+    return static_cast<U>(value);
+}
+
+#pragma warning(pop)
+
+}
 
 /*****************************************************************************/
 #endif

@@ -33,14 +33,10 @@
 
 
 
-#if defined(_WIN32)
-# if defined(building_sound) || defined(SOUND_EXPORTS)
-#  define   SOUNDEXPORT         __declspec(dllexport)
-# elif defined(sound_dll)
-#  define   SOUNDEXPORT         __declspec(dllimport)
-# else
-#  define   SOUNDEXPORT
-# endif
+#if defined(building_sound) || defined(SOUND_EXPORTS)
+# define    SOUNDEXPORT         BE_EXPORT
+#elif defined(sound_dll)
+# define    SOUNDEXPORT         BE_IMPORT
 #else
 # define    SOUNDEXPORT
 #endif

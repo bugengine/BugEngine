@@ -24,7 +24,7 @@
 #ifndef BE_CORE_SINGLETON_MANAGER_HH_
 #define BE_CORE_SINGLETON_MANAGER_HH_
 /*****************************************************************************/
-#include <minitl/container/hash_map>
+#include <minitl/container/hash_map.hh>
 
 namespace BugEngine
 {

@@ -24,7 +24,7 @@
 #ifndef BE_CORE_STREAMS_HH_
 #define BE_CORE_STREAMS_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable>
+#include    <minitl/ptr/refcountable.hh>
 
 namespace BugEngine
 {

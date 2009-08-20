@@ -24,7 +24,7 @@
 #ifndef BE_MINITL_PTR_REFPTR_
 #define BE_MINITL_PTR_REFPTR_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable>
+#include    <minitl/ptr/refcountable.hh>
 
 
 namespace minitl

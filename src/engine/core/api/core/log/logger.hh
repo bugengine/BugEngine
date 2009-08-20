@@ -25,11 +25,12 @@
 #define BE_CORE_LOG_HH_
 /*****************************************************************************/
 #include <core/string/istring.hh>
+#include <minitl/string/format.hh>
 
 namespace BugEngine
 {
 
-enum eLogLevel
+enum LogLevel
 {
     logSpam = 0,
     logDebug = 1,
@@ -47,7 +48,7 @@ class ILogListener
 protected:
     static COREEXPORT const char* s_logNames[];
     virtual ~ILogListener() {}
-    virtual bool log(const istring& logname, eLogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
+    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
 };
 
 class COREEXPORT Logger
@@ -60,37 +61,59 @@ private:
 private:
     Logger();
 public:
+    class LogMessage : public minitl::format<2048>
+    {
+    private:
+        Logger*     m_logger;
+        LogLevel    m_level;
+        const char *m_file;
+        int         m_line;
+    public:
+        LogMessage(Logger* l, LogLevel level, const char *file, int line, const char *msg)
+            :   minitl::format<2048>(msg)
+            ,   m_logger(l)
+            ,   m_level(level)
+            ,   m_file(file)
+            ,   m_line(line)
+        {
+        }
+        ~LogMessage()
+        {
+            m_logger->log(m_level, m_file, m_line, this->c_str());
+        }
+    };
+public:
     Logger(Logger* parent, const istring& name);
     ~Logger();
 
     static Logger* instance(const inamespace& name);
-    static bool    log(const inamespace& name, eLogLevel level, const char *filename, int line, const char *msg);
+    static bool    log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
     static Logger* root();
 
     void addListener(ILogListener* listener);
-    bool log(eLogLevel level, const char *filename, int line, const char *msg);
+    bool log(LogLevel level, const char *filename, int line, const char *msg);
 private:
     Logger(const Logger& other);
     Logger& operator=(const Logger& other);
 };
 
 #ifdef _DEBUG
-# define  be_spam(msg)        Logger::root()->log(logSpam, __FILE__,__LINE__,msg)
-# define  be_debug(msg)       Logger::root()->log(logDebug, __FILE__,__LINE__,msg)
+# define  be_spam(msg)        Logger::LogMessage(Logger::root(), logSpam, __FILE__, __LINE__, msg)
+# define  be_debug(msg)       Logger::LogMessage(Logger::root(), logDebug, __FILE__, __LINE__, msg)
 #else
 # define  be_spam(msg)
 # define  be_debug(msg)
 #endif
 
 #ifndef NDEBUG
-# define  be_info(msg)        Logger::root()->log(logInfo, __FILE__,__LINE__,msg)
+# define  be_info(msg)        Logger::LogMessage(Logger::root(), logInfo, __FILE__, __LINE__, msg)
 #else
 # define  be_info(msg)
 #endif
 
-#define  be_warning(msg)      Logger::root()->log(logWarning, __FILE__,__LINE__,msg)
-#define  be_error(msg)        Logger::root()->log(logError, __FILE__,__LINE__,msg)
-#define  be_fatal(msg)        Logger::root()->log(logFatal, __FILE__,__LINE__,msg)
+#define  be_warning(msg)      Logger::LogMessage(Logger::root(), logWarning, __FILE__, __LINE__, msg)
+#define  be_error(msg)        Logger::LogMessage(Logger::root(), logError, __FILE__, __LINE__, msg)
+#define  be_fatal(msg)        Logger::LogMessage(Logger::root(), logFatal, __FILE__, __LINE__, msg)
 
 }
 

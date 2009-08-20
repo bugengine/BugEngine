@@ -27,14 +27,10 @@
 
 #include <core/stdafx.h>
 
-#if defined(_WIN32)
-# if defined(building_network) || defined(NETWORK_EXPORTS)
-#  define   NETWORKEXPORT       __declspec(dllexport)
-# elif defined(network_dll)
-#  define   NETWORKEXPORT       __declspec(dllimport)
-# else
-#  define   NETWORKEXPORT
-# endif
+#if defined(building_network) || defined(NETWORK_EXPORTS)
+# define    NETWORKEXPORT       BE_EXPORT
+#elif defined(network_dll)
+# define    NETWORKEXPORT       BE_IMPORT
 #else
 # define    NETWORKEXPORT
 #endif

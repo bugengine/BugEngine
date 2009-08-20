@@ -28,7 +28,7 @@
 #include    <core/utils/singleton.hh>
 #include    <core/threads/semaphore.hh>
 #include    <core/threads/event.hh>
-#include    <minitl/memory/pool>
+#include    <minitl/memory/pool.hh>
 #include    <core/timer.hh>
 #include    <maths/vector.hh>
 

@@ -32,14 +32,10 @@
 
 #include <rtti/helper.hh>
 
-#if defined(_WIN32)
-# if defined(building_graphics) || defined(GRAPHICS_EXPORTS)
-#  define   GRAPHICSEXPORT      __declspec(dllexport)
-# elif defined(graphics_dll)
-#  define   GRAPHICSEXPORT      __declspec(dllimport)
-# else
-#  define   GRAPHICSEXPORT
-# endif
+#if defined(building_graphics) || defined(GRAPHICS_EXPORTS)
+# define    GRAPHICSEXPORT      BE_EXPORT
+#elif defined(graphics_dll)
+# define    GRAPHICSEXPORT      BE_IMPORT
 #else
 # define    GRAPHICSEXPORT
 #endif

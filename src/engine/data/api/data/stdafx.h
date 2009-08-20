@@ -31,14 +31,10 @@
 
 #include    <rtti/helper.hh>
 
-#if defined(_WIN32)
-# if defined(building_data) || defined(DATA_EXPORTS)
-#  define   DATAEXPORT          __declspec(dllexport)
-# elif defined(data_dll)
-#  define   DATAEXPORT          __declspec(dllimport)
-# else
-#  define   DATAEXPORT
-# endif
+#if defined(building_data) || defined(DATA_EXPORTS)
+# define    DATAEXPORT          BE_EXPORT
+#elif defined(data_dll)
+# define    DATAEXPORT          BE_IMPORT
 #else
 # define    DATAEXPORT
 #endif

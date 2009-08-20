@@ -24,8 +24,8 @@
 #ifndef BE_SYSTEM_SCHEDULER_TASKITEM_HH_
 #define BE_SYSTEM_SCHEDULER_TASKITEM_HH_
 /*****************************************************************************/
-#include    <minitl/interlocked/interlocked>
-#include    <minitl/interlocked/stack>
+#include    <minitl/interlocked/interlocked.hh>
+#include    <minitl/interlocked/stack.hh>
 #include    <system/scheduler/scheduler.hh>
 #include    <core/threads/semaphore.hh>
 

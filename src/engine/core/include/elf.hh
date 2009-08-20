@@ -21,27 +21,42 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_MOBILE_STDAFX_H_
-#define BE_MOBILE_STDAFX_H_
+#ifndef BE_CORE_DEBUG_ELF_HH_
+#define BE_CORE_DEBUG_ELF_HH_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <system/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <graphics/stdafx.h>
-#include    <physics/stdafx.h>
-#include    <sound/stdafx.h>
+namespace BugEngine { namespace Debug
+{
 
-#include    <rtti/helper.hh>
+enum ElfClass
+{
+    klass_invalid = 0,
+    klass_32 = 1,
+    klass_64 = 2
+};
+
+enum ElfEndianness
+{
+    msb_invalid = 0,
+    msb_littleendian = 1,
+    msb_bigendian = 2
+};
 
 
-#if defined(building_mobile) || defined(MOBILE_EXPORTS)
-# define    MOBILEEXPORT        BE_EXPORT
-#elif defined(mobile_dll)
-# define    MOBILEEXPORT        BE_IMPORT
-#else
-# define    MOBILEEXPORT
-#endif
+
+class Elf
+{
+private:
+    template< ElfClass klass, ElfEndianness endianness >
+    void parse(FILE* f);
+public:
+    Elf(const char* filename, FILE* f);
+    ~Elf();
+
+};
+
+}}
 
 /*****************************************************************************/
 #endif
+

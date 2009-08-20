@@ -24,7 +24,7 @@
 #ifndef BE_MINITL_TYPE_UNION_
 #define BE_MINITL_TYPE_UNION_
 /*****************************************************************************/
-#include    <minitl/type/typelist>
+#include    <minitl/type/typelist.hh>
 
 
 namespace minitl

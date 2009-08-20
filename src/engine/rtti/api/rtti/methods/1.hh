@@ -25,7 +25,7 @@
 #define BE_RTTI_METHODS_1_HH_
 /*****************************************************************************/
 #include    <typeinfo>
-#include    <minitl/type/typemanipulation>
+#include    <minitl/type/typemanipulation.hh>
 
 namespace BugEngine { namespace RTTI { namespace _
 {

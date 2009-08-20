@@ -25,7 +25,7 @@
 #define BE_MINITL_CONTAINER_HASH_MAP_
 /*****************************************************************************/
 #include <map>
-#include <minitl/container/traits>
+#include <minitl/container/traits.hh>
 
 namespace minitl
 {

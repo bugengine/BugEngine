@@ -64,15 +64,18 @@ static void displayError()
 #elif defined __APPLE__
 # define BE_PLATFORM_NAME   MacOSX
 # define BE_PLATFORM_MACOS  1
+# define BE_PLATFORM_POSIX  1
 #elif defined __linux__
 # define BE_PLATFORM_NAME   Linux
 # define BE_PLATFORM_LINUX  1
+# define BE_PLATFORM_POSIX  1
 # include   <strings.h>
 # define    stricmp strcasecmp
 # define    strnicmp strncasecmp
 #elif defined __sun
 # define BE_PLATFORM_NAME   SunOS
 # define BE_PLATFORM_SUN    1
+# define BE_PLATFORM_POSIX  1
 #else
 # error "unknown platform"
 #endif
