@@ -29,8 +29,11 @@
 # include   <dlfcn.h>
 # include   <link.h>
 #endif
+#ifdef BE_PLATFORM_WIN32
+# include   <psapi.h>
+#endif
 
-#include    <elf.h>
+#include    <elf.hh>
 
 
 namespace BugEngine { namespace Debug
@@ -59,7 +62,7 @@ Symbols::Module::Module(const char *filename, u64 baseAddress)
         fseek(f, 0, SEEK_SET);
         if (signature[0] == 'M' && signature[1] == 'Z')
         {
-            /* PE file */
+            be_info("PE file : %s") | filename;
         }
         else if (signature[0] == 0x7f && signature[1] == 'E')
         {
@@ -98,6 +101,21 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
             modules.push_back(Module(lmap->l_name, lmap->l_addr));
         }
     }
+#elif defined(BE_PLATFORM_WIN32)
+    HANDLE process = ::GetCurrentProcess();
+    DWORD requiredSize;
+    ::EnumProcessModules(process, 0, 0, &requiredSize);
+    HMODULE* hmodules = (HMODULE*)be_malloc(requiredSize);
+    ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
+    for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)
+    {
+        char moduleName[32768];
+        MODULEINFO info;
+        ::GetModuleFileNameEx(process, hmodules[i], moduleName, sizeof(moduleName));
+        ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
+        modules.push_back(Module(moduleName, (u64)info.lpBaseOfDll));
+    }
+    be_free(hmodules);
 #else
 # error platform not supported yet...
 #endif

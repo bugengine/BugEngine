@@ -25,6 +25,7 @@
 #include    <core/log/logger.hh>
 #include    <core/debug/assert.hh>
 #include    <core/debug/callstack.hh>
+#include    <core/debug/symbols.hh>
 
 #include    <stdio.h>
 #include    <string.h>
@@ -33,11 +34,13 @@
 
 #include    "resource.h"
 
-
 namespace BugEngine
 {
     extern HINSTANCE hDllInstance;
+}
 
+namespace BugEngine { namespace Debug
+{
 
     static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) 
     { 
@@ -99,9 +102,12 @@ namespace BugEngine
         {
             Debug::Callstack::Address address[128];
             size_t result = Debug::Callstack::backtrace(address, 128, 1);
+            Symbols::Symbol s;
+            const Symbols& symbols = Symbols::runningSymbols();
             for(Debug::Callstack::Address* a = address; a < address+result; ++a)
             {
-                (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", a->filename(), a->line(), a->function());
+                symbols.resolve(*a, s);
+                (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", s.filename(), s.line(), s.function());
                 strcat(callstack, buffer);
                 OutputDebugString(buffer);
             }
@@ -154,4 +160,5 @@ AssertionCallback_t getAssertionCallback()
     return g_callback;
 }
 
-}
+}}
+
