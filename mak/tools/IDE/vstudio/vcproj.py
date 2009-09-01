@@ -43,6 +43,8 @@ class VCproj:
 			self.projectType = '4'
 		elif type == 'util':
 			self.projectType = '10'
+		elif type == 'tool':
+			self.projectType = '1'
 		elif type == 'test':
 			self.projectType = '1'
 		else:
