@@ -52,7 +52,7 @@ Symbols::Symbol::~Symbol()
 
 //---------------------------------------------------------------------------//
 
-Symbols::Module::Module(const char *filename, u64 baseAddress)
+Symbols::Module::Module(const char *filename, u64 /*baseAddress*/)
 {
     FILE* f = fopen(filename, "rb");
     if(f)
@@ -122,7 +122,7 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
     return modules;
 }
 
-bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result) const
+bool Symbols::Module::resolve(const Callstack::Address& /*address*/, Symbol& /*result*/) const
 {
     return false;
 }

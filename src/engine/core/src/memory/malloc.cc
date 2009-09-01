@@ -67,7 +67,7 @@ void Malloc::systemFree(void* pointer)
 #endif
 }
 
-BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t skipStack)
+BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t /*skipStack*/)
 {
     static bool initialized;
     if(!initialized)
@@ -81,7 +81,7 @@ BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t sk
     return ptr;
 }
 
-BE_NOINLINE void* Malloc::internalRealloc(void* ptr, size_t size, size_t alignment, size_t skipStack)
+BE_NOINLINE void* Malloc::internalRealloc(void* ptr, size_t size, size_t alignment, size_t /*skipStack*/)
 {
 #ifdef BE_ENABLE_MEMORY_TRACKING
 #endif
@@ -91,7 +91,7 @@ BE_NOINLINE void* Malloc::internalRealloc(void* ptr, size_t size, size_t alignme
     return ptr;
 }
 
-void Malloc::internalFree(void* ptr, size_t skipStack)
+void Malloc::internalFree(void* ptr, size_t /*skipStack*/)
 {
     if(! ptr)
         return;
