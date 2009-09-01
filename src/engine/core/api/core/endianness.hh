@@ -97,7 +97,7 @@ class Integer
 private:
     T   m_value;
 public:
-    Integer(T value = 0) : m_value(ByteSwap<T, Endianness_Self, e>::byteswap(m_value)) { }
+    Integer(T value = 0) : m_value(ByteSwap<T, Endianness_Self, e>::byteswap(value)) { }
     ~Integer()                                                       { }
     operator T() const                                               { return ByteSwap<T, e, Endianness_Self>::byteswap(m_value); }
     Integer& operator=(T value)                                      { m_value = ByteSwap<T, Endianness_Self, e>::byteswap(m_value); }

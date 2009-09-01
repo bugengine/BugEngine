@@ -281,12 +281,12 @@ void Elf::parse(FILE* f)
 
     Assert(header.shentsize == sizeof(ElfSectionHeader<klass, endianness>));
     ElfSectionHeader<klass, endianness> *sections = (ElfSectionHeader<klass, endianness>*)malloca(header.shentsize*header.shnum);
-    fseek(f, header.shoffset, SEEK_SET);
+    fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
-    char* strings = (char*)malloc(sections[header.shstrndx].size);
-    fseek(f, sections[header.shstrndx].offset, SEEK_SET);
-    fread(strings, 1, sections[header.shstrndx].size, f);
+    char* strings = (char*)malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
+    fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
+    fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
     
     for(int i = 0; i < header.shnum; ++i)
     {
