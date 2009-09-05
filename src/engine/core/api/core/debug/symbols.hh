@@ -34,6 +34,7 @@ class Symbols
 public:
     class Symbol;
     class Module;
+    class ISymbolResolver;
 public:
     class Symbol
     {
@@ -52,8 +53,16 @@ public:
         const char *function() const    { return m_function; }
     };
 public:
+    class ISymbolResolver
+    {
+    public:
+        virtual bool resolve(const Callstack::Address& address, Symbol& result) const = 0;
+    };
+public:
     class Module
     {
+    private:
+        const ISymbolResolver* m_symbols;
     public:
         Module(const char *filename, u64 baseAddress);
         ~Module();
