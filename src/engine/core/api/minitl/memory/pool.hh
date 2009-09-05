@@ -43,7 +43,7 @@ private:
     void*                       m_pool;
     void*                       m_end;
 public:
-    pool(size_t capacity, size_t alignment = BE_ALIGNOF(T));
+    pool(size_t capacity, size_t alignment = be_alignof(T));
     ~pool();
     
     T* allocate();

@@ -42,7 +42,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 2);
+            be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
@@ -69,7 +69,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 2);
+            be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
@@ -96,7 +96,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 2);
+            be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
@@ -123,7 +123,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 2);
+            be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);

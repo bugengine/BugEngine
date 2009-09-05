@@ -242,10 +242,10 @@ static const char* s_elfMachineType [] =
 
 Elf::Elf(const char *filename, FILE* f)
 {
-    be_info("loading file %s") | filename;
+    be_info("loading file %s" | filename);
     ElfIdentification id;
     fread(&id, 1, sizeof(id), f);
-    Assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F');
+    be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
     if(id.klass == klass_32 && id.msb == msb_littleendian)
     {
         Elf::parse<klass_32, msb_littleendian>(f);
@@ -264,7 +264,7 @@ Elf::Elf(const char *filename, FILE* f)
     }
     else
     {
-        Assert(false);
+        be_notreached();
     }
 }
 
@@ -277,9 +277,9 @@ void Elf::parse(FILE* f)
 {
     ElfHeader<klass, endianness> header;
     fread(&header, sizeof(header), 1, f);
-    be_info("elf file type: %s, for machine : %s") | s_elfFileType[header.type] | s_elfMachineType[header.machine];
+    be_info("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
 
-    Assert(header.shentsize == sizeof(ElfSectionHeader<klass, endianness>));
+    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, endianness>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, endianness>) | header.shentsize);
     ElfSectionHeader<klass, endianness> *sections = (ElfSectionHeader<klass, endianness>*)malloca(header.shentsize*header.shnum);
     fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
@@ -290,7 +290,7 @@ void Elf::parse(FILE* f)
     
     for(int i = 0; i < header.shnum; ++i)
     {
-        be_info("\tsection %s\n") | (strings + sections[i].name);
+        be_info("\tsection %s\n" | (strings + sections[i].name));
     }
     free(strings);
     freea(sections);

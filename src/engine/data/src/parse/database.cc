@@ -45,7 +45,7 @@ Database::DatabaseElement::~DatabaseElement()
 void Database::DatabaseElement::add(const istring &name, Visibility v, refptr<const Node> value)
 {
     std::pair< ChildrenContainer::iterator, bool> insertResult = m_objects.insert(std::make_pair(name, std::make_pair(v, value)));
-    Assert(insertResult.second);
+    be_assert(insertResult.second, "database element %s already exist" | name.c_str());
     insertResult.first->second.first = v;
     insertResult.first->second.second = value;
 }
@@ -77,7 +77,7 @@ Value Database::DatabaseElement::doeval(Context& context) const
     for(NamespaceContainer::const_iterator it = m_namespaces.begin(); it != m_namespaces.end(); ++it)
     {
         Value v = it->second->eval(context);
-        Assert(v.type() == RTTI::PropertyTypeObject);
+        be_assert(v.type() == RTTI::PropertyTypeObject, "invalid type");
         RTTI::Namespace* ns = v.as< RTTI::Namespace* >();
         ns->mount(it->first, ns);
     }
@@ -111,7 +111,7 @@ void Database::push(const istring& name)
 
 void Database::pop(const istring& name)
 {
-    Assert(m_current->m_name == name);
+    be_assert(m_current->m_name == name, "asymetric push/pop; should pop %s, popping %s" | m_current->m_name.c_str() | name.c_str());
     m_current = m_current->m_parent;
 }
 
@@ -132,7 +132,7 @@ refptr<RTTI::Namespace> Database::commit()
     Context ctx(*this);
     m_root->dolink(ctx);
     Value value = m_root->doeval(ctx);
-    Assert(value.type() == RTTI::PropertyTypeObject);
+    be_assert(value.type() == RTTI::PropertyTypeObject, "invalid type");
     return value.as< refptr<RTTI::Namespace> >();
 }
 

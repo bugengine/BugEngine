@@ -97,12 +97,11 @@ bool Sequencer::oneturn()
 void Sequencer::pause()
 {
     m_pauseCount++;
-    Assert(m_pauseCount != 0);
 }
 
 void Sequencer::resume()
 {
-    Assert(m_pauseCount != 0);
+    be_assert(m_pauseCount != 0, "resuming sequencer that was not paused");
     m_pauseCount--;
 }
 

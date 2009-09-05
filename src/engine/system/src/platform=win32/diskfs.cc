@@ -94,7 +94,7 @@ void MemoryFileMap::seek(SeekMethod method, i64 _offset)
             m_offset = m_size + _offset;
             break;
         default:
-            AssertNotReached();
+            be_notreached();
     }
     if(m_offset < 0) m_offset = 0;
     if(m_offset > m_size) m_offset = m_size;
@@ -103,7 +103,7 @@ void MemoryFileMap::seek(SeekMethod method, i64 _offset)
 void MemoryFileMap::resize(i64 size)
 {
     UNUSED(size);
-    AssertNotReached();
+    be_notreached();
 }
 
 bool MemoryFileMap::writable() const

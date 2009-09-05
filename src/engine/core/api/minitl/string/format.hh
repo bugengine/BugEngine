@@ -69,12 +69,10 @@ format<size>::format(const char *format)
 template< size_t size >
 void format<size>::findToken()
 {
-    Assert(m_firstFormat >= m_buffer && m_firstFormat < m_buffer+size);
     while(*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
     {
         m_firstFormat++;
     }
-    Assert(m_firstFormat >= m_buffer && m_firstFormat < m_buffer+size);
     if(!m_firstFormat[0])
         m_firstFormat = 0;
 }
@@ -87,30 +85,24 @@ format<size>::~format()
 template< size_t size >
 format<size>::operator const char* () const
 {
-    Assert(m_firstFormat == 0);
     return m_buffer;
 }
 
 template< size_t size >
 format<size>::operator char* ()
 {
-    Assert(m_firstFormat == 0);
     return m_buffer;
 }
 
 template< size_t size >
 const char* format<size>::c_str() const
 {
-    Assert(m_firstFormat == 0);
     return m_buffer;
 }
 
 template< size_t size >
 format<size>& format<size>::operator|(char value)
 {
-    Assert(m_firstFormat);
-    Assert(m_firstFormat[0] == '%');
-    Assert(m_firstFormat[1] == 'c');
     m_firstFormat[0] = value;
     memmove(m_firstFormat+1, m_firstFormat+2, size-(m_firstFormat+2-m_buffer));
     m_firstFormat++;
@@ -121,9 +113,6 @@ format<size>& format<size>::operator|(char value)
 template< size_t size >
 format<size>& format<size>::operator|(const char* value)
 {
-    Assert(m_firstFormat);
-    Assert(m_firstFormat[0] == '%');
-    Assert(m_firstFormat[1] == 's');
     if(!value)
         value = "(null)";
     size_t s = strlen(value);
@@ -137,9 +126,6 @@ format<size>& format<size>::operator|(const char* value)
 template< size_t size >
 format<size>& format<size>::operator|(const void* value)
 {
-    Assert(m_firstFormat);
-    Assert(m_firstFormat[0] == '%');
-    Assert(m_firstFormat[1] == 'p');
     static const size_t s = 2+sizeof(value)*2;
     char result[s];
     result[0] = '0';
@@ -161,9 +147,6 @@ format<size>& format<size>::operator|(const void* value)
 template< size_t size >
 format<size>& format<size>::operator|(i64 value)
 {
-    Assert(m_firstFormat);
-    Assert(m_firstFormat[0] == '%');
-    Assert(m_firstFormat[1] == 'd');
     char result[16];
     char* buf = result;
     if(value < 0)
@@ -189,9 +172,6 @@ format<size>& format<size>::operator|(i64 value)
 template< size_t size >
 format<size>& format<size>::operator|(u64 value)
 {
-    Assert(m_firstFormat);
-    Assert(m_firstFormat[0] == '%');
-    Assert(m_firstFormat[1] == 'u');
     char result[16];
     char* buf = result;
     do 

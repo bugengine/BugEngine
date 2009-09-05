@@ -34,6 +34,7 @@
 #endif
 
 #include    <elf.hh>
+#include    <pe.hh>
 
 
 namespace BugEngine { namespace Debug
@@ -62,7 +63,7 @@ Symbols::Module::Module(const char *filename, u64 /*baseAddress*/)
         fseek(f, 0, SEEK_SET);
         if (signature[0] == 'M' && signature[1] == 'Z')
         {
-            be_info("PE file : %s") | filename;
+            PE pe(filename, f);
         }
         else if (signature[0] == 0x7f && signature[1] == 'E')
         {

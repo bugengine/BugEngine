@@ -39,7 +39,7 @@ Parallel::~Parallel()
 
 void Parallel::initialize(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
 }
 
 bool Parallel::oneturn(ActionContext* /*context*/) const

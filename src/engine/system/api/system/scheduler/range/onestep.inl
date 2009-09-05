@@ -48,7 +48,7 @@ inline bool range_onestep::atomic() const
 
 inline range_onestep range_onestep::split()
 {
-    AssertNotReached();
+    be_unimplemented();
     return *this;
 }
 

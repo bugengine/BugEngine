@@ -40,7 +40,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 1);
+            be_assert(numvalues == 1, "expected %d parameters; got %d" | 1 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<R>::type& v = (o->*Func)();
             return Value(Marshaller<R>().castfrom(v));
@@ -62,7 +62,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 1);
+            be_assert(numvalues == 1, "expected %d parameters; got %d" | 1 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<R>::type& v = (o->*Func)();
             return Value(Marshaller<R>().castfrom(v));
@@ -85,7 +85,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 1);
+            be_assert(numvalues == 1, "expected %d parameters; got %d" | 1 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             (o->*Func)();
             return Value();
@@ -107,7 +107,7 @@ private:
 
         virtual Value call(Value* values, size_t numvalues) const override
         {
-            Assert(numvalues == 1);
+            be_assert(numvalues == 1, "expected %d parameters; got %d" | 1 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             (o->*Func)();
             return Value();

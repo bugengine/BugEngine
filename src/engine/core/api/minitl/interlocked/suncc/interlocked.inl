@@ -112,13 +112,13 @@ inline void* set_conditional(void* volatile* dst, void* compare, void* value)
 
 inline TaggedValue get_ticket(volatile TaggedValue* t)
 {
-    Assert((((size_t)t) & 7) == 0);
+    be_assert((((size_t)t) & 7) == 0, "wrong alignment : type );
     return *t;
 }
 
 inline bool set_conditional(volatile TaggedValue* t, long value, TaggedValue& ticket)
 {
-    Assert((((size_t)t) & 7) == 0);
+    be_assert((((size_t)t) & 7) == 0);
     long long m = (((long long)value) << 32) + ticket.tag+1;
     return set_conditional((volatile long long*)t, ticket.asLongLong, m) == ticket.asLongLong;
 }
@@ -153,7 +153,7 @@ inline long fetch_and_set(volatile long* dst, long value)
 
 inline long long fetch_and_set(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
@@ -179,7 +179,7 @@ inline long fetch_and_add(volatile long* dst, long value)
 
 inline long long fetch_and_add(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented(false);
     return 0;
 }
 
@@ -196,7 +196,7 @@ inline long add_and_fetch(volatile long* dst, long value)
 
 inline long long add_and_fetch(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
@@ -225,39 +225,39 @@ inline long long sub_and_fetch(volatile long long* dst, long long value)
 
 inline long or_and_fetch(volatile long* dst, long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
 inline long long or_and_fetch(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
 
 inline long xor_and_fetch(volatile long* dst, long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
 inline long long xor_and_fetch(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
 
 inline long and_and_fetch(volatile long* dst, long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 
 inline long long and_and_fetch(volatile long long* dst, long long value)
 {
-    Assert(false);
+    be_unimplemented();
     return 0;
 }
 

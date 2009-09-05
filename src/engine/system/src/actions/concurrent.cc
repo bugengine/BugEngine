@@ -39,12 +39,12 @@ Concurrent::~Concurrent()
 
 void Concurrent::initialize(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
 }
 
 bool Concurrent::oneturn(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
     return true;
 }
 

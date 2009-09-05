@@ -26,16 +26,7 @@
 #define BE_CORE_COMPILERS_SUNCC_H_
 /*****************************************************************************/
 
-#ifdef BE_COMPILER_MSVC
-# define BE_ALIGNOF(t)          __alignof(t)
-# define BE_SET_ALIGNMENT(n)    __declspec(align(n))
-#elif defined(BE_COMPILER_INTEL)
-# define BE_ALIGNOF(t)          __alignof(t)
-# define BE_SET_ALIGNMENT(n)    __declspec(align(n))
-#else
-# define BE_ALIGNOF(t)          __alignof__(t)
-# define BE_SET_ALIGNMENT(n)    __attribute__ ((aligned(n)))
-#endif
+#define be_alignof(t)          __alignof__(t)
 
 
 

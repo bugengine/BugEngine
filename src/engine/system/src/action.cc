@@ -52,8 +52,8 @@ ActionContext::StackFrame::StackFrame(ActionContext* context, size_t nbargs, siz
 ,   m_caller(0)
 ,   m_callee(nbargs)
 {
-    Assert(m_callee == m_previous->m_caller);
-    Assert(m_start+m_size <= context->m_stack.size());
+    be_assert(m_callee == m_previous->m_caller, "callee and caller should match");
+    be_assert(m_start+m_size <= context->m_stack.size(), "stack overflow");
     m_context->m_frame = this;
     m_context->m_currentFrame += m_local + m_callee; 
 }
@@ -66,7 +66,7 @@ ActionContext::StackFrame::~StackFrame()
 
 void ActionContext::StackFrame::push(const Value& value)
 {
-    Assert( m_start+m_caller+m_callee+m_local < m_context->m_stack.size() );
+    be_assert(m_start+m_caller+m_callee+m_local < m_context->m_stack.size(), "stack overflow");
     m_context->m_stack[m_start+m_caller+m_callee+m_local] = value;
     m_callee++;
 }
@@ -88,9 +88,8 @@ size_t ActionContext::StackFrame::args() const
 
 Value& ActionContext::StackFrame::operator[](int index)
 {
-    Assert(checked_numcast<size_t>(index) >= m_start);
     size_t realindex = m_start + index;
-    Assert(realindex < m_start+m_caller+m_callee+m_local);
+    be_assert(realindex < m_start+m_caller+m_callee+m_local, "index %d out of range %d" | realindex | m_start+m_caller+m_callee+m_local);
     return m_context->m_stack[realindex];
 }
 

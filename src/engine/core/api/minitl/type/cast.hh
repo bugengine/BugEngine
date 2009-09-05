@@ -33,16 +33,14 @@ namespace minitl
 template< typename U, typename T >
 BE_ALWAYSINLINE U checked_cast(T value)
 {
-    Assert(dynamic_cast<U>(value));
-    Assert(dynamic_cast<U>(value) == static_cast<U>(value));
+    be_assert(dynamic_cast<U>(value), "invalid cast from %s to %s" | typeid(T).name() | typeid(U).name());
     return static_cast<U>(value);
 }
 
 template< typename U, typename T >
 BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
 {
-    Assert(dynamic_cast<U*>(value.get()));
-    Assert(dynamic_cast<U*>(value.get()) == static_cast<U*>(value.get()));
+    be_assert(dynamic_cast<U*>(value.get()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
     return refptr<U>(static_cast<U*>(value.get()));
 }
 
@@ -52,7 +50,7 @@ BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
 template< typename U, typename T >
 BE_ALWAYSINLINE U checked_numcast(T value)
 {
-    Assert(static_cast<T>(static_cast<U>(value)) == value);
+    be_assert(static_cast<T>(static_cast<U>(value)) == value, "precision loss during cast from %s to %s" | typeid(T).name() | typeid(U).name());
     return static_cast<U>(value);
 }
 

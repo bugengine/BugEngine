@@ -55,7 +55,7 @@ VertexBuffer::VertexBuffer(const Renderer* /*renderer*/, u32 /*vertexCount*/, Ve
         case VertexElementInfo::ushort4:
             break;
         default:
-            AssertNotReached();
+            be_notreached();
         };
         switch(flags.info[i].semantic)
         {
@@ -84,7 +84,7 @@ VertexBuffer::VertexBuffer(const Renderer* /*renderer*/, u32 /*vertexCount*/, Ve
         case gUV7:
             break;
         default:
-            AssertNotReached();
+            be_notreached();
         }
     }
 }

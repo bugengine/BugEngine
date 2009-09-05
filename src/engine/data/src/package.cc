@@ -40,7 +40,7 @@ Package::Package(const ipath& name)
 
 Package::~Package()
 {
-    Assert(m_refcount == 0);
+    be_assert(m_refcount == 0, "destroying package that is still in use");
 }
 
 refptr<RTTI::Package> Package::MetaClass::create(const ipath& name) const

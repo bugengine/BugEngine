@@ -89,7 +89,7 @@ DebugRenderer* Renderer::debugRenderer()
 
 void Renderer::createDebugRenderer()
 {
-    Assert(!m_debugRenderer);
+    be_assert(!m_debugRenderer, "creating debug renderer twice");
     m_debugRenderer.reset(new DebugRenderer(this));
 }
 
@@ -115,7 +115,7 @@ void Renderer::drawBatch(const Batch& b)
     case Batch::RptTriangleStrip:
     case Batch::RptTriangleFan:
     default:
-        AssertNotReached();
+        be_notreached();
     }
 }
 

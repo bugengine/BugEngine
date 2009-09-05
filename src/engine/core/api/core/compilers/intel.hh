@@ -26,7 +26,7 @@
 #define BE_CORE_COMPILERS_INTEL_H_
 /*****************************************************************************/
 
-#define BE_ALIGNOF(t)          __alignof(t)
+#define be_alignof(t)          __alignof(t)
 
 typedef signed __int8           i8;
 typedef signed __int16          i16;

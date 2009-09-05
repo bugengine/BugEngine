@@ -112,7 +112,7 @@ template< typename typelist >
 template< typename T >
 const T& variant< typelist >::as() const
 {
-    Assert( m_typeIndex == (indexof<T,typelist>::Value) );
+    be_assert(m_typeIndex == (indexof<T,typelist>::Value), "invalid use of the variant value, asked for type %s" | typeid(T).name());
     return *reinterpret_cast<const T*>(&m_value[0]);
 }
 
@@ -120,7 +120,7 @@ template< typename typelist >
 template< typename T >
 T& variant< typelist >::as()
 {
-    Assert( m_typeIndex == (indexof<T,typelist>::Value) );
+    be_assert(m_typeIndex == (indexof<T,typelist>::Value), "invalid use of the variant value, asked for type %s" | typeid(T).name());
     return *reinterpret_cast<T*>(&m_value[0]);
 }
 

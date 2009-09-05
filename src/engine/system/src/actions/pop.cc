@@ -39,7 +39,7 @@ Pop::~Pop()
 
 void Pop::initialize(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
 }
 
 bool Pop::oneturn(ActionContext* context) const

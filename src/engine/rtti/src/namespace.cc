@@ -126,7 +126,7 @@ Value Namespace::get(const istring& name) const
 void Namespace::mount(const istring& name, Namespace* ns)
 {
     std::pair<NamespaceMap::iterator, bool> inserted = m_subnamespaces.insert(std::make_pair(name, refptr<Namespace>(ns)));
-    Assert(inserted.second);
+    be_assert(inserted.second, "could not insert namespace %s; a namespace of that name already exists" | name.c_str());
     if(! inserted.second)
         inserted.first->second = ns;
     m_metaClass->set(name, Value(refptr<Object>(ns)));
@@ -191,13 +191,11 @@ void Namespace::insert(const inamespace& ns, const Value& value)
 void Namespace::insert(const inamespace& ns, Object* value)
 {
     insert(ns, Value(value));
-    Assert(get(ns).member<Object*>() == value);
 }
 
 void Namespace::insert(const inamespace& ns, refptr<Object> value)
 {
     insert(ns, Value(value));
-    Assert(get(ns).member< refptr<Object> >() == value);
 }
 
 Value Namespace::get(const inamespace& ns)

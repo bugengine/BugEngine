@@ -88,20 +88,20 @@ FileSystem::FileSystemMountPoint* FileSystem::FileSystemMountPoint::get(const is
 void FileSystem::FileSystemMountPoint::erase(const istring& child)
 {
     ChildrenMap::iterator it = m_children.find(child);
-    Assert(it != m_children.end());
+    be_assert(it != m_children.end(), "no mount point %s in filesystem" | child.c_str());
     delete it->second;
     m_children.erase(it);
 }
 
 void FileSystem::FileSystemMountPoint::mount(const refptr<const FileSystemComponent> &component)
 {
-    Assert(m_component == 0);
+    be_assert(m_component == 0, "cannot mount null component");
     m_component = component;
 }
 
 void FileSystem::FileSystemMountPoint::umount()
 {
-    Assert(m_component != 0);
+    be_assert(m_component != 0, "cannot unmount null component");
     m_component = 0;
 }
 
@@ -134,7 +134,7 @@ void FileSystem::mount(const ipath& prefix, refptr<const FileSystemComponent> co
     {
         mountPoint = mountPoint->getOrCreate(prefix[i]);
     }
-    Assert(mountPoint->component() == 0);
+    be_assert(mountPoint->component() == 0, "component %s already mounted" | prefix.str().c_str());
     mountPoint->mount(component);
 }
 
@@ -146,8 +146,8 @@ void FileSystem::umount(const ipath& prefix)
     {
         parent = mountPoint;
         mountPoint = mountPoint->get(prefix[i]);
-        Assert(mountPoint);
-    }        
+        be_assert(mountPoint, "cannot find filesystem component %s in %s" | prefix[i].c_str() | prefix.str().c_str());
+    }
 
     mountPoint->umount();
     if(parent && mountPoint->empty())
@@ -166,25 +166,25 @@ refptr<AbstractMemoryStream> FileSystem::open(const ifilename& file, FileOpenMod
         if(mountPoint)
             suffix.pop_front();
     }
-    Assert(bestmatch);
+    be_assert(bestmatch, "cannot open file %s" | file.str().c_str());
     return bestmatch->component()->open(suffix, mode);
 }
 
 size_t FileSystem::age(const ifilename& /*file*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
     return 0;
 }
 
 std::set<ifilename> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
 {
-    AssertNotReached();
+    be_unimplemented();
     return std::set<ifilename>();
 }
 
 std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
 {
-    AssertNotReached();
+    be_unimplemented();
     return std::set<ipath>();
 }
 

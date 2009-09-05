@@ -50,36 +50,21 @@ COREEXPORT AssertionCallback_t setAssertionCallback(AssertionCallback_t callback
 COREEXPORT AssertionCallback_t getAssertionCallback();
 
 #if !defined(BE_ENABLE_ASSERT)
-# define    Assert(cond) ((void)0)
-# define    AssertMsg(cond,message) ((void)0)
-# define    AssertNotReached() ((void)0)
+# define    be_assert(cond,message) ((void)0)
+# define    be_unimplemented() ((void)0)
+# define    be_notreached() ((void)0)
 #else
 # ifdef      assert
 #  undef     assert
-# endif      /*assert*/
-# define    Assert(cond)                                                                        \
-    {                                                                                           \
+# endif
+# define    be_assert(cond,message)                                                             \
+    do {                                                                                        \
         static bool ignore = false;                                                             \
         if(!ignore && !(cond))                                                                  \
         {                                                                                       \
             BugEngine::Debug::AssertionResult r;                                                \
-            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,#cond);              \
-            switch(r)                                                                           \
-            {                                                                                   \
-                case BugEngine::Debug::Abort:         std::abort(); break;                      \
-            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
-            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
-            default:;                                                                           \
-            }                                                                                   \
-        }                                                                                       \
-    }
-# define    AssertMsg(cond,message)                                                             \
-    {                                                                                           \
-        static bool ignore = false;                                                             \
-        if(!ignore && !(cond))                                                                  \
-        {                                                                                       \
-            BugEngine::Debug::AssertionResult r;                                                \
-            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,message);            \
+            minitl::format<4096> msg = (minitl::format<4096>)message;                           \
+            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,msg);                \
             switch(r)                                                                           \
             {                                                                                   \
             case BugEngine::Debug::Abort:         std::abort(); break;                          \
@@ -88,24 +73,11 @@ COREEXPORT AssertionCallback_t getAssertionCallback();
             default:;                                                                           \
             }                                                                                   \
         }                                                                                       \
-    }
-# define    AssertNotReached()                                                                  \
-    {                                                                                           \
-        static bool ignore = false;                                                             \
-        if(!ignore)                                                                             \
-        {                                                                                       \
-            BugEngine::Debug::AssertionResult r;                                                \
-            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,"Unreachable code"); \
-            switch(r)                                                                           \
-            {                                                                                   \
-            case BugEngine::Debug::Abort:         std::abort(); break;                          \
-            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
-            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
-            default:;                                                                           \
-            }                                                                                   \
-        }                                                                                       \
-    }
+    } while (0)
 #endif
+
+#define be_unimplemented()  be_assert(false, "not implemented")
+#define be_notreached()     be_assert(false, "should not reach code")
 
 }}
 

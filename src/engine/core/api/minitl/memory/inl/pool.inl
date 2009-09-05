@@ -49,14 +49,14 @@ template< typename T >
 T* pool<T>::allocate()
 {
     T* result = (T*)m_items.pop();
-    Assert(result >= m_pool && result < m_end);
+    be_assert(result >= m_pool && result < m_end, "allocated a node that is outside the node range");
     return result;
 }
 
 template< typename T >
 void pool<T>::release(T* t)
 {
-    Assert(t >= m_pool && t < m_end);
+    be_assert(t >= m_pool && t < m_end, "releasing a node that is outside the node range");
     m_items.push((inode*)t);
 }
 

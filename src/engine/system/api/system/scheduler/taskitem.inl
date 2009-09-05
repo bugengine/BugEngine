@@ -48,7 +48,7 @@ TaskItem<Range, Body>::TaskItem(TaskItem& split)
 template< typename Range, typename Body >
 void TaskItem<Range, Body>::run(Scheduler* sc)
 {
-    Assert(m_currentState == Executing);
+    be_assert(m_currentState == Executing, "executing task that is not in the execution state");
     m_body(m_range);
     postrun(sc);
     sc->release_task(this);

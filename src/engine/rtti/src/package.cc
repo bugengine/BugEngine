@@ -47,14 +47,14 @@ Package::Package(const istring& name, Package* parent)
     std::pair< minitl::map<istring,refptr<Package> >::iterator, bool > result = parent->m_children.insert(std::make_pair(name, obj));
     if(!result.second)
     {
-        AssertNotReached();
+        be_notreached();
         s_orphans.push_back(obj);
     }
 }
 
 Package::~Package()
 {
-    Assert(m_refcount == 0);
+    be_assert(m_refcount == 0, "destroying package %s that is still being used" | m_name.c_str());
 }
 
 refptr<Package> Package::MetaClass::create(const ipath& name) const

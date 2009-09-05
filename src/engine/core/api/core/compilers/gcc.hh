@@ -26,7 +26,7 @@
 #define BE_CORE_COMPILERS_GCC_H_
 /*****************************************************************************/
 
-#define BE_ALIGNOF(t)           __alignof__(t)
+#define be_alignof(t)           __alignof__(t)
 
 #include <stdint.h>
 #include <stdlib.h>

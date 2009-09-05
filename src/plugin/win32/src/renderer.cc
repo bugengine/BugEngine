@@ -59,7 +59,7 @@ namespace
             case WM_CLOSE:
                 {
                     Window* win = (Window*)(GetWindowLongPtr(hWnd,GWLP_USERDATA));
-                    Assert(win);
+                    be_assert(win, "BugEngine window not associated with hWnd");
                     win->close();
                     break;
                 }
@@ -67,12 +67,11 @@ namespace
             case WM_CREATE:
                 {
                     nbWindows++;
-                    Assert(nbWindows);
                     break;
                 }
 
             case WM_DESTROY:
-                Assert(nbWindows);
+                be_assert(nbWindows, "trying to destroy a window but no window was registered");
                 nbWindows--;
                 if(!nbWindows)
                     PostQuitMessage(0);

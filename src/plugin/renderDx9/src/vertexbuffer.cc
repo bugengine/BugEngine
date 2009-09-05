@@ -68,7 +68,7 @@ VertexBuffer::VertexBuffer(const Renderer* renderer, u32 vertexCount, VertexUsag
             m_vertexElements[i].Type = D3DDECLTYPE_USHORT4N;
             break;
         default:
-            AssertNotReached();
+            be_notreached();
         };
         m_vertexElements[i].Method = D3DDECLMETHOD_DEFAULT;
         switch(flags.info[i].semantic)
@@ -127,7 +127,7 @@ VertexBuffer::VertexBuffer(const Renderer* renderer, u32 vertexCount, VertexUsag
             m_vertexElements[i].UsageIndex = 7;
             break;
         default:
-            AssertNotReached();
+            be_notreached();
         }
     }
     D3DVERTEXELEMENT9 end = D3DDECL_END();

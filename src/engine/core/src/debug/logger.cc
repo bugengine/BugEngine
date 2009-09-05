@@ -58,14 +58,13 @@ Logger::Logger() :
 
 
 
-Logger::Logger(Logger*parent, const istring& name)
+Logger::Logger(Logger& parent, const istring& name)
     :   m_listeners()
     ,   m_children()
-    ,   m_parent(parent)
+    ,   m_parent(&parent)
     ,   m_name(name)
 {
-    Assert(parent);
-    parent->m_children.insert(std::make_pair( name, this ));
+    parent.m_children.insert(std::make_pair( name, this ));
 }
 
 Logger::~Logger()
@@ -84,7 +83,7 @@ Logger* Logger::instance(const inamespace& name)
     {
         std::map< istring, Logger* >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
-            result = new Logger(result, name[i]);
+            result = new Logger(*result, name[i]);
         else
             result = it->second;
     }

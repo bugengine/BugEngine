@@ -107,7 +107,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
         target->run(sc);
         stopTimer(r);
     }
-    Assert(sc->m_runningTasks > 0);
+    be_assert(sc->m_runningTasks > 0, "running task count should be more than 1");
     return --sc->m_runningTasks == 0;
 }
 
@@ -188,7 +188,7 @@ void Scheduler::Worker::draw(DebugRenderer* renderer, int2 start, int2 stop, u64
             }
             else
             {
-                Assert(currentTick>r->start);
+                be_assert(currentTick>r->start, "current processor clock seems to be in the past");
                 i64 tickDiff = i64(currentTick)-i64(r->start);
                 tickDiff *= width;
                 tickDiff /= tps;
@@ -250,7 +250,7 @@ void Scheduler::frameUpdate()
 {
     m_lastFrameTick = m_currentFrameTick;
     m_currentFrameTick = tick();
-    Assert(m_currentFrameTick >= m_lastFrameTick);
+    be_assert(m_currentFrameTick >= m_lastFrameTick, "processor clock seems to be in the past");
     m_frameTime = m_timer.tick();
     for(size_t i = 0; i < m_workers.size(); ++i)
     {

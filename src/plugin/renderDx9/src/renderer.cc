@@ -49,11 +49,11 @@ static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
 {
     if(err == cgD3D9Failed)
     {
-        AssertMsg(false, cgD3D9TranslateHRESULT(cgD3D9GetLastError()));
+        be_assert(false, "CG D3D error : %s" | cgD3D9TranslateHRESULT(cgD3D9GetLastError()));
     }
     else
     {
-        AssertMsg(false, cgD3D9TranslateCGerror(err));
+        be_assert(false, "CG error : %s" | cgD3D9TranslateCGerror(err));
     }
 }
 
@@ -75,9 +75,9 @@ Renderer::~Renderer()
     cgDestroyContext(m_context);
     cgD3D9SetDevice(0);
     refCnt = m_device->Release();
-    AssertMsg(refCnt == 0, "device refcount is not 0");
+    be_assert(refCnt == 0, "device refcount is not 0");
     refCnt = m_directx->Release();
-    AssertMsg(refCnt == 0, "Dx refcount is not 0");
+    be_assert(refCnt == 0, "Dx refcount is not 0");
 }
 
 LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
@@ -145,7 +145,7 @@ DebugRenderer* Renderer::debugRenderer()
 
 void Renderer::createDebugRenderer()
 {
-    Assert(!m_debugRenderer);
+    be_assert(!m_debugRenderer, "debug renderer created twice");
     m_debugRenderer.reset(new DebugRenderer(this));
 }
 
@@ -178,7 +178,7 @@ void Renderer::drawBatch(const Batch& b)
         break;
     case Batch::RptTriangleStrip:
     case Batch::RptTriangleFan:
-    default: AssertNotReached(); type = D3DPT_TRIANGLELIST; primitiveCount = b.nbVertices;
+    default: be_notreached(); type = D3DPT_TRIANGLELIST; primitiveCount = b.nbVertices;
     }
     D3D_CHECKRESULT(m_device->DrawIndexedPrimitive(type, 0, 0, b.nbVertices, 0, primitiveCount));
 }

@@ -81,7 +81,7 @@ private:
     StringCache();
 public:
     void retain(void) const NOTHROW     { m_refCount++; }
-    void release(void) const NOTHROW    { Assert(m_refCount); m_refCount--; }
+    void release(void) const NOTHROW    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
     size_t hash() const NOTHROW         { return m_hash; }
     size_t size() const NOTHROW         { return m_length; }
     const char *str() const NOTHROW     { return reinterpret_cast<const char *>(this+1); }
@@ -108,8 +108,8 @@ StringCache::Buffer::~Buffer()
 
 StringCache* StringCache::Buffer::reserve(size_t size)
 {
-    size_t allsize = be_align(size+1+sizeof(StringCache), BE_ALIGNOF(StringCache));
-    Assert(allsize < s_capacity);
+    size_t allsize = be_align(size+1+sizeof(StringCache), be_alignof(StringCache));
+    be_assert(allsize < s_capacity, "string size is bigger than pool size");
     if(m_used > s_capacity)
     {
         return reserveNext(size);
@@ -117,7 +117,6 @@ StringCache* StringCache::Buffer::reserve(size_t size)
     size_t offset = m_used.addExchange(allsize);
     if(offset+allsize < s_capacity)
     {
-        Assert(be_align(offset, BE_ALIGNOF(StringCache)) == offset);
         return (StringCache*)(m_buffer+offset);
     }
     else
@@ -170,13 +169,12 @@ StringCache* StringCache::unique(const char *val) NOTHROW
             strcpy(data, val);
 
             std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
-            Assert(insertresult.second);
             return cache;
         }
     }
     catch(...)
     {
-        AssertNotReached();
+        be_notreached();
         exit(1);
     }
 
@@ -363,13 +361,13 @@ size_t igenericnamespace::size() const
 
 const istring& igenericnamespace::operator[](size_t index) const
 {
-    Assert(m_size > index);
+    be_assert(m_size > index, "index %d out of range %d" | index | m_size);
     return m_namespace[index];
 }
 
 void igenericnamespace::push_back(const istring& component)
 {
-    Assert(m_size < MaxNamespaceSize);
+    be_assert(m_size < MaxNamespaceSize, "index %d too large; max size is %d" | m_size | MaxNamespaceSize);
     m_namespace[m_size++] = component;
 }
 
