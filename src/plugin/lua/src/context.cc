@@ -123,7 +123,7 @@ void Context::doFile(const char *filename)
 {
     BugEngine::FileSystem* fs = BugEngine::FileSystem::instance();
     refptr<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
-    printf("loading file %s\n", filename);
+    be_info("loading file %s\n" | filename);
     if(file)
     {
         int result;
@@ -132,7 +132,7 @@ void Context::doFile(const char *filename)
         {
             result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
         }
-        AssertMsg(result == 0, lua_tostring(m_state, -1));
+        be_assert(result == 0, lua_tostring(m_state, -1));
     }
     else
     {
@@ -184,7 +184,7 @@ void Context::push(lua_State* state, const Value& v)
         break;
     case RTTI::PropertyTypeVariant:
     case RTTI::PropertyTypeNotSet:
-        AssertNotReached();
+        be_unimplemented();
         break;
     }
 }

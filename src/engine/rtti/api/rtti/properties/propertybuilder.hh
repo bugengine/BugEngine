@@ -118,7 +118,6 @@ public:
     }
     inline ~PropertyBuilder()
     {
-        Assert(m_metaclass);
         m_metaclass->addProperty(m_name, new ObjectProperty<Owner, T, Getter, Setter >());
     }
 };
@@ -134,7 +133,6 @@ public:
     }
     inline ~PropertyBuilder()
     {
-        Assert(m_metaclass == 0);
     }
 
     template< typename Owner, typename T, size_t offset >

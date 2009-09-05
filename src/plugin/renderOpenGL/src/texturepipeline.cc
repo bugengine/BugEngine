@@ -84,7 +84,7 @@ _Texture* TexturePipeline::load(const ifilename& filename)
     case 11:
         break;
     default:
-        AssertNotReached();
+        be_notreached();
     }
 
 /*    u8* imageData = data+sizeof(TargaHeader)+header->idLength+header->colormapSpec.length*header->colormapSpec.entrySize;

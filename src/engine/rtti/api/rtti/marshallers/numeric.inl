@@ -130,7 +130,7 @@ FROM NumericMarshaller<FROM, TO>::castto(const Value& value) const
     case RTTI::PropertyTypeInteger:
         return checked_numcast<FROM>(value.member<i64>());
     default:
-        AssertNotReached();
+        be_notreached();
         return 0;
     }
 }

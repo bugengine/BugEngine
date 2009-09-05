@@ -35,7 +35,7 @@ VertexBuffer<T>::VertexBuffer(const RenderBackend* owner, u32 vertexCount, Verte
 :   m_owner(owner)
 ,   m_buffer(m_owner->createVertexBuffer(vertexCount, usage, T::getFlags()))
 {
-    Assert(sizeof(T) == T::getFlags().vertexSize);
+    be_assert(sizeof(T) == T::getFlags().vertexSize, "sizes don't match for vertex buffer; vertex type is %s, type size is %d and storage size is %d" | typeid(T).name() | sizeof(T) | T::getFlags().vertexSize);
 }
 
 template< typename T >

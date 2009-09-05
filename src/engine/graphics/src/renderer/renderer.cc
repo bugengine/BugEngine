@@ -33,7 +33,7 @@ Renderer::Renderer(const istring& name)
     if(m_plugin)
     {
         RenderBackend* (*createRenderBackend)() = m_plugin.get<RenderBackend* (*)()>("createRenderBackend");
-        Assert(createRenderBackend);
+        be_assert(createRenderBackend, "no function to create render backend in plugin");
         m_renderBackend = (*createRenderBackend)();
     }
 }
@@ -43,7 +43,7 @@ Renderer::~Renderer()
     if(m_plugin)
     {
         void (*destroyRenderBackend)(RenderBackend*) = m_plugin.get<void (*)(RenderBackend*)>("destroyRenderBackend");
-        Assert(destroyRenderBackend);
+        be_assert(destroyRenderBackend, "no function to destroy render backend in plugin");
         (*destroyRenderBackend)(m_renderBackend);
     }
 }

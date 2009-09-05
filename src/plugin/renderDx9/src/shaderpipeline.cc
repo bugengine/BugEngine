@@ -67,9 +67,7 @@ _Shader* ShaderPipeline::load(const ifilename& filename)
         if(isSystemParameter(name))
         {
             wrapped = getSystemParameter(name);
-            //cgConnectParameter(param, wrapped->m_shaderParam);
             cgConnectParameter(wrapped->m_shaderParam, param);
-            Assert(cgGetParameterVariability(param) == cgGetParameterVariability(wrapped->m_shaderParam));
         }
         else
         {
@@ -104,20 +102,17 @@ const char *ShaderPipeline::getTypeName(ShaderParam::Type t)
 
 ShaderParam::Type ShaderPipeline::getTypeByName(const char *name)
 {
-    CGtype t = cgGetType(name);
-    const char *tname = cgGetTypeString(t);
-    Assert(strcmp(tname, name) == 0);
-    return t;
+    return cgGetType(name);
 }
 
 refptr<CgShaderParam> ShaderPipeline::createSystemParameter(const istring& name, ShaderParam::Type type)
 {
     CGparameter p = cgCreateParameter(m_owner->m_context, CGtype(type));
     cgSetParameterVariability(p, CG_UNIFORM);
-    Assert(cgGetParameterType(p) == type);
+    be_assert(cgGetParameterType(p) == type, "type conflict");
     refptr<CgShaderParam> param(new CgShaderParam(p));
     bool result = m_systemParams.insert(std::make_pair(name, param)).second;
-    Assert(result);
+    be_assert(result, "system parameter %s already exists" | name.c_str());
     return param;
 }
 

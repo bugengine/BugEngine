@@ -42,7 +42,7 @@ Plugin::Plugin(const istring &pluginName)
         throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + error);
     }
     void (*_init)(void) = reinterpret_cast<void (*)(void)>(reinterpret_cast<size_t>(dlsym(FPluginHandle, "_initplugin")));
-    Assert(_init);
+    be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
     (*_init)();
 }
 

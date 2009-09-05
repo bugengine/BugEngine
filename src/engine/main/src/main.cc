@@ -136,7 +136,6 @@ static int __main(int argc, const char *argv[])
 
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());
-        Assert(false);
     }
     catch(std::runtime_error& er)
     {
@@ -157,14 +156,12 @@ namespace BugEngine
 
 static void skipBackslash(char * &cmdLine)
 {
-    Assert( *cmdLine == '\\');
     cmdLine++;
     if (*cmdLine) cmdLine++;
 }
 
 static void lookupNextQuote(char * &cmdLine)
 {
-    Assert( *cmdLine == '"');
     cmdLine++;
 
     while (*cmdLine && *cmdLine != '"')
@@ -231,7 +228,6 @@ int WINAPI WinMain( HINSTANCE hInstance,
     if(lastComponent)
     {
         char backup = *lastComponent;
-        Assert(backup == '\\');
         *const_cast<char*>(lastComponent) = 0;
         SetCurrentDirectory(cmdLine);
         *const_cast<char*>(lastComponent) = backup;

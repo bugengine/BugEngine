@@ -50,7 +50,7 @@ SingletonBase* SingletonManager::get(const char* name) const NOTHROW
     }
     catch(...)
     {
-        AssertNotReached();
+        be_notreached();
         return 0;
     }
 }
@@ -58,15 +58,15 @@ SingletonBase* SingletonManager::get(const char* name) const NOTHROW
 void SingletonManager::set(const char* name, SingletonBase* _instance)
 {
     std::pair< minitl::map< const char*, SingletonBase*, minitl::less<const char *> >::iterator, bool > result = m_registry.insert(std::make_pair(name,_instance));
-    Assert(result.second);
+    be_assert(result.second, "could not register singleton for type %s" | name);
 }
 
 void SingletonManager::erase(const char* name, const SingletonBase* _instance)
 {
     UNUSED(_instance);
     minitl::map< const char*, SingletonBase*, minitl::less<const char *> >::const_iterator it = m_registry.find(name);
-    Assert(it != m_registry.end());
-    Assert(it->second == _instance);
+    be_assert(it != m_registry.end(), "could not erase singleton %s" | name);
+    be_assert(it->second == _instance, "singleton %s instance doesn't match registered instance" | name);
     (void)m_registry.erase(name);
 }
 

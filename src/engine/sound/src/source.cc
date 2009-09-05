@@ -84,7 +84,7 @@ public:
                 format = alGetEnumValue("AL_FORMAT_51CHN16");
                 break;
             default:
-                AssertNotReached();
+                be_notreached();
                 format = AL_FORMAT_STEREO16;
             }
             alBufferData(m_ALBuffers[i], format, buffer, checked_numcast<ALsizei>(size), freq);
@@ -117,7 +117,6 @@ public:
         if(!m_initialized)
         {
             init(sound);
-            Assert(m_initialized);
             return false;
         }
         else
@@ -152,7 +151,7 @@ public:
                         format = alGetEnumValue("AL_FORMAT_51CHN16");
                         break;
                     default:
-                        AssertNotReached();
+                        be_notreached();
                         format = AL_FORMAT_STEREO16;
                     }
                     alBufferData(bufferid, format, buffer, checked_numcast<ALsizei>(size), freq);
@@ -203,7 +202,7 @@ void Source::step() const
 
 void Source::play()
 {
-    Assert(m_pauseCount > 0);
+    be_assert(m_pauseCount > 0, "sound was not paused, cannot resume");
 //    if(!--m_pauseCount)
 //      static_cast<_ALData*>(m_data)->play();
 }
@@ -236,7 +235,6 @@ void Source::setSound(SoundObject* sound)
         m_sound->unlock();
     }
     bool lock = sound->lock(this);
-    Assert(lock);
     m_sound = sound;
     m_sound->reset();
     if(current && m_sound->owner() != current)

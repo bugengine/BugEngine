@@ -119,7 +119,7 @@ bool SoundObject::lock(Source* from)
 
 void SoundObject::unlock()
 {
-    Assert(m_locked);
+    be_assert(m_locked, "sound object was not locked, cannot unlock");
     m_locked = false;
 }
 

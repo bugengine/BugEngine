@@ -43,7 +43,7 @@ Window::~Window()
 
 bool Window::closed() const
 {
-    AssertNotReached();
+    be_unimplemented();
     return false;
 }
 

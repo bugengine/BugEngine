@@ -109,7 +109,7 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 Thread::~Thread()
 {
     DWORD result = WaitForSingleObject((HANDLE)m_data, 2000);
-    Assert(result != WAIT_TIMEOUT);
+    be_assert(result != WAIT_TIMEOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
     CloseHandle((HANDLE)m_data);
     delete static_cast<ThreadParams*>(m_params);
 }

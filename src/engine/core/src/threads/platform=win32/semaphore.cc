@@ -53,7 +53,7 @@ Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
     case WAIT_TIMEOUT:
         return TimeOut;
     case WAIT_FAILED:
-        Assert(false);
+        be_notreached();
     case WAIT_ABANDONED:
     default:
         return Abandoned;

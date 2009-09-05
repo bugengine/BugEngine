@@ -24,7 +24,6 @@ BugEngine::AbstractMemoryStream* g_parseStream = 0;
 }}}
 
 #define YY_INPUT(buf,result,max_size)           \
-    Assert(g_parseStream);                      \
     result = g_parseStream->read(buf,max_size);
 
 extern int g_line;

@@ -42,7 +42,7 @@ public:
 
     virtual bool                readable(Object* /*from*/) const                    { return true; };
     virtual bool                writable(Object* /*from*/) const                    { return false; };
-    virtual void                set(Object* /*dest*/, const Value& /*value*/) const { AssertNotReached(); }
+    virtual void                set(Object* /*dest*/, const Value& /*value*/) const { be_notreached(); }
     virtual Value               get(Object* /*from*/) const                         { return m_value; }
 };
 
@@ -112,7 +112,7 @@ const MetaClass* MetaClass::parent() const
 void MetaClass::addProperty(const istring& name, refptr<const Property> prop)
 {
     std::pair<PropertyIterator,bool> result = m_properties.insert(std::make_pair(name, prop));
-    Assert(result.second);
+    be_assert(result.second, "could not register property %s; a property of that name already exists" | name.c_str());
 }
 
 void MetaClass::addMethod(const istring& name, refptr<Method> method)
@@ -131,7 +131,7 @@ const Property* Object::MetaClass::getProperty(const istring& name) const
 
 Value MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
 {
-    AssertNotReached();
+    be_notreached();
     return Value();
 }
 
@@ -141,7 +141,7 @@ void MetaClass::init(MetaClass* /*mc*/)
 
 refptr<Object> MetaClass::create() const
 {
-    AssertNotReached();
+    be_notreached();
     return 0;
 }
 

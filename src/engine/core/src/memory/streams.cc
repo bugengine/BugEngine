@@ -42,23 +42,19 @@ void* AbstractMemoryStream::memory()
 
 i64 AbstractMemoryStream::read(void* buffer, i64 _size)
 {
-    Assert(offset() <= size());
     i64 toread = std::min(_size,size()-offset());
     memcpy(buffer, memory(), checked_numcast<size_t>(toread));
     seek(eSeekMove, toread);
-    Assert(offset() <= size());
     return toread;
 }
 
 void AbstractMemoryStream::write(void* buffer, i64 _size)
 {
-    Assert(writable());
-    Assert(offset() <= size());
+    be_assert(writable(), "writing in a read-only memory stream");
     if(_size > size()-offset())
         resize(offset()+_size);
     memcpy(memory(),buffer,checked_numcast<size_t>(_size));
     seek(eSeekMove, _size);
-    Assert(offset() <= size());
 }
 
 /*****************************************************************************/
@@ -111,7 +107,7 @@ void MemoryStream::seek(SeekMethod method, i64 _offset)
             m_offset = m_size + _offset;
             break;
         default:
-            AssertNotReached();
+            be_notreached();
     }
     if(m_offset < 0) m_offset = 0;
     if(m_offset > m_size) m_offset = m_size;

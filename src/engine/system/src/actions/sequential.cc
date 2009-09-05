@@ -44,7 +44,7 @@ void Sequential::initialize(ActionContext* context) const
 
 bool Sequential::oneturn(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
     return true;
 }
 

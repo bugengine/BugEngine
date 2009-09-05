@@ -54,7 +54,7 @@ Plugin::Plugin(const istring &pluginName)
         }
         else
         {
-            Assert(_init);
+            be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
             _init();
         }
     }

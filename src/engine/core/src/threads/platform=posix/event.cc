@@ -84,7 +84,7 @@ Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
     case ETIMEDOUT:
         return TimeOut;
     default:
-        Assert(false);
+        be_notreached();
         return Abandoned;
     }
 }

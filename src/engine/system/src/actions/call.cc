@@ -50,7 +50,7 @@ refptr<Call> Call::MetaClass::createWithMethod(RTTI::Method* method)
 
 void Call::initialize(ActionContext* /*context*/) const
 {
-    AssertNotReached();
+    be_unimplemented();
 }
 
 bool Call::oneturn(ActionContext* context) const

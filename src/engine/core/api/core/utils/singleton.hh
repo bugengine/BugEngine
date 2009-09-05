@@ -53,7 +53,7 @@ public:
     {
         if(! gInstance)
             gInstance = SingletonManager::instance()->get(typeid(T).name());
-        Assert(gInstance);
+        be_assert(gInstance, "could not find instance for type %s" | typeid(T).name());
         return static_cast<T*>(gInstance);
     }
     static bool hasinstance(void)

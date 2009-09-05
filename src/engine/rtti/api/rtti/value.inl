@@ -96,7 +96,7 @@ T Value::member() const
     }
     else
     {
-        AssertNotReached();
+        be_notreached();
         throw 0;
     }
 }

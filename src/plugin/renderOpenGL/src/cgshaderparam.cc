@@ -44,7 +44,7 @@ void CgShaderParam::setValue(BugEngine::float4 value)
 
 void CgShaderParam::setValue(_Texture* /*value*/)
 {
-    AssertNotReached();
+    be_unimplemented();
     //cgD3D9SetTexture(m_shaderParam, checked_cast<Texture*>(value)->textureObject());
 }
 

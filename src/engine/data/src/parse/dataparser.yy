@@ -82,7 +82,7 @@ extern int yylex();
 
 file:
         {
-            Assert(g_context == 0);
+            be_assert(g_context == 0, "context was already set");
             g_context = reinterpret_cast<ParseParam*>(param);
             g_line = 1;
             g_columnbefore = 0;
