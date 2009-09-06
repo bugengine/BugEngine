@@ -58,8 +58,8 @@ struct StaticAssert_;
 template< >
 struct StaticAssert_<true>
 {
-	struct Defined
-	{};
+    struct Defined
+    {};
 };
 
 #define StaticAssert(expr) StaticAssert_<expr>::Defined ;

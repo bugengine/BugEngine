@@ -25,6 +25,7 @@
 #define BE_MINITL_TYPE_CAST_
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
+#include    <typeinfo>
 #include    <minitl/ptr/refptr.hh>
 
 namespace minitl
