@@ -89,7 +89,7 @@ size_t ActionContext::StackFrame::args() const
 Value& ActionContext::StackFrame::operator[](int index)
 {
     size_t realindex = m_start + index;
-    be_assert(realindex < m_start+m_caller+m_callee+m_local, "index %d out of range %d" | realindex | m_start+m_caller+m_callee+m_local);
+    be_assert(realindex < m_start+m_caller+m_callee+m_local, "index %d out of range %d" | realindex | (m_start+m_caller+m_callee+m_local));
     return m_context->m_stack[realindex];
 }
 
