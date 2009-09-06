@@ -33,10 +33,11 @@ namespace BugEngine { namespace Debug
 
 AssertionResult defaultAssertionCallback( const char *file,
                                           int        line,
+                                          const char *expr,
                                           const char *message,
                                           ...)
 {
-    fprintf(stderr, "%s:%d Assertion failed:\n\t", file, line);
+    fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     va_list l;
     va_start(l, message);
     vfprintf(stderr, message, l);

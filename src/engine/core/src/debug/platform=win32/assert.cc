@@ -77,6 +77,7 @@ namespace BugEngine { namespace Debug
     static char buffer[BUFFER_SIZE];
     AssertionResult defaultAssertionCallback( const char *file,
                                               int        line,
+                                              const char *expr,
                                               const char *message,
                                               ...)
     {
@@ -90,7 +91,7 @@ namespace BugEngine { namespace Debug
             assertmsg[sizeof(assertmsg)-1] = 0;
             va_end(l);
 
-            (void)_snprintf(outmessage,BUFFER_SIZE-1,"%s:%d : %s\r\n", file, line, assertmsg);
+            (void)_snprintf(outmessage,BUFFER_SIZE-1,"%s:%d : Assertion %s failed - %s\r\n", file, line, expr, assertmsg);
             outmessage[BUFFER_SIZE-1] = 0;
             OutputDebugString(outmessage);
         }
