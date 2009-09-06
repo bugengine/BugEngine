@@ -45,7 +45,7 @@ enum AssertionResult
 };
 
 
-typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, const char *message, ...);
+typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, const char *expr, const char *message, ...);
 COREEXPORT AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
 COREEXPORT AssertionCallback_t getAssertionCallback();
 
@@ -64,7 +64,7 @@ COREEXPORT AssertionCallback_t getAssertionCallback();
         {                                                                                       \
             BugEngine::Debug::AssertionResult r;                                                \
             minitl::format<4096> msg = (minitl::format<4096>)message;                           \
-            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,msg);                \
+            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,#cond,msg);          \
             switch(r)                                                                           \
             {                                                                                   \
             case BugEngine::Debug::Abort:         std::abort(); break;                          \
