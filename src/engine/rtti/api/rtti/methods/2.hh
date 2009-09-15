@@ -45,7 +45,7 @@ private:
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
             const R& v = (o->*Func)(v1, v2);
             return Value(Marshaller<R>().castfrom(v));
         }
@@ -72,7 +72,7 @@ private:
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
             const R& v = (o->*Func)(v1, v2);
             return Value(Marshaller<R>().castfrom(v));
         }
@@ -99,7 +99,7 @@ private:
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
             (o->*Func)(v1, v2);
             return Value();
         }
@@ -126,7 +126,7 @@ private:
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
             OWNER* o = Marshaller<OWNER*>().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
-            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T1>().castto(values[2]);
+            const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
             (o->*Func)(v1, v2);
             return Value();
         }
