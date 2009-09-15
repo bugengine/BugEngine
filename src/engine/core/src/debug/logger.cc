@@ -52,7 +52,7 @@ const char* ILogListener::s_logNames[] =
 Logger::Logger() :
     m_listeners(),
     m_children(),
-    m_name("root")
+    m_name("")
 {
 }
 
@@ -71,8 +71,6 @@ Logger::~Logger()
 {
     for(size_t i = 0; i < m_listeners.size(); ++i)
         delete m_listeners[i];
-    for(std::map<istring, refptr<Logger> >::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
-        delete it->second;
 }
 
 refptr<Logger> Logger::instance(const inamespace& name)

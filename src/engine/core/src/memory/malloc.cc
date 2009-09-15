@@ -32,10 +32,16 @@
 namespace BugEngine
 {
 
-static void init()
+bool s_initialized = false;
+
+void Malloc::init()
 {
-    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
-    Logger::root();
+    if(!s_initialized)
+    {
+        s_initialized = true;
+        //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
+        Logger::root();
+    }
 #ifdef BE_ENABLE_MEMORY_TRACKING
 #endif
 }
@@ -70,12 +76,7 @@ void Malloc::systemFree(void* pointer)
 
 BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t /*skipStack*/)
 {
-    static bool initialized;
-    if(!initialized)
-    {
-        initialized = true;
-        init();
-    }
+    be_assert(s_initialized, "new was called before the memory system was initialized");
     void* ptr = systemAlloc(size, alignment);
 #ifdef BE_ENABLE_MEMORY_TRACKING
 #endif
