@@ -123,7 +123,7 @@ Value Namespace::get(const istring& name) const
     return m_metaClass->get(name);
 }
 
-void Namespace::mount(const istring& name, Namespace* ns)
+void Namespace::mount(const istring& name, refptr<Namespace> ns)
 {
     std::pair<NamespaceMap::iterator, bool> inserted = m_subnamespaces.insert(std::make_pair(name, refptr<Namespace>(ns)));
     be_assert(inserted.second, "could not insert namespace %s; a namespace of that name already exists" | name.c_str());
@@ -138,7 +138,7 @@ void Namespace::umount(const istring& name)
     m_metaClass->erase(name);
 }
 
-Namespace* Namespace::getNamespace(const istring& name)
+refptr<Namespace> Namespace::getNamespace(const istring& name)
 {
     NamespaceMap::iterator it = m_subnamespaces.find(name);
     if(it != m_subnamespaces.end())
@@ -151,7 +151,7 @@ Namespace* Namespace::getNamespace(const istring& name)
     }
 }
 
-Namespace* Namespace::createNamespace(const istring& name)
+refptr<Namespace> Namespace::createNamespace(const istring& name)
 {
     NamespaceMap::iterator it = m_subnamespaces.find(name);
     if(it != m_subnamespaces.end())
@@ -160,24 +160,24 @@ Namespace* Namespace::createNamespace(const istring& name)
     }
     else
     {
-        Namespace* ns = new Namespace();
+        refptr<Namespace> ns = new Namespace();
         this->mount(name, ns);
         return ns;
     }
 }
 
-Namespace* Namespace::root()
+refptr<Namespace> Namespace::root()
 {
-    static Namespace s_root;
-    return &s_root;
+    static refptr<Namespace> s_root = new Namespace;
+    return s_root;
 }
 
 void Namespace::insert(const inamespace& ns, const Value& value)
 {
-    Namespace* _ns = this;
+    refptr<Namespace> _ns = this;
     for(size_t i = 0; i < ns.size() -1; ++i)
     {
-        Namespace* child = _ns->getNamespace(ns[i]);
+        refptr<Namespace> child = _ns->getNamespace(ns[i]);
         if (!child)
         {
             child = new Namespace();
@@ -200,7 +200,7 @@ void Namespace::insert(const inamespace& ns, refptr<Object> value)
 
 Value Namespace::get(const inamespace& ns)
 {
-    Namespace* _ns = this;
+    refptr<Namespace> _ns = this;
     for(size_t i = 0; i < ns.size() -1; ++i)
     {
         _ns = _ns->getNamespace(ns[i]);

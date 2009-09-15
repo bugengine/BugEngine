@@ -34,6 +34,8 @@ class DebugRenderer;
 class COREEXPORT Malloc
 {
 public:
+    static void init();
+
     static void* systemAlloc(size_t size, size_t alignment);
     static void* systemRealloc(void* ptr, size_t size, size_t alignment);
     static void  systemFree(void* pointer);

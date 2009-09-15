@@ -45,7 +45,7 @@ private:
 public:
     weakptr() : m_ptr(0) {}
     template< typename U >
-	weakptr(refptr<U> other) : m_ptr(other.get()) { minitl::addweak(m_ptr); }
+    weakptr(refptr<U> other) : m_ptr(other.get()) { minitl::addweak(m_ptr); }
     weakptr(const weakptr& other) : m_ptr(other.m_ptr) { minitl::addweak(m_ptr); }
     ~weakptr() { minitl::decweak(m_ptr); }
 
@@ -53,7 +53,7 @@ public:
     template< typename U >
     weakptr& operator=(const weakptr<U>& other) { weakptr(other).swap(*this); return *this; }
     template< typename U >
-    weakptr& operator=(U* other) { refptr(other).swap(*this); return *this; }
+    weakptr& operator=(U* other) { weakptr(other).swap(*this); return *this; }
 
     T& operator*()  const { return *m_ptr; }
     T* operator->() const { return m_ptr; }

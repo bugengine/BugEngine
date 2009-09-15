@@ -71,12 +71,12 @@ public:
 
     virtual const MetaClass*  metaclass() const override;
 
-    void        set(const istring& ns, const Value& value);
-    Value       get(const istring& name) const;
-    void        mount(const istring& name, Namespace* ns);
-    void        umount(const istring& name);
-    Namespace*  getNamespace(const istring& name);
-    Namespace*  createNamespace(const istring& name);
+    void                set(const istring& ns, const Value& value);
+    Value               get(const istring& name) const;
+    void                mount(const istring& name, refptr<Namespace> ns);
+    void                umount(const istring& name);
+    refptr<Namespace>   getNamespace(const istring& name);
+    refptr<Namespace>   createNamespace(const istring& name);
 
     void insert(const inamespace& ns, const Value& value);
     void insert(const inamespace& ns, Object* value);
@@ -84,7 +84,7 @@ public:
     Value get(const inamespace& ns);
     void clear();
 
-    static Namespace* root();
+    static refptr<Namespace> root();
 private:
     Namespace(const Namespace& other);
     Namespace& operator=(const Namespace& other);
