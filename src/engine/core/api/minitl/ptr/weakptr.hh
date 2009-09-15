@@ -21,42 +21,48 @@
 * USA                                                                         *
 \*****************************************************************************/
 
-#ifndef BE_LUA_CONTEXT_H_
-#define BE_LUA_CONTEXT_H_
+#ifndef BE_MINITL_PTR_WEAKPTR_
+#define BE_MINITL_PTR_WEAKPTR_
 /*****************************************************************************/
+#include <minitl/ptr/refcountable.hh>
 
-namespace BugEngine { namespace Lua
+
+namespace minitl
 {
 
-class Context
+template< typename T >
+class weakptr
 {
 private:
-    lua_State*      m_state;
-    refptr<Logger>  m_logger;
+    T* m_ptr;
+private:
+    void swap(weakptr& other)
+    {
+        T* tmp = other.m_ptr;
+        other.m_ptr = m_ptr;
+        m_ptr = tmp; 
+    }
 public:
-    Context();
-    ~Context();
+    weakptr() : m_ptr(0) {}
+    template< typename U >
+	weakptr(refptr<U> other) : m_ptr(other.get()) { minitl::addweak(m_ptr); }
+    weakptr(const weakptr& other) : m_ptr(other.m_ptr) { minitl::addweak(m_ptr); }
+    ~weakptr() { minitl::decweak(m_ptr); }
 
-    void doFile(const char *filename);
+    weakptr& operator=(const weakptr& other) { weakptr(other).swap(*this); return *this; }
+    template< typename U >
+    weakptr& operator=(const weakptr<U>& other) { weakptr(other).swap(*this); return *this; }
+    template< typename U >
+    weakptr& operator=(U* other) { refptr(other).swap(*this); return *this; }
 
-private:
-    static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
-
-
-    static const luaL_Reg s_objectMetaTable[];
-    static void printStack(lua_State* state);
-    static Value get(lua_State* state, int index);
-    static void push(lua_State* state, refptr<Object> o);
-    static void push(lua_State* state, Object* o);
-    static void push(lua_State* state, const Value& v);
-
-    static int objectGC(lua_State* state);
-    static int objectToString(lua_State *state);
-    static int objectGet(lua_State *state);
-    static int objectCall(lua_State *state);
+    T& operator*()  const { return *m_ptr; }
+    T* operator->() const { return m_ptr; }
+    T* get(void)    const { return m_ptr; }
+    operator void*() const { return m_ptr; }
+    bool operator!() const { return m_ptr == 0; }
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif

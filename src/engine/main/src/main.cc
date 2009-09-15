@@ -101,14 +101,14 @@ namespace
     protected:
         virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
         {
-            fprintf(m_logFile, "%s(%d): %s\n"
+            fprintf(m_logFile, "%s:%d (%s)\n"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
             fflush(m_logFile);
             #ifdef _WIN32
                 OutputDebugString(filename);
-                OutputDebugString(minitl::format<>("(%d): ") | line);
+                OutputDebugString(minitl::format<>(":%d (") | line);
                 OutputDebugString(logname.c_str());
-                OutputDebugString("\n");
+                OutputDebugString(")\n");
                 OutputDebugString("\t(");
                 OutputDebugString(s_logNames[level]);
                 OutputDebugString(") ");

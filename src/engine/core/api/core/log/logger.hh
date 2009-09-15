@@ -26,6 +26,8 @@
 /*****************************************************************************/
 #include <core/string/istring.hh>
 #include <minitl/string/format.hh>
+#include <minitl/ptr/refptr.hh>
+#include <minitl/ptr/weakptr.hh>
 
 namespace BugEngine
 {
@@ -51,22 +53,22 @@ protected:
     virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
 };
 
-class COREEXPORT Logger
+class COREEXPORT Logger : public minitl::refcountable<>
 {
 private:
-    std::vector< ILogListener* >    m_listeners;
-    std::map< istring, Logger* >    m_children;
-    Logger*                         m_parent;
-    istring                         m_name;
+    std::vector< ILogListener* >                m_listeners;
+    std::map< istring, minitl::refptr<Logger> > m_children;
+    minitl::weakptr<Logger>                     m_parent;
+    istring                                     m_name;
 private:
     Logger();
 public:
-    Logger(Logger& parent, const istring& name);
+	Logger(minitl::refptr<Logger> parent, const istring& name);
     ~Logger();
 
-    static Logger* instance(const inamespace& name);
-    static bool    log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
-    static Logger* root();
+    static minitl::refptr<Logger> instance(const inamespace& name);
+    static bool                  log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
+    static minitl::refptr<Logger> root();
 
     void addListener(ILogListener* listener);
     bool log(LogLevel level, const char *filename, int line, const char *msg);

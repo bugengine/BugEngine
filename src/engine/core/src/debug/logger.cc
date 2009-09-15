@@ -58,42 +58,42 @@ Logger::Logger() :
 
 
 
-Logger::Logger(Logger& parent, const istring& name)
+Logger::Logger(refptr<Logger> parent, const istring& name)
     :   m_listeners()
     ,   m_children()
-    ,   m_parent(&parent)
+    ,   m_parent(parent)
     ,   m_name(name)
 {
-    parent.m_children.insert(std::make_pair( name, this ));
+    parent->m_children.insert(std::make_pair(name, this));
 }
 
 Logger::~Logger()
 {
     for(size_t i = 0; i < m_listeners.size(); ++i)
         delete m_listeners[i];
-    for(std::map<istring,Logger*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
+    for(std::map<istring, refptr<Logger> >::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
         delete it->second;
 }
 
-Logger* Logger::instance(const inamespace& name)
+refptr<Logger> Logger::instance(const inamespace& name)
 {
-    Logger *result = root();
+    refptr<Logger> result = root();
 
     for(size_t i = 0; i < name.size(); ++i)
     {
-        std::map< istring, Logger* >::iterator it = result->m_children.find(name[i]);
+        std::map< istring, refptr<Logger> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
-            result = new Logger(*result, name[i]);
+            result = new Logger(result, name[i]);
         else
             result = it->second;
     }
     return result;
 }
 
-Logger* Logger::root()
+refptr<Logger> Logger::root()
 {
-    static Logger s_rootLogger;
-    return &s_rootLogger;
+    static refptr<Logger> s_rootLogger = new Logger;
+    return s_rootLogger;
 }
 
 bool Logger::log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg)

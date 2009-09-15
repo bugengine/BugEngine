@@ -35,6 +35,7 @@ namespace BugEngine
 static void init()
 {
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
+    Logger::root();
 #ifdef BE_ENABLE_MEMORY_TRACKING
 #endif
 }
