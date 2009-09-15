@@ -45,6 +45,13 @@ BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
     return refptr<U>(static_cast<U*>(value.get()));
 }
 
+template< typename U, typename T >
+BE_ALWAYSINLINE weakptr<U> checked_cast(weakptr<T> value)
+{
+    be_assert(dynamic_cast<U*>(value.get()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
+    return weakptr<U>(checked_cast<U>(refptr<T>(value.get())));
+}
+
 #pragma warning(push)
 #pragma warning(disable:4800)
 

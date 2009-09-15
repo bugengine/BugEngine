@@ -108,10 +108,12 @@ T be_align(T value, size_t alignment)
 #include    <minitl/ptr/refcountable.hh>
 #include    <minitl/ptr/scopedptr.hh>
 #include    <minitl/ptr/refptr.hh>
+#include    <minitl/ptr/weakptr.hh>
 #include    <minitl/type/cast.hh>
 #include    <core/endianness.hh>
 
 using minitl::refptr;
+using minitl::weakptr;
 using minitl::scopedptr;
 using minitl::checked_cast;
 using minitl::checked_numcast;

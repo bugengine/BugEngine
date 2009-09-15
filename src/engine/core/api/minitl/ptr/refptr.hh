@@ -44,26 +44,26 @@ private:
     }
 public:
     refptr() : m_ptr(0) {}
-    refptr(T* value, bool addref = true) : m_ptr(value) { if(m_ptr && addref) minitl::addref(value); }
-    refptr(const refptr& other) : m_ptr(other.m_ptr) { if(m_ptr) minitl::addref(m_ptr); }
+    refptr(T* value) : m_ptr(value) { minitl::addref(value); }
+    refptr(const refptr& other) : m_ptr(other.m_ptr) { minitl::addref(m_ptr); }
     template< typename U >
-    refptr(U* other) : m_ptr(other)  { if(m_ptr) minitl::addref(m_ptr); }
+    refptr(U* other) : m_ptr(other)  { minitl::addref(m_ptr); }
     template< typename U >
-    refptr(refptr<U> other) : m_ptr(other.get())  { if(m_ptr) minitl::addref(m_ptr); }
-    
+    refptr(refptr<U> other) : m_ptr(other.get())  { minitl::addref(m_ptr); }
+
     refptr& operator=(const refptr& other) { refptr(other).swap(*this); return *this; }
     template< typename U >
     refptr& operator=(const refptr<U>& other) { refptr(other).swap(*this); return *this; }
     template< typename U >
     refptr& operator=(U* other) { refptr(other).swap(*this); return *this; }
-    
-    
+
+
     ~refptr() { if(m_ptr) minitl::decref(m_ptr); }
-    
+
     T& operator*()  const { return *m_ptr; }
     T* operator->() const { return m_ptr; }
     T* get(void)    const { return m_ptr; }
-    operator bool() const { return m_ptr != 0; }
+    operator const void*() const { return m_ptr; }
     bool operator!() const { return m_ptr == 0; }
 };
 

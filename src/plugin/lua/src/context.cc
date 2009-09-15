@@ -43,12 +43,6 @@ const luaL_Reg Context::s_objectMetaTable[] = {
 
 static int luaPrint (lua_State *L)
 {
-    static Logger* logger;
-    if(!logger)
-    {
-        logger = Logger::instance("lua");
-    }
-
     int n = lua_gettop(L);  /* number of arguments */
     int i;
     lua_getglobal(L, "tostring");
@@ -62,8 +56,16 @@ static int luaPrint (lua_State *L)
         if (s == NULL)
             return luaL_error(L, LUA_QL("tostring") " must return a string to "
                                  LUA_QL("print"));
-        if (i>1) logger->log(logInfo, "", 0, "\t");
-        logger->log(logInfo, "", 0, s);
+        lua_Debug ar;
+        if(lua_getstack (L, 1, &ar))
+        {
+            lua_getinfo(L, "Snl", &ar);
+            Logger::root()->log(logInfo, ar.source, ar.currentline, s);
+        }
+        else
+        {
+            be_info(s);
+        }
         lua_pop(L, 1);  /* pop result */
     }
     return 0;
@@ -123,7 +125,7 @@ void Context::doFile(const char *filename)
 {
     BugEngine::FileSystem* fs = BugEngine::FileSystem::instance();
     refptr<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
-    be_info("loading file %s\n" | filename);
+    be_info("loading file %s" | filename);
     if(file)
     {
         int result;
