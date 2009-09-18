@@ -53,7 +53,7 @@ subject to the following restrictions:
  * Bullet has been designed in a modular way keeping dependencies to a minimum. The ConvexHullDistance demo demonstrates direct use of btGjkPairDetector.
  *
  * @section copyright Copyright
- * Copyright (C) 2005-2008 Erwin Coumans, some contributions Copyright Gino van den Bergen, Christer Ericson, Simon Hobbs, Ricardo Padrela, F Richter(res), Stephane Redon
+ * Copyright (C) 2005-2009 Erwin Coumans, some contributions Copyright Gino van den Bergen, Christer Ericson, Simon Hobbs, Ricardo Padrela, F Richter(res), Stephane Redon
  * Special thanks to all visitors of the Bullet Physics forum, and in particular above contributors, John McCutchan, Nathanael Presson, Dave Eberle, Dirk Gregorius, Erin Catto, Dave Eberle, Adam Moravanszky,
  * Pierre Terdiman, Kenny Erleben, Russell Smith, Oliver Strunk, Jan Paul van Waveren, Marten Svanfeldt.
  * 
