@@ -62,17 +62,6 @@ TexturePipeline* Renderer::getTexturePipeline()
     return &m_texturePipeline;
 }
 
-DebugRenderer* Renderer::debugRenderer()
-{
-    return m_debugRenderer.get();
-}
-
-void Renderer::createDebugRenderer()
-{
-    be_assert(!m_debugRenderer, "creating debug renderer twice");
-    m_debugRenderer.reset(new DebugRenderer(this));
-}
-
 void Renderer::drawBatch(const Batch& b)
 {
     const VertexBuffer* _vb = static_cast<const VertexBuffer*>(b.vertices);

@@ -4,7 +4,6 @@
 #ifndef BE_OPENGL_RENDERER_HH_
 #define BE_OPENGL_RENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/debugrenderer.hh>
 #include    <cgshaderparam.hh>
 #include    <Cg/cg.h>
 #include    <Cg/cgGL.h>
@@ -41,7 +40,6 @@ private:
     GLXContext                  m_glContext;
 #   endif
     CGcontext                   m_context;
-    scopedptr<DebugRenderer>    m_debugRenderer;
     ShaderPipeline              m_shaderPipeline;
     TexturePipeline             m_texturePipeline;
     refptr<CgShaderParam>       m_systemParams[SystemParamCount];
@@ -57,12 +55,8 @@ public:
     GpuBuffer*              createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     GpuBuffer*              createTextureBuffer(TextureBufferFlags flags) const override;
 
-    DebugRenderer*          debugRenderer();
-
     void                    drawBatch(const Batch& b) override;
     void                    flush() const override;
-private:
-    void                    createDebugRenderer();
 private:
     void                    attachWindow(Window* w);
 };

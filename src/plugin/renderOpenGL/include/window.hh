@@ -29,8 +29,6 @@ public:
     void close() override;
 
     bool closed() const override;
-
-    DebugRenderer* debugRenderer() override;
 };
 
 }}}

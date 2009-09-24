@@ -11,7 +11,6 @@
 #include    <system/scheduler/range/sequence.hh>
 #include    <minitl/interlocked/stack.hh>
 #include    <maths/vector.hh>
-#include    <core/debugrenderer/debugrenderer.hh>
 
 
 namespace BugEngine
@@ -46,7 +45,6 @@ public:
     void stopTimer(WorkReport* r);
 
     void frameUpdate();
-    void draw(DebugRenderer* renderer, int2 start, int2 end, u64 currentTick, u64 ticksPerSecond);
 
     static intptr_t work(intptr_t p1, intptr_t p2);
 private:
@@ -142,48 +140,6 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
 
 
 
-void Scheduler::Worker::draw(DebugRenderer* renderer, int2 start, int2 stop, u64 currentTick, u64 ticksPerSecond)
-{
-    i64 width = stop.x() - start.x();
-    i64 tps = (i64)ticksPerSecond;
-    int cheight = renderer->getCharacterSize().y();
-    for(int i = 1; i < s_frameCount; ++i)
-    {
-        WorkReport* r = m_frames[i];
-        while(r)
-        {
-            if(r->task)
-            {
-                i64 tickDiff = i64(currentTick)-i64(r->start);
-                tickDiff *= width;
-                tickDiff /= tps;
-                int2 begin(checked_numcast<i32>(tickDiff), 0);
-                tickDiff = currentTick-r->stop;
-                tickDiff *= width;
-                tickDiff /= tps;
-                int2 end(checked_numcast<i32>(tickDiff), cheight);
-                if(end.x() > stop.x())
-                    break;
-                renderer->drawRect(stop-begin, stop-end, r->task->color);
-            }
-            else
-            {
-                be_assert(currentTick>r->start, "current processor clock seems to be in the past");
-                i64 tickDiff = i64(currentTick)-i64(r->start);
-                tickDiff *= width;
-                tickDiff /= tps;
-                int2 begin(checked_numcast<i32>(tickDiff), 0);
-                int2 end(begin.x(), cheight);
-                if(end.x() > stop.x())
-                    break;
-                renderer->drawLine(stop-begin, stop-end, color32());
-            }
-            r = static_cast<WorkReport*>((minitl::inode*)r->next);
-        }
-    }
-}
-
-
 void* Scheduler::allocate_task(size_t size)
 {
     if(size > 128)
@@ -237,32 +193,6 @@ void Scheduler::frameUpdate()
         m_workers[i]->frameUpdate();
     }
     m_frameCount++;
-}
-
-void Scheduler::draw(DebugRenderer* renderer, int2 start, int2 stop, float framesPerScreen) const
-{
-    uint2 csize = renderer->getCharacterSize();
-    renderer->drawText(minitl::format<>("Scheduler - current frame : %u\nactive workers : %u") | m_frameCount | m_workers.size(), start, color32());
-    start.y() += 2*csize.y();
-    int width = stop.x() - start.x();
-    int x = width - 2*csize.x();
-    for(unsigned i = 0; i < m_workers.size(); ++i)
-    {
-        renderer->drawText(minitl::format<>("%u") | (i+1), start + int2(x+csize.x(),1), color32());
-        int2 p1 = start;
-        int2 p2 = start+int2(width, 0);
-        int2 p3 = p1+int2(x, 1);
-        int2 p4 = p3 + int2(0, csize.y()+1);
-        renderer->drawLine(p1, p2, color32(255,255,255,128));
-        renderer->drawLine(p3, p4, color32(255,255,255,128));
-
-        u64 frameTime = static_cast<u64>((m_frameTime*60.0f/framesPerScreen)*1000000000.0f);
-        u64 ticksPerSec = ((m_currentFrameTick-m_lastFrameTick)*1000000000)/frameTime;
-        m_workers[i]->draw(renderer, p1, p4, m_currentFrameTick, ticksPerSec);
-        
-        start.y() += csize.y()+2;
-    }
-    renderer->drawLine(start, start+int2(width,0), color32(255,255,255,128));
 }
 
 void Scheduler::queue(ScheduledTasks::BaseTaskItem* task)

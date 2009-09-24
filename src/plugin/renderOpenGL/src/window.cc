@@ -57,9 +57,4 @@ void Window::end()
 #endif
 }
 
-DebugRenderer* Window::debugRenderer()
-{
-    return m_owner->debugRenderer();
-}
-
 }}}

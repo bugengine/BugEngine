@@ -5,7 +5,6 @@
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
 #include    <win32/renderer.hh>
-#include    <graphics/renderer/debugrenderer.hh>
 #include    <cgshaderparam.hh>
 #include    <d3d9.h>
 #include    <Cg/cg.h>
@@ -40,7 +39,6 @@ private:
     LPDIRECT3D9                 m_directx;
     LPDIRECT3DDEVICE9           m_device;
     CGcontext                   m_context;
-    scopedptr<DebugRenderer>    m_debugRenderer;
     ShaderPipeline              m_shaderPipeline;
     TexturePipeline             m_texturePipeline;
     refptr<CgShaderParam>       m_systemParams[SystemParamCount];
@@ -58,12 +56,8 @@ public:
     GpuBuffer*              createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     GpuBuffer*              createTextureBuffer(TextureBufferFlags flags) const override;
 
-    DebugRenderer*          debugRenderer();
-
     void                    drawBatch(const Batch& b) override;
     void                    flush() const override;
-private:
-    void                    createDebugRenderer();
 };
 
 }}}

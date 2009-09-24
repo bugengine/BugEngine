@@ -15,7 +15,6 @@
 namespace BugEngine
 {
 
-class DebugRenderer;
 template< typename Body >
 class Task;
 
@@ -75,7 +74,6 @@ public:
 
     void frameUpdate();
     void wait();
-    void draw(DebugRenderer* renderer, int2 start, int2 stop, float framesPerScreen) const;
 private:
     Scheduler(const Scheduler& other);
     Scheduler& operator=(const Scheduler& other);
