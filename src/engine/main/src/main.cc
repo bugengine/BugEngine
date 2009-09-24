@@ -29,12 +29,6 @@ static void launch_gp2xmenu(void)
 }
 #endif
 
-template< typename T >
-struct SingletonScope
-{
-    SingletonScope()  { new T; }
-    ~SingletonScope() { T::destroy(); }
-};
 struct NamespaceScope
 {
     NamespaceScope()  { }
@@ -111,7 +105,6 @@ static int __main(int argc, const char *argv[])
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
-        SingletonScope<BugEngine::FileSystem> fs;
         BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
         refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);

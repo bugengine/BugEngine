@@ -14,7 +14,7 @@
 namespace BugEngine
 {
 
-class Application : public Object, public Singleton<Application>
+class Application : public Object
 {
 private:
     class UpdateInput;
@@ -42,10 +42,7 @@ private :
     const Application& operator=(const Application&);
 
     be_metaclass(NONE,Application,Object)
-        Application* instance() const { return Application::instance(); }
     be_properties
-        be_classmethod(instance);
-
         be_method(run);
 
         be_property(world)

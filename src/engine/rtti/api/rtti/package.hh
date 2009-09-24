@@ -5,7 +5,6 @@
 #define BE_RTTI_PACKAGE_HH_
 /*****************************************************************************/
 #include    <rtti/helper.hh>
-#include    <core/utils/singleton.hh>
 
 namespace BugEngine { namespace RTTI
 {

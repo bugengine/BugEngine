@@ -7,7 +7,6 @@
 #include    <rtti/object.hh>
 #include    <rtti/property.hh>
 #include    <rtti/metaclass.hh>
-#include    <core/utils/singleton.hh>
 
 #include    <rtti/value.hh>
 

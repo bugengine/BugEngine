@@ -168,4 +168,10 @@ std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
     return std::set<ipath>();
 }
 
+FileSystem* FileSystem::instance()
+{
+    static scopedptr<FileSystem> s_filesystem = new FileSystem();
+    return s_filesystem.get();
+}
+
 }

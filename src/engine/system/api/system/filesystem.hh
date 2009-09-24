@@ -4,7 +4,6 @@
 #ifndef BE_SYSTEM_FILESYSTEM_HH_
 #define BE_SYSTEM_FILESYSTEM_HH_
 /*****************************************************************************/
-#include    <core/utils/singleton.hh>
 #include    <core/string/istring.hh>
 #include    <core/log/exception.hh>
 
@@ -52,13 +51,14 @@ public:
     }
 };
 
-class be_api(SYSTEM) FileSystem : public Singleton<FileSystem>
+class be_api(SYSTEM) FileSystem
 {
 private:
     class FileSystemMountPoint;
 private:
     FileSystemMountPoint*   m_root;
 public:
+    static FileSystem* instance();
     FileSystem(void);
     ~FileSystem(void);
 
