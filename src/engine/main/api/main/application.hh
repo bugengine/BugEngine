@@ -4,7 +4,6 @@
 #ifndef BE_MAIN_APPLICATION_HH_
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
-#include    <core/utils/singleton.hh>
 #include    <rtti/helper.hh>
 
 #include    <mobile/world.hh>
