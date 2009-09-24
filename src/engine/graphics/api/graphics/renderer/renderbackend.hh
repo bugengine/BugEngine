@@ -65,7 +65,7 @@ struct Batch
     const _Shader*                      pixelShader;
 };
 
-class GRAPHICSEXPORT RenderBackend
+class be_api(GRAPHICS) RenderBackend
 {
     friend class Renderer;
 protected:

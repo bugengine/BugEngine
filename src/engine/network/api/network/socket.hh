@@ -9,7 +9,7 @@
 namespace BugEngine
 {
     
-class NETWORKEXPORT Socket
+class be_api(NETWORK) Socket
 {
 public:
     Socket(void);

@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Scene : public minitl::refcountable<void>
+class be_api(GRAPHICS) Scene : public minitl::refcountable<void>
 {
 private:
     Scene*                          m_parent;

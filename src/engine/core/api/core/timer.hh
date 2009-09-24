@@ -56,7 +56,7 @@ static inline tick_type tick(void)
 # error compiler not supported...
 #endif
 
-class COREEXPORT Timer
+class be_api(CORE) Timer
 {
 private:
     u64         m_total;

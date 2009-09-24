@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class RTTIEXPORT Mono : public Singleton<Mono>
+class be_api(RTTI) Mono : public Singleton<Mono>
 {
 private:
     void*   m_domain;

@@ -15,7 +15,7 @@ template< typename OWNER, typename R, typename T1, typename T2, R(OWNER::*Func)(
 class MethodR2 : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Method::MetaClass
+    class MetaClass : public  Method::MetaClass
     {
     public:
         MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
@@ -42,7 +42,7 @@ template< typename OWNER, typename R, typename T1, typename T2, R(OWNER::*Func)(
 class MethodCR2 : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Method::MetaClass
+    class MetaClass : public  Method::MetaClass
     {
     public:
         MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
@@ -69,7 +69,7 @@ template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) >
 class MethodR2<OWNER, void, T1, T2, Func> : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Method::MetaClass
+    class MetaClass : public  Method::MetaClass
     {
     public:
         MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}
@@ -96,7 +96,7 @@ template< typename OWNER, typename T1, typename T2, void(OWNER::*Func)(T1,T2) co
 class MethodCR2<OWNER, void, T1, T2, Func> : public Method
 {
 private:
-    class RTTIEXPORT MetaClass : public  Method::MetaClass
+    class MetaClass : public  Method::MetaClass
     {
     public:
         MetaClass() : Method::MetaClass(typeid(Func).name(), Method::static_metaclass(), false) {}

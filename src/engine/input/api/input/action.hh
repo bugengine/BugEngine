@@ -11,7 +11,7 @@ namespace BugEngine { namespace Input
 class Control;
 class InputMap;
 
-class INPUTEXPORT Action : public Object
+class be_api(INPUT) Action : public Object
 {
     friend class InputMap;
 private:
@@ -35,7 +35,7 @@ public:
     bool            wentUp() const;
 
 
-    be_metaclass(INPUTEXPORT,Action,Object)
+    be_metaclass(INPUT,Action,Object)
     be_properties
     be_end
 };

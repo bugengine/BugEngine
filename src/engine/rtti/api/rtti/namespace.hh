@@ -14,7 +14,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-class RTTIEXPORT Namespace : public Object
+class be_api(RTTI) Namespace : public Object
 {
 protected:
     class MetaClass : public RTTI::MetaClass

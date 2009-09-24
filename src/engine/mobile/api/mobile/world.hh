@@ -12,7 +12,7 @@
 namespace BugEngine
 {
 
-class MOBILEEXPORT World : public Object
+class be_api(MOBILE) World : public Object
 {
 private:
     refptr<Graphics::World>         m_graphicsSystem;
@@ -26,7 +26,7 @@ public:
 
     void createView(Graphics::WindowFlags f, refptr<Graphics::Scene> scene);
 
-    be_metaclass(MOBILEEXPORT,World,Object)
+    be_metaclass(MOBILE,World,Object)
     be_properties
         be_property(GraphicSystem)
             [be_read(m_graphicsSystem)]

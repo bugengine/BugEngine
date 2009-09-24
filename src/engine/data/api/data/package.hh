@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Data
 {
 
-class DATAEXPORT Package : public RTTI::Package
+class be_api(DATA) Package : public RTTI::Package
 {
 private:
     refptr<const RTTI::Namespace> m_namespace;
@@ -22,7 +22,7 @@ public:
 
     virtual const RTTI::Namespace*    getNamespace() const override;
 
-    be_metaclass(DATAEXPORT, Package, RTTI::Package)
+    be_metaclass(DATA, Package, RTTI::Package)
         refptr<RTTI::Package> create(const ipath& name) const override;
     be_properties
     be_end

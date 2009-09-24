@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Parallel : public Action
+class be_api(SYSTEM) Parallel : public Action
 {
 public:
     Parallel();
@@ -19,7 +19,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Parallel,Action)
+    be_metaclass(SYSTEM,Parallel,Action)
     be_properties
     be_end
 };

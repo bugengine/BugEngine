@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Cube : public Primitive
+class be_api(GRAPHICS) Cube : public Primitive
 {
 private:
     typedef VertexDescription<MAKEVERTEXLIST1(float4, gPosition)> VertexFormat;
@@ -24,7 +24,7 @@ public:
     virtual const GpuBuffer* vertices() const override;
     virtual unsigned         nbVertices() const override;
 
-    be_metaclass(GRAPHICSEXPORT,Cube,Primitive)
+    be_metaclass(GRAPHICS,Cube,Primitive)
     be_properties
     be_end
 };

@@ -6,12 +6,6 @@
 /*****************************************************************************/
 
 #include <cstdlib>
-#if defined(BE_COMPILER_MSVC)
-# include <intrin.h>
-# define BREAKPOINT __debugbreak()
-#elif defined(BE_COMPILER_GCC)
-# define BREAKPOINT __asm("int3")
-#endif
 
 namespace BugEngine { namespace Debug
 {
@@ -26,8 +20,8 @@ enum AssertionResult
 
 
 typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, const char *expr, const char *message, ...);
-COREEXPORT AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
-COREEXPORT AssertionCallback_t getAssertionCallback();
+be_api(CORE) AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
+be_api(CORE) AssertionCallback_t getAssertionCallback();
 
 #if !defined(BE_ENABLE_ASSERT)
 # define    be_assert(cond,message) ((void)0)
@@ -49,7 +43,7 @@ COREEXPORT AssertionCallback_t getAssertionCallback();
             {                                                                                   \
             case BugEngine::Debug::Abort:         std::abort(); break;                          \
             case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
-            case BugEngine::Debug::Break:         BREAKPOINT; break;                            \
+            case BugEngine::Debug::Break:         be_break(); break;                            \
             default:;                                                                           \
             }                                                                                   \
         }                                                                                       \

@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Font : public Object
+class be_api(GRAPHICS) Font : public Object
 {
 private:
     struct VertexBuilder;
@@ -26,7 +26,7 @@ public:
 
     const GpuBuffer* vertices() const;
 
-    be_metaclass(GRAPHICSEXPORT, Font, Object)
+    be_metaclass(GRAPHICS, Font, Object)
     be_properties
     be_end
 };

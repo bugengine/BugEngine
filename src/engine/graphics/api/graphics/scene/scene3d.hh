@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Scene3D : public Scene
+class be_api(GRAPHICS) Scene3D : public Scene
 {
 public:
     Scene3D(Scene* parent);

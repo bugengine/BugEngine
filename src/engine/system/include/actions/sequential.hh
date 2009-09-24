@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Sequential : public Action
+class be_api(SYSTEM) Sequential : public Action
 {
 public:
     Sequential();
@@ -19,7 +19,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Sequential,Action)
+    be_metaclass(SYSTEM,Sequential,Action)
     be_properties
     be_end
 };

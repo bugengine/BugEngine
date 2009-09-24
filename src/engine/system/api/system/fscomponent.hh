@@ -14,7 +14,7 @@ namespace BugEngine
 class AbstractMemoryStream;
 
     
-class SYSTEMEXPORT FileSystemComponent : public minitl::refcountable<void>
+class be_api(SYSTEM) FileSystemComponent : public minitl::refcountable<void>
 {
     friend class FileSystem;
 public:

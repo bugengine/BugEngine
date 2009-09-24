@@ -8,7 +8,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT Environment
+class be_api(CORE) Environment
 {
 private:
     Environment();

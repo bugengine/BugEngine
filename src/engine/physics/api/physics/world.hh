@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Physics
 {
 
-class PHYSICSEXPORT World : public Object
+class be_api(PHYSICS) World : public Object
 {
 private:
     class WorldImplementation;
@@ -20,7 +20,7 @@ public:
     
     void step(float time);
 
-    be_metaclass(PHYSICSEXPORT,World,Object)
+    be_metaclass(PHYSICS,World,Object)
         refptr<World> createWithSize(float worldExtentX, float worldExtentY, float worldExtentZ);
     be_properties
         //be_classmethod(createWithSize);

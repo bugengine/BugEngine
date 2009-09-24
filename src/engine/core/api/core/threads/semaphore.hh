@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT Semaphore : public Threads::Waitable
+class be_api(CORE) Semaphore : public Threads::Waitable
 {
 private:
     void*           m_data;

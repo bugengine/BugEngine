@@ -45,5 +45,8 @@ typedef u8                      byte;
 #define BE_EXPORT               __declspec(dllexport)
 #define BE_IMPORT               __declspec(dllimport)
 
+#include <intrin.h>
+#define be_break() __debugbreak()
+
 /*****************************************************************************/
 #endif

@@ -14,7 +14,7 @@ class MetaMetaClass;
 class Property;
 class Method;
 
-class RTTIEXPORT MetaClass : public Object
+class be_api(RTTI) MetaClass : public Object
 {
     friend class Object;
 private:

@@ -8,7 +8,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT Thread
+class be_api(CORE) Thread
 {
 private:
     class ThreadParams;

@@ -11,7 +11,7 @@ namespace BugEngine
 
 class DebugRenderer;
 
-class COREEXPORT Malloc
+class be_api(CORE) Malloc
 {
 public:
     static void init();

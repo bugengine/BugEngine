@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Text : public Primitive
+class be_api(GRAPHICS) Text : public Primitive
 {
 private:
     refptr<const Font>          m_font;
@@ -24,7 +24,7 @@ public:
     virtual const GpuBuffer* vertices() const override;
     virtual unsigned         nbVertices() const override;
 
-    be_metaclass(GRAPHICSEXPORT,Text,Primitive)
+    be_metaclass(GRAPHICS,Text,Primitive)
     be_properties
     be_end
 };

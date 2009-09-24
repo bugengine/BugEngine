@@ -28,12 +28,12 @@ class ILogListener
 {
     friend class Logger;
 protected:
-    static COREEXPORT const char* s_logNames[];
+    static be_api(CORE) const char* s_logNames[];
     virtual ~ILogListener() {}
     virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
 };
 
-class COREEXPORT Logger : public minitl::refcountable<>
+class be_api(CORE) Logger : public minitl::refcountable<>
 {
 private:
     std::vector< ILogListener* >                m_listeners;

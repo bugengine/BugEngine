@@ -12,7 +12,7 @@ namespace BugEngine { namespace RTTI
 
 class Namespace;
 
-class RTTIEXPORT Package : public Object
+class be_api(RTTI) Package : public Object
 {
 protected:
     size_t                                  m_refcount;
@@ -38,7 +38,7 @@ public:
 
     static Package* get(const inamespace& name);
 
-    be_metaclass(RTTIEXPORT,Package,Object)
+    be_metaclass(RTTI,Package,Object)
         virtual refptr<Package> create(const ipath& name) const;
     be_properties
     be_end

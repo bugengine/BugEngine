@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< >
-class RTTIEXPORT Marshaller<std::string> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<std::string> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -24,7 +24,7 @@ public:
 
 
 template< >
-class RTTIEXPORT Marshaller<istring> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<istring> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -36,7 +36,7 @@ public:
 };
 
 template< >
-class RTTIEXPORT Marshaller<inamespace> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<inamespace> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -48,7 +48,7 @@ public:
 };
 
 template< >
-class RTTIEXPORT Marshaller<ifilename> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<ifilename> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -60,7 +60,7 @@ public:
 };
 
 template< >
-class RTTIEXPORT Marshaller<ipath> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<ipath> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;

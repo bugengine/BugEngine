@@ -11,7 +11,7 @@ namespace BugEngine
 
 class SingletonBase;
 
-class COREEXPORT SingletonManager
+class be_api(CORE) SingletonManager
 {
 private:
     minitl::map< const char*, SingletonBase*, minitl::less<const char *> > m_registry;

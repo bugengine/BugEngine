@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Input
 {
 
-class INPUTEXPORT Control : public Object
+class be_api(INPUT) Control : public Object
 {
 private:
     istring         m_name;
@@ -23,7 +23,7 @@ public:
     virtual bool            wentDown() const = 0;
     virtual bool            wentUp() const = 0;
 
-    be_metaclass(INPUTEXPORT,Control,Object)
+    be_metaclass(INPUT,Control,Object)
     be_properties
     be_end
 };

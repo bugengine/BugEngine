@@ -12,7 +12,7 @@ namespace BugEngine { namespace Input
 
 class Manager;
 
-class INPUTEXPORT InputMap : public Object
+class be_api(INPUT) InputMap : public Object
 {
 private:
     std::vector< refptr<Action> >   m_actions;
@@ -34,7 +34,7 @@ public:
     bool    active() const;
     void    setActive(bool active);
 
-    be_metaclass(INPUTEXPORT,InputMap,Object)
+    be_metaclass(INPUT,InputMap,Object)
     private:
         scopedptr<Manager>  m_manager;
         static void init(MetaClass* mc);

@@ -14,7 +14,7 @@ namespace BugEngine
 class AbstractMemoryStream;
 
 
-class SYSTEMEXPORT DiskFS : public FileSystemComponent
+class be_api(SYSTEM) DiskFS : public FileSystemComponent
 {
     friend class FileSystem;
 private:

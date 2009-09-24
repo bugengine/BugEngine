@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Push : public Action
+class be_api(SYSTEM) Push : public Action
 {
 private:
     Value  m_value;
@@ -22,7 +22,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Push,Action)
+    be_metaclass(SYSTEM,Push,Action)
         refptr<Push> createWithValue(const Value& value);
     be_properties
         be_classmethod(createWithValue);

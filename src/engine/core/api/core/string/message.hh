@@ -8,7 +8,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT message
+class be_api(CORE) message
 {
 private:
     char *m_msg;
