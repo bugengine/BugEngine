@@ -17,45 +17,58 @@ struct MSDosHeader
 
 struct ExeHeader
 {
-    u8  signature[2];
-    u8  linkerVersion;
-    u8  linkerRevision;
-    u16 entryTableOffset;
-    u16 entryTableSize;
-    u32 crc;
-    u16 flags;
-    u16 autoSegmentIndex;
-    u16 autoSegmentHeapSize;
-    u16 autoSegmentStackSize;
-    u32 CSIP;
-    u32 SSSP;
-    u16 segmentCount;
-    u16 moduleCount;
-    u16 residentNameCount;
-    u16 segmentTableOffset;
-    u16 resourceTableOffset;
-    u16 residentNameTableOffset;
-    u16 moduleTableOffset;
-    u16 importedNameTableOffset;
-    u32 nonresidentNameTableOffset;
-    u16 movableEntryCOunt;
-    u16 segmentAlignmentShift;
-    u16 resourceCount;
-    u8  exeType;
+    enum MachineType
+    {
+        MachineUnknown = 0x0,
+        AM33 = 0x1d3,
+        AMD64 = 0x8664,
+        ARM = 0x1c0,
+        EBC = 0xebc,
+        i386 = 0x14c,
+        IA64 = 0x200,
+        M32R = 0x9041,
+        MIPS16 = 0x266,
+        MIPSFPU = 0x366,
+        MIPSFPU16 = 0x466,
+        POWERPC = 0x1f0,
+        POWERPCFP = 0x1f1,
+        R4000 = 0x166,
+        SH3 = 0x1a2,
+        SH3DSP = 0x1a3,
+        SH4 = 0x1a6,
+        SH5 = 0x1a8,
+        THUMB = 0x1c2,
+        WCEMIPSV2 = 0x169
+    };
+    enum Characteristics
+    {
+        RelocsStripped = 0x1,
+        ExecutableImage = 0x2,
+        LinesStripped = 0x4,
+        SymbolsStripped = 0x8,
+        AggressiveWorkingSetTrim = 0x10,
+        LargeAddressAware = 0x20,
+        Reserved = 0x40,
+        LittleEndian = 0x80,
+        Machine32 = 0x100,
+        DebugStripped = 0x200,
+        RemovableRunFromSwap = 0x400,
+        NetRunFromSwap = 0x800,
+        SystemFile = 0x1000,
+        Dll = 0x2000,
+        UniProcessor = 0x4000,
+        BigEndian = 0x8000
+    };
+    u8  signature[4];
+    u16 machine;
+    u16 sectionCount;
+    u32 timestamp;
+    u32 symbolTableOffset;
+    u32 symbolCount;
+    u16 optionalHeaderSize;
+    u16 characteristics;
 };
 
-enum ExeFlags
-{
-    SINGLEDATA = 0x0001,
-    MULTIPLEDATA = 0x0002,
-    INVALID = 0x2000,
-    LIBRARY = 0x8000
-};
-
-enum ExeType
-{
-    WINDOWS = 0x02
-};
 
 PE::PE(const char *filename, FILE* f)
 {
