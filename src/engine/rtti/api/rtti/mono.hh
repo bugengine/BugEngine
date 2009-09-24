@@ -4,12 +4,11 @@
 #ifndef BE_RTTI_MONO_HH_
 #define BE_RTTI_MONO_HH_
 /*****************************************************************************/
-#include    <core/utils/singleton.hh>
 
 namespace BugEngine
 {
 
-class be_api(RTTI) Mono : public Singleton<Mono>
+class be_api(RTTI) Mono
 {
 private:
     void*   m_domain;

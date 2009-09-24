@@ -5,6 +5,7 @@
 #define BE_WIN32_WINDOW_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine { namespace Graphics { namespace Win32
 {
@@ -18,7 +19,7 @@ protected:
     HWND        m_window;
     HDC         m_dc;
 public:
-    Window(Renderer* renderer,WindowFlags flags, const Scene* scene);
+    Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
     ~Window();
 
     void close() override;

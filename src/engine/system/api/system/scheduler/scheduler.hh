@@ -5,7 +5,6 @@
 #define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
 #include    <core/threads/thread.hh>
-#include    <core/utils/singleton.hh>
 #include    <core/threads/semaphore.hh>
 #include    <core/threads/event.hh>
 #include    <minitl/memory/pool.hh>
