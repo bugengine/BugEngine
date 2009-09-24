@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Pop : public Action
+class be_api(SYSTEM) Pop : public Action
 {
 public:
     Pop();
@@ -19,7 +19,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Pop,Action)
+    be_metaclass(SYSTEM,Pop,Action)
     be_properties
     be_end
 };

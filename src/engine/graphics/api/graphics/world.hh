@@ -17,7 +17,7 @@ class Scheduler;
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT World : public Object
+class be_api(GRAPHICS) World : public Object
 {
 private:
     class UpdateWindowManagement;
@@ -36,7 +36,7 @@ public:
 
     void createWindow(WindowFlags f, refptr<Scene> scene);
 
-    be_metaclass(GRAPHICSEXPORT,World, Object)
+    be_metaclass(GRAPHICS,World, Object)
     be_properties
     be_end
 };

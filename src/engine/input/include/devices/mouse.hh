@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Input
 {
 
-class INPUTEXPORT Mouse : public Device
+class be_api(INPUT) Mouse : public Device
 {
 private:
     static size_t   s_miceCount;
@@ -17,7 +17,7 @@ public:
     Mouse(size_t numButtons);
     ~Mouse();
 
-    be_metaclass(INPUTEXPORT,Mouse,Device)
+    be_metaclass(INPUT,Mouse,Device)
     be_properties
     be_end
 };

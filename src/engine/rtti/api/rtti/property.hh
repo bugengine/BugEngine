@@ -12,10 +12,10 @@
 namespace BugEngine { namespace RTTI
 {
 
-class RTTIEXPORT Property : public Object
+class be_api(RTTI) Property : public Object
 {
 protected:
-    class RTTIEXPORT MetaClass : public RTTI::MetaClass
+    class be_api(RTTI) MetaClass : public RTTI::MetaClass
     {
     public:
         MetaClass();

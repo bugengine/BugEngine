@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Sleep : public Action
+class be_api(SYSTEM) Sleep : public Action
 {
 public:
     Sleep();
@@ -19,7 +19,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Sleep,Action)
+    be_metaclass(SYSTEM,Sleep,Action)
     be_properties
     be_end
 };

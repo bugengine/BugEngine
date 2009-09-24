@@ -10,7 +10,7 @@ namespace BugEngine { namespace Actions
 {
 
 
-class SYSTEMEXPORT Call : public Action
+class be_api(SYSTEM) Call : public Action
 {
 private:
     RTTI::Method*   m_method;
@@ -22,7 +22,7 @@ public:
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
-    be_metaclass(SYSTEMEXPORT,Call,Action)
+    be_metaclass(SYSTEM,Call,Action)
         refptr<Call> createWithMethod(RTTI::Method* method);
     be_properties
         be_classmethod(createWithMethod);

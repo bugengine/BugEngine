@@ -15,14 +15,14 @@
     public:                                                                                                 \
     typedef _name   self_t;                                                                                 \
     typedef _parent super_t;                                                                                \
-    class exportrule MetaClass : public _parent::MetaClass                                                  \
+    class be_api(exportrule) MetaClass : public _parent::MetaClass                                          \
     {                                                                                                       \
         friend class _name;                                                                                 \
     private:                                                                                                \
         typedef _parent::MetaClass  super_t;                                                                \
         MetaClass();                                                                                        \
     protected:                                                                                              \
-        class exportrule MetaMetaClass : public _parent::MetaClass::MetaMetaClass                           \
+        class be_api(exportrule) MetaMetaClass : public _parent::MetaClass::MetaMetaClass                   \
         {                                                                                                   \
             friend class _name;                                                                             \
             friend class _name::MetaClass;                                                                  \

@@ -9,7 +9,7 @@ namespace BugEngine
 {
 
 
-class SYSTEMEXPORT Plugin
+class be_api(SYSTEM) Plugin
 {
 private:
     typedef void* Handle;

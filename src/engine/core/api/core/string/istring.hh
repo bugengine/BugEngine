@@ -11,7 +11,7 @@ namespace BugEngine
 
 class StringCache;
 
-class COREEXPORT istring
+class be_api(CORE) istring
 {
 private:
     const StringCache* m_index;
@@ -44,7 +44,7 @@ public:
     bool operator<(const istring& other) const NOTHROW;
 };
 
-class COREEXPORT igenericnamespace
+class be_api(CORE) igenericnamespace
 {
     enum
     {
@@ -72,10 +72,10 @@ public:
     bool operator!=(const igenericnamespace& other) const;
 };
 
-COREEXPORT bool startswith(const igenericnamespace& start, const igenericnamespace& full);
-COREEXPORT bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2);
+be_api(CORE) bool startswith(const igenericnamespace& start, const igenericnamespace& full);
+be_api(CORE) bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2);
     
-class COREEXPORT inamespace : public igenericnamespace
+class be_api(CORE) inamespace : public igenericnamespace
 {
 public:
     explicit inamespace(const istring& onlycomponent);
@@ -92,12 +92,12 @@ private:
     inamespace();
 };
 
-COREEXPORT inamespace operator+(const istring& str1, const istring& str2);
-COREEXPORT inamespace operator+(const istring& str1, const inamespace& ns2);
-COREEXPORT inamespace operator+(const inamespace& ns1, const istring& str2);
-COREEXPORT inamespace operator+(const inamespace& ns1, const inamespace& ns2);
+be_api(CORE) inamespace operator+(const istring& str1, const istring& str2);
+be_api(CORE) inamespace operator+(const istring& str1, const inamespace& ns2);
+be_api(CORE) inamespace operator+(const inamespace& ns1, const istring& str2);
+be_api(CORE) inamespace operator+(const inamespace& ns1, const inamespace& ns2);
 
-class COREEXPORT ifilename : public igenericnamespace
+class be_api(CORE) ifilename : public igenericnamespace
 {
 public:
     explicit ifilename(const istring& onlycomponent);
@@ -111,7 +111,7 @@ private:
     ifilename();
 };
 
-class COREEXPORT ipath : public igenericnamespace
+class be_api(CORE) ipath : public igenericnamespace
 {
 public:
     explicit ipath(const istring& onlycomponent);
@@ -128,8 +128,8 @@ private:
     ipath();
 };
 
-COREEXPORT ipath     operator+(const ipath& path1, const ipath& path2);
-COREEXPORT ifilename operator+(const ipath& path, const ifilename& file);
+be_api(CORE) ipath     operator+(const ipath& path1, const ipath& path2);
+be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
 }
 

@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT _Texture
+class be_api(GRAPHICS) _Texture
 {
 public:
     typedef TexturePipeline  Pipeline;

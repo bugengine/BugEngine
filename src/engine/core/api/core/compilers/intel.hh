@@ -37,10 +37,19 @@ typedef u8                      byte;
 #pragma warning(disable:4127)
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
-#define BE_ALWAYSINLINE        __forceinline
+#define BE_ALWAYSINLINE        inline
 #define NOTHROW     throw()
 
 #define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
+#ifdef _WIN32
+# define BE_EXPORT               __declspec(dllexport)
+# define BE_IMPORT               __declspec(dllimport)
+#else
+# define BE_EXPORT
+# define BE_IMPORT
+#endif
+
+#define be_break() __asm("int 3")
 
 /*****************************************************************************/
 #endif

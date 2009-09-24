@@ -41,7 +41,7 @@ private :
     Application(const Application&);
     const Application& operator=(const Application&);
 
-    be_metaclass(NOEXPORT,Application,Object)
+    be_metaclass(NONE,Application,Object)
         Application* instance() const { return Application::instance(); }
     be_properties
         be_classmethod(instance);

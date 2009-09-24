@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT Event : public Threads::Waitable
+class be_api(CORE) Event : public Threads::Waitable
 {
 private:
     void*   m_data;

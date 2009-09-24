@@ -25,7 +25,7 @@ public:
 
     void add(Control* ctrl);
 
-    be_metaclass(INPUTEXPORT,GroupControl,Control)
+    be_metaclass(NONE,GroupControl,Control)
     be_properties
     be_end
 };

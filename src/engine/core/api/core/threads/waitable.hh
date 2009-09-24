@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Threads
 {
 
-class COREEXPORT Waitable
+class be_api(CORE) Waitable
 {
 public:
     Waitable()          {}

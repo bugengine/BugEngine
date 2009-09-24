@@ -16,7 +16,7 @@ namespace BugEngine { namespace Graphics
 class RenderBackend;
 class RenderTarget;
 
-class GRAPHICSEXPORT DebugRenderer : public BugEngine::DebugRenderer
+class be_api(GRAPHICS) DebugRenderer : public BugEngine::DebugRenderer
 {
     friend class RenderTarget;
 protected:

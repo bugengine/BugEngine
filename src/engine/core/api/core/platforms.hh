@@ -10,7 +10,7 @@
 # define NOMINMAX
 # include <windows.h>
 # pragma warning(disable:4505)
-static void displayError()
+static inline void displayError()
 {
     char* msg;
     ::FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
@@ -24,7 +24,7 @@ static void displayError()
     ::LocalFree(msg);
 }
 #define BE_WIN32_PRINTERROR()       displayError()
-#define BE_WIN32_CHECKRESULT(x)     if((x) == -1) BE_WIN32_PRINTERROR()
+#define BE_WIN32_CHECKRESULT(x)     if((x) == (UINT)-1) BE_WIN32_PRINTERROR()
 #endif
 
 #ifndef _WIN32

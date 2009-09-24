@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Renderer : public RenderBackend
+class be_api(GRAPHICS) Renderer : public RenderBackend
 {
 private:
     Plugin          m_plugin;

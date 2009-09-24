@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT DebugRenderer : public Singleton<DebugRenderer>
+class be_api(CORE) DebugRenderer : public Singleton<DebugRenderer>
 {
     friend class Singleton<DebugRenderer>;
 protected:

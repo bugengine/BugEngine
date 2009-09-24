@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Sound
 {
     
-class SOUNDEXPORT Source : public Object
+class be_api(SOUND) Source : public Object
 {
 private:
     refptr<SoundObject> m_sound;
@@ -31,7 +31,7 @@ public:
 
     virtual void step() const;
 
-    be_metaclass(SOUNDEXPORT,Source,Object)
+    be_metaclass(SOUND,Source,Object)
         refptr<Source> createFromSound(SoundObject* sound);
     be_properties
         be_classmethod(createFromSound);

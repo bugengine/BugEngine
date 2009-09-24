@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< >
-class RTTIEXPORT Marshaller<Value> : public AbstractMarshaller
+class be_api(RTTI) Marshaller<Value> : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;

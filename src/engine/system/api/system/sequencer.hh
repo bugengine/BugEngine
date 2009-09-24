@@ -12,7 +12,7 @@
 namespace BugEngine
 {
 
-class SYSTEMEXPORT Sequencer : public Object
+class be_api(SYSTEM) Sequencer : public Object
 {
 public:
     typedef std::set< refptr<Action> >                          ActionList;
@@ -43,7 +43,7 @@ public:
     void pause();
     void resume();
 
-    be_metaclass(SYSTEMEXPORT,Sequencer,Object)
+    be_metaclass(SYSTEM,Sequencer,Object)
     be_properties
         be_method(init);
         be_method(addSequencer);

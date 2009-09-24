@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT EException : public std::runtime_error
+class be_api(CORE) EException : public std::runtime_error
 {
 public:
     EException(const std::string& msg);

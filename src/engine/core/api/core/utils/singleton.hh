@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT SingletonBase
+class be_api(CORE) SingletonBase
 {
 public:
     SingletonBase();

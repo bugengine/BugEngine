@@ -12,7 +12,7 @@ namespace BugEngine { namespace Graphics
 
 class ShaderParam;
 
-class GRAPHICSEXPORT _Shader
+class be_api(GRAPHICS) _Shader
 {
 public:
     typedef ShaderPipeline  Pipeline;

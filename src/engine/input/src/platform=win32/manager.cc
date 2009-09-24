@@ -121,8 +121,6 @@ void Manager::update() const
 
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static unsigned int nbWindows = 0;
-    static int* memoryTest = 0;
     static Manager* m = 0;
     
     switch( msg )

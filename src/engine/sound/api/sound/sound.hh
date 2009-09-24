@@ -11,8 +11,8 @@ namespace BugEngine { namespace Sound
 
 class Source;
 class World;
-    
-class SOUNDEXPORT SoundObject : public Object
+
+class be_api(SOUND) SoundObject : public Object
 {
     friend class Source;
 private:
@@ -33,7 +33,7 @@ public:
 
     size_t read(void* buffer, size_t size, int& frequency, int& channels) const;
 
-    be_metaclass(SOUNDEXPORT,SoundObject,Object)
+    be_metaclass(SOUND,SoundObject,Object)
     be_properties
     be_end
 private:

@@ -10,7 +10,7 @@ namespace BugEngine
 
 class Sequencer;
 
-class SYSTEMEXPORT ActionContext
+class be_api(SYSTEM) ActionContext
 {
 public:
     class StackFrame;
@@ -59,7 +59,7 @@ public:
     StackFrame* thisframe() { return m_frame; }
 };
 
-class SYSTEMEXPORT Action : public Object
+class be_api(SYSTEM) Action : public Object
 {
 public:
     Action();
@@ -68,7 +68,7 @@ public:
     virtual void initialize(ActionContext* context) const = 0;
     virtual bool oneturn(ActionContext* context) const = 0;
 
-    be_metaclass(SYSTEMEXPORT,Action,Object)
+    be_metaclass(SYSTEM,Action,Object)
     be_properties
     be_end
 };

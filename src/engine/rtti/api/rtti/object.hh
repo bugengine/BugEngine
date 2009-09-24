@@ -14,7 +14,7 @@ namespace RTTI
 class MetaClass;
 }
 
-class RTTIEXPORT Object : public minitl::refcountable<void>
+class be_api(RTTI) Object : public minitl::refcountable<void>
 {
 public:
     typedef RTTI::MetaClass MetaClass;

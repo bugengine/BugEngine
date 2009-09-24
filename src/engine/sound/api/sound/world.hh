@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Sound
 {
     
-class SOUNDEXPORT World : public Object
+class be_api(SOUND) World : public Object
 {
     friend class SoundObject;
     friend class Source;
@@ -25,7 +25,7 @@ public:
 
     void step() const;
 
-    be_metaclass(SOUNDEXPORT,World,Object)
+    be_metaclass(SOUND,World,Object)
     be_properties
     be_end
 };

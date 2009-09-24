@@ -11,7 +11,7 @@ namespace BugEngine { namespace Graphics
 
 class Scene;
 
-class GRAPHICSEXPORT RenderTarget : public minitl::refcountable<void>
+class be_api(GRAPHICS) RenderTarget : public minitl::refcountable<void>
 {
 private:
     refptr<const Scene> const   m_scene;

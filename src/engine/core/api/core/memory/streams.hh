@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT AbstractMemoryStream : public minitl::refcountable<>
+class be_api(CORE) AbstractMemoryStream : public minitl::refcountable<>
 {
 public:
     enum SeekMethod
@@ -33,7 +33,7 @@ public:
     virtual bool   writable() const = 0;
 };
     
-class COREEXPORT MemoryStream : public AbstractMemoryStream
+class be_api(CORE) MemoryStream : public AbstractMemoryStream
 {
 private:
     void*   m_memory;

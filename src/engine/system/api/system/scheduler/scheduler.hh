@@ -26,7 +26,7 @@ class BaseTaskItem;
 
 }
 
-class COREEXPORT Scheduler
+class be_api(CORE) Scheduler
 {
 private:
     class Worker;

@@ -9,7 +9,7 @@
 namespace TestNS
 {
 
-class RTTIEXPORT Test : public BugEngine::Object
+class be_api(RTTI) Test : public BugEngine::Object
 {
 private:
     int m_value;
@@ -25,7 +25,7 @@ public:
 
     void test(const std::string& str) const;
 
-    be_metaclass(RTTIEXPORT,Test,BugEngine::Object)
+    be_metaclass(RTTI,Test,BugEngine::Object)
     be_properties
         be_property(Value)
             [be_read(m_value)]
@@ -43,13 +43,13 @@ public:
     be_end
 };
 
-class RTTIEXPORT Test2 : public Test
+class be_api(RTTI) Test2 : public Test
 {
 public:
     Test2();
     ~Test2();
 
-    be_metaclass(RTTIEXPORT,Test2,Test)
+    be_metaclass(RTTI,Test2,Test)
     be_properties
     be_end
 };

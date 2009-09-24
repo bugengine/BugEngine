@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Input
 {
 
-class INPUTEXPORT Keyboard : public Device
+class be_api(INPUT) Keyboard : public Device
 {
 private:
     static size_t   s_keyboardCount;
@@ -17,7 +17,7 @@ public:
     Keyboard(size_t numKeys);
     ~Keyboard();
 
-    be_metaclass(INPUTEXPORT,Keyboard,Device)
+    be_metaclass(INPUT,Keyboard,Device)
     be_properties
     be_end
 };

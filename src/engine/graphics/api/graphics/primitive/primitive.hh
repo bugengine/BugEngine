@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class GRAPHICSEXPORT Primitive : public Object
+class be_api(GRAPHICS) Primitive : public Object
 {
 public:
     Primitive(const RenderBackend* renderer);
@@ -20,7 +20,7 @@ public:
     virtual const GpuBuffer* vertices() const = 0;
     virtual unsigned         nbVertices() const = 0;
 
-    be_metaclass(GRAPHICSEXPORT,Primitive,Object)
+    be_metaclass(GRAPHICS,Primitive,Object)
     be_properties
     be_end
 };

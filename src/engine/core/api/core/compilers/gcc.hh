@@ -6,6 +6,7 @@
 /*****************************************************************************/
 
 #define be_alignof(t)           __alignof__(t)
+#define be_break()              __asm("int3")
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,8 +27,13 @@ typedef u8                      byte;
 #define NOTHROW                 throw()
 
 #define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
-#define BE_EXPORT               __attribute__ ((visibility("default")))
-#define BE_IMPORT
+#ifdef _WIN32
+# define BE_EXPORT              __declspec(dllexport)
+# define BE_IMPORT              __declspec(dllimport)
+#else
+# define BE_EXPORT              __attribute__ ((visibility("default")))
+# define BE_IMPORT
+#endif
 
 /*****************************************************************************/
 #endif

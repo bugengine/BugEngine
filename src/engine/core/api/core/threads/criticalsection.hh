@@ -8,7 +8,7 @@
 namespace BugEngine
 {
 
-class COREEXPORT CriticalSection
+class be_api(CORE) CriticalSection
 {
 private:
     void*           m_data;

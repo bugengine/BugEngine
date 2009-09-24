@@ -52,7 +52,7 @@ public:
     }
 };
 
-class SYSTEMEXPORT FileSystem : public Singleton<FileSystem>
+class be_api(SYSTEM) FileSystem : public Singleton<FileSystem>
 {
 private:
     class FileSystemMountPoint;
