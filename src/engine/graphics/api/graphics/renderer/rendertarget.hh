@@ -4,7 +4,6 @@
 #ifndef BE_GRAPHICS_RENDERTARGET_HH_
 #define BE_GRAPHICS_RENDERTARGET_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/debugrenderer.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -20,7 +19,6 @@ public:
     virtual ~RenderTarget() { }
     virtual void setCurrent() = 0;
 
-    virtual DebugRenderer*  debugRenderer() = 0;
     virtual uint2           getDimensions() const = 0;
     virtual void            close() = 0;
     virtual bool            closed() const = 0;

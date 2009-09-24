@@ -3,7 +3,6 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/renderer/rendertarget.hh>
-#include    <graphics/renderer/debugrenderer.hh>
 #include    <graphics/scene/scene.hh>
 
 namespace BugEngine { namespace Graphics

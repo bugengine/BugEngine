@@ -9,8 +9,6 @@
 namespace BugEngine
 {
 
-class DebugRenderer;
-
 class be_api(CORE) Malloc
 {
 public:

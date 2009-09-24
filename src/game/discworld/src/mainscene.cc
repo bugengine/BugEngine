@@ -7,8 +7,6 @@
 #include    <input/inputmap.hh>
 #include    <rtti/namespace.hh>
 
-#include    <core/debugrenderer/debugrenderer.hh>
-
 #include    <core/timer.hh>
 
 #include    <game/scene.hh>

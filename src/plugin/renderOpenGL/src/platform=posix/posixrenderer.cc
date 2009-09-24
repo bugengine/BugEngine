@@ -10,7 +10,6 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 Renderer::~Renderer()
 {
-    m_debugRenderer.reset(0);
     cgDestroyContext(m_context);
 }
 

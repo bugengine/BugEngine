@@ -51,7 +51,6 @@ Renderer::~Renderer()
 {
     int refCnt;
 
-    m_debugRenderer.reset(0);
     cgDestroyContext(m_context);
     cgD3D9SetDevice(0);
     refCnt = m_device->Release();
@@ -77,7 +76,6 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
                                                  &m_device));
         cgD3D9SetDevice(m_device);
         m_systemParams[__Screen] = m_shaderPipeline.createSystemParameter("__screen", m_shaderPipeline.getTypeByName("float2"));
-        createDebugRenderer();
         D3D_CHECKRESULT(m_device->GetSwapChain(0, &result));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
@@ -116,17 +114,6 @@ ShaderPipeline* Renderer::getShaderPipeline()
 TexturePipeline* Renderer::getTexturePipeline()
 {
     return &m_texturePipeline;
-}
-
-DebugRenderer* Renderer::debugRenderer()
-{
-    return m_debugRenderer.get();
-}
-
-void Renderer::createDebugRenderer()
-{
-    be_assert(!m_debugRenderer, "debug renderer created twice");
-    m_debugRenderer.reset(new DebugRenderer(this));
 }
 
 void Renderer::drawBatch(const Batch& b)

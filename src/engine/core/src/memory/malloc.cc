@@ -4,8 +4,6 @@
 #include    <core/stdafx.h>
 #include    <core/memory/malloc.hh>
 
-#include    <core/debugrenderer/debugrenderer.hh>
-
 #include    <malloc.h>
 
 

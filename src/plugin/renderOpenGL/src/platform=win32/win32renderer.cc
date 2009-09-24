@@ -44,7 +44,6 @@ static HGLRC initContext(HDC dc)
 
 Renderer::~Renderer()
 {
-    m_debugRenderer.reset(0);
     cgDestroyContext(m_context);
 }
 

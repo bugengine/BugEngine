@@ -77,9 +77,4 @@ void Window::end()
     D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
 }
 
-DebugRenderer* Window::debugRenderer()
-{
-    return m_owner->debugRenderer();
-}
-
 }}}
