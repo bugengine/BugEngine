@@ -86,7 +86,8 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
     HANDLE process = ::GetCurrentProcess();
     DWORD requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
-    HMODULE* hmodules = (HMODULE*)be_malloc(requiredSize);
+    size_t moduleCount = requiredSize/sizeof(HMODULE);
+    Malloc::MemoryBlock<HMODULE> hmodules(moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
     for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)
     {
@@ -96,7 +97,6 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
         ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
         modules.push_back(Module(moduleName, (u64)info.lpBaseOfDll));
     }
-    be_free(hmodules);
 #else
 # error platform not supported yet...
 #endif
