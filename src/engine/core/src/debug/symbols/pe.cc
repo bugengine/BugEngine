@@ -15,9 +15,9 @@ struct MSDosHeader
     u32 offset;
 };
 
-struct ExeHeader
+struct ImageHeader
 {
-    enum MachineType
+    enum
     {
         MachineUnknown = 0x0,
         AM33 = 0x1d3,
@@ -40,7 +40,7 @@ struct ExeHeader
         THUMB = 0x1c2,
         WCEMIPSV2 = 0x169
     };
-    enum Characteristics
+    enum
     {
         RelocsStripped = 0x1,
         ExecutableImage = 0x2,
@@ -59,6 +59,11 @@ struct ExeHeader
         UniProcessor = 0x4000,
         BigEndian = 0x8000
     };
+    enum
+    {
+        Pe32Header = 0x10b,
+        Pe32PlusHeader = 0x20b
+    };
     u8  signature[4];
     u16 machine;
     u16 sectionCount;
@@ -69,15 +74,138 @@ struct ExeHeader
     u16 characteristics;
 };
 
+struct PEHeader
+{
+    enum
+    {
+        SubsystemUnknown = 0,
+        SubsystemNative = 1,
+        SubsystemWindows = 2,
+        SubsystemConsole = 3,
+        SubsystemPosix = 7,
+        SubsystemCE = 9,
+        SubsystemEFI = 10,
+        SubsystemEFIBoot = 11,
+        SubsystemEFIRuntime = 12,
+        SubsystemEFIRom = 13,
+        SubsystemXBox = 14,
+    };
+    struct
+    {
+        u16 type;
+        u8  linkerMajor;
+        u8  linkerMinor;
+        u32 codeSize;
+        u32 initializedDataSize;
+        u32 uninitializedDataSize;
+        u32 entryPointOffset;
+        u32 codeBase;
+        u32 dataBase;
+    } standard;
+    struct
+    {
+        u32 imageBase;
+        u32 sectionAlignment;
+        u32 fileAlignment;
+        u16 majorOSVersion;
+        u16 minorOSVersion;
+        u16 majorImageVersion;
+        u16 minorImageVersion;
+        u16 majorSubsystemVersion;
+        u16 minorSubsystemVersion;
+        u32 win32Version;
+        u32 imageSize;
+        u32 headersSize;
+        u32 checksum;
+        u16 subsystem;
+        u16 characteristics;
+        u32 stackReserveSize;
+        u32 stackCommitSize;
+        u32 heapReserveSize;
+        u32 heapCommitSize;
+        u32 loaderFlags;
+        u32 dataDirectoryCount;
+    } Windows;
+    struct
+    {
+        u32 offset;
+        u32 size;
+    } dataDirectoryEntries[1];
+};
+
+struct PEPlusHeader
+{
+    struct
+    {
+        u16 type;
+        u8  linkerMajor;
+        u8  linkerMinor;
+        u32 codeSize;
+        u32 initializedDataSize;
+        u32 uninitializedDataSize;
+        u32 entryPointOffset;
+        u32 codeBase;
+    } standard;
+    struct
+    {
+        u64 imageBase;
+        u32 sectionAlignment;
+        u32 fileAlignment;
+        u16 majorOSVersion;
+        u16 minorOSVersion;
+        u16 majorImageVersion;
+        u16 minorImageVersion;
+        u16 majorSubsystemVersion;
+        u16 minorSubsystemVersion;
+        u32 win32Version;
+        u32 imageSize;
+        u32 headersSize;
+        u32 checksum;
+        u16 sunsystem;
+        u16 characteristics;
+        u64 stackReserveSize;
+        u64 stackCommitSize;
+        u64 heapReserveSize;
+        u64 heapCommitSize;
+        u32 loaderFlags;
+        u32 dataDirectoryCount;
+    } Windows;
+    struct
+    {
+        u32 offset;
+        u32 size;
+    } dataDirectoryEntries[1];
+};
+
+
+struct SectionHeader
+{
+    char name[8];
+    u32 size;
+    u32 offset;
+    u32 rawDataSize;
+    u32 rawDataOffset;
+    u32 relocationOffset;
+    u32 lineNumbersOffset;
+    u16 relocationCount;
+    u16 lineNumbersCount;
+    u32 characteristics;
+};
 
 PE::PE(const char *filename, FILE* f)
 {
     be_info("loading file %s" | filename);
     MSDosHeader dosh;
-    ExeHeader   exeh;
+    ImageHeader   imageHeader;
     fread(&dosh, sizeof(dosh), 1, f);
     fseek(f, dosh.offset, SEEK_SET);
-    fread(&exeh, sizeof(exeh), 1, f);
+    fread(&imageHeader, sizeof(imageHeader), 1, f);
+    fseek(f, imageHeader.optionalHeaderSize, SEEK_CUR);
+    for(u16 i = 0; i < imageHeader.sectionCount; ++i)
+    {
+        SectionHeader section;
+        fread(&section, sizeof(section), 1, f);
+    }
 }
 
 PE::~PE()

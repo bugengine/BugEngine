@@ -27,6 +27,29 @@ public:
     static inline T* internalAllocArray(size_t count, size_t alignment = be_alignof(T));
 
     static void     frameUpdate();
+public:
+    template< typename T >
+    class MemoryBlock
+    {
+    public:
+        T* const data;
+    public:
+        MemoryBlock(const size_t count)
+            :   data(systemAllocArray<T>(count))
+        {
+        };
+        ~MemoryBlock()
+        {
+            systemFree(data);
+        }
+        operator T*() const
+        {
+            return data;
+        }
+    private:
+        MemoryBlock(const MemoryBlock& other);
+        MemoryBlock& operator=(const MemoryBlock& other);
+    };
 };
 
 template< typename T >
