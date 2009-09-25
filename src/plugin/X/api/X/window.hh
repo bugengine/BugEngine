@@ -5,6 +5,7 @@
 #define BE_X_WINDOW_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine { namespace Graphics { namespace X
 {
