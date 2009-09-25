@@ -82,8 +82,7 @@ namespace
                 OutputDebugString(filename);
                 OutputDebugString(minitl::format<>(":%d (") | line);
                 OutputDebugString(logname.c_str());
-                OutputDebugString(")\n");
-                OutputDebugString("\t(");
+                OutputDebugString(")\t\t(");
                 OutputDebugString(s_logNames[level]);
                 OutputDebugString(") ");
                 OutputDebugString(msg);

@@ -42,7 +42,11 @@ public:
         {
             systemFree(data);
         }
-        operator T*() const
+        operator T*()
+        {
+            return data;
+        }
+        operator const T*() const
         {
             return data;
         }
