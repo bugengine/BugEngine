@@ -8,8 +8,6 @@
 namespace BugEngine { namespace Debug
 {
 
-#define be_enum(name)   \
-    struct name { enum _##name; }; enum name::_##name
 static inline char be_hex2char(u8 value)
 {
     return (value&0xf) > 9 ? (value-10+'A') : (value+'0');
@@ -123,52 +121,52 @@ struct MSDosHeader
 
 struct ImageHeader
 {
-    be_enum(Machine)
+    enum Machines
     {
-        Unknown = 0x0,
-        AM33 = 0x1d3,
-        AMD64 = 0x8664,
-        ARM = 0x1c0,
-        EBC = 0xebc,
-        i386 = 0x14c,
-        IA64 = 0x200,
-        M32R = 0x9041,
-        MIPS16 = 0x266,
-        MIPSFPU = 0x366,
-        MIPSFPU16 = 0x466,
-        POWERPC = 0x1f0,
-        POWERPCFP = 0x1f1,
-        R4000 = 0x166,
-        SH3 = 0x1a2,
-        SH3DSP = 0x1a3,
-        SH4 = 0x1a6,
-        SH5 = 0x1a8,
-        THUMB = 0x1c2,
-        WCEMIPSV2 = 0x169
+        Machine_Unknown = 0x0,
+        Machine_AM33 = 0x1d3,
+        Machine_AMD64 = 0x8664,
+        Machine_ARM = 0x1c0,
+        Machine_EBC = 0xebc,
+        Machine_i386 = 0x14c,
+        Machine_IA64 = 0x200,
+        Machine_M32R = 0x9041,
+        Machine_MIPS16 = 0x266,
+        Machine_MIPSFPU = 0x366,
+        Machine_MIPSFPU16 = 0x466,
+        Machine_POWERPC = 0x1f0,
+        Machine_POWERPCFP = 0x1f1,
+        Machine_R4000 = 0x166,
+        Machine_SH3 = 0x1a2,
+        Machine_SH3DSP = 0x1a3,
+        Machine_SH4 = 0x1a6,
+        Machine_SH5 = 0x1a8,
+        Machine_THUMB = 0x1c2,
+        Machine_WCEMIPSV2 = 0x169
     };
-    be_enum(Flags)
+    enum Flags
     {
-        RelocsStripped = 0x1,
-        ExecutableImage = 0x2,
-        LinesStripped = 0x4,
-        SymbolsStripped = 0x8,
-        AggressiveWorkingSetTrim = 0x10,
-        LargeAddressAware = 0x20,
-        Reserved = 0x40,
-        LittleEndian = 0x80,
-        Machine32 = 0x100,
-        DebugStripped = 0x200,
-        RemovableRunFromSwap = 0x400,
-        NetRunFromSwap = 0x800,
-        SystemFile = 0x1000,
-        Dll = 0x2000,
-        UniProcessor = 0x4000,
-        BigEndian = 0x8000
+        Flag_RelocsStripped = 0x1,
+        Flag_ExecutableImage = 0x2,
+        Flag_LinesStripped = 0x4,
+        Flag_SymbolsStripped = 0x8,
+        Flag_AggressiveWorkingSetTrim = 0x10,
+        Flag_LargeAddressAware = 0x20,
+        Flag_Reserved = 0x40,
+        Flag_LittleEndian = 0x80,
+        Flag_Machine32 = 0x100,
+        Flag_DebugStripped = 0x200,
+        Flag_RemovableRunFromSwap = 0x400,
+        Flag_NetRunFromSwap = 0x800,
+        Flag_SystemFile = 0x1000,
+        Flag_Dll = 0x2000,
+        Flag_UniProcessor = 0x4000,
+        Flag_BigEndian = 0x8000
     };
-    be_enum(Headers)
+    enum Headers
     {
-        Pe32Header = 0x10b,
-        Pe32PlusHeader = 0x20b
+        Header_Pe32Header = 0x10b,
+        Header_Pe32PlusHeader = 0x20b
     };
     u8  signature[4];
     u16 machine;
@@ -182,39 +180,39 @@ struct ImageHeader
 
 struct PEHeader
 {
-    be_enum(Subsystems)
+    enum Subsystems
     {
-        Unknown = 0,
-        Native = 1,
-        Windows = 2,
-        Console = 3,
-        Posix = 7,
-        CE = 9,
-        EFI = 10,
-        EFIBoot = 11,
-        EFIRuntime = 12,
-        EFIRom = 13,
-        XBox = 14,
+        Subsystem_Unknown = 0,
+        Subsystem_Native = 1,
+        Subsystem_Windows = 2,
+        Subsystem_Console = 3,
+        Subsystem_Posix = 7,
+        Subsystem_CE = 9,
+        Subsystem_EFI = 10,
+        Subsystem_EFIBoot = 11,
+        Subsystem_EFIRuntime = 12,
+        Subsystem_EFIRom = 13,
+        Subsystem_XBox = 14,
     };
-    be_enum(DataDirectories)
+    enum DataDirectories
     {
-        ExportTable = 0,
-        ImportTable = 1,
-        ResourceTable = 2,
-        ExceptionTable = 3,
-        CertificateTable = 4,
-        BaseRelocationTable = 5,
-        Debug = 6,
-        Architecture = 7,
-        GlobalPtr = 8,
-        TLSTable = 9,
-        LoadConfigTable = 10,
-        BoundImport = 11,
-        ImportAddressTable = 12,
-        DelayImportDescriptor = 13,
-        CLRRuntimeHeeader = 14,
-        Reserved = 15,
-        Count = 16
+        DataDirectory_ExportTable = 0,
+        DataDirectory_ImportTable = 1,
+        DataDirectory_ResourceTable = 2,
+        DataDirectory_ExceptionTable = 3,
+        DataDirectory_CertificateTable = 4,
+        DataDirectory_BaseRelocationTable = 5,
+        DataDirectory_Debug = 6,
+        DataDirectory_Architecture = 7,
+        DataDirectory_GlobalPtr = 8,
+        DataDirectory_TLSTable = 9,
+        DataDirectory_LoadConfigTable = 10,
+        DataDirectory_BoundImport = 11,
+        DataDirectory_ImportAddressTable = 12,
+        DataDirectory_DelayImportDescriptor = 13,
+        DataDirectory_CLRRuntimeHeeader = 14,
+        DataDirectory_Reserved = 15,
+        DataDirectory_Count = 16
     };
     struct
     {
@@ -321,20 +319,20 @@ struct SectionHeader
 
 struct DebugEntry
 {
-    be_enum(Type)
+    enum Types
     {
-        Unknown = 0,
-        COFF = 1,
-        CodeView = 2,
-        FramePointerOmission = 3,
-        Misc = 4,
-        Exception = 5,
-        Fixup = 6,
-        Mappings = 7,
-        ReverseMappings = 8,
-        Borland = 9,
-        Reserved = 10,
-        ClsId = 11
+        Type_Unknown = 0,
+        Type_COFF = 1,
+        Type_CodeView = 2,
+        Type_FramePointerOmission = 3,
+        Type_Misc = 4,
+        Type_Exception = 5,
+        Type_Fixup = 6,
+        Type_Mappings = 7,
+        Type_ReverseMappings = 8,
+        Type_Borland = 9,
+        Type_Reserved = 10,
+        Type_ClsId = 11
     };
     u32 characteristics;
     u32 timeStamp;
@@ -382,22 +380,22 @@ PE::PE(const char *filename, FILE* f)
     {
         Malloc::MemoryBlock<u8> block(imageHeader.optionalHeaderSize);
         fread(block.data, imageHeader.optionalHeaderSize, 1, f);
-        if(*(i16*)block.data == ImageHeader::Headers::Pe32Header)
+        if(*(i16*)block.data == ImageHeader::Header_Pe32Header)
         {
             PEHeader* header = reinterpret_cast<PEHeader*>(block.data);
-            if(header->windows.dataDirectoryCount > PEHeader::DataDirectories::Debug)
+            if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
             {
-                debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectories::Debug].offset;
-                debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectories::Debug].size;
+                debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
+                debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
             }
         }
-        else if(*(i16*)block.data == ImageHeader::Headers::Pe32PlusHeader)
+        else if(*(i16*)block.data == ImageHeader::Header_Pe32PlusHeader)
         {
             PEPlusHeader* header = reinterpret_cast<PEPlusHeader*>(block.data);
-            if(header->windows.dataDirectoryCount > PEHeader::DataDirectories::Debug)
+            if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
             {
-                debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectories::Debug].offset;
-                debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectories::Debug].size;
+                debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
+                debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
             }
         }
         else
@@ -423,7 +421,7 @@ PE::PE(const char *filename, FILE* f)
                 {
                     switch(entries[i].type)
                     {
-                    case DebugEntry::Type::CodeView:
+                    case DebugEntry::Type_CodeView:
                         {
                             Malloc::MemoryBlock<u8> info(entries[i].size);
                             fseek(f, entries[i].fileOffset, SEEK_SET);
@@ -443,7 +441,7 @@ PE::PE(const char *filename, FILE* f)
                             }
                         }
                         break;
-                    case DebugEntry::Type::Reserved:
+                    case DebugEntry::Type_Reserved:
                         /* lots of Microsoft DLLs seem to have this debug entry... */
                         break;
                     default:
