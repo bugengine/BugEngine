@@ -405,7 +405,7 @@ PE::PE(const char *filename, FILE* f)
     }
     if(debugEntryVirtualAdress && debugEntrySize)
     {
-        be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the debug section; expected a multiple of %d, fot %d" | sizeof(DebugEntry) | debugEntrySize);
+        be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the debug section; expected a multiple of %d, got %d" | sizeof(DebugEntry) | debugEntrySize);
         size_t debugEntryCount = debugEntrySize / sizeof(DebugEntry);
         Malloc::MemoryBlock<SectionHeader> sections(imageHeader.sectionCount);
         fread(sections.data, sizeof(SectionHeader), imageHeader.sectionCount, f);

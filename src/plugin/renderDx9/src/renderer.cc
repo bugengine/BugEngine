@@ -27,7 +27,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
 {
-    if(err == cgD3D9Failed)
+    if(cgD3D9Errors(err) == cgD3D9Failed)
     {
         be_assert(false, "CG D3D error : %s" | cgD3D9TranslateHRESULT(cgD3D9GetLastError()));
     }
@@ -39,8 +39,8 @@ static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
 
 Renderer::Renderer()
 :   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
-,   m_context(cgCreateContext())
 ,   m_device(0)
+,   m_context(cgCreateContext())
 ,   m_shaderPipeline(this)
 ,   m_texturePipeline(this)
 {
