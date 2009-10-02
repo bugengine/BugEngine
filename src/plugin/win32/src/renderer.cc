@@ -32,7 +32,6 @@ namespace
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         static unsigned int nbWindows = 0;
-        static int* memoryTest = 0;
         
         switch( msg )
         {
@@ -87,12 +86,12 @@ Renderer::Renderer()
     m_wndClassEx.cbClsExtra     = 0;
     m_wndClassEx.cbWndExtra     = sizeof(Window*);
 
-    BE_WIN32_CHECKRESULT(RegisterClassEx(&m_wndClassEx));
+    RegisterClassEx(&m_wndClassEx);
 }
 
 Renderer::~Renderer()
 {
-    BE_WIN32_CHECKRESULT(UnregisterClass(m_windowClassName.c_str(), hDllInstance));
+    UnregisterClass(m_windowClassName.c_str(), hDllInstance);
 }
 
 HWND Renderer::createWindowImplementation(const WindowCreationFlags* flags) const

@@ -110,7 +110,7 @@ format<size>& format<size>::operator|(const void* value)
     char result[s];
     result[0] = '0';
     result[1] = 'x';
-    for(int i = 0; i < sizeof(value)*2; ++i)
+    for(size_t i = 0; i < sizeof(value)*2; ++i)
     {
         result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
         if(result[i+2] > '9')

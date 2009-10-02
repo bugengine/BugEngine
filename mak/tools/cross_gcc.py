@@ -87,6 +87,10 @@ def find_cross_gcc(conf):
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+	
+	if v['GCC_CONFIGURED_PLATFORM'] == 'win32':
+		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
+		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 
 	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
