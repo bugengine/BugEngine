@@ -36,19 +36,24 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
 	conf.setenv('temp')
-	conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir='mak/tools')
-	name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-	newenv.set_variant(name)
-	if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
-		conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
-		conf.check_tool('winres')
-	Utils.pprint('NORMAL', 'configure for tool %s' % name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', conf.env['GCC_CONFIGURED_PLATFORM']))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
-	newenv = conf.set_env_name(name, newenv)
-	del conf.all_envs['temp']
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
+	try:
+		conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir='mak/tools')
+		name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+		newenv.set_variant(name)
+		if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
+			conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
+			conf.check_tool('winres')
+		Utils.pprint('NORMAL', 'configure for tool %s' % name)
+		conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', conf.env['GCC_CONFIGURED_PLATFORM']))
+		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
+		newenv = conf.set_env_name(name, newenv)
+		del conf.all_envs['temp']
+		conf.setenv('default')
+		conf.env['BUILD_VARIANTS'].append(name)
+	except Exception, e:
+		warn('gcc not available: '+str(e)) 
+		conf.setenv('default')
+
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
