@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
 #include    <core/log/logger.hh>
+#include    <unistd.h>
 
 namespace BugEngine
 {
@@ -72,23 +73,7 @@ const istring& Environment::getUser() const
 }
 size_t Environment::getProcessorCount() const
 {
-    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
-    if(!cpuinfo)
-    {
-        be_warning("cpuinfo not available; assuming 1 cpu");
-        return 1;
-    }
-    int i = 0;
-    while(!feof(cpuinfo))
-    {
-        char line[256];
-        fgets(line, 256, cpuinfo);
-        if(strncmp(line, "processor", 9) == 0)
-        {
-            sscanf(line, "processor : %d", &i);
-        }
-    }
-    return i+1;
+    return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 }
