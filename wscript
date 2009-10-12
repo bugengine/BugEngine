@@ -52,7 +52,7 @@ def build(bld):
 
 	win32			= module.library('win32', [discworld], category='plugin', platforms=['win32'])
 	X				= module.library('X', [discworld,X11], category='plugin', platforms=['posix'])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, cgGL, opengl]).post(bld)
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, opengl]).post(bld)
 	renderDx9		= module.plugin('renderDx9', [discworld, win32, cgDx, directx9], platforms=['win32']).post(bld)
 	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)

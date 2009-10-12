@@ -6,22 +6,16 @@
 /*****************************************************************************/
 #include    <graphics/material/shaderpipeline.hh>
 #include    <graphics/material/shaderparam.hh>
-#include    <Cg/cg.h>
-#include    <Cg/cgGL.h>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
 class Renderer;
-class CgShaderParam;
 
 class ShaderPipeline : public Graphics::ShaderPipeline
 {
 private:
     Renderer*                                   m_owner;
-    CGprofile                                   m_vertexProfile;
-    CGprofile                                   m_fragmentProfile;
-    std::map< istring, refptr<CgShaderParam> >  m_systemParams;
 public:
     ShaderPipeline(Renderer* owner);
     ~ShaderPipeline();
@@ -31,11 +25,6 @@ public:
 
     ShaderParam::Type       getTypeByName(const char *type) override;
     const char *            getTypeName(ShaderParam::Type type) override;
-
-    refptr<CgShaderParam>   createSystemParameter(const istring& name, ShaderParam::Type type);
-private:
-    bool                    isSystemParameter(const char *name);
-    CgShaderParam*          getSystemParameter(const char *name);
 };
 
 }}}

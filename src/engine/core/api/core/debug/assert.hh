@@ -25,8 +25,6 @@ be_api(CORE) AssertionCallback_t getAssertionCallback();
 
 #if !defined(BE_ENABLE_ASSERT)
 # define    be_assert(cond,message) ((void)0)
-# define    be_unimplemented() ((void)0)
-# define    be_notreached() ((void)0)
 #else
 # ifdef      assert
 #  undef     assert
