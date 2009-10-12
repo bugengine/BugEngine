@@ -75,7 +75,7 @@ namespace
     protected:
         virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
         {
-            fprintf(m_logFile, "%s:%d (%s)\n"
+            fprintf(m_logFile, "%s:%d (%s)"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
             fflush(m_logFile);
             #ifdef _WIN32
