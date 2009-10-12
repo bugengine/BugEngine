@@ -16,16 +16,13 @@ namespace BugEngine { namespace Sound
 be_metaclass_impl("Sound",World);
 
 World::World() :
-    m_system(alcOpenDevice(0)),
-    m_context(alcCreateContext(reinterpret_cast<ALCdevice*>(m_system),0))
+    m_system(0),
+    m_context(0)
 {
-    alcMakeContextCurrent(reinterpret_cast<ALCcontext*>(m_context));
 }
 
 World::~World()
 {
-    alcDestroyContext(reinterpret_cast<ALCcontext*>(m_context));
-    alcCloseDevice(reinterpret_cast<ALCdevice*>(m_system));
 }
 
 refptr<SoundObject> World::createSound(const ifilename& file)

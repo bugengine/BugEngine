@@ -17,6 +17,8 @@
 #  include <minitl/interlocked/gcc/x86/interlocked.inl>
 # elif defined(_AMD64)
 #  include <minitl/interlocked/gcc/amd64/interlocked.inl>
+# elif defined(_POWERPC)
+#  include <minitl/interlocked/gcc/ppc/interlocked.inl>
 # else
 #  error Architecture not implemented on GCC
 # endif
@@ -114,11 +116,9 @@ typedef minitl::interlocked<bool>   i_bool;
 typedef minitl::interlocked<u8>     i_u8;
 typedef minitl::interlocked<u16>    i_u16;
 typedef minitl::interlocked<u32>    i_u32;
-typedef minitl::interlocked<u64>    i_u64;
 typedef minitl::interlocked<i8>     i_i8;
 typedef minitl::interlocked<i16>    i_i16;
 typedef minitl::interlocked<i32>    i_i32;
-typedef minitl::interlocked<i64>    i_i64;
 typedef minitl::interlocked<size_t> i_size_t;
 
 /*****************************************************************************/

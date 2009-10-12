@@ -4,10 +4,6 @@
 #ifndef BE_OPENGL_RENDERER_HH_
 #define BE_OPENGL_RENDERER_HH_
 /*****************************************************************************/
-#include    <cgshaderparam.hh>
-#include    <Cg/cg.h>
-#include    <Cg/cgGL.h>
-
 #include    <shaderpipeline.hh>
 #include    <texturepipeline.hh>
 
@@ -39,10 +35,8 @@ private:
 #   else
     GLXContext                  m_glContext;
 #   endif
-    CGcontext                   m_context;
     ShaderPipeline              m_shaderPipeline;
     TexturePipeline             m_texturePipeline;
-    refptr<CgShaderParam>       m_systemParams[SystemParamCount];
 public:
     Renderer();
     ~Renderer();

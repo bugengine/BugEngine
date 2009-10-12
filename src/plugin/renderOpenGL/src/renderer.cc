@@ -11,25 +11,16 @@
 #include    <vertexbuffer.hh>
 #include    <indexbuffer.hh>
 #include    <texturebuffer.hh>
-#include    <cgshader.hh>
-#include    <cgshaderparam.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-static void onCgError(CGcontext /*ctx*/, CGerror /*err*/, void* /*data*/)
-{
-
-}
-
 Renderer::Renderer()
 :   m_glContext(0)
-,   m_context(cgCreateContext())
 ,   m_shaderPipeline(this)
 ,   m_texturePipeline(this)
 {
-    cgSetErrorHandler(onCgError, 0);
 }
 
 RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene)
@@ -71,9 +62,6 @@ void Renderer::drawBatch(const Batch& b)
 
     for(size_t i = 0; i < b.nbParams; ++i)
         b.params[i].first->setValue(b.params[i].second);
-
-    if(b.vertexShader) static_cast<const CgShader*>(b.vertexShader)->set();
-    if(b.pixelShader) static_cast<const CgShader*>(b.pixelShader)->set();
 
     switch(b.ptype)
     {

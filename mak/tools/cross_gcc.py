@@ -30,7 +30,8 @@ def parse_gcc_target(target):
 		   ('psp', 'psp'),
 		   ('arm-eabi', 'nds'),
 		   ('darwin', 'darwin'),
-		   ('gekko', 'wii') ]
+		   ('gekko', 'wii'),
+		   ('spu', 'spu')]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
@@ -40,7 +41,8 @@ def parse_gcc_target(target):
 			  ('x86_64', 'amd64'),
 			  ('powerpc', 'powerpc'),
 			  ('psp', 'powerpc'),
-			  ('mingw32', 'x86')]
+			  ('mingw32', 'x86'),
+			  ('spu', 'spu')]
 	foundpname = None
 	foundaname = None
 	for gccname,pname in os:

@@ -6,7 +6,13 @@
 /*****************************************************************************/
 
 #define be_alignof(t)           __alignof__(t)
-#define be_break()              __asm("int3")
+#if defined(_X86)||defined(_AMD64)
+# define be_break()              __asm("int3")
+#elif defined(_POWERPC)
+# define be_break()              __asm("trap")
+#else
+# error "Breakpoint not supported on this platform"
+#endif
 
 #include <stdint.h>
 #include <stdlib.h>

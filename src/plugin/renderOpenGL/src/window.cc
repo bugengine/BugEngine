@@ -4,7 +4,6 @@
 #include    <stdafx.h>
 #include    <window.hh>
 #include    <renderer.hh>
-#include    <cgshaderparam.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
@@ -45,7 +44,7 @@ void Window::begin()
 {
     setCurrent();
     uint2 size = getDimensions();
-    m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(checked_numcast<float>(size.x()), checked_numcast<float>(size.y())));
+    //m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(checked_numcast<float>(size.x()), checked_numcast<float>(size.y())));
 }
 
 void Window::end()

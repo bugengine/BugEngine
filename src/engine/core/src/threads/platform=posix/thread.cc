@@ -69,6 +69,7 @@ Thread::~Thread()
     abstime.tv_sec += 2;
     int result = pthread_timedjoin_np(*reinterpret_cast<pthread_t*>(m_data), &rvalue, &abstime);
     be_assert(result != ETIMEDOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
+    (void)result;
     delete reinterpret_cast<ThreadParams*>(m_params);
     delete reinterpret_cast<pthread_t*>(m_data);
 }

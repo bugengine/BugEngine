@@ -1,0 +1,29 @@
+# set win32 specific options
+
+import os
+import Utils
+
+def set_options(opt):
+	pass
+
+def configure(conf):
+	conf.env['PLATFORM'] = ['spu', 'newlib']
+	conf.env['library_PATTERN'] = '%s.a'
+	conf.env['shlib_PATTERN']	= '%s.so'
+	conf.env['program_PATTERN'] = '%s'
+	
+	conf.env.append_unique('CCDEFINES', ['SPU', '_SPU', '_SPU_', '__SPU__'])
+	conf.env.append_unique('CXXDEFINES', ['SPU', '_SPU', '_SPU_', '__SPU__'])
+	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['DEPLOY']			= { 'prefix':	'',
+									'bin':		'bin',
+									'etc':		'etc',
+									'runbin':	'bin',
+									'api':		'include',
+									'lib':		'lib',
+									'data':		os.path.join('share', 'bugengine'),
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
+									
+
+def build(bld):
+	pass
