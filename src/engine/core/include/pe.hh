@@ -4,16 +4,33 @@
 #ifndef BE_CORE_DEBUG_PE_HH_
 #define BE_CORE_DEBUG_PE_HH_
 /*****************************************************************************/
-
+#include <core/debug/symbols.hh>
 namespace BugEngine { namespace Debug
 {
 
 class PE
 {
+private:
+    struct StringTable
+    {
+        u32     size;
+        char    strings[1];
+    };
+    struct Section
+    {
+        const char *name;
+        u64         offset;
+        u64         size;
+    };
+private:
+    FILE*                   m_file;
+    const StringTable*      m_stringBuffer;
+    std::vector<Section>    m_sections;
 public:
-    PE(const char* filename, FILE* f);
+    PE(const ifilename& filename);
     ~PE();
 
+    refptr<const Symbols::ISymbolResolver> getSymbolResolver();
 };
 
 }}

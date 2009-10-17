@@ -38,6 +38,7 @@ public:
     class ISymbolResolver : public minitl::refcountable<void>
     {
     public:
+        virtual ~ISymbolResolver();
         virtual bool resolve(u64 address, Symbol& result) const = 0;
     };
 public:
@@ -50,7 +51,7 @@ public:
     private:
         void loadDebugInformation() const;
     public:
-        Module(const char *filename, u64 baseAddress);
+        Module(const char* filename, u64 baseAddress);
         ~Module();
 
         static std::vector<Module> enumerate();

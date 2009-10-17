@@ -20,21 +20,21 @@ ShaderPipeline::~ShaderPipeline()
 {
 }
 
-_Shader* ShaderPipeline::load(const ifilename& filename)
+_Shader* ShaderPipeline::load(const ifilename& /*filename*/)
 {
     return 0;
 }
 
-void ShaderPipeline::unload(_Shader* s)
+void ShaderPipeline::unload(_Shader* /*s*/)
 {
 }
 
-const char *ShaderPipeline::getTypeName(ShaderParam::Type t)
+const char *ShaderPipeline::getTypeName(ShaderParam::Type /*t*/)
 {
     return 0;
 }
 
-ShaderParam::Type ShaderPipeline::getTypeByName(const char *name)
+ShaderParam::Type ShaderPipeline::getTypeByName(const char * /*name*/)
 {
     return 0;
 }

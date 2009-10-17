@@ -44,7 +44,6 @@ static HGLRC initContext(HDC dc)
 
 Renderer::~Renderer()
 {
-    cgDestroyContext(m_context);
 }
 
 void Renderer::attachWindow(Window* w)
