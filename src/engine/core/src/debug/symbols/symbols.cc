@@ -23,6 +23,7 @@ namespace BugEngine { namespace Debug
 Symbols::Symbol::Symbol()
 :   m_line(0)
 {
+    m_module[0] = 0;
     m_filename[0] = 0;
     m_function[0] = 0;
 }
@@ -33,24 +34,10 @@ Symbols::Symbol::~Symbol()
 
 //---------------------------------------------------------------------------//
 
-Symbols::Module::Module(const char *filename, u64 /*baseAddress*/)
+Symbols::Module::Module(const char *filename, u64 baseAddress)
+:   m_filename(filename)
+,   m_baseAddress(baseAddress)
 {
-    FILE* f = fopen(filename, "rb");
-    if(f)
-    {
-        char signature[2];
-        fread(signature, 1, 2, f);
-        fseek(f, 0, SEEK_SET);
-        if (signature[0] == 'M' && signature[1] == 'Z')
-        {
-            PE pe(filename, f);
-        }
-        else if (signature[0] == 0x7f && signature[1] == 'E')
-        {
-            Elf e(filename, f);
-        }
-        fclose(f);
-    }
 }
 
 Symbols::Module::~Module()
@@ -66,7 +53,7 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
     dlinfo(handle, RTLD_DI_LINKMAP, &lmap);
     for(int i = 0; lmap; lmap=lmap->l_next, i++)
     {
-        if(i == 0)
+        if(i == 0 && !lmap->l_name)
         {
             /* main executable */
             /* filename seems broken */
@@ -103,9 +90,34 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
     return modules;
 }
 
-bool Symbols::Module::resolve(const Callstack::Address& /*address*/, Symbol& /*result*/) const
+void Symbols::Module::loadDebugInformation() const
 {
-    return false;
+    FILE* f = fopen(m_filename.str().c_str(), "rb");
+    if(f)
+    {
+        char signature[2];
+        fread(signature, 1, 2, f);
+        fclose(f);
+        if (signature[0] == 'M' && signature[1] == 'Z')
+        {
+            //PE pe(filename, f);
+        }
+        else if (signature[0] == 0x7f && signature[1] == 'E')
+        {
+            m_symbols = Elf(m_filename).getSymbolResolver();
+        }
+    }
+
+}
+
+bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result) const
+{
+    if(!m_symbols)
+    {
+        loadDebugInformation();
+        be_assert(m_symbols, "Impossible to create a symbol resolver for module %s"|m_filename);
+    }
+    return m_symbols->resolve((u64)address.pointer()-m_baseAddress, result);
 }
 
 //---------------------------------------------------------------------------//
@@ -132,8 +144,9 @@ void Symbols::resolve(const Callstack::Address& address, Symbol& result) const
             return;
         }
     }
-    strcpy(result.m_filename, "???");
-    strcpy(result.m_function, "???");
+    strncpy(result.m_module, "???", sizeof(result.m_module));
+    strncpy(result.m_filename, "???", sizeof(result.m_filename));
+    strncpy(result.m_function, "???", sizeof(result.m_function));
 }
 
 const Symbols& Symbols::runningSymbols()

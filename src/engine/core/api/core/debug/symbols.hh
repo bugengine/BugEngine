@@ -21,6 +21,7 @@ public:
         friend class Symbols;
         friend class Module;
     private:
+        char    m_module[4096];
         char    m_filename[4096];
         char    m_function[4096];
         int     m_line;
@@ -28,21 +29,26 @@ public:
         Symbol();
         ~Symbol();
 
+        const char *module() const      { return m_module; }
         const char *filename() const    { return m_filename; }
         int         line() const        { return m_line; }
         const char *function() const    { return m_function; }
     };
 public:
-    class ISymbolResolver
+    class ISymbolResolver : public minitl::refcountable<void>
     {
     public:
-        virtual bool resolve(const Callstack::Address& address, Symbol& result) const = 0;
+        virtual bool resolve(u64 address, Symbol& result) const = 0;
     };
 public:
     class Module
     {
     private:
-        const ISymbolResolver* m_symbols;
+        ifilename                               m_filename;
+        u64                                     m_baseAddress;
+        mutable refptr<const ISymbolResolver>   m_symbols;
+    private:
+        void loadDebugInformation() const;
     public:
         Module(const char *filename, u64 baseAddress);
         ~Module();
