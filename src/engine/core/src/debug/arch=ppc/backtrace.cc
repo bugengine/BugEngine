@@ -15,7 +15,7 @@ static inline void** st_next(void** stack_pointer)
     {
         return 0;
     }
-    if(reinterpret_cast<char*>(nextStackPointer) >= reinterpret_cast<char*>(stack_pointer) + 2*1024*1024)
+    if(reinterpret_cast<char*>(stack_pointer) - reinterpret_cast<char*>(nextStackPointer) > 2*1024*1024)
     {
         return 0;
     }

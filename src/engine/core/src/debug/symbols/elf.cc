@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 
 #include    <elf.hh>
+#include    <dwarf.hh>
 
 namespace BugEngine { namespace Debug
 {
@@ -242,7 +243,8 @@ static const char* s_elfMachineType [] =
 };
 
 Elf::Elf(const ifilename& filename)
-    :   m_stringPool(0)
+    :   m_filename(filename)
+    ,   m_stringPool(0)
     ,   m_file(fopen(filename.str().c_str(), "rb"))
 {
     be_debug("loading file %s" | filename);
@@ -297,26 +299,44 @@ void Elf::parse()
     fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
-    char* strings = (char*)be_malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
-    fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
-    fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
-    m_stringPool = strings;
+    {
+        char* strings = (char*)be_malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
+        fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
+        fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
+        m_stringPool = strings;
+    }
     
     for(int i = 0; i < header.shnum; ++i)
     {
-        if(sections[i].flags & ElfSectionHeader<klass, endianness>::Exec)
-        {
-            be_debug("section %s" | (strings + sections[i].name));
-        }
-
+        Section sec = { m_stringPool + sections[i].name, sections[i].addr, sections[i].size };
+        m_sections.push_back(sec);
     }
     freea(sections);
 }
 
 refptr<const Symbols::ISymbolResolver> Elf::getSymbolResolver()
 {
+    for(const Section* s = begin(); s != end(); ++s)
+    {
+        if(strncmp(s->name, ".text", 5) == 0)
+        {
+            return new Dwarf(m_filename, *this, s->offset, s->size);
+        }
+    }
     return 0;
 }
+
+const Elf::Section* Elf::begin() const
+{
+    return &m_sections[0];
+}
+
+const Elf::Section* Elf::end() const
+{
+    return &m_sections[m_sections.size()];
+}
+
+
 
 }}
 
