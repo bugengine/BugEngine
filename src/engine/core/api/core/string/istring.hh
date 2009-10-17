@@ -140,25 +140,25 @@ namespace minitl
 inline size_t hash_value(const BugEngine::istring& key) { return key.hash(); }
 
 template< size_t size >
-minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::istring& value)
+const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::istring& value)
 {
     return format | value.c_str();
 }
 
 template< size_t size >
-minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::inamespace& value)
+const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::inamespace& value)
 {
     return format | value.str().c_str();
 }
 
 template< size_t size >
-minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::ipath& value)
+const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::ipath& value)
 {
     return format | value.str().c_str();
 }
 
 template< size_t size >
-minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::ifilename& value)
+const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::ifilename& value)
 {
     return format | value.str().c_str();
 }

@@ -100,14 +100,13 @@ void Symbols::Module::loadDebugInformation() const
         fclose(f);
         if (signature[0] == 'M' && signature[1] == 'Z')
         {
-            //PE pe(filename, f);
+            m_symbols = PE(m_filename).getSymbolResolver();
         }
         else if (signature[0] == 0x7f && signature[1] == 'E')
         {
             m_symbols = Elf(m_filename).getSymbolResolver();
         }
     }
-
 }
 
 bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result) const
