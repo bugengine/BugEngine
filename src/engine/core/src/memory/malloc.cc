@@ -42,12 +42,12 @@ void* Malloc::systemRealloc(void* ptr, size_t size, size_t alignment)
 #endif
 }
 
-void Malloc::systemFree(void* pointer)
+void Malloc::systemFree(const void* pointer)
 {
 #ifdef _MSC_VER
-    return _aligned_free(pointer);
+    return _aligned_free(const_cast<void*>(pointer));
 #else
-    return free(pointer);
+    return free(const_cast<void*>(pointer));
 #endif
 }
 
@@ -70,7 +70,7 @@ BE_NOINLINE void* Malloc::internalRealloc(void* ptr, size_t size, size_t alignme
     return ptr;
 }
 
-void Malloc::internalFree(void* ptr, size_t /*skipStack*/)
+void Malloc::internalFree(const void* ptr, size_t /*skipStack*/)
 {
     if(! ptr)
         return;

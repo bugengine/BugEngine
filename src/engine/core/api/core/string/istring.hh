@@ -133,9 +133,36 @@ be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
 }
 
+#include <minitl/string/format.hh>
+
 namespace minitl
 {
 inline size_t hash_value(const BugEngine::istring& key) { return key.hash(); }
+
+template< size_t size >
+minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::istring& value)
+{
+    return format | value.c_str();
+}
+
+template< size_t size >
+minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::inamespace& value)
+{
+    return format | value.str().c_str();
+}
+
+template< size_t size >
+minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::ipath& value)
+{
+    return format | value.str().c_str();
+}
+
+template< size_t size >
+minitl::format<size>& operator|(minitl::format<size>& format, const BugEngine::ifilename& value)
+{
+    return format | value.str().c_str();
+}
+
 }
 
 /*****************************************************************************/

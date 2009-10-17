@@ -16,13 +16,13 @@ public:
 
     static void* systemAlloc(size_t size, size_t alignment);
     static void* systemRealloc(void* ptr, size_t size, size_t alignment);
-    static void  systemFree(void* pointer);
+    static void  systemFree(const void* pointer);
     template< typename T >
     static inline T* systemAllocArray(size_t count, size_t alignment = be_alignof(T));
 public:
     static void*    internalAlloc(size_t size, size_t alignment, size_t skipStack = 1);
     static void*    internalRealloc(void* ptr, size_t size, size_t alignment, size_t skipStack = 1);
-    static void     internalFree(void* ptr, size_t skipStack = 1);
+    static void     internalFree(const void* ptr, size_t skipStack = 1);
     template< typename T >
     static inline T* internalAllocArray(size_t count, size_t alignment = be_alignof(T));
 

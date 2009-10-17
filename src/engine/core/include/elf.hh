@@ -4,6 +4,7 @@
 #ifndef BE_CORE_DEBUG_ELF_HH_
 #define BE_CORE_DEBUG_ELF_HH_
 /*****************************************************************************/
+#include    <core/debug/symbols.hh>
 
 namespace BugEngine { namespace Debug
 {
@@ -28,11 +29,15 @@ class Elf
 {
 private:
     template< ElfClass klass, ElfEndianness endianness >
-    void parse(FILE* f);
+    void parse();
+private:
+    const char *                m_stringPool;
+    FILE*                       m_file;
 public:
-    Elf(const char* filename, FILE* f);
+    Elf(const ifilename& filename);
     ~Elf();
 
+    refptr<const Symbols::ISymbolResolver> getSymbolResolver();
 };
 
 }}

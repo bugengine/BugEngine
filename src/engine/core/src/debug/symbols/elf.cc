@@ -98,6 +98,27 @@ struct ElfHeader
 template< ElfClass klass, ElfEndianness endianness >
 struct ElfSectionHeader
 {
+    enum Types
+    {
+        Null = 0,
+        ProgBits = 1,
+        SymbolTable = 2,
+        StringTable = 3,
+        Rela = 4,
+        Hash = 5,
+        Dynamic = 6,
+        Note = 7,
+        Nobits = 8,
+        Rel = 9,
+        SharedLibrary = 10,
+        DynSym = 11
+    };
+    enum Flags
+    {
+        Write = 0x1,
+        Alloc = 0x2,
+        Exec = 0x4
+    };
     typename ElfTypes<klass, endianness>::word_t     name;
     typename ElfTypes<klass, endianness>::word_t     type;
     typename ElfTypes<klass, endianness>::addr_t     flags;
@@ -220,31 +241,33 @@ static const char* s_elfMachineType [] =
 "Tensilica Xtensa Architecture",                        // 94
 };
 
-Elf::Elf(const char *filename, FILE* f)
+Elf::Elf(const ifilename& filename)
+    :   m_stringPool(0)
+    ,   m_file(fopen(filename.str().c_str(), "rb"))
 {
     be_debug("loading file %s" | filename);
     ElfIdentification id;
-    fread(&id, 1, sizeof(id), f);
+    fread(&id, 1, sizeof(id), m_file);
     be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
     if(id.klass == klass_32 && id.msb == msb_littleendian)
     {
         be_debug("32 bits little-endian");
-        Elf::parse<klass_32, msb_littleendian>(f);
+        Elf::parse<klass_32, msb_littleendian>();
     }
     else if(id.klass == klass_64 && id.msb == msb_littleendian)
     {
         be_debug("64 bits little-endian");
-        Elf::parse<klass_64, msb_littleendian>(f);
+        Elf::parse<klass_64, msb_littleendian>();
     }
     else if(id.klass == klass_32 && id.msb == msb_bigendian)
     {
         be_debug("32 bits big-endian");
-        Elf::parse<klass_32, msb_bigendian>(f);
+        Elf::parse<klass_32, msb_bigendian>();
     }
     else if(id.klass == klass_64 && id.msb == msb_bigendian)
     {
         be_debug("64 bits big-endian");
-        Elf::parse<klass_64, msb_bigendian>(f);
+        Elf::parse<klass_64, msb_bigendian>();
     }
     else
     {
@@ -254,11 +277,15 @@ Elf::Elf(const char *filename, FILE* f)
 
 Elf::~Elf()
 {
+    be_free(const_cast<char*>(m_stringPool));
+    fclose(m_file);
 }
 
 template< ElfClass klass, ElfEndianness endianness >
-void Elf::parse(FILE* f)
+void Elf::parse()
 {
+    FILE* f = m_file;
+
     ElfHeader<klass, endianness> header;
     fread(&header, sizeof(header), 1, f);
     be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
@@ -270,16 +297,25 @@ void Elf::parse(FILE* f)
     fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
-    char* strings = (char*)malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
+    char* strings = (char*)be_malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
     fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
     fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
+    m_stringPool = strings;
     
     for(int i = 0; i < header.shnum; ++i)
     {
-        be_debug("section %s" | (strings + sections[i].name));
+        if(sections[i].flags & ElfSectionHeader<klass, endianness>::Exec)
+        {
+            be_debug("section %s" | (strings + sections[i].name));
+        }
+
     }
-    free(strings);
     freea(sections);
+}
+
+refptr<const Symbols::ISymbolResolver> Elf::getSymbolResolver()
+{
+    return 0;
 }
 
 }}
