@@ -28,16 +28,31 @@ enum ElfEndianness
 class Elf
 {
 private:
+    struct Section
+    {
+        const char *    name;
+        u64             offset;
+        u64             size;
+    };
+    std::vector<Section>    m_sections;
+private:
     template< ElfClass klass, ElfEndianness endianness >
     void parse();
 private:
-    const char *                m_stringPool;
-    FILE*                       m_file;
+    const ifilename m_filename;
+    const char *    m_stringPool;
+    FILE*           m_file;
 public:
     Elf(const ifilename& filename);
     ~Elf();
 
     refptr<const Symbols::ISymbolResolver> getSymbolResolver();
+
+    const Section* begin() const;
+    const Section* end() const;
+private:
+    Elf(const Elf& other);
+    Elf& operator=(const Elf& other);
 };
 
 }}

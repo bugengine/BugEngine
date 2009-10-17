@@ -31,7 +31,7 @@ AssertionResult defaultAssertionCallback( const char *file,
     for(size_t i = 0; i < backtraceSize; ++i)
     {
         symbols.resolve(buffer[i], s);
-        fprintf(stderr, "%s:%d - %s\n", s.filename(), s.line(), s.function());
+        fprintf(stderr, "[%p] %s - %s:%d - %s\n", s.address(), s.module(), s.filename(), s.line(), s.function());
     }
     return Break;
 }

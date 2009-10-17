@@ -9,6 +9,9 @@
 namespace BugEngine { namespace Debug
 {
 
+class Dwarf;
+class PDB;
+
 class Symbols
 {
 public:
@@ -20,15 +23,19 @@ public:
     {
         friend class Symbols;
         friend class Module;
+        friend class Dwarf;
+        friend class PDB;
     private:
-        char    m_module[4096];
-        char    m_filename[4096];
-        char    m_function[4096];
-        int     m_line;
+        char        m_module[4096];
+        char        m_filename[4096];
+        char        m_function[4096];
+        const void* m_address;
+        int         m_line;
     public:
         Symbol();
         ~Symbol();
 
+        const void* address() const     { return m_address; }
         const char *module() const      { return m_module; }
         const char *filename() const    { return m_filename; }
         int         line() const        { return m_line; }
@@ -38,7 +45,7 @@ public:
     class ISymbolResolver : public minitl::refcountable<void>
     {
     public:
-        virtual ~ISymbolResolver();
+        virtual ~ISymbolResolver() { }
         virtual bool resolve(u64 address, Symbol& result) const = 0;
     };
 public:

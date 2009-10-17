@@ -21,7 +21,8 @@ namespace BugEngine { namespace Debug
 {
 
 Symbols::Symbol::Symbol()
-:   m_line(0)
+:   m_address(0)
+,   m_line(0)
 {
     m_module[0] = 0;
     m_filename[0] = 0;
@@ -53,7 +54,7 @@ std::vector<Symbols::Module> Symbols::Module::enumerate()
     dlinfo(handle, RTLD_DI_LINKMAP, &lmap);
     for(int i = 0; lmap; lmap=lmap->l_next, i++)
     {
-        if(i == 0 && !lmap->l_name)
+        if(i == 0 && (!lmap->l_name || !*lmap->l_name))
         {
             /* main executable */
             /* filename seems broken */
@@ -107,6 +108,10 @@ void Symbols::Module::loadDebugInformation() const
             m_symbols = Elf(m_filename).getSymbolResolver();
         }
     }
+    else
+    {
+        be_error("Unable to open file %s"|m_filename);
+    }
 }
 
 bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result) const
@@ -114,9 +119,9 @@ bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result)
     if(!m_symbols)
     {
         loadDebugInformation();
-        be_assert(m_symbols, "Impossible to create a symbol resolver for module %s"|m_filename);
+        //be_assert(m_symbols, "Impossible to create a symbol resolver for module %s"|m_filename);
     }
-    return m_symbols->resolve((u64)address.pointer()-m_baseAddress, result);
+    return m_symbols?m_symbols->resolve((u64)address.pointer()-m_baseAddress, result):false;
 }
 
 //---------------------------------------------------------------------------//
@@ -136,6 +141,7 @@ Symbols::~Symbols()
 
 void Symbols::resolve(const Callstack::Address& address, Symbol& result) const
 {
+    result.m_address = address.pointer();
     for (size_t i = 0; i < m_modules.size(); ++i)
     {
         if(m_modules[i].resolve(address, result))
