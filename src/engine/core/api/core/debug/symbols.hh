@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Debug
 {
 
-class Dwarf;
+class DwarfModule;
 class PDB;
 
 class Symbols
@@ -23,7 +23,7 @@ public:
     {
         friend class Symbols;
         friend class Module;
-        friend class Dwarf;
+        friend class DwarfModule;
         friend class PDB;
     private:
         char        m_module[4096];

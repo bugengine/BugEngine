@@ -27,21 +27,25 @@ enum ElfEndianness
 
 class Elf
 {
-private:
+public:
     struct Section
     {
         const char *    name;
         u64             offset;
         u64             size;
+        u64             fileOffset;
+        u64             fileSize;
     };
-    std::vector<Section>    m_sections;
 private:
     template< ElfClass klass, ElfEndianness endianness >
     void parse();
 private:
-    const ifilename m_filename;
-    const char *    m_stringPool;
-    FILE*           m_file;
+    const ifilename         m_filename;
+    std::vector<Section>    m_sections;
+    const char *            m_stringPool;
+    ElfClass                m_class;
+    ElfEndianness           m_endianness;
+    FILE*                   m_file;
 public:
     Elf(const ifilename& filename);
     ~Elf();
@@ -50,6 +54,10 @@ public:
 
     const Section* begin() const;
     const Section* end() const;
+
+    void readSection(const Section* section, void* buffer) const;
+
+    ElfEndianness endianness() const { return m_endianness; }
 private:
     Elf(const Elf& other);
     Elf& operator=(const Elf& other);

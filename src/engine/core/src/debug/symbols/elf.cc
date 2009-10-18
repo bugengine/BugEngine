@@ -245,12 +245,16 @@ static const char* s_elfMachineType [] =
 Elf::Elf(const ifilename& filename)
     :   m_filename(filename)
     ,   m_stringPool(0)
+    ,   m_class(klass_invalid)
+    ,   m_endianness(msb_invalid)
     ,   m_file(fopen(filename.str().c_str(), "rb"))
 {
     be_debug("loading file %s" | filename);
     ElfIdentification id;
     fread(&id, 1, sizeof(id), m_file);
     be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
+    m_class = (ElfClass)id.klass;
+    m_endianness = (ElfEndianness)id.msb;
     if(id.klass == klass_32 && id.msb == msb_littleendian)
     {
         be_debug("32 bits little-endian");
@@ -283,19 +287,19 @@ Elf::~Elf()
     fclose(m_file);
 }
 
-template< ElfClass klass, ElfEndianness endianness >
+template< ElfClass klass, ElfEndianness e >
 void Elf::parse()
 {
     FILE* f = m_file;
 
-    ElfHeader<klass, endianness> header;
+    ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
     be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
     UNUSED(BugEngine::Debug::s_elfFileType);
     UNUSED(BugEngine::Debug::s_elfMachineType);
 
-    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, endianness>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, endianness>) | header.shentsize);
-    ElfSectionHeader<klass, endianness> *sections = (ElfSectionHeader<klass, endianness>*)malloca(header.shentsize*header.shnum);
+    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
+    ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass, e>*)malloca(header.shentsize*header.shnum);
     fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
@@ -308,7 +312,7 @@ void Elf::parse()
     
     for(int i = 0; i < header.shnum; ++i)
     {
-        Section sec = { m_stringPool + sections[i].name, sections[i].addr, sections[i].size };
+        Section sec = { m_stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
         m_sections.push_back(sec);
     }
     freea(sections);
@@ -320,7 +324,7 @@ refptr<const Symbols::ISymbolResolver> Elf::getSymbolResolver()
     {
         if(strncmp(s->name, ".text", 5) == 0)
         {
-            return new Dwarf(m_filename, *this, s->offset, s->size);
+            return new DwarfModule(m_filename, *this, s->offset, s->size);
         }
     }
     return 0;
@@ -336,7 +340,11 @@ const Elf::Section* Elf::end() const
     return &m_sections[m_sections.size()];
 }
 
-
+void Elf::readSection(const Section* s, void* buffer) const
+{
+    fseek(m_file, s->fileOffset, SEEK_SET);
+    fread(buffer, s->fileSize, 1, m_file);
+}
 
 }}
 
