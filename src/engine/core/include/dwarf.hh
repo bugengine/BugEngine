@@ -10,15 +10,20 @@
 namespace BugEngine { namespace Debug
 {
 
-class Dwarf : public Symbols::ISymbolResolver
+class DwarfModule : public Symbols::ISymbolResolver
 {
 private:
     const u64       m_begin;
     const u64       m_end;
     const ifilename m_moduleName;
+    void*           m_debugInfo;
+    void*           m_lineProgram;
+private:
+    template< Endianness endianness >
+    void parse(const Elf& elf);
 public:
-    Dwarf(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size);
-    ~Dwarf();
+    DwarfModule(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size);
+    ~DwarfModule();
 
     virtual bool resolve(u64, BugEngine::Debug::Symbols::Symbol&) const override;
 };
