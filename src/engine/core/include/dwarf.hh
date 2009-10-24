@@ -13,11 +13,33 @@ namespace BugEngine { namespace Debug
 class DwarfModule : public Symbols::ISymbolResolver
 {
 private:
+    struct AddressRange
+    {
+        u64 begin;
+        u64 end;
+
+        static bool consistent(AddressRange range1, AddressRange range2);
+        bool operator<(AddressRange other) const;
+        bool operator==(AddressRange other) const;
+    };
+    class CompilationUnit
+    {
+    public:
+        const char*                                 name;
+        AddressRange                                range;
+        minitl::map<AddressRange, CompilationUnit>  children;
+
+        CompilationUnit() : name(0) { }
+        ~CompilationUnit() { }
+    };
+    template< Endianness e >
+    class Buffer;
+    typedef minitl::map<AddressRange, CompilationUnit>  UnitMap;
+private:
     const u64       m_begin;
     const u64       m_end;
     const ifilename m_moduleName;
-    void*           m_debugInfo;
-    void*           m_lineProgram;
+    UnitMap         m_units;
 private:
     template< Endianness endianness >
     void parse(const Elf& elf);
