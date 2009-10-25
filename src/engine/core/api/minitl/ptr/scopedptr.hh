@@ -19,6 +19,7 @@ public:
     ~scopedptr()                                { if(m_ptr) checked_delete<T>(m_ptr); }
 
     void reset(T* value) NOTHROW                { if(m_ptr) checked_delete<T>(m_ptr); m_ptr = value; }
+    T* detach()                                 { T* value = m_ptr; m_ptr = 0; return value; }
     
 
     T& operator*() NOTHROW                      { return *m_ptr; }
