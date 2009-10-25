@@ -9,6 +9,42 @@
 namespace BugEngine { namespace Debug
 {
 
+static const size_t c_stringBufferSize = 2048;
+
+DwarfModule::StringBuffer::StringBuffer(char* buffer, u64 size, const StringBuffer* next)
+    :   m_next(next)
+    ,   m_size(size)
+    ,   m_current(size)
+    ,   m_buffer(buffer)
+{
+}
+
+DwarfModule::StringBuffer::StringBuffer(size_t size, const StringBuffer* next)
+    :   m_next(next)
+    ,   m_size(size)
+    ,   m_current(0)
+    ,   m_buffer((char*)be_malloc(size))
+{
+}
+
+DwarfModule::StringBuffer::~StringBuffer()
+{
+    be_free(m_buffer);
+}
+
+const char* DwarfModule::StringBuffer::store(const char* string, size_t size)
+{
+    if(m_size-m_current > size)
+    {
+        char* buffer = m_buffer+m_current;
+        m_current += size + 1;
+        strcpy(buffer, string);
+        return buffer;
+    }
+    else
+        return 0;
+}
+
 namespace Dwarf
 {
 
@@ -87,6 +123,7 @@ bool DwarfModule::AddressRange::operator==(AddressRange other) const
 template< Endianness endianness >
 class DwarfModule::Buffer
 {
+    friend class DwarfModule;
 private:
     u8*     m_buffer;
     u64     m_size;
@@ -100,12 +137,7 @@ public:
     bool operator !() const;
 
     void seek(u64 offset) { m_position = offset; be_assert(m_position < m_size, "seekking an invalid position : %d (size is %d)" | m_position | m_size); }
-
-    void readUnit(Dwarf::Unit& unit);
-    bool readInfos(UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
-    bool fillNode(CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
-    bool readAbbreviation(minitl::vector<Dwarf::Abbreviation>& abbreviations);
-private:
+public:
     Buffer& operator>>(Dwarf::size_t& value);
     Buffer& operator>>(Dwarf::offset_t& value);
     Buffer& operator>>(Dwarf::uleb128_t& value);
@@ -208,202 +240,6 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u8&
     return *this;
 }
 
-template< Endianness endianness >
-bool DwarfModule::Buffer<endianness>::fillNode(CompilationUnit& r, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
-{
-    unsigned attributesMatched = 0; 
-    for(unsigned i = 0; i < abbrev.propertyCount; ++i)
-    {
-        u64 attribute = abbrev.properties[i].attribute;
-        u64 type = abbrev.properties[i].type;
-        if(type == Dwarf::Type_indirect)
-        {
-            Dwarf::uleb128_t indirectType;
-            *this >> indirectType;
-            type = indirectType;
-        }
-
-        if(attribute == Dwarf::Attribute_name)
-        {
-            attributesMatched++;
-        }
-        else if(attribute == Dwarf::Attribute_low_pc)
-        {
-            attributesMatched++;
-        }
-        else if(attribute == Dwarf::Attribute_high_pc)
-        {
-            attributesMatched++;
-        }
-
-        switch(type)
-        {
-            case Dwarf::Type_addr:
-                m_position += ptrSize;
-                break;
-
-            case Dwarf::Type_block2:
-                {
-                    u16 length;
-                    *this >> length;
-                    m_position += length;
-                }
-                break;
-
-            case Dwarf::Type_block4:
-                {
-                    u32 length;
-                    *this >> length;
-                    m_position += length;
-                }
-                break;
-
-            case Dwarf::Type_data2:
-            case Dwarf::Type_ref2:
-                m_position += 2;
-                break;
-
-            case Dwarf::Type_data4:
-            case Dwarf::Type_ref4:
-                m_position += 4;
-                break;
-
-            case Dwarf::Type_data8:
-            case Dwarf::Type_ref8:
-                m_position += 8;
-                break;
-
-            case Dwarf::Type_string:
-                u8 c;
-                do { *this >> c; } while(c);
-                break;
-
-            case Dwarf::Type_block:
-                {
-                    Dwarf::uleb128_t length;
-                    *this >> length;
-                    m_position += length;
-                }
-                break;
-
-            case Dwarf::Type_block1:
-                {
-                    u8 length;
-                    *this >> length;
-                    m_position += length;
-                }
-                break;
-
-            case Dwarf::Type_data1:
-            case Dwarf::Type_ref1:
-                m_position ++;
-                break;
-
-            case Dwarf::Type_flag:
-                m_position ++;
-                break;
-
-            case Dwarf::Type_sdata:
-                {
-                    Dwarf::uleb128_t value;
-                    *this >> value;
-                }
-                break;
-
-            case Dwarf::Type_strp:
-                {
-                    Dwarf::offset_t size;
-                    *this >> size;
-                }
-                break;
-
-            case Dwarf::Type_udata:
-            case Dwarf::Type_ref_udata:
-                {
-                    Dwarf::uleb128_t value;
-                    *this >> value;
-                }
-                break;
-
-            case Dwarf::Type_ref_addr:
-                {
-                    Dwarf::offset_t size;
-                    *this >> size;
-                }
-                break;
-
-            case Dwarf::Type_indirect:
-                be_unimplemented();
-                break;
-
-            default:
-                be_unimplemented();
-                break;
-        };
-    }
-    if(abbrev.children)
-    {
-        while(readInfos(r.children, abbreviations, ptrSize)) /* Again */;
-    }
-    return attributesMatched == 3;
-}
-
-template< Endianness endianness >
-bool DwarfModule::Buffer<endianness>::readInfos(UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
-{
-    Dwarf::uleb128_t l;
-
-    *this >> l;
-    if(l == 0)
-        return false;
-    const Dwarf::Abbreviation& abbrev = abbreviations[checked_numcast<size_t>(l.value)-1];
-    CompilationUnit u;
-    if(fillNode(u, abbrev, abbreviations, ptrSize))
-    {
-        bool result = units.insert(std::make_pair(u.range, u)).second;
-        be_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name | u.range.begin | u.range.end);
-    }
-    return true;
-}
-
-template< Endianness endianness >
-void DwarfModule::Buffer<endianness>::readUnit(Dwarf::Unit& unit)
-{
-    *this >> unit.length;
-    *this >> unit.version;
-    *this >> unit.abbrev;
-    *this >> unit.ptrSize;
-}
-
-template< Endianness endianness >
-bool DwarfModule::Buffer<endianness>::readAbbreviation(minitl::vector<Dwarf::Abbreviation>& abbreviations)
-{
-    Dwarf::uleb128_t code;
-    *this >> code;
-    if(code == 0)
-        return false;
-
-    if(abbreviations.size() < code)
-        abbreviations.resize(code);
-    Dwarf::Abbreviation& abbrev = abbreviations[code-1];
-
-    *this >> abbrev.tag;
-    *this >> abbrev.children;
-    abbrev.propertyCount = 0;
-    do
-    {
-        *this >> abbrev.properties[abbrev.propertyCount].attribute;
-        *this >> abbrev.properties[abbrev.propertyCount].type;
-        if(abbrev.properties[abbrev.propertyCount].attribute == 0)
-        {
-            be_assert(abbrev.properties[abbrev.propertyCount].type == 0, "inconsistent entry with attribute %d and type %d" | abbrev.properties[abbrev.propertyCount].attribute | abbrev.properties[abbrev.propertyCount].type);
-            return true;
-        }
-        abbrev.propertyCount++;
-        be_assert(abbrev.propertyCount < Dwarf::Attribute_max, "too many attributes");
-    } while(true);
-}
-
 
 
 
@@ -459,6 +295,13 @@ void DwarfModule::parse(const Elf& elf)
 
     for (const Elf::Section* s = elf.begin(); s != elf.end(); ++s)
     {
+        if(strcmp(s->name, ".debug_str") == 0)
+        {
+            m_stringPool = (char*)be_malloc(s->fileSize);
+            elf.readSection(s, m_stringPool);
+            StringBuffer* previous = m_strings.detach();
+            m_strings.reset(new StringBuffer(m_stringPool, s->fileSize, previous));
+        }
         if(strcmp(s->name, ".debug_info") == 0)
         {
             debugInfo = (u8*)be_malloc(s->fileSize);
@@ -484,18 +327,238 @@ void DwarfModule::parse(const Elf& elf)
 
     while(info)
     {
-        Dwarf::Unit u;
+        Dwarf::Unit unit;
+
         abbrev.resize(0);
-        info.readUnit(u);
-        abbreviations.seek(u.abbrev);
-        while(abbreviations.readAbbreviation(abbrev)) /*again*/;
-        info.readInfos(m_units, abbrev, u.ptrSize);
+        info >> unit.length;
+        info >> unit.version;
+        info >> unit.abbrev;
+        info >> unit.ptrSize;
+
+        abbreviations.seek(unit.abbrev);
+        while(readAbbreviation(abbreviations, abbrev)) /*again*/;
+        readInfos(info, m_units, abbrev, unit.ptrSize);
     }
 
     be_free(lineProgram);
     be_free(debugAbbrev);
     be_free(debugInfo);
 }
+
+const char * DwarfModule::storeString(const char *string)
+{
+    size_t size = strlen(string);
+    const char *result = 0;
+    be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
+    if(!m_strings)
+    {
+        m_strings.reset(new StringBuffer(c_stringBufferSize, 0));
+    }
+    if(!(result = m_strings->store(string, size)))
+    {
+        StringBuffer* previous = m_strings.detach();
+        m_strings.reset(new StringBuffer(c_stringBufferSize, previous));
+        result = m_strings->store(string, size);
+        be_assert(result, "new empty pool could not store string");
+    }
+    return result;
+}
+
+const char * DwarfModule::indexedString(u64 offset) const
+{
+    return m_stringPool + offset;
+}
+
+template< Endianness endianness >
+bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations)
+{
+    Dwarf::uleb128_t code;
+    buffer >> code;
+    if(code == 0)
+        return false;
+
+    if(abbreviations.size() < code)
+        abbreviations.resize(code);
+    Dwarf::Abbreviation& abbrev = abbreviations[code-1];
+
+    buffer >> abbrev.tag;
+    buffer >> abbrev.children;
+    abbrev.propertyCount = 0;
+    do
+    {
+        buffer >> abbrev.properties[abbrev.propertyCount].attribute;
+        buffer >> abbrev.properties[abbrev.propertyCount].type;
+        if(abbrev.properties[abbrev.propertyCount].attribute == 0)
+        {
+            be_assert(abbrev.properties[abbrev.propertyCount].type == 0, "inconsistent entry with attribute %d and type %d" | abbrev.properties[abbrev.propertyCount].attribute | abbrev.properties[abbrev.propertyCount].type);
+            return true;
+        }
+        abbrev.propertyCount++;
+        be_assert(abbrev.propertyCount < Dwarf::Attribute_max, "too many attributes");
+    } while(true);
+}
+
+template< Endianness endianness >
+bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
+{
+    unsigned attributesMatched = 0; 
+    for(unsigned i = 0; i < abbrev.propertyCount; ++i)
+    {
+        u64 attribute = abbrev.properties[i].attribute;
+        u64 type = abbrev.properties[i].type;
+        if(type == Dwarf::Type_indirect)
+        {
+            Dwarf::uleb128_t indirectType;
+            buffer >> indirectType;
+            type = indirectType;
+        }
+
+        if(attribute == Dwarf::Attribute_name)
+        {
+            attributesMatched++;
+        }
+        else if(attribute == Dwarf::Attribute_low_pc)
+        {
+            attributesMatched++;
+        }
+        else if(attribute == Dwarf::Attribute_high_pc)
+        {
+            attributesMatched++;
+        }
+
+        switch(type)
+        {
+            case Dwarf::Type_addr:
+                buffer.m_position += ptrSize;
+                break;
+
+            case Dwarf::Type_block2:
+                {
+                    u16 length;
+                    buffer >> length;
+                    buffer.m_position += length;
+                }
+                break;
+
+            case Dwarf::Type_block4:
+                {
+                    u32 length;
+                    buffer >> length;
+                    buffer.m_position += length;
+                }
+                break;
+
+            case Dwarf::Type_data2:
+            case Dwarf::Type_ref2:
+                buffer.m_position += 2;
+                break;
+
+            case Dwarf::Type_data4:
+            case Dwarf::Type_ref4:
+                buffer.m_position += 4;
+                break;
+
+            case Dwarf::Type_data8:
+            case Dwarf::Type_ref8:
+                buffer.m_position += 8;
+                break;
+
+            case Dwarf::Type_string:
+                u8 c;
+                do { buffer >> c; } while(c);
+                break;
+
+            case Dwarf::Type_block:
+                {
+                    Dwarf::uleb128_t length;
+                    buffer >> length;
+                    buffer.m_position += length;
+                }
+                break;
+
+            case Dwarf::Type_block1:
+                {
+                    u8 length;
+                    buffer >> length;
+                    buffer.m_position += length;
+                }
+                break;
+
+            case Dwarf::Type_data1:
+            case Dwarf::Type_ref1:
+                buffer.m_position ++;
+                break;
+
+            case Dwarf::Type_flag:
+                buffer.m_position ++;
+                break;
+
+            case Dwarf::Type_sdata:
+                {
+                    Dwarf::uleb128_t value;
+                    buffer >> value;
+                }
+                break;
+
+            case Dwarf::Type_strp:
+                {
+                    Dwarf::offset_t size;
+                    buffer >> size;
+                }
+                break;
+
+            case Dwarf::Type_udata:
+            case Dwarf::Type_ref_udata:
+                {
+                    Dwarf::uleb128_t value;
+                    buffer >> value;
+                }
+                break;
+
+            case Dwarf::Type_ref_addr:
+                {
+                    Dwarf::offset_t size;
+                    buffer >> size;
+                }
+                break;
+
+            case Dwarf::Type_indirect:
+                be_unimplemented();
+                break;
+
+            default:
+                be_unimplemented();
+                break;
+        };
+    }
+    if(abbrev.children)
+    {
+        while(readInfos(buffer, r.children, abbreviations, ptrSize)) /* Again */;
+    }
+    return false; //attributesMatched == 3;
+}
+
+template< Endianness endianness >
+bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
+{
+    Dwarf::uleb128_t l;
+
+    buffer >> l;
+    if(l == 0)
+        return false;
+    const Dwarf::Abbreviation& abbrev = abbreviations[checked_numcast<size_t>(l.value)-1];
+    CompilationUnit u;
+    if(fillNode(buffer, u, abbrev, abbreviations, ptrSize))
+    {
+        bool result = units.insert(std::make_pair(u.range, u)).second;
+        be_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name | u.range.begin | u.range.end);
+    }
+    return true;
+}
+
+
+
+
 
 }}
 

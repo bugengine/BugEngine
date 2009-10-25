@@ -10,8 +10,29 @@
 namespace BugEngine { namespace Debug
 {
 
+namespace Dwarf
+{
+    class CompilationUnit;
+    class Abbreviation;
+}
+
 class DwarfModule : public Symbols::ISymbolResolver
 {
+private:
+    class StringBuffer
+    {
+    private:
+        const scopedptr<const StringBuffer> m_next;
+        u64 const                           m_size;
+        u64                                 m_current;
+        char* const                         m_buffer;
+    public:
+        StringBuffer(char* buffer, u64 size, const StringBuffer* next = 0);
+        StringBuffer(size_t size, const StringBuffer* next = 0);
+        ~StringBuffer();
+
+        const char* store(const char* string, size_t size);
+    };
 private:
     struct AddressRange
     {
@@ -22,6 +43,7 @@ private:
         bool operator<(AddressRange other) const;
         bool operator==(AddressRange other) const;
     };
+private:
     class CompilationUnit
     {
     public:
@@ -32,22 +54,33 @@ private:
         CompilationUnit() : name(0) { }
         ~CompilationUnit() { }
     };
-    template< Endianness e >
-    class Buffer;
+private:
+    template< Endianness e > class Buffer;
     typedef minitl::map<AddressRange, CompilationUnit>  UnitMap;
 private:
-    const u64       m_begin;
-    const u64       m_end;
-    const ifilename m_moduleName;
-    UnitMap         m_units;
+    const u64               m_begin;
+    const u64               m_end;
+    const ifilename         m_moduleName;
+    UnitMap                 m_units;
+    scopedptr<StringBuffer> m_strings;
+    char*                   m_stringPool;
 private:
-    template< Endianness endianness >
+    template< Endianness e >
     void parse(const Elf& elf);
+    template< Endianness e >
+    bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
+    template< Endianness e >
+    bool fillNode(Buffer<e>& buffer, CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
+    template< Endianness e >
+    bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations);
 public:
     DwarfModule(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size);
     ~DwarfModule();
 
     virtual bool resolve(u64, BugEngine::Debug::Symbols::Symbol&) const override;
+
+    const char *storeString(const char *string);
+    const char *indexedString(u64 offset) const;
 };
 
 }}
