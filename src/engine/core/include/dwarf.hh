@@ -13,7 +13,7 @@ namespace BugEngine { namespace Debug
 namespace Dwarf
 {
     class CompilationUnit;
-    class Abbreviation;
+    struct Abbreviation;
 }
 
 class DwarfModule : public Symbols::ISymbolResolver

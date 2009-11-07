@@ -342,8 +342,8 @@ const Elf::Section* Elf::end() const
 
 void Elf::readSection(const Section* s, void* buffer) const
 {
-    fseek(m_file, s->fileOffset, SEEK_SET);
-    fread(buffer, s->fileSize, 1, m_file);
+    fseek(m_file, checked_numcast<long>(s->fileOffset), SEEK_SET);
+    fread(buffer, checked_numcast<long>(s->fileSize), 1, m_file);
 }
 
 }}

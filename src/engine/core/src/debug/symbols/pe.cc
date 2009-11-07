@@ -378,6 +378,8 @@ struct COFFSymbol
 };
 
 PE::PE(const ifilename& filename)
+:   m_file(0)
+,   m_stringBuffer(0)
 {
     be_info("loading file %s" | filename);
     MSDosHeader dosh;
@@ -426,7 +428,7 @@ PE::PE(const ifilename& filename)
             {
                 be_info("loading debug info from section %s" | sections[section].name);
                 Malloc::MemoryBlock<DebugEntry> entries(debugEntryCount);
-                fseek(m_file, sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset), SEEK_SET);
+                fseek(m_file, static_cast<long>(sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET);
                 fread(entries, sizeof(DebugEntry), debugEntryCount, m_file);
                 for(size_t i = 0; i < debugEntryCount; ++i)
                 {
@@ -469,7 +471,7 @@ PE::PE(const ifilename& filename)
 
         u32 stringTableSize;
         size_t stringTableOffset = imageHeader.symbolTableOffset + imageHeader.symbolCount*18;
-        fseek(m_file, stringTableOffset, SEEK_SET);
+        fseek(m_file, static_cast<long>(stringTableOffset), SEEK_SET);
         fread(&stringTableSize, sizeof(stringTableSize), 1, m_file);
         StringTable* strings = (StringTable*)be_malloc(stringTableSize);
         strings->size = stringTableSize;
