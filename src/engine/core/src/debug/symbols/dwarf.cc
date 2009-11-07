@@ -268,7 +268,7 @@ DwarfModule::~DwarfModule()
 {
 }
 
-bool DwarfModule::resolve(u64 address, BugEngine::Debug::Symbols::Symbol& symbol) const override
+bool DwarfModule::resolve(u64 address, BugEngine::Debug::Symbols::Symbol& symbol) const
 {
     if(address >= m_begin && address < m_end)
     {
@@ -297,26 +297,26 @@ void DwarfModule::parse(const Elf& elf)
     {
         if(strcmp(s->name, ".debug_str") == 0)
         {
-            m_stringPool = (char*)be_malloc(s->fileSize);
+            m_stringPool = (char*)be_malloc(checked_numcast<size_t>(s->fileSize));
             elf.readSection(s, m_stringPool);
             StringBuffer* previous = m_strings.detach();
             m_strings.reset(new StringBuffer(m_stringPool, s->fileSize, previous));
         }
         if(strcmp(s->name, ".debug_info") == 0)
         {
-            debugInfo = (u8*)be_malloc(s->fileSize);
+            debugInfo = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
             debugInfoSize = s->fileSize;
             elf.readSection(s, debugInfo);
         }
         if(strcmp(s->name, ".debug_abbrev") == 0)
         {
-            debugAbbrev = (u8*)be_malloc(s->fileSize);
+            debugAbbrev = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
             debugAbbrevSize = s->fileSize;
             elf.readSection(s, debugAbbrev);
         }
         if(strcmp(s->name, ".debug_line") == 0)
         {
-            lineProgram = (u8*)be_malloc(s->fileSize);
+            lineProgram = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
             elf.readSection(s, lineProgram);
         }
     }
@@ -354,7 +354,8 @@ const char * DwarfModule::storeString(const char *string)
     {
         m_strings.reset(new StringBuffer(c_stringBufferSize, 0));
     }
-    if(!(result = m_strings->store(string, size)))
+    result = m_strings->store(string, size);
+    if(!result)
     {
         StringBuffer* previous = m_strings.detach();
         m_strings.reset(new StringBuffer(c_stringBufferSize, previous));
@@ -378,8 +379,8 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
         return false;
 
     if(abbreviations.size() < code)
-        abbreviations.resize(code);
-    Dwarf::Abbreviation& abbrev = abbreviations[code-1];
+        abbreviations.resize(checked_numcast<size_t>(code.value));
+    Dwarf::Abbreviation& abbrev = abbreviations[checked_numcast<size_t>(code.value)-1];
 
     buffer >> abbrev.tag;
     buffer >> abbrev.children;
