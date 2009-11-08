@@ -3,12 +3,12 @@
 
 #include    <core/stdafx.h>
 
-#include    <core/debug/callstack.hh>
+#include    <core/runtime/callstack.hh>
 #ifdef BE_COMPILER_MSVC
 # include <intrin.h>
 #endif
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 static inline void** st_next(void** stack_pointer)

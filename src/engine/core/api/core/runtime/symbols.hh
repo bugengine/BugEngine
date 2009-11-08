@@ -4,9 +4,9 @@
 #ifndef BE_CORE_DEBUG_SYMBOLS_HH_
 #define BE_CORE_DEBUG_SYMBOLS_HH_
 /*****************************************************************************/
-#include    <core/debug/callstack.hh>
+#include    <core/runtime/callstack.hh>
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 class DwarfModule;

@@ -3,7 +3,7 @@
 
 #include    <core/stdafx.h>
 
-#include    <core/debug/symbols.hh>
+#include    <core/runtime/symbols.hh>
 
 #ifdef BE_PLATFORM_POSIX
 # include   <dlfcn.h>
@@ -13,11 +13,11 @@
 # include   <psapi.h>
 #endif
 
-#include    <elf.hh>
-#include    <pe.hh>
+#include    <modules/elf.hh>
+#include    <modules/pe.hh>
 
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 Symbols::Symbol::Symbol()

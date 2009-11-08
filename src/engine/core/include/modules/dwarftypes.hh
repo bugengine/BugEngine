@@ -5,7 +5,7 @@
 #define BE_CORE_DEBUG_DWARFTYPES_HH_
 /*****************************************************************************/
 
-namespace BugEngine { namespace Debug { namespace Dwarf
+namespace BugEngine { namespace Runtime { namespace Dwarf
 {
 
 enum Tag

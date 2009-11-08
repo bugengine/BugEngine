@@ -3,5 +3,5 @@
 
 #include    <core/stdafx.h>
 
-#include    <core/debug/symbols.hh>
+#include    <core/runtime/symbols.hh>
 
