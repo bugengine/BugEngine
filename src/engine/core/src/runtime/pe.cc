@@ -3,9 +3,9 @@
 
 #include    <core/stdafx.h>
 
-#include    <pe.hh>
+#include    <modules/pe.hh>
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 static inline char be_hex2char(u8 value)

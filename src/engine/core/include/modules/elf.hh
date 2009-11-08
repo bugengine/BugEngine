@@ -4,9 +4,9 @@
 #ifndef BE_CORE_DEBUG_ELF_HH_
 #define BE_CORE_DEBUG_ELF_HH_
 /*****************************************************************************/
-#include    <core/debug/symbols.hh>
+#include    <core/runtime/symbols.hh>
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 enum ElfClass

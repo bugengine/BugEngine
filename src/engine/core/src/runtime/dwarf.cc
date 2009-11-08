@@ -3,10 +3,10 @@
 
 #include    <core/stdafx.h>
 
-#include    <dwarf.hh>
-#include    <dwarftypes.hh>
+#include    <modules/dwarf.hh>
+#include    <modules/dwarftypes.hh>
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 static const size_t c_stringBufferSize = 2048;
@@ -268,7 +268,7 @@ DwarfModule::~DwarfModule()
 {
 }
 
-bool DwarfModule::resolve(u64 address, BugEngine::Debug::Symbols::Symbol& symbol) const
+bool DwarfModule::resolve(u64 address, Symbols::Symbol& symbol) const
 {
     if(address >= m_begin && address < m_end)
     {

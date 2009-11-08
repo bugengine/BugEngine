@@ -3,8 +3,8 @@
 
 #include    <core/stdafx.h>
 #include    <core/debug/assert.hh>
-#include    <core/debug/callstack.hh>
-#include    <core/debug/symbols.hh>
+#include    <core/runtime/callstack.hh>
+#include    <core/runtime/symbols.hh>
 
 #include    <stdio.h>
 #include    <string.h>
@@ -78,11 +78,11 @@ namespace BugEngine { namespace Debug
         char *dlgParams[2] = { outmessage, callstack };
 
         {
-            Debug::Callstack::Address address[128];
-            size_t result = Debug::Callstack::backtrace(address, 128, 1);
-            Symbols::Symbol s;
-            const Symbols& symbols = Symbols::runningSymbols();
-            for(Debug::Callstack::Address* a = address; a < address+result; ++a)
+            Runtime::Callstack::Address address[128];
+            size_t result = Runtime::Callstack::backtrace(address, 128, 1);
+            Runtime::Symbols::Symbol s;
+            const Runtime::Symbols& symbols = Runtime::Symbols::runningSymbols();
+            for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
             {
                 symbols.resolve(*a, s);
                 (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", s.filename(), s.line(), s.function());

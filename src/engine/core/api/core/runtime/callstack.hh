@@ -5,7 +5,7 @@
 #define BE_CORE_DEBUG_CALLSTACK_HH_
 /*****************************************************************************/
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 class Callstack

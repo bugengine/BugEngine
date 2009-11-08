@@ -4,8 +4,9 @@
 #ifndef BE_CORE_DEBUG_PE_HH_
 #define BE_CORE_DEBUG_PE_HH_
 /*****************************************************************************/
-#include <core/debug/symbols.hh>
-namespace BugEngine { namespace Debug
+#include <core/runtime/symbols.hh>
+
+namespace BugEngine { namespace Runtime
 {
 
 class PE

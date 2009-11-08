@@ -4,10 +4,10 @@
 #ifndef BE_CORE_DEBUG_DWARF_HH_
 #define BE_CORE_DEBUG_DWARF_HH_
 /*****************************************************************************/
-#include    <core/debug/symbols.hh>
-#include    <elf.hh>
+#include    <core/runtime/symbols.hh>
+#include    <modules/elf.hh>
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 namespace Dwarf
@@ -77,7 +77,7 @@ public:
     DwarfModule(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size);
     ~DwarfModule();
 
-    virtual bool resolve(u64, BugEngine::Debug::Symbols::Symbol&) const override;
+    virtual bool resolve(u64, Symbols::Symbol&) const override;
 
     const char *storeString(const char *string);
     const char *indexedString(u64 offset) const;

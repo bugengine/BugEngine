@@ -3,10 +3,10 @@
 
 #include    <core/stdafx.h>
 
-#include    <core/debug/callstack.hh>
+#include    <core/runtime/callstack.hh>
 
 
-namespace BugEngine { namespace Debug
+namespace BugEngine { namespace Runtime
 {
 
 Callstack::Address::Address()
