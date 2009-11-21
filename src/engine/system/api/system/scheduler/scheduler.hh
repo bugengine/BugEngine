@@ -24,7 +24,7 @@ class BaseTaskItem;
 
 }
 
-class be_api(CORE) Scheduler
+class be_api(SYSTEM) Scheduler
 {
 private:
     class Worker;

@@ -19,7 +19,7 @@ class BaseTaskItem;
 
 }
 
-class be_api(CORE) BaseTask : public minitl::refcountable<void>
+class be_api(SYSTEM) BaseTask : public minitl::refcountable<void>
 {
     friend class ScheduledTasks::BaseTaskItem;
 public:
@@ -54,7 +54,7 @@ private:
     BaseTask(const BaseTask& other);
 };
 
-class be_api(CORE) ChainTaskCallback : public BaseTask::Callback
+class be_api(SYSTEM) ChainTaskCallback : public BaseTask::Callback
 {
 private:
     const BaseTask*         m_task;
