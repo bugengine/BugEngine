@@ -17,7 +17,7 @@ class BaseTask;
 namespace ScheduledTasks
 {
 
-class be_api(CORE) BaseTaskItem : public minitl::inode
+class be_api(SYSTEM) BaseTaskItem : public minitl::inode
 {
     friend class ::BugEngine::Scheduler;
     friend class ::BugEngine::Scheduler::Worker;
