@@ -324,10 +324,10 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
 {
     SymbolResolver::SymbolInformations result;
     result.type = SymbolResolver::SymbolInformations::ELFDwarf;
-    const Section& code = (*this)[".code"];
+    const Section& code = (*this)[".text"];
     result.offset = m_baseAddress + code.offset;
     result.size = code.size;
-    const Section& debug_link = (*this)["debug_link"];
+    const Section& debug_link = (*this)[".gnu_debuglink"];
     if(debug_link)
     {
         Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));

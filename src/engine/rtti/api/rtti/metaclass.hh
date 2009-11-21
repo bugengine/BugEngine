@@ -52,7 +52,7 @@ private:
     MetaClass& operator=(const MetaClass& other);
 };
 
-class MetaMetaClass : public MetaClass
+class be_api(RTTI) MetaMetaClass : public MetaClass
 {
 public:
     MetaMetaClass(const inamespace& name, const MetaClass* parent);

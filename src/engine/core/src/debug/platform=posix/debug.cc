@@ -3,8 +3,9 @@
 
 #include    <core/stdafx.h>
 #include    <core/debug/assert.hh>
-#include    <core/debug/callstack.hh>
-#include    <core/debug/symbols.hh>
+#include    <core/runtime/callstack.hh>
+#include    <core/runtime/module.hh>
+#include    <core/runtime/symbols.hh>
 #include    <cstdio>
 #include    <cstdarg>
 
@@ -23,16 +24,34 @@ AssertionResult defaultAssertionCallback( const char *file,
     vfprintf(stderr, message, l);
     va_end(l);
     fprintf(stderr, "\n");
-    Callstack::Address buffer[1024];
-    size_t backtraceSize = Callstack::backtrace(buffer, 1024, 1);
-    Symbols::Symbol s;
-    const Symbols& symbols = Symbols::runningSymbols();
 
-    for(size_t i = 0; i < backtraceSize; ++i)
+    Runtime::Callstack::Address address[128];
+    size_t result = Runtime::Callstack::backtrace(address, 128, 1);
+    Runtime::Symbol s;
+
+    static refptr<const Runtime::Module> executable;
+    static refptr<const Runtime::SymbolResolver> s_symbols;
+    if(!executable)
     {
-        symbols.resolve(buffer[i], s);
-        fprintf(stderr, "[%p] %s - %s:%d - %s\n", s.address(), s.module(), s.filename(), s.line(), s.function());
+        executable = Runtime::Module::self();
+        Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+        s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
     }
+    while(executable->next())
+    {
+        executable = executable->next();
+        Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+        s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
+    }
+    if(s_symbols)
+    {
+        for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+        {
+            s_symbols->resolve(*a, s);
+            fprintf(stderr, "[%p] %s - %s:%d - %s\n", (void*)s.address(), s.module(), s.filename(), s.line(), s.function());
+        }
+    }
+    
     return Break;
 }
 

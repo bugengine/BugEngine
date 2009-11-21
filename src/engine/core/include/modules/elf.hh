@@ -37,8 +37,8 @@ public:
     Elf(const char* filename, u64 baseAddress);
     ~Elf();
 
-    operator void*() const { return (void*)(m_endianness == msb_invalid); }
-    bool operator !() const { return m_endianness != msb_invalid; }
+    operator void*() const { return (void*)(m_endianness != msb_invalid); }
+    bool operator !() const { return m_endianness == msb_invalid; }
 private:
     Elf(const Elf& other);
     Elf& operator=(const Elf& other);

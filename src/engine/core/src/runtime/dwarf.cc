@@ -249,6 +249,7 @@ DwarfModule::DwarfModule(const ifilename& moduleName, const Module& m, u64 begin
 ,   m_end(begin+size)
 ,   m_moduleName(moduleName)
 {
+    be_info("loading module %s | %d-%d" | moduleName | begin | size);
     switch(m.endianness())
     {
     case Endianness_Little:
