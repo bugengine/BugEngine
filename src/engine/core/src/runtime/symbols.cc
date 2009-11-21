@@ -15,151 +15,76 @@
 
 #include    <modules/elf.hh>
 #include    <modules/pe.hh>
+#include    <modules/dwarf.hh>
+#include    <modules/pdb20.hh>
+#include    <modules/pdb70.hh>
 
 
 namespace BugEngine { namespace Runtime
 {
 
-Symbols::Symbol::Symbol()
-:   m_address(0)
-,   m_line(0)
-{
-    m_module[0] = 0;
-    m_filename[0] = 0;
-    m_function[0] = 0;
-}
-
-Symbols::Symbol::~Symbol()
+SymbolResolver::~SymbolResolver()
 {
 }
 
-//---------------------------------------------------------------------------//
-
-Symbols::Module::Module(const char *filename, u64 baseAddress)
-:   m_filename(filename)
-,   m_baseAddress(baseAddress)
+void SymbolResolver::fillSymbol(Symbol& symbol, u64 address, const char *module, const char *filename, const char *function, int line)
 {
+    strncpy(symbol.m_module, module, sizeof(symbol.m_module));
+    strncpy(symbol.m_filename, filename, sizeof(symbol.m_filename));
+    strncpy(symbol.m_function, function, sizeof(symbol.m_function));
+    symbol.m_address = address;
+    symbol.m_line = line;
 }
 
-Symbols::Module::~Module()
+refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next)
 {
-}
-
-std::vector<Symbols::Module> Symbols::Module::enumerate()
-{
-    std::vector<Symbols::Module> modules;
-#ifdef BE_PLATFORM_POSIX
-    void* handle = dlopen(0, RTLD_LAZY);
-    link_map* lmap;
-    dlinfo(handle, RTLD_DI_LINKMAP, &lmap);
-    for(int i = 0; lmap; lmap=lmap->l_next, i++)
+    switch(infos.type)
     {
-        if(i == 0 && (!lmap->l_name || !*lmap->l_name))
+    case SymbolInformations::PDB70:
+        // TODO
+        return next;
+    case SymbolInformations::PDB20:
+        // TODO
+        return next;
+    case SymbolInformations::Coff:
+        // TODO
+        return next;
+    case SymbolInformations::PEDwarf:
         {
-            /* main executable */
-            /* filename seems broken */
-            FILE* cmdline = fopen("/proc/self/cmdline", "r");
-            if(!cmdline)
-                continue;
-            char filename[4096];
-            fread(filename, 1, 4096, cmdline);
-            modules.push_back(Module(filename, lmap->l_addr));
+            PE pe(infos.filename.str().c_str(), 0);
+            if(pe)
+            {
+                refptr<SymbolResolver> resolver = new DwarfModule(infos.filename, pe, infos.offset, infos.size);
+                resolver->m_next = next;
+                return resolver;
+            }
         }
-        else
+        return next;
+    case SymbolInformations::ELFDwarf:
         {
-            modules.push_back(Module(lmap->l_name, lmap->l_addr));
+            Elf elf(infos.filename.str().c_str(), 0);
+            if(elf)
+            {
+                refptr<SymbolResolver> resolver = new DwarfModule(infos.filename, elf, infos.offset, infos.size);
+                resolver->m_next = next;
+                return resolver;
+            }
         }
+        return next;
+    case SymbolInformations::None:
+        return next;
+    default:
+        be_warning("Unknown symbol type for symbols %s" | infos.filename);
+        return next;
     }
-#elif defined(BE_PLATFORM_WIN32)
-    HANDLE process = ::GetCurrentProcess();
-    DWORD requiredSize;
-    ::EnumProcessModules(process, 0, 0, &requiredSize);
-    size_t moduleCount = requiredSize/sizeof(HMODULE);
-    Malloc::MemoryBlock<HMODULE> hmodules(moduleCount);
-    ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
-    for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)
-    {
-        char moduleName[32768];
-        MODULEINFO info;
-        ::GetModuleFileNameEx(process, hmodules[i], moduleName, sizeof(moduleName));
-        ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
-        modules.push_back(Module(moduleName, (u64)info.lpBaseOfDll));
-    }
-#else
-# error platform not supported yet...
-#endif
-    return modules;
 }
 
-void Symbols::Module::loadDebugInformation() const
+bool SymbolResolver::resolve(Callstack::Address& address, Symbol& symbol) const
 {
-    FILE* f = fopen(m_filename.str().c_str(), "rb");
-    if(f)
-    {
-        char signature[2];
-        fread(signature, 1, 2, f);
-        fclose(f);
-        if (signature[0] == 'M' && signature[1] == 'Z')
-        {
-            m_symbols = PE(m_filename).getSymbolResolver();
-        }
-        else if (signature[0] == 0x7f && signature[1] == 'E')
-        {
-            m_symbols = Elf(m_filename).getSymbolResolver();
-        }
-    }
+    if(!resolve(address.address(), symbol))
+        return m_next->resolve(address, symbol);
     else
-    {
-        be_error("Unable to open file %s"|m_filename);
-    }
-}
-
-bool Symbols::Module::resolve(const Callstack::Address& address, Symbol& result) const
-{
-    if(!m_symbols)
-    {
-        loadDebugInformation();
-        //be_assert(m_symbols, "Impossible to create a symbol resolver for module %s"|m_filename);
-    }
-    return m_symbols?m_symbols->resolve((u64)address.pointer()-m_baseAddress, result):false;
-}
-
-//---------------------------------------------------------------------------//
-
-Symbols::Symbols()
-{
-}
-
-Symbols::Symbols(_TargetSelf /*self*/)
-:   m_modules(Module::enumerate())
-{
-}
-
-Symbols::~Symbols()
-{
-}
-
-void Symbols::resolve(const Callstack::Address& address, Symbol& result) const
-{
-    result.m_address = address.pointer();
-    for (size_t i = 0; i < m_modules.size(); ++i)
-    {
-        if(m_modules[i].resolve(address, result))
-        {
-            return;
-        }
-    }
-    strncpy(result.m_module, "???", sizeof(result.m_module));
-    strncpy(result.m_filename, "???", sizeof(result.m_filename));
-    strncpy(result.m_function, "???", sizeof(result.m_function));
-}
-
-const Symbols& Symbols::runningSymbols()
-{
-    static Symbols s(Self);
-    return s;
+        return true;
 }
 
 }}
-
-

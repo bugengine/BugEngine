@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_LOG_HH_
-#define BE_CORE_LOG_HH_
+#ifndef BE_CORE_DEBUG_LOG_HH_
+#define BE_CORE_DEBUG_LOG_HH_
 /*****************************************************************************/
 #include <core/string/istring.hh>
 #include <minitl/string/format.hh>

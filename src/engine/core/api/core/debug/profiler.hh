@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_PROFILER_HH_
-#define BE_CORE_PROFILER_HH_
+#ifndef BE_CORE_DEBUG_PROFILER_HH_
+#define BE_CORE_DEBUG_PROFILER_HH_
 /*****************************************************************************/
 
 namespace BugEngine

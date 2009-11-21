@@ -81,7 +81,7 @@ T be_align(T value, size_t alignment)
 
 #include    <core/debug/assert.hh>
 #include    <core/string/istring.hh>
-#include    <core/log/logger.hh>
+#include    <core/debug/logger.hh>
 #include    <core/string/message.hh>
 
 #include    <maths/float.hh>

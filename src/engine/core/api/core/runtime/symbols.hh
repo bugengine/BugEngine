@@ -1,82 +1,69 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_DEBUG_SYMBOLS_HH_
-#define BE_CORE_DEBUG_SYMBOLS_HH_
+#ifndef BE_CORE_RUNTIME_SYMBOLS_HH_
+#define BE_CORE_RUNTIME_SYMBOLS_HH_
 /*****************************************************************************/
 #include    <core/runtime/callstack.hh>
 
 namespace BugEngine { namespace Runtime
 {
 
-class DwarfModule;
-class PDB;
+class Module;
+class SymbolResolver;
 
-class Symbols
+class Symbol
 {
-public:
-    class Symbol;
-    class Module;
-    class ISymbolResolver;
-public:
-    class Symbol
-    {
-        friend class Symbols;
-        friend class Module;
-        friend class DwarfModule;
-        friend class PDB;
-    private:
-        char        m_module[4096];
-        char        m_filename[4096];
-        char        m_function[4096];
-        const void* m_address;
-        int         m_line;
-    public:
-        Symbol();
-        ~Symbol();
-
-        const void* address() const     { return m_address; }
-        const char *module() const      { return m_module; }
-        const char *filename() const    { return m_filename; }
-        int         line() const        { return m_line; }
-        const char *function() const    { return m_function; }
-    };
-public:
-    class ISymbolResolver : public minitl::refcountable<void>
-    {
-    public:
-        virtual ~ISymbolResolver() { }
-        virtual bool resolve(u64 address, Symbol& result) const = 0;
-    };
-public:
-    class Module
-    {
-    private:
-        ifilename                               m_filename;
-        u64                                     m_baseAddress;
-        mutable refptr<const ISymbolResolver>   m_symbols;
-    private:
-        void loadDebugInformation() const;
-    public:
-        Module(const char* filename, u64 baseAddress);
-        ~Module();
-
-        static std::vector<Module> enumerate();
-        bool resolve(const Callstack::Address& address, Symbol& result) const;
-    };
+    friend class SymbolResolver;
+    friend class Module;
 private:
-    enum _TargetSelf { Self };
-    Symbols(_TargetSelf self);
+    char        m_module[4096];
+    char        m_filename[4096];
+    char        m_function[4096];
+    u64         m_address;
+    int         m_line;
 public:
-    Symbols();
-    ~Symbols();
+    u64         address() const     { return m_address; }
+    const char *module() const      { return m_module; }
+    const char *filename() const    { return m_filename; }
+    int         line() const        { return m_line; }
+    const char *function() const    { return m_function; }
+};
 
-    void addModule(const Module& m);
-    void resolve(const Callstack::Address& address, Symbol& result) const;
-
-    static const Symbols& runningSymbols();
+class SymbolResolver : public minitl::refcountable<void>
+{
 private:
-    std::vector<Module> m_modules;
+    refptr<const SymbolResolver>    m_next;
+protected:
+    static void fillSymbol(Symbol& symbol, u64 address, const char *module, const char *filename, const char *function, int line);
+    virtual bool resolve(u64 address, Symbol& symbol) const = 0;
+public:
+    struct SymbolInformations
+    {
+        enum SymbolType
+        {
+            None,
+            ELFDwarf,
+            PEDwarf,
+            Coff,
+            PDB20,
+            PDB70
+        };
+
+        SymbolType  type;
+        ifilename   filename;
+        istring     identifier;
+        istring     section;
+        u64         offset;
+        u64         size;
+
+        SymbolInformations() : type(None), filename(""), offset(0), size(0) { }
+    };
+
+    virtual ~SymbolResolver();
+    bool resolve(Callstack::Address& address, Symbol& symbol) const;
+
+    static refptr<const SymbolResolver> loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next);
 };
 
 }}

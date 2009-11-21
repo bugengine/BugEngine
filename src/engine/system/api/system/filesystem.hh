@@ -5,11 +5,11 @@
 #define BE_SYSTEM_FILESYSTEM_HH_
 /*****************************************************************************/
 #include    <core/string/istring.hh>
-#include    <core/log/exception.hh>
+#include    <core/debug/exception.hh>
 
 namespace BugEngine
 {
-   
+
 class FileSystemComponent;
 class AbstractMemoryStream;
 

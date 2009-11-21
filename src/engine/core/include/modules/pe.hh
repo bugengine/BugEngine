@@ -1,15 +1,15 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_DEBUG_PE_HH_
-#define BE_CORE_DEBUG_PE_HH_
+#ifndef BE_CORE_RUNTIME_PE_HH_
+#define BE_CORE_RUNTIME_PE_HH_
 /*****************************************************************************/
-#include <core/runtime/symbols.hh>
+#include <core/runtime/module.hh>
 
 namespace BugEngine { namespace Runtime
 {
 
-class PE
+class PE : public Module
 {
 private:
     struct StringTable
@@ -17,21 +17,18 @@ private:
         u32     size;
         char    strings[1];
     };
-    struct Section
-    {
-        const char *name;
-        u64         offset;
-        u64         size;
-    };
 private:
-    FILE*                   m_file;
-    const StringTable*      m_stringBuffer;
-    std::vector<Section>    m_sections;
+    FILE*                               m_file;
+    SymbolResolver::SymbolInformations  m_symbolInformations;
 public:
-    PE(const ifilename& filename);
+    PE(const char *filename, u64 baseAddress);
     ~PE();
 
-    refptr<const Symbols::ISymbolResolver> getSymbolResolver();
+    operator void*() const { return (void*) m_file; }
+    bool operator !() const { return m_file != 0; }
+
+    virtual Endianness endianness() const override { return Endianness_Little; }
+    virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
 };
 
 }}

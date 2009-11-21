@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <core/stdafx.h>
-#include    <core/log/profiler.hh>
+#include    <core/debug/profiler.hh>
 
 namespace BugEngine
 {

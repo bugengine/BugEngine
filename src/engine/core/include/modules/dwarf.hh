@@ -16,7 +16,7 @@ namespace Dwarf
     struct Abbreviation;
 }
 
-class DwarfModule : public Symbols::ISymbolResolver
+class DwarfModule : public SymbolResolver
 {
 private:
     class StringBuffer
@@ -66,7 +66,7 @@ private:
     char*                   m_stringPool;
 private:
     template< Endianness e >
-    void parse(const Elf& elf);
+    void parse(const Module& m);
     template< Endianness e >
     bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
     template< Endianness e >
@@ -74,10 +74,10 @@ private:
     template< Endianness e >
     bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations);
 public:
-    DwarfModule(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size);
+    DwarfModule(const ifilename& moduleName, const Module& m, u64 begin, u64 size);
     ~DwarfModule();
 
-    virtual bool resolve(u64, Symbols::Symbol&) const override;
+    virtual bool resolve(u64 address, Symbol& symbol) const override;
 
     const char *storeString(const char *string);
     const char *indexedString(u64 offset) const;

@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/debug/assert.hh>
 #include    <core/runtime/callstack.hh>
+#include    <core/runtime/module.hh>
 #include    <core/runtime/symbols.hh>
 
 #include    <stdio.h>
@@ -80,14 +81,29 @@ namespace BugEngine { namespace Debug
         {
             Runtime::Callstack::Address address[128];
             size_t result = Runtime::Callstack::backtrace(address, 128, 1);
-            Runtime::Symbols::Symbol s;
-            const Runtime::Symbols& symbols = Runtime::Symbols::runningSymbols();
-            for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+            Runtime::Symbol s;
+
+            static refptr<const Runtime::Module> executable;
+            static refptr<const Runtime::SymbolResolver> s_symbols;
+            if(!executable)
             {
-                symbols.resolve(*a, s);
-                (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", s.filename(), s.line(), s.function());
-                strcat(callstack, buffer);
-                OutputDebugString(buffer);
+                executable = Runtime::Module::self();
+            }
+            while(executable->next())
+            {
+                executable = executable->next();
+                Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+                s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
+            }
+            if(s_symbols)
+            {
+                for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+                {
+                    s_symbols->resolve(*a, s);
+                    (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", s.filename(), s.line(), s.function());
+                    strcat(callstack, buffer);
+                    OutputDebugString(buffer);
+                }
             }
         }
 

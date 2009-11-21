@@ -242,56 +242,55 @@ static const char* s_elfMachineType [] =
 "Tensilica Xtensa Architecture",                        // 94
 };
 
-Elf::Elf(const ifilename& filename)
-    :   m_filename(filename)
-    ,   m_stringPool(0)
-    ,   m_class(klass_invalid)
-    ,   m_endianness(msb_invalid)
-    ,   m_file(fopen(filename.str().c_str(), "rb"))
+Elf::Elf(const char *filename, u64 baseAddress)
+:   Module(filename, baseAddress)
+,   m_class(klass_invalid)
+,   m_endianness(msb_invalid)
 {
-    be_debug("loading file %s" | filename);
-    ElfIdentification id;
-    fread(&id, 1, sizeof(id), m_file);
-    be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
-    m_class = (ElfClass)id.klass;
-    m_endianness = (ElfEndianness)id.msb;
-    if(id.klass == klass_32 && id.msb == msb_littleendian)
+    FILE* file = fopen(filename, "rb");
+    if(file)
     {
-        be_debug("32 bits little-endian");
-        Elf::parse<klass_32, msb_littleendian>();
-    }
-    else if(id.klass == klass_64 && id.msb == msb_littleendian)
-    {
-        be_debug("64 bits little-endian");
-        Elf::parse<klass_64, msb_littleendian>();
-    }
-    else if(id.klass == klass_32 && id.msb == msb_bigendian)
-    {
-        be_debug("32 bits big-endian");
-        Elf::parse<klass_32, msb_bigendian>();
-    }
-    else if(id.klass == klass_64 && id.msb == msb_bigendian)
-    {
-        be_debug("64 bits big-endian");
-        Elf::parse<klass_64, msb_bigendian>();
-    }
-    else
-    {
-        be_notreached();
+        be_debug("loading file %s" | filename);
+        ElfIdentification id;
+        fread(&id, 1, sizeof(id), file);
+        be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
+        m_class = (ElfClass)id.klass;
+        m_endianness = (ElfEndianness)id.msb;
+        if(id.klass == klass_32 && id.msb == msb_littleendian)
+        {
+            be_debug("32 bits little-endian");
+            Elf::parse<klass_32, msb_littleendian>(file);
+        }
+        else if(id.klass == klass_64 && id.msb == msb_littleendian)
+        {
+            be_debug("64 bits little-endian");
+            Elf::parse<klass_64, msb_littleendian>(file);
+        }
+        else if(id.klass == klass_32 && id.msb == msb_bigendian)
+        {
+            be_debug("32 bits big-endian");
+            Elf::parse<klass_32, msb_bigendian>(file);
+        }
+        else if(id.klass == klass_64 && id.msb == msb_bigendian)
+        {
+            be_debug("64 bits big-endian");
+            Elf::parse<klass_64, msb_bigendian>(file);
+        }
+        else
+        {
+            be_notreached();
+        }
+        fclose(file);
     }
 }
 
 Elf::~Elf()
 {
-    be_free(const_cast<char*>(m_stringPool));
-    fclose(m_file);
 }
 
 template< ElfClass klass, ElfEndianness e >
-void Elf::parse()
+void Elf::parse(FILE* f)
 {
-    FILE* f = m_file;
-
     ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
     be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
@@ -303,47 +302,42 @@ void Elf::parse()
     fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
+    const char *stringPool = 0;
+
     {
         char* strings = (char*)be_malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
         fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
         fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
-        m_stringPool = strings;
+        stringPool = strings;
     }
     
     for(int i = 0; i < header.shnum; ++i)
     {
-        Section sec = { m_stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
+        Section sec = { stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
         m_sections.push_back(sec);
     }
+    be_free(stringPool);
     freea(sections);
 }
 
-refptr<const Symbols::ISymbolResolver> Elf::getSymbolResolver()
+SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
 {
-    for(const Section* s = begin(); s != end(); ++s)
+    SymbolResolver::SymbolInformations result;
+    result.type = SymbolResolver::SymbolInformations::ELFDwarf;
+    const Section& code = (*this)[".code"];
+    result.offset = m_baseAddress + code.offset;
+    result.size = code.size;
+    const Section& debug_link = (*this)["debug_link"];
+    if(debug_link)
     {
-        if(strncmp(s->name, ".text", 5) == 0)
-        {
-            return new DwarfModule(m_filename, *this, s->offset, s->size);
-        }
+        Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));
+        result.filename = ifilename(filename);
     }
-    return 0;
-}
-
-const Elf::Section* Elf::begin() const
-{
-    return &m_sections[0];
-}
-
-const Elf::Section* Elf::end() const
-{
-    return &m_sections[m_sections.size()];
-}
-
-void Elf::readSection(const Section* s, void* buffer) const
-{
-    fseek(m_file, checked_numcast<long>(s->fileOffset), SEEK_SET);
-    fread(buffer, checked_numcast<long>(s->fileSize), 1, m_file);
+    else
+    {
+        result.filename = m_filename;
+    }
+    return result;
 }
 
 }}
