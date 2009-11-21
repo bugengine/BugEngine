@@ -8,8 +8,8 @@ def set_options(opt):
 
 def configure(conf):
 	conf.env['PLATFORM'] = ['linux', 'posix']
-	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']	= '%s.so'
+	conf.env['library_PATTERN'] = 'lib%s.a'
+	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
 	
 	conf.env.append_unique('CCDEFINES', ['LINUX', '_LINUX', '_LINUX_', '__LINUX__'])
