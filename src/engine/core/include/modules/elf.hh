@@ -1,10 +1,10 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_DEBUG_ELF_HH_
-#define BE_CORE_DEBUG_ELF_HH_
+#ifndef BE_CORE_RUNTIME_ELF_HH_
+#define BE_CORE_RUNTIME_ELF_HH_
 /*****************************************************************************/
-#include    <core/runtime/symbols.hh>
+#include    <core/runtime/module.hh>
 
 namespace BugEngine { namespace Runtime
 {
@@ -25,42 +25,26 @@ enum ElfEndianness
 
 
 
-class Elf
+class Elf : public Module
 {
-public:
-    struct Section
-    {
-        const char *    name;
-        u64             offset;
-        u64             size;
-        u64             fileOffset;
-        u64             fileSize;
-    };
 private:
     template< ElfClass klass, ElfEndianness endianness >
-    void parse();
+    void parse(FILE* file);
 private:
-    const ifilename         m_filename;
-    std::vector<Section>    m_sections;
-    const char *            m_stringPool;
     ElfClass                m_class;
     ElfEndianness           m_endianness;
-    FILE*                   m_file;
 public:
-    Elf(const ifilename& filename);
+    Elf(const char* filename, u64 baseAddress);
     ~Elf();
 
-    refptr<const Symbols::ISymbolResolver> getSymbolResolver();
-
-    const Section* begin() const;
-    const Section* end() const;
-
-    void readSection(const Section* section, void* buffer) const;
-
-    ElfEndianness endianness() const { return m_endianness; }
+    operator void*() const { return (void*)(m_endianness == msb_invalid); }
+    bool operator !() const { return m_endianness != msb_invalid; }
 private:
     Elf(const Elf& other);
     Elf& operator=(const Elf& other);
+
+    virtual Endianness endianness() const override { return m_endianness == msb_littleendian ? Endianness_Little : Endianness_Big; };
+    virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
 };
 
 }}

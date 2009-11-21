@@ -15,6 +15,11 @@ Callstack::Address::Address()
 }
 
 Callstack::Address::Address(const void* address)
+:   m_address(reinterpret_cast<u64>(address))
+{
+}
+
+Callstack::Address::Address(u64 address)
 :   m_address(address)
 {
 }
@@ -37,7 +42,7 @@ Callstack::Address::~Address()
 {
 }
 
-const void* Callstack::Address::pointer() const
+u64 Callstack::Address::address() const
 {
     return m_address;
 }

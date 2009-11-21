@@ -3,7 +3,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <core/log/logger.hh>
+#include    <core/debug/logger.hh>
 #include    <unistd.h>
 
 namespace BugEngine

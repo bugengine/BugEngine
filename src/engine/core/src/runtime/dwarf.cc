@@ -136,7 +136,7 @@ public:
     operator const void*() const;
     bool operator !() const;
 
-    void seek(u64 offset) { m_position = offset; be_assert(m_position < m_size, "seekking an invalid position : %d (size is %d)" | m_position | m_size); }
+    void seek(u64 offset) { m_position = offset; be_assert(m_position < m_size, "seeking an invalid position : %d (size is %d)" | m_position | m_size); }
 public:
     Buffer& operator>>(Dwarf::size_t& value);
     Buffer& operator>>(Dwarf::offset_t& value);
@@ -244,20 +244,20 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u8&
 
 
 
-DwarfModule::DwarfModule(const ifilename& moduleName, const Elf& elf, u64 begin, u64 size)
+DwarfModule::DwarfModule(const ifilename& moduleName, const Module& m, u64 begin, u64 size)
 :   m_begin(begin)
 ,   m_end(begin+size)
 ,   m_moduleName(moduleName)
 {
-    switch(elf.endianness())
+    switch(m.endianness())
     {
-    case msb_littleendian:
+    case Endianness_Little:
         be_debug("parsing littleendian");
-        parse<Endianness_Little>(elf);
+        parse<Endianness_Little>(m);
         break;
-    case msb_bigendian:
+    case Endianness_Big:
         be_debug("parsing bigendian");
-        parse<Endianness_Big>(elf);
+        parse<Endianness_Big>(m);
         break;
     default:
         be_unimplemented();
@@ -268,16 +268,19 @@ DwarfModule::~DwarfModule()
 {
 }
 
-bool DwarfModule::resolve(u64 address, Symbols::Symbol& symbol) const
+bool DwarfModule::resolve(u64 address, Symbol& symbol) const
 {
     if(address >= m_begin && address < m_end)
     {
-        strncpy(symbol.m_module, m_moduleName.str().c_str(), sizeof(symbol.m_module));
         AddressRange r; r.begin = r.end = address;
         UnitMap::const_iterator it = m_units.find(r);
         if(it != m_units.end())
         {
-            strncpy(symbol.m_filename, it->second.name, sizeof(symbol.m_filename));
+            fillSymbol(symbol, address, m_moduleName[m_moduleName.size()-1].c_str(), it->second.name, "", 0);
+        }
+        else
+        {
+            fillSymbol(symbol, address, m_moduleName[m_moduleName.size()-1].c_str(), "", "", 0);
         }
         return true;
     }
@@ -285,7 +288,7 @@ bool DwarfModule::resolve(u64 address, Symbols::Symbol& symbol) const
 }
 
 template< Endianness endianness >
-void DwarfModule::parse(const Elf& elf)
+void DwarfModule::parse(const Module& module)
 {
     u8* debugInfo = 0;
     u64 debugInfoSize = 0;
@@ -293,32 +296,33 @@ void DwarfModule::parse(const Elf& elf)
     u64 debugAbbrevSize = 0;
     u8* lineProgram = 0;
 
-    for (const Elf::Section* s = elf.begin(); s != elf.end(); ++s)
+    const Module::Section& debug_str = module[".debug_str"];
+    if(debug_str)
     {
-        if(strcmp(s->name, ".debug_str") == 0)
-        {
-            m_stringPool = (char*)be_malloc(checked_numcast<size_t>(s->fileSize));
-            elf.readSection(s, m_stringPool);
-            StringBuffer* previous = m_strings.detach();
-            m_strings.reset(new StringBuffer(m_stringPool, s->fileSize, previous));
-        }
-        if(strcmp(s->name, ".debug_info") == 0)
-        {
-            debugInfo = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
-            debugInfoSize = s->fileSize;
-            elf.readSection(s, debugInfo);
-        }
-        if(strcmp(s->name, ".debug_abbrev") == 0)
-        {
-            debugAbbrev = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
-            debugAbbrevSize = s->fileSize;
-            elf.readSection(s, debugAbbrev);
-        }
-        if(strcmp(s->name, ".debug_line") == 0)
-        {
-            lineProgram = (u8*)be_malloc(checked_numcast<size_t>(s->fileSize));
-            elf.readSection(s, lineProgram);
-        }
+        m_stringPool = (char*)be_malloc(checked_numcast<size_t>(debug_str.fileSize));
+        module.readSection(debug_str, m_stringPool);
+        StringBuffer* previous = m_strings.detach();
+        m_strings.reset(new StringBuffer(m_stringPool, debug_str.fileSize, previous));
+    }
+    const Module::Section& debug_info = module[".debug_info"];
+    if(debug_info)
+    {
+        debugInfo = (u8*)be_malloc(checked_numcast<size_t>(debug_info.fileSize));
+        debugInfoSize = debug_info.fileSize;
+        module.readSection(debug_info, debugInfo);
+    }
+    const Module::Section& debug_abbrev = module[".debug_abbrev"];
+    if(debug_abbrev)
+    {
+        debugAbbrev = (u8*)be_malloc(checked_numcast<size_t>(debug_abbrev.fileSize));
+        debugAbbrevSize = debug_abbrev.fileSize;
+        module.readSection(debug_abbrev, debugAbbrev);
+    }
+    const Module::Section& debug_line = module[".debug_line"];
+    if(debug_line)
+    {
+        lineProgram = (u8*)be_malloc(checked_numcast<size_t>(debug_line.fileSize));
+        module.readSection(debug_line, lineProgram);
     }
 
     minitl::vector<Dwarf::Abbreviation> abbrev;
@@ -334,6 +338,7 @@ void DwarfModule::parse(const Elf& elf)
         info >> unit.version;
         info >> unit.abbrev;
         info >> unit.ptrSize;
+        be_info("%d/%d" | unit.length | unit.abbrev);
 
         abbreviations.seek(unit.abbrev);
         while(readAbbreviation(abbreviations, abbrev)) /*again*/;

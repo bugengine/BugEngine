@@ -6,7 +6,7 @@
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
-#include    <core/log/logger.hh>
+#include    <core/debug/logger.hh>
 #include    <maths/vector.hh>
 #include    <maths/matrix.hh>
 

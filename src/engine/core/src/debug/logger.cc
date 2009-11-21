@@ -3,8 +3,8 @@
 
 
 #include    <core/stdafx.h>
-#include    <core/log/logger.hh>
-#include    <core/log/exception.hh>
+#include    <core/debug/logger.hh>
+#include    <core/debug/exception.hh>
 
 #include    <minitl/ptr/scopedptr.hh>
 
