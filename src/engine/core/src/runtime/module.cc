@@ -51,10 +51,13 @@ refptr<const Module> Module::self()
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
             s_module = new Elf(filename, lmap->l_addr);
+            module = s_module;
         }
         else
         {
-            s_module->m_depends.push_back(new Elf(lmap->l_name, lmap->l_addr));
+            refptr<Module> newModule = new Elf(lmap->l_name, lmap->l_addr);
+            module->m_next = newModule;
+            module = newModule;
         }
     }
 #elif defined(BE_PLATFORM_WIN32)

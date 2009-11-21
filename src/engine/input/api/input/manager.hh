@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Input
 {
 
-class Manager
+class be_api(INPUT) Manager
 {
 private:
     class WindowCommunication;

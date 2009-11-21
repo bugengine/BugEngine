@@ -8,7 +8,7 @@
 namespace BugEngine
 {
 
-class SettingsManager
+class be_api(CORE) SettingsManager
 {
 public:
     static SettingsManager* getManager();

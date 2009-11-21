@@ -38,6 +38,7 @@ void SymbolResolver::fillSymbol(Symbol& symbol, u64 address, const char *module,
 
 refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next)
 {
+    be_info("%s" | infos.filename);
     switch(infos.type)
     {
     case SymbolInformations::PDB70:
@@ -81,8 +82,11 @@ refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformation
 
 bool SymbolResolver::resolve(Callstack::Address& address, Symbol& symbol) const
 {
+    fillSymbol(symbol, address.address(), "unknown module", "?", "?", 0);
     if(!resolve(address.address(), symbol))
-        return m_next->resolve(address, symbol);
+    {
+        return m_next ? m_next->resolve(address, symbol) : false;
+    }
     else
         return true;
 }
