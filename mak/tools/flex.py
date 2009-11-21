@@ -16,8 +16,7 @@ TaskGen.declare_chain(
 	rule = '${FLEX} -o${TGT} ${FLEXFLAGS} ${SRC}',
 	ext_in = '.l .ll',
 	decider = decide_ext,
-	before = 'cc cxx',
-	shell=True
+	before = 'cc cxx'
 )
 
 def detect(conf):

@@ -94,21 +94,21 @@ def find_cross_gcc(conf):
 		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 
-	conf.env['CCFLAGS_debug'] = ['-g', '-D_DEBUG', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_release'] = ['-g', '-O1']
-	conf.env['CXXFLAGS_release'] = ['-g', '-O1', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_release'] = ['-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
+	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_release'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_profile'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_profile'] = ['-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_profile'] = ['-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_profile'] = ['-pipe', '-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_profile'] = ['-pipe', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_profile'] = ['-pipe', '-s', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_final'] = ['-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_final'] = ['-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_final'] = ['-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['CCFLAGS_final'] = ['-pipe', '-DNDEBUG', '-O3']
+	conf.env['CXXFLAGS_final'] = ['-pipe', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_final'] = ['-pipe', '-s', '-Wl,-x', '-Wl,-O2']
 	
 	if v['GCC_CONFIGURED_PLATFORM'] == 'linux':
 		conf.env.append_unique('CCFLAGS', ['-fPIC'])
