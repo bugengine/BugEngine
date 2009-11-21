@@ -13,7 +13,7 @@ namespace BugEngine
 
 Plugin::Plugin(const istring &pluginName)
 {
-    minitl::format<> f = (minitl::format<>("%s.so") | pluginName.c_str());
+    minitl::format<> f = (minitl::format<>("lib%s.so") | pluginName.c_str());
     FPluginHandle = dlopen((Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
     if(! FPluginHandle)
     {
