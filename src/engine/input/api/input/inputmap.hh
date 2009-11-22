@@ -35,9 +35,6 @@ public:
     void    setActive(bool active);
 
     be_metaclass(INPUT,InputMap,Object)
-    private:
-        scopedptr<Manager>  m_manager;
-        static void init(MetaClass* mc);
     public:
         const Manager* getManager() const;
     be_properties

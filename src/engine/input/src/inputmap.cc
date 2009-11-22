@@ -11,15 +11,11 @@ namespace BugEngine { namespace Input
 {
 
 be_metaclass_impl("Input",InputMap);
-void InputMap::MetaClass::init(MetaClass* mc)
-{
-    super_t::init(mc);
-    mc->m_manager.reset(new Manager);
-}
 
 const Manager* InputMap::MetaClass::getManager() const
 {
-    return m_manager.get();
+    static Manager s_manager;
+    return &s_manager;
 }
 
 InputMap::InputMap()
