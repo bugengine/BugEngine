@@ -494,12 +494,11 @@ PE::PE(const char *filename, u64 baseAddress)
                 }
                 name = strings->strings+offset-4;
             }
-            be_info("section name : %s" | name);
-            Section sec = { name, sections[section].rawDataOffset, sections[section].rawDataSize, sections[section].offset,  sections[section].size };
+            Section sec = { name, sections[section].offset,  sections[section].size, sections[section].rawDataOffset, sections[section].rawDataSize };
             m_sections.push_back(sec);
         }
         const Section& code = (*this)[".text"];
-        be_assert(code, "No .code section in executable %s" | m_filename);
+        be_assert(code, "No .text section in executable %s" | m_filename);
         const Section& debug_link = (*this)["debug_link"];
         if(debug_link)
         {

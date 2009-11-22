@@ -88,6 +88,8 @@ namespace BugEngine { namespace Debug
             if(!executable)
             {
                 executable = Runtime::Module::self();
+                Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+                s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
             }
             while(executable->next())
             {
@@ -100,7 +102,7 @@ namespace BugEngine { namespace Debug
                 for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
                 {
                     s_symbols->resolve(*a, s);
-                    (void)_snprintf(buffer, BUFFER_SIZE-1, "%s:%d : %s\r\n", s.filename(), s.line(), s.function());
+                    (void)_snprintf(buffer, BUFFER_SIZE-1, "[%s] %s(%d) : %s\r\n", s.module(), s.filename(), s.line(), s.function());
                     strcat(callstack, buffer);
                     OutputDebugString(buffer);
                 }

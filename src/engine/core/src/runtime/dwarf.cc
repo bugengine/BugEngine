@@ -175,11 +175,15 @@ bool DwarfModule::Buffer<endianness>::operator !() const
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwarf::size_t& value)
 {
-    value.value = *(Integer<u32,endianness>*)(m_buffer+m_position);
+    Integer<u32,endianness> m;
+    memcpy(&m, m_buffer+m_position, 4);
+    value.value = m;
     m_position += 4;
     if(value.value == 0xffffffff)
     {
-        value.value = *(Integer<u64,endianness>*)(m_buffer+m_position);
+        Integer<u64,endianness> m;
+        memcpy(&m, m_buffer+m_position, 8);
+        value.value = m;
         m_position += 8;
         m_64 = true;
     }
@@ -191,12 +195,16 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
 {
     if(m_64)
     {
-        value.value = *(Integer<u64,endianness>*)(m_buffer+m_position);
+        Integer<u64,endianness> m;
+        memcpy(&m, m_buffer+m_position, 8);
+        value.value = m;
         m_position += 8;
     }
     else
     {
-        value.value = *(Integer<u32,endianness>*)(m_buffer+m_position);
+        Integer<u32,endianness> m;
+        memcpy(&m, m_buffer+m_position, 4);
+        value.value = m;
         m_position += 4;
     }
     return *this;
@@ -219,16 +227,20 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
     template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u32& value)
 {
-    value = *(Integer<u32,endianness>*)(m_buffer+m_position);
-    m_position+=4;
+    Integer<u32,endianness> m;
+    memcpy(&m, m_buffer+m_position, 4);
+    value = m;
+    m_position += 4;
     return *this;
 }
 
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u16& value)
 {
-    value = *(Integer<u16,endianness>*)(m_buffer+m_position);
-    m_position+=2;
+    Integer<u16,endianness> m;
+    memcpy(&m, m_buffer+m_position, 2);
+    value = m;
+    m_position += 2;
     return *this;
 }
 
@@ -303,20 +315,20 @@ void DwarfModule::parse(const Module& module)
         m_stringPool = (char*)be_malloc(checked_numcast<size_t>(debug_str.fileSize));
         module.readSection(debug_str, m_stringPool);
         StringBuffer* previous = m_strings.detach();
-        m_strings.reset(new StringBuffer(m_stringPool, debug_str.fileSize, previous));
+        m_strings.reset(new StringBuffer(m_stringPool, debug_str.size, previous));
     }
     const Module::Section& debug_info = module[".debug_info"];
     if(debug_info)
     {
         debugInfo = (u8*)be_malloc(checked_numcast<size_t>(debug_info.fileSize));
-        debugInfoSize = debug_info.fileSize;
+        debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
     if(debug_abbrev)
     {
         debugAbbrev = (u8*)be_malloc(checked_numcast<size_t>(debug_abbrev.fileSize));
-        debugAbbrevSize = debug_abbrev.fileSize;
+        debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
@@ -339,7 +351,6 @@ void DwarfModule::parse(const Module& module)
         info >> unit.version;
         info >> unit.abbrev;
         info >> unit.ptrSize;
-        be_info("%d/%d" | unit.length | unit.abbrev);
 
         abbreviations.seek(unit.abbrev);
         while(readAbbreviation(abbreviations, abbrev)) /*again*/;
