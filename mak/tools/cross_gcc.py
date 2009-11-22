@@ -94,12 +94,12 @@ def find_cross_gcc(conf):
 		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 
-	conf.env['CCFLAGS_debug'] = ['-pipe', '-gdwarf3', '-D_DEBUG', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-pipe', '-gdwarf3', '-D_DEBUG', '-Wno-invalid-offsetof']
+	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
 
-	conf.env['CCFLAGS_release'] = ['-pipe', '-gdwarf3', '-O1']
-	conf.env['CXXFLAGS_release'] = ['-pipe', '-gdwarf3', '-O1', '-Wno-invalid-offsetof']
+	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
+	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_release'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
 
 	conf.env['CCFLAGS_profile'] = ['-pipe', '-DNDEBUG', '-O3']
