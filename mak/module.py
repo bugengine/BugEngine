@@ -337,8 +337,7 @@ class library(module):
 		for envname in builder.env['BUILD_VARIANTS']:
 			env = builder.all_envs[envname]
 			options = coptions()
-			ioptions = coptions()
-			task = self.gentask(builder, env, envname, 'cobjects', options, ioptions)
+			task = self.gentask(builder, env, envname, 'cobjects', options)
 		return self
 			
 """ shared lib """
@@ -361,7 +360,7 @@ class shared_library(module):
 						depends,
 						category,
 						localoptions,
-						globaloptions,
+						globaloptions.merge(coptions( defines = [name+'_dll'] )),
 						localarchoptions,
 						globalarchoptions,
 						platforms,
@@ -377,8 +376,7 @@ class shared_library(module):
 			options = coptions()
 			options.defines.add('BUILDING_DLL')
 			options.defines.add('_USRDLL')
-			ioptions = coptions( defines = [self.name+'_dll'] )
-			task = self.gentask(builder, env, envname, 'cshlib', options, ioptions)
+			task = self.gentask(builder, env, envname, 'cshlib', options)
 		return self
 
 """ static lib """
@@ -493,11 +491,7 @@ class game(module):
 		for envname in builder.env['BUILD_VARIANTS']:
 			env = builder.all_envs[envname]
 			options = coptions()
-			ioptions = coptions( )
-			for d in self.depends:
-				if env['STATIC'] and d.__class__.__name__ == 'library':
-					ioptions.defines.add(d.name + '_dll')
-			task = self.gentask(builder, env, envname, 'cprogram', options, ioptions)
+			task = self.gentask(builder, env, envname, 'cprogram', options)
 		return self
 
 
@@ -535,11 +529,7 @@ class tool(module):
 		for envname in builder.env['BUILD_VARIANTS']:
 			env = builder.all_envs[envname]
 			options = coptions()
-			ioptions = coptions( )
-			for d in self.depends:
-				if env['STATIC'] and d.__class__.__name__ == 'library':
-					ioptions.defines.add(d.name + '_dll')
-			task = self.gentask(builder, env, envname, 'cprogram', options, ioptions)
+			task = self.gentask(builder, env, envname, 'cprogram', options)
 		return self
 
 

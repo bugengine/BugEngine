@@ -117,7 +117,7 @@ class VCproj:
 				self.output.write('				AdditionalLibraryDirectories="%s"\n' % libdirs)
 				if self.type == 'plugin':
 					self.output.write('				OutputFile="$(OutDir)data\\plugins\\%s.dll"\n' % self.name)
-				elif self.type == 'dynamic_library':
+				elif self.type == 'shared_library':
 					self.output.write('				OutputFile="$(OutDir)%s.dll"\n' % self.name)
 				else:
 					self.output.write('				OutputFile="$(OutDir)%s.exe"\n' % self.name)
