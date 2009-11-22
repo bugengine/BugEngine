@@ -25,7 +25,8 @@ static inline void** st_next(void** stack_pointer)
 BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
     void** stackPointer;
-    stackPointer = (void**)(&buffer)-2;
+//    stackPointer = (void**)(&buffer)-2;
+    __asm__ volatile ("mr %0,1" : "=r" (stackPointer));
     size_t result = 0;
     while(stackPointer && result < count)
     {
