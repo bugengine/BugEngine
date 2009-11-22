@@ -38,7 +38,6 @@ void SymbolResolver::fillSymbol(Symbol& symbol, u64 address, const char *module,
 
 refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next)
 {
-    be_info("%s" | infos.filename);
     switch(infos.type)
     {
     case SymbolInformations::PDB70:

@@ -60,7 +60,7 @@ T be_align(T value, size_t alignment)
 #define     NOEXPORT
 #define     NONEEXPORT
 #define     FORCEEXPORT         BE_EXPORT
-#define be_api(module) module##EXPORT
+#define     be_api(module) module##EXPORT
 
 #include    <core/memory/malloc.hh>
 #include    <cstdlib>
