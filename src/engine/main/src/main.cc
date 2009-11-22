@@ -80,7 +80,7 @@ namespace
             fflush(m_logFile);
             #ifdef _WIN32
                 OutputDebugString(filename);
-                OutputDebugString(minitl::format<>(":%d (") | line);
+                OutputDebugString(minitl::format<>("(%d) :") | line);
                 OutputDebugString(logname.c_str());
                 OutputDebugString(")\t\t(");
                 OutputDebugString(s_logNames[level]);
