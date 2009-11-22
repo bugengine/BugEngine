@@ -36,17 +36,22 @@ def build(bld):
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
-	
-	core			= module.library('core',[dbghelp, win32, pthreads])
-	network			= module.library('network',[core])
-	rtti			= module.library('rtti',[core,network] )
-	system			= module.library('system',[core,rtti] )
-	data			= module.library('data',[core,rtti,system] )
-	input			= module.library('input',[core,rtti] )
-	graphics		= module.library('graphics',[core, rtti, system, input, freetype ] )
-	sound			= module.library('sound',[core,rtti,system, openal, oggvorbis] )
-	physics			= module.library('physics',[core,rtti,system, bullet] )
-	mobile			= module.library('mobile',[core,rtti,system,graphics, sound, physics, input] )
+
+	if False:
+		lib = module.shared_library
+	else:
+		lib = module.library
+
+	core			= lib('core',[dbghelp, win32, pthreads])
+	network			= lib('network',[core])
+	rtti			= lib('rtti',[core,network] )
+	system			= lib('system',[core,rtti] )
+	data			= lib('data',[core,rtti,system] )
+	input			= lib('input',[core,rtti] )
+	graphics		= lib('graphics',[core, rtti, system, input, freetype ] )
+	sound			= lib('sound',[core,rtti,system, openal, oggvorbis] )
+	physics			= lib('physics',[core,rtti,system, bullet] )
+	mobile			= lib('mobile',[core,rtti,system,graphics, sound, physics, input] )
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
