@@ -37,7 +37,8 @@ def build(bld):
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	if False:
+	shared = True
+	if shared:
 		lib = module.shared_library
 	else:
 		lib = module.library
@@ -55,12 +56,16 @@ def build(bld):
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
 	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
-	win32			= module.library('win32', [discworld], category='plugin', platforms=['win32'])
-	X				= module.library('X', [discworld,X11], category='plugin', platforms=['posix'])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, opengl]).post(bld)
-	renderDx9		= module.plugin('renderDx9', [discworld, win32, cgDx, directx9], platforms=['win32']).post(bld)
-	lua				= module.plugin('lua', [discworld, lualib]).post(bld)
-	squirrel		= module.plugin('squirrel', [discworld, squirellib]).post(bld)
+	if shared:
+		depends = [core, rtti, system, data, input, graphics, sound, physics, mobile, discworld]
+	else:
+		depends = [discworld]
+	win32			= module.library('win32', depends, category='plugin', platforms=['win32'])
+	X				= module.library('X', depends+[X11], category='plugin', platforms=['posix'])
+	renderOpenGL	= module.plugin('renderOpenGL', depends+[win32, X, opengl]).post(bld)
+	renderDx9		= module.plugin('renderDx9', depends+[win32, cgDx, directx9], platforms=['win32']).post(bld)
+	lua				= module.plugin('lua', depends+[lualib]).post(bld)
+	squirrel		= module.plugin('squirrel', depends+[squirellib]).post(bld)
 
 	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['win32', 'posix']).post(bld)
 
