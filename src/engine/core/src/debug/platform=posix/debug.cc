@@ -45,7 +45,7 @@ AssertionResult defaultAssertionCallback( const char *file,
     }
     if(s_symbols)
     {
-        fprintf(stderr, "Callstack (%d):\n", result);
+        fprintf(stderr, "Callstack:\n");
         for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
         {
             s_symbols->resolve(*a, s);
