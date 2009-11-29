@@ -331,6 +331,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     if(debug_link)
     {
         Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));
+        readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }
     else

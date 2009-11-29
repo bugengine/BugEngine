@@ -26,8 +26,8 @@ public:
         u64             fileOffset;
         u64             fileSize;
 
-        bool operator !() const { return offset == 0; }
-        operator void* () const { return (void*)offset; }
+        bool operator !() const { return fileSize == 0; }
+        operator void* () const { return (void*)fileSize; }
     };
 private:
     friend class Section;
