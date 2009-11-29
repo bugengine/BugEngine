@@ -499,10 +499,11 @@ PE::PE(const char *filename, u64 baseAddress)
         }
         const Section& code = (*this)[".text"];
         be_assert(code, "No .text section in executable %s" | m_filename);
-        const Section& debug_link = (*this)["debug_link"];
+        const Section& debug_link = (*this)[".gnu_debuglink"];
         if(debug_link)
         {
             Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));
+            readSection(debug_link, filename);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(filename);
             m_symbolInformations.offset = m_baseAddress + code.offset;
