@@ -33,22 +33,23 @@ protected:
     virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
 };
 
-class be_api(CORE) Logger : public minitl::refcountable<>
+class be_api(CORE) Logger : public minitl::refcountable
 {
+    friend class minitl::ref<Logger>;
 private:
     std::vector< ILogListener* >                m_listeners;
-    std::map< istring, minitl::refptr<Logger> > m_children;
-    minitl::weakptr<Logger>                     m_parent;
+    std::map< istring, minitl::ref<Logger> >    m_children;
+    minitl::weak<Logger>                        m_parent;
     istring                                     m_name;
 private:
     Logger();
 public:
-	Logger(minitl::refptr<Logger> parent, const istring& name);
+    Logger(minitl::ref<Logger> parent, const istring& name);
     ~Logger();
 
-    static minitl::refptr<Logger> instance(const inamespace& name);
-    static bool                  log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
-    static minitl::refptr<Logger> root();
+    static minitl::ref<Logger> instance(const inamespace& name);
+    static bool                log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
+    static minitl::ref<Logger> root();
 
     void addListener(ILogListener* listener);
     bool log(LogLevel level, const char *filename, int line, const char *msg);

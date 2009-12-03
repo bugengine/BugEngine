@@ -13,7 +13,7 @@ class be_api(RTTI) Test : public BugEngine::Object
 {
 private:
     int m_value;
-    refptr<Test> m_other;
+    ref<Test> m_other;
 public:
     Test();
     ~Test();

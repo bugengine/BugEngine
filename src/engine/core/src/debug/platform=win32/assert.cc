@@ -83,8 +83,8 @@ namespace BugEngine { namespace Debug
             size_t result = Runtime::Callstack::backtrace(address, 128, 1);
             Runtime::Symbol s;
 
-            static refptr<const Runtime::Module> executable;
-            static refptr<const Runtime::SymbolResolver> s_symbols;
+            static weak<const Runtime::Module> executable;
+            static ref<const Runtime::SymbolResolver> s_symbols;
             if(!executable)
             {
                 executable = Runtime::Module::self();

@@ -51,20 +51,40 @@ public:
     }
 };
 
-class be_api(SYSTEM) FileSystem
+class be_api(SYSTEM) FileSystem : public minitl::refcountable
 {
 private:
-    class FileSystemMountPoint;
+    class FileSystemMountPoint : public pointer
+    {
+    public:
+        typedef std::map< istring, scoped<FileSystemMountPoint> > ChildrenMap;
+    private:
+        ref<const FileSystemComponent>  m_component;
+        ChildrenMap                     m_children;
+    public:
+        FileSystemMountPoint(ref<const FileSystemComponent> component = ref<const FileSystemComponent>());
+        ~FileSystemMountPoint();
+
+        weak<FileSystemMountPoint> getOrCreate(const istring& child);
+        weak<FileSystemMountPoint> get(const istring& child);
+        void erase(const istring& child);
+
+        void mount(const ref<const FileSystemComponent>& component);
+        void umount();
+        weak<const FileSystemComponent>  component() const;
+
+        bool empty() const;
+    };
 private:
-    FileSystemMountPoint*   m_root;
+    scoped<FileSystemMountPoint> m_root;
 public:
-    static FileSystem* instance();
+    static weak<FileSystem> instance();
     FileSystem(void);
     ~FileSystem(void);
 
-    void mount(const ipath& prefix, refptr<const FileSystemComponent> component);
+    void mount(const ipath& prefix, ref<const FileSystemComponent> component);
     void umount(const ipath& prefix);
-    refptr<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
+    ref<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
     size_t age(const ifilename& file) const;
 
     std::set<ifilename> listFiles(const ipath& prefix, const char* extension = 0);

@@ -11,7 +11,7 @@ namespace BugEngine { namespace System
 class MemoryStream;
 class ifilename;
 
-class Pipeline
+class Pipeline : public minitl::pointer
 {
 };
 

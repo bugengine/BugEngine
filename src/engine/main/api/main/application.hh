@@ -20,21 +20,21 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
-    scopedptr<Scheduler>    m_scheduler;
-    refptr<World>           m_world;
-    scopedptr< BaseTask >   m_updateInputTask;
-    scopedptr< BaseTask >   m_updateMemoryTask;
-    scopedptr< BaseTask >   m_updateSchedulerTask;
-    refptr<Frame>           m_frame;
+    scoped<Scheduler>    m_scheduler;
+    ref<World>           m_world;
+    scoped< BaseTask >   m_updateInputTask;
+    scoped< BaseTask >   m_updateMemoryTask;
+    scoped< BaseTask >   m_updateSchedulerTask;
+    ref<Frame>           m_frame;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
     int run(void);
 
-    void createWindow(Graphics::WindowFlags f, refptr<Graphics::Scene> scene);
+    void createWindow(Graphics::WindowFlags f, ref<Graphics::Scene> scene);
 
-    const Scheduler* scheduler() const  { return m_scheduler.get(); }
+    weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private :
     Application(void);
     Application(const Application&);

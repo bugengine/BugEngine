@@ -10,12 +10,12 @@ namespace BugEngine { namespace RTTI
 {
 
 Method::MetaClass::MetaClass()
-    :   RTTI::MetaClass("meta.method", 0, 0, true)
+:   RTTI::MetaClass("meta.method", ref<RTTI::MetaClass>(), ref<RTTI::MetaMetaClass>(), true)
 {
 }
 
-Method::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass)
-    :   RTTI::MetaClass(name, parent, 0, registerClass)
+Method::MetaClass::MetaClass(const inamespace& name, ref<const MetaClass> parent, bool registerClass)
+    :   RTTI::MetaClass(name, parent, ref<MetaMetaClass>(), registerClass)
 {
 }
 
@@ -33,14 +33,14 @@ Method::~Method()
 {
 }
 
-const Method::MetaClass* Method::metaclass() const
+ref<const RTTI::MetaClass> Method::metaclass() const
 {
     return static_metaclass();
 }
 
-const Method::MetaClass* Method::static_metaclass()
+ref<const Method::MetaClass> Method::static_metaclass()
 {
-    static const Method::MetaClass* s_metaclass = new Method::MetaClass;
+    static ref<const Method::MetaClass> s_metaclass = ref<Method::MetaClass>::create();
     return s_metaclass;
 }
 

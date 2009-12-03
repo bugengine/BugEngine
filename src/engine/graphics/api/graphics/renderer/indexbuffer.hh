@@ -13,19 +13,19 @@ namespace BugEngine { namespace Graphics
 class RenderBackend;
 
 template< typename T >
-class IndexBuffer : public minitl::refcountable<void>
+class IndexBuffer : public minitl::refcountable
 {
 private:
-    const RenderBackend*    m_owner;
-    refptr<GpuBuffer>       m_buffer;
+    weak<const RenderBackend>   m_owner;
+    ref<GpuBuffer>              m_buffer;
 public:
-    IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage);
+    IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage);
     ~IndexBuffer();
 
     T*  map(u32 count = 0, u32 offset = 0);
     void unmap();
 
-    const GpuBuffer* buffer() const;
+    weak<const GpuBuffer> buffer() const;
 };
 
 }}

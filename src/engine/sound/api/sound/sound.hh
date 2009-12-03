@@ -16,19 +16,19 @@ class be_api(SOUND) SoundObject : public Object
 {
     friend class Source;
 private:
-    World*                          m_owner;
-    refptr<AbstractMemoryStream>    m_soundFile;
-    void*                           m_data;
-    bool                            m_locked;
+    weak<World>                 m_owner;
+    ref<AbstractMemoryStream>   m_soundFile;
+    void*                       m_data;
+    bool                        m_locked;
 public:
-    SoundObject(World* owner, refptr<AbstractMemoryStream> soundfile);
+    SoundObject(weak<World> owner, ref<AbstractMemoryStream> soundfile);
     ~SoundObject();
 
-    World* owner() const;
+    weak<World> owner() const;
 
     void reset();
 
-    bool lock(Source* from);
+    bool lock(weak<Source> from);
     void unlock();
 
     size_t read(void* buffer, size_t size, int& frequency, int& channels) const;

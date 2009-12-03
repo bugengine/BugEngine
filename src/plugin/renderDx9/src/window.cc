@@ -68,7 +68,7 @@ void Window::begin()
     D3D_CHECKRESULT(m_owner->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
     D3D_CHECKRESULT(m_owner->m_device->BeginScene());
     uint2 size = getDimensions();
-    m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(checked_numcast<float>(size.x()), checked_numcast<float>(size.y())));
+    m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
 }
 
 void Window::end()

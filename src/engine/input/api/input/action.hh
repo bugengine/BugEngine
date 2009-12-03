@@ -13,14 +13,12 @@ class InputMap;
 
 class be_api(INPUT) Action : public Object
 {
-    friend class InputMap;
 private:
     istring const           m_name;
     const InputMap* const   m_owner;
     std::vector< Control* > m_controls;
-private:
-    Action(const istring& name, const InputMap* owner);
 public:
+    Action(const istring& name, const InputMap* owner);
     ~Action();
 
 public:

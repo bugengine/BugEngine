@@ -14,7 +14,7 @@ be_abstractmetaclass_impl("",Package);
 
 Package::Package(const ipath& name)
 :   RTTI::Package(name[name.size()-1], 0)
-,   m_namespace(0)
+,   m_namespace()
 {
 }
 
@@ -23,9 +23,9 @@ Package::~Package()
     be_assert(m_refcount == 0, "destroying package that is still in use");
 }
 
-refptr<RTTI::Package> Package::MetaClass::create(const ipath& name) const
+ref<RTTI::Package> Package::MetaClass::create(const ipath& name) const
 {
-    return new Package(name);
+    return ref<Package>::create(name);
 }
 
 void Package::doload()
@@ -42,12 +42,12 @@ void Package::doload()
 
 void Package::dounload()
 {
-    m_namespace = 0;
+    m_namespace.clear();
 }
 
-const RTTI::Namespace* Package::getNamespace() const
+weak<const RTTI::Namespace> Package::getNamespace() const
 {
-    return m_namespace.get();
+    return m_namespace;
 }
 
 }}

@@ -11,48 +11,26 @@
 namespace BugEngine
 {
 
-class FileSystem::FileSystemMountPoint
-{
-public:
-    typedef std::map<istring, FileSystemMountPoint*> ChildrenMap;
-private:
-    refptr<const FileSystemComponent>   m_component;
-    ChildrenMap                         m_children;
-public:
-    FileSystemMountPoint(const FileSystemComponent *component = 0);
-    ~FileSystemMountPoint();
-
-    FileSystemMountPoint* getOrCreate(const istring& child);
-    FileSystemMountPoint* get(const istring& child);
-    void erase(const istring& child);
-
-    void mount(const refptr<const FileSystemComponent>& component);
-    void umount();
-    const FileSystemComponent*  component() const;
-
-    bool empty() const;
-};
-
-FileSystem::FileSystemMountPoint::FileSystemMountPoint(const FileSystemComponent *component) :
-    m_component(component)
+FileSystem::FileSystemMountPoint::FileSystemMountPoint(ref<const FileSystemComponent> component)
+:   m_component(component)
 {
 }
-    
+
 FileSystem::FileSystemMountPoint::~FileSystemMountPoint()
 {
     for(ChildrenMap::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
         delete it->second;
 }
 
-FileSystem::FileSystemMountPoint* FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)
+weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)
 {
-    std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, (FileSystemMountPoint*)0));
+    std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, scoped<FileSystemMountPoint>()));
     if(result.second)
-        result.first->second = new FileSystemMountPoint;
+        result.first->second = scoped<FileSystemMountPoint>::create();
     return result.first->second;
 }
 
-FileSystem::FileSystemMountPoint* FileSystem::FileSystemMountPoint::get(const istring& child)
+weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::get(const istring& child)
 {
     ChildrenMap::iterator it = m_children.find(child);
     if(it != m_children.end())
@@ -61,7 +39,7 @@ FileSystem::FileSystemMountPoint* FileSystem::FileSystemMountPoint::get(const is
     }
     else
     {
-        return 0;
+        return weak<FileSystem::FileSystemMountPoint>();
     }
 }
 
@@ -73,7 +51,7 @@ void FileSystem::FileSystemMountPoint::erase(const istring& child)
     m_children.erase(it);
 }
 
-void FileSystem::FileSystemMountPoint::mount(const refptr<const FileSystemComponent> &component)
+void FileSystem::FileSystemMountPoint::mount(const ref<const FileSystemComponent> &component)
 {
     be_assert(m_component == 0, "cannot mount null component");
     m_component = component;
@@ -82,12 +60,12 @@ void FileSystem::FileSystemMountPoint::mount(const refptr<const FileSystemCompon
 void FileSystem::FileSystemMountPoint::umount()
 {
     be_assert(m_component != 0, "cannot unmount null component");
-    m_component = 0;
+    m_component = ref<const FileSystemComponent>();
 }
 
-const FileSystemComponent* FileSystem::FileSystemMountPoint::component() const
+weak<const FileSystemComponent> FileSystem::FileSystemMountPoint::component() const
 {
-    return m_component.get();
+    return m_component;
 }
 
 bool FileSystem::FileSystemMountPoint::empty() const
@@ -97,8 +75,8 @@ bool FileSystem::FileSystemMountPoint::empty() const
 
 //-----------------------------------------------------------------------------
 
-FileSystem::FileSystem(void) :
-    m_root(new FileSystemMountPoint(0))
+FileSystem::FileSystem(void)
+: m_root(scoped<FileSystemMountPoint>::create())
 {
 }
 
@@ -107,9 +85,9 @@ FileSystem::~FileSystem(void)
     delete m_root;
 }
 
-void FileSystem::mount(const ipath& prefix, refptr<const FileSystemComponent> component)
+void FileSystem::mount(const ipath& prefix, ref<const FileSystemComponent> component)
 {
-    FileSystemMountPoint* mountPoint = m_root;
+    weak<FileSystemMountPoint> mountPoint = m_root;
     for(size_t i = 0; i < prefix.size(); ++i)
     {
         mountPoint = mountPoint->getOrCreate(prefix[i]);
@@ -120,8 +98,8 @@ void FileSystem::mount(const ipath& prefix, refptr<const FileSystemComponent> co
 
 void FileSystem::umount(const ipath& prefix)
 {
-    FileSystemMountPoint* mountPoint = m_root;
-    FileSystemMountPoint* parent     = 0;
+    weak<FileSystemMountPoint> mountPoint = m_root;
+    weak<FileSystemMountPoint> parent     = 0;
     for(size_t i = 0; i < prefix.size(); ++i)
     {
         parent = mountPoint;
@@ -134,10 +112,10 @@ void FileSystem::umount(const ipath& prefix)
         parent->erase(prefix[prefix.size()-1]);
 }
 
-refptr<AbstractMemoryStream> FileSystem::open(const ifilename& file, FileOpenMode mode) const
+ref<AbstractMemoryStream> FileSystem::open(const ifilename& file, FileOpenMode mode) const
 {
-    FileSystemMountPoint* mountPoint = m_root;
-    FileSystemMountPoint* bestmatch = mountPoint;
+    weak<FileSystemMountPoint> mountPoint = m_root;
+    weak<FileSystemMountPoint> bestmatch = mountPoint;
     ifilename suffix = file;
     for(size_t i = 0; (i < file.size()-1) && mountPoint; ++i)
     {
@@ -168,10 +146,10 @@ std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
     return std::set<ipath>();
 }
 
-FileSystem* FileSystem::instance()
+weak<FileSystem> FileSystem::instance()
 {
-    static scopedptr<FileSystem> s_filesystem(new FileSystem());
-    return s_filesystem.get();
+    static scoped<FileSystem> s_filesystem(scoped<FileSystem>::create());
+    return s_filesystem;
 }
 
 }

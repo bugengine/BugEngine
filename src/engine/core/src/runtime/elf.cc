@@ -299,15 +299,15 @@ void Elf::parse(FILE* f)
 
     be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
     ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass, e>*)malloca(header.shentsize*header.shnum);
-    fseek(f, checked_numcast<long>(header.shoffset), SEEK_SET);
+    fseek(f, be_checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
     const char *stringPool = 0;
 
     {
-        char* strings = (char*)be_malloc(checked_numcast<size_t>(sections[header.shstrndx].size));
-        fseek(f, checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
-        fread(strings, 1, checked_numcast<size_t>(sections[header.shstrndx].size), f);
+        char* strings = (char*)be_malloc(be_checked_numcast<size_t>(sections[header.shstrndx].size));
+        fseek(f, be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
+        fread(strings, 1, be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
         stringPool = strings;
     }
     
@@ -330,7 +330,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     const Section& debug_link = (*this)[".gnu_debuglink"];
     if(debug_link)
     {
-        Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));
+        Malloc::MemoryBlock<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
         readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }

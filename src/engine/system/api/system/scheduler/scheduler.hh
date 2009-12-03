@@ -24,7 +24,7 @@ class BaseTaskItem;
 
 }
 
-class be_api(SYSTEM) Scheduler
+class be_api(SYSTEM) Scheduler : public minitl::pointer
 {
 private:
     class Worker;

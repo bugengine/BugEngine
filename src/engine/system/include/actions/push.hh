@@ -23,7 +23,7 @@ public:
     virtual bool oneturn(ActionContext* context) const override;
 
     be_metaclass(SYSTEM,Push,Action)
-        refptr<Push> createWithValue(const Value& value);
+        ref<Push> createWithValue(const Value& value);
     be_properties
         be_classmethod(createWithValue);
 

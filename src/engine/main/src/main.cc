@@ -106,7 +106,7 @@ static int __main(int argc, const char *argv[])
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
         BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-        refptr<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
+        ref<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
         result = be_main(locApplication.get());
     }
     catch(std::runtime_error& er)

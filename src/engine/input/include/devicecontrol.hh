@@ -14,10 +14,10 @@ class Device;
 class DeviceControl : public Control
 {
 private:
-    const Device*   m_device;
-    size_t          m_index;
+    weak<const Device>  m_device;
+    size_t              m_index;
 public:
-    DeviceControl(const istring& name,const  Device* device, size_t index);
+    DeviceControl(const istring& name, weak<const Device> device, size_t index);
     ~DeviceControl();
 
     float           value() const override;

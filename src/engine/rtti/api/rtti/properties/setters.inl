@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 
 template< typename OWNER,
           typename T >
-void SetImpossible<OWNER,T>::set(OWNER* /*from*/, const T& /*value*/)
+void SetImpossible<OWNER,T>::set(weak<OWNER> /*from*/, const T& /*value*/)
 {
     throw 0;
 }
@@ -20,15 +20,15 @@ void SetImpossible<OWNER,T>::set(OWNER* /*from*/, const T& /*value*/)
 template< typename OWNER,
           typename T,
           void (OWNER::*SETTER)(T value) >
-void SetFromSetter<OWNER,T,SETTER>::set(OWNER* from, const PropertyType& value)
+void SetFromSetter<OWNER,T,SETTER>::set(weak<OWNER> from, const PropertyType& value)
 {
-    (from->*SETTER)(value);
+    (from.operator->()->*SETTER)(value);
 }
 
 template< typename OWNER, typename T, size_t offset >
-void SetFromField<OWNER,T,offset>::set(OWNER* from, const T& value)
+void SetFromField<OWNER,T,offset>::set(weak<OWNER> from, const T& value)
 {
-    *reinterpret_cast<T*>(reinterpret_cast<char*>(from)+offset) = value;
+    *reinterpret_cast<T*>(reinterpret_cast<char*>(from.operator->())+offset) = value;
 }
 
 }}

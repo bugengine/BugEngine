@@ -10,14 +10,14 @@ namespace BugEngine { namespace Graphics
 {
 
 template< >
-inline IndexBuffer<u16>::IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage)
+inline IndexBuffer<u16>::IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Short)))
 {
 }
 
 template< >
-inline IndexBuffer<u32>::IndexBuffer(const RenderBackend* owner, u32 vertexCount, IndexUsage usage)
+inline IndexBuffer<u32>::IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Long)))
 {
@@ -41,9 +41,9 @@ void IndexBuffer<T>::unmap()
 }
 
 template< typename T >
-const GpuBuffer* IndexBuffer<T>::buffer() const
+weak<const GpuBuffer> IndexBuffer<T>::buffer() const
 {
-    return m_buffer.get();
+    return m_buffer;
 }
 
 

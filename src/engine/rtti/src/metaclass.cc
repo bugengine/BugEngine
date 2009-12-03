@@ -20,10 +20,10 @@ public:
     StaticProperty(Value v);
     ~StaticProperty();
 
-    virtual bool                readable(Object* /*from*/) const                    { return true; };
-    virtual bool                writable(Object* /*from*/) const                    { return false; };
-    virtual void                set(Object* /*dest*/, const Value& /*value*/) const { be_notreached(); }
-    virtual Value               get(Object* /*from*/) const                         { return m_value; }
+    virtual bool                readable(weak<Object> /*from*/) const override                    { return true; };
+    virtual bool                writable(weak<Object> /*from*/) const override                    { return false; };
+    virtual void                set(weak<Object> /*dest*/, const Value& /*value*/) const override { be_notreached(); }
+    virtual Value               get(weak<Object> /*from*/) const override                         { return m_value; }
 };
 
 MetaClass::StaticProperty::StaticProperty(Value v)
@@ -37,8 +37,8 @@ MetaClass::StaticProperty::~StaticProperty()
 
 //-----------------------------------------------------------------------------
 
-MetaMetaClass::MetaMetaClass(const inamespace& name, const Object::MetaClass* parent)
-    :   MetaClass(name, parent, 0, false)
+MetaMetaClass::MetaMetaClass(const inamespace& name, ref<const Object::MetaClass> parent)
+    :   MetaClass(name, parent, ref<MetaMetaClass>(), false)
 {
     if(!parent)
     {
@@ -53,7 +53,7 @@ MetaMetaClass::~MetaMetaClass()
 
 //-----------------------------------------------------------------------------
 
-MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass)
+MetaClass::MetaClass(const inamespace& name, ref<const MetaClass> parent, ref<MetaMetaClass> mc, bool registerClass)
     :   m_name(name[name.size()-1])
     ,   m_parent(parent)
     ,   m_metaclass(mc)
@@ -66,7 +66,7 @@ MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaCl
 
     if(registerClass)
     {
-        Namespace::root()->insert(name, Value(static_cast< refptr<Object> >(this)));
+        Namespace::root()->insert(name, Value(weak<Object>(this)));
     }
 }
 
@@ -79,34 +79,34 @@ const istring& MetaClass::name() const
     return m_name;
 }
 
-const MetaClass* MetaClass::metaclass() const
+ref<const MetaClass> MetaClass::metaclass() const
 {
-    return m_metaclass.get();
+    return m_metaclass;
 }
 
-const MetaClass* MetaClass::parent() const
+ref<const MetaClass> MetaClass::parent() const
 {
-    return m_parent.get();
+    return m_parent;
 }
 
-void MetaClass::addProperty(const istring& name, refptr<const Property> prop)
+void MetaClass::addProperty(const istring& name, ref<const Property> prop)
 {
     std::pair<PropertyIterator,bool> result = m_properties.insert(std::make_pair(name, prop));
     be_assert(result.second, "could not register property %s; a property of that name already exists" | name.c_str());
 }
 
-void MetaClass::addMethod(const istring& name, refptr<Method> method)
+void MetaClass::addMethod(const istring& name, ref<Method> method)
 {
-    addProperty(name, new StaticProperty(Value(refptr<Object>(method))));
+	addProperty(name, ref<StaticProperty>::create(Value(ref<Object>(method))));
 }
 
-const Property* Object::MetaClass::getProperty(const istring& name) const
+weak<const Property> Object::MetaClass::getProperty(const istring& name) const
 {
     PropertyConstIterator it = m_properties.find(name);
     if(it != m_properties.end())
-        return it->second.get();
+        return it->second;
     else
-        return 0;
+        return weak<const Property>();
 }
 
 Value MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
@@ -115,14 +115,14 @@ Value MetaClass::call(Value* /*params*/, size_t /*nbParams*/) const
     return Value();
 }
 
-void MetaClass::init(MetaClass* /*mc*/)
+void MetaClass::init(weak<MetaClass> /*mc*/)
 {
 }
 
-refptr<Object> MetaClass::create() const
+ref<Object> MetaClass::create() const
 {
     be_notreached();
-    return 0;
+    return ref<Object>();
 }
 
 }}

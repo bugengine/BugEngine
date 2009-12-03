@@ -38,13 +38,12 @@ Logger::Logger() :
 
 
 
-Logger::Logger(refptr<Logger> parent, const istring& name)
+Logger::Logger(ref<Logger> parent, const istring& name)
     :   m_listeners()
     ,   m_children()
     ,   m_parent(parent)
     ,   m_name(name)
 {
-    parent->m_children.insert(std::make_pair(name, this));
 }
 
 Logger::~Logger()
@@ -53,24 +52,28 @@ Logger::~Logger()
         delete m_listeners[i];
 }
 
-refptr<Logger> Logger::instance(const inamespace& name)
+ref<Logger> Logger::instance(const inamespace& name)
 {
-    refptr<Logger> result = root();
+    ref<Logger> result = root();
 
     for(size_t i = 0; i < name.size(); ++i)
     {
-        std::map< istring, refptr<Logger> >::iterator it = result->m_children.find(name[i]);
+        std::map< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
-            result = new Logger(result, name[i]);
+        {
+            ref<Logger> next = ref<Logger>::create(result, name[i]);
+            result->m_children.insert(std::make_pair(name[i], next));
+            result = next;
+        }
         else
             result = it->second;
     }
     return result;
 }
 
-refptr<Logger> Logger::root()
+ref<Logger> Logger::root()
 {
-    static refptr<Logger> s_rootLogger = new Logger;
+    static ref<Logger> s_rootLogger = ref<Logger>::create();
     return s_rootLogger;
 }
 

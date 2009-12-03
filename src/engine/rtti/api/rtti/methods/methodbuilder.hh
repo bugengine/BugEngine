@@ -14,13 +14,13 @@ template< typename Owner, typename R >
 struct MethodBuilderR0
 {
     template< R (Owner::*Func)() >
-    Method* buildMethod() { return new MethodR0<Owner, R, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodR0<Owner, R, Func > >::create(); }
 };
 template< typename Owner, typename R >
 struct MethodBuilderCR0
 {
     template< R (Owner::*Func)() const >
-    Method* buildMethod() { return new MethodCR0<Owner, R, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodCR0<Owner, R, Func > >::create(); }
 };
 
 template< typename Owner, typename R >
@@ -35,13 +35,13 @@ template< typename Owner, typename R, typename T1 >
 struct MethodBuilderR1
 {
     template< R (Owner::*Func)(T1) >
-    Method* buildMethod() { return new MethodR1<Owner, R, T1, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodR1<Owner, R, T1, Func > >::create(); }
 };
 template< typename Owner, typename R, typename T1 >
 struct MethodBuilderCR1
 {
     template< R (Owner::*Func)(T1) const >
-    Method* buildMethod() { return new MethodCR1<Owner, R, T1, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodCR1<Owner, R, T1, Func > >::create(); }
 };
 
 template< typename Owner, typename R, typename T1 >
@@ -56,13 +56,13 @@ template< typename Owner, typename R, typename T1, typename T2 >
 struct MethodBuilderR2
 {
     template< R (Owner::*Func)(T1, T2) >
-    Method* buildMethod() { return new MethodR2<Owner, R, T1, T2, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodR2<Owner, R, T1, T2, Func > >::create(); }
 };
 template< typename Owner, typename R, typename T1, typename T2 >
 struct MethodBuilderCR2
 {
     template< R (Owner::*Func)(T1, T2) const >
-    Method* buildMethod() { return new MethodCR2<Owner, R, T1, T2, Func >(); }
+    ref<Method> buildMethod() { return ref< MethodCR2<Owner, R, T1, T2, Func > >::create(); }
 };
 
 template< typename Owner, typename R, typename T1, typename T2 >

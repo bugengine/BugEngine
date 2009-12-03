@@ -13,7 +13,7 @@ class be_api(PHYSICS) World : public Object
 private:
     class WorldImplementation;
 private:
-    scopedptr<WorldImplementation>              m_implementation;
+    scoped<WorldImplementation> m_implementation;
 public:
     World(float3 worldExtents);
     ~World();
@@ -21,7 +21,7 @@ public:
     void step(float time);
 
     be_metaclass(PHYSICS,World,Object)
-        refptr<World> createWithSize(float worldExtentX, float worldExtentY, float worldExtentZ);
+        ref<World> createWithSize(float worldExtentX, float worldExtentY, float worldExtentZ);
     be_properties
         //be_classmethod(createWithSize);
     be_end

@@ -22,11 +22,11 @@ class be_api(GRAPHICS) World : public Object
 private:
     class UpdateWindowManagement;
 private:
-    typedef std::vector< refptr<RenderTarget> > SceneList;
-    scopedptr<Renderer>             m_renderer;
-    SceneList                       m_scenes;
-    refptr< BaseTask >              m_updateWindowTask;
-    refptr< BaseTask >              m_flushTask;
+    typedef std::vector< ref<RenderTarget> > SceneList;
+    scoped<Renderer>             m_renderer;
+    SceneList                    m_scenes;
+    ref< BaseTask >              m_updateWindowTask;
+    ref< BaseTask >              m_flushTask;
 private:
     int step();
     void flush();
@@ -34,7 +34,7 @@ public:
     World();
     ~World();
 
-    void createWindow(WindowFlags f, refptr<Scene> scene);
+    void createWindow(WindowFlags f, ref<Scene> scene);
 
     be_metaclass(GRAPHICS,World, Object)
     be_properties

@@ -10,8 +10,8 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass::MetaClass() :
-    Property::MetaClass("meta.objectproperty", Property::static_metaclass(), false)
+ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass::MetaClass()
+:   Property::MetaClass("meta.objectproperty", Property::static_metaclass(), false)
 {
 }
 
@@ -33,41 +33,41 @@ ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::~ObjectProperty()
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-bool ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::readable(Object* from) const
+bool ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::readable(weak<Object> from) const
 {
     UNUSED(from);
     return bool(ValueGetter::Read);
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-bool ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::writable(Object* from) const
+bool ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::writable(weak<Object> from) const
 {
     UNUSED(from);
     return bool(ValueSetter::Write);
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-void ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::set(Object* dest, const Value& value) const
+void ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::set(weak<Object> dest, const Value& value) const
 {
-    ValueSetter::set(checked_cast<OWNER*>(dest), m_marshaller.castto(value));
+    ValueSetter::set(be_checked_cast<OWNER>(dest), m_marshaller.castto(value));
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-Value ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::get(Object* from) const
+Value ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::get(weak<Object> from) const
 {
-    return ValueGetterProxy< ValueGetter,ValueGetter::Ref, Marshaller<T> >::get(checked_cast<OWNER*>(from),&m_marshaller);
+    return ValueGetterProxy< ValueGetter,ValueGetter::Ref, Marshaller<T> >::get(be_checked_cast<OWNER>(from),&m_marshaller);
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-const typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass* ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::metaclass() const
+ref<const RTTI::MetaClass> ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::metaclass() const
 {
     return static_metaclass();
 }
 
 template< typename OWNER, typename T, typename ValueGetter, typename ValueSetter >
-const typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass* ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::static_metaclass()
+ref<const typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass> ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::static_metaclass()
 {
-    static typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass* s_metaclass = new typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass;
+    static ref<typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass> s_metaclass = ref<typename ObjectProperty<OWNER,T,ValueGetter,ValueSetter>::MetaClass>::create();
     return s_metaclass;
 }
 

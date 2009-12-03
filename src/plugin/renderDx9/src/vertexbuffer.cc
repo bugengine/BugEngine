@@ -14,7 +14,7 @@ VertexBuffer::VertexBuffer(const Renderer* renderer, u32 vertexCount, VertexUsag
     for(i = 0; i < flags.elementCount; ++i)
     {
         m_vertexElements[i].Stream = 0;
-        m_vertexElements[i].Offset = checked_numcast<WORD>(flags.info[i].offset);
+        m_vertexElements[i].Offset = be_checked_numcast<WORD>(flags.info[i].offset);
         switch(flags.info[i].type)
         {
         case VertexElementInfo::float1:

@@ -21,7 +21,7 @@ public:
         Read = 0,
         Ref = 0
     };
-    static inline T get(OWNER* from);
+    static inline T get(weak<OWNER> from);
 };
 
 //-----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ public:
         Read = 1,
         Ref = minitl::is_reference<T>::Value
     };
-    static inline T get(OWNER* from);
+    static inline T get(weak<OWNER> from);
 };
 
 //-----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public:
         Read = 1,
         Ref = minitl::is_reference<T>::Value && ! minitl::is_const<T>::Value
     };
-    static inline T get(OWNER* from);
+    static inline T get(weak<OWNER> from);
 };
 
 //-----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ public:
         Read = 1,
         Ref = 1
     };
-    static inline T& get(OWNER* from);
+    static inline T& get(weak<OWNER> from);
 };
 
 //-----------------------------------------------------------------------------
@@ -90,14 +90,14 @@ template< typename ValueGetter,
 struct ValueGetterProxy<ValueGetter, true, Marshaller >
 {
 public:
-    static inline Value get(typename ValueGetter::Owner* from, const Marshaller* marshaller);
+    static inline Value get(weak<typename ValueGetter::Owner> from, const Marshaller* marshaller);
 };
 template< typename ValueGetter,
           typename Marshaller >
 struct ValueGetterProxy<ValueGetter, false, Marshaller >
 {
 public:
-    static inline Value get(typename ValueGetter::Owner* from, const Marshaller* marshaller);
+    static inline Value get(weak<typename ValueGetter::Owner> from, const Marshaller* marshaller);
 };
 
 }}

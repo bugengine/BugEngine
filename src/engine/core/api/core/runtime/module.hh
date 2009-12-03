@@ -13,7 +13,7 @@ namespace BugEngine { namespace Runtime
 class Symbol;
 class SymbolResolver;
 
-class Module : public minitl::refcountable<void>
+class Module : public minitl::refcountable
 {
 public:
     class Section
@@ -34,7 +34,7 @@ private:
 protected:
     ifilename                   m_filename;
     u64                         m_baseAddress;
-    refptr<const Module>        m_next;
+    ref<const Module>           m_next;
     minitl::vector< Section >   m_sections;
 public:
     Module(const char* filename, u64 baseAddress);
@@ -48,8 +48,8 @@ public:
 
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const = 0;
 
-    static refptr<const Module> self();
-    refptr<const Module> next() const { return m_next; }
+    static ref<const Module> self();
+    weak<const Module> next() const { return m_next; }
 };
 
 }}

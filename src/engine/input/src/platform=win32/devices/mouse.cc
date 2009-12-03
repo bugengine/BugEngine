@@ -25,16 +25,16 @@ Mouse::Mouse(size_t numButtons)
     for(size_t i = 0; i < numButtons; ++i)
     {
         minitl::format<> f = minitl::format<>("Button %u") | i;
-        Control* ctrl = new DeviceControl(f, this, i);
+        ref<Control> ctrl = ref<DeviceControl>::create(f, this, i);
         addControl(ctrl);
         Value v = getMouse().getNamespace()->get(f);
         if(v)
         {
-            v.as< refptr<GroupControl> >()->add(ctrl);
+            v.as< ref<GroupControl> >()->add(ctrl);
         }
         else
         {
-            GroupControl* g = new GroupControl(f);
+            ref<GroupControl> g = ref<GroupControl>::create(f);
             getMouse().addControl(g);
             g->add(ctrl);
         }

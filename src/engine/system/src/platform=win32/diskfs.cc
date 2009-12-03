@@ -109,7 +109,7 @@ bool DiskFS::writable() const
     return m_readOnly;
 }
 
-refptr<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
+ref<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
     std::string fullname = (m_prefix+filename).str();
     if(mode == eReadOnly)
@@ -125,7 +125,7 @@ refptr<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMod
             DWORD sizehigh;
             HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, (m_prefix+filename).tostring("/").c_str());
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
-            return new MemoryFileMap(memory, GetFileSize(file, &sizehigh), file, filemap);
+            return ref<MemoryFileMap>::create(memory, GetFileSize(file, &sizehigh), file, filemap);
         }
     }
     else

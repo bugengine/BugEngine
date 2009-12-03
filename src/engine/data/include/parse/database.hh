@@ -44,19 +44,19 @@ private:
     {
         friend class Database;
     private:
-        typedef minitl::map< istring,std::pair< Visibility, refptr<const Node> > >  ChildrenContainer;
-        typedef minitl::map< istring, refptr<DatabaseElement> >                     NamespaceContainer;
+        typedef minitl::map< istring,std::pair< Visibility, ref<const Node> > >  ChildrenContainer;
+        typedef minitl::map< istring, ref<DatabaseElement> >                     NamespaceContainer;
     private:
-        istring const           m_name;
-        DatabaseElement* const  m_parent;
-        NamespaceContainer      m_namespaces;
-        ChildrenContainer       m_objects;
+        istring const                m_name;
+        weak<DatabaseElement> const  m_parent;
+        NamespaceContainer           m_namespaces;
+        ChildrenContainer            m_objects;
     public:
-        DatabaseElement(const istring& name, DatabaseElement* parent);
+        DatabaseElement(const istring& name, weak<DatabaseElement> parent);
         ~DatabaseElement();
 
-        void add(const istring& name, Visibility v, refptr<const Node> value);
-        DatabaseElement* push(const istring &name);
+        void add(const istring& name, Visibility v, ref<const Node> value);
+        weak<DatabaseElement> push(const istring &name);
     private:
         void  dolink(Context& context) const override;
         Value doeval(Context& context) const override;
@@ -64,18 +64,18 @@ private:
         DatabaseElement& operator=(const DatabaseElement& other);
         DatabaseElement(const DatabaseElement& other);
     };
-    refptr<DatabaseElement> m_root;
-    DatabaseElement*        m_current;
+    ref<DatabaseElement>  m_root;
+    weak<DatabaseElement> m_current;
 public:
     Database();
     ~Database();
 
-    void add(const istring& name, Visibility v, refptr<const Node> value);
+    void add(const istring& name, Visibility v, ref<const Node> value);
     void push(const istring& name);
     void pop(const istring& name);
 
     void parse(const ifilename& file);
-    refptr<RTTI::Namespace> commit();
+    ref<RTTI::Namespace> commit();
 };
 
 }}}

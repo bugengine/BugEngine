@@ -31,13 +31,13 @@ public:
     inline ObjectProperty();
     virtual ~ObjectProperty();
 
-    virtual bool                readable(Object* from) const override;
-    virtual bool                writable(Object* from) const override;
-    virtual void                set(Object* dest, const Value& value) const override;
-    virtual Value               get(Object* from) const override;
+    virtual bool                readable(weak<Object> from) const override;
+    virtual bool                writable(weak<Object> from) const override;
+    virtual void                set(weak<Object> dest, const Value& value) const override;
+    virtual Value               get(weak<Object> from) const override;
 
-    virtual const MetaClass*    metaclass() const override;
-    static  const MetaClass*    static_metaclass();
+    virtual ref<const RTTI::MetaClass> metaclass() const override;
+    static  ref<const MetaClass>       static_metaclass();
 private:
     ObjectProperty(const Property& other);
     ObjectProperty& operator=(const Property& other);

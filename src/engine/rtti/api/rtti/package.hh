@@ -16,29 +16,29 @@ class be_api(RTTI) Package : public Object
 protected:
     size_t                                  m_refcount;
     istring                                 m_name;
-    refptr<RTTI::Namespace>                 m_namespace;
-    Package*                                m_parent;
-    minitl::map< istring, refptr<Package> > m_children;
+    ref<RTTI::Namespace>                    m_namespace;
+    weak<Package>                           m_parent;
+    minitl::map< istring, ref<Package> >    m_children;
 private:
     virtual void doload() = 0;
     virtual void dounload() = 0;
 private:
     Package();
 public:
-    Package(const istring& name, Package* parent);
+    Package(const istring& name, weak<Package> parent);
     ~Package();
 
     void load();
     void unload();
 
-    virtual const Namespace*    getNamespace() const = 0;
+    virtual weak<const Namespace>    getNamespace() const = 0;
 
     const istring& name() const { return m_name; }
 
-    static Package* get(const inamespace& name);
+    static weak<Package> get(const inamespace& name);
 
     be_metaclass(RTTI,Package,Object)
-        virtual refptr<Package> create(const ipath& name) const;
+        virtual ref<Package> create(const ipath& name) const;
     be_properties
     be_end
 };

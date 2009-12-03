@@ -26,7 +26,7 @@ public:
 
     virtual bool writable() const override;
 
-    virtual refptr<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const override;
+    virtual ref<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const override;
     virtual size_t age(const ifilename& file) const override;
 };
 

@@ -71,10 +71,10 @@ Manager::Manager()
         {
         case RIM_TYPEKEYBOARD:
             OutputDebugString(minitl::format<>("keyboard %s :\ntype %d/subtype %d/keys / %d\n") | deviceName | (i32)info.keyboard.dwType | (i32)info.keyboard.dwSubType | (i32)info.keyboard.dwNumberOfKeysTotal);
-            m_devices.insert(std::make_pair(lst[i].hDevice, new Keyboard(info.keyboard.dwNumberOfKeysTotal)));
+            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Keyboard>::create(info.keyboard.dwNumberOfKeysTotal)));
             break;
         case RIM_TYPEMOUSE:
-            m_devices.insert(std::make_pair(lst[i].hDevice, new Mouse(info.mouse.dwNumberOfButtons)));
+            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Mouse>::create(info.mouse.dwNumberOfButtons)));
             break;
         case RIM_TYPEHID:
             break;
@@ -104,13 +104,13 @@ Manager::~Manager()
     m_inputThread.wait();
 }
 
-Device* Manager::getDevice(void* handle)
+weak<Device> Manager::getDevice(void* handle)
 {
     DeviceList::iterator it = m_devices.find(handle);
     if(it != m_devices.end())
-        return it->second.get();
+        return it->second;
     else
-        return 0;
+        return weak<Device>();
 }
 
 void Manager::update() const
@@ -138,11 +138,11 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
             {
             case RIM_TYPEKEYBOARD:
                 {
-                    Device* d = m->getDevice(rinput->header.hDevice);
+                    weak<Device> d = m->getDevice(rinput->header.hDevice);
                     if(d)
                     {
                         float value = (rinput->data.keyboard.Message == WM_KEYDOWN||rinput->data.keyboard.Message == WM_SYSKEYDOWN) ? 1.0f : 0.0f;
-                        checked_cast<Keyboard*>(d)->getBuffer()[rinput->data.keyboard.MakeCode] = value;
+                        be_checked_cast<Keyboard>(d)->getBuffer()[rinput->data.keyboard.MakeCode] = value;
                     }
                 }
                 break;

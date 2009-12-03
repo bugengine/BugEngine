@@ -46,6 +46,7 @@ public:
 
     operator T() const                              { return (T)m_value; }
     T operator=(T value)                            { return (T)impl::set_and_fetch(&m_value, value); }
+    T operator=(const interlocked& value)           { return (T)impl::set_and_fetch(&m_value, value); }
     T exchange(T value)                             { return (T)impl::fetch_and_set(&m_value, value); }
     T addExchange(T value)                          { return (T)impl::fetch_and_add(&m_value, value); }
 

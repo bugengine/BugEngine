@@ -30,10 +30,10 @@ public:
     const char *function() const    { return m_function; }
 };
 
-class SymbolResolver : public minitl::refcountable<void>
+class SymbolResolver : public minitl::refcountable
 {
 private:
-    refptr<const SymbolResolver>    m_next;
+    ref<const SymbolResolver> m_next;
 protected:
     static void fillSymbol(Symbol& symbol, u64 address, const char *module, const char *filename, const char *function, int line);
     virtual bool resolve(u64 address, Symbol& symbol) const = 0;
@@ -63,7 +63,7 @@ public:
     virtual ~SymbolResolver();
     bool resolve(Callstack::Address& address, Symbol& symbol) const;
 
-    static refptr<const SymbolResolver> loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next);
+    static ref<const SymbolResolver> loadSymbols(const SymbolInformations& infos, ref<const SymbolResolver> next);
 };
 
 }}

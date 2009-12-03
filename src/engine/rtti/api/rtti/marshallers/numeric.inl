@@ -95,7 +95,7 @@ void NumericMarshaller<FROM, TO>::pop_front(const Value& value, void* dst) const
 template< typename FROM, typename TO >
 ValueCopy NumericMarshaller<FROM, TO>::castfrom(FROM value) const
 {
-    return ValueCopy(checked_numcast<TO>(value));
+    return ValueCopy(be_checked_numcast<TO>(value));
 }
 
 template< typename FROM, typename TO >
@@ -104,11 +104,11 @@ FROM NumericMarshaller<FROM, TO>::castto(const Value& value) const
     switch(value.type())
     {
     case RTTI::PropertyTypeFloat:
-        return checked_numcast<FROM>(value.member<double>());
+        return be_checked_numcast<FROM>(value.member<double>());
     case RTTI::PropertyTypeUnsigned:
-        return checked_numcast<FROM>(value.member<u64>());
+        return be_checked_numcast<FROM>(value.member<u64>());
     case RTTI::PropertyTypeInteger:
-        return checked_numcast<FROM>(value.member<i64>());
+        return be_checked_numcast<FROM>(value.member<i64>());
     default:
         be_notreached();
         return 0;

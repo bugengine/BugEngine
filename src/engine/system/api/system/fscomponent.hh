@@ -13,8 +13,7 @@ namespace BugEngine
 
 class AbstractMemoryStream;
 
-    
-class be_api(SYSTEM) FileSystemComponent : public minitl::refcountable<void>
+class be_api(SYSTEM) FileSystemComponent : public minitl::refcountable
 {
     friend class FileSystem;
 public:
@@ -24,7 +23,7 @@ protected:
 
     virtual bool writable() const = 0;
 
-    virtual refptr<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const = 0;
+    virtual ref<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const = 0;
     virtual size_t age(const ifilename& file) const = 0;
 };
 

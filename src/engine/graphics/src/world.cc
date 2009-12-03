@@ -39,8 +39,8 @@ public:
 };
 
 World::World()
-:   m_renderer(new Renderer("renderOpenGL"))
-,   m_updateWindowTask(new Task<UpdateWindowManagement>("window", color32(255, 12, 12), UpdateWindowManagement(this)))
+:   m_renderer(scoped<Renderer>::create("renderOpenGL"))
+,   m_updateWindowTask(ref< Task<UpdateWindowManagement> >::create("window", color32(255, 12, 12), UpdateWindowManagement(this)))
 {
 }
 
@@ -57,9 +57,9 @@ void World::flush()
 {
 }
 
-void World::createWindow(WindowFlags f, refptr<Scene> scene)
+void World::createWindow(WindowFlags f, ref<Scene> scene)
 {
-    RenderTarget* w = m_renderer->createRenderWindow(f, scene.get());
+    ref<RenderTarget> w = m_renderer->createRenderWindow(f, scene);
     m_scenes.push_back(w);
 }
 

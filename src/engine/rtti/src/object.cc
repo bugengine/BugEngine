@@ -18,11 +18,12 @@ Object::~Object()
 {
 }
 
-const Object::MetaClass* Object::static_metaclass()
+ref<const Object::MetaClass> Object::static_metaclass()
 {
     Malloc::init();
-    static refptr<Object::MetaClass> s_metaclass(new Object::MetaClass("Object", 0, new MetaClass::MetaMetaClass("ObjectClass", 0), true));
-    return s_metaclass.get();
+    ref<MetaClass::MetaMetaClass> metametaclass = ref<MetaClass::MetaMetaClass>::create("ObjectClass", ref<MetaClass::MetaMetaClass>());
+    static ref<Object::MetaClass> s_metaclass = ref<Object::MetaClass>::create("Object", ref<MetaClass>(), metametaclass, true);
+    return s_metaclass;
 }
 
 void Object::registerMetaClass()

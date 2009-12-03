@@ -13,7 +13,7 @@ namespace BugEngine { namespace Input
 class be_api(INPUT) Device : public Object
 {
 private:
-    refptr<RTTI::Namespace>         m_deviceNamespace;
+    ref<RTTI::Namespace>         m_deviceNamespace;
     istring                         m_name;
     size_t                          m_numControls;
     float*                          m_active;
@@ -27,13 +27,13 @@ public:
     const float* getLastBuffer() const;
     float* getBuffer();
 
-    void addControl(Control* ctrl);
-    void addControlAlias(const istring& ns, const istring& alias, Control* ctrl);
+    void addControl(ref<Control> ctrl);
+    void addControlAlias(const istring& ns, const istring& alias, ref<Control> ctrl);
 
     void update();
 
     const istring& name() const                 { return m_name; }
-    const RTTI::Namespace* getNamespace() const { return m_deviceNamespace.get(); }
+    const weak<RTTI::Namespace> getNamespace() const { return m_deviceNamespace; }
 
     be_metaclass(INPUT,Device,Object)
     be_properties

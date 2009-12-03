@@ -15,15 +15,15 @@ class Manager;
 class be_api(INPUT) InputMap : public Object
 {
 private:
-    std::vector< refptr<Action> >   m_actions;
-    bool                            m_active;
+    std::vector< ref<Action> >  m_actions;
+    bool                        m_active;
 public:
     typedef size_t  ActionId;
 public:
     InputMap();
     ~InputMap();
 
-    Action* addAction(ActionId id, const istring& name);
+    weak<Action> addAction(ActionId id, const istring& name);
 
     void    mapControl(ActionId id, Control* button);
     bool    isDown(ActionId id) const;

@@ -15,16 +15,16 @@ namespace BugEngine
 class be_api(MOBILE) World : public Object
 {
 private:
-    refptr<Graphics::World>         m_graphicsSystem;
-    refptr<Physics::World>          m_physicsSystem;
-    refptr<Sound::World>            m_soundSystem;
+    ref<Graphics::World>         m_graphicsSystem;
+    ref<Physics::World>          m_physicsSystem;
+    ref<Sound::World>            m_soundSystem;
 public:
     World(float3 worldExtents);
     ~World();
 
-    refptr<BaseTask>    m_task;
+    ref<BaseTask>    m_task;
 
-    void createView(Graphics::WindowFlags f, refptr<Graphics::Scene> scene);
+    void createView(Graphics::WindowFlags f, ref<Graphics::Scene> scene);
 
     be_metaclass(MOBILE,World,Object)
     be_properties

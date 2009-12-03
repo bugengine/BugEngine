@@ -44,7 +44,7 @@ void Window::begin()
 {
     setCurrent();
     uint2 size = getDimensions();
-    //m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(checked_numcast<float>(size.x()), checked_numcast<float>(size.y())));
+    //m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
 }
 
 void Window::end()

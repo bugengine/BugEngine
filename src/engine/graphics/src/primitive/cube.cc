@@ -11,8 +11,8 @@ be_abstractmetaclass_impl("Graphics",Cube);
 
 Cube::Cube(const RenderBackend* renderer)
 :   Primitive(renderer)
-,   m_vertexBuffer(new VertexBuffer<VertexFormat>(renderer, 8, VuStatic))
-,   m_indexBuffer(new IndexBuffer<u16>(renderer, 36, IuStatic))
+,   m_vertexBuffer(ref< VertexBuffer<VertexFormat> >::create(renderer, 8, VuStatic))
+,   m_indexBuffer(ref< IndexBuffer<u16> >::create(renderer, 36, IuStatic))
 {
     VertexFormat* v = m_vertexBuffer->map();
     v[0].position = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -74,12 +74,12 @@ Cube::~Cube()
 {
 }
 
-const GpuBuffer* Cube::indices() const
+weak<const GpuBuffer> Cube::indices() const
 {
     return m_indexBuffer->buffer();
 }
 
-const GpuBuffer* Cube::vertices() const
+weak<const GpuBuffer> Cube::vertices() const
 {
     return m_vertexBuffer->buffer();
 }

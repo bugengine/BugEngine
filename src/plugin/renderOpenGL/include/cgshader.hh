@@ -19,7 +19,7 @@ class CgShader : public _Shader
     friend class ShaderPipeline;
 private:
     CGprogram                           m_program;
-    std::vector< refptr<ShaderParam> >  m_params;
+    std::vector< ref<ShaderParam> >  m_params;
 public:
     CgShader(CGprogram program);
     ~CgShader();

@@ -23,16 +23,16 @@ private:
         virtual Value call(Value* values, size_t numvalues) const override
         {
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            weak<OWNER> o = Marshaller< weak<OWNER> >().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
-            const R& v = (o->*Func)(v1, v2);
+            const R& v = (o.operator->()->*Func)(v1, v2);
             return Value(Marshaller<R>().castfrom(v));
         }
     };
 public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+    virtual ref<const RTTI::MetaClass> metaclass() const override { return static_metaclass(); }
+    static  ref<const MetaClass> static_metaclass()               { static ref<MetaClass> s_metaclass = ref<MetaClass>::create(); return s_metaclass; }
 };
 
 
@@ -50,16 +50,16 @@ private:
         virtual Value call(Value* values, size_t numvalues) const override
         {
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            weak<OWNER> o = Marshaller< weak<OWNER> >().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
-            const R& v = (o->*Func)(v1, v2);
+            const R& v = (o.operator->()->*Func)(v1, v2);
             return Value(Marshaller<R>().castfrom(v));
         }
     };
 public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+    virtual ref<const RTTI::MetaClass> metaclass() const override { return static_metaclass(); }
+    static  ref<const MetaClass> static_metaclass()               { static ref<MetaClass> s_metaclass = ref<MetaClass>::create(); return s_metaclass; }
 };
 
 
@@ -77,16 +77,16 @@ private:
         virtual Value call(Value* values, size_t numvalues) const override
         {
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            weak<OWNER> o = Marshaller< weak<OWNER> >().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
-            (o->*Func)(v1, v2);
+            (o.operator->()->*Func)(v1, v2);
             return Value();
         }
     };
 public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+    virtual ref<const RTTI::MetaClass> metaclass() const override { return static_metaclass(); }
+    static  ref<const MetaClass> static_metaclass()               { static ref<MetaClass> s_metaclass = ref<MetaClass>::create(); return s_metaclass; }
 };
 
 
@@ -104,16 +104,16 @@ private:
         virtual Value call(Value* values, size_t numvalues) const override
         {
             be_assert(numvalues == 3, "expected %d parameters; got %d" | 3 | numvalues);
-            OWNER* o = Marshaller<OWNER*>().castto(values[0]);
+            weak<OWNER> o = Marshaller< weak<OWNER> >().castto(values[0]);
             const typename minitl::remove_reference<T1>::type& v1 = Marshaller<T1>().castto(values[1]);
             const typename minitl::remove_reference<T2>::type& v2 = Marshaller<T2>().castto(values[2]);
-            (o->*Func)(v1, v2);
+            (o.operator->()->*Func)(v1, v2);
             return Value();
         }
     };
 public:
-    virtual const MetaClass* metaclass() const override { return static_metaclass(); }
-    static  const MetaClass* static_metaclass()         { static MetaClass s_metaclass; return &s_metaclass; }
+    virtual ref<const RTTI::MetaClass> metaclass() const override { return static_metaclass(); }
+    static  ref<const MetaClass> static_metaclass()               { static ref<MetaClass> s_metaclass = ref<MetaClass>::create(); return s_metaclass; }
 };
 
 

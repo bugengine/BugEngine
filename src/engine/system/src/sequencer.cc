@@ -32,7 +32,7 @@ void Sequencer::init()
     }
 }
 
-void Sequencer::addSequencer(refptr<Sequencer> seq, bool adjustLifeTime)
+void Sequencer::addSequencer(ref<Sequencer> seq, bool adjustLifeTime)
 {
     m_children.push_back(std::make_pair(seq, adjustLifeTime));
 }
@@ -50,7 +50,7 @@ bool Sequencer::_oneturn(ActionContext* ctx)
         ActionList::iterator it = m_actions.begin();
         while(it != m_actions.end())
         {
-            refptr<Action> action = *it;
+            ref<Action> action = *it;
             if(action->oneturn(ctx))
             {
                 ActionList::iterator next = it;
@@ -85,12 +85,12 @@ void Sequencer::resume()
     m_pauseCount--;
 }
 
-void Sequencer::run(refptr<Action> action)
+void Sequencer::run(ref<Action> action)
 {
     m_actions.insert(action);
 }
 
-void Sequencer::stop(refptr<Action> action)
+void Sequencer::stop(ref<Action> action)
 {
     m_actions.erase(action);
 }

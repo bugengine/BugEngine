@@ -15,8 +15,8 @@ namespace BugEngine
 class be_api(SYSTEM) Sequencer : public Object
 {
 public:
-    typedef std::set< refptr<Action> >                          ActionList;
-    typedef std::vector< std::pair<refptr<Sequencer>,bool> >    SequencerList;
+    typedef std::set< ref<Action> >                          ActionList;
+    typedef std::vector< std::pair<ref<Sequencer>,bool> >    SequencerList;
 private:
     SequencerList   m_children;
     ActionContext   m_context;
@@ -32,12 +32,12 @@ public:
     Sequencer();
     ~Sequencer();
 
-    void addSequencer(refptr<Sequencer> seq, bool adjustLifeTime);
+    void addSequencer(ref<Sequencer> seq, bool adjustLifeTime);
 
     void init();
 
-    void run(refptr<Action> action);
-    void stop(refptr<Action> action);
+    void run(ref<Action> action);
+    void stop(ref<Action> action);
 
     bool oneturn();
     void pause();

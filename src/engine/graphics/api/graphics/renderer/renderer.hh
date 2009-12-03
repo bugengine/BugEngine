@@ -13,8 +13,8 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) Renderer : public RenderBackend
 {
 private:
-    Plugin          m_plugin;
-    RenderBackend*  m_renderBackend;
+    Plugin              m_plugin;
+    weak<RenderBackend> m_renderBackend;
 public:
     Renderer(const istring& name);
     ~Renderer();
@@ -24,13 +24,13 @@ public:
 
     uint2 getScreenSize() override;
 
-    ShaderPipeline*     getShaderPipeline() override;
-    TexturePipeline*    getTexturePipeline() override;
+    weak<ShaderPipeline>    getShaderPipeline() override;
+    weak<TexturePipeline>   getTexturePipeline() override;
 
-    RenderTarget*       createRenderWindow(WindowFlags flags, const Scene* scene) override;
-    GpuBuffer*          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    GpuBuffer*          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
-    GpuBuffer*          createTextureBuffer(TextureBufferFlags flags) const override;
+    ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) override;
+    ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
+    ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
+    ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
 
     void drawBatch(const Batch& batch) override;
 };

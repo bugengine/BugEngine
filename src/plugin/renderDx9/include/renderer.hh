@@ -39,22 +39,22 @@ private:
     LPDIRECT3D9                 m_directx;
     LPDIRECT3DDEVICE9           m_device;
     CGcontext                   m_context;
-    ShaderPipeline              m_shaderPipeline;
-    TexturePipeline             m_texturePipeline;
-    refptr<CgShaderParam>       m_systemParams[SystemParamCount];
+    scoped<ShaderPipeline>      m_shaderPipeline;
+    scoped<TexturePipeline>     m_texturePipeline;
+    ref<CgShaderParam>          m_systemParams[SystemParamCount];
 public:
     Renderer();
     ~Renderer();
 
     LPDIRECT3DSWAPCHAIN9    createSwapChain(D3DPRESENT_PARAMETERS* params);
 
-    ShaderPipeline*         getShaderPipeline() override;
-    TexturePipeline*        getTexturePipeline() override;
+    weak<ShaderPipeline>    getShaderPipeline() override;
+    weak<TexturePipeline>   getTexturePipeline() override;
 
-    RenderTarget*           createRenderWindow(WindowFlags flags, const Scene* scene) override;
-    GpuBuffer*              createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    GpuBuffer*              createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
-    GpuBuffer*              createTextureBuffer(TextureBufferFlags flags) const override;
+    ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) override;
+    ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
+    ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
+    ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
 
     void                    drawBatch(const Batch& b) override;
     void                    flush() const override;

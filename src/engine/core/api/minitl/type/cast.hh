@@ -12,31 +12,43 @@ namespace minitl
 {
 
 template< typename U, typename T >
-BE_ALWAYSINLINE U checked_cast(T value)
+inline U* be_checked_cast(T* value)
 {
-    be_assert(dynamic_cast<U>(value), "invalid cast from %s to %s" | typeid(T).name() | typeid(U).name());
-    return static_cast<U>(value);
+    be_assert(dynamic_cast<U*>(value), "invalid cast from %s to %s" | typeid(T).name() | typeid(U).name());
+    return static_cast<U*>(value);
 }
 
 template< typename U, typename T >
-BE_ALWAYSINLINE refptr<U> checked_cast(refptr<T> value)
+inline ref<U> be_checked_cast(ref<T> value)
 {
-    be_assert(dynamic_cast<U*>(value.get()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
-    return refptr<U>(static_cast<U*>(value.get()));
+    be_assert(dynamic_cast<U*>(value.operator->()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
+    return ref<U>(static_cast<U*>(value.operator->()));
 }
 
 template< typename U, typename T >
-BE_ALWAYSINLINE weakptr<U> checked_cast(weakptr<T> value)
+inline weak<U> be_checked_cast(weak<T> value)
 {
-    be_assert(dynamic_cast<U*>(value.get()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
-    return weakptr<U>(checked_cast<U>(refptr<T>(value.get())));
+    be_assert(dynamic_cast<U*>(value.operator->()), "invalid cast from %s* to %s*" | typeid(T).name() | typeid(U).name());
+    return weak<U>(static_cast<U*>(value.operator->()));
+}
+
+template< typename U, typename T >
+inline weak<U> be_const_cast(weak<T> value)
+{
+    return weak<U>(const_cast<U*>(value.operator->()));
+}
+
+template< typename U, typename T >
+inline ref<U> be_const_cast(ref<T> value)
+{
+    return ref<U>(const_cast<U*>(value.operator->()));
 }
 
 #pragma warning(push)
 #pragma warning(disable:4800)
 
 template< typename U, typename T >
-BE_ALWAYSINLINE U checked_numcast(T value)
+inline U be_checked_numcast(T value)
 {
     be_assert(static_cast<T>(static_cast<U>(value)) == value, "precision loss during cast from %s to %s" | typeid(T).name() | typeid(U).name());
     return static_cast<U>(value);

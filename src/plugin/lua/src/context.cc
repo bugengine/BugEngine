@@ -104,7 +104,7 @@ Context::~Context()
 void Context::doFile(const char *filename)
 {
     BugEngine::FileSystem* fs = BugEngine::FileSystem::instance();
-    refptr<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
+    ref<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
     be_info("loading file %s" | filename);
     if(file)
     {
@@ -122,7 +122,7 @@ void Context::doFile(const char *filename)
     }
 }
 
-void Context::push(lua_State* state, refptr<Object> o)
+void Context::push(lua_State* state, ref<Object> o)
 {
     Object** userdata = (Object**)lua_newuserdata(state, sizeof(Object*));
     *userdata = o.get();
@@ -159,7 +159,7 @@ void Context::push(lua_State* state, const Value& v)
         lua_pushstring(state, v.as<std::string>().c_str());
         break;
     case RTTI::PropertyTypeObject:
-        push(state, v.as< refptr<Object> >());
+        push(state, v.as< ref<Object> >());
         break;
     case RTTI::PropertyTypeWeakObject:
         push(state, v.as< Object* >());

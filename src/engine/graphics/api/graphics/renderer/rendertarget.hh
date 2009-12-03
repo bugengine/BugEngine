@@ -10,12 +10,12 @@ namespace BugEngine { namespace Graphics
 
 class Scene;
 
-class be_api(GRAPHICS) RenderTarget : public minitl::refcountable<void>
+class be_api(GRAPHICS) RenderTarget : public minitl::refcountable
 {
 private:
-    refptr<const Scene> const   m_scene;
+    ref<const Scene> const   m_scene;
 public:
-    RenderTarget(const Scene* scene);
+    RenderTarget(ref<const Scene> scene);
     virtual ~RenderTarget() { }
     virtual void setCurrent() = 0;
 
@@ -23,7 +23,7 @@ public:
     virtual void            close() = 0;
     virtual bool            closed() const = 0;
 
-    const Scene* scene() const;
+    weak<const Scene> scene() const;
 private:
     RenderTarget& operator=(const RenderTarget& other);
     RenderTarget(const RenderTarget& other);

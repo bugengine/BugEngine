@@ -93,11 +93,12 @@ T be_align(T value, size_t alignment)
 #include    <minitl/type/cast.hh>
 #include    <core/endianness.hh>
 
-using minitl::refptr;
-using minitl::weakptr;
-using minitl::scopedptr;
-using minitl::checked_cast;
-using minitl::checked_numcast;
+using minitl::ref;
+using minitl::weak;
+using minitl::scoped;
+using minitl::be_checked_cast;
+using minitl::be_const_cast;
+using minitl::be_checked_numcast;
 
 
 /*****************************************************************************/

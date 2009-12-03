@@ -48,14 +48,14 @@ float* Device::getBuffer()
     return m_buffer;
 }
 
-void Device::addControl(Control* ctrl)
+void Device::addControl(ref<Control> ctrl)
 {
-    m_deviceNamespace->set(ctrl->name(), Value(refptr<Object>(ctrl)));
+    m_deviceNamespace->set(ctrl->name(), Value(ref<Object>(ctrl)));
 }
 
-void Device::addControlAlias(const istring& ns, const istring& alias, Control* ctrl)
+void Device::addControlAlias(const istring& ns, const istring& alias, ref<Control> ctrl)
 {
-    m_deviceNamespace->createNamespace(ns)->set(alias, Value(refptr<Object>(ctrl)));
+    m_deviceNamespace->createNamespace(ns)->set(alias, Value(ref<Object>(ctrl)));
 }
 
 void Device::update()

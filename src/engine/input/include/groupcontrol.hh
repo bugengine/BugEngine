@@ -12,7 +12,7 @@ namespace BugEngine { namespace Input
 class GroupControl : public Control
 {
 private:
-    std::vector< refptr<Control> >  m_controls;
+    std::vector< ref<Control> >  m_controls;
 public:
     GroupControl(const istring& name);
     ~GroupControl();
@@ -23,7 +23,7 @@ public:
     bool            wentDown() const override;
     bool            wentUp() const override;
 
-    void add(Control* ctrl);
+    void add(ref<Control> ctrl);
 
     be_metaclass(NONE,GroupControl,Control)
     be_properties

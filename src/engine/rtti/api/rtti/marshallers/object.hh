@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename T >
-class Marshaller< refptr<T> > : public AbstractMarshaller
+class Marshaller< ref<T> > : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -26,13 +26,13 @@ public:
     virtual void        pop_back(const Value& value, void* dst)                 const override;
     virtual void        pop_front(const Value& value, void* dst)                const override;
 
-    inline ValueCopy    castfrom(refptr<T> value)                               const;
-    inline refptr<T>    castto(const Value& value)                              const;
+    inline ValueCopy    castfrom(ref<T> value)                                  const;
+    inline ref<T>       castto(const Value& value)                              const;
 };
 
 
 template< typename T >
-class Marshaller<T*> : public AbstractMarshaller
+class Marshaller< weak<T> > : public AbstractMarshaller
 {
 public:
     virtual ValueTypeIndex type() const;
@@ -47,8 +47,8 @@ public:
     virtual void        pop_back(const Value& value, void* dst)                 const override;
     virtual void        pop_front(const Value& value, void* dst)                const override;
 
-    inline ValueCopy    castfrom(T* value)                                      const;
-    inline T*           castto(const Value& value)                              const;
+    inline ValueCopy    castfrom(weak<T> value)                                 const;
+    inline weak<T>      castto(const Value& value)                              const;
 };
 
 }}

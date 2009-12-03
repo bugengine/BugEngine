@@ -18,7 +18,7 @@ Task< Body >::Task(const istring& name, color32 color, const Body& body, bool si
 }
 
 template< typename Body >
-void Task< Body >::runTask(Scheduler* sc) const
+void Task< Body >::runTask(weak<Scheduler> sc) const
 {
     typedef typename Body::Range Range;
     Range r = m_body.prepare();

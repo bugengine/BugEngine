@@ -17,19 +17,11 @@ Package::Package()
 {
 }
 
-Package::Package(const istring& name, Package* parent)
+Package::Package(const istring& name, weak<Package> parent)
 :   m_refcount(0)
 ,   m_name(name)
 ,   m_parent(parent)
 {
-    static std::vector< refptr<Package> > s_orphans;
-    refptr<Package> obj(this);
-    std::pair< minitl::map<istring,refptr<Package> >::iterator, bool > result = parent->m_children.insert(std::make_pair(name, obj));
-    if(!result.second)
-    {
-        be_notreached();
-        s_orphans.push_back(obj);
-    }
 }
 
 Package::~Package()
@@ -37,7 +29,7 @@ Package::~Package()
     be_assert(m_refcount == 0, "destroying package %s that is still being used" | m_name.c_str());
 }
 
-refptr<Package> Package::MetaClass::create(const ipath& name) const
+ref<Package> Package::MetaClass::create(const ipath& name) const
 {
     UNUSED(name);
     throw 0;
@@ -56,20 +48,20 @@ void Package::unload()
         dounload(); 
 }
 
-Package* Package::get(const inamespace& name)
+weak<Package> Package::get(const inamespace& name)
 {
     UNUSED(name);
 /*  static Package s_root;
     Package* result = &s_root;
     for(size_t i = 0; i < name.size(); ++i)
     {
-        stdhash::hash_map<istring,refptr<Package> >::iterator it = result->m_children.find(name[i]);
+        stdhash::hash_map<istring,ref<Package> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
             return 0;
         result = *it->second;
     }
     return result;*/
-    return 0;
+    return weak<Package>();
 }
 
 }}

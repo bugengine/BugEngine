@@ -14,16 +14,16 @@ namespace RTTI
 class MetaClass;
 }
 
-class be_api(RTTI) Object : public minitl::refcountable<void>
+class be_api(RTTI) Object : public minitl::refcountable
 {
 public:
     typedef RTTI::MetaClass MetaClass;
     Object();
     virtual ~Object();
 
-    virtual const RTTI::MetaClass*  metaclass() const = 0;
-    static const RTTI::MetaClass*   static_metaclass();
-    static void                     registerMetaClass();
+    virtual ref<const RTTI::MetaClass>  metaclass() const = 0;
+    static ref<const Object::MetaClass> static_metaclass();
+    static void                          registerMetaClass();
 private:
     Object(const Object& other);
     Object& operator=(const Object& other);

@@ -12,7 +12,7 @@ namespace BugEngine { namespace Data
 class be_api(DATA) Package : public RTTI::Package
 {
 private:
-    refptr<const RTTI::Namespace> m_namespace;
+    ref<const RTTI::Namespace> m_namespace;
 private:
     virtual void doload();
     virtual void dounload();
@@ -20,10 +20,10 @@ public:
     Package(const ipath& name);
     ~Package();
 
-    virtual const RTTI::Namespace*    getNamespace() const override;
+    virtual weak<const RTTI::Namespace> getNamespace() const override;
 
     be_metaclass(DATA, Package, RTTI::Package)
-        refptr<RTTI::Package> create(const ipath& name) const override;
+        ref<RTTI::Package> create(const ipath& name) const override;
     be_properties
     be_end
 };

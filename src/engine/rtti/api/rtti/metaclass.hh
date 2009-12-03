@@ -21,32 +21,32 @@ private:
     class StaticProperty;
 public:
     typedef RTTI::MetaMetaClass MetaMetaClass;
-    typedef minitl::map< istring, refptr<const Property> >      PropertyMap;
-    typedef PropertyMap::iterator                               PropertyIterator;
-    typedef PropertyMap::const_iterator                         PropertyConstIterator;
+    typedef minitl::map< istring, ref<const Property> > PropertyMap;
+    typedef PropertyMap::iterator                       PropertyIterator;
+    typedef PropertyMap::const_iterator                 PropertyConstIterator;
 private:
     istring                 m_name;
-    refptr<const MetaClass> m_parent;
+    ref<const MetaClass>    m_parent;
 protected:
-    refptr<MetaMetaClass>   m_metaclass;
+    ref<MetaMetaClass>      m_metaclass;
     PropertyMap             m_properties;
 public:
-    MetaClass(const inamespace& name, const MetaClass* parent, MetaMetaClass* mc, bool registerClass = true);
+    MetaClass(const inamespace& name, ref<const MetaClass> parent, ref<MetaMetaClass> mc, bool registerClass = true);
     virtual ~MetaClass();
 
     const istring& name() const;
-    virtual const MetaClass* metaclass() const override;
-    virtual const MetaClass* parent() const;
+    virtual ref<const MetaClass> metaclass() const override;
+    virtual ref<const MetaClass> parent() const;
 
     virtual Value call(Value* params, size_t nbParams) const;
 
-    void addProperty(const istring& name, refptr<const Property> property);
-    void addMethod(const istring& name, refptr<Method> method);
-    const Property* getProperty(const istring& name) const;
+    void addProperty(const istring& name, ref<const Property> property);
+    void addMethod(const istring& name, ref<Method> method);
+    weak<const Property> getProperty(const istring& name) const;
 
-    virtual refptr<Object> create() const;
+    virtual ref<Object> create() const;
 protected:
-    static void init(MetaClass* mc);
+    static void init(weak<MetaClass> mc);
 private:
     MetaClass(const MetaClass& other);
     MetaClass& operator=(const MetaClass& other);
@@ -55,7 +55,7 @@ private:
 class be_api(RTTI) MetaMetaClass : public MetaClass
 {
 public:
-    MetaMetaClass(const inamespace& name, const MetaClass* parent);
+    MetaMetaClass(const inamespace& name, ref<const MetaClass> parent);
     ~MetaMetaClass();
 private:
     MetaMetaClass(const MetaMetaClass& other);

@@ -19,15 +19,15 @@ protected:
     {
     public:
         MetaClass();
-        MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass);
+        MetaClass(const inamespace& name, ref<const MetaClass> parent, bool registerClass);
         ~MetaClass();
     };
 public:
     Method();
     virtual ~Method();
 
-    virtual const MetaClass* metaclass() const override;
-    static  const MetaClass* static_metaclass();
+    virtual ref<const RTTI::MetaClass> metaclass() const override;
+    static  ref<const Method::MetaClass> static_metaclass();
 private:
     Method(const Method& other);
     Method& operator=(const Method& other);
