@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Data { namespace Parse
 {
 
-Database::DatabaseElement::DatabaseElement(const istring& name, DatabaseElement* parent) :
+Database::DatabaseElement::DatabaseElement(const istring& name, weak<DatabaseElement> parent) :
     m_name(name),
     m_parent(parent)
 {
@@ -22,7 +22,7 @@ Database::DatabaseElement::~DatabaseElement()
 {
 }
 
-void Database::DatabaseElement::add(const istring &name, Visibility v, refptr<const Node> value)
+void Database::DatabaseElement::add(const istring &name, Visibility v, ref<const Node> value)
 {
     std::pair< ChildrenContainer::iterator, bool> insertResult = m_objects.insert(std::make_pair(name, std::make_pair(v, value)));
     be_assert(insertResult.second, "database element %s already exist" | name.c_str());
@@ -30,14 +30,14 @@ void Database::DatabaseElement::add(const istring &name, Visibility v, refptr<co
     insertResult.first->second.second = value;
 }
 
-Database::DatabaseElement* Database::DatabaseElement::push(const istring &name)
+weak<Database::DatabaseElement> Database::DatabaseElement::push(const istring &name)
 {
-    std::pair< NamespaceContainer::iterator, bool> insertResult = m_namespaces.insert(std::make_pair(name, refptr<DatabaseElement>(0)));
+    std::pair< NamespaceContainer::iterator, bool> insertResult = m_namespaces.insert(std::make_pair(name, ref<DatabaseElement>()));
     if(insertResult.second)
     {
-        insertResult.first->second = new DatabaseElement(name, this);
+        insertResult.first->second = ref<DatabaseElement>::create(name, this);
     }
-    return insertResult.first->second.get();
+    return insertResult.first->second;
 }
 
 void Database::DatabaseElement::dolink(Context& context) const
@@ -50,7 +50,7 @@ void Database::DatabaseElement::dolink(Context& context) const
 
 Value Database::DatabaseElement::doeval(Context& context) const
 {
-    RTTI::Namespace* ns = new RTTI::Namespace();
+    ref<RTTI::Namespace> ns = ref<RTTI::Namespace>::create();
     for(ChildrenContainer::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
         if(it->second.first == Export)
             ns->set(it->first, it->second.second->eval(context));
@@ -58,20 +58,20 @@ Value Database::DatabaseElement::doeval(Context& context) const
     {
         Value v = it->second->eval(context);
         be_assert(v.type() == RTTI::PropertyTypeObject, "invalid type");
-        RTTI::Namespace* ns = v.as< RTTI::Namespace* >();
+        ref<RTTI::Namespace> ns = v.as< ref<RTTI::Namespace> >();
         ns->mount(it->first, ns);
     }
 
-    return Value(refptr<Object>(ns));
+    return Value(ref<Object>(ns));
 }
 
 //-----------------------------------------------------------------------------
 
-extern AbstractMemoryStream* g_parseStream;
+extern weak<AbstractMemoryStream> g_parseStream;
 
-Database::Database() :
-    m_root(new DatabaseElement("", 0)),
-    m_current(m_root.get())
+Database::Database()
+:   m_root(ref<DatabaseElement>::create("", weak<DatabaseElement>()))
+,   m_current(m_root)
 {
 }
 
@@ -79,7 +79,7 @@ Database::~Database()
 {
 }
 
-void Database::add(const istring& name, Visibility v, refptr<const Node> value)
+void Database::add(const istring& name, Visibility v, ref<const Node> value)
 {
     m_current->add(name, v, value);
 }
@@ -99,21 +99,21 @@ void Database::parse(const ifilename& file)
 {
     ParseParam params(file, this);
 
-    refptr<AbstractMemoryStream> stream = FileSystem::instance()->open(file, eReadOnly);
-    g_parseStream = stream.get();
+    ref<AbstractMemoryStream> stream = FileSystem::instance()->open(file, eReadOnly);
+    g_parseStream = stream;
 
     yyparse(&params);
 
     g_parseStream = 0;
 }
 
-refptr<RTTI::Namespace> Database::commit()
+ref<RTTI::Namespace> Database::commit()
 {
     Context ctx(*this);
     m_root->dolink(ctx);
     Value value = m_root->doeval(ctx);
     be_assert(value.type() == RTTI::PropertyTypeObject, "invalid type");
-    return value.as< refptr<RTTI::Namespace> >();
+    return value.as< ref<RTTI::Namespace> >();
 }
 
 

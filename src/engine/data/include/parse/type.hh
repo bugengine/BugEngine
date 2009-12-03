@@ -83,9 +83,9 @@ protected:
 class Type::Vector : public Type
 {
 private:
-    refptr<Type>    m_cellType;
+    Type*    m_cellType;
 public:
-    Vector(refptr<Type> cellType);
+    Vector(Type* cellType);
     ~Vector();
 protected:
     void dolink(Context& context) const override;
@@ -95,10 +95,10 @@ protected:
 class Type::Map : public Type
 {
 private:
-    refptr<Type>    m_keyType;
-    refptr<Type>    m_valueType;
+    Type*    m_keyType;
+    Type*    m_valueType;
 public:
-    Map(refptr<Type> keyType, refptr<Type> valueType);
+    Map(Type* keyType, Type* valueType);
     ~Map();
 protected:
     void dolink(Context& context) const override;

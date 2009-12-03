@@ -23,7 +23,7 @@ TexturePipeline::~TexturePipeline()
 
 _Texture* TexturePipeline::load(const ifilename& filename)
 {
-    refptr<AbstractMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
+    ref<AbstractMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
 
 #pragma pack(push)
 #pragma pack(1)

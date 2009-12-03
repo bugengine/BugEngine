@@ -22,8 +22,8 @@ typedef TYPELIST7( bool,
                    u64,
                    double,
                    std::string,
-                   refptr<Object>,
-                   Object* )   ValueTypes;
+                   ref<Object>,
+                   weak<Object> )   ValueTypes;
 enum ValueTypeIndex
 {
     PropertyTypeNotSet      = minitl::indexof< void, ValueTypes >::Value,
@@ -32,8 +32,8 @@ enum ValueTypeIndex
     PropertyTypeUnsigned    = minitl::indexof< u64, ValueTypes >::Value,
     PropertyTypeFloat       = minitl::indexof< double, ValueTypes >::Value,
     PropertyTypeString      = minitl::indexof< std::string, ValueTypes >::Value,
-    PropertyTypeObject      = minitl::indexof< refptr<Object>, ValueTypes >::Value,
-    PropertyTypeWeakObject  = minitl::indexof< Object*, ValueTypes >::Value,
+    PropertyTypeObject      = minitl::indexof< ref<Object>, ValueTypes >::Value,
+    PropertyTypeWeakObject  = minitl::indexof< weak<Object>, ValueTypes >::Value,
     //PropertyTypeVector        = Meta::IndexOf< PublishedVector, ValueTypes >::Value,
     //PropertyTypeMap           = Meta::IndexOf< PublishedMap, ValueTypes >::Value,
     PropertyTypeVariant     = 255

@@ -65,9 +65,9 @@ class Application::UpdateScheduler
     friend class Task<UpdateScheduler>;
 private:
     typedef range_onestep   Range;
-    Scheduler*              m_scheduler;
+    weak<Scheduler> m_scheduler;
 public:
-    UpdateScheduler(Scheduler* sc)
+    UpdateScheduler(weak<Scheduler> sc)
         :   m_scheduler(sc)
     { 
     }
@@ -89,11 +89,11 @@ public:
 
 Application::Application(int argc, const char *argv[])
 :   Object()
-,   m_scheduler(new Scheduler())
-,   m_world(new World(float3(10000.0f, 10000.0f, 10000.0f)))
-,   m_updateInputTask(new Task<UpdateInput>("input", color32(200,200,120), UpdateInput()))
-,   m_updateMemoryTask(new Task<UpdateMemory>("memory", color32(150,180,120), UpdateMemory()))
-,   m_updateSchedulerTask(new Task<UpdateScheduler>("scheduler", color32(200,180,120), UpdateScheduler(m_scheduler.get())))
+,   m_scheduler(scoped<Scheduler>::create())
+,   m_world(ref<World>::create(float3(10000.0f, 10000.0f, 10000.0f)))
+,   m_updateInputTask(scoped< Task<UpdateInput> >::create("input", color32(200,200,120), UpdateInput()))
+,   m_updateMemoryTask(scoped< Task<UpdateMemory> >::create("memory", color32(150,180,120), UpdateMemory()))
+,   m_updateSchedulerTask(scoped< Task<UpdateScheduler> >::create("scheduler", color32(200,180,120), UpdateScheduler(m_scheduler)))
 {
     UNUSED(argc); UNUSED(argv);
 }
@@ -109,7 +109,7 @@ int Application::run()
     return 0;
 }
 
-void Application::createWindow(Graphics::WindowFlags f, refptr<Graphics::Scene> scene)
+void Application::createWindow(Graphics::WindowFlags f, ref<Graphics::Scene> scene)
 {
     m_world->createView(f, scene);
 }

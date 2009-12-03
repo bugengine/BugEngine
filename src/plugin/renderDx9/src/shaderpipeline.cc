@@ -27,7 +27,7 @@ ShaderPipeline::~ShaderPipeline()
 
 _Shader* ShaderPipeline::load(const ifilename& filename)
 {
-    refptr<AbstractMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
+    ref<AbstractMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
     const char *ext = filename[filename.size()-1].c_str();
     size_t extpos = strlen(ext) - 5;
     CGprofile p = m_vertexProfile;
@@ -85,12 +85,12 @@ ShaderParam::Type ShaderPipeline::getTypeByName(const char *name)
     return cgGetType(name);
 }
 
-refptr<CgShaderParam> ShaderPipeline::createSystemParameter(const istring& name, ShaderParam::Type type)
+ref<CgShaderParam> ShaderPipeline::createSystemParameter(const istring& name, ShaderParam::Type type)
 {
     CGparameter p = cgCreateParameter(m_owner->m_context, CGtype(type));
     cgSetParameterVariability(p, CG_UNIFORM);
     be_assert(cgGetParameterType(p) == type, "type conflict");
-    refptr<CgShaderParam> param(new CgShaderParam(p));
+    ref<CgShaderParam> param(new CgShaderParam(p));
     bool result = m_systemParams.insert(std::make_pair(name, param)).second;
     be_assert(result, "system parameter %s already exists" | name.c_str());
     return param;

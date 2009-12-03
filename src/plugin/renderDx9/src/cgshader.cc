@@ -35,7 +35,7 @@ void CgShader::addParam(ShaderParam* p)
 ShaderParam* CgShader::getParam(const BugEngine::istring &name) const
 {
     const char *str = name.c_str();
-    for(std::vector< refptr<ShaderParam> >::const_iterator it = m_params.begin(); it != m_params.end(); ++it)
+    for(std::vector< ref<ShaderParam> >::const_iterator it = m_params.begin(); it != m_params.end(); ++it)
     {
         if(strcmp((*it)->name(), str) == 0)
             return it->get();

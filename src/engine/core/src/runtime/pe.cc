@@ -502,7 +502,7 @@ PE::PE(const char *filename, u64 baseAddress)
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if(debug_link)
         {
-            Malloc::MemoryBlock<char> filename(checked_numcast<size_t>(debug_link.fileSize));
+            Malloc::MemoryBlock<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
             readSection(debug_link, filename);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(filename);

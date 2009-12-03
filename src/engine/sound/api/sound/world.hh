@@ -20,8 +20,8 @@ public:
     World();
     ~World();
 
-    refptr<SoundObject> createSound(const ifilename& file);
-    refptr<SoundObject> createMusic(const ifilename& file);
+    ref<SoundObject> createSound(const ifilename& file);
+    ref<SoundObject> createMusic(const ifilename& file);
 
     void step() const;
 

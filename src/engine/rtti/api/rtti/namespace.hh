@@ -27,10 +27,10 @@ protected:
             Property();
             ~Property();
 
-            virtual bool    readable(Object* from) const override;
-            virtual bool    writable(Object* from) const override;
-            virtual void    set(Object* dest, const Value& value) const override;
-            virtual Value   get(Object* from) const override;
+            virtual bool    readable(weak<Object> from) const override;
+            virtual bool    writable(weak<Object> from) const override;
+            virtual void    set(weak<Object> dest, const Value& value) const override;
+            virtual Value   get(weak<Object> from) const override;
         };
     public:
         MetaClass();
@@ -41,29 +41,29 @@ protected:
         void    erase(const istring& name);
     };
 private:
-    typedef minitl::map< istring, refptr<Namespace> >  NamespaceMap;
-    refptr<MetaClass>   m_metaClass;
-    NamespaceMap        m_subnamespaces;
+    typedef minitl::map< istring, ref<Namespace> >  NamespaceMap;
+    ref<MetaClass>  m_metaClass;
+    NamespaceMap    m_subnamespaces;
 public:
     Namespace();
     virtual ~Namespace();
 
-    virtual const MetaClass*  metaclass() const override;
+    virtual ref<const RTTI::MetaClass>  metaclass() const override;
 
     void                set(const istring& ns, const Value& value);
     Value               get(const istring& name) const;
-    void                mount(const istring& name, refptr<Namespace> ns);
+    void                mount(const istring& name, ref<Namespace> ns);
     void                umount(const istring& name);
-    refptr<Namespace>   getNamespace(const istring& name);
-    refptr<Namespace>   createNamespace(const istring& name);
+    ref<Namespace>   getNamespace(const istring& name);
+    ref<Namespace>   createNamespace(const istring& name);
 
     void insert(const inamespace& ns, const Value& value);
-    void insert(const inamespace& ns, Object* value);
-    void insert(const inamespace& ns, refptr<Object> value);
+    void insert(const inamespace& ns, weak<Object> value);
+    void insert(const inamespace& ns, ref<Object> value);
     Value get(const inamespace& ns);
     void clear();
 
-    static refptr<Namespace> root();
+    static ref<Namespace> root();
 private:
     Namespace(const Namespace& other);
     Namespace& operator=(const Namespace& other);

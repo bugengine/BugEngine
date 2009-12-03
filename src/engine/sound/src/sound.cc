@@ -21,7 +21,7 @@ namespace BugEngine { namespace Sound
 static size_t vorbis_read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
     AbstractMemoryStream* stream = static_cast<AbstractMemoryStream*>(datasource);
-    return checked_numcast<size_t>(stream->read(ptr,size*nmemb));
+    return be_checked_numcast<size_t>(stream->read(ptr,size*nmemb));
 }
 
 static int vorbis_seek(void *datasource, ogg_int64_t offset, int whence)
@@ -34,18 +34,18 @@ static int vorbis_seek(void *datasource, ogg_int64_t offset, int whence)
 static long vorbis_tell(void *datasource)
 {
     AbstractMemoryStream* stream = static_cast<AbstractMemoryStream*>(datasource);
-    return checked_numcast<long>(stream->offset());
+    return be_checked_numcast<long>(stream->offset());
 }
 
 static ov_callbacks be_callbacks_vorbis = { vorbis_read, vorbis_seek, 0, vorbis_tell };
 
 be_abstractmetaclass_impl("Sound",SoundObject);
 
-SoundObject::SoundObject(World* owner, refptr<AbstractMemoryStream> soundfile) :
-    m_owner(owner),
-    m_soundFile(soundfile),
-    m_data(0),
-    m_locked(false)
+SoundObject::SoundObject(weak<World> owner, ref<AbstractMemoryStream> soundfile)
+:   m_owner(owner)
+,   m_soundFile(soundfile)
+,   m_data(0)
+,   m_locked(false)
 {
     UNUSED(OV_CALLBACKS_DEFAULT);
     UNUSED(OV_CALLBACKS_NOCLOSE);
@@ -62,7 +62,7 @@ SoundObject::~SoundObject()
     }
 }
 
-World* SoundObject::owner() const
+weak<World> SoundObject::owner() const
 {
     return m_owner;
 }
@@ -70,7 +70,7 @@ World* SoundObject::owner() const
 size_t SoundObject::read(void* buffer, size_t size, int& frequency, int& channels) const
 {
     int bitstream;
-    size_t result = ov_read(static_cast<OggVorbis_File*>(m_data), (char*)buffer, checked_numcast<int>(size), 0, 2, 1, &bitstream);
+    size_t result = ov_read(static_cast<OggVorbis_File*>(m_data), (char*)buffer, be_checked_numcast<int>(size), 0, 2, 1, &bitstream);
     vorbis_info* info = ov_info(static_cast<OggVorbis_File*>(m_data), bitstream);
     frequency = info->rate;
     channels = info->channels;
@@ -85,10 +85,10 @@ void SoundObject::reset()
         delete static_cast<OggVorbis_File*>(m_data);
     }
     m_data = new OggVorbis_File;
-    ov_open_callbacks(m_soundFile.get(), static_cast<OggVorbis_File*>(m_data), 0, 0, be_callbacks_vorbis);
+    ov_open_callbacks(m_soundFile.operator->(), static_cast<OggVorbis_File*>(m_data), 0, 0, be_callbacks_vorbis);
 }
 
-bool SoundObject::lock(Source* from)
+bool SoundObject::lock(weak<Source> from)
 {
     UNUSED(from);
     if(m_locked)

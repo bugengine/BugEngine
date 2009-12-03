@@ -19,20 +19,20 @@ protected:
     {
     public:
         MetaClass();
-        MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass);
+        MetaClass(const inamespace& name, ref<const MetaClass> parent, bool registerClass);
         ~MetaClass();
     };
 public:
     Property();
     virtual ~Property();
 
-    virtual bool                readable(Object* from) const = 0;
-    virtual bool                writable(Object* from) const = 0;
-    virtual void                set(Object* dest, const Value& value) const = 0;
-    virtual Value               get(Object* from) const = 0;
+    virtual bool                readable(weak<Object> from) const = 0;
+    virtual bool                writable(weak<Object> from) const = 0;
+    virtual void                set(weak<Object> dest, const Value& value) const = 0;
+    virtual Value               get(weak<Object> from) const = 0;
 
-    virtual const MetaClass*    metaclass() const override;
-    static  const MetaClass*    static_metaclass();
+    virtual ref<const RTTI::MetaClass>       metaclass() const override;
+    static  ref<const Property::MetaClass>   static_metaclass();
 private:
     Property(const Property& other);
     Property& operator=(const Property& other);

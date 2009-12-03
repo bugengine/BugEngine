@@ -13,17 +13,17 @@ namespace BugEngine { namespace Actions
 class be_api(SYSTEM) Call : public Action
 {
 private:
-    RTTI::Method*   m_method;
+    weak<RTTI::Method>   m_method;
 public:
     Call();
-    Call(RTTI::Method* method);
+    Call(weak<RTTI::Method> method);
     ~Call();
 
     virtual void initialize(ActionContext* context) const override;
     virtual bool oneturn(ActionContext* context) const override;
 
     be_metaclass(SYSTEM,Call,Action)
-        refptr<Call> createWithMethod(RTTI::Method* method);
+        ref<Call> createWithMethod(weak<RTTI::Method> method);
     be_properties
         be_classmethod(createWithMethod);
 

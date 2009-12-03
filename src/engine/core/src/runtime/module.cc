@@ -31,10 +31,10 @@ Module::~Module()
 {
 }
 
-refptr<const Module> Module::self()
+ref<const Module> Module::self()
 {
-    static refptr<Module> s_module;
-    refptr<Module> module;
+    static ref<Module> s_module;
+    ref<Module> module;
 #ifdef BE_PLATFORM_POSIX
     void* handle = dlopen(0, RTLD_LAZY);
     link_map* lmap;
@@ -55,7 +55,7 @@ refptr<const Module> Module::self()
         }
         else
         {
-            refptr<Module> newModule = new Elf(lmap->l_name, lmap->l_addr);
+            ref<Module> newModule = new Elf(lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module = newModule;
         }
@@ -76,12 +76,12 @@ refptr<const Module> Module::self()
         ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
         if(i == 0)
         {
-            s_module = new PE(moduleName, (u64)info.lpBaseOfDll);
+           s_module = ref<PE>::create(moduleName, (u64)info.lpBaseOfDll);
             module = s_module;
         }
         else
         {
-            refptr<Module> newModule = new PE(moduleName, (u64)info.lpBaseOfDll);
+            ref<Module> newModule = ref<PE>::create(moduleName, (u64)info.lpBaseOfDll);
             module->m_next = newModule;
             module = newModule;
         }
@@ -106,8 +106,8 @@ const Module::Section& Module::operator[](const istring& name) const
 void Module::readSection(const Section &section, void *data) const
 {
     FILE*f = fopen(m_filename.str().c_str(), "rb");
-    fseek(f, checked_numcast<long int>(section.fileOffset), SEEK_SET);
-    fread(data, checked_numcast<long int>(section.fileSize), 1, f);
+    fseek(f, be_checked_numcast<long int>(section.fileOffset), SEEK_SET);
+    fread(data, be_checked_numcast<long int>(section.fileSize), 1, f);
 }
 
 

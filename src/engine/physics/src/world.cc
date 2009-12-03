@@ -28,12 +28,12 @@ private:
         ~WorldSetup();
     };
 public:
-    WorldSetup                                  m_setup;
-    scopedptr<btDefaultCollisionConfiguration>  m_configuration;
-    scopedptr<btDispatcher>                     m_dispatcher;
-    scopedptr<btConstraintSolver>               m_solver;
-    scopedptr<btBroadphaseInterface>            m_broadphase;
-    scopedptr<btDynamicsWorld>                  m_world;
+    WorldSetup                          m_setup;
+    btDefaultCollisionConfiguration     m_configuration;
+    btCollisionDispatcher               m_dispatcher;
+    btSequentialImpulseConstraintSolver m_solver;
+    btAxisSweep3                        m_broadphase;
+    btDiscreteDynamicsWorld             m_world;
 public:
     WorldImplementation(float3 worldExtents);
     ~WorldImplementation();
@@ -70,11 +70,11 @@ World::WorldImplementation::WorldSetup::~WorldSetup()
 
 World::WorldImplementation::WorldImplementation(float3 worldExtents)
 :   m_setup()
-,   m_configuration(new btDefaultCollisionConfiguration)
-,   m_dispatcher(new btCollisionDispatcher(m_configuration.get()))
-,   m_solver(new btSequentialImpulseConstraintSolver)
-,   m_broadphase(new btAxisSweep3(btVector3(-worldExtents.x(),-worldExtents.y(),-worldExtents.z()),btVector3(worldExtents.x(),worldExtents.y(),worldExtents.z())))
-,   m_world(new btDiscreteDynamicsWorld(m_dispatcher.get(),m_broadphase.get(),m_solver.get(),m_configuration.get()))
+,   m_configuration()
+,   m_dispatcher(&m_configuration)
+,   m_solver()
+,   m_broadphase(btVector3(-worldExtents.x(),-worldExtents.y(),-worldExtents.z()),btVector3(worldExtents.x(),worldExtents.y(),worldExtents.z()))
+,   m_world(&m_dispatcher, &m_broadphase, &m_solver, &m_configuration)
 {
 }
 
@@ -83,7 +83,7 @@ World::WorldImplementation::~WorldImplementation()
 }
 
 World::World(float3 worldExtents)
-:   m_implementation(new WorldImplementation(worldExtents))
+:   m_implementation(scoped<WorldImplementation>::create(worldExtents))
 {
 }
 
@@ -93,7 +93,7 @@ World::~World()
 
 void World::step(float time)
 {
-    m_implementation->m_world->stepSimulation(time);
+    m_implementation->m_world.stepSimulation(time);
 }
 
 }}

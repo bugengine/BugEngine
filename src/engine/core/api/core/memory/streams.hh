@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class be_api(CORE) AbstractMemoryStream : public minitl::refcountable<>
+class be_api(CORE) AbstractMemoryStream : public minitl::refcountable
 {
 public:
     enum SeekMethod

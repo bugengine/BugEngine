@@ -13,7 +13,7 @@ struct GpuMapFlags
 {
 };
 
-class be_api(GRAPHICS) GpuBuffer : public minitl::refcountable<void>
+class be_api(GRAPHICS) GpuBuffer : public minitl::refcountable
 {
 protected:
     GpuBuffer();

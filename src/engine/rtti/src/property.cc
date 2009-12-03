@@ -9,12 +9,12 @@ namespace BugEngine { namespace RTTI
 {
 
 Property::MetaClass::MetaClass()
-:   RTTI::MetaClass("meta.property", 0, 0, true)
+:   RTTI::MetaClass("meta.property", ref<RTTI::MetaClass>(), ref<RTTI::MetaMetaClass>(), true)
 {
 }
 
-Property::MetaClass::MetaClass(const inamespace& name, const MetaClass* parent, bool registerClass) :
-BugEngine::Object::MetaClass(name, parent, 0, registerClass)
+Property::MetaClass::MetaClass(const inamespace& name, ref<const MetaClass> parent, bool registerClass)
+:    BugEngine::Object::MetaClass(name, parent, ref<MetaMetaClass>(), registerClass)
 {
 }
 
@@ -24,8 +24,8 @@ Property::MetaClass::~MetaClass()
 
 //-----------------------------------------------------------------------------
 
-Property::Property() :
-    Object()
+Property::Property()
+:   Object()
 {
 }
 
@@ -33,14 +33,14 @@ Property::~Property()
 {
 }
 
-const Property::MetaClass* Property::metaclass() const
+ref<const RTTI::MetaClass> Property::metaclass() const
 {
     return static_metaclass();
 }
 
-const Property::MetaClass* Property::static_metaclass()
+ref<const Property::MetaClass> Property::static_metaclass()
 {
-    static const Property::MetaClass*  s_metaclass = new Property::MetaClass();
+    static ref<const Property::MetaClass> s_metaclass = ref<Property::MetaClass>::create();
     return s_metaclass;
 }
 

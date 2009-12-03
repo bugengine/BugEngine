@@ -9,61 +9,54 @@ namespace minitl
 {
 
 template< typename T >
-class scopedptr
+class scoped
 {
 private:
-    T* m_ptr;
-public:
-    scopedptr() NOTHROW : m_ptr(0)              { }
-    scopedptr(T* value) NOTHROW : m_ptr(value)  { }
-    ~scopedptr()                                { if(m_ptr) checked_delete<T>(m_ptr); }
-
-    void reset(T* value) NOTHROW                { if(m_ptr) checked_delete<T>(m_ptr); m_ptr = value; }
-    T* detach()                                 { T* value = m_ptr; m_ptr = 0; return value; }
-    
-
-    T& operator*() NOTHROW                      { return *m_ptr; }
-    const T& operator*()  const NOTHROW         { return *m_ptr; }
-    T* operator->() NOTHROW                     { return m_ptr; }
-    const T* operator->() const NOTHROW         { return m_ptr; }
-    T* get(void) NOTHROW                        { return m_ptr; }
-    const T* get(void) const NOTHROW            { return m_ptr; }
-    operator bool() const NOTHROW               { return m_ptr != 0; }
-    bool operator!() const NOTHROW              { return m_ptr == 0; }
+    mutable T* m_ptr;
 private:
-    scopedptr(const scopedptr& other);
-    scopedptr& operator=(const scopedptr& other);
+    scoped(T* value) NOTHROW : m_ptr(value)  { }
+public:
+#define be_create scoped
+#include "factory0.inl"
+#include "factory1.inl"
+#include "factory2.inl"
+#include "factory3.inl"
+#include "factory4.inl"
+#include "factory5.inl"
+#include "factory6.inl"
+#undef be_create
+public:
+    scoped() NOTHROW : m_ptr(0)                         { }
+    ~scoped()                                           { checked_delete<T>(m_ptr); }
+    scoped(const scoped& other) : m_ptr(other.m_ptr)    { other.m_ptr = 0; }
+    template< typename U >
+    scoped(const scoped<U>& other) : m_ptr(other.m_ptr) { other.m_ptr = 0; }
+    scoped& operator=(const scoped& other)              { checked_delete<T>(m_ptr); m_ptr = other.m_ptr; other.m_ptr = 0; }
+
+    T* operator->() NOTHROW              { return m_ptr; }
+    const T* operator->() const NOTHROW  { return m_ptr; }
+    operator const void*() const NOTHROW { return m_ptr; }
+    bool operator!() const NOTHROW       { return m_ptr == 0; }
+private:
 };
 
 template<typename T, typename U>
-bool operator==(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() == ref2.get(); }  
-template<typename T, typename U>
-bool operator==(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() == ptr2; }  
+bool operator==(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() == ref2.operator->(); }  
 
 template<typename T, typename U>
-bool operator!=(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() != ref2.get(); }
-template<typename T, typename U>
-bool operator!=(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() != ptr2; }
+bool operator!=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() != ref2.operator->(); }
 
 template<typename T, typename U>
-bool operator<(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() < ref2.get(); }  
-template<typename T, typename U>
-bool operator<(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() < ptr2; }
-  
-template<typename T, typename U>
-bool operator<=(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() <= ref2.get(); }
-template<typename T, typename U>
-bool operator<=(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() <= ptr2; }
+bool operator<(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() < ref2.operator->(); }  
 
 template<typename T, typename U>
-bool operator>(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() > ref2.get(); }  
-template<typename T, typename U>
-bool operator>(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() > ptr2; }  
+bool operator<=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() <= ref2.operator->(); }
 
 template<typename T, typename U>
-bool operator>=(const scopedptr<T>& ref1, const scopedptr<U>& ref2) { return ref1.get() >= ref2.get(); }
+bool operator>(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() > ref2.operator->(); }  
+
 template<typename T, typename U>
-bool operator>=(const scopedptr<T>& ref1, const U* ptr2) { return ref1.get() >= ptr2; }
+bool operator>=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() >= ref2.operator->(); }
 
 }
 

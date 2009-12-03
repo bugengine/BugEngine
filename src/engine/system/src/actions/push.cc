@@ -23,9 +23,9 @@ Push::~Push()
 {
 }
 
-refptr<Push> Push::MetaClass::createWithValue(const Value& value)
+ref<Push> Push::MetaClass::createWithValue(const Value& value)
 {
-    return new Push(value);
+    return ref<Push>::create(value);
 }
 
 void Push::initialize(ActionContext* context) const

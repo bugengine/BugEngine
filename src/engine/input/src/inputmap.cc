@@ -27,11 +27,11 @@ InputMap::~InputMap()
 {
 }
 
-Action* InputMap::addAction(ActionId id, const istring& name)
+weak<Action> InputMap::addAction(ActionId id, const istring& name)
 {
     if(id >= m_actions.size())
         m_actions.resize(id+1);
-    Action* result = new Action(name, this); 
+    ref<Action> result = ref<Action>::create(name, this); 
     m_actions[id] = result;
     return result;
 }

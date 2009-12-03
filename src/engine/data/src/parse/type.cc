@@ -113,13 +113,14 @@ Value Type::String::doeval(Context& /*context*/) const
 
 //-----------------------------------------------------------------------------
 
-Type::Vector::Vector(refptr<Type> cellType) :
-    m_cellType(cellType)
+Type::Vector::Vector(Type* cellType)
+:   m_cellType(cellType)
 {
 }
 
 Type::Vector::~Vector()
 {
+    delete m_cellType;
 }
 
 void Type::Vector::dolink(Context& /*context*/) const
@@ -133,7 +134,7 @@ Value Type::Vector::doeval(Context& /*context*/) const
 
 //-----------------------------------------------------------------------------
 
-Type::Map::Map(refptr<Type> keyType, refptr<Type> valueType) :
+Type::Map::Map(Type* keyType, Type* valueType) :
     m_keyType(keyType),
     m_valueType(valueType)
 {
@@ -141,6 +142,8 @@ Type::Map::Map(refptr<Type> keyType, refptr<Type> valueType) :
 
 Type::Map::~Map()
 {
+    delete m_keyType;
+    delete m_valueType;
 }
 
 void Type::Map::dolink(Context& /*context*/) const

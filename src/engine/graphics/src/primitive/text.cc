@@ -9,10 +9,10 @@ namespace BugEngine { namespace Graphics
 
 be_abstractmetaclass_impl("Graphics",Text);
 
-Text::Text(const RenderBackend* renderer, const Font* font, const char * /*message*/)
+Text::Text(weak<const RenderBackend> renderer, ref<const Font> font, const char * /*message*/)
 :   Primitive(renderer)
 ,   m_font(font)
-,   m_indexBuffer(0)
+,   m_indexBuffer()
 ,   m_totalVertices(0)
 {
 }
@@ -21,12 +21,12 @@ Text::~Text()
 {
 }
 
-const GpuBuffer* Text::indices() const
+weak<const GpuBuffer> Text::indices() const
 {
     return m_indexBuffer->buffer();
 }
 
-const GpuBuffer* Text::vertices() const
+weak<const GpuBuffer> Text::vertices() const
 {
     return m_font->vertices();
 }

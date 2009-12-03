@@ -51,8 +51,8 @@ struct Font::VertexBuilder
 
 Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
 {
-    refptr<AbstractMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
-    FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
+    ref<AbstractMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
+    FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), be_checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
     OutputDebugString(font.str().c_str());
     OutputDebugString(": ");
 
@@ -90,7 +90,7 @@ Font::~Font()
     FT_Done_Face(m_face);
 }
 
-const GpuBuffer* Font::vertices() const
+weak<const GpuBuffer> Font::vertices() const
 {
     return m_fontTriangles->buffer();
 }

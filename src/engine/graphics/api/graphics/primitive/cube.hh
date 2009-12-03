@@ -13,16 +13,16 @@ class be_api(GRAPHICS) Cube : public Primitive
 {
 private:
     typedef VertexDescription<MAKEVERTEXLIST1(float4, gPosition)> VertexFormat;
-    refptr< VertexBuffer<VertexFormat> >    m_vertexBuffer;
-    refptr< IndexBuffer<u16> >              m_indexBuffer;
+    ref< VertexBuffer<VertexFormat> >    m_vertexBuffer;
+    ref< IndexBuffer<u16> >              m_indexBuffer;
     u32                                     m_totalVertices;
 public:
     Cube(const RenderBackend* renderer);
     ~Cube();
 
-    virtual const GpuBuffer* indices() const override;
-    virtual const GpuBuffer* vertices() const override;
-    virtual unsigned         nbVertices() const override;
+    virtual weak<const GpuBuffer> indices() const override;
+    virtual weak<const GpuBuffer> vertices() const override;
+    virtual unsigned              nbVertices() const override;
 
     be_metaclass(GRAPHICS,Cube,Primitive)
     be_properties

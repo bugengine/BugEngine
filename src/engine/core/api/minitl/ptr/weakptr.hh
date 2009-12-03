@@ -5,41 +5,52 @@
 #define BE_MINITL_PTR_WEAKPTR_
 /*****************************************************************************/
 #include <minitl/ptr/refcountable.hh>
+#include <minitl/ptr/scopedptr.hh>
+#include <minitl/ptr/refptr.hh>
 
 
 namespace minitl
 {
 
 template< typename T >
-class weakptr
+class weak
 {
+    template< typename T, typename U >
+    friend weak<T> be_checked_cast(weak<U> u);
+    template< typename T, typename U >
+    friend weak<T> be_const_cast(weak<U> u);
 private:
     T* m_ptr;
 private:
-    void swap(weakptr& other)
+    void swap(weak& other)
     {
         T* tmp = other.m_ptr;
         other.m_ptr = m_ptr;
         m_ptr = tmp; 
     }
 public:
-    weakptr() : m_ptr(0) {}
+    weak() : m_ptr(0) {}
+    weak(T* ptr) : m_ptr(ptr) { minitl::addweak(m_ptr); }
     template< typename U >
-    weakptr(refptr<U> other) : m_ptr(other.get()) { minitl::addweak(m_ptr); }
-    weakptr(const weakptr& other) : m_ptr(other.m_ptr) { minitl::addweak(m_ptr); }
-    ~weakptr() { minitl::decweak(m_ptr); }
+    weak(ref<U> other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    template< typename U >
+    weak(scoped<U> other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    weak(const weak& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    template< typename U >
+    weak(const weak<U>& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    ~weak() { minitl::decweak(m_ptr); }
 
-    weakptr& operator=(const weakptr& other) { weakptr(other).swap(*this); return *this; }
+    weak& operator=(const weak& other) { weak(other).swap(*this); return *this; }
     template< typename U >
-    weakptr& operator=(const weakptr<U>& other) { weakptr(other).swap(*this); return *this; }
+    weak& operator=(const weak<U>& other) { weak(other).swap(*this); return *this; }
     template< typename U >
-    weakptr& operator=(U* other) { weakptr(other).swap(*this); return *this; }
+    weak& operator=(U* other) { weak(other).swap(*this); return *this; }
 
-    T& operator*()  const { return *m_ptr; }
     T* operator->() const { return m_ptr; }
-    T* get(void)    const { return m_ptr; }
-    operator void*() const { return m_ptr; }
+    operator const void*() const { return m_ptr; }
     bool operator!() const { return m_ptr == 0; }
+
+    void clear() { minitl::decweak(m_ptr); m_ptr = 0; }
 };
 
 }

@@ -23,7 +23,7 @@ void* AbstractMemoryStream::memory()
 i64 AbstractMemoryStream::read(void* buffer, i64 _size)
 {
     i64 toread = std::min(_size,size()-offset());
-    memcpy(buffer, memory(), checked_numcast<size_t>(toread));
+    memcpy(buffer, memory(), be_checked_numcast<size_t>(toread));
     seek(eSeekMove, toread);
     return toread;
 }
@@ -33,7 +33,7 @@ void AbstractMemoryStream::write(void* buffer, i64 _size)
     be_assert(writable(), "writing in a read-only memory stream");
     if(_size > size()-offset())
         resize(offset()+_size);
-    memcpy(memory(),buffer,checked_numcast<size_t>(_size));
+    memcpy(memory(),buffer,be_checked_numcast<size_t>(_size));
     seek(eSeekMove, _size);
 }
 
@@ -47,7 +47,7 @@ MemoryStream::MemoryStream() :
 }
 
 MemoryStream::MemoryStream(i64 _size) :
-    m_memory(be_malloc(checked_numcast<size_t>(_size))),
+    m_memory(be_malloc(be_checked_numcast<size_t>(_size))),
     m_size(_size),
     m_offset(0)
 {
@@ -95,7 +95,7 @@ void MemoryStream::seek(SeekMethod method, i64 _offset)
 
 void MemoryStream::resize(i64 _size)
 {
-    void* buffer = realloc(m_memory,checked_numcast<size_t>(_size));
+    void* buffer = realloc(m_memory,be_checked_numcast<size_t>(_size));
     if(! buffer)
         throw std::bad_alloc();
     m_memory = buffer;

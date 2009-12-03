@@ -14,7 +14,7 @@ class be_api(INPUT) Manager
 {
 private:
     class WindowCommunication;
-    typedef std::map< void*, refptr<Device> >   DeviceList;
+    typedef std::map< void*, ref<Device> >   DeviceList;
 private:
     WindowCommunication&    m_communication;
     Thread                  m_inputThread;
@@ -25,7 +25,7 @@ public:
     Manager();
     ~Manager();
 
-    Device* getDevice(void* handle);
+    weak<Device> getDevice(void* handle);
 
     void update() const;
 private:

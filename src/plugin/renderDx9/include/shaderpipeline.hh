@@ -21,7 +21,7 @@ private:
     Renderer*                                   m_owner;
     CGprofile                                   m_vertexProfile;
     CGprofile                                   m_fragmentProfile;
-    std::map< istring, refptr<CgShaderParam> >  m_systemParams;
+    std::map< istring, ref<CgShaderParam> >  m_systemParams;
 public:
     ShaderPipeline(Renderer* owner);
     ~ShaderPipeline();
@@ -32,7 +32,7 @@ public:
     ShaderParam::Type       getTypeByName(const char *type) override;
     const char *            getTypeName(ShaderParam::Type type) override;
 
-    refptr<CgShaderParam>   createSystemParameter(const istring& name, ShaderParam::Type type);
+    ref<CgShaderParam>   createSystemParameter(const istring& name, ShaderParam::Type type);
 private:
     bool                    isSystemParameter(const char *name);
     CgShaderParam*          getSystemParameter(const char *name);

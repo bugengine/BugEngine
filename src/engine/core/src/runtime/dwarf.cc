@@ -11,7 +11,7 @@ namespace BugEngine { namespace Runtime
 
 static const size_t c_stringBufferSize = 2048;
 
-DwarfModule::StringBuffer::StringBuffer(char* buffer, u64 size, const StringBuffer* next)
+DwarfModule::StringBuffer::StringBuffer(char* buffer, u64 size, ref<const StringBuffer> next)
     :   m_next(next)
     ,   m_size(size)
     ,   m_current(size)
@@ -19,7 +19,7 @@ DwarfModule::StringBuffer::StringBuffer(char* buffer, u64 size, const StringBuff
 {
 }
 
-DwarfModule::StringBuffer::StringBuffer(size_t size, const StringBuffer* next)
+DwarfModule::StringBuffer::StringBuffer(size_t size, ref<const StringBuffer> next)
     :   m_next(next)
     ,   m_size(size)
     ,   m_current(0)
@@ -312,29 +312,28 @@ void DwarfModule::parse(const Module& module)
     const Module::Section& debug_str = module[".debug_str"];
     if(debug_str)
     {
-        m_stringPool = (char*)be_malloc(checked_numcast<size_t>(debug_str.fileSize));
+        m_stringPool = (char*)be_malloc(be_checked_numcast<size_t>(debug_str.fileSize));
         module.readSection(debug_str, m_stringPool);
-        StringBuffer* previous = m_strings.detach();
-        m_strings.reset(new StringBuffer(m_stringPool, debug_str.size, previous));
+        m_strings = ref<StringBuffer>::create(m_stringPool, debug_str.size, m_strings);
     }
     const Module::Section& debug_info = module[".debug_info"];
     if(debug_info)
     {
-        debugInfo = (u8*)be_malloc(checked_numcast<size_t>(debug_info.fileSize));
+        debugInfo = (u8*)be_malloc(be_checked_numcast<size_t>(debug_info.fileSize));
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
     if(debug_abbrev)
     {
-        debugAbbrev = (u8*)be_malloc(checked_numcast<size_t>(debug_abbrev.fileSize));
+        debugAbbrev = (u8*)be_malloc(be_checked_numcast<size_t>(debug_abbrev.fileSize));
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
     if(debug_line)
     {
-        lineProgram = (u8*)be_malloc(checked_numcast<size_t>(debug_line.fileSize));
+        lineProgram = (u8*)be_malloc(be_checked_numcast<size_t>(debug_line.fileSize));
         module.readSection(debug_line, lineProgram);
     }
 
@@ -369,13 +368,12 @@ const char * DwarfModule::storeString(const char *string)
     be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
     if(!m_strings)
     {
-        m_strings.reset(new StringBuffer(c_stringBufferSize, 0));
+        m_strings = ref<StringBuffer>::create(c_stringBufferSize);
     }
     result = m_strings->store(string, size);
     if(!result)
     {
-        StringBuffer* previous = m_strings.detach();
-        m_strings.reset(new StringBuffer(c_stringBufferSize, previous));
+        m_strings = ref<StringBuffer>::create(c_stringBufferSize, m_strings);
         result = m_strings->store(string, size);
         be_assert(result, "new empty pool could not store string");
     }
@@ -396,8 +394,8 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
         return false;
 
     if(abbreviations.size() < code)
-        abbreviations.resize(checked_numcast<size_t>(code.value));
-    Dwarf::Abbreviation& abbrev = abbreviations[checked_numcast<size_t>(code.value)-1];
+        abbreviations.resize(be_checked_numcast<size_t>(code.value));
+    Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast<size_t>(code.value)-1];
 
     buffer >> abbrev.tag;
     buffer >> abbrev.children;
@@ -564,7 +562,7 @@ bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const mi
     buffer >> l;
     if(l == 0)
         return false;
-    const Dwarf::Abbreviation& abbrev = abbreviations[checked_numcast<size_t>(l.value)-1];
+    const Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast<size_t>(l.value)-1];
     CompilationUnit u;
     if(fillNode(buffer, u, abbrev, abbreviations, ptrSize))
     {

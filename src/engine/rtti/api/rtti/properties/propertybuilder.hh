@@ -72,10 +72,10 @@ static inline CreateWriteFieldFromSetterHelper< Owner, T > createHelperFromSette
 class BasePropertyBuilder
 {
 protected:
-    MetaClass *     m_metaclass;
+    weak<MetaClass> m_metaclass;
     const char *    m_name;
 protected:
-    inline BasePropertyBuilder(MetaClass* metaclass, const char *name)
+    inline BasePropertyBuilder(weak<MetaClass> metaclass, const char *name)
         :   m_metaclass(metaclass)
         ,   m_name(name)
     {
@@ -92,13 +92,13 @@ private:
     typedef typename Setter::Owner          Owner;
     typedef typename Setter::PropertyType   T;
 public:
-    inline PropertyBuilder(MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(weak<MetaClass> metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
     inline ~PropertyBuilder()
     {
-        m_metaclass->addProperty(m_name, new ObjectProperty<Owner, T, Getter, Setter >());
+        m_metaclass->addProperty(m_name, ref<ObjectProperty<Owner, T, Getter, Setter > >::create());
     }
 };
 
@@ -107,7 +107,7 @@ template<>
 class PropertyBuilder<void, void> : public BasePropertyBuilder
 {
 public:
-    inline PropertyBuilder(MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(weak<MetaClass> metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
@@ -118,37 +118,37 @@ public:
     template< typename Owner, typename T, size_t offset >
     inline PropertyBuilder<GetFromField<Owner, T, offset>, void> operator[](const GetFromField<Owner, T, offset>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<GetFromField<Owner, T, offset>, void>(mc, m_name);
     }
     template< typename Owner, typename T, T (Owner::*Getter)() >
     inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<GetFromGetter<Owner, T, Getter>, void>(mc, m_name);
     }
     template< typename Owner, typename T, T (Owner::*Getter)() const >
     inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void>(mc, m_name);
     }
 
     template< typename Owner, typename T, size_t offset >
     inline PropertyBuilder<void, SetFromField<Owner, T, offset> > operator[](const SetFromField<Owner, T, offset>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<void, SetFromField<Owner, T, offset> >(mc, m_name);
     }
     template< typename Owner, typename T, void (Owner::*Setter)(T) >
     inline PropertyBuilder<void, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<void, SetFromSetter<Owner, T, Setter> >(mc, m_name);
     }
 };
@@ -160,7 +160,7 @@ private:
     typedef typename Getter::Owner          Owner;
     typedef typename Getter::PropertyType   T;
 public:
-    inline PropertyBuilder(MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(weak<MetaClass> metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
@@ -168,21 +168,21 @@ public:
     inline ~PropertyBuilder()
     {
         if(m_metaclass)
-            m_metaclass->addProperty(m_name, new ObjectProperty<Owner, T, Getter, SetImpossible<Owner,T> >());
+            m_metaclass->addProperty(m_name, ref< ObjectProperty<Owner, T, Getter, SetImpossible<Owner,T> > >::create());
     }
 
     template< typename Owner, typename T, size_t offset >
     inline PropertyBuilder<Getter, SetFromField<Owner, T, offset> > operator[](const SetFromField<Owner, T, offset>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<Getter, SetFromField<Owner, T, offset> >(mc, m_name);
     }
     template< typename Owner, typename T, void (Owner::*Setter)(T) >
     inline PropertyBuilder<Getter, SetFromSetter<Owner, T, Setter> > operator[](const SetFromSetter<Owner, T, Setter>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<Getter, SetFromSetter<Owner, T, Setter> >(mc, m_name);
     }
 };
@@ -194,37 +194,37 @@ private:
     typedef typename Setter::Owner          Owner;
     typedef typename Setter::PropertyType   T;
 public:
-    inline PropertyBuilder(MetaClass* metaclass, const char *name)
+    inline PropertyBuilder(weak<MetaClass> metaclass, const char *name)
         : BasePropertyBuilder(metaclass, name)
     {
     }
     inline ~PropertyBuilder()
     {
         if(m_metaclass)
-            m_metaclass->addProperty(m_name, new ObjectProperty<Owner, T, GetImpossible<Owner,T>, Setter >());
+            m_metaclass->addProperty(m_name, ref< new ObjectProperty<Owner, T, GetImpossible<Owner,T>, Setter > >::create());
     }
 
     template< size_t offset >
     inline PropertyBuilder<GetFromField<Owner, T, offset>, Setter> operator[](const GetFromField<Owner, T, offset>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<GetFromField<Owner, T, offset>, Setter>(mc, m_name);
     }
     template< T (Owner::*Getter)() >
     inline PropertyBuilder<GetFromGetter<Owner, T, Getter>, void> operator[](const GetFromGetter<Owner, T, Getter>& /*just for type detection*/)
     {
-        Object::MetaClass* mc = m_metaclass;
-        m_metaclass = 0;
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
         return PropertyBuilder<GetFromGetter<Owner, T, Getter>, Setter>(mc, m_name);
-	}
-	template< T (Owner::*Getter)() const >
-	inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& /*just for type detection*/)
-	{
-		Object::MetaClass* mc = m_metaclass;
-		m_metaclass = 0;
-		return PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, Setter>(mc, m_name);
-	}
+    }
+    template< T (Owner::*Getter)() const >
+    inline PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, void> operator[](const GetFromGetterConst<Owner, T, Getter>& /*just for type detection*/)
+    {
+        weak<Object::MetaClass> mc = m_metaclass;
+        m_metaclass.clear();
+        return PropertyBuilder<GetFromGetterConst<Owner, T, Getter>, Setter>(mc, m_name);
+    }
 };
 
 }}}

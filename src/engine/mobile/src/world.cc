@@ -10,9 +10,9 @@ namespace BugEngine
 be_abstractmetaclass_impl("",World);
 
 World::World(float3 worldExtents)
-:   m_graphicsSystem(new Graphics::World())
-,   m_physicsSystem(new Physics::World(worldExtents))
-,   m_soundSystem(new Sound::World())
+:   m_graphicsSystem(ref<Graphics::World>::create())
+,   m_physicsSystem(ref<Physics::World>::create(worldExtents))
+,   m_soundSystem(ref<Sound::World>::create())
 {
 }
 
@@ -20,7 +20,7 @@ World::~World()
 {
 }
 
-void World::createView(Graphics::WindowFlags f, refptr<Graphics::Scene> scene)
+void World::createView(Graphics::WindowFlags f, ref<Graphics::Scene> scene)
 {
     m_graphicsSystem->createWindow(f, scene);
 }

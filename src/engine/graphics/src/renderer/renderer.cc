@@ -12,7 +12,7 @@ Renderer::Renderer(const istring& name)
 {
     if(m_plugin)
     {
-        RenderBackend* (*createRenderBackend)() = m_plugin.get<RenderBackend* (*)()>("createRenderBackend");
+        weak<RenderBackend> (*createRenderBackend)() = m_plugin.get<weak<RenderBackend> (*)()>("createRenderBackend");
         be_assert(createRenderBackend, "no function to create render backend in plugin");
         m_renderBackend = (*createRenderBackend)();
     }
@@ -22,7 +22,7 @@ Renderer::~Renderer()
 {
     if(m_plugin)
     {
-        void (*destroyRenderBackend)(RenderBackend*) = m_plugin.get<void (*)(RenderBackend*)>("destroyRenderBackend");
+        void (*destroyRenderBackend)(weak<RenderBackend>) = m_plugin.get<void (*)(weak<RenderBackend>)>("destroyRenderBackend");
         be_assert(destroyRenderBackend, "no function to destroy render backend in plugin");
         (*destroyRenderBackend)(m_renderBackend);
     }
@@ -33,32 +33,32 @@ uint2 Renderer::getScreenSize()
     return m_renderBackend->getScreenSize();;
 }
 
-RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene)
+ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, weak<const Scene> scene)
 {
     return m_renderBackend->createRenderWindow(flags, scene);
 }
 
-GpuBuffer* Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
     return m_renderBackend->createVertexBuffer(vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
     return m_renderBackend->createIndexBuffer(vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createTextureBuffer(TextureBufferFlags flags) const
+ref<GpuBuffer> Renderer::createTextureBuffer(TextureBufferFlags flags) const
 {
     return m_renderBackend->createTextureBuffer(flags);
 }
 
-ShaderPipeline* Renderer::getShaderPipeline()
+weak<ShaderPipeline> Renderer::getShaderPipeline()
 {
     return m_renderBackend->getShaderPipeline();
 }
 
-TexturePipeline* Renderer::getTexturePipeline()
+weak<TexturePipeline> Renderer::getTexturePipeline()
 {
     return m_renderBackend->getTexturePipeline();
 }

@@ -97,14 +97,6 @@ T* Malloc::systemAllocArray(size_t count, size_t alignment)
 #endif
 
 
-template< typename T >
-static inline void checked_delete(T* ptr)
-{
-    char typeMustBeComplete[sizeof(T)];
-    (void)typeMustBeComplete;
-    delete ptr;
-}
-
 /*****************************************************************************/
 #endif
 

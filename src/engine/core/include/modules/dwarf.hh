@@ -19,19 +19,22 @@ namespace Dwarf
 class DwarfModule : public SymbolResolver
 {
 private:
-    class StringBuffer
+    class StringBuffer : public refcountable
     {
     private:
-        const scopedptr<const StringBuffer> m_next;
-        u64 const                           m_size;
-        u64                                 m_current;
-        char* const                         m_buffer;
+        const ref<const StringBuffer>  m_next;
+        u64 const                      m_size;
+        u64                            m_current;
+        char* const                    m_buffer;
     public:
-        StringBuffer(char* buffer, u64 size, const StringBuffer* next = 0);
-        StringBuffer(size_t size, const StringBuffer* next = 0);
+        StringBuffer(char* buffer, u64 size, ref<const StringBuffer> next = ref<const StringBuffer>());
+        StringBuffer(size_t size, ref<const StringBuffer> next = ref<const StringBuffer>());
         ~StringBuffer();
 
         const char* store(const char* string, size_t size);
+    private:
+        StringBuffer(const StringBuffer&);
+        StringBuffer& operator=(const StringBuffer&);
     };
 private:
     struct AddressRange
@@ -58,12 +61,12 @@ private:
     template< Endianness e > class Buffer;
     typedef minitl::map<AddressRange, CompilationUnit>  UnitMap;
 private:
-    const u64               m_begin;
-    const u64               m_end;
-    const ifilename         m_moduleName;
-    UnitMap                 m_units;
-    scopedptr<StringBuffer> m_strings;
-    char*                   m_stringPool;
+    const u64           m_begin;
+    const u64           m_end;
+    const ifilename     m_moduleName;
+    UnitMap             m_units;
+    ref<StringBuffer>   m_strings;
+    char*               m_stringPool;
 private:
     template< Endianness e >
     void parse(const Module& m);
@@ -81,6 +84,9 @@ public:
 
     const char *storeString(const char *string);
     const char *indexedString(u64 offset) const;
+private:
+    DwarfModule(const DwarfModule&);
+    DwarfModule& operator=(const DwarfModule&);
 };
 
 }}

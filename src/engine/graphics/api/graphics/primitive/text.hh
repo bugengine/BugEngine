@@ -13,16 +13,16 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) Text : public Primitive
 {
 private:
-    refptr<const Font>          m_font;
-    refptr< IndexBuffer<u16> >  m_indexBuffer;
-    int                         m_totalVertices;
+    ref<const Font>         m_font;
+    ref< IndexBuffer<u16> > m_indexBuffer;
+    int                     m_totalVertices;
 public:
-    Text(const RenderBackend* renderer, const Font* font, const char* m);
+    Text(weak<const RenderBackend> renderer, ref<const Font> font, const char* m);
     ~Text();
 
-    virtual const GpuBuffer* indices() const override;
-    virtual const GpuBuffer* vertices() const override;
-    virtual unsigned         nbVertices() const override;
+    virtual weak<const GpuBuffer> indices() const override;
+    virtual weak<const GpuBuffer> vertices() const override;
+    virtual unsigned              nbVertices() const override;
 
     be_metaclass(GRAPHICS,Text,Primitive)
     be_properties

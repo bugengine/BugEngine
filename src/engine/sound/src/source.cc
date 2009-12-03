@@ -67,7 +67,7 @@ public:
                 be_notreached();
                 format = AL_FORMAT_STEREO16;
             }
-            alBufferData(m_ALBuffers[i], format, buffer, checked_numcast<ALsizei>(size), freq);
+            alBufferData(m_ALBuffers[i], format, buffer, be_checked_numcast<ALsizei>(size), freq);
             alSourceQueueBuffers(m_audioSource, 1, &m_ALBuffers[i]);
         }
         alSourcePlay(m_audioSource);
@@ -134,7 +134,7 @@ public:
                         be_notreached();
                         format = AL_FORMAT_STEREO16;
                     }
-                    alBufferData(bufferid, format, buffer, checked_numcast<ALsizei>(size), freq);
+                    alBufferData(bufferid, format, buffer, be_checked_numcast<ALsizei>(size), freq);
                     alSourceQueueBuffers(m_audioSource, 1, &bufferid);
                     processed_buffers--;
                 }
@@ -166,7 +166,7 @@ public:
 #endif
 
 Source::Source()
-:   m_sound(0)
+:   m_sound()
 //, m_data(new _ALData())
 ,    m_pauseCount(0)
 {
@@ -205,7 +205,7 @@ void Source::setVolume(float volume)
 //  static_cast<_ALData*>(m_data)->setVolume(volume);
 }
 
-void Source::setSound(SoundObject* sound)
+void Source::setSound(ref<SoundObject> sound)
 {
     UNUSED(sound);
 /*    Sequencer* current = 0;
@@ -224,9 +224,9 @@ void Source::setSound(SoundObject* sound)
     m_sound->owner()->run(this);*/
 }
 
-refptr<Source> Source::MetaClass::createFromSound(SoundObject* sound)
+ref<Source> Source::MetaClass::createFromSound(ref<SoundObject> sound)
 {
-    Source* src = new Source;
+    ref<Source> src = ref<Source>::create();
     src->setSound(sound);
     return src;
 }

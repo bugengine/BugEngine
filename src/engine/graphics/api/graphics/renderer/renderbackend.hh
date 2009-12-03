@@ -7,18 +7,14 @@
 #include    <system/action.hh>
 #include    <graphics/renderer/vertexdesc.hh>
 #include    <graphics/scene/scene.hh>
+#include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/gpubuffer.hh>
+#include    <graphics/material/shader.hh>
+#include    <graphics/material/shaderpipeline.hh>
+#include    <graphics/material/texturepipeline.hh>
 
 namespace BugEngine { namespace Graphics
 {
-
-class RenderTarget;
-class Renderer;
-class GpuBuffer;
-class ShaderPipeline;
-class TexturePipeline;
-class _Shader;
-class ShaderParam;
-
 
 struct WindowFlags
 {
@@ -55,17 +51,17 @@ struct Batch
         RptTriangleFan
     };
 
-    RenderPrimitiveType                 ptype;
-    std::pair<ShaderParam*, float4>     params[32];
-    size_t                              nbParams;
-    const GpuBuffer*                    vertices;
-    int                                 nbVertices;
-    const GpuBuffer*                    indices;
-    const _Shader*                      vertexShader;
-    const _Shader*                      pixelShader;
+    RenderPrimitiveType                     ptype;
+    std::pair< weak<ShaderParam>, float4>   params[32];
+    size_t                                  nbParams;
+    weak<const GpuBuffer>                   vertices;
+    int                                     nbVertices;
+    weak<const GpuBuffer>                   indices;
+    weak<const _Shader>                     vertexShader;
+    weak<const _Shader>                     pixelShader;
 };
 
-class be_api(GRAPHICS) RenderBackend
+class be_api(GRAPHICS) RenderBackend : public minitl::pointer
 {
     friend class Renderer;
 protected:
@@ -76,15 +72,15 @@ public:
 
     virtual uint2 getScreenSize() = 0;
 
-    virtual ShaderPipeline*     getShaderPipeline() = 0;
-    virtual TexturePipeline*    getTexturePipeline() = 0;
+    virtual weak<ShaderPipeline>    getShaderPipeline() = 0;
+    virtual weak<TexturePipeline>   getTexturePipeline() = 0;
 
-    virtual RenderTarget*   createRenderWindow(WindowFlags flags, const Scene* scene) = 0;
-    virtual GpuBuffer*      createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
-    virtual GpuBuffer*      createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
-    virtual GpuBuffer*      createTextureBuffer(TextureBufferFlags flags) const = 0;
+    virtual ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) = 0;
+    virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
+    virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
+    virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;
 
-    virtual void            drawBatch(const Batch& batch) = 0;
+    virtual void                    drawBatch(const Batch& batch) = 0;
 };
 
 }}

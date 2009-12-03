@@ -18,7 +18,7 @@ int be_main (BugEngine::Application* app)
 {
     printf("Test\n");
     TestNS::Test* t = new TestNS::Test;
-    BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", refptr<BugEngine::Object>(t));
+    BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
     BugEngine::Plugin p("lua");
     void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
     (*doFile)("data/scripts/main.lua");
@@ -33,7 +33,7 @@ int be_main (BugEngine::Application* app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    refptr<BugEngine::Graphics::Scene> scene = new Discworld::MainScene(app);
+    ref<BugEngine::Graphics::Scene> scene = new Discworld::MainScene(app);
     app->createWindow(f, scene);
 
     return app->run();

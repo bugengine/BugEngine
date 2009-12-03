@@ -13,7 +13,7 @@ namespace BugEngine { namespace Sound
 class be_api(SOUND) Source : public Object
 {
 private:
-    refptr<SoundObject> m_sound;
+    ref<SoundObject>    m_sound;
     void*               m_data;
     size_t              m_pauseCount;
 public:
@@ -24,7 +24,7 @@ public:
     void play();
     void pause();
 
-    void setSound(SoundObject* sound);
+    void setSound(ref<SoundObject> sound);
 
     float volume() const;
     void  setVolume(float volume);
@@ -32,7 +32,7 @@ public:
     virtual void step() const;
 
     be_metaclass(SOUND,Source,Object)
-        refptr<Source> createFromSound(SoundObject* sound);
+        ref<Source> createFromSound(ref<SoundObject> sound);
     be_properties
         be_classmethod(createFromSound);
 

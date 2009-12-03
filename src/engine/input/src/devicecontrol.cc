@@ -11,7 +11,7 @@ namespace BugEngine { namespace Input
 
 be_abstractmetaclass_impl("Input",DeviceControl);
 
-DeviceControl::DeviceControl(const istring& name, const Device* device, size_t index)
+DeviceControl::DeviceControl(const istring& name, weak<const Device> device, size_t index)
 :   Control(name)
 ,   m_device(device)
 ,   m_index(index)

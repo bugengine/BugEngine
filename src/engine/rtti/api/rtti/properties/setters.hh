@@ -21,7 +21,7 @@ public:
         Write = 0,
         Ref = 0
     };
-    static inline void set(OWNER* from, const T& value);
+    static inline void set(weak<OWNER> from, const T& value);
 };
 
 template< typename OWNER,
@@ -36,7 +36,7 @@ public:
     {
         Write = 1
     };
-    static inline void set(OWNER* from, const PropertyType& value);
+    static inline void set(weak<OWNER> from, const PropertyType& value);
 };
 
 template< typename OWNER, typename T, size_t offset >
@@ -49,7 +49,7 @@ public:
     {
         Write = 1
     };
-    static inline void set(OWNER* from, const T& value);
+    static inline void set(weak<OWNER> from, const T& value);
 };
 
 }}

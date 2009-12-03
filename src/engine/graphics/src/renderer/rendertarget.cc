@@ -8,14 +8,14 @@
 namespace BugEngine { namespace Graphics
 {
 
-RenderTarget::RenderTarget(const Scene* scene)
+RenderTarget::RenderTarget(ref<const Scene> scene)
 :   m_scene(scene)
 {
 }
 
-const Scene* RenderTarget::scene() const
+weak<const Scene> RenderTarget::scene() const
 {
-    return &*m_scene;
+    return m_scene;
 }
 
 }}

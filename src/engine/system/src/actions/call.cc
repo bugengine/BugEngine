@@ -14,7 +14,7 @@ Call::Call() :
 {
 }
 
-Call::Call(RTTI::Method* method) :
+Call::Call(weak<RTTI::Method> method) :
     m_method(method)
 {
 }
@@ -23,9 +23,9 @@ Call::~Call()
 {
 }
 
-refptr<Call> Call::MetaClass::createWithMethod(RTTI::Method* method)
+ref<Call> Call::MetaClass::createWithMethod(weak<RTTI::Method> method)
 {
-    return new Call(method);
+    return ref<Call>::create(method);
 }
 
 void Call::initialize(ActionContext* /*context*/) const

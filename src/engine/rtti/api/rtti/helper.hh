@@ -11,13 +11,14 @@
 #include    <rtti/properties/propertybuilder.hh>
 #include    <rtti/methods/methodbuilder.hh>
 
-#define be_metaclass(exportrule,_name,_parent)                                                              \
+#define be_metaclass(exportrule,_name,_parent)                                                             \
     public:                                                                                                 \
     typedef _name   self_t;                                                                                 \
     typedef _parent super_t;                                                                                \
     class be_api(exportrule) MetaClass : public _parent::MetaClass                                          \
     {                                                                                                       \
         friend class _name;                                                                                 \
+        friend class minitl::ref<MetaClass>;                                                                \
     private:                                                                                                \
         typedef _parent::MetaClass  super_t;                                                                \
         MetaClass();                                                                                        \
@@ -27,22 +28,24 @@
             friend class _name;                                                                             \
             friend class _name::MetaClass;                                                                  \
         public:                                                                                             \
-            MetaMetaClass(const BugEngine::inamespace& name, const BugEngine::Object::MetaClass* parent);   \
+            MetaMetaClass(const BugEngine::inamespace& name,                                                \
+                          ref<const BugEngine::Object::MetaClass> parent);                                  \
             ~MetaMetaClass();                                                                               \
         };                                                                                                  \
     public:                                                                                                 \
-        MetaClass(const BugEngine::inamespace& name, const MetaClass* parent, MetaMetaClass* meta);         \
+        MetaClass(const BugEngine::inamespace& name, ref<const MetaClass> parent, ref<MetaMetaClass> meta); \
         ~MetaClass();                                                                                       \
-        refptr<BugEngine::Object> create() const override;
+        ref<BugEngine::Object> create() const override;
 
-#define be_properties                                                                                       \
+#define be_properties                                                                                      \
     };                                                                                                      \
+    static ref<MetaClass> s_metaclass;                                                                      \
     static BugEngine::RTTI::_::AutoRegister<self_t> s_autoRegistration;                                     \
     static const BugEngine::inamespace& getClassName();                                                     \
-    static const self_t::MetaClass* static_metaclass();                                                     \
-    const self_t::MetaClass* metaclass() const override;                                                    \
+    static ref<const self_t::MetaClass> static_metaclass();                                                 \
+    ref<const BugEngine::RTTI::MetaClass> metaclass() const override;                                       \
 private:                                                                                                    \
-    static void registerMetaClass(self_t::MetaClass* mc)                                                    \
+    static void registerMetaClass(weak<self_t::MetaClass> mc)                                               \
     {                                                                                                       \
         self_t::MetaClass::init(mc);
 
@@ -65,10 +68,11 @@ private:                                                                        
 #define be_end                                                                          \
     }
 
-#define be_metaclass_impl_(_namespace,_cls,_code)                                                           \
+#define be_metaclass_impl_(_namespace,_cls,_code)                                                          \
+    ref<_cls::MetaClass> _cls::s_metaclass;                                                                 \
     BugEngine::RTTI::_::AutoRegister<_cls> _cls::s_autoRegistration;                                        \
     _cls::MetaClass::MetaMetaClass::MetaMetaClass( const BugEngine::inamespace& name,                       \
-                                                   const BugEngine::Object::MetaClass* parent) :            \
+                                                   ref<const BugEngine::Object::MetaClass> parent) :        \
         _cls::super_t::MetaClass::MetaMetaClass( name, parent )                                             \
     {                                                                                                       \
     }                                                                                                       \
@@ -78,13 +82,13 @@ private:                                                                        
     _cls::MetaClass::MetaClass()                                                                            \
         : _cls::super_t::MetaClass( _cls::self_t::getClassName(),                                           \
                                     _cls::super_t::static_metaclass(),                                      \
-                                    new MetaMetaClass( #_cls "Class",                                       \
+                                    ref<MetaMetaClass>::create( #_cls "Class",                              \
                                                        _cls::super_t::static_metaclass()->metaclass()))     \
     {                                                                                                       \
     }                                                                                                       \
     _cls::MetaClass::MetaClass( const BugEngine::inamespace& name,                                          \
-                                const MetaClass* parent,                                                    \
-                                MetaMetaClass* meta) :                                                      \
+                                ref<const MetaClass> parent,                                                \
+                                ref<MetaMetaClass> meta) :                                                  \
         _cls::super_t::MetaClass( name, parent, meta )                                                      \
     {                                                                                                       \
     }                                                                                                       \
@@ -96,32 +100,31 @@ private:                                                                        
         static BugEngine::inamespace s_name = BugEngine::inamespace(_namespace)+BugEngine::istring(#_cls);  \
         return s_name;                                                                                      \
     }                                                                                                       \
-    const _cls::MetaClass* _cls::static_metaclass()                                                         \
+    ref<const _cls::MetaClass> _cls::static_metaclass()                                                     \
     {                                                                                                       \
-        static self_t::MetaClass* s_metaclass;                                                              \
         if(!s_metaclass)                                                                                    \
         {                                                                                                   \
             super_t::static_metaclass();                                                                    \
             if(!s_metaclass)                                                                                \
             {                                                                                               \
-                s_metaclass = new self_t::MetaClass();                                                      \
+                s_metaclass = ref<self_t::MetaClass>::create();                                             \
                 self_t::registerMetaClass(s_metaclass);                                                     \
             }                                                                                               \
         }                                                                                                   \
         return s_metaclass;                                                                                 \
     }                                                                                                       \
-    const _cls::MetaClass* _cls::metaclass() const                                                          \
+    ref<const BugEngine::RTTI::MetaClass> _cls::metaclass() const                                           \
     {                                                                                                       \
         return static_metaclass();                                                                          \
     }                                                                                                       \
-    refptr<BugEngine::Object> _cls::MetaClass::create() const                                               \
+    ref<BugEngine::Object> _cls::MetaClass::create() const                                                  \
     {                                                                                                       \
         _code;                                                                                              \
     }                                                                                                       \
     class _cls
 
 
-#define be_metaclass_impl(_namespace,_cls)          be_metaclass_impl_(_namespace,_cls,return new _cls)
+#define be_metaclass_impl(_namespace,_cls)          be_metaclass_impl_(_namespace,_cls,return ref<_cls>::create())
 #define be_abstractmetaclass_impl(_namespace,_cls)  be_metaclass_impl_(_namespace,_cls, throw 0)
 
 /*****************************************************************************/

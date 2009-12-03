@@ -25,16 +25,16 @@ World::~World()
 {
 }
 
-refptr<SoundObject> World::createSound(const ifilename& file)
+ref<SoundObject> World::createSound(const ifilename& file)
 {
-    refptr<AbstractMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
-    return new SoundObject(this, soundfile);
+    ref<AbstractMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
+    return ref<SoundObject>::create(this, soundfile);
 }
 
-refptr<SoundObject> World::createMusic(const ifilename& file)
+ref<SoundObject> World::createMusic(const ifilename& file)
 {
-    refptr<AbstractMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
-    return new SoundObject(this, soundfile);
+    ref<AbstractMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
+    return ref<SoundObject>::create(this, soundfile);
 }
 
 void World::step() const

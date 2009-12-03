@@ -34,17 +34,17 @@ Keyboard::Keyboard(size_t /*numControls*/)
             ActivateKeyboardLayout(usLayout, 0);
             GetKeyNameTextA(i<<16, keyName, 256);
             ActivateKeyboardLayout(oldLayout, 0);
-            Control* ctrl = new DeviceControl(mappedName, this, i);
+            ref<Control> ctrl = ref<DeviceControl>::create(mappedName, this, i);
             addControl(ctrl);
             addControlAlias("US", keyName, ctrl);
             Value v = getKeyboard().getNamespace()->get(istring(mappedName));
             if(v)
             {
-                v.as< refptr<GroupControl> >()->add(ctrl);
+                v.as< ref<GroupControl> >()->add(ctrl);
             }
             else
             {
-                GroupControl* g = new GroupControl(mappedName);
+                ref<GroupControl> g = ref<GroupControl>::create(mappedName);
                 getKeyboard().addControl(g);
                 getKeyboard().addControlAlias("US", keyName, g);
                 g->add(ctrl);

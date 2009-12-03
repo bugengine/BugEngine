@@ -36,7 +36,7 @@ void SymbolResolver::fillSymbol(Symbol& symbol, u64 address, const char *module,
     symbol.m_line = line;
 }
 
-refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& infos, refptr<const SymbolResolver> next)
+ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& infos, ref<const SymbolResolver> next)
 {
     switch(infos.type)
     {
@@ -54,7 +54,7 @@ refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformation
             PE pe(infos.filename.str().c_str(), 0);
             if(pe)
             {
-                refptr<SymbolResolver> resolver = new DwarfModule(infos.filename, pe, infos.offset, infos.size);
+                ref<SymbolResolver> resolver = ref<DwarfModule>::create(infos.filename, pe, infos.offset, infos.size);
                 resolver->m_next = next;
                 return resolver;
             }
@@ -65,7 +65,7 @@ refptr<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformation
             Elf elf(infos.filename.str().c_str(), 0);
             if(elf)
             {
-                refptr<SymbolResolver> resolver = new DwarfModule(infos.filename, elf, infos.offset, infos.size);
+                ref<SymbolResolver> resolver = ref<DwarfModule>::create(infos.filename, elf, infos.offset, infos.size);
                 resolver->m_next = next;
                 return resolver;
             }

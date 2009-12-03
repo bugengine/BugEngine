@@ -60,7 +60,7 @@ bool GroupControl::wentUp() const
     return false;
 }
 
-void GroupControl::add(Control *ctrl)
+void GroupControl::add(ref<Control> ctrl)
 {
     m_controls.push_back(ctrl);
 }

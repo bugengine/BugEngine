@@ -10,13 +10,13 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Scene : public minitl::refcountable<void>
+class be_api(GRAPHICS) Scene : public minitl::refcountable
 {
 private:
-    Scene*                          m_parent;
-    std::vector< refptr<Scene> >    m_children;
+    weak<Scene>                  m_parent;
+    std::vector< ref<Scene> >    m_children;
 public:
-    Scene(Scene* parent = 0);
+    Scene(weak<Scene> parent = weak<Scene>());
     virtual ~Scene();
 };
 

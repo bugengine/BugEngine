@@ -19,12 +19,12 @@ private:
 
     FT_Face                                 m_face;
     typedef VertexDescription<MAKEVERTEXLIST2(float4, gPosition, float4, gUV0)> VertexFormat;
-    refptr< VertexBuffer<VertexFormat> >    m_fontTriangles;
+    ref< VertexBuffer<VertexFormat> >    m_fontTriangles;
 public:
     Font(const RenderBackend* renderer, const ifilename& font);
     virtual ~Font();
 
-    const GpuBuffer* vertices() const;
+    weak<const GpuBuffer> vertices() const;
 
     be_metaclass(GRAPHICS, Font, Object)
     be_properties

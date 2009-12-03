@@ -10,7 +10,7 @@ namespace BugEngine { namespace Graphics
 {
 
 template< typename T >
-VertexBuffer<T>::VertexBuffer(const RenderBackend* owner, u32 vertexCount, VertexUsage usage)
+VertexBuffer<T>::VertexBuffer(weak<const RenderBackend> owner, u32 vertexCount, VertexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createVertexBuffer(vertexCount, usage, T::getFlags()))
 {
@@ -35,9 +35,9 @@ void VertexBuffer<T>::unmap()
 }
 
 template< typename T >
-const GpuBuffer* VertexBuffer<T>::buffer() const
+weak<const GpuBuffer> VertexBuffer<T>::buffer() const
 {
-    return m_buffer.get();
+    return m_buffer;
 }
 
 }}

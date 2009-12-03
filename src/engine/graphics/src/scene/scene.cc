@@ -7,7 +7,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-Scene::Scene(Scene* parent)
+Scene::Scene(weak<Scene> parent)
 :   m_parent(parent)
 {
 }

@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) ShaderParam : public minitl::refcountable<void>
+class be_api(GRAPHICS) ShaderParam : public minitl::refcountable
 {
 public:
     typedef int Type;
