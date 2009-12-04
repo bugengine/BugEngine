@@ -7,7 +7,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-VertexBuffer::VertexBuffer(const Renderer* /*renderer*/, u32 /*vertexCount*/, VertexUsage /*usage*/, VertexBufferFlags flags)
+VertexBuffer::VertexBuffer(weak<const Renderer> /*renderer*/, u32 /*vertexCount*/, VertexUsage /*usage*/, VertexBufferFlags flags)
 {
     size_t i;
     for(i = 0; i < flags.elementCount; ++i)

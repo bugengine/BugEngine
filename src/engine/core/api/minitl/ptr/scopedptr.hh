@@ -11,6 +11,8 @@ namespace minitl
 template< typename T >
 class scoped
 {
+    template< typename U >
+    friend class scoped;
 private:
     mutable T* m_ptr;
 private:
@@ -33,8 +35,7 @@ public:
     scoped(const scoped<U>& other) : m_ptr(other.m_ptr) { other.m_ptr = 0; }
     scoped& operator=(const scoped& other)              { checked_delete<T>(m_ptr); m_ptr = other.m_ptr; other.m_ptr = 0; }
 
-    T* operator->() NOTHROW              { return m_ptr; }
-    const T* operator->() const NOTHROW  { return m_ptr; }
+    T* operator->() const NOTHROW              { return m_ptr; }
     operator const void*() const NOTHROW { return m_ptr; }
     bool operator!() const NOTHROW       { return m_ptr == 0; }
 private:

@@ -12,7 +12,7 @@ Renderer::Renderer(const istring& name)
 {
     if(m_plugin)
     {
-        weak<RenderBackend> (*createRenderBackend)() = m_plugin.get<weak<RenderBackend> (*)()>("createRenderBackend");
+        RenderBackend* (*createRenderBackend)() = m_plugin.get<RenderBackend* (*)()>("createRenderBackend");
         be_assert(createRenderBackend, "no function to create render backend in plugin");
         m_renderBackend = (*createRenderBackend)();
     }
@@ -22,9 +22,9 @@ Renderer::~Renderer()
 {
     if(m_plugin)
     {
-        void (*destroyRenderBackend)(weak<RenderBackend>) = m_plugin.get<void (*)(weak<RenderBackend>)>("destroyRenderBackend");
+        void (*destroyRenderBackend)(RenderBackend*) = m_plugin.get<void (*)(RenderBackend*)>("destroyRenderBackend");
         be_assert(destroyRenderBackend, "no function to destroy render backend in plugin");
-        (*destroyRenderBackend)(m_renderBackend);
+        (*destroyRenderBackend)(m_renderBackend.operator->());
     }
 }
 
@@ -33,7 +33,7 @@ uint2 Renderer::getScreenSize()
     return m_renderBackend->getScreenSize();;
 }
 
-ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, weak<const Scene> scene)
+ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, ref<const Scene> scene)
 {
     return m_renderBackend->createRenderWindow(flags, scene);
 }

@@ -41,8 +41,8 @@ Renderer::Renderer()
 :   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
 ,   m_context(cgCreateContext())
-,   m_shaderPipeline(this)
-,   m_texturePipeline(this)
+,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
+,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {
     cgSetErrorHandler(onCgError, 0);
 }
@@ -75,7 +75,7 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
                                                  params,
                                                  &m_device));
         cgD3D9SetDevice(m_device);
-        m_systemParams[__Screen] = m_shaderPipeline.createSystemParameter("__screen", m_shaderPipeline.getTypeByName("float2"));
+        m_systemParams[__Screen] = m_shaderPipeline->createSystemParameter("__screen", m_shaderPipeline->getTypeByName("float2"));
         D3D_CHECKRESULT(m_device->GetSwapChain(0, &result));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
@@ -86,40 +86,40 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
     return result;
 }
 
-RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene)
+ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, ref<const Scene> scene)
 {
-    return new Window(this, flags, scene);
+    return ref<Window>::create(this, flags, scene);
 }
 
-GpuBuffer* Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
-    return new VertexBuffer(this, vertexCount, usage, flags);
+    return ref<VertexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
-    return new IndexBuffer(this, vertexCount, usage, flags);
+    return ref<IndexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
+ref<GpuBuffer> Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
 {
-    return 0;
+    return ref<GpuBuffer>();
 }
 
-ShaderPipeline* Renderer::getShaderPipeline()
+weak<Graphics::ShaderPipeline> Renderer::getShaderPipeline()
 {
-    return &m_shaderPipeline;
+    return m_shaderPipeline;
 }
 
-TexturePipeline* Renderer::getTexturePipeline()
+weak<Graphics::TexturePipeline> Renderer::getTexturePipeline()
 {
-    return &m_texturePipeline;
+    return m_texturePipeline;
 }
 
 void Renderer::drawBatch(const Batch& b)
 {
-    const VertexBuffer* _vb = static_cast<const VertexBuffer*>(b.vertices);
-    const IndexBuffer* _ib = static_cast<const IndexBuffer*>(b.indices);
+    weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
+    weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
 
     D3D_CHECKRESULT(m_device->SetVertexDeclaration(_vb->m_vertexDecl));
     D3D_CHECKRESULT(m_device->SetStreamSource(0, _vb->m_buffer, 0, _vb->m_vertexStride));
@@ -128,8 +128,8 @@ void Renderer::drawBatch(const Batch& b)
     for(size_t i = 0; i < b.nbParams; ++i)
         b.params[i].first->setValue(b.params[i].second);
 
-    if(b.vertexShader) static_cast<const CgShader*>(b.vertexShader)->set();
-    if(b.pixelShader) static_cast<const CgShader*>(b.pixelShader)->set();
+    if(b.vertexShader) be_checked_cast<const CgShader>(b.vertexShader)->set();
+    if(b.pixelShader) be_checked_cast<const CgShader>(b.pixelShader)->set();
 
     D3DPRIMITIVETYPE type;
     int primitiveCount = 0;

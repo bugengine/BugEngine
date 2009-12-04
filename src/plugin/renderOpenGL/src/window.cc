@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
 :   Windowing::Window(renderer, flags, scene)
 ,   m_owner(renderer)
 {

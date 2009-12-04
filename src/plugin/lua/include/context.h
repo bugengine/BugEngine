@@ -27,7 +27,7 @@ private:
     static void printStack(lua_State* state);
     static Value get(lua_State* state, int index);
     static void push(lua_State* state, ref<Object> o);
-    static void push(lua_State* state, Object* o);
+    static void push(lua_State* state, weak<Object> o);
     static void push(lua_State* state, const Value& v);
 
     static int objectGC(lua_State* state);

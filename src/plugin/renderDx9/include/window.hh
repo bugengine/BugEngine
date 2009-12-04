@@ -18,9 +18,9 @@ class Window : public Win32::Window
 private:
     LPDIRECT3DSWAPCHAIN9    m_swapChain;
     LPDIRECT3DSWAPCHAIN9    m_workingSwapChain;
-    Renderer*               m_owner;
+    weak<Renderer>          m_owner;
 public:
-    Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
+    Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene);
     ~Window();
 
     void setCurrent() override;

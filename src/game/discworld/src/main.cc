@@ -12,12 +12,13 @@
 #include    <rtti/test.hh>
 #include    <rtti/namespace.hh>
 
+#include    <core/runtime/symbols.hh>
 
 /*---------------------------------------------------------------------------*/
-int be_main (BugEngine::Application* app)
+int be_main (weak<BugEngine::Application> app)
 {
     printf("Test\n");
-    TestNS::Test* t = new TestNS::Test;
+    ref<TestNS::Test> t = ref<TestNS::Test>::create();
     BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
     BugEngine::Plugin p("lua");
     void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
@@ -33,7 +34,7 @@ int be_main (BugEngine::Application* app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    ref<BugEngine::Graphics::Scene> scene = new Discworld::MainScene(app);
+    ref<BugEngine::Graphics::Scene> scene = ref<Discworld::MainScene>::create(app);
     app->createWindow(f, scene);
 
     return app->run();

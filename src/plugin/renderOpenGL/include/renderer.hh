@@ -35,16 +35,16 @@ private:
 #   else
     GLXContext                  m_glContext;
 #   endif
-    ShaderPipeline              m_shaderPipeline;
-    TexturePipeline             m_texturePipeline;
+    scoped<ShaderPipeline>      m_shaderPipeline;
+    scoped<TexturePipeline>     m_texturePipeline;
 public:
     Renderer();
     ~Renderer();
 
-    weak<ShaderPipeline>    getShaderPipeline() override;
-    weak<TexturePipeline>   getTexturePipeline() override;
+    weak<Graphics::ShaderPipeline>    getShaderPipeline() override;
+    weak<Graphics::TexturePipeline>   getTexturePipeline() override;
 
-    ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) override;
+    ref<RenderTarget>       createRenderWindow(WindowFlags flags, ref<const Scene> scene) override;
     ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
@@ -53,6 +53,13 @@ public:
     void                    flush() const override;
 private:
     void                    attachWindow(Window* w);
+
+public:
+    void* operator new(size_t size)                  { return ::operator new(size); }
+    void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
+public:
+    void  operator delete(void* memory)              { return ::operator delete(memory); }
+    void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
 };
 
 }}}

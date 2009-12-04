@@ -104,10 +104,10 @@ static int __main(int argc, const char *argv[])
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
-        BugEngine::FileSystem::instance()->mount("data", new BugEngine::DiskFS(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
+        BugEngine::FileSystem::instance()->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-        ref<BugEngine::Application> locApplication = new BugEngine::Application(argc, argv);
-        result = be_main(locApplication.get());
+        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(argc, argv);
+        result = be_main(locApplication);
     }
     catch(std::runtime_error& er)
     {

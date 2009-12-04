@@ -82,7 +82,6 @@ FileSystem::FileSystem(void)
 
 FileSystem::~FileSystem(void)
 {
-    delete m_root;
 }
 
 void FileSystem::mount(const ipath& prefix, ref<const FileSystemComponent> component)

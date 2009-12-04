@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-TexturePipeline::TexturePipeline(Renderer* owner)
+TexturePipeline::TexturePipeline(weak<Renderer> owner)
     :   m_owner(owner)
 {
 }

@@ -27,7 +27,7 @@ public:
     weak<ShaderPipeline>    getShaderPipeline() override;
     weak<TexturePipeline>   getTexturePipeline() override;
 
-    ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) override;
+    ref<RenderTarget>       createRenderWindow(WindowFlags flags, ref<const Scene> scene) override;
     ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;

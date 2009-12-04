@@ -15,7 +15,7 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
 :   Win32::Window(renderer, flags, scene)
 ,   m_owner(renderer)
 {
