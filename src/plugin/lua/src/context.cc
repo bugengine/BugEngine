@@ -284,7 +284,8 @@ int Context::objectCall(lua_State *state)
 
     if(top-1)
     {
-        ::operator delete[](values, v);
+        for(int i = 0; i < top-1; ++i)
+            values[i].~Value();
         freea(v);
     }
 
