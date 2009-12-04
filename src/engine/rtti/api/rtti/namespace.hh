@@ -36,9 +36,9 @@ protected:
         MetaClass();
         ~MetaClass();
 
-        void    set(const istring& name, const Value& value);
-        Value   get(const istring& name);
-        void    erase(const istring& name);
+        weak<const RTTI::Property>  set(const istring& name, const Value& value);
+        Value                       get(const istring& name);
+        void                        erase(const istring& name);
     };
 private:
     typedef minitl::map< istring, ref<Namespace> >  NamespaceMap;
@@ -50,16 +50,16 @@ public:
 
     virtual ref<const RTTI::MetaClass>  metaclass() const override;
 
-    void                set(const istring& ns, const Value& value);
-    Value               get(const istring& name) const;
-    void                mount(const istring& name, ref<Namespace> ns);
-    void                umount(const istring& name);
-    ref<Namespace>   getNamespace(const istring& name);
-    ref<Namespace>   createNamespace(const istring& name);
+    weak<const RTTI::Property>  set(const istring& ns, const Value& value);
+    Value                       get(const istring& name) const;
+    void                        mount(const istring& name, ref<Namespace> ns);
+    void                        umount(const istring& name);
+    ref<Namespace>              getNamespace(const istring& name);
+    ref<Namespace>              createNamespace(const istring& name);
 
-    void insert(const inamespace& ns, const Value& value);
-    void insert(const inamespace& ns, weak<Object> value);
-    void insert(const inamespace& ns, ref<Object> value);
+    weak<const RTTI::Property>  insert(const inamespace& ns, const Value& value);
+    weak<const RTTI::Property>  insert(const inamespace& ns, weak<Object> value);
+    weak<const RTTI::Property>  insert(const inamespace& ns, ref<Object> value);
     Value get(const inamespace& ns);
     void clear();
 

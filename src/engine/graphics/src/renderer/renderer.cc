@@ -23,8 +23,10 @@ Renderer::~Renderer()
     if(m_plugin)
     {
         void (*destroyRenderBackend)(RenderBackend*) = m_plugin.get<void (*)(RenderBackend*)>("destroyRenderBackend");
+        RenderBackend* r = m_renderBackend.operator->();
+        m_renderBackend.clear();
         be_assert(destroyRenderBackend, "no function to destroy render backend in plugin");
-        (*destroyRenderBackend)(m_renderBackend.operator->());
+        (*destroyRenderBackend)(r);
     }
 }
 

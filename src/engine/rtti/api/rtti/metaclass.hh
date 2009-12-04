@@ -27,6 +27,7 @@ public:
 private:
     istring                 m_name;
     ref<const MetaClass>    m_parent;
+    weak<const Property>    m_dbOwner;
 protected:
     ref<MetaMetaClass>      m_metaclass;
     PropertyMap             m_properties;

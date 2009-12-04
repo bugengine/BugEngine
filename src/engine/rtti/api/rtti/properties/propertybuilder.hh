@@ -72,8 +72,8 @@ static inline CreateWriteFieldFromSetterHelper< Owner, T > createHelperFromSette
 class BasePropertyBuilder
 {
 protected:
-    weak<MetaClass> m_metaclass;
-    const char *    m_name;
+    mutable weak<MetaClass> m_metaclass;
+    mutable const char *    m_name;
 protected:
     inline BasePropertyBuilder(weak<MetaClass> metaclass, const char *name)
         :   m_metaclass(metaclass)
@@ -82,6 +82,12 @@ protected:
     }
     inline ~BasePropertyBuilder()
     {
+    }
+    inline BasePropertyBuilder(const BasePropertyBuilder& other)
+    {
+        m_metaclass = other.m_metaclass;
+        m_name = other.m_name;
+        other.m_metaclass.clear();
     }
 };
 
@@ -98,7 +104,8 @@ public:
     }
     inline ~PropertyBuilder()
     {
-        m_metaclass->addProperty(m_name, ref<ObjectProperty<Owner, T, Getter, Setter > >::create());
+        if(m_metaclass)
+            m_metaclass->addProperty(m_name, ref<ObjectProperty<Owner, T, Getter, Setter > >::create());
     }
 };
 
