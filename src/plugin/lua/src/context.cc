@@ -91,7 +91,7 @@ Context::Context()
     luaL_register(m_state, "bugrefobject", s_objectMetaTable);
     luaL_register(m_state, "bugweakobject", &s_objectMetaTable[1]);
 
-    push(m_state, RTTI::Namespace::root());
+    push(m_state, ref<Object>(RTTI::Namespace::root()));
     lua_setglobal(m_state, "BugEngine");
     lua_pop(m_state, 1);
 }
@@ -103,7 +103,7 @@ Context::~Context()
 
 void Context::doFile(const char *filename)
 {
-    BugEngine::FileSystem* fs = BugEngine::FileSystem::instance();
+    weak<BugEngine::FileSystem> fs = BugEngine::FileSystem::instance();
     ref<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
     be_info("loading file %s" | filename);
     if(file)
@@ -125,16 +125,16 @@ void Context::doFile(const char *filename)
 void Context::push(lua_State* state, ref<Object> o)
 {
     Object** userdata = (Object**)lua_newuserdata(state, sizeof(Object*));
-    *userdata = o.get();
+    *userdata = o.operator->();
     minitl::addref(*userdata);
     lua_getglobal(state, "bugrefobject");
     lua_setmetatable(state, -2);
 }
 
-void Context::push(lua_State* state, Object* o)
+void Context::push(lua_State* state, weak<Object> o)
 {
     Object** userdata = (Object**)lua_newuserdata(state, sizeof(Object*));
-    *userdata = o;
+    *userdata = o.operator->();
     lua_getglobal(state, "bugweakobject");
     lua_setmetatable(state, -2);
 }
@@ -162,7 +162,7 @@ void Context::push(lua_State* state, const Value& v)
         push(state, v.as< ref<Object> >());
         break;
     case RTTI::PropertyTypeWeakObject:
-        push(state, v.as< Object* >());
+        push(state, v.as< weak<Object> >());
         break;
     case RTTI::PropertyTypeVariant:
     case RTTI::PropertyTypeNotSet:
@@ -190,8 +190,8 @@ Value Context::get(lua_State *state, int index)
         }
     case LUA_TUSERDATA:
         {
-            Object** userdata = (Object**)lua_touserdata(state, index);
-            return Value(*userdata);
+            //Object** userdata = (Object**)lua_touserdata(state, index);
+            return Value();
         }
     default:
         return Value();
@@ -221,7 +221,7 @@ int Context::objectGet(lua_State *state)
         return 1;
     }
     const char *name = lua_tostring(state, -1);
-    const RTTI::Property* p = (*userdata)->metaclass()->getProperty(name);
+    weak<const RTTI::Property> p = (*userdata)->metaclass()->getProperty(name);
     if(!p)
     {
         lua_pushnil(state);

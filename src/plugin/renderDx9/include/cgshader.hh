@@ -27,9 +27,9 @@ public:
 
     void set() const;
 
-    virtual ShaderParam* getParam(const istring& name) const override;
+    virtual ref<ShaderParam> getParam(const istring& name) const override;
 private:
-    void addParam(ShaderParam* p);
+    void addParam(ref<ShaderParam> p);
 };
 
 }}}

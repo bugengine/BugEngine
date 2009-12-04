@@ -52,6 +52,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 
 Thread::ThreadParams::~ThreadParams()
 {
+    be_assert(false, "test assertions");
 }
 
 unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
@@ -81,7 +82,7 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 
 Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p, bool isSuspended)
 :   m_params(new ThreadParams(name, f, p1, p2))
-,   m_data((void*)CreateThread( 0, 0, &ThreadParams::threadWrapper, m_params, isSuspended?CREATE_SUSPENDED:0, &m_id))
+,   m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, isSuspended?CREATE_SUSPENDED:0, &m_id))
 {
     setPriority(p);
 }

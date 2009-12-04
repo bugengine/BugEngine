@@ -34,7 +34,7 @@ public:
     template< typename U >
     weak(ref<U> other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
     template< typename U >
-    weak(scoped<U> other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    weak(const scoped<U>& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
     weak(const weak& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
     template< typename U >
     weak(const weak<U>& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }

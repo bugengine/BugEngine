@@ -16,9 +16,9 @@ class Window : public Windowing::Window
 {
     friend class Renderer;
 private:
-    Renderer*               m_owner;
+    weak<Renderer>  m_owner;
 public:
-    Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
+    Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene);
     ~Window();
 
     void setCurrent() override;

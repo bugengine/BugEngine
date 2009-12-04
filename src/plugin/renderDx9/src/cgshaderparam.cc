@@ -24,7 +24,7 @@ void CgShaderParam::setValue(BugEngine::float4 value)
 
 void CgShaderParam::setValue(_Texture* value)
 {
-    cgD3D9SetTexture(m_shaderParam, be_checked_cast<Texture*>(value)->textureObject());
+    cgD3D9SetTexture(m_shaderParam, be_checked_cast<Texture>(value)->textureObject());
 }
 
 ShaderParam::Type CgShaderParam::type() const

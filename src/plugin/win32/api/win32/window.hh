@@ -15,11 +15,11 @@ class Renderer;
 class Window : public RenderTarget
 {
 protected:
-    Renderer*   m_renderer;
-    HWND        m_window;
-    HDC         m_dc;
+    weak<Renderer>  m_renderer;
+    HWND            m_window;
+    HDC             m_dc;
 public:
-    Window(Renderer* renderer, WindowFlags flags, const Scene* scene);
+    Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene);
     ~Window();
 
     void close() override;

@@ -7,7 +7,7 @@
 #include    <main/application.hh>
 
 
-extern "C" FORCEEXPORT int be_main(BugEngine::Application *application);
+extern "C" FORCEEXPORT int be_main(weak<BugEngine::Application> application);
 
 /*****************************************************************************/
 #endif

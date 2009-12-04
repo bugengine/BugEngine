@@ -46,18 +46,24 @@ public:
     Renderer();
     ~Renderer();
 
-    LPDIRECT3DSWAPCHAIN9    createSwapChain(D3DPRESENT_PARAMETERS* params);
+    LPDIRECT3DSWAPCHAIN9            createSwapChain(D3DPRESENT_PARAMETERS* params);
 
-    weak<ShaderPipeline>    getShaderPipeline() override;
-    weak<TexturePipeline>   getTexturePipeline() override;
+    weak<Graphics::ShaderPipeline>  getShaderPipeline() override;
+    weak<Graphics::TexturePipeline> getTexturePipeline() override;
 
-    ref<RenderTarget>       createRenderWindow(WindowFlags flags, weak<const Scene> scene) override;
-    ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
-    ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
+    ref<Graphics::RenderTarget>     createRenderWindow(WindowFlags flags, ref<const Scene> scene) override;
+    ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
+    ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
+    ref<GpuBuffer>                  createTextureBuffer(TextureBufferFlags flags) const override;
 
-    void                    drawBatch(const Batch& b) override;
-    void                    flush() const override;
+    void                            drawBatch(const Batch& b) override;
+    void                            flush() const override;
+public:
+    void* operator new(size_t size)                  { return ::operator new(size); }
+    void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
+public:
+    void  operator delete(void* memory)              { return ::operator delete(memory); }
+    void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
 };
 
 }}}

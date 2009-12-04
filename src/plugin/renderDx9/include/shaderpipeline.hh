@@ -18,12 +18,12 @@ class CgShaderParam;
 class ShaderPipeline : public Graphics::ShaderPipeline
 {
 private:
-    Renderer*                                   m_owner;
-    CGprofile                                   m_vertexProfile;
-    CGprofile                                   m_fragmentProfile;
-    std::map< istring, ref<CgShaderParam> >  m_systemParams;
+    weak<Renderer>                          m_owner;
+    CGprofile                               m_vertexProfile;
+    CGprofile                               m_fragmentProfile;
+    std::map< istring, ref<CgShaderParam> > m_systemParams;
 public:
-    ShaderPipeline(Renderer* owner);
+    ShaderPipeline(weak<Renderer> owner);
     ~ShaderPipeline();
 
     _Shader*                load(const ifilename& file) override;
@@ -32,10 +32,10 @@ public:
     ShaderParam::Type       getTypeByName(const char *type) override;
     const char *            getTypeName(ShaderParam::Type type) override;
 
-    ref<CgShaderParam>   createSystemParameter(const istring& name, ShaderParam::Type type);
+    ref<CgShaderParam>      createSystemParameter(const istring& name, ShaderParam::Type type);
 private:
     bool                    isSystemParameter(const char *name);
-    CgShaderParam*          getSystemParameter(const char *name);
+    ref<CgShaderParam>      getSystemParameter(const char *name);
 };
 
 }}}

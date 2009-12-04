@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-TexturePipeline::TexturePipeline(Renderer* owner)
+TexturePipeline::TexturePipeline(weak<Renderer> owner)
     :   m_owner(owner)
 {
 }

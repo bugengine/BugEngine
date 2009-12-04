@@ -20,7 +20,7 @@ private:
     //LPDIRECT3DVERTEXDECLARATION9    m_vertexDecl;
     u32                             m_vertexStride;
 public:
-    VertexBuffer(const Renderer* renderer, u32 count, VertexUsage usage, VertexBufferFlags flags);
+    VertexBuffer(weak<const Renderer> renderer, u32 count, VertexUsage usage, VertexBufferFlags flags);
     ~VertexBuffer();
 protected:
     virtual void* map(GpuMapFlags flags, u32 byteCount, u32 byteOffset) override;

@@ -15,7 +15,7 @@ namespace Discworld
 class MainScene : public BugEngine::Graphics::Scene
 {
 public:
-    MainScene(const BugEngine::Application* application);
+    MainScene(weak<const BugEngine::Application> application);
     virtual ~MainScene();
 };
 

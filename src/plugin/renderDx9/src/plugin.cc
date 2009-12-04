@@ -19,6 +19,6 @@ extern "C" FORCEEXPORT BugEngine::Graphics::RenderBackend* createRenderBackend()
 
 extern "C" FORCEEXPORT void destroyRenderBackend(BugEngine::Graphics::RenderBackend* backend)
 {
-    delete be_checked_cast<BugEngine::Graphics::DirectX9::Renderer*>(backend);
+    delete be_checked_cast<BugEngine::Graphics::DirectX9::Renderer>(backend);
 }
 

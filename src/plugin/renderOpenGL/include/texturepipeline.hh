@@ -14,9 +14,9 @@ class Renderer;
 class TexturePipeline : public Graphics::TexturePipeline
 {
 private:
-    Renderer*   m_owner;
+    weak<Renderer>   m_owner;
 public:
-    TexturePipeline(Renderer* owner);
+    TexturePipeline(weak<Renderer> owner);
     ~TexturePipeline();
 
     _Texture*               load(const ifilename& file) override;

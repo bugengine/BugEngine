@@ -13,7 +13,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-ShaderPipeline::ShaderPipeline(Renderer* owner)
+ShaderPipeline::ShaderPipeline(weak<Renderer> owner)
     :   m_owner(owner)
     ,   m_vertexProfile(cgGetProfile("vs_2_x"))
     ,   m_fragmentProfile(cgGetProfile("ps_2_x"))
@@ -43,7 +43,7 @@ _Shader* ShaderPipeline::load(const ifilename& filename)
     while(param)
     {
         const char *name = cgGetParameterName(param);
-        CgShaderParam* wrapped = 0;
+        ref<CgShaderParam> wrapped;
         if(isSystemParameter(name))
         {
             wrapped = getSystemParameter(name);
@@ -51,7 +51,7 @@ _Shader* ShaderPipeline::load(const ifilename& filename)
         }
         else
         {
-            wrapped = new CgShaderParam(param);
+            wrapped = ref<CgShaderParam>::create(param);
         }
         s->addParam(wrapped);
         param = cgGetNextParameter(param);
@@ -70,9 +70,9 @@ bool ShaderPipeline::isSystemParameter(const char *name)
     return name && name[0] == '_' && name[1] == '_';
 }
 
-CgShaderParam* ShaderPipeline::getSystemParameter(const char* name)
+ref<CgShaderParam> ShaderPipeline::getSystemParameter(const char* name)
 {
-    return m_systemParams[name].get();
+    return m_systemParams[name];
 }
 
 const char *ShaderPipeline::getTypeName(ShaderParam::Type t)
@@ -90,7 +90,7 @@ ref<CgShaderParam> ShaderPipeline::createSystemParameter(const istring& name, Sh
     CGparameter p = cgCreateParameter(m_owner->m_context, CGtype(type));
     cgSetParameterVariability(p, CG_UNIFORM);
     be_assert(cgGetParameterType(p) == type, "type conflict");
-    ref<CgShaderParam> param(new CgShaderParam(p));
+    ref<CgShaderParam> param(ref<CgShaderParam>::create(p));
     bool result = m_systemParams.insert(std::make_pair(name, param)).second;
     be_assert(result, "system parameter %s already exists" | name.c_str());
     return param;

@@ -18,45 +18,45 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 Renderer::Renderer()
 :   m_glContext(0)
-,   m_shaderPipeline(this)
-,   m_texturePipeline(this)
+,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
+,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {
 }
 
-RenderTarget* Renderer::createRenderWindow(WindowFlags flags, const Scene* scene)
+ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, ref<const Scene> scene)
 {
-    return new Window(this, flags, scene);
+    return ref<Window>::create(this, flags, scene);
 }
 
-GpuBuffer* Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
-    return new VertexBuffer(this, vertexCount, usage, flags);
+    return ref<VertexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
+ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
-    return new IndexBuffer(this, vertexCount, usage, flags);
+    return ref<IndexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-GpuBuffer* Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
+ref<GpuBuffer> Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
 {
-    return 0;
+    return ref<GpuBuffer>();
 }
 
-ShaderPipeline* Renderer::getShaderPipeline()
+weak<Graphics::ShaderPipeline> Renderer::getShaderPipeline()
 {
-    return &m_shaderPipeline;
+    return m_shaderPipeline;
 }
 
-TexturePipeline* Renderer::getTexturePipeline()
+weak<Graphics::TexturePipeline> Renderer::getTexturePipeline()
 {
-    return &m_texturePipeline;
+    return m_texturePipeline;
 }
 
 void Renderer::drawBatch(const Batch& b)
 {
-    const VertexBuffer* _vb = static_cast<const VertexBuffer*>(b.vertices);
-    const IndexBuffer* _ib = static_cast<const IndexBuffer*>(b.indices);
+    weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
+    weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
     UNUSED(_vb);
     UNUSED(_ib);
 
