@@ -18,8 +18,6 @@ FileSystem::FileSystemMountPoint::FileSystemMountPoint(ref<const FileSystemCompo
 
 FileSystem::FileSystemMountPoint::~FileSystemMountPoint()
 {
-    for(ChildrenMap::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
-        delete it->second;
 }
 
 weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)

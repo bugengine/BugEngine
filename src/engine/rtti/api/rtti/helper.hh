@@ -10,6 +10,7 @@
 #include    <rtti/autoregistration.hh>
 #include    <rtti/properties/propertybuilder.hh>
 #include    <rtti/methods/methodbuilder.hh>
+#include    <rtti/namespace.hh>
 
 #define be_metaclass(exportrule,_name,_parent)                                                             \
     public:                                                                                                 \
@@ -39,7 +40,6 @@
 
 #define be_properties                                                                                      \
     };                                                                                                      \
-    static ref<MetaClass> s_metaclass;                                                                      \
     static BugEngine::RTTI::_::AutoRegister<self_t> s_autoRegistration;                                     \
     static const BugEngine::inamespace& getClassName();                                                     \
     static ref<const self_t::MetaClass> static_metaclass();                                                 \
@@ -68,8 +68,7 @@ private:                                                                        
 #define be_end                                                                          \
     }
 
-#define be_metaclass_impl_(_namespace,_cls,_code)                                                          \
-    ref<_cls::MetaClass> _cls::s_metaclass;                                                                 \
+#define be_metaclass_impl_(_namespace,_cls,_code)                                                           \
     BugEngine::RTTI::_::AutoRegister<_cls> _cls::s_autoRegistration;                                        \
     _cls::MetaClass::MetaMetaClass::MetaMetaClass( const BugEngine::inamespace& name,                       \
                                                    ref<const BugEngine::Object::MetaClass> parent) :        \
@@ -102,6 +101,8 @@ private:                                                                        
     }                                                                                                       \
     ref<const _cls::MetaClass> _cls::static_metaclass()                                                     \
     {                                                                                                       \
+        BugEngine::RTTI::Namespace::root();                                                                 \
+        static ref<_cls::MetaClass> s_metaclass;                                                            \
         if(!s_metaclass)                                                                                    \
         {                                                                                                   \
             super_t::static_metaclass();                                                                    \

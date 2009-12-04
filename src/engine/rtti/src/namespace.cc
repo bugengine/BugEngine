@@ -46,8 +46,8 @@ Value Namespace::MetaClass::Property::get(weak<Object> from) const
 
 //-----------------------------------------------------------------------------
 
-Namespace::MetaClass::MetaClass() :
-Object::MetaClass(inamespace("meta.namespace"), ref<RTTI::MetaClass>(), ref<RTTI::MetaMetaClass>(), false)
+Namespace::MetaClass::MetaClass()
+: Object::MetaClass(inamespace("meta.namespace"), ref<RTTI::MetaClass>(), ref<RTTI::MetaMetaClass>(), false)
 {
 }
 
@@ -55,12 +55,13 @@ Namespace::MetaClass::~MetaClass()
 {
 }
 
-void Namespace::MetaClass::set(const istring& name, const Value& value)
+weak<const RTTI::Property> Namespace::MetaClass::set(const istring& name, const Value& value)
 {
     std::pair<PropertyIterator, bool> result = m_properties.insert(std::make_pair(name, ref<Property>()));
     if(result.second)
         result.first->second = ref<Property>::create();
     result.first->second->set(this, value);
+    return result.first->second;
 }
 
 Value Namespace::MetaClass::get(const istring& name)
@@ -93,9 +94,9 @@ ref<const RTTI::MetaClass> Namespace::metaclass() const
     return m_metaClass;
 }
 
-void Namespace::set(const istring& name, const Value& value)
+weak<const RTTI::Property> Namespace::set(const istring& name, const Value& value)
 {
-    m_metaClass->set(name, value);
+    return m_metaClass->set(name, value);
 }
 
 Value Namespace::get(const istring& name) const
@@ -148,11 +149,12 @@ ref<Namespace> Namespace::createNamespace(const istring& name)
 
 ref<Namespace> Namespace::root()
 {
-	static ref<Namespace> s_root = ref<Namespace>::create();
+    Malloc::init();
+    static ref<Namespace> s_root = ref<Namespace>::create();
     return s_root;
 }
 
-void Namespace::insert(const inamespace& ns, const Value& value)
+weak<const RTTI::Property> Namespace::insert(const inamespace& ns, const Value& value)
 {
     weak<Namespace> _ns = this;
     for(size_t i = 0; i < ns.size() -1; ++i)
@@ -165,17 +167,17 @@ void Namespace::insert(const inamespace& ns, const Value& value)
         }
         _ns = child;
     }
-    _ns->set(ns[ns.size()-1], value);
+    return _ns->set(ns[ns.size()-1], value);
 }
 
-void Namespace::insert(const inamespace& ns, weak<Object> value)
+weak<const RTTI::Property> Namespace::insert(const inamespace& ns, weak<Object> value)
 {
-    insert(ns, Value(value));
+    return insert(ns, Value(value));
 }
 
-void Namespace::insert(const inamespace& ns, ref<Object> value)
+weak<const RTTI::Property> Namespace::insert(const inamespace& ns, ref<Object> value)
 {
-    insert(ns, Value(value));
+    return insert(ns, Value(value));
 }
 
 Value Namespace::get(const inamespace& ns)

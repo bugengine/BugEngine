@@ -13,11 +13,18 @@
 namespace BugEngine { namespace Lua
 {
 
-const luaL_Reg Context::s_objectMetaTable[] = {
-    {"__gc",       Context::objectGC},
-    {"__tostring", Context::objectToString},
-    {"__index", Context::objectGet},
-    {"__call", Context::objectCall},
+const luaL_Reg Context::s_refObjectMetaTable[] = {
+    {"__gc",        Context::objectGC<ref>},
+    {"__tostring",  Context::objectToString<ref>},
+    {"__index",     Context::objectGet<ref>},
+    {"__call",      Context::objectCall<ref>},
+    {0, 0}
+};
+const luaL_Reg Context::s_weakObjectMetaTable[] = {
+    {"__gc",        Context::objectGC<weak>},
+    {"__tostring",  Context::objectToString<weak>},
+    {"__index",     Context::objectGet<weak>},
+    {"__call",      Context::objectCall<weak>},
     {0, 0}
 };
 
@@ -88,8 +95,8 @@ Context::Context()
     luaopen_debug(m_state);
 
     luaL_register(m_state, "_G", base_funcs);
-    luaL_register(m_state, "bugrefobject", s_objectMetaTable);
-    luaL_register(m_state, "bugweakobject", &s_objectMetaTable[1]);
+    luaL_register(m_state, "bugrefobject", s_refObjectMetaTable);
+    luaL_register(m_state, "bugweakobject", s_weakObjectMetaTable);
 
     push(m_state, ref<Object>(RTTI::Namespace::root()));
     lua_setglobal(m_state, "BugEngine");
@@ -124,17 +131,16 @@ void Context::doFile(const char *filename)
 
 void Context::push(lua_State* state, ref<Object> o)
 {
-    Object** userdata = (Object**)lua_newuserdata(state, sizeof(Object*));
-    *userdata = o.operator->();
-    minitl::addref(*userdata);
+    void* userdata = lua_newuserdata(state, sizeof(ref<Object>));
+    new(userdata) ref<Object>(o);
     lua_getglobal(state, "bugrefobject");
     lua_setmetatable(state, -2);
 }
 
 void Context::push(lua_State* state, weak<Object> o)
 {
-    Object** userdata = (Object**)lua_newuserdata(state, sizeof(Object*));
-    *userdata = o.operator->();
+    void* userdata = lua_newuserdata(state, sizeof(weak<Object>));
+    new(userdata) weak<Object>(o);
     lua_getglobal(state, "bugweakobject");
     lua_setmetatable(state, -2);
 }
@@ -190,31 +196,54 @@ Value Context::get(lua_State *state, int index)
         }
     case LUA_TUSERDATA:
         {
-            //Object** userdata = (Object**)lua_touserdata(state, index);
-            return Value();
+            lua_getmetatable(state, index);
+            lua_getglobal(state, "bugrefobject");
+            if(lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                ref<Object>* robject = (ref<Object>*)lua_touserdata(state, index);
+                return Value(*robject);
+            }
+            lua_pop(state, 1);
+            lua_getglobal(state, "bugweakobject");
+            if(lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                weak<Object>* wobject = (weak<Object>*)lua_touserdata(state, index);
+                return Value(*wobject);
+            }
+            else
+            {
+                lua_pop(state, 2);
+                be_notreached();
+                return Value();
+            }
         }
     default:
         return Value();
     }
 }
 
+template< template< typename > class ptr >
 int Context::objectGC(lua_State *state)
 {
-    Object** userdata = (Object**)lua_touserdata(state, -1);
-    minitl::decref(*userdata);
+    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -1);
+    userdata->~ptr<Object>();
     return 0;
 }
 
+template< template< typename > class ptr >
 int Context::objectToString(lua_State *state)
 {
-    Object** userdata = (Object**)lua_touserdata(state, -1);
-    lua_pushfstring(state, "[%s object @0x%p]", (*userdata)->metaclass()->name().c_str(), (*userdata));
+    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -1);
+    lua_pushfstring(state, "[%s object @0x%p]", (*userdata)->metaclass()->name().c_str(), (*userdata).operator->());
     return 1;
 }
 
+template< template< typename > class ptr >
 int Context::objectGet(lua_State *state)
 {
-    Object** userdata = (Object**)lua_touserdata(state, -2);
+    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -2);
     if(!*userdata)
     {
         lua_pushnil(state);
@@ -232,11 +261,12 @@ int Context::objectGet(lua_State *state)
     return 1;
 }
 
+template< template< typename > class ptr >
 int Context::objectCall(lua_State *state)
 {
     int i;
     int top = lua_gettop(state);
-    Object** userdata = (Object**)lua_touserdata(state, 1);
+    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, 1);
 
     void* v = 0;
     Value* values = 0;

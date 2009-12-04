@@ -66,12 +66,14 @@ MetaClass::MetaClass(const inamespace& name, ref<const MetaClass> parent, ref<Me
 
     if(registerClass)
     {
-        Namespace::root()->insert(name, Value(weak<Object>(this)));
+        m_dbOwner = Namespace::root()->insert(name, Value(weak<Object>(this)));
     }
 }
 
 MetaClass::~MetaClass()
 {
+    if(m_dbOwner)
+        m_dbOwner->set(0, Value());
 }
 
 const istring& MetaClass::name() const
@@ -92,12 +94,12 @@ ref<const MetaClass> MetaClass::parent() const
 void MetaClass::addProperty(const istring& name, ref<const Property> prop)
 {
     std::pair<PropertyIterator,bool> result = m_properties.insert(std::make_pair(name, prop));
-    be_assert(result.second, "could not register property %s; a property of that name already exists" | name.c_str());
+    be_assert(result.second, "could not register property %s; a property of that name already exists in class %s" | name.c_str() | this->name());
 }
 
 void MetaClass::addMethod(const istring& name, ref<Method> method)
 {
-	addProperty(name, ref<StaticProperty>::create(Value(ref<Object>(method))));
+    addProperty(name, ref<StaticProperty>::create(Value(ref<Object>(method))));
 }
 
 weak<const Property> Object::MetaClass::getProperty(const istring& name) const
