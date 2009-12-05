@@ -83,18 +83,13 @@ namespace BugEngine { namespace Debug
             size_t result = Runtime::Callstack::backtrace(address, 128, 1);
             Runtime::Symbol s;
 
-            static weak<const Runtime::Module> executable;
-            static ref<const Runtime::SymbolResolver> s_symbols;
-            if(!executable)
+            static ref<const Runtime::Module> executable = Runtime::Module::self();
+            static weak<const Runtime::Module> last = executable;
+            static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols);
+            while(last->next())
             {
-                executable = Runtime::Module::self();
-                Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
-                s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
-            }
-            while(executable->next())
-            {
-                executable = executable->next();
-                Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+                last = last->next();
+                Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
                 s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
             }
             if(s_symbols)

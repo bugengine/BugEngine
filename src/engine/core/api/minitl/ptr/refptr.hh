@@ -13,10 +13,10 @@ namespace minitl
 template< typename T >
 class ref
 {
-    template< typename T, typename U >
-    friend ref<T> be_checked_cast(ref<U> u);
-    template< typename T, typename U >
-    friend ref<T> be_const_cast(ref<U> u);
+    template< typename U, typename V >
+    friend ref<U> be_checked_cast(ref<V> v);
+    template< typename U, typename V >
+    friend ref<U> be_const_cast(ref<V> v);
 private:
     T* m_ptr;
 private:

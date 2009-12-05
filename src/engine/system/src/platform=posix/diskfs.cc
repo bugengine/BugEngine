@@ -125,7 +125,7 @@ ref<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode m
         else
         {
             off_t size = lseek(file,0,SEEK_END);
-            return new MemoryFileMap(file, size);
+            return ref<MemoryFileMap>::create(file, size);
         }
     }
     else

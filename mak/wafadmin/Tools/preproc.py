@@ -614,7 +614,10 @@ class c_parser(object):
 		self.curfile = filename
 
 		# for msvc it should be a for loop on the whole stack
-		found = self.currentnode_stack[-1].find_resource(filename)
+		for i in range(1, len(self.currentnode_stack)+1):
+			found = self.currentnode_stack[-i].find_resource(filename)
+			if found:
+				break
 
 		for n in self.nodepaths:
 			if found:
@@ -631,7 +634,6 @@ class c_parser(object):
 		return found
 
 	def addlines(self, node):
-
 		self.currentnode_stack.append(node.parent)
 		filepath = node.abspath(self.env)
 
@@ -665,6 +667,7 @@ class c_parser(object):
 		self.env = env
 		variant = node.variant(env)
 		bld = node.__class__.bld
+
 		try:
 			self.parse_cache = bld.parse_cache
 		except AttributeError:

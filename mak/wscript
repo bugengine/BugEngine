@@ -11,7 +11,7 @@ import misc
 import module
 import mak
 
-from mak.tools.IDE import visualstudio,netbeans,xcode
+from mak.tools.IDE import visualstudio,netbeans,xcode,vim
 
 
 def set_options(opt):
@@ -153,7 +153,7 @@ def add_cobjects_method(self):
 def createmasterfile(task):
 	f = open(task.outputs[0].bldpath(task.env), 'w')
 	for src in task.inputs:
-		f.write('#include "../%s"\n' % src.srcpath(task.env).replace('\\','/'))
+		f.write('#include "../%s"\n' % src.bldpath(task.env).replace('\\','/'))
 	f.close()
 
 MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
@@ -175,7 +175,6 @@ def add_extra_outputs(self):
 @before('apply_lib_vars')
 def apply_lib_vars_cprogram(self):
 	env = self.env
-
 	uselib = self.to_list(self.uselib)
 	seen = []
 	names = self.to_list(self.uselib_local)[:] # consume a copy of the list of names

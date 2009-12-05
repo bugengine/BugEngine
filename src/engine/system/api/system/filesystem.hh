@@ -14,7 +14,6 @@ class FileSystemComponent;
 class AbstractMemoryStream;
 
 
-
 enum FileOpenMode
 {
     eReadOnly,
@@ -92,6 +91,9 @@ public:
 };
 
 }
+#include    <system/fscomponent.hh>
+
+
 
 
 /*****************************************************************************/

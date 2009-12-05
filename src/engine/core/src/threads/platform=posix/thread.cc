@@ -40,7 +40,6 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 
 Thread::ThreadParams::~ThreadParams()
 {
-    be_assert(false, "Test assertions");
 }
 
 void* Thread::ThreadParams::threadWrapper(void* params)
