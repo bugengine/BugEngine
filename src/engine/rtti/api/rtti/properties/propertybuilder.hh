@@ -208,7 +208,7 @@ public:
     inline ~PropertyBuilder()
     {
         if(m_metaclass)
-            m_metaclass->addProperty(m_name, ref< new ObjectProperty<Owner, T, GetImpossible<Owner,T>, Setter > >::create());
+            m_metaclass->addProperty(m_name, ref< ObjectProperty<Owner, T, GetImpossible<Owner,T>, Setter > >::create());
     }
 
     template< size_t offset >

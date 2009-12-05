@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Graphics { namespace X
 {
 
-Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
 :   RenderTarget(scene)
 ,   m_renderer(renderer)
 {
@@ -16,7 +16,7 @@ Window::Window(Renderer* renderer, WindowFlags flags, const Scene* scene)
 
 Window::~Window()
 {
-	close();
+    close();
 }
 
 void Window::close()

@@ -15,10 +15,10 @@ class Renderer;
 class XEXPORT Window : public RenderTarget
 {
 protected:
-    Renderer*   m_renderer;
-    ::Window    m_window;
+    weak<Renderer>  m_renderer;
+    ::Window        m_window;
 public:
-    Window(Renderer* renderer,WindowFlags flags, const Scene* scene);
+    Window(weak<Renderer> renderer,WindowFlags flags, ref<const Scene> scene);
     ~Window();
 
     void close() override;

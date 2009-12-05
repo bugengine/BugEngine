@@ -43,9 +43,9 @@ Manager::~Manager()
 {
 }
 
-Device* Manager::getDevice(void* handle)
+weak<Device> Manager::getDevice(void* handle)
 {
-    return 0;
+    return weak<Device>();
 }
 
 void Manager::update() const

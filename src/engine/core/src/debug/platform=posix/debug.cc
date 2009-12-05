@@ -28,19 +28,13 @@ AssertionResult defaultAssertionCallback( const char *file,
     Runtime::Callstack::Address address[128];
     size_t result = Runtime::Callstack::backtrace(address, 128, 1);
     Runtime::Symbol s;
-
-    static weak<const Runtime::Module> executable;
-    static ref<const Runtime::SymbolResolver> s_symbols;
-    if(!executable)
+    static ref<const Runtime::Module> executable = executable = Runtime::Module::self();
+    static weak<const Runtime::Module> last = executable;
+    static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols);
+    while(last->next())
     {
-        executable = Runtime::Module::self();
-        Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
-        s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
-    }
-    while(executable->next())
-    {
-        executable = executable->next();
-        Runtime::SymbolResolver::SymbolInformations infos = executable->getSymbolInformation();
+        last = last->next();
+        Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
         s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
     }
     if(s_symbols)
@@ -49,11 +43,11 @@ AssertionResult defaultAssertionCallback( const char *file,
         for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
         {
             s_symbols->resolve(*a, s);
-            fprintf(stderr, "[%p] %s - %s:%d - %s\n", (void*)s.address(), s.module(), s.filename(), s.line(), s.function());
+            fprintf(stderr, "[%16p] %s - %s:%d - %s\n", (void*)s.address(), s.module(), s.filename(), s.line(), s.function());
         }
     }
     
-    return Break;
+    return Ignore;
 }
 
 static AssertionCallback_t g_callback = defaultAssertionCallback;

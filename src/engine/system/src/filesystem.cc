@@ -45,7 +45,6 @@ void FileSystem::FileSystemMountPoint::erase(const istring& child)
 {
     ChildrenMap::iterator it = m_children.find(child);
     be_assert(it != m_children.end(), "no mount point %s in filesystem" | child.c_str());
-    delete it->second;
     m_children.erase(it);
 }
 

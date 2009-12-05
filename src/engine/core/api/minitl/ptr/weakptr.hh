@@ -15,10 +15,10 @@ namespace minitl
 template< typename T >
 class weak
 {
-    template< typename T, typename U >
-    friend weak<T> be_checked_cast(weak<U> u);
-    template< typename T, typename U >
-    friend weak<T> be_const_cast(weak<U> u);
+    template< typename U, typename V >
+    friend weak<U> be_checked_cast(weak<V> v);
+    template< typename U, typename V >
+    friend weak<U> be_const_cast(weak<V> v);
 private:
     T* m_ptr;
 private:

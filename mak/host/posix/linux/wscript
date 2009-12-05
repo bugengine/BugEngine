@@ -10,6 +10,37 @@ import Logs
 import Options
 from Logs import info,warn
 
+def add_opencc_to_env(conf, version, toolchaindir, target):
+	arch,compiler,platform = target.split('-')
+	newenv = conf.set_env_name('temp', conf.env.copy())
+	conf.setenv('temp')
+	newenv['CC'] = conf.find_program('opencc-'+version, var='CC')
+	newenv['CXX'] = conf.find_program('openCC-'+version, var='CXX')
+	conf.check_tool('gcc gxx', tooldir='mak/tools')
+	name = '-'.join(['opencc', platform, arch, version.replace('-','_')])
+	newenv.set_variant(name)
+	Utils.pprint('NORMAL', 'configure for tool %s' % name)
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', platform))
+	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
+	newenv = conf.set_env_name(name, newenv)
+	del conf.all_envs['temp']
+	conf.setenv('default')
+	conf.env['BUILD_VARIANTS'].append(name)
+
+def get_available_opencc(conf):
+	paths = ['/', '/usr/', '/usr/local', '/opt']
+	for toolchaindir in paths:
+		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc-lib')):
+			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc-lib')):
+				if target in ['.svn', '.cvs']:
+					continue
+				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc-lib', target)):
+					if version in ['.svn', '.cvs']:
+						continue
+					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc-lib', target, version)):
+						continue
+					name = add_opencc_to_env(conf, version, os.path.join(toolchaindir), target)
+
 def get_available_suncc(conf):
 	newenv = conf.env.copy()
 	conf.set_env_name('temp',newenv)
@@ -82,6 +113,7 @@ def configure(conf):
 	conf.env['BUILD_VARIANTS'] = []
 	conf.check_tool("bison flex", tooldir='mak/tools')
 	get_available_suncc(conf)
+	get_available_opencc(conf)
 	get_available_gcc(conf)
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:

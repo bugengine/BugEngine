@@ -36,7 +36,7 @@ ref<const Module> Module::self()
     static ref<Module> s_module;
     ref<Module> module;
 #ifdef BE_PLATFORM_POSIX
-    void* handle = dlopen(0, RTLD_LAZY);
+    void* handle = dlopen(0, RTLD_LAZY|RTLD_NOLOAD);
     link_map* lmap;
     dlinfo(handle, RTLD_DI_LINKMAP, &lmap);
     for(int i = 0; lmap; lmap=lmap->l_next, i++)
@@ -50,16 +50,17 @@ ref<const Module> Module::self()
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
-            s_module = new Elf(filename, lmap->l_addr);
+            s_module = ref<Elf>::create(filename, lmap->l_addr);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = new Elf(lmap->l_name, lmap->l_addr);
+            ref<Module> newModule = ref<Elf>::create(lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module = newModule;
         }
     }
+    dlclose(handle);
 #elif defined(BE_PLATFORM_WIN32)
     HANDLE process = ::GetCurrentProcess();
     DWORD requiredSize;
