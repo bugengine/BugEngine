@@ -1,0 +1,166 @@
+Building BugEngine
+=====================
+
+
+Supported platforms
+----------------------
+
+The following platforms are currently tested and known to build & work :
+- win32 with GCC 4.3 amd 4.4
+- win32 with visual studio 2005/2008
+- win32 with visual studio 2005-2008 express
+- win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2010
+- win32 with Intel compiler 10 or 11
+
+- linux amd64 with GCC 4.1 to 4.4
+- linux powerpc (G5) with GCC 4.1 to 4.4
+
+the following platforms are not tested but should work :
+- linux x86 with GCC
+- linux powerpc 64
+
+the following platforms will work in the future :
+- linux with OpenCC compiler (from AMD)
+- linux with Intel compiler
+- linux with sunCC
+- solaris 10 on x86 (gcc or sunCC)
+- OpenSolaris on x86 (gcc or sunCC)
+- darwin (MacOS X) on x86 (gcc)
+- darwin (MacOS X) on powerpc (gcc)
+- freebsd x86
+- wii
+- psp
+
+The engine will build for all platforms but the editor will only be built for a PC architecture (not on consoles)
+
+
+Any OS with accelerated 3D should be supported
+Some platforms might need minor fix from time to time (i.e. x86 might be broken when a checkin was only tested on amd64)
+
+
+
+
+Building
+-----------
+
+The requirements fro building BugEngine are quite low :
+You need one of the supported compilers installed and working
+You need python installed (I use 2.4 and 2.5)
+You need Flex and Bison in the path
+
+waf is the build system that is used for building.
+waf can also be used to generate projects for MSVC
+(supported MSVC versions are 2005, 2008 and express editions
+2010 beta 2 should work also)
+
+
+Configuring
+..............
+
+In the root folder of the project, run
+> python waf configure
+it will detect all the supported toolchains and try and pick the most appropriated one
+(it doesn't always pick the best one)
+the last line in the output sums up which version and compiler was picked.
+you can choose manually from the available toolchains with the --toolchains=...
+option
+the format of the toolchain is variant-compiler-platform-architecture-version
+where variant is one of the build variants in debug, release, profile, final
+compiler is the name of the compiler in msvc, wsdk (windows sdk), gcc, icc, opencc, suncc
+platform is the name of the platform in linux, win32, freebsd, darwin, psp, wii...
+architecture is the name of the CPU architecture in x86, amd64, x64 (alias for amd64), ppc, ppc64, arm7, arm9...
+version is the version of the compiler, it depends on the compiler
+it can be 4.1 or 4.4.1 for GCC, 8.0 or 9.0 for MSVC, the version of the windows SDK for the command line, etc
+
+The argument expected by the --toolchains parameter is a list of regular expressions :
+> python waf configure --toolchains=.*-gcc-.*
+will select all toolchains with GCC (which can be a lot of several versions of GCC are installed)
+> python waf configure --toolchains=debug-msvc-win32-.*-10.0, debug-gcc-win32-x86-4.4
+will pick all compilers available for visual studio 2010 (probably x86 and amd64) and GCC 4.4
+
+
+Discovering
+..............
+
+The project trys to automatically find the compilers and you usually don't need to
+specify a path or anything. This is particukary comfortable on Win32 where you
+don't need to set the MSVC environment for the project to build.
+Waf will automatically detect which compilers are installed and configure them properly,
+even if visual studio was not installed in the default path.
+
+
+Building from the command line
+.................................
+
+when you have decided which compiler to use, you can build & "install" by running
+> python waf install
+It should build all source files, compile all libs and a sample executable
+and move them to a folder specific to the toolchain
+
+
+Bulding with IDEs
+....................
+
+The other way of building is to create projects for the supported IDEs and build from the IDE
+the supported IDEs at the moment are Visual Studio 2005, 2008 and 2010, in their complete or
+express editions.
+To generate the project files, configure the project (which toolchain is selected doesn't
+actually matter) and run
+> python waf install --projects=[ide list]
+where [ide-list] is the list of projects you'd like to generate in
+vs2005, vs2008, vs2010, vs2005e or vs2008e
+> python waf install --projects=vs2005e,vs2010
+will create a set of projects and a solution for Visual Studio 2005 express, and another set of
+projects and solutions for Visual Studio 2010.
+You don't need to have these installed to generate the projects, you just need them to actually
+open the projects.
+
+
+
+Project architecture
+=======================
+
+Engine
+---------
+
+The project contains only two folders at its root; under mak/ are all the python scripts and
+tools that are used to build the project, and under src/ are all the sources.
+src/ contains several folders that are used to sort the subprojects. The categories are
+3rdparty/ : external libraries (sometimes with sources, sometimes just a set of compile flags or libs)
+engine/ : the main engine source files
+plugin/ : plugins that are built separately from the engine
+game/ : the game projects that use the engine
+tool/ : tools that use some of the libraries. It does not differ much from game/
+test/ : unit tests
+
+each folder can contain several subprojects. The main folder, engine/, contains a lot of different subprojects that can depend on each other.
+each project has 3 kind of files : sources under the src/ folder, private headers in the incude/ folder and public headers in the api/ folder.
+The sources are discovered automatically; if a file has a known extension and is in the src/ folder, then it will be built and/or added to the projects
+Source files in include/ or api/ are never built.
+Some folders have a special syntax to let the build system know that they are platform or architecture specific;
+sources in the folder platforms=win32/ are built only when the target (and not the host) platform is win32.
+sources in a folder archs=x86/ are only build for x86
+sources in a folder archs=x86,amd64/ are built for these two architectures, but not for powerpc.
+These sources are also excluded from the projects when it makes sense
+
+
+Editor
+---------
+
+The role of the editor is to be able to edit the data for a game that uses the BugEngine, and also to start the game and collect statistics
+The editor itself is using the same engine and can be edited with itself
+The editor is able to read game data for all target platform and run the game on any architecture; an editor running on Linux powerPC
+can collect statistics from a game running on Win32 and built with MSVC. The only requirement is to have published the game executables
+(especially the debug files, .pdb or .dbg) so that the editor can analyze callstacks.
+
+
+Static/dynamic builds
+------------------------
+
+The engine can be built either using shared versions of the engine or be statically linked to the engine.
+Both architectures are supported and can be changed by editing the wscript file.
+Shared versions build a little faster and are lighter than the static executables but harder to redistribute.
+On some platforms, only static builds work (wii/psp)
+
+
+

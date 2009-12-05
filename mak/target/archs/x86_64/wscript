@@ -1,0 +1,13 @@
+# set amd64 specific options
+
+import os
+
+def set_options(opt):
+	opt.sub_options('../amd64')
+	pass
+
+def configure(conf):
+	conf.sub_config('../amd64')
+
+def build(bld):
+	pass
