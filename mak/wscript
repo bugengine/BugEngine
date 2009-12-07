@@ -11,7 +11,7 @@ import misc
 import module
 import mak
 
-from mak.tools.IDE import visualstudio,netbeans,xcode,vim
+from mak.tools.IDE import visualstudio,netbeans,xcode
 
 
 def set_options(opt):
