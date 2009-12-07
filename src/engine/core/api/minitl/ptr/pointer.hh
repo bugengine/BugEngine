@@ -12,6 +12,9 @@ template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;
 
+template< typename T >
+static void checked_delete(const T*);
+
 class pointer
 {
     friend inline void addweak(const pointer* ptr);
@@ -22,7 +25,7 @@ class pointer
     template< typename T >
     friend class scoped;
     template< typename T >
-    friend static void checked_delete(const T*);
+    friend void checked_delete(const T*);
 private:
 #ifdef BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;

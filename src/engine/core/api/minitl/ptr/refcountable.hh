@@ -29,7 +29,7 @@ class refcountable : public pointer
     template< typename T >
     friend class scoped;
     template < typename T >
-    friend static void checked_delete(const T* ptr);
+    friend void checked_delete(const T* ptr);
 private:
     mutable i_u32 m_refCount;
 public:
