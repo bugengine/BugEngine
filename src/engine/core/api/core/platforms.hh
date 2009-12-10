@@ -55,6 +55,9 @@ static inline void displayError()
 # define BE_PLATFORM_NAME   SunOS
 # define BE_PLATFORM_SUN    1
 # define BE_PLATFORM_POSIX  1
+#elif defined _WII
+# define BE_PLATFORM_NAME   Wii
+# define BE_PLATFORM_WII    1
 #else
 # error "unknown platform"
 #endif
