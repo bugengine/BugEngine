@@ -62,7 +62,7 @@ def get_available_msvc(conf):
 gccPlatforms = {
 	'mingw32' : [('win32','x86')],
 	'x86_64-pc-mingw32' : [('win32','amd64')],
-	'powerpc-gekko': [('wii','powerpc')],
+	'powerpc-eabi': [('wii','powerpc')],
 	'psp': [('psp','mips')],
 	'arm-eabi': [('nds', 'arm7'), ('nds', 'arm9')]
 }
@@ -82,7 +82,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 		newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 								   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
 		conf.setenv(name)
-		conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir='mak/tools')
+		conf.check_tool('cross_gcc', tooldir='mak/tools')
 		if platform=='win32':
 			conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
 			conf.check_tool('winres')
