@@ -30,7 +30,7 @@ def parse_gcc_target(target):
 		   ('psp', 'psp'),
 		   ('arm-eabi', 'nds'),
 		   ('darwin', 'darwin'),
-		   ('gekko', 'wii'),
+		   ('powerpc-eabi', 'wii'),
 		   ('spu', 'spu')]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
@@ -69,11 +69,24 @@ def find_cross_gcc(conf):
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+version, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+version, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++', var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++', var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
+
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
+
+		if not v['AS']: v['AS'] = conf.find_program(target+'-as', var='AS', path_list=v['GCC_PATH'])
+		if not v['AS']: v['AS'] = conf.find_program(target+'-gas', var='AS', path_list=v['GCC_PATH'])
+		if not v['AS']:
+			v['AS'] = conf.find_program('as', var='AS', path_list=v['GCC_PATH'])
+			if not v['AS']: v['AS'] = conf.find_program('gas', var='AS', path_list=v['GCC_PATH'])
+		if not v['AS']: conf.fatal('unable to find as for target %s' % target)
 
 		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
 		if not v['AR']:
@@ -85,7 +98,7 @@ def find_cross_gcc(conf):
 			v['RANLIB'] = conf.find_program('ar', var='RANLIB', path_list=v['GCC_PATH'])
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
-	conf.check_tool('gcc')
+	conf.check_tool('gcc gxx gas')
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
@@ -117,6 +130,11 @@ def find_cross_gcc(conf):
 	if v['GCC_CONFIGURED_PLATFORM'] != 'win32':
 		conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
+		flags = ['-mcpu=750', '-meabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
+		conf.env.append_unique('CCFLAGS', flags)
+		conf.env.append_unique('CXXFLAGS', flags)
+		conf.env.append_unique('ASFLAGS', ['-mgekko'])
 		
 @feature('cc', 'cxx')
 def static_libgcc(self):
