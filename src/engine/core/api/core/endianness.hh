@@ -50,11 +50,11 @@ struct ByteSwap<T, Endianness_Big, Endianness_Little>
         T result = 0;
         for (unsigned i = 0; i < sizeof(T)/2; ++i)
         {
-            result = (value & (0xff << i)) << (8*((sizeof(T))-i*2-1));
+            result = T((value & (0xff << i)) << (8*((sizeof(T))-i*2-1)));
         }
         for (unsigned i = sizeof(T)/2; i < sizeof(T); ++i)
         {
-            result = (value & (0xff << i)) >> (8*(i*2+1));
+            result = T((value & (0xff << i)) >> (8*(i*2+1)));
         }
 
         return result;
