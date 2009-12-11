@@ -7,7 +7,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['PLATFORM'] = ['linux', 'posix']
+	conf.env['PLATFORM'] = ['linux', 'posix', 'pc']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'

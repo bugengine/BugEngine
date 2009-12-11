@@ -28,7 +28,7 @@ static inline tick_type tick(void)
     __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
     return ((u64)lo) | (((u64)hi)<<32);
 }
-# elif defined(__powerpc__)
+# elif defined(__PPC__)
 typedef unsigned long long tick_type;
 static inline tick_type tick(void)
 {

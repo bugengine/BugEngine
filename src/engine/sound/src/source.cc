@@ -7,8 +7,6 @@
 
 #include    <system/sequencer.hh>
 
-#include    <AL/al.h>
-
 namespace BugEngine { namespace Sound
 {
 

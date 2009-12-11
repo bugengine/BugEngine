@@ -6,9 +6,6 @@
 
 #include    <system/filesystem.hh>
 
-#include    <AL/al.h>
-#include    <AL/alc.h>
-
 
 namespace BugEngine { namespace Sound
 {

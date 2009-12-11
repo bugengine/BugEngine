@@ -7,7 +7,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['PLATFORM'] = ['freebsd', 'bsd', 'posix']
+	conf.env['PLATFORM'] = ['freebsd', 'bsd', 'posix', 'pc']
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']	= '%s.so'
 	conf.env['program_PATTERN'] = '%s'

@@ -6,7 +6,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['PLATFORM'] = ['win32']
+	conf.env['PLATFORM'] = ['win32', 'pc']
 	conf.env['library_PATTERN'] = '%s.lib'
 	conf.env['shlib_PATTERN']	= '%s.dll'
 	conf.env['program_PATTERN'] = '%s.exe'

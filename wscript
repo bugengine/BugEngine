@@ -32,18 +32,19 @@ def build(bld):
 	bullet			= module.external('bullet')
 
 	win32			= module.external('win32')
+	libwii			= module.external('libwii')
 	pthreads		= module.external('pthreads')
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	shared = True
+	shared = False
 	if shared:
 		lib = module.shared_library
 	else:
 		lib = module.library
 
-	core			= lib('core',[dbghelp, win32, pthreads])
+	core			= lib('core',[dbghelp, win32, libwii, pthreads])
 	network			= lib('network',[core])
 	rtti			= lib('rtti',[core,network] )
 	system			= lib('system',[core,rtti] )
@@ -62,7 +63,7 @@ def build(bld):
 		depends = [discworld]
 	win32			= module.library('win32', depends, category='plugin', platforms=['win32'])
 	X				= module.library('X', depends+[X11], category='plugin', platforms=['posix'])
-	renderOpenGL	= module.plugin('renderOpenGL', depends+[win32, X, opengl]).post(bld)
+	renderOpenGL	= module.plugin('renderOpenGL', depends+[win32, X, opengl], platforms=['pc']).post(bld)
 	renderDx9		= module.plugin('renderDx9', depends+[win32, cgDx, directx9], platforms=['win32']).post(bld)
 	lua				= module.plugin('lua', depends+[lualib]).post(bld)
 	squirrel		= module.plugin('squirrel', depends+[squirellib]).post(bld)
