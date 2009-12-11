@@ -237,7 +237,7 @@ class module:
 					doprocess = process
 
 				newexts = { '.ll':('.cc','.hh'), '.yy': ('.cc','.hh'), '.l':('.c', '.h'), '.y':('.c', '.h') }
-				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.bin', '.grit']):
+				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.S', '.bin', '.grit']):
 					result.addFile(sources.cppsource(file, platforms, archs, doprocess, self.usepch))
 				elif ext in set(['.rc']):
 					result.addFile(sources.rcsource(file, platforms, archs, doprocess))

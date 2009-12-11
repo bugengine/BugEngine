@@ -37,6 +37,8 @@ class VCxproj:
 			self.projectType = 'StaticLibrary'
 		elif type == 'util':
 			self.projectType = 'Utility'
+		elif type == 'tool':
+			self.projectType = 'Application'
 		elif type == 'test':
 			self.projectType = 'Application'
 		else:

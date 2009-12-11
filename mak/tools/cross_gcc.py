@@ -81,12 +81,7 @@ def find_cross_gcc(conf):
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
-		if not v['AS']: v['AS'] = conf.find_program(target+'-as', var='AS', path_list=v['GCC_PATH'])
-		if not v['AS']: v['AS'] = conf.find_program(target+'-gas', var='AS', path_list=v['GCC_PATH'])
-		if not v['AS']:
-			v['AS'] = conf.find_program('as', var='AS', path_list=v['GCC_PATH'])
-			if not v['AS']: v['AS'] = conf.find_program('gas', var='AS', path_list=v['GCC_PATH'])
-		if not v['AS']: conf.fatal('unable to find as for target %s' % target)
+		if not v['AS']: v['AS'] = v['CC']
 
 		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
 		if not v['AR']:
@@ -99,6 +94,7 @@ def find_cross_gcc(conf):
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc gxx gas')
+	v['ASFLAGS'] = ['-c']
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
@@ -131,10 +127,11 @@ def find_cross_gcc(conf):
 		conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
-		flags = ['-mcpu=750', '-meabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
+		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
 		conf.env.append_unique('CCFLAGS', flags)
 		conf.env.append_unique('CXXFLAGS', flags)
-		conf.env.append_unique('ASFLAGS', ['-mgekko'])
+		conf.env.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
+		conf.env.append_unique('LINKFLAGS', flags)
 		
 @feature('cc', 'cxx')
 def static_libgcc(self):

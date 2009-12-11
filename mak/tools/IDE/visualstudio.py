@@ -13,7 +13,7 @@ projects = {
 	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00')),
 	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
 	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
-	'vs2010':	(('Visual Studio 10', '11.00'),(vstudio.vcxproj.VCxproj, '4.0')),
+	'vs2010':	(('Visual Studio 2010', '11.00'),(vstudio.vcxproj.VCxproj, '4.0')),
 }
 
 allconfigs = ['debug','release','profile','final']

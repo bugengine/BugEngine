@@ -3,32 +3,32 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/mutex.hh>
-#include    <pthread.h>
+#include    <ogc/mutex.h>
 
 
 namespace BugEngine
 {
 
 Mutex::Mutex()
-:   m_data(new pthread_mutex_t)
+:   m_data(new mutex_t)
 {
-    pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(m_data), 0);
+    LWP_MutexInit(reinterpret_cast<mutex_t*>(m_data), true);
 }
 
 Mutex::~Mutex()
 {
-    pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(m_data));
-    delete reinterpret_cast<pthread_mutex_t*>(m_data);
+    LWP_MutexDestroy(*reinterpret_cast<mutex_t*>(m_data));
+    delete reinterpret_cast<mutex_t*>(m_data);
 }
 
 void Mutex::release()
 {
-    pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    LWP_MutexUnlock(*reinterpret_cast<mutex_t*>(m_data));
 }
 
 Threads::Waitable::WaitResult Mutex::wait(unsigned int timeout)
 {
-    pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    LWP_MutexLock(*reinterpret_cast<mutex_t*>(m_data));
     return Finished;
 }
 

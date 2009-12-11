@@ -115,14 +115,6 @@ void Thread::wait() const
     pthread_join(*reinterpret_cast<pthread_t*>(m_data), &result);
 }
 
-Thread::Priority Thread::priority() const
-{
-    int policy;
-    sched_param param;
-    pthread_getschedparam(*reinterpret_cast<pthread_t*>(m_data), &policy, &param);
-    return Thread::Priority(param.__sched_priority-sched_get_priority_min(policy));
-}
-
 void Thread::setPriority(Priority p)
 {
     sched_param param;
