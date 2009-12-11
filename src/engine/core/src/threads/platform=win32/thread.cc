@@ -130,25 +130,6 @@ void Thread::wait() const
     WaitForSingleObject((HANDLE)m_data, INFINITE);
 }
 
-Thread::Priority Thread::priority() const
-{
-    int p = GetThreadPriority((HANDLE)m_data);
-    if(p < THREAD_PRIORITY_LOWEST)
-        return Idle;
-    else if (p == THREAD_PRIORITY_LOWEST)
-        return Lowest;
-    else if (p == THREAD_PRIORITY_BELOW_NORMAL)
-        return BelowNormal;
-    else if (p == THREAD_PRIORITY_NORMAL)
-        return Normal;
-    else if (p == THREAD_PRIORITY_ABOVE_NORMAL)
-        return AboveNormal;
-    else if (p == THREAD_PRIORITY_HIGHEST)
-        return Highest;
-    else /*if (p > THREAD_PRIORITY_HIGHEST)*/
-        return Critical;
-}
-
 void Thread::setPriority(Priority p)
 {
     switch(p)

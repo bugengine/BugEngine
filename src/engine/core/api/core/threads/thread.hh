@@ -35,7 +35,6 @@ public:
 
     void resume();
 
-    Priority priority() const;
     void setPriority(Priority p);
 
     unsigned long   id() const;

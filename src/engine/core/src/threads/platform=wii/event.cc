@@ -3,6 +3,8 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/event.hh>
+#include    <ogc/cond.h>
+#include    <ogc/mutex.h>
 #include    <cerrno>
 
 
@@ -10,53 +12,52 @@ namespace BugEngine
 {
 
 Event::Event()
-:   m_data(new pthread_cond_t)
-,   m_lock(new pthread_mutex_t)
+:   m_data(new cond_t)
+,   m_lock(new mutex_t)
 {
-    pthread_cond_init(reinterpret_cast<pthread_cond_t*>(m_data), 0);
-    pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(m_lock), 0);
+    LWP_CondInit(reinterpret_cast<cond_t*>(m_data));
+    LWP_MutexInit(reinterpret_cast<mutex_t*>(m_lock), false);
 }
 
 Event::~Event()
 {
-    pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(m_lock));
-    pthread_cond_destroy(reinterpret_cast<pthread_cond_t*>(m_data));
-    delete reinterpret_cast<pthread_mutex_t*>(m_lock);
-    delete reinterpret_cast<pthread_cond_t*>(m_data);
+    LWP_MutexDestroy(*reinterpret_cast<mutex_t*>(m_lock));
+    LWP_CondDestroy(*reinterpret_cast<cond_t*>(m_data));
+    delete reinterpret_cast<mutex_t*>(m_lock);
+    delete reinterpret_cast<cond_t*>(m_data);
 }
 
 void Event::set()
 {
-    pthread_cond_signal(reinterpret_cast<pthread_cond_t*>(m_data));
+    LWP_CondSignal(*reinterpret_cast<cond_t*>(m_data));
 }
 
 void Event::pulse()
 {
-    pthread_cond_broadcast(reinterpret_cast<pthread_cond_t*>(m_data));
+    LWP_CondBroadcast(*reinterpret_cast<cond_t*>(m_data));
 }
 
 void Event::lock()
 {
-    pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(m_lock));
+    LWP_MutexLock(*reinterpret_cast<mutex_t*>(m_lock));
 }
 
 
 void Event::unlock()
 {
-    pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_lock));
+    LWP_MutexUnlock(*reinterpret_cast<mutex_t*>(m_lock));
 }
 
 Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
 {
-    timespec abstime;
-    clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += timeout % 1000;
-    abstime.tv_sec += timeout / 1000;
-    abstime.tv_sec += abstime.tv_nsec % 1000000000;
-    abstime.tv_nsec = abstime.tv_nsec % 1000000000;
-    int result = pthread_cond_timedwait( reinterpret_cast<pthread_cond_t*>(m_data),
-                                         reinterpret_cast<pthread_mutex_t*>(m_lock),
-                                         &abstime);
+    timespec time;
+    time.tv_nsec = timeout % 1000;
+    time.tv_sec = timeout / 1000;
+    time.tv_sec += time.tv_nsec % 1000000000;
+    time.tv_nsec = time.tv_nsec % 1000000000;
+    int result = LWP_CondTimedWait( *reinterpret_cast<cond_t*>(m_data),
+                                    *reinterpret_cast<mutex_t*>(m_lock),
+                                    &time);
     switch(result)
     {
     case 0:
