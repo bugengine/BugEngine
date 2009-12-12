@@ -10,6 +10,7 @@
 #include    <core/threads/thread.hh>
 
 #include    <rtti/test.hh>
+#include    <rtti/script.hh>
 #include    <rtti/namespace.hh>
 
 #include    <core/runtime/symbols.hh>
@@ -20,9 +21,8 @@ int be_main (weak<BugEngine::Application> app)
     printf("Test\n");
     ref<TestNS::Test> t = ref<TestNS::Test>::create();
     BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
-    BugEngine::Plugin p("lua");
-    void (*doFile)(const char *file) = p.get<void(*)(const char *)>("doFile");
-    (*doFile)("data/scripts/main.lua");
+    BugEngine::Plugin<BugEngine::Script> p("lua");
+    p->doFile("data/scripts/main.lua");
     printf("Done\n");
 
     BugEngine::Graphics::WindowFlags f;
