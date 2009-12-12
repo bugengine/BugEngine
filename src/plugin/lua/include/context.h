@@ -4,11 +4,12 @@
 #ifndef BE_LUA_CONTEXT_H_
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
+#include    <rtti/script.hh>
 
 namespace BugEngine { namespace Lua
 {
 
-class Context
+class Context : public Script
 {
 private:
     lua_State*      m_state;
@@ -17,7 +18,8 @@ public:
     Context();
     ~Context();
 
-    void doFile(const char *filename);
+    void doFile(const ifilename& filename) override;
+    void doFile(weak<AbstractMemoryStream> stream) override;
 
 private:
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);

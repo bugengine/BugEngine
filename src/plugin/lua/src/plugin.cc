@@ -6,20 +6,12 @@
 #include    <context.h>
 
 
-static BugEngine::Lua::Context* s_context = 0;
-
-extern "C" FORCEEXPORT void _initplugin(void)
+extern "C" FORCEEXPORT BugEngine::Lua::Context* be_createPlugin(void)
 {
-    s_context = new BugEngine::Lua::Context;
+    return new BugEngine::Lua::Context;
 }
 
-extern "C" FORCEEXPORT void _finiplugin(void)
+extern "C" FORCEEXPORT void be_destroyPlugin(BugEngine::Lua::Context* context)
 {
-    delete s_context;
-    s_context = 0;
-}
-
-extern "C" FORCEEXPORT void doFile(const char *filename)
-{
-    s_context->doFile(filename);
+    delete context;
 }

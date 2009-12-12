@@ -8,36 +8,22 @@
 namespace BugEngine
 {
 
-
+template< typename Interface >
 class be_api(SYSTEM) Plugin
 {
 private:
     typedef void* Handle;
-    #ifdef WIN32
-    # ifdef _WIN64
-        typedef __int64 __rval;
-    # else
-        typedef int     __rval;
-    # endif
-    #else
-        typedef int     __rval;
-    #endif
-    typedef __rval (* generic)(void);
 private:
-    Handle FPluginHandle;
-private:
-    generic _get(const std::string& name);
+    Handle      m_handle;
+    Interface*  m_interface;
 public:
     Plugin(const istring &pluginName);
     virtual ~Plugin(void);
 
-    template< typename callback >
-    callback get(const std::string& name)
-    {
-        return reinterpret_cast<callback>(_get(name));
-    }
-
-    operator const void*() const { return FPluginHandle; }
+    Interface* operator->()             { return m_interface; }
+    const Interface* operator->() const { return m_interface; }
+    operator const void*() const        { return m_interface; }
+    bool operator!() const              { return m_interface == 0; }
 private:
     Plugin();
     Plugin(const Plugin& other);
@@ -45,6 +31,14 @@ private:
 };
 
 }
+
+#if defined(BE_PLATFORM_WIN32)
+# include "win32/plugin.inl"
+#elif defined(BE_PLATFORM_POSIX)
+# include "posix/plugin.inl"
+#elif defined(BE_PLATFORM_CONSOLE)
+# include "console/plugin.inl"
+#endif
 
 /*****************************************************************************/
 #endif

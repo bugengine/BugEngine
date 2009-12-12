@@ -108,25 +108,23 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::doFile(const char *filename)
+void Context::doFile(const ifilename& filename)
 {
     weak<BugEngine::FileSystem> fs = BugEngine::FileSystem::instance();
     ref<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
     be_info("loading file %s" | filename);
-    if(file)
+    doFile(file);
+}
+
+void Context::doFile(weak<AbstractMemoryStream> file)
+{
+    int result;
+    result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), "");
+    if(result == 0)
     {
-        int result;
-        result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), filename);
-        if(result == 0)
-        {
-            result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
-        }
-        be_assert(result == 0, lua_tostring(m_state, -1));
+        result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
-    else
-    {
-        printf("file not found : %s\n", filename);
-    }
+    be_assert(result == 0, lua_tostring(m_state, -1));
 }
 
 void Context::push(lua_State* state, ref<Object> o)
