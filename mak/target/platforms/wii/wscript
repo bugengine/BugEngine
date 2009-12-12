@@ -10,6 +10,7 @@ def configure(conf):
 	conf.env['library_PATTERN'] = '%s.a'
 	#conf.env['shlib_PATTERN']	 = '%s.so'
 	conf.env['program_PATTERN'] = '%s.elf'
+	conf.env['STATIC'] = True
 
 	conf.env.append_unique('CCDEFINES', ['WII', '_WII', '_WII_', '__WII__'])
 	conf.env.append_unique('CXXDEFINES', ['WII', '_WII', '_WII_', '__WII__'])

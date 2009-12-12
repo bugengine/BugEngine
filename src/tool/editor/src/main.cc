@@ -6,7 +6,7 @@
 #include    <main/main.hh>
 
 /*---------------------------------------------------------------------------*/
-int be_main (weak<BugEngine::Application> app)
+int be_main(weak<BugEngine::Application> app)
 {
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);

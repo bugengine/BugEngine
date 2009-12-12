@@ -38,37 +38,31 @@ def build(bld):
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	shared = False
-	if shared:
-		lib = module.shared_library
-	else:
-		lib = module.library
-
-	core			= lib('core',[dbghelp, win32, libwii, pthreads])
-	network			= lib('network',[core])
-	rtti			= lib('rtti',[core,network] )
-	system			= lib('system',[core,rtti] )
-	data			= lib('data',[core,rtti,system] )
-	input			= lib('input',[core,rtti] )
-	graphics		= lib('graphics',[core, rtti, system, input, freetype ] )
-	sound			= lib('sound',[core,rtti,system, openal, oggvorbis] )
-	physics			= lib('physics',[core,rtti,system, bullet] )
-	mobile			= lib('mobile',[core,rtti,system,graphics, sound, physics, input] )
+	core			= module.library('core',[dbghelp, win32, libwii, pthreads])
+	network			= module.library('network',[core])
+	rtti			= module.library('rtti',[core,network] )
+	system			= module.library('system',[core,rtti] )
+	data			= module.library('data',[core,rtti,system] )
+	input			= module.library('input',[core,rtti] )
+	graphics		= module.library('graphics',[core, rtti, system, input, freetype ] )
+	sound			= module.library('sound',[core,rtti,system, openal, oggvorbis] )
+	physics			= module.library('physics',[core,rtti,system, bullet] )
+	mobile			= module.library('mobile',[core,rtti,system,graphics, sound, physics, input] )
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
-	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main]).post(bld)
 
-	if shared:
-		depends = [core, rtti, system, data, input, graphics, sound, physics, mobile, discworld]
-	else:
-		depends = [discworld]
-	win32			= module.library('win32', depends, category='plugin', platforms=['win32'])
-	X				= module.library('X', depends+[X11], category='plugin', platforms=['posix'])
-	renderOpenGL	= module.plugin('renderOpenGL', depends+[win32, X, opengl], platforms=['pc']).post(bld)
-	renderDx9		= module.plugin('renderDx9', depends+[win32, cgDx, directx9], platforms=['win32']).post(bld)
-	lua				= module.plugin('lua', depends+[lualib]).post(bld)
-	squirrel		= module.plugin('squirrel', depends+[squirellib]).post(bld)
+	win32			= module.library('win32', [core, rtti, system, graphics], category='plugin', platforms=['win32'])
+	X				= module.library('X', [core, rtti, system, graphics, X11], category='plugin', platforms=['posix'])
+	renderOpenGL	= module.plugin('renderOpenGL', [win32, X, opengl], platforms=['pc'])
+	renderDx9		= module.plugin('renderDx9', [win32, cgDx, directx9], platforms=['win32'])
+	lua				= module.plugin('lua', [core, rtti, system, lualib])
+	squirrel		= module.plugin('squirrel', [core, rtti, system, squirellib])
 
-	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['win32', 'posix']).post(bld)
+	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main],
+							plugins=[renderOpenGL, renderDx9, lua, squirrel])
+	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['pc'],
+							plugins=[])
 
+	discworld.post(bld)
+	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)

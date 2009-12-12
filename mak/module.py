@@ -56,6 +56,10 @@ class coptions:
 				self.pchname+','+
 				self.pchstop)
 
+def expand(modules):
+	result = []
+
+
 class module:
 	def __init__( self,
 				  name,
@@ -169,7 +173,7 @@ class module:
 					options.merge(aoptions)
 		return options
 
-	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions()):
+	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = []):
 		if not self.tasks.has_key(variant):
 			if type=='dummy' or not env['PLATFORM'] in self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
@@ -193,13 +197,27 @@ class module:
 				task.add_objects = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
 				dps = self.depends[:]
+				blacklist = []
+				seen = set()
+				while extradepends:
+					d = extradepends.pop(0)
+					t = d.tasks[variant]
+					if t:
+						seen.add(d)
+						if t.type == 'cobjects':
+							blacklist.append(t)
+						else:
+							task.uselib_local.append(d.name)
+						task.inheritedoptions.merge(t.inheritedoptions)
+						extradepends += [dep for dep in d.depends if dep not in seen]
+
 				seen = set()
 				while dps:
 					d = dps.pop(0)
 					t = d.tasks[variant]
 					if t:
 						seen.add(d)
-						if t.type == 'cobjects' and d in self.depends:
+						if t.type == 'cobjects' and d in self.depends and not t in blacklist:
 							task.add_objects.append(d.name)
 						else:
 							task.uselib_local.append(d.name)
@@ -318,6 +336,13 @@ class module:
 				task.platforms		= platforms
 				self.projects[p] = task
 
+	def post(self, builder):
+		self.makeproject(builder)
+		for envname in builder.env['BUILD_VARIANTS']:
+			env = builder.all_envs[envname]
+			self._post(builder, env, envname)
+		return self
+
 """ simple objects """
 class library(module):
 	def __init__( self,
@@ -345,15 +370,13 @@ class library(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
-			task = self.gentask(builder, env, envname, 'cobjects', options)
-		return self
+			d._post(builder, env, envname)
+		options = coptions()
+		task = self.gentask(builder, env, envname, 'cobjects', options)
+
+
 			
 """ shared lib """
 class shared_library(module):
@@ -382,17 +405,13 @@ class shared_library(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
-			options.defines.add('BUILDING_DLL')
-			options.defines.add('_USRDLL')
-			task = self.gentask(builder, env, envname, 'cshlib', options)
-		return self
+			d.post(builder, env, envname)
+		options = coptions()
+		options.defines.add('BUILDING_DLL')
+		options.defines.add('_USRDLL')
+		task = self.gentask(builder, env, envname, 'cshlib', options)
 
 """ static lib """
 class static_library(module):
@@ -421,15 +440,11 @@ class static_library(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
-			task = self.gentask(builder, env, envname, 'cstaticlib', options, coptions())
-		return self
+			d._post(builder, env, envname)
+		options = coptions()
+		task = self.gentask(builder, env, envname, 'cstaticlib', options, coptions())
 			
 """ plugin """
 class plugin(module):
@@ -458,19 +473,20 @@ class plugin(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname, executable):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
+			d._post(builder, env, envname)
+		if env['STATIC']:
+			options = coptions()
+			task = self.gentask(builder, env, envname, 'cobjects', options, coptions())
+		else:
+			executable._post(builder, env, envname)
 			options = coptions()
 			options.defines.add('BUILDING_DLL')
 			options.defines.add('_USRDLL')
-			task = self.gentask(builder, env, envname, 'cshlib', options, coptions())
+			task = self.gentask(builder, env, envname, 'cshlib', options, coptions(), [executable])
 			if task:
 				task.install_bindir = os.path.join(env['DEPLOY']['plugin'])
-		return self
 
 """ game """
 class game(module):
@@ -485,7 +501,9 @@ class game(module):
 				  platforms = allplatforms,
 				  archs = allarchs,
 				  sources=[],
+				  plugins=[]
 				):
+		self.plugins = plugins
 		self.install_path = 'bin'
 		module.__init__(self,
 						name,
@@ -499,18 +517,21 @@ class game(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
+			d._post(builder, env, envname)
+		options = coptions()
+		if env['STATIC']:
+			for d in self.plugins:
+				d._post(builder, env, envname, self)
+			task = self.gentask(builder, env, envname, 'cprogram', options, self.plugins)
+		elif not self.tasks.has_key(envname):
 			task = self.gentask(builder, env, envname, 'cprogram', options)
-		return self
+			for d in self.plugins:
+				d._post(builder, env, envname, self)
 
 
-""" game """
+""" tool """
 class tool(module):
 	def __init__( self,
 				  name,
@@ -523,7 +544,9 @@ class tool(module):
 				  platforms = allplatforms,
 				  archs = allarchs,
 				  sources=[],
+				  plugins=[]
 				):
+		self.plugins = plugins
 		self.install_path = 'bin'
 		module.__init__(self,
 						name,
@@ -537,15 +560,19 @@ class tool(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
+			d._post(builder, env, envname)
+		options = coptions()
+		if env['STATIC']:
+			for d in self.plugins:
+				d._post(builder, env, envname, self)
+			task = self.gentask(builder, env, envname, 'cprogram', options, self.plugins)
+		elif not self.tasks.has_key(envname):
 			task = self.gentask(builder, env, envname, 'cprogram', options)
-		return self
+			for d in self.plugins:
+				d._post(builder, env, envname, self)
+
 
 
 """ unit test """
@@ -574,18 +601,14 @@ class test(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			options = coptions()
-			task = self.gentask(builder, env, envname, 'cprogram', options, coptions())
-			task.subsystem = 'console'
-			task.do_install = 0
-			task.features.append("unittest")
-		return self
+			d._post(builder, env, envname)
+		options = coptions()
+		task = self.gentask(builder, env, envname, 'cprogram', options, coptions())
+		task.subsystem = 'console'
+		task.do_install = 0
+		task.features.append("unittest")
 
 """ barely a C option holder """
 class util(module):
@@ -613,14 +636,10 @@ class util(module):
 						archs,
 						sources)
 
-	def post(self, builder):
+	def _post(self, builder, env, envname):
 		for d in self.depends:
-			d.post(builder)
-		self.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			task = self.gentask(builder, env, envname, 'dummy')
-		return self
+			d._post(builder, env, envname)
+		task = self.gentask(builder, env, envname, 'dummy')
 
 m={}
 def external( name,
