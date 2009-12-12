@@ -52,7 +52,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 
 Thread::ThreadParams::~ThreadParams()
 {
-    be_assert(false, "test assertions");
+    be_assert(false, "testing asserts");
 }
 
 unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)

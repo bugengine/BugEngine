@@ -32,12 +32,14 @@ private:
 
 }
 
-#if defined(BE_PLATFORM_WIN32)
+#ifdef BE_STATIC
+# include "console/plugin.inl"
+#elif defined(BE_PLATFORM_WIN32)
 # include "win32/plugin.inl"
 #elif defined(BE_PLATFORM_POSIX)
 # include "posix/plugin.inl"
-#elif defined(BE_PLATFORM_CONSOLE)
-# include "console/plugin.inl"
+#else
+# error Plugin subsystem not implemented...
 #endif
 
 /*****************************************************************************/
