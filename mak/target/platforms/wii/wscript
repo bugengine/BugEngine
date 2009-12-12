@@ -6,10 +6,10 @@ def set_options(opt):
 	pass
 
 def configure(conf):
-	conf.env['PLATFORM'] = ['wii']
+	conf.env['PLATFORM'] = 'wii'
 	conf.env['library_PATTERN'] = '%s.a'
 	#conf.env['shlib_PATTERN']	 = '%s.so'
-	conf.env['program_PATTERN'] = '%s.dol'
+	conf.env['program_PATTERN'] = '%s.elf'
 
 	conf.env.append_unique('CCDEFINES', ['WII', '_WII', '_WII_', '__WII__'])
 	conf.env.append_unique('CXXDEFINES', ['WII', '_WII', '_WII_', '__WII__'])

@@ -115,17 +115,14 @@ def filter_sources(self):
 			head,tail = os.path.split(head)
 			if tail[0:5] == 'arch=':
 				archs=set(tail[5:].split(','))
-				if not set(v['ARCHITECTURE']) & archs:
-					print 'excluding source :',source
+				if not v['ARCHITECTURE'] in archs:
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]
 					rejectedsources.append(source)
 					continue
 			if tail[0:9] == 'platform=':
 				platforms=set(tail[9:].split(','))
-				if not set(v['PLATFORM']) & platforms:
-					print v['PLATFORMS']
-					print 'excluding source :',source
+				if not v['PLATFORM'] in platforms:
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]
 					rejectedsources.append(source)
@@ -164,7 +161,7 @@ MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
 def add_extra_outputs(self):
 	if self.env['CC_NAME'] == 'msvc':
 		self.link_task.outputs.append(self.link_task.outputs[0].change_ext('.pdb'))
-	if 'win32' in self.env['PLATFORM']:
+	if 'win32' == self.env['PLATFORM']:
 		dll = self.link_task.outputs[0]
 		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
 		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
