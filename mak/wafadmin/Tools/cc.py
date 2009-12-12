@@ -13,7 +13,7 @@ from TaskGen import feature, before, extension, after
 g_cc_flag_vars = [
 'CCDEPS', 'FRAMEWORK', 'FRAMEWORKPATH',
 'STATICLIB', 'LIB', 'LIBPATH', 'LINKFLAGS', 'RPATH',
-'CCFLAGS', 'CPPPATH', 'CPPFLAGS', 'CCDEFINES']
+'CCFLAGS', 'CPPPATH', 'CPPFLAGS', 'CCDEFINES', 'ASFLAGS']
 
 EXT_CC = ['.c']
 

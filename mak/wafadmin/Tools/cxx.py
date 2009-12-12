@@ -12,7 +12,7 @@ from TaskGen import feature, before, extension, after
 g_cxx_flag_vars = [
 'CXXDEPS', 'FRAMEWORK', 'FRAMEWORKPATH',
 'STATICLIB', 'LIB', 'LIBPATH', 'LINKFLAGS', 'RPATH',
-'CXXFLAGS', 'CCFLAGS', 'CPPPATH', 'CPPFLAGS', 'CXXDEFINES']
+'CXXFLAGS', 'CCFLAGS', 'CPPPATH', 'CPPFLAGS', 'CXXDEFINES', 'ASFLAGS']
 "main cpp variables"
 
 EXT_CXX = ['.cpp', '.cc', '.cxx', '.C', '.c++']
