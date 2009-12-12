@@ -8,6 +8,19 @@ alloptims		= mak.alloptims
 allplatforms	= mak.allplatforms
 allarchs		= mak.allarchs
 
+platformaliases = {
+	'pc':		['win32', 'linux', 'sunos', 'darwin', 'freebsd'],
+	'posix': 	['linux', 'sunos', 'darwin', 'freebsd'],
+	'console':	['wii', 'ps2', 'ps3', 'spu', 'xenon', 'nds', 'psp'],
+}
+
+def expandPlatforms(platforms):
+	result = []
+	for p in platforms:
+		try: result += platformaliases[p]
+		except KeyError: result += [p]
+	return result
+
 class coptions:
 	def __init__( self, 
 				  includedir = [],
@@ -64,7 +77,7 @@ class module:
 		self.depends  = depends
 		self.tasks = {}
 		self.root = os.path.join('src', category, name)
-		self.platforms = platforms
+		self.platforms = expandPlatforms(platforms)
 		self.archs = archs
 		self.projects = {}
 		sourcelist = [os.path.normpath(i) for i in sourcelist]
@@ -106,57 +119,59 @@ class module:
 
 		self.sourcetree		   = sources.directory()
 		if os.path.isdir(os.path.join('src', category, name, 'include')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, platforms, archs), 'include')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, self.platforms, archs), 'include')
 		if os.path.isdir(os.path.join('src', category, name, 'api')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, platforms, archs), 'api')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, self.platforms, archs), 'api')
 		if os.path.isdir(os.path.join('src', category, name, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, platforms, archs, sourcelist), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, self.platforms, archs, sourcelist), 'data')
 		if os.path.isdir(os.path.join('src', category, name, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, platforms, archs, sourcelist), 'src')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, self.platforms, archs, sourcelist), 'src')
 		for arch in allarchs:
 			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, platforms, [arch]), 'lib.'+arch)
+				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, self.platforms, [arch]), 'lib.'+arch)
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, platforms, [arch]), 'bin.'+arch)
+				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, self.platforms, [arch]), 'bin.'+arch)
 
-	def getoptions(self, platforms, archs):
+	def getoptions(self, platform, arch):
 		options = coptions()
 		options.merge(self.localoptions)
-		options.merge(self.getglobaloptions(platforms, archs))
-		for arch in archs:
-			try: options.merge(self.globalarchoptions[arch])
-			except KeyError: pass
-		for platform in platforms:
-			try: options.merge(self.localarchoptions[platform])
-			except KeyError: pass
-		for platform in platforms:
-			for arch in archs:
-				try: options.merge(self.localarchoptions[platform+'-'+arch])
-				except KeyError: pass
+		options.merge(self.getglobaloptions(platform, arch))
+
+		for key,aoptions in self.localarchoptions.iteritems():
+			try:
+				p,a = key.split('-')
+				p = expandPlatforms([p])
+				print p
+				if a == arch and platform in p:
+					options.merge(aoptions)
+			except:
+				p = expandPlatforms([key])
+				if arch in p or platform in p:
+					options.merge(aoptions)
 		return options
 
-	def getglobaloptions(self, platforms, archs):
+	def getglobaloptions(self, platform, arch):
 		options = coptions()
-		if not (set(platforms) & set(self.platforms)) or not (set(archs) & set(self.archs)):
+		if not platform in self.platforms or not arch in self.archs:
 			return options
 		options.merge(self.globaloptions)
 		for d in self.depends:
-			options.merge(d.getglobaloptions(platforms, archs))
-		for platform in platforms:
-			try: options.merge(self.globalarchoptions[platform])
-			except KeyError: pass
-		for arch in archs:
-			try: options.merge(self.globalarchoptions[arch])
-			except KeyError: pass
-		for platform in platforms:
-			for arch in archs:
-				try: options.merge(self.globalarchoptions[platform+'-'+arch])
-				except KeyError: pass
+			options.merge(d.getglobaloptions(platform, arch))
+		for key,aoptions in self.globalarchoptions.iteritems():
+			try:
+				p,a = key.split('-')
+				p = expandPlatforms([p])
+				if a == arch and platform in p:
+					options.merge(aoptions)
+			except:
+				p = expandPlatforms([key])
+				if arch in p or platform in p:
+					options.merge(aoptions)
 		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions()):
 		if not self.tasks.has_key(variant):
-			if type=='dummy' or not (set(env['PLATFORM'] ) & set(self.platforms)) or not (set(env['ARCHITECTURE']) & set(self.archs)):
+			if type=='dummy' or not env['PLATFORM'] in self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
@@ -220,7 +235,7 @@ class module:
 				continue
 			elif os.path.isdir(os.path.join(path,file)):
 				if file[0:9] == 'platform=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs, sourcelist), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, expandPlatforms(file[9:].split(',')), archs, sourcelist), file )
 				elif file[0:5] == 'arch=':
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(','), sourcelist), file )
 				else:
@@ -298,7 +313,7 @@ class module:
 				platforms = {}
 				for platform in self.platforms or allplatforms:
 					for arch in self.archs or allarchs:
-						options = self.getoptions([platform], [arch])
+						options = self.getoptions(platform, arch)
 						platforms[platform+'-'+arch] = options
 				task.platforms		= platforms
 				self.projects[p] = task
