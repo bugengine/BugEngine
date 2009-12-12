@@ -196,28 +196,14 @@ class module:
 				task.uselib_local = []
 				task.add_objects = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
-				dps = self.depends[:]
-				blacklist = []
-				seen = set()
-				while extradepends:
-					d = extradepends.pop(0)
-					t = d.tasks[variant]
-					if t:
-						seen.add(d)
-						if t.type == 'cobjects':
-							blacklist.append(t)
-						else:
-							task.uselib_local.append(d.name)
-						task.inheritedoptions.merge(t.inheritedoptions)
-						extradepends += [dep for dep in d.depends if dep not in seen]
-
+				dps = self.depends + extradepends
 				seen = set()
 				while dps:
 					d = dps.pop(0)
 					t = d.tasks[variant]
 					if t:
 						seen.add(d)
-						if t.type == 'cobjects' and d in self.depends and not t in blacklist:
+						if t.type == 'cobjects' and d in self.depends:
 							task.add_objects.append(d.name)
 						else:
 							task.uselib_local.append(d.name)

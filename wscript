@@ -50,18 +50,17 @@ def build(bld):
 	mobile			= module.library('mobile',[core,rtti,system,graphics, sound, physics, input] )
 	main			= module.library('main', [core, rtti, system, data, input, graphics, sound, physics, mobile])
 
-	win32			= module.library('win32', [core, rtti, system, graphics], category='plugin', platforms=['win32'])
-	X				= module.library('X', [core, rtti, system, graphics, X11], category='plugin', platforms=['posix'])
+	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main])
+	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['pc'])
+
+	win32			= module.library('win32', [discworld], category='plugin', platforms=['win32'])
+	X				= module.library('X', [discworld, X11], category='plugin', platforms=['posix'])
 	renderOpenGL	= module.plugin('renderOpenGL', [win32, X, opengl], platforms=['pc'])
 	renderDx9		= module.plugin('renderDx9', [win32, cgDx, directx9], platforms=['win32'])
-	lua				= module.plugin('lua', [core, rtti, system, lualib])
-	squirrel		= module.plugin('squirrel', [core, rtti, system, squirellib])
+	lua				= module.plugin('lua', [discworld, lualib])
+	squirrel		= module.plugin('squirrel', [discworld, squirellib])
 
-	discworld		= module.game('discworld', [core, rtti, system, data, input, graphics, sound, physics, mobile, main],
-							plugins=[renderOpenGL, renderDx9, lua, squirrel])
-	editor			= module.tool('editor', [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['pc'],
-							plugins=[])
-
+	discworld.plugins=[renderOpenGL, renderDx9, lua, squirrel]
 	discworld.post(bld)
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
