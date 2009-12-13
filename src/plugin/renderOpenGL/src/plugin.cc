@@ -3,14 +3,6 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <system/plugin.hh>
 
-extern "C" FORCEEXPORT BugEngine::Graphics::RenderBackend* be_createPlugin()
-{
-    return new BugEngine::Graphics::OpenGL::Renderer;
-}
-
-extern "C" FORCEEXPORT void be_destroyPlugin(BugEngine::Graphics::RenderBackend* backend)
-{
-    delete be_checked_cast<BugEngine::Graphics::OpenGL::Renderer>(backend);
-}
-
+BE_PLUGIN_REGISTER(renderOpenGL, BugEngine::Graphics::OpenGL::Renderer, ());

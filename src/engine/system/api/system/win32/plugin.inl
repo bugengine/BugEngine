@@ -5,6 +5,10 @@
 #include    <core/environment.hh>
 
 
+#define BE_PLUGIN_REGISTER(name, klass, args)                                   \
+    extern "C" FORCEEXPORT klass* be_createPlugin() { return new klass args; }  \
+    extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { delete cls; }
+
 namespace BugEngine
 {
 
@@ -12,8 +16,8 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
 {
     SetLastError(0);
-    std::string pluginDir = Environment::getEnvironment().getPluginDirectory().str();
-    m_handle = LoadLibrary( (pluginDir + "/" + pluginName.c_str() + ".dll").c_str());
+    std::string pluginDir = Environment::getEnvironment().getDataDirectory().str();
+    m_handle = LoadLibrary( (pluginDir + "/plugins/" + pluginName.c_str() + ".dll").c_str());
     if(m_handle != 0)
     {
         Interface* (*be_pluginCreate)(void) = reinterpret_cast<Interface* (*)(void)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));

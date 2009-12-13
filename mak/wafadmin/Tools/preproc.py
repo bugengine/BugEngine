@@ -667,6 +667,7 @@ class c_parser(object):
 		self.env = env
 		variant = node.variant(env)
 		bld = node.__class__.bld
+		self.nodepaths.append(bld.srcnode.find_or_declare('src/engine/'))
 
 		try:
 			self.parse_cache = bld.parse_cache
