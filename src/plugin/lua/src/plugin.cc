@@ -4,14 +4,6 @@
 #include    <stdafx.h>
 
 #include    <context.h>
+#include    <system/plugin.hh>
 
-
-extern "C" FORCEEXPORT BugEngine::Lua::Context* be_createPlugin(void)
-{
-    return new BugEngine::Lua::Context;
-}
-
-extern "C" FORCEEXPORT void be_destroyPlugin(BugEngine::Lua::Context* context)
-{
-    delete context;
-}
+BE_PLUGIN_REGISTER(lua, BugEngine::Lua::Context, ());

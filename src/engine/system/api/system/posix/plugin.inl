@@ -8,6 +8,11 @@
 #include    <stdexcept>
 #include    <dlfcn.h>
 
+
+#define BE_PLUGIN_REGISTER(name, klass, args)                                   \
+    extern "C" FORCEEXPORT klass* be_createPlugin() { return new klass args; }  \
+    extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { delete cls; }
+
 namespace BugEngine
 {
 

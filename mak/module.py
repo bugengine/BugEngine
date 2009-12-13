@@ -85,6 +85,7 @@ class module:
 		self.archs = archs
 		self.projects = {}
 		sourcelist = [os.path.normpath(i) for i in sourcelist]
+		self.plugins  = []
 
 		self.localoptions = coptions()
 		self.localoptions.merge(localoptions)
@@ -309,6 +310,8 @@ class module:
 				self.deploy(os.path.join(dirname,file),outputdir,deploytype,platforms, archs)
 
 	def makeproject(self, bld):
+		for d in self.depends:
+			d.makeproject(bld)
 		for p in bld.env['PROJECTS']:
 			if not self.projects.has_key(p):
 				task = bld.new_task_gen()
@@ -330,6 +333,8 @@ class module:
 
 	def post(self, builder):
 		self.makeproject(builder)
+		for d in self.plugins:
+			d.makeproject(builder)
 		for envname in builder.env['BUILD_VARIANTS']:
 			env = builder.all_envs[envname]
 			self._post(builder, env, envname)

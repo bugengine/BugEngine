@@ -42,14 +42,12 @@ namespace
         be_metaclass(NONE,Environment,Object)
             const BugEngine::ipath& getHomeDirectory() { return BugEngine::Environment::getEnvironment().getHomeDirectory(); }
             const BugEngine::ipath& getDataDirectory() { return BugEngine::Environment::getEnvironment().getDataDirectory(); }
-            const BugEngine::ipath& getPluginDirectory() { return BugEngine::Environment::getEnvironment().getPluginDirectory(); }
             const BugEngine::istring& getGame() { return BugEngine::Environment::getEnvironment().getGame(); }
             const BugEngine::istring& getUser() { return BugEngine::Environment::getEnvironment().getUser(); }
             size_t getProcessorCount() { return BugEngine::Environment::getEnvironment().getProcessorCount(); }
         be_properties
             be_classmethod(getHomeDirectory);
             be_classmethod(getDataDirectory);
-            be_classmethod(getPluginDirectory);
             be_classmethod(getGame);
             be_classmethod(getUser);
             be_classmethod(getProcessorCount);
@@ -78,7 +76,7 @@ namespace
             fprintf(m_logFile, "%s:%d (%s)"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
             fflush(m_logFile);
-            #ifdef _WIN32
+            #ifdef BE_PLATFORM_WIN32
                 OutputDebugString(filename);
                 OutputDebugString(minitl::format<>("(%d) :") | line);
                 OutputDebugString(logname.c_str());

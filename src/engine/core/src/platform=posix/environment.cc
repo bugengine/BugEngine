@@ -12,7 +12,6 @@ namespace BugEngine
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
 ,   m_dataDirectory("")
-,   m_pluginDirectory("")
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
@@ -33,8 +32,6 @@ Environment::Environment()
     *filename = 0;
     m_game = filename+1;
     m_dataDirectory = (minitl::format<4096>("%s/../share/bugengine") | exe).c_str();
-    m_pluginDirectory = m_dataDirectory;
-    m_pluginDirectory.push_back("plugins");
 }
 
 Environment::~Environment()
@@ -50,11 +47,6 @@ const Environment& Environment::getEnvironment()
 const ipath& Environment::getDataDirectory() const
 {
     return m_dataDirectory;
-}
-
-const ipath& Environment::getPluginDirectory() const
-{
-    return m_pluginDirectory;
 }
 
 const ipath& Environment::getHomeDirectory() const

@@ -3,14 +3,6 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <system/plugin.hh>
 
-extern "C" FORCEEXPORT BugEngine::Graphics::RenderBackend* be_createPlugin()
-{
-    return new BugEngine::Graphics::DirectX9::Renderer;
-}
-
-extern "C" FORCEEXPORT void be_destroyPlugin(BugEngine::Graphics::RenderBackend* backend)
-{
-    delete be_checked_cast<BugEngine::Graphics::DirectX9::Renderer>(backend);
-}
-
+BE_PLUGIN_REGISTER(renderDx9, BugEngine::Graphics::DirectX9::Renderer, ());
