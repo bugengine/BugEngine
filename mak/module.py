@@ -8,11 +8,7 @@ alloptims		= mak.alloptims
 allplatforms	= mak.allplatforms
 allarchs		= mak.allarchs
 
-platformaliases = {
-	'pc':		['win32', 'linux', 'sunos', 'darwin', 'freebsd'],
-	'posix': 	['linux', 'sunos', 'darwin', 'freebsd'],
-	'console':	['wii', 'ps2', 'ps3', 'spu', 'xenon', 'nds', 'psp'],
-}
+platformaliases = mak.platformaliases
 
 def expandPlatforms(platforms):
 	result = []

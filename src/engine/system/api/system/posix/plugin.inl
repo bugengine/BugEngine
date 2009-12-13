@@ -16,32 +16,29 @@
 namespace BugEngine
 {
 
-Plugin::Plugin(const istring &pluginName)
+template< typename Interface >
+Plugin<Interface>::Plugin(const istring &pluginName)
 {
     minitl::format<> f = (minitl::format<>("lib%s.so") | pluginName.c_str());
-    FPluginHandle = dlopen((Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
-    if(! FPluginHandle)
+    m_handle = dlopen((Environment::getEnvironment().getDataDirectory() + ipath("plugins") + ifilename(f.c_str())).str().c_str(), RTLD_NOW);
+    if(! m_handle)
     {
         const char* error = dlerror();
         fprintf(stderr, "%s\n", error);
-        throw std::runtime_error(std::string("failed to load plugin ") + (Environment::getEnvironment().getPluginDirectory() + ifilename(f.c_str())).str().c_str() + ": " + error);
+        throw std::runtime_error(std::string("failed to load plugin ") + f.c_str() + ": " + error);
     }
-    void (*_init)(void) = reinterpret_cast<void (*)(void)>(reinterpret_cast<size_t>(dlsym(FPluginHandle, "_initplugin")));
+    Interface* (*_init)(void) = reinterpret_cast<Interface* (*)(void)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
     be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
-    (*_init)();
+    m_interface = (*_init)();
 }
 
-Plugin::~Plugin(void)
+template< typename Interface >
+Plugin<Interface>::~Plugin(void)
 {
-    void (*_fini)(void) = reinterpret_cast<void (*)(void)>(reinterpret_cast<size_t>(dlsym(FPluginHandle, "_finiplugin")));
+    void (*_fini)(Interface*) = reinterpret_cast<void (*)(Interface*)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_destroyPlugin")));
     if(_fini)
-        _fini(); 
-    dlclose(FPluginHandle);
-}
-
-Plugin::generic Plugin::_get(const std::string& symbol)
-{
-    return reinterpret_cast<generic>(reinterpret_cast<size_t>(dlsym(FPluginHandle,symbol.c_str())));
+        _fini(m_interface); 
+    dlclose(m_handle);
 }
 
 }

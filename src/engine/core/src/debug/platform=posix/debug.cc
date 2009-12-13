@@ -52,7 +52,7 @@ AssertionResult defaultAssertionCallback( const char *file,
 
 static AssertionCallback_t g_callback = defaultAssertionCallback;
 
-AssertionCallback_t be_api(CORE) setAssertionCallback(AssertionCallback_t callback)
+AssertionCallback_t setAssertionCallback(AssertionCallback_t callback)
 {
     AssertionCallback_t previous = g_callback;
     g_callback = callback;
