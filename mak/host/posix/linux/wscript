@@ -28,7 +28,7 @@ def add_opencc_to_env(conf, version, toolchaindir, target):
 	conf.env['BUILD_VARIANTS'].append(name)
 
 def get_available_opencc(conf):
-	paths = ['/', '/usr/', '/usr/local', '/opt']
+	paths = ['/usr/local', '/opt', '/', '/usr']
 	for toolchaindir in paths:
 		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc-lib')):
 			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc-lib')):
@@ -68,7 +68,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
 	conf.setenv('temp')
 	try:
-		conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir='mak/tools')
+		conf.check_tool('cross_gcc', tooldir='mak/tools')
 		name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
 		newenv.set_variant(name)
 		if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
@@ -88,7 +88,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
-	paths = ['/', '/usr/', '/usr/local', '/opt']
+	paths = ['/usr/local', '/opt', '/', '/usr']
 	for toolchaindir in paths:
 		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
 			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
@@ -118,3 +118,4 @@ def configure(conf):
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:
 		raise SystemExit("no match found : make sure you selected a valid toolchain")
+
