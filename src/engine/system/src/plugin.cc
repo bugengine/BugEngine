@@ -10,7 +10,6 @@ namespace BugEngine { namespace _
 
 #ifdef BE_STATIC
 
-const size_t PluginList::s_maxPlugins;
 size_t       PluginList::s_currentPlugin;
 
 PluginList*  PluginList::s_plugins[s_maxPlugins];
