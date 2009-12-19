@@ -474,3 +474,4 @@ bool btKinematicCharacterController::onGround () const
 void	btKinematicCharacterController::debugDraw(btIDebugDraw* debugDrawer)
 {
 }
+
