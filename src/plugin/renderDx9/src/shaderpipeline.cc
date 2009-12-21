@@ -93,6 +93,7 @@ ref<CgShaderParam> ShaderPipeline::createSystemParameter(const istring& name, Sh
     ref<CgShaderParam> param(ref<CgShaderParam>::create(p));
     bool result = m_systemParams.insert(std::make_pair(name, param)).second;
     be_assert(result, "system parameter %s already exists" | name.c_str());
+	UNUSED(result);
     return param;
 }
 
