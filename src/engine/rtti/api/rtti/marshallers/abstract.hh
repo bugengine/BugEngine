@@ -12,6 +12,7 @@ namespace BugEngine { namespace RTTI
 class AbstractMarshaller
 {
 public:
+	virtual ~AbstractMarshaller() { }
     virtual ValueCopy get(void* source)                                                 const = 0;
     virtual ValueCopy get(void* /*source*/, size_t /*index*/)                           const { throw 0; }
     virtual ValueCopy get(void* /*source*/, const Value& /*key*/)                       const { throw 0; }
