@@ -1,10 +1,10 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <sound/stdafx.h>
-#include    <sound/sound.hh>
+#include    <audio/stdafx.h>
+#include    <audio/sound.hh>
 
-#include    <sound/world.hh>
+#include    <audio/world.hh>
 
 #ifdef BE_COMPILER_MSVC
 #pragma warning(push,1)
@@ -14,7 +14,7 @@
 #pragma warning(pop)
 #endif
 
-namespace BugEngine { namespace Sound
+namespace BugEngine { namespace Audio
 {
 
 
@@ -39,13 +39,11 @@ static long vorbis_tell(void *datasource)
 
 static ov_callbacks be_callbacks_vorbis = { vorbis_read, vorbis_seek, 0, vorbis_tell };
 
-be_abstractmetaclass_impl("Sound",SoundObject);
+be_abstractmetaclass_impl("Audio",Sound);
 
-SoundObject::SoundObject(weak<World> owner, ref<AbstractMemoryStream> soundfile)
+Sound::Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile)
 :   m_owner(owner)
 ,   m_soundFile(soundfile)
-,   m_data(0)
-,   m_locked(false)
 {
     UNUSED(OV_CALLBACKS_DEFAULT);
     UNUSED(OV_CALLBACKS_NOCLOSE);
@@ -53,7 +51,7 @@ SoundObject::SoundObject(weak<World> owner, ref<AbstractMemoryStream> soundfile)
     UNUSED(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 }
 
-SoundObject::~SoundObject()
+Sound::~Sound()
 {
     if(m_data)
     {
@@ -62,12 +60,12 @@ SoundObject::~SoundObject()
     }
 }
 
-weak<World> SoundObject::owner() const
+weak<World> Sound::owner() const
 {
     return m_owner;
 }
 
-size_t SoundObject::read(void* buffer, size_t size, int& frequency, int& channels) const
+size_t Sound::read(void* buffer, size_t size, int& frequency, int& channels) const
 {
     int bitstream;
     size_t result = ov_read(static_cast<OggVorbis_File*>(m_data), (char*)buffer, be_checked_numcast<int>(size), 0, 2, 1, &bitstream);
@@ -77,7 +75,7 @@ size_t SoundObject::read(void* buffer, size_t size, int& frequency, int& channel
     return result;
 }
 
-void SoundObject::reset()
+void Sound::reset()
 {
     if(m_data)
     {
@@ -88,7 +86,7 @@ void SoundObject::reset()
     ov_open_callbacks(m_soundFile.operator->(), static_cast<OggVorbis_File*>(m_data), 0, 0, be_callbacks_vorbis);
 }
 
-bool SoundObject::lock(weak<Source> from)
+bool Sound::lock(weak<Source> from)
 {
     UNUSED(from);
     if(m_locked)
@@ -97,10 +95,11 @@ bool SoundObject::lock(weak<Source> from)
     return true;
 }
 
-void SoundObject::unlock()
+void Sound::unlock()
 {
     be_assert(m_locked, "sound object was not locked, cannot unlock");
     m_locked = false;
 }
 
 }}
+

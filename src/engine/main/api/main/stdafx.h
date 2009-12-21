@@ -10,7 +10,7 @@
 #include    <system/stdafx.h>
 #include    <graphics/stdafx.h>
 #include    <physics/stdafx.h>
-#include    <sound/stdafx.h>
+#include    <audio/stdafx.h>
 #include    <mobile/stdafx.h>
 
 /*****************************************************************************/

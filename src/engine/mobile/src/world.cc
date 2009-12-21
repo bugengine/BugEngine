@@ -13,7 +13,7 @@ World::World(float3 worldExtents)
 :   m_physicsSystem("physicsBullet")
 ,   m_graphicsWorld(ref<Graphics::World>::create())
 ,   m_physicsWorld(m_physicsSystem->createWorld(worldExtents))
-,   m_soundWorld(ref<Sound::World>::create())
+,   m_soundWorld("audioOpenAL")
 {
 }
 

@@ -45,23 +45,24 @@ def build(bld):
 	data			= module.library('data',        [core, rtti, system] )
 	input			= module.library('input',       [core, rtti] )
 	graphics		= module.library('graphics',    [core, rtti, system, input, freetype ] )
-	sound			= module.library('sound',       [core, rtti, system, oggvorbis] )
+	audio			= module.library('audio',       [core, rtti, system, oggvorbis] )
 	physics			= module.library('physics',     [core, rtti, system] )
-	mobile			= module.library('mobile',      [core, rtti, system, graphics, sound, physics, input] )
-	main			= module.library('main',        [core, rtti, system, data, input, graphics, sound, physics, mobile])
+	mobile			= module.library('mobile',      [core, rtti, system, graphics, audio, physics, input] )
+	main			= module.library('main',        [core, rtti, system, data, input, graphics, audio, physics, mobile])
 
-	discworld		= module.game('discworld',      [core, rtti, system, data, input, graphics, sound, physics, mobile, main])
-	editor			= module.tool('editor',         [core, rtti, system, data, input, graphics, sound, physics, mobile, main], platforms=['pc'])
+	discworld		= module.game('discworld',      [core, rtti, system, data, input, graphics, audio, physics, mobile, main])
+	editor			= module.tool('editor',         [core, rtti, system, data, input, graphics, audio, physics, mobile, main], platforms=['pc'])
 
 	win32			= module.library('win32',       [discworld], category='plugin', platforms=['win32'])
 	X				= module.library('X',           [discworld, X11], category='plugin', platforms=['posix'])
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
 	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, opengl], platforms=['pc'])
 	renderDx9		= module.plugin('renderDx9',    [discworld, win32, cgDx, directx9], platforms=['win32'])
+	audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, lua, squirrel]
+	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, audioOpenAL, lua, squirrel]
 	discworld.post(bld)
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
