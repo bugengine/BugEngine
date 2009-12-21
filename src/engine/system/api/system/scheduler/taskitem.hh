@@ -48,6 +48,7 @@ protected:
 public:
     explicit BaseTaskItem(const BaseTask* owner, TaskState initialState = Ready);
     BaseTaskItem(BaseTaskItem& cpy);
+	virtual ~BaseTaskItem() { }
 };
 
 template< typename Range, typename Body >
