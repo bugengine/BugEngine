@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SOUND_STDAFX_H_
-#define BE_SOUND_STDAFX_H_
+#ifndef BE_AUDIO_STDAFX_H_
+#define BE_AUDIO_STDAFX_H_
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
@@ -13,12 +13,12 @@
 
 
 
-#if defined(building_sound) || defined(SOUND_EXPORTS)
-# define    SOUNDEXPORT         BE_EXPORT
-#elif defined(sound_dll)
-# define    SOUNDEXPORT         BE_IMPORT
+#if defined(building_audio) || defined(AUDIO_EXPORTS)
+# define    AUDIOEXPORT         BE_EXPORT
+#elif defined(audio_dll)
+# define    AUDIOEXPORT         BE_IMPORT
 #else
-# define    SOUNDEXPORT
+# define    AUDIOEXPORT
 #endif
 
 /*****************************************************************************/

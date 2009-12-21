@@ -1,16 +1,15 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <sound/stdafx.h>
-#include    <sound/source.hh>
-#include    <sound/world.hh>
+#include    <stdafx.h>
+#include    <source.hh>
+#include    <world.hh>
 
 #include    <system/sequencer.hh>
 
-namespace BugEngine { namespace Sound
+namespace BugEngine { namespace Audio { namespace OpenAL
 {
 
-be_metaclass_impl("Sound",Source);
 
 #if 0
 
@@ -163,10 +162,9 @@ public:
 
 #endif
 
-Source::Source()
-:   m_sound()
-//, m_data(new _ALData())
-,    m_pauseCount(0)
+Source::Source(ref<Sound> sound)
+:   Audio::Source(sound)
+,   m_pauseCount(0)
 {
 }
 
@@ -203,30 +201,5 @@ void Source::setVolume(float volume)
 //  static_cast<_ALData*>(m_data)->setVolume(volume);
 }
 
-void Source::setSound(ref<SoundObject> sound)
-{
-    UNUSED(sound);
-/*    Sequencer* current = 0;
-    if(m_sound)
-    {
-        current = m_sound->owner();
-        m_sound->unlock();
-    }
-    bool lock = sound->lock(this);
-    m_sound = sound;
-    m_sound->reset();
-    if(current && m_sound->owner() != current)
-    {
-        current->stop(this);
-    }
-    m_sound->owner()->run(this);*/
-}
+}}}
 
-ref<Source> Source::MetaClass::createFromSound(ref<SoundObject> sound)
-{
-    ref<Source> src = ref<Source>::create();
-    src->setSound(sound);
-    return src;
-}
-
-}}

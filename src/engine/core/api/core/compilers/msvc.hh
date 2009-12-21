@@ -17,12 +17,15 @@ typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-# define _CRT_SECURE_NO_WARNINGS 1
+#ifdef  _CRT_SECURE_NO_WARNINGS
+# undef _CRT_SECURE_NO_WARNINGS
 #endif
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #ifndef _CRT_SECURE_NO_DEPRECATE
-# define _CRT_SECURE_NO_DEPRECATE 1
+# undef _CRT_SECURE_NO_DEPRECATE
 #endif
+#define _CRT_SECURE_NO_DEPRECATE 1
 
 #pragma warning(disable:4275)
 #ifdef NDEBUG

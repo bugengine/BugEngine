@@ -1,18 +1,18 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SOUND_SOUNDOBJECT_HH_
-#define BE_SOUND_SOUNDOBJECT_HH_
+#ifndef BE_AUDIO_SOUND_HH_
+#define BE_AUDIO_SOUND_HH_
 /*****************************************************************************/
 #include    <core/memory/streams.hh>
 
-namespace BugEngine { namespace Sound
+namespace BugEngine { namespace Audio
 {
 
 class Source;
 class World;
 
-class be_api(SOUND) SoundObject : public Object
+class be_api(AUDIO) Sound : public Object
 {
     friend class Source;
 private:
@@ -21,8 +21,8 @@ private:
     void*                       m_data;
     bool                        m_locked;
 public:
-    SoundObject(weak<World> owner, ref<AbstractMemoryStream> soundfile);
-    ~SoundObject();
+    Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile);
+    ~Sound();
 
     weak<World> owner() const;
 
@@ -33,12 +33,9 @@ public:
 
     size_t read(void* buffer, size_t size, int& frequency, int& channels) const;
 
-    be_metaclass(SOUND,SoundObject,Object)
+    be_metaclass(AUDIO,Sound,Object)
     be_properties
     be_end
-private:
-    SoundObject(const SoundObject& other);
-    SoundObject& operator=(const SoundObject& other);
 };
 
 }}
