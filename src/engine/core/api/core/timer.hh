@@ -12,7 +12,7 @@ namespace BugEngine
 typedef u64 tick_type;
 inline tick_type tick(){ u64 result; QueryPerformanceCounter((LARGE_INTEGER*)&result); return result; }
 #elif defined __GNUC__
-# if defined(_X86_)
+# if defined(_X86)
 typedef u64 tick_type;
 static inline tick_type tick(void)
 {
@@ -20,7 +20,7 @@ static inline tick_type tick(void)
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
     return x;
 }
-# elif defined(_AMD64_)
+# elif defined(_AMD64)
 typedef u64 tick_type;
 static inline tick_type tick(void)
 {
