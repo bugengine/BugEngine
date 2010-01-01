@@ -36,10 +36,10 @@ public:
     btAxisSweep3                        m_broadphase;
     btDiscreteDynamicsWorld             m_world;
 public:
-    BulletWorld(float3 worldExtents);
+    BulletWorld(float3 worldExtents, weak<BaseTask::Callback> endJob);
     ~BulletWorld();
 
-    virtual void step(float time) override;
+    virtual void step() override;
 };
 
 }}}

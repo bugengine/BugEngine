@@ -26,47 +26,46 @@ public:
     class Callback : public minitl::refcountable
     {
         friend class BaseTask;
+    private:
+        typedef std::vector< weak<BaseTask> > TaskList;
+        TaskList        m_triggeredBy;
+        TaskList        m_triggers;
+        mutable i_u32   m_triggeredCompleted;
     protected:
-        virtual void onAdded(weak<const BaseTask> t) = 0;
-        virtual void onRemoved(weak<const BaseTask> t) = 0;
-        virtual void onCompleted(weak<Scheduler> sc, weak<const BaseTask> t) = 0;
+        void completed(weak<Scheduler> sc, weak<const BaseTask> t);
+    public:
+        Callback();
+        ~Callback();
+
+        void connectFrom(weak<BaseTask> t);
+        void connectTo(weak<BaseTask> t);
+        void disconnectFrom(weak<BaseTask> t);
+        void disconnectTo(weak<BaseTask> t);
     };
+    friend class Callback;
 public:
     const istring           name;
     const color32           color;
 private:
-    std::list< ref<Callback> >   m_callbacks;
-    mutable i_u32                   m_taskCount;
-    mutable i_u32                   m_taskCompleted;
+    typedef std::vector< weak<Callback> > CallbackList;
+    CallbackList    m_startedBy;
+    CallbackList    m_starting;
+    mutable i_u32   m_taskCount;
+    mutable i_u32   m_taskCompleted;
 protected:
     virtual void runTask(weak<Scheduler> sc) const = 0;
 public:
-    BaseTask(const istring& name, color32 color, bool simultaneous = false);
+    BaseTask(const istring& name, color32 color);
     ~BaseTask();
-
-    void addCallback(ref<Callback> c);
-    void removeCallback(ref<Callback> c);
 
     void run(weak<Scheduler> sc) const;
     void end(weak<Scheduler> sc) const;
 private:
+    void addCallback(weak<Callback> callback);
+    void removeCallback(weak<Callback> callback);
+private:
     BaseTask& operator=(const BaseTask& other);
     BaseTask(const BaseTask& other);
-};
-
-class be_api(SYSTEM) ChainTaskCallback : public BaseTask::Callback
-{
-private:
-    weak<const BaseTask>    m_task;
-    u32                     m_dependencies;
-    mutable i_u32           m_dependenciesCompleted;
-protected:
-    void onAdded(weak<const BaseTask> t) override;
-    void onRemoved(weak<const BaseTask> t) override;
-    void onCompleted(weak<Scheduler> sc, weak<const BaseTask> t) override;
-public:
-    ChainTaskCallback(weak<const BaseTask> task);
-    ~ChainTaskCallback();
 };
 
 template< typename Body >
@@ -75,7 +74,7 @@ class Task : public BaseTask
 private:
     mutable Body m_body;
 public:
-    Task(const istring& name, color32 color, const Body& body, bool simultaneous = false);
+    Task(const istring& name, color32 color, const Body& body);
     void runTask(weak<Scheduler> sc) const override;
 };
 

@@ -20,21 +20,24 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) World : public Object
 {
 private:
-    class UpdateWindowManagement;
-private:
     typedef std::vector< ref<RenderTarget> > SceneList;
-    scoped<Renderer>             m_renderer;
-    SceneList                    m_scenes;
-    ref< BaseTask >              m_updateWindowTask;
-    ref< BaseTask >              m_flushTask;
+    scoped<Renderer>                            m_renderer;
+    SceneList                                   m_scenes;
+    ref< BaseTask::Callback >                   m_start;
+    weak< BaseTask::Callback >                  m_end;
+    std::vector< ref< BaseTask > >              m_tasks;
+    std::vector< ref< BaseTask::Callback > >    m_edges;
 private:
-    int step();
+    void step();
     void flush();
 public:
-    World();
+    World(weak<BaseTask::Callback> endJob);
     ~World();
 
     void createWindow(WindowFlags f, ref<Scene> scene);
+
+    weak< BaseTask::Callback > getStart() { return m_start; }
+    weak< BaseTask::Callback > getEnd()   { return m_end; }
 
     be_metaclass(GRAPHICS,World, Object)
     be_properties

@@ -8,7 +8,6 @@
 
 #include    <mobile/world.hh>
 #include    <graphics/scene/scene.hh>
-#include    <main/frame.hh>
 
 namespace BugEngine
 {
@@ -20,12 +19,12 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
-    scoped<Scheduler>    m_scheduler;
-    ref<World>           m_world;
-    scoped< BaseTask >   m_updateInputTask;
-    scoped< BaseTask >   m_updateMemoryTask;
-    scoped< BaseTask >   m_updateSchedulerTask;
-    ref<Frame>           m_frame;
+    scoped<Scheduler>       m_scheduler;
+    ref<BaseTask::Callback> m_frameFinished;
+    ref<World>              m_world;
+    scoped< BaseTask >      m_updateInputTask;
+    scoped< BaseTask >      m_updateMemoryTask;
+    scoped< BaseTask >      m_updateSchedulerTask;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);

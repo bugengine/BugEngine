@@ -11,8 +11,8 @@
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
 
-World::World()
-:   Audio::World()
+World::World(weak<BaseTask::Callback> endJob)
+:   Audio::World(endJob)
 ,   m_system(0)
 ,   m_context(0)
 {
@@ -34,8 +34,13 @@ ref<Audio::Sound> World::createMusic(const ifilename& file)
     return ref<Sound>::create(this, soundfile);
 }
 
-void World::step() const
+void World::step()
 {
+}
+
+ref<Audio::World> WorldManager::createWorld(weak<BaseTask::Callback> endJob)
+{
+    return ref<World>::create(endJob);
 }
 
 }}}

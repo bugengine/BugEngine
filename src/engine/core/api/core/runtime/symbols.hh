@@ -23,6 +23,7 @@ private:
     u64         m_address;
     int         m_line;
 public:
+    Symbol() { *m_module = 0; *m_filename = 0; *m_function = 0; m_address = 0; m_line = 0; }
     u64         address() const     { return m_address; }
     const char *module() const      { return m_module; }
     const char *filename() const    { return m_filename; }

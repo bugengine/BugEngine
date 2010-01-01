@@ -21,19 +21,25 @@ private:
     void*   m_system;
     void*   m_context;
 public:
-    World();
+    World(weak<BaseTask::Callback> endJob);
     ~World();
 
     ref<Audio::Sound> createSound(const ifilename& file) override;
     ref<Audio::Sound> createMusic(const ifilename& file) override;
 
-    void step() const override;
+    void step() override;
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
 public:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
+};
+
+class WorldManager : public Audio::WorldManager
+{
+protected:
+    ref<Audio::World> createWorld(weak<BaseTask::Callback> endJob);
 };
 
 }}}

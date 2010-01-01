@@ -15,7 +15,7 @@ public:
     IPhysicsWorldManager();
     ~IPhysicsWorldManager();
     
-    virtual ref<IPhysicsWorld> createWorld(float3 worldextents) const = 0;
+    virtual ref<IPhysicsWorld> createWorld(float3 worldextents, weak<BaseTask::Callback> endJob) const = 0;
 
     be_metaclass(PHYSICS,IPhysicsWorldManager,Object)
     be_properties
