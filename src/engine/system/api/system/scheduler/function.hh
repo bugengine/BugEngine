@@ -15,6 +15,8 @@ class FunctionBody
 {
 private:
     weak<Owner> const       m_owner;
+private:
+    FunctionBody& operator=(const FunctionBody& other);
 public:
     typedef range_onestep   Range;
     FunctionBody(weak<Owner> owner)
