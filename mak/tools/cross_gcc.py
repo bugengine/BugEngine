@@ -123,6 +123,10 @@ def find_cross_gcc(conf):
 	conf.env['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	conf.env['LINKFLAGS_final'] = ['-pipe', '-g', '-s', '-Wl,-x', '-Wl,-O2']
 	
+	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
+		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
+		conf.env.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
+
 	if v['GCC_CONFIGURED_PLATFORM'] == 'linux':
 		conf.env.append_unique('CCFLAGS', ['-fPIC'])
 		conf.env.append_unique('CXXFLAGS', ['-fPIC'])

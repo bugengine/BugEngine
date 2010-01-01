@@ -4,7 +4,7 @@
 #ifndef BE_CORE_DEBUG_ASSERT_HH_
 #define BE_CORE_DEBUG_ASSERT_HH_
 /*****************************************************************************/
-
+#include <minitl/string/format.hh>
 #include <cstdlib>
 
 namespace BugEngine { namespace Debug

@@ -27,6 +27,7 @@
 #else
 # error Compiler not implemented
 #endif
+#include <core/debug/assert.hh>
 
 namespace minitl
 {
@@ -38,10 +39,10 @@ private:
     typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
     typedef typename impl::value_t                          value_t; 
 private:
-    BE_SET_ALIGNMENT(4) volatile value_t m_value;
+    volatile value_t m_value;
 public:
-    interlocked()                                   {}
-    interlocked(T value) : m_value(value)           {}
+    interlocked()                                   { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
+    interlocked(T value) : m_value(value)           { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
     ~interlocked()                                  {}
 
     operator T() const                              { return (T)m_value; }
@@ -68,16 +69,16 @@ private:
     typedef interlocked_impl::InterlockedType< sizeof(T*) > impl;
     typedef typename impl::value_t                          value_t;
 private:
-    BE_SET_ALIGNMENT(4) T* volatile m_value;
+    value_t m_value;
 public:
-    iptr()                                          {}
-    iptr(T* value) : m_value(value)                 {}
+    iptr()                                          { be_assert(be_align(&m_value, sizeof(T*)) == &m_value, "value is incorrectly aligned"); }
+    iptr(T* value) : m_value(value)                 { be_assert(be_align(&m_value, sizeof(T*)) == &m_value, "value is incorrectly aligned"); }
     ~iptr()                                         {}
 
-    operator const T*() const                       { return m_value; }
-    operator T*()                                   { return m_value; }
-    T* operator->()                                 { return m_value; }
-    const T* operator->() const                     { return m_value; }
+    operator const T*() const                       { return (T*)m_value; }
+    operator T*()                                   { return (T*)m_value; }
+    T* operator->()                                 { return (T*)m_value; }
+    const T* operator->() const                     { return (T*)m_value; }
 
     T* operator=(T* value)                          { return (T*)impl::set_and_fetch((value_t*)&m_value, (value_t)value); }
     T* exchange(T* value)                           { return (T*)impl::fetch_and_set((value_t*)&m_value, (value_t)value); }
@@ -97,8 +98,8 @@ private:
 public:
     typedef typename type_t::tag_t                          ticket_t;
 
-    itaggedptr()                                    {}
-    itaggedptr(T* value) : m_value(value)           {}
+    itaggedptr()                                    { be_assert(be_align(&m_value, sizeof(value_t)) == &m_value, "value is incorrectly aligned"); }
+    itaggedptr(T* value) : m_value(value)           { be_assert(be_align(&m_value, sizeof(value_t)) == &m_value, "value is incorrectly aligned"); }
     ~itaggedptr()                                   {}
 
     operator const T*() const                       { return (T*)m_value.value(); }

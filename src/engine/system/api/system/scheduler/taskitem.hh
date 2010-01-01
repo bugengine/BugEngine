@@ -33,7 +33,6 @@ protected:
         // the scheduler can wait for the state to return to ready in a loop
         Reserved    // It's being temporarily accessed
     };
-    BaseTaskItem* volatile              m_next;
     minitl::interlocked<TaskState>      m_currentState;
     size_t                              m_affinity;
     size_t                              m_splitCount;
@@ -48,7 +47,7 @@ protected:
 public:
     explicit BaseTaskItem(const BaseTask* owner, TaskState initialState = Ready);
     BaseTaskItem(BaseTaskItem& cpy);
-	virtual ~BaseTaskItem() { }
+    virtual ~BaseTaskItem() { }
 };
 
 template< typename Range, typename Body >

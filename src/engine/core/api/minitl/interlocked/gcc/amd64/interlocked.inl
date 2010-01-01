@@ -15,7 +15,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<8>
 {
-    typedef i64 value_t;
+    typedef BE_SET_ALIGNMENT(8) i64 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;
@@ -31,11 +31,10 @@ struct InterlockedType<8>
     }
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
-        value_t prev;
-        __asm__ __volatile__ ("lock; xchgw %0, %1"
-                      : "=a" (prev), "+m" (*p)
+        __asm__ __volatile__ ("lock; xchgq %2, %1"
+                      : "=r" (v), "+m" (*p)
                       : "r" (v));
-        return prev;
+        return v;
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
@@ -73,8 +72,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef i64         value_t;
-        typedef i64         counter_t;
+        typedef BE_SET_ALIGNMENT(8) i64         value_t;
+        typedef BE_SET_ALIGNMENT(8) i64         counter_t;
         typedef tagged_t    tag_t;
         BE_SET_ALIGNMENT(16) struct
         {
@@ -127,7 +126,7 @@ struct InterlockedType<8>
 template<>
 struct InterlockedType<4>
 {
-    typedef i32 value_t;
+    typedef BE_SET_ALIGNMENT(4) i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;
@@ -143,20 +142,18 @@ struct InterlockedType<4>
     }
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
-        long prev;
-        __asm__ __volatile__ ("lock; xchg %0, %1"
-                      : "=a" (prev), "+m" (*p)
+        __asm__ __volatile__ ("lock; xchg %2, %1"
+                      : "=r" (v), "+m" (*p)
                       : "r" (v));
-        return prev;
+        return v;
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
-        long prev;
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
-                      : "=a" (prev)
+                      : "=r" (v)
                       : "r" (v), "m" (*(p)), "0"(condition)
                       : "memory", "cc");
-        return prev;
+        return v;
     }
     static inline value_t set_and_fetch(volatile value_t *p, value_t v)
     {
