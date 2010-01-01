@@ -11,8 +11,8 @@ namespace BugEngine
 {
 
 template< typename Body >
-Task< Body >::Task(const istring& name, color32 color, const Body& body, bool simultaneous)
-:   BaseTask(name, color, simultaneous)
+Task< Body >::Task(const istring& name, color32 color, const Body& body)
+:   BaseTask(name, color)
 ,   m_body(body)
 {
 }

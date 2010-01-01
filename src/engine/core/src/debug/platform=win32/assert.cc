@@ -81,7 +81,6 @@ namespace BugEngine { namespace Debug
         {
             Runtime::Callstack::Address address[128];
             size_t result = Runtime::Callstack::backtrace(address, 128, 1);
-            Runtime::Symbol s;
 
             static ref<const Runtime::Module> executable = Runtime::Module::self();
             static weak<const Runtime::Module> last = executable;
@@ -92,15 +91,16 @@ namespace BugEngine { namespace Debug
                 Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
                 s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
             }
-            if(s_symbols)
+            for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
             {
-                for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+                Runtime::Symbol s;
+                if(s_symbols)
                 {
                     s_symbols->resolve(*a, s);
-                    (void)_snprintf(buffer, BUFFER_SIZE-1, "[%s] %s(%d) : %s\r\n", s.module(), s.filename(), s.line(), s.function());
-                    strcat(callstack, buffer);
-                    OutputDebugString(buffer);
                 }
+                (void)_snprintf(buffer, BUFFER_SIZE-1, "[%s] %s(%d) : %s\r\n", s.module(), s.filename(), s.line(), s.function());
+                strcat(callstack, buffer);
+                OutputDebugString(buffer);
             }
         }
 

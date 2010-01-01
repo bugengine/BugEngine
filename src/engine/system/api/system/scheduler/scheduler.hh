@@ -66,7 +66,6 @@ public:
         t->~T();
         return release_task(reinterpret_cast<void*>(static_cast<ScheduledTasks::BaseTaskItem*>(t)), sizeof(T));
     }
-    void run(ScheduledTasks::BaseTaskItem* task);
 public:
     Scheduler();
     ~Scheduler();

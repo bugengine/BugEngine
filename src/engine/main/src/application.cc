@@ -30,7 +30,7 @@ public:
     range_onestep prepare() { return range_onestep(); }
     void operator()(range_onestep& /*r*/)
     {
-        Input::InputMap::static_metaclass()->getManager()->update();
+        //Input::InputMap::static_metaclass()->getManager()->update();
     }
     void operator()(range_onestep& /*myRange*/, UpdateInput& /*with*/, range_onestep& /*withRange*/)
     {
@@ -90,12 +90,19 @@ public:
 Application::Application(int argc, const char *argv[])
 :   Object()
 ,   m_scheduler(scoped<Scheduler>::create())
-,   m_world(ref<World>::create(float3(10000.0f, 10000.0f, 10000.0f)))
+,   m_frameFinished(ref<BaseTask::Callback>::create())
+,   m_world(ref<World>::create(float3(10000.0f, 10000.0f, 10000.0f), m_frameFinished))
 ,   m_updateInputTask(scoped< Task<UpdateInput> >::create("input", color32(200,200,120), UpdateInput()))
 ,   m_updateMemoryTask(scoped< Task<UpdateMemory> >::create("memory", color32(150,180,120), UpdateMemory()))
 ,   m_updateSchedulerTask(scoped< Task<UpdateScheduler> >::create("scheduler", color32(200,180,120), UpdateScheduler(m_scheduler)))
 {
     UNUSED(argc); UNUSED(argv);
+    m_world->getStart()->connectFrom(m_updateInputTask);
+    m_world->getStart()->connectFrom(m_updateMemoryTask);
+    m_world->getStart()->connectFrom(m_updateSchedulerTask);
+    m_world->getEnd()->connectTo(m_updateInputTask);
+    m_world->getEnd()->connectTo(m_updateMemoryTask);
+    m_world->getEnd()->connectTo(m_updateSchedulerTask);
 }
 
 Application::~Application(void)
@@ -104,8 +111,8 @@ Application::~Application(void)
 
 int Application::run()
 {
-    //m_world->run(m_scheduler.get());
-    //m_scheduler->wait();
+    m_world->run(m_scheduler);
+    m_scheduler->wait();
     return 0;
 }
 

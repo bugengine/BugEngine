@@ -33,8 +33,9 @@ BulletWorld::WorldSetup::~WorldSetup()
 }
 
 
-BulletWorld::BulletWorld(float3 worldExtents)
-:   m_setup()
+BulletWorld::BulletWorld(float3 worldExtents, weak<BaseTask::Callback> endJob)
+:   IPhysicsWorld(endJob)
+,   m_setup()
 ,   m_configuration()
 ,   m_dispatcher(&m_configuration)
 ,   m_solver()
@@ -47,9 +48,9 @@ BulletWorld::~BulletWorld()
 {
 }
 
-void BulletWorld::step(float time)
+void BulletWorld::step()
 {
-    m_world.stepSimulation(time);
+    m_world.stepSimulation(0.033f);
 }
 
 }}}

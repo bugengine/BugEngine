@@ -6,51 +6,33 @@
 #include    <graphics/scene/scene3d.hh>
 #include    <rtti/namespace.hh>
 #include    <input/action.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <system/scheduler/function.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-be_metaclass_impl("Graphics",World);
+be_abstractmetaclass_impl("Graphics",World);
 
-class World::UpdateWindowManagement
-{
-    friend class Task<UpdateWindowManagement>;
-private:
-    typedef range_onestep   Range;
-    World*                  m_world;
-public:
-    UpdateWindowManagement(World* world)
-        :   m_world(world)
-    {
-    }
-    ~UpdateWindowManagement()
-    {
-    }
-
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(range_onestep& /*r*/)
-    {
-        m_world->step();
-    }
-    void operator()(range_onestep& /*myRange*/, UpdateWindowManagement& /*with*/, range_onestep& /*withRange*/)
-    {
-    }
-};
-
-World::World()
+World::World(weak<BaseTask::Callback> endJob)
 :   m_renderer(scoped<Renderer>::create("renderOpenGL"))
-,   m_updateWindowTask(ref< Task<UpdateWindowManagement> >::create("window", color32(255, 12, 12), UpdateWindowManagement(this)))
+,   m_start( ref< BaseTask::Callback >::create())
+,   m_end(endJob)
 {
+    m_tasks.push_back(ref< Task< FunctionBody <World, &World::step> > >::create("window", color32(255, 12, 12), FunctionBody <World, &World::step>(this)));
+    m_start->connectTo(m_tasks[0]);
+    m_end->connectFrom(m_tasks[0]);
 }
 
 World::~World()
 {
 }
 
-int World::step()
+void World::step()
 {
-    return m_renderer->step();
+    if(m_renderer->step())
+    {
+        m_start->disconnectTo(m_tasks[0]);
+    }
 }
 
 void World::flush()
