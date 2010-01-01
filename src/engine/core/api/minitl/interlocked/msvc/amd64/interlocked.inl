@@ -35,24 +35,25 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef long value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    typedef BE_SET_ALIGNMENT(4) long value_t;
+    typedef long incr_t;
+    static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
     {
         return _InterlockedExchangeAdd(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
     {
         return InterlockedExchangeAdd(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
     {
         return _InterlockedExchange(p, v);
     }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(volatile value_t *p, incr_t v, incr_t condition)
     {
         return _InterlockedCompareExchange(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(volatile value_t *p, incr_t v)
     {
         _InterlockedExchange(p, v);
         return v;
@@ -69,24 +70,25 @@ struct InterlockedType<2> : public InterlockedType<4>
 template<>
 struct InterlockedType<8>
 {
-    typedef long long value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    typedef BE_SET_ALIGNMENT(8) long long value_t;
+    typedef long long incr_t;
+    static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
     {
         return InterlockedExchangeAdd64(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
     {
         return InterlockedExchangeAdd64(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
     {
         return _InterlockedExchange64(p, v);
     }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(volatile value_t *p, incr_t v, incr_t condition)
     {
         return _InterlockedCompareExchange64(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(volatile value_t *p, incr_t v)
     {
         _InterlockedExchange64(p, v);
         return v;
@@ -96,8 +98,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef long long   value_t;
-        typedef long long   counter_t;
+        typedef BE_SET_ALIGNMENT(8) long long   value_t;
+        typedef BE_SET_ALIGNMENT(8) long long   counter_t;
     #ifdef TAG_LONG
         typedef tagged_t    tag_t;
     #else
