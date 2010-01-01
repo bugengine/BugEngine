@@ -49,7 +49,7 @@ BaseTask::Callback::~Callback()
 {
     for(TaskList::iterator it = m_triggeredBy.begin(); it != m_triggeredBy.end(); ++it)
     {
-        for(CallbackList::const_iterator cb = (*it)->m_starting.begin(); cb != (*it)->m_starting.end(); )
+        for(CallbackList::iterator cb = (*it)->m_starting.begin(); cb != (*it)->m_starting.end(); )
         {
             if(*cb == this)
             {
@@ -63,7 +63,7 @@ BaseTask::Callback::~Callback()
     }
     for(TaskList::iterator it = m_triggers.begin(); it != m_triggers.end(); ++it)
     {
-        for(CallbackList::const_iterator cb = (*it)->m_startedBy.begin(); cb != (*it)->m_startedBy.end(); )
+        for(CallbackList::iterator cb = (*it)->m_startedBy.begin(); cb != (*it)->m_startedBy.end(); )
         {
             if(*cb == this)
             {

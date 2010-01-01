@@ -13,11 +13,10 @@ namespace BugEngine
 template< typename Owner, void(Owner::*Function)() >
 class FunctionBody
 {
-    friend class Task<FunctionBody>;
 private:
-    typedef range_onestep   Range;
-    weak<Owner>             m_owner;
+    weak<Owner> const       m_owner;
 public:
+    typedef range_onestep   Range;
     FunctionBody(weak<Owner> owner)
         :   m_owner(owner)
     {

@@ -56,7 +56,7 @@ protected:
     virtual void runTask(weak<Scheduler> sc) const = 0;
 public:
     BaseTask(const istring& name, color32 color);
-    ~BaseTask();
+    virtual ~BaseTask();
 
     void run(weak<Scheduler> sc) const;
     void end(weak<Scheduler> sc) const;
@@ -76,6 +76,9 @@ private:
 public:
     Task(const istring& name, color32 color, const Body& body);
     void runTask(weak<Scheduler> sc) const override;
+private:
+    Task(const Task& other);
+    Task& operator=(const Task& other);
 };
 
 }
