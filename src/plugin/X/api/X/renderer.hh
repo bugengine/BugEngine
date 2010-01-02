@@ -12,16 +12,20 @@ namespace BugEngine { namespace Graphics { namespace X
 
 class Window;
 
-class XEXPORT Renderer : public RenderBackend
+class be_api(X) Renderer : public RenderBackend
 {
     friend class Window;
-private:
-    Thread          m_windowManagementThread;
-    volatile bool   m_exit;
 protected:
-    Display*        m_display;
+    ::Display*      m_display;
+    int             m_screen;
+    ::Window        m_rootWindow;
+    ::XVisualInfo*  m_visual;
+private:
+    i_bool          m_exit;
+    Thread          m_windowManagementThread;
 private:
     static intptr_t updateWindows(intptr_t p1, intptr_t p2);
+    static int      xError(::Display* display, XErrorEvent* event);
 public:
     Renderer();
     ~Renderer();
