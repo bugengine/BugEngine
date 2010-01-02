@@ -44,8 +44,11 @@ inline ref<U> be_const_cast(ref<T> value)
     return ref<U>(const_cast<U*>(value.operator->()));
 }
 
-#pragma warning(push)
-#pragma warning(disable:4800)
+#if BE_COMPILER_MSVC
+# pragma warning(push)
+# pragma warning(disable:4800)
+# pragma warning(disable:4267)
+#endif
 
 template< typename U, typename T >
 inline U be_checked_numcast(T value)
@@ -54,8 +57,9 @@ inline U be_checked_numcast(T value)
     return static_cast<U>(value);
 }
 
-#pragma warning(pop)
-
+#if BE_COMPILER_MSVC
+# pragma warning(pop)
+#endif
 }
 
 /*****************************************************************************/
