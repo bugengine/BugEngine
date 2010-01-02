@@ -11,7 +11,7 @@ namespace BugEngine { namespace Graphics { namespace X
 Window::Attributes::Attributes(::Display* display, ::Window root, ::Visual* visual, WindowFlags flags)
 {
     m_attributes.border_pixel = 0;
-    m_attributes.override_redirect = False;
+    m_attributes.override_redirect = !flags.fullscreen;
     m_attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     m_attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect;
 }
@@ -27,7 +27,7 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scen
 ,   m_window(XCreateWindow(renderer->m_display,
                            renderer->m_rootWindow,
                            0, 0,
-                           1680, 1200,
+                           flags.size.x(), flags.size.y(),
                            0,
                            CopyFromParent, InputOutput,
                            CopyFromParent, //renderer->m_visual->visual,
