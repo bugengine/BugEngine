@@ -8,14 +8,17 @@
 namespace BugEngine
 {
 
+class ScopedCriticalSection;
+
 class be_api(CORE) CriticalSection
 {
+    friend class ScopedCriticalSection;
 private:
     void*           m_data;
 public:
     CriticalSection();
     ~CriticalSection();
-
+private:
     void enter();
     void leave();
 };

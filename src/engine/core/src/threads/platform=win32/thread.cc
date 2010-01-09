@@ -90,7 +90,7 @@ Thread::~Thread()
 {
     DWORD result = WaitForSingleObject((HANDLE)m_data, 2000);
     be_assert(result != WAIT_TIMEOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
-	UNUSED(result);
+    UNUSED(result);
     CloseHandle((HANDLE)m_data);
     delete static_cast<ThreadParams*>(m_params);
 }
