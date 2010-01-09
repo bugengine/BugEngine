@@ -9,14 +9,17 @@
 namespace BugEngine
 {
 
+class ScopedMutexLock;
+
 class be_api(CORE) Mutex : public Threads::Waitable
 {
+    friend class ScopedMutexLock;
 private:
     void*           m_data;
 public:
     Mutex();
     ~Mutex();
-
+private:
     void release();
     virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
 };
