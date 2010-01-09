@@ -13,78 +13,13 @@ struct InterlockedType;
 
 
 template<>
-struct InterlockedType<8>
-{
-    typedef long long value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
-    {
-        value_t old;
-        __asm__ __volatile__ ("lock; xaddq %0,%1"
-                      : "=a" (old), "=m" (*p)
-                      : "a" (incr), "m" (*p)
-                      : "memory", "cc");
-        return old;
-    }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
-    {
-        return fetch_and_add(p, -incr);
-    }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
-    {
-        value_t prev;
-        __asm__ __volatile__ ("lock; xchgw %0, %1"
-                      : "=a" (prev), "+m" (*p)
-                      : "r" (v));
-        return prev;
-    }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
-    {
-        value_t result;
-    #if __PIC__
-        __asm__ __volatile__ (
-                "pushl %%ebx\n\t"
-                "movl  (%%ecx),%%ebx\n\t"
-                "movl  4(%%ecx),%%ecx\n\t"
-                "lock\n\t cmpxchg8b %1\n\t"
-                "popl  %%ebx"
-                 : "=A"(result), "=m"(*(i64 *)p)
-                 : "m"(*(i64 *)p), "0"(condition), "c"(&v)
-                 : "memory", "esp"
-    #if defined(BE_COMPILER_INTEL)
-                 ,"ebx"
-    #endif
-        );
-    #else
-        union {
-            i64 asI64;
-            i32 asI32[2];
-        };
-        asI64 = v;
-        __asm__ __volatile__ (
-                "lock\n\t cmpxchg8b %1\n\t"
-                 : "=A"(result), "=m"(*p)
-                 : "m"(*p), "0"(condition), "b"(asI32[0]), "c"(asI32[1])
-                 : "memory"
-        );
-    #endif
-        return result;
-    }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
-    {
-        fetch_and_set(p, v);
-        return v;
-    }
-};
-
-
-template<>
 struct InterlockedType<4>
 {
-    typedef long value_t;
+    typedef BE_SET_ALIGNMENT(4) i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old;
-        __asm__ __volatile__ ("lock; xaddl %0,%1"
+        __asm__ __volatile__ ("lock; xadd %0,%1"
                       : "=a" (old), "=m" (*p)
                       : "a" (incr), "m" (*p)
                       : "memory", "cc");
@@ -96,46 +31,36 @@ struct InterlockedType<4>
     }
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
-        long prev;
-        __asm__ __volatile__ ("lock; xchgl %0, %1"
-                      : "=a" (prev), "+m" (*p)
+        __asm__ __volatile__ ("lock; xchg %2, %1"
+                      : "=r" (v), "+m" (*p)
                       : "r" (v));
-        return prev;
+        return v;
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
-        long prev;
-        __asm__ __volatile__ ("lock; cmpxchgl %1, %2"
-                      : "=a" (prev)
+        __asm__ __volatile__ ("lock; cmpxchg %1, %2"
+                      : "=r" (v)
                       : "r" (v), "m" (*(p)), "0"(condition)
                       : "memory", "cc");
-        return prev;
+        return v;
     }
     static inline value_t set_and_fetch(volatile value_t *p, value_t v)
     {
         fetch_and_set(p, v);
         return v;
     }
-
 
     struct tagged_t
     {
-        typedef long        value_t;
-        typedef long        counter_t;
+        typedef BE_SET_ALIGNMENT(4) i32         value_t;
+        typedef BE_SET_ALIGNMENT(4) i32         counter_t;
         typedef tagged_t    tag_t;
-        union
+        BE_SET_ALIGNMENT(8) struct
         {
-            BE_SET_ALIGNMENT(8) struct
-            {
-                volatile counter_t   tag;
-                volatile value_t     value;
-            } taggedvalue;
-            BE_SET_ALIGNMENT(8) volatile long long asLongLong;
-        };
-        tagged_t(long long value)
-            :   asLongLong(value)
-        {
-        }
+            volatile counter_t   tag;
+            volatile value_t     value;
+        } taggedvalue;
+
         tagged_t(value_t value = 0)
         {
             taggedvalue.tag = 0;
@@ -147,24 +72,51 @@ struct InterlockedType<4>
             taggedvalue.value = value;
         }
         tagged_t(const tagged_t& other)
-            :   asLongLong(other.asLongLong)
         {
+            taggedvalue.tag = other.taggedvalue.tag;
+            taggedvalue.value = other.taggedvalue.value;
         }
         tagged_t& operator=(const tagged_t& other)
         {
-            asLongLong = other.asLongLong;
+            taggedvalue.tag = other.taggedvalue.tag;
+            taggedvalue.value = other.taggedvalue.value;
             return *this;
         }
         inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return asLongLong == other.asLongLong; }
+        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        return InterlockedType<8>::set_conditional((i64*)p, v, condition.asLongLong) == condition.asLongLong;
+        tagged_t result;
+        tagged_t dst(condition.taggedvalue.tag+1, v);
+    #ifdef __PIC__
+        __asm__ __volatile__ (
+                "pushl %%ebx\n\t"
+                "movl  (%%ecx),%%ebx\n\t"
+                "movl  4(%%ecx),%%ecx\n\t"
+                "lock\n\t cmpxchg8b %2\n\t"
+                "popl  %%ebx"
+                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*(i64 *)p)
+                 : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "c"(&dst)
+                 : "memory", "esp"
+    #if defined(BE_COMPILER_INTEL)
+                 ,"ebx"
+    #endif
+        );
+    #else
+        __asm__ __volatile__ (
+                "lock;  cmpxchg8b %2\n\t"
+                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
+                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(next), "c"(v)
+                 : "memory", "cc"
+
+        );
+    #endif
+        return result.taggedvalue.tag == condition.taggedvalue.tag;
     }
 };
 
