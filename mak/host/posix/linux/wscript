@@ -12,20 +12,23 @@ from Logs import info,warn
 
 def add_opencc_to_env(conf, version, toolchaindir, target):
 	arch,compiler,platform = target.split('-')
-	newenv = conf.set_env_name('temp', conf.env.copy())
-	conf.setenv('temp')
-	newenv['CC'] = conf.find_program('opencc-'+version, var='CC')
-	newenv['CXX'] = conf.find_program('openCC-'+version, var='CXX')
-	conf.check_tool('gcc gxx', tooldir='mak/tools')
-	name = '-'.join(['opencc', platform, arch, version.replace('-','_')])
-	newenv.set_variant(name)
-	Utils.pprint('NORMAL', 'configure for tool %s' % name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', platform))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
-	newenv = conf.set_env_name(name, newenv)
-	del conf.all_envs['temp']
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
+	try:
+		newenv = conf.set_env_name('temp', conf.env.copy())
+		conf.setenv('temp')
+		newenv['CC'] = conf.find_program('opencc-'+version, var='CC')
+		newenv['CXX'] = conf.find_program('openCC-'+version, var='CXX')
+		conf.check_tool('gcc gxx', tooldir='mak/tools')
+		name = '-'.join(['opencc', platform, arch, version.replace('-','_')])
+		newenv.set_variant(name)
+		Utils.pprint('NORMAL', 'configure for tool %s' % name)
+		conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', platform))
+		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
+		newenv = conf.set_env_name(name, newenv)
+		del conf.all_envs['temp']
+		conf.setenv('default')
+		conf.env['BUILD_VARIANTS'].append(name)
+	except:
+		conf.setenv('default')
 
 def get_available_opencc(conf):
 	paths = ['/usr/local', '/opt', '/', '/usr']

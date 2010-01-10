@@ -37,7 +37,9 @@ def parse_gcc_target(target):
 			  ('i586', 'x86'),
 			  ('i686', 'x86'),
 			  ('arm-eabi', 'arm7'),
-			  ('gekko', 'mips'),
+			  ('mipsel', 'mips'),
+			  ('mips', 'mips'),
+			  ('Gekko', 'mips'),
 			  ('x86_64', 'amd64'),
 			  ('powerpc', 'powerpc'),
 			  ('psp', 'powerpc'),
@@ -62,15 +64,19 @@ def find_cross_gcc(conf):
 	if not target:
 		target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
+	versionsmall = '.'.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
 		v['GCC_CONFIGURED_PLATFORM'],v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
 		conf.env['TARGET_PLATFORM'] = v['GCC_CONFIGURED_PLATFORM']
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
+		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+versionsmall, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+version, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+version, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
