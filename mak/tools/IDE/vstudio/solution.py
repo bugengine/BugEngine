@@ -1,5 +1,10 @@
 import string
-import hashlib
+try:
+	import hashlib
+	createMd5=hashlib.md5
+except:
+	import md5
+	createMd5=md5.new
 
 def _hexdigest(s):
 	"""Return a string as a string of hex characters.
@@ -25,7 +30,7 @@ def generateGUID(slnfile, name):
 	based on the MD5 signatures of the sln filename plus the name of
 	the project.  It basically just needs to be unique, and not
 	change with each invocation."""
-	solution = _hexdigest(hashlib.md5(str(slnfile)+str(name)).digest()).upper()
+	solution = _hexdigest(createMd5(str(slnfile)+str(name)).digest()).upper()
 	# convert most of the signature to GUID form (discard the rest)
 	solution = "{" + solution[:8] + "-" + solution[8:12] + "-" + solution[12:16] + "-" + solution[16:20] + "-" + solution[20:32] + "}"
 	return solution

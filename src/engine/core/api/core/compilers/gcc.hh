@@ -10,6 +10,8 @@
 # define be_break()              __asm("int3")
 #elif defined(_POWERPC)
 # define be_break()              __asm("trap")
+#elif defined(_MIPS)
+# define be_break()              __asm("break")
 #else
 # error "Breakpoint not supported on this platform"
 #endif
