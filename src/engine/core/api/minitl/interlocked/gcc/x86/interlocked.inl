@@ -111,7 +111,7 @@ struct InterlockedType<4>
         __asm__ __volatile__ (
                 "lock;  cmpxchg8b %2\n\t"
                  : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
-                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(next), "c"(v)
+                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
                  : "memory", "cc"
 
         );
