@@ -31,7 +31,8 @@ def parse_gcc_target(target):
 		   ('arm-eabi', 'nds'),
 		   ('darwin', 'darwin'),
 		   ('powerpc-eabi', 'wii'),
-		   ('spu', 'spu')]
+		   ('spu', 'spu'),
+		   ('lv2', 'ps3')]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
@@ -44,7 +45,8 @@ def parse_gcc_target(target):
 			  ('powerpc', 'powerpc'),
 			  ('psp', 'powerpc'),
 			  ('mingw32', 'x86'),
-			  ('spu', 'spu')]
+			  ('ppu', 'powerpc'),
+			  ('spu', 'powerpc')]
 	foundpname = None
 	foundaname = None
 	for gccname,pname in os:
@@ -100,7 +102,7 @@ def find_cross_gcc(conf):
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc gxx gas')
-	conf.env['ASFLAGS'] = ['-c']
+	conf.env.append_unique('ASFLAGS', '-c')
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']

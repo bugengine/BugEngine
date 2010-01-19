@@ -1,0 +1,15 @@
+# set amd64 specific options
+
+import os
+
+def set_options(opt):
+	pass
+
+def configure(conf):
+	conf.env['ARCHITECTURE'] = 'ppc'
+	conf.env.append_unique('CCDEFINES', ['BE_BIGENDIAN', '_POWERPC', '_PPC'])
+	conf.env.append_unique('CXXDEFINES', ['BE_BIGENDIAN', '_POWERPC', '_PPC'])
+
+def build(bld):
+	pass
+

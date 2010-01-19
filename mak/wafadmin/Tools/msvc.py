@@ -19,12 +19,13 @@
 # platforms and targets will be tested in the order they appear;
 # the first good configuration will be used
 # supported platforms :
-# ia64, x64, x86, x86_amd64, x86_ia64
+# ia64, x64, x86, x86_amd64, x86_ia64, powerpc for xenon, arm/mips for wince
 
 # compilers supported :
 #  msvc       => Visual Studio, versions 7.1 (2003), 8,0 (2005), 9.0 (2008)
 #  wsdk       => Windows SDK, versions 6.0, 6.1, 7.0
 #  icl        => Intel compiler, versions 9,10,11
+#  xdk        => XBox 360
 #  Smartphone => Compiler/SDK for Smartphone devices (armv4/v4i)
 #  PocketPC   => Compiler/SDK for PocketPC devices (armv4/v4i)
 
@@ -55,9 +56,9 @@ def setup_msvc(conf, versions):
 			targets = dict(versiondict [version])
 			for target in platforms:
 				try:
-					arch,(p1,p2,p3) = targets[target]
+					arch,platform,(p1,p2,p3) = targets[target]
 					compiler,version = version.split()
-					return compiler,p1,p2,p3
+					return compiler,platform,p1,p2,p3
 				except KeyError: continue
 		except KeyError: continue
 	conf.fatal('msvc: Impossible to find a valid architecture for building (in setup_msvc)')
@@ -146,7 +147,7 @@ def gather_wsdk_versions(conf, versions):
 			targets = []
 			for target,arch in all_msvc_platforms:
 				try:
-					targets.append((target, (arch, conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
+					targets.append((target, (arch, 'win32', conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
 				except Configure.ConfigurationError:
 					pass
 			versions.append(('wsdk ' + version[1:], targets))
@@ -210,12 +211,12 @@ def gather_msvc_versions(conf, versions):
 				if os.path.isfile(os.path.join(path, 'VC', 'vcvarsall.bat')):
 					for target,realtarget in all_msvc_platforms[::-1]:
 						try:
-							targets.append((target, (realtarget, conf.get_msvc_version('msvc', version+vcvar, target, os.path.join(path, 'VC', 'vcvarsall.bat')))))
+							targets.append((target, (realtarget, 'win32', conf.get_msvc_version('msvc', version+vcvar, target, os.path.join(path, 'VC', 'vcvarsall.bat')))))
 						except:
 							pass
 				elif os.path.isfile(os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')):
 					try:
-						targets.append(('x86', ('x86', conf.get_msvc_version('msvc', version+vcvar, 'x86', os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')))))
+						targets.append(('x86', ('x86', 'win32', conf.get_msvc_version('msvc', version+vcvar, 'x86', os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')))))
 					except Configure.ConfigurationError:
 						pass
 				versions.append(('msvc '+version+vcvar, targets))
@@ -230,7 +231,7 @@ def gather_msvc_versions(conf, versions):
 									bindirs = [os.path.join(winCEpath, 'bin', compiler), os.path.join(winCEpath, 'bin', 'x86_'+compiler)] + common_bindirs
 									incdirs = [include, os.path.join(winCEpath, 'include'), os.path.join(winCEpath, 'atlmfc', 'include')]
 									libdirs = [lib, os.path.join(winCEpath, 'lib', platform), os.path.join(winCEpath, 'atlmfc', 'lib', platform)]
-									cetargets.append((platform, (platform, (bindirs,incdirs,libdirs))))
+									cetargets.append((platform, (platform, 'wince', (bindirs,incdirs,libdirs))))
 						versions.append((device+' '+version, cetargets))
 			except WindowsError:
 				continue
@@ -258,7 +259,7 @@ def gather_icl_versions(conf, versions):
 				path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
 				if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
 					try:
-						targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
+						targets.append((target, (arch, 'win32', conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
 					except Configure.ConfigurationError:
 						pass
 			except WindowsError:
@@ -294,7 +295,7 @@ def gather_icl_versions(conf, versions):
 					path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
 					if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
 						try:
-							targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
+							targets.append((target, (arch, 'win32', conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
 						except Configure.ConfigurationError:
 							pass
 				except WindowsError:
@@ -302,14 +303,32 @@ def gather_icl_versions(conf, versions):
 			major = float(version)
 			versions.append(('intel ' + str(math.floor(major)), targets))
 
+@conf
+def gather_xenon_versions(conf, versions):
+	try:
+		xversion = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\XBox\\2.0\\SDK')
+	except WindowsError:
+		try:
+			xversion = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\XBox\\2.0\\SDK')
+		except WindowsError:
+			return
+	version,type = _winreg.QueryValueEx(xversion,'InstalledVersion')
+	path,type = _winreg.QueryValueEx(xversion, 'InstallPath')
+	useless1,useless2,major,minor = version.split(',')
+	try:
+		target = ('ppc', ('ppc', 'xbox360', conf.get_msvc_version('xenon', major, 'ppc', os.path.join(path, 'bin', 'win32', 'xdkvars.bat'))))
+		versions.append(('xdk ' + major, [target]))
+	except Configure.ConfigurationError:
+		pass
 
 @conf
 def get_msvc_versions(conf):
 	if not conf.env['MSVC_INSTALLED_VERSIONS']:
 		conf.env['MSVC_INSTALLED_VERSIONS'] = []
-		conf.gather_msvc_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
-		conf.gather_wsdk_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
 		conf.gather_icl_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
+		conf.gather_xenon_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
+		conf.gather_wsdk_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
+		conf.gather_msvc_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
 	return conf.env['MSVC_INSTALLED_VERSIONS']
 
 @conf
@@ -637,7 +656,7 @@ cxx_add_flags
 @conftest
 def autodetect(conf):
 	v = conf.env
-	compiler, path, includes, libdirs = detect_msvc(conf)
+	compiler, target, path, includes, libdirs = detect_msvc(conf)
 	v['PATH'] = path
 	v['CPPPATH'] = includes
 	v['LIBPATH'] = libdirs
@@ -663,7 +682,7 @@ def find_msvc(conf):
 
 	v = conf.env
 
-	compiler, path, includes, libdirs = detect_msvc(conf)
+	compiler, target, path, includes, libdirs = detect_msvc(conf)
 	v['PATH'] = path
 	v['CPPPATH'] = includes
 	v['LIBPATH'] = libdirs
@@ -711,15 +730,14 @@ def find_msvc(conf):
 		v['STLINKFLAGS'] = ['/NOLOGO']
 
 	# manifest tool. Not required for VS 2003 and below. Must have for VS 2005 and later
-	manifesttool = conf.find_program('MT', path_list=path)
-	if manifesttool:
-		v['MT'] = manifesttool
-		v['MTFLAGS'] = ['/NOLOGO']
-
-	conf.check_tool('winres')
-
-	if not conf.env['WINRC']:
-		warn('Resource compiler not found. Compiling resource file is disabled')
+	if target != 'xbox360':
+		manifesttool = conf.find_program('MT', path_list=path)
+		if manifesttool:
+			v['MT'] = manifesttool
+			v['MTFLAGS'] = ['/NOLOGO']
+		conf.check_tool('winres')
+		if not conf.env['WINRC']:
+			warn('Resource compiler not found. Compiling resource file is disabled')
 
 def exec_command_msvc(self, *k, **kw):
 	"instead of quoting all the paths and keep using the shell, we can just join the options msvc is interested in"
@@ -754,8 +772,8 @@ def msvc_common_flags(conf):
 
 	v['CCDEFINES_ST']     = '/D%s'
 	v['CXXDEFINES_ST']    = '/D%s'
-	v['CCDEFINES']    = ['WIN32'] # avoid using this, any compiler predefines the _WIN32 marcro anyway
-	v['CXXDEFINES']   = ['WIN32'] # avoid using this, any compiler predefines the _WIN32 marcro anyway
+	v['CCDEFINES']    = []
+	v['CXXDEFINES']   = []
 
 	v['_CCINCFLAGS']  = []
 	v['_CCDEFFLAGS']  = []

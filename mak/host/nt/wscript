@@ -12,17 +12,16 @@ import Logs
 from Logs import info,warn
 
 # adds MSVC vars to environment
-def add_msvc_to_env(conf, compiler, version, target, tname):
-	name = '%s-win32-%s-%s' %(compiler,target,version)
+def add_msvc_to_env(conf, compiler, version, target, platform, tname):
+	name = '%s-%s-%s-%s' %(compiler, platform, target, version)
 	info('configure for tool %s' % name)
 	newenv = conf.set_env_name(name, conf.env.copy())
 	newenv.set_variant(name)
-	tool,platform,arch,version = name.split('-')
 	newenv['MSVC_VERSIONS'] = [compiler+' '+version]
 	newenv['MSVC_TARGETS'] = [target]
 	conf.setenv(name)
+	conf.check_tool('msvc')
 	try:
-		conf.check_tool('msvc')
 		
 		conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 		conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
@@ -44,7 +43,7 @@ def add_msvc_to_env(conf, compiler, version, target, tname):
 		conf.setenv('default')
 		warn('configuration fail for tool %s' % name)
 		return
-	conf.sub_config(os.path.join('..', '..', 'target', 'platforms', 'win32'))
+	conf.sub_config(os.path.join('..', '..', 'target', 'platforms', platform))
 	conf.sub_config(os.path.join('..', '..', 'target', 'archs', tname))
 	conf.setenv('default')
 	conf.env['BUILD_VARIANTS'].append(name)
@@ -54,42 +53,34 @@ def get_available_msvc(conf):
 	allversions = conf.get_msvc_versions()
 	for (compiler, targets) in allversions:
 		compiler,version = compiler.split()
-		for (target, (tname, paths)) in targets:
+		for (target, (tname, platform, paths)) in targets:
 			if tname in conf.env['ARCHITECTURES']:
-				add_msvc_to_env(conf, compiler, version, target, tname)
+				add_msvc_to_env(conf, compiler, version, target, platform, tname)
 
-# adds GCC vars to environment
-gccPlatforms = {
-	'mingw32' : [('win32','x86')],
-	'x86_64-pc-mingw32' : [('win32','amd64')],
-	'powerpc-eabi': [('wii','powerpc')],
-	'psp': [('psp','mips')],
-	'arm-eabi': [('nds', 'arm7'), ('nds', 'arm9')]
-}
-	
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
-	import subprocess
-	try: supportedPlatforms = gccPlatforms[gcc_target]
-	except KeyError: supportedPlatforms = []
-	for platform,arch in supportedPlatforms:
-		name = 'gcc-'+platform + '-' + arch + '-' + version
-		Utils.pprint('NORMAL', 'configure for tool %s' % name)
-		newenv = conf.set_env_name(name, conf.env.copy())
-		newenv.set_variant(name)
-		tool,platform,arch,version = name.split('-')
-		newenv['GCC_VERSION']	= version
-		newenv['GCC_TARGET']	= gcc_target
-		newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-								   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-		conf.setenv(name)
+	newenv = conf.set_env_name('temp', conf.env.copy())
+	newenv['GCC_VERSION']	= version
+	newenv['GCC_TARGET']	= gcc_target
+	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	conf.setenv('temp')
+	try:
 		conf.check_tool('cross_gcc', tooldir='mak/tools')
-		if platform=='win32':
+		name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+		newenv.set_variant(name)
+		if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
 			conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
 			conf.check_tool('winres')
-		conf.sub_config(os.path.join('..', '..', 'target', 'platforms', platform))
-		conf.sub_config(os.path.join('..', '..', 'target', 'archs', arch))
+		Utils.pprint('NORMAL', 'configure for tool %s' % name)
+		conf.sub_config(os.path.join('..', '..', 'target', 'platforms', conf.env['GCC_CONFIGURED_PLATFORM']))
+		conf.sub_config(os.path.join('..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
+		newenv = conf.set_env_name(name, newenv)
+		del conf.all_envs['temp']
 		conf.setenv('default')
 		conf.env['BUILD_VARIANTS'].append(name)
+	except Exception, e:
+		warn('gcc not available: '+str(e)) 
+		conf.setenv('default')
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
