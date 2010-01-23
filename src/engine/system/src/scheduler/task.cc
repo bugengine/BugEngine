@@ -77,10 +77,12 @@ BaseTask::Callback::~Callback()
     }
 }
 
-void BaseTask::Callback::connectFrom(weak<BaseTask> t)
+void BaseTask::Callback::connectFrom(weak<BaseTask> t, InitialState initialState)
 {
     m_triggeredBy.push_back(t);
     t->m_starting.push_back(this);
+    if(initialState == InitialStateCompleted)
+        m_triggeredCompleted++;
 }
 
 void BaseTask::Callback::disconnectFrom(weak<BaseTask> t)

@@ -34,6 +34,7 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scen
 
     renderer->m_directx->AddRef();
     renderer->m_device->AddRef();
+    setCurrent();
 }
 
 Window::~Window()
@@ -49,7 +50,6 @@ bool Window::closed() const
 
 void Window::setCurrent()
 {
-    m_swapChain->AddRef();
     LPDIRECT3DSURFACE9 backBuffer;
     D3D_CHECKRESULT(m_owner->m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
     D3D_CHECKRESULT(m_owner->m_device->SetRenderTarget(0, backBuffer));

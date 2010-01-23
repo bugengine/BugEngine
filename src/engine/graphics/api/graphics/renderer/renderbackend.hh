@@ -51,14 +51,15 @@ struct Batch
         RptTriangleFan
     };
 
+    const RenderTarget*                     rtarget;
     RenderPrimitiveType                     ptype;
-    std::pair< weak<ShaderParam>, float4>   params[32];
+    std::pair< ShaderParam*, float4>        params[32];
     size_t                                  nbParams;
-    weak<const GpuBuffer>                   vertices;
+    const GpuBuffer*                        vertices;
     int                                     nbVertices;
-    weak<const GpuBuffer>                   indices;
-    weak<const _Shader>                     vertexShader;
-    weak<const _Shader>                     pixelShader;
+    const GpuBuffer*                        indices;
+    const _Shader*                          vertexShader;
+    const _Shader*                          pixelShader;
 };
 
 class be_api(GRAPHICS) RenderBackend : public minitl::pointer
@@ -80,7 +81,7 @@ public:
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;
 
-    virtual void                    drawBatch(const Batch& batch) = 0;
+    virtual void                    dispatch() = 0;
 };
 
 }}

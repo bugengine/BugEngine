@@ -150,8 +150,16 @@ void Renderer::drawBatch(const Batch& b)
     D3D_CHECKRESULT(m_device->DrawIndexedPrimitive(type, 0, 0, b.nbVertices, 0, primitiveCount));
 }
 
+void Renderer::dispatch()
+{
+    m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0);
+    m_device->BeginScene();
+}
+
 void Renderer::flush() const
 {
+    m_device->EndScene();
+    m_device->Present(0, 0, 0, 0);
 }
 
 }}}

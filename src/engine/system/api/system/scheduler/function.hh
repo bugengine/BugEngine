@@ -11,7 +11,7 @@ namespace BugEngine
 {
 
 template< typename Owner, void(Owner::*Function)() >
-class FunctionBody
+struct FunctionBody
 {
 private:
     weak<Owner> const       m_owner;

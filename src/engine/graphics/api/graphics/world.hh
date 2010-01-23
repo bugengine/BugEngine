@@ -20,6 +20,11 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) World : public Object
 {
 private:
+    struct Render;
+    friend struct Render;
+    struct Sort;
+    friend struct Sort;
+private:
     typedef std::vector< ref<RenderTarget> > SceneList;
     scoped<Renderer>                            m_renderer;
     SceneList                                   m_scenes;
@@ -29,7 +34,7 @@ private:
     std::vector< ref< BaseTask::Callback > >    m_edges;
 private:
     void step();
-    void flush();
+    void dispatch();
 public:
     World(weak<BaseTask::Callback> endJob);
     ~World();
