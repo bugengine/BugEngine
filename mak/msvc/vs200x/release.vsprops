@@ -25,7 +25,6 @@
 		EnableEnhancedInstructionSet="2"
 		FloatingPointModel="2"
 		FloatingPointExceptions="false"
-		WarningLevel="2"
 		DebugInformationFormat="3"
 	/>
 	<Tool

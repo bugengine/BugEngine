@@ -6,10 +6,11 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		PreprocessorDefinitions="BUILDING_DLL"
+        WarningLevel="4"
+        WarnAsError="true"
 	/>
-	<Tool
-		Name="VCLinkerTool"
-		UseLibraryDependencyInputs="true"
-	/>
+    <Tool
+        Name="VCLinkerTool"
+        UseLibraryDependencyInputs="true"
+    />
 </VisualStudioPropertySheet>

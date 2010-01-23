@@ -1,6 +1,6 @@
 #include    <rtti/stdafx.h>
 
-#if defined(WIN32) && defined(BUILDING_DLL)
+#if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)
 #include <core/memory/new.inl>
 
 namespace BugEngine

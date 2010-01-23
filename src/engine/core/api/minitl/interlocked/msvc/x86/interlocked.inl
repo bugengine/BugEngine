@@ -9,8 +9,6 @@
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedCompareExchange64)
-#define _InterlockedExchange64          InterlockedExchange64
-#define _InterlockedExchangeAdd64       InterlockedExchangeAdd64
 
 #include    <core/debug/assert.hh>
 
@@ -34,7 +32,7 @@ struct InterlockedType<4>
     }
     static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
     {
-        return InterlockedExchangeAdd(p, -incr);
+        return _InterlockedExchangeAdd(p, -incr);
     }
     static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
     {
@@ -110,33 +108,6 @@ struct InterlockedType<1> : public InterlockedType<4>
 template<>
 struct InterlockedType<2> : public InterlockedType<4>
 {
-};
-template<>
-struct InterlockedType<8>
-{
-    typedef BE_SET_ALIGNMENT(8) long long value_t;
-    typedef long long incr_t;
-    static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
-    {
-        return InterlockedExchangeAdd64(p, incr);
-    }
-    static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
-    {
-        return InterlockedExchangeAdd64(p, -incr);
-    }
-    static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
-    {
-        return _InterlockedExchange64(p, v);
-    }
-    static inline value_t set_conditional(volatile value_t *p, incr_t v, incr_t condition)
-    {
-        return _InterlockedCompareExchange64(p, v, condition);
-    }
-    static inline value_t set_and_fetch(volatile value_t *p, incr_t v)
-    {
-        _InterlockedExchange64(p, v);
-        return v;
-    }
 };
 
 StaticAssert(sizeof(interlocked_impl::InterlockedType<4>::tagged_t) == 8);

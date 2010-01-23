@@ -385,7 +385,7 @@ def msvc_linker(task):
 		lst.extend(to_list(env['LINKFLAGS']))
 
 	lst.extend([a.srcpath(env) for a in task.inputs])
-	lst.extend(to_list('/OUT:%s' % outfile))
+	lst.extend(['/OUT:%s' % outfile])
 	lst = [x for x in lst if x]
 
 	lst = [lst]

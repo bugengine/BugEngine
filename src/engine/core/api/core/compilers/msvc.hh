@@ -39,16 +39,21 @@ typedef u8                      byte;
 #pragma warning(disable:4481)  // use of "override" extension
 #pragma warning(disable:4127)
 #pragma warning(disable:4709)  // comma operator used in []
+#pragma warning(disable:4505)  // unreferenced local function has been removed
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline
 #define NOTHROW     throw()
 
-#define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
-#define BE_EXPORT               __declspec(dllexport)
-#define BE_IMPORT               __declspec(dllimport)
+#define BE_SET_ALIGNMENT(n)     __declspec(align(n))
+#ifndef BE_STATIC
+# define BE_EXPORT              __declspec(dllexport)
+# define BE_IMPORT              __declspec(dllimport)
+#endif
 
-#include <intrin.h>
+#ifndef _XBOX
+# include <intrin.h>
+#endif
 #define be_break() __debugbreak()
 
 /*****************************************************************************/

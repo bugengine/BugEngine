@@ -9,6 +9,8 @@
 #  include <minitl/interlocked/msvc/x86/interlocked.inl>
 # elif defined(_AMD64)
 #  include <minitl/interlocked/msvc/amd64/interlocked.inl>
+# elif defined(_PPC)
+#  include <minitl/interlocked/msvc/ppc/interlocked.inl>
 # else
 #  error Architecture not implemented on MSVC
 # endif

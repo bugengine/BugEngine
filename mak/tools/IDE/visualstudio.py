@@ -17,7 +17,7 @@ projects = {
 }
 
 allconfigs = ['debug','release','profile','final']
-allplatforms = ['Win32', 'x64']
+allplatforms = ['Win32', 'x64', 'Xbox 360']
 
 def generateSolution(task):
 	solution = vstudio.solution.Solution( task.name,
@@ -35,7 +35,6 @@ def generateSolution(task):
 		if d.type != 'game':
 			solution.addProject(d)
 	solution.writeFooter(allplatforms, allconfigs)
-	return
 
 def generateProject(task):
 	project = task.projectClass( task.outputs[0].bldpath(task.env),
@@ -48,13 +47,12 @@ def generateProject(task):
 	project.writeHeader(allconfigs, allplatforms, task.platforms)
 	project.addDirectory(task.sourceTree)
 	project.writeFooter()
-	return
 
 GenerateSolution = Task.task_type_from_func('generateSolution', generateSolution)
 GenerateProject = Task.task_type_from_func('generateProject', generateProject)
 
 def filterplatforms(type,platforms,depends):
-	supportedplatforms = {'win32-x86': 'Win32', 'win32-amd64': 'x64'}
+	supportedplatforms = {'win32-x86': 'Win32', 'win32-amd64': 'x64', 'xbox360-ppc':'Xbox 360'}
 	common_options = mak.module.coptions( defines = ['PREFIX=\\"\\"',
 										   'DATA_DIR=\\"data/\\"',
 										   'PLUGIN_DIR=\\"data/plugins\\"',
@@ -64,7 +62,7 @@ def filterplatforms(type,platforms,depends):
 			if d.type == 'game':
 				common_options.libs.append(d.name)
 
-	return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()] or [('win32-x86', 'Win32', common_options),('win32-amd64', 'x64', common_options)]
+	return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()] or [('win32-x86', 'Win32', common_options),('win32-amd64', 'x64', common_options),('xbox360-ppc', 'Xbox 360', common_options)]
 
 solutions = {}
 def create_project(t):

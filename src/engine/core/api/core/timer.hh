@@ -8,9 +8,13 @@
 namespace BugEngine
 {
 
-#if defined(_MSC_VER)
+#if defined(BE_COMPILER_MSVC) && defined(BE_PLATFORM_WIN32)
 typedef u64 tick_type;
 inline tick_type tick(){ u64 result; QueryPerformanceCounter((LARGE_INTEGER*)&result); return result; }
+#elif defined(BE_COMPILER_MSVC)
+#include <PPCIntrinsics.h>
+typedef u32 tick_type;
+inline tick_type tick(){ return __mftb32(); }
 #elif defined __GNUC__
 # if defined(_X86)
 typedef u64 tick_type;
