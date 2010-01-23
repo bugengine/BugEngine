@@ -27,6 +27,9 @@ public:
     PluginList(const char* name, Create c, Destroy d);
     ~PluginList();
     static PluginList* findPlugin(const char *name);
+private:
+    PluginList(const PluginList& other);
+    PluginList& operator=(const PluginList& other);
 };
 
 }}

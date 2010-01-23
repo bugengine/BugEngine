@@ -21,12 +21,11 @@
 		SmallerTypeCheck="true"
 		RuntimeLibrary="3"
 		BufferSecurityCheck="true"
+		RuntimeTypeInfo="true"
 		EnableFunctionLevelLinking="false"
 		EnableEnhancedInstructionSet="0"
 		FloatingPointModel="1"
 		FloatingPointExceptions="true"
-		WarningLevel="4"
-		WarnAsError="true"
 		DebugInformationFormat="3"
 	/>
 	<Tool

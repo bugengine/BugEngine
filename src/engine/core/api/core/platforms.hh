@@ -5,7 +5,7 @@
 #define BE_CORE_PLATFORMS_H_
 /*****************************************************************************/
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_XBOX)
 # define WIN32_LEAN_AND_MEAN
 # define NOMINMAX
 # include <windows.h>
@@ -31,23 +31,25 @@ static inline void displayError()
 # define OutputDebugString(s) printf("%s", s)
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_XBOX)
 # ifdef _AMD64
 #  define BE_PLATFORM_NAME      Win64
-#  define BE_PLATFORM_WIN32     1
 #  define BE_PLATFORM_WIN64     1
 # else
 #  define BE_PLATFORM_NAME      Win32
-#  define BE_PLATFORM_WIN32     1
 # endif
+# define BE_PLATFORM_WIN32     1
+# define BE_PLATFORM_PC        1
 #elif defined __APPLE__
 # define BE_PLATFORM_NAME       MacOSX
 # define BE_PLATFORM_MACOS      1
 # define BE_PLATFORM_POSIX      1
+# define BE_PLATFORM_PC         1
 #elif defined __linux__
 # define BE_PLATFORM_NAME       Linux
 # define BE_PLATFORM_LINUX      1
 # define BE_PLATFORM_POSIX      1
+# define BE_PLATFORM_PC         1
 # include   <strings.h>
 # define    stricmp strcasecmp
 # define    strnicmp strncasecmp
@@ -55,9 +57,18 @@ static inline void displayError()
 # define BE_PLATFORM_NAME       SunOS
 # define BE_PLATFORM_SUN        1
 # define BE_PLATFORM_POSIX      1
+# define BE_PLATFORM_PC         1
 #elif defined _WII
 # define BE_PLATFORM_NAME       Wii
 # define BE_PLATFORM_WII        1
+# define BE_PLATFORM_CONSOLE    1
+#elif defined _XBOX360
+# define BE_PLATFORM_NAME       XBox360
+# define BE_PLATFORM_XBOX360    1
+# define BE_PLATFORM_CONSOLE    1
+#elif defined _PS3
+# define BE_PLATFORM_NAME       Playstation3
+# define BE_PLATFORM_PS3        1
 # define BE_PLATFORM_CONSOLE    1
 #else
 # error "unknown platform"

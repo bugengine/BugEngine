@@ -115,7 +115,7 @@ static int __main(int argc, const char *argv[])
     return result;
 }
 /*****************************************************************************/
-#if defined(_WIN32)
+#if defined(BE_PLATFORM_WIN32)
 
 namespace BugEngine
 {

@@ -483,7 +483,7 @@ ipath::ipath(const std::string& _str) :
 
 std::string ipath::str() const
 {
-#   ifdef WIN32
+#   ifdef BE_PLATFORM_WIN32
     return igenericnamespace::tostring("\\");
 #   else
     return igenericnamespace::tostring("/");
@@ -523,7 +523,7 @@ ifilename::ifilename(const std::string& _str) :
 
 std::string ifilename::str() const
 {
-#   ifdef WIN32
+#   ifdef BE_PLATFORM_WIN32
     return igenericnamespace::tostring("\\");
 #   else
     return igenericnamespace::tostring("/");

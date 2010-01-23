@@ -2,9 +2,11 @@
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="static_library"
+	Name="test"
 	>
 	<Tool
-		Name="VCLibrarianTool"
+		Name="VCCLCompilerTool"
+        WarningLevel="4"
+        WarnAsError="true"
 	/>
 </VisualStudioPropertySheet>

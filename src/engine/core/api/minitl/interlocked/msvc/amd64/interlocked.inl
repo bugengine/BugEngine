@@ -43,7 +43,7 @@ struct InterlockedType<4>
     }
     static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
     {
-        return InterlockedExchangeAdd(p, -incr);
+        return _InterlockedExchangeAdd(p, -incr);
     }
     static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
     {

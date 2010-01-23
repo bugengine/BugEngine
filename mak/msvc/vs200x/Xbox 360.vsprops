@@ -2,15 +2,15 @@
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="tool"
+	Name="Xbox 360"
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-        WarningLevel="4"
-        WarnAsError="true"
+		PreprocessorDefinitions="BE_STATIC;_PPC;__PPC__;_XBOX;_XBOX360;__XBOX360__"
+		EnableEnhancedInstructionSet="0"
 	/>
-    <Tool
-        Name="VCLinkerTool"
-        UseLibraryDependencyInputs="true"
-    />
+	<Tool
+		Name="VCLinkerTool"
+		TargetMachine="17"
+	/>
 </VisualStudioPropertySheet>

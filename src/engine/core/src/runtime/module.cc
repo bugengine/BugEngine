@@ -31,6 +31,7 @@ Module::~Module()
 {
 }
 
+#ifdef BE_PLATFORM_PC
 ref<const Module> Module::self()
 {
     static ref<Module> s_module;
@@ -87,13 +88,10 @@ ref<const Module> Module::self()
             module = newModule;
         }
     }
-#elif defined(BE_PLATFORM_WII)
-    be_warning("TODO");
-#else
-# error platform not supported yet...
 #endif
     return s_module;
 }
+#endif
 
 const Module::Section& Module::operator[](const istring& name) const
 {

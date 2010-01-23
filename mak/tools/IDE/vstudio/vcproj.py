@@ -2,6 +2,7 @@ import os
 import solution
 import mak.sources
 import string
+from xml.dom import minidom
 
 def xmlify(s):
 	s = string.replace(s, "&", "&amp;") # do this first
@@ -21,7 +22,8 @@ def getFileDeployPath(type):
 
 class VCproj:
 	extensions = ['.vcproj']
-	archs = { 'Win32':'x86', 'x64':'amd64' }
+	vcplatforms = { 'Win32':'win32', 'x64':'win32', 'Xbox 360':'xbox360' }
+	archs = { 'Win32':'x86', 'x64':'amd64', 'Xbox 360':'ppc' }
 
 	def __init__(self, filename, name, category, versionName, versionNumber, type):
 		self.versionName = versionName
@@ -68,89 +70,74 @@ class VCproj:
 			apidirs = ";".join([xmlify("\"..\\..\\"+d+"\"") for d in opts.includedir])
 			libdirs = ";".join([xmlify("\"..\\..\\"+d+"\"") for d in opts.libdir])
 			libs	= " ".join([xmlify("\""+str(d)+".lib\"") for d in opts.libs])
+
+
+
 			for config in configs:
+				props =	{
+					'VCPreBuildEventTool': { },
+					'VCCustomBuildTool': { },
+					'VCXMLDataGeneratorTool': { },
+					'VCWebServiceProxyGeneratorTool': { },
+					'VCCLCompilerTool':
+							{
+								'PreprocessorDefinitions':defines,
+								'AdditionalIncludeDirectories':apidirs,
+								'UsePrecompiledHeader':'0',
+								'PrecompiledHeaderThrough':opts.pchstop,
+							},
+					'VCManagedResourceCompilerTool': { },
+					'VCResourceCompilerTool': { 'AdditionalIncludeDirectories':apidirs, },
+					'VCVCPrelinkEventTool': { },
+					'VCLinkerTool':
+							{
+								'AdditionalDependencies':libs,
+								'AdditionalLibraryDirectories':libdirs,
+								'ImportLibrary':"$(OutDir)lib\\%s.lib"%self.name,
+							},
+					'VCLibrarianTool': { 'OutputFile':"$(OutDir)lib\\$(ProjectName).lib", },
+					'VCALinkTool': { },
+					'VCManifestTool': { },
+					'VCXDCMakeTool': { },
+					'VCBscMakeTool': { },
+					'VCFxCopTool': { },
+					'VCAppVerifierTool': { },
+					'VCWebDeploymentTool': { },
+					'VCPostBuildEventTool': { },
+				}
+				if self.type == 'plugin':
+					props['VCLinkerTool']['OutputFile'] = "$(OutDir)data\\plugins\\%s.dll" % self.name
+				elif self.type == 'shared_library':
+					props['VCLinkerTool']['OutputFile'] = "$(OutDir)%s.dll" % self.name
+				else:
+					props['VCLinkerTool']['OutputFile'] = "$(OutDir)%s.exe" % self.name
+
+				for sheet in set([config, platform, self.type, self.category]):
+					document = minidom.parse("../../mak/msvc/vs200x/%s.vsprops"%sheet)
+					for tool in document.getElementsByTagName("Tool"):
+						name = tool.attributes['Name'].value
+						if not props.has_key(name):
+							props[name] = { }
+						for attribute in tool.attributes.values():
+							if attribute.name == 'Name': continue
+							try: props[name][attribute.name] += ';'+attribute.value
+							except KeyError: props[name][attribute.name] = attribute.value
+					document.unlink()
+
 				self.output.write('		<Configuration\n')
 				self.output.write('			Name="%s|%s"\n' % (config,platform))
 				self.output.write('			OutputDirectory="$(SolutionDir)deploy\\%s\\$(PlatformName)\\$(ConfigurationName)\\"\n' % self.versionName)
 				self.output.write('			IntermediateDirectory="$(SolutionDir).build\\%s\\$(PlatformName)\\$(ConfigurationName)\\$(ProjectName)\\"\n' % self.versionName)
 				self.output.write('			ConfigurationType="%s"\n' % self.projectType)
-				self.output.write('			InheritedPropertySheets="$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops;$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops;$(SolutionDir)mak\\msvc\\vs200x\\%s.vsprops"\n' % (config,platform,self.type))
 				self.output.write('			CharacterSet="2"\n')
 				self.output.write('			>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCPreBuildEventTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCCustomBuildTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCXMLDataGeneratorTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCWebServiceProxyGeneratorTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCMIDLTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCCLCompilerTool"\n')
-				self.output.write('				PreprocessorDefinitions="%s"\n' % defines)
-				self.output.write('				AdditionalIncludeDirectories="%s"\n' % apidirs)
-				self.output.write('				UsePrecompiledHeader="0"\n')
-				if self.category == '3rdparty':
-					self.output.write('				WarningLevel="1"\n')
-				self.output.write('				PrecompiledHeaderThrough="%s"\n' % opts.pchstop)
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCManagedResourceCompilerTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCResourceCompilerTool"\n')
-				self.output.write('				AdditionalIncludeDirectories="%s"\n' % apidirs)
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCPreLinkEventTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCLinkerTool"\n')
-				self.output.write('				AdditionalDependencies="%s"\n' % libs)
-				self.output.write('				AdditionalLibraryDirectories="%s"\n' % libdirs)
-				if self.type == 'plugin':
-					self.output.write('				OutputFile="$(OutDir)data\\plugins\\%s.dll"\n' % self.name)
-				elif self.type == 'shared_library':
-					self.output.write('				OutputFile="$(OutDir)%s.dll"\n' % self.name)
-				else:
-					self.output.write('				OutputFile="$(OutDir)%s.exe"\n' % self.name)
-				self.output.write('				ImportLibrary="$(OutDir)lib\\%s.lib"\n' % self.name)
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCLibrarianTool"\n')
-				self.output.write('				OutputFile="$(OutDir)lib\\$(ProjectName).lib"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCALinkTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCManifestTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCXDCMakeTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCBscMakeTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCFxCopTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCAppVerifierTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCWebDeploymentTool"\n')
-				self.output.write('			/>\n')
-				self.output.write('			<Tool\n')
-				self.output.write('				Name="VCPostBuildEventTool"\n')
-				self.output.write('			/>\n')
+				for key,values in props.iteritems():
+					self.output.write('			<Tool\n')
+					self.output.write('				Name="%s"\n' % key)
+					for attribute,value in values.iteritems():
+						self.output.write('				%s="%s"\n' % (attribute,value))
+
+					self.output.write('			/>\n')
 				self.output.write('		</Configuration>\n')
 		self.output.write('	</Configurations>\n')
 		self.output.write('	<References>\n')
@@ -166,7 +153,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if 'win32' not in source.platforms or not source.process:
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -195,7 +182,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if 'win32' not in source.platforms or not source.process:
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -216,7 +203,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if 'win32' not in source.platforms or not source.process:
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -238,7 +225,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if 'win32' not in source.platforms or not source.process:
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:

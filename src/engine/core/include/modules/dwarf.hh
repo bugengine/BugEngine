@@ -50,9 +50,8 @@ private:
     class CompilationUnit
     {
     public:
-        const char*                                 name;
-        AddressRange                                range;
-        minitl::map<AddressRange, CompilationUnit>  children;
+        const char*                                         name;
+        AddressRange                                        range;
 
         CompilationUnit() : name(0) { }
         ~CompilationUnit() { }
