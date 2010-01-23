@@ -31,7 +31,7 @@ public:
     ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
 
-    void drawBatch(const Batch& batch) override;
+    void                    dispatch() override;
 };
 
 }}

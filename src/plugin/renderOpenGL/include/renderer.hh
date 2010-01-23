@@ -49,10 +49,11 @@ public:
     ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
 
-    void                    drawBatch(const Batch& b) override;
+    void                    dispatch() override;
     void                    flush() const override;
 private:
     void                    attachWindow(Window* w);
+    void                    drawBatch(const Batch& b);
 
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }

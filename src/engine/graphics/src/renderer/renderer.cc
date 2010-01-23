@@ -61,9 +61,9 @@ void Renderer::flush() const
     return m_plugin->flush();
 }
 
-void Renderer::drawBatch(const Batch& batch)
+void Renderer::dispatch()
 {
-    return m_plugin->drawBatch(batch);
+    return m_plugin->dispatch();
 }
 
 }}

@@ -36,8 +36,13 @@ public:
     public:
         Callback();
         ~Callback();
+        enum InitialState
+        {
+            InitialStatePending,
+            InitialStateCompleted
+        };
 
-        void connectFrom(weak<BaseTask> t);
+        void connectFrom(weak<BaseTask> t, InitialState initialState = InitialStatePending);
         void connectTo(weak<BaseTask> t);
         void disconnectFrom(weak<BaseTask> t);
         void disconnectTo(weak<BaseTask> t);
