@@ -20,8 +20,8 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 	newenv['MSVC_VERSIONS'] = [compiler+' '+version]
 	newenv['MSVC_TARGETS'] = [target]
 	conf.setenv(name)
-	conf.check_tool('msvc')
 	try:
+		conf.check_tool('msvc')
 		
 		conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 		conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
