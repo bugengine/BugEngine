@@ -79,21 +79,39 @@ class Solution:
 			self.addProject(dep)
 
 	def writeFooter(self,platforms,configs):
-		self.file.write("""Global
+		if float(self.versionnumber) >= 9.0:
+			self.file.write("""Global
 \tGlobalSection(SolutionConfigurationPlatforms) = preSolution
 """)
-		for conf in configs:
-			for platform in platforms:
-				self.file.write("""\t\t%s|%s = %s|%s
+			for conf in configs:
+				for platform in platforms:
+					self.file.write("""\t\t%s|%s = %s|%s
 """ % (conf,platform,conf,platform))
-		self.file.write("""\tEndGlobalSection
+		else:
+			self.file.write("""Global
+\tGlobalSection(SolutionConfiguration) = preSolution
+""")
+			for conf in configs:
+				self.file.write("""\t\t%s = %s
+""" % (conf,conf))
+		if float(self.versionnumber) >= 9.0:
+			self.file.write("""\tEndGlobalSection
 \tGlobalSection(ProjectConfigurationPlatforms) = postSolution
+""")
+		else:
+			self.file.write("""\tEndGlobalSection
+\tGlobalSection(ProjectConfiguration) = postSolution
 """)
 		for proj in self.projectlist:
 			for conf in configs:
 				for platform in platforms:
-					self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s
+					if float(self.versionnumber) >= 9.0:
+						self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s
 \t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s
+""" % {'GUID':proj,'CONF':conf,'PLATFORM':platform})
+					else:
+						self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s
+\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s
 """ % {'GUID':proj,'CONF':conf,'PLATFORM':platform})
 		self.file.write("""\tEndGlobalSection
 EndGlobal
