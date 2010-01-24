@@ -9,15 +9,15 @@ import vstudio.vcproj
 import vstudio.vcxproj
 
 projects = {
-	'vs2005':	(('Visual Studio 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00')),
-	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00')),
-	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
-	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00')),
-	'vs2010':	(('Visual Studio 2010', '11.00'),(vstudio.vcxproj.VCxproj, '4.0')),
+	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vstudio.vcproj.VCproj, '7.10'), ['Win32']),
+	'vs2005':	(('Visual Studio 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00'), ['Win32']),
+	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00'), ['Win32']),
+	'vs2010':	(('Visual Studio 2010', '11.00'),(vstudio.vcxproj.VCxproj, '4.0'), ['Win32', 'x64', 'Xbox 360']),
 }
 
 allconfigs = ['debug','release','profile','final']
-allplatforms = ['Win32', 'x64', 'Xbox 360']
 
 def generateSolution(task):
 	solution = vstudio.solution.Solution( task.name,
@@ -34,7 +34,7 @@ def generateSolution(task):
 	for d in task.depends:
 		if d.type != 'game':
 			solution.addProject(d)
-	solution.writeFooter(allplatforms, allconfigs)
+	solution.writeFooter(task.allplatforms, allconfigs)
 
 def generateProject(task):
 	project = task.projectClass( task.outputs[0].bldpath(task.env),
@@ -44,7 +44,7 @@ def generateProject(task):
 								 task.versionNumber,
 								 task.type,
 								)
-	project.writeHeader(allconfigs, allplatforms, task.platforms)
+	project.writeHeader(allconfigs, task.allplatforms, task.platforms)
 	project.addDirectory(task.sourceTree)
 	project.writeFooter()
 
@@ -73,6 +73,7 @@ def create_project(t):
 		solution = GenerateSolution(env=t.env)
 		solution.version = toolName
 		solution.versionName, solution.versionNumber = projects[toolName][0]
+		solution.allplatforms    = projects[toolName][2]
 		solution.set_outputs(t.path.find_or_declare(outname))
 		solution.install_path = t.path.srcpath(t.env)
 		solution.depends = []
@@ -84,6 +85,7 @@ def create_project(t):
 
 	project = GenerateProject(env=t.env.copy())
 	project.type			= t.type
+	project.allplatforms    = projects[toolName][2]
 	project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
 	project.version 		= toolName
 	project.versionNumber 	= versionNumber
