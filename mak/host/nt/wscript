@@ -100,7 +100,6 @@ def set_options(opt):
 
 def configure(conf):
 	import Options
-
 	conf.check_tool("bison flex", tooldir='mak/tools')
 
 	conf.env['BUILD_VARIANTS'] = []

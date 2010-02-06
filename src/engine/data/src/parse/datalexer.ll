@@ -43,6 +43,12 @@ static void newline()
     g_columnafter = 1;
 }
 
+extern "C" int yywrap()
+{
+    return 1;
+}
+
+
 #ifndef _MSC_VER
 # define atoi64(a,l) strtoll(a,0,l)
 #else
@@ -50,7 +56,6 @@ static void newline()
 #endif
 
 %}
-%option noyywrap
 %option nounput
 
 alpha       [A-Za-z_]
