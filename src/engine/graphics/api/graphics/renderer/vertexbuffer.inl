@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_VERTEXBUFFER_INL_
 #define BE_GRAPHICS_VERTEXBUFFER_INL_
 /*****************************************************************************/
-#include    <graphics/renderer/renderer.hh>
+#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine { namespace Graphics
 {

@@ -4,10 +4,11 @@
 #ifndef BE_GRAPHICS_WORLD_HH_
 #define BE_GRAPHICS_WORLD_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/renderer.hh>
+#include    <graphics/renderer/renderbackend.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/scene/scene.hh>
 #include    <system/scheduler/task.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine
 {
@@ -26,7 +27,7 @@ private:
     friend struct Sort;
 private:
     typedef std::vector< ref<RenderTarget> > SceneList;
-    scoped<Renderer>                            m_renderer;
+    Plugin<RenderBackend>                       m_renderer;
     SceneList                                   m_scenes;
     ref< BaseTask::Callback >                   m_start;
     weak< BaseTask::Callback >                  m_end;

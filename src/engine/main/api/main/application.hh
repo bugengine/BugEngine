@@ -22,6 +22,7 @@ private:
     scoped<Scheduler>       m_scheduler;
     ref<BaseTask::Callback> m_frameFinished;
     ref<World>              m_world;
+    ref<Graphics::World>    m_display;
     scoped< BaseTask >      m_updateInputTask;
     scoped< BaseTask >      m_updateMemoryTask;
     scoped< BaseTask >      m_updateSchedulerTask;
