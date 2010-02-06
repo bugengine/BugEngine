@@ -5,7 +5,6 @@
 #define DISCWORLD_GAME_SCENE_HH_
 /*****************************************************************************/
 #include    <graphics/scene/scene3d.hh>
-#include    <graphics/renderer/renderer.hh>
 
 namespace Discworld
 {
@@ -18,7 +17,6 @@ public:
 };
 
 }
-
 
 /*****************************************************************************/
 #endif

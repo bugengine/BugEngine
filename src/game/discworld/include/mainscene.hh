@@ -5,7 +5,6 @@
 #define DISCWORLD_MAINSCENE_HH_
 /*****************************************************************************/
 #include    <graphics/scene/scene.hh>
-#include    <graphics/renderer/renderer.hh>
 #include    <input/action.hh>
 #include    <main/application.hh>
 

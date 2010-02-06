@@ -71,7 +71,7 @@ public:
 };
 
 World::World(weak<BaseTask::Callback> endJob)
-:   m_renderer(scoped<Renderer>::create("renderDx9"))
+:   m_renderer("renderDx9")
 ,   m_start( ref< BaseTask::Callback >::create())
 ,   m_end(endJob)
 {
