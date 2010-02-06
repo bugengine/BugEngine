@@ -29,10 +29,14 @@ static void newline()
     g_settingsColumnAfter = 1;
 }
 
+extern "C" int be_settings_wrap()
+{
+    return 1;
+}
+
 %}
 
 %option prefix="be_settings_"
-%option noyywrap
 %option nounput
 
 alpha       [A-Za-z_]
