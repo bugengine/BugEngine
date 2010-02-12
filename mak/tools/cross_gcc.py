@@ -43,7 +43,7 @@ def parse_gcc_target(target):
 			  ('Gekko', 'mips'),
 			  ('x86_64', 'amd64'),
 			  ('powerpc', 'powerpc'),
-			  ('psp', 'powerpc'),
+			  ('psp', 'mips'),
 			  ('mingw32', 'x86'),
 			  ('ppu', 'powerpc'),
 			  ('spu', 'powerpc')]
