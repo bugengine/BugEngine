@@ -12,18 +12,13 @@ class Scene;
 
 class be_api(GRAPHICS) RenderTarget : public minitl::refcountable
 {
-private:
-    ref<const Scene> const   m_scene;
 public:
-    RenderTarget(ref<const Scene> scene);
+    RenderTarget();
     virtual ~RenderTarget() { }
-    virtual void setCurrent() = 0;
 
     virtual uint2           getDimensions() const = 0;
     virtual void            close() = 0;
     virtual bool            closed() const = 0;
-
-    weak<const Scene> scene() const;
 private:
     RenderTarget& operator=(const RenderTarget& other);
     RenderTarget(const RenderTarget& other);

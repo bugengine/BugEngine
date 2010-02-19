@@ -26,24 +26,21 @@ private:
     struct Sort;
     friend struct Sort;
 private:
-    typedef std::vector< ref<RenderTarget> > SceneList;
-    Plugin<RenderBackend>                       m_renderer;
-    SceneList                                   m_scenes;
-    ref< BaseTask::Callback >                   m_start;
-    weak< BaseTask::Callback >                  m_end;
-    std::vector< ref< BaseTask > >              m_tasks;
-    std::vector< ref< BaseTask::Callback > >    m_edges;
-private:
+    typedef std::pair< ref<RenderTarget>, ref<Scene> >  View;
+    typedef std::vector< View>                          ViewList;
+    Plugin<RenderBackend>                               m_renderer;
+    ViewList                                            m_views;
+public:
     void step();
     void dispatch();
 public:
-    World(weak<BaseTask::Callback> endJob);
+    World();
     ~World();
 
-    void createWindow(WindowFlags f, ref<Scene> scene);
+    ref<Graphics::RenderTarget> createWindow(WindowFlags f);
+    void addView(ref<RenderTarget> target, ref<Scene> scene);
 
-    weak< BaseTask::Callback > getStart() { return m_start; }
-    weak< BaseTask::Callback > getEnd()   { return m_end; }
+
 
     be_metaclass(GRAPHICS,World, Object)
     be_properties

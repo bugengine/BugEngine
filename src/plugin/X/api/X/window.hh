@@ -30,7 +30,7 @@ protected:
     Attributes          m_attributes;
     ::Window            m_window;
 public:
-    Window(weak<Renderer> renderer,WindowFlags flags, ref<const Scene> scene);
+    Window(weak<Renderer> renderer,WindowFlags flags);
     ~Window();
 
     void close() override;

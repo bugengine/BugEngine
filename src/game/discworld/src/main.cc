@@ -33,7 +33,7 @@ int be_main (weak<BugEngine::Application> app)
     f.triplebuffered = false;
 
     ref<BugEngine::Graphics::Scene> scene = ref<Discworld::MainScene>::create(app);
-    app->createWindow(f, scene);
+    ref<BugEngine::Graphics::RenderTarget> w = app->createWindow(f);
 
     return app->run();
 }

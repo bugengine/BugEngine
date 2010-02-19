@@ -76,7 +76,7 @@ public:
     virtual weak<ShaderPipeline>    getShaderPipeline() = 0;
     virtual weak<TexturePipeline>   getTexturePipeline() = 0;
 
-    virtual ref<RenderTarget>       createRenderWindow(WindowFlags flags, ref<const Scene> scene) = 0;
+    virtual ref<RenderTarget>       createRenderWindow(WindowFlags flags) = 0;
     virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;

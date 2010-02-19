@@ -9,8 +9,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
-:   Windowing::Window(renderer, flags, scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   Windowing::Window(renderer, flags)
 ,   m_owner(renderer)
 {
     m_owner->attachWindow(this);

@@ -12,7 +12,7 @@ namespace Discworld
 class GameScene : public BugEngine::Graphics::Scene3D
 {
 public:
-    GameScene(BugEngine::Graphics::Scene* scene);
+    GameScene();
     virtual ~GameScene();
 };
 

@@ -15,8 +15,8 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
-:   Win32::Window(renderer, flags, scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   Win32::Window(renderer, flags)
 ,   m_owner(renderer)
 {
     D3DPRESENT_PARAMETERS d3dpp;

@@ -35,6 +35,7 @@ public:
     {
         for(World::SceneList::const_iterator it = r.begin(); it != r.end(); ++it)
         {
+
         }
     }
     void operator()(Range& /*myRange*/, Render& /*with*/, Range& /*withRange*/)
@@ -111,10 +112,9 @@ void World::dispatch()
     m_renderer->flush();
 }
 
-void World::createWindow(WindowFlags f, ref<Scene> scene)
+ref<Graphics::RenderTarget> World::createWindow(WindowFlags f)
 {
-    ref<RenderTarget> w = m_renderer->createRenderWindow(f, scene);
-    m_scenes.push_back(w);
+    return m_renderer->createRenderWindow(f);
 }
 
 }}
