@@ -7,8 +7,8 @@
 namespace BugEngine { namespace Graphics
 {
 
-Scene3D::Scene3D(Scene* parent)
-:   Scene(parent)
+Scene3D::Scene3D()
+:   Scene()
 {
 }
 

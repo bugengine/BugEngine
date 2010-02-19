@@ -86,9 +86,9 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
     return result;
 }
 
-ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags, ref<const Scene> scene)
+ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
-    return ref<Window>::create(this, flags, scene);
+    return ref<Window>::create(this, flags);
 }
 
 ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const

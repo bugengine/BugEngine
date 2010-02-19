@@ -14,8 +14,8 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Win32
 {
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
-:   RenderTarget(scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   RenderTarget()
 ,   m_renderer(renderer)
 {
     WindowCreationFlags f;

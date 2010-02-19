@@ -34,7 +34,6 @@ public:
     World(float3 worldExtents, weak<BaseTask::Callback> endJob);
     ~World();
 
-    void createView(Graphics::WindowFlags f, ref<Graphics::Scene> scene);
     void run(weak<Scheduler> scheduler);
 
     weak< BaseTask::Callback > getStart() { return m_start; }

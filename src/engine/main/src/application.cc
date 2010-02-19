@@ -91,18 +91,13 @@ Application::Application(int argc, const char *argv[])
 :   Object()
 ,   m_scheduler(scoped<Scheduler>::create())
 ,   m_frameFinished(ref<BaseTask::Callback>::create())
-,   m_world(ref<World>::create(float3(10000.0f, 10000.0f, 10000.0f), m_frameFinished))
+,   m_world(ref<World>::create(float3(10000.0f, 10000.0f, 10000.0f)))
+,   m_display()
 ,   m_updateInputTask(scoped< Task<UpdateInput> >::create("input", color32(200,200,120), UpdateInput()))
 ,   m_updateMemoryTask(scoped< Task<UpdateMemory> >::create("memory", color32(150,180,120), UpdateMemory()))
 ,   m_updateSchedulerTask(scoped< Task<UpdateScheduler> >::create("scheduler", color32(200,180,120), UpdateScheduler(m_scheduler)))
 {
     UNUSED(argc); UNUSED(argv);
-    m_world->getStart()->connectFrom(m_updateInputTask);
-    m_world->getStart()->connectFrom(m_updateMemoryTask);
-    m_world->getStart()->connectFrom(m_updateSchedulerTask);
-    m_world->getEnd()->connectTo(m_updateInputTask);
-    m_world->getEnd()->connectTo(m_updateMemoryTask);
-    m_world->getEnd()->connectTo(m_updateSchedulerTask);
 }
 
 Application::~Application(void)
@@ -116,9 +111,26 @@ int Application::run()
     return 0;
 }
 
-void Application::createWindow(Graphics::WindowFlags f, ref<Graphics::Scene> scene)
+ref<Graphics::RenderTarget> Application::createWindow(Graphics::WindowFlags f)
 {
-    m_world->createView(f, scene);
+    return m_display->createWindow(f);
 }
+
+void Application::addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)
+{
+    m_views.push_back(
+}
+
+void Application::addWorld(ref<World> world)
+{
+    world->getStart()->connectFrom(m_updateInputTask);
+    world->getStart()->connectFrom(m_updateMemoryTask);
+    world->getStart()->connectFrom(m_updateSchedulerTask);
+    world->getEnd()->connectTo(m_updateInputTask);
+    world->getEnd()->connectTo(m_updateMemoryTask);
+    world->getEnd()->connectTo(m_updateSchedulerTask);
+    m_worlds.push_back(world);
+}
+
 
 }

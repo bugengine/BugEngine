@@ -19,20 +19,27 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
+    typedef std::pair< ref<Graphics::Scene>, ref<Graphics::RenderTarget> >  View;
+    typedef std::vector< View >                                             ViewList;
+    typedef std::vector< ref<World> >                                       Worldist;
+private:
     scoped<Scheduler>       m_scheduler;
     ref<BaseTask::Callback> m_frameFinished;
-    ref<World>              m_world;
     ref<Graphics::World>    m_display;
     scoped< BaseTask >      m_updateInputTask;
     scoped< BaseTask >      m_updateMemoryTask;
     scoped< BaseTask >      m_updateSchedulerTask;
+    ViewList                m_views;
+    WorldList               m_worlds;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
     int run(void);
 
-    void createWindow(Graphics::WindowFlags f, ref<Graphics::Scene> scene);
+    ref<Graphics::RenderTarget> createWindow(Graphics::WindowFlags f);
+    void addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+    void addWorld(ref<World> world);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private :
@@ -42,11 +49,6 @@ private :
 
     be_metaclass(NONE,Application,Object)
     be_properties
-        be_method(run);
-
-        be_property(world)
-            [be_read(m_world)]
-            [be_write(m_world)];
     be_end
 };
 

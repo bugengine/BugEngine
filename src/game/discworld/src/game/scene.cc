@@ -11,8 +11,8 @@
 namespace Discworld
 {
 
-GameScene::GameScene(BugEngine::Graphics::Scene* parent)
-:   Scene3D(parent)
+GameScene::GameScene()
+:   Scene3D()
 {
 }
 

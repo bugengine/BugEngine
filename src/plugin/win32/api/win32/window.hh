@@ -19,7 +19,7 @@ protected:
     HWND            m_window;
     HDC             m_dc;
 public:
-    Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene);
+    Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
 
     void close() override;

@@ -20,7 +20,7 @@ Window::Attributes::~Attributes()
 {
 }
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags, ref<const Scene> scene)
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   RenderTarget(scene)
 ,   m_renderer(renderer)
 ,   m_attributes(renderer->m_display, renderer->m_rootWindow, renderer->m_visual->visual, flags)
