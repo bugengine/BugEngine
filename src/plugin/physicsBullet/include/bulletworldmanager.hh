@@ -16,7 +16,7 @@ public:
     BulletWorldManager();
     ~BulletWorldManager();
 
-    virtual ref<IPhysicsWorld> createWorld(float3 extents, weak<BaseTask::Callback> endJob) const override;
+    virtual ref<IPhysicsWorld> createWorld(float3 extents) const override;
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

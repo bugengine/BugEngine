@@ -36,7 +36,7 @@ public:
     btAxisSweep3                        m_broadphase;
     btDiscreteDynamicsWorld             m_world;
 public:
-    BulletWorld(float3 worldExtents, weak<BaseTask::Callback> endJob);
+    BulletWorld(float3 worldExtents);
     ~BulletWorld();
 
     virtual void step() override;

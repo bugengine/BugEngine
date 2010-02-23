@@ -21,7 +21,7 @@ private:
     void*   m_system;
     void*   m_context;
 public:
-    World(weak<BaseTask::Callback> endJob);
+    World();
     ~World();
 
     ref<Audio::Sound> createSound(const ifilename& file) override;
@@ -39,7 +39,7 @@ public:
 class WorldManager : public Audio::WorldManager
 {
 protected:
-    ref<Audio::World> createWorld(weak<BaseTask::Callback> endJob);
+    ref<Audio::World> createWorld();
 };
 
 }}}

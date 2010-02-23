@@ -8,6 +8,8 @@
 
 #include    <mobile/world.hh>
 #include    <graphics/scene/scene.hh>
+#include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine
 {
@@ -19,18 +21,11 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
-    typedef std::pair< ref<Graphics::Scene>, ref<Graphics::RenderTarget> >  View;
-    typedef std::vector< View >                                             ViewList;
-    typedef std::vector< ref<World> >                                       Worldist;
-private:
     scoped<Scheduler>       m_scheduler;
     ref<BaseTask::Callback> m_frameFinished;
-    ref<Graphics::World>    m_display;
     scoped< BaseTask >      m_updateInputTask;
     scoped< BaseTask >      m_updateMemoryTask;
     scoped< BaseTask >      m_updateSchedulerTask;
-    ViewList                m_views;
-    WorldList               m_worlds;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);

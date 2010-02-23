@@ -47,11 +47,11 @@ private: //friend Worker
     minitl::istack<ScheduledTasks::BaseTaskItem>    m_tasks;
     i_u32                                           m_runningTasks;
     bool volatile                                   m_running;
-private:
-    void split(ScheduledTasks::BaseTaskItem* t, size_t count);
 private: //friend Worker
     ScheduledTasks::BaseTaskItem* pop();
     void queue(ScheduledTasks::BaseTaskItem* task);
+private:
+    void split(ScheduledTasks::BaseTaskItem* t, size_t count);
 public:
     void* allocate_task(size_t size);
     void  release_task(void* t, size_t size);

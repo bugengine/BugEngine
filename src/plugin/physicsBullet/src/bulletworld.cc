@@ -33,8 +33,8 @@ BulletWorld::WorldSetup::~WorldSetup()
 }
 
 
-BulletWorld::BulletWorld(float3 worldExtents, weak<BaseTask::Callback> endJob)
-:   IPhysicsWorld(endJob)
+BulletWorld::BulletWorld(float3 worldExtents)
+:   IPhysicsWorld()
 ,   m_setup()
 ,   m_configuration()
 ,   m_dispatcher(&m_configuration)
