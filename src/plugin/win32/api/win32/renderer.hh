@@ -14,13 +14,13 @@ class Window;
 
 struct WindowCreationFlags
 {
-	const char *className;
-	const char *title;
-	int x;
-	int y;
-	RECT size;
-	DWORD flags;
-	bool fullscreen;
+    const char *className;
+    const char *title;
+    int x;
+    int y;
+    RECT size;
+    DWORD flags;
+    bool fullscreen;
 };
 
 class Renderer : public RenderBackend

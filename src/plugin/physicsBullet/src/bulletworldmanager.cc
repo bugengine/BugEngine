@@ -16,9 +16,9 @@ BulletWorldManager::~BulletWorldManager()
 {
 }
 
-ref<IPhysicsWorld> BulletWorldManager::createWorld(float3 extents, weak<BaseTask::Callback> endJob) const
+ref<IPhysicsWorld> BulletWorldManager::createWorld(float3 extents) const
 {
-    return ref<BulletWorld>::create(extents, endJob);
+    return ref<BulletWorld>::create(extents);
 }
 
 }}}
