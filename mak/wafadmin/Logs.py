@@ -31,7 +31,7 @@ if got_tty:
 
 import Utils
 
-if not got_tty or 'NOCOLOR' in os.environ:
+if not got_tty or sys.platform == 'win32' or 'NOCOLOR' in os.environ:
 	colors_lst['USE'] = False
 
 def get_color(cl):
