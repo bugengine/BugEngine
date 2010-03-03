@@ -17,13 +17,14 @@ class MetaClass;
 class be_api(RTTI) Object : public minitl::refcountable
 {
 public:
-    typedef RTTI::MetaClass MetaClass;
-    Object();
     virtual ~Object();
 
+    typedef RTTI::MetaClass MetaClass;
     virtual ref<const RTTI::MetaClass>  metaclass() const = 0;
+protected:
+    Object();
     static ref<const Object::MetaClass> static_metaclass();
-    static void                          registerMetaClass();
+    static void                         registerMetaClass();
 private:
     Object(const Object& other);
     Object& operator=(const Object& other);
