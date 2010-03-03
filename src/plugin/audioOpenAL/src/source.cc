@@ -163,7 +163,7 @@ public:
 #endif
 
 Source::Source(ref<Sound> sound)
-:   Audio::Source(sound)
+:   Audio::ISource(sound)
 ,   m_pauseCount(0)
 {
 }

@@ -4,8 +4,8 @@
 #ifndef BE_AUDIO_OPENAL_WORLD_HH_
 #define BE_AUDIO_OPENAL_WORLD_HH_
 /*****************************************************************************/
-#include    <audio/world.hh>
-#include    <audio/sound.hh>
+#include    <audio/iworld.hh>
+#include    <audio/isound.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
@@ -13,7 +13,7 @@ namespace BugEngine { namespace Audio { namespace OpenAL
 class Sound;
 class Source;
 
-class World : public Audio::World
+class World : public Audio::IWorld
 {
     friend class Sound;
     friend class Source;
@@ -24,8 +24,8 @@ public:
     World();
     ~World();
 
-    ref<Audio::Sound> createSound(const ifilename& file) override;
-    ref<Audio::Sound> createMusic(const ifilename& file) override;
+    ref<Audio::ISound> createSound(const ifilename& file) override;
+    ref<Audio::ISound> createMusic(const ifilename& file) override;
 
     void step() override;
 public:
@@ -36,10 +36,10 @@ public:
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
 };
 
-class WorldManager : public Audio::WorldManager
+class WorldManager : public Audio::IWorldManager
 {
 protected:
-    ref<Audio::World> createWorld();
+    ref<Audio::IWorld> createWorld();
 };
 
 }}}

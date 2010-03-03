@@ -108,7 +108,7 @@ void FileSystem::umount(const ipath& prefix)
         parent->erase(prefix[prefix.size()-1]);
 }
 
-ref<AbstractMemoryStream> FileSystem::open(const ifilename& file, FileOpenMode mode) const
+ref<IMemoryStream> FileSystem::open(const ifilename& file, FileOpenMode mode) const
 {
     weak<FileSystemMountPoint> mountPoint = m_root;
     weak<FileSystemMountPoint> bestmatch = mountPoint;

@@ -2,20 +2,20 @@
    see LICENSE for detail */
 
 #include    <physics/stdafx.h>
-#include    <physics/iphysicsworld.hh>
+#include    <physics/iworld.hh>
 
 #include    <system/scheduler/function.hh>
 
 namespace BugEngine { namespace Physics
 {
 
-be_abstractmetaclass_impl("Physics", IPhysicsWorld);
+be_abstractmetaclass_impl("Physics", IWorld);
 
-IPhysicsWorld::IPhysicsWorld()
+IWorld::IWorld()
 {
 }
 
-IPhysicsWorld::~IPhysicsWorld()
+IWorld::~IWorld()
 {
 }
 

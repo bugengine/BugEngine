@@ -19,7 +19,7 @@ public:
     ~Context();
 
     void doFile(const ifilename& filename) override;
-    void doFile(weak<AbstractMemoryStream> stream) override;
+    void doFile(weak<IMemoryStream> stream) override;
 
 private:
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);

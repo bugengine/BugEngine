@@ -4,7 +4,7 @@
 #ifndef BE_AUDIO_OPENAL_SOUND_HH_
 #define BE_AUDIO_OPENAL_SOUND_HH_
 /*****************************************************************************/
-#include    <audio/sound.hh>
+#include    <audio/isound.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
@@ -12,11 +12,11 @@ namespace BugEngine { namespace Audio { namespace OpenAL
 class Source;
 class World;
 
-class Sound : public Audio::Sound
+class Sound : public Audio::ISound
 {
     friend class Source;
 public:
-    Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile);
+    Sound(weak<World> owner, ref<IMemoryStream> soundfile);
     ~Sound();
 };
 

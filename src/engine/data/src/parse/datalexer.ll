@@ -19,7 +19,7 @@ using namespace BugEngine::Data::Parse;
 namespace BugEngine { namespace Data { namespace Parse
 {
 
-weak<BugEngine::AbstractMemoryStream> g_parseStream;
+weak<BugEngine::IMemoryStream> g_parseStream;
 
 }}}
 

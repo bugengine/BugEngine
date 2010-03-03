@@ -15,7 +15,7 @@ public:
     virtual ~Script() { }
 
     virtual void doFile(const ifilename& file) = 0;
-    virtual void doFile(weak<AbstractMemoryStream> stream) = 0;
+    virtual void doFile(weak<IMemoryStream> stream) = 0;
 };
 
 }

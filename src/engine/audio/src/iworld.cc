@@ -2,20 +2,20 @@
    see LICENSE for detail */
 
 #include    <audio/stdafx.h>
-#include    <audio/source.hh>
-#include    <audio/world.hh>
+#include    <audio/iworld.hh>
+
+#include    <system/scheduler/function.hh>
 
 namespace BugEngine { namespace Audio
 {
 
-be_abstractmetaclass_impl("Audio",Source);
+be_abstractmetaclass_impl("Audio",IWorld);
 
-Source::Source(ref<Sound> sound)
-:   m_sound(sound)
+IWorld::IWorld()
 {
 }
 
-Source::~Source()
+IWorld::~IWorld()
 {
 }
 

@@ -5,7 +5,7 @@
 #define BE_PHYSICSBULLET_BULLETWORLD_H_
 /*****************************************************************************/
 
-#include    <physics/iphysicsworld.hh>
+#include    <physics/iworld.hh>
 
 #ifdef BE_COMPILER_MSVC
 #pragma warning(push,1)
@@ -19,7 +19,7 @@
 namespace BugEngine { namespace Physics { namespace Bullet
 {
 
-class BulletWorld : public IPhysicsWorld
+class BulletWorld : public IWorld
 {
 private:
     class WorldSetup

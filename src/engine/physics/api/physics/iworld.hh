@@ -1,0 +1,29 @@
+/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+   see LICENSE for detail */
+
+#ifndef BE_PHYSICS_IWORLD_HH_
+#define BE_PHYSICS_IWORLD_HH_
+/*****************************************************************************/
+#include    <system/scheduler/task.hh>
+
+namespace BugEngine { namespace Physics
+{
+
+class be_api(PHYSICS) IWorld : public Object
+{
+public:
+    IWorld();
+    ~IWorld();
+    
+    virtual void step() = 0;
+
+    be_metaclass(PHYSICS,IWorld,Object)
+    be_properties
+    be_end
+};
+
+}}
+
+
+/*****************************************************************************/
+#endif
