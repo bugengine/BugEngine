@@ -11,7 +11,7 @@ namespace BugEngine
 {
 
 class FileSystemComponent;
-class AbstractMemoryStream;
+class IMemoryStream;
 
 
 enum FileOpenMode
@@ -83,7 +83,7 @@ public:
 
     void mount(const ipath& prefix, ref<const FileSystemComponent> component);
     void umount(const ipath& prefix);
-    ref<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
+    ref<IMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
     size_t age(const ifilename& file) const;
 
     std::set<ifilename> listFiles(const ipath& prefix, const char* extension = 0);

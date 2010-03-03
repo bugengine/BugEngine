@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <audio/stdafx.h>
-#include    <audio/listener.hh>
+#include    <audio/ilistener.hh>
 
 
 namespace BugEngine { namespace Audio

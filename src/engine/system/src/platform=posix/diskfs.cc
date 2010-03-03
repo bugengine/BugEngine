@@ -14,7 +14,7 @@
 namespace BugEngine
 {
 
-class MemoryFileMap : public AbstractMemoryStream
+class MemoryFileMap : public IMemoryStream
 {
 private:
     const int       m_file;
@@ -111,7 +111,7 @@ bool DiskFS::writable() const
     return m_readOnly;
 }
 
-ref<AbstractMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
+ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
     std::string fullname = (m_prefix+filename).str();
     if(mode == eReadOnly)

@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include    <audio/stdafx.h>
-#include    <audio/sound.hh>
+#include    <audio/isound.hh>
 
-#include    <audio/world.hh>
+#include    <audio/iworld.hh>
 
 #ifdef BE_COMPILER_MSVC
 #pragma warning(push,1)
@@ -20,28 +20,28 @@ namespace BugEngine { namespace Audio
 
 static size_t vorbis_read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-    AbstractMemoryStream* stream = static_cast<AbstractMemoryStream*>(datasource);
+    IMemoryStream* stream = static_cast<IMemoryStream*>(datasource);
     return be_checked_numcast<size_t>(stream->read(ptr,size*nmemb));
 }
 
 static int vorbis_seek(void *datasource, ogg_int64_t offset, int whence)
 {
-    AbstractMemoryStream* stream = static_cast<AbstractMemoryStream*>(datasource);
-    stream->seek(AbstractMemoryStream::SeekMethod(whence), offset);
+    IMemoryStream* stream = static_cast<IMemoryStream*>(datasource);
+    stream->seek(IMemoryStream::SeekMethod(whence), offset);
     return 0;
 }
 
 static long vorbis_tell(void *datasource)
 {
-    AbstractMemoryStream* stream = static_cast<AbstractMemoryStream*>(datasource);
+    IMemoryStream* stream = static_cast<IMemoryStream*>(datasource);
     return be_checked_numcast<long>(stream->offset());
 }
 
 static ov_callbacks be_callbacks_vorbis = { vorbis_read, vorbis_seek, 0, vorbis_tell };
 
-be_abstractmetaclass_impl("Audio",Sound);
+be_abstractmetaclass_impl("Audio",ISound);
 
-Sound::Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile)
+ISound::ISound(weak<IWorld> owner, ref<IMemoryStream> soundfile)
 :   m_owner(owner)
 ,   m_soundFile(soundfile)
 {
@@ -51,7 +51,7 @@ Sound::Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile)
     UNUSED(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 }
 
-Sound::~Sound()
+ISound::~ISound()
 {
     if(m_data)
     {
@@ -60,12 +60,12 @@ Sound::~Sound()
     }
 }
 
-weak<World> Sound::owner() const
+weak<IWorld> ISound::owner() const
 {
     return m_owner;
 }
 
-size_t Sound::read(void* buffer, size_t size, int& frequency, int& channels) const
+size_t ISound::read(void* buffer, size_t size, int& frequency, int& channels) const
 {
     int bitstream;
     size_t result = ov_read(static_cast<OggVorbis_File*>(m_data), (char*)buffer, be_checked_numcast<int>(size), 0, 2, 1, &bitstream);
@@ -75,7 +75,7 @@ size_t Sound::read(void* buffer, size_t size, int& frequency, int& channels) con
     return result;
 }
 
-void Sound::reset()
+void ISound::reset()
 {
     if(m_data)
     {
@@ -86,7 +86,7 @@ void Sound::reset()
     ov_open_callbacks(m_soundFile.operator->(), static_cast<OggVorbis_File*>(m_data), 0, 0, be_callbacks_vorbis);
 }
 
-bool Sound::lock(weak<Source> from)
+bool ISound::lock(weak<ISource> from)
 {
     UNUSED(from);
     if(m_locked)
@@ -95,7 +95,7 @@ bool Sound::lock(weak<Source> from)
     return true;
 }
 
-void Sound::unlock()
+void ISound::unlock()
 {
     be_assert(m_locked, "sound object was not locked, cannot unlock");
     m_locked = false;

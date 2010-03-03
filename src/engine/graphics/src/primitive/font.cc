@@ -51,7 +51,7 @@ struct Font::VertexBuilder
 
 Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
 {
-    ref<AbstractMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
+    ref<IMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
     FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), be_checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
     OutputDebugString(font.str().c_str());
     OutputDebugString(": ");

@@ -5,18 +5,18 @@
 #define BE_PHYSICSBULLET_BULLETWORLDMANAGER_H_
 /*****************************************************************************/
 
-#include    <physics/iphysicsworldmanager.hh>
+#include    <physics/iworldmanager.hh>
 
 namespace BugEngine { namespace Physics { namespace Bullet
 {
 
-class BulletWorldManager : public IPhysicsWorldManager
+class BulletWorldManager : public IWorldManager
 {
 public:
     BulletWorldManager();
     ~BulletWorldManager();
 
-    virtual ref<IPhysicsWorld> createWorld(float3 extents) const override;
+    virtual ref<IWorld> createWorld(float3 extents) const override;
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

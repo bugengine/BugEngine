@@ -5,13 +5,13 @@
 #define BE_AUDIO_OPENAL_SOURCE_HH_
 /*****************************************************************************/
 #include    <sound.hh>
-#include    <audio/source.hh>
+#include    <audio/isource.hh>
 #include    <system/action.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
 
-class Source : public Audio::Source 
+class Source : public Audio::ISource 
 {
 private:
     size_t      m_pauseCount;

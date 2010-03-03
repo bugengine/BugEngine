@@ -1,24 +1,25 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PHYSICS_IPHYSICSWORLD_HH_
-#define BE_PHYSICS_IPHYSICSWORLD_HH_
+#ifndef BE_PHYSICS_IWORLDMANAGER_HH_
+#define BE_PHYSICS_IWORLDMANAGER_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task.hh>
+#include    <physics/iworld.hh>
 
 namespace BugEngine { namespace Physics
 {
 
-class be_api(PHYSICS) IPhysicsWorld : public Object
+class be_api(PHYSICS) IWorldManager : public Object
 {
 public:
-    IPhysicsWorld();
-    ~IPhysicsWorld();
+    IWorldManager();
+    ~IWorldManager();
     
-    virtual void step() = 0;
+    virtual ref<IWorld> createWorld(float3 worldextents) const = 0;
 
-    be_metaclass(PHYSICS,IPhysicsWorld,Object)
+    be_metaclass(PHYSICS,IWorldManager,Object)
     be_properties
+        //be_classmethod(createWorld);
     be_end
 };
 

@@ -67,7 +67,7 @@ Value Database::DatabaseElement::doeval(Context& context) const
 
 //-----------------------------------------------------------------------------
 
-extern weak<AbstractMemoryStream> g_parseStream;
+extern weak<IMemoryStream> g_parseStream;
 
 Database::Database()
 :   m_root(ref<DatabaseElement>::create("", weak<DatabaseElement>()))
@@ -99,7 +99,7 @@ void Database::parse(const ifilename& file)
 {
     ParseParam params(file, this);
 
-    ref<AbstractMemoryStream> stream = FileSystem::instance()->open(file, eReadOnly);
+    ref<IMemoryStream> stream = FileSystem::instance()->open(file, eReadOnly);
     g_parseStream = stream;
 
     yyparse(&params);

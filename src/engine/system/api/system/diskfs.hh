@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-class AbstractMemoryStream;
+class IMemoryStream;
 
 
 class be_api(SYSTEM) DiskFS : public FileSystemComponent
@@ -26,7 +26,7 @@ public:
 
     virtual bool writable() const override;
 
-    virtual ref<AbstractMemoryStream> open(const ifilename& file, FileOpenMode mode) const override;
+    virtual ref<IMemoryStream> open(const ifilename& file, FileOpenMode mode) const override;
     virtual size_t age(const ifilename& file) const override;
 };
 

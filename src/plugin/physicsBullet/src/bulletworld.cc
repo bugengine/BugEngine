@@ -34,7 +34,7 @@ BulletWorld::WorldSetup::~WorldSetup()
 
 
 BulletWorld::BulletWorld(float3 worldExtents)
-:   IPhysicsWorld()
+:   IWorld()
 ,   m_setup()
 ,   m_configuration()
 ,   m_dispatcher(&m_configuration)

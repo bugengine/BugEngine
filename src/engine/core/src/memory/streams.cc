@@ -7,20 +7,20 @@
 namespace BugEngine
 {
 
-AbstractMemoryStream::AbstractMemoryStream()
+IMemoryStream::IMemoryStream()
 {
 }
 
-AbstractMemoryStream::~AbstractMemoryStream()
+IMemoryStream::~IMemoryStream()
 {
 }
 
-void* AbstractMemoryStream::memory()
+void* IMemoryStream::memory()
 {
     return static_cast<void*>(static_cast<char*>(basememory())+offset());
 }
 
-i64 AbstractMemoryStream::read(void* buffer, i64 _size)
+i64 IMemoryStream::read(void* buffer, i64 _size)
 {
     i64 toread = std::min(_size,size()-offset());
     memcpy(buffer, memory(), be_checked_numcast<size_t>(toread));
@@ -28,7 +28,7 @@ i64 AbstractMemoryStream::read(void* buffer, i64 _size)
     return toread;
 }
 
-void AbstractMemoryStream::write(void* buffer, i64 _size)
+void IMemoryStream::write(void* buffer, i64 _size)
 {
     be_assert(writable(), "writing in a read-only memory stream");
     if(_size > size()-offset())

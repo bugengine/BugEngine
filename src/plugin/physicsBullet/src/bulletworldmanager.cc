@@ -16,7 +16,7 @@ BulletWorldManager::~BulletWorldManager()
 {
 }
 
-ref<IPhysicsWorld> BulletWorldManager::createWorld(float3 extents) const
+ref<IWorld> BulletWorldManager::createWorld(float3 extents) const
 {
     return ref<BulletWorld>::create(extents);
 }

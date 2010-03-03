@@ -10,8 +10,8 @@ namespace BugEngine { namespace Audio { namespace OpenAL
 {
 
 
-Sound::Sound(weak<World> owner, ref<AbstractMemoryStream> soundfile)
-:   Audio::Sound(owner, soundfile)
+Sound::Sound(weak<World> owner, ref<IMemoryStream> soundfile)
+:   Audio::ISound(owner, soundfile)
 {
 }
 

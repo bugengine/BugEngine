@@ -111,12 +111,12 @@ Context::~Context()
 void Context::doFile(const ifilename& filename)
 {
     weak<BugEngine::FileSystem> fs = BugEngine::FileSystem::instance();
-    ref<BugEngine::AbstractMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
+    ref<BugEngine::IMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
     be_info("loading file %s" | filename);
     doFile(file);
 }
 
-void Context::doFile(weak<AbstractMemoryStream> file)
+void Context::doFile(weak<IMemoryStream> file)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), "");
