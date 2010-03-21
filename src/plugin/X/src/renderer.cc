@@ -14,10 +14,11 @@ namespace
 {
     static int s_glxAttributes[] = {
         GLX_RGBA, GLX_DOUBLEBUFFER,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8, 
+        GLX_RED_SIZE, 6,
+        GLX_GREEN_SIZE, 6,
+        GLX_BLUE_SIZE, 6, 
         GLX_DEPTH_SIZE, 24,
+        GLX_X_VISUAL_TYPE_EXT, GLX_TRUE_COLOR_EXT,
         None
     };
 }
@@ -27,10 +28,9 @@ Renderer::Renderer()
 ,   m_screen(XDefaultScreen(m_display))
 ,   m_rootWindow(XRootWindow(m_display, m_screen))
 ,   m_visual(glXChooseVisual(m_display, m_screen, s_glxAttributes))
-,   m_exit(false)
-,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)   
 {
-    XSetErrorHandler(&Renderer::xError);
+    //XSetErrorHandler(&Renderer::xError);
+    XFlush(m_display);
 }
 
 Renderer::~Renderer()
@@ -45,19 +45,39 @@ uint2 Renderer::getScreenSize()
     return uint2(XWidthOfScreen(s), XHeightOfScreen(s));
 }
 
-int Renderer::step() const
+::Window Renderer::createWindow(const WindowFlags& flags)
 {
-    return (int)m_exit;
+    XSetWindowAttributes attributes;
+    attributes.border_pixel = 0;
+    attributes.override_redirect = !flags.fullscreen;
+    attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
+    int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect;
+    ::Window result = XCreateWindow(m_display,
+                                    XRootWindow(m_display, m_visual->screen),
+                                    0, 0,
+                                    flags.size.x(), flags.size.y(),
+                                    1,
+                                    m_visual->depth,
+                                    InputOutput,
+                                    m_visual->visual,
+                                    attributeMask,
+                                    &attributes);
+    if(result)
+    {
+        XMapRaised(m_display, result);
+    }
+    XFlush(m_display);
+    return result;
 }
 
-intptr_t Renderer::updateWindows(intptr_t p1, intptr_t p2)
+int Renderer::step() const
 {
-    weak<Renderer> renderer = (Renderer*)p1;
     XEvent event;
     /* wait for events*/ 
-    while (!renderer->m_exit)
+    int exit = 0;
+    while(XPending(m_display))
     {
-        XNextEvent(renderer->m_display, &event);
+        XNextEvent(m_display, &event);
         switch (event.type)
         {
         case DestroyNotify:
@@ -71,19 +91,20 @@ intptr_t Renderer::updateWindows(intptr_t p1, intptr_t p2)
         case ConfigureNotify:
             break;
         case ButtonPress:
-            renderer->m_exit = true;
+            exit = 1;
             break;
         case KeyPress:
             if (XLookupKeysym(&event.xkey, 0) == XK_Escape)
             {
-                renderer->m_exit = true;
+                exit = 1;
             }
             break;
         default:
             break;
         }
     }
-    return 0;
+
+    return exit;
 }
 
 static const char *s_messages[] =

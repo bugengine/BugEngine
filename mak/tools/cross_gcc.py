@@ -42,6 +42,7 @@ def parse_gcc_target(target):
 			  ('mips', 'mips'),
 			  ('Gekko', 'mips'),
 			  ('x86_64', 'amd64'),
+			  ('amd64', 'amd64'),
 			  ('powerpc', 'powerpc'),
 			  ('psp', 'mips'),
 			  ('mingw32', 'x86'),
