@@ -42,7 +42,7 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 
 Window::~Window()
 {
-	close();
+    close();
 }
 
 void Window::close()

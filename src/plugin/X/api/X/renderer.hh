@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <graphics/renderer/renderbackend.hh>
 #include    <core/threads/thread.hh>
+#include    <core/threads/event.hh>
 
 namespace BugEngine { namespace Graphics { namespace X
 {
@@ -21,11 +22,8 @@ protected:
     ::Window        m_rootWindow;
     ::XVisualInfo*  m_visual;
 private:
-    i_bool          m_exit;
-    Thread          m_windowManagementThread;
-private:
-    static intptr_t updateWindows(intptr_t p1, intptr_t p2);
     static int      xError(::Display* display, XErrorEvent* event);
+    ::Window        createWindow(const WindowFlags& flags);
 public:
     Renderer();
     ~Renderer();
