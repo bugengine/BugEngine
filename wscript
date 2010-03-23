@@ -3,6 +3,7 @@ APPNAME = "BugEngine"
 
 from mak import module
 import os
+import Environment
 
 srcdir = '.'
 blddir = '.build/waf'
@@ -12,6 +13,11 @@ def set_options(opt):
 
 def configure(conf):
 	conf.sub_config('mak')
+
+def list(ctx):
+	proj = Environment.Environment('.build/waf/c4che/default.cache.py')
+	for toolchain in proj['BUILD_VARIANTS']:
+		print toolchain
 
 def build(bld):
 	bld.add_subdirs('mak')

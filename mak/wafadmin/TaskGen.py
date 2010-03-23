@@ -196,13 +196,13 @@ class task_gen(object):
 		self.meths = out
 
 		# then we run the methods in order
-		debug('task_gen: posting %s %d' % (self, id(self)))
+		debug('task_gen: posting %s %d', self, id(self))
 		for x in out:
 			try:
 				v = getattr(self, x)
 			except AttributeError:
 				raise Utils.WafError("tried to retrieve %s which is not a valid method" % x)
-			debug('task_gen: -> %s (%d)' % (x, id(self)))
+			debug('task_gen: -> %s (%d)', x, id(self))
 			v()
 
 	def post(self):
@@ -217,7 +217,7 @@ class task_gen(object):
 			#error("OBJECT ALREADY POSTED" + str( self))
 			return
 		self.apply()
-		debug('task_gen: posted %s' % self.name)
+		debug('task_gen: posted %s', self.name)
 		self.posted = True
 
 	def get_hook(self, ext):
@@ -226,8 +226,15 @@ class task_gen(object):
 			try: return task_gen.mappings[ext]
 			except KeyError: return None
 
-	def create_task(self, name, env=None):
-		task = Task.TaskBase.classes[name](env or self.env, generator=self)
+	# TODO waf 1.6: always set the environment
+	# TODO waf 1.6: create_task(self, name, inputs, outputs)
+	def create_task(self, name, src=None, tgt=None, env=None):
+		env = env or self.env
+		task = Task.TaskBase.classes[name](env.copy(), generator=self)
+		if src:
+			task.set_inputs(src)
+		if tgt:
+			task.set_outputs(tgt)
 		self.tasks.append(task)
 		return task
 
@@ -257,7 +264,7 @@ class task_gen(object):
 		#make sure dirnames is a list helps with dirnames with spaces
 		dirnames = self.to_list(dirnames)
 
-		ext_lst = exts or self.mappings.keys() + task_gen.mappings.keys()
+		ext_lst = exts or list(self.mappings.keys()) + list(task_gen.mappings.keys())
 
 		for name in dirnames:
 			anode = self.path.find_dir(name)
@@ -267,7 +274,6 @@ class task_gen(object):
 					 ", or it's not child of '%s'." % (name, self.bld.srcnode))
 
 			self.bld.rescan(anode)
-
 			for name in self.bld.cache_dir_contents[anode.id]:
 
 				# ignore hidden files
@@ -336,8 +342,8 @@ def declare_order(*k):
 		if not f1 in task_gen.prec[f2]:
 			task_gen.prec[f2].append(f1)
 
-def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=1, color='BLUE',
-	install=0, before=[], after=[], decider=None, rule=None, scan=None, shell=None):
+def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=True, color='BLUE',
+	install=0, before=[], after=[], decider=None, rule=None, scan=None):
 	"""
 	see Tools/flex.py for an example
 	while i do not like such wrappers, some people really do
@@ -345,7 +351,7 @@ def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=1, color=
 
 	action = action or rule
 	if isinstance(action, str):
-		act = Task.simple_task_type(name, action, shell=shell, color=color)
+		act = Task.simple_task_type(name, action, color=color)
 	else:
 		act = Task.task_type_from_func(name, action, color=color)
 	act.ext_in = tuple(Utils.to_list(ext_in))
@@ -357,7 +363,7 @@ def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=1, color=
 	def x_file(self, node):
 		if decider:
 			ext = decider(self, node)
-		elif isinstance(ext_out, str):
+		else:
 			ext = ext_out
 
 		if isinstance(ext, str):
@@ -367,17 +373,15 @@ def declare_chain(name='', action='', ext_in='', ext_out='', reentrant=1, color=
 		elif isinstance(ext, list):
 			out_source = [node.change_ext(x) for x in ext]
 			if reentrant:
-				for i in xrange(reentrant):
+				for i in xrange((reentrant is True) and len(out_source) or reentrant):
 					self.allnodes.append(out_source[i])
 		else:
 			# XXX: useless: it will fail on Utils.to_list above...
 			raise Utils.WafError("do not know how to process %s" % str(ext))
 
-		tsk = self.create_task(name)
-		tsk.set_inputs(node)
-		tsk.set_outputs(out_source)
+		tsk = self.create_task(name, node, out_source)
 
-		if node.__class__.bld.is_install == INSTALL:
+		if node.__class__.bld.is_install:
 			tsk.install = install
 
 	declare_extension(act.ext_in, x_file)
@@ -401,6 +405,7 @@ Intelligent compilers binding aspect-oriented programming and parallelization, w
 """
 def taskgen(func):
 	setattr(task_gen, func.__name__, func)
+	return func
 
 def feature(*k):
 	def deco(func):
@@ -498,6 +503,8 @@ def exec_rule(self):
 
 	# create the task class
 	name = getattr(self, 'name', None) or self.target or self.rule
+	if not isinstance(name, str):
+		name = str(self.idx)
 	cls = Task.task_type_from_func(name, func, vars)
 
 	# now create one instance
@@ -509,7 +516,7 @@ def exec_rule(self):
 
 	if getattr(self, 'target', None):
 		cls.quiet = True
-		tsk.outputs=[self.path.find_or_declare(x) for x in self.to_list(self.target)]
+		tsk.outputs = [self.path.find_or_declare(x) for x in self.to_list(self.target)]
 
 	if getattr(self, 'source', None):
 		cls.quiet = True
@@ -519,9 +526,6 @@ def exec_rule(self):
 			if not y:
 				raise Utils.WafError('input file %r could not be found (%r)' % (x, self.path.abspath()))
 			tsk.inputs.append(y)
-
-	if getattr(self, 'always', None):
-		Task.always_run(cls)
 
 	if getattr(self, 'scan', None):
 		cls.scan = self.scan
@@ -535,7 +539,10 @@ def exec_rule(self):
 	if getattr(self, 'on_results', None):
 		Task.update_outputs(cls)
 
-	for x in ['after', 'before']:
+	if getattr(self, 'always', None):
+		Task.always_run(cls)
+
+	for x in ['after', 'before', 'ext_in', 'ext_out']:
 		setattr(cls, x, getattr(self, x, []))
 feature('*')(exec_rule)
 before('apply_core')(exec_rule)
@@ -548,8 +555,8 @@ def sequence_order(self):
 	there is also an awesome trick for executing the method in last position
 
 	to use:
-	bld.new_task_gen(features='javac seq')
-	bld.new_task_gen(features='jar seq')
+	bld(features='javac seq')
+	bld(features='jar seq')
 
 	to start a new sequence, set the attribute seq_start, for example:
 	obj.seq_start = True

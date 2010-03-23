@@ -53,8 +53,13 @@ class Environment(object):
 	def __setitem__(self, key, value):
 		self.table[key] = value
 
-	def __delitem__(self, key, value):
+	def __delitem__(self, key):
 		del self.table[key]
+	
+	def pop(self, key, *args):
+		if len(args):
+			return self.table.pop(key, *args)
+		return self.table.pop(key)
 
 	def set_variant(self, name):
 		self.table[VARIANT] = name
@@ -75,6 +80,20 @@ class Environment(object):
 		newenv.parent = self
 		return newenv
 
+	def detach(self):
+		"""TODO try it
+		modifying the original env will not change the copy"""
+		tbl = self.get_merged_dict()
+		try:
+			delattr(self, 'parent')
+		except AttributeError:
+			pass
+		else:
+			keys = tbl.keys()
+			for x in keys:
+				tbl[x] = copy.deepcopy(tbl[x])
+			self.table = tbl
+
 	def get_flat(self, key):
 		s = self[key]
 		if isinstance(s, str): return s
@@ -91,7 +110,7 @@ class Environment(object):
 			try: value = self.parent[key]
 			except AttributeError: value = []
 			if isinstance(value, list):
-				value = copy.copy(value)
+				value = value[:]
 			else:
 				value = [value]
 		else:
@@ -159,7 +178,7 @@ class Environment(object):
 		for m in re_imp.finditer(code):
 			g = m.group
 			tbl[g(2)] = eval(g(3))
-		Logs.debug('env: %s' % str(self.table))
+		Logs.debug('env: %s', self.table)
 
 	def get_destdir(self):
 		"return the destdir, useful for installing"
@@ -183,9 +202,9 @@ class Environment(object):
 		else:
 			self[name] = value
 
-	def __detattr__(self, name):
+	def __delattr__(self, name):
 		if name in self.__slots__:
-			object.__detattr__(self, name)
+			object.__delattr__(self, name)
 		else:
 			del self[name]
 

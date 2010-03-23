@@ -5,18 +5,17 @@
 "intltool support"
 
 import os, re
-import Configure, TaskGen, Task, Utils, Runner, Options, Build
+import Configure, TaskGen, Task, Utils, Runner, Options, Build, config_c
 from TaskGen import feature, before, taskgen
 from Logs import error
 
 """
 Usage:
 
-bld.new_task_gen(features='intltool_in', source='a.po b.po', podir='po', cache='.intlcache', flags='')
-
-
+bld(features='intltool_in', source='a.po b.po', podir='po', cache='.intlcache', flags='')
 
 """
+
 class intltool_in_taskgen(TaskGen.task_gen):
 	"""deprecated"""
 	def __init__(self, *k, **kw):
@@ -42,10 +41,7 @@ def iapply_intltool_in_f(self):
 		self.env['INTLPODIR'] = podirnode.srcpath(self.env)
 		self.env['INTLFLAGS'] = getattr(self, 'flags', ['-q', '-u', '-c'])
 
-		task = self.create_task('intltool')
-		task.set_inputs(node)
-		task.set_outputs(node.change_ext(''))
-
+		task = self.create_task('intltool', node, node.change_ext(''))
 		task.install_path = self.install_path
 
 class intltool_po_taskgen(TaskGen.task_gen):
@@ -68,9 +64,7 @@ def apply_intltool_po(self):
 		filename = out.name
 		(langname, ext) = os.path.splitext(filename)
 		inst_file = langname + os.sep + 'LC_MESSAGES' + os.sep + appname + '.mo'
-		self.bld.install_as(
-			os.path.join(self.install_path, inst_file),
-			out.abspath(self.env), chmod=self.chmod)
+		self.bld.install_as(os.path.join(self.install_path, inst_file), out, self.env, self.chmod)
 
 	linguas = self.path.find_resource(os.path.join(podir, 'LINGUAS'))
 	if linguas:
@@ -135,8 +129,9 @@ def detect(conf):
 	conf.define('LOCALEDIR', os.path.join(datadir, 'locale'))
 	conf.define('DATADIR', datadir)
 
-	#Define to 1 if you have the <locale.h> header file.
-	conf.check(header_name='locale.h')
+	if conf.env['CC'] or conf.env['CXX']:
+		# Define to 1 if <locale.h> is present
+		conf.check(header_name='locale.h')
 
 def set_options(opt):
 	opt.add_option('--want-rpath', type='int', default=1, dest='want_rpath', help='set rpath to 1 or 0 [Default 1]')

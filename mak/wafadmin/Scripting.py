@@ -4,7 +4,7 @@
 
 "Module called for configuring, compiling and installing targets"
 
-import os, sys, shutil, traceback, datetime, inspect
+import os, sys, shutil, traceback, datetime, inspect, errno
 
 import Utils, Configure, Build, Logs, Options, Environment, Task
 from Logs import error, warn, info
@@ -27,7 +27,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 	# now find the wscript file
 	msg1 = 'Waf: Please run waf from a directory containing a file named "%s" or run distclean' % WSCRIPT_FILE
 
-	# in theory projects can be configured in a gcc manner:
+	# in theory projects can be configured in an autotool-like manner:
 	# mkdir build && cd build && ../waf configure && ../waf
 	build_dir_override = None
 	candidate = None
@@ -39,7 +39,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 		candidate = cwd
 
 	elif 'configure' in sys.argv and not WSCRIPT_BUILD_FILE in lst:
-		# gcc-like configuration
+		# autotool-like configuration
 		calldir = os.path.abspath(os.path.dirname(sys.argv[0]))
 		if WSCRIPT_FILE in os.listdir(calldir):
 			candidate = calldir
@@ -60,7 +60,10 @@ def prepare_impl(t, cwd, ver, wafdir):
 			break
 		if Options.lockfile in dirlst:
 			env = Environment.Environment()
-			env.load(os.path.join(cwd, Options.lockfile))
+			try:
+				env.load(os.path.join(cwd, Options.lockfile))
+			except:
+				error('could not load %r' % Options.lockfile)
 			try:
 				os.stat(env['cwd'])
 			except:
@@ -105,7 +108,7 @@ def prepare_impl(t, cwd, ver, wafdir):
 		if not n in Utils.g_module.__dict__:
 			setattr(Utils.g_module, n, obj)
 
-	for k in [dist, distclean, distcheck, build, clean, install, uninstall]:
+	for k in [dist, distclean, distcheck, clean, install, uninstall]:
 		set_def(k)
 
 	set_def(Configure.ConfigurationContext, 'configure_context')
@@ -198,19 +201,20 @@ def configure(conf):
 
 	src = getattr(Options.options, SRCDIR, None)
 	if not src: src = getattr(Utils.g_module, SRCDIR, None)
+	if not src: src = getattr(Utils.g_module, 'top', None)
 	if not src:
 		src = '.'
 		incomplete_src = 1
 	src = os.path.abspath(src)
 
 	bld = getattr(Options.options, BLDDIR, None)
-	if not bld:
-		bld = getattr(Utils.g_module, BLDDIR, None)
-		if bld == '.':
-			raise Utils.WafError('Setting blddir="." may cause distclean problems')
+	if not bld: bld = getattr(Utils.g_module, BLDDIR, None)
+	if not bld: bld = getattr(Utils.g_module, 'out', None)
 	if not bld:
 		bld = 'build'
 		incomplete_bld = 1
+	if bld == '.':
+		raise Utils.WafError('Setting blddir="." may cause distclean problems')
 	bld = os.path.abspath(bld)
 
 	try: os.makedirs(bld)
@@ -415,7 +419,7 @@ def dont_dist(name, src, build_dir):
 
 	if (name.startswith(',,')
 		or name.startswith('++')
-		or name.startswith('.waf-1.')
+		or name.startswith('.waf')
 		or (src == '.' and name == Options.lockfile)
 		or name in excludes
 		or name == build_dir
@@ -448,22 +452,32 @@ def copytree(src, dst, build_dir):
 # TODO in waf 1.6, change this method if "srcdir == blddir" is allowed
 def distclean(ctx=None):
 	'''removes the build directory'''
+	global commands
 	lst = os.listdir('.')
 	for f in lst:
 		if f == Options.lockfile:
 			try:
 				proj = Environment.Environment(f)
+			except:
+				Logs.warn('could not read %r' % f)
+				continue
+
+			try:
 				shutil.rmtree(proj[BLDDIR])
-			except (OSError, IOError):
+			except IOError:
 				pass
+			except OSError, e:
+				if e.errno != errno.ENOENT:
+					Logs.warn('project %r cannot be removed' % proj[BLDDIR])
 
 			try:
 				os.remove(f)
-			except (OSError, IOError):
-				pass
+			except OSError, e:
+				if e.errno != errno.ENOENT:
+					Logs.warn('file %r cannot be removed' % f)
 
 		# remove the local waf cache
-		if f.startswith('.waf-'):
+		if not commands and f.startswith('.waf'):
 			shutil.rmtree(f, ignore_errors=True)
 
 # FIXME waf 1.6 a unique ctx parameter, and remove the optional appname and version
@@ -476,7 +490,10 @@ def dist(appname='', version=''):
 	if not version: version = getattr(Utils.g_module, VERSION, '1.0')
 
 	tmp_folder = appname + '-' + version
-	arch_name = tmp_folder+'.tar.'+g_gz
+	if g_gz in ['gz', 'bz2']:
+		arch_name = tmp_folder + '.tar.' + g_gz
+	else:
+		arch_name = tmp_folder + '.' + 'zip'
 
 	# remove the previous dir
 	try:
@@ -504,9 +521,12 @@ def dist(appname='', version=''):
 			# go back to the root directory
 			os.chdir(back)
 
-	tar = tarfile.open(arch_name, 'w:' + g_gz)
-	tar.add(tmp_folder)
-	tar.close()
+	if g_gz in ['gz', 'bz2']:
+		tar = tarfile.open(arch_name, 'w:' + g_gz)
+		tar.add(tmp_folder)
+		tar.close()
+	else:
+		Utils.zip_folder(tmp_folder, arch_name, tmp_folder)
 
 	try: from hashlib import sha1 as sha
 	except ImportError: from sha import sha

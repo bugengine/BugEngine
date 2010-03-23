@@ -6,7 +6,7 @@
 "Custom command-line options"
 
 import os, sys, imp, types, tempfile, optparse
-import Logs, Utils, Configure
+import Logs, Utils
 from Constants import *
 
 cmds = 'distclean configure build install clean uninstall check dist distcheck'.split()
@@ -22,7 +22,7 @@ tooldir = ''
 lockfile = os.environ.get('WAFLOCK', '.lock-wscript')
 try: cache_global = os.path.abspath(os.environ['WAFCACHE'])
 except KeyError: cache_global = ''
-platform = Utils.detect_platform()
+platform = Utils.unversioned_sys_platform()
 conf_file = 'conf-runs-%s-%d.pickle' % (platform, ABI)
 
 # Such a command-line should work:  JOBS=4 PREFIX=/opt/ DESTDIR=/tmp/ahoj/ waf configure
@@ -39,8 +39,12 @@ if default_jobs < 1:
 		else:
 			default_jobs = int(Utils.cmd_output(['sysctl', '-n', 'hw.ncpu']))
 	except:
-		# environment var defined on win32
-		default_jobs = int(os.environ.get('NUMBER_OF_PROCESSORS', 1))
+		if os.name == 'java': # platform.system() == 'Java'
+			from java.lang import Runtime
+			default_jobs = Runtime.getRuntime().availableProcessors()
+		else:
+			# environment var defined on win32
+			default_jobs = int(os.environ.get('NUMBER_OF_PROCESSORS', 1))
 
 default_destdir = os.environ.get('DESTDIR', '')
 
@@ -256,6 +260,8 @@ class Handler(Utils.Context):
 
 		for tool in tools:
 			tool = tool.replace('++', 'xx')
+			if tool == 'java': tool = 'javaw'
+			if tool.lower() == 'unittest': tool = 'unittestw'
 			module = Utils.load_tool(tool, path)
 			try:
 				fun = module.set_options
