@@ -30,7 +30,7 @@
 #  PocketPC   => Compiler/SDK for PocketPC devices (armv4/v4i)
 
 
-import os, sys, re, string, optparse
+import os, sys, re, string, optparse, math
 import Utils, TaskGen, Runner, Configure, Task, Options
 from Logs import debug, info, warn, error
 from TaskGen import after, before, feature
@@ -780,7 +780,16 @@ def exec_mf(self):
 	self.do_manifest = False
 
 	outfile = self.outputs[0].bldpath(env)
-	manifest = self.outputs[-1].bldpath(env)
+	manifest = None
+	for out_node in self.outputs:
+		if out_node.name.endswith('.manifest'):
+			manifest = out_node.bldpath(env)
+			break
+	if manifest is None:
+		# Should never get here.  If we do, it means the manifest file was 
+		# never added to the outputs list, thus we don't have a manifest file 
+		# to embed, so we just return.
+		return 0
 
 	# embedding mode. Different for EXE's and DLL's.
 	# see: http://msdn2.microsoft.com/en-us/library/ms235591(VS.80).aspx
@@ -794,7 +803,7 @@ def exec_mf(self):
 	#flags = ' '.join(env['MTFLAGS'] or [])
 
 	lst = []
-	lst.extend(Utils.to_list(env['MT']))
+	lst.extend([env['MT']])
 	lst.extend(Utils.to_list(env['MTFLAGS']))
 	lst.extend(Utils.to_list("-manifest"))
 	lst.extend(Utils.to_list(manifest))
