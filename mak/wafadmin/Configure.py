@@ -66,8 +66,8 @@ def find_program_impl(env, filename, path_list=[], var=None, environ=None):
 	except AttributeError: pass
 
 	if var:
-		if var in environ: env[var] = environ[var]
 		if env[var]: return env[var]
+		if var in environ: env[var] = environ[var]
 
 	if not path_list: path_list = environ.get('PATH', '').split(os.pathsep)
 
@@ -119,7 +119,11 @@ class ConfigurationContext(Utils.Context):
 		path = os.path.join(self.blddir, WAF_CONFIG_LOG)
 		try: os.unlink(path)
 		except (OSError, IOError): pass
-		self.log = open(path, 'w')
+
+		try:
+			self.log = open(path, 'w')
+		except (OSError, IOError):
+			self.fatal('could not open %r for writing' % path)
 
 		app = getattr(Utils.g_module, 'APPNAME', '')
 		if app:
@@ -153,6 +157,7 @@ class ConfigurationContext(Utils.Context):
 		for tool in tools:
 			tool = tool.replace('++', 'xx')
 			if tool == 'java': tool = 'javaw'
+			if tool.lower() == 'unittest': tool = 'unittestw'
 			# avoid loading the same tool more than once with the same functions
 			# used by composite projects
 
@@ -162,10 +167,14 @@ class ConfigurationContext(Utils.Context):
 			self.tool_cache.append(mag)
 
 			module = Utils.load_tool(tool, tooldir)
-			func = getattr(module, 'detect', None)
-			if func:
-				if type(func) is type(find_file): func(self)
-				else: self.eval_rules(funs or func)
+
+			if funs:
+				self.eval_rules(funs)
+			else:
+				func = getattr(module, 'detect', None)
+				if func:
+					if type(func) is type(find_file): func(self)
+					else: self.eval_rules(func)
 
 			self.tools.append({'tool':tool, 'tooldir':tooldir, 'funs':funs})
 
@@ -228,17 +237,20 @@ class ConfigurationContext(Utils.Context):
 
 	def check_message_1(self, sr):
 		self.line_just = max(self.line_just, len(sr))
-		self.log.write(sr + '\n\n')
+		for x in ('\n', self.line_just * '-', '\n', sr, '\n'):
+			self.log.write(x)
 		Utils.pprint('NORMAL', "%s :" % sr.ljust(self.line_just), sep='')
 
 	def check_message_2(self, sr, color='GREEN'):
+		self.log.write(sr)
+		self.log.write('\n')
 		Utils.pprint(color, sr)
 
 	def check_message(self, th, msg, state, option=''):
 		sr = 'Checking for %s %s' % (th, msg)
 		self.check_message_1(sr)
 		p = self.check_message_2
-		if state: p('ok ' + option)
+		if state: p('ok ' + str(option))
 		else: p('not found', 'YELLOW')
 
 	# FIXME remove in waf 1.6
@@ -250,11 +262,31 @@ class ConfigurationContext(Utils.Context):
 
 	def find_program(self, filename, path_list=[], var=None, mandatory=False):
 		"wrapper that adds a configuration message"
-		ret = find_program_impl(self.env, filename, path_list, var, environ=self.environ)
-		self.check_message('program', filename, ret, ret)
-		self.log.write('find program=%r paths=%r var=%r -> %r\n\n' % (filename, path_list, var, ret))
-		if not ret and mandatory:
-			self.fatal('The program %s could not be found' % filename)
+
+		ret = None
+		if var:
+			if self.env[var]:
+				ret = self.env[var]
+			elif var in os.environ:
+				ret = os.environ[var]
+
+		if not isinstance(filename, list): filename = [filename]
+		if not ret:
+			for x in filename:
+				ret = find_program_impl(self.env, x, path_list, var, environ=self.environ)
+				if ret: break
+
+		self.check_message_1('Check for program %s' % ' or '.join(filename))
+		self.log.write('  find program=%r paths=%r var=%r\n  -> %r\n' % (filename, path_list, var, ret))
+		if ret:
+			Utils.pprint('GREEN', str(ret))
+		else:
+			Utils.pprint('YELLOW', 'not found')
+			if mandatory:
+				self.fatal('The program %r is required' % filename)
+
+		if var:
+			self.env[var] = ret
 		return ret
 
 	def cmd_to_list(self, cmd):

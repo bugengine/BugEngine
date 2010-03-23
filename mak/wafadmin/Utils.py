@@ -9,8 +9,8 @@ Utilities, the stable ones are the following:
   the module fnv if it is installed (see waf/utils/fnv & http://code.google.com/p/waf/wiki/FAQ)
   else, md5 (see the python docs)
 
-  For large projects (projects with more than 15000 files) it is possible to use
-  a hashing based on the path and the size (may give broken cache results)
+  For large projects (projects with more than 15000 files) or slow hard disks and filesystems (HFS)
+  it is possible to use a hashing based on the path and the size (may give broken cache results)
   The method h_file MUST raise an OSError if the file is a folder
 
 	import stat
@@ -46,6 +46,13 @@ else:
 import Logs
 from Constants import *
 
+try:
+	from collections import deque
+except ImportError:
+	class deque(list):
+		def popleft(self):
+			return self.pop(0)
+
 is_win32 = sys.platform == 'win32'
 
 try:
@@ -67,7 +74,10 @@ except ImportError:
 class WafError(Exception):
 	def __init__(self, *args):
 		self.args = args
-		self.stack = traceback.extract_stack()
+		try:
+			self.stack = traceback.extract_stack()
+		except:
+			pass
 		Exception.__init__(self, *args)
 	def __str__(self):
 		return str(len(self.args) == 1 and self.args[0] or self.args)
@@ -78,7 +88,10 @@ class WscriptError(WafError):
 			self.wscript_file = wscript_file
 			self.wscript_line = None
 		else:
-			(self.wscript_file, self.wscript_line) = self.locate_error()
+			try:
+				(self.wscript_file, self.wscript_line) = self.locate_error()
+			except:
+				(self.wscript_file, self.wscript_line) = (None, None)
 
 		msg_file_line = ''
 		if self.wscript_file:
@@ -124,7 +137,6 @@ except ImportError:
 	def h_file(filename):
 		f = open(filename, 'rb')
 		m = md5()
-		readBytes = 100000
 		while (filename):
 			filename = f.read(100000)
 			m.update(filename)
@@ -157,21 +169,32 @@ def exec_command(s, **kw):
 		return -1
 
 if is_win32:
-	old_log = exec_command
 	def exec_command(s, **kw):
-		# TODO very long command-lines are unlikely to be used in the configuration
-		if len(s) < 2000: return old_log(s, **kw)
-
 		if 'log' in kw:
 			kw['stdout'] = kw['stderr'] = kw['log']
 			del(kw['log'])
 		kw['shell'] = isinstance(s, str)
 
-		startupinfo = pproc.STARTUPINFO()
-		startupinfo.dwFlags |= pproc.STARTF_USESHOWWINDOW
-		kw['startupinfo'] = startupinfo
-		proc = pproc.Popen(s, **kw)
-		return proc.wait()
+		if len(s) > 2000:
+			startupinfo = pproc.STARTUPINFO()
+			startupinfo.dwFlags |= pproc.STARTF_USESHOWWINDOW
+			kw['startupinfo'] = startupinfo
+
+		try:
+			if 'stdout' not in kw:
+				kw['stdout'] = pproc.PIPE
+				kw['stderr'] = pproc.PIPE
+				proc = pproc.Popen(s,**kw)
+				(stdout, stderr) = proc.communicate()
+				Logs.info(stdout)
+				if stderr:
+					Logs.error(stderr)
+				return proc.returncode
+			else:
+				proc = pproc.Popen(s,**kw)
+				return proc.wait()
+		except OSError:
+			return -1
 
 listdir = os.listdir
 if is_win32:
@@ -204,13 +227,15 @@ def waf_version(mini = 0x010000, maxi = 0x100000):
 		sys.exit(0)
 
 def python_24_guard():
-	if sys.hexversion<0x20400f0:
-		raise ImportError("Waf requires Python >= 2.3 but the raw source requires Python 2.4")
+	if sys.hexversion < 0x20400f0 or sys.hexversion >= 0x3000000:
+		raise ImportError("Waf requires Python >= 2.3 but the raw source requires Python 2.4, 2.5 or 2.6")
 
 def ex_stack():
 	exc_type, exc_value, tb = sys.exc_info()
-	exc_lines = traceback.format_exception(exc_type, exc_value, tb)
-	return ''.join(exc_lines)
+	if Logs.verbose > 1:
+		exc_lines = traceback.format_exception(exc_type, exc_value, tb)
+		return ''.join(exc_lines)
+	return str(exc_value)
 
 def to_list(sth):
 	if isinstance(sth, str):
@@ -236,14 +261,16 @@ def load_module(file_path, name=WSCRIPT_FILE):
 	try:
 		code = readf(file_path, m='rU')
 	except (IOError, OSError):
-		raise WscriptError('The file %s could not be opened!' % file_path)
+		raise WscriptError('Could not read the file %r' % file_path)
 
 	module.waf_hash_val = code
 
-	module_dir = os.path.dirname(file_path)
-	sys.path.insert(0, module_dir)
-	exec(code, module.__dict__)
-	sys.path.remove(module_dir)
+	sys.path.insert(0, os.path.dirname(file_path))
+	try:
+		exec(compile(code, file_path, 'exec'), module.__dict__)
+	except Exception:
+		raise WscriptError(traceback.format_exc(), file_path)
+	sys.path.pop(0)
 
 	g_loaded_modules[file_path] = module
 
@@ -336,14 +363,10 @@ def def_attrs(cls, **kw):
 		if not hasattr(cls, k):
 			setattr(cls, k, v)
 
-quote_define_name_table = None
 def quote_define_name(path):
-	"Converts a string to a constant name, foo/zbr-xpto.h -> FOO_ZBR_XPTO_H"
-	global quote_define_name_table
-	if not quote_define_name_table:
-		invalid_chars = set([chr(x) for x in xrange(256)]) - set(string.digits + string.uppercase)
-		quote_define_name_table = string.maketrans(''.join(invalid_chars), '_'*len(invalid_chars))
-	return string.translate(string.upper(path), quote_define_name_table)
+	fu = re.compile("[^a-zA-Z0-9]").sub("_", path)
+	fu = fu.upper()
+	return fu
 
 def quote_whitespace(path):
 	return (path.strip().find(' ') > 0 and '"%s"' % path or path).replace('""', '"')
@@ -432,7 +455,57 @@ def subst_vars(expr, params):
 			return params[m.group(3)]
 	return reg_subst.sub(repl_var, expr)
 
+def unversioned_sys_platform_to_binary_format(unversioned_sys_platform):
+	"infers the binary format from the unversioned_sys_platform name."
+
+	if unversioned_sys_platform in ('linux', 'freebsd', 'netbsd', 'openbsd', 'sunos'):
+		return 'elf'
+	elif unversioned_sys_platform == 'darwin':
+		return 'mac-o'
+	elif unversioned_sys_platform in ('win32', 'cygwin', 'uwin', 'msys'):
+		return 'pe'
+	# TODO we assume all other operating systems are elf, which is not true.
+	# we may set this to 'unknown' and have ccroot and other tools handle the case "gracefully" (whatever that means).
+	return 'elf'
+
+def unversioned_sys_platform():
+	"""returns an unversioned name from sys.platform.
+	sys.plaform is not very well defined and depends directly on the python source tree.
+	The version appended to the names is unreliable as it's taken from the build environment at the time python was built,
+	i.e., it's possible to get freebsd7 on a freebsd8 system.
+	So we remove the version from the name, except for special cases where the os has a stupid name like os2 or win32.
+	Some possible values of sys.platform are, amongst others:
+		aix3 aix4 atheos beos5 darwin freebsd2 freebsd3 freebsd4 freebsd5 freebsd6 freebsd7
+		generic irix5 irix6 linux2 mac netbsd1 next3 os2emx riscos sunos5 unixware7
+	Investigating the python source tree may reveal more values.
+	"""
+	s = sys.platform
+	if s == 'java':
+		# The real OS is hidden under the JVM.
+		from java.lang import System
+		s = System.getProperty('os.name')
+		# see http://lopica.sourceforge.net/os.html for a list of possible values
+		if s == 'Mac OS X':
+			return 'darwin'
+		elif s.startswith('Windows '):
+			return 'win32'
+		elif s == 'OS/2':
+			return 'os2'
+		elif s == 'HP-UX':
+			return 'hpux'
+		elif s in ('SunOS', 'Solaris'):
+			return 'sunos'
+		else: s = s.lower()
+	if s == 'win32' or s.endswith('os2') and s != 'sunos2': return s
+	return re.split('\d+$', s)[0]
+
+#@deprecated('use unversioned_sys_platform instead')
 def detect_platform():
+	"""this function has been in the Utils module for some time.
+	It's hard to guess what people have used it for.
+	It seems its goal is to return an unversionned sys.platform, but it's not handling all platforms.
+	For example, the version is not removed on freebsd and netbsd, amongst others.
+	"""
 	s = sys.platform
 
 	# known POSIX
@@ -448,6 +521,15 @@ def detect_platform():
 	return s
 
 def load_tool(tool, tooldir=None):
+	'''
+	load_tool: import a Python module, optionally using several directories.
+	@param tool [string]: name of tool to import.
+	@param tooldir [list]: directories to look for the tool.
+	@return: the loaded module.
+
+	Warning: this function is not thread-safe: plays with sys.path,
+					 so must run in sequence.
+	'''
 	if tooldir:
 		assert isinstance(tooldir, list)
 		sys.path = tooldir + sys.path
@@ -455,20 +537,19 @@ def load_tool(tool, tooldir=None):
 		try:
 			return __import__(tool)
 		except ImportError, e:
-			raise WscriptError(e)
+			Logs.error('Could not load the tool %r in %r:\n%s' % (tool, sys.path, e))
+			raise
 	finally:
 		if tooldir:
-			for d in tooldir:
-				sys.path.remove(d)
+			sys.path = sys.path[len(tooldir):]
 
 def readf(fname, m='r'):
 	"get the contents of a file, it is not used anywhere for the moment"
-	f = None
+	f = open(fname, m)
 	try:
-		f = open(fname, m)
 		txt = f.read()
 	finally:
-		if f: f.close()
+		f.close()
 	return txt
 
 def nada(*k, **kw):
@@ -516,9 +597,10 @@ class Context(object):
 				nexdir = os.path.join(self.curdir, x)
 
 			base = os.path.join(nexdir, WSCRIPT_FILE)
+			file_path = base + '_' + name
 
 			try:
-				txt = readf(base + '_' + name, m='rU')
+				txt = readf(file_path, m='rU')
 			except (OSError, IOError):
 				try:
 					module = load_module(base)
@@ -543,15 +625,18 @@ class Context(object):
 			else:
 				dc = {'ctx': self}
 				if getattr(self.__class__, 'pre_recurse', None):
-					dc = self.pre_recurse(txt, base + '_' + name, nexdir)
+					dc = self.pre_recurse(txt, file_path, nexdir)
 				old = self.curdir
 				self.curdir = nexdir
 				try:
-					exec (txt, dc)
+					try:
+						exec(compile(txt, file_path, 'exec'), dc)
+					except Exception:
+						raise WscriptError(traceback.format_exc(), base)
 				finally:
 					self.curdir = old
 				if getattr(self.__class__, 'post_recurse', None):
-					self.post_recurse(txt, base + '_' + name, nexdir)
+					self.post_recurse(txt, file_path, nexdir)
 
 if is_win32:
 	old = shutil.copy2
@@ -559,6 +644,25 @@ if is_win32:
 		old(src, dst)
 		shutil.copystat(src, src)
 	setattr(shutil, 'copy2', copy2)
+
+def zip_folder(dir, zip_file_name, prefix):
+	"""
+	prefix represents the app to add in the archive
+	"""
+	import zipfile
+	zip = zipfile.ZipFile(zip_file_name, 'w', compression=zipfile.ZIP_DEFLATED)
+	base = os.path.abspath(dir)
+
+	if prefix:
+		if prefix[-1] != os.sep:
+			prefix += os.sep
+
+	n = len(base)
+	for root, dirs, files in os.walk(base):
+		for f in files:
+			archive_name = prefix + root[n:] + os.sep + f
+			zip.write(root + os.sep + f, archive_name, zipfile.ZIP_DEFLATED)
+	zip.close()
 
 def get_elapsed_time(start):
 	"Format a time delta (datetime.timedelta) using the format DdHhMmS.MSs"

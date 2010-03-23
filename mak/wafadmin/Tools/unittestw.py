@@ -18,7 +18,9 @@ In the shutdown method, add the following code:
 Each object to use as a unit test must be a program and must have X{obj.unit_test=1}
 """
 import os, sys
-import Build, TaskGen, Utils, Options, Logs
+import Build, TaskGen, Utils, Options, Logs, Task
+from TaskGen import before, after, feature
+from Constants import *
 
 class unit_test(object):
 	"Unit test representation"
@@ -114,10 +116,16 @@ class unit_test(object):
 				if not self.want_to_see_test_error:
 					kwargs['stderr'] = Utils.pproc.PIPE  # PIPE for ignoring output
 				if ld_library_path:
+					v = kwargs['env']
+					def add_path(dct, path, var):
+						dct[var] = os.pathsep.join(Utils.to_list(path) + [os.environ.get(var, '')])
 					if sys.platform == 'win32':
-						kwargs['env']['PATH'] = ';'.join(ld_library_path + [os.environ.get('PATH', '')])
+						add_path(v, ld_library_path, 'PATH')
+					elif sys.platform == 'darwin':
+						add_path(v, ld_library_path, 'DYLD_LIBRARY_PATH')
+						add_path(v, ld_library_path, 'LD_LIBRARY_PATH')
 					else:
-						kwargs['env']['LD_LIBRARY_PATH'] = ':'.join(ld_library_path + [os.environ.get('LD_LIBRARY_PATH', '')])
+						add_path(v, ld_library_path, 'LD_LIBRARY_PATH')
 
 				pp = Utils.pproc.Popen(filename, **kwargs)
 				pp.wait()
@@ -185,4 +193,113 @@ Total number of tests: %i
 ''' % (self.num_tests_ok, percentage_ok, self.num_tests_failed, percentage_failed,
 		self.num_tests_err, percentage_erroneous, self.total_num_tests))
 		p('GREEN', 'Unit tests finished')
+
+
+############################################################################################
+
+"""
+New unit test system
+
+The targets with feature 'test' are executed after they are built
+bld(features='cprogram cc test', ...)
+
+To display the results:
+import UnitTest
+bld.add_post_fun(UnitTest.summary)
+"""
+
+import threading
+testlock = threading.Lock()
+
+def set_options(opt):
+	opt.add_option('--alltests', action='store_true', default=True, help='Exec all unit tests', dest='all_tests')
+
+@feature('test')
+@after('apply_link', 'vars_target_cprogram')
+def make_test(self):
+	if not 'cprogram' in self.features:
+		Logs.error('test cannot be executed %s' % self)
+		return
+
+	self.default_install_path = None
+	self.create_task('utest', self.link_task.outputs)
+
+def exec_test(self):
+
+	status = 0
+
+	variant = self.env.variant()
+	filename = self.inputs[0].abspath(self.env)
+
+	try:
+		fu = getattr(self.generator.bld, 'all_test_paths')
+	except AttributeError:
+		fu = os.environ.copy()
+		self.generator.bld.all_test_paths = fu
+
+		lst = []
+		for obj in self.generator.bld.all_task_gen:
+			link_task = getattr(obj, 'link_task', None)
+			if link_task and link_task.env.variant() == variant:
+				lst.append(link_task.outputs[0].parent.abspath(obj.env))
+
+		def add_path(dct, path, var):
+			dct[var] = os.pathsep.join(Utils.to_list(path) + [os.environ.get(var, '')])
+
+		if sys.platform == 'win32':
+			add_path(fu, lst, 'PATH')
+		elif sys.platform == 'darwin':
+			add_path(fu, lst, 'DYLD_LIBRARY_PATH')
+			add_path(fu, lst, 'LD_LIBRARY_PATH')
+		else:
+			add_path(fu, lst, 'LD_LIBRARY_PATH')
+
+
+	cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath(self.env)
+	proc = Utils.pproc.Popen(filename, cwd=cwd, env=fu, stderr=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE)
+	(stdout, stderr) = proc.communicate()
+
+	tup = (filename, proc.returncode, stdout, stderr)
+	self.generator.utest_result = tup
+
+	testlock.acquire()
+	try:
+		bld = self.generator.bld
+		Logs.debug("ut: %r", tup)
+		try:
+			bld.utest_results.append(tup)
+		except AttributeError:
+			bld.utest_results = [tup]
+	finally:
+		testlock.release()
+
+cls = Task.task_type_from_func('utest', func=exec_test, color='PINK', ext_in='.bin')
+
+old = cls.runnable_status
+def test_status(self):
+	if getattr(Options.options, 'all_tests', False):
+		return RUN_ME
+	return old(self)
+
+cls.runnable_status = test_status
+cls.quiet = 1
+
+def summary(bld):
+	lst = getattr(bld, 'utest_results', [])
+	if lst:
+		Utils.pprint('CYAN', 'execution summary')
+
+		total = len(lst)
+		tfail = len([x for x in lst if x[1]])
+
+		Utils.pprint('CYAN', '  tests that pass %d/%d' % (total-tfail, total))
+		for (f, code, out, err) in lst:
+			if not code:
+				Utils.pprint('CYAN', '    %s' % f)
+
+		Utils.pprint('CYAN', '  tests that fail %d/%d' % (tfail, total))
+		for (f, code, out, err) in lst:
+			if code:
+				Utils.pprint('CYAN', '    %s' % f)
+
 

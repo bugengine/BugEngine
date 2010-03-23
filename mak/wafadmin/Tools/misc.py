@@ -69,11 +69,10 @@ def apply_copy(self):
 		# TODO the file path may be incorrect
 		newnode = self.path.find_or_declare(target)
 
-		tsk = self.create_task('copy')
-		tsk.set_inputs(node)
-		tsk.set_outputs(newnode)
+		tsk = self.create_task('copy', node, newnode)
 		tsk.fun = self.fun
 		tsk.chmod = self.chmod
+		tsk.install_path = self.install_path
 
 		if not tsk.env:
 			tsk.debug()
@@ -141,9 +140,7 @@ def apply_subst(self):
 			lst = [self.dict[x] for x in keys]
 			self.env['DICT_HASH'] = str(Utils.h_list(lst))
 
-		tsk = self.create_task('copy')
-		tsk.set_inputs(node)
-		tsk.set_outputs(newnode)
+		tsk = self.create_task('copy', node, newnode)
 		tsk.fun = self.fun
 		tsk.dict = self.dict
 		tsk.dep_vars = ['DICT_HASH']
@@ -192,15 +189,6 @@ class output_file(cmd_arg):
 			return self.template % self.node.bldpath(env)
 
 class cmd_dir_arg(cmd_arg):
-	def __init__(self, name, template=None):
-		cmd_arg.__init__(self)
-		self.name = name
-		self.node = None
-		if template is None:
-			self.template = '%s'
-		else:
-			self.template = template
-
 	def find_node(self, base_path):
 		assert isinstance(base_path, Node.Node)
 		self.node = base_path.find_dir(self.name)

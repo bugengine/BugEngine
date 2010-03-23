@@ -81,6 +81,15 @@ class valac_task(Task.Task):
 			if hasattr(self, 'gir'):
 				self._fix_output("%s.gir" % self.gir)
 
+		first = None
+		for node in self.outputs:
+			if not first:
+				first = node
+			else:
+				if first.parent.id != node.parent.id:
+					# issue #483
+					if env['VALAC_VERSION'] < (0, 7, 0):
+						shutil.move(first.parent.abspath(self.env) + os.sep + node.name, node.abspath(self.env))
 		return result
 
 	def install(self):
@@ -103,12 +112,10 @@ class valac_task(Task.Task):
 						api_version = "0." + version[1]
 					else:
 						api_version = version[0] + ".0"
-				install_path = "${INCLUDEDIR}/%s-%s/%s" % (package, api_version, header.relpath_gen(top_src))
-				bld.install_as(install_path, header.abspath(self.env), self.env)
-			for vapi in vapi_list:
-				bld.install_files("${DATAROOTDIR}/vala/vapi", vapi.abspath(self.env), self.env)
-			for gir in gir_list:
-				bld.install_files("${DATAROOTDIR}/gir-1.0", gir.abspath(self.env), self.env)
+				install_path = '${INCLUDEDIR}/%s-%s/%s' % (package, api_version, header.relpath_gen(top_src))
+				bld.install_as(install_path, header, self.env)
+			bld.install_files('${DATAROOTDIR}/vala/vapi', vapi_list, self.env)
+			bld.install_files('${DATAROOTDIR}/gir-1.0', gir_list, self.env)
 
 	def _fix_output(self, output):
 		top_bld = self.generator.bld.srcnode.abspath(self.env)

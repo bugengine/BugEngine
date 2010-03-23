@@ -6,15 +6,15 @@
 Node: filesystem structure, contains lists of nodes
 
 IMPORTANT:
-1. Each file/folder is represented by exactly one node
+1. Each file/folder is represented by exactly one node.
 
 2. Most would-be class properties are stored in Build: nodes to depend on, signature, flags, ..
-unused class members increase the .wafpickle file size sensibly with lots of objects
+unused class members increase the .wafpickle file size sensibly with lots of objects.
 
-3. The build is launched from the top of the build dir (for example, in _build_/)
+3. The build is launched from the top of the build dir (for example, in _build_/).
 
 4. Node should not be instantiated directly.
-Each instance of Build.BuildContext has a Node sublass.
+Each instance of Build.BuildContext has a Node subclass.
 (aka: 'Nodu', see BuildContext initializer)
 The BuildContext is referenced here as self.__class__.bld
 Its Node class is referenced here as self.__class__
@@ -30,8 +30,8 @@ ${TGT[0].abspath(env)} -> /path/to/dir/to/file.ext
 
 """
 
-import os, sys, fnmatch, re
-import Utils
+import os, sys, fnmatch, re, stat
+import Utils, Constants
 
 UNDEFINED = 0
 DIR = 1
@@ -256,7 +256,6 @@ class Node(object):
 						return None
 		return current
 
-	# FIXME: remove in waf 1.6 ?
 	def ensure_dir_node_from_path(self, lst):
 		"used very rarely, force the construction of a branch of node instance for representing folders"
 
@@ -278,7 +277,6 @@ class Node(object):
 					current = self.__class__(name, prev, DIR)
 		return current
 
-	# FIXME: remove in waf 1.6
 	def exclusive_build_node(self, path):
 		"""
 		create a hierarchy in the build dir (no source folders) for ill-behaving compilers
@@ -295,10 +293,8 @@ class Node(object):
 			except OSError:
 				pass
 			if not parent:
-				# exclusive build directory -> mark the parent as rescanned
-				# for find_dir and find_resource to work
 				parent = self.ensure_dir_node_from_path(lst[:-1])
-				self.__class__.bld.cache_scanned_folders[parent.id] = 1
+				self.__class__.bld.rescan(parent)
 			else:
 				try:
 					self.__class__.bld.rescan(parent)
@@ -404,17 +400,27 @@ class Node(object):
 	def abspath(self, env=None):
 		"""
 		absolute path
-		@param env: optional only if the node is a source node
+		@param env [Environment]:
+			* obligatory for build nodes: build/variant/src/dir/bar.o
+			* optional for dirs: get either src/dir or build/variant/src/dir
+			* excluded for source nodes: src/dir/bar.c
+
+		Instead of computing the absolute path each time again,
+		store the already-computed absolute paths in one of (variants+1) dictionaries:
+		bld.cache_node_abspath[0] holds absolute paths for source nodes.
+		bld.cache_node_abspath[variant] holds the absolute path for the build nodes
+		which reside in the variant given by env.
 		"""
 		## absolute path - hot zone, so do not touch
 
 		# less expensive
 		variant = (env and (self.id & 3 != FILE) and env.variant()) or 0
-		#variant = self.variant(env)
+
 		ret = self.__class__.bld.cache_node_abspath[variant].get(self.id, None)
 		if ret: return ret
 
 		if not variant:
+			# source directory
 			if not self.parent:
 				val = os.sep == '/' and os.sep or ''
 			elif not self.parent.name: # root
@@ -422,7 +428,8 @@ class Node(object):
 			else:
 				val = self.parent.abspath() + os.sep + self.name
 		else:
-			val = os.sep.join((self.__class__.bld.bldnode.abspath(), env.variant(), self.path_to_parent(self.__class__.bld.srcnode)))
+			# build directory
+			val = os.sep.join((self.__class__.bld.bldnode.abspath(), variant, self.path_to_parent(self.__class__.bld.srcnode)))
 		self.__class__.bld.cache_node_abspath[variant][self.id] = val
 		return val
 
@@ -486,9 +493,10 @@ class Node(object):
 		return self.name[k:]
 
 	def find_iter_impl(self, src=True, bld=True, dir=True, accept_name=None, is_prune=None, maxdepth=25):
-		"find nodes in the filesystem hierarchy, try to instanciate the nodes passively"
-		self.__class__.bld.rescan(self)
-		for name in self.__class__.bld.cache_dir_contents[self.id]:
+		"""find nodes in the filesystem hierarchy, try to instanciate the nodes passively; same gotcha as ant_glob"""
+		bld_ctx = self.__class__.bld
+		bld_ctx.rescan(self)
+		for name in bld_ctx.cache_dir_contents[self.id]:
 			if accept_name(self, name):
 				node = self.find_resource(name)
 				if node:
@@ -496,7 +504,7 @@ class Node(object):
 						yield node
 				else:
 					node = self.find_dir(name)
-					if node and node.id != self.__class__.bld.bldnode.id:
+					if node and node.id != bld_ctx.bldnode.id:
 						if dir:
 							yield node
 						if not is_prune(self, name):
@@ -509,14 +517,14 @@ class Node(object):
 					if not node:
 						# not a file, it is a dir
 						node = self.find_dir(name)
-						if node and node.id != self.__class__.bld.bldnode.id:
+						if node and node.id != bld_ctx.bldnode.id:
 							if maxdepth:
 								for k in node.find_iter_impl(src, bld, dir, accept_name, is_prune, maxdepth=maxdepth - 1):
 									yield k
 
 		if bld:
 			for node in self.childs.values():
-				if node.id == self.__class__.bld.bldnode.id:
+				if node.id == bld_ctx.bldnode.id:
 					continue
 				if node.id & 3 == BUILD:
 					if accept_name(self, node.name):
@@ -524,7 +532,7 @@ class Node(object):
 		raise StopIteration
 
 	def find_iter(self, in_pat=['*'], ex_pat=exclude_pats, prune_pat=prune_pats, src=True, bld=True, dir=False, maxdepth=25, flat=False):
-		"find nodes recursively, this returns everything but folders by default"
+		"""find nodes recursively, this returns everything but folders by default; same gotcha as ant_glob"""
 
 		if not (src or bld or dir):
 			raise StopIteration
@@ -558,9 +566,12 @@ class Node(object):
 		return ret
 
 	def ant_glob(self, *k, **kw):
+		"""
+		known gotcha: will enumerate the files, but only if the folder exists in the source directory
+		"""
 
 		src=kw.get('src', 1)
-		bld=kw.get('bld', 1)
+		bld=kw.get('bld', 0)
 		dir=kw.get('dir', 0)
 		excl = kw.get('excl', exclude_regs)
 		incl = k and k[0] or kw.get('incl', '**')
@@ -644,6 +655,36 @@ class Node(object):
 			return " ".join([x.relpath_gen(self) for x in ret])
 
 		return ret
+
+	def update_build_dir(self, env=None):
+
+		if not env:
+			for env in bld.all_envs:
+				self.update_build_dir(env)
+			return
+
+		path = self.abspath(env)
+
+		lst = Utils.listdir(path)
+		try:
+			self.__class__.bld.cache_dir_contents[self.id].update(lst)
+		except KeyError:
+			self.__class__.bld.cache_dir_contents[self.id] = set(lst)
+		self.__class__.bld.cache_scanned_folders[self.id] = True
+
+		for k in lst:
+			npath = path + os.sep + k
+			st = os.stat(npath)
+			if stat.S_ISREG(st[stat.ST_MODE]):
+				ick = self.find_or_declare(k)
+				if not (ick.id in self.__class__.bld.node_sigs[env.variant()]):
+					self.__class__.bld.node_sigs[env.variant()][ick.id] = Constants.SIG_NIL
+			elif stat.S_ISDIR(st[stat.ST_MODE]):
+				child = self.find_dir(k)
+				if not child:
+					child = self.ensure_dir_node_from_path(k)
+				child.update_build_dir(env)
+
 
 class Nodu(Node):
 	pass
