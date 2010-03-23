@@ -172,7 +172,18 @@ class VCproj:
 		self.output.write(tabs+'</File>\n')
 
 	def addRcFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
+		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		for platform in self.platforms:
+			for config in self.configs:
+				self.output.write(tabs+'	<FileConfiguration\n')
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+				else:
+					if self.archs[platform] not in source.archs:
+						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+				self.output.write(tabs+'		Name="%s|%s" />\n' % (config,platform))
+		self.output.write(tabs+'</File>\n')
+
 
 	def addHFile(self, path, filename, source, tabs):
 		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
