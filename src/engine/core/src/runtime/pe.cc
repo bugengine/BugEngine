@@ -192,7 +192,7 @@ struct PEHeader
         Subsystem_EFIBoot = 11,
         Subsystem_EFIRuntime = 12,
         Subsystem_EFIRom = 13,
-        Subsystem_XBox = 14,
+        Subsystem_XBox = 14
     };
     enum DataDirectories
     {

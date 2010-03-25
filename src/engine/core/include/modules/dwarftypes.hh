@@ -127,7 +127,7 @@ enum Tag
     SUN_hi                  = 0x42ff /* SUN */,
 
 
-    Hi_user                 = 0xffff,
+    Hi_user                 = 0xffff
 };
 
 enum Children
@@ -255,7 +255,7 @@ enum Type
     Type_ref4                   = 0x13,
     Type_ref8                   = 0x14,
     Type_ref_udata              = 0x15,
-    Type_indirect               = 0x16,
+    Type_indirect               = 0x16
 };
 
 }}}

@@ -64,11 +64,15 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 Thread::~Thread()
 {
     void* rvalue;
+#ifdef __GNU_SOURCE
     timespec abstime;
     clock_gettime(CLOCK_REALTIME, &abstime);
     abstime.tv_sec += 2;
     int result = pthread_timedjoin_np(*reinterpret_cast<pthread_t*>(m_data), &rvalue, &abstime);
     be_assert(result != ETIMEDOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
+#else
+    int result = pthread_join(*reinterpret_cast<pthread_t*>(m_data), &rvalue);
+#endif
     (void)result;
     delete reinterpret_cast<ThreadParams*>(m_params);
     delete reinterpret_cast<pthread_t*>(m_data);
@@ -91,7 +95,13 @@ void Thread::sleep(int milliseconds)
 
 void Thread::yield()
 {
+#ifdef BE_PLATFORM_SUN
+    thr_yield();
+#elif defined(BE_PLATFORM_LINUX)
+    sched_yield();
+#else
     pthread_yield();
+#endif
 }
 
 unsigned long Thread::id() const
