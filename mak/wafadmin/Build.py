@@ -524,8 +524,11 @@ class BuildContext(Utils.Context):
 					continue
 
 				for dct in self.node_sigs:
-					if node.id in dct:
-						dict.__delitem__(node.id)
+					try:
+						if node.id in dct:
+							dict.__delitem__(node.id)
+					except:
+						pass
 
 				# the policy is to avoid removing nodes representing directories
 				src_dir_node.childs.__delitem__(node.name)

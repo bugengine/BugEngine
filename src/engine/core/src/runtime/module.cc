@@ -6,7 +6,7 @@
 #include    <core/runtime/module.hh>
 #include    <core/runtime/symbols.hh>
 
-#if defined(BE_PLATFORM_POSIX)
+#if defined(BE_PLATFORM_POSIX) && defined(__GNU_SOURCE)
 # include   <dlfcn.h>
 # include   <link.h>
 #endif
@@ -36,10 +36,10 @@ ref<const Module> Module::self()
 {
     static ref<Module> s_module;
     ref<Module> module;
-#if defined(BE_PLATFORM_POSIX)
+#if defined(BE_PLATFORM_POSIX) && defined(__GNU_SOURCE)
     void* handle = dlopen(0, RTLD_LAZY|RTLD_NOLOAD);
     link_map* lmap;
-    dlinfo(handle, RTLD_DI_LINKMAP, &lmap);
+    dlinfo(handle, 0, &lmap);
     for(int i = 0; lmap; lmap=lmap->l_next, i++)
     {
         if(i == 0)

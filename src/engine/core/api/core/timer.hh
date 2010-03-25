@@ -15,12 +15,12 @@ inline tick_type tick(){ u64 result; QueryPerformanceCounter((LARGE_INTEGER*)&re
 #include <PPCIntrinsics.h>
 typedef u32 tick_type;
 inline tick_type tick(){ return __mftb32(); }
-#elif defined __GNUC__
+#elif defined (BE_COMPILER_GCC) || defined(BE_COMPILER_SUNCC)
 # if defined(_X86)
 typedef u64 tick_type;
 static inline tick_type tick(void)
 {
-    u64 x;
+    u64 x = 0;
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
     return x;
 }

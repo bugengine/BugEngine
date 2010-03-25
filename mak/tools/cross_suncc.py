@@ -23,9 +23,9 @@ def get_suncc_target(conf):
 	else:
 		conf.fatal('Unable to retrieve SunCC version')
 	if conf.env['SUNCC_PLATFORM'] == 'Linux':
-		conf.env.append_unique('CCFLAGS', ['-library=stlport4', '-staticlib=Crun'])
-		conf.env.append_unique('CXXFLAGS', ['-library=stlport4', '-staticlib=Crun,stlport4'])
-		conf.env.append_unique('LDFLAGS', ['-library=stlport4', '-staticlib=Crun,stlport4'])
+		conf.env.append_unique('CCFLAGS', ['-m32', '-staticlib=Crun'])
+		conf.env.append_unique('CXXFLAGS', ['-m32', '-library=stlport4', '-staticlib=Crun,stlport4'])
+		conf.env.append_unique('LDFLAGS', ['-m32', '-library=stlport4', '-staticlib=Crun,stlport4'])
 
 @conftest
 def find_suncc(conf):
