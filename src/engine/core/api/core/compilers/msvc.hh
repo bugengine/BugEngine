@@ -49,12 +49,19 @@ typedef u8                      byte;
 #ifndef BE_STATIC
 # define BE_EXPORT              __declspec(dllexport)
 # define BE_IMPORT              __declspec(dllimport)
+#else
+# define BE_EXPORT
+# define BE_IMPORT
 #endif
 
-#ifndef _XBOX
-# include <intrin.h>
+#if _MSC_VER >= 1300
+# ifndef _XBOX
+#  include <intrin.h>
+# endif
+# define be_break() __debugbreak()
+#else
+# define be_break() asm  { int 3; }
 #endif
-#define be_break() __debugbreak()
 
 /*****************************************************************************/
 #endif

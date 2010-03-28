@@ -6,8 +6,8 @@
 #include    <core/settings/manager.hh>
 #include    <system/scheduler/scheduler.hh>
 #include    <core/threads/mutex.hh>
-#include    <system/scheduler/task.hh>
-#include    <system/scheduler/taskitem.hh>
+#include    <system/scheduler/task/task.hh>
+#include    <system/scheduler/private/taskitem.hh>
 #include    <system/scheduler/range/sequence.hh>
 #include    <minitl/interlocked/stack.hh>
 #include    <maths/vector.hh>
@@ -21,7 +21,7 @@ class Scheduler::Worker
 protected:
     struct WorkReport : public minitl::inode
     {
-        const BaseTask* task;
+        const ITask*    task;
         tick_type       start;
         tick_type       stop;
     };
@@ -34,14 +34,14 @@ private:
     minitl::pool<WorkReport>                m_reportPool;
     Thread                                  m_workThread;
 protected:
-    void unhook(ScheduledTasks::BaseTaskItem* prev, ScheduledTasks::BaseTaskItem* t);
+    void unhook(ScheduledTasks::ITaskItem* prev, ScheduledTasks::ITaskItem* t);
 public:
     Worker(Scheduler* scheduler, size_t workerId);
     ~Worker();
 
     bool doWork(Scheduler* sc);
 
-    WorkReport* startTimer(const BaseTask* t);
+    WorkReport* startTimer(const ITask* t);
     void stopTimer(WorkReport* r);
 
     void frameUpdate();
@@ -68,14 +68,12 @@ Scheduler::Worker::~Worker()
 
 bool Scheduler::Worker::doWork(Scheduler* sc)
 {
-    SettingsManager::getManager();
     static const i32& s_taskCount = 16;
 
-    ScheduledTasks::BaseTaskItem* target = sc->pop();
-    target->m_currentState = ScheduledTasks::BaseTaskItem::Executing;
+    ScheduledTasks::ITaskItem* target = sc->pop();
     if(!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
-        ScheduledTasks::BaseTaskItem* newTarget = target->split(sc);
+        ScheduledTasks::ITaskItem* newTarget = target->split(sc);
         sc->queue(newTarget);
         sc->queue(target);
     }
@@ -90,7 +88,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
 }
 
 
-Scheduler::Worker::WorkReport* Scheduler::Worker::startTimer(const BaseTask* t)
+Scheduler::Worker::WorkReport* Scheduler::Worker::startTimer(const ITask* t)
 {
     WorkReport* r = m_reportPool.allocate();
     r->task = t;
@@ -195,14 +193,14 @@ void Scheduler::frameUpdate()
     m_frameCount++;
 }
 
-void Scheduler::queue(ScheduledTasks::BaseTaskItem* task)
+void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 {
     m_tasks.push(task);
     m_runningTasks ++;
     m_synchro.release(1);
 }
 
-ScheduledTasks::BaseTaskItem* Scheduler::pop()
+ScheduledTasks::ITaskItem* Scheduler::pop()
 {
     return m_tasks.pop();
 }

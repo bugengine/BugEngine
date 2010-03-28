@@ -16,12 +16,9 @@ namespace BugEngine
 
 template< typename Body >
 class Task;
-
 namespace ScheduledTasks
 {
-
-class BaseTaskItem;
-
+class ITaskItem;
 }
 
 class be_api(SYSTEM) Scheduler : public minitl::pointer
@@ -30,7 +27,7 @@ private:
     class Worker;
     class HeadTask;
     friend class Worker;
-    friend class ScheduledTasks::BaseTaskItem;
+    friend class ScheduledTasks::ITaskItem;
     template< typename Body >
     friend class Task;
 private:
@@ -44,14 +41,14 @@ private:
     float                           m_frameTime;
     Event                           m_end;
 private: //friend Worker
-    minitl::istack<ScheduledTasks::BaseTaskItem>    m_tasks;
-    i_u32                                           m_runningTasks;
-    bool volatile                                   m_running;
+    minitl::istack<ScheduledTasks::ITaskItem>   m_tasks;
+    i_u32                                       m_runningTasks;
+    bool volatile                               m_running;
 private: //friend Worker
-    ScheduledTasks::BaseTaskItem* pop();
-    void queue(ScheduledTasks::BaseTaskItem* task);
+    ScheduledTasks::ITaskItem* pop();
+    void queue(ScheduledTasks::ITaskItem* task);
 private:
-    void split(ScheduledTasks::BaseTaskItem* t, size_t count);
+    void split(ScheduledTasks::ITaskItem* t, size_t count);
 public:
     void* allocate_task(size_t size);
     void  release_task(void* t, size_t size);
@@ -64,7 +61,7 @@ public:
     void release_task(T* t)
     {
         t->~T();
-        return release_task(reinterpret_cast<void*>(static_cast<ScheduledTasks::BaseTaskItem*>(t)), sizeof(T));
+        return release_task(reinterpret_cast<void*>(static_cast<ScheduledTasks::ITaskItem*>(t)), sizeof(T));
     }
 public:
     Scheduler();

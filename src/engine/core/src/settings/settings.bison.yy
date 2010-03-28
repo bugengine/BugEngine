@@ -86,25 +86,21 @@ variable:
         TOK_ID '=' VAL_INTEGER
         {
             minitl::format<> str = minitl::format<>("%s = %d\n") | $1 | $3;
-            OutputDebugString(str.c_str());
         }
     |
         TOK_ID '=' VAL_BOOLEAN
         {
             minitl::format<> str = minitl::format<>("%s = %s\n") | $1 | ($3?"true":"false");
-            OutputDebugString(str.c_str());
         }
     |
         TOK_ID '=' VAL_FLOAT
         {
             minitl::format<> str = minitl::format<>("%s = %s\n") | $1 | "float";
-            OutputDebugString(str.c_str());
         }
     |
         TOK_ID '=' VAL_STRING
         {
             minitl::format<> str = minitl::format<>("%s = %s\n") | $1 | $3;
-            OutputDebugString(str.c_str());
         }
     ;
 

@@ -7,7 +7,7 @@
 #include    <system/plugin.hh>
 #include    <physics/iworldmanager.hh>
 #include    <audio/iworld.hh>
-#include    <system/scheduler/task.hh>
+#include    <system/scheduler/task/itask.hh>
 
 namespace BugEngine
 {

@@ -21,11 +21,8 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
-    scoped<Scheduler>       m_scheduler;
-    ref<BaseTask::Callback> m_frameFinished;
-    scoped< BaseTask >      m_updateInputTask;
-    scoped< BaseTask >      m_updateMemoryTask;
-    scoped< BaseTask >      m_updateSchedulerTask;
+    scoped<Scheduler>               m_scheduler;
+    minitl::vector< ref<ITask> >    m_tasks;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);

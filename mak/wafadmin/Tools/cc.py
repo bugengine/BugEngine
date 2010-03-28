@@ -31,7 +31,7 @@ def init_cc(self):
 	self.p_type_vars = set(self.p_type_vars).union(g_cc_type_vars)
 
 	if not self.env['CC_NAME']:
-		raise Utils.WafError("At least one compiler (gcc, ..) must be selected")
+		raise Utils.WafError("At least one compiler (gcc, ..) must be selected " + self.env.name)
 
 @feature('cc')
 @after('apply_incpaths')

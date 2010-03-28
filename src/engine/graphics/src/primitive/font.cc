@@ -53,12 +53,9 @@ Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
 {
     ref<IMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
     FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), be_checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
-    OutputDebugString(font.str().c_str());
-    OutputDebugString(": ");
 
     if(m_face->face_flags & FT_FACE_FLAG_SCALABLE)
     {
-        OutputDebugString("outline font\n");
         for(unsigned int i = 0; i < (unsigned)m_face->num_glyphs; ++i)
         {
             if(! FT_Load_Glyph(m_face, i, FT_LOAD_NO_SCALE|FT_LOAD_NO_BITMAP))
@@ -72,7 +69,6 @@ Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
                     break;
                 case FT_GLYPH_FORMAT_COMPOSITE:
                 default:
-                    OutputDebugString("unsupported format : ??\n");
                     break;
                 }
             }
@@ -80,7 +76,6 @@ Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
     }
     else
     {
-        OutputDebugString("bitmap font\n");
         /* TODO : generate texture */
     }
 }

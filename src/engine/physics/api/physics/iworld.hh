@@ -4,7 +4,7 @@
 #ifndef BE_PHYSICS_IWORLD_HH_
 #define BE_PHYSICS_IWORLD_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task.hh>
+#include    <system/scheduler/task/task.hh>
 
 namespace BugEngine { namespace Physics
 {

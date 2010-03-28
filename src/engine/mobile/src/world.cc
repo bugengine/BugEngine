@@ -4,9 +4,6 @@
 #include    <mobile/stdafx.h>
 #include    <mobile/world.hh>
 
-#include    <system/scheduler/function.hh>
-
-
 namespace BugEngine
 {
 
