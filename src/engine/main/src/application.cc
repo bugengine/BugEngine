@@ -18,6 +18,7 @@ Application::Application(int argc, const char *argv[])
 :   Object()
 ,   m_scheduler(scoped<Scheduler>::create())
 ,   m_tasks()
+,   m_callbacks()
 {
     UNUSED(argc); UNUSED(argv);
 
@@ -30,6 +31,14 @@ Application::Application(int argc, const char *argv[])
     updateTask->addStartTask(m_tasks[2]);
     updateTask->addEndTask(m_tasks[1]);
     updateTask->addEndTask(m_tasks[2]);
+
+    m_startUpdate = ref<ITask::ChainCallback>::create();
+    m_callbacks.push_back(m_startUpdate);
+    m_startUpdate->makeStart(updateTask);
+
+    m_onUpdate = ref<ITask::ChainCallback>::create();
+    m_callbacks.push_back(m_onUpdate);
+    updateTask->addCallback(m_onUpdate);
 }
 
 Application::~Application(void)
@@ -43,11 +52,6 @@ int Application::run()
     return 0;
 }
 
-ref<Graphics::RenderTarget> Application::createWindow(Graphics::WindowFlags f)
-{
-    return ref<Graphics::RenderTarget>(); //m_display->createWindow(f);
-}
-
 void Application::addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)
 {
     //m_views.push_back(
@@ -55,13 +59,21 @@ void Application::addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarge
 
 void Application::addWorld(ref<World> world)
 {
-    /*world->getStart()->connectFrom(m_updateInputTask);
-    world->getStart()->connectFrom(m_updateMemoryTask);
-    world->getStart()->connectFrom(m_updateSchedulerTask);
-    world->getEnd()->connectTo(m_updateInputTask);
-    world->getEnd()->connectTo(m_updateMemoryTask);
-    world->getEnd()->connectTo(m_updateSchedulerTask);
-    m_worlds.push_back(world);*/
+    m_onUpdate->makeStart(world->copyWorldTask());
+
+    ref<ITask::ChainCallback> callback = ref<ITask::ChainCallback>::create();
+    m_callbacks.push_back(callback);
+    callback->makeStart(world->updateWorldTask());
+    world->copyWorldTask()->addCallback(callback);
+
+    callback = ref<ITask::ChainCallback>::create();
+    m_callbacks.push_back(callback);
+    callback->makeStart(world->swapWorldTask());
+    world->updateWorldTask()->addCallback(callback);
+
+    world->swapWorldTask()->addCallback(m_startUpdate);
+
+    m_worlds.push_back(world);
 }
 
 

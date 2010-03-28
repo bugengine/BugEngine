@@ -15,6 +15,9 @@
 
 #include    <core/runtime/symbols.hh>
 
+
+#include    <mobile/world.hh>
+
 /*---------------------------------------------------------------------------*/
 int be_main (weak<BugEngine::Application> app)
 {
@@ -33,7 +36,12 @@ int be_main (weak<BugEngine::Application> app)
     f.triplebuffered = false;
 
     ref<BugEngine::Graphics::Scene> scene = ref<Discworld::MainScene>::create(app);
-    ref<BugEngine::Graphics::RenderTarget> w = app->createWindow(f);
+    //ref<BugEngine::Graphics::RenderTarget> w = app->createWindow(f);
+
+    ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+    app->addWorld(world);
+    world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+    app->addWorld(world);
 
     return app->run();
 }

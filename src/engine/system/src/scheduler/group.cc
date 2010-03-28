@@ -45,6 +45,7 @@ void TaskGroup::addEndTask(weak<ITask> task)
 TaskGroup::Callback::Callback(weak<TaskGroup> owner)
 :   ICallback()
 ,   m_owner(owner)
+,   m_completed(0)
 {
 }
 

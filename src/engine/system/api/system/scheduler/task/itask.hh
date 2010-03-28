@@ -28,7 +28,7 @@ public:
     {
     private:
         minitl::vector< weak<ITask> >   m_starts;
-        i_u32                           m_startedBy;
+        minitl::vector< weak<ITask> >   m_startedBy;
         mutable i_u32                   m_completed;
     public:
         ChainCallback();

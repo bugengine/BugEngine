@@ -21,15 +21,18 @@ private:
     class UpdateScheduler;
     class UpdateMemory;
 private:
-    scoped<Scheduler>               m_scheduler;
-    minitl::vector< ref<ITask> >    m_tasks;
+    scoped<Scheduler>                               m_scheduler;
+    minitl::vector< ref<World> >                    m_worlds;
+    minitl::vector< ref<ITask> >                    m_tasks;
+    ref< ITask::ChainCallback >                     m_startUpdate;
+    ref< ITask::ChainCallback >                     m_onUpdate;
+    minitl::vector< ref< ITask::ChainCallback > >   m_callbacks;
 public :
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
     int run(void);
 
-    ref<Graphics::RenderTarget> createWindow(Graphics::WindowFlags f);
     void addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
     void addWorld(ref<World> world);
 
