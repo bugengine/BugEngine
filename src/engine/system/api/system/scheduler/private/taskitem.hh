@@ -32,7 +32,7 @@ protected: //friend Worker
 public:
     explicit ITaskItem(weak<const ITask> owner);
     ITaskItem(ITaskItem& cpy);
-    virtual ~ITaskItem() { be_notreached(); }
+    virtual ~ITaskItem() { }
 };
 
 template< typename Range, typename Body >
