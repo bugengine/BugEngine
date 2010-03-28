@@ -4,8 +4,6 @@
 #include    <audio/stdafx.h>
 #include    <audio/iworld.hh>
 
-#include    <system/scheduler/function.hh>
-
 namespace BugEngine { namespace Audio
 {
 

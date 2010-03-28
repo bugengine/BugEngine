@@ -43,10 +43,16 @@ extern "C" int be_settings_wrap()
     return 1;
 }
 
+static int isatty (int)
+{
+	return 0;
+}
+
 %}
 
 %option prefix="be_settings_"
 %option nounput
+%option nounistd
 
 alpha       [A-Za-z_]
 num         [0-9]

@@ -5,40 +5,35 @@
 #define BE_SYSTEM_SCHEDULER_TASKITEM_INL_
 /*****************************************************************************/
 #include    <system/scheduler/scheduler.hh>
+#include    <system/scheduler/task/task.hh>
 
 namespace BugEngine { namespace ScheduledTasks
 {
 
 template< typename Range, typename Body >
-TaskItem<Range, Body>::TaskItem(const BaseTask* owner, const Range& r, const Body& b)
-:   BaseTaskItem(owner)
+TaskItem<Range, Body>::TaskItem(weak<const Task<Body> > owner, const Range& r, const Body& b)
+:   ITaskItem(owner)
 ,   m_range(r)
 ,   m_body(b)
 {
+    owner->m_taskCount++;
 }
 
 template< typename Range, typename Body >
 TaskItem<Range, Body>::TaskItem(TaskItem& split)
-:   BaseTaskItem(split)
+:   ITaskItem(split)
 ,   m_range(split.m_range.split())
 ,   m_body(split.m_body)
 {
+    const Task<Body>* owner = be_checked_cast< const Task<Body> >(m_owner);
+    owner->m_taskCount++;
 }
 
 template< typename Range, typename Body >
-void TaskItem<Range, Body>::run(Scheduler* sc)
-{
-    be_assert(m_currentState == Executing, "executing task that is not in the execution state");
-    m_body(m_range);
-    postrun(sc);
-    sc->release_task(this);
-}
-
-template< typename Range, typename Body >
-BaseTaskItem* TaskItem<Range, Body>::split(Scheduler* sc)
+ITaskItem* TaskItem<Range, Body>::split(weak<Scheduler> sc)
 {
     void* mem = sc->allocate_task< TaskItem<Range, Body> >();
-    BaseTaskItem* result = new(mem) TaskItem<Range, Body>(*this);
+    ITaskItem* result = new(mem) TaskItem<Range, Body>(*this);
     return result;
 }
 
@@ -46,6 +41,18 @@ template< typename Range, typename Body >
 bool TaskItem<Range, Body>::atomic() const
 {
     return m_range.atomic();
+}
+
+template< typename Range, typename Body >
+void TaskItem<Range, Body>::run(weak<Scheduler> sc)
+{
+    m_body(m_range);
+    const Task<Body>* owner = be_checked_cast< const Task<Body> >(m_owner);
+    if(++owner->m_taskCompleted == owner->m_taskCount)
+    {
+        owner->end(sc);
+    }
+    sc->release_task(this);
 }
 
 }}

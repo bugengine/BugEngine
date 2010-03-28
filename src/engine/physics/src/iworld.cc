@@ -4,8 +4,6 @@
 #include    <physics/stdafx.h>
 #include    <physics/iworld.hh>
 
-#include    <system/scheduler/function.hh>
-
 namespace BugEngine { namespace Physics
 {
 

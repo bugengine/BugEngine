@@ -5,7 +5,7 @@
 #define BE_AUDIO_IWORLD_HH_
 /*****************************************************************************/
 #include    <audio/isource.hh>
-#include    <system/scheduler/task.hh>
+#include    <system/scheduler/task/task.hh>
 
 namespace BugEngine { namespace Audio
 {
