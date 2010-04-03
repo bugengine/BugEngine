@@ -13,7 +13,7 @@ namespace BugEngine
 template< typename Body >
 class Task : public ITask
 {
-    template< class Body, class Range >
+    template< class B, class R >
     friend class ScheduledTasks::TaskItem;
 private:
     mutable Body    m_body;

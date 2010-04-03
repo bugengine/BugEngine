@@ -9,7 +9,7 @@ namespace BugEngine { namespace Graphics { namespace X
 {
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   RenderTarget(scene)
+:   RenderTarget()
 ,   m_renderer(renderer)
 ,   m_window(renderer->createWindow(flags))
 {
