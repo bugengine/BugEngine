@@ -43,10 +43,12 @@ extern "C" int be_settings_wrap()
     return 1;
 }
 
+#ifdef BE_PLATFORM_WIN32
 static int isatty (int)
 {
 	return 0;
 }
+#endif
 
 %}
 

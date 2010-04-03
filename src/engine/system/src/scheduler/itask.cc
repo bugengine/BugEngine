@@ -8,8 +8,8 @@ namespace BugEngine
 {
 
 ITask::ITask(istring name, color32 color)
-:   color(color)
-,   name(name)
+:   name(name)
+,   color(color)
 {
 }
 
