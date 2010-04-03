@@ -9,11 +9,14 @@ namespace BugEngine { namespace Graphics
 {
 
 class Scene;
+class RenderBackend;
 
 class be_api(GRAPHICS) RenderTarget : public minitl::refcountable
 {
+protected:
+    weak<RenderBackend> const   m_renderer;
 public:
-    RenderTarget();
+    RenderTarget(weak<RenderBackend> renderer);
     virtual ~RenderTarget() { }
 
     virtual uint2           getDimensions() const = 0;

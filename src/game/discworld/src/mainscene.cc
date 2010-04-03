@@ -15,7 +15,7 @@ namespace Discworld
 {
 
 MainScene::MainScene(weak<const BugEngine::Application> /*application*/)
-:   Scene(0)
+:   Scene()
 {
 }
 

@@ -4,6 +4,8 @@
 #ifndef BE_GRAPHICS_RENDERBACKEND_HH_
 #define BE_GRAPHICS_RENDERBACKEND_HH_
 /*****************************************************************************/
+#include    <minitl/interlocked/stack.hh>
+#include    <minitl/memory/pool.hh>
 #include    <system/action.hh>
 #include    <graphics/renderer/vertexdesc.hh>
 #include    <graphics/scene/scene.hh>
@@ -41,7 +43,7 @@ struct TextureBufferFlags
     TextureFormat   format;
 };
 
-struct Batch
+struct Batch : public minitl::inode
 {
     enum RenderPrimitiveType
     {
@@ -66,7 +68,11 @@ class be_api(GRAPHICS) RenderBackend : public minitl::pointer
 {
     friend class Renderer;
 protected:
+    RenderBackend() : m_batchPool(8192), m_batches() { }
     virtual ~RenderBackend() {}
+protected:
+    minitl::pool<Batch>     m_batchPool;
+    minitl::istack<Batch>   m_batches;
 public:
     virtual int step() const = 0;
     virtual void flush() const = 0;
@@ -80,6 +86,9 @@ public:
     virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;
+
+    Batch*                          getBatch();
+    Batch*                          putBatch();
 
     virtual void                    dispatch() = 0;
 };

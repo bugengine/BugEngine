@@ -18,7 +18,6 @@ class Window : public Win32::Window
 private:
     LPDIRECT3DSWAPCHAIN9    m_swapChain;
     LPDIRECT3DSWAPCHAIN9    m_workingSwapChain;
-    weak<Renderer>          m_owner;
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();

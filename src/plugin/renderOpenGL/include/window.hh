@@ -15,8 +15,6 @@ class Renderer;
 class Window : public Windowing::Window
 {
     friend class Renderer;
-private:
-    weak<Renderer>  m_owner;
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
@@ -27,7 +25,6 @@ public:
     void end();
 
     void close() override;
-
     bool closed() const override;
 };
 

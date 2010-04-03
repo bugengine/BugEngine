@@ -10,6 +10,7 @@
 #include    <graphics/scene/scene.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/renderbackend.hh>
+#include    <system/scheduler/task/group.hh>
 
 namespace BugEngine
 {
@@ -17,27 +18,41 @@ namespace BugEngine
 class Application : public Object
 {
 private:
-    class UpdateInput;
-    class UpdateScheduler;
-    class UpdateMemory;
+    struct Request;
+private:
+    class RenderView
+    {
+    private:
+        ref<Graphics::Scene>        m_scene;
+        ref<Graphics::RenderTarget> m_renderTarget;
+        ref<TaskGroup>              m_renderTask;
+    public:
+        RenderView(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+        ~RenderView();
+
+        weak<ITask> renderTask() const;
+    };
 private:
     scoped<Scheduler>                               m_scheduler;
-    minitl::vector< ref<World> >                    m_worlds;
+    minitl::vector< RenderView >                    m_views;
     minitl::vector< ref<ITask> >                    m_tasks;
     ref< ITask::ChainCallback >                     m_startUpdate;
     ref< ITask::ChainCallback >                     m_onUpdate;
     minitl::vector< ref< ITask::ChainCallback > >   m_callbacks;
-public :
+    minitl::istack<Request>                         m_requests;
+private:
+    void addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+    void processRequests();
+public:
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
     int run(void);
 
     void addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
-    void addWorld(ref<World> world);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
-private :
+private:
     Application(void);
     Application(const Application&);
     const Application& operator=(const Application&);

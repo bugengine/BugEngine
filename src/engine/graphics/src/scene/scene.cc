@@ -3,17 +3,23 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/scene/scene.hh>
+#include    <system/scheduler/task/group.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-Scene::Scene(weak<Scene> parent)
-:   m_parent(parent)
+Scene::Scene()
+:   m_updateTask(ref<TaskGroup>::create("update", color32(0, 0, 255)))
 {
 }
 
 Scene::~Scene()
 {
+}
+
+weak<ITask> Scene::updateTask() const
+{
+    return m_updateTask;
 }
 
 }}

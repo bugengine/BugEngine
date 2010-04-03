@@ -14,6 +14,7 @@ namespace BugEngine
 
 class be_api(MOBILE) World : public Object
 {
+    friend class WorldScene;
 private:
     Plugin<Physics::IWorldManager>          m_physicsSystem;
     Plugin<Audio::IWorldManager>            m_audioSystem;
@@ -26,13 +27,14 @@ private:
     void copyWorld();
     void updateWorld();
     void swapWorld();
+be_friend(WorldScene):
+    weak<ITask> copyWorldTask();
+    weak<ITask> updateWorldTask();
+    weak<ITask> swapWorldTask();
 public:
     World(float3 worldExtents);
     ~World();
 
-    weak<ITask> copyWorldTask();
-    weak<ITask> updateWorldTask();
-    weak<ITask> swapWorldTask();
 
     be_metaclass(MOBILE,World,Object)
     be_properties

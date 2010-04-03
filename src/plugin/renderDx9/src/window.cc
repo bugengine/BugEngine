@@ -17,7 +17,6 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Win32::Window(renderer, flags)
-,   m_owner(renderer)
 {
     D3DPRESENT_PARAMETERS d3dpp;
     ZeroMemory(&d3dpp, sizeof(d3dpp));
@@ -39,8 +38,8 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 
 Window::~Window()
 {
-    m_owner->m_device->Release();
-    m_owner->m_directx->Release();
+    be_checked_cast<Renderer>(m_renderer)->m_device->Release();
+    be_checked_cast<Renderer>(m_renderer)->m_directx->Release();
 }
 
 bool Window::closed() const
@@ -51,8 +50,8 @@ bool Window::closed() const
 void Window::setCurrent()
 {
     LPDIRECT3DSURFACE9 backBuffer;
-    D3D_CHECKRESULT(m_owner->m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
-    D3D_CHECKRESULT(m_owner->m_device->SetRenderTarget(0, backBuffer));
+    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
+    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
 }
 
 void Window::close()
@@ -65,15 +64,15 @@ void Window::close()
 void Window::begin()
 {
     setCurrent();
-    D3D_CHECKRESULT(m_owner->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
-    D3D_CHECKRESULT(m_owner->m_device->BeginScene());
+    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
+    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
     uint2 size = getDimensions();
-    m_owner->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
+    be_checked_cast<Renderer>(m_renderer)->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
 }
 
 void Window::end()
 {
-    D3D_CHECKRESULT(m_owner->m_device->EndScene());
+    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
     D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
 }
 

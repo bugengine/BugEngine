@@ -3,12 +3,13 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/renderer/rendertarget.hh>
-#include    <graphics/scene/scene.hh>
+#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-RenderTarget::RenderTarget()
+RenderTarget::RenderTarget(weak<RenderBackend> renderer)
+:   m_renderer(renderer)
 {
 }
 
