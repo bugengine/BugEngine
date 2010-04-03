@@ -15,7 +15,6 @@ class Renderer;
 class Window : public RenderTarget
 {
 protected:
-    weak<Renderer>  m_renderer;
     HWND            m_window;
     HDC             m_dc;
 public:

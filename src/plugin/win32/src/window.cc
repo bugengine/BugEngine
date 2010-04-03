@@ -15,8 +15,7 @@ namespace BugEngine { namespace Graphics { namespace Win32
 {
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   RenderTarget()
-,   m_renderer(renderer)
+:   RenderTarget(renderer)
 {
     WindowCreationFlags f;
     f.className = renderer->getWindowClassName().c_str();
@@ -50,7 +49,7 @@ void Window::close()
     HWND hWnd = m_window;
     m_window = 0;
     if(hWnd)
-        m_renderer->destroyWindowImplementation(hWnd);
+        be_checked_cast<Renderer>(m_renderer)->destroyWindowImplementation(hWnd);
 }
 
 uint2 Window::getDimensions() const

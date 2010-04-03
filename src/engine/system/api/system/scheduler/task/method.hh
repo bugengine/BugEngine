@@ -10,16 +10,16 @@
 namespace BugEngine
 {
 
-template< typename Owner, void(Owner::*Method)() >
+template< typename Owner, void(Owner::*Method)(), template< typename > class Ptr = weak >
 struct MethodCaller
 {
 private:
-    weak<Owner> const m_owner;
+    Ptr<Owner> const m_owner;
 private:
     MethodCaller& operator=(const MethodCaller& other);
 public:
     typedef range_onestep   Range;
-    MethodCaller(weak<Owner> owner)
+    MethodCaller(Ptr<Owner> owner)
         :   m_owner(owner)
     {
     }

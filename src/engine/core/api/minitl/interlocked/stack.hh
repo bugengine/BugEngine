@@ -58,7 +58,7 @@ T* istack<T>::pop()
         ticket = m_head.getTicket();
         result = static_cast<T*>((inode*)m_head);
     }
-    while(!m_head.setConditional(const_cast<inode*>(result->next), ticket));
+    while(result && !m_head.setConditional(const_cast<inode*>(result->next), ticket));
     return result;
 }
 
