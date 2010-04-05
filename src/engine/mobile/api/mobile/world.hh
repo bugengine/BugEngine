@@ -27,7 +27,7 @@ private:
     void copyWorld();
     void updateWorld();
     void swapWorld();
-be_friend(WorldScene):
+private: //friend WorldScene
     weak<ITask> copyWorldTask();
     weak<ITask> updateWorldTask();
     weak<ITask> swapWorldTask();

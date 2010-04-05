@@ -24,7 +24,7 @@ int be_main (weak<BugEngine::Application> app)
     ref<TestNS::Test> t = ref<TestNS::Test>::create();
     BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
     BugEngine::Plugin<BugEngine::Script> p("lua");
-    p->doFile("data/scripts/main.lua");
+    //p->doFile("data/scripts/main.lua");
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);
@@ -35,10 +35,9 @@ int be_main (weak<BugEngine::Application> app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderDx9");
-    ref<BugEngine::Graphics::RenderTarget> w1 = display->createRenderWindow(f);
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2 ("renderOpenGL");
-    ref<BugEngine::Graphics::RenderTarget> w2 = display->createRenderWindow(f);
+    ref<BugEngine::Graphics::RenderTarget> w1 = display2->createRenderWindow(f);
+    ref<BugEngine::Graphics::RenderTarget> w2 = display2->createRenderWindow(f);
 
     ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
     ref<BugEngine::Graphics::Scene> scene = ref<BugEngine::WorldScene>::create(world);

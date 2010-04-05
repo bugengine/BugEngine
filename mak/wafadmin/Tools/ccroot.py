@@ -370,7 +370,7 @@ def apply_lib_vars(self):
 			link_name = y.target[y.target.rfind(os.sep) + 1:]
 			if 'cstaticlib' in y.features:
 				env.append_value('STATICLIB', link_name)
-			elif 'cshlib' in y.features or 'cprogram' in y.features:
+			elif 'cshlib' in y.features:
 				# WARNING some linkers can link against programs
 				env.append_value('LIB', link_name)
 
