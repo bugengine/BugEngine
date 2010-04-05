@@ -9,8 +9,7 @@ namespace BugEngine { namespace Graphics { namespace X
 {
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   RenderTarget()
-,   m_renderer(renderer)
+:   RenderTarget(renderer)
 ,   m_window(renderer->createWindow(flags))
 {
 }
@@ -26,7 +25,7 @@ void Window::close()
     {
         ::Window bu = m_window;
         m_window = 0;
-        XDestroyWindow(m_renderer->m_display, bu);
+        XDestroyWindow(be_checked_cast<Renderer>(m_renderer)->m_display, bu);
     }
 }
 
