@@ -26,6 +26,7 @@ private:
         ref<Graphics::Scene>        m_scene;
         ref<Graphics::RenderTarget> m_renderTarget;
         ref<TaskGroup>              m_renderTask;
+        std::vector< ref<ITask> >   m_tasks;
     public:
         RenderView(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
         ~RenderView();
@@ -38,7 +39,6 @@ private:
     minitl::vector< ref<ITask> >                    m_tasks;
     ref< ITask::ChainCallback >                     m_startUpdate;
     ref< ITask::ChainCallback >                     m_onUpdate;
-    minitl::vector< ref< ITask::ChainCallback > >   m_callbacks;
     minitl::istack<Request>                         m_requests;
 private:
     void addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);

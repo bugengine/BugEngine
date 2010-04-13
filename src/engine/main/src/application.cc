@@ -31,7 +31,12 @@ Application::RenderView::RenderView(ref<Graphics::Scene> scene, ref<Graphics::Re
 ,   m_renderTask(ref<TaskGroup>::create("render", color32(255,0,0)))
 {
     m_renderTask->addStartTask(scene->updateTask());
-    m_renderTask->addEndTask(scene->updateTask());
+    ref<ITask::ChainCallback> callback = ref<ITask::ChainCallback>::create();
+    ref<ITask> renderTask = target->createSceneRenderTask(scene);
+    m_renderTask->addEndTask(renderTask);
+    scene->updateTask()->addCallback(callback);
+    callback->makeStart(renderTask);
+    m_tasks.push_back(renderTask);
 }
 
 Application::RenderView::~RenderView()
@@ -47,7 +52,6 @@ Application::Application(int argc, const char *argv[])
 :   Object()
 ,   m_scheduler(scoped<Scheduler>::create())
 ,   m_tasks()
-,   m_callbacks()
 {
     UNUSED(argc); UNUSED(argv);
 
@@ -65,11 +69,9 @@ Application::Application(int argc, const char *argv[])
     updateTask->addEndTask(m_tasks[3]);
 
     m_startUpdate = ref<ITask::ChainCallback>::create();
-    m_callbacks.push_back(m_startUpdate);
     m_startUpdate->makeStart(updateTask);
 
     m_onUpdate = ref<ITask::ChainCallback>::create();
-    m_callbacks.push_back(m_onUpdate);
     updateTask->addCallback(m_onUpdate);
 }
 

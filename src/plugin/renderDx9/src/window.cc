@@ -50,8 +50,9 @@ bool Window::closed() const
 void Window::setCurrent()
 {
     LPDIRECT3DSURFACE9 backBuffer;
-    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
+    D3D_CHECKRESULT(m_swapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
     D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
+    backBuffer->Release();
 }
 
 void Window::close()

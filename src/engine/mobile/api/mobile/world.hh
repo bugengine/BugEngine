@@ -20,17 +20,13 @@ private:
     Plugin<Audio::IWorldManager>            m_audioSystem;
     ref<Physics::IWorld>                    m_physicsWorld;
     ref<Audio::IWorld>                      m_audioWorld;
-    minitl::vector< ref<ITask::ICallback> > m_callbacks;
     minitl::vector< ref<ITask> >            m_tasks;
     int                                     m_worldIndex;
 private:
     void copyWorld();
     void updateWorld();
-    void swapWorld();
-private: //friend WorldScene
-    weak<ITask> copyWorldTask();
+private: // friend class WorldScene
     weak<ITask> updateWorldTask();
-    weak<ITask> swapWorldTask();
 public:
     World(float3 worldExtents);
     ~World();

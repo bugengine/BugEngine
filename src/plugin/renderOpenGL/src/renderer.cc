@@ -76,12 +76,10 @@ void Renderer::drawBatch(const Batch& b)
     }
 }
 
-void Renderer::dispatch()
+void Renderer::flush()
 {
-}
-
-void Renderer::flush() const
-{
+    OutputDebugString("flush\n");
+    Thread::sleep(33);
 }
 
 }}}
