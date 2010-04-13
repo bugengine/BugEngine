@@ -55,11 +55,9 @@ public:
     ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>                  createTextureBuffer(TextureBufferFlags flags) const override;
-
-    void                            dispatch() override;
-    void                            flush() const override;
 private:
     void                            drawBatch(const Batch& b);
+    void                            flush() override;
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

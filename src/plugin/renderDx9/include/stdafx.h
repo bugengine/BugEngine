@@ -5,19 +5,19 @@
 #define BE_RENDERDX9_STDAFX_H_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
-#include    <graphics/stdafx.h>
-#include    <win32/stdafx.h>
+#include   <core/stdafx.h>
+#include   <rtti/stdafx.h>
+#include   <system/stdafx.h>
+#include   <graphics/stdafx.h>
+#include   <win32/stdafx.h>
 
 #ifdef BE_COMPILER_MSVC
 # pragma warning(disable:4985)
 #endif
 
-#include    <d3d9.h>
-#include    <DxErr.h>
-#include    <Cg/cg.h>
+#include   <d3d9.h>
+#include   <DxErr.h>
+#include   <Cg/cg.h>
 
 #define D3D_CHECKRESULT(operation)                          \
     {                                                       \

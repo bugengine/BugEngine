@@ -68,16 +68,19 @@ class be_api(GRAPHICS) RenderBackend : public minitl::pointer
 {
     friend class Renderer;
 protected:
-    RenderBackend() : m_batchPool(8192), m_batches() { }
-    virtual ~RenderBackend() {}
+    RenderBackend();
+    virtual ~RenderBackend();
 protected:
+    ref<ITask>              m_flushTask;
     minitl::pool<Batch>     m_batchPool;
     minitl::istack<Batch>   m_batches;
-public:
+protected:
     virtual int step() const = 0;
-    virtual void flush() const = 0;
+    virtual void flush() = 0;
+public:
+    weak<ITask>                     flushTask();
 
-    virtual uint2 getScreenSize() = 0;
+    virtual uint2                   getScreenSize() = 0;
 
     virtual weak<ShaderPipeline>    getShaderPipeline() = 0;
     virtual weak<TexturePipeline>   getTexturePipeline() = 0;
@@ -89,8 +92,6 @@ public:
 
     Batch*                          getBatch();
     Batch*                          putBatch();
-
-    virtual void                    dispatch() = 0;
 };
 
 }}

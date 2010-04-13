@@ -16,14 +16,15 @@ void Malloc::init()
 {
     if(!s_initialized)
     {
+#ifdef  BE_ENABLE_MEMORY_TRACKING
+# ifdef BE_PLATFORM_WIN32
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_CHECK_EVERY_1024_DF|_CRTDBG_LEAK_CHECK_DF);
+        _CrtSetBreakAlloc(-1);
+# endif
+#endif
         s_initialized = true;
         Logger::root();
     }
-#ifdef  BE_ENABLE_MEMORY_TRACKING
-# ifdef BE_PLATFORM_WIN32
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_CHECK_EVERY_1024_DF|_CRTDBG_LEAK_CHECK_DF);
-# endif
-#endif
 }
 
 

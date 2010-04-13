@@ -13,8 +13,8 @@ WorldScene::WorldScene(ref<World> world)
 {
     m_worldUpdateTask->addStartTask(m_updateTask);
     m_worldUpdateTask->addEndTask(m_updateTask);
-    m_worldUpdateTask->addStartTask(world->copyWorldTask());
-    m_worldUpdateTask->addEndTask(world->copyWorldTask());
+    m_worldUpdateTask->addStartTask(world->updateWorldTask());
+    m_worldUpdateTask->addEndTask(world->updateWorldTask());
 }
 
 WorldScene::~WorldScene()

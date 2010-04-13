@@ -4,6 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERTARGET_HH_
 #define BE_GRAPHICS_RENDERTARGET_HH_
 /*****************************************************************************/
+#include   <system/scheduler/task/itask.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -19,9 +20,13 @@ public:
     RenderTarget(weak<RenderBackend> renderer);
     virtual ~RenderTarget() { }
 
-    virtual uint2           getDimensions() const = 0;
-    virtual void            close() = 0;
-    virtual bool            closed() const = 0;
+    virtual uint2   getDimensions() const = 0;
+    virtual void    close() = 0;
+
+    ref<ITask>      createSceneRenderTask(weak<Scene> scene);
+protected:
+    virtual bool    closed() const = 0;
+    void            render();
 private:
     RenderTarget& operator=(const RenderTarget& other);
     RenderTarget(const RenderTarget& other);

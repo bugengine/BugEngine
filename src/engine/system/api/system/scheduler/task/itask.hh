@@ -40,7 +40,7 @@ public:
         void makeStart(weak<ITask> task);
     };
 private:
-    minitl::vector< weak<ICallback> > m_callbacks;
+    minitl::vector< ref<ICallback> > m_callbacks;
 public:
     const istring name;
     const color32 color;
@@ -50,7 +50,7 @@ public:
     virtual void run(weak<Scheduler> scheduler) const = 0;
     void end(weak<Scheduler> scheduler) const;
 
-    void addCallback(weak<ICallback> callback);
+    void addCallback(ref<ICallback> callback);
     void removeCallback(weak<ICallback> callback);
 
 protected:

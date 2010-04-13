@@ -15,7 +15,7 @@ ITask::ITask(istring name, color32 color)
 
 ITask::~ITask()
 {
-    for(minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::vector< ref<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onDisconnected(this);
     }
@@ -23,11 +23,11 @@ ITask::~ITask()
 
 void ITask::end(weak<Scheduler> sc) const
 {
-    for(minitl::vector< weak<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::vector< ref<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
         (*it)->onCompleted(sc, this);
 }
 
-void ITask::addCallback(weak<ICallback> callback)
+void ITask::addCallback(ref<ICallback> callback)
 {
     m_callbacks.push_back(callback);
     callback->onConnected(this);
@@ -35,7 +35,7 @@ void ITask::addCallback(weak<ICallback> callback)
 
 void ITask::removeCallback(weak<ICallback> callback)
 {
-    for(minitl::vector< weak<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); )
+    for(minitl::vector< ref<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); )
     {
         if(*it == callback)
         {

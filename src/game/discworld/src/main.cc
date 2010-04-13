@@ -42,7 +42,7 @@ int be_main (weak<BugEngine::Application> app)
     ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
     ref<BugEngine::Graphics::Scene> scene = ref<BugEngine::WorldScene>::create(world);
     app->addScene(scene, w1);
-    app->addScene(scene, w2);
+    //app->addScene(scene, w2);
 
     return app->run();
 }
