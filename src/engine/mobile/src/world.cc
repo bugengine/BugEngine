@@ -32,13 +32,8 @@ World::World(float3 worldExtents)
 
     m_tasks[WorldUpdateTask_CopyWorld] = ref< Task< MethodCaller<World, &World::copyWorld> > >::create("copyWorld", color32(255,0,255),  MethodCaller<World, &World::copyWorld>(this));
     m_tasks[WorldUpdateTask_UpdateWorld] = ref< Task< MethodCaller<World, &World::updateWorld> > >::create("updateWorld", color32(255,0,255),  MethodCaller<World, &World::updateWorld>(this));
-
-    ref<ITask::ChainCallback> startUpdate = ref<ITask::ChainCallback>::create();
-    ref<ITask::ChainCallback> startCopy = ref<ITask::ChainCallback>::create();
-    startUpdate->makeStart(m_tasks[WorldUpdateTask_UpdateWorld]);
-    startCopy->makeStart(m_tasks[WorldUpdateTask_CopyWorld]);
-    m_tasks[WorldUpdateTask_CopyWorld]->addCallback(startUpdate);
-    m_tasks[WorldUpdateTask_UpdateWorld]->addCallback(startCopy);
+    m_tasks[WorldUpdateTask_CopyWorld]->addCallback(m_tasks[WorldUpdateTask_UpdateWorld]->startCallback());
+    m_tasks[WorldUpdateTask_UpdateWorld]->addCallback(m_tasks[WorldUpdateTask_CopyWorld]->startCallback(), ITask::ICallback::CallbackStatus_Completed);
 }
 
 World::~World()

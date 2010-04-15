@@ -25,15 +25,23 @@ TaskGroup::~TaskGroup()
 
 void TaskGroup::run(weak<Scheduler> scheduler) const
 {
-    for(minitl::vector< weak<ITask> >::const_iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
+    if(!m_startTasks.empty())
     {
-        (*it)->run(scheduler);
+        for(minitl::vector< weak<ITask> >::const_iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
+        {
+            (*it)->startCallback()->onCompleted(scheduler, this);
+        }
+    }
+    else
+    {
+        end(scheduler);
     }
 }
 
 void TaskGroup::addStartTask(weak<ITask> task)
 {
     m_startTasks.push_back(task);
+    task->startCallback()->onConnected(this, ICallback::CallbackStatus_Pending);
 }
 
 void TaskGroup::addEndTask(weak<ITask> task)
@@ -62,11 +70,13 @@ void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<const ITas
     }
 }
 
-void TaskGroup::Callback::onConnected(weak<ITask> to)
+void TaskGroup::Callback::onConnected(weak<ITask> /*to*/, CallbackStatus status)
 {
+    if(status == CallbackStatus_Completed)
+        m_completed++;
 }
 
-void TaskGroup::Callback::onDisconnected(weak<ITask> from)
+void TaskGroup::Callback::onDisconnected(weak<ITask> /*from*/)
 {
 }
 

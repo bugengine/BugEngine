@@ -37,8 +37,6 @@ private:
     scoped<Scheduler>                               m_scheduler;
     minitl::vector< RenderView >                    m_views;
     minitl::vector< ref<ITask> >                    m_tasks;
-    ref< ITask::ChainCallback >                     m_startUpdate;
-    ref< ITask::ChainCallback >                     m_onUpdate;
     minitl::istack<Request>                         m_requests;
 private:
     void addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
