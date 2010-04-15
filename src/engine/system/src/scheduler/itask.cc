@@ -10,12 +10,13 @@ namespace BugEngine
 ITask::ITask(istring name, color32 color)
 :   name(name)
 ,   color(color)
+,   m_start(ref<ChainCallback>::create(this))
 {
 }
 
 ITask::~ITask()
 {
-    for(minitl::vector< ref<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onDisconnected(this);
     }
@@ -23,19 +24,19 @@ ITask::~ITask()
 
 void ITask::end(weak<Scheduler> sc) const
 {
-    for(minitl::vector< ref<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::vector< weak<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
         (*it)->onCompleted(sc, this);
 }
 
-void ITask::addCallback(ref<ICallback> callback)
+void ITask::addCallback(weak<ICallback> callback, ICallback::CallbackStatus status)
 {
     m_callbacks.push_back(callback);
-    callback->onConnected(this);
+    callback->onConnected(this, status);
 }
 
 void ITask::removeCallback(weak<ICallback> callback)
 {
-    for(minitl::vector< ref<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); )
+    for(minitl::vector< weak<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); )
     {
         if(*it == callback)
         {
@@ -46,6 +47,12 @@ void ITask::removeCallback(weak<ICallback> callback)
             ++it;
     }
 }
+
+weak<ITask::ICallback> ITask::startCallback()
+{
+    return m_start;
+}
+
 /*----------------------------------------------------------------------------*/
 
 ITask::ICallback::ICallback()
@@ -58,9 +65,9 @@ ITask::ICallback::~ICallback()
 
 /*----------------------------------------------------------------------------*/
 
-ITask::ChainCallback::ChainCallback()
+ITask::ChainCallback::ChainCallback(weak<ITask> task)
 :   ICallback()
-,   m_starts()
+,   m_starts(task)
 ,   m_startedBy(0)
 ,   m_completed(0)
 {
@@ -79,16 +86,17 @@ void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITa
     if(++m_completed == m_startedBy.size())
     {
         m_completed = 0;
-        for(minitl::vector< weak<ITask> >::const_iterator it = m_starts.begin(); it != m_starts.end(); ++it)
-        {
-            (*it)->run(scheduler);
-        }
+        m_starts->run(scheduler);
     }
 }
 
-void ITask::ChainCallback::onConnected(weak<ITask> to)
+void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 {
     m_startedBy.push_back(to);
+    if(status == CallbackStatus_Completed)
+    {
+        m_completed++;
+    }
 }
 
 void ITask::ChainCallback::onDisconnected(weak<ITask> from)
@@ -104,11 +112,6 @@ void ITask::ChainCallback::onDisconnected(weak<ITask> from)
              ++it;
         }
     }
-}
-
-void ITask::ChainCallback::makeStart(weak<ITask> task)
-{
-    m_starts.push_back(task);
 }
 
 }

@@ -30,12 +30,12 @@ Application::RenderView::RenderView(ref<Graphics::Scene> scene, ref<Graphics::Re
 ,   m_renderTarget(target)
 ,   m_renderTask(ref<TaskGroup>::create("render", color32(255,0,0)))
 {
-    m_renderTask->addStartTask(scene->updateTask());
-    ref<ITask::ChainCallback> callback = ref<ITask::ChainCallback>::create();
     ref<ITask> renderTask = target->createSceneRenderTask(scene);
+
+    m_renderTask->addStartTask(scene->updateTask());
     m_renderTask->addEndTask(renderTask);
-    scene->updateTask()->addCallback(callback);
-    callback->makeStart(renderTask);
+
+    scene->updateTask()->addCallback(renderTask->startCallback());
     m_tasks.push_back(renderTask);
 }
 
@@ -67,12 +67,6 @@ Application::Application(int argc, const char *argv[])
     updateTask->addEndTask(m_tasks[1]);
     updateTask->addEndTask(m_tasks[2]);
     updateTask->addEndTask(m_tasks[3]);
-
-    m_startUpdate = ref<ITask::ChainCallback>::create();
-    m_startUpdate->makeStart(updateTask);
-
-    m_onUpdate = ref<ITask::ChainCallback>::create();
-    updateTask->addCallback(m_onUpdate);
 }
 
 Application::~Application(void)
@@ -90,8 +84,8 @@ void Application::addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderT
 {
     RenderView view(scene, target);
     m_views.push_back(view);
-    m_onUpdate->makeStart(scene->updateTask());
-    scene->updateTask()->addCallback(m_startUpdate);
+    m_tasks[0]->addCallback(view.renderTask()->startCallback());
+    view.renderTask()->addCallback(m_tasks[0]->startCallback());
 }
 
 void Application::addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)

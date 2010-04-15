@@ -23,12 +23,8 @@ RenderTarget::RenderTarget(weak<RenderBackend> renderer)
 ref<ITask> RenderTarget::createSceneRenderTask(weak<Scene> scene)
 {
     ref<ITask> result = ref< Task< MethodCaller<RenderTarget, &RenderTarget::render> > >::create("copyWorld", color32(255,0,0),  MethodCaller<RenderTarget, &RenderTarget::render>(this));
-    ref<ITask::ChainCallback> callback = ref<ITask::ChainCallback>::create();
-    result->addCallback(callback);
-    callback->makeStart(m_renderer->flushTask());
-    ref<ITask::ChainCallback> waitPreviousFrame = ref<ITask::ChainCallback>::create();
-    m_renderer->flushTask()->addCallback(waitPreviousFrame);
-    callback->makeStart(result);
+    result->addCallback(m_renderer->flushTask()->startCallback());
+    m_renderer->flushTask()->addCallback(result->startCallback(), ITask::ICallback::CallbackStatus_Completed);
     return result;
 }
 

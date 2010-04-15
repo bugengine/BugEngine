@@ -18,40 +18,51 @@ public:
     protected:
         ICallback();
     public:
+        enum CallbackStatus
+        {
+            CallbackStatus_Pending,
+            CallbackStatus_Completed
+        };
+
         virtual ~ICallback();
 
         virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const = 0;
-        virtual void onConnected(weak<ITask> to) = 0;
+        virtual void onConnected(weak<ITask> to, CallbackStatus) = 0;
         virtual void onDisconnected(weak<ITask> from) = 0;
     };
+private:
     class ChainCallback : public ICallback
     {
     private:
-        minitl::vector< weak<ITask> >   m_starts;
+        weak<ITask> const               m_starts;
         minitl::vector< weak<ITask> >   m_startedBy;
         mutable i_u32                   m_completed;
     public:
-        ChainCallback();
+        ChainCallback(weak<ITask> task);
         virtual ~ChainCallback();
 
         virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const override;
-        virtual void onConnected(weak<ITask> to) override;
+        virtual void onConnected(weak<ITask> to, CallbackStatus status) override;
         virtual void onDisconnected(weak<ITask> from) override;
-        void makeStart(weak<ITask> task);
+    private:
+        ChainCallback(const ChainCallback& other);
+        ChainCallback& operator=(const ChainCallback& other);
     };
 private:
-    minitl::vector< ref<ICallback> > m_callbacks;
+    minitl::vector< weak<ICallback> >   m_callbacks;
+    ref<ICallback>                      m_start;
 public:
     const istring name;
     const color32 color;
 public:
     virtual ~ITask();
-public:
+
     virtual void run(weak<Scheduler> scheduler) const = 0;
     void end(weak<Scheduler> scheduler) const;
 
-    void addCallback(ref<ICallback> callback);
+    void addCallback(weak<ICallback> callback, ICallback::CallbackStatus status = ICallback::CallbackStatus_Pending);
     void removeCallback(weak<ICallback> callback);
+    weak<ICallback> startCallback();
 
 protected:
     ITask(istring name, color32 color);

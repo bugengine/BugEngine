@@ -22,7 +22,7 @@ private:
         virtual ~Callback();
 
         virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const override;
-        virtual void onConnected(weak<ITask> to) override;
+        virtual void onConnected(weak<ITask> to, CallbackStatus status) override;
         virtual void onDisconnected(weak<ITask> to) override;
     };
     friend class Callback;
