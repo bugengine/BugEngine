@@ -5,6 +5,7 @@
 #define BE_GRAPHICS_FONT_FONT_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/vertexbuffer.hh>
+#include    <core/memory/streams.hh>
 
 #include    <ft2build.h>
 #include    FT_FREETYPE_H
@@ -21,7 +22,7 @@ private:
     typedef VertexDescription<MAKEVERTEXLIST2(float4, gPosition, float4, gUV0)> VertexFormat;
     ref< VertexBuffer<VertexFormat> >    m_fontTriangles;
 public:
-    Font(const RenderBackend* renderer, const ifilename& font);
+    Font(const RenderBackend* renderer, ref<IMemoryStream> font);
     virtual ~Font();
 
     weak<const GpuBuffer> vertices() const;

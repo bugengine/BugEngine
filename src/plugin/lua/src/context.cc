@@ -5,7 +5,6 @@
 
 #include    <context.h>
 
-#include    <system/filesystem.hh>
 #include    <core/memory/streams.hh>
 #include    <rtti/namespace.hh>
 
@@ -85,8 +84,9 @@ void* Context::luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize)
     }
 }
 
-Context::Context()
+Context::Context(weak<const FileSystem> filesystem)
 :   m_state(lua_newstate(&Context::luaAlloc, 0))
+,   m_filesystem(filesystem)
 {
     luaopen_base(m_state);
     luaopen_table(m_state);
@@ -108,12 +108,10 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::doFile(const ifilename& filename)
+void Context::doFile(const ifilename& file)
 {
-    weak<BugEngine::FileSystem> fs = BugEngine::FileSystem::instance();
-    ref<BugEngine::IMemoryStream> file = fs->open(filename, BugEngine::eReadOnly);
-    be_info("loading file %s" | filename);
-    doFile(file);
+    ref<IMemoryStream> stream = m_filesystem->open(file, eReadOnly);
+    doFile(stream);
 }
 
 void Context::doFile(weak<IMemoryStream> file)

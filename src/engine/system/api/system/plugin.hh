@@ -18,6 +18,10 @@ private:
     Interface*  m_interface;
 public:
     Plugin(const istring &pluginName);
+    template< typename T1 >
+    Plugin(const istring &pluginName, T1 param1);
+    template< typename T1, typename T2 >
+    Plugin(const istring &pluginName, T1 param1, T2 param2);
     virtual ~Plugin(void);
 
     Interface* operator->()             { return m_interface; }

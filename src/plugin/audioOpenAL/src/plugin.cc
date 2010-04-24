@@ -5,5 +5,5 @@
 #include    <world.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(audioOpenAL, BugEngine::Audio::OpenAL::WorldManager, ());
+BE_PLUGIN_REGISTER(audioOpenAL, BugEngine::Audio::OpenAL::World, (), ());
 

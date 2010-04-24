@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <bulletworldmanager.hh>
+#include    <bulletworld.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(physicsBullet, BugEngine::Physics::Bullet::BulletWorldManager, ());
+BE_PLUGIN_REGISTER(physicsBullet, BugEngine::Physics::Bullet::BulletWorld, (BugEngine::float3 worldExtents), (worldExtents));
 

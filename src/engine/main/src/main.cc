@@ -7,8 +7,6 @@
 #include    <rtti/test.hh>
 #include    <rtti/autoregistration.hh>
 #include    <rtti/mono.hh>
-#include    <system/filesystem.hh>
-#include    <system/diskfs.hh>
 #include    <input/inputmap.hh>
 #include    <system/scheduler/scheduler.hh>
 #include    <core/environment.hh>
@@ -102,8 +100,6 @@ static int __main(int argc, const char *argv[])
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
-        BugEngine::FileSystem::instance()->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
-
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(argc, argv);
         result = be_main(locApplication);
     }

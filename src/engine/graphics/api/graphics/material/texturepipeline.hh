@@ -9,13 +9,13 @@
 namespace BugEngine { namespace Graphics
 {
 
-class _Texture;
+class Texture;
 
 class TexturePipeline : public System::Pipeline
 {
 public:
-    virtual _Texture*           load(const ifilename& file) = 0;
-    virtual void                unload(_Texture* s) = 0;
+    virtual Texture*    load(const ifilename& file) = 0;
+    virtual void        unload(Texture* s) = 0;
 };
 
 }}

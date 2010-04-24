@@ -15,11 +15,11 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 class ShaderPipeline;
 
-class CgShader : public _Shader
+class CgShader : public Shader
 {
     friend class ShaderPipeline;
 private:
-    CGprogram                           m_program;
+    CGprogram                        m_program;
     std::vector< ref<ShaderParam> >  m_params;
 public:
     CgShader(CGprogram program);
@@ -27,7 +27,7 @@ public:
 
     void set() const;
 
-    virtual ref<ShaderParam> getParam(const istring& name) const override;
+    virtual ref<ShaderParam> getParam(const istring& name) const;
 private:
     void addParam(ref<ShaderParam> p);
 };

@@ -29,14 +29,14 @@ using namespace BugEngine::Data::Parse;
 
 #define YYSTACK_USE_ALLOCA 1
 
-static ParseParam* g_context = 0;
+static Database*   g_context = 0;
        int         g_line = 0;
        int         g_columnbefore = 0;
        int         g_columnafter = 0;
 
 static int yyerror(const char *msg)
 {
-    fprintf(stderr, "%s:%d (%d-%d) : %s\n", g_context->m_filename.str().c_str(), g_line, g_columnbefore, g_columnafter, msg);
+    fprintf(stderr, "line %d (%d-%d) : %s\n", g_line, g_columnbefore, g_columnafter, msg);
     return 0;
 }
 extern int yylex();
@@ -83,7 +83,7 @@ extern int yylex();
 file:
         {
             be_assert(g_context == 0, "context was already set");
-            g_context = reinterpret_cast<ParseParam*>(param);
+            g_context = reinterpret_cast<Database*>(param);
             g_line = 1;
             g_columnbefore = 0;
             g_columnafter = 1;
@@ -124,7 +124,7 @@ decl:
     |
         visibility function
         {
-            //g_context->m_database->add($2->name(), $1, $2);
+            //g_context->add($2->name(), $1, $2);
         }
     |
         visibility VAL_id '=' atom
@@ -134,9 +134,9 @@ decl:
     
 namespace:
         KW_namespace VAL_id
-        '{'         { g_context->m_database->push($2); }
+        '{'         { g_context->push($2); }
             decls
-        '}'         { g_context->m_database->pop($2); }
+        '}'         { g_context->pop($2); }
     ;
     
     

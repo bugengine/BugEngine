@@ -5,9 +5,6 @@
 #include    <world.hh>
 #include    <sound.hh>
 
-#include    <system/filesystem.hh>
-
-
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
 
@@ -22,25 +19,13 @@ World::~World()
 {
 }
 
-ref<Audio::ISound> World::createSound(const ifilename& file)
+ref<Audio::ISound> World::createSound(ref<IMemoryStream> soundfile)
 {
-    ref<IMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
-    return ref<Sound>::create(this, soundfile);
-}
-
-ref<Audio::ISound> World::createMusic(const ifilename& file)
-{
-    ref<IMemoryStream> soundfile = FileSystem::instance()->open(file, eReadOnly);
     return ref<Sound>::create(this, soundfile);
 }
 
 void World::step()
 {
-}
-
-ref<Audio::IWorld> WorldManager::createWorld()
-{
-    return ref<World>::create();
 }
 
 }}}

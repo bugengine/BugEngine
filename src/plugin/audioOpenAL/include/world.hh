@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <audio/iworld.hh>
 #include    <audio/isound.hh>
+#include    <core/memory/streams.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {
@@ -24,8 +25,7 @@ public:
     World();
     ~World();
 
-    ref<Audio::ISound> createSound(const ifilename& file) override;
-    ref<Audio::ISound> createMusic(const ifilename& file) override;
+    ref<Audio::ISound> createSound(ref<IMemoryStream> file) override;
 
     void step() override;
 public:
@@ -34,12 +34,6 @@ public:
 public:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
-};
-
-class WorldManager : public Audio::IWorldManager
-{
-protected:
-    ref<Audio::IWorld> createWorld();
 };
 
 }}}

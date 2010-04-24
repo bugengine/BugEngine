@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <win32/renderer.hh>
 #include    <cgshaderparam.hh>
+#include    <system/filesystem.hh>
 #include    <d3d9.h>
 #include    <Cg/cg.h>
 #include    <Cg/cgD3D9.h>
@@ -39,11 +40,12 @@ private:
     LPDIRECT3D9                 m_directx;
     LPDIRECT3DDEVICE9           m_device;
     CGcontext                   m_context;
+    weak<const FileSystem>      m_filesystem;
     scoped<ShaderPipeline>      m_shaderPipeline;
     scoped<TexturePipeline>     m_texturePipeline;
     ref<CgShaderParam>          m_systemParams[SystemParamCount];
 public:
-    Renderer();
+    Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
 
     LPDIRECT3DSWAPCHAIN9            createSwapChain(D3DPRESENT_PARAMETERS* params);
@@ -55,6 +57,8 @@ public:
     ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
     ref<GpuBuffer>                  createTextureBuffer(TextureBufferFlags flags) const override;
+
+    weak<const FileSystem>          filesystem() const { return m_filesystem; }
 private:
     void                            drawBatch(const Batch& b);
     void                            flush() override;

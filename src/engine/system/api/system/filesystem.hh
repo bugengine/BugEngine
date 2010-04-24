@@ -77,7 +77,6 @@ private:
 private:
     scoped<FileSystemMountPoint> m_root;
 public:
-    static weak<FileSystem> instance();
     FileSystem(void);
     ~FileSystem(void);
 

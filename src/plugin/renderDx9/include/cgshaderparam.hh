@@ -25,7 +25,7 @@ public:
     ~CgShaderParam();
 
     virtual void setValue(float4 value) override;
-    virtual void setValue(_Texture* value) override;
+    virtual void setValue(Graphics::Texture* value) override;
     virtual Type type() const override;
 
     virtual const char *name() const override;

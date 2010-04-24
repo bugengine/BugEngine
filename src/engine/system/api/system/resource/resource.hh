@@ -8,32 +8,27 @@
 namespace BugEngine
 {
 
-class MemoryStream;
-class ifilename;
-
-template< typename Type, typename Pipeline = typename Type::Pipeline >
+template< typename Destination, typename Source, typename ResourceLoader = typename Source::ResourceLoader >
 class Resource
 {
 private:
-    Type*       m_resource;
-    Pipeline*   m_loader;
+    ref<Destination>                    m_resource;
+    weak<const ResourceLoader> const    m_loader;
 protected:
-    void load(Pipeline* loader, const ifilename& file);
+    void load(const Source& source);
     void unload();
 public:
-    Resource();
-    Resource(Pipeline* loader, const ifilename& file);
+    Resource(weak<const ResourceLoader> loader, const Source& source);
     ~Resource();
 
     inline bool isBound() const;
 
-    inline Type* get();
+    inline weak<Destination> get();
 
-    inline operator void*() const;
-    inline Type* operator->();
-    inline const Type* operator->() const;
-    inline Type& operator*();
-    inline const Type& operator*() const;
+    inline operator const void*() const;
+    inline bool operator!() const;
+    inline Destination* operator->();
+    inline const Destination* operator->() const;
 };
 
 }

@@ -13,7 +13,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
 TexturePipeline::TexturePipeline(weak<Renderer> owner)
-    :   m_owner(owner)
+:   m_owner(owner)
 {
 }
 
@@ -21,9 +21,9 @@ TexturePipeline::~TexturePipeline()
 {
 }
 
-_Texture* TexturePipeline::load(const ifilename& filename)
+Graphics::Texture* TexturePipeline::load(const ifilename& filename)
 {
-    ref<IMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
+    ref<IMemoryStream> file = m_owner->filesystem()->open(filename, eReadOnly);
 
 #pragma pack(push)
 #pragma pack(1)
@@ -107,7 +107,7 @@ _Texture* TexturePipeline::load(const ifilename& filename)
     return new Texture(dx9texture);
 }
 
-void TexturePipeline::unload(_Texture* s)
+void TexturePipeline::unload(Graphics::Texture* s)
 {
     delete s;
 }

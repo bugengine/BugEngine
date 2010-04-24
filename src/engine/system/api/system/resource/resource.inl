@@ -8,84 +8,69 @@
 namespace BugEngine
 {
 
-template< typename Type, typename Pipeline>
-Resource<Type,Pipeline>::Resource()
-    :   m_resource(0)
-    ,   m_loader(0)
+template<typename Destination, typename Source, typename ResourceLoader >
+Resource<Destination, Source, ResourceLoader>::Resource(weak<const ResourceLoader> loader, const Source& file)
+:   m_resource(0)
+,   m_loader(loader)
 {
+    load(file);
 }
 
-template< typename Type, typename Pipeline>
-Resource<Type,Pipeline>::Resource(Pipeline* loader, const ifilename& file)
-    :   m_resource(0)
-    ,   m_loader(0)
-{
-    load(loader, file);
-}
-
-template< typename Type, typename Pipeline>
-Resource<Type,Pipeline>::~Resource()
+template<typename Destination, typename Source, typename ResourceLoader>
+Resource<Destination, Source, ResourceLoader>::~Resource()
 {
     unload();
 }
 
-template< typename Type, typename Pipeline>
-bool Resource<Type,Pipeline>::isBound() const
+template<typename Destination, typename Source, typename ResourceLoader>
+bool Resource<Destination, Source, ResourceLoader>::isBound() const
 {
     return m_resource != 0;
 }
 
-template< typename Type, typename Pipeline>
-Resource<Type,Pipeline>::operator void *() const
+template<typename Destination, typename Source, typename ResourceLoader>
+Resource<Destination, Source, ResourceLoader>::operator const void *() const
 {
     return m_resource;
 }
 
-template< typename Type, typename Pipeline>
-Type* Resource<Type,Pipeline>::get()
+template<typename Destination, typename Source, typename ResourceLoader>
+bool Resource<Destination, Source, ResourceLoader>::operator!() const
+{
+    return !m_resource;
+}
+
+template<typename Destination, typename Source, typename ResourceLoader>
+weak<Destination> Resource<Destination, Source, ResourceLoader>::get()
 {
     return m_resource;
 }
 
-template< typename Type, typename Pipeline>
-Type& Resource<Type,Pipeline>::operator*()
+template<typename Destination, typename Source, typename ResourceLoader>
+Destination* Resource<Destination, Source, ResourceLoader>::operator->()
 {
-    return *m_resource;
+    return m_resource.operator->();
 }
 
-template< typename Type, typename Pipeline>
-const Type& Resource<Type,Pipeline>::operator*() const
+template<typename Destination, typename Source, typename ResourceLoader>
+const Destination* Resource<Destination, Source, ResourceLoader>::operator->() const
 {
-    return *m_resource;
+    return m_resource.operator->();
 }
 
-template< typename Type, typename Pipeline>
-Type* Resource<Type,Pipeline>::operator->()
-{
-    return m_resource;
-}
-
-template< typename Type, typename Pipeline>
-const Type* Resource<Type,Pipeline>::operator->() const
-{
-    return m_resource;
-}
-
-template< typename Type, typename Pipeline>
-void Resource<Type,Pipeline>::load(Pipeline* loader, const ifilename& file)
+template<typename Destination, typename Source, typename ResourceLoader>
+void Resource<Destination, Source, ResourceLoader>::load(const Source& source)
 {
     unload();
-    m_loader = loader;
-    m_resource = m_loader->load(file);
+    m_resource = m_loader->load(source);
 }
 
-template< typename Type, typename Pipeline>
-void Resource<Type,Pipeline>::unload()
+template<typename Destination, typename Source, typename ResourceLoader>
+void Resource<Destination, Source, ResourceLoader>::unload()
 {
     if(m_resource)
     {
         m_loader->unload(m_resource);
-        m_loader = 0;
         m_resource = 0;
     }
 }

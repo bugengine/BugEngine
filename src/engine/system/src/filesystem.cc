@@ -142,10 +142,4 @@ std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
     return std::set<ipath>();
 }
 
-weak<FileSystem> FileSystem::instance()
-{
-    static scoped<FileSystem> s_filesystem(scoped<FileSystem>::create());
-    return s_filesystem;
-}
-
 }
