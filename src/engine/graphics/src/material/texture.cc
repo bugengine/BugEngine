@@ -7,11 +7,11 @@
 namespace BugEngine { namespace Graphics
 {
 
-_Texture::_Texture()
+Texture::Texture()
 {
 }
 
-_Texture::~_Texture()
+Texture::~Texture()
 {
 }
 

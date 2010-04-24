@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <shaderpipeline.hh>
 #include    <texturepipeline.hh>
+#include    <system/filesystem.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
@@ -35,10 +36,11 @@ private:
 #   else
     GLXContext                  m_glContext;
 #   endif
+    weak<const FileSystem>      m_filesystem;
     scoped<ShaderPipeline>      m_shaderPipeline;
     scoped<TexturePipeline>     m_texturePipeline;
 public:
-    Renderer();
+    Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
 
     weak<Graphics::ShaderPipeline>    getShaderPipeline() override;
@@ -50,6 +52,8 @@ public:
     ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const override;
 
     void                    flush() override;
+
+    weak<const FileSystem>  filesystem() const  { return m_filesystem; }
 private:
     void                    attachWindow(Window* w);
     void                    drawBatch(const Batch& b);

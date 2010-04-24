@@ -95,15 +95,10 @@ void Database::pop(const istring& name)
     m_current = m_current->m_parent;
 }
 
-void Database::parse(const ifilename& file)
+void Database::parse(weak<IMemoryStream> stream)
 {
-    ParseParam params(file, this);
-
-    ref<IMemoryStream> stream = FileSystem::instance()->open(file, eReadOnly);
     g_parseStream = stream;
-
-    yyparse(&params);
-
+    yyparse(this);
     g_parseStream = 0;
 }
 

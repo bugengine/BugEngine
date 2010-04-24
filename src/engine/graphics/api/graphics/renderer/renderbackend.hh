@@ -60,8 +60,8 @@ struct Batch : public minitl::inode
     const GpuBuffer*                        vertices;
     int                                     nbVertices;
     const GpuBuffer*                        indices;
-    const _Shader*                          vertexShader;
-    const _Shader*                          pixelShader;
+    const Shader*                           vertexShader;
+    const Shader*                           pixelShader;
 };
 
 class be_api(GRAPHICS) RenderBackend : public minitl::pointer

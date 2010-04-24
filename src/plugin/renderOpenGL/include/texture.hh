@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Texture : public _Texture
+class Texture : public Graphics::Texture
 {
 private:
     //LPDIRECT3DTEXTURE9 m_texture;

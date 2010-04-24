@@ -16,8 +16,9 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-Renderer::Renderer()
+Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_glContext(0)
+,   m_filesystem(filesystem)
 ,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
 ,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {

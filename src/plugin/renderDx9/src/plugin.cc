@@ -5,4 +5,4 @@
 #include    <renderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(renderDx9, BugEngine::Graphics::DirectX9::Renderer, ());
+BE_PLUGIN_REGISTER(renderDx9, BugEngine::Graphics::DirectX9::Renderer, (weak<const BugEngine::FileSystem> filesystem), (filesystem));

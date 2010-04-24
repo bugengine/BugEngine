@@ -12,7 +12,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
 CgShader::CgShader(CGprogram program)
-:   _Shader()
+:   Shader()
 ,   m_program(program)
 {
 }

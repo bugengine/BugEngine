@@ -5,6 +5,7 @@
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
 #include    <rtti/script.hh>
+#include    <system/filesystem.hh>
 
 namespace BugEngine { namespace Lua
 {
@@ -12,13 +13,14 @@ namespace BugEngine { namespace Lua
 class Context : public Script
 {
 private:
-    lua_State*      m_state;
-    ref<Logger>  m_logger;
+    lua_State*              m_state;
+    weak<const FileSystem>  m_filesystem;
+    ref<Logger>             m_logger;
 public:
-    Context();
+    Context(weak<const FileSystem> filesystem);
     ~Context();
 
-    void doFile(const ifilename& filename) override;
+    void doFile(const ifilename& file) override;
     void doFile(weak<IMemoryStream> stream) override;
 
 private:

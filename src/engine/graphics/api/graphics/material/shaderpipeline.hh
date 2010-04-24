@@ -10,13 +10,13 @@
 namespace BugEngine { namespace Graphics
 {
 
-class _Shader;
+class Shader;
 
 class ShaderPipeline : public System::Pipeline
 {
 public:
-    virtual _Shader*            load(const ifilename& file) = 0;
-    virtual void                unload(_Shader* s) = 0;
+    virtual Shader*             load(const ifilename& file) = 0;
+    virtual void                unload(Shader* s) = 0;
 
     virtual ShaderParam::Type   getTypeByName(const char *type) = 0;
     virtual const char *        getTypeName(ShaderParam::Type type) = 0;

@@ -26,8 +26,8 @@ public:
     ShaderPipeline(weak<Renderer> owner);
     ~ShaderPipeline();
 
-    _Shader*                load(const ifilename& file) override;
-    void                    unload(_Shader* s) override;
+    Shader*                 load(const ifilename& file) override;
+    void                    unload(Shader* s) override;
 
     ShaderParam::Type       getTypeByName(const char *type) override;
     const char *            getTypeName(ShaderParam::Type type) override;

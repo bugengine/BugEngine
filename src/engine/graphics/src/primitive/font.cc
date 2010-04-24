@@ -49,9 +49,8 @@ struct Font::VertexBuilder
     }
 };
 
-Font::Font(const RenderBackend* /*renderer*/, const ifilename& font)
+Font::Font(const RenderBackend* /*renderer*/,ref<IMemoryStream> fontFile)
 {
-    ref<IMemoryStream> fontFile = FileSystem::instance()->open(font, eReadOnly);
     FT_New_Memory_Face(g_library.m_library, (FT_Byte*)fontFile->memory(), be_checked_numcast<FT_Long>(fontFile->size()), 0, &m_face);
 
     if(m_face->face_flags & FT_FACE_FLAG_SCALABLE)

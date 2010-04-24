@@ -19,8 +19,8 @@ public:
     TexturePipeline(weak<Renderer> owner);
     ~TexturePipeline();
 
-    _Texture*               load(const ifilename& file) override;
-    void                    unload(_Texture* s) override;
+    Graphics::Texture*  load(const ifilename& file) override;
+    void                unload(Graphics::Texture* s) override;
 };
 
 }}}

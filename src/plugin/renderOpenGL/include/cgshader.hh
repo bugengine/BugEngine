@@ -14,7 +14,7 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 class ShaderPipeline;
 
-class CgShader : public _Shader
+class CgShader : public Shader
 {
     friend class ShaderPipeline;
 private:

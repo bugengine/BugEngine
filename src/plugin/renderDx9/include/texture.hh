@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-class Texture : public _Texture
+class Texture : public Graphics::Texture
 {
 private:
     LPDIRECT3DTEXTURE9 m_texture;

@@ -20,12 +20,12 @@ ShaderPipeline::~ShaderPipeline()
 {
 }
 
-_Shader* ShaderPipeline::load(const ifilename& /*filename*/)
+Shader* ShaderPipeline::load(const ifilename& /*filename*/)
 {
     return 0;
 }
 
-void ShaderPipeline::unload(_Shader* /*s*/)
+void ShaderPipeline::unload(Shader* /*s*/)
 {
 }
 

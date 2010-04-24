@@ -34,10 +34,10 @@ private:
 
 }}
 
-#define BE_PLUGIN_REGISTER(name, klass, args)                                                                           \
-    static klass* be_createPlugin() { return new klass args; }                                                          \
+#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                   \
+    static klass* be_createPlugin params { return new klass args; }                                                     \
     static void be_destroyPlugin(klass* cls) { delete cls; }                                                            \
-    static BugEngine::_::PluginList s_##name##Plugin( #name,                                                \
+    static BugEngine::_::PluginList s_##name##Plugin( #name,                                                            \
                                               reinterpret_cast<BugEngine::_::PluginList::Create>(be_createPlugin),      \
                                               reinterpret_cast<BugEngine::_::PluginList::Destroy>(be_destroyPlugin));
 
@@ -52,6 +52,30 @@ Plugin<Interface>::Plugin(const istring &pluginName)
     if(m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const _::PluginList*>(m_handle)->create))();
+    }
+}
+
+template< typename Interface >
+template< typename T1 >
+Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
+:   m_handle(_::PluginList::findPlugin(pluginName.c_str()))
+,   m_interface(0)
+{
+    if(m_handle)
+    {
+        m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const _::PluginList*>(m_handle)->create))(param1);
+    }
+}
+
+template< typename Interface >
+template< typename T1, typename T2 >
+Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
+:   m_handle(_::PluginList::findPlugin(pluginName.c_str()))
+,   m_interface(0)
+{
+    if(m_handle)
+    {
+        m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const _::PluginList*>(m_handle)->create))(param1, param2);
     }
 }
 

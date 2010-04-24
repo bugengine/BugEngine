@@ -25,9 +25,9 @@ ShaderPipeline::~ShaderPipeline()
 {
 }
 
-_Shader* ShaderPipeline::load(const ifilename& filename)
+Shader* ShaderPipeline::load(const ifilename& filename)
 {
-    ref<IMemoryStream> file = FileSystem::instance()->open(filename, eReadOnly);
+    ref<IMemoryStream> file = m_owner->filesystem()->open(filename, eReadOnly);
     const char *ext = filename[filename.size()-1].c_str();
     size_t extpos = strlen(ext) - 5;
     CGprofile p = m_vertexProfile;
@@ -60,7 +60,7 @@ _Shader* ShaderPipeline::load(const ifilename& filename)
     return s;
 }
 
-void ShaderPipeline::unload(_Shader* s)
+void ShaderPipeline::unload(Shader* s)
 {
     delete s;
 }

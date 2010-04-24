@@ -19,7 +19,7 @@ public:
     ~ShaderParam();
 
     virtual void setValue(float4 value) = 0;
-    virtual void setValue(_Texture* value) = 0;
+    virtual void setValue(Texture* value) = 0;
     virtual Type type() const = 0;
 
     virtual const char *name() const = 0;

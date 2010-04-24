@@ -7,11 +7,11 @@
 namespace BugEngine { namespace Graphics
 {
 
-_Shader::_Shader()
+Shader::Shader()
 {
 }
 
-_Shader::~_Shader()
+Shader::~Shader()
 {
 }
 

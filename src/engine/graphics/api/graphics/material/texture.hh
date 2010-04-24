@@ -10,16 +10,14 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) _Texture
+class be_api(GRAPHICS) Texture
 {
 public:
     typedef TexturePipeline  Pipeline;
 public:
-    _Texture();
-    virtual ~_Texture();
+    Texture();
+    virtual ~Texture();
 };
-
-typedef Resource<_Texture>   Texture;
 
 }}
 

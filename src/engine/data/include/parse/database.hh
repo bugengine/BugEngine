@@ -6,26 +6,13 @@
 /*****************************************************************************/
 #include    <parse/node.hh>
 #include    <rtti/namespace.hh>
+#include    <core/memory/streams.hh>
 
 extern int yyparse(void *param);
 
 
 namespace BugEngine { namespace Data { namespace Parse
 {
-
-class Database;
-
-struct ParseParam
-{
-    const ifilename&    m_filename;
-    Database*           m_database;
-    ParseParam(const ifilename& file, Database* db) :
-        m_filename(file), m_database(db)
-    {}
-private:
-    ParseParam(const ParseParam& other);
-    ParseParam& operator=(const ParseParam& other);
-};
 
 class Database
 {
@@ -74,7 +61,7 @@ public:
     void push(const istring& name);
     void pop(const istring& name);
 
-    void parse(const ifilename& file);
+    void parse(weak<IMemoryStream> stream);
     ref<RTTI::Namespace> commit();
 };
 

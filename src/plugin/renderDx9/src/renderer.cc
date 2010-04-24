@@ -37,10 +37,11 @@ static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
     }
 }
 
-Renderer::Renderer()
+Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
 ,   m_context(cgCreateContext())
+,   m_filesystem(filesystem)
 ,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
 ,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {

@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <audio/isource.hh>
 #include    <system/scheduler/task/task.hh>
+#include    <core/memory/streams.hh>
 
 namespace BugEngine { namespace Audio
 {
@@ -16,8 +17,7 @@ public:
     IWorld();
     ~IWorld();
 
-    virtual ref<ISound> createSound(const ifilename& file) = 0;
-    virtual ref<ISound> createMusic(const ifilename& file) = 0;
+    virtual ref<ISound> createSound(ref<IMemoryStream> soundFile) = 0;
 
     virtual void step() = 0;
 
@@ -25,14 +25,6 @@ public:
     be_properties
     be_end
 };
-
-class be_api(AUDIO) IWorldManager
-{
-public:
-    virtual ~IWorldManager() { }
-    virtual ref<IWorld> createWorld() = 0;
-};
-
 
 }}
 
