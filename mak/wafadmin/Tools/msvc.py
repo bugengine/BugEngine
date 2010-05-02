@@ -66,7 +66,7 @@ wintrust wldap32 wmiutils wow32 ws2_32 wsnmp32 wsock32 wst wtsapi32 xaswitch xol
 """.split()
 
 
-all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86_amd64', 'amd64'), ('x86_ia64', 'ia64') ]
+all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86_amd64', 'amd64'), ('x86_ia64', 'ia64'), ('ppc', 'ppc') ]
 all_wince_platforms = [ ('armv4', 'arm'), ('armv4i', 'arm'), ('mipsii', 'mips'), ('mipsii_fp', 'mips'), ('mipsiv', 'mips'), ('mipsiv_fp', 'mips'), ('sh4', 'sh'), ('x86', 'cex86') ]
 all_icl_platforms = [ ('Itanium', 'ia64'), ('ia64', 'ia64'), ('intel64', 'amd64'), ('em64t', 'amd64'), ('em64t_native', 'amd64'), ('ia32', 'x86'), ('ia32_intel64', 'amd64'), ('ia32_ia64', 'ia64')]
 
@@ -105,7 +105,7 @@ echo LIB=%%LIB%%
 	lines = sout.splitlines()
 
 	for x in ('Setting environment', 'Setting SDK environment', 'Intel(R) C++ Compiler'):
-		if lines[0].find(x) != -1:
+		if (lines[0].find(x) != -1) or (lines[1].find(x) != -1):
 			break
 	else:
 		debug('msvc: get_msvc_version: %r %r %r -> not found', compiler, version, target)
@@ -257,7 +257,7 @@ def gather_msvc_versions(conf, versions):
 						targets.append(('x86', ('x86', 'win32', conf.get_msvc_version('msvc', version, 'x86', os.path.join(path, 'Common7', 'Tools', 'vsvars32.bat')))))
 					except Configure.ConfigurationError:
 						pass
-				versions.append(('msvc '+version, targets))
+				versions.append(('msvc '+version+vcvar, targets))
 
 			except WindowsError:
 				continue
@@ -347,7 +347,8 @@ def gather_xenon_versions(conf, versions):
 	try:
 		target = ('ppc', ('ppc', 'xbox360', conf.get_msvc_version('xenon', major, 'ppc', os.path.join(path, 'bin', 'win32', 'xdkvars.bat'))))
 		versions.append(('xdk ' + major, [target]))
-	except Configure.ConfigurationError:
+	except Configure.ConfigurationError, e:
+		print e
 		pass
 
 @conf
@@ -355,7 +356,7 @@ def get_msvc_versions(conf):
 	if not conf.env.MSVC_INSTALLED_VERSIONS:
 		lst = []
 		conf.gather_msvc_versions(lst)
-		conf.gather_xenon_versions(conf.env['MSVC_INSTALLED_VERSIONS'])
+		conf.gather_xenon_versions(lst)
 		conf.gather_wsdk_versions(lst)
 		conf.gather_icl_versions(lst)
 		conf.env.MSVC_INSTALLED_VERSIONS = lst
@@ -533,6 +534,10 @@ def find_msvc(conf):
 	v = conf.env
 
 	compiler, target,version, path, includes, libdirs = detect_msvc(conf)
+	try:
+		version = float(version)
+	except ValueError:
+		version = float(version[:-3])
 
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
 	has_msvc_manifest = (compiler == 'msvc' and float(version) >= 8) or (compiler == 'wsdk' and float(version) >= 6)	or (compiler == 'intel' and float(version) >= 11)
@@ -582,10 +587,9 @@ def find_msvc(conf):
 	v.MT = mt
 	v.MTFLAGS = v.ARFLAGS = ['/NOLOGO']
 
-
-	conf.check_tool('winres')
-
-	if not conf.env.WINRC:
+	try:
+		conf.check_tool('winres')
+	except:
 		warn('Resource compiler not found. Compiling resource file is disabled')
 
 	# environment flags
