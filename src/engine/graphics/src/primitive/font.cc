@@ -12,8 +12,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_abstractmetaclass_impl("Graphics",Font);
-
 struct FreetypeLibrary
 {
     FT_Library m_library;

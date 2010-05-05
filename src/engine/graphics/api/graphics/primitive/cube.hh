@@ -23,10 +23,6 @@ public:
     virtual weak<const GpuBuffer> indices() const override;
     virtual weak<const GpuBuffer> vertices() const override;
     virtual unsigned              nbVertices() const override;
-
-    be_metaclass(GRAPHICS,Cube,Primitive)
-    be_properties
-    be_end
 };
 
 }}

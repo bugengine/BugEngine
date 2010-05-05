@@ -7,8 +7,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_abstractmetaclass_impl("Graphics", Primitive);
-
 Primitive::Primitive(weak<const RenderBackend> /*renderer*/)
 {
 }

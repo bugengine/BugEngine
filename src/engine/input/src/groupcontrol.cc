@@ -9,8 +9,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",GroupControl);
-
 GroupControl::GroupControl(const istring& name)
 :   Control(name)
 {

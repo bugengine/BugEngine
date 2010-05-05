@@ -24,10 +24,6 @@ public:
     bool            wentUp() const override;
 
     void add(ref<Control> ctrl);
-
-    be_metaclass(NONE,GroupControl,Control)
-    be_properties
-    be_end
 };
 
 }}

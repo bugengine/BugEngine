@@ -8,8 +8,6 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#include    <rtti/helper.hh>
-
 
 #if defined(building_input) || defined(INPUT_EXPORTS)
 # define    INPUTEXPORT         BE_EXPORT

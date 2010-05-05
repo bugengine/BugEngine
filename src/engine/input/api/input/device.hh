@@ -5,15 +5,14 @@
 #define BE_INPUT_DEVICE_HH_
 /*****************************************************************************/
 #include    <input/control.hh>
-#include    <rtti/namespace.hh>
 
 namespace BugEngine { namespace Input
 {
 
-class be_api(INPUT) Device : public Object
+class be_api(INPUT) Device : public minitl::refcountable
 {
 private:
-    ref<RTTI::Namespace>         m_deviceNamespace;
+    //ref<RTTI::Namespace>         m_deviceNamespace;
     istring                         m_name;
     size_t                          m_numControls;
     float*                          m_active;
@@ -33,11 +32,7 @@ public:
     void update();
 
     const istring& name() const                 { return m_name; }
-    const weak<RTTI::Namespace> getNamespace() const { return m_deviceNamespace; }
-
-    be_metaclass(INPUT,Device,Object)
-    be_properties
-    be_end
+    //const weak<RTTI::Namespace> getNamespace() const { return m_deviceNamespace; }
 };
 
 }}

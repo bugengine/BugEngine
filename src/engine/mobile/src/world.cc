@@ -9,8 +9,6 @@
 namespace BugEngine
 {
 
-be_abstractmetaclass_impl("",World);
-
 enum
 {
     WorldUpdateTask_CopyWorld   = 0,

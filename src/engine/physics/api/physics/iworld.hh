@@ -9,17 +9,13 @@
 namespace BugEngine { namespace Physics
 {
 
-class be_api(PHYSICS) IWorld : public Object
+class be_api(PHYSICS) IWorld : public minitl::refcountable
 {
 public:
     IWorld();
     ~IWorld();
     
     virtual void step() = 0;
-
-    be_metaclass(PHYSICS,IWorld,Object)
-    be_properties
-    be_end
 };
 
 }}

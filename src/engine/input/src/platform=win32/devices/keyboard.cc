@@ -9,8 +9,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",Keyboard);
-
 size_t Keyboard::s_keyboardCount = 0;
 
 static Device& getKeyboard()
@@ -37,7 +35,7 @@ Keyboard::Keyboard(size_t /*numControls*/)
             ref<Control> ctrl = ref<DeviceControl>::create(mappedName, this, i);
             addControl(ctrl);
             addControlAlias("US", keyName, ctrl);
-            Value v = getKeyboard().getNamespace()->get(istring(mappedName));
+            /* TODO Value v = getKeyboard().getNamespace()->get(istring(mappedName));
             if(v)
             {
                 v.as< ref<GroupControl> >()->add(ctrl);
@@ -48,7 +46,7 @@ Keyboard::Keyboard(size_t /*numControls*/)
                 getKeyboard().addControl(g);
                 getKeyboard().addControlAlias("US", keyName, g);
                 g->add(ctrl);
-            }
+            }*/
         }
     }
 }

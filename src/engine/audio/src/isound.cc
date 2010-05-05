@@ -39,7 +39,6 @@ static long vorbis_tell(void *datasource)
 
 static ov_callbacks be_callbacks_vorbis = { vorbis_read, vorbis_seek, 0, vorbis_tell };
 
-be_abstractmetaclass_impl("Audio",ISound);
 
 ISound::ISound(weak<IWorld> owner, ref<IMemoryStream> soundfile)
 :   m_owner(owner)

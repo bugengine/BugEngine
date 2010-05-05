@@ -26,10 +26,6 @@ public:
     bool            wentDown() const override;
     bool            wentUp() const override;
     size_t          index() const { return m_index; }
-
-    be_metaclass(NONE,DeviceControl,Control)
-    be_properties
-    be_end
 };
 
 }}

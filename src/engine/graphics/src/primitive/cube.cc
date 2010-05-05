@@ -7,8 +7,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_abstractmetaclass_impl("Graphics",Cube);
-
 Cube::Cube(const RenderBackend* renderer)
 :   Primitive(renderer)
 ,   m_vertexBuffer(ref< VertexBuffer<VertexFormat> >::create(renderer, 8, VuStatic))

@@ -8,8 +8,6 @@
 namespace BugEngine { namespace Audio
 {
 
-be_abstractmetaclass_impl("Audio",ISource);
-
 ISource::ISource(ref<ISound> sound)
 :   m_sound(sound)
 {

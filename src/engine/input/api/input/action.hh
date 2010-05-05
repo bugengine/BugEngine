@@ -11,7 +11,7 @@ namespace BugEngine { namespace Input
 class Control;
 class InputMap;
 
-class be_api(INPUT) Action : public Object
+class be_api(INPUT) Action : public minitl::refcountable
 {
 private:
     istring const           m_name;
@@ -31,11 +31,9 @@ public:
     bool            isDown() const;
     bool            wentDown() const;
     bool            wentUp() const;
-
-
-    be_metaclass(INPUT,Action,Object)
-    be_properties
-    be_end
+private:
+    Action(const Action& other);
+    Action& operator=(const Action& other);
 };
 
 }}

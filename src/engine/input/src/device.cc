@@ -4,17 +4,13 @@
 #include    <input/stdafx.h>
 #include    <input/device.hh>
 
-#include    <rtti/namespace.hh>
-
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",Device);
-
 
 Device::Device(const istring& name, size_t numControls)
-:   m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
-,   m_name(name)
+:   /*m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
+,*/   m_name(name)
 ,   m_numControls(numControls)
 ,   m_active((float*)be_malloc(sizeof(float)*numControls))
 ,   m_lastFrame((float*)be_malloc(sizeof(float)*numControls))
@@ -27,7 +23,7 @@ Device::Device(const istring& name, size_t numControls)
 
 Device::~Device()
 {
-    m_deviceNamespace->clear();
+    //m_deviceNamespace->clear();
     be_free(m_buffer);
     be_free(m_lastFrame);
     be_free(m_active);
@@ -48,14 +44,14 @@ float* Device::getBuffer()
     return m_buffer;
 }
 
-void Device::addControl(ref<Control> ctrl)
+void Device::addControl(ref<Control> /*ctrl*/)
 {
-    m_deviceNamespace->set(ctrl->name(), Value(ref<Object>(ctrl)));
+    //m_deviceNamespace->set(ctrl->name(), Value(ref<Object>(ctrl)));
 }
 
-void Device::addControlAlias(const istring& ns, const istring& alias, ref<Control> ctrl)
+void Device::addControlAlias(const istring& /*ns*/, const istring& /*alias*/, ref<Control> /*ctrl*/)
 {
-    m_deviceNamespace->createNamespace(ns)->set(alias, Value(ref<Object>(ctrl)));
+    //m_deviceNamespace->createNamespace(ns)->set(alias, Value(ref<Object>(ctrl)));
 }
 
 void Device::update()

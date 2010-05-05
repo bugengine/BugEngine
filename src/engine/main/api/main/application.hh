@@ -4,8 +4,6 @@
 #ifndef BE_MAIN_APPLICATION_HH_
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
-#include    <rtti/helper.hh>
-
 #include    <mobile/world.hh>
 #include    <graphics/scene/scene.hh>
 #include    <graphics/renderer/rendertarget.hh>
@@ -15,7 +13,7 @@
 namespace BugEngine
 {
 
-class Application : public Object
+class Application : public minitl::refcountable
 {
 private:
     struct Request;
@@ -54,10 +52,6 @@ private:
     Application(void);
     Application(const Application&);
     const Application& operator=(const Application&);
-
-    be_metaclass(NONE,Application,Object)
-    be_properties
-    be_end
 };
 
 }

@@ -7,4 +7,13 @@
 namespace BugEngine { namespace Graphics
 {
 
+StaticMesh::StaticMesh()
+:   Primitive(0)
+{
+}
+
+StaticMesh::~StaticMesh()
+{
+}
+
 }}

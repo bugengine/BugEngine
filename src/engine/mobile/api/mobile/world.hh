@@ -12,7 +12,7 @@
 namespace BugEngine
 {
 
-class be_api(MOBILE) World : public Object
+class be_api(MOBILE) World : public minitl::refcountable
 {
     friend class WorldScene;
 private:
@@ -27,11 +27,6 @@ private: // friend class WorldScene
 public:
     World(float3 worldExtents);
     ~World();
-
-
-    be_metaclass(MOBILE,World,Object)
-    be_properties
-    be_end
 };
 
 }

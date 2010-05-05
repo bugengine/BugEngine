@@ -13,7 +13,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Font : public Object
+class be_api(GRAPHICS) Font : public minitl::refcountable
 {
 private:
     struct VertexBuilder;
@@ -26,10 +26,6 @@ public:
     virtual ~Font();
 
     weak<const GpuBuffer> vertices() const;
-
-    be_metaclass(GRAPHICS, Font, Object)
-    be_properties
-    be_end
 };
 
 

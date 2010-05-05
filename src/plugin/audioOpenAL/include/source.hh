@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <sound.hh>
 #include    <audio/isource.hh>
-#include    <system/action.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {

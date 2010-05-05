@@ -4,14 +4,11 @@
 #include    <main/stdafx.h>
 #include    <main/application.hh>
 
-#include    <rtti/namespace.hh>
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
 namespace BugEngine
 {
-
-be_abstractmetaclass_impl("",Application);
 
 struct Application::Request : public minitl::inode
 {
@@ -49,8 +46,7 @@ weak<ITask> Application::RenderView::renderTask() const
 }
 
 Application::Application(int argc, const char *argv[])
-:   Object()
-,   m_scheduler(scoped<Scheduler>::create())
+:   m_scheduler(scoped<Scheduler>::create())
 ,   m_tasks()
 {
     UNUSED(argc); UNUSED(argv);

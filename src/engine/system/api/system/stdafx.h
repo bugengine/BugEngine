@@ -8,9 +8,6 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#include    <rtti/helper.hh>
-
-
 #if defined(building_system) || defined(SYSTEM_EXPORTS)
 # define    SYSTEMEXPORT        BE_EXPORT
 #elif defined(system_dll)

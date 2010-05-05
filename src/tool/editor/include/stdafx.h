@@ -13,9 +13,6 @@
 #include    <physics/stdafx.h>
 #include    <audio/stdafx.h>
 #include    <mobile/stdafx.h>
-#include    <data/stdafx.h>
-
-#include    <rtti/helper.hh>
 
 /*****************************************************************************/
 #endif
