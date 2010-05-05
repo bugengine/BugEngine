@@ -5,7 +5,6 @@
 #include    <mainscene.hh>
 
 #include    <input/inputmap.hh>
-#include    <rtti/namespace.hh>
 
 #include    <core/timer.hh>
 

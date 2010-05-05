@@ -9,8 +9,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",Mouse);
-
 size_t Mouse::s_miceCount = 0;
 
 static Device& getMouse()
@@ -27,7 +25,7 @@ Mouse::Mouse(size_t numButtons)
         minitl::format<> f = minitl::format<>("Button %u") | i;
         ref<Control> ctrl = ref<DeviceControl>::create(f, this, i);
         addControl(ctrl);
-        Value v = getMouse().getNamespace()->get(f);
+        /*TODO Value v = getMouse().getNamespace()->get(f);
         if(v)
         {
             v.as< ref<GroupControl> >()->add(ctrl);
@@ -37,7 +35,7 @@ Mouse::Mouse(size_t numButtons)
             ref<GroupControl> g = ref<GroupControl>::create(f);
             getMouse().addControl(g);
             g->add(ctrl);
-        }
+        }*/
     }
 }
 

@@ -12,10 +12,6 @@
 #include    <system/filesystem.hh>
 #include    <system/diskfs.hh>
 
-#include    <rtti/test.hh>
-#include    <rtti/script.hh>
-#include    <rtti/namespace.hh>
-
 #include    <graphics/renderer/renderbackend.hh>
 
 
@@ -27,10 +23,10 @@ int be_main (weak<BugEngine::Application> app)
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create();
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-    ref<TestNS::Test> t = ref<TestNS::Test>::create();
-    BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
-    BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
-    p->doFile("data/scripts/main.lua");
+    //ref<TestNS::Test> t = ref<TestNS::Test>::create();
+    //BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
+    //BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
+    //p->doFile("data/scripts/main.lua");
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);

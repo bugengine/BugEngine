@@ -16,10 +16,6 @@ private:
 public:
     Keyboard(size_t numKeys);
     ~Keyboard();
-
-    be_metaclass(INPUT,Keyboard,Device)
-    be_properties
-    be_end
 };
 
 }}

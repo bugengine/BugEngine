@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Primitive : public Object
+class be_api(GRAPHICS) Primitive : public minitl::refcountable
 {
 public:
     Primitive(weak<const RenderBackend> renderer);
@@ -19,10 +19,6 @@ public:
     virtual weak<const GpuBuffer> indices() const = 0;
     virtual weak<const GpuBuffer> vertices() const = 0;
     virtual unsigned              nbVertices() const = 0;
-
-    be_metaclass(GRAPHICS,Primitive,Object)
-    be_properties
-    be_end
 };
 
 }}

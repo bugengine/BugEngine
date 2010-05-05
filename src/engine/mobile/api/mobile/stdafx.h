@@ -12,8 +12,6 @@
 #include    <physics/stdafx.h>
 #include    <audio/stdafx.h>
 
-#include    <rtti/helper.hh>
-
 
 #if defined(building_mobile) || defined(MOBILE_EXPORTS)
 # define    MOBILEEXPORT        BE_EXPORT

@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <minitl/interlocked/stack.hh>
 #include    <minitl/memory/pool.hh>
-#include    <system/action.hh>
 #include    <graphics/renderer/vertexdesc.hh>
 #include    <graphics/scene/scene.hh>
 #include    <graphics/renderer/rendertarget.hh>

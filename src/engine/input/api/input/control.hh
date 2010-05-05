@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Input
 {
 
-class be_api(INPUT) Control : public Object
+class be_api(INPUT) Control : public minitl::refcountable
 {
 private:
     istring         m_name;
@@ -22,10 +22,6 @@ public:
     virtual bool            wasDown() const = 0;
     virtual bool            wentDown() const = 0;
     virtual bool            wentUp() const = 0;
-
-    be_metaclass(INPUT,Control,Object)
-    be_properties
-    be_end
 };
 
 }}

@@ -16,10 +16,6 @@ private:
 public:
     Mouse(size_t numButtons);
     ~Mouse();
-
-    be_metaclass(INPUT,Mouse,Device)
-    be_properties
-    be_end
 };
 
 }}

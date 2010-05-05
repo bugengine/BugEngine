@@ -12,7 +12,7 @@ namespace BugEngine { namespace Audio
 class ISource;
 class IWorld;
 
-class be_api(AUDIO) ISound : public Object
+class be_api(AUDIO) ISound : public minitl::refcountable
 {
     friend class ISource;
 private:
@@ -32,10 +32,6 @@ public:
     void unlock();
 
     size_t read(void* buffer, size_t size, int& frequency, int& channels) const;
-
-    be_metaclass(AUDIO,ISound,Object)
-    be_properties
-    be_end
 };
 
 }}

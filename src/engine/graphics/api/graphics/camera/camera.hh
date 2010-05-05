@@ -8,13 +8,13 @@
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Camera : public Object
+class be_api(GRAPHICS) Camera : public minitl::refcountable
 {
 protected:
     float4  m_camera;
 public:
     Camera();
-    virtual ~Camera();
+    virtual ~Camera() { }
 };
 
 }}

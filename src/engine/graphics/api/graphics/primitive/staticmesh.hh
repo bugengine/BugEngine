@@ -14,10 +14,6 @@ class be_api(GRAPHICS) StaticMesh : public Primitive
 public:
     StaticMesh();
     ~StaticMesh();
-
-    be_metaclass(GRAPHICS,StaticMesh,Primitive)
-    be_properties
-    be_end
 };
 
 }}

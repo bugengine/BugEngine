@@ -8,8 +8,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",Control);
-
 Control::Control(const istring& name)
 :   m_name(name)
 {

@@ -12,7 +12,7 @@ namespace BugEngine { namespace Input
 
 class Manager;
 
-class be_api(INPUT) InputMap : public Object
+class be_api(INPUT) InputMap : public minitl::refcountable
 {
 private:
     std::vector< ref<Action> >  m_actions;
@@ -33,12 +33,6 @@ public:
 
     bool    active() const;
     void    setActive(bool active);
-
-    be_metaclass(INPUT,InputMap,Object)
-    public:
-        const Manager* getManager() const;
-    be_properties
-    be_end
 };
 
 }}

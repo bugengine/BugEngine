@@ -10,7 +10,6 @@
 #include <system/stdafx.h>
 #include <input/stdafx.h>
 
-#include <rtti/helper.hh>
 
 #if defined(building_graphics) || defined(GRAPHICS_EXPORTS)
 # define    GRAPHICSEXPORT      BE_EXPORT

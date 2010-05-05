@@ -7,7 +7,6 @@
 namespace BugEngine { namespace Audio
 {
 
-be_abstractmetaclass_impl("Audio",IWorld);
 
 IWorld::IWorld()
 {

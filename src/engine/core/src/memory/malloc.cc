@@ -10,11 +10,11 @@
 namespace BugEngine
 {
 
-bool s_initialized = false;
-
-void Malloc::init()
+struct MallocInitializer
 {
-    if(!s_initialized)
+    bool initialized;
+    MallocInitializer()
+        :   initialized(false)
     {
 #ifdef  BE_ENABLE_MEMORY_TRACKING
 # ifdef BE_PLATFORM_WIN32
@@ -22,14 +22,19 @@ void Malloc::init()
         _CrtSetBreakAlloc(-1);
 # endif
 #endif
-        s_initialized = true;
-        Logger::root();
+        initialized = true;
     }
-}
+    ~MallocInitializer()
+    {
+    }
+};
+
+static MallocInitializer s_initializer;
 
 
 void* Malloc::systemAlloc(size_t size, size_t alignment)
 {
+    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
 #ifdef _MSC_VER
     return _aligned_malloc(size, alignment);
 #else
@@ -57,7 +62,7 @@ void Malloc::systemFree(const void* pointer)
 
 BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t /*skipStack*/)
 {
-    be_assert(s_initialized, "new was called before the memory system was initialized");
+    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
     void* ptr = systemAlloc(size, alignment);
 #ifdef BE_ENABLE_MEMORY_TRACKING
 #endif

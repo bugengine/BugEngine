@@ -10,14 +10,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_metaclass_impl("Input",InputMap);
-
-const Manager* InputMap::MetaClass::getManager() const
-{
-    static Manager s_manager;
-    return &s_manager;
-}
-
 InputMap::InputMap()
 :   m_active(false)
 {

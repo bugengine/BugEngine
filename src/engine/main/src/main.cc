@@ -3,10 +3,6 @@
 
 #include    <main/stdafx.h>
 #include    <main/main.hh>
-#include    <rtti/namespace.hh>
-#include    <rtti/test.hh>
-#include    <rtti/autoregistration.hh>
-#include    <rtti/mono.hh>
 #include    <input/inputmap.hh>
 #include    <system/scheduler/scheduler.hh>
 #include    <core/environment.hh>
@@ -27,34 +23,8 @@ static void launch_gp2xmenu(void)
 }
 #endif
 
-struct NamespaceScope
-{
-    NamespaceScope()  { }
-    ~NamespaceScope() { BugEngine::RTTI::Namespace::root()->clear(); }
-};
-
 namespace
 {
-    class Environment : public BugEngine::Object
-    {
-        be_metaclass(NONE,Environment,Object)
-            const BugEngine::ipath& getHomeDirectory() { return BugEngine::Environment::getEnvironment().getHomeDirectory(); }
-            const BugEngine::ipath& getDataDirectory() { return BugEngine::Environment::getEnvironment().getDataDirectory(); }
-            const BugEngine::istring& getGame() { return BugEngine::Environment::getEnvironment().getGame(); }
-            const BugEngine::istring& getUser() { return BugEngine::Environment::getEnvironment().getUser(); }
-            size_t getProcessorCount() { return BugEngine::Environment::getEnvironment().getProcessorCount(); }
-        be_properties
-            be_classmethod(getHomeDirectory);
-            be_classmethod(getDataDirectory);
-            be_classmethod(getGame);
-            be_classmethod(getUser);
-            be_classmethod(getProcessorCount);
-        be_end
-    };
-
-    be_abstractmetaclass_impl("", Environment);
-
-
     class LogListener : public BugEngine::ILogListener
     {
     private:

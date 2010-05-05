@@ -10,8 +10,6 @@
 namespace BugEngine { namespace Input
 {
 
-be_abstractmetaclass_impl("Input",Action);
-
 Action::Action(const istring& name, const InputMap* owner)
 :   m_name(name)
 ,   m_owner(owner)

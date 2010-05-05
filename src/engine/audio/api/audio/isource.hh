@@ -5,12 +5,11 @@
 #define BE_AUDIO_ISOURCE_HH_
 /*****************************************************************************/
 #include    <audio/isound.hh>
-#include    <system/action.hh>
 
 namespace BugEngine { namespace Audio
 {
-    
-class be_api(AUDIO) ISource : public Object
+
+class be_api(AUDIO) ISource : public minitl::refcountable
 {
 protected:
     ref<ISound> m_sound;
@@ -25,18 +24,6 @@ public:
     virtual void  setVolume(float volume) = 0;
 
     virtual void step() const = 0;
-
-    be_metaclass(AUDIO,ISource,Object)
-    be_properties
-        be_method(volume);
-        be_method(setVolume);
-        be_method(play);
-        be_method(pause);
-
-        be_property(Volume)
-            [be_get(volume)]
-            [be_set(setVolume)];
-    be_end
 };
 
 }}

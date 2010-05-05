@@ -7,8 +7,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_abstractmetaclass_impl("Graphics",Text);
-
 Text::Text(weak<const RenderBackend> renderer, ref<const Font> font, const char * /*message*/)
 :   Primitive(renderer)
 ,   m_font(font)

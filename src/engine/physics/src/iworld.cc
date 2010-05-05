@@ -7,8 +7,6 @@
 namespace BugEngine { namespace Physics
 {
 
-be_abstractmetaclass_impl("Physics", IWorld);
-
 IWorld::IWorld()
 {
 }

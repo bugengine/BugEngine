@@ -5,7 +5,6 @@
 #include    <source.hh>
 #include    <world.hh>
 
-#include    <system/sequencer.hh>
 
 namespace BugEngine { namespace Audio { namespace OpenAL
 {

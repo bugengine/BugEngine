@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Audio
 {
 
-class be_api(AUDIO) IWorld : public Object
+class be_api(AUDIO) IWorld : public minitl::refcountable
 {
 public:
     IWorld();
@@ -20,10 +20,6 @@ public:
     virtual ref<ISound> createSound(ref<IMemoryStream> soundFile) = 0;
 
     virtual void step() = 0;
-
-    be_metaclass(AUDIO,IWorld,Object)
-    be_properties
-    be_end
 };
 
 }}

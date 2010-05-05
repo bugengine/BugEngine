@@ -9,8 +9,6 @@
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
 
-#include    <rtti/helper.hh>
-
 
 
 #if defined(building_audio) || defined(AUDIO_EXPORTS)
