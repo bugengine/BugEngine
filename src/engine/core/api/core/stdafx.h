@@ -6,8 +6,10 @@
 /*****************************************************************************/
 
 
-#define     BE_STRINGIZE_IMPL(n)    #n
-#define     BE_STRINGIZE(n)         BE_STRINGIZE_IMPL(n)
+#define     BE_STRINGIZE_IMPL(n)   #n
+#define     BE_STRINGIZE(n)        BE_STRINGIZE_IMPL(n)
+#define     BE_CONCAT_IMPL(i,j)    i##j
+#define     BE_CONCAT(i,j)         BE_CONCAT_IMPL(i,j)
 #ifndef BE_FILEID
 # ifdef     _WIN32
 #  define   BE_COUNTER          __COUNTER__

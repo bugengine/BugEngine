@@ -49,6 +49,7 @@ public:
     T* operator->() const { return m_ptr; }
     operator const void*() const { return m_ptr; }
     bool operator!() const { return m_ptr == 0; }
+    T& operator*() { return *m_ptr; }
 
     void clear() { minitl::decweak(m_ptr); m_ptr = 0; }
 };

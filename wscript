@@ -49,16 +49,15 @@ def build(bld):
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
-	data			= module.library('data',        [core, rtti, system] )
 	input			= module.library('input',       [core, rtti] )
 	graphics		= module.library('graphics',    [core, rtti, system, input, freetype ] )
 	audio			= module.library('audio',       [core, rtti, system, oggvorbis] )
 	physics			= module.library('physics',     [core, rtti, system] )
 	mobile			= module.library('mobile',      [core, rtti, system, graphics, audio, physics, input] )
-	main			= module.library('main',        [core, rtti, system, data, input, graphics, audio, physics, mobile])
+	main			= module.library('main',        [core, rtti, system, input, graphics, audio, physics, mobile])
 
-	discworld		= module.game('discworld',      [core, rtti, system, data, input, graphics, audio, physics, mobile, main])
-	editor			= module.tool('editor',         [core, rtti, system, data, input, graphics, audio, physics, mobile, main], platforms=['pc'])
+	discworld		= module.game('discworld',      [core, rtti, system, input, graphics, audio, physics, mobile, main])
+	editor			= module.tool('editor',         [core, rtti, system, input, graphics, audio, physics, mobile, main], platforms=['pc'])
 
 	win32			= module.library('win32',       [discworld], category='plugin', platforms=['win32'])
 	X				= module.library('X',           [discworld, X11], category='plugin', platforms=['posix'])
@@ -69,7 +68,7 @@ def build(bld):
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, audioOpenAL, lua, squirrel]
+	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, audioOpenAL]
 	discworld.post(bld)
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
