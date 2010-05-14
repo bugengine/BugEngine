@@ -53,6 +53,7 @@ public:
     T* operator->() const { return m_ptr; }
     operator const void*() const { return m_ptr; }
     bool operator!() const { return m_ptr == 0; }
+    T& operator*() { return *m_ptr; }
 
     void clear() { decref(m_ptr); m_ptr = 0; }
 };

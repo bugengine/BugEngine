@@ -38,6 +38,7 @@ public:
     T* operator->() const NOTHROW        { return m_ptr; }
     operator const void*() const NOTHROW { return m_ptr; }
     bool operator!() const NOTHROW       { return m_ptr == 0; }
+    T& operator*()                       { return *m_ptr; }
 private:
 };
 

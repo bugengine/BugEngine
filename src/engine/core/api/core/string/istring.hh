@@ -48,11 +48,11 @@ class be_api(CORE) igenericnamespace
 {
     enum
     {
-        MaxNamespaceSize = 32
+        MaxNamespaceSize = 15
     };
 private:
     istring m_namespace[MaxNamespaceSize];
-    size_t  m_size;
+    u32     m_size;
 protected:
     igenericnamespace();
     explicit igenericnamespace(const istring& onlycomponent);
