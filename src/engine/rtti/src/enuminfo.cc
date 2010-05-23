@@ -7,13 +7,4 @@
 namespace BugEngine
 {
 
-EnumInfo::EnumInfo(const inamespace& name)
-:   TypeInfo(name)
-{
-}
-
-EnumInfo::~EnumInfo()
-{
-}
-
 }

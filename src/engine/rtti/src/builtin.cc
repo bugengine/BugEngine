@@ -8,60 +8,50 @@ namespace BugEngine
 {
 
 template< typename T >
-class BuiltinTypeInfo : public TypeInfo
+class BuiltinClassInfo : public ClassInfo
 {
 public:
-    BuiltinTypeInfo(const inamespace& name) : TypeInfo(name)            { }
-    virtual ~BuiltinTypeInfo()                                          { }
+    BuiltinClassInfo(const inamespace& name);
+    ~BuiltinClassInfo();
 
-    const TypeInfo* parent() const override                             { return be_typeid<void>(); }
-    size_t          size() const override                               { return sizeof(T); }
-    void            copy(const void* source, void* dest) const override { new(dest) T(*reinterpret_cast<const T*>(source)); }
-    void            destroy(void* dest) const override                  { reinterpret_cast<T*>(dest)->~T(); }
-private:
-    BuiltinTypeInfo(const TypeInfo& other);
-    BuiltinTypeInfo& operator=(const TypeInfo& other);
+    size_t size() const override;
 };
 
-template<>
-BE_EXPORT const TypeInfo* be_typeid<void>()
+template< typename T >
+BuiltinClassInfo<T>::BuiltinClassInfo(const inamespace& name)
+:   ClassInfo(name)
 {
-    return 0;
 }
 
-template<>
-BE_EXPORT const TypeInfo* be_typeid<int>()
+template< typename T >
+BuiltinClassInfo<T>::~BuiltinClassInfo()
 {
-    static BuiltinTypeInfo<int> ti("int");
-    return &ti;
 }
 
-template<>
-BE_EXPORT const TypeInfo* be_typeid<message>()
+template< typename T >
+size_t BuiltinClassInfo<T>::size() const
 {
-    static BuiltinTypeInfo<message> ti("message");
-    return &ti;
+    return sizeof(T);
 }
 
-template<>
-BE_EXPORT const TypeInfo* be_typeid<istring>()
-{
-    static BuiltinTypeInfo<istring> ti("istring");
-    return &ti;
+#define BE_BUILTIN_TYPE(t)                                                         \
+template<>                                                                          \
+BE_EXPORT TypeInfo be_typeid<t>::type()                                             \
+{                                                                                   \
+    static ref< BuiltinClassInfo<t> > ci = ref< BuiltinClassInfo<t> >::create(#t);  \
+    return TypeInfo(ci);                                                            \
 }
 
-template<>
-BE_EXPORT const TypeInfo* be_typeid<inamespace>()
-{
-    static BuiltinTypeInfo<inamespace> ti("inamespace");
-    return &ti;
-}
-
-template<>
-BE_EXPORT const TypeInfo* be_typeid<std::string>()
-{
-    static BuiltinTypeInfo<std::string> ti("string");
-    return &ti;
-}
+BE_BUILTIN_TYPE(bool);
+BE_BUILTIN_TYPE(u8);
+BE_BUILTIN_TYPE(u16);
+BE_BUILTIN_TYPE(u32);
+BE_BUILTIN_TYPE(u64);
+BE_BUILTIN_TYPE(i8);
+BE_BUILTIN_TYPE(i16);
+BE_BUILTIN_TYPE(i32);
+BE_BUILTIN_TYPE(i64);
+BE_BUILTIN_TYPE(float);
+BE_BUILTIN_TYPE(double);
 
 }

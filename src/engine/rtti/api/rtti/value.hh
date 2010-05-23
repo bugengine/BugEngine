@@ -4,31 +4,17 @@
 #ifndef BE_RTTI_VALUE_HH_
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
-#include   <rtti/value.hh>
+#include   <rtti/typeinfo.hh>
 
 namespace BugEngine
 {
-
-class TypeInfo;
-class PropertyInfo;
 
 class Value
 {
 private:
     char            m_buffer[128];
     void*           m_data;
-    const TypeInfo* m_type;
-    struct PropertyProxy
-    {
-        Value&                      from;
-        weak<const PropertyInfo>    prop;
-
-        inline PropertyProxy(Value& v, weak<const PropertyInfo> p);
-        inline operator Value();
-        inline void operator=(const Value& v);
-    private:
-        PropertyProxy& operator=(const PropertyProxy& other);
-    };
+    TypeInfo        m_type;
 public:
     template< typename T >
     explicit inline Value(const T& t);
@@ -36,11 +22,11 @@ public:
 
     template< typename T >
     inline const T& as() const;
-
-    inline PropertyProxy operator[](istring);
 };
 
 }
+
+#include   <rtti/value.inl>
 
 /*****************************************************************************/
 #endif
