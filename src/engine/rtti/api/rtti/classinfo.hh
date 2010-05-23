@@ -4,19 +4,19 @@
 #ifndef BE_RTTI_CLASSINFO_HH_
 #define BE_RTTI_CLASSINFO_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.hh>
-#include   <rtti/value.hh>
 
 namespace BugEngine
 {
 
-class PropertyInfo;
-
-class ClassInfo : public TypeInfo
+class ClassInfo : public minitl::refcountable
 {
+private:
+    inamespace m_name;
 public:
-    ClassInfo(const inamespace& name);
+    ClassInfo(const inamespace& ns);
     virtual ~ClassInfo();
+
+    virtual size_t size() const = 0;
 };
 
 }

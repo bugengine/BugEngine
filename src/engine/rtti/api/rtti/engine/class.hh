@@ -20,10 +20,7 @@ public:
     template< typename T >
     PropertyInfo& property(const istring& name, T(Class::*member));
 
-    const TypeInfo* parent() const override { return be_typeid<Parent>(); }
     size_t          size() const override   { return sizeof(Class); }
-    void            copy(const void* /*source*/, void* /*dest*/) const override { be_assert(false, "no copy!"); }
-    void            destroy(void* dest) const override { reinterpret_cast<Class*>(dest)->~Class(); }
 };
 
 }}
@@ -34,43 +31,13 @@ public:
 
 
 #define be_class(klass,parent,name)                                            \
-    template<>                                                                  \
-    const TypeInfo* be_typeid<klass>();                                         \
-    static const TypeInfo* BE_CONCAT(t,__LINE__) = be_typeid<klass>();          \
-    template<>                                                                  \
-    const TypeInfo* be_typeid<klass>()                                          \
-    {                                                                           \
-        typedef klass KLASS;                                                    \
-        static RTTI::ClassInfo<klass, parent> result(name);                     \
-        static TypeInfo& r = result
 
 #define be_field(name)                                                         \
-        ;static BugEngine::PropertyInfo& p##name = result.property(#name, &KLASS::name)
-#define be_field_name(var, name)                                                         \
-        ;static BugEngine::PropertyInfo& p##name = result.property(#name, &KLASS::var)
 
-#define be_end ;return &result; }
+#define be_field_name(var, name)                                               \
 
-template< typename T >
-TypeInfo be_typeid< ref<T> >()
-{
-    return TypeInfo(
-}
+#define be_end
 
-template< typename T >
-const TypeInfo* be_typeid< weak<T> >()
-{
-}
-
-template< typename T >
-const TypeInfo* be_typeid< const T >()
-{
-}
-
-template< typename T >
-const TypeInfo* be_typeid< T& >()
-{
-}
 
 /*****************************************************************************/
 #endif

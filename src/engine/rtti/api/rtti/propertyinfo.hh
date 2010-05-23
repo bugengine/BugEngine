@@ -17,7 +17,7 @@ public:
     PropertyInfo();
     virtual ~PropertyInfo();
 
-    virtual const TypeInfo* type() const = 0;
+    virtual TypeInfo type() const = 0;
     virtual Value get(void* from) const = 0;
     virtual void set(const Value& v, void* to) const = 0;
 

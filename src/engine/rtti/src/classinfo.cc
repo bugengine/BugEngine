@@ -8,8 +8,8 @@
 namespace BugEngine
 {
 
-ClassInfo::ClassInfo(const inamespace& name)
-:   TypeInfo(name)
+ClassInfo::ClassInfo(const inamespace& ns)
+:   m_name(ns)
 {
 }
 
