@@ -11,6 +11,7 @@ namespace Example
 
 class Test
 {
+    friend BugEngine::be_typeid<Test>;
 public:
     enum Type
     {
@@ -23,7 +24,7 @@ public:
 
     Test(int i) : i(i) { }
     ~Test() { }
-
+private:
     int i;
     Type type;
 };
@@ -40,7 +41,7 @@ be_end
 
 //be_class(Example::Test, void, "Example.Test")
 //    [Documentation::Brief("Example class")]
-//    [Documentation::Doc("Example class")]
+//    [Documentation::Detail("Example class")]
 //
 //    be_field(i)
 //        [Documentation::Brief("Example property")]
@@ -71,11 +72,15 @@ static struct Startup
         Example::Test t(2);
         Example::Test& t2 = t;
         const Example::Test& t3 = t;
-        float f[4] = { 0.0f };
+        typedef const float float_array[4];
+        float_array f = { 0.0f };
+        const float_array * const f2 = &f;
         Value v = Value(t);
         Value v2 = Value(t2);
         Value v3 = Value(t3);
-        Value v4 = Value(f);
+        Value v4 = Value(f2);
+        OutputDebugString((minitl::format<>("%s %d\n")|be_typeid<const float_array * const* const>::type().name().c_str()|sizeof(v4)).c_str());
+        OutputDebugString((minitl::format<>("%s %d\n")|v4.type().name().c_str()|sizeof(v4)).c_str());
     }
 } s_startup;
 }

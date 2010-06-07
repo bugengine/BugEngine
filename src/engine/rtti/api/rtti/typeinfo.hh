@@ -10,39 +10,46 @@ namespace BugEngine
 
 class ClassInfo;
 
-struct TypeInfo
+class TypeInfo
 {
 public:
     enum Type
     {
-        Raw,
+        Class = 0,
         Array,
-        Class,
         Const,
         Ref,
         Ptr,
-        Struct,
         RefPtr,
         WeakPtr
     };
 private:
-    Type                    m_type;
-    size_t                  m_count;
+    static const size_t s_maxAttributeCount = 7;
     weak<const ClassInfo>   m_class;
+    struct Indirection
+    {
+        unsigned int        type:8;
+        unsigned int        count:24;
+    }   m_attributes[s_maxAttributeCount];
 public:
     inline TypeInfo(const TypeInfo& proxy, Type type, size_t count = 1);
     inline explicit TypeInfo(weak<const ClassInfo> klass);
     inline ~TypeInfo();
 
-    inline void copy(const void* src, void* dst) const;
-    inline void destroy(void* src) const;
-    inline size_t size() const;
+    void copy(const void* src, void* dst) const;
+    void destroy(void* src) const;
+    size_t size() const;
+    std::string name() const;
 };
 
 template< typename T >
 struct be_typeid
 {
-    static TypeInfo type();
+    static weak<const ClassInfo> klass();
+    inline static TypeInfo type()
+    {
+        return TypeInfo(klass());
+    }
 };
 
 template< typename T >

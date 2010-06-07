@@ -17,6 +17,7 @@ public:
     virtual ~ClassInfo();
 
     virtual size_t size() const = 0;
+    std::string name() const;
 };
 
 }

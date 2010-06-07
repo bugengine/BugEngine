@@ -36,10 +36,10 @@ size_t BuiltinClassInfo<T>::size() const
 
 #define BE_BUILTIN_TYPE(t)                                                         \
 template<>                                                                          \
-BE_EXPORT TypeInfo be_typeid<t>::type()                                             \
+BE_EXPORT weak<const ClassInfo> be_typeid<t>::klass()                               \
 {                                                                                   \
     static ref< BuiltinClassInfo<t> > ci = ref< BuiltinClassInfo<t> >::create(#t);  \
-    return TypeInfo(ci);                                                            \
+    return ci;                                                                      \
 }
 
 BE_BUILTIN_TYPE(bool);
@@ -53,5 +53,7 @@ BE_BUILTIN_TYPE(i32);
 BE_BUILTIN_TYPE(i64);
 BE_BUILTIN_TYPE(float);
 BE_BUILTIN_TYPE(double);
+
+
 
 }
