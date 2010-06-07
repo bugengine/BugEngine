@@ -17,4 +17,9 @@ ClassInfo::~ClassInfo()
 {
 }
 
+std::string ClassInfo::name() const
+{
+    return m_name.str();
+}
+
 }

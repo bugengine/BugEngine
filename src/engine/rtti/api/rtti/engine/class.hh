@@ -27,7 +27,7 @@ public:
 
 #include   <rtti/engine/class.inl>
 #include   <rtti/documentation/brief.hh>
-#include   <rtti/documentation/documentation.hh>
+#include   <rtti/documentation/detail.hh>
 
 
 #define be_class(klass,parent,name)                                            \

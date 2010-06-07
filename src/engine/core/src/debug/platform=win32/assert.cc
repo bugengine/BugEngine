@@ -130,7 +130,7 @@ namespace BugEngine { namespace Debug
         else if (locr == IDC_BUTTONIGNORE)
             return Ignore;
         else if (locr == IDC_BUTTONIGNOREALL)
-            return IgnoreAll;      
+            return IgnoreAll;
         else if (locr == IDC_BUTTONABORT)
             return Abort;
         else

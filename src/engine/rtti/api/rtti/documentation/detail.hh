@@ -1,19 +1,19 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RTTI_DOCUMENTATION_DOCUMENTATION_HH_
-#define BE_RTTI_DOCUMENTATION_DOCUMENTATION_HH_
+#ifndef BE_RTTI_DOCUMENTATION_DETAIL_HH_
+#define BE_RTTI_DOCUMENTATION_DETAIL_HH_
 /*****************************************************************************/
 
 namespace BugEngine { namespace Documentation
 {
 
-class Doc
+class Detail
 {
 public:
     message doc;
-    Doc(const char *doc);
-    ~Doc();
+    Detail(const char *doc);
+    ~Detail();
 };
 
 }}

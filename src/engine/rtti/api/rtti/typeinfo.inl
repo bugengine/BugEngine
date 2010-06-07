@@ -10,33 +10,29 @@ namespace BugEngine
 {
 
 TypeInfo::TypeInfo(const TypeInfo& proxy, Type type, size_t count)
-:   m_type(type)
-,   m_count(count)
-,   m_class(proxy.m_class)
+:   m_class(proxy.m_class)
 {
+    memcpy(m_attributes, proxy.m_attributes, sizeof(m_attributes));
+    for(size_t i = 0; i < s_maxAttributeCount; ++i)
+    {
+        if(m_attributes[i].type == Class)
+        {
+            m_attributes[i].type = type;
+            m_attributes[i].count = count;
+            return;
+        }
+    }
+    be_notreached();
 }
 
 TypeInfo::TypeInfo(weak<const ClassInfo> klass)
-:   m_type(Class)
-,   m_class(klass)
+:   m_class(klass)
 {
+    memset(m_attributes, 0, sizeof(m_attributes));
 }
 
 TypeInfo::~TypeInfo()
 {
-}
-
-void TypeInfo::copy(const void* /*src*/, void* /*dst*/) const
-{
-}
-
-void TypeInfo::destroy(void* /*src*/) const
-{
-}
-
-size_t TypeInfo::size() const
-{
-    return m_class->size() * m_count;
 }
 
 }

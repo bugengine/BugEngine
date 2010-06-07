@@ -14,7 +14,7 @@ namespace BugEngine { namespace RTTI
 
 #include   <rtti/engine/enum.inl>
 #include   <rtti/documentation/brief.hh>
-#include   <rtti/documentation/documentation.hh>
+#include   <rtti/documentation/detail.hh>
 
 
 #define be_enum(klass,name)                                                    \

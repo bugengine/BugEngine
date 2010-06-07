@@ -21,11 +21,16 @@ Value::~Value()
 {
 }
 
+const TypeInfo& Value::type() const
+{
+    return m_type;
+}
+
 template< typename T >
 const T& Value::as() const
 {
     be_assert(be_typeid<T>::type() == m_type, "Value has type %s; unable to unbox to type %s" | m_type->name | be_typeid<T>()->name);
-    return *(const T*)pointer();
+    return *(const T*)0;
 }
 
 }
