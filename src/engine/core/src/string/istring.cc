@@ -266,7 +266,7 @@ static inline const char* findnext(const char* str, const char *sep, size_t len)
     return result;
 }
 
-static void parse(const char *str, const char *end, const char *sep, istring* buffer, size_t& size)
+static void parse(const char *str, const char *end, const char *sep, istring* buffer, u32& size)
 {
     size_t numsep = strlen(sep);
 
