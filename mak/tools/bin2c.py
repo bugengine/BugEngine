@@ -9,7 +9,6 @@ TaskGen.declare_chain(
 	ext_in = '.bin',
 	ext_out = '_bin.h',
 	before = 'cc cxx',
-	shell=True,
 	reentrant=False
 )
 

@@ -12,8 +12,7 @@ TaskGen.declare_chain(
 	rule = '${GRIT} "${SRC[0].abspath().replace(\'.grit\', \'.png\')}" -q -fts -o"${TGT[0].bldpath(env)}" -fh',
 	ext_in = '.grit',
 	decider = decide_ext,
-	before = 'cc cxx',
-	shell=True
+	before = 'cc cxx'
 )
 
 def detect(conf):
