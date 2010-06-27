@@ -85,15 +85,18 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
-	toolchaindir = '../..'
-	if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
-		for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
-			if target in ['.svn', '.cvs']:
-				continue
-			for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
-				if version in ['.svn', '.cvs']:
+	toolchaindirs = ['../..']
+	for dir in os.listdir('../../opt/'):
+		toolchaindirs.append(os.path.join('..', '..', 'opt', dir))
+	for toolchaindir in toolchaindirs:
+		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
+			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
+				if target in ['.svn', '.cvs']:
 					continue
-				name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
+				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+					if version in ['.svn', '.cvs']:
+						continue
+					name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
 
 
 def set_options(opt):
