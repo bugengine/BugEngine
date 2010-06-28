@@ -71,7 +71,7 @@ def find_program_impl(env, filename, path_list=[], var=None, environ=None):
 
 	if not path_list: path_list = environ.get('PATH', '').split(os.pathsep)
 
-	ext = (Options.platform == 'win32') and '.exe,.com,.bat,.cmd' or ''
+	ext = (Options.platform == 'win32') and '.exe,.com,.bat,.cmd,' or ''
 	for y in [filename+x for x in ext.split(',')]:
 		for directory in path_list:
 			x = os.path.join(directory, y)
