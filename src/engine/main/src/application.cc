@@ -22,12 +22,12 @@ struct Application::Request : public minitl::inode
 };
 
 
-Application::RenderView::RenderView(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)
+Application::RenderView::RenderView(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
 :   m_scene(scene)
 ,   m_renderTarget(target)
 ,   m_renderTask(ref<TaskGroup>::create("render", color32(255,0,0)))
 {
-    ref<ITask> renderTask = target->createSceneRenderTask(scene);
+    ref<ITask> renderTask = scene->createRenderTask(target);
 
     m_renderTask->addStartTask(scene->updateTask());
     m_renderTask->addEndTask(renderTask);
@@ -76,7 +76,7 @@ int Application::run()
     return 0;
 }
 
-void Application::addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)
+void Application::addSceneSync(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
 {
     RenderView view(scene, target);
     m_views.push_back(view);
@@ -84,7 +84,7 @@ void Application::addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderT
     view.renderTask()->addCallback(m_tasks[0]->startCallback());
 }
 
-void Application::addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target)
+void Application::addScene(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
 {
     Request* request = new Request();
     request->operation = Request::AddScene;
@@ -100,7 +100,7 @@ void Application::processRequests()
         switch(request->operation)
         {
         case Request::AddScene:
-            addSceneSync(be_checked_cast<Graphics::Scene>(request->param1), be_checked_cast<Graphics::RenderTarget>(request->param2));
+            addSceneSync(be_checked_cast<Graphics::IScene>(request->param1), be_checked_cast<Graphics::RenderTarget>(request->param2));
             break;
         case Request::RemoveScene:
         default:

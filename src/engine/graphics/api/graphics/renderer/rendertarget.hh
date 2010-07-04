@@ -9,7 +9,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-class Scene;
 class RenderBackend;
 
 class be_api(GRAPHICS) RenderTarget : public minitl::refcountable
@@ -23,10 +22,9 @@ public:
     virtual uint2   getDimensions() const = 0;
     virtual void    close() = 0;
 
-    ref<ITask>      createSceneRenderTask(weak<Scene> scene);
+    weak<ITask> flushTask() const;
 protected:
     virtual bool    closed() const = 0;
-    void            render();
 private:
     RenderTarget& operator=(const RenderTarget& other);
     RenderTarget(const RenderTarget& other);

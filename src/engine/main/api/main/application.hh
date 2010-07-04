@@ -5,7 +5,7 @@
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
 #include    <mobile/world.hh>
-#include    <graphics/scene/scene.hh>
+#include    <graphics/scene/iscene.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/renderbackend.hh>
 #include    <system/scheduler/task/group.hh>
@@ -21,12 +21,12 @@ private:
     class RenderView
     {
     private:
-        ref<Graphics::Scene>        m_scene;
+        ref<Graphics::IScene>       m_scene;
         ref<Graphics::RenderTarget> m_renderTarget;
         ref<TaskGroup>              m_renderTask;
         std::vector< ref<ITask> >   m_tasks;
     public:
-        RenderView(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+        RenderView(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
         ~RenderView();
 
         weak<ITask> renderTask() const;
@@ -37,7 +37,7 @@ private:
     minitl::vector< ref<ITask> >                    m_tasks;
     minitl::istack<Request>                         m_requests;
 private:
-    void addSceneSync(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+    void addSceneSync(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
     void processRequests();
 public:
     Application(int argc, const char *argv[]);
@@ -45,7 +45,7 @@ public:
 
     int run(void);
 
-    void addScene(ref<Graphics::Scene> scene, ref<Graphics::RenderTarget> target);
+    void addScene(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

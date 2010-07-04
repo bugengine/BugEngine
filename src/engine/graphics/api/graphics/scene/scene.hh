@@ -4,25 +4,27 @@
 #ifndef BE_GRAPHICS_SCENE_SCENE_HH_
 #define BE_GRAPHICS_SCENE_SCENE_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable.hh>
+#include    <graphics/scene/iscene.hh>
 #include    <system/scheduler/task/itask.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Scene : public minitl::refcountable
+template< class SpacePartitioning >
+class Scene : public IScene
 {
-protected:
-    ref<ITask>  m_updateTask;
+private:
+    SpacePartitioning   m_scenePartition;
 public:
-    Scene();
-    virtual ~Scene();
-
-    virtual weak<ITask> updateTask() const;
+    typedef typename SpacePartitioning::Node Node;
+public:
+    Node root();
+    virtual ref<ITask> createRenderTask(weak<const RenderTarget> renderTarget) const override;
 };
 
 }}
 
+#include    <graphics/scene/scene.inl>
 
 /*****************************************************************************/
 #endif

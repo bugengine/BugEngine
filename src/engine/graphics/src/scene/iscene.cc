@@ -8,16 +8,16 @@
 namespace BugEngine { namespace Graphics
 {
 
-Scene::Scene()
+IScene::IScene()
 :   m_updateTask(ref<TaskGroup>::create("update", color32(0, 0, 255)))
 {
 }
 
-Scene::~Scene()
+IScene::~IScene()
 {
 }
 
-weak<ITask> Scene::updateTask() const
+weak<ITask> IScene::updateTask() const
 {
     return m_updateTask;
 }

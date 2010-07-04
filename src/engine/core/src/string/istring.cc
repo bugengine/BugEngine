@@ -176,28 +176,28 @@ const StringCache* istring::init(const char *begin, const char *end)
     return result;
 }
 
-istring::istring() NOTHROW :
-    m_index(init(""))
+istring::istring() NOTHROW
+:   m_index(init(""))
 {
 }
 
-istring::istring(const char *value) NOTHROW :
-    m_index(init(value))
+istring::istring(const char *value) NOTHROW
+:   m_index(init(value))
 {
 }
 
-istring::istring(const char *begin, const char *end) NOTHROW :
-    m_index(init(begin,end))
+istring::istring(const char *begin, const char *end) NOTHROW
+:   m_index(init(begin,end))
 {
 }
 
-istring::istring(const std::string& other) :
-    m_index(init(other.c_str()))
+istring::istring(const std::string& other)
+:   m_index(init(other.c_str()))
 {
 }
 
-istring::istring(const istring& other) NOTHROW :
-    m_index(other.m_index)
+istring::istring(const istring& other) NOTHROW
+:   m_index(other.m_index)
 {
     m_index->retain();
 }
@@ -284,29 +284,29 @@ static void parse(const char *str, const char *end, const char *sep, istring* bu
     return;
 }
 
-igenericnamespace::igenericnamespace() :
-    m_namespace(),
-    m_size(0)
+igenericnamespace::igenericnamespace()
+:   m_namespace()
+,   m_size(0)
 {
 }
 
-igenericnamespace::igenericnamespace(const istring& onlycomponent) :
-    m_namespace(),
-    m_size(1)
+igenericnamespace::igenericnamespace(const istring& onlycomponent)
+:   m_namespace()
+,   m_size(1)
 {
     m_namespace[0] = onlycomponent;
 }
 
-igenericnamespace::igenericnamespace(const char *begin, const char *end, const char* sep) :
-    m_namespace(),
-    m_size(0)
+igenericnamespace::igenericnamespace(const char *begin, const char *end, const char* sep)
+:   m_namespace()
+,   m_size(0)
 {
     parse(begin, end, sep, m_namespace, m_size);
 }
 
-igenericnamespace::igenericnamespace(const char *str, const char* sep) :
-    m_namespace(),
-    m_size(0)
+igenericnamespace::igenericnamespace(const char *str, const char* sep)
+:   m_namespace()
+,   m_size(0)
 {
     parse(str, str+strlen(str), sep, m_namespace, m_size);
 }
@@ -405,18 +405,18 @@ bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2)
 
 //-----------------------------------------------------------------------------
 
-inamespace::inamespace(const istring& onlycomponent) :
-    igenericnamespace(onlycomponent)
+inamespace::inamespace(const istring& onlycomponent)
+:   igenericnamespace(onlycomponent)
 {
 }
 
-inamespace::inamespace(const char* _str) :
-    igenericnamespace(_str, ".")
+inamespace::inamespace(const char* _str)
+:   igenericnamespace(_str, ".")
 {
 }
 
-inamespace::inamespace(const std::string& _str) :
-    igenericnamespace(_str.c_str(), ".")
+inamespace::inamespace(const std::string& _str)
+:   igenericnamespace(_str.c_str(), ".")
 {
 }
 
@@ -461,23 +461,23 @@ inamespace operator+(const inamespace& ns1, const inamespace& ns2)
 
 //-----------------------------------------------------------------------------
 
-ipath::ipath(const istring& onlycomponent) :
-    igenericnamespace(onlycomponent)
+ipath::ipath(const istring& onlycomponent)
+:   igenericnamespace(onlycomponent)
 {
 }
 
-ipath::ipath(const char *_str) :
-    igenericnamespace(_str, "/\\")
+ipath::ipath(const char *_str)
+:   igenericnamespace(_str, "/\\")
 {
 }
 
-ipath::ipath(const char *begin, const char *end) :
-    igenericnamespace(begin, end, "/\\")
+ipath::ipath(const char *begin, const char *end)
+:   igenericnamespace(begin, end, "/\\")
 {
 }
 
-ipath::ipath(const std::string& _str) :
-    igenericnamespace(_str.c_str(), "/\\")
+ipath::ipath(const std::string& _str)
+:   igenericnamespace(_str.c_str(), "/\\")
 {
 }
 
@@ -506,18 +506,18 @@ ipath operator+(const ipath& path1, const ipath& path2)
 
 //-----------------------------------------------------------------------------
     
-ifilename::ifilename(const istring& onlycomponent) :
-    igenericnamespace(onlycomponent)
+ifilename::ifilename(const istring& onlycomponent)
+:   igenericnamespace(onlycomponent)
 {
 }
 
-ifilename::ifilename(const char *_str) :
-    igenericnamespace(_str, "/\\")
+ifilename::ifilename(const char *_str)
+:   igenericnamespace(_str, "/\\")
 {
 }
 
-ifilename::ifilename(const std::string& _str) :
-    igenericnamespace(_str.c_str(), "/\\")
+ifilename::ifilename(const std::string& _str)
+:   igenericnamespace(_str.c_str(), "/\\")
 {
 }
 

@@ -5,12 +5,11 @@
 
 #include    <main/main.hh>
 
-#include    <mainscene.hh>
-
 #include    <core/threads/thread.hh>
 
 #include    <system/filesystem.hh>
 #include    <system/diskfs.hh>
+#include    <mobile/worldscene.hh>
 
 #include    <graphics/renderer/renderbackend.hh>
 
@@ -44,7 +43,7 @@ int be_main (weak<BugEngine::Application> app)
     ref<BugEngine::Graphics::RenderTarget> w2 = display2->createRenderWindow(f);
 
     ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-    ref<BugEngine::Graphics::Scene> scene = ref<BugEngine::WorldScene>::create(world);
+    ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
     app->addScene(scene, w1);
     app->addScene(scene, w2);
 

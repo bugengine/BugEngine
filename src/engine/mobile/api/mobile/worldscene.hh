@@ -4,15 +4,19 @@
 #ifndef BE_MOBILE_WORLDSCENE_HH_
 #define BE_MOBILE_WORLDSCENE_HH_
 /*****************************************************************************/
-#include    <graphics/scene/scene3d.hh>
-
 #include    <mobile/world.hh>
+#include    <graphics/scene/scene.hh>
 #include    <system/scheduler/task/group.hh>
 
 namespace BugEngine
 {
 
-class be_api(MOBILE) WorldScene : public Graphics::Scene3D
+struct ScenePart
+{
+    typedef int Node;
+};
+
+class be_api(MOBILE) WorldScene : public Graphics::Scene<ScenePart>
 {
 private:
     ref<World>      m_world;
