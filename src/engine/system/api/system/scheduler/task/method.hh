@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-template< typename Owner, void(Owner::*Method)(), template< typename > class Ptr = weak >
+template< typename Owner, void(Owner::*Method)(), template< typename > class Ptr = ::minitl::weak >
 struct MethodCaller
 {
 private:
@@ -27,12 +27,12 @@ public:
     {
     }
 
-    range_onestep prepare() { return range_onestep(); }
-    void operator()(const range_onestep& /*r*/) const
+    Range prepare() { return Range(); }
+    void operator()(const Range& /*r*/) const
     {
         (m_owner.operator->()->*Method)();
     }
-    void operator()(range_onestep& /*myRange*/, MethodCaller& /*with*/, range_onestep& /*withRange*/)
+    void operator()(Range& /*myRange*/, MethodCaller& /*with*/, Range& /*withRange*/)
     {
     }
 };
