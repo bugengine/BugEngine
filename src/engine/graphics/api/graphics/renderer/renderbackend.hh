@@ -71,8 +71,6 @@ protected:
     virtual ~RenderBackend();
 protected:
     ref<ITask>              m_flushTask;
-    minitl::pool<Batch>     m_batchPool;
-    minitl::istack<Batch>   m_batches;
 protected:
     virtual int step() const = 0;
     virtual void flush() = 0;
@@ -88,9 +86,6 @@ public:
     virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;
-
-    Batch*                          getBatch();
-    Batch*                          putBatch();
 };
 
 }}

@@ -79,7 +79,6 @@ void Renderer::drawBatch(const Batch& b)
 
 void Renderer::flush()
 {
-    Thread::sleep(1000);
 }
 
 }}}

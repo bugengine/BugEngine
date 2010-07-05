@@ -12,12 +12,15 @@ namespace BugEngine { namespace Graphics
 
 RenderTarget::RenderTarget(weak<RenderBackend> renderer)
 :   m_renderer(renderer)
+,   m_flushTask(ref<TaskGroup>::create("targetFlush", color32(255,0,0)))
 {
+    m_flushTask->addStartTask(m_renderer->flushTask());
+    m_flushTask->addEndTask(m_renderer->flushTask());
 }
 
 weak<ITask> RenderTarget::flushTask() const
 {
-    return m_renderer->flushTask();
+    return m_flushTask;
 }
 
 }}

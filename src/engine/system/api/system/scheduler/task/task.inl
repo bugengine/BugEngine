@@ -22,7 +22,6 @@ Task< Body >::Task(istring name, color32 color, const Body& body)
 template< typename Body >
 void Task< Body >::run(weak<Scheduler> sc) const
 {
-    OutputDebugString((minitl::format<>("%s\n") | typeid(Body).name()).c_str());
     m_taskCount = 0;
     m_taskCompleted = 0;
 

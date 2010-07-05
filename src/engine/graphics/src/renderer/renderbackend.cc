@@ -10,8 +10,6 @@ namespace BugEngine { namespace Graphics
 
 RenderBackend::RenderBackend()
 :   m_flushTask(ref< Task< MethodCaller<RenderBackend, &RenderBackend::flush> > >::create("flush", color32(255,0,0),  MethodCaller<RenderBackend, &RenderBackend::flush>(this)))
-,   m_batchPool(8192)
-,   m_batches()
 {
 }
 
