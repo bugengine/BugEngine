@@ -7,16 +7,17 @@
 #include    <mobile/world.hh>
 #include    <graphics/scene/scene.hh>
 #include    <system/scheduler/task/group.hh>
+#include    <system/scheduler/range/onestep.hh>
 
 namespace BugEngine
 {
 
-struct ScenePart
+struct Space
 {
-    typedef int Node;
+    typedef range_onestep Node;
 };
 
-class be_api(MOBILE) WorldScene : public Graphics::Scene<ScenePart>
+class be_api(MOBILE) WorldScene : public Graphics::Scene<Space>
 {
 private:
     ref<World>      m_world;

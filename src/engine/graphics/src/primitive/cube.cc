@@ -13,14 +13,14 @@ Cube::Cube(const RenderBackend* renderer)
 ,   m_indexBuffer(ref< IndexBuffer<u16> >::create(renderer, 36, IuStatic))
 {
     VertexFormat* v = m_vertexBuffer->map();
-    v[0].position = float4(0.0f, 0.0f, 0.0f, 1.0f);
-    v[1].position = float4(1.0f, 0.0f, 0.0f, 1.0f);
-    v[2].position = float4(0.0f, 1.0f, 0.0f, 1.0f);
-    v[3].position = float4(1.0f, 1.0f, 0.0f, 1.0f);
-    v[4].position = float4(0.0f, 0.0f, 1.0f, 1.0f);
-    v[5].position = float4(1.0f, 0.0f, 1.0f, 1.0f);
-    v[6].position = float4(0.0f, 1.0f, 1.0f, 1.0f);
-    v[7].position = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    v[0].position = float4(-0.5f, -0.5f, -0.5f, 1.0f);
+    v[1].position = float4( 0.5f, -0.5f, -0.5f, 1.0f);
+    v[2].position = float4(-0.5f,  0.5f, -0.5f, 1.0f);
+    v[3].position = float4( 0.5f,  0.5f, -0.5f, 1.0f);
+    v[4].position = float4(-0.5f, -0.5f,  0.5f, 1.0f);
+    v[5].position = float4( 0.5f, -0.5f,  0.5f, 1.0f);
+    v[6].position = float4(-0.5f,  0.5f,  0.5f, 1.0f);
+    v[7].position = float4( 0.5f,  0.5f,  0.5f, 1.0f);
     m_vertexBuffer->unmap();
 
     u16* i = m_indexBuffer->map();

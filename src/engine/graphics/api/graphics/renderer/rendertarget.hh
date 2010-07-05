@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERTARGET_HH_
 #define BE_GRAPHICS_RENDERTARGET_HH_
 /*****************************************************************************/
-#include   <system/scheduler/task/itask.hh>
+#include   <system/scheduler/task/group.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -15,6 +15,7 @@ class be_api(GRAPHICS) RenderTarget : public minitl::refcountable
 {
 protected:
     weak<RenderBackend> const   m_renderer;
+    ref<TaskGroup>              m_flushTask;
 public:
     RenderTarget(weak<RenderBackend> renderer);
     virtual ~RenderTarget() { }

@@ -33,7 +33,7 @@ ref<ITask> Scene<SpacePartitioning>::createRenderTask(weak<const RenderTarget> r
         {
         }
 
-        typedef range_onestep   Range;
+        typedef SpacePartitioning::Node Range;
 
         Range prepare() { return Range(); }
         void operator()(const Range& /*r*/) const
