@@ -36,16 +36,12 @@ int be_main (weak<BugEngine::Application> app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderDx9", filesystem);
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2 ("renderOpenGL", filesystem);
+    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderOpenGL", filesystem);
     ref<BugEngine::Graphics::RenderTarget> w1 = display->createRenderWindow(f);
-    f.position = BugEngine::int2(500,0);
-    ref<BugEngine::Graphics::RenderTarget> w2 = display2->createRenderWindow(f);
 
     ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
     ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
     app->addScene(scene, w1);
-    app->addScene(scene, w2);
 
     return app->run();
 }

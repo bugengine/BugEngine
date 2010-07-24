@@ -27,3 +27,4 @@ weak<ITask> WorldScene::updateTask() const
 }
 
 }
+

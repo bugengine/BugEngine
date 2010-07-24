@@ -29,7 +29,7 @@ Renderer::Renderer()
 ,   m_rootWindow(XRootWindow(m_display, m_screen))
 ,   m_visual(glXChooseVisual(m_display, m_screen, s_glxAttributes))
 {
-    //XSetErrorHandler(&Renderer::xError);
+    XSetErrorHandler(&Renderer::xError);
     XFlush(m_display);
 }
 

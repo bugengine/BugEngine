@@ -25,7 +25,7 @@ template< typename T >
 PropertyInfo& ClassInfo<Class, Parent>::property(const istring& name, T(Class::*member))
 {
     ref< FieldPropertyInfo<Class, T> > prop = ref< FieldPropertyInfo<Class, T> >::create(member);
-    m_properties.push_back(std::make_pair(name, prop));
+    //m_properties.push_back(std::make_pair(name, prop));
     return *prop;
 }
 
