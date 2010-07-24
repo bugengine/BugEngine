@@ -48,12 +48,12 @@ private:
         ChainCallback(const ChainCallback& other);
         ChainCallback& operator=(const ChainCallback& other);
     };
-private:
-    minitl::vector< weak<ICallback> >   m_callbacks;
-    ref<ICallback>                      m_start;
 public:
     const istring name;
     const color32 color;
+private:
+    minitl::vector< weak<ICallback> >   m_callbacks;
+    ref<ICallback>                      m_start;
 public:
     virtual ~ITask();
 

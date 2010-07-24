@@ -17,3 +17,4 @@ void Renderer::attachWindow(Window* w)
 }
 
 }}}
+
