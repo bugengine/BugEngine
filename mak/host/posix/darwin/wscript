@@ -38,9 +38,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
-	toolchaindirs=[]
+	toolchaindirs=set([])
 	for dir in os.environ['PATH'].split(':'):
-		toolchaindirs.append(os.path.join(dir, '..'))
+		toolchaindirs.add(os.path.abspath(os.path.join(dir, '..')))
 	print toolchaindirs
 	for toolchaindir in toolchaindirs:
 		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
@@ -65,7 +65,8 @@ def set_options(opt):
 def configure(conf):
 	conf.env['BUILD_VARIANTS'] = []
 	conf.env['DEV_PATH'] = ['/Developer/usr/bin']
-	conf.check_tool("bison flex", tooldir='mak/tools')
+	conf.check_tool('bison flex', tooldir='mak/tools')
+
 	get_available_gcc(conf)
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:

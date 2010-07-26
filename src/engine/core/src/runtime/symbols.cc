@@ -5,14 +5,6 @@
 
 #include    <core/runtime/symbols.hh>
 
-#ifdef BE_PLATFORM_POSIX
-# include   <dlfcn.h>
-# include   <link.h>
-#endif
-#ifdef BE_PLATFORM_WIN32
-# include   <psapi.h>
-#endif
-
 #include    <modules/elf.hh>
 #include    <modules/pe.hh>
 #include    <modules/dwarf.hh>

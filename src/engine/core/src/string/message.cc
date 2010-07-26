@@ -4,14 +4,13 @@
 #include    <core/stdafx.h>
 #include    <core/string/message.hh>
 #include    <cstring>
-#include    <libintl.h>
 
 
 namespace BugEngine
 {
 
 message::message(const char *msg)
-:   m_msg(gettext(msg))
+:   m_msg(msg)
 {
 }
 

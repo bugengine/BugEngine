@@ -105,7 +105,7 @@ def set_options(opt):
 def configure(conf):
 	import Options
 	
-	conf.check_tool("flex bison")
+	conf.check_tool('flex bison', tooldir=['mak/tools'])
 
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
