@@ -5,6 +5,8 @@
 #include    <core/environment.hh>
 #include    <core/debug/logger.hh>
 #include    <unistd.h>
+#include    <sys/types.h>
+#include    <sys/sysctl.h>
 
 namespace BugEngine
 {
@@ -65,7 +67,29 @@ const istring& Environment::getUser() const
 }
 size_t Environment::getProcessorCount() const
 {
+#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUNOS)
     return sysconf(_SC_NPROCESSORS_ONLN);
+#else
+    int numCPU;
+    int mib[4];
+    size_t len;
+
+    mib[0] = CTL_HW;
+    mib[1] = HW_NCPU;
+    sysctl(mib, 2, &numCPU, &len, NULL, 0);
+
+    if( numCPU < 1 )
+    {
+         mib[1] = HW_AVAILCPU;
+         sysctl( mib, 2, &numCPU, &len, NULL, 0 );
+
+         if( numCPU < 1 )
+         {
+              numCPU = 1;
+         }
+    }
+    return numCPU;
+#endif
 }
 
 }

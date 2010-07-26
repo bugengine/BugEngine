@@ -7,20 +7,16 @@
 namespace BugEngine
 {
 
-static BE_THREAD_LOCAL Profile*    g_currentProfile;
-
 Profile::~Profile()
 {
 }
 
 void Profile::start()
 {
-    m_parent = g_currentProfile;
 }
 
 void Profile::stop()
 {
-    g_currentProfile = m_parent;
 }
 
 }

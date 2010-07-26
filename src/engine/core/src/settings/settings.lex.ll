@@ -54,7 +54,6 @@ static int isatty (int)
 
 %option prefix="be_settings_"
 %option nounput
-%option nounistd
 
 alpha       [A-Za-z_]
 num         [0-9]
