@@ -25,7 +25,7 @@
 
 static int yyerror(const char *msg)
 {
-    fprintf(stderr, msg);
+    fprintf(stderr, "%s\n", msg);
     return 0;
 }
 extern int yylex();

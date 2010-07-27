@@ -11,7 +11,9 @@
 namespace BugEngine
 {
 
+#ifdef BE_PLATFORM_MACOS
 static mach_timebase_info_data_t s_info = { 0, 0 };
+#endif
 
 Timer::Timer()
 :   m_total(0)
