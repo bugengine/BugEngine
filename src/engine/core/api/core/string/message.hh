@@ -11,7 +11,7 @@ namespace BugEngine
 class be_api(CORE) message
 {
 private:
-    char *m_msg;
+    const char *m_msg;
 public:
     message(const char *str);
     ~message();

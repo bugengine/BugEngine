@@ -33,7 +33,7 @@ public:
     const format<size>& operator|(i32 value) const;
     const format<size>& operator|(u16 value) const;
     const format<size>& operator|(i16 value) const;
-    const format<size>& operator|(size_t value) const;
+//    const format<size>& operator|(size_t value) const;
 };
 
 
@@ -187,11 +187,11 @@ const format<size>& format<size>::operator|(u16 value) const
     return *this | (u64)value;
 }
 
-template< size_t size >
-const format<size>& format<size>::operator|(size_t value) const
-{
-    return *this | (u64)value;
-}
+//template< size_t size >
+//const format<size>& format<size>::operator|(size_t value) const
+//{
+//    return *this | (u64)value;
+//}
 
 }
 
