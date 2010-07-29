@@ -26,7 +26,7 @@ def post_run_bison(task):
 		except OSError:
 			pass
 	task.post_run_orig()
-	
+
 cls.post_run_orig = cls.post_run
 cls.post_run = post_run_bison
 

@@ -40,7 +40,7 @@ private:
 # include "console/plugin.inl"
 #elif defined(BE_PLATFORM_WIN32)
 # include "win32/plugin.inl"
-#elif defined(BE_PLATFORM_POSIX)
+#elif defined(BE_PLATFORM_POSIX) || defined(BE_PLATFORM_MACOS)
 # include "posix/plugin.inl"
 #else
 # error Plugin subsystem not implemented...

@@ -107,15 +107,15 @@ def find_cross_gcc(conf):
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	
+
 	if v['GCC_CONFIGURED_PLATFORM'] == 'win32':
 		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 
-	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
-	conf.env['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	conf.env['CCFLAGS_debug'] = ['-save-temps', '-g', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-save-temps', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_debug'] = ['-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['ASFLAGS_debug'] = ['-g', '-D_DEBUG']
 
 	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
 	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
@@ -131,7 +131,7 @@ def find_cross_gcc(conf):
 	conf.env['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	conf.env['LINKFLAGS_final'] = ['-pipe', '-g', '-s', '-Wl,-x', '-Wl,-O2']
-	
+
 	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
 		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
 		conf.env.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
@@ -149,7 +149,7 @@ def find_cross_gcc(conf):
 		conf.env.append_unique('CXXFLAGS', flags)
 		conf.env.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
 		conf.env.append_unique('LINKFLAGS', flags)
-		
+
 @feature('cc', 'cxx')
 def static_libgcc(self):
 	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':

@@ -43,7 +43,6 @@ static inline void displayError()
 #elif defined __APPLE__
 # define BE_PLATFORM_NAME       MacOSX
 # define BE_PLATFORM_MACOS      1
-# define BE_PLATFORM_POSIX      1
 # define BE_PLATFORM_PC         1
 #elif defined __linux__
 # define BE_PLATFORM_NAME       Linux

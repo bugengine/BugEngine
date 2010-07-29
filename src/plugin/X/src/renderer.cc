@@ -16,7 +16,7 @@ namespace
         GLX_RGBA, GLX_DOUBLEBUFFER,
         GLX_RED_SIZE, 6,
         GLX_GREEN_SIZE, 6,
-        GLX_BLUE_SIZE, 6, 
+        GLX_BLUE_SIZE, 6,
         GLX_DEPTH_SIZE, 24,
         GLX_X_VISUAL_TYPE_EXT, GLX_TRUE_COLOR_EXT,
         None
