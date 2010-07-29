@@ -4,7 +4,7 @@ allarchs		= [ 'amd64', 'x86', 'alpha', 'arm', 'arm7', 'arm9', 'hppa', 'ia64', 'm
 builder			= None
 platformaliases = {
 	'pc':		['win32', 'linux', 'sunos', 'darwin', 'freebsd'],
-	'posix': 	['linux', 'sunos', 'darwin', 'freebsd'],
+	'posix': 	['linux', 'sunos', 'freebsd'],
 	'console':	['psp', 'ps3', 'spu', 'wii', 'xbox360'],
 }
 
