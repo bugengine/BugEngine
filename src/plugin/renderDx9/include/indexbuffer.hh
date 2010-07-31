@@ -4,7 +4,7 @@
 #ifndef BE_DX9_INDEXBUFFER_HH_
 #define BE_DX9_INDEXBUFFER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/gpubuffer.hh>
+#include    <graphics/renderer/buffer/gpubuffer.hh>
 #include    <renderer.hh>
 
 #include    <d3d9.h>

@@ -11,11 +11,11 @@ namespace BugEngine { namespace Input
 
 size_t Keyboard::s_keyboardCount = 0;
 
-static Device& getKeyboard()
+/*static Device& getKeyboard()
 {
     static Device s_keyboard("Keyboard", 256);
     return s_keyboard;
-}
+}*/
 
 Keyboard::Keyboard(size_t /*numControls*/)
 :   Device((minitl::format<>("Keyboard%u") | s_keyboardCount++).c_str(), 256)

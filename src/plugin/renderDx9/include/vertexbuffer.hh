@@ -4,8 +4,8 @@
 #ifndef BE_DX9_VERTEXBUFFER_HH_
 #define BE_DX9_VERTEXBUFFER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/gpubuffer.hh>
-#include    <graphics/renderer/vertexdesc.hh>
+#include    <graphics/renderer/buffer/gpubuffer.hh>
+#include    <graphics/renderer/buffer/vertexdesc.hh>
 #include    <renderer.hh>
 
 #include    <d3d9.h>

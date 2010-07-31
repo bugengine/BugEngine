@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/renderer/gpubuffer.hh>
+#include    <graphics/renderer/buffer/gpubuffer.hh>
 
 namespace BugEngine { namespace Graphics
 {

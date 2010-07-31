@@ -25,7 +25,7 @@ private:
 private: // friend class WorldScene
     weak<ITask> updateWorldTask();
 public:
-    World(float3 worldExtents);
+    World(istring physics, istring audio, float3 worldExtents);
     ~World();
 };
 

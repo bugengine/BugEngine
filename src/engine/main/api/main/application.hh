@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <mobile/world.hh>
 #include    <graphics/scene/iscene.hh>
-#include    <graphics/camera/camera.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/renderbackend.hh>
 #include    <system/scheduler/task/group.hh>
@@ -24,7 +23,6 @@ private:
     private:
         ref<Graphics::IScene>       m_scene;
         ref<Graphics::RenderTarget> m_renderTarget;
-        ref<Graphics::Camera>       m_camera;
         uint2                       m_viewport;
         ref<TaskGroup>              m_renderTask;
         std::vector< ref<ITask> >   m_tasks;

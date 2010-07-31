@@ -6,10 +6,10 @@
 /*****************************************************************************/
 #include    <minitl/interlocked/stack.hh>
 #include    <minitl/memory/pool.hh>
-#include    <graphics/renderer/vertexdesc.hh>
+#include    <graphics/renderer/buffer/vertexdesc.hh>
 #include    <graphics/scene/scene.hh>
 #include    <graphics/renderer/rendertarget.hh>
-#include    <graphics/renderer/gpubuffer.hh>
+#include    <graphics/renderer/buffer/gpubuffer.hh>
 #include    <graphics/material/shader.hh>
 #include    <graphics/material/shaderpipeline.hh>
 #include    <graphics/material/texturepipeline.hh>
@@ -51,8 +51,6 @@ struct Batch : public minitl::inode
         RptTriangleStrip,
         RptTriangleFan
     };
-
-    const RenderTarget*                     rtarget;
     RenderPrimitiveType                     ptype;
     std::pair< ShaderParam*, float4>        params[32];
     size_t                                  nbParams;

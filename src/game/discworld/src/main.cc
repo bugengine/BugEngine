@@ -29,7 +29,7 @@ int be_main (weak<BugEngine::Application> app)
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);
-    f.size = BugEngine::uint2(480,480);
+    f.size = BugEngine::uint2(480, 480);
     f.title = "discworld v0.01";
     f.border = true;
     f.fullscreen = false;
@@ -39,7 +39,7 @@ int be_main (weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderOpenGL", filesystem);
     ref<BugEngine::Graphics::RenderTarget> w1 = display->createRenderWindow(f);
 
-    ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+    ref<BugEngine::World> world = ref<BugEngine::World>::create("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
     ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
     app->addScene(scene, w1);
 
