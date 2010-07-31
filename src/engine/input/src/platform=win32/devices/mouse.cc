@@ -11,11 +11,11 @@ namespace BugEngine { namespace Input
 
 size_t Mouse::s_miceCount = 0;
 
-static Device& getMouse()
+/*static Device& getMouse()
 {
     static Device s_mouse("Mouse", 256);
     return s_mouse;
-}
+}*/
 
 Mouse::Mouse(size_t numButtons)
 :   Device((minitl::format<>("Mouse%u") | s_miceCount++).c_str(), numButtons+2)

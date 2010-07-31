@@ -21,7 +21,6 @@ class be_api(MOBILE) WorldScene : public Graphics::Scene<Space>
 {
 private:
     ref<World>      m_world;
-    ref<TaskGroup>  m_worldUpdateTask;
 public:
     WorldScene(ref<World> world);
     virtual ~WorldScene();

@@ -16,9 +16,9 @@ enum
     WorldUpdateTask_Count
 };
 
-World::World(float3 worldExtents)
-:   m_physicsSystem("physicsBullet", worldExtents)
-,   m_audioSystem("audioOpenAL")
+World::World(istring physics, istring audio, float3 worldExtents)
+:   m_physicsSystem(physics, worldExtents)
+,   m_audioSystem(audio)
 ,   m_tasks()
 {
     m_tasks.resize(WorldUpdateTask_Count);

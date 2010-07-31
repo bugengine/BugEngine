@@ -4,8 +4,8 @@
 #ifndef BE_OPENGL_VERTEXBUFFER_HH_
 #define BE_OPENGL_VERTEXBUFFER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/gpubuffer.hh>
-#include    <graphics/renderer/vertexdesc.hh>
+#include    <graphics/renderer/buffer/gpubuffer.hh>
+#include    <graphics/renderer/buffer/vertexdesc.hh>
 #include    <renderer.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL

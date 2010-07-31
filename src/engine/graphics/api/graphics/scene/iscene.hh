@@ -14,13 +14,11 @@ class RenderTarget;
 
 class IScene : public minitl::refcountable
 {
-protected:
-    ref<ITask>          m_updateTask;
 public:
     IScene();
     virtual ~IScene();
 
-    virtual weak<ITask> updateTask() const;
+    virtual weak<ITask> updateTask() const = 0;
     virtual ref<ITask> createRenderTask(weak<const RenderTarget> renderTarget) const = 0;
 };
 

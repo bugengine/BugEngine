@@ -15,10 +15,6 @@ struct MallocInitializer
         :   initialized(false)
     {
 #ifdef  BE_ENABLE_MEMORY_TRACKING
-# ifdef BE_PLATFORM_WIN32
-        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_CHECK_EVERY_1024_DF|_CRTDBG_LEAK_CHECK_DF);
-        //_CrtSetBreakAlloc(227);
-# endif
 #endif
         initialized = true;
     }
