@@ -171,7 +171,7 @@ def gather_wsdk_versions(conf, versions):
 			continue
 		if os.path.isfile(os.path.join(path, 'bin', 'SetEnv.cmd')):
 			targets = []
-			for target,arch in all_msvc_platforms:
+			for target,arch in all_msvc_platforms[::-1]:
 				try:
 					targets.append((target, (arch, 'win32', conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
 				except Configure.ConfigurationError:
@@ -203,7 +203,7 @@ def gather_msvc_versions(conf, versions):
 			path,device = os.path.split(path)
 			if not device:
 				path,device = os.path.split(path)
-			for arch,compiler in all_wince_platforms:
+			for arch,compiler in all_wince_platforms[::-1]:
 				platforms = []
 				if os.path.isdir(os.path.join(path, device, 'Lib', arch)):
 					platforms.append((arch, compiler, os.path.join(path, device, 'Include', arch), os.path.join(path, device, 'Lib', arch)))
@@ -282,7 +282,7 @@ def gather_icl_versions(conf, versions):
 		if not version_pattern.match(version):
 			continue
 		targets = []
-		for target,arch in all_icl_platforms:
+		for target,arch in all_icl_platforms[::-1]:
 			try:
 				icl_version = _winreg.OpenKey(all_versions, version+'\\'+target)
 				path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
