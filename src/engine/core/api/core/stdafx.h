@@ -79,7 +79,7 @@ T be_align(T value, size_t alignment)
 
 
 
-#define UNUSED(p)   static_cast<void>(p)
+#define be_forceuse(p)   static_cast<void>(p)
 
 #include    <core/debug/assert.hh>
 #include    <core/string/istring.hh>

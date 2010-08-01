@@ -112,10 +112,10 @@ def find_cross_gcc(conf):
 		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 
-	conf.env['CCFLAGS_debug'] = ['-save-temps', '-g', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-save-temps', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-g', '-Wl,-x', '-Wl,-O2']
-	conf.env['ASFLAGS_debug'] = ['-g', '-D_DEBUG']
+	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 
 	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
 	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
@@ -143,6 +143,8 @@ def find_cross_gcc(conf):
 	if v['GCC_CONFIGURED_PLATFORM'] != 'win32':
 		conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	if v['GCC_CONFIGURED_PLATFORM'] == 'win32':
+		conf.env.append_unique('LINKFLAGS', ['-Wl,-static', '-lstdc++'])
 	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
 		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
 		conf.env.append_unique('CCFLAGS', flags)

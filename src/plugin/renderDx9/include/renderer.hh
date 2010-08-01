@@ -11,9 +11,6 @@
 #include    <Cg/cg.h>
 #include    <Cg/cgD3D9.h>
 
-#include    <shaderpipeline.hh>
-#include    <texturepipeline.hh>
-
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
@@ -27,36 +24,25 @@ class Renderer : public Win32::Renderer
     friend class Window;
     friend class VertexBuffer;
     friend class IndexBuffer;
-    friend class TextureBuffer;
-    friend class ShaderPipeline;
-    friend class TexturePipeline;
-private:
-    enum
-    {
-        __Screen,
-        SystemParamCount
-    };
 private:
     LPDIRECT3D9                 m_directx;
     LPDIRECT3DDEVICE9           m_device;
+    D3DCAPS9                    m_caps;
     CGcontext                   m_context;
     weak<const FileSystem>      m_filesystem;
-    scoped<ShaderPipeline>      m_shaderPipeline;
-    scoped<TexturePipeline>     m_texturePipeline;
-    ref<CgShaderParam>          m_systemParams[SystemParamCount];
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
 
     LPDIRECT3DSWAPCHAIN9            createSwapChain(D3DPRESENT_PARAMETERS* params);
 
-    weak<Graphics::ShaderPipeline>  getShaderPipeline() override;
-    weak<Graphics::TexturePipeline> getTexturePipeline() override;
-
-    ref<Graphics::RenderTarget>     createRenderWindow(WindowFlags flags) override;
+    ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
+    ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
+    ref<Graphics::IRenderTarget>    createMultipleRenderBuffer(TextureFlags flags, size_t count) override;
     ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
-    ref<GpuBuffer>                  createTextureBuffer(TextureBufferFlags flags) const override;
+
+    u32                             getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
 
     weak<const FileSystem>          filesystem() const { return m_filesystem; }
 private:

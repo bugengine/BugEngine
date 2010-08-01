@@ -5,8 +5,7 @@
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
 #include    <mobile/world.hh>
-#include    <graphics/scene/iscene.hh>
-#include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/graph/inode.hh>
 #include    <graphics/renderer/renderbackend.hh>
 #include    <system/scheduler/task/group.hh>
 
@@ -18,35 +17,22 @@ class Application : public minitl::refcountable
 private:
     struct Request;
 private:
-    class RenderView
-    {
-    private:
-        ref<Graphics::IScene>       m_scene;
-        ref<Graphics::RenderTarget> m_renderTarget;
-        uint2                       m_viewport;
-        ref<TaskGroup>              m_renderTask;
-        std::vector< ref<ITask> >   m_tasks;
-    public:
-        RenderView(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
-        ~RenderView();
-
-        weak<ITask> renderTask() const;
-    };
-private:
     scoped<Scheduler>                               m_scheduler;
-    minitl::vector< RenderView >                    m_views;
+    ref<Graphics::INode>                            m_scene;
+    ITask::CallbackConnection                       m_startSceneUpdate;
+    ITask::CallbackConnection                       m_endSceneUpdate;
     minitl::vector< ref<ITask> >                    m_tasks;
-    minitl::istack<Request>                         m_requests;
+    minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
+    minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
 private:
-    void addSceneSync(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
-    void processRequests();
+    void frameUpdate();
 public:
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
     int run(void);
 
-    void addScene(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target);
+    void setScene(ref<Graphics::INode> node);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

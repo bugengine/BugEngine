@@ -11,6 +11,11 @@ namespace BugEngine
 
 class be_api(SYSTEM) TaskGroup : public ITask
 {
+public:
+    class TaskStartConnection;
+    friend class TaskStartConnection;
+    class TaskEndConnection;
+    friend class TaskEndConnection;
 private:
     class Callback : public ICallback
     {
@@ -23,7 +28,7 @@ private:
 
         virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const override;
         virtual void onConnected(weak<ITask> to, CallbackStatus status) override;
-        virtual void onDisconnected(weak<ITask> to) override;
+        virtual bool onDisconnected(weak<ITask> to) override;
     };
     friend class Callback;
 public:
@@ -33,11 +38,38 @@ public: //ITask
     virtual void run(weak<Scheduler> scheduler) const override;
 public:
     void addStartTask(weak<ITask> task);
-    void addEndTask(weak<ITask> task);
+    bool removeStartTask(weak<ITask> task);
 private:
     minitl::vector< weak<ITask> >   m_startTasks;
-    minitl::vector< weak<ITask> >   m_endTasks;
+    i_u32                           m_endTaskCount;
     ref<Callback>                   m_completionCallback;
+};
+
+class be_api(SYSTEM) TaskGroup::TaskStartConnection
+{
+private:
+    weak<TaskGroup> m_group;
+    weak<ITask>     m_task;
+public:
+    TaskStartConnection();
+    TaskStartConnection(weak<TaskGroup> group, weak<ITask> task);
+    TaskStartConnection(const TaskStartConnection& other);
+    TaskStartConnection& operator=(const TaskStartConnection& other);
+    ~TaskStartConnection();
+};
+
+class be_api(SYSTEM) TaskGroup::TaskEndConnection
+{
+private:
+    weak<TaskGroup>     m_group;
+    weak<ITask>         m_task;
+    CallbackConnection  m_callback;
+public:
+    TaskEndConnection();
+    TaskEndConnection(weak<TaskGroup> group, weak<ITask> task);
+    TaskEndConnection(const TaskEndConnection& other);
+    TaskEndConnection& operator=(const TaskEndConnection& other);
+    ~TaskEndConnection();
 };
 
 }

@@ -10,17 +10,13 @@ namespace BugEngine
 TaskGroup::TaskGroup(istring name, color32 color)
 :   ITask(name, color)
 ,   m_startTasks()
-,   m_endTasks()
+,   m_endTaskCount(0)
 ,   m_completionCallback(ref<Callback>::create(this))
 {
 }
 
 TaskGroup::~TaskGroup()
 {
-    for(minitl::vector< weak<ITask> >::const_iterator it = m_endTasks.begin(); it != m_endTasks.end(); ++it)
-    {
-        (*it)->removeCallback(m_completionCallback);
-    }
 }
 
 void TaskGroup::run(weak<Scheduler> scheduler) const
@@ -44,10 +40,18 @@ void TaskGroup::addStartTask(weak<ITask> task)
     task->startCallback()->onConnected(this, ICallback::CallbackStatus_Pending);
 }
 
-void TaskGroup::addEndTask(weak<ITask> task)
+bool TaskGroup::removeStartTask(weak<ITask> task)
 {
-    m_endTasks.push_back(task);
-    task->addCallback(m_completionCallback);
+    for(minitl::vector< weak<ITask> >::const_iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
+    {
+        if(*it == task)
+        {
+            (*it)->startCallback()->onDisconnected(this);
+            m_startTasks.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 TaskGroup::Callback::Callback(weak<TaskGroup> owner)
@@ -63,7 +67,7 @@ TaskGroup::Callback::~Callback()
 
 void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const
 {
-    if(++m_completed == m_owner->m_endTasks.size())
+    if(++m_completed == m_owner->m_endTaskCount)
     {
         m_completed = 0;
         m_owner->end(scheduler);
@@ -76,8 +80,117 @@ void TaskGroup::Callback::onConnected(weak<ITask> /*to*/, CallbackStatus status)
         m_completed++;
 }
 
-void TaskGroup::Callback::onDisconnected(weak<ITask> /*from*/)
+bool TaskGroup::Callback::onDisconnected(weak<ITask> /*from*/)
 {
+    return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+TaskGroup::TaskStartConnection::TaskStartConnection()
+:   m_group()
+,   m_task()
+{
+}
+
+TaskGroup::TaskStartConnection::TaskStartConnection(weak<TaskGroup> group, weak<ITask> task)
+:   m_group(group)
+,   m_task(task)
+{
+    if(m_group)
+    {
+        m_group->addStartTask(m_task);
+    }
+}
+
+TaskGroup::TaskStartConnection::TaskStartConnection(const TaskStartConnection& other)
+:   m_group(other.m_group)
+,   m_task(other.m_task)
+{
+    if(m_group)
+    {
+        m_group->addStartTask(m_task);
+    }
+}
+
+TaskGroup::TaskStartConnection& TaskGroup::TaskStartConnection::operator =(const TaskStartConnection& other)
+{
+    if(m_group)
+    {
+        bool result = m_group->removeStartTask(m_task);
+        be_forceuse(result);
+        be_assert(result, "could not disconnect task %s from group %s" | m_task->name | m_group->name);
+    }
+    m_group = other.m_group;
+    m_task = other.m_task;
+    if(m_group)
+    {
+        m_group->addStartTask(m_task);
+    }
+    return *this;
+}
+
+TaskGroup::TaskStartConnection::~TaskStartConnection()
+{
+    if(m_group)
+    {
+        bool result = m_group->removeStartTask(m_task);
+        be_forceuse(result);
+        be_assert(result, "could not disconnect task %s from group %s" | m_task->name | m_group->name);
+    }
+}
+
+TaskGroup::TaskEndConnection::TaskEndConnection()
+:   m_group()
+,   m_task()
+,   m_callback()
+{
+}
+
+TaskGroup::TaskEndConnection::TaskEndConnection(weak<TaskGroup> group, weak<ITask> task)
+:   m_group(group)
+,   m_task(task)
+,   m_callback(task, group->m_completionCallback)
+{
+    if(m_group)
+    {
+        m_group->m_endTaskCount++;
+    }
+}
+
+TaskGroup::TaskEndConnection::TaskEndConnection(const TaskEndConnection& other)
+:   m_group(other.m_group)
+,   m_task(other.m_task)
+,   m_callback(other.m_callback)
+{
+    if(m_group)
+    {
+        m_group->m_endTaskCount++;
+    }
+}
+
+TaskGroup::TaskEndConnection& TaskGroup::TaskEndConnection::operator =(const TaskEndConnection& other)
+{
+    if(m_group)
+    {
+        m_group->m_endTaskCount--;
+    }
+    m_group = other.m_group;
+    m_task = other.m_task;
+    m_callback = other.m_callback;
+    if(m_group)
+    {
+        m_group->m_endTaskCount++;
+    }
+    return *this;
+}
+
+TaskGroup::TaskEndConnection::~TaskEndConnection()
+{
+    if(m_group)
+    {
+        m_group->m_endTaskCount--;
+    }
 }
 
 }

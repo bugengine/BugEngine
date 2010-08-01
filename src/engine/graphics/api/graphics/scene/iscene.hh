@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class RenderTarget;
+class IRenderTarget;
 
 class IScene : public minitl::refcountable
 {
@@ -19,7 +19,6 @@ public:
     virtual ~IScene();
 
     virtual weak<ITask> updateTask() const = 0;
-    virtual ref<ITask> createRenderTask(weak<const RenderTarget> renderTarget) const = 0;
 };
 
 }}

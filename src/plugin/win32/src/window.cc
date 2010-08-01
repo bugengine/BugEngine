@@ -15,7 +15,7 @@ namespace BugEngine { namespace Graphics { namespace Win32
 {
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   RenderTarget(renderer)
+:   IRenderTarget(renderer)
 {
     WindowCreationFlags f;
     f.className = renderer->getWindowClassName().c_str();

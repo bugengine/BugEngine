@@ -19,17 +19,17 @@ public:
     CriticalSection();
     ~CriticalSection();
 private:
-    void enter();
-    void leave();
+    void enter() const;
+    void leave() const;
 };
 
 class ScopedCriticalSection
 {
 private:
-    CriticalSection&    m_section;
+    const CriticalSection&    m_section;
 public:
-    inline ScopedCriticalSection(CriticalSection& s) : m_section(s) { m_section.enter(); }
-    inline ~ScopedCriticalSection()                                 { m_section.leave(); }
+    inline ScopedCriticalSection(const CriticalSection& s) : m_section(s)   { m_section.enter(); }
+    inline ~ScopedCriticalSection()                                         { m_section.leave(); }
 private:
     ScopedCriticalSection& operator=(const ScopedCriticalSection& other);
     ScopedCriticalSection(const ScopedCriticalSection& other);

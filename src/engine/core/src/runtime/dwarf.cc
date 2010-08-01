@@ -417,7 +417,7 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
 template< Endianness endianness >
 bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
 {
-    UNUSED(r);
+    be_forceuse(r);
     unsigned attributesMatched = 0; 
     for(unsigned i = 0; i < abbrev.propertyCount; ++i)
     {

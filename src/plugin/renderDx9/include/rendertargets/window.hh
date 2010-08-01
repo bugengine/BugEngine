@@ -1,29 +1,35 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WIN32_WINDOW_HH_
-#define BE_WIN32_WINDOW_HH_
+#ifndef BE_DX9_RENDERTARGETS_WINDOW_HH_
+#define BE_DX9_RENDERTARGETS_WINDOW_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/renderbackend.hh>
+#include    <win32/window.hh>
+#include    <d3d9.h>
 
-namespace BugEngine { namespace Graphics { namespace Win32
+namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
 class Renderer;
 
-class Window : public IRenderTarget
+class Window : public Win32::Window
 {
-protected:
-    HWND            m_window;
-    HDC             m_dc;
+private:
+    LPDIRECT3DSWAPCHAIN9    m_swapChain;
+    LPDIRECT3DSWAPCHAIN9    m_workingSwapChain;
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
 
+    void setCurrent();
+
+    void begin();
+    void end();
+
     void close() override;
 
-    uint2 getDimensions() const override;
+    bool closed() const override;
 };
 
 }}}

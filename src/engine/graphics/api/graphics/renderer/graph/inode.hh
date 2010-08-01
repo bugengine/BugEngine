@@ -1,19 +1,28 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_MATERIAL_TEXTURE_HH_
-#define BE_GRAPHICS_MATERIAL_TEXTURE_HH_
+#ifndef BE_GRAPHICS_RENDERER_GRAPH_INODE_HH_
+#define BE_GRAPHICS_RENDERER_GRAPH_INODE_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
+
+namespace BugEngine
+{
+
+class ITask;
+
+}
 
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Texture
+class INode : public minitl::refcountable
 {
 public:
-    Texture();
-    virtual ~Texture();
+    INode();
+    virtual ~INode();
+
+    virtual weak<ITask> renderTask() = 0;
+    virtual bool closed() const = 0;
 };
 
 }}

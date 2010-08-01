@@ -20,12 +20,12 @@ CriticalSection::~CriticalSection()
     delete (CRITICAL_SECTION*)m_data;
 }
 
-void CriticalSection::enter()
+void CriticalSection::enter() const
 {
     EnterCriticalSection((CRITICAL_SECTION*)m_data);
 }
 
-void CriticalSection::leave()
+void CriticalSection::leave() const
 {
     LeaveCriticalSection((CRITICAL_SECTION*)m_data);
 }

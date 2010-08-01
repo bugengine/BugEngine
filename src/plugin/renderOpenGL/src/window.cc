@@ -21,8 +21,7 @@ Window::~Window()
 
 bool Window::closed() const
 {
-    be_unimplemented();
-    return false;
+    return m_window == 0;
 }
 
 void Window::setCurrent()
@@ -43,7 +42,6 @@ void Window::begin()
 {
     setCurrent();
     uint2 size = getDimensions();
-    //be_checked_cast<Renderer>(m_renderer)->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
 }
 
 void Window::end()

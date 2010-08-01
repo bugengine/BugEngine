@@ -20,12 +20,12 @@ CriticalSection::~CriticalSection()
     delete reinterpret_cast<mutex_t*>(m_data);
 }
 
-void CriticalSection::enter()
+void CriticalSection::enter() const
 {
     LWP_MutexLock(*reinterpret_cast<mutex_t*>(m_data));
 }
 
-void CriticalSection::leave()
+void CriticalSection::leave() const
 {
     LWP_MutexUnlock(*reinterpret_cast<mutex_t*>(m_data));
 }

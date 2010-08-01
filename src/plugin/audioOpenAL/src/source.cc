@@ -196,7 +196,7 @@ float Source::volume() const
 
 void Source::setVolume(float volume)
 {
-    UNUSED(volume);
+    be_forceuse(volume);
 //  static_cast<_ALData*>(m_data)->setVolume(volume);
 }
 

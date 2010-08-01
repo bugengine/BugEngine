@@ -2,8 +2,17 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/renderer/buffer/texturebuffer.hh>
+#include    <graphics/renderer/graph/inode.hh>
 
 namespace BugEngine { namespace Graphics
 {
+
+INode::INode()
+{
+}
+
+INode::~INode()
+{
+}
+
 }}

@@ -10,63 +10,36 @@
 namespace BugEngine
 {
 
-struct Application::Request : public minitl::inode
-{
-    enum
-    {
-        AddScene,
-        RemoveScene
-    } operation;
-    ref<minitl::refcountable> param1;
-    ref<minitl::refcountable> param2;
-};
-
-
-Application::RenderView::RenderView(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
-:   m_scene(scene)
-,   m_renderTarget(target)
-,   m_renderTask(ref<TaskGroup>::create("render", color32(255,0,0)))
-{
-    ref<ITask> renderTask = scene->createRenderTask(target);
-
-    m_renderTask->addStartTask(scene->updateTask());
-    m_renderTask->addEndTask(renderTask);
-
-    scene->updateTask()->addCallback(renderTask->startCallback());
-    m_tasks.push_back(renderTask);
-}
-
-Application::RenderView::~RenderView()
-{
-}
-
-weak<ITask> Application::RenderView::renderTask() const
-{
-    return m_renderTask;
-}
-
 Application::Application(int argc, const char *argv[])
 :   m_scheduler(scoped<Scheduler>::create())
 ,   m_tasks()
 {
-    UNUSED(argc); UNUSED(argv);
+    be_forceuse(argc); be_forceuse(argv);
 
     ref< TaskGroup > updateTask = ref< TaskGroup >::create("application", color32(255,255,0));
     m_tasks.push_back(updateTask);
 
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create("scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create("memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
-    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::processRequests> > >::create("requests", color32(255,255,0), MethodCaller<Application, &Application::processRequests>(this)));
-    updateTask->addStartTask(m_tasks[1]);
-    updateTask->addStartTask(m_tasks[2]);
-    updateTask->addStartTask(m_tasks[3]);
-    updateTask->addEndTask(m_tasks[1]);
-    updateTask->addEndTask(m_tasks[2]);
-    updateTask->addEndTask(m_tasks[3]);
+    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create("application", color32(255,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[1]));
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[2]));
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[3]));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[1]));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[2]));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[3]));
 }
 
 Application::~Application(void)
 {
+}
+
+void Application::frameUpdate()
+{
+    if(m_scene && m_scene->closed())
+    {
+        setScene(ref<Graphics::INode>());
+    }
 }
 
 int Application::run()
@@ -76,39 +49,19 @@ int Application::run()
     return 0;
 }
 
-void Application::addSceneSync(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
+void Application::setScene(ref<Graphics::INode> scene)
 {
-    RenderView view(scene, target);
-    m_views.push_back(view);
-    m_tasks[0]->addCallback(view.renderTask()->startCallback());
-    view.renderTask()->addCallback(m_tasks[0]->startCallback());
-}
-
-void Application::addScene(ref<Graphics::IScene> scene, ref<Graphics::RenderTarget> target)
-{
-    Request* request = new Request();
-    request->operation = Request::AddScene;
-    request->param1 = scene;
-    request->param2 = target;
-    m_requests.push(request);
-}
-
-void Application::processRequests()
-{
-    while(Request* request = m_requests.pop())
+    if(scene)
     {
-        switch(request->operation)
-        {
-        case Request::AddScene:
-            addSceneSync(be_checked_cast<Graphics::IScene>(request->param1), be_checked_cast<Graphics::RenderTarget>(request->param2));
-            break;
-        case Request::RemoveScene:
-        default:
-            be_notreached();
-            break;
-        }
-        delete request;
+        m_startSceneUpdate = ITask::CallbackConnection(m_tasks[0], scene->renderTask()->startCallback());
+        m_endSceneUpdate = ITask::CallbackConnection(scene->renderTask(),m_tasks[0]->startCallback());
     }
+    else
+    {
+        m_startSceneUpdate = ITask::CallbackConnection();
+        m_endSceneUpdate = ITask::CallbackConnection();
+    }
+    m_scene = scene;
 }
 
 }

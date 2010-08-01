@@ -20,16 +20,11 @@ class CgShader : public Shader
     friend class ShaderPipeline;
 private:
     CGprogram                        m_program;
-    std::vector< ref<ShaderParam> >  m_params;
 public:
     CgShader(CGprogram program);
     ~CgShader();
 
     void set() const;
-
-    virtual ref<ShaderParam> getParam(const istring& name) const;
-private:
-    void addParam(ref<ShaderParam> p);
 };
 
 }}}

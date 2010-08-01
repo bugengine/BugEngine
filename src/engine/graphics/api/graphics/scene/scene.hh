@@ -19,7 +19,6 @@ public:
     typedef typename SpacePartitioning::Node Node;
 public:
     Node root();
-    virtual ref<ITask> createRenderTask(weak<const RenderTarget> renderTarget) const override;
 };
 
 }}
