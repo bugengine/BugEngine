@@ -22,7 +22,7 @@ MultiNode::~MultiNode()
 
 void MultiNode::update()
 {
-    for(minitl::vector<NodeInfo>::const_iterator it = m_mainNodes.begin(); it != m_mainNodes.end(); )
+    for(minitl::vector<NodeInfo>::iterator it = m_mainNodes.begin(); it != m_mainNodes.end(); )
     {
         if(it->node->closed())
         {
@@ -33,7 +33,7 @@ void MultiNode::update()
             ++it;
         }
     }
-    for(minitl::vector<NodeInfo>::const_iterator it = m_secondaryNodes.begin(); it != m_secondaryNodes.end(); )
+    for(minitl::vector<NodeInfo>::iterator it = m_secondaryNodes.begin(); it != m_secondaryNodes.end(); )
     {
         if(it->node->closed())
         {

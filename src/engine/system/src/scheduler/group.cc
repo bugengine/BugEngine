@@ -42,7 +42,7 @@ void TaskGroup::addStartTask(weak<ITask> task)
 
 bool TaskGroup::removeStartTask(weak<ITask> task)
 {
-    for(minitl::vector< weak<ITask> >::const_iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
+    for(minitl::vector< weak<ITask> >::iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
     {
         if(*it == task)
         {

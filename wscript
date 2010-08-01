@@ -2,7 +2,6 @@ VERSION = "0.1.0"
 APPNAME = "BugEngine"
 
 from mak import module
-from mak.monkey import *
 import os
 import Environment
 import Scripting
@@ -72,16 +71,4 @@ def build(bld):
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)
-
-def monkeyserver(ctx):
-	server.MonkeyServer(2802).run()
-
-def monkey(ctx):
-	Scripting.commands += ['monkeyclientstart']
-
-def monkeyclientstart(ctx):
-	client.MonkeyClient("192.168.0.199", 2802).run()
-
-def monkeyforce(ctx):
-	client.MonkeyStart("192.168.0.199", 2802).run(12)
 
