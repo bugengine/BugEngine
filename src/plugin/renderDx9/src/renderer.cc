@@ -6,13 +6,13 @@
 
 #include    <input/inputmap.hh>
 
-#include    <window.hh>
+#include    <rendertargets/window.hh>
+#include    <rendertargets/offscreen.hh>
+#include    <rendertargets/multiple.hh>
 #include    <texture.hh>
 #include    <vertexbuffer.hh>
 #include    <indexbuffer.hh>
 #include    <texturebuffer.hh>
-#include    <cgshader.hh>
-#include    <cgshaderparam.hh>
 
 #pragma warning(disable:4311 4312 4355)
 
@@ -42,21 +42,23 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 ,   m_device(0)
 ,   m_context(cgCreateContext())
 ,   m_filesystem(filesystem)
-,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
-,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {
     cgSetErrorHandler(onCgError, 0);
+    m_directx->GetDeviceCaps(0, D3DDEVTYPE_HAL, &m_caps);
 }
 
 Renderer::~Renderer()
 {
-    int refCnt;
-
     cgDestroyContext(m_context);
     cgD3D9SetDevice(0);
-    refCnt = m_device->Release();
-    be_assert(refCnt == 0, "device refcount is not 0");
-    refCnt = m_directx->Release();
+    if(m_device)
+    {
+        int refCnt = m_device->Release();
+        be_forceuse(refCnt);
+        be_assert(refCnt == 0, "device refcount is not 0");
+    }
+    int refCnt = m_directx->Release();
+    be_forceuse(refCnt);
     be_assert(refCnt == 0, "Dx refcount is not 0");
 }
 
@@ -76,7 +78,6 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
                                                  params,
                                                  &m_device));
         cgD3D9SetDevice(m_device);
-        m_systemParams[__Screen] = m_shaderPipeline->createSystemParameter("__screen", m_shaderPipeline->getTypeByName("float2"));
         D3D_CHECKRESULT(m_device->GetSwapChain(0, &result));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         D3D_CHECKRESULT(m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
@@ -87,9 +88,19 @@ LPDIRECT3DSWAPCHAIN9 Renderer::createSwapChain(D3DPRESENT_PARAMETERS* params)
     return result;
 }
 
-ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags)
+ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
     return ref<Window>::create(this, flags);
+}
+
+ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)
+{
+    return ref<Window>();
+}
+
+ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, size_t /*count*/)
+{
+    return ref<Window>();
 }
 
 ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
@@ -102,21 +113,6 @@ ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, In
     return ref<IndexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-ref<GpuBuffer> Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
-{
-    return ref<GpuBuffer>();
-}
-
-weak<Graphics::ShaderPipeline> Renderer::getShaderPipeline()
-{
-    return m_shaderPipeline;
-}
-
-weak<Graphics::TexturePipeline> Renderer::getTexturePipeline()
-{
-    return m_texturePipeline;
-}
-
 void Renderer::drawBatch(const Batch& b)
 {
     weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
@@ -125,12 +121,6 @@ void Renderer::drawBatch(const Batch& b)
     D3D_CHECKRESULT(m_device->SetVertexDeclaration(_vb->m_vertexDecl));
     D3D_CHECKRESULT(m_device->SetStreamSource(0, _vb->m_buffer, 0, _vb->m_vertexStride));
     D3D_CHECKRESULT(m_device->SetIndices(_ib->m_buffer));
-
-    for(size_t i = 0; i < b.nbParams; ++i)
-        b.params[i].first->setValue(b.params[i].second);
-
-    if(b.vertexShader) be_checked_cast<const CgShader>(b.vertexShader)->set();
-    if(b.pixelShader) be_checked_cast<const CgShader>(b.pixelShader)->set();
 
     D3DPRIMITIVETYPE type;
     int primitiveCount = 0;

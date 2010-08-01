@@ -109,8 +109,8 @@ T& variant< typelist >::as()
 template< >
 inline void destroy<void>(size_t typeindex, unsigned char *data)
 {
-    UNUSED(typeindex);
-    UNUSED(data);
+    be_forceuse(typeindex);
+    be_forceuse(data);
 }
 
 template< typename typelist >
@@ -131,9 +131,9 @@ inline void destroy(size_t typeindex, unsigned char *data)
 template< >
 inline void copy<void>(size_t typeindex, unsigned char* dest, const unsigned char* src)
 {
-    UNUSED(typeindex);
-    UNUSED(dest);
-    UNUSED(src);
+    be_forceuse(typeindex);
+    be_forceuse(dest);
+    be_forceuse(src);
 }
 
 template< typename typelist >

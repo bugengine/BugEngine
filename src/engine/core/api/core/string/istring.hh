@@ -15,6 +15,9 @@ class be_api(CORE) istring
 {
 private:
     const StringCache* m_index;
+#ifdef BE_DEBUG
+    const char *m_str;
+#endif
 private:
     const StringCache* init(const char *str);
     const StringCache* init(const char *begin, const char *end);

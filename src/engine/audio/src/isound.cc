@@ -44,10 +44,10 @@ ISound::ISound(weak<IWorld> owner, ref<IMemoryStream> soundfile)
 :   m_owner(owner)
 ,   m_soundFile(soundfile)
 {
-    UNUSED(OV_CALLBACKS_DEFAULT);
-    UNUSED(OV_CALLBACKS_NOCLOSE);
-    UNUSED(OV_CALLBACKS_STREAMONLY);
-    UNUSED(OV_CALLBACKS_STREAMONLY_NOCLOSE);
+    be_forceuse(OV_CALLBACKS_DEFAULT);
+    be_forceuse(OV_CALLBACKS_NOCLOSE);
+    be_forceuse(OV_CALLBACKS_STREAMONLY);
+    be_forceuse(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 }
 
 ISound::~ISound()
@@ -87,7 +87,7 @@ void ISound::reset()
 
 bool ISound::lock(weak<ISource> from)
 {
-    UNUSED(from);
+    be_forceuse(from);
     if(m_locked)
         return false;
     m_locked = true;

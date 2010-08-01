@@ -11,8 +11,6 @@
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/buffer/gpubuffer.hh>
 #include    <graphics/material/shader.hh>
-#include    <graphics/material/shaderpipeline.hh>
-#include    <graphics/material/texturepipeline.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -28,6 +26,10 @@ struct WindowFlags
     bool    triplebuffered;
 };
 
+enum RenderFormat
+{
+};
+
 enum TextureFormat
 {
     TfRGB_DXT1,
@@ -36,7 +38,7 @@ enum TextureFormat
     TfRGBA_128
 };
 
-struct TextureBufferFlags
+struct TextureFlags
 {
     uint2           size;
     TextureFormat   format;
@@ -52,13 +54,9 @@ struct Batch : public minitl::inode
         RptTriangleFan
     };
     RenderPrimitiveType                     ptype;
-    std::pair< ShaderParam*, float4>        params[32];
-    size_t                                  nbParams;
     const GpuBuffer*                        vertices;
     int                                     nbVertices;
     const GpuBuffer*                        indices;
-    const Shader*                           vertexShader;
-    const Shader*                           pixelShader;
 };
 
 class be_api(GRAPHICS) RenderBackend : public minitl::pointer
@@ -77,13 +75,13 @@ public:
 
     virtual uint2                   getScreenSize() = 0;
 
-    virtual weak<ShaderPipeline>    getShaderPipeline() = 0;
-    virtual weak<TexturePipeline>   getTexturePipeline() = 0;
+    virtual u32                     getMaxSimultaneousRenderTargets() const = 0;
 
-    virtual ref<RenderTarget>       createRenderWindow(WindowFlags flags) = 0;
+    virtual ref<IRenderTarget>      createRenderWindow(WindowFlags flags) = 0;
+    virtual ref<IRenderTarget>      createRenderBuffer(TextureFlags flags) = 0;
+    virtual ref<IRenderTarget>      createMultipleRenderBuffer(TextureFlags flags, size_t count) = 0;
     virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
-    virtual ref<GpuBuffer>          createTextureBuffer(TextureBufferFlags flags) const = 0;
 };
 
 }}

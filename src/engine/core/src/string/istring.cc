@@ -178,26 +178,41 @@ const StringCache* istring::init(const char *begin, const char *end)
 
 istring::istring() NOTHROW
 :   m_index(init(""))
+#ifdef BE_DEBUG
+,   m_str(m_index->str())
+#endif
 {
 }
 
 istring::istring(const char *value) NOTHROW
 :   m_index(init(value))
+#ifdef BE_DEBUG
+,   m_str(m_index->str())
+#endif
 {
 }
 
 istring::istring(const char *begin, const char *end) NOTHROW
 :   m_index(init(begin,end))
+#ifdef BE_DEBUG
+,   m_str(m_index->str())
+#endif
 {
 }
 
 istring::istring(const std::string& other)
 :   m_index(init(other.c_str()))
+#ifdef BE_DEBUG
+,   m_str(m_index->str())
+#endif
 {
 }
 
 istring::istring(const istring& other) NOTHROW
 :   m_index(other.m_index)
+#ifdef BE_DEBUG
+,   m_str(m_index->str())
+#endif
 {
     m_index->retain();
 }

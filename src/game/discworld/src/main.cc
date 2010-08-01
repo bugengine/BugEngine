@@ -12,6 +12,8 @@
 #include    <mobile/worldscene.hh>
 
 #include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/graph/scenenode.hh>
+#include    <graphics/renderer/graph/multinode.hh>
 
 
 #include    <mobile/world.hh>
@@ -36,12 +38,34 @@ int be_main (weak<BugEngine::Application> app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderOpenGL", filesystem);
-    ref<BugEngine::Graphics::RenderTarget> w1 = display->createRenderWindow(f);
+    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display ("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
+    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
-    ref<BugEngine::World> world = ref<BugEngine::World>::create("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-    ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
-    app->addScene(scene, w1);
+    ref<BugEngine::Graphics::MultiNode> node = ref<BugEngine::Graphics::MultiNode>::create();
+    {
+
+        ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
+        f.position += BugEngine::int2(100, 100);
+        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
+        f.position += BugEngine::int2(100, 100);
+        ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
+        f.position += BugEngine::int2(100, 100);
+        ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
+        f.position += BugEngine::int2(100, 100);
+        ref<BugEngine::Graphics::IRenderTarget> w5 = display2->createRenderWindow(f);
+
+        //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
+
+        ref<BugEngine::World> world = ref<BugEngine::World>::create("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
+
+        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w));
+        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w2));
+        node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w3));
+        node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w4));
+        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w5));
+    }
+    app->setScene(node);
 
     return app->run();
 }

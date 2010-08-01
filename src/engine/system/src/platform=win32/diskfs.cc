@@ -82,7 +82,7 @@ void MemoryFileMap::seek(SeekMethod method, i64 _offset)
 
 void MemoryFileMap::resize(i64 size)
 {
-    UNUSED(size);
+    be_forceuse(size);
     be_notreached();
 }
 

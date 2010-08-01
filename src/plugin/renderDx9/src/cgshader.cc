@@ -27,20 +27,4 @@ void CgShader::set() const
     cgD3D9BindProgram(m_program);
 }
 
-void CgShader::addParam(ref<ShaderParam> p)
-{
-    m_params.push_back(p);
-}
-
-ref<ShaderParam> CgShader::getParam(const BugEngine::istring &name) const
-{
-    const char *str = name.c_str();
-    for(std::vector< ref<ShaderParam> >::const_iterator it = m_params.begin(); it != m_params.end(); ++it)
-    {
-        if(strcmp((*it)->name(), str) == 0)
-            return *it;
-    }
-    return ref<ShaderParam>();
-}
-
 }}}

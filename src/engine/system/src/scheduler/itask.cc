@@ -16,36 +16,46 @@ ITask::ITask(istring name, color32 color)
 
 ITask::~ITask()
 {
-    for(minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    ScopedCriticalSection scope(m_cs);
+    for(minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
-        (*it)->onDisconnected(this);
+        bool result = (*it)->onDisconnected(this);
+        be_forceuse(result);
+        be_assert(result, "unable to disconnect callback");
     }
 }
 
 void ITask::end(weak<Scheduler> sc) const
 {
-    for(minitl::vector< weak<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    ScopedCriticalSection scope(m_cs);
+    for(minitl::list< weak<ICallback > >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
         (*it)->onCompleted(sc, this);
+    }
 }
 
 void ITask::addCallback(weak<ICallback> callback, ICallback::CallbackStatus status)
 {
+    ScopedCriticalSection scope(m_cs);
     m_callbacks.push_back(callback);
     callback->onConnected(this, status);
 }
 
-void ITask::removeCallback(weak<ICallback> callback)
+bool ITask::removeCallback(weak<ICallback> callback)
 {
-    for(minitl::vector< weak<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); )
+    ScopedCriticalSection scope(m_cs);
+    for(minitl::list< weak<ICallback > >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         if(*it == callback)
         {
-            (*it)->onDisconnected(this);
-            it = m_callbacks.erase(it);
+            bool result = (*it)->onDisconnected(this);
+            m_callbacks.erase(it);
+            be_forceuse(result);
+            be_assert(result, "unable to disconnect callback");
+            return true;
         }
-        else
-            ++it;
     }
+    return false;
 }
 
 weak<ITask::ICallback> ITask::startCallback()
@@ -99,18 +109,71 @@ void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
     }
 }
 
-void ITask::ChainCallback::onDisconnected(weak<ITask> from)
+bool ITask::ChainCallback::onDisconnected(weak<ITask> from)
 {
-    for(minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end();)
+    for(minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
     {
         if((*it) == from)
         {
-            it = m_startedBy.erase(it);
+            m_startedBy.erase(it);
+            return true;
         }
-        else
-        {
-             ++it;
-        }
+    }
+    return false;
+}
+
+/*----------------------------------------------------------------------------*/
+
+ITask::CallbackConnection::CallbackConnection()
+:   m_task(0)
+,   m_callback(0)
+{
+}
+
+ITask::CallbackConnection::CallbackConnection(weak<ITask> task, weak<ICallback> callback, ICallback::CallbackStatus status)
+:   m_task(task)
+,   m_callback(callback)
+{
+    if(m_task)
+    {
+        m_task->addCallback(m_callback, status);
+    }
+}
+
+ITask::CallbackConnection::CallbackConnection(const CallbackConnection& other)
+:   m_task(other.m_task)
+,   m_callback(other.m_callback)
+{
+    if(m_task)
+    {
+        m_task->addCallback(m_callback, ICallback::CallbackStatus_Pending);
+    }
+}
+
+ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackConnection& other)
+{
+    if(m_task)
+    {
+        bool result = m_task->removeCallback(m_callback);
+        be_forceuse(result);
+        be_assert(result, "could not disconnect callback from task %s" | m_task->name);
+    }
+    m_task = other.m_task;
+    m_callback = other.m_callback;
+    if(m_task)
+    {
+        m_task->addCallback(m_callback, ICallback::CallbackStatus_Pending);
+    }
+    return *this;
+}
+
+ITask::CallbackConnection::~CallbackConnection()
+{
+    if(m_task)
+    {
+        bool result = m_task->removeCallback(m_callback);
+        be_forceuse(result);
+        be_assert(result, "could not disconnect callback from task %s" | m_task->name);
     }
 }
 

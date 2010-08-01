@@ -294,8 +294,8 @@ void Elf::parse(FILE* f)
     ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
     be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
-    UNUSED(s_elfFileType);
-    UNUSED(s_elfMachineType);
+    be_forceuse(s_elfFileType);
+    be_forceuse(s_elfMachineType);
 
     be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
     ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass, e>*)malloca(header.shentsize*header.shnum);

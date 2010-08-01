@@ -19,14 +19,22 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_glContext(0)
 ,   m_filesystem(filesystem)
-,   m_shaderPipeline(scoped<ShaderPipeline>::create(this))
-,   m_texturePipeline(scoped<TexturePipeline>::create(this))
 {
 }
 
-ref<RenderTarget> Renderer::createRenderWindow(WindowFlags flags)
+ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
     return ref<Window>::create(this, flags);
+}
+
+ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)
+{
+    return ref<Window>();
+}
+
+ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, size_t /*count*/)
+{
+    return ref<Window>();
 }
 
 ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
@@ -39,30 +47,12 @@ ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, In
     return ref<IndexBuffer>::create(this, vertexCount, usage, flags);
 }
 
-ref<GpuBuffer> Renderer::createTextureBuffer(TextureBufferFlags /*flags*/) const
-{
-    return ref<GpuBuffer>();
-}
-
-weak<Graphics::ShaderPipeline> Renderer::getShaderPipeline()
-{
-    return m_shaderPipeline;
-}
-
-weak<Graphics::TexturePipeline> Renderer::getTexturePipeline()
-{
-    return m_texturePipeline;
-}
-
 void Renderer::drawBatch(const Batch& b)
 {
     weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
     weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
-    UNUSED(_vb);
-    UNUSED(_ib);
-
-    for(size_t i = 0; i < b.nbParams; ++i)
-        b.params[i].first->setValue(b.params[i].second);
+    be_forceuse(_vb);
+    be_forceuse(_ib);
 
     switch(b.ptype)
     {

@@ -5,7 +5,6 @@
 #define BE_GRAPHICS_MATERIAL_SHADER_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.hh>
-#include    <graphics/material/shaderpipeline.hh>
 
 namespace BugEngine { namespace Graphics
 {

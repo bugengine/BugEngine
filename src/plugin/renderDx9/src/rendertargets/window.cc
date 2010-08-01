@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <window.hh>
+#include    <rendertargets/window.hh>
 #include    <renderer.hh>
 #include    <cgshaderparam.hh>
 
@@ -68,7 +68,6 @@ void Window::begin()
     D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
     D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
     uint2 size = getDimensions();
-    be_checked_cast<Renderer>(m_renderer)->m_systemParams[Renderer::__Screen]->setValue(float4(be_checked_numcast<float>(size.x()), be_checked_numcast<float>(size.y())));
 }
 
 void Window::end()
