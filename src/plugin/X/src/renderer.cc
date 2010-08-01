@@ -14,23 +14,18 @@ namespace
 {
     static int s_glxAttributes[] = {
         GLX_RGBA, GLX_DOUBLEBUFFER,
-        GLX_RED_SIZE, 6,
-        GLX_GREEN_SIZE, 6,
-        GLX_BLUE_SIZE, 6,
-        GLX_DEPTH_SIZE, 24,
-        GLX_X_VISUAL_TYPE_EXT, GLX_TRUE_COLOR_EXT,
         None
     };
 }
 
 Renderer::Renderer()
-:   m_display(XOpenDisplay(0))
+:   m_display((XInitThreads(), XOpenDisplay(0)))
 ,   m_screen(XDefaultScreen(m_display))
 ,   m_rootWindow(XRootWindow(m_display, m_screen))
 ,   m_visual(glXChooseVisual(m_display, m_screen, s_glxAttributes))
 {
     XSetErrorHandler(&Renderer::xError);
-    XFlush(m_display);
+    XSync(m_display, false);
 }
 
 Renderer::~Renderer()
@@ -48,13 +43,14 @@ uint2 Renderer::getScreenSize()
 ::Window Renderer::createWindow(const WindowFlags& flags)
 {
     XSetWindowAttributes attributes;
+    attributes.colormap = XCreateColormap(m_display, XRootWindow(m_display, m_visual->screen), m_visual->visual, AllocNone);
     attributes.border_pixel = 0;
     attributes.override_redirect = !flags.fullscreen;
     attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
-    int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect;
+    int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result = XCreateWindow(m_display,
                                     XRootWindow(m_display, m_visual->screen),
-                                    0, 0,
+                                    flags.position.x(), flags.position.y(),
                                     flags.size.x(), flags.size.y(),
                                     1,
                                     m_visual->depth,
@@ -66,7 +62,8 @@ uint2 Renderer::getScreenSize()
     {
         XMapRaised(m_display, result);
     }
-    XFlush(m_display);
+    XSync(m_display, false);
+    step();
     return result;
 }
 
@@ -89,6 +86,7 @@ int Renderer::step() const
             be_info("exposure");
             break;
         case ConfigureNotify:
+            be_info("configure");
             break;
         case ButtonPress:
             exit = 1;
