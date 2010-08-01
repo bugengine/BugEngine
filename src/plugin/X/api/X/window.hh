@@ -12,7 +12,7 @@ namespace BugEngine { namespace Graphics { namespace X
 
 class Renderer;
 
-class be_api(X) Window : public RenderTarget
+class be_api(X) Window : public IRenderTarget
 {
     friend class Renderer;
 protected:

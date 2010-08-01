@@ -24,16 +24,16 @@ public:
     inline operator const char* () const;
     inline const char* c_str() const;
 
+    const format<size>& operator|(char* value) const;
     const format<size>& operator|(const char* value) const;
     const format<size>& operator|(const void* value) const;
     const format<size>& operator|(char value) const;
     const format<size>& operator|(u64 value) const;
     const format<size>& operator|(i64 value) const;
-    const format<size>& operator|(u32 value) const;
     const format<size>& operator|(i32 value) const;
-    const format<size>& operator|(u16 value) const;
     const format<size>& operator|(i16 value) const;
-    const format<size>& operator|(unsigned long value) const;
+    template< typename T >
+    const format<size>& operator|(T value) const;
 };
 
 
@@ -82,6 +82,12 @@ const format<size>& format<size>::operator|(char value) const
     m_firstFormat++;
     findToken();
     return *this;
+}
+
+template< size_t size >
+const format<size>& format<size>::operator|(char *value) const
+{
+    return *this | (const char *)value;
 }
 
 template< size_t size >
@@ -170,27 +176,16 @@ const format<size>& format<size>::operator|(i32 value) const
 }
 
 template< size_t size >
-const format<size>& format<size>::operator|(u32 value) const
-{
-    return *this | (u64)value;
-}
-
-template< size_t size >
 const format<size>& format<size>::operator|(i16 value) const
 {
     return *this | (i64)value;
 }
 
 template< size_t size >
-const format<size>& format<size>::operator|(u16 value) const
+template< typename T >
+const format<size>& format<size>::operator|(T value) const
 {
-    return *this | (u64)value;
-}
-
-template< size_t size >
-const format<size>& format<size>::operator|(unsigned long value) const
-{
-    return *this | (u64)value;
+    return *this | static_cast<u64>(value);
 }
 
 }

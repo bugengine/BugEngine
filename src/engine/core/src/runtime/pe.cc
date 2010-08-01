@@ -456,7 +456,7 @@ PE::PE(const char *filename, u64 baseAddress)
                                     PdbInfo70* pdb70 = reinterpret_cast<PdbInfo70*>(info.data);
                                     m_symbolInformations.type = SymbolResolver::SymbolInformations::PDB70;
                                     m_symbolInformations.filename = pdb70->filename;
-                                    m_symbolInformations.identifier = minitl::format<>("%s%d") | pdb70->signature.compactstr() | pdb70->age;
+                                    m_symbolInformations.identifier = minitl::format<>("%s%d") | (const char *)pdb70->signature.compactstr() | pdb70->age;
                                     m_symbolInformations.offset = m_baseAddress;
                                 }
                             }
