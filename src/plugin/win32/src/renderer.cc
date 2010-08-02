@@ -69,7 +69,7 @@ namespace
 }
 
 Renderer::Renderer()
-:   m_windowClassName(minitl::format<>("__be__%p__") | (void*)this)
+:   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
 ,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)&m_exit, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
