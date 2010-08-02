@@ -47,7 +47,7 @@ AssertionResult defaultAssertionCallback( const char *file,
         }
     }
     
-    return Ignore;
+    return Break;
 }
 
 static AssertionCallback_t g_callback = defaultAssertionCallback;
