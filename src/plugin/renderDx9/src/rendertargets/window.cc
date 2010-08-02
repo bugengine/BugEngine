@@ -38,6 +38,8 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 
 Window::~Window()
 {
+    if(m_swapChain)
+        close();
     be_checked_cast<Renderer>(m_renderer)->m_device->Release();
     be_checked_cast<Renderer>(m_renderer)->m_directx->Release();
 }

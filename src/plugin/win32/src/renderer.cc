@@ -70,7 +70,7 @@ namespace
 
 Renderer::Renderer()
 :   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
-,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)&m_exit, 0, Thread::AboveNormal)
+,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, 0, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -91,6 +91,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+    PostThreadMessageA(m_windowManagementThread.id(), WM_QUIT, 0, 0);
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
 }
 
@@ -120,16 +121,9 @@ const istring& Renderer::getWindowClassName() const
     return m_windowClassName;
 }
 
-int Renderer::step() const
-{
-    return (int)m_exit;
-}
-
-intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
+intptr_t Renderer::updateWindows(intptr_t /*p1*/, intptr_t /*p2*/)
 {
     MSG msg;
-    bool& shouldQuit = *(bool*)p1;
-    shouldQuit = false;
     while(::GetMessage(&msg, 0, 0, 0))
     {
         switch(msg.message)
@@ -159,7 +153,6 @@ intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
         }
         DispatchMessage(&msg);
     }
-    shouldQuit = true;
     return 0;
 }
 
