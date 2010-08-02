@@ -23,6 +23,7 @@ Renderer::Renderer()
 ,   m_screen(XDefaultScreen(m_display))
 ,   m_rootWindow(XRootWindow(m_display, m_screen))
 ,   m_visual(glXChooseVisual(m_display, m_screen, s_glxAttributes))
+,   m_windowManagementThread("X11", &windowProc, (intptr_t)this, 0)
 {
     XSetErrorHandler(&Renderer::xError);
     XSync(m_display, false);
@@ -45,7 +46,7 @@ uint2 Renderer::getScreenSize()
     XSetWindowAttributes attributes;
     attributes.colormap = XCreateColormap(m_display, XRootWindow(m_display, m_visual->screen), m_visual->visual, AllocNone);
     attributes.border_pixel = 0;
-    attributes.override_redirect = !flags.fullscreen;
+    attributes.override_redirect = flags.fullscreen;
     attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result = XCreateWindow(m_display,
@@ -63,18 +64,18 @@ uint2 Renderer::getScreenSize()
         XMapRaised(m_display, result);
     }
     XSync(m_display, false);
-    step();
     return result;
 }
-#if 0
-int Renderer::step() const
+
+intptr_t Renderer::windowProc(intptr_t p1, intptr_t /*p2*/)
 {
+    Renderer* r = reinterpret_cast<Renderer*>(p1);
     XEvent event;
     /* wait for events*/ 
     int exit = 0;
-    while(XPending(m_display))
+    while(!exit)
     {
-        XNextEvent(m_display, &event);
+        XNextEvent(r->m_display, &event);
         switch (event.type)
         {
         case DestroyNotify:
@@ -102,9 +103,9 @@ int Renderer::step() const
         }
     }
 
-    return exit;
+    return 0;
 }
-#endif
+
 static const char *s_messages[] =
 {
     "Success"

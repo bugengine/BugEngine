@@ -21,8 +21,10 @@ protected:
     int             m_screen;
     ::Window        m_rootWindow;
     ::XVisualInfo*  m_visual;
+    Thread          m_windowManagementThread;
 private:
     static int      xError(::Display* display, XErrorEvent* event);
+    static intptr_t windowProc(intptr_t p1, intptr_t p2);
     ::Window        createWindow(const WindowFlags& flags);
 public:
     Renderer();
