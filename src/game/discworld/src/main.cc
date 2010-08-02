@@ -50,9 +50,9 @@ int be_main (weak<BugEngine::Application> app)
         f.position += BugEngine::int2(100, 100);
         ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w5 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w5 = display2->createRenderWindow(f);
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 
@@ -62,8 +62,8 @@ int be_main (weak<BugEngine::Application> app)
         node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w));
         node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w2));
         node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w3));
-        //node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w4));
-        //node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w5));
+        node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w4));
+        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w5));
     }
     app->setScene(node);
 

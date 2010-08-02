@@ -66,7 +66,7 @@ uint2 Renderer::getScreenSize()
     step();
     return result;
 }
-
+#if 0
 int Renderer::step() const
 {
     XEvent event;
@@ -104,7 +104,7 @@ int Renderer::step() const
 
     return exit;
 }
-
+#endif
 static const char *s_messages[] =
 {
     "Success"

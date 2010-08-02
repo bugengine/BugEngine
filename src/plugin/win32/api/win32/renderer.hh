@@ -30,7 +30,6 @@ private:
     istring         m_windowClassName;
     WNDCLASSEX      m_wndClassEx;
     Thread          m_windowManagementThread;
-    volatile bool   m_exit;
 private:
     static intptr_t updateWindows(intptr_t p1, intptr_t p2);
 private:
@@ -42,8 +41,6 @@ public:
 
     uint2           getScreenSize() override;
     const istring&  getWindowClassName() const;
-
-    int             step() const override;
 };
 
 }}}

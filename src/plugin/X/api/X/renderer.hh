@@ -31,8 +31,6 @@ public:
     uint2           getScreenSize() override;
     const istring&  getWindowClassName() const;
 
-    int             step() const override;
-
     Display*        display()                       { return m_display; }
 };
 

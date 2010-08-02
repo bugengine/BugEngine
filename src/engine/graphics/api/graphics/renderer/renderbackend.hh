@@ -68,7 +68,6 @@ protected:
 protected:
     ref<ITask>              m_flushTask;
 protected:
-    virtual int step() const = 0;
     virtual void flush() = 0;
 public:
     weak<ITask>                     flushTask();
