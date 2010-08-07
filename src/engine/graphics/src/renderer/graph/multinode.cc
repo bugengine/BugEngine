@@ -22,7 +22,7 @@ MultiNode::~MultiNode()
 
 void MultiNode::update()
 {
-    for(minitl::vector<NodeInfo>::iterator it = m_mainNodes.begin(); it != m_mainNodes.end(); )
+    for(minitl::list<NodeInfo>::iterator it = m_mainNodes.begin(); it != m_mainNodes.end(); )
     {
         if(it->node->closed())
         {
@@ -33,7 +33,7 @@ void MultiNode::update()
             ++it;
         }
     }
-    for(minitl::vector<NodeInfo>::iterator it = m_secondaryNodes.begin(); it != m_secondaryNodes.end(); )
+    for(minitl::list<NodeInfo>::iterator it = m_secondaryNodes.begin(); it != m_secondaryNodes.end(); )
     {
         if(it->node->closed())
         {
@@ -46,12 +46,12 @@ void MultiNode::update()
     }
 }
 
-void MultiNode::addMainNode(ref<INode> node)
+void MultiNode::addMainNode(scoped<INode> node)
 {
     m_mainNodes.push_back(NodeInfo(node, m_updateTask, m_task));
 }
 
-void MultiNode::addSecondaryNode(ref<INode> node)
+void MultiNode::addSecondaryNode(scoped<INode> node)
 {
     m_secondaryNodes.push_back(NodeInfo(node, m_updateTask, m_task));
 }
@@ -69,8 +69,8 @@ bool MultiNode::closed() const
         return false;
 }
 
-MultiNode::NodeInfo::NodeInfo(ref<INode> node, ref<ITask> updateTask, ref<TaskGroup> owner)
-:   node(node)
+MultiNode::NodeInfo::NodeInfo(scoped<INode> n, ref<ITask> updateTask, ref<TaskGroup> owner)
+:   node(n)
 ,   groupConnection(owner, node->renderTask())
 ,   startConnection(updateTask, node->renderTask()->startCallback())
 {
@@ -82,14 +82,5 @@ MultiNode::NodeInfo::NodeInfo(const NodeInfo& other)
     groupConnection = other.groupConnection;
     node = other.node;
 }
-
-MultiNode::NodeInfo& MultiNode::NodeInfo::operator=(const NodeInfo& other)
-{
-    startConnection = other.startConnection;
-    groupConnection = other.groupConnection;
-    node = other.node;
-    return *this;
-}
-
 
 }}

@@ -16,27 +16,28 @@ class MultiNode : public INode
 private:
     struct NodeInfo
     {
-        ref<INode>                      node;
+        scoped<INode>                      node;
         TaskGroup::TaskEndConnection    groupConnection;
         ITask::CallbackConnection       startConnection;
-        NodeInfo(ref<INode> node, ref<ITask> updateTask, ref<TaskGroup> owner);
+        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> owner);
         NodeInfo(const NodeInfo& other);
+    private:
         NodeInfo& operator=(const NodeInfo& other);
     };
     ref<TaskGroup>                  m_task;
     ref<ITask>                      m_updateTask;
     TaskGroup::TaskStartConnection  m_startConnection;
     TaskGroup::TaskEndConnection    m_endConnection;
-    minitl::vector< NodeInfo >      m_mainNodes;
-    minitl::vector< NodeInfo >      m_secondaryNodes;
+    minitl::list< NodeInfo >        m_mainNodes;
+    minitl::list< NodeInfo >        m_secondaryNodes;
 private:
     void update();
 public:
     MultiNode();
     ~MultiNode();
 
-    void addMainNode(ref<INode> node);
-    void addSecondaryNode(ref<INode> node);
+    void addMainNode(scoped<INode> node);
+    void addSecondaryNode(scoped<INode> node);
 
     virtual weak<ITask> renderTask() override;
     virtual bool closed() const override;

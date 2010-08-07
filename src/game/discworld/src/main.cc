@@ -59,11 +59,11 @@ int be_main (weak<BugEngine::Application> app)
         ref<BugEngine::World> world = ref<BugEngine::World>::create("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
         ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
 
-        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w));
-        node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w2));
-        node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w3));
-        //node->addSecondaryNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w4));
-        //node->addMainNode(ref<BugEngine::Graphics::SceneNode>::create(scene, w5));
+        node->addMainNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w));
+        node->addMainNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w2));
+        node->addSecondaryNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w3));
+        //node->addSecondaryNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w4));
+        //node->addMainNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w5));
     }
     app->setScene(node);
 
