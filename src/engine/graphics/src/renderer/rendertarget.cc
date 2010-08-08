@@ -24,7 +24,7 @@ IRenderTarget::~IRenderTarget()
 
 weak<ITask> IRenderTarget::flushTask() const
 {
-    return m_flushTask;
+    return m_renderer->flushTask();
 }
 
 }}

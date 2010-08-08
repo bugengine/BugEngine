@@ -31,11 +31,11 @@ void OffscreenRenderTarget::close()
 {
 }
 
-void OffscreenRenderTarget::begin()
+void OffscreenRenderTarget::begin(ClearMode /*clear*/)
 {
 }
 
-void OffscreenRenderTarget::end()
+void OffscreenRenderTarget::end(PresentMode /*present*/)
 {
 }
 

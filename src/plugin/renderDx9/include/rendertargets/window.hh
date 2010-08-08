@@ -18,14 +18,15 @@ class Window : public Win32::Window
 private:
     LPDIRECT3DSWAPCHAIN9    m_swapChain;
     LPDIRECT3DSWAPCHAIN9    m_workingSwapChain;
+    i_u8                    m_closed;
+private:
+    void setCurrent();
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
 
-    void setCurrent();
-
-    void begin();
-    void end();
+    void begin(ClearMode clear) override;
+    void end(PresentMode present) override;
 
     void close() override;
 

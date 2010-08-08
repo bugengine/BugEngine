@@ -16,17 +16,35 @@ class IRenderTarget;
 class SceneNode : public INode
 {
 private:
+    struct RenderConfig
+    {
+        ref<TaskGroup>                  m_renderTask;
+        TaskGroup::TaskStartConnection  m_renderStartTask;
+        TaskGroup::TaskEndConnection    m_renderEndTask;
+        RenderConfig(SceneNode* node, weak<IScene> scene);
+    };
+    struct DispatchConfig
+    {
+        weak<ITask>                     m_dispatchTask;
+        ref<ITask>                      m_realDispatch;
+        ITask::CallbackConnection       m_startRealDispatch;
+        ITask::CallbackConnection       m_waitForSync;
+        DispatchConfig(SceneNode* node, weak<IRenderTarget> renderTarget);
+    };
+private:
     ref<IScene>                     m_scene;
     ref<IRenderTarget>              m_renderTarget;
-    ref<TaskGroup>                  m_task;
-    TaskGroup::TaskStartConnection  m_startUpdateConnection;
-    TaskGroup::TaskEndConnection    m_endUpdateConnection;
-    ITask::CallbackConnection       m_callbackConnection;
+    RenderConfig                    m_renderConfig;
+    DispatchConfig                  m_dispatchConfig;
+    ITask::CallbackConnection       m_startDispatch;
+private:
+    void dispatch();
 public:
     SceneNode(ref<IScene> scene, ref<IRenderTarget> renderTarget);
     ~SceneNode();
 
     virtual weak<ITask> renderTask() override;
+    virtual weak<ITask> dispatchTask() override;
     virtual bool closed() const override;
 };
 

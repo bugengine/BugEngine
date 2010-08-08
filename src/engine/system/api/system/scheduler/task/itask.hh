@@ -23,8 +23,8 @@ public:
     public:
         enum CallbackStatus
         {
-            CallbackStatus_Pending,
-            CallbackStatus_Completed
+            Pending,
+            Completed
         };
 
         virtual ~ICallback();
@@ -83,7 +83,7 @@ private:
     weak<ITask::ICallback>  m_callback;
 public:
     CallbackConnection();
-    CallbackConnection(weak<ITask> task, weak<ICallback> callback, ICallback::CallbackStatus status = ICallback::CallbackStatus_Pending);
+    CallbackConnection(weak<ITask> task, weak<ICallback> callback, ICallback::CallbackStatus status = ICallback::Pending);
     CallbackConnection(const CallbackConnection& other);
     CallbackConnection& operator=(const CallbackConnection& other);
     ~CallbackConnection();

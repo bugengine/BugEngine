@@ -31,11 +31,11 @@ void MultipleRenderTarget::close()
 {
 }
 
-void MultipleRenderTarget::begin()
+void MultipleRenderTarget::begin(ClearMode /*clear*/)
 {
 }
 
-void MultipleRenderTarget::end()
+void MultipleRenderTarget::end(PresentMode /*present*/)
 {
 }
 

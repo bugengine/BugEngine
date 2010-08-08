@@ -16,20 +16,28 @@ class MultiNode : public INode
 private:
     struct NodeInfo
     {
-        scoped<INode>                      node;
-        TaskGroup::TaskEndConnection    groupConnection;
-        ITask::CallbackConnection       startConnection;
-        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> owner);
+        scoped<INode>                   node;
+        TaskGroup::TaskEndConnection    renderEndConnection;
+        TaskGroup::TaskStartConnection  dispatchStartConnection;
+        TaskGroup::TaskEndConnection    dispatchEndConnection;
+        ITask::CallbackConnection       startRender;
+        ITask::CallbackConnection       chainFlush;
+        bool                            main;
+        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> render, ref<TaskGroup> dispatch, bool main);
         NodeInfo(const NodeInfo& other);
     private:
         NodeInfo& operator=(const NodeInfo& other);
     };
-    ref<TaskGroup>                  m_task;
+    ref<TaskGroup>                  m_globalTask;
+    ref<TaskGroup>                  m_renderTask;
+    ref<TaskGroup>                  m_dispatchTask;
     ref<ITask>                      m_updateTask;
-    TaskGroup::TaskStartConnection  m_startConnection;
-    TaskGroup::TaskEndConnection    m_endConnection;
-    minitl::list< NodeInfo >        m_mainNodes;
-    minitl::list< NodeInfo >        m_secondaryNodes;
+    TaskGroup::TaskStartConnection  m_startUpdateConnection;
+    TaskGroup::TaskEndConnection    m_endUpdateConnection;
+    ITask::CallbackConnection       m_startRender;
+    ITask::CallbackConnection       m_startDispatch;
+    minitl::list< NodeInfo >        m_nodes;
+    u32                             m_mainNodes;
 private:
     void update();
 public:
@@ -40,6 +48,7 @@ public:
     void addSecondaryNode(scoped<INode> node);
 
     virtual weak<ITask> renderTask() override;
+    virtual weak<ITask> dispatchTask() override;
     virtual bool closed() const override;
 };
 

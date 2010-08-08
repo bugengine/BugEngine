@@ -16,7 +16,7 @@ Application::Application(int argc, const char *argv[])
 {
     be_forceuse(argc); be_forceuse(argv);
 
-    ref< TaskGroup > updateTask = ref< TaskGroup >::create("application", color32(255,255,0));
+    ref< TaskGroup > updateTask = ref< TaskGroup >::create("applicationUpdate", color32(255,255,0));
     m_tasks.push_back(updateTask);
 
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create("scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));

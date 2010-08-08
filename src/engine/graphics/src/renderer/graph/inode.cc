@@ -4,6 +4,7 @@
 #include    <graphics/stdafx.h>
 #include    <graphics/renderer/graph/inode.hh>
 
+
 namespace BugEngine { namespace Graphics
 {
 
