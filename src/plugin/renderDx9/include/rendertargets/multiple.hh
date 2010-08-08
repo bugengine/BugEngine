@@ -15,14 +15,14 @@ class Renderer;
 
 class MultipleRenderTarget : public Graphics::IRenderTarget
 {
+private:
+    void setCurrent();
 public:
     MultipleRenderTarget(weak<Renderer> renderer, TextureFlags flags);
     ~MultipleRenderTarget();
 
-    void setCurrent() override;
-
-    void begin() override;
-    void end() override;
+    void begin(ClearMode clear) override;
+    void end(PresentMode present) override;
 
     void close() override;
     bool closed() const override;

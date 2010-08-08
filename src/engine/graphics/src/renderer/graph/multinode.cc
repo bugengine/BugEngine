@@ -9,10 +9,15 @@ namespace BugEngine { namespace Graphics
 {
 
 MultiNode::MultiNode()
-:   m_task(ref<TaskGroup>::create("renderMultiScene", color32(255, 0, 0)))
+:   m_globalTask(ref<TaskGroup>::create("updateMultiScene", color32(255, 0, 0)))
+,   m_renderTask(ref<TaskGroup>::create("renderMultiScene", color32(255, 0, 0)))
+,   m_dispatchTask(ref<TaskGroup>::create("dispatchMultiScene", color32(255, 0, 0)))
 ,   m_updateTask(ref< Task< MethodCaller<MultiNode, &MultiNode::update> > >::create("updateNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::update>(this)))
-,   m_startConnection(m_task, m_updateTask)
-,   m_endConnection(m_task, m_updateTask)
+,   m_startUpdateConnection(m_globalTask, m_updateTask)
+,   m_endUpdateConnection(m_globalTask, m_dispatchTask)
+,   m_startRender(m_updateTask, m_renderTask->startCallback())
+,   m_startDispatch(m_renderTask, m_dispatchTask->startCallback())
+,   m_mainNodes(0)
 {
 }
 
@@ -22,25 +27,18 @@ MultiNode::~MultiNode()
 
 void MultiNode::update()
 {
-    for(minitl::list<NodeInfo>::iterator it = m_mainNodes.begin(); it != m_mainNodes.end(); )
+    minitl::list<NodeInfo>::iterator prev;
+    for(minitl::list<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
     {
         if(it->node->closed())
         {
-            it = m_mainNodes.erase(it);
+            if(it->main)
+                m_mainNodes--;
+            it = m_nodes.erase(it);
         }
         else
         {
-            ++it;
-        }
-    }
-    for(minitl::list<NodeInfo>::iterator it = m_secondaryNodes.begin(); it != m_secondaryNodes.end(); )
-    {
-        if(it->node->closed())
-        {
-            it = m_secondaryNodes.erase(it);
-        }
-        else
-        {
+            prev = it;
             ++it;
         }
     }
@@ -48,38 +46,50 @@ void MultiNode::update()
 
 void MultiNode::addMainNode(scoped<INode> node)
 {
-    m_mainNodes.push_back(NodeInfo(node, m_updateTask, m_task));
+    m_nodes.push_back(NodeInfo(node, m_updateTask, m_renderTask, m_dispatchTask, true));
+    m_mainNodes++;
 }
 
 void MultiNode::addSecondaryNode(scoped<INode> node)
 {
-    m_secondaryNodes.push_back(NodeInfo(node, m_updateTask, m_task));
+    m_nodes.push_back(NodeInfo(node, m_updateTask, m_renderTask, m_dispatchTask, false));
 }
 
 weak<ITask> MultiNode::renderTask()
 {
-    return m_task;
+    return m_globalTask;
+}
+
+weak<ITask> MultiNode::dispatchTask()
+{
+    return m_dispatchTask;
 }
 
 bool MultiNode::closed() const
 {
-    if(m_mainNodes.empty())
-        return true;
-    else
-        return false;
+    return m_mainNodes == 0;
 }
 
-MultiNode::NodeInfo::NodeInfo(scoped<INode> n, ref<ITask> updateTask, ref<TaskGroup> owner)
+MultiNode::NodeInfo::NodeInfo(scoped<INode> n, ref<ITask> update, ref<TaskGroup> render, ref<TaskGroup> dispatch, bool main)
 :   node(n)
-,   groupConnection(owner, node->renderTask())
-,   startConnection(updateTask, node->renderTask()->startCallback())
+,   renderEndConnection(render, node->renderTask())
+,   dispatchStartConnection(dispatch, node->dispatchTask())
+,   dispatchEndConnection(dispatch, node->dispatchTask())
+,   startRender(update, node->renderTask()->startCallback())
+,   chainFlush()
+,   main(main)
 {
 }
 
 MultiNode::NodeInfo::NodeInfo(const NodeInfo& other)
 {
-    startConnection = other.startConnection;
-    groupConnection = other.groupConnection;
+    // reverse order to ensure proper deinitialization
+    main = other.main;
+    chainFlush = other.chainFlush;
+    startRender = other.startRender;
+    dispatchEndConnection = other.dispatchEndConnection;
+    dispatchStartConnection = other.dispatchStartConnection;
+    renderEndConnection = other.renderEndConnection;
     node = other.node;
 }
 

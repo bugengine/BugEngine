@@ -17,6 +17,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Win32::Window(renderer, flags)
+,   m_closed(0)
 {
     D3DPRESENT_PARAMETERS d3dpp;
     ZeroMemory(&d3dpp, sizeof(d3dpp));
@@ -39,43 +40,64 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 Window::~Window()
 {
     if(m_swapChain)
-        close();
+    {
+        m_swapChain->Release();
+        m_swapChain = 0;
+        Win32::Window::close();
+    }
     be_checked_cast<Renderer>(m_renderer)->m_device->Release();
     be_checked_cast<Renderer>(m_renderer)->m_directx->Release();
 }
 
 bool Window::closed() const
 {
-    return m_swapChain == 0;
+    return m_closed > 0;
 }
 
 void Window::setCurrent()
 {
-    LPDIRECT3DSURFACE9 backBuffer;
-    D3D_CHECKRESULT(m_swapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
-    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
-    backBuffer->Release();
+    if(m_swapChain)
+    {
+        LPDIRECT3DSURFACE9 backBuffer;
+        D3D_CHECKRESULT(m_swapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
+        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
+        backBuffer->Release();
+    }
 }
 
 void Window::close()
 {
-    m_swapChain->Release();
-    m_swapChain = 0;
-    Win32::Window::close();
+    m_closed++;
 }
 
-void Window::begin()
+void Window::begin(ClearMode clear)
 {
-    setCurrent();
-    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
-    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
-    uint2 size = getDimensions();
+    if(m_swapChain)
+    {
+        setCurrent();
+        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
+        if(clear == Clear)
+        {
+            D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
+        }
+        uint2 size = getDimensions();
+    }
 }
 
-void Window::end()
+void Window::end(PresentMode present)
 {
-    D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
-    D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
+    OutputDebugString("begin render Dx9\n");
+    Thread::sleep(50);
+    OutputDebugString("end render Dx9\n");
+
+    if(m_swapChain)
+    {
+        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
+        if(present == Present)
+        {
+            D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
+        }
+    }
 }
 
 }}}

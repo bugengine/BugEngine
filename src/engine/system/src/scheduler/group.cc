@@ -37,7 +37,7 @@ void TaskGroup::run(weak<Scheduler> scheduler) const
 void TaskGroup::addStartTask(weak<ITask> task)
 {
     m_startTasks.push_back(task);
-    task->startCallback()->onConnected(this, ICallback::CallbackStatus_Pending);
+    task->startCallback()->onConnected(this, ICallback::Pending);
 }
 
 bool TaskGroup::removeStartTask(weak<ITask> task)
@@ -76,7 +76,7 @@ void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<const ITas
 
 void TaskGroup::Callback::onConnected(weak<ITask> /*to*/, CallbackStatus status)
 {
-    if(status == CallbackStatus_Completed)
+    if(status == Completed)
         m_completed++;
 }
 

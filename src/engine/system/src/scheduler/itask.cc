@@ -103,7 +103,7 @@ void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITa
 void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 {
     m_startedBy.push_back(to);
-    if(status == CallbackStatus_Completed)
+    if(status == Completed)
     {
         m_completed++;
     }
@@ -146,7 +146,7 @@ ITask::CallbackConnection::CallbackConnection(const CallbackConnection& other)
 {
     if(m_task)
     {
-        m_task->addCallback(m_callback, ICallback::CallbackStatus_Pending);
+        m_task->addCallback(m_callback, ICallback::Pending);
     }
 }
 
@@ -162,7 +162,7 @@ ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackCo
     m_callback = other.m_callback;
     if(m_task)
     {
-        m_task->addCallback(m_callback, ICallback::CallbackStatus_Pending);
+        m_task->addCallback(m_callback, ICallback::Pending);
     }
     return *this;
 }

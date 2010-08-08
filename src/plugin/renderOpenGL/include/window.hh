@@ -15,14 +15,14 @@ class Renderer;
 class Window : public Windowing::Window
 {
     friend class Renderer;
+private:
+    void setCurrent();
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
 
-    void setCurrent();
-
-    void begin();
-    void end();
+    void begin(ClearMode clear) override;
+    void end(PresentMode present) override;
 
     void close() override;
     bool closed() const override;

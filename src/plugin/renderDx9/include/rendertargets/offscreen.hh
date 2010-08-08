@@ -17,14 +17,14 @@ class OffscreenRenderTarget : public Graphics::IRenderTarget
 {
 private:
     LPDIRECT3DSURFACE9    m_surface;
+private:
+    void setCurrent();
 public:
     OffscreenRenderTarget(weak<Renderer> renderer, TextureFlags flags);
     ~OffscreenRenderTarget();
 
-    void setCurrent() override;
-
-    void begin() override;
-    void end() override;
+    void begin(ClearMode clear) override;
+    void end(PresentMode present) override;
 
     void close() override;
     bool closed() const override;

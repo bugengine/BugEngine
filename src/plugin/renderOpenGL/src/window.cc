@@ -4,6 +4,7 @@
 #include    <stdafx.h>
 #include    <window.hh>
 #include    <renderer.hh>
+#include    <GL/gl.h>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
@@ -31,6 +32,7 @@ void Window::setCurrent()
 #else
     glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, m_window, be_checked_cast<Renderer>(m_renderer)->m_glContext);
 #endif
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Window::close()
@@ -38,19 +40,24 @@ void Window::close()
     Windowing::Window::close();
 }
 
-void Window::begin()
+void Window::begin(ClearMode /*clear*/)
 {
     setCurrent();
-    uint2 size = getDimensions();
 }
 
-void Window::end()
+void Window::end(PresentMode present)
 {
+    OutputDebugString("begin render OpenGL\n");
+    Thread::sleep(50);
+    OutputDebugString("end render OpenGL\n");
+    if(present == Present)
+    {
 #ifdef BE_PLATFORM_WIN32
-    SwapBuffers(m_dc);
+        //SwapBuffers(m_dc);
 #else
-    glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
+        glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
 #endif
+    }
 }
 
 }}}

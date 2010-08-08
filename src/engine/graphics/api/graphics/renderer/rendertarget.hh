@@ -19,14 +19,23 @@ protected:
     TaskGroup::TaskStartConnection  m_startFlushConnection;
     TaskGroup::TaskEndConnection    m_endFlushConnection;
 public:
+    enum ClearMode
+    {
+        DontClear,
+        Clear
+    };
+    enum PresentMode
+    {
+        DontPresent,
+        Present
+    };
     IRenderTarget(weak<RenderBackend> renderer);
     virtual ~IRenderTarget();
 
     virtual uint2   getDimensions() const = 0;
     virtual void    close() = 0;
-    virtual void    setCurrent() = 0;
-    virtual void    begin() = 0;
-    virtual void    end() = 0;
+    virtual void    begin(ClearMode clear) = 0;
+    virtual void    end(PresentMode present) = 0;
 
     weak<ITask>     flushTask() const;
     virtual bool    closed() const = 0;
