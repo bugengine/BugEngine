@@ -24,6 +24,7 @@ public:
     virtual weak<ITask> renderTask() = 0;
     virtual weak<ITask> dispatchTask() = 0;
     virtual bool closed() const = 0;
+    virtual void disconnect() = 0;
 };
 
 }}

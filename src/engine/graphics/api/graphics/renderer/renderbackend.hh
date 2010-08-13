@@ -66,11 +66,11 @@ protected:
     RenderBackend();
     virtual ~RenderBackend();
 protected:
-    ref<ITask>              m_flushTask;
+    ref<ITask>              m_syncTask;
 protected:
     virtual void flush() = 0;
 public:
-    weak<ITask>                     flushTask();
+    weak<ITask>                     syncTask();
 
     virtual uint2                   getScreenSize() = 0;
 

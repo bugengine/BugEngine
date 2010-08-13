@@ -15,9 +15,6 @@ class be_api(GRAPHICS) IRenderTarget : public minitl::refcountable
 {
 protected:
     weak<RenderBackend> const       m_renderer;
-    ref<TaskGroup>                  m_flushTask;
-    TaskGroup::TaskStartConnection  m_startFlushConnection;
-    TaskGroup::TaskEndConnection    m_endFlushConnection;
 public:
     enum ClearMode
     {
@@ -37,7 +34,7 @@ public:
     virtual void    begin(ClearMode clear) = 0;
     virtual void    end(PresentMode present) = 0;
 
-    weak<ITask>     flushTask() const;
+    weak<ITask>     syncTask() const;
     virtual bool    closed() const = 0;
 private:
     IRenderTarget& operator=(const IRenderTarget& other);

@@ -12,7 +12,7 @@ namespace BugEngine { namespace ScheduledTasks
 ITaskItem::ITaskItem(weak<const ITask> owner)
 :   m_affinity(~0u)
 ,   m_splitCount(0)
-,   m_owner(owner.operator->())
+,   m_owner(owner)
 {
 }
 

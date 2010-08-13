@@ -34,7 +34,8 @@ void MultiNode::update()
         {
             if(it->main)
                 m_mainNodes--;
-            it = m_nodes.erase(it);
+            it->disconnect();
+            ++it;
         }
         else
         {
@@ -70,12 +71,16 @@ bool MultiNode::closed() const
     return m_mainNodes == 0;
 }
 
+void MultiNode::disconnect()
+{
+}
+
 MultiNode::NodeInfo::NodeInfo(scoped<INode> n, ref<ITask> update, ref<TaskGroup> render, ref<TaskGroup> dispatch, bool main)
 :   node(n)
+,   renderStartConnection(render, node->renderTask())
 ,   renderEndConnection(render, node->renderTask())
 ,   dispatchStartConnection(dispatch, node->dispatchTask())
 ,   dispatchEndConnection(dispatch, node->dispatchTask())
-,   startRender(update, node->renderTask()->startCallback())
 ,   chainFlush()
 ,   main(main)
 {
@@ -86,11 +91,22 @@ MultiNode::NodeInfo::NodeInfo(const NodeInfo& other)
     // reverse order to ensure proper deinitialization
     main = other.main;
     chainFlush = other.chainFlush;
-    startRender = other.startRender;
+    renderStartConnection = other.renderStartConnection;
     dispatchEndConnection = other.dispatchEndConnection;
     dispatchStartConnection = other.dispatchStartConnection;
     renderEndConnection = other.renderEndConnection;
     node = other.node;
+}
+
+void MultiNode::NodeInfo::disconnect()
+{
+    node->disconnect();
+    main = false;
+    chainFlush = ITask::CallbackConnection();
+    renderStartConnection = TaskGroup::TaskStartConnection();
+    dispatchEndConnection = TaskGroup::TaskEndConnection();
+    dispatchStartConnection = TaskGroup::TaskStartConnection();
+    renderEndConnection = TaskGroup::TaskEndConnection();
 }
 
 }}

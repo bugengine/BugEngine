@@ -21,16 +21,20 @@ private:
         ref<TaskGroup>                  m_renderTask;
         TaskGroup::TaskStartConnection  m_renderStartTask;
         TaskGroup::TaskEndConnection    m_renderEndTask;
-        RenderConfig(SceneNode* node, weak<IScene> scene);
+        RenderConfig(weak<SceneNode> node);
+        void disconnect();
     };
     struct DispatchConfig
     {
-        weak<ITask>                     m_dispatchTask;
+        weak<ITask>                     m_syncTask;
         ref<ITask>                      m_realDispatch;
         ITask::CallbackConnection       m_startRealDispatch;
         ITask::CallbackConnection       m_waitForSync;
-        DispatchConfig(SceneNode* node, weak<IRenderTarget> renderTarget);
+        DispatchConfig(weak<SceneNode> node);
+        void disconnect();
     };
+    friend struct RenderConfig;
+    friend struct DispatchConfig;
 private:
     ref<IScene>                     m_scene;
     ref<IRenderTarget>              m_renderTarget;
@@ -46,6 +50,7 @@ public:
     virtual weak<ITask> renderTask() override;
     virtual weak<ITask> dispatchTask() override;
     virtual bool closed() const override;
+    virtual void disconnect() override;
 };
 
 }}

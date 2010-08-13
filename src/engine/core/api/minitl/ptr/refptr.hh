@@ -43,6 +43,8 @@ public:
     ref(const ref& other) : m_ptr(other.m_ptr) { addref(m_ptr); }
     template< typename U >
     ref(const ref<U> other) : m_ptr(other.operator->())  { addref(m_ptr); }
+    template< typename U >
+    ref(const scoped<U> other) : m_ptr(other.operator->())  { addref(m_ptr); other.m_ptr = 0; }
 
     ref& operator=(const ref& other) { ref(other).swap(*this); return *this; }
     template< typename U >

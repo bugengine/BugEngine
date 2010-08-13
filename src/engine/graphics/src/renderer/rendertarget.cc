@@ -12,9 +12,6 @@ namespace BugEngine { namespace Graphics
 
 IRenderTarget::IRenderTarget(weak<RenderBackend> renderer)
 :   m_renderer(renderer)
-,   m_flushTask(ref<TaskGroup>::create("targetFlush", color32(255,0,0)))
-,   m_startFlushConnection(m_flushTask, m_renderer->flushTask())
-,   m_endFlushConnection(m_flushTask, m_renderer->flushTask())
 {
 }
 
@@ -22,9 +19,9 @@ IRenderTarget::~IRenderTarget()
 {
 }
 
-weak<ITask> IRenderTarget::flushTask() const
+weak<ITask> IRenderTarget::syncTask() const
 {
-    return m_renderer->flushTask();
+    return m_renderer->syncTask();
 }
 
 }}

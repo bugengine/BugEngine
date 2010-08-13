@@ -16,15 +16,16 @@ class MultiNode : public INode
 private:
     struct NodeInfo
     {
-        scoped<INode>                   node;
+        ref<INode>                      node;
+        TaskGroup::TaskStartConnection  renderStartConnection;
         TaskGroup::TaskEndConnection    renderEndConnection;
         TaskGroup::TaskStartConnection  dispatchStartConnection;
         TaskGroup::TaskEndConnection    dispatchEndConnection;
-        ITask::CallbackConnection       startRender;
         ITask::CallbackConnection       chainFlush;
         bool                            main;
         NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> render, ref<TaskGroup> dispatch, bool main);
         NodeInfo(const NodeInfo& other);
+        void disconnect();
     private:
         NodeInfo& operator=(const NodeInfo& other);
     };
@@ -50,6 +51,7 @@ public:
     virtual weak<ITask> renderTask() override;
     virtual weak<ITask> dispatchTask() override;
     virtual bool closed() const override;
+    virtual void disconnect() override;
 };
 
 }}

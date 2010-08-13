@@ -31,7 +31,7 @@ private:
     template< typename Body >
     friend class Task;
 private:
-    std::vector< Worker* >          m_workers;
+    minitl::vector< Worker* >       m_workers;
     Semaphore                       m_synchro;
     minitl::pool< char[128] >       m_taskPool;
     unsigned int                    m_frameCount;
