@@ -47,9 +47,6 @@ void Window::begin(ClearMode /*clear*/)
 
 void Window::end(PresentMode present)
 {
-    OutputDebugString("begin render OpenGL\n");
-    Thread::sleep(50);
-    OutputDebugString("end render OpenGL\n");
     if(present == Present)
     {
 #ifdef BE_PLATFORM_WIN32

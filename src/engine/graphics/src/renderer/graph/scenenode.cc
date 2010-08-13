@@ -45,6 +45,7 @@ SceneNode::SceneNode(ref<IScene> scene, ref<IRenderTarget> renderTarget)
 ,   m_renderConfig(this)
 ,   m_dispatchConfig(this)
 ,   m_startDispatch(m_renderConfig.m_renderTask, m_dispatchConfig.m_syncTask->startCallback())
+,   m_waitSync(m_dispatchConfig.m_syncTask, m_renderConfig.m_renderTask->startCallback(), ITask::ICallback::Completed)
 {
 }
 
@@ -77,6 +78,7 @@ void SceneNode::dispatch()
 void SceneNode::disconnect()
 {
     m_startDispatch = ITask::CallbackConnection();
+    m_waitSync = ITask::CallbackConnection();
     m_renderConfig.disconnect();
     m_dispatchConfig.disconnect();
 }

@@ -13,6 +13,12 @@ namespace BugEngine { namespace Graphics
 
 class MultiNode : public INode
 {
+public:
+    enum NodeType
+    {
+        ToolWindow,
+        MainWindow
+    };
 private:
     struct NodeInfo
     {
@@ -22,8 +28,8 @@ private:
         TaskGroup::TaskStartConnection  dispatchStartConnection;
         TaskGroup::TaskEndConnection    dispatchEndConnection;
         ITask::CallbackConnection       chainFlush;
-        bool                            main;
-        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> render, ref<TaskGroup> dispatch, bool main);
+        NodeType                        type;
+        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> render, ref<TaskGroup> dispatch, NodeType type);
         NodeInfo(const NodeInfo& other);
         void disconnect();
     private:
@@ -45,8 +51,7 @@ public:
     MultiNode();
     ~MultiNode();
 
-    void addMainNode(scoped<INode> node);
-    void addSecondaryNode(scoped<INode> node);
+    void addNode(scoped<INode> node, NodeType type);
 
     virtual weak<ITask> renderTask() override;
     virtual weak<ITask> dispatchTask() override;

@@ -143,7 +143,6 @@ void Renderer::drawBatch(const Batch& b)
 
 void Renderer::flush()
 {
-    OutputDebugString("flush\n");
 }
 
 }}}
