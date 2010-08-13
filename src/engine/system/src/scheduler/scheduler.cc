@@ -41,7 +41,7 @@ public:
 
     bool doWork(Scheduler* sc);
 
-    WorkReport* startTimer(const ITask* t);
+    WorkReport* startTimer(weak<const ITask> t);
     void stopTimer(WorkReport* r);
 
     void frameUpdate();
@@ -88,10 +88,10 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
 }
 
 
-Scheduler::Worker::WorkReport* Scheduler::Worker::startTimer(const ITask* t)
+Scheduler::Worker::WorkReport* Scheduler::Worker::startTimer(weak<const ITask> t)
 {
     WorkReport* r = m_reportPool.allocate();
-    r->task = t;
+    r->task = t.operator->();
     r->start = tick();
     return r;
 }

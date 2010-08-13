@@ -22,9 +22,9 @@ class be_api(SYSTEM) ITaskItem : public minitl::inode
     friend class ::BugEngine::Scheduler;
     friend class ::BugEngine::Scheduler::Worker;
 protected:
-    unsigned int    m_affinity;
-    size_t          m_splitCount;
-    const ITask*    m_owner;
+    unsigned int        m_affinity;
+    size_t              m_splitCount;
+    weak<const ITask>   m_owner;
 protected: //friend Worker
     virtual void            run(weak<Scheduler> sc) = 0;
     virtual ITaskItem*      split(weak<Scheduler> sc) = 0;

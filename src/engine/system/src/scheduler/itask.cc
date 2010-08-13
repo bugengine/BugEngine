@@ -87,7 +87,8 @@ ITask::ChainCallback::~ChainCallback()
 {
     while(!m_startedBy.empty())
     {
-        m_startedBy.back()->removeCallback(this);
+        bool result = m_startedBy.back()->removeCallback(this);
+        be_assert(result, "unable to disconnect from task %s" | m_startedBy.back()->name.c_str());
     }
 }
 

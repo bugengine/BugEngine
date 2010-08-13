@@ -13,6 +13,8 @@ class scoped
 {
     template< typename U >
     friend class scoped;
+    template< typename U >
+    friend class ref;
 private:
     mutable T* m_ptr;
 private:

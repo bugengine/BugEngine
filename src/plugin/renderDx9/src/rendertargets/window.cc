@@ -51,7 +51,7 @@ Window::~Window()
 
 bool Window::closed() const
 {
-    return m_closed > 0;
+    return m_closed > 0 || m_swapChain == 0;
 }
 
 void Window::setCurrent()
@@ -96,6 +96,16 @@ void Window::end(PresentMode present)
         if(present == Present)
         {
             D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
+        }
+    }
+    if(m_closed > 0)
+    {
+        if(m_swapChain)
+        {
+            m_swapChain->Release();
+            m_swapChain = 0;
+            Win32::Window::close();
+            m_closed = 0;
         }
     }
 }

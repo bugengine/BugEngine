@@ -15,6 +15,7 @@ class be_api(SYSTEM) ITask : public minitl::refcountable
 public:
     class CallbackConnection;
     friend class CallbackConnection;
+    friend class ScheduledTasks::ITaskItem;
 public:
     class ICallback : public minitl::refcountable
     {

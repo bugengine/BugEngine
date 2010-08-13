@@ -46,7 +46,9 @@ bool TaskGroup::removeStartTask(weak<ITask> task)
     {
         if(*it == task)
         {
-            (*it)->startCallback()->onDisconnected(this);
+            bool result = (*it)->startCallback()->onDisconnected(this);
+            be_forceuse(result);
+            be_assert(result, "unable to disconnect task %s from group %s" | task->name | this->name);
             m_startTasks.erase(it);
             return true;
         }
