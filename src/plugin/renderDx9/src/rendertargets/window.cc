@@ -86,10 +86,6 @@ void Window::begin(ClearMode clear)
 
 void Window::end(PresentMode present)
 {
-    OutputDebugString("begin render Dx9\n");
-    Thread::sleep(50);
-    OutputDebugString("end render Dx9\n");
-
     if(m_swapChain)
     {
         D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());

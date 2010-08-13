@@ -41,6 +41,7 @@ private:
     RenderConfig                    m_renderConfig;
     DispatchConfig                  m_dispatchConfig;
     ITask::CallbackConnection       m_startDispatch;
+    ITask::CallbackConnection       m_waitSync;
 private:
     void dispatch();
 public:
