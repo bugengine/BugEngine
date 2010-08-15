@@ -31,16 +31,16 @@ be_api(CORE) AssertionCallback_t getAssertionCallback();
 # endif
 # define    be_assert(cond,message)                                                             \
     do {                                                                                        \
-        static bool ignore = false;                                                             \
-        if(!ignore && !(cond))                                                                  \
+        static bool be_ignore_ = false;                                                         \
+        if(!be_ignore_ && !(cond))                                                              \
         {                                                                                       \
-            BugEngine::Debug::AssertionResult r;                                                \
-            minitl::format<4096> msg = (minitl::format<4096>)message;                           \
-            r = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,#cond,msg);          \
-            switch(r)                                                                           \
+            BugEngine::Debug::AssertionResult be_r_;                                            \
+            minitl::format<4096> be_msg_ = (minitl::format<4096>)message;                       \
+            be_r_ = BugEngine::Debug::getAssertionCallback()(__FILE__,__LINE__,#cond,be_msg_);  \
+            switch(be_r_)                                                                       \
             {                                                                                   \
             case BugEngine::Debug::Abort:         std::abort(); break;                          \
-            case BugEngine::Debug::IgnoreAll:     ignore = true; break;                         \
+            case BugEngine::Debug::IgnoreAll:     be_ignore_ = true; break;                     \
             case BugEngine::Debug::Break:         be_break(); break;                            \
             default:;                                                                           \
             }                                                                                   \
