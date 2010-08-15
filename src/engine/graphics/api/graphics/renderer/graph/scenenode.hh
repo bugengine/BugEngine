@@ -22,6 +22,7 @@ private:
     ref<IRenderTarget>              m_renderTarget;
     TaskGroup::TaskStartConnection  m_renderStartTask;
     TaskGroup::TaskEndConnection    m_renderEndTask;
+    AsyncDispatchJobGraph           m_jobGraph;
 private:
     void dispatch();
 public:

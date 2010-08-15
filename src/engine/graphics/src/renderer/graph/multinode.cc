@@ -10,19 +10,21 @@ namespace BugEngine { namespace Graphics
 
 MultiNode::MultiNode()
 :   INode()
+,   m_globalTask(ref<TaskGroup>::create("updateMultiScene", color32(255, 0, 0)))
 ,   m_renderTask(ref<TaskGroup>::create("renderMultiScene", color32(255, 0, 0)))
 ,   m_syncTask(ref<TaskGroup>::create("syncMultiScene", color32(255, 0, 0)))
 ,   m_dispatchTask(ref<TaskGroup>::create("dispatchMultiScene", color32(255, 0, 0)))
 ,   m_cleanTask(ref< Task< MethodCaller<MultiNode, &MultiNode::clean> > >::create("cleanNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::clean>(this)))
 ,   m_endSyncConnection(m_syncTask, m_cleanTask)
+,   m_startGlobalConnection(m_globalTask, m_renderTask)
+,   m_endGlobalConnection(m_globalTask, m_syncTask)
+,   m_jobGraph(m_renderTask, m_syncTask, m_dispatchTask)
 ,   m_mainNodes(0)
 {
-    setup(m_renderTask, m_syncTask, m_dispatchTask);
 }
 
 MultiNode::~MultiNode()
 {
-    disconnect();
 }
 
 void MultiNode::clean()
@@ -82,7 +84,7 @@ bool MultiNode::closed() const
 
 weak<ITask> MultiNode::updateTask()
 {
-    return m_renderTask;
+    return m_globalTask;
 }
 
 weak<ITask> MultiNode::renderTask()
