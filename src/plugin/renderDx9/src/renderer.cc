@@ -26,6 +26,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
 #define BE_WIN32_CREATECONTEXT 0
+#define BE_WIN32_DESTROYCONTEXT 1
 
 namespace
 {
@@ -63,12 +64,7 @@ Renderer::~Renderer()
 {
     cgD3D9SetDevice(0);
     cgDestroyContext(m_context);
-    if(m_device)
-    {
-        int refCnt = m_device->Release();
-        be_forceuse(refCnt);
-        be_assert(refCnt == 0, "device refcount is not 0");
-    }
+    destroyContextAsync();
     int refCnt = m_directx->Release();
     be_forceuse(refCnt);
     be_assert(refCnt == 0, "Dx refcount is not 0");
@@ -87,7 +83,7 @@ Renderer::SwapchainItem Renderer::createSwapChain(D3DPRESENT_PARAMETERS params)
         createContextAsync(params);
         m_deviceSwapChain = it;
         d3d_checkResult(m_device->GetSwapChain(0, &it->swapchain));
-        d3d_checkResult(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
+        //d3d_checkResult(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         d3d_checkResult(m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
         d3d_checkResult(m_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         d3d_checkResult(m_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
@@ -123,6 +119,14 @@ void Renderer::createContextAsync(D3DPRESENT_PARAMETERS& params)
     ContextCreationEvent event;
     event.params = params;
     postMessage(WM_USER+Win32::Renderer::messageCount()+BE_WIN32_CREATECONTEXT, (WPARAM)&event, 0);
+    event.event.wait();
+    return;
+}
+
+void Renderer::destroyContextAsync()
+{
+    ContextCreationEvent event;
+    postMessage(WM_USER+Win32::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT, (WPARAM)&event, 0);
     event.event.wait();
     return;
 }
@@ -199,7 +203,7 @@ void Renderer::drawBatch(const Batch& b)
 
 UINT Renderer::messageCount() const
 {
-    return 1+Win32::Renderer::messageCount();
+    return 2+Win32::Renderer::messageCount();
 }
 
 void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
@@ -210,6 +214,18 @@ void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
     {
         ContextCreationEvent* event = (ContextCreationEvent*)wParam;
         createContext(event->params);
+        event->event.set();
+    }
+    else if(msg == WM_USER+Win32::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT)
+    {
+        ContextCreationEvent* event = (ContextCreationEvent*)wParam;
+        if(m_device)
+        {
+            int refCnt = m_device->Release();
+            be_forceuse(refCnt);
+            be_assert(refCnt == 0, "device refcount is not 0");
+            m_device = 0;
+        }
         event->event.set();
     }
     else
@@ -224,7 +240,6 @@ void Renderer::flush()
     {
     case DeviceLost:
         {
-            be_error("Device was lost; recreating resources");
             for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
             {
                 if(it->swapchain)
@@ -247,10 +262,7 @@ void Renderer::flush()
             }
             else
             {
-                int refCnt = m_device->Release();
-                be_forceuse(refCnt);
-                be_assert(refCnt == 0, "device refcount is not 0");
-                m_device = 0;
+                destroyContextAsync();
             }
         }
         break;

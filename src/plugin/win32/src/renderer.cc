@@ -52,8 +52,6 @@ namespace
             case WM_DESTROY:
                 be_assert(nbWindows, "trying to destroy a window but no window was registered");
                 nbWindows--;
-                if(!nbWindows)
-                    PostQuitMessage(0);
                 break;
 
             case WM_SETFOCUS:
