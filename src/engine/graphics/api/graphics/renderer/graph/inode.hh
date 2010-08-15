@@ -18,15 +18,18 @@ namespace BugEngine { namespace Graphics
 
 class INode : public minitl::refcountable
 {
-private:
-    ITask::CallbackConnection   m_renderToSync;
-    ITask::CallbackConnection   m_syncToRender;
-    ITask::CallbackConnection   m_syncToDispatch;
-    ITask::CallbackConnection   m_dispatchToSync;
+protected:
+    class AsyncDispatchJobGraph
+    {
+        ITask::CallbackConnection   m_renderToSync;
+        ITask::CallbackConnection   m_syncToRender;
+        ITask::CallbackConnection   m_syncToDispatch;
+        ITask::CallbackConnection   m_dispatchToSync;
+    public:
+        AsyncDispatchJobGraph(weak<ITask> renderTask, weak<ITask> syncTask, weak<ITask> dispatchTask);
+    };
 protected:
     INode();
-    void setup(weak<ITask> renderTask, weak<ITask> syncTask, weak<ITask> dispatchTask);
-    void disconnect();
 public:
     virtual ~INode();
 

@@ -20,13 +20,12 @@ SceneNode::SceneNode(ref<IScene> scene, ref<IRenderTarget> renderTarget)
 ,   m_renderTarget(renderTarget)
 ,   m_renderStartTask(m_renderTask, m_scene->updateTask())
 ,   m_renderEndTask(m_renderTask, m_scene->updateTask())
+,   m_jobGraph(m_renderTask, m_renderTarget->syncTask(), m_dispatchTask)
 {
-    setup(m_renderTask, m_renderTarget->syncTask(), m_dispatchTask);
 }
 
 SceneNode::~SceneNode()
 {
-    disconnect();
 }
 
 bool SceneNode::closed() const

@@ -53,8 +53,8 @@ void Application::setScene(scoped<Graphics::INode> scene)
 {
     if(scene)
     {
-        m_startSceneUpdate = ITask::CallbackConnection(m_tasks[0], scene->renderTask()->startCallback());
-        m_endSceneUpdate = ITask::CallbackConnection(scene->renderTask(),m_tasks[0]->startCallback());
+        m_startSceneUpdate = ITask::CallbackConnection(m_tasks[0], scene->updateTask()->startCallback());
+        m_endSceneUpdate = ITask::CallbackConnection(scene->updateTask(),m_tasks[0]->startCallback());
     }
     else
     {
