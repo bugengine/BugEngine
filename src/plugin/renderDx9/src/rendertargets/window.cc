@@ -27,40 +27,29 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
     d3dpp.BackBufferWidth = flags.size.x();
     d3dpp.BackBufferHeight = flags.size.y();
     d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
-    d3dpp.BackBufferCount = flags.vsync ? (flags.triplebuffered ? 3 : 2) : 2;
+    d3dpp.BackBufferCount = flags.vsync ? (flags.triplebuffered ? 2 : 1) : 1;
     d3dpp.PresentationInterval = flags.vsync ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
 
-    m_swapChain = renderer->createSwapChain(&d3dpp);
-
-    renderer->m_directx->AddRef();
-    renderer->m_device->AddRef();
-    setCurrent();
+    m_swapChain = be_checked_cast<Renderer>(m_renderer)->createSwapChain(d3dpp);
 }
 
 Window::~Window()
 {
-    if(m_swapChain)
-    {
-        m_swapChain->Release();
-        m_swapChain = 0;
-        Win32::Window::close();
-    }
-    be_checked_cast<Renderer>(m_renderer)->m_device->Release();
-    be_checked_cast<Renderer>(m_renderer)->m_directx->Release();
+    m_swapChain = be_checked_cast<Renderer>(m_renderer)->release(m_swapChain);
 }
 
 bool Window::closed() const
 {
-    return m_closed > 0 || m_swapChain == 0;
+    return m_closed > 0;
 }
 
 void Window::setCurrent()
 {
-    if(m_swapChain)
+    if(m_swapChain->swapchain)
     {
         LPDIRECT3DSURFACE9 backBuffer;
-        D3D_CHECKRESULT(m_swapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
-        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
+        d3d_checkResult(m_swapChain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
+        d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->SetRenderTarget(0, backBuffer));
         backBuffer->Release();
     }
 }
@@ -72,37 +61,27 @@ void Window::close()
 
 void Window::begin(ClearMode clear)
 {
-    if(m_swapChain)
+    setCurrent();
+    d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
+    if(clear == Clear)
     {
-        setCurrent();
-        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->BeginScene());
-        if(clear == Clear)
-        {
-            D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
-        }
-        uint2 size = getDimensions();
+        d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0));
     }
+    uint2 size = getDimensions();
 }
 
 void Window::end(PresentMode present)
 {
-    if(m_swapChain)
-    {
-        D3D_CHECKRESULT(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
-        if(present == Present)
-        {
-            D3D_CHECKRESULT(m_swapChain->Present(NULL, NULL, NULL, NULL, 0));
-        }
-    }
+    d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
     if(m_closed > 0)
     {
-        if(m_swapChain)
-        {
-            m_swapChain->Release();
-            m_swapChain = 0;
-            Win32::Window::close();
-            m_closed = 0;
-        }
+        m_swapChain = be_checked_cast<Renderer>(m_renderer)->release(m_swapChain);
+        Win32::Window::close();
+    }
+    else if(present == Present && m_swapChain->swapchain)
+    {
+        if(d3d_checkResult(m_swapChain->swapchain->Present(NULL, NULL, NULL, NULL, 0)) == D3DERR_DEVICELOST)
+            be_checked_cast<Renderer>(m_renderer)->m_deviceState = Renderer::DeviceLost;
     }
 }
 

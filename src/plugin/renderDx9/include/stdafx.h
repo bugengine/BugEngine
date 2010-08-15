@@ -19,18 +19,5 @@
 #include   <DxErr.h>
 #include   <Cg/cg.h>
 
-#define D3D_CHECKRESULT(operation)                          \
-    do                                                      \
-    {                                                       \
-        HRESULT result_ = operation;                        \
-        if(FAILED(result_))                                 \
-        {                                                   \
-            MessageBox( 0,                                  \
-                        DXGetErrorDescription(result_),     \
-                        DXGetErrorString(result_),          \
-                        MB_OK);                             \
-        }                                                   \
-    } while(0)
-
 /*****************************************************************************/
 #endif

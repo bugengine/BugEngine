@@ -33,8 +33,12 @@ private:
 private:
     static intptr_t updateWindows(intptr_t p1, intptr_t p2);
 private:
-    HWND createWindowImplementation(const WindowCreationFlags* flags) const;
-    void destroyWindowImplementation(HWND hWnd);
+    HWND            createWindowImplementation(const WindowCreationFlags* flags) const;
+    void            destroyWindowImplementation(HWND hWnd);
+protected:
+    virtual UINT    messageCount() const;
+    virtual void    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+    void            postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const;
 public:
     Renderer();
     ~Renderer();

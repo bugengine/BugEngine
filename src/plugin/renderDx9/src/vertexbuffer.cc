@@ -114,7 +114,7 @@ VertexBuffer::VertexBuffer(const Renderer* renderer, u32 vertexCount, VertexUsag
     m_vertexElements[i] = end;
     fvf = 0;
     renderer->m_device->CreateVertexBuffer(vertexCount*flags.vertexSize, (usage == VuStatic?0:D3DUSAGE_DYNAMIC) | D3DUSAGE_WRITEONLY, fvf, D3DPOOL_DEFAULT, &m_buffer, 0);
-    D3D_CHECKRESULT(renderer->m_device->CreateVertexDeclaration(m_vertexElements, &m_vertexDecl));
+    d3d_checkResult(renderer->m_device->CreateVertexDeclaration(m_vertexElements, &m_vertexDecl));
     m_vertexStride = flags.vertexSize;
 }
 
@@ -126,13 +126,13 @@ VertexBuffer::~VertexBuffer()
 void* VertexBuffer::map(GpuMapFlags /*flags*/, u32 byteCount, u32 byteOffset)
 {
     void* data;
-    D3D_CHECKRESULT(m_buffer->Lock(byteOffset, byteCount, &data, D3DLOCK_DISCARD));
+    d3d_checkResult(m_buffer->Lock(byteOffset, byteCount, &data, D3DLOCK_DISCARD));
     return data;
 }
 
 void VertexBuffer::unmap()
 {
-    D3D_CHECKRESULT(m_buffer->Unlock());
+    d3d_checkResult(m_buffer->Unlock());
 }
 
 

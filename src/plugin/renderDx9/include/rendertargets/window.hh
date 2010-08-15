@@ -5,22 +5,23 @@
 #define BE_DX9_RENDERTARGETS_WINDOW_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/renderbackend.hh>
+#include    <renderer.hh>
 #include    <win32/window.hh>
 #include    <d3d9.h>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-class Renderer;
-
 class Window : public Win32::Window
 {
+    friend class Renderer;
 private:
-    LPDIRECT3DSWAPCHAIN9    m_swapChain;
-    LPDIRECT3DSWAPCHAIN9    m_workingSwapChain;
+    Renderer::SwapchainItem m_swapChain;
+    WindowFlags             m_flags;
     i_u8                    m_closed;
 private:
     void setCurrent();
+    void recreate(WindowFlags flags);
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
@@ -29,7 +30,6 @@ public:
     void end(PresentMode present) override;
 
     void close() override;
-
     bool closed() const override;
 };
 

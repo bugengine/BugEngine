@@ -20,13 +20,13 @@ IndexBuffer::~IndexBuffer()
 void* IndexBuffer::map(GpuMapFlags /*flags*/, u32 byteCount, u32 byteOffset)
 {
     void* data;
-    D3D_CHECKRESULT(m_buffer->Lock(byteOffset, byteCount, &data, D3DLOCK_DISCARD));
+    d3d_checkResult(m_buffer->Lock(byteOffset, byteCount, &data, D3DLOCK_DISCARD));
     return data;
 }
 
 void IndexBuffer::unmap()
 {
-    D3D_CHECKRESULT(m_buffer->Unlock());
+    d3d_checkResult(m_buffer->Unlock());
 }
 
 
