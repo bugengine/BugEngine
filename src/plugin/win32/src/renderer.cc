@@ -17,8 +17,8 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Win32
 {
 
-#define WM_BE_CREATEWINDOW  WM_USER
-#define WM_BE_DESTROYWINDOW WM_USER+1
+#define WM_BE_CREATEWINDOW  0
+#define WM_BE_DESTROYWINDOW 1
 
 namespace
 {
@@ -70,7 +70,7 @@ namespace
 
 Renderer::Renderer()
 :   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
-,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, 0, 0, Thread::AboveNormal)
+,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -91,7 +91,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-    PostThreadMessageA(m_windowManagementThread.id(), WM_QUIT, 0, 0);
+    postMessage(WM_QUIT, 0, 0);
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
 }
 
@@ -99,14 +99,14 @@ HWND Renderer::createWindowImplementation(const WindowCreationFlags* flags) cons
 {
     WindowCreationEvent event;
     event.flags = flags;
-    PostThreadMessageA(m_windowManagementThread.id(), WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
+    postMessage(WM_USER+WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
     event.event.wait();
     return event.hWnd;
 }
 
 void Renderer::destroyWindowImplementation(HWND hWnd)
 {
-    PostThreadMessageA(m_windowManagementThread.id(), WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
+    postMessage(WM_USER+WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
 }
 
 uint2 Renderer::getScreenSize()
@@ -121,37 +121,64 @@ const istring& Renderer::getWindowClassName() const
     return m_windowClassName;
 }
 
-intptr_t Renderer::updateWindows(intptr_t /*p1*/, intptr_t /*p2*/)
+UINT Renderer::messageCount() const
 {
+    return 2;
+}
+
+void Renderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
+{
+    PostThreadMessageA(m_windowManagementThread.id(), msg, wParam, lParam);
+}
+
+void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    be_forceuse(wParam);
+    be_forceuse(lParam);
+    switch(msg)
+    {
+    case WM_USER+WM_BE_CREATEWINDOW:
+        {
+            WindowCreationEvent* event = (WindowCreationEvent*)wParam;
+            event->hWnd = CreateWindowEx( event->flags->fullscreen ? WS_EX_TOPMOST : 0,
+                event->flags->className,
+                event->flags->title,
+                event->flags->flags,
+                event->flags->x, event->flags->y,
+                event->flags->size.right-event->flags->size.left, event->flags->size.bottom-event->flags->size.top,
+                NULL, NULL, hDllInstance, NULL );
+            ShowWindow(event->hWnd, SW_SHOW);
+            UpdateWindow(event->hWnd);
+            event->event.set();
+        }
+        break;
+
+    case WM_USER+WM_BE_DESTROYWINDOW:
+        {
+            HWND hWnd = (HWND)wParam;
+            DestroyWindow(hWnd);
+        }
+        break;
+    default:
+        be_assert(false, "unhandled message type %d" | msg);
+        break;
+    }
+}
+
+intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
+{
+    weak<Renderer> renderer(reinterpret_cast<Renderer*>(p1));
     MSG msg;
     while(::GetMessage(&msg, 0, 0, 0))
     {
-        switch(msg.message)
+        if(msg.message >= WM_USER && msg.message < WM_APP)
         {
-        case WM_BE_CREATEWINDOW:
-            {
-                WindowCreationEvent* event = (WindowCreationEvent*)msg.wParam;
-                event->hWnd = CreateWindowEx( event->flags->fullscreen ? WS_EX_TOPMOST : 0,
-                    event->flags->className,
-                    event->flags->title,
-                    event->flags->flags,
-                    event->flags->x, event->flags->y,
-                    event->flags->size.right-event->flags->size.left, event->flags->size.bottom-event->flags->size.top,
-                    NULL, NULL, hDllInstance, NULL );
-                ShowWindow(event->hWnd, SW_SHOW);
-                UpdateWindow(event->hWnd);
-                event->event.set();
-            }
-            break;
-
-        case WM_BE_DESTROYWINDOW:
-            {
-                HWND hWnd = (HWND)msg.wParam;
-                DestroyWindow(hWnd);
-            }
-            break;
+            renderer->handleMessage(msg.message, msg.wParam, msg.lParam);
         }
-        DispatchMessage(&msg);
+        else
+        {
+            DispatchMessage(&msg);
+        }
     }
     return 0;
 }

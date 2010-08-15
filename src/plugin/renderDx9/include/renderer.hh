@@ -14,6 +14,17 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
+
+static inline HRESULT d3d_checkResult(HRESULT r)
+{
+    if(FAILED(r))
+    {
+        be_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
+    }
+    return r;
+}
+
+
 class Window;
 class VertexBuffer;
 class IndexBuffer;
@@ -25,16 +36,34 @@ class Renderer : public Win32::Renderer
     friend class VertexBuffer;
     friend class IndexBuffer;
 private:
-    LPDIRECT3D9                 m_directx;
-    LPDIRECT3DDEVICE9           m_device;
-    D3DCAPS9                    m_caps;
-    CGcontext                   m_context;
-    weak<const FileSystem>      m_filesystem;
+    struct SwapchainDesc
+    {
+        D3DPRESENT_PARAMETERS   params;
+        LPDIRECT3DSWAPCHAIN9    swapchain;
+    };
+    typedef minitl::list<SwapchainDesc>::iterator SwapchainItem;
+private:
+    enum DeviceState
+    {
+        DeviceReady,
+        DeviceLost,
+        DeviceRestored
+    };
+private:
+    LPDIRECT3D9                     m_directx;
+    LPDIRECT3DDEVICE9               m_device;
+    D3DCAPS9                        m_caps;
+    CGcontext                       m_context;
+    weak<const FileSystem>          m_filesystem;
+    minitl::list<SwapchainDesc>     m_swapchains;
+    SwapchainItem                   m_deviceSwapChain;
+    DeviceState                     m_deviceState;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
 
-    LPDIRECT3DSWAPCHAIN9            createSwapChain(D3DPRESENT_PARAMETERS* params);
+    SwapchainItem                   createSwapChain(D3DPRESENT_PARAMETERS params);
+    SwapchainItem                   release(SwapchainItem swapchain);
 
     ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
     ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
@@ -48,6 +77,11 @@ public:
 private:
     void                            drawBatch(const Batch& b);
     void                            flush() override;
+    void                            createContext(D3DPRESENT_PARAMETERS& params);
+    void                            createContextAsync(D3DPRESENT_PARAMETERS& params);
+protected:
+    virtual UINT                    messageCount() const;
+    virtual void                    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

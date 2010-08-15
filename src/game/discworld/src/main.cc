@@ -68,7 +68,6 @@ int be_main (weak<BugEngine::Application> app)
         app->setScene(node);
     }
 
-    int result = app->run();
-    return result;
+    return app->run();
 }
 /*---------------------------------------------------------------------------*/
