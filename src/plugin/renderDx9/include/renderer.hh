@@ -79,6 +79,7 @@ private:
     void                            flush() override;
     void                            createContext(D3DPRESENT_PARAMETERS& params);
     void                            createContextAsync(D3DPRESENT_PARAMETERS& params);
+    void                            destroyContextAsync();
 protected:
     virtual UINT                    messageCount() const;
     virtual void                    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
