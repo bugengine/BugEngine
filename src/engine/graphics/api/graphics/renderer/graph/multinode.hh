@@ -25,41 +25,41 @@ private:
         ref<INode>                      node;
         TaskGroup::TaskStartConnection  renderStartConnection;
         TaskGroup::TaskEndConnection    renderEndConnection;
+        TaskGroup::TaskStartConnection  syncStartConnection;
+        ITask::CallbackConnection       syncEndConnection;
         TaskGroup::TaskStartConnection  dispatchStartConnection;
         TaskGroup::TaskEndConnection    dispatchEndConnection;
-        ITask::CallbackConnection       chainFlush;
+        ITask::CallbackConnection       chainDispatch;
         NodeType                        type;
-        NodeInfo(scoped<INode> node, ref<ITask> updateTask, ref<TaskGroup> render, ref<TaskGroup> dispatch, NodeType type);
-        NodeInfo(const NodeInfo& other);
-        void disconnect();
-    private:
-        NodeInfo& operator=(const NodeInfo& other);
+        NodeInfo(scoped<INode> node, weak<MultiNode> owner, NodeType type);
     };
-    ref<TaskGroup>                  m_globalTask;
+    friend struct NodeInfo;
+private:
     ref<TaskGroup>                  m_renderTask;
+    ref<TaskGroup>                  m_syncTask;
     ref<TaskGroup>                  m_dispatchTask;
-    ref<ITask>                      m_updateTask;
-    TaskGroup::TaskStartConnection  m_startUpdateConnection;
-    TaskGroup::TaskEndConnection    m_endUpdateConnection;
-    ITask::CallbackConnection       m_startRender;
-    ITask::CallbackConnection       m_startDispatch;
+    ref<ITask>                      m_cleanTask;
+    TaskGroup::TaskEndConnection    m_endSyncConnection;
     minitl::list< NodeInfo >        m_nodes;
+    minitl::vector< ref<INode> >    m_deleted;
     u32                             m_mainNodes;
 private:
-    void update();
+    void clean();
 public:
     MultiNode();
     ~MultiNode();
 
     void addNode(scoped<INode> node, NodeType type);
 
-    virtual weak<ITask> renderTask() override;
-    virtual weak<ITask> dispatchTask() override;
     virtual bool closed() const override;
-    virtual void disconnect() override;
+    virtual weak<ITask> updateTask() override;
+    virtual weak<ITask> renderTask() override;
+    virtual weak<ITask> syncTask() override;
+    virtual weak<ITask> dispatchTask() override;
 };
 
 }}
+
 
 /*****************************************************************************/
 #endif

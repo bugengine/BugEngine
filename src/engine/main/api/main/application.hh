@@ -32,7 +32,7 @@ public:
 
     int run(void);
 
-    void setScene(ref<Graphics::INode> node);
+    void setScene(scoped<Graphics::INode> node);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

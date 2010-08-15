@@ -38,7 +38,7 @@ void Application::frameUpdate()
 {
     if(m_scene && m_scene->closed())
     {
-        setScene(ref<Graphics::INode>());
+        setScene(scoped<Graphics::INode>());
     }
 }
 
@@ -49,7 +49,7 @@ int Application::run()
     return 0;
 }
 
-void Application::setScene(ref<Graphics::INode> scene)
+void Application::setScene(scoped<Graphics::INode> scene)
 {
     if(scene)
     {
