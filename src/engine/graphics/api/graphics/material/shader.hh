@@ -4,20 +4,16 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADER_HH_
 #define BE_GRAPHICS_MATERIAL_SHADER_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class ShaderNode;
-
 class be_api(GRAPHICS) Shader
 {
+private:
 public:
     Shader();
-    virtual ~Shader();
-
-    weak<ShaderNode> root();
+    ~Shader();
 };
 
 }}

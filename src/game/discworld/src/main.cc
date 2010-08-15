@@ -41,18 +41,18 @@ int be_main (weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
-    ref<BugEngine::Graphics::MultiNode> node = ref<BugEngine::Graphics::MultiNode>::create();
+    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create();
     {
 
         ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w3 = display2->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w5 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w5 = display->createRenderWindow(f);
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 
@@ -60,14 +60,15 @@ int be_main (weak<BugEngine::Application> app)
         ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
 
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w), BugEngine::Graphics::MultiNode::MainWindow);
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w2));
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w3));
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w4));
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
         //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(scene, w));
         app->setScene(node);
     }
 
-    return app->run();
+    int result = app->run();
+    return result;
 }
 /*---------------------------------------------------------------------------*/
