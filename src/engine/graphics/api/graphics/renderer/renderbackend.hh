@@ -61,16 +61,15 @@ struct Batch : public minitl::inode
 
 class be_api(GRAPHICS) RenderBackend : public minitl::pointer
 {
-    friend class Renderer;
 protected:
     RenderBackend();
     virtual ~RenderBackend();
 protected:
     ref<ITask>              m_syncTask;
 protected:
-    virtual void flush() = 0;
+    virtual void                    flush() = 0;
 public:
-    weak<ITask>                     syncTask();
+            weak<ITask>             syncTask();
 
     virtual uint2                   getScreenSize() = 0;
 
@@ -81,6 +80,7 @@ public:
     virtual ref<IRenderTarget>      createMultipleRenderBuffer(TextureFlags flags, size_t count) = 0;
     virtual ref<GpuBuffer>          createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const = 0;
     virtual ref<GpuBuffer>          createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const = 0;
+    virtual bool                    multithreaded() const = 0;
 };
 
 }}

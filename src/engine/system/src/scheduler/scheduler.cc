@@ -195,14 +195,21 @@ void Scheduler::frameUpdate()
 
 void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 {
-    m_tasks.push(task);
+    int priority = task->m_owner->priority;
+    m_tasks[priority].push(task);
     m_runningTasks ++;
     m_synchro.release(1);
 }
 
 ScheduledTasks::ITaskItem* Scheduler::pop()
 {
-    return m_tasks.pop();
+    for(unsigned int i = High; i != Low; --i)
+    {
+        ScheduledTasks::ITaskItem* t = m_tasks[i].pop();
+        if(t)
+            return t;
+    }
+    return 0;
 }
 
 void Scheduler::wait()

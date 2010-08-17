@@ -16,7 +16,12 @@ class Window : public Windowing::Window
 {
     friend class Renderer;
 private:
-    void setCurrent();
+    #ifdef BE_PLATFORM_WIN32
+        HGLRC   m_glContext;
+    #endif
+private:
+    inline void setCurrent();
+    inline void clearCurrent();
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();

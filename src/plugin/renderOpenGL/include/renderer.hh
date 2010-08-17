@@ -46,6 +46,7 @@ public:
     ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
 
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
+    bool                            multithreaded() const override {return true; }
 
     void                            flush() override;
 

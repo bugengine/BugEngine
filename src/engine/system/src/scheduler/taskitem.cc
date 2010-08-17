@@ -10,15 +10,13 @@ namespace BugEngine { namespace ScheduledTasks
 {
 
 ITaskItem::ITaskItem(weak<const ITask> owner)
-:   m_affinity(~0u)
-,   m_splitCount(0)
+:   m_splitCount(0)
 ,   m_owner(owner)
 {
 }
 
 ITaskItem::ITaskItem(ITaskItem& cpy)
-:   m_affinity(cpy.m_affinity)
-,   m_splitCount(++cpy.m_splitCount)
+:   m_splitCount(++cpy.m_splitCount)
 ,   m_owner(cpy.m_owner)
 {
 }

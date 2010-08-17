@@ -11,6 +11,7 @@ Timer::Timer()
 :   m_total(0)
 ,   m_start(0)
 {
+    start();
 }
 
 Timer::~Timer()
