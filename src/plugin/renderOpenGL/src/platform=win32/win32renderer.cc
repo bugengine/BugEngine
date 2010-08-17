@@ -15,9 +15,16 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-static HGLRC initContext(HDC dc)
+Renderer::~Renderer()
 {
-    PIXELFORMATDESCRIPTOR pfd =
+    if(m_glContext)
+        wglDeleteContext(m_glContext);
+}
+
+void Renderer::attachWindow(Window* w)
+{
+    HDC hDC = GetDC(w->m_window);
+    static const PIXELFORMATDESCRIPTOR pfd =
     {
         sizeof(PIXELFORMATDESCRIPTOR),
         1,
@@ -36,23 +43,14 @@ static HGLRC initContext(HDC dc)
         0,
         0, 0, 0
     };
-    GLuint pixelFormat = ChoosePixelFormat(dc, &pfd);
-    SetPixelFormat(dc, pixelFormat, &pfd);
-
-    return wglCreateContext(dc);
-}
-
-Renderer::~Renderer()
-{
-}
-
-void Renderer::attachWindow(Window* w)
-{
-    HDC hDC = GetDC(w->m_window);
+    GLuint pixelFormat = ChoosePixelFormat(hDC, &pfd);
+    SetPixelFormat(hDC, pixelFormat, &pfd);
     if(!m_glContext)
     {
-        initContext(hDC);
+        m_glContext = wglCreateContext(hDC);
     }
+    w->m_glContext = wglCreateContext(hDC);
+    wglShareLists(m_glContext, w->m_glContext);
 }
 
 }}}

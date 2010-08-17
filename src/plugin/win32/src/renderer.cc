@@ -54,6 +54,13 @@ namespace
                 nbWindows--;
                 break;
 
+            case WM_PAINT:
+                {
+                    ValidateRect(hWnd, NULL);
+                    break;
+                }
+
+
             case WM_SETFOCUS:
                 break;
             case WM_KILLFOCUS:

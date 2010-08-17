@@ -9,7 +9,7 @@ namespace BugEngine { namespace Graphics
 {
 
 RenderBackend::RenderBackend()
-:   m_syncTask(ref< Task< MethodCaller<RenderBackend, &RenderBackend::flush> > >::create("flush", color32(255,0,0),  MethodCaller<RenderBackend, &RenderBackend::flush>(this)))
+:   m_syncTask(ref< Task< MethodCaller<RenderBackend, &RenderBackend::flush> > >::create("flush", color32(255,0,0),  MethodCaller<RenderBackend, &RenderBackend::flush>(this), Scheduler::High))
 {
 }
 

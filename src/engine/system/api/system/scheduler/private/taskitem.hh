@@ -22,7 +22,6 @@ class be_api(SYSTEM) ITaskItem : public minitl::inode
     friend class ::BugEngine::Scheduler;
     friend class ::BugEngine::Scheduler::Worker;
 protected:
-    unsigned int        m_affinity;
     size_t              m_splitCount;
     weak<const ITask>   m_owner;
 protected: //friend Worker

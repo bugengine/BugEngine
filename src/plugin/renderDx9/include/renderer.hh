@@ -71,7 +71,9 @@ public:
     ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
     ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
 
+
     u32                             getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
+    bool                            multithreaded() const override { return false; }
 
     weak<const FileSystem>          filesystem() const { return m_filesystem; }
 private:
@@ -81,8 +83,8 @@ private:
     void                            createContextAsync(D3DPRESENT_PARAMETERS& params);
     void                            destroyContextAsync();
 protected:
-    virtual UINT                    messageCount() const;
-    virtual void                    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+    UINT                            messageCount() const override;
+    void                            handleMessage(UINT msg, WPARAM wParam, LPARAM lParam) override;
 public:
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

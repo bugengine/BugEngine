@@ -11,8 +11,8 @@ namespace BugEngine
 {
 
 template< typename Body >
-Task< Body >::Task(istring name, color32 color, const Body& body)
-:   ITask(name, color)
+Task< Body >::Task(istring name, color32 color, const Body& body, Scheduler::Priority priority)
+:   ITask(name, color, priority)
 ,   m_body(body)
 ,   m_taskCount(0)
 ,   m_taskCompleted(0)

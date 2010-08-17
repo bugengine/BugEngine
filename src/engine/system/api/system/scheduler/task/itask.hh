@@ -53,8 +53,9 @@ private:
         ChainCallback& operator=(const ChainCallback& other);
     };
 public:
-    const istring name;
-    const color32 color;
+    const istring               name;
+    const color32               color;
+    const Scheduler::Priority   priority;
 private:
     minitl::list< weak<ICallback> >     m_callbacks;
     ref<ICallback>                      m_start;
@@ -71,7 +72,7 @@ public:
     weak<ICallback> startCallback();
 
 protected:
-    ITask(istring name, color32 color);
+    ITask(istring name, color32 color, Scheduler::Priority priority);
 private:
     ITask& operator=(const ITask& other);
     ITask(const ITask& other);
