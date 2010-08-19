@@ -18,10 +18,10 @@ private:
     class Buffer
     {
     private:
-        Buffer*     m_next;
-        byte*       m_buffer;
-        i_size_t    m_used;
-        static const size_t s_capacity = 1024*200;
+        Buffer*                             m_next;
+        Memory<Arena::General>::Block<byte> m_buffer;
+        i_size_t                            m_used;
+        static const size_t                 s_capacity = 1024*200;
     private:
         StringCache*    reserveNext(size_t size);
     public:
@@ -75,7 +75,7 @@ StringCache::Buffer* StringCache::getBuffer() NOTHROW
 
 StringCache::Buffer::Buffer()
 :   m_next(0)
-,   m_buffer((byte*)be_malloc(s_capacity))
+,   m_buffer(s_capacity)
 ,   m_used(0)
 {
 }
@@ -83,7 +83,6 @@ StringCache::Buffer::Buffer()
 StringCache::Buffer::~Buffer()
 {
     delete m_next;
-    be_free(m_buffer);
 }
 
 StringCache* StringCache::Buffer::reserve(size_t size)

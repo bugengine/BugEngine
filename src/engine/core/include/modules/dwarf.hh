@@ -22,16 +22,16 @@ private:
     class StringBuffer : public refcountable
     {
     private:
-        const ref<const StringBuffer>  m_next;
-        u64 const                      m_size;
-        u64                            m_current;
-        char* const                    m_buffer;
+        const ref<const StringBuffer>       m_next;
+        u64 const                           m_size;
+        u64                                 m_current;
+        Memory<Arena::General>::Block<char> m_buffer;
     public:
-        StringBuffer(char* buffer, u64 size, ref<const StringBuffer> next = ref<const StringBuffer>());
         StringBuffer(size_t size, ref<const StringBuffer> next = ref<const StringBuffer>());
         ~StringBuffer();
 
         const char* store(const char* string, size_t size);
+        char* data();
     private:
         StringBuffer(const StringBuffer&);
         StringBuffer& operator=(const StringBuffer&);

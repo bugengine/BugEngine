@@ -12,21 +12,18 @@ Device::Device(const istring& name, size_t numControls)
 :   /*m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
 ,*/   m_name(name)
 ,   m_numControls(numControls)
-,   m_active((float*)be_malloc(sizeof(float)*numControls))
-,   m_lastFrame((float*)be_malloc(sizeof(float)*numControls))
-,   m_buffer((float*)be_malloc(sizeof(float)*numControls))
+,   m_active(numControls)
+,   m_lastFrame(numControls)
+,   m_buffer(numControls)
 {
-    std::fill(m_active, m_active+numControls, 0.0f);
-    std::fill(m_lastFrame, m_lastFrame+numControls, 0.0f);
-    std::fill(m_buffer, m_buffer+numControls, 0.0f);
+    std::fill((float*)m_active, (float*)m_active+numControls, 0.0f);
+    std::fill((float*)m_lastFrame, (float*)m_lastFrame+numControls, 0.0f);
+    std::fill((float*)m_buffer, (float*)m_buffer+numControls, 0.0f);
 }
 
 Device::~Device()
 {
     //m_deviceNamespace->clear();
-    be_free(m_buffer);
-    be_free(m_lastFrame);
-    be_free(m_active);
 }
 
 const float* Device::getActiveBuffer() const
@@ -56,11 +53,9 @@ void Device::addControlAlias(const istring& /*ns*/, const istring& /*alias*/, re
 
 void Device::update()
 {
-    float* tmp = m_buffer;
-    m_buffer = m_lastFrame;
-    m_lastFrame = m_active;
-    m_active = tmp;
-    memcpy(m_buffer, m_active, m_numControls*sizeof(float));
+    m_buffer.swap(m_lastFrame);
+    m_lastFrame.swap(m_active);
+    memcpy((float*)m_buffer, (float*)m_active, m_numControls*sizeof(float));
 }
 
 }}

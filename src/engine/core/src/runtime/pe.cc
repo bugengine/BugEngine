@@ -392,20 +392,20 @@ PE::PE(const char *filename, u64 baseAddress)
         size_t debugEntryVirtualAdress = 0;
         size_t debugEntrySize = 0;
         {
-            Malloc::MemoryBlock<u8> block(imageHeader.optionalHeaderSize);
-            fread(block.data, imageHeader.optionalHeaderSize, 1, m_file);
-            if(*(i16*)block.data == ImageHeader::Header_Pe32Header)
+            Memory<Arena::General>::Block<u8> block(imageHeader.optionalHeaderSize);
+            fread(block, imageHeader.optionalHeaderSize, 1, m_file);
+            if(*(i16*)(u8*)block == ImageHeader::Header_Pe32Header)
             {
-                PEHeader* header = reinterpret_cast<PEHeader*>(block.data);
+                PEHeader* header = reinterpret_cast<PEHeader*>((u8*)block);
                 if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
                     debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
                     debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
                 }
             }
-            else if(*(i16*)block.data == ImageHeader::Header_Pe32PlusHeader)
+            else if(*(i16*)(u8*)block == ImageHeader::Header_Pe32PlusHeader)
             {
-                PEPlusHeader* header = reinterpret_cast<PEPlusHeader*>(block.data);
+                PEPlusHeader* header = reinterpret_cast<PEPlusHeader*>((u8*)block);
                 if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
                     debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
@@ -418,8 +418,8 @@ PE::PE(const char *filename, u64 baseAddress)
             }
         }
 
-        Malloc::MemoryBlock<SectionHeader> sections(imageHeader.sectionCount);
-        fread(sections.data, sizeof(SectionHeader), imageHeader.sectionCount, m_file);
+        Memory<Arena::General>::Block<SectionHeader> sections(imageHeader.sectionCount);
+        fread(sections, sizeof(SectionHeader), imageHeader.sectionCount, m_file);
 
         if(debugEntryVirtualAdress && debugEntrySize)
         {
@@ -430,7 +430,7 @@ PE::PE(const char *filename, u64 baseAddress)
                 if(sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset + sections[section].size) > debugEntryVirtualAdress)
                 {
                     be_info("loading debug info from section %s" | sections[section].name);
-                    Malloc::MemoryBlock<DebugEntry> entries(debugEntryCount);
+                    Memory<Arena::General>::Block<DebugEntry> entries(debugEntryCount);
                     fseek(m_file, static_cast<long>(sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET);
                     fread(entries, sizeof(DebugEntry), debugEntryCount, m_file);
                     for(size_t i = 0; i < debugEntryCount; ++i)
@@ -439,13 +439,13 @@ PE::PE(const char *filename, u64 baseAddress)
                         {
                         case DebugEntry::Type_CodeView:
                             {
-                                Malloc::MemoryBlock<u8> info(entries[i].size);
+                                Memory<Arena::General>::Block<u8> info(entries[i].size);
                                 fseek(m_file, entries[i].fileOffset, SEEK_SET);
                                 fread(info, entries[i].size, 1, m_file);
-                                PdbInfo* pdbInfo = reinterpret_cast<PdbInfo*>(info.data);
+                                PdbInfo* pdbInfo = reinterpret_cast<PdbInfo*>((u8*)info);
                                 if (strncmp(pdbInfo->signature, "NB10", 4) == 0)
                                 {
-                                    PdbInfo20* pdb20 = reinterpret_cast<PdbInfo20*>(info.data);
+                                    PdbInfo20* pdb20 = reinterpret_cast<PdbInfo20*>((u8*)info);
                                     m_symbolInformations.type = SymbolResolver::SymbolInformations::PDB20;
                                     m_symbolInformations.filename = pdb20->filename;
                                     m_symbolInformations.identifier = minitl::format<>("%d%d") | pdb20->timestamp | pdb20->age;
@@ -453,7 +453,7 @@ PE::PE(const char *filename, u64 baseAddress)
                                 }
                                 else if (strncmp(pdbInfo->signature, "RSDS", 4) == 0)
                                 {
-                                    PdbInfo70* pdb70 = reinterpret_cast<PdbInfo70*>(info.data);
+                                    PdbInfo70* pdb70 = reinterpret_cast<PdbInfo70*>((u8*)info);
                                     m_symbolInformations.type = SymbolResolver::SymbolInformations::PDB70;
                                     m_symbolInformations.filename = pdb70->filename;
                                     m_symbolInformations.identifier = minitl::format<>("%s%d") | (const char *)pdb70->signature.compactstr() | pdb70->age;
@@ -477,7 +477,8 @@ PE::PE(const char *filename, u64 baseAddress)
         size_t stringTableOffset = imageHeader.symbolTableOffset + imageHeader.symbolCount*18;
         fseek(m_file, static_cast<long>(stringTableOffset), SEEK_SET);
         fread(&stringTableSize, sizeof(stringTableSize), 1, m_file);
-        StringTable* strings = (StringTable*)be_malloc(stringTableSize);
+        Memory<Arena::General>::Block<char> stringBlock(stringTableSize);
+        StringTable* strings = reinterpret_cast<StringTable*>((char*)stringBlock);
         strings->size = stringTableSize;
         fread(strings->strings, 1, stringTableSize-4, m_file);
 
@@ -502,7 +503,7 @@ PE::PE(const char *filename, u64 baseAddress)
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if(debug_link)
         {
-            Malloc::MemoryBlock<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
+            Memory<Arena::General>::Block<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
             readSection(debug_link, filename);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(filename);
@@ -516,7 +517,6 @@ PE::PE(const char *filename, u64 baseAddress)
             m_symbolInformations.offset = m_baseAddress + code.offset;
             m_symbolInformations.size = code.size;
         }
-        be_free(strings);
     }
 }
 

@@ -28,11 +28,11 @@ protected:
 protected:
     static const int s_frameCount = 8;
 private:
-    size_t const                            m_workerId;
-    WorkReport*                             m_frames[s_frameCount];
-    volatile size_t                         m_currentFrame;
-    minitl::pool<WorkReport>                m_reportPool;
-    Thread                                  m_workThread;
+    size_t const                                m_workerId;
+    WorkReport*                                 m_frames[s_frameCount];
+    volatile size_t                             m_currentFrame;
+    minitl::pool<Arena::General, WorkReport>    m_reportPool;
+    Thread                                      m_workThread;
 protected:
     void unhook(ScheduledTasks::ITaskItem* prev, ScheduledTasks::ITaskItem* t);
 public:
