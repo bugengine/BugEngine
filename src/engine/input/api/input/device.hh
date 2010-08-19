@@ -13,11 +13,11 @@ class be_api(INPUT) Device : public minitl::refcountable
 {
 private:
     //ref<RTTI::Namespace>         m_deviceNamespace;
-    istring                         m_name;
-    size_t                          m_numControls;
-    float*                          m_active;
-    float*                          m_lastFrame;
-    float*                          m_buffer;
+    istring                                 m_name;
+    size_t                                  m_numControls;
+    Memory<Arena::General>::Block<float>    m_active;
+    Memory<Arena::General>::Block<float>    m_lastFrame;
+    Memory<Arena::General>::Block<float>    m_buffer;
 public:
     Device(const istring& name, size_t numKeys);
     ~Device();

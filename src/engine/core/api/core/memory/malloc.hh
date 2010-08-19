@@ -9,64 +9,96 @@
 namespace BugEngine
 {
 
-class be_api(CORE) Malloc
+template< int ARENA >
+class Memory
 {
-public:
-    static void init();
-
+private:
     static void* systemAlloc(size_t size, size_t alignment);
     static void* systemRealloc(void* ptr, size_t size, size_t alignment);
     static void  systemFree(const void* pointer);
-    template< typename T >
-    static inline T* systemAllocArray(size_t count, size_t alignment = be_alignof(T));
 public:
-    static void*    internalAlloc(size_t size, size_t alignment, size_t skipStack = 1);
-    static void*    internalRealloc(void* ptr, size_t size, size_t alignment, size_t skipStack = 1);
-    static void     internalFree(const void* ptr, size_t skipStack = 1);
+    static inline void* alloc(size_t size, size_t alignment);
+    static inline void* realloc(void* ptr, size_t size, size_t alignment);
+    static inline void  free(const void* pointer);
     template< typename T >
-    static inline T* internalAllocArray(size_t count, size_t alignment = be_alignof(T));
-
-    static void     frameUpdate();
+    static inline T* allocArray(size_t count, size_t alignment = be_alignof(T));
 public:
     template< typename T >
-    class MemoryBlock
+    class Block
     {
+    private:
+        T* m_data;
     public:
-        T* const data;
-    public:
-        MemoryBlock(const size_t count)
-            :   data(systemAllocArray<T>(count))
+        Block(size_t count, size_t alignment = be_alignof(T))
+            :   m_data(Memory<ARENA>::allocArray<T>(count, alignment))
         {
         };
-        ~MemoryBlock()
+        ~Block()
         {
-            systemFree(data);
+            Memory<ARENA>::free(m_data);
         }
         operator T*()
         {
-            return data;
+            return m_data;
         }
         operator const T*() const
         {
-            return data;
+            return m_data;
+        }
+        void realloc(size_t count, size_t alignment = be_alignof(T))
+        {
+            size_t size = be_align(sizeof(T),alignment)*count;
+            m_data = Memory<ARENA>::realloc(data, size, alignment);
+        }
+        void swap(Block<T>& other)
+        {
+            T* data = m_data;
+            m_data = other.m_data;
+            other.m_data = data;
+        }
+        T& operator[](const size_t index)
+        {
+            return m_data[index];
+        }
+        const T& operator[](const size_t index) const
+        {
+            return m_data[index];
         }
     private:
-        MemoryBlock(const MemoryBlock& other);
-        MemoryBlock& operator=(const MemoryBlock& other);
+        Block(const Block& other);
+        Block& operator=(const Block& other);
     };
 };
 
-template< typename T >
-T* Malloc::internalAllocArray(size_t count, size_t alignment)
+template< int ARENA >
+void* Memory<ARENA>::alloc(size_t size, size_t alignment)
 {
-    size_t size = be_align(sizeof(T),alignment)*count;
-    void* r = internalAlloc(size, alignment);
-    memset(r, 0, size);
-    return reinterpret_cast<T*>(r);
+#ifdef BE_MEMORY_TRACKING
+#endif
+    return systemAlloc(size, alignment);
 }
 
+template< int ARENA >
+void* Memory<ARENA>::realloc(void* ptr, size_t size, size_t alignment)
+{
+    if(!ptr)
+        return alloc(size, alignment);
+#ifdef BE_MEMORY_TRACKING
+#endif
+    return systemRealloc(ptr, size, alignment);
+}
+
+template< int ARENA >
+void  Memory<ARENA>::free(const void* pointer)
+{
+#ifdef BE_MEMORY_TRACKING
+#endif
+    systemFree(pointer);
+}
+
+template< int ARENA >
 template< typename T >
-T* Malloc::systemAllocArray(size_t count, size_t alignment)
+T* Memory<ARENA>::allocArray(size_t count, size_t alignment)
 {
     size_t size = be_align(sizeof(T),alignment)*count;
     void* r = systemAlloc(size, alignment);
@@ -74,17 +106,25 @@ T* Malloc::systemAllocArray(size_t count, size_t alignment)
     return reinterpret_cast<T*>(r);
 }
 
+struct Arena
+{
+    enum
+    {
+        // engine section
+        General = 0x0000,
+        Rtti    = 0x0001,
+        // game section
+        Game    = 0x0100,
+        // plugin section
+        Plugin  = 0x1000
+    };
+};
+
 }
 
-#define be_malloc(s)            BugEngine::Malloc::internalAlloc(s,16)
-#define be_malloc_aligned(s,a)  BugEngine::Malloc::internalAlloc(s,a)
-#define be_realloc(p,s)         BugEngine::Malloc::internalRealloc(p,s,16)
-#define be_free(p)              BugEngine::Malloc::internalFree(p)
 
 #ifdef BE_PLATFORM_MACOS
 # include   <malloc/malloc.h>
-#else
-# include   <malloc.h>
 #endif
 #include    <new>
 

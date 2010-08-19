@@ -67,7 +67,7 @@ ref<const Module> Module::self()
     DWORD requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
     size_t moduleCount = requiredSize/sizeof(HMODULE);
-    Malloc::MemoryBlock<HMODULE> hmodules(moduleCount);
+    Memory<Arena::General>::Block<HMODULE> hmodules(moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
     for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)

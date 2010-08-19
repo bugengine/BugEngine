@@ -18,6 +18,7 @@
 
 #include    <mobile/world.hh>
 
+
 /*---------------------------------------------------------------------------*/
 int be_main (weak<BugEngine::Application> app)
 {

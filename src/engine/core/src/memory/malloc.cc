@@ -29,7 +29,8 @@ struct MallocInitializer
 static MallocInitializer s_initializer;
 
 
-void* Malloc::systemAlloc(size_t size, size_t alignment)
+template< >
+be_api(CORE) void* Memory<Arena::General>::systemAlloc(size_t size, size_t alignment)
 {
     be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
 #ifdef _MSC_VER
@@ -39,7 +40,8 @@ void* Malloc::systemAlloc(size_t size, size_t alignment)
 #endif
 }
 
-void* Malloc::systemRealloc(void* ptr, size_t size, size_t alignment)
+template< >
+be_api(CORE) void* Memory<Arena::General>::systemRealloc(void* ptr, size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
     return _aligned_realloc(ptr, size, alignment);
@@ -48,46 +50,13 @@ void* Malloc::systemRealloc(void* ptr, size_t size, size_t alignment)
 #endif
 }
 
-void Malloc::systemFree(const void* pointer)
+template< >
+be_api(CORE) void Memory<Arena::General>::systemFree(const void* pointer)
 {
 #ifdef _MSC_VER
     return _aligned_free(const_cast<void*>(pointer));
 #else
     return free(const_cast<void*>(pointer));
-#endif
-}
-
-BE_NOINLINE void* Malloc::internalAlloc(size_t size, size_t alignment, size_t /*skipStack*/)
-{
-    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
-    void* ptr = systemAlloc(size, alignment);
-#ifdef BE_ENABLE_MEMORY_TRACKING
-#endif
-    return ptr;
-}
-
-BE_NOINLINE void* Malloc::internalRealloc(void* ptr, size_t size, size_t alignment, size_t /*skipStack*/)
-{
-#ifdef BE_ENABLE_MEMORY_TRACKING
-#endif
-    ptr = systemRealloc(ptr, size, alignment);
-#ifdef BE_ENABLE_MEMORY_TRACKING
-#endif
-    return ptr;
-}
-
-void Malloc::internalFree(const void* ptr, size_t /*skipStack*/)
-{
-    if(! ptr)
-        return;
-#ifdef BE_ENABLE_MEMORY_TRACKING
-#endif
-    systemFree(ptr);
-}
-
-void Malloc::frameUpdate()
-{
-#ifdef BE_ENABLE_MEMORY_TRACKING
 #endif
 }
 

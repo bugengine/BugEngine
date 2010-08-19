@@ -39,15 +39,15 @@ public:
         PriorityCount = 3
     };
 private:
-    minitl::vector< Worker* >       m_workers;
-    Semaphore                       m_synchro;
-    minitl::pool< char[128] >       m_taskPool;
-    unsigned int                    m_frameCount;
-    Timer                           m_timer;
-    tick_type                       m_lastFrameTick;
-    tick_type                       m_currentFrameTick;
-    float                           m_frameTime;
-    Event                           m_end;
+    minitl::vector< Worker* >                   m_workers;
+    Semaphore                                   m_synchro;
+    minitl::pool< Arena::General, char[128] >   m_taskPool;
+    unsigned int                                m_frameCount;
+    Timer                                       m_timer;
+    tick_type                                   m_lastFrameTick;
+    tick_type                                   m_currentFrameTick;
+    float                                       m_frameTime;
+    Event                                       m_end;
 private: //friend Worker
     minitl::istack<ScheduledTasks::ITaskItem>   m_tasks[PriorityCount];
     i_u32                                       m_runningTasks;

@@ -4,10 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERBACKEND_HH_
 #define BE_GRAPHICS_RENDERBACKEND_HH_
 /*****************************************************************************/
-#include    <minitl/interlocked/stack.hh>
-#include    <minitl/memory/pool.hh>
 #include    <graphics/renderer/buffer/vertexdesc.hh>
-#include    <graphics/scene/scene.hh>
 #include    <graphics/renderer/rendertarget.hh>
 #include    <graphics/renderer/buffer/gpubuffer.hh>
 #include    <graphics/material/shader.hh>

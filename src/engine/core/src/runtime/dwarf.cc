@@ -11,25 +11,16 @@ namespace BugEngine { namespace Runtime
 
 static const size_t c_stringBufferSize = 2048;
 
-DwarfModule::StringBuffer::StringBuffer(char* buffer, u64 size, ref<const StringBuffer> next)
-    :   m_next(next)
-    ,   m_size(size)
-    ,   m_current(size)
-    ,   m_buffer(buffer)
-{
-}
-
 DwarfModule::StringBuffer::StringBuffer(size_t size, ref<const StringBuffer> next)
     :   m_next(next)
     ,   m_size(size)
     ,   m_current(0)
-    ,   m_buffer((char*)be_malloc(size))
+    ,   m_buffer(size)
 {
 }
 
 DwarfModule::StringBuffer::~StringBuffer()
 {
-    be_free(m_buffer);
 }
 
 const char* DwarfModule::StringBuffer::store(const char* string, size_t size)
@@ -43,6 +34,11 @@ const char* DwarfModule::StringBuffer::store(const char* string, size_t size)
     }
     else
         return 0;
+}
+
+char* DwarfModule::StringBuffer::data()
+{
+    return m_buffer;
 }
 
 namespace Dwarf
@@ -312,28 +308,27 @@ void DwarfModule::parse(const Module& module)
     const Module::Section& debug_str = module[".debug_str"];
     if(debug_str)
     {
-        m_stringPool = (char*)be_malloc(be_checked_numcast<size_t>(debug_str.fileSize));
-        module.readSection(debug_str, m_stringPool);
-        m_strings = ref<StringBuffer>::create(m_stringPool, debug_str.size, m_strings);
+        m_strings = ref<StringBuffer>::create(debug_str.fileSize, m_strings);
+        module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
+    debugInfo = Memory<Arena::General>::Block<u8>(debug_info.fileSize);
     if(debug_info)
     {
-        debugInfo = (u8*)be_malloc(be_checked_numcast<size_t>(debug_info.fileSize));
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
+    debugAbbrev = Memory<Arena::General>::Block<u8>(debug_abbrev.fileSize);
     if(debug_abbrev)
     {
-        debugAbbrev = (u8*)be_malloc(be_checked_numcast<size_t>(debug_abbrev.fileSize));
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
+    lineProgram = Memory<Arena::General>::Block<u8>(debug_line.fileSize);
     if(debug_line)
     {
-        lineProgram = (u8*)be_malloc(be_checked_numcast<size_t>(debug_line.fileSize));
         module.readSection(debug_line, lineProgram);
     }
 
@@ -355,10 +350,6 @@ void DwarfModule::parse(const Module& module)
         while(readAbbreviation(abbreviations, abbrev)) /*again*/;
         readInfos(info, m_units, abbrev, unit.ptrSize);
     }
-
-    be_free(lineProgram);
-    be_free(debugAbbrev);
-    be_free(debugInfo);
 }
 
 const char * DwarfModule::storeString(const char *string)

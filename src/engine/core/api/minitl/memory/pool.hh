@@ -11,7 +11,7 @@
 namespace minitl
 {
 
-template< typename T >
+template< int ARENA, typename T >
 class pool
 {
 private:
@@ -19,9 +19,9 @@ private:
     {
         ElementSize = sizeof(T)
     };
-    istack<inode>               m_items;
-    void*                       m_pool;
-    void*                       m_end;
+    istack<inode>                                   m_items;
+    typename BugEngine::Memory<ARENA>::Block<T>     m_pool;
+    T*                                              m_end;
 public:
     pool(size_t capacity, size_t alignment = be_alignof(T));
     ~pool();
