@@ -34,9 +34,9 @@ be_api(CORE) void* Memory<Arena::General>::systemAlloc(size_t size, size_t align
 {
     be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
 #ifdef _MSC_VER
-    return _aligned_malloc(size, alignment);
+    return ::_aligned_malloc(size, alignment);
 #else
-    return malloc(size);
+    return ::malloc(size);
 #endif
 }
 
@@ -44,9 +44,9 @@ template< >
 be_api(CORE) void* Memory<Arena::General>::systemRealloc(void* ptr, size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
-    return _aligned_realloc(ptr, size, alignment);
+    return ::_aligned_realloc(ptr, size, alignment);
 #else
-    return realloc(ptr, size);
+    return ::realloc(ptr, size);
 #endif
 }
 
@@ -54,9 +54,9 @@ template< >
 be_api(CORE) void Memory<Arena::General>::systemFree(const void* pointer)
 {
 #ifdef _MSC_VER
-    return _aligned_free(const_cast<void*>(pointer));
+    return ::_aligned_free(const_cast<void*>(pointer));
 #else
-    return free(const_cast<void*>(pointer));
+    return ::free(const_cast<void*>(pointer));
 #endif
 }
 

@@ -14,6 +14,11 @@ Renderer::~Renderer()
 
 void Renderer::attachWindow(Window* w)
 {
+    if(!m_glContext)
+    {
+        glXCreateContext(m_display, m_visual, 0, True);
+    }
+    w->m_glContext = glXCreateContext(m_display, m_visual, m_glContext, True);
 }
 
 }}}
