@@ -23,12 +23,6 @@ class Renderer : public Windowing::Renderer
     friend class ShaderPipeline;
     friend class TexturePipeline;
 private:
-    enum
-    {
-        __Screen,
-        SystemParamCount
-    };
-private:
 #   ifdef BE_PLATFORM_WIN32
     HGLRC                       m_glContext;
 #   else

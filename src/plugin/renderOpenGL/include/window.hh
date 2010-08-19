@@ -17,7 +17,9 @@ class Window : public Windowing::Window
     friend class Renderer;
 private:
     #ifdef BE_PLATFORM_WIN32
-        HGLRC   m_glContext;
+        HGLRC       m_glContext;
+    #else
+        GLXContext  m_glContext;
     #endif
 private:
     inline void setCurrent();

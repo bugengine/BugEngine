@@ -30,7 +30,7 @@ public:
         T* m_data;
     public:
         Block(size_t count, size_t alignment = be_alignof(T))
-            :   m_data(Memory<ARENA>::allocArray<T>(count, alignment))
+            :   m_data(Memory<ARENA>::template allocArray<T>(count, alignment))
         {
         };
         ~Block()
@@ -48,7 +48,7 @@ public:
         void realloc(size_t count, size_t alignment = be_alignof(T))
         {
             size_t size = be_align(sizeof(T),alignment)*count;
-            m_data = Memory<ARENA>::realloc(data, size, alignment);
+            m_data = Memory<ARENA>::realloc(m_data, size, alignment);
         }
         void swap(Block<T>& other)
         {

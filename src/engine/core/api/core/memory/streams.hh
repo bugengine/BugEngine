@@ -37,7 +37,7 @@ template< int ARENA >
 class MemoryStream : public IMemoryStream
 {
 private:
-    typename Memory<ARENA>::Block<char> m_memory;
+    typename Memory<ARENA>::Block m_memory;
     i64                                 m_size;
     i64                                 m_offset;
 public:

@@ -11,9 +11,9 @@ template< >
 void* Memory<Arena::Plugin>::systemAlloc(size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
-    return _aligned_malloc(size, alignment);
+    return ::_aligned_malloc(size, alignment);
 #else
-    return malloc(size);
+    return ::malloc(size);
 #endif
 }
 
@@ -21,9 +21,9 @@ template< >
 void* Memory<Arena::Plugin>::systemRealloc(void* ptr, size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
-    return _aligned_realloc(ptr, size, alignment);
+    return ::_aligned_realloc(ptr, size, alignment);
 #else
-    return realloc(ptr, size);
+    return ::realloc(ptr, size);
 #endif
 }
 
@@ -31,9 +31,9 @@ template< >
 void Memory<Arena::Plugin>::systemFree(const void* pointer)
 {
 #ifdef _MSC_VER
-    return _aligned_free(const_cast<void*>(pointer));
+    return ::_aligned_free(const_cast<void*>(pointer));
 #else
-    return free(const_cast<void*>(pointer));
+    return ::free(const_cast<void*>(pointer));
 #endif
 }
 
