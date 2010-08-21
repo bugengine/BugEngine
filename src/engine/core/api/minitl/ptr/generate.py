@@ -1,4 +1,4 @@
-#! /bin/python
+#! python
 def template(f, n, const, types = '', params = '', args = ''):
 	if n > 0:
 		if const:
@@ -17,9 +17,17 @@ def template(f, n, const, types = '', params = '', args = ''):
 				template(f, n-1, True, ('class A%d ' % n), ('A%d& a%d' %(n,n)), ('a%d'%n))
 	elif const:
 		if types :
-			f.write('template< %s > static inline be_create<T> create(%s) { return be_create<T>(new T(%s)); }\n' % (types, params, args));
+			f.write('template< int ARENA, %s > static inline be_pointer_<T> create(%s)\n' % (types, params))
+			f.write('{\n')
+			f.write('    void* mem = BugEngine::Memory<ARENA>::alloc(sizeof(T), be_alignof(T));\n')
+			f.write('    return be_pointer_<T>(new(mem) T(%s), &BugEngine::Memory<ARENA>::free);\n' % args)
+			f.write('}\n');
 		else:
-			f.write('static inline be_create<T> create() { return be_create<T>(new T()); }\n');
+			f.write('template< int ARENA > static inline be_pointer_<T> create()\n')
+			f.write('{\n')
+			f.write('    void* mem = BugEngine::Memory<ARENA>::alloc(sizeof(T), be_alignof(T));\n')
+			f.write('    return be_pointer_<T>(new(mem) T, &BugEngine::Memory<ARENA>::free);\n')
+			f.write('}\n');
 
 
 for i in range(0,7):

@@ -1,1 +1,5 @@
-static inline be_create<T> create() { return be_create<T>(new T()); }
+template< int ARENA > static inline be_pointer_<T> create()
+{
+    void* mem = BugEngine::Memory<ARENA>::alloc(sizeof(T), be_alignof(T));
+    return be_pointer_<T>(new(mem) T, &BugEngine::Memory<ARENA>::free);
+}

@@ -38,7 +38,7 @@ size_t BuiltinClassInfo<T>::size() const
 template<>                                                                          \
 BE_EXPORT weak<const ClassInfo> be_typeid<t>::klass()                               \
 {                                                                                   \
-    static ref< BuiltinClassInfo<t> > ci = ref< BuiltinClassInfo<t> >::create(#t);  \
+    static ref< BuiltinClassInfo<t> > ci = ref< BuiltinClassInfo<t> >::create<Arena::General>(#t);  \
     return ci;                                                                      \
 }
 

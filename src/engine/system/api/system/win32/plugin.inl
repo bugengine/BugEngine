@@ -4,7 +4,7 @@
 #include    <stdexcept>
 #include    <core/environment.hh>
 
-
+#include <winerror.h>
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
     extern "C" FORCEEXPORT klass* be_createPlugin params { return new klass args; } \
     extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { delete cls; }
@@ -19,14 +19,16 @@ static HANDLE loadPlugin(const istring &pluginName)
     HANDLE h = LoadLibrary( (pluginDir + "/plugins/" + pluginName.c_str() + ".dll").c_str());
     if(!h)
     {
-        char *errorMessage;
-        ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+        char *errorMessage = 0;
+        int errorCode = ::GetLastError();
+        FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
             NULL,
-            ::GetLastError(),
-            0,
-            reinterpret_cast<LPTSTR>(&errorMessage),
+            errorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
+        errorCode = ::GetLastError();
         be_error(errorMessage);
         ::LocalFree(errorMessage);
     }

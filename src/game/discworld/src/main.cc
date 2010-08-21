@@ -22,10 +22,10 @@
 /*---------------------------------------------------------------------------*/
 int be_main (weak<BugEngine::Application> app)
 {
-    ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create();
-    filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
+    ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create<BugEngine::Arena::General>();
+    filesystem->mount("data", ref<BugEngine::DiskFS>::create<BugEngine::Arena::General>(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-    //ref<TestNS::Test> t = ref<TestNS::Test>::create();
+    //ref<TestNS::Test> t = ref<TestNS::Test>::create<Arena::General>();
     //BugEngine::RTTI::Namespace::root()->insert("Sub1.Sub2.test", ref<BugEngine::Object>(t));
     //BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
     //p->doFile("data/scripts/main.lua");
@@ -42,7 +42,7 @@ int be_main (weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
     BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
-    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create();
+    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create<BugEngine::Arena::General>();
     {
 
         ref<BugEngine::Graphics::IRenderTarget> w = display2->createRenderWindow(f);
@@ -57,15 +57,15 @@ int be_main (weak<BugEngine::Application> app)
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 
-        ref<BugEngine::World> world = ref<BugEngine::World>::create("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(world);
+        ref<BugEngine::World> world = ref<BugEngine::World>::create<BugEngine::Arena::General>("physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create<BugEngine::Arena::General>(world);
 
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
-        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(scene, w));
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
+        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w));
         app->setScene(node);
     }
 

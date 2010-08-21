@@ -16,22 +16,22 @@ static inline void checked_delete(const T* ptr)
 {
     char typeMustBeComplete[sizeof(T)];
     (void)typeMustBeComplete;
-    delete ptr;
+    if(ptr)
+    {
+        Deleter* d = ptr->m_deleter;
+        ptr->~T();
+        (*d)(ptr);
+    }
 }
 
 class refcountable : public pointer
 {
-    friend inline void addref(const refcountable* ptr);
-    template < typename T >
-    friend inline const T* decref(const T* ptr);
-    template< typename T >
-    friend class ref;
-    template< typename T >
-    friend class scoped;
-    template < typename T >
-    friend void checked_delete(const T* ptr);
-private:
-    mutable i_u32 m_refCount;
+                            friend inline void addref(const refcountable* ptr);
+    template< typename T >  friend inline const T* decref(const T* ptr);
+    template< typename T >  friend class ref;
+    template< typename T >  friend class scoped;
+private: /* friend ref */
+    mutable i_u32   m_refCount;
 public:
     refcountable()
     :   m_refCount(0)

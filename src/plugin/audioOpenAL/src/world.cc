@@ -21,7 +21,7 @@ World::~World()
 
 ref<Audio::ISound> World::createSound(ref<IMemoryStream> soundfile)
 {
-    return ref<Sound>::create(this, soundfile);
+    return ref<Sound>::create<Arena::General>(this, soundfile);
 }
 
 void World::step()

@@ -308,7 +308,7 @@ void DwarfModule::parse(const Module& module)
     const Module::Section& debug_str = module[".debug_str"];
     if(debug_str)
     {
-        m_strings = ref<StringBuffer>::create(debug_str.fileSize, m_strings);
+        m_strings = ref<StringBuffer>::create<Arena::General>(debug_str.fileSize, m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
@@ -359,12 +359,12 @@ const char * DwarfModule::storeString(const char *string)
     be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
     if(!m_strings)
     {
-        m_strings = ref<StringBuffer>::create(c_stringBufferSize);
+        m_strings = ref<StringBuffer>::create<Arena::General>(c_stringBufferSize);
     }
     result = m_strings->store(string, size);
     if(!result)
     {
-        m_strings = ref<StringBuffer>::create(c_stringBufferSize, m_strings);
+        m_strings = ref<StringBuffer>::create<Arena::General>(c_stringBufferSize, m_strings);
         result = m_strings->store(string, size);
         be_assert(result, "new empty pool could not store string");
     }
