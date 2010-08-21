@@ -51,12 +51,12 @@ ref<const Module> Module::self()
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
-            s_module = ref<Elf>::create(filename, lmap->l_addr);
+            s_module = ref<Elf>::create<Arena::General>(filename, lmap->l_addr);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<Elf>::create(lmap->l_name, lmap->l_addr);
+            ref<Module> newModule = ref<Elf>::create<Arena::General>(lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module = newModule;
         }
@@ -78,12 +78,12 @@ ref<const Module> Module::self()
         ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
         if(i == 0)
         {
-           s_module = ref<PE>::create(moduleName, (u64)info.lpBaseOfDll);
+           s_module = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<PE>::create(moduleName, (u64)info.lpBaseOfDll);
+            ref<Module> newModule = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
             module->m_next = newModule;
             module = newModule;
         }

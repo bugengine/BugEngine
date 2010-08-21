@@ -24,7 +24,7 @@ weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCr
 {
     std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, scoped<FileSystemMountPoint>()));
     if(result.second)
-        result.first->second = scoped<FileSystemMountPoint>::create();
+        result.first->second = scoped<FileSystemMountPoint>::create<Arena::General>();
     return result.first->second;
 }
 
@@ -73,7 +73,7 @@ bool FileSystem::FileSystemMountPoint::empty() const
 //-----------------------------------------------------------------------------
 
 FileSystem::FileSystem(void)
-: m_root(scoped<FileSystemMountPoint>::create())
+: m_root(scoped<FileSystemMountPoint>::create<Arena::General>())
 {
 }
 

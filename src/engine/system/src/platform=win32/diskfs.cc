@@ -125,7 +125,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
             DWORD sizehigh;
             HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, (m_prefix+filename).tostring("/").c_str());
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
-            return ref<MemoryFileMap>::create(memory, GetFileSize(file, &sizehigh), file, filemap);
+            return ref<MemoryFileMap>::create<Arena::General>(memory, GetFileSize(file, &sizehigh), file, filemap);
         }
     }
     else

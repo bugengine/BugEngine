@@ -11,7 +11,7 @@ ITask::ITask(istring name, color32 color, Scheduler::Priority priority)
 :   name(name)
 ,   color(color)
 ,   priority(priority)
-,   m_start(ref<ChainCallback>::create(this))
+,   m_start(ref<ChainCallback>::create<Arena::General>(this))
 {
 }
 

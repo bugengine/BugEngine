@@ -17,7 +17,7 @@ private:
     static void* systemRealloc(void* ptr, size_t size, size_t alignment);
     static void  systemFree(const void* pointer);
 public:
-    static inline void* alloc(size_t size, size_t alignment);
+    static inline void* alloc(size_t size, size_t alignment = 16);
     static inline void* realloc(void* ptr, size_t size, size_t alignment);
     static inline void  free(const void* pointer);
     template< typename T >

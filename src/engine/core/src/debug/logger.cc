@@ -61,7 +61,7 @@ ref<Logger> Logger::instance(const inamespace& name)
         std::map< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
         {
-            ref<Logger> next = ref<Logger>::create(result, name[i]);
+            ref<Logger> next = ref<Logger>::create<Arena::General>(result, name[i]);
             result->m_children.insert(std::make_pair(name[i], next));
             result = next;
         }
@@ -73,7 +73,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 
 ref<Logger> Logger::root()
 {
-    static ref<Logger> s_rootLogger = ref<Logger>::create();
+    static ref<Logger> s_rootLogger = ref<Logger>::create<Arena::General>();
     return s_rootLogger;
 }
 

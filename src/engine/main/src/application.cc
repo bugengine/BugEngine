@@ -11,17 +11,17 @@ namespace BugEngine
 {
 
 Application::Application(int argc, const char *argv[])
-:   m_scheduler(scoped<Scheduler>::create())
+:   m_scheduler(scoped<Scheduler>::create<Arena::General>())
 ,   m_tasks()
 {
     be_forceuse(argc); be_forceuse(argv);
 
-    ref< TaskGroup > updateTask = ref< TaskGroup >::create("applicationUpdate", color32(255,255,0));
+    ref< TaskGroup > updateTask = ref< TaskGroup >::create<Arena::General>("applicationUpdate", color32(255,255,0));
     m_tasks.push_back(updateTask);
 
-    m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create("scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
-    //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create("memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
-    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create("application", color32(255,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
+    m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create<Arena::General>("scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
+    //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create<Arena::General>("memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
+    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create<Arena::General>("application", color32(255,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[1]));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[2]));
     //m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[3]));

@@ -24,7 +24,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
-    return ref<Window>::create(this, flags);
+    return ref<Window>::create<Arena::General>(this, flags);
 }
 
 ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)
@@ -39,12 +39,12 @@ ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, 
 
 ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
 {
-    return ref<VertexBuffer>::create(this, vertexCount, usage, flags);
+    return ref<VertexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
 }
 
 ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
 {
-    return ref<IndexBuffer>::create(this, vertexCount, usage, flags);
+    return ref<IndexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
 }
 
 void Renderer::drawBatch(const Batch& b)

@@ -11,29 +11,28 @@ namespace minitl
 template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;
+typedef void (Deleter)(const void* ptr);
 
 template< typename T >
 static void checked_delete(const T*);
 
 class pointer
 {
-    friend inline void addweak(const pointer* ptr);
-    template< typename T >
-    friend inline void decweak(const T* ptr);
-    template< typename T >
-    friend class ref;
-    template< typename T >
-    friend class scoped;
-    template< typename T >
-    friend void checked_delete(const T*);
+                            friend inline void addweak(const pointer* ptr);
+                            friend inline void decweak(const pointer* ptr);
+    template< typename T >  friend class ref;
+    template< typename T >  friend class scoped;
+    template< typename T >  friend void checked_delete(const T*);
 private:
+    Deleter*    m_deleter;
 #ifdef BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
 public:
     pointer()
+    :   m_deleter(0)
 #ifdef BE_ENABLE_WEAKCHECK
-    :   m_weakCount(0)
+    ,   m_weakCount(0)
 #endif
     {}
     inline virtual ~pointer()
@@ -60,8 +59,7 @@ inline void addweak(const pointer* ptr)
 #endif
 }
 
-template< typename T >
-inline void decweak(const T *ptr)
+inline void decweak(const pointer* ptr)
 {
 #ifdef BE_ENABLE_WEAKCHECK
     if(!ptr)

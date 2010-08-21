@@ -71,10 +71,10 @@ Manager::Manager()
         {
         case RIM_TYPEKEYBOARD:
             OutputDebugString(minitl::format<>("keyboard %s :\ntype %d/subtype %d/keys / %d\n") | deviceName | (i32)info.keyboard.dwType | (i32)info.keyboard.dwSubType | (i32)info.keyboard.dwNumberOfKeysTotal);
-            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Keyboard>::create(info.keyboard.dwNumberOfKeysTotal)));
+            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Keyboard>::create<Arena::General>(info.keyboard.dwNumberOfKeysTotal)));
             break;
         case RIM_TYPEMOUSE:
-            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Mouse>::create(info.mouse.dwNumberOfButtons)));
+            m_devices.insert(std::make_pair(lst[i].hDevice, ref<Mouse>::create<Arena::General>(info.mouse.dwNumberOfButtons)));
             break;
         case RIM_TYPEHID:
             break;

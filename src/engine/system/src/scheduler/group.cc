@@ -11,7 +11,7 @@ TaskGroup::TaskGroup(istring name, color32 color)
 :   ITask(name, color, Scheduler::High)
 ,   m_startTasks()
 ,   m_endTaskCount(0)
-,   m_completionCallback(ref<Callback>::create(this))
+,   m_completionCallback(ref<Callback>::create<Arena::General>(this))
 {
 }
 

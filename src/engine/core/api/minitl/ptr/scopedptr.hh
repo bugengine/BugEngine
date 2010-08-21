@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_PTR_SCOPEDPTR_
-#define BE_MINITL_PTR_SCOPEDPTR_
+#ifndef BE_MINITL_PTR_SCOPEDPTR_HH_
+#define BE_MINITL_PTR_SCOPEDPTR_HH_
 /*****************************************************************************/
 
 namespace minitl
@@ -16,11 +16,22 @@ class scoped
     template< typename U >
     friend class ref;
 private:
-    mutable T* m_ptr;
+    mutable T*  m_ptr;
 private:
-    scoped(T* value) NOTHROW : m_ptr(value)  { }
+    scoped(T* value, Deleter* deleter);
 public:
-#define be_create scoped
+    inline scoped();
+    inline ~scoped();
+    inline scoped(const scoped& other);
+    template< typename U > inline scoped(const scoped<U>& other);
+    inline scoped& operator=(const scoped& other);
+
+    inline T* operator->() const;
+    inline operator const void*() const;
+    inline bool operator!() const;
+    inline T& operator*();
+
+#define be_pointer_ scoped
 #include "factory0.inl"
 #include "factory1.inl"
 #include "factory2.inl"
@@ -28,41 +39,12 @@ public:
 #include "factory4.inl"
 #include "factory5.inl"
 #include "factory6.inl"
-#undef be_create
-public:
-    scoped() NOTHROW : m_ptr(0)                         { }
-    ~scoped()                                           { checked_delete<T>(m_ptr); }
-    scoped(const scoped& other) : m_ptr(other.m_ptr)    { other.m_ptr = 0; }
-    template< typename U >
-    scoped(const scoped<U>& other) : m_ptr(other.m_ptr) { other.m_ptr = 0; }
-    scoped& operator=(const scoped& other)              { checked_delete<T>(m_ptr); m_ptr = other.m_ptr; other.m_ptr = 0; return *this; }
-
-    T* operator->() const NOTHROW        { return m_ptr; }
-    operator const void*() const NOTHROW { return m_ptr; }
-    bool operator!() const NOTHROW       { return m_ptr == 0; }
-    T& operator*()                       { return *m_ptr; }
-private:
+#undef be_pointer_
 };
 
-template<typename T, typename U>
-bool operator==(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() == ref2.operator->(); }  
-
-template<typename T, typename U>
-bool operator!=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() != ref2.operator->(); }
-
-template<typename T, typename U>
-bool operator<(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() < ref2.operator->(); }  
-
-template<typename T, typename U>
-bool operator<=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() <= ref2.operator->(); }
-
-template<typename T, typename U>
-bool operator>(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() > ref2.operator->(); }  
-
-template<typename T, typename U>
-bool operator>=(const scoped<T>& ref1, const scoped<U>& ref2) { return ref1.operator->() >= ref2.operator->(); }
-
 }
+
+#include   <minitl/ptr/scopedptr.inl>
 
 /*****************************************************************************/
 #endif
