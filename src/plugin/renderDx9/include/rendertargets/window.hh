@@ -4,7 +4,7 @@
 #ifndef BE_DX9_RENDERTARGETS_WINDOW_HH_
 #define BE_DX9_RENDERTARGETS_WINDOW_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 #include    <renderer.hh>
 #include    <win32/window.hh>
 #include    <d3d9.h>

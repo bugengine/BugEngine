@@ -4,7 +4,7 @@
 #ifndef BE_OPENGL_WINDOW_HH_
 #define BE_OPENGL_WINDOW_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL

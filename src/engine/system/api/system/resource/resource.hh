@@ -4,36 +4,32 @@
 #ifndef BE_SYSTEM_RESOURCE_RESOURCE_HH_
 #define BE_SYSTEM_RESOURCE_RESOURCE_HH_
 /*****************************************************************************/
+#include    <system/resource/iresourcemanager.hh>
 
 namespace BugEngine
 {
 
-template< typename Destination, typename Source, typename ResourceLoader = typename Source::ResourceLoader >
 class Resource
 {
+    friend class IResourceManager;
 private:
-    ref<Destination>                    m_resource;
-    weak<const ResourceLoader> const    m_loader;
-protected:
-    void load(const Source& source);
-    void unload();
+    struct ResourceHandle
+    {
+    private:
+        weak<const IResourceManager>    m_manager;
+        const void*                     m_handle;
+    public:
+        ResourceHandle(weak<const IResourceManager> manager, const void* handle);
+        ~ResourceHandle();
+    };
+private:
+    minitl::list<ResourceHandle>    m_handles;
 public:
-    Resource(weak<const ResourceLoader> loader, const Source& source);
+    Resource();
     ~Resource();
-
-    inline bool isBound() const;
-
-    inline weak<Destination> get();
-
-    inline operator const void*() const;
-    inline bool operator!() const;
-    inline Destination* operator->();
-    inline const Destination* operator->() const;
 };
 
 }
-
-#include "resource.inl"
 
 /*****************************************************************************/
 #endif

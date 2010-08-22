@@ -4,20 +4,20 @@
 #ifndef BE_GRAPHICS_INDEXBUFFER_INL_
 #define BE_GRAPHICS_INDEXBUFFER_INL_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
 template< >
-inline IndexBuffer<u16>::IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage)
+inline IndexBuffer<u16>::IndexBuffer(weak<const IRenderer> owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Short)))
 {
 }
 
 template< >
-inline IndexBuffer<u32>::IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage)
+inline IndexBuffer<u32>::IndexBuffer(weak<const IRenderer> owner, u32 vertexCount, IndexUsage usage)
 :   m_owner(owner)
 ,   m_buffer(m_owner->createIndexBuffer(vertexCount, usage, IndexBufferFlags(IndexBufferFlags::Long)))
 {

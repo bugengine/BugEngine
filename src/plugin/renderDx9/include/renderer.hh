@@ -5,11 +5,8 @@
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
 #include    <win32/renderer.hh>
-#include    <cgshaderparam.hh>
 #include    <system/filesystem.hh>
 #include    <d3d9.h>
-#include    <Cg/cg.h>
-#include    <Cg/cgD3D9.h>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
@@ -68,9 +65,6 @@ public:
     ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
     ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
     ref<Graphics::IRenderTarget>    createMultipleRenderBuffer(TextureFlags flags, size_t count) override;
-    ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
-
 
     u32                             getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
     bool                            multithreaded() const override { return false; }

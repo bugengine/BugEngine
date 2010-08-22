@@ -4,8 +4,8 @@
 #ifndef BE_DX9_RENDERTARGETS_OFFSCREEN_HH_
 #define BE_DX9_RENDERTARGETS_OFFSCREEN_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/rendertarget.hh>
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irendertarget.hh>
+#include    <graphics/renderer/irenderer.hh>
 #include    <d3d9.h>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9

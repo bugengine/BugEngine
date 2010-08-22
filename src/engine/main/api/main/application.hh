@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <mobile/world.hh>
 #include    <graphics/renderer/graph/inode.hh>
-#include    <graphics/renderer/renderbackend.hh>
 #include    <system/scheduler/task/group.hh>
 
 namespace BugEngine
@@ -14,8 +13,6 @@ namespace BugEngine
 
 class Application : public minitl::refcountable
 {
-private:
-    struct Request;
 private:
     scoped<Scheduler>                               m_scheduler;
     ref<Graphics::INode>                            m_scene;

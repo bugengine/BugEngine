@@ -4,7 +4,6 @@
 #include    <stdafx.h>
 #include    <rendertargets/window.hh>
 #include    <renderer.hh>
-#include    <cgshaderparam.hh>
 
 namespace BugEngine
 {

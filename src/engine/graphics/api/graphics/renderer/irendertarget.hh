@@ -1,20 +1,20 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_RENDERTARGET_HH_
-#define BE_GRAPHICS_RENDERTARGET_HH_
+#ifndef BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
+#define BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
 /*****************************************************************************/
 #include   <system/scheduler/task/group.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class RenderBackend;
+class IRenderer;
 
 class be_api(GRAPHICS) IRenderTarget : public minitl::refcountable
 {
 protected:
-    weak<RenderBackend> const       m_renderer;
+    weak<IRenderer> const   m_renderer;
 public:
     enum ClearMode
     {
@@ -26,7 +26,7 @@ public:
         DontPresent,
         Present
     };
-    IRenderTarget(weak<RenderBackend> renderer);
+    IRenderTarget(weak<IRenderer> renderer);
     virtual ~IRenderTarget();
 
     virtual uint2   getDimensions() const = 0;
