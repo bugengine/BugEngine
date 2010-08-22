@@ -4,8 +4,8 @@
 #ifndef BE_WIN32_WINDOW_HH_
 #define BE_WIN32_WINDOW_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/rendertarget.hh>
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irendertarget.hh>
+#include    <graphics/renderer/irenderer.hh>
 
 namespace BugEngine { namespace Graphics { namespace Win32
 {

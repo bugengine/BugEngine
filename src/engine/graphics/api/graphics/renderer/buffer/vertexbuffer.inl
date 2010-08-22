@@ -1,18 +1,15 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_VERTEXBUFFER_INL_
-#define BE_GRAPHICS_VERTEXBUFFER_INL_
+#ifndef BE_GRAPHICS_RENDERER_BUFFER_VERTEXBUFFER_INL_
+#define BE_GRAPHICS_RENDERER_BUFFER_VERTEXBUFFER_INL_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
 template< typename T >
-VertexBuffer<T>::VertexBuffer(weak<const RenderBackend> owner, u32 vertexCount, VertexUsage usage)
-:   m_owner(owner)
-,   m_buffer(m_owner->createVertexBuffer(vertexCount, usage, T::getFlags()))
+VertexBuffer<T>::VertexBuffer(u32 vertexCount, VertexUsage usage)
 {
     be_assert(sizeof(T) == T::getFlags().vertexSize, "sizes don't match for vertex buffer; vertex type is %s, type size is %d and storage size is %d" | typeid(T).name() | sizeof(T) | T::getFlags().vertexSize);
 }

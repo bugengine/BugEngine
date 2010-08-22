@@ -10,16 +10,16 @@
 namespace BugEngine { namespace Graphics
 {
 
-class RenderBackend;
+class IRenderer;
 
 template< typename T >
 class IndexBuffer : public minitl::refcountable
 {
 private:
-    weak<const RenderBackend>   m_owner;
-    ref<GpuBuffer>              m_buffer;
+    weak<const IRenderer>   m_owner;
+    ref<GpuBuffer>          m_buffer;
 public:
-    IndexBuffer(weak<const RenderBackend> owner, u32 vertexCount, IndexUsage usage);
+    IndexBuffer(weak<const IRenderer> owner, u32 vertexCount, IndexUsage usage);
     ~IndexBuffer();
 
     T*  map(u32 count = 0, u32 offset = 0);

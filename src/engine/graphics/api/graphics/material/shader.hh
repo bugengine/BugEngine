@@ -4,11 +4,12 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADER_HH_
 #define BE_GRAPHICS_MATERIAL_SHADER_HH_
 /*****************************************************************************/
+#include    <system/resource/resource.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Shader
+class be_api(GRAPHICS) Shader : Resource
 {
 private:
 public:

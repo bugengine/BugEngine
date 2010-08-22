@@ -6,8 +6,8 @@
 /*****************************************************************************/
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/range/onestep.hh>
-#include    <graphics/renderer/renderbackend.hh>
-#include    <graphics/renderer/rendertarget.hh>
+#include    <graphics/renderer/irenderer.hh>
+#include    <graphics/renderer/irendertarget.hh>
 
 namespace BugEngine { namespace Graphics
 {

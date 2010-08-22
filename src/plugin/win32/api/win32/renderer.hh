@@ -4,7 +4,7 @@
 #ifndef BE_WIN32_RENDERER_HH_
 #define BE_WIN32_RENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 #include    <core/threads/thread.hh>
 
 namespace BugEngine { namespace Graphics { namespace Win32
@@ -23,7 +23,7 @@ struct WindowCreationFlags
     bool fullscreen;
 };
 
-class Renderer : public RenderBackend
+class Renderer : public IRenderer
 {
     friend class Window;
 private:

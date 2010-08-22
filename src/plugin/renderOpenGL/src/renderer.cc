@@ -7,10 +7,6 @@
 #include    <input/inputmap.hh>
 
 #include    <window.hh>
-#include    <texture.hh>
-#include    <vertexbuffer.hh>
-#include    <indexbuffer.hh>
-#include    <texturebuffer.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
@@ -37,22 +33,12 @@ ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, 
     return ref<Window>();
 }
 
-ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
-{
-    return ref<VertexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
-}
-
-ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
-{
-    return ref<IndexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
-}
-
 void Renderer::drawBatch(const Batch& b)
 {
-    weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
-    weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
-    be_forceuse(_vb);
-    be_forceuse(_ib);
+    //weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
+    //weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
+    //be_forceuse(_vb);
+    //be_forceuse(_ib);
 
     switch(b.ptype)
     {

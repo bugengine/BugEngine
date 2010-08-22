@@ -11,7 +11,7 @@
 #include    <system/diskfs.hh>
 #include    <mobile/worldscene.hh>
 
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 #include    <graphics/renderer/graph/scenenode.hh>
 #include    <graphics/renderer/graph/multinode.hh>
 
@@ -39,8 +39,8 @@ int be_main (weak<BugEngine::Application> app)
     f.vsync = false;
     f.triplebuffered = false;
 
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display2("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
-    BugEngine::Plugin<BugEngine::Graphics::RenderBackend> display("renderDx9", weak<BugEngine::FileSystem>(filesystem));
+    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
+    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create<BugEngine::Arena::General>();
     {

@@ -36,8 +36,6 @@ public:
     ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
     ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
     ref<Graphics::IRenderTarget>    createMultipleRenderBuffer(TextureFlags flags, size_t count) override;
-    ref<GpuBuffer>                  createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const override;
-    ref<GpuBuffer>                  createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const override;
 
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
     bool                            multithreaded() const override {return true; }

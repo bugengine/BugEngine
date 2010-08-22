@@ -9,10 +9,6 @@
 #include    <rendertargets/window.hh>
 #include    <rendertargets/offscreen.hh>
 #include    <rendertargets/multiple.hh>
-#include    <texture.hh>
-#include    <vertexbuffer.hh>
-#include    <indexbuffer.hh>
-#include    <texturebuffer.hh>
 
 #pragma warning(disable:4311 4312 4355)
 
@@ -37,18 +33,6 @@ namespace
     };
 }
 
-static void onCgError(CGcontext /*ctx*/, CGerror err, void* /*data*/)
-{
-    if(cgD3D9Errors(err) == cgD3D9Failed)
-    {
-        be_assert(false, "CG D3D error : %s" | cgD3D9TranslateHRESULT(cgD3D9GetLastError()));
-    }
-    else
-    {
-        be_assert(false, "CG error : %s" | cgD3D9TranslateCGerror(err));
-    }
-}
-
 Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
@@ -56,14 +40,11 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 ,   m_filesystem(filesystem)
 ,   m_deviceState(DeviceLost)
 {
-    cgSetErrorHandler(onCgError, 0);
     m_directx->GetDeviceCaps(0, D3DDEVTYPE_HAL, &m_caps);
 }
 
 Renderer::~Renderer()
 {
-    cgD3D9SetDevice(0);
-    cgDestroyContext(m_context);
     destroyContextAsync();
     int refCnt = m_directx->Release();
     be_forceuse(refCnt);
@@ -111,7 +92,6 @@ void Renderer::createContext(D3DPRESENT_PARAMETERS& params)
                                                  &m_device));
         m_deviceState = DeviceReady;
     }
-    cgD3D9SetDevice(m_device);
 }
 
 void Renderer::createContextAsync(D3DPRESENT_PARAMETERS& params)
@@ -163,24 +143,14 @@ ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, 
     return ref<Window>();
 }
 
-ref<GpuBuffer> Renderer::createVertexBuffer(u32 vertexCount, VertexUsage usage, VertexBufferFlags flags) const
-{
-    return ref<VertexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
-}
-
-ref<GpuBuffer> Renderer::createIndexBuffer(u32 vertexCount, IndexUsage usage, IndexBufferFlags flags) const
-{
-    return ref<IndexBuffer>::create<Arena::General>(this, vertexCount, usage, flags);
-}
-
 void Renderer::drawBatch(const Batch& b)
 {
-    weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
-    weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
+    //weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
+    //weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
 
-    d3d_checkResult(m_device->SetVertexDeclaration(_vb->m_vertexDecl));
-    d3d_checkResult(m_device->SetStreamSource(0, _vb->m_buffer, 0, _vb->m_vertexStride));
-    d3d_checkResult(m_device->SetIndices(_ib->m_buffer));
+    //d3d_checkResult(m_device->SetVertexDeclaration(_vb->m_vertexDecl));
+    //d3d_checkResult(m_device->SetStreamSource(0, _vb->m_buffer, 0, _vb->m_vertexStride));
+    //d3d_checkResult(m_device->SetIndices(_ib->m_buffer));
 
     D3DPRIMITIVETYPE type;
     int primitiveCount = 0;
@@ -252,7 +222,6 @@ void Renderer::flush()
                     it->swapchain = 0;
                 }
             }
-            cgD3D9SetDevice(0);
             if(!m_swapchains.empty())
             {
                 if(m_deviceSwapChain == m_swapchains.end())
