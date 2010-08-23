@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_PTR_REFPTR_INL_
 #define BE_MINITL_PTR_REFPTR_INL_
 /*****************************************************************************/
+#include   <typeinfo>
 
 namespace minitl
 {

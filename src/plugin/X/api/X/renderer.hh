@@ -4,7 +4,7 @@
 #ifndef BE_X_RENDERER_HH_
 #define BE_X_RENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/renderbackend.hh>
+#include    <graphics/renderer/irenderer.hh>
 #include    <core/threads/thread.hh>
 #include    <core/threads/event.hh>
 
@@ -13,7 +13,7 @@ namespace BugEngine { namespace Graphics { namespace X
 
 class Window;
 
-class be_api(X) Renderer : public RenderBackend
+class be_api(X) Renderer : public IRenderer
 {
     friend class Window;
 protected:

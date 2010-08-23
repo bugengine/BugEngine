@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_PTR_SCOPEDPTR_INL_
 #define BE_MINITL_PTR_SCOPEDPTR_INL_
 /*****************************************************************************/
+#include   <typeinfo>
 
 namespace minitl
 {

@@ -56,14 +56,6 @@ public:
             m_data = other.m_data;
             other.m_data = data;
         }
-        T& operator[](const size_t index)
-        {
-            return m_data[index];
-        }
-        const T& operator[](const size_t index) const
-        {
-            return m_data[index];
-        }
     private:
         Block(const Block& other);
         Block& operator=(const Block& other);
