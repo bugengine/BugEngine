@@ -8,7 +8,7 @@ namespace BugEngine
 {
 
 template< >
-void* Memory<Arena::Plugin>::systemAlloc(size_t size, size_t alignment)
+void* Memory<Arena::Plugin>::internalAlloc(size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_malloc(size, alignment);
@@ -18,7 +18,7 @@ void* Memory<Arena::Plugin>::systemAlloc(size_t size, size_t alignment)
 }
 
 template< >
-void* Memory<Arena::Plugin>::systemRealloc(void* ptr, size_t size, size_t alignment)
+void* Memory<Arena::Plugin>::internalRealloc(void* ptr, size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, size, alignment);
@@ -28,7 +28,7 @@ void* Memory<Arena::Plugin>::systemRealloc(void* ptr, size_t size, size_t alignm
 }
 
 template< >
-void Memory<Arena::Plugin>::systemFree(const void* pointer)
+void Memory<Arena::Plugin>::internalFree(const void* pointer)
 {
 #ifdef _MSC_VER
     return ::_aligned_free(const_cast<void*>(pointer));
