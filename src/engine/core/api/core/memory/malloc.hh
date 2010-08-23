@@ -13,9 +13,9 @@ template< int ARENA >
 class Memory
 {
 private:
-    static void* systemAlloc(size_t size, size_t alignment);
-    static void* systemRealloc(void* ptr, size_t size, size_t alignment);
-    static void  systemFree(const void* pointer);
+    static void* internalAlloc(size_t size, size_t alignment);
+    static void* internalRealloc(void* ptr, size_t size, size_t alignment);
+    static void  internalFree(const void* pointer);
 public:
     static inline void* alloc(size_t size, size_t alignment = 16);
     static inline void* realloc(void* ptr, size_t size, size_t alignment);
@@ -75,7 +75,7 @@ void* Memory<ARENA>::alloc(size_t size, size_t alignment)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
-    return systemAlloc(size, alignment);
+    return internalAlloc(size, alignment);
 }
 
 template< int ARENA >
@@ -85,7 +85,7 @@ void* Memory<ARENA>::realloc(void* ptr, size_t size, size_t alignment)
         return alloc(size, alignment);
 #ifdef BE_MEMORY_TRACKING
 #endif
-    return systemRealloc(ptr, size, alignment);
+    return internalRealloc(ptr, size, alignment);
 }
 
 template< int ARENA >
@@ -93,7 +93,7 @@ void  Memory<ARENA>::free(const void* pointer)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
-    systemFree(pointer);
+    internalFree(pointer);
 }
 
 template< int ARENA >
@@ -101,7 +101,7 @@ template< typename T >
 T* Memory<ARENA>::allocArray(size_t count, size_t alignment)
 {
     size_t size = be_align(sizeof(T),alignment)*count;
-    void* r = systemAlloc(size, alignment);
+    void* r = internalAlloc(size, alignment);
     memset(r, 0, size);
     return reinterpret_cast<T*>(r);
 }
