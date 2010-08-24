@@ -25,14 +25,6 @@ def get_native_gcc_target(conf):
 				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
 
 def parse_gcc_target(target):
-	os = [ ('mingw', 'win32'),
-		   ('linux', 'linux'),
-		   ('psp', 'psp'),
-		   ('arm-eabi', 'nds'),
-		   ('darwin', 'darwin'),
-		   ('powerpc-eabi', 'wii'),
-		   ('spu', 'spu'),
-		   ('lv2', 'ps3')]
 	archs = [ ('i386', 'x86'),
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
@@ -48,17 +40,10 @@ def parse_gcc_target(target):
 			  ('mingw32', 'x86'),
 			  ('ppu', 'powerpc'),
 			  ('spu', 'powerpc')]
-	foundpname = None
-	foundaname = None
-	for gccname,pname in os:
-		if target.find(gccname) != -1:
-			foundpname = pname
-			break
 	for gccname,aname in archs:
 		if target.find(gccname) != -1:
-			foundaname = aname
-			break
-	return foundpname,foundaname
+				return aname
+
 
 @conftest
 def find_cross_gcc(conf):
@@ -70,8 +55,7 @@ def find_cross_gcc(conf):
 	versionsmall = '.'.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
-		v['GCC_CONFIGURED_PLATFORM'],v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
-		conf.env['TARGET_PLATFORM'] = v['GCC_CONFIGURED_PLATFORM']
+		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+versionsmall, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
@@ -108,10 +92,6 @@ def find_cross_gcc(conf):
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 
-	if v['GCC_CONFIGURED_PLATFORM'] == 'win32':
-		conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
-		conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
-
 	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
 	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
@@ -143,8 +123,6 @@ def find_cross_gcc(conf):
 	if v['GCC_CONFIGURED_PLATFORM'] != 'win32':
 		conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
-	if v['GCC_CONFIGURED_PLATFORM'] == 'win32':
-		conf.env.append_unique('LINKFLAGS', ['-Wl,-static', '-lstdc++'])
 	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
 		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
 		conf.env.append_unique('CCFLAGS', flags)
@@ -152,10 +130,6 @@ def find_cross_gcc(conf):
 		conf.env.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
 		conf.env.append_unique('LINKFLAGS', flags)
 
-@feature('cc', 'cxx')
-def static_libgcc(self):
-	if self.env['TARGET_PLATFORM'] == 'win32' and self.env['CC_NAME'] == 'gcc':
-		self.env.append_unique('LINKFLAGS', '-static-libgcc')
 
 detect = '''
 get_native_gcc_target
