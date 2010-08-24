@@ -2,90 +2,29 @@
 # detect tools : msvc, mingw
 
 
-import _winreg
 import os
-import re
-import Tools.msvc
 import Utils
 import Configure
 import Logs
 from Logs import info,warn
 
 os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
-# adds MSVC vars to environment
-def add_msvc_to_env(conf, compiler, version, target, platform, tname):
-	name = '%s-%s-%s-%s' %(compiler, platform, target, version)
-	info('configure for tool %s' % name)
-	newenv = conf.set_env_name(name, conf.env.copy())
-	newenv.set_variant(name)
-	newenv['MSVC_VERSIONS'] = [compiler+' '+version]
-	newenv['MSVC_TARGETS'] = [target]
-	conf.setenv(name)
-	try:
-		conf.check_tool('msvc')
-		
-		conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
-		conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
-		conf.env['LINKFLAGS_debug'] = ['/DEBUG']
-
-		conf.env['CCFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
-		conf.env['CXXFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
-		conf.env['LINKFLAGS_release'] = ['/DEBUG']
-
-		conf.env['CCFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-		conf.env['CXXFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-		conf.env['LINKFLAGS_profile'] = ['/DEBUG']
-
-		conf.env['CCFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-		conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-		conf.env['LINKFLAGS_final'] = ['/DEBUG']
-
-	except Configure.ConfigurationError, e:
-		conf.setenv('default')
-		warn('configuration fail for tool %s : %s' % (name, e))
-		return
-	conf.sub_config(os.path.join('..', '..', 'target', 'platforms', platform))
-	conf.sub_config(os.path.join('..', '..', 'target', 'archs', tname))
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
 
 # gets a list of all the MSVC complete suites installed
 def get_available_msvc(conf):
+	conf.env['MSVC_TARGETS'] = []
 	allversions = conf.get_msvc_versions()
 	for (compiler, targets) in allversions:
 		compiler,version = compiler.split()
 		for (target, (tname, platform, paths)) in targets:
 			if tname in conf.env['ARCHITECTURES']:
-				add_msvc_to_env(conf, compiler, version, target, platform, tname)
+				conf.env['MSVC_TARGETS'].append((compiler, version, target, platform, tname))
 
-def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
-	newenv = conf.set_env_name('temp', conf.env.copy())
-	newenv['GCC_VERSION']	= version
-	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.setenv('temp')
-	try:
-		conf.check_tool('cross_gcc', tooldir='mak/tools')
-		name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-		newenv.set_variant(name)
-		if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
-			conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
-			conf.check_tool('winres')
-		Utils.pprint('NORMAL', 'configure for tool %s' % name)
-		conf.sub_config(os.path.join('..', '..', 'target', 'platforms', conf.env['GCC_CONFIGURED_PLATFORM']))
-		conf.sub_config(os.path.join('..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
-		newenv = conf.set_env_name(name, newenv)
-		del conf.all_envs['temp']
-		conf.setenv('default')
-		conf.env['BUILD_VARIANTS'].append(name)
-	except Exception, e:
-		warn('gcc not available: '+str(e)) 
-		conf.setenv('default')
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
 	toolchaindirs=[]
+	conf.env['GCC_TARGETS'] = []
 	for dir in os.environ['PATH'].split(';'):
 		toolchaindirs.append(os.path.join(dir, '..'))
 	for toolchaindir in toolchaindirs:
@@ -96,7 +35,7 @@ def get_available_gcc(conf):
 				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
 					if version in ['.svn', '.cvs']:
 						continue
-					name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
+					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
 
 
 def set_options(opt):
@@ -104,12 +43,9 @@ def set_options(opt):
 
 def configure(conf):
 	import Options
-	
+
 	conf.check_tool('flex bison', tooldir=['mak/tools'])
 
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
 	get_available_msvc(conf)
-
-	if len(conf.env['BUILD_VARIANTS']) == 0:
-		raise SystemExit("no match found : make sure you selected a valid toolchain")

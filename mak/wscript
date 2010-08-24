@@ -46,7 +46,11 @@ def configure(conf):
 	conf.env['OPTIMS']		  = mak.alloptims
 
 	conf.sub_config(os.path.join('host', os.name))
+	for p in ['win32']:
+		conf.sub_config(os.path.join('target', 'platforms', p))
 
+	if len(conf.env['BUILD_VARIANTS']) == 0:
+		raise SystemExit("no match found : make sure you selected a valid toolchain")
 	conf.env['DEFAULT_BUILD_TOOL'] = conf.env['BUILD_VARIANTS'][-1]
 
 	selectedvariants = []
