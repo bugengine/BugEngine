@@ -8,6 +8,7 @@ class directory:
 		
 	def addDirectory(self, dir, name):
 		self.directories[name] = dir
+		dir.prefix = name
 
 	def addFile(self, file):
 		self.files.append(file)

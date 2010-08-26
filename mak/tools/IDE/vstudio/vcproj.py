@@ -255,13 +255,13 @@ class VCproj:
 	def addFiles(self, path, directory, tabs):
 		for subname,subdir in directory.directories.iteritems():
 			self.output.write(tabs+'<Filter Name="%s">\n' % subname)
-			self.addFiles(os.path.join(path, subname), subdir, tabs+'	')
+			self.addFiles(os.path.join(path, subdir.prefix), subdir, tabs+'	')
 			self.output.write(tabs+'</Filter>\n')
 		for source in directory.files:
 			if not source.generated():
-				filename = os.path.join('..', '..', 'src', self.category, self.name, path, source.filename)
+				filename = os.path.join('..', '..', path, source.filename)
 			else:
-				filename = os.path.join('$(IntDir)', 'src', self.category, self.name, path, source.filename)
+				filename = os.path.join('$(IntDir)', path, source.filename)
 			if isinstance(source, mak.sources.hsource):
 				self.addHFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.cppsource):
@@ -277,5 +277,5 @@ class VCproj:
 
 	def addDirectory(self, sources):
 		self.output.write('	<Files>\n')
-		self.addFiles('', sources, '		')
+		self.addFiles(sources.prefix, sources, '		')
 		self.output.write('	</Files>\n')
