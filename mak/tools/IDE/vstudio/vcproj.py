@@ -162,7 +162,7 @@ class VCproj:
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCLCompilerTool"\n')
 				if self.pchname and source.usepch:
-					if os.path.join('src', self.category, self.name, path, source.filename) == self.pchname:
+					if os.path.join(path, source.filename) == self.pchname:
 						self.output.write(tabs+'		UsePrecompiledHeader="1"\n')
 					else:
 						self.output.write(tabs+'		UsePrecompiledHeader="2"\n')

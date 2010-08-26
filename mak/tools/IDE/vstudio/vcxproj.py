@@ -127,7 +127,7 @@ class VCxproj:
 			if 'amd64' not in source.archs:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
 		if source.usepch:
-			if os.path.join('src', self.category, self.name, path, source.filename) == self.pchname:
+			if os.path.join(path, source.filename) == self.pchname:
 				self.output.write('      <PrecompiledHeader>Create</PrecompiledHeader>\n')
 		else:
 			self.output.write('      <PrecompiledHeader>NotUsing</PrecompiledHeader>\n')
@@ -165,7 +165,7 @@ class VCxproj:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
 			if 'amd64' not in source.archs:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
-		self.output.write('      <Command>set PATH="$(SolutionDir)../../bin";%%PATH%% &amp;&amp; (if not exist "%s" mkdir "%s") &amp;&amp; bison.exe -o"%s" -d --no-lines "%s"</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
 		self.output.write('      <Outputs>%s;%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp, '$(IntDir)'+source.generatedh))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
@@ -181,7 +181,7 @@ class VCxproj:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
 			if 'amd64' not in source.archs:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
-		self.output.write('      <Command>set PATH="$(SolutionDir)../../bin";%%PATH%% &amp;&amp; (if not exist "%s" mkdir "%s") &amp;&amp; flex.exe -o"%s" "%s"</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; flex.exe -o&quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
 		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
@@ -207,12 +207,12 @@ class VCxproj:
 
 	def addFiles(self, path, directory, runtypes):
 		for subname,subdir in directory.directories.iteritems():
-			self.addFiles(os.path.join(path, subname), subdir, runtypes)
+			self.addFiles(os.path.join(path, subdir.prefix), subdir, runtypes)
 		for source in directory.files:
 			if not source.generated():
-				filename = os.path.join('..', '..', 'src', self.category, self.name, path, source.filename)
+				filename = os.path.join('..', '..', path, source.filename)
 			else:
-				filename = os.path.join('$(IntDir)', 'src', self.category, self.name, path, source.filename)
+				filename = os.path.join('$(IntDir)', path, source.filename)
 			for type,function in runtypes:
 				if isinstance(source, type):
 					function(path, filename, source)
@@ -227,24 +227,24 @@ class VCxproj:
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles('', sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile), (mak.sources.deployedsource, self.addDeployedFile)])
+		self.addFiles(sources.prefix, sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile), (mak.sources.deployedsource, self.addDeployedFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles('', sources, [(mak.sources.cppsource, self.addCppFile)])
+		self.addFiles(sources.prefix, sources, [(mak.sources.cppsource, self.addCppFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles('', sources, [(mak.sources.rcsource, self.addRcFile)])
+		self.addFiles(sources.prefix, sources, [(mak.sources.rcsource, self.addRcFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles('', sources, [(mak.sources.hsource, self.addHFile)])
+		self.addFiles(sources.prefix, sources, [(mak.sources.hsource, self.addHFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
