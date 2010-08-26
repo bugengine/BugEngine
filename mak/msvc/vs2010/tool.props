@@ -1,6 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutDir>$(SolutionDir)deploy\vs2010\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).build\vs2010\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
 </Project>

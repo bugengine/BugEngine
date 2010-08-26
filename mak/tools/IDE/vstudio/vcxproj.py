@@ -16,7 +16,7 @@ def getFileDeployPath(type):
 class VCxproj:
 	extensions = ['.vcxproj', '.vcxproj.filters']
 
-	def __init__(self, filename, name, category, versionName, versionNumber, type):
+	def __init__(self, filename, name, category, versionName, versionNumber, type, depends):
 		self.versionName = versionName
 		self.versionNumber = versionNumber
 		self.name = name
@@ -25,6 +25,7 @@ class VCxproj:
 		self.filters = open(filename+'.filters', 'w')
 		self.targetName = os.path.join('.build', versionName, category+'.'+name+'.'+versionName+self.extensions[0])
 		self.type = type
+		self.depends = depends
 		if type == 'game':
 			self.projectType = 'Application'
 		elif type == 'plugin':
@@ -116,7 +117,7 @@ class VCxproj:
 		for subname,subdir in directory.directories.iteritems():
 			self.addFilter(os.path.join(name,subname), subdir)
 
-	def addCppFile(self, path, filename, source):
+	def addCppFile(self, path, filter, filename, source):
 		self.output.write('    <ClCompile Include="%s">\n' % filename)
 		self.output.write('      <ObjectFileName>$(IntDir)%s\\</ObjectFileName>\n' % path)
 		if ('win32' not in source.platforms) or not source.process:
@@ -133,10 +134,10 @@ class VCxproj:
 			self.output.write('      <PrecompiledHeader>NotUsing</PrecompiledHeader>\n')
 		self.output.write('    </ClCompile>\n')
 		self.filters.write('    <ClCompile Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </ClCompile>\n')
 
-	def addRcFile(self, path, filename, source):
+	def addRcFile(self, path, filter, filename, source):
 		self.output.write('    <ResourceCompile Include="%s">\n' % filename)
 		if 'win32' not in source.platforms or not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
@@ -147,16 +148,16 @@ class VCxproj:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
 		self.output.write('    </ResourceCompile>\n')
 		self.filters.write('    <ResourceCompile Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </ResourceCompile>\n')
 
-	def addHFile(self, path, filename, source):
+	def addHFile(self, path, filter, filename, source):
 		self.output.write('    <ClInclude Include="%s" />\n' % filename)
 		self.filters.write('    <ClInclude Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </ClInclude>\n')
 
-	def addBisonFile(self, path, filename, source):
+	def addBisonFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
 		if 'win32' not in source.platforms or not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
@@ -169,10 +170,10 @@ class VCxproj:
 		self.output.write('      <Outputs>%s;%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp, '$(IntDir)'+source.generatedh))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </CustomBuild>\n')
 
-	def addFlexFile(self, path, filename, source):
+	def addFlexFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
 		if 'win32' not in source.platforms or not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
@@ -185,10 +186,10 @@ class VCxproj:
 		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </CustomBuild>\n')
 
-	def addDeployedFile(self, path, filename, source):
+	def addDeployedFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
 		if 'win32' not in source.platforms or not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
@@ -202,12 +203,12 @@ class VCxproj:
 		self.output.write('      <Outputs>%s</Outputs>\n' % os.path.join(outputpath,source.filename))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
-		self.filters.write('      <Filter>%s</Filter>\n' % path)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </CustomBuild>\n')
 
-	def addFiles(self, path, directory, runtypes):
+	def addFiles(self, path, filter, directory, runtypes):
 		for subname,subdir in directory.directories.iteritems():
-			self.addFiles(os.path.join(path, subdir.prefix), subdir, runtypes)
+			self.addFiles(os.path.join(path, subdir.prefix), os.path.join(filter, subname), subdir, runtypes)
 		for source in directory.files:
 			if not source.generated():
 				filename = os.path.join('..', '..', path, source.filename)
@@ -215,7 +216,7 @@ class VCxproj:
 				filename = os.path.join('$(IntDir)', path, source.filename)
 			for type,function in runtypes:
 				if isinstance(source, type):
-					function(path, filename, source)
+					function(path, filter, filename, source)
 
 	def addDirectory(self, sources):
 		self.output.write('  <ItemGroup>\n')
@@ -227,24 +228,44 @@ class VCxproj:
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile), (mak.sources.deployedsource, self.addDeployedFile)])
+		self.addFiles(sources.prefix, '', sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile), (mak.sources.deployedsource, self.addDeployedFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, sources, [(mak.sources.cppsource, self.addCppFile)])
+		self.addFiles(sources.prefix, '', sources, [(mak.sources.cppsource, self.addCppFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, sources, [(mak.sources.rcsource, self.addRcFile)])
+		self.addFiles(sources.prefix, '', sources, [(mak.sources.rcsource, self.addRcFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, sources, [(mak.sources.hsource, self.addHFile)])
+		self.addFiles(sources.prefix, '', sources, [(mak.sources.hsource, self.addHFile)])
+		self.output.write('  </ItemGroup>\n')
+		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
+		self.filters.write('  <ItemGroup>\n')
+		for d in self.depends:
+			self.output.write('    <ProjectReference Include="%s">\n' % os.path.split(d.outname)[1])
+			self.output.write('      <Project>%s</Project>\n' % solution.generateGUID(d.outname, d.name))
+			self.output.write('      <Private>true</Private>\n')
+			self.output.write('      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>\n')
+			self.output.write('      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>\n')
+			if self.type in ['game', 'tool', 'plugin', 'shared_library']:
+				self.output.write('      <LinkLibraryDependencies>true</LinkLibraryDependencies>\n')
+			else:
+				self.output.write('      <LinkLibraryDependencies>false</LinkLibraryDependencies>\n')
+			if self.type in ['game', 'tool']:
+				self.output.write('      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>\n')
+			else:
+				self.output.write('      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>\n')
+			self.output.write('    </ProjectReference>\n')
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
