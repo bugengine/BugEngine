@@ -25,7 +25,7 @@ class VCproj:
 	vcplatforms = { 'Win32':'win32', 'x64':'win32', 'Xbox 360':'xbox360' }
 	archs = { 'Win32':'x86', 'x64':'amd64', 'Xbox 360':'ppc' }
 
-	def __init__(self, filename, name, category, versionName, versionNumber, type):
+	def __init__(self, filename, name, category, versionName, versionNumber, type, depends):
 		self.versionName = versionName
 		self.versionNumber = versionNumber
 		self.name = name

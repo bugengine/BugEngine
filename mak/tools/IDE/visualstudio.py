@@ -43,6 +43,7 @@ def generateProject(task):
 								 task.version,
 								 task.versionNumber,
 								 task.type,
+								 task.depends
 								)
 	project.writeHeader(allconfigs, task.allplatforms, task.platforms)
 	project.addDirectory(task.sourceTree)
@@ -95,6 +96,7 @@ def create_project(t):
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
 	project.install_path	= os.path.join(t.path.srcpath(t.env), '.build', toolName)
+	project.depends         = t.depends
 
 	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]
 	t.outname = os.path.join('.build', toolName, outname)
