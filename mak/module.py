@@ -119,6 +119,7 @@ class module:
 			self.globaloptions.includedir.add(os.path.join('src', category, name, 'api'))
 
 		self.sourcetree		   = sources.directory()
+		self.sourcetree.prefix = os.path.join('src', category, name)
 		if os.path.isdir(os.path.join('src', category, name, 'include')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, self.platforms, archs), 'include')
 		if os.path.isdir(os.path.join('src', category, name, 'api')):
@@ -127,6 +128,30 @@ class module:
 			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, self.platforms, archs, sourcelist), 'data')
 		if os.path.isdir(os.path.join('src', category, name, 'src')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, self.platforms, archs, sourcelist), 'src')
+
+		platformsdirectory = sources.directory()
+		for platform in self.platforms:
+			pdir = sources.directory()
+			if os.path.isdir(os.path.join('extra', platform, category, name, 'api')):
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'api'), '', 0, self.platforms, archs), 'api')
+				try:
+					self.globalarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'api'))
+				except KeyError:
+					self.globalarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'api')])
+			if os.path.isdir(os.path.join('extra', platform, category, name, 'include')):
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'include'), '', 0, self.platforms, archs), 'include')
+				try:
+					self.localarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'include'))
+				except KeyError:
+					self.localarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'include')])
+			if os.path.isdir(os.path.join('extra', platform, category, name, 'src')):
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], archs, sourcelist), 'extrasrc')
+			if pdir.directories or pdir.files:
+				platformsdirectory.addDirectory(pdir, platform)
+				pdir.prefix = os.path.join(platform, category, name)
+				self.sourcetree.addDirectory(platformsdirectory, 'platforms')
+		platformsdirectory.prefix = os.path.join('..', '..', '..', 'extra')
+
 		for arch in allarchs:
 			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, self.platforms, [arch]), 'lib.'+arch)

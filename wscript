@@ -37,13 +37,12 @@ def build(bld):
 	bullet			= module.external('bullet')
 
 	win32			= module.external('win32')
-	libwii			= module.external('libwii')
 	pthreads		= module.external('pthreads')
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	core			= module.library('core',        [dbghelp, win32, libwii, pthreads, intl])
+	core			= module.library('core',        [dbghelp, win32, pthreads, intl])
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )

@@ -103,18 +103,11 @@ def configure(conf):
 				conf.setenv('default')
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
 			try:
 				add_msvc_to_env(conf, compiler, version, target, platform, tname)
 				add_win32_flags_to_env(conf)
-
-				newenv = conf.set_env_name(name, newenv)
-				del conf.all_envs['temp']
-				conf.setenv('default')
-				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception, e:
-				warn('gcc not available: '+str(e)) 
+				warn('msvc not available: '+str(e)) 
 				conf.setenv('default')
 
 
