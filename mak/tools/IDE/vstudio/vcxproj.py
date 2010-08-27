@@ -253,19 +253,20 @@ class VCxproj:
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
 		for d in self.depends:
-			self.output.write('    <ProjectReference Include="%s">\n' % os.path.split(d.outname)[1])
-			self.output.write('      <Project>%s</Project>\n' % solution.generateGUID(d.outname, d.name))
-			self.output.write('      <Private>true</Private>\n')
-			self.output.write('      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>\n')
-			self.output.write('      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>\n')
-			if self.type in ['game', 'tool', 'plugin', 'shared_library']:
-				self.output.write('      <LinkLibraryDependencies>true</LinkLibraryDependencies>\n')
-			else:
-				self.output.write('      <LinkLibraryDependencies>false</LinkLibraryDependencies>\n')
-			if self.type in ['game', 'tool']:
-				self.output.write('      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>\n')
-			else:
-				self.output.write('      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>\n')
-			self.output.write('    </ProjectReference>\n')
+			if 'win32-x86' in d.platforms or 'win32-amd64' in d.platforms:
+				self.output.write('    <ProjectReference Include="%s">\n' % os.path.split(d.outname)[1])
+				self.output.write('      <Project>%s</Project>\n' % solution.generateGUID(d.outname, d.name))
+				self.output.write('      <Private>true</Private>\n')
+				self.output.write('      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>\n')
+				self.output.write('      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>\n')
+				if self.type in ['game', 'tool', 'plugin', 'shared_library']:
+					self.output.write('      <LinkLibraryDependencies>true</LinkLibraryDependencies>\n')
+				else:
+					self.output.write('      <LinkLibraryDependencies>false</LinkLibraryDependencies>\n')
+				if self.type in ['game', 'tool']:
+					self.output.write('      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>\n')
+				else:
+					self.output.write('      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>\n')
+				self.output.write('    </ProjectReference>\n')
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
