@@ -12,6 +12,7 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
+,   m_closed(0)
 {
     renderer->attachWindow(this);
 }
@@ -19,13 +20,17 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 Window::~Window()
 {
 #ifdef BE_PLATFORM_WIN32
-    wglDeleteContext(m_glContext);
+    /*if(m_glContext)
+    {
+        wglDeleteContext(m_glContext);
+        m_glContext = 0;
+    }*/
 #endif
 }
 
 bool Window::closed() const
 {
-    return m_window == 0;
+    return m_closed > 0;
 }
 
 void Window::setCurrent()
@@ -72,31 +77,46 @@ void Window::clearCurrent()
 
 void Window::close()
 {
-    Windowing::Window::close();
+    m_closed++;
 }
 
 void Window::begin(ClearMode clear)
 {
-    setCurrent();
-    if (clear == IRenderTarget::Clear)
+    if(m_window)
     {
-        glClearColor(0.3f, 0.3f, 03.f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        setCurrent();
+        if (clear == IRenderTarget::Clear)
+        {
+            glClearColor(0.3f, 0.3f, 03.f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
     }
 }
 
 void Window::end(PresentMode present)
 {
-    glFlush();
-    if(present == Present)
+    if(m_window)
     {
-#ifdef BE_PLATFORM_WIN32
-        SwapBuffers(m_dc);
-#else
-        glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
-#endif
+        glFlush();
+        if(present == Present)
+        {
+    #ifdef BE_PLATFORM_WIN32
+            SwapBuffers(m_dc);
+    #else
+            glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
+    #endif
+        }
+        clearCurrent();
+        if(m_closed > 0 && m_window)
+        {
+            Win32::Window::close();
+            /*if(m_glContext)
+            {
+                wglDeleteContext(m_glContext);
+                m_glContext = 0;
+            }*/
+        }
     }
-    clearCurrent();
 }
 
 }}}

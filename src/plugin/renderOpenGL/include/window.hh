@@ -21,6 +21,7 @@ private:
     #else
         GLXContext  m_glContext;
     #endif
+    i_u8            m_closed;
 private:
     inline void setCurrent();
     inline void clearCurrent();
