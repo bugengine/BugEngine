@@ -37,6 +37,14 @@ public:
         {
             Memory<ARENA>::free(m_data);
         }
+        T* data()
+        {
+            return m_data;
+        }
+        const T* data() const
+        {
+            return m_data;
+        }
         operator T*()
         {
             return m_data;
@@ -92,6 +100,8 @@ template< int ARENA >
 template< typename T >
 T* Memory<ARENA>::allocArray(size_t count, size_t alignment)
 {
+    if(!count)
+        return 0;
     size_t size = be_align(sizeof(T),alignment)*count;
     void* r = internalAlloc(size, alignment);
     memset(r, 0, size);
@@ -112,6 +122,24 @@ struct Arena
     };
 };
 
+}
+
+namespace minitl
+{
+    template< typename T >
+    T* advance(T* input, i64 offset)
+    {
+        char *ptr = reinterpret_cast<char*>(input);
+        ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
+        return reinterpret_cast<T*>(ptr);
+    }
+    template< typename T >
+    const T* advance(const T* input, i64 offset)
+    {
+        const char *ptr = reinterpret_cast<const char*>(input);
+        ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
+        return reinterpret_cast<const T*>(ptr);
+    }
 }
 
 

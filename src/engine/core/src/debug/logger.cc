@@ -90,7 +90,7 @@ void Logger::addListener(ILogListener* listener)
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
-    for(std::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for(minitl::vector< ILogListener*, Arena::General >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }

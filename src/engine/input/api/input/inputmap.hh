@@ -15,8 +15,8 @@ class Manager;
 class be_api(INPUT) InputMap : public minitl::refcountable
 {
 private:
-    std::vector< ref<Action> >  m_actions;
-    bool                        m_active;
+    minitl::vector< ref<Action>, Arena::General >   m_actions;
+    bool                                            m_active;
 public:
     typedef size_t  ActionId;
 public:

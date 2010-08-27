@@ -45,7 +45,6 @@ private:
     TaskGroup::TaskEndConnection    m_endGlobalConnection;
     AsyncDispatchJobGraph           m_jobGraph;
     minitl::list< NodeInfo >        m_nodes;
-    minitl::vector< ref<INode> >    m_deleted;
     u32                             m_mainNodes;
 private:
     void clean();

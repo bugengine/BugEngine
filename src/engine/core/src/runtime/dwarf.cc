@@ -332,7 +332,7 @@ void DwarfModule::parse(const Module& module)
         module.readSection(debug_line, lineProgram);
     }
 
-    minitl::vector<Dwarf::Abbreviation> abbrev;
+    minitl::vector<Dwarf::Abbreviation, Arena::General> abbrev;
     Buffer<endianness> abbreviations(debugAbbrev, debugAbbrevSize);
     Buffer<endianness> info(debugInfo, debugInfoSize);
 
@@ -377,7 +377,7 @@ const char * DwarfModule::indexedString(u64 offset) const
 }
 
 template< Endianness endianness >
-bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations)
+bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations)
 {
     Dwarf::uleb128_t code;
     buffer >> code;
@@ -406,7 +406,7 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
 }
 
 template< Endianness endianness >
-bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
+bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations, u8 ptrSize)
 {
     be_forceuse(r);
     unsigned attributesMatched = 0; 
@@ -548,7 +548,7 @@ bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const
 }
 
 template< Endianness endianness >
-bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize)
+bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations, u8 ptrSize)
 {
     Dwarf::uleb128_t l;
 

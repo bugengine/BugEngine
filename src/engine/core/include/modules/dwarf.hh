@@ -70,11 +70,11 @@ private:
     template< Endianness e >
     void parse(const Module& m);
     template< Endianness e >
-    bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
+    bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations, u8 ptrSize);
     template< Endianness e >
-    bool fillNode(Buffer<e>& buffer, CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
+    bool fillNode(Buffer<e>& buffer, CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations, u8 ptrSize);
     template< Endianness e >
-    bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations);
+    bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation, Arena::General>& abbreviations);
 public:
     DwarfModule(const ifilename& moduleName, const Module& m, u64 begin, u64 size);
     ~DwarfModule();
