@@ -14,9 +14,9 @@ class InputMap;
 class be_api(INPUT) Action : public minitl::refcountable
 {
 private:
-    istring const           m_name;
-    const InputMap* const   m_owner;
-    std::vector< Control* > m_controls;
+    istring const                               m_name;
+    const InputMap* const                       m_owner;
+    minitl::vector< Control*, Arena::General >  m_controls;
 public:
     Action(const istring& name, const InputMap* owner);
     ~Action();

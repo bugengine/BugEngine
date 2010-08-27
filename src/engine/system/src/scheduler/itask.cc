@@ -79,7 +79,7 @@ ITask::ICallback::~ICallback()
 ITask::ChainCallback::ChainCallback(weak<ITask> task)
 :   ICallback()
 ,   m_starts(task)
-,   m_startedBy(0)
+,   m_startedBy()
 ,   m_completed(0)
 {
 }
@@ -114,7 +114,7 @@ void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 
 bool ITask::ChainCallback::onDisconnected(weak<ITask> from)
 {
-    for(minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
+    for(minitl::vector< weak<ITask>, Arena::General >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
     {
         if((*it) == from)
         {

@@ -73,7 +73,7 @@ void Action::mapControl(Control* c)
 
 void Action::unmapControl(Control* c)
 {
-    for(std::vector<Control*>::iterator it = m_controls.begin(); it != m_controls.end(); )
+    for(minitl::vector<Control*, Arena::General>::iterator it = m_controls.begin(); it != m_controls.end(); )
     {
         if(*it == c)
         {

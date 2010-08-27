@@ -37,10 +37,10 @@ class be_api(CORE) Logger : public minitl::refcountable
 {
     friend class minitl::ref<Logger>;
 private:
-    std::vector< ILogListener* >                m_listeners;
-    std::map< istring, minitl::ref<Logger> >    m_children;
-    minitl::weak<Logger>                        m_parent;
-    istring                                     m_name;
+    minitl::vector< ILogListener*, Arena::General > m_listeners;
+    std::map< istring, minitl::ref<Logger> >        m_children;
+    minitl::weak<Logger>                            m_parent;
+    istring                                         m_name;
 private:
     Logger();
 public:

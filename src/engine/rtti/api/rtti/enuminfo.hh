@@ -12,7 +12,7 @@ namespace BugEngine
 class EnumInfo : public TypeInfo
 {
 protected:
-    minitl::vector< std::pair< istring, int > >   m_enum;
+    minitl::vector< std::pair< istring, int >, Arena::General >   m_enum;
 public:
     EnumInfo(const inamespace& name);
     virtual ~EnumInfo();

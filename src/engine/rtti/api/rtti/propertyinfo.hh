@@ -12,7 +12,7 @@ namespace BugEngine
 class PropertyInfo : public minitl::refcountable
 {
 private:
-    minitl::vector<Value>   m_attributes;
+    minitl::vector<Value, Arena::General>  m_attributes;
 public:
     PropertyInfo();
     virtual ~PropertyInfo();

@@ -32,10 +32,10 @@ public:
 private:
     friend class Section;
 protected:
-    ifilename                   m_filename;
-    u64                         m_baseAddress;
-    ref<const Module>           m_next;
-    minitl::vector< Section >   m_sections;
+    ifilename                                   m_filename;
+    u64                                         m_baseAddress;
+    ref<const Module>                           m_next;
+    minitl::vector< Section, Arena::General >   m_sections;
 public:
     Module(const char* filename, u64 baseAddress);
     virtual ~Module();

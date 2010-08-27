@@ -38,9 +38,9 @@ private:
     class ChainCallback : public ICallback
     {
     private:
-        weak<ITask> const               m_starts;
-        minitl::vector< weak<ITask> >   m_startedBy;
-        mutable i_u32                   m_completed;
+        weak<ITask> const                               m_starts;
+        minitl::vector< weak<ITask>, Arena::General >   m_startedBy;
+        mutable i_u32                                   m_completed;
     public:
         ChainCallback(weak<ITask> task);
         virtual ~ChainCallback();
