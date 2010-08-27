@@ -45,15 +45,15 @@ int be_main (weak<BugEngine::Application> app)
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create<BugEngine::Arena::General>();
     {
 
-        ref<BugEngine::Graphics::IRenderTarget> w = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w2 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w3 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w4 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w4 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w5 = display2->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w5 = display->createRenderWindow(f);
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 

@@ -49,8 +49,8 @@ void Renderer::attachWindow(Window* w)
     {
         m_glContext = wglCreateContext(hDC);
     }
-    w->m_glContext = wglCreateContext(hDC);
-    wglShareLists(m_glContext, w->m_glContext);
+    w->m_glContext = m_glContext;
+    //wglShareLists(m_glContext, w->m_glContext);
 }
 
 }}}
