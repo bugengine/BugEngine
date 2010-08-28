@@ -42,10 +42,7 @@ def set_options(opt):
 	Utils.pprint('NORMAL', 'Host system is Win32')
 
 def configure(conf):
-	import Options
-
 	conf.check_tool('flex bison', tooldir=['mak/tools'])
-
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
 	get_available_msvc(conf)

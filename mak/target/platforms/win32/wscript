@@ -1,7 +1,11 @@
 # set win32 specific options
 
 import os
-import Tools.msvc
+try:
+	import Tools.msvc
+except:
+	pass
+
 import Utils
 from Logs import info,warn
 
