@@ -26,6 +26,7 @@ public:
     typedef const T*    const_pointer;
     typedef const T&    const_reference;
     typedef size_t      size_type;
+    typedef ptrdiff_t   difference_type;
 public:
     typedef base_iterator<iterator_policy>                  iterator;
     typedef base_iterator<const_iterator_policy>            const_iterator;

@@ -78,7 +78,7 @@ ref<const Module> Module::self()
         ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
         if(i == 0)
         {
-           s_module = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
+            s_module = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
             module = s_module;
         }
         else

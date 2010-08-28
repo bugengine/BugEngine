@@ -308,25 +308,25 @@ void DwarfModule::parse(const Module& module)
     const Module::Section& debug_str = module[".debug_str"];
     if(debug_str)
     {
-        m_strings = ref<StringBuffer>::create<Arena::General>(debug_str.fileSize, m_strings);
+        m_strings = ref<StringBuffer>::create<Arena::General>(be_checked_numcast<size_t>(debug_str.fileSize), m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
-    debugInfo = Memory<Arena::General>::Block<u8>(debug_info.fileSize);
+    debugInfo = Memory<Arena::General>::Block<u8>(be_checked_numcast<size_t>(debug_info.fileSize));
     if(debug_info)
     {
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
-    debugAbbrev = Memory<Arena::General>::Block<u8>(debug_abbrev.fileSize);
+    debugAbbrev = Memory<Arena::General>::Block<u8>(be_checked_numcast<size_t>(debug_abbrev.fileSize));
     if(debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
-    lineProgram = Memory<Arena::General>::Block<u8>(debug_line.fileSize);
+    lineProgram = Memory<Arena::General>::Block<u8>(be_checked_numcast<size_t>(debug_line.fileSize));
     if(debug_line)
     {
         module.readSection(debug_line, lineProgram);

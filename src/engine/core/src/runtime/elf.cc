@@ -302,7 +302,7 @@ void Elf::parse(FILE* f)
     fseek(f, be_checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
-    Memory<Arena::General>::Block<char> stringPool(sections[header.shstrndx].size);
+    Memory<Arena::General>::Block<char> stringPool(be_checked_numcast<size_t>(sections[header.shstrndx].size));
     fseek(f, be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
     fread(stringPool, 1, be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
     
