@@ -116,10 +116,6 @@ def find_cross_gcc(conf):
 		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
 		conf.env.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
 
-	if v['GCC_CONFIGURED_PLATFORM'] == 'linux':
-		conf.env.append_unique('CCFLAGS', ['-fPIC'])
-		conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-		conf.env.append_unique('LINKFLAGS', ['-rdynamic'])
 	if v['GCC_CONFIGURED_PLATFORM'] != 'win32':
 		conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])

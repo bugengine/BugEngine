@@ -33,9 +33,9 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    typename BugEngine::Memory<ARENA>::Block<T> m_memory;
-    T*                                          m_end;
-    T*                                          m_capacity;
+    typename BugEngine::Memory<ARENA>::template Block<T>    m_memory;
+    T*                                                      m_end;
+    T*                                                      m_capacity;
 private:
     void grow(size_type capacity);
 public:
