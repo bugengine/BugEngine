@@ -26,12 +26,15 @@ public:
 
     const format<size>& operator|(char* value) const;
     const format<size>& operator|(const char* value) const;
-    const format<size>& operator|(const void* value) const;
     const format<size>& operator|(char value) const;
     const format<size>& operator|(u64 value) const;
     const format<size>& operator|(i64 value) const;
     const format<size>& operator|(i32 value) const;
     const format<size>& operator|(i16 value) const;
+    template< typename T >
+    const format<size>& operator|(T* value) const;
+    template< typename T >
+    const format<size>& operator|(const T* value) const;
     template< typename T >
     const format<size>& operator|(T value) const;
 };
@@ -104,27 +107,6 @@ const format<size>& format<size>::operator|(const char* value) const
 }
 
 template< size_t size >
-const format<size>& format<size>::operator|(const void* value) const
-{
-    static const size_t s = 2+sizeof(value)*2;
-    char result[s];
-    result[0] = '0';
-    result[1] = 'x';
-    for(size_t i = 0; i < sizeof(value)*2; ++i)
-    {
-        result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
-        if(result[i+2] > '9')
-            result[i+2] = result[i+2]+'A'-'9'-1;
-    }
-    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
-    strncpy(m_firstFormat, result, s);
-    m_firstFormat += s;
-    findToken();
-    return *this;
-}
-
-
-template< size_t size >
 const format<size>& format<size>::operator|(i64 value) const
 {
     char result[16];
@@ -186,6 +168,48 @@ template< typename T >
 const format<size>& format<size>::operator|(T value) const
 {
     return *this | static_cast<u64>(value);
+}
+
+template< size_t size >
+template< typename T >
+const format<size>& format<size>::operator|(T* value) const
+{
+    static const size_t s = 2+sizeof(value)*2;
+    char result[s];
+    result[0] = '0';
+    result[1] = 'x';
+    for(size_t i = 0; i < sizeof(value)*2; ++i)
+    {
+        result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
+        if(result[i+2] > '9')
+            result[i+2] = result[i+2]+'A'-'9'-1;
+    }
+    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
+    strncpy(m_firstFormat, result, s);
+    m_firstFormat += s;
+    findToken();
+    return *this;
+}
+
+template< size_t size >
+template< typename T >
+const format<size>& format<size>::operator|(const T* value) const
+{
+    static const size_t s = 2+sizeof(value)*2;
+    char result[s];
+    result[0] = '0';
+    result[1] = 'x';
+    for(size_t i = 0; i < sizeof(value)*2; ++i)
+    {
+        result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
+        if(result[i+2] > '9')
+            result[i+2] = result[i+2]+'A'-'9'-1;
+    }
+    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
+    strncpy(m_firstFormat, result, s);
+    m_firstFormat += s;
+    findToken();
+    return *this;
 }
 
 }

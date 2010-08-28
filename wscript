@@ -20,7 +20,6 @@ def configure(conf):
 def build(bld):
 	bld.add_subdirs('mak')
 
-	intl            = module.external('intl')
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
 	directx10		= module.external('DirectX10')
@@ -42,7 +41,7 @@ def build(bld):
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	core			= module.library('core',        [dbghelp, win32, pthreads, intl])
+	core			= module.library('core',        [dbghelp, win32, pthreads])
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )

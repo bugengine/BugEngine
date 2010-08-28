@@ -31,6 +31,14 @@ static inline void displayError()
 # define OutputDebugString(s) printf("%s", s)
 #endif
 
+#if defined(_AMD64)
+# define BE_64
+#elif defined(_X86)
+# define BE_32
+#else
+# error "unknown arch"
+#endif
+
 #if defined(_WIN32) && !defined(_XBOX)
 # ifdef _AMD64
 #  define BE_PLATFORM_NAME      Win64

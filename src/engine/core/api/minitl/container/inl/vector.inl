@@ -5,7 +5,7 @@
 #define BE_MINITL_CONTAINER_INL_VECTOR_INL_
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
-
+#include <vector>
 namespace minitl
 {
 
@@ -160,7 +160,7 @@ struct vector<T, ARENA>::iterator_policy
 {
     typedef typename vector<T, ARENA>::pointer           pointer;
     typedef typename vector<T, ARENA>::reference         reference;
-    static pointer advance(pointer i, i64 offset)       { return minitl::advance(i, offset); }
+    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, offset); }
 };
 
 template< typename T, int ARENA >
@@ -168,7 +168,7 @@ struct vector<T, ARENA>::const_iterator_policy
 {
     typedef typename vector<T, ARENA>::const_pointer     pointer;
     typedef typename vector<T, ARENA>::const_reference   reference;
-    static pointer advance(pointer i, i64 offset)       { return minitl::advance(i, offset); }
+    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, offset); }
 };
 
 template< typename T, int ARENA >
@@ -176,7 +176,7 @@ struct vector<T, ARENA>::reverse_iterator_policy
 {
     typedef typename vector<T, ARENA>::pointer           pointer;
     typedef typename vector<T, ARENA>::reference         reference;
-    static pointer advance(pointer i, i64 offset)       { return minitl::advance(i, -offset); }
+    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, -offset); }
 };
 
 template< typename T, int ARENA >
@@ -184,7 +184,7 @@ struct vector<T, ARENA>::const_reverse_iterator_policy
 {
     typedef typename vector<T, ARENA>::const_pointer     pointer;
     typedef typename vector<T, ARENA>::const_reference   reference;
-    static pointer advance(pointer i, i64 offset)       { return minitl::advance(i, -offset); }
+    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, -offset); }
 };
 
 
@@ -199,7 +199,7 @@ vector<T, ARENA>::vector()
 template< typename T, int ARENA >
 vector<T, ARENA>::~vector()
 {
-    for(const T* t = m_memory; t != m_end; t = advance(t, 1))
+    for(const_pointer t = m_memory; t != m_end; t = advance(t, 1))
     {
         t->~T();
     }
@@ -257,7 +257,7 @@ typename vector<T, ARENA>::const_reverse_iterator   vector<T, ARENA>::rend() con
 template< typename T, int ARENA >
 typename vector<T, ARENA>::size_type                vector<T, ARENA>::size() const
 {
-    return m_end - m_memory;
+    return distance(m_memory.data(), m_end);
 }
 
 template< typename T, int ARENA >
@@ -297,21 +297,21 @@ typename vector<T, ARENA>::iterator                 vector<T, ARENA>::erase(iter
 template< typename T, int ARENA >
 typename vector<T, ARENA>::iterator                 vector<T, ARENA>::erase(iterator first, iterator last)
 {
-    be_assert_return(first.m_owner == this,, "can't erase iterator that is not pointing on current vector");
-    be_assert_return(last.m_owner == this,, "can't erase iterator that is not pointing on current vector");
-    //be_assert_return(m_memory <= first.m_iterator && m_end > first.m_iterator,, "first %p is not in the range of the vector [%p,%p)" | first.m_iterator | m_memory.data() | m_end);
-    //be_assert_return(m_memory <= last.m_iterator && m_end > last.m_iterator,, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end);
-    //be_assert_return(first.m_iterator <= last.m_iterator,, "first %p is not before last %p" | first.m_iterator | last.m_iterator);
+    be_assert_recover(first.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
+    be_assert_recover(last.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
+    be_assert_recover(m_memory <= first.m_iterator && m_end > first.m_iterator, "first %p is not in the range of the vector [%p,%p)" | first.m_iterator | m_memory.data() | m_end, return first);
+    be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end, return first);
+    be_assert_recover(first.m_iterator <= last.m_iterator,"first %p is not before last %p" | first.m_iterator | last.m_iterator, return first);
 
-    for(T* t = first.m_iterator; t != last.m_iterator; t = advance(t, 1))
+    for(pointer t = first.m_iterator; t != last.m_iterator; t = advance(t, 1))
     {
         t->~T();
     }
-    T* t = first.m_iterator;
-    T* t2 = last.m_iterator;
+    pointer t = first.m_iterator;
+    pointer t2 = last.m_iterator;
     for( ; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
     {
-        *t = *t2;
+        new(t) T(*t2);
         t2->~T();
     }
     m_end = t;
@@ -351,19 +351,19 @@ typename vector<T, ARENA>::const_reference          vector<T, ARENA>::back() con
 template< typename T, int ARENA >
 void                                                vector<T, ARENA>::resize(size_type size)
 {
-    size_type s = m_end - m_memory;
+    size_type s = distance(m_memory.data(), m_end);
     if(size > s)
     {
         grow(size);
-        T* newend = advance(m_memory.data(), size);
-        for(T* t = m_end; t != newend; ++t)
+        pointer newend = advance(m_memory.data(), size);
+        for(pointer t = m_end; t != newend; ++t)
             new(t) T;
         m_end = newend;
     }
     else
     {
-        T* newend = advance(m_memory.data(), size);
-        for(T* t = newend; t != m_end; ++t)
+        pointer newend = advance(m_memory.data(), size);
+        for(pointer t = newend; t != m_end; ++t)
             t->~T();
         m_end = newend;
     }
@@ -372,7 +372,7 @@ void                                                vector<T, ARENA>::resize(siz
 template< typename T, int ARENA >
 void                                                vector<T, ARENA>::grow(size_type size)
 {
-    size_type capacity = m_capacity - m_memory;
+    size_type capacity = distance(m_memory.data(), m_capacity);
     if(size > capacity)
     {
         size = size >> 1  | size;
@@ -380,11 +380,13 @@ void                                                vector<T, ARENA>::grow(size_
         size = size >> 4  | size;
         size = size >> 8  | size;
         size = size >> 16 | size;
+    #ifdef BE_64
         size = size >> 32 | size;
+    #endif
         size++;
         BugEngine::Memory<ARENA>::Block<T> block(size);
-        T* t = block;
-        for(T* t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
+        pointer t = block;
+        for(pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
         {
             new(t) T(*t2);
             t2->~T();
