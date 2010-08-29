@@ -77,7 +77,7 @@ bool vector<T, ARENA>::base_iterator<POLICY>::operator!=(const base_iterator<POL
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator++()
+vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator++()
 {
     m_iterator = POLICY::advance(m_iterator, 1);
     return *this;
@@ -85,7 +85,7 @@ typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterato
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator++(int)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator++(int)
 {
     base_iterator<POLICY> p = *this;
     m_iterator = POLICY::advance(m_iterator, 1);
@@ -94,7 +94,7 @@ typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+=(typename POLICY::difference_type size)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+=(typename POLICY::difference_type size)
 {
     m_iterator = POLICY::advance(m_iterator, size);
     return *this;
@@ -102,7 +102,7 @@ typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator--()
+vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator--()
 {
     m_iterator = POLICY::advance(m_iterator, -1);
     return *this;
@@ -110,7 +110,7 @@ typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterato
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator--(int)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator--(int)
 {
     base_iterator<POLICY> p = *this;
     m_iterator = POLICY::advance(m_iterator, -1);
@@ -119,7 +119,7 @@ typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-=(typename POLICY::difference_type size)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-=(typename POLICY::difference_type size)
 {
     m_iterator = POLICY::advance(m_iterator, -size);
     return *this;
@@ -141,14 +141,14 @@ typename POLICY::reference vector<T, ARENA>::base_iterator<POLICY>::operator*() 
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+(int i)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+(int i)
 {
     return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, i));
 }
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-(int i)
+vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-(int i)
 {
     return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, -i));
 }
