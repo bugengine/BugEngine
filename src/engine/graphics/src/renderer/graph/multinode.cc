@@ -29,31 +29,27 @@ MultiNode::~MultiNode()
 
 void MultiNode::clean()
 {
-    minitl::list<NodeInfo>::iterator prev = m_nodes.end();
-    for(minitl::list<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
+    for(minitl::vector<NodeInfo, Arena::General>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
     {
         if(it->node->closed())
         {
             if(it->type == MainWindow)
                 m_mainNodes--;
-            if(prev != m_nodes.end())
+            if(it != m_nodes.begin())
             {
-                minitl::list<NodeInfo>::iterator next = it;
-                next++;
-                if(next == m_nodes.end())
+                if(it+1 != m_nodes.end())
                 {
-                    prev->chainDispatch = ITask::CallbackConnection();
+                    (it-1)->chainDispatch = ITask::CallbackConnection();
                 }
                 else
                 {
-                    prev->chainDispatch = ITask::CallbackConnection(prev->node->dispatchTask(), next->node->dispatchTask()->startCallback());
+                    (it-1)->chainDispatch = ITask::CallbackConnection((it-1)->node->dispatchTask(), (it+1)->node->dispatchTask()->startCallback());
                 }
             }
             it = m_nodes.erase(it);
         }
         else
         {
-            prev = it;
             ++it;
         }
     }
@@ -68,9 +64,9 @@ void MultiNode::addNode(scoped<INode> node, NodeType type)
     m_nodes.push_back(NodeInfo(node, this, type));
     if(type == MainWindow)
         m_mainNodes++;
-    std::list<NodeInfo>::reverse_iterator it = m_nodes.rbegin();
+    minitl::vector<NodeInfo, Arena::General>::reverse_iterator it = m_nodes.rbegin();
     be_assert(it != m_nodes.rend(), "Added node but list is still empty");
-    std::list<NodeInfo>::reverse_iterator it2 = it++;
+    minitl::vector<NodeInfo, Arena::General>::reverse_iterator it2 = it++;
     if(it != m_nodes.rend())
     {
         it->chainDispatch = ITask::CallbackConnection(it->node->dispatchTask(), it2->node->dispatchTask()->startCallback());

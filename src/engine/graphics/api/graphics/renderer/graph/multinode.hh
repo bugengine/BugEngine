@@ -35,16 +35,16 @@ private:
     };
     friend struct NodeInfo;
 private:
-    ref<TaskGroup>                  m_globalTask;
-    ref<TaskGroup>                  m_renderTask;
-    ref<TaskGroup>                  m_syncTask;
-    ref<TaskGroup>                  m_dispatchTask;
-    ref<ITask>                      m_cleanTask;
-    TaskGroup::TaskEndConnection    m_endSyncConnection;
-    TaskGroup::TaskStartConnection  m_startGlobalConnection;
-    TaskGroup::TaskEndConnection    m_endGlobalConnection;
-    AsyncDispatchJobGraph           m_jobGraph;
-    minitl::list< NodeInfo >        m_nodes;
+    ref<TaskGroup>                              m_globalTask;
+    ref<TaskGroup>                              m_renderTask;
+    ref<TaskGroup>                              m_syncTask;
+    ref<TaskGroup>                              m_dispatchTask;
+    ref<ITask>                                  m_cleanTask;
+    TaskGroup::TaskEndConnection                m_endSyncConnection;
+    TaskGroup::TaskStartConnection              m_startGlobalConnection;
+    TaskGroup::TaskEndConnection                m_endGlobalConnection;
+    AsyncDispatchJobGraph                       m_jobGraph;
+    minitl::vector<NodeInfo, Arena::General>    m_nodes;
     u32                             m_mainNodes;
 private:
     void clean();

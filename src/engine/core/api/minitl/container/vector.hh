@@ -67,6 +67,7 @@ public:
     const_reference         back() const;
 
     void                    resize(size_type size);
+    void                    clear();
 };
 
 }
