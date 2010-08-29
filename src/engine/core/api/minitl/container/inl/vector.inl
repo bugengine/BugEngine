@@ -30,10 +30,10 @@ public:
     base_iterator<POLICY> operator-(int offset);
     base_iterator<POLICY>& operator++();
     base_iterator<POLICY>  operator++(int size);
-    base_iterator<POLICY>  operator+=(int size);
+    base_iterator<POLICY>  operator+=(typename POLICY::difference_type size);
     base_iterator<POLICY>& operator--();
     base_iterator<POLICY>  operator--(int size);
-    base_iterator<POLICY>  operator-=(int size);
+    base_iterator<POLICY>  operator-=(typename POLICY::difference_type size);
 
     typename POLICY::pointer    operator->() const;
     typename POLICY::reference  operator*() const;
@@ -77,7 +77,7 @@ bool vector<T, ARENA>::base_iterator<POLICY>::operator!=(const base_iterator<POL
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator++()
+typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator++()
 {
     m_iterator = POLICY::advance(m_iterator, 1);
     return *this;
@@ -85,7 +85,7 @@ typename vector<T, ARENA>::template base_iterator<POLICY>& vector<T, ARENA>::bas
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator++(int size)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator++(int)
 {
     base_iterator<POLICY> p = *this;
     m_iterator = POLICY::advance(m_iterator, 1);
@@ -94,7 +94,7 @@ typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+=(int size)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+=(typename POLICY::difference_type size)
 {
     m_iterator = POLICY::advance(m_iterator, size);
     return *this;
@@ -102,7 +102,7 @@ typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator--()
+typename vector<T, ARENA>::base_iterator<POLICY>& vector<T, ARENA>::base_iterator<POLICY>::operator--()
 {
     m_iterator = POLICY::advance(m_iterator, -1);
     return *this;
@@ -110,7 +110,7 @@ typename vector<T, ARENA>::template base_iterator<POLICY>& vector<T, ARENA>::bas
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator--(int)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator--(int)
 {
     base_iterator<POLICY> p = *this;
     m_iterator = POLICY::advance(m_iterator, -1);
@@ -119,7 +119,7 @@ typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-=(int size)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-=(typename POLICY::difference_type size)
 {
     m_iterator = POLICY::advance(m_iterator, -size);
     return *this;
@@ -141,14 +141,14 @@ typename POLICY::reference vector<T, ARENA>::base_iterator<POLICY>::operator*() 
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+(int i)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+(int i)
 {
     return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, i));
 }
 
 template< typename T, int ARENA >
 template< typename POLICY >
-typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-(int i)
+typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-(int i)
 {
     return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, -i));
 }
@@ -158,33 +158,41 @@ typename vector<T, ARENA>::template base_iterator<POLICY> vector<T, ARENA>::base
 template< typename T, int ARENA >
 struct vector<T, ARENA>::iterator_policy
 {
-    typedef typename vector<T, ARENA>::pointer           pointer;
-    typedef typename vector<T, ARENA>::reference         reference;
-    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, offset); }
+    typedef typename vector<T, ARENA>::pointer          pointer;
+    typedef typename vector<T, ARENA>::reference        reference;
+    typedef typename vector<T, ARENA>::size_type        size_type;
+    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
 template< typename T, int ARENA >
 struct vector<T, ARENA>::const_iterator_policy
 {
-    typedef typename vector<T, ARENA>::const_pointer     pointer;
-    typedef typename vector<T, ARENA>::const_reference   reference;
-    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, offset); }
+    typedef typename vector<T, ARENA>::const_pointer    pointer;
+    typedef typename vector<T, ARENA>::const_reference  reference;
+    typedef typename vector<T, ARENA>::size_type        size_type;
+    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
 template< typename T, int ARENA >
 struct vector<T, ARENA>::reverse_iterator_policy
 {
-    typedef typename vector<T, ARENA>::pointer           pointer;
-    typedef typename vector<T, ARENA>::reference         reference;
-    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, -offset); }
+    typedef typename vector<T, ARENA>::pointer          pointer;
+    typedef typename vector<T, ARENA>::reference        reference;
+    typedef typename vector<T, ARENA>::size_type        size_type;
+    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
 template< typename T, int ARENA >
 struct vector<T, ARENA>::const_reverse_iterator_policy
 {
-    typedef typename vector<T, ARENA>::const_pointer     pointer;
-    typedef typename vector<T, ARENA>::const_reference   reference;
-    static pointer advance(pointer i, ptrdiff_t offset)       { return minitl::advance(i, -offset); }
+    typedef typename vector<T, ARENA>::const_pointer    pointer;
+    typedef typename vector<T, ARENA>::const_reference  reference;
+    typedef typename vector<T, ARENA>::size_type        size_type;
+    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
 
