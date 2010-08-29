@@ -27,8 +27,14 @@ public:
     bool operator==(const base_iterator<POLICY>& other);
     bool operator!=(const base_iterator<POLICY>& other);
 
-    base_iterator<POLICY> operator+(int offset);
-    base_iterator<POLICY> operator-(int offset);
+    base_iterator<POLICY> operator+(typename POLICY::difference_type offset)
+    {
+        return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, offset));
+    }
+    base_iterator<POLICY> operator-(typename POLICY::difference_type offset)
+    {
+        return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, -offset));
+    }
 
     base_iterator<POLICY>& operator++()
     {
@@ -116,21 +122,6 @@ typename POLICY::reference vector<T, ARENA>::base_iterator<POLICY>::operator*() 
 {
     return *m_iterator;
 }
-
-template< typename T, int ARENA >
-template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator+(int i)
-{
-    return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, i));
-}
-
-template< typename T, int ARENA >
-template< typename POLICY >
-typename vector<T, ARENA>::base_iterator<POLICY> vector<T, ARENA>::base_iterator<POLICY>::operator-(int i)
-{
-    return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, -i));
-}
-
 
 
 template< typename T, int ARENA >
