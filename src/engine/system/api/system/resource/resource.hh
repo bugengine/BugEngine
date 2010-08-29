@@ -19,6 +19,7 @@ private:
         weak<const IResourceManager>    m_manager;
         const void*                     m_handle;
     public:
+        ResourceHandle();
         ResourceHandle(weak<const IResourceManager> manager, const void* handle);
         ~ResourceHandle();
     };

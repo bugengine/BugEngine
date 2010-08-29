@@ -41,7 +41,7 @@ public:
         m_iterator = POLICY::advance(m_iterator, 1);
         return *this;
     }
-    base_iterator<POLICY>  operator++(int size)
+    base_iterator<POLICY>  operator++(int)
     {
         base_iterator<POLICY> p = *this;
         m_iterator = POLICY::advance(m_iterator, 1);
@@ -57,7 +57,7 @@ public:
         m_iterator = POLICY::advance(m_iterator, -1);
         return *this;
     }
-    base_iterator<POLICY>  operator--(int size)
+    base_iterator<POLICY>  operator--(int)
     {
         base_iterator<POLICY> p = *this;
         m_iterator = POLICY::advance(m_iterator, -1);
@@ -344,6 +344,14 @@ void                                                vector<T, ARENA>::resize(siz
             t->~T();
         m_end = newend;
     }
+}
+
+template< typename T, int ARENA >
+void                                                vector<T, ARENA>::clear()
+{
+    for(pointer t = m_memory.data(); t != m_end; ++t)
+        t->~T();
+    m_end = m_memory.data();
 }
 
 template< typename T, int ARENA >
