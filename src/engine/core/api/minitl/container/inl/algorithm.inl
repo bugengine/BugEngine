@@ -1,19 +1,22 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_CONTAINER_LIST_HH_
-#define BE_MINITL_CONTAINER_LIST_HH_
+#ifndef BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
+#define BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
 /*****************************************************************************/
-#include <list>
+#include    <core/debug/assert.hh>
+
 
 namespace minitl
 {
 
-using std::list;
-
+template< typename ITERATOR, typename FUNCTOR >
+void for_each(ITERATOR first, iterator last, FUNCTOR f)
+{
+    for(; first != last; ++first) f(*first);
 }
 
-#include <minitl/container/inl/list.inl>
+}
 
 /*****************************************************************************/
 #endif

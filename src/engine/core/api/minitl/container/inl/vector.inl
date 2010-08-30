@@ -5,14 +5,17 @@
 #define BE_MINITL_CONTAINER_INL_VECTOR_INL_
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
-#include <vector>
+
+
 namespace minitl
 {
-
 
 template< typename T, int ARENA >
 template< typename POLICY >
 class vector<T, ARENA>::base_iterator
+#ifdef BE_ENABLE_DEBUG_ITERATORS
+    :   intrusive_list< base_iterator<POLICY> >::item
+#endif
 {
     friend class vector<T, ARENA>;
 private:
