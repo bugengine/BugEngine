@@ -39,7 +39,7 @@ private:
     {
     private:
         weak<ITask> const                               m_starts;
-        minitl::vector< weak<ITask>, Arena::General >   m_startedBy;
+        minitl::vector<weak<ITask>, Arena::General>     m_startedBy;
         mutable i_u32                                   m_completed;
     public:
         ChainCallback(weak<ITask> task);
@@ -57,9 +57,9 @@ public:
     const color32               color;
     const Scheduler::Priority   priority;
 private:
-    minitl::list< weak<ICallback> >     m_callbacks;
-    ref<ICallback>                      m_start;
-    CriticalSection                     m_cs;
+    minitl::list< weak<ICallback> >                 m_callbacks;
+    ref<ICallback>                                  m_start;
+    CriticalSection                                 m_cs;
 private:
     void addCallback(weak<ICallback> callback, ICallback::CallbackStatus status);
     bool removeCallback(weak<ICallback> callback);

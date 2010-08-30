@@ -1,20 +1,18 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_CONTAINER_VECTOR_HH_
-#define BE_MINITL_CONTAINER_VECTOR_HH_
+#ifndef BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
+#define BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
 /*****************************************************************************/
-#include    <core/memory/malloc.hh>
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#include    <minitl/container/intrusive_list.hh>
-#endif
 
 namespace minitl
 {
 
-template< typename T, int ARENA >
-class vector
+template< typename T, int INDEX = 0 >
+class intrusive_list
 {
+public:
+    class item;
 private:
     template< typename POLICY >
     class base_iterator;
@@ -36,17 +34,11 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    typename BugEngine::Memory<ARENA>::template Block<T>    m_memory;
-    T*                                                      m_end;
-    T*                                                      m_capacity;
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-    intrusive_list<iterator>                                m_iterators;
-#endif
-private:
-    void grow(size_type capacity);
+    item        m_root;
+    size_type   m_size;
 public:
-    vector();
-    ~vector();
+    intrusive_list();
+    ~intrusive_list();
 
     iterator                begin();
     iterator                end();
@@ -60,9 +52,7 @@ public:
     size_type               size() const;
     bool                    empty() const;
 
-    reference               operator[](size_type i);
-    const_reference         operator[](size_type i) const;
-
+    void                    push_front(const_reference r);
     void                    push_back(const_reference r);
     iterator                erase(iterator it);
     iterator                erase(iterator begin, iterator end);
@@ -72,13 +62,12 @@ public:
     const_reference         front() const;
     const_reference         back() const;
 
-    void                    resize(size_type size);
     void                    clear();
 };
 
 }
 
-#include <minitl/container/inl/vector.inl>
+#include <minitl/container/inl/intrusive_list.inl>
 
 /*****************************************************************************/
 #endif
