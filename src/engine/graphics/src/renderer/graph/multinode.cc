@@ -39,11 +39,11 @@ void MultiNode::clean()
             {
                 if(it+1 != m_nodes.end())
                 {
-                    (it-1)->chainDispatch = ITask::CallbackConnection();
+                    (it-1)->chainDispatch = ITask::CallbackConnection((it-1)->node->dispatchTask(), (it+1)->node->dispatchTask()->startCallback());
                 }
                 else
                 {
-                    (it-1)->chainDispatch = ITask::CallbackConnection((it-1)->node->dispatchTask(), (it+1)->node->dispatchTask()->startCallback());
+                    (it-1)->chainDispatch = ITask::CallbackConnection();
                 }
             }
             it = m_nodes.erase(it);
