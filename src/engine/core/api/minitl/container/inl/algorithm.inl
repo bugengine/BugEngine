@@ -11,10 +11,27 @@ namespace minitl
 {
 
 template< typename ITERATOR, typename FUNCTOR >
-void for_each(ITERATOR first, iterator last, FUNCTOR f)
+void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
 {
     for(; first != last; ++first) f(*first);
 }
+
+template< typename T >
+T* advance(T* input, ptrdiff_t offset)
+{
+    char *ptr = reinterpret_cast<char*>(input);
+    ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
+    return reinterpret_cast<T*>(ptr);
+}
+
+template< typename T >
+const T* advance(const T* input, ptrdiff_t offset)
+{
+    const char *ptr = reinterpret_cast<const char*>(input);
+    ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
+    return reinterpret_cast<const T*>(ptr);
+}
+
 
 }
 

@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
 #define BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
 /*****************************************************************************/
+#include    <minitl/container/algorithm.hh>
 
 namespace minitl
 {
@@ -21,13 +22,13 @@ private:
     struct reverse_iterator_policy;
     struct const_reverse_iterator_policy;
 public:
-    typedef T           value_type;
-    typedef T*          pointer;
-    typedef T&          reference;
-    typedef const T*    const_pointer;
-    typedef const T&    const_reference;
-    typedef size_t      size_type;
-    typedef ptrdiff_t   difference_type;
+    typedef T                       value_type;
+    typedef T*                      pointer;
+    typedef T&                      reference;
+    typedef const T*                const_pointer;
+    typedef const T&                const_reference;
+    typedef minitl::size_type       size_type;
+    typedef minitl::difference_type difference_type;
 public:
     typedef base_iterator<iterator_policy>                  iterator;
     typedef base_iterator<const_iterator_policy>            const_iterator;
@@ -35,7 +36,6 @@ public:
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
     item        m_root;
-    size_type   m_size;
 public:
     intrusive_list();
     ~intrusive_list();
