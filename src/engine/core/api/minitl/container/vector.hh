@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_VECTOR_HH_
 #define BE_MINITL_CONTAINER_VECTOR_HH_
 /*****************************************************************************/
+#include    <minitl/container/algorithm.hh>
 #include    <core/memory/malloc.hh>
 #ifdef BE_ENABLE_DEBUG_ITERATORS
 #include    <minitl/container/intrusive_list.hh>
@@ -23,13 +24,13 @@ private:
     struct reverse_iterator_policy;
     struct const_reverse_iterator_policy;
 public:
-    typedef T           value_type;
-    typedef T*          pointer;
-    typedef T&          reference;
-    typedef const T*    const_pointer;
-    typedef const T&    const_reference;
-    typedef size_t      size_type;
-    typedef ptrdiff_t   difference_type;
+    typedef T                       value_type;
+    typedef T*                      pointer;
+    typedef T&                      reference;
+    typedef const T*                const_pointer;
+    typedef const T&                const_reference;
+    typedef minitl::size_type       size_type;
+    typedef minitl::difference_type difference_type;
 public:
     typedef base_iterator<iterator_policy>                  iterator;
     typedef base_iterator<const_iterator_policy>            const_iterator;
