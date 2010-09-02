@@ -10,28 +10,66 @@
 namespace minitl
 {
 
+namespace _
+{
+
+template< typename ITERATOR, typename COMPARE >
+struct SortPredicate
+{
+    ITERATOR    m_iterator;
+    COMPARE     m_compare;
+    SortPredicate(ITERATOR it)
+        :   m_iterator(it)
+    {
+    }
+    bool operator()(typename ITERATOR::const_reference ref) { return m_compare(*m_iterator, ref); }
+};
+
+}
+
+
+template< typename T >
+void swap(T& a, T& b)
+{
+    T c = a; a = b; b = c;
+}
+
 template< typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
 {
     for(; first != last; ++first) f(*first);
 }
 
-template< typename T >
-T* advance(T* input, ptrdiff_t offset)
+template< typename ITERATOR, typename PREDICATE >
+ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 {
-    char *ptr = reinterpret_cast<char*>(input);
-    ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
-    return reinterpret_cast<T*>(ptr);
+    ITERATOR middle = first;
+    for( ; middle != last; ++first)
+    {
+        if(p(*first))
+        {
+            minitl::swap(*first, *middle);
+            ++middle;
+        }
+    }
+    return middle;
 }
 
-template< typename T >
-const T* advance(const T* input, ptrdiff_t offset)
+template< typename ITERATOR, typename COMPARE >
+void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
-    const char *ptr = reinterpret_cast<const char*>(input);
-    ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
-    return reinterpret_cast<const T*>(ptr);
+    ITERATOR::difference_type d = distance(first, last)/2;
+    if(d > 1)
+    {
+        ITERATOR reallast = last - 1;
+        ITERATOR t = first + d/2;
+        swap(*t, *reallast);
+        t = partition(first, last-1, _::SortPredicate<ITERATOR, COMPARE>(last-1));
+        swap(*t, *reallast);
+        sort(first, t-1, s);
+        sort(t, last, s);
+    }
 }
-
 
 }
 

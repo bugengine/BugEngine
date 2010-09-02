@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
 #define BE_MINITL_CONTAINER_INTRUSIVE_LIST_HH_
 /*****************************************************************************/
-#include    <minitl/container/algorithm.hh>
+#include    <minitl/container/iterator.hh>
 
 namespace minitl
 {

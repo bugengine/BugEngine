@@ -6,18 +6,27 @@
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
 
-
 namespace minitl
 {
 
 template< typename T, int ARENA >
 template< typename POLICY >
 class vector<T, ARENA>::base_iterator
+    :   public random_access_iterator<T, typename vector<T, ARENA>::difference_type>
 #ifdef BE_ENABLE_DEBUG_ITERATORS
-    :   intrusive_list< base_iterator<POLICY> >::item
+    ,   public intrusive_list< base_iterator<POLICY> >::item
 #endif
 {
     friend class vector<T, ARENA>;
+public:
+    typedef typename random_access_iterator_tag         iterator_category;
+    typedef typename vector<T, ARENA>::value_type       value_type;
+    typedef typename vector<T, ARENA>::pointer          pointer;
+    typedef typename vector<T, ARENA>::reference        reference;
+    typedef typename vector<T, ARENA>::const_pointer    const_pointer;
+    typedef typename vector<T, ARENA>::const_reference  const_reference;
+    typedef typename vector<T, ARENA>::size_type        size_type;
+    typedef typename vector<T, ARENA>::difference_type  difference_type;
 private:
     const vector<T, ARENA>*     m_owner;
     typename POLICY::pointer    m_iterator;
@@ -30,13 +39,18 @@ public:
     bool operator==(const base_iterator<POLICY>& other);
     bool operator!=(const base_iterator<POLICY>& other);
 
-    base_iterator<POLICY> operator+(typename POLICY::difference_type offset)
+    base_iterator<POLICY> operator+(typename POLICY::difference_type offset) const
     {
         return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, offset));
     }
-    base_iterator<POLICY> operator-(typename POLICY::difference_type offset)
+    base_iterator<POLICY> operator-(typename POLICY::difference_type offset) const
     {
         return base_iterator<POLICY>(m_owner, POLICY::advance(m_iterator, -offset));
+    }
+    typename POLICY::difference_type operator-(const base_iterator<POLICY>& other) const
+    {
+        be_assert_recover(m_owner == other.m_owner, "can't differ between unrelated iterators", return 0);
+        return distance(other.m_iterator, m_iterator);
     }
 
     base_iterator<POLICY>& operator++()
@@ -71,7 +85,6 @@ public:
         m_iterator = POLICY::advance(m_iterator, -size);
         return *this;
     }
-
     typename POLICY::pointer    operator->() const;
     typename POLICY::reference  operator*() const;
 };

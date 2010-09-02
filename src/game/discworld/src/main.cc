@@ -17,11 +17,31 @@
 
 
 #include    <mobile/world.hh>
-
+#include    <algorithm>
 
 /*---------------------------------------------------------------------------*/
 int be_main (weak<BugEngine::Application> app)
 {
+    struct Print
+    {
+        void operator()(int i)
+        {
+            printf("%d\n", i);
+        }
+    };
+    minitl::vector<int, BugEngine::Arena::General> v;
+    v.push_back(1);
+    v.push_back(3);
+    v.push_back(4);
+    v.push_back(2);
+    v.push_back(7);
+    v.push_back(9);
+    v.push_back(8);
+    v.push_back(6);
+    minitl::for_each(v.begin(), v.end(), Print());
+    minitl::sort(v.begin(), v.end(), minitl::less<int>());
+    minitl::for_each(v.begin(), v.end(), Print());
+
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create<BugEngine::Arena::General>();
     filesystem->mount("data", ref<BugEngine::DiskFS>::create<BugEngine::Arena::General>(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
