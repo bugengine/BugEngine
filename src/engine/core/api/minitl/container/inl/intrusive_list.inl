@@ -20,6 +20,8 @@ private:
 protected:
     item();
     ~item();
+    item(const item& other);
+    item& operator=(const item& other);
 
     void insert(const item* before);
     void unhook();
@@ -30,6 +32,19 @@ intrusive_list<T, INDEX>::item::item()
 :   m_next(this)
 ,   m_previous(this)
 {
+}
+
+template< typename T, int INDEX >
+intrusive_list<T, INDEX>::item::item(const item& other)
+:   m_next(this)
+,   m_previous(this)
+{
+}
+
+template< typename T, int INDEX >
+typename intrusive_list<T, INDEX>::item& intrusive_list<T, INDEX>::item::operator=(const item& other)
+{
+    return *this;
 }
 
 template< typename T, int INDEX >
