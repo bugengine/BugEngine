@@ -66,7 +66,7 @@ void sort(ITERATOR first, ITERATOR last, COMPARE s)
         swap(*t, *reallast);
         t = partition(first, reallast, _::SortPredicate<ITERATOR, COMPARE>(reallast));
         swap(*t, *reallast);
-        sort(first, t-1, s);
+        sort(first, t, s);
         sort(t, last, s);
     }
 }
