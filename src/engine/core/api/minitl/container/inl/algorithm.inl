@@ -44,9 +44,9 @@ template< typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 {
     ITERATOR middle = first;
-    for( ; middle != last; ++first)
+    for( ; first != last; ++first)
     {
-        if(p(*first))
+        if(!p(*first))
         {
             minitl::swap(*first, *middle);
             ++middle;
@@ -58,13 +58,13 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
-    ITERATOR::difference_type d = distance(first, last)/2;
+    ITERATOR::difference_type d = distance(first, last);
     if(d > 1)
     {
         ITERATOR reallast = last - 1;
         ITERATOR t = first + d/2;
         swap(*t, *reallast);
-        t = partition(first, last-1, _::SortPredicate<ITERATOR, COMPARE>(last-1));
+        t = partition(first, reallast, _::SortPredicate<ITERATOR, COMPARE>(reallast));
         swap(*t, *reallast);
         sort(first, t-1, s);
         sort(t, last, s);
