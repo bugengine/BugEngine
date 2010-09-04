@@ -10,24 +10,13 @@ namespace minitl
 {
 
 template< typename T, int ARENA >
-struct vector<T, ARENA>::invalidate
-{
-    invalidate(typename vector<T, ARENA>::const_pointer* begin, typename vector<T, ARENA>::const_pointer* end);
-    template< typename POLICY >
-    void operator()(const typename vector<T, ARENA>::template base_iterator<POLICY>& it);
-};
-
-template< typename T, int ARENA >
 template< typename POLICY >
 class vector<T, ARENA>::base_iterator
     :   public random_access_iterator<T, typename vector<T, ARENA>::difference_type>
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-    ,   public intrusive_list< base_iterator<POLICY> >::item
-#endif
 {
     friend class vector<T, ARENA>;
 public:
-    typedef typename random_access_iterator_tag         iterator_category;
+    typedef          random_access_iterator_tag         iterator_category;
     typedef typename vector<T, ARENA>::value_type       value_type;
     typedef typename vector<T, ARENA>::pointer          pointer;
     typedef typename vector<T, ARENA>::reference        reference;
@@ -50,8 +39,6 @@ public:
     
     base_iterator<POLICY>& operator=(const base_iterator<POLICY>& other)
     {
-        #ifdef BE_ENABLE_DEBUG_ITERATORS
-        #endif
         m_owner = other.m_owner;
         m_iterator = other.m_iterator;
         return *this;
@@ -112,8 +99,6 @@ vector<T, ARENA>::base_iterator<POLICY>::base_iterator()
 :   m_owner(0)
 ,   m_iterator(0)
 {
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#endif
 }
 
 template< typename T, int ARENA >
@@ -122,8 +107,6 @@ vector<T, ARENA>::base_iterator<POLICY>::base_iterator(const vector<T, ARENA>* o
 :   m_owner(owner)
 ,   m_iterator(it)
 {
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#endif
 }
 
 template< typename T, int ARENA >
@@ -132,16 +115,12 @@ vector<T, ARENA>::base_iterator<POLICY>::base_iterator(const base_iterator<POLIC
 :   m_owner(other.m_owner)
 ,   m_iterator(other.m_iterator)
 {
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#endif
 }
 
 template< typename T, int ARENA >
 template< typename POLICY >
 vector<T, ARENA>::base_iterator<POLICY>::~base_iterator()
 {
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#endif
 }
 
 template< typename T, int ARENA >

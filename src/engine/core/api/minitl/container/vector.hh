@@ -4,11 +4,8 @@
 #ifndef BE_MINITL_CONTAINER_VECTOR_HH_
 #define BE_MINITL_CONTAINER_VECTOR_HH_
 /*****************************************************************************/
-#include    <minitl/container/algorithm.hh>
+#include    <minitl/container/iterator.hh>
 #include    <core/memory/malloc.hh>
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-#include    <minitl/container/intrusive_list.hh>
-#endif
 
 namespace minitl
 {
@@ -32,9 +29,6 @@ public:
     typedef minitl::size_type       size_type;
     typedef minitl::difference_type difference_type;
 public:
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-    struct invalidate;
-#endif
     typedef base_iterator<iterator_policy>                  iterator;
     typedef base_iterator<const_iterator_policy>            const_iterator;
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
@@ -43,12 +37,6 @@ private:
     typename BugEngine::Memory<ARENA>::template Block<T>    m_memory;
     T*                                                      m_end;
     T*                                                      m_capacity;
-#ifdef BE_ENABLE_DEBUG_ITERATORS
-    intrusive_list<iterator>                                m_iterators;
-    intrusive_list<const_iterator>                          m_const_iterators;
-    intrusive_list<reverse_iterator>                        m_reverse_iterators;
-    intrusive_list<const_reverse_iterator>                  m_const_reverse_iterators;
-#endif
 private:
     void grow(size_type capacity);
 public:

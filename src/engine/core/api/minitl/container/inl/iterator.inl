@@ -34,7 +34,7 @@ static typename iterator_traits<ITERATOR>::difference_type distance(const ITERAT
 template< typename ITERATOR >
 typename iterator_traits<ITERATOR>::iterator_category   iterator_category(const ITERATOR& it)
 {
-    return iterator_traits<ITERATOR>::iterator_category();
+    return typename iterator_traits<ITERATOR>::iterator_category();
 }
 
 template< typename ITERATOR >

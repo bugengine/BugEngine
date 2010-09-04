@@ -36,7 +36,7 @@ def add_linux_flags_to_env(conf):
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
-									'runbin':	'bin',
+									'runbin':	'lib',
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),

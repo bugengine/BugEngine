@@ -58,7 +58,7 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
-    ITERATOR::difference_type d = distance(first, last);
+    typename ITERATOR::difference_type d = distance(first, last);
     if(d > 1)
     {
         ITERATOR reallast = last - 1;
