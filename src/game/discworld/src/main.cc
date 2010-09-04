@@ -17,19 +17,19 @@
 
 
 #include    <mobile/world.hh>
-#include    <algorithm>
+#include    <minitl/container/algorithm.hh>
+
+struct Print
+{
+    void operator()(int i)
+    {
+        printf((minitl::format<>("%d\n") | i).c_str());
+    }
+};
 
 /*---------------------------------------------------------------------------*/
 int be_main (weak<BugEngine::Application> app)
-{
-    struct Print
-    {
-        void operator()(int i)
-        {
-            OutputDebugString((minitl::format<>("%d\n") | i).c_str());
-        }
-    };
-    minitl::vector<int, BugEngine::Arena::General> v;
+{    minitl::vector<int, BugEngine::Arena::General> v;
     v.push_back(1);
     v.push_back(9);
     v.push_back(3);
