@@ -95,6 +95,7 @@ class VCxproj:
 				self.output.write('      <WarningLevel>Level1</WarningLevel>\n')
 			self.output.write('    </ClCompile>\n')
 			self.output.write('    <ResourceCompile>\n')
+			self.output.write('      <PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>\n' % ';'.join(opts.defines))
 			self.output.write('      <AdditionalIncludeDirectories>%s;%%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n' % includedirs)
 			self.output.write('    </ResourceCompile>\n')
 			self.output.write('    <Link>\n')

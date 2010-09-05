@@ -87,7 +87,11 @@ class VCproj:
 								'PrecompiledHeaderThrough':opts.pchstop,
 							},
 					'VCManagedResourceCompilerTool': { },
-					'VCResourceCompilerTool': { 'AdditionalIncludeDirectories':apidirs, },
+					'VCResourceCompilerTool':
+							{
+								'PreprocessorDefinitions':defines,
+								'AdditionalIncludeDirectories':apidirs,
+							},
 					'VCVCPrelinkEventTool': { },
 					'VCLinkerTool':
 							{

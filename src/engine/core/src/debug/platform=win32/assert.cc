@@ -12,7 +12,7 @@
 #include    <stdlib.h>
 #include    <malloc.h>
 
-#include    "resource.h"
+#include    <core/debug/resource.h>
 
 namespace BugEngine
 {
