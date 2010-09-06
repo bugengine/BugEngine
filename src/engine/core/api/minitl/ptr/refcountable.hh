@@ -12,14 +12,23 @@ namespace minitl
 class refcountable;
 
 template< typename T >
-static inline void checked_delete(const T* ptr)
+static inline void checked_destroy(const T* ptr)
 {
     char typeMustBeComplete[sizeof(T)];
     (void)typeMustBeComplete;
     if(ptr)
     {
-        Deleter* d = ptr->m_deleter;
         ptr->~T();
+    }
+}
+
+template< typename T >
+static inline void checked_delete(const T* ptr)
+{
+    if(ptr)
+    {
+        Deleter* d = ptr->m_deleter;
+        checked_destroy(ptr);
         (*d)(ptr);
     }
 }

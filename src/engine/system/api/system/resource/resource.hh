@@ -24,7 +24,7 @@ private:
         ~ResourceHandle();
     };
 private:
-    minitl::list<ResourceHandle>    m_handles;
+    minitl::list<ResourceHandle, Arena::General>    m_handles;
 public:
     Resource();
     ~Resource();

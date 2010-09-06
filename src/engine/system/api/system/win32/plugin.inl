@@ -4,10 +4,11 @@
 #include    <stdexcept>
 #include    <core/environment.hh>
 
-#include <winerror.h>
+#include    <winerror.h>
+
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
-    extern "C" FORCEEXPORT klass* be_createPlugin params { return new klass args; } \
-    extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { delete cls; }
+    extern "C" FORCEEXPORT klass* be_createPlugin params { void* m = BugEngine::Memory<klass::Arena>::allocArray<klass>(1); return new(m) klass args; } \
+    extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::Memory<klass::Arena>::free(cls); }
 
 namespace BugEngine
 {

@@ -57,7 +57,7 @@ public:
     const color32               color;
     const Scheduler::Priority   priority;
 private:
-    minitl::list< weak<ICallback> >                 m_callbacks;
+    minitl::list< weak<ICallback>, Arena::General > m_callbacks;
     ref<ICallback>                                  m_start;
     CriticalSection                                 m_cs;
 private:

@@ -14,6 +14,8 @@ template< typename T > class scoped;
 typedef void (Deleter)(const void* ptr);
 
 template< typename T >
+static void checked_destroy(const T*);
+template< typename T >
 static void checked_delete(const T*);
 
 class pointer
