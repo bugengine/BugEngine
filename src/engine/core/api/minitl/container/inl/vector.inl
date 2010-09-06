@@ -17,13 +17,11 @@ class vector<T, ARENA>::base_iterator
     friend class vector<T, ARENA>;
 public:
     typedef          random_access_iterator_tag         iterator_category;
-    typedef typename vector<T, ARENA>::value_type       value_type;
-    typedef typename vector<T, ARENA>::pointer          pointer;
-    typedef typename vector<T, ARENA>::reference        reference;
-    typedef typename vector<T, ARENA>::const_pointer    const_pointer;
-    typedef typename vector<T, ARENA>::const_reference  const_reference;
-    typedef typename vector<T, ARENA>::size_type        size_type;
-    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    typedef typename POLICY::value_type                 value_type;
+    typedef typename POLICY::pointer                    pointer;
+    typedef typename POLICY::reference                  reference;
+    typedef typename POLICY::size_type                  size_type;
+    typedef typename POLICY::difference_type            difference_type;
 private:
     const vector<T, ARENA>*     m_owner;
     typename POLICY::pointer    m_iterator;
@@ -155,6 +153,7 @@ typename POLICY::reference vector<T, ARENA>::base_iterator<POLICY>::operator*() 
 template< typename T, int ARENA >
 struct vector<T, ARENA>::iterator_policy
 {
+    typedef typename vector<T, ARENA>::value_type       value_type;
     typedef typename vector<T, ARENA>::pointer          pointer;
     typedef typename vector<T, ARENA>::reference        reference;
     typedef typename vector<T, ARENA>::size_type        size_type;
@@ -165,6 +164,7 @@ struct vector<T, ARENA>::iterator_policy
 template< typename T, int ARENA >
 struct vector<T, ARENA>::const_iterator_policy
 {
+    typedef typename vector<T, ARENA>::value_type const value_type;
     typedef typename vector<T, ARENA>::const_pointer    pointer;
     typedef typename vector<T, ARENA>::const_reference  reference;
     typedef typename vector<T, ARENA>::size_type        size_type;
@@ -175,6 +175,7 @@ struct vector<T, ARENA>::const_iterator_policy
 template< typename T, int ARENA >
 struct vector<T, ARENA>::reverse_iterator_policy
 {
+    typedef typename vector<T, ARENA>::value_type       value_type;
     typedef typename vector<T, ARENA>::pointer          pointer;
     typedef typename vector<T, ARENA>::reference        reference;
     typedef typename vector<T, ARENA>::size_type        size_type;
@@ -185,6 +186,7 @@ struct vector<T, ARENA>::reverse_iterator_policy
 template< typename T, int ARENA >
 struct vector<T, ARENA>::const_reverse_iterator_policy
 {
+    typedef typename vector<T, ARENA>::value_type const value_type;
     typedef typename vector<T, ARENA>::const_pointer    pointer;
     typedef typename vector<T, ARENA>::const_reference  reference;
     typedef typename vector<T, ARENA>::size_type        size_type;

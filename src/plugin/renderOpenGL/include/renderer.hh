@@ -48,10 +48,7 @@ private:
     void                            drawBatch(const Batch& b);
 
 public:
-    void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
-public:
-    void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
 };
 

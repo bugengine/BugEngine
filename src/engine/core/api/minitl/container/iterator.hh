@@ -53,8 +53,6 @@ struct iterator_traits
     typedef typename ITERATOR::value_type           value_type;
     typedef typename ITERATOR::pointer              pointer;
     typedef typename ITERATOR::reference            reference;
-    typedef typename ITERATOR::const_pointer        const_pointer;
-    typedef typename ITERATOR::const_reference      const_reference;
     typedef typename ITERATOR::size_type            size_type;
     typedef typename ITERATOR::difference_type      difference_type;
 };

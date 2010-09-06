@@ -214,7 +214,7 @@ void Renderer::flush()
     {
     case DeviceLost:
         {
-            for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
+            for(minitl::list<SwapchainDesc, Arena::General>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
             {
                 if(it->swapchain)
                 {
@@ -244,7 +244,7 @@ void Renderer::flush()
             if(!m_swapchains.empty())
             {
                 d3d_checkResult(m_device->GetSwapChain(0, &m_deviceSwapChain->swapchain));
-                for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
+                for(minitl::list<SwapchainDesc, Arena::General>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
                 {
                     if(it != m_deviceSwapChain)
                     {

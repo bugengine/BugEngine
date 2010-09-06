@@ -114,12 +114,12 @@ struct Arena
     enum
     {
         // engine section
-        General = 0x0000,
-        Rtti    = 0x0001,
+        General = 0x1000,
+        Rtti    = 0x1001,
         // game section
-        Game    = 0x0100,
+        Game    = 0x1100,
         // plugin section
-        Plugin  = 0x1000
+        Plugin  = 0x2000
     };
 };
 

@@ -54,6 +54,7 @@ public:
 
     void                    push_front(const_reference r);
     void                    push_back(const_reference r);
+    iterator                insert(iterator after, const_reference r);
     iterator                erase(iterator it);
     iterator                erase(iterator begin, iterator end);
 

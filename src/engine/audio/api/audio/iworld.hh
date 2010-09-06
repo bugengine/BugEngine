@@ -20,6 +20,8 @@ public:
     virtual ref<ISound> createSound(ref<IMemoryStream> soundFile) = 0;
 
     virtual void step() = 0;
+public:
+    enum { Arena = BugEngine::Arena::General };
 };
 
 }}
