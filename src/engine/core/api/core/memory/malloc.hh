@@ -128,6 +128,8 @@ struct Arena
 
 #ifdef BE_PLATFORM_MACOS
 # include   <malloc/malloc.h>
+#else
+# include   <malloc.h>
 #endif
 #ifdef BE_PLATFORM_SUN
 # include   <alloca.h>

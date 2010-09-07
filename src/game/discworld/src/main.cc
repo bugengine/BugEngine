@@ -43,9 +43,6 @@ int be_main (weak<BugEngine::Application> app)
     minitl::sort(v.begin(), v.end(), minitl::less<int>());
     minitl::for_each(v.begin(), v.end(), Print());
 
-    be_notreached();
-    be_unimplemented();
-
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create<BugEngine::Arena::General>();
     filesystem->mount("data", ref<BugEngine::DiskFS>::create<BugEngine::Arena::General>(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
