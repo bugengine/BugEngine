@@ -225,7 +225,7 @@ typename list<T, ARENA>::const_reverse_iterator     list<T, ARENA>::rend() const
 template< typename T, int ARENA >
 typename list<T, ARENA>::size_type                  list<T, ARENA>::size() const
 {
-    return m_size
+    return m_size;
 }
 
 template< typename T, int ARENA >
@@ -237,7 +237,7 @@ bool                                                list<T, ARENA>::empty() cons
 template< typename T, int ARENA >
 void                                                list<T, ARENA>::push_front(const_reference r)
 {
-    item* m = BugEngine::Memory<ARENA>::allocArray<item>(1);
+    item* m = BugEngine::Memory<ARENA>::template allocArray<item>(1);
     new(m) item(r);
     ++m_size;
     m_list.push_front(*m);
@@ -246,7 +246,7 @@ void                                                list<T, ARENA>::push_front(c
 template< typename T, int ARENA >
 void                                                list<T, ARENA>::push_back(const_reference r)
 {
-    item* m = BugEngine::Memory<ARENA>::allocArray<item>(1);
+    item* m = BugEngine::Memory<ARENA>::template allocArray<item>(1);
     new(m) item(r);
     ++m_size;
     m_list.push_back(*m);
@@ -255,7 +255,7 @@ void                                                list<T, ARENA>::push_back(co
 template< typename T, int ARENA >
 typename list<T, ARENA>::iterator                   list<T, ARENA>::insert(iterator after, const_reference r)
 {
-    item* m = BugEngine::Memory<ARENA>::allocArray<item>(1);
+    item* m = BugEngine::Memory<ARENA>::template allocArray<item>(1);
     new(m) item(r);
     ++m_size;
     return iterator(m_list.insert(after, *m));

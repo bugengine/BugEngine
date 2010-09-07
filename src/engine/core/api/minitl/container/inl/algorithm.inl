@@ -22,7 +22,7 @@ struct SortPredicate
         :   m_iterator(it)
     {
     }
-    bool operator()(typename const ITERATOR::value_type& r) { return m_compare(*m_iterator, r); }
+    bool operator()(const typename ITERATOR::value_type& r) { return m_compare(*m_iterator, r); }
 };
 
 }

@@ -31,6 +31,7 @@ public:
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
+    void  operator delete(void* memory)              { be_notreached(); return ::operator delete(memory); }
 };
 
 }}}

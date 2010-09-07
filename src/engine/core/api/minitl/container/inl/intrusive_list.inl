@@ -336,7 +336,7 @@ typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, IN
 {
     while(first != last)
     {
-        item* i = it.m_iterator;
+        item* i = first.m_iterator;
         ++first;
         i->unhook();
     }
