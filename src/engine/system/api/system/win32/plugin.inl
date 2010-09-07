@@ -17,7 +17,8 @@ static HANDLE loadPlugin(const istring &pluginName)
 {
     SetLastError(0);
     std::string pluginDir = Environment::getEnvironment().getDataDirectory().str();
-    HANDLE h = LoadLibrary( (pluginDir + "/plugins/" + pluginName.c_str() + ".dll").c_str());
+    std::string pluginPath = pluginDir + "/plugins/" + pluginName.c_str() + ".dll";
+    HANDLE h = LoadLibrary(pluginPath.c_str());
     if(!h)
     {
         char *errorMessage = 0;

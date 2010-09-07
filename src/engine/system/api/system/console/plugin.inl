@@ -34,11 +34,11 @@ private:
 
 }}
 
-#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                   \
-    static klass* be_createPlugin params { return new klass args; }                                                     \
-    static void be_destroyPlugin(klass* cls) { delete cls; }                                                            \
-    static BugEngine::_::PluginList s_##name##Plugin( #name,                                                            \
-                                              reinterpret_cast<BugEngine::_::PluginList::Create>(be_createPlugin),      \
+#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+    static klass* be_createPlugin params { void* m = BugEngine::Memory<klass::Arena>::allocArray<klass>(1); return new(m) klass args; } \
+    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::Memory<klass::Arena>::free(cls); }              \
+    static BugEngine::_::PluginList s_##name##Plugin( #name,                                                                            \
+                                              reinterpret_cast<BugEngine::_::PluginList::Create>(be_createPlugin),                      \
                                               reinterpret_cast<BugEngine::_::PluginList::Destroy>(be_destroyPlugin));
 
 namespace BugEngine
