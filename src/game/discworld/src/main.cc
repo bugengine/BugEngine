@@ -43,6 +43,9 @@ int be_main (weak<BugEngine::Application> app)
     minitl::sort(v.begin(), v.end(), minitl::less<int>());
     minitl::for_each(v.begin(), v.end(), Print());
 
+    be_notreached();
+    be_unimplemented();
+
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create<BugEngine::Arena::General>();
     filesystem->mount("data", ref<BugEngine::DiskFS>::create<BugEngine::Arena::General>(BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
@@ -68,7 +71,7 @@ int be_main (weak<BugEngine::Application> app)
 
         ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        /*ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
         ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
@@ -87,7 +90,7 @@ int be_main (weak<BugEngine::Application> app)
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
         //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w));
-        app->setScene(node);*/
+        app->setScene(node);
     }
 
     return app->run();

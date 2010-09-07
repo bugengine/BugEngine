@@ -89,57 +89,6 @@ namespace BugEngine
     HINSTANCE hDllInstance;
 }
 
-#define ARGC_MAX    4096
-
-static void skipBackslash(char * &cmdLine)
-{
-    cmdLine++;
-    if (*cmdLine) cmdLine++;
-}
-
-static void lookupNextQuote(char * &cmdLine)
-{
-    cmdLine++;
-
-    while (*cmdLine && *cmdLine != '"')
-    {
-        if (*cmdLine == '\\')
-            skipBackslash(cmdLine);
-        else
-            cmdLine++;
-    }
-    if (*cmdLine) cmdLine++;
-}
-
-static void parceCmdLine( char *cmdLine, int &argc, const char *argv[] )
-{
-    while(*cmdLine)
-    {
-        argv[argc++] = cmdLine;
-        if (argc == ARGC_MAX)
-        {
-            return;
-        }
-        else
-        {
-            while(*cmdLine && (*(cmdLine) != ' '))
-            {
-                if (*cmdLine == '"')
-                {
-                    lookupNextQuote(cmdLine);
-                }
-                else if (*cmdLine == '\\')
-                {
-                    skipBackslash(cmdLine);
-                }
-                else
-                    cmdLine++;
-            }
-            if (*cmdLine) *(cmdLine++) = 0;
-        }
-    }
-}
-
 extern "C"
 int WINAPI WinMain( HINSTANCE hInstance,
                     HINSTANCE /*hPrevInstance*/,
@@ -147,33 +96,10 @@ int WINAPI WinMain( HINSTANCE hInstance,
                     int /*nCmdShow*/ )
 {
     BugEngine::hDllInstance = hInstance;
-    int argc = 0;
-    const char *argv[ARGC_MAX];
-    char *cmdLine = GetCommandLine();
-
-
-    parceCmdLine(cmdLine, argc, argv);
-
-    const char* path=argv[0];
-    const char *lastComponent = 0;
-    while(*path != '\0')
-    {
-        if(*path == '\\')
-            lastComponent = path;
-        path++;
-    }
-    if(lastComponent)
-    {
-        char backup = *lastComponent;
-        *const_cast<char*>(lastComponent) = 0;
-        SetCurrentDirectory(cmdLine);
-        *const_cast<char*>(lastComponent) = backup;
-    }
     freopen("be_out.txt", "w+", stdout);
     freopen("be_err.txt", "w+", stderr);
 
-
-    int result = __main(argc, &(argv[0]));
+    int result = __main(__argc, (const char **)__argv);
     fflush(stdout);
     fflush(stderr);
     
