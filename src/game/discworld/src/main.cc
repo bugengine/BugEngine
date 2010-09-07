@@ -61,14 +61,14 @@ int be_main (weak<BugEngine::Application> app)
     f.triplebuffered = false;
 
     BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));
+    /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
 
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create<BugEngine::Arena::General>();
     {
 
         ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
+        /*ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
         ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
@@ -87,7 +87,7 @@ int be_main (weak<BugEngine::Application> app)
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
         //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w));
-        app->setScene(node);
+        app->setScene(node);*/
     }
 
     return app->run();

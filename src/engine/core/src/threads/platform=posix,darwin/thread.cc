@@ -5,7 +5,7 @@
 #include    <core/threads/thread.hh>
 
 #include    <cerrno>
-
+#include	<thread.h>
 
 namespace BugEngine
 {
@@ -128,7 +128,11 @@ void Thread::wait() const
 void Thread::setPriority(Priority p)
 {
     sched_param param;
+#ifdef BE_PLATFORM_SUN
+    param.sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
+#else
     param.__sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
+#endif
     pthread_setschedparam(*reinterpret_cast<pthread_t*>(m_data), SCHED_RR, &param);
 }
 

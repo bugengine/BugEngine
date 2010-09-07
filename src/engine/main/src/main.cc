@@ -62,6 +62,7 @@ namespace
 /*****************************************************************************/
 static int __main(int argc, const char *argv[])
 {
+	BugEngine::Environment::getEnvironment().init(argc, argv);
 #   ifdef _GP2X
     atexit(launch_gp2xmenu);
 #   endif

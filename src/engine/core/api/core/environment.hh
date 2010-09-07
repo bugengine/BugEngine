@@ -19,7 +19,9 @@ private:
     istring m_game;
     istring m_user;
 public:
-    static const Environment& getEnvironment();
+    static Environment& getEnvironment();
+
+	void init(int argc, const char *argv[]);
 
     const ipath&    getHomeDirectory() const;
     const ipath&    getDataDirectory() const;

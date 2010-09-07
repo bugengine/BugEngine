@@ -45,7 +45,7 @@ def configure(conf):
 	conf.env['OPTIMS']		  = mak.alloptims
 
 	conf.sub_config(os.path.join('host', os.name))
-	for p in ['win32', 'linux']:
+	for p in ['win32', 'linux', 'sunos']:
 		conf.sub_config(os.path.join('target', 'platforms', p))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
@@ -216,8 +216,6 @@ def apply_lib_vars_cprogram(self):
 		if 'cprogram' in y.features:
 			if 'win32' in env['PLATFORM']:
 				env.append_value('LIB', libname)
-			else:
-				y.link_task.env.append_unique('LINKFLAGS', '-Wl,-E')
 
 		# set the dependency over the link task
 		if self.link_task is not None and y.link_task is not None:

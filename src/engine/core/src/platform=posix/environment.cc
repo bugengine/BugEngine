@@ -5,42 +5,49 @@
 #include    <core/environment.hh>
 #include    <core/debug/logger.hh>
 #include    <unistd.h>
-#include    <sys/types.h>
-#include    <sys/sysctl.h>
+#if !defined(BE_PLATFORM_LINUX) && !defined(BE_PLATFORM_SUN)
+# include    <sys/types.h>
+# include    <sys/sysctl.h>
+#endif
 
 namespace BugEngine
 {
 
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory("")
+,   m_dataDirectory("../share/bugengine")
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
-    FILE* cmdline = fopen("/proc/self/cmdline", "r");
-    if(!cmdline)
-        return;
-    char exe[4096];
-    fread(exe, 1, 4096, cmdline);
-    char* filename = exe;
+}
+
+void Environment::init(int argc, const char *argv[])
+{
+    const char* filename = argv[0];
     while(*filename != 0)
     {
         filename++;
     }
-    while(*filename != '/' && filename != exe)
+    while(*filename != '/' && filename != argv[0])
     {
         filename--;
     }
-    *filename = 0;
     m_game = filename+1;
-    m_dataDirectory = (minitl::format<4096>("%s/../share/bugengine") | exe).c_str();
+	filename--;
+    while(*filename != '/' && filename != argv[0])
+    {
+        filename--;
+    }
+	m_dataDirectory = ipath(argv[0], filename);
+	m_dataDirectory += "share";
+	m_dataDirectory += "bugengine";
 }
 
 Environment::~Environment()
 {
 }
 
-const Environment& Environment::getEnvironment()
+Environment& Environment::getEnvironment()
 {
     static Environment s_environment;
     return s_environment;
@@ -67,7 +74,7 @@ const istring& Environment::getUser() const
 }
 size_t Environment::getProcessorCount() const
 {
-#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUNOS)
+#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN)
     return sysconf(_SC_NPROCESSORS_ONLN);
 #else
     int numCPU;

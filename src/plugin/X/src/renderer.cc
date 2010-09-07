@@ -6,6 +6,7 @@
 #include    <X/window.hh>
 #include    <GL/glx.h>
 #include    <core/threads/event.hh>
+#include 	<X11/keysym.h>
 
 namespace BugEngine { namespace Graphics { namespace X
 {

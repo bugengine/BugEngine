@@ -24,9 +24,16 @@ Environment::Environment()
     GetUserProfileDirectory(token, profile, &size);
     m_homeDirectory = profile;
     m_homeDirectory += "BugEngine";
+}
 
-    const char *exe = __argv[0];
-    size_t s = strlen(__argv[0])-1;
+Environment::~Environment()
+{
+}
+
+void Environment::init(int argc, const char *argv[])
+{
+    const char *exe = argv[0];
+    size_t s = strlen(argv[0])-1;
     do
     {
         if(exe[s] == '\\' || exe[s] == '/')
@@ -42,11 +49,7 @@ Environment::Environment()
     m_game = istring(exe+begin+1, exe+s);
 }
 
-Environment::~Environment()
-{
-}
-
-const Environment& Environment::getEnvironment()
+Environment& Environment::getEnvironment()
 {
     static Environment s_environment;
     return s_environment;
