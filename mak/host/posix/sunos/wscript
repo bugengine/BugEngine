@@ -20,14 +20,31 @@ def get_available_suncc(conf):
 	conf.setenv('default')
 	conf.env['BUILD_VARIANTS'].append(name)
 
+# gets a list of the GCC toolchains installed
+def get_available_gcc(conf):
+	toolchaindirs=set([])
+	conf.env['GCC_TARGETS'] = []
+	for dir in os.environ['PATH'].split(':'):
+		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
+	for toolchaindir in toolchaindirs:
+		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
+			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
+				print toolchaindir
+				if target in ['.svn', '.cvs']:
+					continue
+				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+					if version in ['.svn', '.cvs']:
+						continue
+					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
+						continue
+					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
+
+
 def set_options(opt):
 	Utils.pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
 						
 def configure(conf):
 	conf.env['BUILD_VARIANTS'] = []
 	conf.check_tool('bison flex', tooldir='mak/tools')
-	get_available_suncc(conf)
-	#get_available_gcc(conf)
-
-	if len(conf.env['BUILD_VARIANTS']) == 0:
-		raise SystemExit("no match found : make sure you selected a valid toolchain")
+	#get_available_suncc(conf)
+	get_available_gcc(conf)

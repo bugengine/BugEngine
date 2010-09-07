@@ -72,18 +72,28 @@ def find_cross_gcc(conf):
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program('cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		if not v['AS']: v['AS'] = v['CC']
 
+		if not v['AR']: v['AR'] = conf.find_program(target+'-gar', var='AR', path_list=v['GCC_PATH'])
 		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
+		if not v['AR']:
+			v['AR'] = conf.find_program('gar', var='AR', path_list=v['GCC_PATH'])
+		if not v['AR']:
+			v['AR'] = conf.find_program('gar', var='AR')
 		if not v['AR']:
 			v['AR'] = conf.find_program('ar', var='AR', path_list=v['GCC_PATH'])
 		if not v['AR']: conf.fatal('unable to find ar for target %s' % target)
 
 		if not v['RANLIB']: v['RANLIB'] = conf.find_program(target+'-ranlib', var='RANLIB', path_list=v['GCC_PATH'])
 		if not v['RANLIB']:
-			v['RANLIB'] = conf.find_program('ar', var='RANLIB', path_list=v['GCC_PATH'])
+			v['RANLIB'] = conf.find_program('granlib', var='RANLIB', path_list=v['GCC_PATH'])
+		if not v['RANLIB']:
+			v['RANLIB'] = conf.find_program('ranlib', var='RANLIB', path_list=v['GCC_PATH'])
+		if not v['RANLIB']:
+			v['RANLIB'] = conf.find_program('granlib', var='RANLIB')
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc gxx gas')
@@ -94,23 +104,23 @@ def find_cross_gcc(conf):
 
 	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g']
 	conf.env['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 
 	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
 	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
 	conf.env['ASFLAGS_release'] = ['-pipe', '-g', '-O1']
-	conf.env['LINKFLAGS_release'] = ['-pipe', '-g', '-Wl,-x', '-Wl,-O2']
+	conf.env['LINKFLAGS_release'] = ['-pipe', '-g']
 
 	conf.env['CCFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	conf.env['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['LINKFLAGS_profile'] = ['-pipe', '-g', '-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
 
 	conf.env['CCFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	conf.env['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['LINKFLAGS_final'] = ['-pipe', '-g', '-s', '-Wl,-x', '-Wl,-O2']
+	conf.env['LINKFLAGS_final'] = ['-pipe', '-g', '-s']
 
 	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
 		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])

@@ -1,15 +1,35 @@
-# set win32 specific options
+# set SunOS specific options
 
 import os
 import Utils
+import Logs
+import Options
+from Logs import info,warn
 
 def set_options(opt):
 	pass
 
-def configure(conf):
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
+	newenv = conf.env
+	newenv['GCC_VERSION']	= version
+	newenv['GCC_TARGET']	= gcc_target
+	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	conf.check_tool('cross_gcc', tooldir='mak/tools')
+
+
+def add_gcc_flags_to_env(conf, toolchaindir):
+	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-R', os.path.abspath(os.path.join(toolchaindir, 'lib'))])
+	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+
+
+def add_sunos_flags_to_env(conf):
 	conf.env['PLATFORM'] = 'sunos'
-	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']	= '%s.so'
+	conf.env['library_PATTERN'] = 'lib%s.a'
+	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
 	
 	conf.env.append_unique('CCDEFINES', ['POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
@@ -18,12 +38,37 @@ def configure(conf):
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
-									'runbin':	'bin',
+									'runbin':	'lib',
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
-									'plugin':	os.path.join('data', 'plugins') }
-									
+									'plugin':	os.path.join('share', 'bugengine', 'plugins')  }
+			
+
+def configure(conf):
+	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
+		print target
+		if target.find('solaris') != -1:
+			newenv = conf.set_env_name('temp', conf.env.copy())
+			conf.setenv('temp')
+			try:
+				add_gcc_to_env(conf, version, toolchaindir, target)
+				add_gcc_flags_to_env(conf, toolchaindir)
+
+				name = 'gcc-sunos-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+				newenv.set_variant(name)
+				add_sunos_flags_to_env(conf)
+				newenv = conf.set_env_name(name, newenv)
+				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
+				del conf.all_envs['temp']
+				conf.setenv('default')
+				conf.env['BUILD_VARIANTS'].append(name)
+			except Exception, e:
+				warn('gcc not available: '+str(e)) 
+				conf.setenv('default')
+
+						
 
 def build(bld):
 	pass
