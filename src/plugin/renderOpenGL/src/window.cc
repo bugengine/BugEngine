@@ -50,7 +50,10 @@ void Window::setCurrent()
         ::LocalFree(errorMessage);
     }
 #else
-    glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, m_window, be_checked_cast<Renderer>(m_renderer)->m_glContext);
+    if(m_window)
+    {
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, m_window, be_checked_cast<Renderer>(m_renderer)->m_glContext);
+    }
 #endif
 }
 
@@ -71,7 +74,10 @@ void Window::clearCurrent()
         ::LocalFree(errorMessage);
     }
 #else
-    glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, 0, 0);
+    if(m_window)
+    {
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, 0, 0);
+    }
 #endif
 }
 
@@ -114,7 +120,6 @@ void Window::end(PresentMode present)
     #else
             X::Window::close();
     #endif
-
             /*if(m_glContext)
             {
                 wglDeleteContext(m_glContext);

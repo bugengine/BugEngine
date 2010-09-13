@@ -16,7 +16,6 @@ class be_api(X) Window : public IRenderTarget
 {
     friend class Renderer;
 protected:
-    weak<Renderer>      m_renderer;
     ::Window            m_window;
 public:
     Window(weak<Renderer> renderer,WindowFlags flags);

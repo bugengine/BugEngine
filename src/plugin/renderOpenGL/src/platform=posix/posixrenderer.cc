@@ -8,6 +8,10 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
+#define GLX_CONTEXT_MAJOR_VERSION_ARB       0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB       0x2092
+typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
+
 Renderer::~Renderer()
 {
 }
@@ -16,9 +20,32 @@ void Renderer::attachWindow(Window* w)
 {
     if(!m_glContext)
     {
-        glXCreateContext(m_display, m_visual, 0, True);
+        glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
+        if(glXCreateContextAttribsARB)
+        {
+            int attribs[] =
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+                    //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                };
+            m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
+            if(!m_glContext)
+            {
+                attribs[1] = 1;
+                attribs[3] = 0;
+                m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
+            }
+            be_info("Creating OpenGL %d.%d context" | attribs[1] | attribs[3]);
+        }
+        else
+        {
+            m_glContext = glXCreateNewContext(m_display, m_fbConfig, GLX_RGBA_TYPE, 0, True);
+        }
+        XSync(m_display, false);
     }
-    w->m_glContext = glXCreateContext(m_display, m_visual, m_glContext, True);
+    w->m_glContext = m_glContext;
 }
 
 }}}
