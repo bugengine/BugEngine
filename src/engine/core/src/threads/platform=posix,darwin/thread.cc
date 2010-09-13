@@ -5,7 +5,10 @@
 #include    <core/threads/thread.hh>
 
 #include    <cerrno>
-#include	<thread.h>
+
+#ifdef BE_PLATFORM_SUN
+# include   <thread.h>
+#endif
 
 namespace BugEngine
 {

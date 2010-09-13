@@ -8,6 +8,8 @@
 #include    <core/threads/thread.hh>
 #include    <core/threads/event.hh>
 
+#include    <GL/glx.h>
+
 namespace BugEngine { namespace Graphics { namespace X
 {
 
@@ -20,11 +22,13 @@ protected:
     ::Display*      m_display;
     int             m_screen;
     ::Window        m_rootWindow;
+    GLXFBConfig     m_fbConfig;
     ::XVisualInfo*  m_visual;
-    Thread          m_windowManagementThread;
+    ::Atom          m_windowProperty;
+protected:
+    void flush() override;
 private:
     static int      xError(::Display* display, XErrorEvent* event);
-    static intptr_t windowProc(intptr_t p1, intptr_t p2);
     ::Window        createWindow(const WindowFlags& flags);
 public:
     Renderer();

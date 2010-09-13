@@ -4,6 +4,7 @@
 #include    <X/stdafx.h>
 #include    <X/window.hh>
 #include    <X/renderer.hh>
+#include    <X11/Xatom.h>
 
 namespace BugEngine { namespace Graphics { namespace X
 {
@@ -12,6 +13,10 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   IRenderTarget(renderer)
 ,   m_window(renderer->createWindow(flags))
 {
+    Window* w = this;
+    XChangeProperty(renderer->m_display, m_window, renderer->m_windowProperty,
+                    XA_INTEGER, 32, PropModeReplace, (const unsigned char*)&w, sizeof(w)/4);
+    be_info("%p" | (const void*)w);
 }
 
 Window::~Window()
