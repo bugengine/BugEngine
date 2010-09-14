@@ -93,6 +93,7 @@ class module:
 		self.globaloptions.merge(globaloptions)
 		self.localarchoptions = localarchoptions
 		self.globalarchoptions = {}
+		self.gobaloptioncache = { }
 		self.usemaster = True
 		
 		for k in globalarchoptions.keys():
@@ -176,23 +177,27 @@ class module:
 		return options
 
 	def getglobaloptions(self, platform, arch):
-		options = coptions()
-		if not platform in self.platforms or not arch in self.archs:
+		try:
+			return self.gobaloptioncache[platform+"-"+arch]
+		except KeyError:
+			options = coptions()
+			if not platform in self.platforms or not arch in self.archs:
+				return options
+			options.merge(self.globaloptions)
+			for d in self.depends:
+				options.merge(d.getglobaloptions(platform, arch))
+			for key,aoptions in self.globalarchoptions.iteritems():
+				try:
+					p,a = key.split('-')
+					p = expandPlatforms([p])
+					if a == arch and platform in p:
+						options.merge(aoptions)
+				except:
+					p = expandPlatforms([key])
+					if arch in p or platform in p:
+						options.merge(aoptions)
+			self.gobaloptioncache[platform+"-"+arch] = options
 			return options
-		options.merge(self.globaloptions)
-		for d in self.depends:
-			options.merge(d.getglobaloptions(platform, arch))
-		for key,aoptions in self.globalarchoptions.iteritems():
-			try:
-				p,a = key.split('-')
-				p = expandPlatforms([p])
-				if a == arch and platform in p:
-					options.merge(aoptions)
-			except:
-				p = expandPlatforms([key])
-				if arch in p or platform in p:
-					options.merge(aoptions)
-		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
 		if not self.tasks.has_key(variant):

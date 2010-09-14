@@ -103,7 +103,7 @@ def create_project(t):
 	for extension in projectClass.extensions:
 		outname = t.category+'.'+t.name+'.'+toolName+extension
 		project.set_outputs([t.path.find_or_declare(outname)])
-	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree
+	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree.hash()
 	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
 	project.dep_vars = ['MSVC_PROJECT_SOURCES', 'MSVC_PROJECT_FLAGS']
 

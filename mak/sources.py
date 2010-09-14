@@ -1,5 +1,10 @@
 import os
-
+try:
+	import hashlib
+	createMd5=hashlib.md5
+except:
+	import md5
+	createMd5=md5.new
 
 class directory:
 	def __init__(self):
@@ -41,10 +46,18 @@ class directory:
 			f.make_source(bld, env, prefix, relative, result)
 		return result
 		
-	def __repr__(self):
-		result =  ','.join(repr(value) for value in self.files)
-		result += ';'+';'.join(name+':'+repr(value) for name,value in self.directories.iteritems())
-		return result
+	def hash(self, md5 = None):
+		if not md5:
+			md5 = createMd5()
+		for value in self.files:
+			md5.update(',')
+			value.hash(md5)
+		md5.update(';')
+		for name, value in self.directories.iteritems():
+			md5.update(name)
+			md5.update(':')
+			value.hash(md5)
+		return md5.digest()
 		
 
 class source:
@@ -58,8 +71,8 @@ class source:
 			result.append(os.path.join(prefix,	self.filename))
 	def __cmp__(self,other):
 		return cmp(self.filename,other.filename)
-	def __repr__(self):
-		return self.filename
+	def hash(self, md5):
+		md5.update(self.filename)
 	def generated(self):
 		return False
 
