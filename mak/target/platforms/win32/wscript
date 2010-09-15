@@ -55,11 +55,13 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 def add_gcc_flags_to_env(conf):
 	conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
-
+	conf.env.append_unique('CCFLAGS', '-mwindows')
+	conf.env.append_unique('CXXFLAGS', '-mwindows')
+	conf.env.append_unique('LINKFLAGS', '-mwindows')
 	conf.env.append_unique('LINKFLAGS', '-static-libgcc')
-	conf.env.append_unique('LINKFLAGS', '-Wl,-static')
+	conf.env.append_unique('LINKFLAGS', '-Wl,-Bstatic')
 	conf.env.append_unique('LINKFLAGS', '-lstdc++')
-	conf.env.append_unique('LINKFLAGS', '-Wl,-dynamic')
+	conf.env.append_unique('LINKFLAGS', '-Wl,-Bdynamic')
 
 
 def add_win32_flags_to_env(conf):
