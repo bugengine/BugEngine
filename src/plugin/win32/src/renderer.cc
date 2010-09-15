@@ -17,8 +17,17 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Win32
 {
 
+#define WM_BE_CREATEWINDOW  0
+#define WM_BE_DESTROYWINDOW 1
+
 namespace
 {
+    struct WindowCreationEvent
+    {
+        const WindowCreationFlags* flags;
+        HWND                 hWnd;
+        Event                event;
+    };
 
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
@@ -66,6 +75,7 @@ namespace
 
 Renderer::Renderer()
 :   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
+,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -86,7 +96,22 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+    postMessage(WM_QUIT, 0, 0);
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
+}
+
+HWND Renderer::createWindowImplementation(const WindowCreationFlags* flags) const
+{
+    WindowCreationEvent event;
+    event.flags = flags;
+    postMessage(WM_USER+WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
+    event.event.wait();
+    return event.hWnd;
+}
+
+void Renderer::destroyWindowImplementation(HWND hWnd)
+{
+    postMessage(WM_USER+WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
 }
 
 uint2 Renderer::getScreenSize()
@@ -101,14 +126,70 @@ const istring& Renderer::getWindowClassName() const
     return m_windowClassName;
 }
 
+UINT Renderer::messageCount() const
+{
+    return 2;
+}
+
+void Renderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
+{
+    PostThreadMessageA(m_windowManagementThread.id(), msg, wParam, lParam);
+}
+
+void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    be_forceuse(wParam);
+    be_forceuse(lParam);
+    switch(msg)
+    {
+    case WM_USER+WM_BE_CREATEWINDOW:
+        {
+            WindowCreationEvent* event = (WindowCreationEvent*)wParam;
+            event->hWnd = CreateWindowEx( event->flags->fullscreen ? WS_EX_TOPMOST : 0,
+                event->flags->className,
+                event->flags->title,
+                event->flags->flags,
+                event->flags->x, event->flags->y,
+                event->flags->size.right-event->flags->size.left, event->flags->size.bottom-event->flags->size.top,
+                NULL, NULL, hDllInstance, NULL );
+            ShowWindow(event->hWnd, SW_SHOW);
+            UpdateWindow(event->hWnd);
+            event->event.set();
+        }
+        break;
+
+    case WM_USER+WM_BE_DESTROYWINDOW:
+        {
+            HWND hWnd = (HWND)wParam;
+            DestroyWindow(hWnd);
+        }
+        break;
+    default:
+        be_assert(false, "unhandled message type %d" | msg);
+        break;
+    }
+}
+
 void Renderer::flush()
 {
+}
+
+intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
+{
+    weak<Renderer> renderer(reinterpret_cast<Renderer*>(p1));
     MSG msg;
-    while(::PeekMessage(&msg, 0, 0, 0, PM_REMOVE|PM_NOYIELD))
+    while(::GetMessage(&msg, 0, 0, 0))
     {
-        DispatchMessage(&msg);
+        if(msg.message >= WM_USER && msg.message < WM_APP)
+        {
+            renderer->handleMessage(msg.message, msg.wParam, msg.lParam);
+        }
+        else
+        {
+            DispatchMessage(&msg);
+        }
     }
-    return;
+    return 0;
 }
 
 }}}
