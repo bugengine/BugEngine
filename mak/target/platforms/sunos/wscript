@@ -47,7 +47,6 @@ def add_sunos_flags_to_env(conf):
 
 def configure(conf):
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
-		print target
 		if target.find('solaris') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.setenv('temp')
