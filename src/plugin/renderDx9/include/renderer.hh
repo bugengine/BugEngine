@@ -74,7 +74,11 @@ private:
     void                            drawBatch(const Batch& b);
     void                            flush() override;
     void                            createContext(D3DPRESENT_PARAMETERS& params);
-    void                            destroyContext();
+    void                            createContextAsync(D3DPRESENT_PARAMETERS& params);
+    void                            destroyContextAsync();
+protected:
+    UINT                            messageCount() const override;
+    void                            handleMessage(UINT msg, WPARAM wParam, LPARAM lParam) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
