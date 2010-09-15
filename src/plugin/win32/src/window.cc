@@ -17,20 +17,22 @@ namespace BugEngine { namespace Graphics { namespace Win32
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   IRenderTarget(renderer)
 {
-    WindowCreationFlags f;
-    f.className = renderer->getWindowClassName().c_str();
-    f.title = flags.title.c_str();
-    f.flags = flags.border ? WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX : WS_POPUP;
-    f.x = flags.position.x();
-    f.y = flags.position.y();
-    f.size.left   = 0;
-    f.size.right  = flags.size.x();
-    f.size.top    = 0;
-    f.size.bottom = flags.size.y();
-    f.fullscreen = !flags.border;
+    RECT size;
+    size.left   = 0;
+    size.right  = flags.size.x();
+    size.top    = 0;
+    size.bottom = flags.size.y();
     if(flags.border)
-        AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
-    m_window = renderer->createWindowImplementation(&f);
+        AdjustWindowRect(&size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
+    m_window = CreateWindowEx( !flags.border ? WS_EX_TOPMOST : 0,
+        renderer->getWindowClassName().c_str(),
+        flags.title.c_str(),
+        flags.border ? WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX : WS_POPUP,
+        flags.position.x(), flags.position.y(),
+        size.right-size.left, size.bottom-size.top,
+        NULL, NULL, hDllInstance, NULL );
+    ShowWindow(m_window, SW_SHOW);
+    UpdateWindow(m_window);
     m_dc = GetDC(m_window);
     if(!m_window)
     {
@@ -49,7 +51,7 @@ void Window::close()
     HWND hWnd = m_window;
     m_window = 0;
     if(hWnd)
-        be_checked_cast<Renderer>(m_renderer)->destroyWindowImplementation(hWnd);
+        DestroyWindow(hWnd);
 }
 
 uint2 Window::getDimensions() const
