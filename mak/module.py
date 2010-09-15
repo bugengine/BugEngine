@@ -177,10 +177,10 @@ class module:
 		return options
 
 	def getglobaloptions(self, platform, arch):
+		options = coptions()
 		try:
-			return self.gobaloptioncache[platform+"-"+arch]
+			options.merge(self.gobaloptioncache[platform+"-"+arch])
 		except KeyError:
-			options = coptions()
 			if not platform in self.platforms or not arch in self.archs:
 				return options
 			options.merge(self.globaloptions)
@@ -197,7 +197,7 @@ class module:
 					if arch in p or platform in p:
 						options.merge(aoptions)
 			self.gobaloptioncache[platform+"-"+arch] = options
-			return options
+		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
 		if not self.tasks.has_key(variant):
