@@ -5,16 +5,22 @@
 #define BE_GRAPHICS_MATERIAL_SHADER_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.hh>
+#include    <graphics/material/shaders/node.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Shader : Resource
+class IShaderBuilder;
+
+class be_api(GRAPHICS) Shader : public Resource
 {
 private:
+    ref<Shaders::Node> m_root;
 public:
     Shader();
     ~Shader();
+
+    void buildSource(const IShaderBuilder& builder) const;
 };
 
 }}

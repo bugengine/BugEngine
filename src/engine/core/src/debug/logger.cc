@@ -61,7 +61,7 @@ ref<Logger> Logger::instance(const inamespace& name)
         std::map< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
         {
-            ref<Logger> next = ref<Logger>::create<Arena::General>(result, name[i]);
+            ref<Logger> next = ref<Logger>::create<Arena::DebugData>(result, name[i]);
             result->m_children.insert(std::make_pair(name[i], next));
             result = next;
         }
@@ -73,7 +73,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 
 ref<Logger> Logger::root()
 {
-    static ref<Logger> s_rootLogger = ref<Logger>::create<Arena::General>();
+    static ref<Logger> s_rootLogger = ref<Logger>::create<Arena::DebugData>();
     return s_rootLogger;
 }
 
@@ -90,7 +90,7 @@ void Logger::addListener(ILogListener* listener)
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
-    for(minitl::vector< ILogListener*, Arena::General >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for(minitl::vector< ILogListener*, Arena::DebugData >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }
