@@ -57,7 +57,7 @@ public:
         void realloc(size_t count, size_t alignment = be_alignof(T))
         {
             size_t size = be_align(sizeof(T),alignment)*count;
-            m_data = Memory<ARENA>::realloc(m_data, size, alignment);
+            m_data = (T*)Memory<ARENA>::realloc(m_data, size, alignment);
         }
         void swap(Block<T>& other)
         {
@@ -114,12 +114,14 @@ struct Arena
     enum
     {
         // engine section
-        General = 0x1000,
-        Rtti    = 0x1001,
+        General         = 0x1000,
+        TemporaryData   = 0x1001,
+        DebugData       = 0x1002,
+        Rtti            = 0x1002,
         // game section
-        Game    = 0x1100,
+        Game            = 0x1100,
         // plugin section
-        Plugin  = 0x2000
+        Plugin          = 0x2000
     };
 };
 

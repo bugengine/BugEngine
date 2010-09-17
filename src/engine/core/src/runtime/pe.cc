@@ -392,7 +392,7 @@ PE::PE(const char *filename, u64 baseAddress)
         size_t debugEntryVirtualAdress = 0;
         size_t debugEntrySize = 0;
         {
-            Memory<Arena::General>::Block<u8> block(imageHeader.optionalHeaderSize);
+            Memory<Arena::TemporaryData>::Block<u8> block(imageHeader.optionalHeaderSize);
             fread(block, imageHeader.optionalHeaderSize, 1, m_file);
             if(*(i16*)(u8*)block == ImageHeader::Header_Pe32Header)
             {
@@ -418,7 +418,7 @@ PE::PE(const char *filename, u64 baseAddress)
             }
         }
 
-        Memory<Arena::General>::Block<SectionHeader> sections(imageHeader.sectionCount);
+        Memory<Arena::TemporaryData>::Block<SectionHeader> sections(imageHeader.sectionCount);
         fread(sections, sizeof(SectionHeader), imageHeader.sectionCount, m_file);
 
         if(debugEntryVirtualAdress && debugEntrySize)
@@ -430,7 +430,7 @@ PE::PE(const char *filename, u64 baseAddress)
                 if(sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset + sections[section].size) > debugEntryVirtualAdress)
                 {
                     be_info("loading debug info from section %s" | sections[section].name);
-                    Memory<Arena::General>::Block<DebugEntry> entries(debugEntryCount);
+                    Memory<Arena::TemporaryData>::Block<DebugEntry> entries(debugEntryCount);
                     fseek(m_file, static_cast<long>(sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET);
                     fread(entries, sizeof(DebugEntry), debugEntryCount, m_file);
                     for(size_t i = 0; i < debugEntryCount; ++i)
@@ -439,7 +439,7 @@ PE::PE(const char *filename, u64 baseAddress)
                         {
                         case DebugEntry::Type_CodeView:
                             {
-                                Memory<Arena::General>::Block<u8> info(entries[i].size);
+                                Memory<Arena::TemporaryData>::Block<u8> info(entries[i].size);
                                 fseek(m_file, entries[i].fileOffset, SEEK_SET);
                                 fread(info, entries[i].size, 1, m_file);
                                 PdbInfo* pdbInfo = reinterpret_cast<PdbInfo*>((u8*)info);
@@ -477,7 +477,7 @@ PE::PE(const char *filename, u64 baseAddress)
         size_t stringTableOffset = imageHeader.symbolTableOffset + imageHeader.symbolCount*18;
         fseek(m_file, static_cast<long>(stringTableOffset), SEEK_SET);
         fread(&stringTableSize, sizeof(stringTableSize), 1, m_file);
-        Memory<Arena::General>::Block<char> stringBlock(stringTableSize);
+        Memory<Arena::TemporaryData>::Block<char> stringBlock(stringTableSize);
         StringTable* strings = reinterpret_cast<StringTable*>((char*)stringBlock);
         strings->size = stringTableSize;
         fread(strings->strings, 1, stringTableSize-4, m_file);
@@ -503,7 +503,7 @@ PE::PE(const char *filename, u64 baseAddress)
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if(debug_link)
         {
-            Memory<Arena::General>::Block<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
+            Memory<Arena::TemporaryData>::Block<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
             readSection(debug_link, filename);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(filename);

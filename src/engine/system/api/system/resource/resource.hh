@@ -13,7 +13,7 @@ class Resource
 {
     friend class IResourceManager;
 private:
-    struct ResourceHandle
+    struct ResourceHandle : public minitl::intrusive_list<ResourceHandle>::item
     {
     private:
         weak<const IResourceManager>    m_manager;
@@ -24,7 +24,7 @@ private:
         ~ResourceHandle();
     };
 private:
-    minitl::list<ResourceHandle, Arena::General>    m_handles;
+    minitl::intrusive_list<ResourceHandle>  m_handles;
 public:
     Resource();
     ~Resource();

@@ -37,7 +37,7 @@ template< int ARENA >
 class MemoryStream : public IMemoryStream
 {
 private:
-    typename Memory<ARENA>::Block m_memory;
+    typename Memory<ARENA>::Block<u8>   m_memory;
     i64                                 m_size;
     i64                                 m_offset;
 public:
@@ -117,7 +117,7 @@ void MemoryStream<ARENA>::seek(SeekMethod method, i64 offset)
 template< int ARENA >
 void MemoryStream<ARENA>::resize(i64 size)
 {
-    m_memory.resize(size);
+    m_memory.realloc(size);
 }
 
 template< int ARENA >

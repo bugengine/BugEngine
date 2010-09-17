@@ -15,4 +15,9 @@ Shader::~Shader()
 {
 }
 
+void Shader::buildSource(const IShaderBuilder& builder) const
+{
+    m_root->buildSource(builder);
+}
+
 }}

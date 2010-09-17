@@ -51,12 +51,12 @@ ref<const Module> Module::self()
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
-            s_module = ref<Elf>::create<Arena::General>(filename, lmap->l_addr);
+            s_module = ref<Elf>::create<Arena::DebugData>(filename, lmap->l_addr);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<Elf>::create<Arena::General>(lmap->l_name, lmap->l_addr);
+            ref<Module> newModule = ref<Elf>::create<Arena::DebugData>(lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module = newModule;
         }
@@ -67,7 +67,7 @@ ref<const Module> Module::self()
     DWORD requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
     size_t moduleCount = requiredSize/sizeof(HMODULE);
-    Memory<Arena::General>::Block<HMODULE> hmodules(moduleCount);
+    Memory<Arena::TemporaryData>::Block<HMODULE> hmodules(moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
     for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)
@@ -78,12 +78,12 @@ ref<const Module> Module::self()
         ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
         if(i == 0)
         {
-            s_module = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
+            s_module = ref<PE>::create<Arena::DebugData>(moduleName, (u64)info.lpBaseOfDll);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<PE>::create<Arena::General>(moduleName, (u64)info.lpBaseOfDll);
+            ref<Module> newModule = ref<PE>::create<Arena::DebugData>(moduleName, (u64)info.lpBaseOfDll);
             module->m_next = newModule;
             module = newModule;
         }
@@ -96,7 +96,7 @@ ref<const Module> Module::self()
 const Module::Section& Module::operator[](const istring& name) const
 {
     static Section s_empty = { "", 0, 0, 0, 0 };
-    for(minitl::vector<Section, Arena::General>::const_iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+    for(minitl::vector<Section, Arena::DebugData>::const_iterator it = m_sections.begin(); it != m_sections.end(); ++it)
     {
         if(it->name == name)
             return *it;
