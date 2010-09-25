@@ -5,21 +5,7 @@
 #include    <rtti/classinfo.hh>
 #include    <rtti/propertyinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-ClassInfo::ClassInfo(const inamespace& ns)
-:   m_name(ns)
-{
-}
-
-ClassInfo::~ClassInfo()
-{
-}
-
-std::string ClassInfo::name() const
-{
-    return m_name.str();
-}
-
-}
+}}

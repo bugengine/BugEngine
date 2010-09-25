@@ -10,7 +10,7 @@ class directory:
 	def __init__(self):
 		self.directories = {}
 		self.files = []
-		
+
 	def addDirectory(self, dir, name):
 		self.directories[name] = dir
 		dir.prefix = name
@@ -18,7 +18,7 @@ class directory:
 	def addFile(self, file):
 		self.files.append(file)
 		self.files.sort()
-		
+
 	def addFullFile(self, filename, file):
 		pathlist = []
 		head = filename
@@ -45,7 +45,7 @@ class directory:
 		for f in self.files:
 			f.make_source(bld, env, prefix, relative, result)
 		return result
-		
+
 	def hash(self, md5 = None):
 		if not md5:
 			md5 = createMd5()
@@ -58,7 +58,7 @@ class directory:
 			md5.update(':')
 			value.hash(md5)
 		return md5.digest()
-		
+
 
 class source:
 	def __init__( self, filename, platforms, archs, process ):
@@ -112,7 +112,7 @@ class cssource(source):
 		source.__init__( self, filename, platforms, archs, process )
 	def make_source(self, bld, env, prefix, relative, result):
 		pass
-		
+
 class deployedsource(source):
 	def __init__( self, filename, outdir, type, platforms, archs, process ):
 		source.__init__( self, filename, platforms, archs, process )
@@ -121,6 +121,11 @@ class deployedsource(source):
 	def make_source(self, bld, env, prefix, relative, result):
 		if self.process and env['PLATFORM'] in self.platforms and env['ARCHITECTURE'] in self.archs:
 			bld.install_files(os.path.join(env['PREFIX'], env['DEPLOY']['prefix'], env['DEPLOY'][self.type], self.outdir), os.path.join(prefix, self.filename), env=env)
+
+class datasource(source):
+	def __init__( self, filename, generatedcpp, platforms, archs, process ):
+		source.__init__( self, filename, platforms, archs, process )
+		self.generatedcpp = generatedcpp
 
 class lexsource(source):
 	def __init__( self, filename, generatedcpp, platforms, archs, process ):

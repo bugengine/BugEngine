@@ -3,9 +3,8 @@
 
 #include   <rtti/stdafx.h>
 #include   <rtti/typeinfo.hh>
-#include   <rtti/engine/struct.hh>
-#include   <rtti/engine/enum.hh>
 
 namespace Example
 {
+
 }

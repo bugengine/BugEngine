@@ -45,6 +45,6 @@ def set_options(opt):
 						
 def configure(conf):
 	conf.env['BUILD_VARIANTS'] = []
-	conf.check_tool('bison flex', tooldir='mak/tools')
+	conf.check_tool('bison flex data', tooldir='mak/tools')
 	#get_available_suncc(conf)
 	get_available_gcc(conf)

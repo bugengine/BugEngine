@@ -67,7 +67,7 @@ def configure(conf):
 			env['OPTIMISATION'] = optim
 			env['PREFIX'] = name
 			selectedvariants.append(name)
-				
+
 	conf.env['BUILD_VARIANTS'] = selectedvariants
 
 	if Options.options.toolchains:

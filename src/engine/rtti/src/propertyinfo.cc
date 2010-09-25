@@ -4,15 +4,7 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/propertyinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-PropertyInfo::PropertyInfo()
-{
-}
-
-PropertyInfo::~PropertyInfo()
-{
-}
-
-}
+}}
