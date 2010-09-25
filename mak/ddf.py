@@ -1,4 +1,3 @@
-#!python
 import sys
 import ply.yacc as yacc
 import ply.lex as lex
@@ -113,11 +112,15 @@ def t_comment(t):
 	t.lexer.lineno += t.value.count('\n')
 
 def t_comment_2(t):
-	r'//.*(\\\n.*)*'
+	r'\//([^\\\n]|(\\.)|(\\\n))*'
 	t.lexer.lineno += t.value.count('\n')
 
 def t_preprocessor(t):
-	r'\#.*'
+	r'\#([^\\\n]|(\\.)|(\\\n))*'
+	kw = t.value[1:].lstrip()
+	if kw.startswith("if") or kw.startswith("el") or kw.startswith("endif"):
+		implementation.write(t.value)
+		implementation.write("\n")
 	t.lexer.lineno += t.value.count('\n')
 	pass
 
@@ -185,7 +188,6 @@ def t_error(t):
 	t.lexer.skip(1)
 
 lexer = lex.lex()
-lexer.inside = 0
 
 def p_decls(t):
 	"""
@@ -317,7 +319,8 @@ def p_skiplist(t):
 	"""
 	pass
 
-yacc = yacc.yacc(method='LALR')
+path = os.path.abspath(os.path.split(sys.argv[0])[0])
+yacc = yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
 yacc.namespace = []
 
 if not args:
@@ -333,13 +336,13 @@ for arg in args:
 
 	if options.folder:
 		sourcefile = os.path.join(options.folder, filename+options.cpp)
-		print sourcefile
 	else:
 		sourcefile = os.path.join(base+options.cpp)
 	try:
 		implementation = open(sourcefile, 'w')
 	except IOError,e:
 		raise Exception("cannot open output file %s : %s" % (sourcefile, str(e)))
+	implementation.write("#include <%s>\n" % arg)
 
 	yacc.parse(input.read(), lexer=lexer)
 

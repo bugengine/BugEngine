@@ -2,18 +2,9 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
-#include    <rtti/documentation/detail.hh>
+#include    <rtti/documentation/detail.script.hh>
 
 namespace BugEngine { namespace Documentation
 {
-
-Detail::Detail(const char * doc)
-:   doc(doc)
-{
-}
-
-Detail::~Detail()
-{
-}
 
 }}
