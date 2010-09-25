@@ -5,6 +5,7 @@ import os
 
 from optparse import OptionParser
 
+error = 0
 parser = OptionParser()
 parser.set_usage('ddf.py [options] file1 [file2... fileN]')
 parser.add_option("-o", "--output", dest="folder", help="Places the output into <folder>", default='')
@@ -184,6 +185,8 @@ t_COLON             = r':'
 t_ELLIPSIS          = r'\.\.\.'
 
 def t_error(t):
+	global error
+	error += 1
 	print("Illegal character %s" % repr(t.value[0]))
 	t.lexer.skip(1)
 
@@ -319,6 +322,20 @@ def p_skiplist(t):
 	"""
 	pass
 
+def p_error(errtoken):
+	global error
+	error += 1
+	if errtoken:
+		if hasattr(errtoken,"lineno"): lineno = errtoken.lineno
+		else: lineno = 0
+		if lineno:
+			sys.stderr.write("yacc: Syntax error at line %d, token=%s\n" % (lineno, errtoken.type))
+		else:
+			sys.stderr.write("yacc: Syntax error, token=%s" % errtoken.type)
+	else:
+		sys.stderr.write("yacc: Parse error in input. EOF\n")
+
+
 path = os.path.abspath(os.path.split(sys.argv[0])[0])
 yacc = yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
 yacc.namespace = []
@@ -338,12 +355,18 @@ for arg in args:
 		sourcefile = os.path.join(options.folder, filename+options.cpp)
 	else:
 		sourcefile = os.path.join(base+options.cpp)
+	if os.path.normpath(sourcefile) == os.path.normpath(arg):
+		raise Exception("source file and target file are the same: " % sourcefile)
 	try:
 		implementation = open(sourcefile, 'w')
 	except IOError,e:
 		raise Exception("cannot open output file %s : %s" % (sourcefile, str(e)))
 	implementation.write("#include <%s>\n" % arg)
 
+	olderror = error
 	yacc.parse(input.read(), lexer=lexer)
-
+	implementation.close()
+	if error != olderror:
+		os.remove(sourcefile)
+exit(error)
 
