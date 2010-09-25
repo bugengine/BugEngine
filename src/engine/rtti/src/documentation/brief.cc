@@ -2,18 +2,9 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
-#include    <rtti/documentation/brief.hh>
+#include    <rtti/documentation/brief.script.hh>
 
 namespace BugEngine { namespace Documentation
 {
-
-Brief::Brief(const char * brief)
-:   doc(brief)
-{
-}
-
-Brief::~Brief()
-{
-}
 
 }}

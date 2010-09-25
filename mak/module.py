@@ -310,7 +310,7 @@ class module:
 					result.addFile(sources.source(file,platforms,archs, doprocess))
 					result.addFile(sources.hsource(file,platforms,archs, doprocess))
 				elif ext in set(['.h', '.hpp', '.hh', '.hxx', '.inl']):
-					if file.endswith('.data'+ext):
+					if file.endswith('.script'+ext):
 						generatedcfile = os.path.join(path, filename+'.cc')
 						result.addFile(sources.datasource(file, generatedcfile, platforms, archs, True))
 						result.addFile(sources.generatedcppsource(filename+'.cc', platforms, archs, True))
