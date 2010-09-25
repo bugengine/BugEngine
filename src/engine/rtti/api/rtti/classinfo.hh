@@ -4,23 +4,30 @@
 #ifndef BE_RTTI_CLASSINFO_HH_
 #define BE_RTTI_CLASSINFO_HH_
 /*****************************************************************************/
+#include   <rtti/typeinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class ClassInfo : public minitl::refcountable
-{
-private:
-    inamespace m_name;
-public:
-    ClassInfo(const inamespace& ns);
-    virtual ~ClassInfo();
+struct PropertyInfo;
+struct MethodInfo;
 
-    virtual size_t size() const = 0;
-    std::string name() const;
+struct ClassInfo
+{
+    const char *        name;
+    const ClassInfo*    parent;
+    size_t              size;
+    size_t              propertyCount;
+    const PropertyInfo* properties;
+    size_t              methodCount;
+    MethodInfo*         methods;
+    size_t              constructorCount;
+    MethodInfo*         constructors;
+    MethodInfo*         destructor;
+    MethodInfo*         copy;
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

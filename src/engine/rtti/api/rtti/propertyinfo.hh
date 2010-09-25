@@ -4,32 +4,18 @@
 #ifndef BE_RTTI_PROPERTYINFO_HH_
 #define BE_RTTI_PROPERTYINFO_HH_
 /*****************************************************************************/
-#include   <rtti/value.hh>
+#include   <rtti/typeinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class PropertyInfo : public minitl::refcountable
+struct PropertyInfo
 {
-private:
-    minitl::vector<Value, Arena::General>  m_attributes;
-public:
-    PropertyInfo();
-    virtual ~PropertyInfo();
-
-    virtual TypeInfo type() const = 0;
-    virtual Value get(void* from) const = 0;
-    virtual void set(const Value& v, void* to) const = 0;
-
-    template< typename T >
-    PropertyInfo& operator[](const T& attribute)
-    {
-        m_attributes.push_back(Value(attribute));
-        return *this;
-    }
+    const char *const           name;
+    const TypeInfo              type;
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

@@ -4,7 +4,7 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/enuminfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-}
+}}

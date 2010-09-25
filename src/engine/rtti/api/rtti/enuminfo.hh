@@ -6,19 +6,14 @@
 /*****************************************************************************/
 #include   <rtti/typeinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-class EnumInfo : public TypeInfo
+struct EnumInfo
 {
-protected:
-    minitl::vector< std::pair< istring, int >, Arena::General >   m_enum;
-public:
-    EnumInfo(const inamespace& name);
-    virtual ~EnumInfo();
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

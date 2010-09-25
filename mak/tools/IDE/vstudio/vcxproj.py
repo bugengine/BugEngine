@@ -174,6 +174,23 @@ class VCxproj:
 		self.filters.write('      <Filter>%s</Filter>\n' % filter)
 		self.filters.write('    </CustomBuild>\n')
 
+	def addDataFile(self, path, filter, filename, source):
+		self.output.write('    <CustomBuild Include="%s">\n' % filename)
+		if 'win32' not in source.platforms or not source.process:
+			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
+		else:
+			if 'x86' not in source.archs:
+				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
+			if 'amd64' not in source.archs:
+				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
+		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
+		self.output.write('    </CustomBuild>\n')
+		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
+		self.filters.write('      <Filter>%s</Filter>\n' % filter)
+		self.filters.write('    </CustomBuild>\n')
+
+
 	def addFlexFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
 		if 'win32' not in source.platforms or not source.process:
@@ -244,6 +261,13 @@ class VCxproj:
 		self.addFiles(sources.prefix, '', sources, [(mak.sources.rcsource, self.addRcFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
+
+		self.output.write('  <ItemGroup>\n')
+		self.filters.write('  <ItemGroup>\n')
+		self.addFiles(sources.prefix, '', sources, [(mak.sources.datasource, self.addDataFile)])
+		self.output.write('  </ItemGroup>\n')
+		self.filters.write('  </ItemGroup>\n')
+
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')

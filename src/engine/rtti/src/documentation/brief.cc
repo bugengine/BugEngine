@@ -3,7 +3,6 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/documentation/brief.hh>
-#include    <rtti/engine/struct.hh>
 
 namespace BugEngine { namespace Documentation
 {
@@ -17,10 +16,4 @@ Brief::~Brief()
 {
 }
 
-}
-
-be_struct(Documentation::Brief, void, "Documentation.Brief")
-    be_field(doc)
-be_end
-
-}
+}}

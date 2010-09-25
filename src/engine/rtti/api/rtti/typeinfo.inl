@@ -4,9 +4,8 @@
 #ifndef BE_RTTI_TYPEINFO_INL_
 #define BE_RTTI_TYPEINFO_INL_
 /*****************************************************************************/
-#include   <rtti/classinfo.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 TypeInfo::TypeInfo(const TypeInfo& proxy, Type type, size_t count)
@@ -25,7 +24,7 @@ TypeInfo::TypeInfo(const TypeInfo& proxy, Type type, size_t count)
     be_notreached();
 }
 
-TypeInfo::TypeInfo(weak<const ClassInfo> klass)
+TypeInfo::TypeInfo(const ClassInfo& klass)
 :   m_class(klass)
 {
     memset(m_attributes, 0, sizeof(m_attributes));
@@ -35,7 +34,7 @@ TypeInfo::~TypeInfo()
 {
 }
 
-}
+}}
 
 
 /*****************************************************************************/

@@ -213,6 +213,27 @@ class VCproj:
 		self.output.write(tabs+'</File>\n')
 
 
+	def addDataFile(self, path, filename, source, tabs):
+		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		for platform in self.platforms:
+			for config in self.configs:
+				self.output.write(tabs+'	<FileConfiguration\n')
+				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+				else:
+					if self.archs[platform] not in source.archs:
+						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+				self.output.write(tabs+'	<Tool\n')
+				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
+				self.output.write(tabs+'		Description="datagen &quot;$(InputPath)&quot;"\n')
+				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
+				self.output.write(tabs+'		Outputs="&quot;%s&quot;"\n' % ('$(IntDir)'+source.generatedcpp))
+				self.output.write(tabs+'	/>\n')
+				self.output.write(tabs+'	</FileConfiguration>\n')
+		self.output.write(tabs+'</File>\n')
+
+
 	def addFlexFile(self, path, filename, source, tabs):
 		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
 		for platform in self.platforms:
@@ -272,6 +293,8 @@ class VCproj:
 				self.addCppFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.rcsource):
 				self.addRcFile(path, filename, source, tabs)
+			elif isinstance(source, mak.sources.datasource):
+				self.addDataFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.lexsource):
 				self.addFlexFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.yaccsource):

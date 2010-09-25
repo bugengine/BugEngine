@@ -18,7 +18,7 @@ def expandPlatforms(platforms):
 	return result
 
 class coptions:
-	def __init__( self, 
+	def __init__( self,
 				  includedir = [],
 				  libdir = [],
 				  defines = [],
@@ -95,7 +95,7 @@ class module:
 		self.globalarchoptions = {}
 		self.gobaloptioncache = { }
 		self.usemaster = True
-		
+
 		for k in globalarchoptions.keys():
 			self.globalarchoptions[k] = coptions()
 			self.globalarchoptions[k].merge(globalarchoptions[k])
@@ -213,7 +213,7 @@ class module:
 				task.type				= type
 				task.features			= ['cc', 'cxx', type]
 				task.usemaster			= self.usemaster
-				
+
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
 				task.uselib = [optim]
@@ -256,15 +256,15 @@ class module:
 				task.includes			= [i for i in task.options.includedir]
 				task.extralibdirs		= [l for l in task.options.libdir]
 				task.extralibs			= [l for l in task.options.libs]
-				
+
 				task.source				= self.sourcetree.make_sources(bld, env, self.root)
 				task.do_install			= 1
 			self.tasks[variant]		= task
 		return self.tasks[variant]
-		
+
 	def scandir(self, path, local, process, platforms, archs, sourcelist = []):
 		result = sources.directory()
-		
+
 		for file in os.listdir(path):
 			if file == '.svn':
 				continue
@@ -308,8 +308,14 @@ class module:
 				elif ext in set(['.def']):
 					self.localoptions.deffile = fullname
 					result.addFile(sources.source(file,platforms,archs, doprocess))
-				elif ext in set(['.h', '.hpp', '.inl','.hh', '.hxx', '']):
 					result.addFile(sources.hsource(file,platforms,archs, doprocess))
+				elif ext in set(['.h', '.hpp', '.hh', '.hxx', '.inl']):
+					if file.endswith('.data'+ext):
+						generatedcfile = os.path.join(path, filename+'.cc')
+						result.addFile(sources.datasource(file, generatedcfile, platforms, archs, True))
+						result.addFile(sources.generatedcppsource(filename+'.cc', platforms, archs, True))
+					else:
+						result.addFile(sources.hsource(file, platforms, archs, doprocess))
 				elif ext in set(['.ogg', '.lua', '.nut', '.dd', '.cg', '.pcf', '.ttf', '.fon', '.tga']):
 					result.addFile( sources.deployedsource(file, local, 'data', platforms, archs, doprocess ) )
 		return result
