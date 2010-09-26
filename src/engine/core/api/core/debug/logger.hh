@@ -30,7 +30,7 @@ class ILogListener
 protected:
     static be_api(CORE) const char* s_logNames[];
     virtual ~ILogListener() {}
-    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) NOTHROW = 0;
+    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) = 0;
 };
 
 class be_api(CORE) Logger : public minitl::refcountable

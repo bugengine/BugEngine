@@ -43,7 +43,6 @@ typedef u8                      byte;
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline
-#define NOTHROW     throw()
 
 #define BE_SET_ALIGNMENT(n)     __declspec(align(n))
 #ifndef BE_STATIC
