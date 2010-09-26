@@ -415,7 +415,6 @@ def p_template_params_opt(t):
 		template_params_opt :
 		template_params_opt : LT skiplist_comma GT
 	"""
-	if len(t) > 1: print t[1], t[3]
 	pass
 
 ###################################
@@ -438,7 +437,6 @@ def p_name_item(t):
 	"""
 		name_item : typename_opt template_opt ID template_params_opt
 	"""
-	print t[3]
 	pass
 	
 def p_name_operator(t):
@@ -476,7 +474,6 @@ def p_visibility(t):
 		visibility : PROTECTED
 		visibility : PRIVATE
 	"""
-	print t[1]
 	pass
 
 def p_visibility_opt(t):
@@ -630,7 +627,6 @@ def p_skiplist_base(t):
 		skiplist_base : skiplist_base SCOPE
 		skiplist_base : skiplist_base SEMI
 	"""
-	if len(t) > 3: print t[2]
 	pass
 
 def p_skiplist(t):
