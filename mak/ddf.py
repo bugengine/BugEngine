@@ -18,13 +18,12 @@ implementation = None
 # Reserved words
 reserved = (
 		'BE_PUBLISH',
-		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE',
+		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
 		'USING',
 		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
 		'SIGNED', 'UNSIGNED',
-		'INLINE','STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE',
-		'TRUE', 'FALSE', 'NULL', 'NULLPTR',
-		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF'
+		'INLINE','STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
+		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW'
 	)
 
 tokens = reserved + (
@@ -118,10 +117,6 @@ def t_comment_2(t):
 
 def t_preprocessor(t):
 	r'\#([^\\\n]|(\\.)|(\\\n))*'
-	kw = t.value[1:].lstrip()
-	if kw.startswith("if") or kw.startswith("el") or kw.startswith("endif"):
-		implementation.write(t.value)
-		implementation.write("\n")
 	t.lexer.lineno += t.value.count('\n')
 	pass
 
@@ -195,7 +190,7 @@ lexer = lex.lex()
 def p_decls(t):
 	"""
 		decls :
-		decls : decls decl
+		decls : decls template_opt modifier_left decl
 	"""
 	pass
 
@@ -205,13 +200,16 @@ def p_using(t):
 	"""
 	pass
 
-
+precedence = (
+	("left", "LT", "GT"),
+	("left", "SCOPE"),
+)
 ###################################
 # Namespaces
 def p_namespace(t):
 	"""
 		decl : namespace_begin decls namespace_end
-		decl : namespace_anonymous skiplist namespace_end
+		decl : namespace_anonymous skiplist_all namespace_end
 		decl : NAMESPACE ID EQUALS ID SEMI
 	"""
 	pass
@@ -220,35 +218,116 @@ def p_namespace_begin(t):
 	"""
 		namespace_begin : NAMESPACE ID LBRACE
 	"""
-	yacc.namespace.append(t[2])
+	implementation.write('namespace %s {\n' % t[2])
 
 def p_namespace_anonymous(t):
 	"""
 		namespace_anonymous : NAMESPACE LBRACE
 	"""
-	yacc.namespace.append('')
+	implementation.write('namespace {\n')
 
 def p_namespace_end(t):
 	"""
 		namespace_end : RBRACE
 	"""
+	implementation.write('}\n')
+
+###################################
+# params
+def p_param_name_opt(t):
+	"""
+		param_name_opt :
+		param_name_opt : ID
+	"""
+	pass
+
+def p_param_value_opt(t):
+	"""
+		param_value_opt :
+		param_value_opt : EQUALS skiplist_gt
+	"""
+	pass
+
+def p_param(t):
+	"""
+		param : type param_name_opt array_opt param_value_opt
+		param : class param_name_opt array_opt param_value_opt
+		param : TYPENAME param_name_opt array_opt param_value_opt
+	"""
+	pass
+
+def p_params_list(t):
+	"""
+		params_list :
+		params_list : cs_params_list
+	"""
+	pass
+	
+def p_cs_params_list(t):
+	"""
+		cs_params_list : param
+		cs_params_list : cs_params_list COMMA param
+	"""
+	pass
 
 ###################################
 # type
+
+def p_type_modifier(t):
+	"""
+		type_modifier : MUTABLE
+		type_modifier : CONST
+		type_modifier : SIGNED
+		type_modifier : UNSIGNED
+		type_modifier : VOLATILE
+		type_modifier : TIMES
+		type_modifier : AND
+	"""
+	pass
+
+def p_array_opt(t):
+	"""
+		array_opt :
+		array_opt : array_opt LBRACKET RBRACKET
+		array_opt : array_opt LBRACKET skiplist_all RBRACKET
+	"""
+	pass
+
 def p_type(t):
 	"""
 		type : name
+		type : type_modifier name
+		type : type type_modifier
 	"""
 	pass
 
 ###################################
-# typedef
+# decls
 def p_typedef(t):
 	"""
-		decl : TYPEDEF type ID SEMI
+		decl : TYPEDEF type ID
 	"""
 	pass
 
+def p_modifier_left(t):
+	"""
+		modifier_left :
+		modifier_left : modifier_left STATIC
+		modifier_left : modifier_left INLINE
+		modifier_left : modifier_left VIRTUAL
+		modifier_left : modifier_left OVERRIDE
+	"""
+	pass
+	
+def p_decl(t):
+	"""
+		decl : SEMI
+		decl : type array_opt SEMI
+		decl : type name array_opt SEMI
+		decl : FRIEND CLASS name SEMI
+		decl : FRIEND STRUCT name SEMI
+	"""
+	pass
 
 ###################################
 # Value
@@ -262,24 +341,88 @@ def p_constant(t):
 		constant : OCTAL
 		constant : HEX
 		constant : FLOAT
-		constant : TRUE
-		constant : FALSE
-		constant : NULL
-		constant : NULLPTR
 	"""
 	pass
 
-def p_value(t):
+def p_operator(t):
 	"""
-		value : constant
+		operator : PLUS
+		operator : MINUS
+		operator : TIMES
+		operator : DIVIDE
+		operator : MOD
+		operator : OR
+		operator : AND
+		operator : NOT
+		operator : XOR
+		operator : LSHIFT
+		operator : RSHIFT
+		operator : LOR
+		operator : LAND
+		operator : LNOT
+		operator : LE
+		operator : GE
+		operator : EQ
+		operator : NE
+		operator : EQUALS
+		operator : TIMESEQUAL
+		operator : DIVEQUAL
+		operator : MODEQUAL
+		operator : PLUSEQUAL
+		operator : MINUSEQUAL
+		operator : LSHIFTEQUAL
+		operator : RSHIFTEQUAL
+		operator : ANDEQUAL
+		operator : OREQUAL
+		operator : XOREQUAL
+		operator : PLUSPLUS
+		operator : MINUSMINUS
+		operator : ARROW
+		operator : CONDOP
+		operator : PERIOD
+		operator : COLON
+		operator : ELLIPSIS
 	"""
+	pass
 
-precedence = (
-)
+###################################
+# template stuff
+def p_template(t):
+	"""
+		template : TEMPLATE LT params_list GT
+	"""
+	pass
 
+def p_typename_opt(t):
+	"""
+		typename_opt :
+		typename_opt : TYPENAME
+	"""
+	pass
+	
+def p_template_opt(t):
+	"""
+		template_opt :
+		template_opt : template
+	"""
+	pass
+
+def p_template_params_opt(t):
+	"""
+		template_params_opt :
+		template_params_opt : LT skiplist_comma GT
+	"""
+	pass
 
 ###################################
 # Name
+def p_name_opt(t):
+	"""
+		name_opt : 
+		name_opt : name
+	"""
+	pass
+
 def p_name(t):
 	"""
 		name : namelist
@@ -289,19 +432,32 @@ def p_name(t):
 
 def p_namelist(t):
 	"""
-		namelist : ID
-		namelist : ID SCOPE namelist
+		namelist : typename_opt template_opt ID template_params_opt
+		namelist : namelist SCOPE typename_opt template_opt ID template_params_opt
 	"""
 	pass
+	
 
 ###################################
 # visibility
+def p_visibility(t):
+	"""
+		visibility : PUBLIC
+		visibility : PROTECTED
+		visibility : PRIVATE
+	"""
+	pass
+
 def p_visibility_opt(t):
 	"""
 		visibility_opt :
-		visibility_opt : PUBLIC
-		visibility_opt : PROTECTED
-		visibility_opt : PRIVATE
+		visibility_opt : visibility
+	"""
+	pass
+	
+def p_declare_visibility(t):
+	"""
+		decl : visibility COLON
 	"""
 	pass
 
@@ -315,10 +471,173 @@ def p_parent_opt(t):
 	pass
 
 ###################################
+# class
+def p_struct_or_class(t):
+	"""
+		class : CLASS
+		class : STRUCT
+		class : UNION
+	"""
+	pass
+
+def p_class(t):
+	"""
+		type :	class name_opt parent_opt LBRACE decls RBRACE
+		type :	class name
+	"""
+	pass
+	
+def p_enum_values(t):
+	"""
+		enum_values :
+		enum_values : enum_value
+		enum_values : enum_value COMMA enum_values
+	"""
+	pass
+	
+def p_enum_value(t):
+	"""
+		enum_value : ID param_value_opt
+	"""
+	pass
+
+def p_enum(t):
+	"""
+		type :	ENUM name_opt LBRACE enum_values RBRACE
+	"""
+	pass
+	
+###################################
+# method
+	
+def p_method_modifier_right(t):
+	"""
+		method_modifier_right :
+		method_modifier_right : method_modifier_right CONST
+		method_modifier_right : method_modifier_right VOLATILE
+		method_modifier_right : method_modifier_right VIRTUAL
+		method_modifier_right : method_modifier_right OVERRIDE
+		method_modifier_right : method_modifier_right EQUALS DECIMAL
+		method_modifier_right : method_modifier_right THROW LPAREN skiplist_all RPAREN
+	"""
+	pass
+
+def p_method(t):
+	"""
+		method : type name LPAREN params_list RPAREN method_modifier_right
+		method : name LPAREN params_list RPAREN method_modifier_right
+	"""
+	pass
+
+def p_method_name_opt(t):
+	"""
+		operator_name_opt :
+		operator_name_opt : name SCOPE
+	"""
+	pass
+	
+def p_method_operator(t):
+	"""
+		method : type operator_name_opt OPERATOR operator LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name_opt OPERATOR LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
+		method : operator_name_opt OPERATOR type LPAREN params_list RPAREN method_modifier_right
+	"""
+	pass
+
+def p_initializers(t):
+	"""
+		initializers :
+		initializers : COLON initializer_list
+	"""
+	pass
+	
+def p_initializer_list(t):
+	"""
+		initializer_list : initializer
+		initializer_list : initializer_list COMMA initializer
+	"""
+	pass
+	
+def p_initializer(t):
+	"""
+		initializer : ID LPAREN skiplist_all RPAREN
+	"""
+	pass
+
+def p_method_decl_or_impl(t):
+	"""
+		decl : method SEMI
+		decl : method initializers LBRACE skiplist_all RBRACE
+	"""
+	pass
+
+###################################
 # skiplist
+def p_keyword(t):
+	"""
+		keyword : STRUCT
+				| CLASS
+				| ENUM
+				| NAMESPACE
+				| UNION
+				| USING
+				| PUBLIC
+				| PROTECTED
+				| PRIVATE
+				| FRIEND
+				| SIGNED
+				| UNSIGNED
+				| INLINE
+				| STATIC
+				| CONST
+				| VOLATILE
+				| VIRTUAL
+				| OVERRIDE
+				| TEMPLATE
+				| TYPENAME
+				| OPERATOR
+				| TYPEDEF
+				| THROW
+	"""
+	pass
+
 def p_skiplist(t):
 	"""
 		skiplist :
+		skiplist : skiplist LBRACE skiplist_all RBRACE
+		skiplist : skiplist LBRACKET skiplist_all RBRACKET
+		skiplist : skiplist LPAREN skiplist_all RPAREN
+		skiplist : skiplist LT skiplist_comma GT
+		skiplist : skiplist operator
+		skiplist : skiplist keyword
+		skiplist : skiplist constant
+		skiplist : skiplist ID
+		skiplist : skiplist SCOPE
+		skiplist : skiplist SEMI
+	"""
+	pass
+
+def p_skiplist_with_gt(t):
+	"""
+		skiplist_gt : skiplist
+		skiplist_gt : skiplist_gt LT skiplist
+		skiplist_gt : skiplist_gt GT skiplist
+	"""
+	pass
+
+def p_skiplist_with_comma(t):
+	"""
+		skiplist_comma : skiplist
+		skiplist_comma : skiplist_comma COMMA skiplist
+	"""
+	pass
+
+def p_skiplist_all(t):
+	"""
+		skiplist_all : skiplist
+		skiplist_all : skiplist_all COMMA skiplist
+		skiplist_all : skiplist_all LT skiplist
+		skiplist_all : skiplist_all GT skiplist
 	"""
 	pass
 
@@ -369,4 +688,5 @@ for arg in args:
 	if error != olderror:
 		os.remove(sourcefile)
 exit(error)
+
 
