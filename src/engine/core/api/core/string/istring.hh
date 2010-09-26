@@ -22,11 +22,11 @@ private:
     const StringCache* init(const char *str);
     const StringCache* init(const char *begin, const char *end);
 public:
-    istring() NOTHROW;
-    istring(const char *str) NOTHROW;
-    istring(const char *begin, const char *end) NOTHROW;
+    istring();
+    istring(const char *str);
+    istring(const char *begin, const char *end);
     istring(const std::string& other);
-    istring(const istring& other) NOTHROW;
+    istring(const istring& other);
     template< size_t SIZE >
     istring(const minitl::format<SIZE>& f)
         :   m_index(init(f))
@@ -35,16 +35,16 @@ public:
 
     ~istring();
 
-    istring& operator=(const istring&) NOTHROW;
+    istring& operator=(const istring&);
 
-    const char *c_str() const NOTHROW;
+    const char *c_str() const;
     std::string str()   const;
-    size_t size() const NOTHROW;
-    size_t hash() const NOTHROW;
+    size_t size() const;
+    size_t hash() const;
 
-    bool operator==(const istring& other) const NOTHROW;
-    bool operator!=(const istring& other) const NOTHROW;
-    bool operator<(const istring& other) const NOTHROW;
+    bool operator==(const istring& other) const;
+    bool operator!=(const istring& other) const;
+    bool operator<(const istring& other) const;
 };
 
 class be_api(CORE) igenericnamespace

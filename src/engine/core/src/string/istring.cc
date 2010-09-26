@@ -37,10 +37,10 @@ private:
 private:
     typedef minitl::map< const char *, StringCache*, minitl::less<const char *> > StringIndex;
 private:
-    static Buffer*  getBuffer() NOTHROW;
+    static Buffer*  getBuffer();
 public:
-    static StringCache* unique(const char *val) NOTHROW;
-    static StringCache* unique(const char *begin, const char *end) NOTHROW;
+    static StringCache* unique(const char *val);
+    static StringCache* unique(const char *begin, const char *end);
 private:
     mutable i_u32  m_refCount;
     size_t  m_hash;
@@ -49,7 +49,7 @@ private:
     size_t  m_gard;
 #   endif
 private:
-    StringCache(size_t _hash, size_t len) NOTHROW :
+    StringCache(size_t _hash, size_t len) :
         m_refCount(0),
         m_hash(_hash),
         m_length(len)
@@ -60,14 +60,14 @@ private:
     }
     StringCache();
 public:
-    void retain(void) const NOTHROW     { m_refCount++; }
-    void release(void) const NOTHROW    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
-    size_t hash() const NOTHROW         { return m_hash; }
-    size_t size() const NOTHROW         { return m_length; }
-    const char *str() const NOTHROW     { return reinterpret_cast<const char *>(this+1); }
+    void retain(void) const     { m_refCount++; }
+    void release(void) const    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
+    size_t hash() const         { return m_hash; }
+    size_t size() const         { return m_length; }
+    const char *str() const     { return reinterpret_cast<const char *>(this+1); }
 };
 
-StringCache::Buffer* StringCache::getBuffer() NOTHROW
+StringCache::Buffer* StringCache::getBuffer()
 {
     static Buffer s_root;
     return &s_root;
@@ -113,7 +113,7 @@ StringCache* StringCache::Buffer::reserveNext(size_t size)
     return m_next->reserve(size);
 }
 
-StringCache* StringCache::unique(const char *begin, const char *end) NOTHROW
+StringCache* StringCache::unique(const char *begin, const char *end)
 {
     size_t _size = 1+size_t(end)-size_t(begin);
     char *val = static_cast<char*>(malloca(_size));
@@ -124,7 +124,7 @@ StringCache* StringCache::unique(const char *begin, const char *end) NOTHROW
     return result;
 }
 
-StringCache* StringCache::unique(const char *val) NOTHROW
+StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
@@ -175,7 +175,7 @@ const StringCache* istring::init(const char *begin, const char *end)
     return result;
 }
 
-istring::istring() NOTHROW
+istring::istring()
 :   m_index(init(""))
 #ifdef BE_DEBUG
 ,   m_str(m_index->str())
@@ -183,7 +183,7 @@ istring::istring() NOTHROW
 {
 }
 
-istring::istring(const char *value) NOTHROW
+istring::istring(const char *value)
 :   m_index(init(value))
 #ifdef BE_DEBUG
 ,   m_str(m_index->str())
@@ -191,7 +191,7 @@ istring::istring(const char *value) NOTHROW
 {
 }
 
-istring::istring(const char *begin, const char *end) NOTHROW
+istring::istring(const char *begin, const char *end)
 :   m_index(init(begin,end))
 #ifdef BE_DEBUG
 ,   m_str(m_index->str())
@@ -207,7 +207,7 @@ istring::istring(const std::string& other)
 {
 }
 
-istring::istring(const istring& other) NOTHROW
+istring::istring(const istring& other)
 :   m_index(other.m_index)
 #ifdef BE_DEBUG
 ,   m_str(m_index->str())
@@ -221,7 +221,7 @@ istring::~istring()
     m_index->release();
 }
 
-istring& istring::operator=(const istring& other) NOTHROW
+istring& istring::operator=(const istring& other)
 {
     if(&other == this)
         return *this;
@@ -231,17 +231,17 @@ istring& istring::operator=(const istring& other) NOTHROW
     return *this;
 }
 
-size_t istring::hash() const NOTHROW
+size_t istring::hash() const
 {
     return m_index->hash();
 }
 
-size_t istring::size() const NOTHROW
+size_t istring::size() const
 {
     return m_index->size();
 }
 
-const char *istring::c_str() const NOTHROW
+const char *istring::c_str() const
 {
     return m_index->str();
 }
@@ -251,17 +251,17 @@ std::string istring::str() const
     return std::string(c_str());
 }
 
-bool istring::operator==(const istring& other) const NOTHROW
+bool istring::operator==(const istring& other) const
 {
     return other.m_index == m_index;
 }
 
-bool istring::operator!=(const istring& other) const NOTHROW
+bool istring::operator!=(const istring& other) const
 {
     return other.m_index != m_index;
 }
 
-bool istring::operator<(const istring& other) const NOTHROW
+bool istring::operator<(const istring& other) const
 {
     return m_index < other.m_index;
 }

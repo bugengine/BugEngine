@@ -29,7 +29,6 @@ typedef u8                      byte;
 #define BE_NOINLINE            
 #define BE_ALWAYSINLINE        inline
 
-#define NOTHROW     throw()
 #define BE_EXPORT
 #define BE_IMPORT
 
