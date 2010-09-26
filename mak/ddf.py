@@ -19,7 +19,7 @@ implementation = None
 reserved = (
 		'BE_PUBLISH',
 		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
-		'USING',
+		'USING', 'NEW', 'DELETE',
 		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
 		'SIGNED', 'UNSIGNED',
 		'INLINE','STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
@@ -99,6 +99,9 @@ for r in reserved:
 
 def t_API(t):
 	r'be_api[ \t]*\([^\)]*\)'
+	pass
+def t_ALIGNMENT(t):
+	r'BE_SET_ALIGNMENT[ \t]*\([^\)]*\)'
 	pass
 
 def t_ID(t):
@@ -251,8 +254,6 @@ def p_param_value_opt(t):
 def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
-		param : class param_name_opt array_opt param_value_opt
-		param : TYPENAME param_name_opt array_opt param_value_opt
 	"""
 	pass
 
@@ -346,6 +347,8 @@ def p_constant(t):
 
 def p_operator(t):
 	"""
+		operator : NEW
+		operator : DELETE
 		operator : PLUS
 		operator : MINUS
 		operator : TIMES
@@ -403,7 +406,7 @@ def p_typename_opt(t):
 def p_template_opt(t):
 	"""
 		template_opt :
-		template_opt : template
+		template_opt : template_opt template
 	"""
 	pass
 
@@ -412,6 +415,7 @@ def p_template_params_opt(t):
 		template_params_opt :
 		template_params_opt : LT skiplist_comma GT
 	"""
+	if len(t) > 1: print t[1], t[3]
 	pass
 
 ###################################
@@ -430,10 +434,36 @@ def p_name(t):
 	"""
 	pass
 
+def p_name_item(t):
+	"""
+		name_item : typename_opt template_opt ID template_params_opt
+	"""
+	print t[3]
+	pass
+	
+def p_name_operator(t):
+	"""
+		name_operator : OPERATOR operator array_opt
+		name_operator : OPERATOR LT array_opt
+		name_operator : OPERATOR GT array_opt
+		name_operator : OPERATOR type
+		name_operator : OPERATOR LPAREN RPAREN
+		name_operator : OPERATOR LBRACKET RBRACKET
+	"""
+	pass
+
+def p_namelist_items(t):
+	"""
+		namelist_items : name_item
+		namelist_items : namelist_items SCOPE name_item
+	"""
+	pass
+
 def p_namelist(t):
 	"""
-		namelist : typename_opt template_opt ID template_params_opt
-		namelist : namelist SCOPE typename_opt template_opt ID template_params_opt
+		namelist : name_operator
+		namelist : namelist_items
+		namelist : namelist_items SCOPE name_operator
 	"""
 	pass
 	
@@ -446,6 +476,7 @@ def p_visibility(t):
 		visibility : PROTECTED
 		visibility : PRIVATE
 	"""
+	print t[1]
 	pass
 
 def p_visibility_opt(t):
@@ -524,23 +555,8 @@ def p_method_modifier_right(t):
 
 def p_method(t):
 	"""
-		method : type name LPAREN params_list RPAREN method_modifier_right
-		method : name LPAREN params_list RPAREN method_modifier_right
-	"""
-	pass
-
-def p_method_name_opt(t):
-	"""
-		operator_name_opt :
-		operator_name_opt : name SCOPE
-	"""
-	pass
-	
-def p_method_operator(t):
-	"""
-		method : type operator_name_opt OPERATOR operator LPAREN params_list RPAREN method_modifier_right
-		method : type operator_name_opt OPERATOR LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
-		method : operator_name_opt OPERATOR type LPAREN params_list RPAREN method_modifier_right
+		method : type name template_params_opt LPAREN params_list RPAREN method_modifier_right
+		method : name template_params_opt LPAREN params_list RPAREN method_modifier_right
 	"""
 	pass
 
@@ -601,27 +617,34 @@ def p_keyword(t):
 	"""
 	pass
 
+def p_skiplist_base(t):
+	"""
+		skiplist_base :
+		skiplist_base : skiplist_base LBRACE skiplist_all RBRACE
+		skiplist_base : skiplist_base LBRACKET skiplist_all RBRACKET
+		skiplist_base : skiplist_base LPAREN skiplist_all RPAREN
+		skiplist_base : skiplist_base operator
+		skiplist_base : skiplist_base keyword
+		skiplist_base : skiplist_base constant
+		skiplist_base : skiplist_base ID
+		skiplist_base : skiplist_base SCOPE
+		skiplist_base : skiplist_base SEMI
+	"""
+	if len(t) > 3: print t[2]
+	pass
+
 def p_skiplist(t):
 	"""
-		skiplist :
-		skiplist : skiplist LBRACE skiplist_all RBRACE
-		skiplist : skiplist LBRACKET skiplist_all RBRACKET
-		skiplist : skiplist LPAREN skiplist_all RPAREN
+		skiplist : skiplist_base
 		skiplist : skiplist LT skiplist_comma GT
-		skiplist : skiplist operator
-		skiplist : skiplist keyword
-		skiplist : skiplist constant
-		skiplist : skiplist ID
-		skiplist : skiplist SCOPE
-		skiplist : skiplist SEMI
 	"""
 	pass
 
 def p_skiplist_with_gt(t):
 	"""
-		skiplist_gt : skiplist
-		skiplist_gt : skiplist_gt LT skiplist
-		skiplist_gt : skiplist_gt GT skiplist
+		skiplist_gt : skiplist_base
+		skiplist_gt : skiplist_gt LT skiplist_base
+		skiplist_gt : skiplist_gt GT skiplist_base
 	"""
 	pass
 
@@ -634,10 +657,10 @@ def p_skiplist_with_comma(t):
 
 def p_skiplist_all(t):
 	"""
-		skiplist_all : skiplist
-		skiplist_all : skiplist_all COMMA skiplist
-		skiplist_all : skiplist_all LT skiplist
-		skiplist_all : skiplist_all GT skiplist
+		skiplist_all : skiplist_base
+		skiplist_all : skiplist_all COMMA skiplist_base
+		skiplist_all : skiplist_all LT skiplist_base
+		skiplist_all : skiplist_all GT skiplist_base
 	"""
 	pass
 
