@@ -675,7 +675,7 @@ for arg in args:
 	else:
 		sourcefile = os.path.join(base+options.cpp)
 	if os.path.normpath(sourcefile) == os.path.normpath(arg):
-		raise Exception("source file and target file are the same: " % sourcefile)
+		raise Exception("source file and target file are the same: %s" % sourcefile)
 	try:
 		implementation = open(sourcefile, 'w')
 	except IOError,e:
