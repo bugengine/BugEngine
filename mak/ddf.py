@@ -10,9 +10,12 @@ parser = OptionParser()
 parser.set_usage('ddf.py [options] file1 [file2... fileN]')
 parser.add_option("-o", "--output", dest="folder", help="Places the output into <folder>", default='')
 parser.add_option("--cpp", dest="cpp", help="extension used for source implementation", default='.cc')
+parser.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
+parser.add_option("-D", dest="macrofile", action="append", help="add teh content of <macrofile> to the macros, one macro per line")
 (options, args) = parser.parse_args()
 
 
+sourcename = None
 implementation = None
 
 # Reserved words
@@ -21,13 +24,13 @@ reserved = (
 		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
 		'USING', 'NEW', 'DELETE',
 		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
-		'SIGNED', 'UNSIGNED',
-		'EXPLICIT', 'INLINE', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
+		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
+		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
 		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW'
 	)
 
 tokens = reserved + (
-	'ID', 'CHAR', 'WCHAR', 'STRING', 'WSTRING', 'FLOAT', 'DECIMAL', 'OCTAL', 'HEX',
+	'ID', 'CHARCONST', 'WCHAR', 'STRING', 'WSTRING', 'FLOATING', 'DECIMAL', 'OCTAL', 'HEX',
 	# Operators
 	'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MOD',
 	'OR', 'AND', 'NOT', 'XOR', 'LSHIFT', 'RSHIFT',
@@ -79,8 +82,8 @@ hex_escape = r"""(x[0-9a-fA-F]+)"""
 
 escape_sequence = r"""(\\("""+simple_escape+'|'+octal_escape+'|'+hex_escape+'))'
 cconst_char = r"""([^'\\\n]|"""+escape_sequence+')'
-t_CHAR = "'"+cconst_char+"'"
-t_WCHAR = 'L'+t_CHAR
+t_CHARCONST = "'"+cconst_char+"'"
+t_WCHAR = 'L'+t_CHARCONST
 
 # string literals (K&R2: A.2.6)
 string_char = r"""([^"\\\n]|"""+escape_sequence+')'
@@ -90,27 +93,59 @@ t_WSTRING = 'L'+t_STRING
 # floating constants (K&R2: A.2.5.3)
 exponent_part = r"""([eE][-+]?[0-9]+)"""
 fractional_constant = r"""([0-9]*\.[0-9]+)|([0-9]+\.)"""
-t_FLOAT = '(((('+fractional_constant+')'+exponent_part+'?)|([0-9]+'+exponent_part+'))[FfLl]?)'
+t_FLOATING = '(((('+fractional_constant+')'+exponent_part+'?)|([0-9]+'+exponent_part+'))[FfLl]?)'
 
 
 reserved_map = { }
 for r in reserved:
 	reserved_map[r.lower()] = r
 
-def t_API(t):
-	r'be_api[ \t]*\([^\)]*\)'
-	pass
-def t_ALIGNMENT(t):
-	r'BE_SET_ALIGNMENT[ \t]*\([^\)]*\)'
-	pass
-def t_INLINE(t):
-	r'BE_ALWAYSINLINE[ \t]*'
-	pass
+states = (
+	('MACRO', 'exclusive'),
+)
+
+macro_map = {
+	"__declspec": True,
+	"__attribute__": True,
+	"CALLBACK": False,
+	"WINAPI": False,
+	"__cdecl": False,
+	"__fastcall": False,
+	"__stdcall": False,
+	"PASCAL": False,
+}
 
 def t_ID(t):
-	r'~?[a-zA-Z_\$][a-zA-Z_0-9\$]*'
-	t.type = reserved_map.get(t.value,"ID")
-	return t
+	r'~?[a-zA-Z_\$][a-zA-Z_0-9\$]*[ \t]*'
+	t.value = t.value.strip()
+	try:
+		remove_paren = macro_map[t.value]
+		if remove_paren and t.lexer.lexdata[t.lexer.lexpos] == '(':
+			t.lexer.begin('MACRO')
+	except KeyError:
+		t.type = reserved_map.get(t.value, "ID")
+		return t
+
+def t_MACRO_open(t):
+	r'\('
+	t.lexer.inside = t.lexer.inside + 1
+	pass
+
+def t_MACRO_close(t):
+	r'\)'
+	t.lexer.inside = t.lexer.inside - 1
+	if t.lexer.inside == 0:
+		t.lexer.begin('INITIAL')
+	pass
+
+t_MACRO_ignore = ' \t\x0c'
+def t_MACRO_skip(t):
+	r'[^\(\)\n]'
+	pass
+
+def t_MACRO_NEWLINE(t):
+	r'\n+'
+	t.lexer.lineno += t.value.count("\n")
 
 # Comments
 def t_comment(t):
@@ -188,15 +223,37 @@ t_ELLIPSIS          = r'\.\.\.'
 def t_error(t):
 	global error
 	error += 1
-	print("Illegal character %s" % repr(t.value[0]))
+	print("%s(%d): Illegal character %s" % (sourcename, t.lexer.lineno, repr(t.value[0])))
+	t.lexer.skip(1)
+
+def t_MACRO_error(t):
+	global error
+	error += 1
+	print("%s(%d): Illegal character %s" % (sourcename, t.lexer.lineno, repr(t.value[0])))
 	t.lexer.skip(1)
 
 lexer = lex.lex()
+lexer.inside = 0
+
+
+
 
 def p_decls(t):
 	"""
 		decls :
-		decls : decls template_opt modifier_left decl
+		decls : decls decl
+	"""
+	pass
+
+def p_decl_template(t):
+	"""
+		decl : template decl
+	"""
+	pass
+
+def p_decl_modifier(t):
+	"""
+		decl : modifier_left decl
 	"""
 	pass
 
@@ -234,6 +291,12 @@ def p_namespace_end(t):
 		namespace_end : RBRACE
 	"""
 	implementation.write('}\n')
+
+def p_extern(t):
+	"""
+		extern : EXTERN STRING LBRACE decls RBRACE
+	"""
+	pass
 
 ###################################
 # params
@@ -314,11 +377,40 @@ def p_type_modifier(t):
 	"""
 		type_modifier : MUTABLE
 		type_modifier : CONST
-		type_modifier : SIGNED
-		type_modifier : UNSIGNED
 		type_modifier : VOLATILE
-		type_modifier : TIMES
-		type_modifier : AND
+	"""
+	pass
+
+def p_type_modifier_list(t):
+	"""
+		type_modifier_list :
+		type_modifier_list : type_modifier_list type_modifier
+	"""
+	pass
+
+def p_integer_type(t):
+	"""
+		simple_type : integer_type_list integer_type
+	"""
+	pass
+
+def p_integer_type_item(t):
+	"""
+		integer_type : LONG
+		integer_type : UNSIGNED
+		integer_type : SIGNED
+		integer_type : CHAR
+		integer_type : SHORT
+		integer_type : INT
+		integer_type : FLOAT
+		integer_type : DOUBLE
+	"""
+	pass
+
+def p_integer_type_list(t):
+	"""
+		integer_type_list :
+		integer_type_list : integer_type_list integer_type
 	"""
 	pass
 
@@ -330,11 +422,23 @@ def p_array_opt(t):
 	"""
 	pass
 
-def p_type(t):
+def p_type_name(t):
 	"""
-		type : name
-		type : type_modifier name
-		type : type type_modifier
+		simple_type : name
+	"""
+	pass
+
+def p_type_const(t):
+	"""
+		simple_type : type_modifier simple_type
+	"""
+	pass
+
+def p_complex_type(t):
+	"""
+		type : simple_type type_modifier_list
+		type : type TIMES type_modifier_list
+		type : type AND type_modifier_list
 	"""
 	pass
 
@@ -342,16 +446,15 @@ def p_type(t):
 # function pointers
 def p_function_pointer_name(t):
 	"""
+		function_pointer_with_name : type LPAREN RPAREN LPAREN params_list RPAREN
 		function_pointer_with_name : type LPAREN ID RPAREN LPAREN params_list RPAREN
-		function_pointer_with_name : type LPAREN TIMES ID RPAREN LPAREN params_list RPAREN
-		function_pointer_with_name : type LPAREN name SCOPE TIMES ID RPAREN LPAREN params_list RPAREN
+		function_pointer_with_name : type LPAREN pointer_on_member ID RPAREN LPAREN params_list RPAREN
 	"""
 	pass
 
 def p_function_pointer_no_name(t):
 	"""
-		function_pointer_without_name : type LPAREN TIMES RPAREN LPAREN params_list RPAREN
-		function_pointer_without_name : type LPAREN name SCOPE TIMES RPAREN LPAREN params_list RPAREN
+		function_pointer_without_name : type LPAREN pointer_on_member RPAREN LPAREN params_list RPAREN
 	"""
 	pass
 
@@ -373,21 +476,28 @@ def p_typedef(t):
 
 def p_modifier_left(t):
 	"""
-		modifier_left :
-		modifier_left : modifier_left STATIC
-		modifier_left : modifier_left EXPLICIT
-		modifier_left : modifier_left INLINE
-		modifier_left : modifier_left VIRTUAL
-		modifier_left : modifier_left OVERRIDE
-		modifier_left : modifier_left FRIEND
+		modifier_left : STATIC
+		modifier_left : EXPLICIT
+		modifier_left : INLINE
+		modifier_left : VIRTUAL
+		modifier_left : OVERRIDE
+		modifier_left : FRIEND
+		modifier_left : EXTERN
+		modifier_left : EXTERN STRING
 	"""
 	pass
 
+def p_field_length_opt(t):
+	"""
+		field_length_opt :
+		field_length_opt : COLON DECIMAL
+	"""
+	pass
 def p_decl(t):
 	"""
 		decl : SEMI
 		decl : type array_opt SEMI
-		decl : type name array_opt param_value_opt SEMI
+		decl : type name array_opt param_value_opt field_length_opt SEMI
 	"""
 	pass
 
@@ -397,12 +507,12 @@ def p_constant(t):
 	"""
 		constant : STRING
 		constant : WSTRING
-		constant : CHAR
+		constant : CHARCONST
 		constant : WCHAR
 		constant : DECIMAL
 		constant : OCTAL
 		constant : HEX
-		constant : FLOAT
+		constant : FLOATING
 	"""
 	pass
 
@@ -459,34 +569,6 @@ def p_template(t):
 	"""
 	pass
 
-def p_typename_opt(t):
-	"""
-		typename_opt :
-		typename_opt : TYPENAME
-	"""
-	pass
-
-def p_template_opt(t):
-	"""
-		template_opt :
-		template_opt : template_opt template
-	"""
-	pass
-
-def p_template_params_opt(t):
-	"""
-		template_params_opt :
-		template_params_opt : LT skiplist_comma GT
-	"""
-	pass
-
-def p_template_keyword_opt(t):
-	"""
-		template_keyword_opt :
-		template_keyword_opt : TEMPLATE
-	"""
-	pass
-
 ###################################
 # Name
 def p_name_opt(t):
@@ -496,29 +578,40 @@ def p_name_opt(t):
 	"""
 	pass
 
+def p_pointer_on_member(t):
+	"""
+		pointer_on_member : TIMES
+		pointer_on_member : namelist TIMES
+		pointer_on_member : SCOPE namelist TIMES
+	"""
+
+def p_operator_name(t):
+	"""
+		operator_name : OPERATOR
+		operator_name : namelist OPERATOR
+		operator_name : SCOPE namelist OPERATOR
+	"""
+
 def p_name(t):
 	"""
-		name : namelist
-		name : SCOPE namelist
+		name : name_item
+		name : namelist name_item
+		name : SCOPE namelist name_item
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2]
 
 def p_name_item(t):
 	"""
-		name_item : typename_opt template_keyword_opt ID template_params_opt
+		name_item : ID
+		name_item : TYPENAME name_item
+		name_item : TEMPLATE name_item
+		name_item : name_item LT skiplist_comma GT
 	"""
-	t[0] = t[3]
 
 def p_namelist(t):
 	"""
-		namelist : name_item
-		namelist : namelist SCOPE name_item
+		namelist : name_item SCOPE
+		namelist : namelist name_item SCOPE
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2] + t[3]
 
 
 ###################################
@@ -549,7 +642,14 @@ def p_declare_visibility(t):
 def p_parent_opt(t):
 	"""
 		parent_opt :
-		parent_opt : COLON visibility_opt name
+		parent_opt : COLON visibility_opt name extra_parents
+	"""
+	pass
+
+def p_extra_parents(t):
+	"""
+		extra_parents :
+		extra_parents : extra_parents COMMA visibility_opt name
 	"""
 	pass
 
@@ -558,15 +658,15 @@ def p_parent_opt(t):
 def p_struct_or_class(t):
 	"""
 		class : CLASS
-		class :	STRUCT
+		class : STRUCT
 		class : UNION
 	"""
 	pass
 
 def p_class(t):
 	"""
-		type :	class name_opt parent_opt LBRACE decls RBRACE
-		type :	class name
+		simple_type :	class name_opt parent_opt LBRACE decls RBRACE
+		simple_type :	class name
 	"""
 	pass
 
@@ -586,7 +686,7 @@ def p_enum_value(t):
 
 def p_enum(t):
 	"""
-		type :	ENUM name_opt LBRACE enum_values RBRACE
+		simple_type :	ENUM name_opt LBRACE enum_values RBRACE
 	"""
 	pass
 
@@ -608,25 +708,18 @@ def p_method_modifier_right(t):
 def p_method(t):
 	"""
 		method : type name LPAREN params_list RPAREN method_modifier_right
-		method : name LPAREN params_list RPAREN method_modifier_right
-	"""
-	pass
-
-def p_operator_function_namespace(t):
-	"""
-		namespace_opt :
-		namespace_opt : name SCOPE
+		method : type LPAREN params_list RPAREN method_modifier_right
 	"""
 	pass
 
 def p_operator_function(t):
 	"""
-		method : type namespace_opt OPERATOR operator LPAREN params_list RPAREN method_modifier_right
-		method : type namespace_opt OPERATOR LT LPAREN params_list RPAREN method_modifier_right
-		method : type namespace_opt OPERATOR GT LPAREN params_list RPAREN method_modifier_right
-		method : type namespace_opt OPERATOR LBRACKET RBRACKET LPAREN params_list RPAREN method_modifier_right
-		method : type namespace_opt OPERATOR LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
-		method : namespace_opt OPERATOR type LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name operator LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name LT LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name GT LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name LBRACKET RBRACKET LPAREN params_list RPAREN method_modifier_right
+		method : type operator_name LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
+		method : operator_name type LPAREN params_list RPAREN method_modifier_right
 	"""
 	pass
 
@@ -673,7 +766,14 @@ def p_keyword(t):
 				| FRIEND
 				| SIGNED
 				| UNSIGNED
+				| CHAR
+				| SHORT
+				| LONG
+				| INT
+				| FLOAT
+				| DOUBLE
 				| EXPLICIT
+				| EXTERN
 				| INLINE
 				| STATIC
 				| CONST
@@ -699,7 +799,6 @@ def p_skiplist_base(t):
 		skiplist_base : skiplist_base constant
 		skiplist_base : skiplist_base ID
 		skiplist_base : skiplist_base SCOPE
-		skiplist_base : skiplist_base SEMI
 	"""
 	pass
 
@@ -712,13 +811,16 @@ def p_skiplist(t):
 
 precedence = (
 	('right', 'LT', 'GT'),
+	('right', 'SCOPE'),
+	('left', 'TEMPLATE'),
+	('right', 'LPAREN'),
 )
 def p_skiplist_with_gt(t):
 	"""
 		skiplist_gt : skiplist_base
 		skiplist_gt : skiplist_gt LT skiplist_base
 		skiplist_gt : skiplist_gt GT skiplist_base
-		skiplist_gt : skiplist_gt LT skiplist_comma GT skiplist_gt
+		skiplist_gt : skiplist_gt LT skiplist_comma GT skiplist_base
 	"""
 	pass
 
@@ -733,8 +835,9 @@ def p_skiplist_all(t):
 	"""
 		skiplist_all : skiplist_base
 		skiplist_all : skiplist_all COMMA skiplist_base
-		skiplist_all : skiplist_all LT skiplist_base
-		skiplist_all : skiplist_all GT skiplist_base
+		skiplist_all : skiplist_all LT skiplist_all
+		skiplist_all : skiplist_all GT skiplist_all
+		skiplist_all : skiplist_all SEMI skiplist_base
 	"""
 	pass
 
@@ -745,16 +848,36 @@ def p_error(errtoken):
 		if hasattr(errtoken,"lineno"): lineno = errtoken.lineno
 		else: lineno = 0
 		if lineno:
-			sys.stderr.write("yacc: Syntax error at line %d, token=%s\n" % (lineno, errtoken.type))
+			sys.stderr.write("%s(%d): Syntax error: unexpected token %s\n" % (sourcename, lineno, errtoken.type))
 		else:
-			sys.stderr.write("yacc: Syntax error, token=%s" % errtoken.type)
+			sys.stderr.write("%s: Syntax error, token=%s" % (sourcename, errtoken.type))
 	else:
-		sys.stderr.write("yacc: Parse error in input. EOF\n")
+		sys.stderr.write("%s: Parse error in input. EOF\n" % (sourcename))
 
 
 path = os.path.abspath(os.path.split(sys.argv[0])[0])
 yacc = yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
 yacc.namespace = []
+
+if options.macro:
+	for m in options.macro:
+		if m.endswith('()'):
+			macro_map[m[:-2].strip()] = True
+		else:
+			macro_map[m.strip()] = False
+
+if options.macrofile:
+	for f in options.macrofile:
+		try:
+			macros = open(f, 'r')
+		except IOError,e:
+			raise Exception("cannot open macro file %s : %s" % (f, str(e)))
+		for m in macros.readlines():
+			m = m.strip()
+			if m.endswith('()'):
+				macro_map[m[:-2].strip()] = True
+			else:
+				macro_map[m.strip()] = False
 
 if not args:
 	parser.print_help()
@@ -762,6 +885,8 @@ if not args:
 for arg in args:
 	base,ext = os.path.splitext(arg)
 	path,filename = os.path.split(base)
+	sourcename = arg
+
 	try:
 		input = open(arg, 'r')
 	except IOError,e:
@@ -780,7 +905,7 @@ for arg in args:
 	implementation.write("#include <%s>\n" % arg)
 
 	olderror = error
-	yacc.parse(input.read(), lexer=lexer)
+	yacc.parse(input.read(), lexer=lexer, debug=0)
 	implementation.close()
 	if error != olderror:
 		os.remove(sourcefile)

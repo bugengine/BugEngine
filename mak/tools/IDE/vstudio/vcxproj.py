@@ -183,7 +183,7 @@ class VCxproj:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
 			if 'amd64' not in source.archs:
 				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
-		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
+		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -D $(SolutionDir)mak/macros_ignore -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
 		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
 		self.output.write('    </CustomBuild>\n')
 		self.filters.write('    <CustomBuild Include="%s">\n' % filename)
