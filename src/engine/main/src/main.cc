@@ -102,7 +102,7 @@ int WINAPI WinMain( HINSTANCE hInstance,
     int result = __main(__argc, (const char **)__argv);
     fflush(stdout);
     fflush(stderr);
-    
+
     return result;
 }
 #else

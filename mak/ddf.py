@@ -292,9 +292,9 @@ def p_namespace_end(t):
 	"""
 	implementation.write('}\n')
 
-def p_extern(t):
+def p_unused(t):
 	"""
-		extern : EXTERN STRING LBRACE decls RBRACE
+		decl : EXTERN STRING LBRACE decls RBRACE
 	"""
 	pass
 
