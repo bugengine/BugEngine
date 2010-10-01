@@ -12,7 +12,6 @@ parser.add_option("-o", "--output", dest="folder", help="Places the output into 
 parser.add_option("--cpp", dest="cpp", help="extension used for source implementation", default='.cc')
 parser.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
 parser.add_option("-D", dest="macrofile", action="append", help="add teh content of <macrofile> to the macros, one macro per line")
-(options, args) = parser.parse_args()
 
 
 sourcename = None
@@ -104,7 +103,7 @@ states = (
 	('MACRO', 'exclusive'),
 )
 
-macro_map = {
+global_macro_map = {
 	"__declspec": True,
 	"__attribute__": True,
 	"CALLBACK": False,
@@ -119,7 +118,7 @@ def t_ID(t):
 	r'~?[a-zA-Z_\$][a-zA-Z_0-9\$]*[ \t]*'
 	t.value = t.value.strip()
 	try:
-		remove_paren = macro_map[t.value]
+		remove_paren = lexer.macro_map[t.value]
 		if remove_paren and t.lexer.lexdata[t.lexer.lexpos] == '(':
 			t.lexer.begin('MACRO')
 	except KeyError:
@@ -859,56 +858,67 @@ path = os.path.abspath(os.path.split(sys.argv[0])[0])
 yacc = yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
 yacc.namespace = []
 
-if options.macro:
-	for m in options.macro:
-		if m.endswith('()'):
-			macro_map[m[:-2].strip()] = True
-		else:
-			macro_map[m.strip()] = False
-
-if options.macrofile:
-	for f in options.macrofile:
-		try:
-			macros = open(f, 'r')
-		except IOError,e:
-			raise Exception("cannot open macro file %s : %s" % (f, str(e)))
-		for m in macros.readlines():
-			m = m.strip()
+def doParse(source, output, macro = [], macrofile = []):
+	lexer.macro_map = dict(global_macro_map)
+	if macro:
+		for m in macro:
 			if m.endswith('()'):
-				macro_map[m[:-2].strip()] = True
+				lexer.macro_map[m[:-2].strip()] = True
 			else:
-				macro_map[m.strip()] = False
+				lexer.macro_map[m.strip()] = False
+	if macrofile:
+		for f in macrofile:
+			try:
+				macros = open(f, 'r')
+			except IOError,e:
+				raise Exception("cannot open macro file %s : %s" % (f, str(e)))
+			for m in macros.readlines():
+				m = m.strip()
+				if m.endswith('()'):
+					lexer.macro_map[m[:-2].strip()] = True
+				else:
+					lexer.macro_map[m.strip()] = False
 
-if not args:
-	parser.print_help()
-
-for arg in args:
-	base,ext = os.path.splitext(arg)
-	path,filename = os.path.split(base)
-	sourcename = arg
-
+	global input
+	global implementation
 	try:
-		input = open(arg, 'r')
+		input = open(source, 'r')
 	except IOError,e:
-		raise Exception("cannot open input file %s : %s" % (arg, str(e)))
-
-	if options.folder:
-		sourcefile = os.path.join(options.folder, filename+options.cpp)
-	else:
-		sourcefile = os.path.join(base+options.cpp)
-	if os.path.normpath(sourcefile) == os.path.normpath(arg):
-		raise Exception("source file and target file are the same: %s" % sourcefile)
+		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 	try:
-		implementation = open(sourcefile, 'w')
+		implementation = open(output, 'w')
 	except IOError,e:
-		raise Exception("cannot open output file %s : %s" % (sourcefile, str(e)))
-	implementation.write("#include <%s>\n" % arg)
+		raise Exception("cannot open output file %s : %s" % (output, str(e)))
+	implementation.write("#include <%s>\n" % source)
 
-	olderror = error
+	global error
+	error = 0
 	yacc.parse(input.read(), lexer=lexer, debug=0)
 	implementation.close()
-	if error != olderror:
+	if error != 0:
 		os.remove(sourcefile)
-exit(error)
+	return error
 
+
+
+if __name__ == '__main__':
+	(options, args) = parser.parse_args()
+	if not args:
+		parser.print_help()
+
+	for arg in args:
+		base,ext = os.path.splitext(arg)
+		path,filename = os.path.split(base)
+		sourcename = arg
+
+		if options.folder:
+			outputname = os.path.join(options.folder, filename+options.cpp)
+		else:
+			outputname = os.path.join(base+options.cpp)
+		if os.path.normpath(outputname) == os.path.normpath(sourcename):
+			raise Exception("source file and target file are the same: %s" % outputname)
+
+		if doParse(sourcename, outputname, options.macro, options.macrofile) > 0:
+			exit(1)
+	exit(0)
 
