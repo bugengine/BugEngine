@@ -21,7 +21,7 @@ Value::~Value()
 {
 }
 
-const TypeInfo& Value::type() const
+const RTTI::TypeInfo& Value::type() const
 {
     return m_type;
 }
