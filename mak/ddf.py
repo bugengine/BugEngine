@@ -933,7 +933,7 @@ def doParse(source, output, macro = [], macrofile = []):
 	yacc.implementation.close()
 	input.close()
 	if lexer.error != 0:
-		os.remove(source)
+		os.remove(output)
 	return lexer.error
 
 
