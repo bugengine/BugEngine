@@ -1,11 +1,10 @@
 import sys
-import ply.yacc as yacc
-import ply.lex as lex
+import ply.yacc
+import ply.lex
 import os
 
 from optparse import OptionParser
 
-error = 0
 parser = OptionParser()
 parser.set_usage('ddf.py [options] file1 [file2... fileN]')
 parser.add_option("-o", "--output", dest="folder", help="Places the output into <folder>", default='')
@@ -13,9 +12,6 @@ parser.add_option("--cpp", dest="cpp", help="extension used for source implement
 parser.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
 parser.add_option("-D", dest="macrofile", action="append", help="add teh content of <macrofile> to the macros, one macro per line")
 
-
-sourcename = None
-implementation = None
 
 # Reserved words
 reserved = (
@@ -118,7 +114,7 @@ def t_ID(t):
 	r'~?[a-zA-Z_\$][a-zA-Z_0-9\$]*[ \t]*'
 	t.value = t.value.strip()
 	try:
-		remove_paren = lexer.macro_map[t.value]
+		remove_paren = t.lexer.macro_map[t.value]
 		if remove_paren and t.lexer.lexdata[t.lexer.lexpos] == '(':
 			t.lexer.begin('MACRO')
 	except KeyError:
@@ -220,19 +216,15 @@ t_COLON             = r':'
 t_ELLIPSIS          = r'\.\.\.'
 
 def t_error(t):
-	global error
-	error += 1
-	print("%s(%d): Illegal character %s" % (sourcename, t.lexer.lineno, repr(t.value[0])))
+	t.lexer.error += 1
+	print("%s(%d): Illegal character %s" % (t.lexer.sourcename, t.lexer.lineno, repr(t.value[0])))
 	t.lexer.skip(1)
 
 def t_MACRO_error(t):
-	global error
-	error += 1
-	print("%s(%d): Illegal character %s" % (sourcename, t.lexer.lineno, repr(t.value[0])))
+	t.lexer.error += 1
+	print("%s(%d): Illegal character %s" % (t.lexer.sourcename, t.lexer.lineno, repr(t.value[0])))
 	t.lexer.skip(1)
 
-lexer = lex.lex()
-lexer.inside = 0
 
 
 
@@ -277,19 +269,19 @@ def p_namespace_begin(t):
 	"""
 		namespace_begin : NAMESPACE ID LBRACE
 	"""
-	implementation.write('namespace %s {\n' % t[2])
+	t.parser.implementation.write('namespace %s {\n' % t[2])
 
 def p_namespace_anonymous(t):
 	"""
 		namespace_anonymous : NAMESPACE LBRACE
 	"""
-	implementation.write('namespace {\n')
+	t.parser.implementation.write('namespace {\n')
 
 def p_namespace_end(t):
 	"""
 		namespace_end : RBRACE
 	"""
-	implementation.write('}\n')
+	t.parser.implementation.write('}\n')
 
 def p_unused(t):
 	"""
@@ -324,9 +316,20 @@ def p_template_param_value_opt(t):
 def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
+	"""
+	t[0] = (t[1]+t[3], t[2])
+
+def p_function_param(t):
+	"""
 		param : function_pointer_with_name param_value_opt
+	"""
+	t[0] = t[1]
+
+def p_param_ellipsis(t):
+	"""
 		param : ELLIPSIS
 	"""
+	t[0] = ('...', '')
 	pass
 
 def p_template_param(t):
@@ -340,12 +343,17 @@ def p_template_param(t):
 	pass
 
 
-def p_params_list(t):
+def p_params_list_none(t):
 	"""
 		params_list :
+	"""
+	t[0] = []
+
+def p_params_list(t):
+	"""
 		params_list : cs_params_list
 	"""
-	pass
+	t[0] = t[1]
 
 def p_template_params_list(t):
 	"""
@@ -357,9 +365,15 @@ def p_template_params_list(t):
 def p_cs_params_list(t):
 	"""
 		cs_params_list : param
+	"""
+	t[0] = [t[1]]
+
+def p_cs_params_list_extend(t):
+	"""
 		cs_params_list : cs_params_list COMMA param
 	"""
-	pass
+	t[0] = t[1]
+	t[0].append(t[3])
 
 
 def p_cs_template_params_list(t):
@@ -419,7 +433,7 @@ def p_array_opt(t):
 		array_opt : array_opt LBRACKET RBRACKET
 		array_opt : array_opt LBRACKET skiplist_all RBRACKET
 	"""
-	pass
+	t[0] = ''
 
 def p_type_name(t):
 	"""
@@ -699,16 +713,38 @@ def p_method_modifier_right(t):
 		method_modifier_right : method_modifier_right VOLATILE
 		method_modifier_right : method_modifier_right VIRTUAL
 		method_modifier_right : method_modifier_right OVERRIDE
+	"""
+	if len(t) > 1:
+		t[0] = t[1]
+		t[0].insert(t[2])
+	else:
+		t[0] = set()
+
+def p_method_pure_virtual(t):
+	"""
 		method_modifier_right : method_modifier_right EQUALS DECIMAL
+	"""
+	t[0] = t[1]
+	t[0].insert('PUREVIRTUAL')
+
+def p_method_throws(t):
+	"""
 		method_modifier_right : method_modifier_right THROW LPAREN skiplist_all RPAREN
 	"""
-	pass
+	t[0] = t[1]
 
 def p_method(t):
 	"""
 		method : type name LPAREN params_list RPAREN method_modifier_right
+	"""
+	t[0] = (name, t[1], t[3], t[4])
+	pass
+
+def p_constructor(t):
+	"""
 		method : type LPAREN params_list RPAREN method_modifier_right
 	"""
+	t[0] = ('__new__', t[1], t[3], t[4])
 	pass
 
 def p_operator_function(t):
@@ -841,24 +877,28 @@ def p_skiplist_all(t):
 	pass
 
 def p_error(errtoken):
-	global error
-	error += 1
+	errtoken.lexer.error += 1
 	if errtoken:
 		if hasattr(errtoken,"lineno"): lineno = errtoken.lineno
 		else: lineno = 0
 		if lineno:
-			sys.stderr.write("%s(%d): Syntax error: unexpected token %s\n" % (sourcename, lineno, errtoken.type))
+			sys.stderr.write("%s(%d): Syntax error: unexpected token %s\n" % (errtoken.lexer.sourcename, lineno, errtoken.type))
 		else:
-			sys.stderr.write("%s: Syntax error, token=%s" % (sourcename, errtoken.type))
+			sys.stderr.write("%s: Syntax error, token=%s" % (errortoken.lexer.sourcename, errtoken.type))
 	else:
-		sys.stderr.write("%s: Parse error in input. EOF\n" % (sourcename))
+		sys.stderr.write("%s: Parse error in input. EOF\n" % (errortoken.lexer.sourcename))
 
 
 path = os.path.abspath(os.path.split(sys.argv[0])[0])
-yacc = yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
-yacc.namespace = []
 
 def doParse(source, output, macro = [], macrofile = []):
+	lexer = ply.lex.lex()
+	lexer.inside = 0
+	lexer.sourcename = source
+	lexer.error = 0
+	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
+	yacc.namespace = []
+
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
 		for m in macro:
@@ -879,25 +919,22 @@ def doParse(source, output, macro = [], macrofile = []):
 				else:
 					lexer.macro_map[m.strip()] = False
 
-	global input
-	global implementation
 	try:
 		input = open(source, 'r')
 	except IOError,e:
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 	try:
-		implementation = open(output, 'w')
+		yacc.implementation = open(output, 'w')
 	except IOError,e:
 		raise Exception("cannot open output file %s : %s" % (output, str(e)))
-	implementation.write("#include <%s>\n" % source)
+	yacc.implementation.write("#include <%s>\n" % source)
 
-	global error
-	error = 0
 	yacc.parse(input.read(), lexer=lexer, debug=0)
-	implementation.close()
-	if error != 0:
-		os.remove(sourcefile)
-	return error
+	yacc.implementation.close()
+	input.close()
+	if lexer.error != 0:
+		os.remove(source)
+	return lexer.error
 
 
 
