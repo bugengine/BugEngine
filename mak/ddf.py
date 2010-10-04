@@ -2,6 +2,7 @@ import sys
 import ply.yacc
 import ply.lex
 import os
+import rtti
 
 from optparse import OptionParser
 
@@ -269,19 +270,23 @@ def p_namespace_begin(t):
 	"""
 		namespace_begin : NAMESPACE ID LBRACE
 	"""
-	t.parser.implementation.write('namespace %s {\n' % t[2])
+	ns = rtti.Namespace(t[2])
+	t.parser.namespace[-1].addObject(ns)
+	t.parser.namespace.append(ns)
 
 def p_namespace_anonymous(t):
 	"""
 		namespace_anonymous : NAMESPACE LBRACE
 	"""
-	t.parser.implementation.write('namespace {\n')
+	ns = rtti.Namespace("")
+	t.parser.namespace[-1].addObject(ns)
+	t.parser.namespace.append(ns)
 
 def p_namespace_end(t):
 	"""
 		namespace_end : RBRACE
 	"""
-	t.parser.implementation.write('}\n')
+	t.parser.namespace.pop()
 
 def p_unused(t):
 	"""
@@ -317,20 +322,16 @@ def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
 	"""
-	t[0] = (t[1]+t[3], t[2])
 
 def p_function_param(t):
 	"""
 		param : function_pointer_with_name param_value_opt
 	"""
-	t[0] = t[1]
 
 def p_param_ellipsis(t):
 	"""
 		param : ELLIPSIS
 	"""
-	t[0] = ('...', '')
-	pass
 
 def p_template_param(t):
 	"""
@@ -405,7 +406,7 @@ def p_integer_type(t):
 	"""
 		simple_type : integer_type_list integer_type
 	"""
-	pass
+	t[0] = t[1] + " " + t[2]
 
 def p_integer_type_item(t):
 	"""
@@ -418,14 +419,17 @@ def p_integer_type_item(t):
 		integer_type : FLOAT
 		integer_type : DOUBLE
 	"""
-	pass
+	t[0] = t[1]
 
 def p_integer_type_list(t):
 	"""
 		integer_type_list :
 		integer_type_list : integer_type_list integer_type
 	"""
-	pass
+	if len(t) > 1:
+		t[0] = t[1] + " " + t[2]
+	else:
+		t[0] = ''
 
 def p_array_opt(t):
 	"""
@@ -433,7 +437,6 @@ def p_array_opt(t):
 		array_opt : array_opt LBRACKET RBRACKET
 		array_opt : array_opt LBRACKET skiplist_all RBRACKET
 	"""
-	t[0] = ''
 
 def p_type_name(t):
 	"""
@@ -737,14 +740,12 @@ def p_method(t):
 	"""
 		method : type name LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = (name, t[1], t[3], t[4])
 	pass
 
 def p_constructor(t):
 	"""
 		method : type LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = ('__new__', t[1], t[3], t[4])
 	pass
 
 def p_operator_function(t):
@@ -897,7 +898,7 @@ def doParse(source, output, macro = [], macrofile = []):
 	lexer.sourcename = source
 	lexer.error = 0
 	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
-	yacc.namespace = []
+	yacc.namespace = [rtti.Container()]
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
@@ -923,19 +924,22 @@ def doParse(source, output, macro = [], macrofile = []):
 		input = open(source, 'r')
 	except IOError,e:
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
-	try:
-		yacc.implementation = open(output, 'w')
-	except IOError,e:
-		raise Exception("cannot open output file %s : %s" % (output, str(e)))
-	yacc.implementation.write("#include <%s>\n" % source)
+
 
 	yacc.parse(input.read(), lexer=lexer, debug=0)
-	yacc.implementation.close()
 	input.close()
-	if lexer.error != 0:
-		os.remove(output)
-	return lexer.error
 
+	if lexer.error != 0:
+		return lexer.error
+
+	try:
+		implementation = open(output, 'w')
+	except IOError,e:
+		raise Exception("cannot open output file %s : %s" % (output, str(e)))
+	implementation.write("#include <%s>\n" % source)
+	yacc.namespace[0].dump(implementation)
+
+	return 0
 
 
 if __name__ == '__main__':
