@@ -270,23 +270,19 @@ def p_namespace_begin(t):
 	"""
 		namespace_begin : NAMESPACE ID LBRACE
 	"""
-	ns = rtti.Namespace(t[2])
-	t.parser.namespace[-1].addObject(ns)
-	t.parser.namespace.append(ns)
+	t.parser.namespace = rtti.Namespace(t.parser.namespace, t[2], t.lineno(1))
 
 def p_namespace_anonymous(t):
 	"""
 		namespace_anonymous : NAMESPACE LBRACE
 	"""
-	ns = rtti.Namespace("")
-	t.parser.namespace[-1].addObject(ns)
-	t.parser.namespace.append(ns)
+	t.parser.namespace = rtti.Namespace(t.parser.namespace, "", t.lineno(1))
 
 def p_namespace_end(t):
 	"""
 		namespace_end : RBRACE
 	"""
-	t.parser.namespace.pop()
+	t.parser.namespace = t.parser.namespace.parent
 
 def p_unused(t):
 	"""
@@ -530,14 +526,12 @@ def p_constant(t):
 		constant : HEX
 		constant : FLOATING
 	"""
-	pass
+	t[0] = t[1]
 
 def p_operator(t):
 	"""
 		operator : NEW
 		operator : DELETE
-		operator : NEW LBRACKET RBRACKET
-		operator : DELETE LBRACKET RBRACKET
 		operator : PLUS
 		operator : MINUS
 		operator : TIMES
@@ -575,7 +569,14 @@ def p_operator(t):
 		operator : COLON
 		operator : ELLIPSIS
 	"""
-	pass
+	t[0] = t[1]
+
+def p_operator_2(t):
+	"""
+		operator : NEW LBRACKET RBRACKET
+		operator : DELETE LBRACKET RBRACKET
+	"""
+	t[0] = t[1] + t[2] + t[3]
 
 ###################################
 # template stuff
@@ -592,7 +593,10 @@ def p_name_opt(t):
 		name_opt :
 		name_opt : name
 	"""
-	pass
+	if len(t) > 1:
+		t[0] = t[1]
+	else:
+		t[0] = ''
 
 def p_pointer_on_member(t):
 	"""
@@ -614,20 +618,39 @@ def p_name(t):
 		name : namelist name_item
 		name : SCOPE namelist name_item
 	"""
+	t[0] = t[1]
+	if len(t) > 2:
+		t[0] += t[2]
+	if len(t) > 3:
+		t[0] += t[3]
 
 def p_name_item(t):
 	"""
 		name_item : ID
+	"""
+	t[0] = t[1]
+
+def p_name_item_2(t):
+	"""
 		name_item : TYPENAME name_item
 		name_item : TEMPLATE name_item
+	"""
+	t[0] = t[1] + " " + t[2]
+
+def p_name_item_3(t):
+	"""
 		name_item : name_item LT skiplist_comma GT
 	"""
+	t[0] = t[1] + t[2] + t[3] + t[4]
 
 def p_namelist(t):
 	"""
 		namelist : name_item SCOPE
 		namelist : namelist name_item SCOPE
 	"""
+	t[0] = t[1] + t[2]
+	if len(t) > 3:
+		t[0] += t[3]
 
 
 ###################################
@@ -679,9 +702,20 @@ def p_struct_or_class(t):
 	"""
 	pass
 
+def p_class_header(t):
+	"""
+		class_header : name_opt parent_opt LBRACE
+	"""
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t.lineno(3))
+
 def p_class(t):
 	"""
-		simple_type :	class name_opt parent_opt LBRACE decls RBRACE
+		simple_type :	class class_header decls RBRACE
+	"""
+	t.parser.namespace = t.parser.namespace.parent
+
+def p_class_decl(t):
+	"""
 		simple_type :	class name
 	"""
 	pass
@@ -822,28 +856,40 @@ def p_keyword(t):
 				| TYPEDEF
 				| THROW
 	"""
-	pass
+	t[0] = t[1]
 
 def p_skiplist_base(t):
 	"""
 		skiplist_base :
+	"""
+	t[0] = ""
+
+def p_skiplist_base_1(t):
+	"""
 		skiplist_base : skiplist_base LBRACE skiplist_all RBRACE
 		skiplist_base : skiplist_base LBRACKET skiplist_all RBRACKET
 		skiplist_base : skiplist_base LPAREN skiplist_all RPAREN
+	"""
+	t[0] = t[1]+t[2]+t[3]+t[4]
+
+def p_skiplist_base_2(t):
+	"""
 		skiplist_base : skiplist_base operator
 		skiplist_base : skiplist_base keyword
 		skiplist_base : skiplist_base constant
 		skiplist_base : skiplist_base ID
 		skiplist_base : skiplist_base SCOPE
 	"""
-	pass
+	t[0] = t[1] + t[2]
 
 def p_skiplist(t):
 	"""
 		skiplist : skiplist_base
 		skiplist : skiplist LT skiplist_comma GT skiplist
 	"""
-	pass
+	t[0] = t[1]
+	if len(t) > 1:
+		t[0] += t[2] + t[3] + t[4] + t[5]
 
 precedence = (
 	('right', 'LT', 'GT'),
@@ -858,14 +904,20 @@ def p_skiplist_with_gt(t):
 		skiplist_gt : skiplist_gt GT skiplist_base
 		skiplist_gt : skiplist_gt LT skiplist_comma GT skiplist_base
 	"""
-	pass
+	t[0] = t[1]
+	if len(t) > 1:
+		t[0] += t[2] + t[3]
+	if len(t) > 3:
+		t[0] += t[4] + t[5]
 
 def p_skiplist_with_comma(t):
 	"""
 		skiplist_comma : skiplist
 		skiplist_comma : skiplist_comma COMMA skiplist
 	"""
-	pass
+	t[0] = t[1]
+	if len(t) > 1:
+		t[0] += t[2] + t[3]
 
 def p_skiplist_all(t):
 	"""
@@ -875,11 +927,13 @@ def p_skiplist_all(t):
 		skiplist_all : skiplist_all GT skiplist_all
 		skiplist_all : skiplist_all SEMI skiplist_base
 	"""
-	pass
+	t[0] = t[1]
+	if len(t) > 2:
+		t[0] += t[2] + t[3]
 
 def p_error(errtoken):
-	errtoken.lexer.error += 1
 	if errtoken:
+		errtoken.lexer.error += 1
 		if hasattr(errtoken,"lineno"): lineno = errtoken.lineno
 		else: lineno = 0
 		if lineno:
@@ -887,7 +941,7 @@ def p_error(errtoken):
 		else:
 			sys.stderr.write("%s: Syntax error, token=%s" % (errortoken.lexer.sourcename, errtoken.type))
 	else:
-		sys.stderr.write("%s: Parse error in input. EOF\n" % (errortoken.lexer.sourcename))
+		sys.stderr.write("Parse error in input. EOF\n")
 
 
 path = os.path.abspath(os.path.split(sys.argv[0])[0])
@@ -898,7 +952,7 @@ def doParse(source, output, macro = [], macrofile = []):
 	lexer.sourcename = source
 	lexer.error = 0
 	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
-	yacc.namespace = [rtti.Container()]
+	yacc.namespace = rtti.Root(source)
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
@@ -936,8 +990,7 @@ def doParse(source, output, macro = [], macrofile = []):
 		implementation = open(output, 'w')
 	except IOError,e:
 		raise Exception("cannot open output file %s : %s" % (output, str(e)))
-	implementation.write("#include <%s>\n" % source)
-	yacc.namespace[0].dump(implementation)
+	yacc.namespace.dump(implementation)
 
 	return 0
 
