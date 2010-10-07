@@ -661,14 +661,17 @@ def p_visibility(t):
 		visibility : PROTECTED
 		visibility : PRIVATE
 	"""
-	pass
+	t[0] =t[1]
 
 def p_visibility_opt(t):
 	"""
 		visibility_opt :
 		visibility_opt : visibility
 	"""
-	pass
+	if len(t) > 1:
+		t[0] = t[1]
+	else:
+		t[0] = ''
 
 def p_declare_visibility(t):
 	"""
@@ -683,14 +686,27 @@ def p_parent_opt(t):
 		parent_opt :
 		parent_opt : COLON visibility_opt name extra_parents
 	"""
-	pass
+	if len(t) > 1:
+		if t[2] == 'public':
+			t[0] = t[3]
+		else:
+			t[0] = t[4]
+	else:
+		t[0] = ''
 
 def p_extra_parents(t):
 	"""
 		extra_parents :
-		extra_parents : extra_parents COMMA visibility_opt name
+		extra_parents : COMMA visibility_opt name extra_parents
 	"""
-	pass
+	if len(t) > 1:
+		if t[2] == 'PUBLIC':
+			t[0] = t[3]
+		else:
+			t[0] = t[4]
+	else:
+		t[0] = ''
+
 
 ###################################
 # class
@@ -706,7 +722,7 @@ def p_class_header(t):
 	"""
 		class_header : name_opt parent_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t.lineno(3))
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3))
 
 def p_class(t):
 	"""
