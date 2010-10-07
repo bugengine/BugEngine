@@ -47,8 +47,7 @@ public:
 template< typename T >
 struct be_typeid
 {
-    static const char *name;
-    static const RTTI::ClassInfo klass;
+    static const RTTI::ClassInfo* const klass;
     inline static RTTI::TypeInfo type()
     {
         return RTTI::TypeInfo(klass);
