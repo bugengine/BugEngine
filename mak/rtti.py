@@ -19,8 +19,7 @@ class Container:
 
 	def dump(self, file, namespace, index):
 		for o in self.objects:
-			o.dump(file, namespace, index)
-			index += 1
+			index = o.dump(file, namespace, index)
 		return index
 
 class Root(Container):
@@ -69,4 +68,4 @@ class Class(Container):
 		file.write("    static const RTTI::ClassInfo s_%sClass = { s_%sName, ::BugEngine::be_typeid<%s>::klass, sizeof(%s), 0, 0, 0, 0, 0, 0, 0, 0 };\n" % (decl, decl, self.inherits, self.fullname))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
-		return index+1
+		return index
