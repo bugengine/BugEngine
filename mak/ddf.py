@@ -591,7 +591,7 @@ def p_template(t):
 def p_name_opt(t):
 	"""
 		name_opt :
-		name_opt : name
+		name_opt : define_name
 	"""
 	if len(t) > 1:
 		t[0] = t[1]
@@ -611,18 +611,60 @@ def p_operator_name(t):
 		operator_name : namelist OPERATOR
 		operator_name : SCOPE namelist OPERATOR
 	"""
+def expandname(name, container):
+	for c in container.objects:
+		if name == c.name:
+			return container.fullname
+	if container.parent:
+		return expandname(name, container.parent)
+	else:
+		return ''
+
+
+def p_define_name(t):
+	"""
+		define_name : name_item
+	"""
+	t[0] = t[1]
+
+def p_define_name_2(t):
+	"""
+		define_name : namelist name_item
+	"""
+	t[0] = t[1] + t[2]
+
+def p_define_name_3(t):
+	"""
+		define_name : SCOPE namelist name_item
+	"""
+	t[0] = t[1] + t[2] + t[3]
 
 def p_name(t):
 	"""
 		name : name_item
+	"""
+	namespace = expandname(t[1], t.parser.namespace)
+	if namespace:
+		t[0] =namespace+'::'+t[1]
+	else:
+		t[0] = t[1]
+
+def p_name_2(t):
+	"""
 		name : namelist name_item
+	"""
+	first = t[1][:t[1].find('::')]
+	namespace = expandname(first, t.parser.namespace)
+	if namespace:
+		t[0] = namespace + '::' + t[1] + t[2]
+	else:
+		t[0] = t[1] + t[2]
+
+def p_name_3(t):
+	"""
 		name : SCOPE namelist name_item
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2]
-	if len(t) > 3:
-		t[0] += t[3]
+	t[0] = t[1] + t[2] + t[3]
 
 def p_name_item(t):
 	"""
