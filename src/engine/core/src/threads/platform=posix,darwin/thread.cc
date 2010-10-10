@@ -60,7 +60,7 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 ,   m_data(new pthread_t)
 {
     pthread_create(reinterpret_cast<pthread_t*>(m_data), 0, &ThreadParams::threadWrapper, m_params);
-    m_id = *reinterpret_cast<pthread_t*>(m_data);
+    m_id = reinterpret_cast<unsigned long>(m_data);
     setPriority(p);
 }
 
@@ -87,13 +87,22 @@ void Thread::resume()
 
 void Thread::sleep(int milliseconds)
 {
+#ifdef BE_PLATFORM_BSD
+    timespec r = { };
+    r.tv_nsec = milliseconds * 1000000;
+    r.tv_sec  = r.tv_nsec / 1000000000;
+    r.tv_nsec = r.tv_nsec % 1000000000;
+    while(nanosleep(&r, &r) == -1)
+        /*again*/;
+#else
     timespec abstime, r;
     clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += milliseconds * 10000000;
-    abstime.tv_sec += abstime.tv_nsec % 1000000000;
+    abstime.tv_nsec += milliseconds * 1000000;
+    abstime.tv_sec += abstime.tv_nsec / 1000000000;
     abstime.tv_nsec = abstime.tv_nsec % 1000000000;
     while(clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &abstime, &r) == -1)
         /*again*/;
+#endif
 }
 
 void Thread::yield()
@@ -114,7 +123,7 @@ unsigned long Thread::id() const
 
 unsigned long Thread::currentId()
 {
-    return pthread_self();
+    return (unsigned long)pthread_self();
 }
 
 const istring& Thread::name()
@@ -131,7 +140,7 @@ void Thread::wait() const
 void Thread::setPriority(Priority p)
 {
     sched_param param;
-#ifdef BE_PLATFORM_SUN
+#if defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_BSD)
     param.sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
 #else
     param.__sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;

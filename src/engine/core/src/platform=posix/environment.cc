@@ -85,16 +85,6 @@ size_t Environment::getProcessorCount() const
     mib[1] = HW_NCPU;
     sysctl(mib, 2, &numCPU, &len, NULL, 0);
 
-    if( numCPU < 1 )
-    {
-         mib[1] = HW_AVAILCPU;
-         sysctl( mib, 2, &numCPU, &len, NULL, 0 );
-
-         if( numCPU < 1 )
-         {
-              numCPU = 1;
-         }
-    }
     return numCPU;
 #endif
 }
