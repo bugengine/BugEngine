@@ -40,6 +40,9 @@ def get_host_gcc(conf):
 	newenv['GCC_VERSION']	= major+'.'+minor+'.'+patch
 	newenv['GCC_TARGET']	= os.uname()[-1]
 	name = 'gcc-freebsd-'+conf.env['GCC_TARGET']+'-'+conf.env['GCC_VERSION']
+	if os.uname()[-1] == 'amd64':
+		newenv['CCFLAGS'] += ['-m64']
+		newenv['CXXFLAGS'] += ['-m64']
 	newenv.set_variant(name)
 	Utils.pprint('NORMAL', 'configure for tool %s' % name)
 	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'freebsd'))
