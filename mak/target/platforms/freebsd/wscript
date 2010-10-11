@@ -45,23 +45,28 @@ def add_freebsd_flags_to_env(conf):
 									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def configure(conf):
-	newenv = conf.set_env_name('temp', conf.env.copy())
-	conf.setenv('temp')
-	try:
-		get_host_gcc(conf)
-		add_gcc_flags_to_env(conf)
-		name = 'gcc-freebsd-'+newenv['GCC_TARGET']+'-'+newenv['GCC_VERSION']
-		newenv.set_variant(name)
-		add_freebsd_flags_to_env(conf)
-		newenv = conf.set_env_name(name, newenv)
-		Utils.pprint('NORMAL', 'configure for tool %s' % name)
-		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_TARGET']))
-		del conf.all_envs['temp']
-		conf.setenv('default')
-		conf.env['BUILD_VARIANTS'].append(name)
-	except Exception, e:
-		warn('gcc not available: '+str(e))
-		conf.setenv('default')
+	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
+		if target.find('freebsd') != -1:
+			newenv = conf.set_env_name('temp', conf.env.copy())
+			conf.setenv('temp')
+			try:
+				if target == '':
+					get_host_gcc(conf)
+				else:
+					pass
+				add_gcc_flags_to_env(conf)
+				name = 'gcc-freebsd-'+newenv['GCC_TARGET']+'-'+newenv['GCC_VERSION']
+				newenv.set_variant(name)
+				add_freebsd_flags_to_env(conf)
+				newenv = conf.set_env_name(name, newenv)
+				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_TARGET']))
+				del conf.all_envs['temp']
+				conf.setenv('default')
+				conf.env['BUILD_VARIANTS'].append(name)
+			except Exception, e:
+				warn('gcc not available: '+str(e))
+				conf.setenv('default')
 
 
 
