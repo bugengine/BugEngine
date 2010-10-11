@@ -113,10 +113,13 @@ struct InterlockedType<8>
     {
         unsigned char result;
         __asm__ __volatile__ (
-                   "lock\n\t cmpxchg16b %1; setz %0\n\t"
+                "\tmov r8,%1\n"
+                "lock\n\tcmpxchg16b (%r8);\n"
+                // " db F0 49 0F C7 08"
+                "\tsetz %0\n"
                  : "=A"(result), "=m"(*p)
-                 : "m"(*p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory"
+                 : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
+                 : "memory", "r8"
         );
         return result;
     }
