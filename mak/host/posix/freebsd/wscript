@@ -1,5 +1,5 @@
-# set FreeBSD specific options
-# detect tools : gcc
+# set win32 specific options
+# detect tools : msvc, mingw
 
 
 import os
@@ -10,53 +10,13 @@ import Logs
 import Options
 from Logs import info,warn
 
-def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
-	newenv = conf.set_env_name('temp', conf.env.copy())
-	newenv['GCC_VERSION']	= version
-	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.setenv('temp')
-	conf.check_tool('cross_gcc cross_gxx cross_gas', tooldir='mak/tools')
-	name = 'gcc-'+conf.env['GCC_CONFIGURED_PLATFORM']+'-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-	newenv.set_variant(name)
-	if conf.env['GCC_CONFIGURED_PLATFORM']=='win32':
-		conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
-		conf.check_tool('winres')
-	Utils.pprint('NORMAL', 'configure for tool %s' % name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', conf.env['GCC_CONFIGURED_PLATFORM']))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
-	newenv = conf.set_env_name(name, newenv)
-	del conf.all_envs['temp']
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
-
-def get_host_gcc(conf):
-	newenv = conf.set_env_name('temp', conf.env.copy())
-	conf.setenv('temp')
-	conf.check_tool('gcc g++')
-	major,minor,patch=conf.env['CC_VERSION']
-
-	newenv['GCC_VERSION']	= major+'.'+minor+'.'+patch
-	newenv['GCC_TARGET']	= os.uname()[-1]
-	name = 'gcc-freebsd-'+conf.env['GCC_TARGET']+'-'+conf.env['GCC_VERSION']
-	if os.uname()[-1] == 'amd64':
-		newenv['CCFLAGS'] += ['-m64']
-		newenv['CXXFLAGS'] += ['-m64']
-	newenv.set_variant(name)
-	Utils.pprint('NORMAL', 'configure for tool %s' % name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'freebsd'))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_TARGET']))
-	newenv = conf.set_env_name(name, newenv)
-	del conf.all_envs['temp']
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
-
-
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
-	paths = ['/', '/usr/', '/usr/local', '/opt']
-	for toolchaindir in paths:
+	toolchaindirs=set([])
+	conf.env['GCC_TARGETS'] = []
+	for dir in os.environ['PATH'].split(':'):
+		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
+	for toolchaindir in toolchaindirs:
 		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
 			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
 				if target in ['.svn', '.cvs']:
@@ -66,22 +26,13 @@ def get_available_gcc(conf):
 						continue
 					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
 						continue
-					name = add_gcc_to_env(conf, version, os.path.join(toolchaindir), target)
+					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
 
 def set_options(opt):
-	Utils.pprint('NORMAL', 'Host system is posix/freebsd')
-	opt.add_option( '--gcc-install-path',
-					action='store',
-					default='',
-					dest='gcc_install_path',
-					help='adds a comma separated list of paths where GCC might be installed')
+	pass
 
 def configure(conf):
+	conf.check_tool("bison flex data", tooldir=['mak/tools'])
 	conf.env['BUILD_VARIANTS'] = []
-	conf.check_tool("bison flex data", tooldir='mak/tools')
 	get_available_gcc(conf)
-	#default GCC for FreeBSD is packaged differently
-	get_host_gcc(conf)
 
-	if len(conf.env['BUILD_VARIANTS']) == 0:
-		raise SystemExit("no match found : make sure you selected a valid toolchain")

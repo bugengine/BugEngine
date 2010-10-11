@@ -1,30 +1,69 @@
-# set win32 specific options
+# set linux specific options
 
 import os
 import Utils
+from Logs import info,warn
+
 
 def set_options(opt):
 	pass
 
-def configure(conf):
+def get_host_gcc(conf):
+	conf.check_tool('gcc g++')
+	major,minor,patch=conf.env['CC_VERSION']
+
+	conf.env['GCC_VERSION']	= major+'.'+minor+'.'+patch
+	conf.env['GCC_TARGET']	= os.uname()[-1]
+	if os.uname()[-1] == 'amd64':
+		conf.env['CCFLAGS'] += ['-m64']
+		conf.env['CXXFLAGS'] += ['-m64']
+
+
+def add_gcc_flags_to_env(conf):
+	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-Wl,-E'])
+	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+
+def add_freebsd_flags_to_env(conf):
 	conf.env['PLATFORM'] = 'freebsd'
-	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']	= '%s.so'
+	conf.env['library_PATTERN'] = 'lib%s.a'
+	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
-	
+
 	conf.env.append_unique('CCDEFINES', ['FREEBSD', '_FREEBSD', '_FREEBSD_', '__FREEBSD__'])
 	conf.env.append_unique('CXXDEFINES', ['FREEBSD', '_FREEBSD', '_FREEBSD_', '__FREEBSD__'])
 	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
-									'runbin':	'bin',
+									'runbin':	'lib',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
-									'plugin':	os.path.join('data', 'plugins') }
-									
+									'data':		os.path.join('share', 'bugengine'),
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
+
+def configure(conf):
+	newenv = conf.set_env_name('temp', conf.env.copy())
+	conf.setenv('temp')
+	try:
+		get_host_gcc(conf)
+		add_gcc_flags_to_env(conf)
+		name = 'gcc-freebsd-'+newenv['GCC_TARGET']+'-'+newenv['GCC_VERSION']
+		newenv.set_variant(name)
+		add_freebsd_flags_to_env(conf)
+		newenv = conf.set_env_name(name, newenv)
+		Utils.pprint('NORMAL', 'configure for tool %s' % name)
+		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_TARGET']))
+		del conf.all_envs['temp']
+		conf.setenv('default')
+		conf.env['BUILD_VARIANTS'].append(name)
+	except Exception, e:
+		warn('gcc not available: '+str(e))
+		conf.setenv('default')
+
+
 
 def build(bld):
 	pass
-
