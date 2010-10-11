@@ -35,4 +35,5 @@ def configure(conf):
 	conf.check_tool("bison flex data", tooldir=['mak/tools'])
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
+	conf.env['GCC_TARGETS'].append(('freebsd', '', ''))
 
