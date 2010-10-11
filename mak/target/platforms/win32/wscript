@@ -19,7 +19,7 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 	newenv['MSVC_TARGETS'] = [target]
 	conf.setenv(name)
 	conf.check_tool('msvc')
-	
+
 	conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	conf.env['LINKFLAGS_debug'] = ['/DEBUG']
@@ -72,6 +72,9 @@ def add_win32_flags_to_env(conf):
 
 	conf.env.append_unique('CCDEFINES', ['WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
 	conf.env.append_unique('CXXDEFINES', ['WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
+	if conf.env['GCC_CONFIGURED_ARCH'] == 'amd64':
+		conf.env.append_unique('CCDEFINES', ['_WIN64'])
+		conf.env.append_unique('CXXDEFINES', ['_WIN64'])
 	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'',
@@ -105,7 +108,7 @@ def configure(conf):
 				conf.setenv('default')
 				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception, e:
-				warn('gcc not available: '+str(e)) 
+				warn('gcc not available: '+str(e))
 				conf.setenv('default')
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
@@ -113,7 +116,7 @@ def configure(conf):
 				add_msvc_to_env(conf, compiler, version, target, platform, tname)
 				add_win32_flags_to_env(conf)
 			except Exception, e:
-				warn('msvc not available: '+str(e)) 
+				warn('msvc not available: '+str(e))
 				conf.setenv('default')
 
 

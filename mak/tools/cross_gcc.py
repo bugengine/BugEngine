@@ -25,7 +25,8 @@ def get_native_gcc_target(conf):
 				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
 
 def parse_gcc_target(target):
-	archs = [ ('i386', 'x86'),
+	archs = [ ('i686-w64', 'amd64'),
+			  ('i386', 'x86'),
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
 			  ('i686', 'x86'),
