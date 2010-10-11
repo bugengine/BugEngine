@@ -46,7 +46,7 @@ def configure(conf):
 	conf.env['OPTIMS']		  = mak.alloptims
 
 	conf.sub_config(os.path.join('host', os.name))
-	for p in ['win32', 'linux', 'sunos']:
+	for p in ['win32', 'linux', 'sunos', 'freebsd']:
 		conf.sub_config(os.path.join('target', 'platforms', p))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
@@ -156,8 +156,11 @@ def add_extra_libs(self):
 	for lib in getattr(self,'extralibs',[]):
 		env.append_value('LIB', lib)
 	for libpath in getattr(self,'extralibdirs',[]):
-		libpath = self.path.find_dir(libpath)
-		if not libpath.srcpath(self.env) in env['LIBPATH']: env.append_value('LIBPATH', libpath.srcpath(self.env))
+		libpathnode = self.path.find_dir(libpath)
+		if libpathnode:
+			if not libpathnode.srcpath(self.env) in env['LIBPATH']: env.append_value('LIBPATH', libpathnode.srcpath(self.env))
+		else:
+			env.append_value('LIBPATH', libpath)
 
 @taskgen
 @feature('cobjects')
