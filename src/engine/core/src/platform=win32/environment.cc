@@ -30,7 +30,7 @@ Environment::~Environment()
 {
 }
 
-void Environment::init(int argc, const char *argv[])
+void Environment::init(int /*argc*/, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;

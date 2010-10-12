@@ -12,14 +12,14 @@ namespace BugEngine
 class Value
 {
 private:
-    char            m_buffer[32];
-    RTTI::TypeInfo  m_type;
+    char                m_buffer[32];
+    RTTI::ClassInfo     m_type;
 public:
     template< typename T >
     explicit inline Value(const T& t);
     inline ~Value();
 
-    inline const RTTI::TypeInfo& type() const;
+    inline const RTTI::ClassInfo& type() const;
 
     template< typename T >
     inline const T& as() const;

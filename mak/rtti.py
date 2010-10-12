@@ -41,6 +41,10 @@ class Root(Container):
 		file.write("}\n")
 		return index
 
+class Typedef(Container):
+	def __init__(self, parent, name, line):
+		Container.__init__(self, parent, name, line)
+
 class Namespace(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line)

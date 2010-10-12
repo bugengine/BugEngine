@@ -24,7 +24,7 @@ static typename iterator_traits<ITERATOR>::difference_type distance(const ITERAT
 }
 
 template< typename ITERATOR >
-static typename iterator_traits<ITERATOR>::difference_type distance(const ITERATOR& t1, const ITERATOR& t2, random_access_iterator_tag type)
+static typename iterator_traits<ITERATOR>::difference_type distance(const ITERATOR& t1, const ITERATOR& t2, random_access_iterator_tag /*type*/)
 {
     return t2 - t1;
 }
@@ -32,7 +32,7 @@ static typename iterator_traits<ITERATOR>::difference_type distance(const ITERAT
 }
 
 template< typename ITERATOR >
-typename iterator_traits<ITERATOR>::iterator_category   iterator_category(const ITERATOR& it)
+typename iterator_traits<ITERATOR>::iterator_category   iterator_category(const ITERATOR& /*it*/)
 {
     return typename iterator_traits<ITERATOR>::iterator_category();
 }

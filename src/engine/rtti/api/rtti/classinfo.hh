@@ -4,7 +4,6 @@
 #ifndef BE_RTTI_CLASSINFO_HH_
 #define BE_RTTI_CLASSINFO_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace RTTI
 {

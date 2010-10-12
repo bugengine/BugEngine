@@ -35,14 +35,14 @@ intrusive_list<T, INDEX>::item::item()
 }
 
 template< typename T, int INDEX >
-intrusive_list<T, INDEX>::item::item(const item& other)
+intrusive_list<T, INDEX>::item::item(const item& /*other*/)
 :   m_next(static_cast<T*>(this))
 ,   m_previous(static_cast<T*>(this))
 {
 }
 
 template< typename T, int INDEX >
-typename intrusive_list<T, INDEX>::item& intrusive_list<T, INDEX>::item::operator=(const item& other)
+typename intrusive_list<T, INDEX>::item& intrusive_list<T, INDEX>::item::operator=(const item& /*other*/)
 {
     return *this;
 }

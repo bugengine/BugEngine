@@ -64,8 +64,8 @@ MemoryStream<ARENA>::MemoryStream()
 
 template< int ARENA >
 MemoryStream<ARENA>::MemoryStream(i64 size)
-:   m_memory(size)
-,   m_size(size)
+:   m_memory((size_t)size)
+,   m_size((size_t)size)
 ,   m_offset(0)
 {
 }
@@ -117,7 +117,7 @@ void MemoryStream<ARENA>::seek(SeekMethod method, i64 offset)
 template< int ARENA >
 void MemoryStream<ARENA>::resize(i64 size)
 {
-    m_memory.realloc(size);
+    m_memory.realloc((size_t)size);
 }
 
 template< int ARENA >

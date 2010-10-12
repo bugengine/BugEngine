@@ -11,8 +11,8 @@ namespace BugEngine { namespace RTTI
 
 struct PropertyInfo
 {
-    const char *const           name;
-    const TypeInfo              type;
+    const char *        name;
+    ClassInfo const*    type;
 };
 
 }}
