@@ -11,7 +11,7 @@ parser.set_usage('ddf.py [options] file1 [file2... fileN]')
 parser.add_option("-o", "--output", dest="folder", help="Places the output into <folder>", default='')
 parser.add_option("--cpp", dest="cpp", help="extension used for source implementation", default='.cc')
 parser.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
-parser.add_option("-D", dest="macrofile", action="append", help="add teh content of <macrofile> to the macros, one macro per line")
+parser.add_option("-D", dest="macrofile", action="append", help="add the content of <macrofile> to the macros, one macro per line")
 
 
 # Reserved words
@@ -483,7 +483,7 @@ def p_typedef(t):
 		decl : TYPEDEF type ID
 		decl : TYPEDEF function_pointer_with_name
 	"""
-	pass
+	rtti.Typedef(t.parser.namespace, t[3], t.lineno(1))
 
 
 def p_modifier_left(t):
@@ -776,7 +776,8 @@ def p_class_decl(t):
 	"""
 		simple_type :	class name
 	"""
-	pass
+	rtti.Typedef(t.parser.namespace, t[2], t.lineno(2))
+
 
 def p_enum_values(t):
 	"""

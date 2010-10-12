@@ -12,23 +12,23 @@ namespace BugEngine { namespace RTTI
 
 struct ParamInfo
 {
-    const char *const   name;
-    const TypeInfo      type;
+    const char *        name;
+    const ClassInfo*    type;
 };
 
 struct OverloadInfo
 {
-    const TypeInfo      returntype;
-    const size_t        paramCount;
+    const ClassInfo*    returntype;
+    size_t              paramCount;
     const ParamInfo*    parameters;
-    Value               (*method)(Value* values, size_t params);
+    Value               (*method)(Value* params, size_t paramCount);
 };
 
 struct MethodInfo
 {
-    const char *const           name;
-    const size_t                overloadCount;
-    const OverloadInfo* const   overloads;
+    const char *        name;
+    size_t              overloadCount;
+    const OverloadInfo* overloads;
 };
 
 }}
