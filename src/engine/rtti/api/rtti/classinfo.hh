@@ -13,17 +13,11 @@ struct MethodInfo;
 
 struct ClassInfo
 {
-    const char *        name;
-    const ClassInfo*    parent;
-    size_t              size;
-    size_t              propertyCount;
-    const PropertyInfo* properties;
-    size_t              methodCount;
-    MethodInfo*         methods;
-    size_t              constructorCount;
-    MethodInfo*         constructors;
-    MethodInfo*         destructor;
-    MethodInfo*         copy;
+    const char *            name;
+    raw<const ClassInfo>    parent;
+    raw<const ClassInfo>    metaclass;
+    size_t                  size;
+
 };
 
 }}

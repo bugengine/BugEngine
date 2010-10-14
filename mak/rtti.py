@@ -69,7 +69,7 @@ class Class(Container):
 		file.write("#line %d\n" % (self.line))
 		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
 		file.write("#line %d\n" % (self.line))
-		file.write("    static const RTTI::ClassInfo s_%sClass = { s_%sName, ::BugEngine::be_typeid<%s>::klass, sizeof(%s), 0, 0, 0, 0, 0, 0, 0, 0 };\n" % (decl, decl, self.inherits, self.fullname))
+		file.write("    static const RTTI::ClassInfo s_%sClass = { s_%sName, ::BugEngine::be_typeid<%s>::klass, 0, sizeof(%s) };\n" % (decl, decl, self.inherits, self.fullname))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
