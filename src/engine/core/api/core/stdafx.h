@@ -89,12 +89,14 @@ T be_align(T value, size_t alignment)
 #include    <maths/float.hh>
 
 #include    <minitl/ptr/refcountable.hh>
+#include    <minitl/ptr/rawptr.hh>
 #include    <minitl/ptr/scopedptr.hh>
 #include    <minitl/ptr/refptr.hh>
 #include    <minitl/ptr/weakptr.hh>
 #include    <minitl/type/cast.hh>
 #include    <core/endianness.hh>
 
+using minitl::raw;
 using minitl::ref;
 using minitl::weak;
 using minitl::scoped;
