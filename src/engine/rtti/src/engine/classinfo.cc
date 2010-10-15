@@ -2,8 +2,7 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
-#include    <rtti/classinfo.hh>
-#include    <rtti/propertyinfo.hh>
+#include    <rtti/engine/classinfo.script.hh>
 
 namespace BugEngine { namespace RTTI
 {

@@ -3,7 +3,7 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
-#include    <rtti/classinfo.hh>
+#include    <rtti/engine/classinfo.script.hh>
 
 namespace BugEngine
 {
