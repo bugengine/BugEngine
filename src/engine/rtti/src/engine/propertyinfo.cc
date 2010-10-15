@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
-#include    <rtti/methodinfo.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-}
+}}

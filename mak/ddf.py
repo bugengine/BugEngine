@@ -510,6 +510,7 @@ def p_decl(t):
 		decl : SEMI
 		decl : type array_opt SEMI
 		decl : type name array_opt param_value_opt field_length_opt SEMI
+		decl : function_pointer_with_name SEMI
 	"""
 	pass
 
@@ -947,7 +948,7 @@ def p_skiplist(t):
 		skiplist : skiplist LT skiplist_comma GT skiplist
 	"""
 	t[0] = t[1]
-	if len(t) > 1:
+	if len(t) > 2:
 		t[0] += t[2] + t[3] + t[4] + t[5]
 
 precedence = (
@@ -964,9 +965,9 @@ def p_skiplist_with_gt(t):
 		skiplist_gt : skiplist_gt LT skiplist_comma GT skiplist_base
 	"""
 	t[0] = t[1]
-	if len(t) > 1:
+	if len(t) > 2:
 		t[0] += t[2] + t[3]
-	if len(t) > 3:
+	if len(t) > 4:
 		t[0] += t[4] + t[5]
 
 def p_skiplist_with_comma(t):
@@ -975,7 +976,7 @@ def p_skiplist_with_comma(t):
 		skiplist_comma : skiplist_comma COMMA skiplist
 	"""
 	t[0] = t[1]
-	if len(t) > 1:
+	if len(t) > 2:
 		t[0] += t[2] + t[3]
 
 def p_skiplist_all(t):

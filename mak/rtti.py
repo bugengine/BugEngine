@@ -28,10 +28,13 @@ class Root(Container):
 		self.source = source
 
 	def dump(self, file, namespace = '', index = 0):
-		file.write("#include    <%s>\n" % self.source)
 		file.write("#include    <rtti/stdafx.h>\n")
+		file.write("#include    <%s>\n" % self.source)
 		file.write("#include    <rtti/typeinfo.hh>\n")
-		file.write("#include    <rtti/classinfo.hh>\n")
+		file.write("#include    <rtti/engine/classinfo.script.hh>\n")
+		file.write("#include    <rtti/engine/methodinfo.script.hh>\n")
+		file.write("#include    <rtti/engine/propertyinfo.script.hh>\n")
+		file.write("#include    <rtti/engine/enuminfo.script.hh>\n")
 		file.write("\n")
 		file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
 		index = Container.dump(self, file, namespace, index)

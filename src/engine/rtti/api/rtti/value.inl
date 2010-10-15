@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include   <rtti/value.hh>
 #include   <rtti/typeinfo.hh>
-#include   <rtti/propertyinfo.hh>
 
 namespace BugEngine
 {
