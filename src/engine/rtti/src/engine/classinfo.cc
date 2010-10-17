@@ -7,4 +7,13 @@
 namespace BugEngine { namespace RTTI
 {
 
+void ClassInfo::copy(const void *src, void* dst) const
+{
+    memcpy(dst, src, size);
+}
+
+void ClassInfo::destroy(void*) const
+{
+}
+
 }}

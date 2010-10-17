@@ -12,11 +12,7 @@ namespace BugEngine
 template< typename T >
 struct be_typeid
 {
-    static const RTTI::ClassInfo* const klass;
-    inline static RTTI::ClassInfo type()
-    {
-        return *klass;
-    }
+    static const RTTI::ClassInfo* const type;
 };
 
 }

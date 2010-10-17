@@ -243,12 +243,6 @@ def p_decl_template(t):
 	"""
 	pass
 
-def p_decl_modifier(t):
-	"""
-		decl : modifier_left decl
-	"""
-	pass
-
 def p_using(t):
 	"""
 		decl : USING name SEMI
@@ -318,16 +312,19 @@ def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
 	"""
+	t[0] = (t[1]+t[3], t[2])
 
 def p_function_param(t):
 	"""
 		param : function_pointer_with_name param_value_opt
 	"""
+	t[0] = t[1]
 
 def p_param_ellipsis(t):
 	"""
 		param : ELLIPSIS
 	"""
+	t[0] = ('...','')
 
 def p_template_param(t):
 	"""
@@ -389,14 +386,17 @@ def p_type_modifier(t):
 		type_modifier : CONST
 		type_modifier : VOLATILE
 	"""
-	pass
+	t[0] = t[1]
 
 def p_type_modifier_list(t):
 	"""
 		type_modifier_list :
 		type_modifier_list : type_modifier_list type_modifier
 	"""
-	pass
+	if len(t) > 1:
+		t[0] = t[1] + " " + t[2]
+	else:
+		t[0] = ''
 
 def p_integer_type(t):
 	"""
@@ -430,51 +430,81 @@ def p_integer_type_list(t):
 def p_array_opt(t):
 	"""
 		array_opt :
+	"""
+	t[0] = ""
+
+def p_array_opt_2(t):
+	"""
 		array_opt : array_opt LBRACKET RBRACKET
 		array_opt : array_opt LBRACKET skiplist_all RBRACKET
 	"""
+	t[0] = " ".join(t[1:])
 
 def p_type_name(t):
 	"""
 		simple_type : name
 	"""
-	pass
+	t[0] = t[1]
 
 def p_type_const(t):
 	"""
 		simple_type : type_modifier simple_type
 	"""
-	pass
+	t[0] = t[1] + " " + t[2]
 
 def p_complex_type(t):
 	"""
 		type : simple_type type_modifier_list
+	"""
+	if t[2]:
+		t[0] = t[1] + " " + t[2]
+	else:
+		t[0] = t[1]
+
+def p_complex_type_2(t):
+	"""
 		type : type TIMES type_modifier_list
 		type : type AND type_modifier_list
 	"""
-	pass
+	t[0] = t[1] + " " + t[2] + " " + t[3]
 
 ###################################
 # function pointers
+def typeList(params):
+	if len(params) == 1:
+		if params[0][0] == 'void':
+			return ""
+		else:
+			return params[0][0]
+	result = params[0][0]
+	for type,name in params[1:]:
+		result = result + ', ' + type
+		return result
+
 def p_function_pointer_name(t):
 	"""
-		function_pointer_with_name : type LPAREN RPAREN LPAREN params_list RPAREN
 		function_pointer_with_name : type LPAREN ID RPAREN LPAREN params_list RPAREN
+	"""
+	t[0] = (t[1] + t[2] + t[4] + t[5] + typeList(t[6]) + t[7], t[3])
+
+def p_function_pointer_name_2(t):
+	"""
 		function_pointer_with_name : type LPAREN pointer_on_member ID RPAREN LPAREN params_list RPAREN
 	"""
-	pass
+	t[0] = (t[1] + t[2] + t[3] + t[5] + t[6] + typeList(t[7]) + t[8], t[4])
 
 def p_function_pointer_no_name(t):
 	"""
+		function_pointer_with_name : type LPAREN RPAREN LPAREN params_list RPAREN
 		function_pointer_without_name : type LPAREN pointer_on_member RPAREN LPAREN params_list RPAREN
 	"""
-	pass
+	t[0] = " ".join(t[1:])
 
 def p_function_pointer_type(t):
 	"""
 		type : function_pointer_without_name
 	"""
-	pass
+	t[0] = t[1]
 
 ###################################
 # decls
@@ -497,7 +527,19 @@ def p_modifier_left(t):
 		modifier_left : EXTERN
 		modifier_left : EXTERN STRING
 	"""
-	pass
+	t[0] = t[1]
+
+def p_modifier_list(t):
+	"""
+		modifier_list : modifier_left
+	"""
+	t[0] = [t[1]]
+
+def p_modifier_list_2(t):
+	"""
+		modifier_list : modifier_list modifier_left
+	"""
+	t[0] = t[1] + [t[2]]
 
 def p_field_length_opt(t):
 	"""
@@ -509,10 +551,25 @@ def p_decl(t):
 	"""
 		decl : SEMI
 		decl : type array_opt SEMI
-		decl : type name array_opt param_value_opt field_length_opt SEMI
+		decl : modifier_list type array_opt SEMI
 		decl : function_pointer_with_name SEMI
+		decl : modifier_list function_pointer_with_name SEMI
 	"""
-	pass
+def p_variable_decl(t):
+	"""
+		decl : type name array_opt param_value_opt field_length_opt SEMI
+	"""
+	t.parser.namespace.addMember(t[1]+t[3], t[2])
+
+def p_variable_decl_2(t):
+	"""
+		decl : modifier_list type name array_opt param_value_opt field_length_opt SEMI
+	"""
+	if 'static' in t[1]:
+		pass
+		#t.parser.namespace.meta.addMember(t[1]+t[3], t[2])
+	else:
+		t.parser.namespace.addMember(t[1]+t[3], t[2])
 
 ###################################
 # Value
@@ -605,6 +662,7 @@ def p_pointer_on_member(t):
 		pointer_on_member : namelist TIMES
 		pointer_on_member : SCOPE namelist TIMES
 	"""
+	t[0] = " ".join(t[1:])
 
 def p_operator_name(t):
 	"""
@@ -612,6 +670,7 @@ def p_operator_name(t):
 		operator_name : namelist OPERATOR
 		operator_name : SCOPE namelist OPERATOR
 	"""
+	
 def expandname(name, container):
 	for c in container.objects:
 		if name == c.name:
@@ -684,7 +743,7 @@ def p_name_item_3(t):
 	"""
 		name_item : name_item LT skiplist_comma GT
 	"""
-	t[0] = t[1] + t[2] + t[3] + t[4]
+	t[0] = t[1] + t[2] + " " + t[3] + " " + t[4]
 
 def p_namelist(t):
 	"""
@@ -771,13 +830,14 @@ def p_class(t):
 	"""
 		simple_type :	class class_header decls RBRACE
 	"""
+	t[0] = t.parser.namespace.fullname
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_decl(t):
 	"""
 		simple_type :	class name
 	"""
-	rtti.Typedef(t.parser.namespace, t[2], t.lineno(2))
+	t[0] = rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname
 
 
 def p_enum_values(t):
@@ -794,11 +854,18 @@ def p_enum_value(t):
 	"""
 	pass
 
+def p_enum_header(t):
+	"""
+		enum_header :	ENUM name_opt LBRACE
+	"""
+	t.parser.namespace = rtti.Enum(t.parser.namespace, t[2], t.lineno(3))
+	
 def p_enum(t):
 	"""
-		simple_type :	ENUM name_opt LBRACE enum_values RBRACE
+		simple_type :	enum_header enum_values RBRACE
 	"""
-	pass
+	t[0] = t.parser.namespace.fullname
+	t.parser.namespace = t.parser.namespace.parent
 
 ###################################
 # method
@@ -813,7 +880,7 @@ def p_method_modifier_right(t):
 	"""
 	if len(t) > 1:
 		t[0] = t[1]
-		t[0].insert(t[2])
+		t[0].add(t[2])
 	else:
 		t[0] = set()
 
@@ -822,7 +889,7 @@ def p_method_pure_virtual(t):
 		method_modifier_right : method_modifier_right EQUALS DECIMAL
 	"""
 	t[0] = t[1]
-	t[0].insert('PUREVIRTUAL')
+	t[0].add('PUREVIRTUAL')
 
 def p_method_throws(t):
 	"""
@@ -930,7 +997,7 @@ def p_skiplist_base_1(t):
 		skiplist_base : skiplist_base LBRACKET skiplist_all RBRACKET
 		skiplist_base : skiplist_base LPAREN skiplist_all RPAREN
 	"""
-	t[0] = t[1]+t[2]+t[3]+t[4]
+	t[0] = " ".join(t[1:])
 
 def p_skiplist_base_2(t):
 	"""
@@ -940,16 +1007,14 @@ def p_skiplist_base_2(t):
 		skiplist_base : skiplist_base ID
 		skiplist_base : skiplist_base SCOPE
 	"""
-	t[0] = t[1] + t[2]
+	t[0] = " ".join(t[1:])
 
 def p_skiplist(t):
 	"""
 		skiplist : skiplist_base
 		skiplist : skiplist LT skiplist_comma GT skiplist
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2] + t[3] + t[4] + t[5]
+	t[0] = " ".join(t[1:])
 
 precedence = (
 	('right', 'LT', 'GT'),
@@ -964,20 +1029,14 @@ def p_skiplist_with_gt(t):
 		skiplist_gt : skiplist_gt GT skiplist_base
 		skiplist_gt : skiplist_gt LT skiplist_comma GT skiplist_base
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2] + t[3]
-	if len(t) > 4:
-		t[0] += t[4] + t[5]
+	t[0] = " ".join(t[1:])
 
 def p_skiplist_with_comma(t):
 	"""
 		skiplist_comma : skiplist
 		skiplist_comma : skiplist_comma COMMA skiplist
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2] + t[3]
+	t[0] = " ".join(t[1:])
 
 def p_skiplist_all(t):
 	"""
@@ -987,9 +1046,7 @@ def p_skiplist_all(t):
 		skiplist_all : skiplist_all GT skiplist_all
 		skiplist_all : skiplist_all SEMI skiplist_base
 	"""
-	t[0] = t[1]
-	if len(t) > 2:
-		t[0] += t[2] + t[3]
+	t[0] = " ".join(t[1:])
 
 def p_error(errtoken):
 	if errtoken:
@@ -1004,14 +1061,13 @@ def p_error(errtoken):
 		sys.stderr.write("Parse error in input. EOF\n")
 
 
-path = os.path.abspath(os.path.split(sys.argv[0])[0])
 
-def doParse(source, output, macro = [], macrofile = []):
+def doParse(source, output, temppath, macro = [], macrofile = []):
 	lexer = ply.lex.lex()
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
-	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(path, 'parser.out'), tabmodule=os.path.join(path, 'parsetab'), picklefile=sys.argv[0]+'c')
+	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(temppath, 'parser.out'), tabmodule=os.path.join(temppath, 'parsetab'), picklefile=sys.argv[0]+'c')
 	yacc.namespace = rtti.Root(source)
 
 	lexer.macro_map = dict(global_macro_map)
@@ -1072,7 +1128,8 @@ if __name__ == '__main__':
 		if os.path.normpath(outputname) == os.path.normpath(sourcename):
 			raise Exception("source file and target file are the same: %s" % outputname)
 
-		if doParse(sourcename, outputname, options.macro, options.macrofile) > 0:
+		path = os.path.abspath(os.path.split(sys.argv[0])[0])
+		if doParse(sourcename, outputname, path, options.macro, options.macrofile) > 0:
 			exit(1)
 	exit(0)
 
