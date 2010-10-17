@@ -11,16 +11,47 @@ namespace BugEngine
 {
 
 template< typename T >
-Value::Value(const T& /*t*/)
-//:   m_type(be_typeid<T>::type())
+Value::Value(const T& t)
+:   m_type(be_typeid<T>::type())
+,   m_pointer(m_type->size > sizeof(m_buffer) ? Memory<Arena::General>::alloc(m_type->size) : 0)
+,   m_deallocate(m_pointer != 0)
+{
+    m_type->copy(&t, memory());
+}
+
+template< typename T >
+Value::Value(const T& t, AsRefType)
+:   m_type(be_typeid<T>::type())
+,   m_pointer(&t)
+,   m_deallocate(0)
+{
+}
+
+Value::Value(const Value& other)
+:   m_type(other.m_type)
+,   m_pointer(m_type->size > sizeof(m_buffer) ? Memory<Arena::General>::alloc(m_type->size) : 0)
+,   m_deallocate(m_pointer != 0)
+{
+    m_type->copy(other.memory(), memory());
+}
+
+Value::Value(Value& other, AsRefType)
+:   m_type(other.m_type)
+,   m_pointer(other.memory())
+,   m_deallocate(0)
 {
 }
 
 Value::~Value()
 {
+    m_type->destroy(memory());
+    if(m_type->size > sizeof(m_buffer) && m_deallocate)
+    {
+        Memory<Arena::General>::free(m_pointer);
+    }
 }
 
-const RTTI::ClassInfo& Value::type() const
+raw<const RTTI::ClassInfo> Value::type() const
 {
     return m_type;
 }
@@ -28,8 +59,47 @@ const RTTI::ClassInfo& Value::type() const
 template< typename T >
 const T& Value::as() const
 {
-    //be_assert(be_typeid<T>::type() == m_type, "Value has type %s; unable to unbox to type %s" | m_type->name | be_typeid<T>()->name);
-    return *(const T*)0;
+    be_assert(be_typeid<T>::type == m_type, "Value has type %s; unable to unbox to type %s" | m_type->name | be_typeid<T>::type->name);
+    return *(const T*)memory();
+}
+
+template< typename T >
+T& Value::as()
+{
+    be_assert(be_typeid<T>::type == m_type, "Value has type %s; unable to unbox to type %s" | m_type->name | be_typeid<T>::type->name);
+    return *(T*)memory();
+}
+
+void* Value::memory()
+{
+    if(m_type->size <= sizeof(m_buffer))
+    {
+        return m_buffer;
+    }
+    else
+    {
+        return m_pointer;
+    }
+}
+
+const void* Value::memory() const
+{
+    if(m_type->size <= sizeof(m_buffer))
+    {
+        return m_buffer;
+    }
+    else
+    {
+        return m_pointer;
+    }
+}
+
+Value& Value::operator=(const Value& other)
+{
+    be_assert(m_type == other.m_type, "Value has type %s; unable to copy from type %s" | m_type->name | other.m_type->name);
+    m_type->destroy(memory());
+    m_type->copy(other.memory(), memory());
+    return *this;
 }
 
 }
