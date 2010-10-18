@@ -5,6 +5,7 @@ import Task
 from TaskGen import extension
 import mak.ddf
 import os
+import sys
 
 path = os.path.abspath(os.path.split(sys.argv[0])[0])
 
