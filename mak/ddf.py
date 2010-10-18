@@ -60,7 +60,7 @@ tokens = reserved + (
 )
 
 # Completely ignored characters
-t_ignore           = ' \t\x0c'
+t_ignore           = ' \t\x0c\r'
 
 # Newlines
 def t_NEWLINE(t):
