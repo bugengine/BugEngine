@@ -12,7 +12,7 @@ namespace BugEngine
 class Value
 {
 private:
-    raw<const RTTI::ClassInfo> const    m_type;
+    TypeInfo    m_type;
     union
     {
         char                            m_buffer[32];
@@ -26,14 +26,11 @@ private:
     inline void* memory();
     inline const void* memory() const;
 public:
-    enum AsRefType { AsRef };
-    template< typename T > explicit inline Value(const T& t);
-    template< typename T > explicit inline Value(const T& t, AsRefType asref);
+    template< typename T > explicit inline Value(T t);
     inline Value(const Value& other);
-    inline Value(Value& other, AsRefType asref);
     inline ~Value();
 
-    inline raw<const RTTI::ClassInfo> type() const;
+    inline TypeInfo type() const;
 
     template< typename T > inline const T& as() const;
     template< typename T > inline T& as();

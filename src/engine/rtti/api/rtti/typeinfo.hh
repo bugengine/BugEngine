@@ -4,7 +4,7 @@
 #ifndef BE_RTTI_TYPEINFO_HH_
 #define BE_RTTI_TYPEINFO_HH_
 /*****************************************************************************/
-#include    <rtti/engine/classinfo.script.hh>
+#include    <rtti/typeinfo.script.hh>
 
 namespace BugEngine
 {
@@ -12,7 +12,11 @@ namespace BugEngine
 template< typename T >
 struct be_typeid
 {
-    static const RTTI::ClassInfo* const type;
+    static const RTTI::ClassInfo* const klass;
+    static const TypeInfo type()
+    {
+        return { klass, TypeInfo::Class, TypeInfo::Mutable };
+    }
 };
 
 }

@@ -20,12 +20,12 @@ struct ClassInfo
 {
     friend class Value;
 public:
-    const char *            name;
+    raw<const char>         name;
     raw<const ClassInfo>    parent;
     raw<const ClassInfo>    metaclass;
     size_t                  size;
     size_t                  propertyCount;
-    PropertyInfo const *    properties;
+    raw<PropertyInfo const> properties;
 private:
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

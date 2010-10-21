@@ -4,15 +4,15 @@
 #ifndef BE_RTTI_ENGINE_PROPERTYINFO_SCRIPT_HH_
 #define BE_RTTI_ENGINE_PROPERTYINFO_SCRIPT_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.hh>
+#include   <rtti/typeinfo.script.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
 struct PropertyInfo
 {
-    const char *            name;
-    raw<const ClassInfo>    type;
+    raw<const char>         name;
+    TypeInfo                type;
     size_t                  offset;
 };
 
