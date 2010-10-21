@@ -69,6 +69,15 @@ class Enum(Container):
 		Container.__init__(self, parent, name, line)
 
 	def dump(self, file, namespace, index):
+		file.write("")
+		decl = "class%d" % index
+		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
+		file.write("#line %d\n" % (self.line))
+		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
+		file.write("#line %d\n" % (self.line))
+		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< void >::klass }, { 0 }, sizeof(%s), 0, { 0 } };\n" % (decl, decl, self.fullname))
+		index = Container.dump(self, file, namespace, index+1)
+		self.parent.classes += self.classes
 		return index
 
 class Class(Container):
