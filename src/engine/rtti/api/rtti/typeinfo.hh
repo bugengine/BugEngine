@@ -15,7 +15,8 @@ struct be_typeid
     static const RTTI::ClassInfo* const klass;
     static const TypeInfo type()
     {
-        return { klass, TypeInfo::Class, TypeInfo::Mutable };
+        TypeInfo i = { klass, TypeInfo::Class, TypeInfo::Mutable };
+        return i;
     }
 };
 
