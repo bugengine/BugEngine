@@ -13,7 +13,7 @@ namespace Builtin
     static const char *const s_voidName = "void";
     static const RTTI::ClassInfo s_voidClass =  { s_voidName, &s_voidClass, 0, 0 };
 };
-template< > const RTTI::ClassInfo* const be_typeid<void>::type = &Builtin::s_voidClass;
+template< > const RTTI::ClassInfo* const be_typeid<void>::klass = &Builtin::s_voidClass;
 
 #define BE_MAKE_BUILTIN_TYPE(type_)                     \
 namespace Builtin                                       \
@@ -23,7 +23,7 @@ namespace Builtin                                       \
         { s_##type_##Name, &s_voidClass, 0,             \
             sizeof(type_) };                            \
 };                                                      \
-    template< > const RTTI::ClassInfo* const be_typeid<type_>::type = &Builtin::s_##type_##Class;
+    template< > const RTTI::ClassInfo* const be_typeid<type_>::klass = &Builtin::s_##type_##Class;
 
 BE_MAKE_BUILTIN_TYPE(u8);
 BE_MAKE_BUILTIN_TYPE(u16);

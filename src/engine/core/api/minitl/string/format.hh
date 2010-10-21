@@ -26,6 +26,8 @@ public:
 
     const format<size>& operator|(char* value) const;
     const format<size>& operator|(const char* value) const;
+    template< size_t osize >
+    const format<size>& operator|(const format<osize>& value) const;
     const format<size>& operator|(char value) const;
     const format<size>& operator|(u64 value) const;
     const format<size>& operator|(i64 value) const;
@@ -104,6 +106,13 @@ const format<size>& format<size>::operator|(const char* value) const
     m_firstFormat += s;
     findToken();
     return *this;
+}
+
+template< size_t size >
+template< size_t osize >
+const format<size>& format<size>::operator|(const format<osize>& value) const
+{
+    return *this | value.c_str();
 }
 
 template< size_t size >

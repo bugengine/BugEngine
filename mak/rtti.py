@@ -44,9 +44,7 @@ class Root(Container):
 		index = Container.dump(self, file, namespace, index)
 		file.write("namespace BugEngine {\n\n")
 		for fullname,classname in self.classes:
-			file.write("    template< > const RTTI::ClassInfo* const be_typeid< %s >::type = &%s;\n" % (fullname, classname))
-			file.write("    template< > const RTTI::ClassInfo* const be_typeid< %s& >::type = &%s;\n" % (fullname, classname))
-			file.write("    template< > const RTTI::ClassInfo* const be_typeid< %s const >::type = &%s;\n" % (fullname, classname))
+			file.write("    template< > const RTTI::ClassInfo* const be_typeid< %s >::klass = &%s;\n" % (fullname, classname))
 		file.write("}\n")
 		return index
 
@@ -84,11 +82,11 @@ class Class(Container):
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
 		if self.members:
 			file.write("#line %d\n" % (self.line))
-			file.write("    static const PropertyInfo s_%sProperties[] = {\n" % decl)
+			file.write("    static const ::BugEngine::RTTI::PropertyInfo s_%sProperties[] = {\n" % decl)
 			for type,name in self.members[:-1]:
-				file.write("        { \"%s\", ::BugEngine::be_typeid< %s >::type, (char*)&((%s*)0)->%s - (char*)0 },\n" % (name, type, self.fullname, name))
+				file.write("        { \"%s\", { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass, ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, (char*)&((%s*)0)->%s - (char*)0 },\n" % (name, type, type, type, self.fullname, name))
 			type,name = self.members[-1]
-			file.write("        { \"%s\", ::BugEngine::be_typeid< %s >::type, (char*)&((%s*)0)->%s - (char*)0 }\n" % (name, type, self.fullname, name))
+			file.write("        { \"%s\", { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass, ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, (char*)&((%s*)0)->%s - (char*)0 }\n" % (name, type, type, type, self.fullname, name))
 			file.write("    };\n")
 			props = "s_%sProperties" % decl
 			propCount = "(sizeof(s_%sProperties)/sizeof(s_%sProperties[0]))" % (decl, decl)
@@ -98,7 +96,7 @@ class Class(Container):
 		file.write("#line %d\n" % (self.line))
 		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
 		file.write("#line %d\n" % (self.line))
-		file.write("    static const RTTI::ClassInfo s_%sClass = { s_%sName, ::BugEngine::be_typeid< %s >::type, 0, sizeof(%s), %s, %s };\n" % (decl, decl, self.inherits, self.fullname, propCount, props))
+		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { s_%sName, ::BugEngine::be_typeid< %s >::klass, 0, sizeof(%s), %s, %s };\n" % (decl, decl, self.inherits, self.fullname, propCount, props))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
