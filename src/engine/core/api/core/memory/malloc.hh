@@ -142,6 +142,7 @@ struct Arena
 # define    malloca    _alloca
 # define    freea      _freea
 #else
+# include <malloc.h>
 # define    malloca     alloca
 # define    freea(p)
 #endif

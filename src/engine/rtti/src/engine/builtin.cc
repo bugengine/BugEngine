@@ -25,6 +25,7 @@ namespace Builtin                                       \
 };                                                      \
     template< > const RTTI::ClassInfo* const be_typeid<type_>::klass = &Builtin::s_##type_##Class;
 
+BE_MAKE_BUILTIN_TYPE(char);
 BE_MAKE_BUILTIN_TYPE(u8);
 BE_MAKE_BUILTIN_TYPE(u16);
 BE_MAKE_BUILTIN_TYPE(u32);
