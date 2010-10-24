@@ -9,7 +9,7 @@
 namespace minitl
 {
 
-template< size_t size = 512 >
+template< u16 size = 512 >
 class format
 {
 private:
@@ -26,7 +26,7 @@ public:
 
     const format<size>& operator|(char* value) const;
     const format<size>& operator|(const char* value) const;
-    template< size_t osize >
+    template< u16 osize >
     const format<size>& operator|(const format<osize>& value) const;
     const format<size>& operator|(char value) const;
     const format<size>& operator|(u64 value) const;
@@ -42,7 +42,7 @@ public:
 };
 
 
-template< size_t size >
+template< u16 size >
 format<size>::format(const char *format)
 {
     strncpy(m_buffer, format, size);
@@ -51,7 +51,7 @@ format<size>::format(const char *format)
     findToken();
 }
 
-template< size_t size >
+template< u16 size >
 void format<size>::findToken() const
 {
     while(*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
@@ -62,24 +62,24 @@ void format<size>::findToken() const
         m_firstFormat = 0;
 }
 
-template< size_t size >
+template< u16 size >
 format<size>::~format()
 {
 }
 
-template< size_t size >
+template< u16 size >
 format<size>::operator const char* () const
 {
     return m_buffer;
 }
 
-template< size_t size >
+template< u16 size >
 const char* format<size>::c_str() const
 {
     return m_buffer;
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(char value) const
 {
     m_firstFormat[0] = value;
@@ -89,13 +89,13 @@ const format<size>& format<size>::operator|(char value) const
     return *this;
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(char *value) const
 {
     return *this | (const char *)value;
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(const char* value) const
 {
     if(!value)
@@ -108,14 +108,14 @@ const format<size>& format<size>::operator|(const char* value) const
     return *this;
 }
 
-template< size_t size >
-template< size_t osize >
+template< u16 size >
+template< u16 osize >
 const format<size>& format<size>::operator|(const format<osize>& value) const
 {
     return *this | value.c_str();
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(i64 value) const
 {
     char result[16];
@@ -140,7 +140,7 @@ const format<size>& format<size>::operator|(i64 value) const
 }
 
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(u64 value) const
 {
     char result[16];
@@ -160,26 +160,26 @@ const format<size>& format<size>::operator|(u64 value) const
     return *this;
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(i32 value) const
 {
     return *this | (i64)value;
 }
 
-template< size_t size >
+template< u16 size >
 const format<size>& format<size>::operator|(i16 value) const
 {
     return *this | (i64)value;
 }
 
-template< size_t size >
+template< u16 size >
 template< typename T >
 const format<size>& format<size>::operator|(T value) const
 {
     return *this | static_cast<u64>(value);
 }
 
-template< size_t size >
+template< u16 size >
 template< typename T >
 const format<size>& format<size>::operator|(T* value) const
 {
@@ -200,7 +200,7 @@ const format<size>& format<size>::operator|(T* value) const
     return *this;
 }
 
-template< size_t size >
+template< u16 size >
 template< typename T >
 const format<size>& format<size>::operator|(const T* value) const
 {

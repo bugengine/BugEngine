@@ -5,7 +5,7 @@
 #define BE_RTTI_VALUE_INL_
 /*****************************************************************************/
 #include   <rtti/value.hh>
-#include   <rtti/typeinfo.hh>
+#include   <rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine
 {
@@ -51,7 +51,7 @@ const T& Value::as() const
 template< typename T >
 T& Value::as()
 {
-    be_assert(be_typeid<T>::type == m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type.name());
+    be_assert(be_typeid<T>::type() == m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type().name());
     return *(T*)memory();
 }
 
@@ -85,6 +85,11 @@ Value& Value::operator=(const Value& other)
     m_type.destroy(memory());
     m_type.copy(other.memory(), memory());
     return *this;
+}
+
+inline Value Value::operator()(const char *prop)
+{
+    return m_type.property(prop)->get(*this);
 }
 
 }

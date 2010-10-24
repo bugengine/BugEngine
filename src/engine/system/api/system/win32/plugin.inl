@@ -31,7 +31,7 @@ static HANDLE loadPlugin(const istring &pluginName)
             0,
             NULL);
         errorCode = ::GetLastError();
-        be_error(errorMessage);
+        be_error("%s : %s"|pluginName|errorMessage);
         ::LocalFree(errorMessage);
     }
     return h;

@@ -36,11 +36,13 @@ public:
     template< typename T > inline T& as();
 
     inline Value& operator=(const Value& other);
+
+    inline Value operator()(const char *prop);
 };
 
 }
 
-#include   <rtti/value.inl>
+#include <rtti/value.inl>
 
 /*****************************************************************************/
 #endif

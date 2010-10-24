@@ -33,7 +33,7 @@ template< typename T >
 struct RefType< T& >
 {
     typedef T Type;
-    enum { Reference = TypeInfo::Reference, Constness = RefType<T>::Constness };
+    enum { Reference = TypeInfo::Class, Constness = RefType<T>::Constness };
 };
 
 template< typename T >
