@@ -39,6 +39,7 @@ class Root(Container):
 		file.write("#include    <rtti/engine/methodinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/propertyinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/enuminfo.script.hh>\n")
+		file.write("#include    <rtti/engine/wrapper.hh>\n")
 		file.write("\n")
 		file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
 		index = Container.dump(self, file, namespace, index)
@@ -92,10 +93,14 @@ class Class(Container):
 		if self.members:
 			file.write("#line %d\n" % (self.line))
 			file.write("    static const ::BugEngine::RTTI::PropertyInfo s_%sProperties[] = {\n" % decl)
-			for type,name in self.members[:-1]:
-				file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass } , ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, (char*)&((%s*)0)->%s - (char*)0 },\n" % (name, type, type, type, self.fullname, name))
-			type,name = self.members[-1]
-			file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass }, ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, (char*)&((%s*)0)->%s - (char*)0 }\n" % (name, type, type, type, self.fullname, name))
+			index = 0
+			for type,name in self.members:
+				file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass } , ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, &::BugEngine::RTTI::get<%s, %s, &%s::%s > }" % (name, type, type, type, type, self.fullname, self.fullname, name))
+				index += 1
+				if index < len(self.members):
+					file.write(",\n")
+				else:
+					file.write("\n")
 			file.write("    };\n")
 			props = "s_%sProperties" % decl
 			propCount = "(sizeof(s_%sProperties)/sizeof(s_%sProperties[0]))" % (decl, decl)

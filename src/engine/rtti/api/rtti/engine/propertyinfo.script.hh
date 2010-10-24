@@ -6,6 +6,11 @@
 /*****************************************************************************/
 #include   <rtti/typeinfo.script.hh>
 
+namespace BugEngine
+{
+class Value;
+}
+
 namespace BugEngine { namespace RTTI
 {
 
@@ -13,7 +18,8 @@ struct PropertyInfo
 {
     raw<const char>         name;
     TypeInfo                type;
-    size_t                  offset;
+    Value                   (*get)(Value& object);
+    void                    (*set)(Value& object, Value& value);
 };
 
 }}

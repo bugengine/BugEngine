@@ -7,7 +7,7 @@
 
 namespace BugEngine
 {
-class Value;
+struct TypeInfo;
 }
 
 namespace BugEngine { namespace RTTI
@@ -18,7 +18,7 @@ struct MethodInfo;
 
 struct ClassInfo
 {
-    friend class Value;
+    friend struct TypeInfo;
 public:
     raw<const char>         name;
     raw<const ClassInfo>    parent;
