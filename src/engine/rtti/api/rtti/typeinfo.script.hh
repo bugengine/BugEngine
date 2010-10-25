@@ -14,10 +14,12 @@ struct TypeInfo
     enum Type
     {
         Class,
-        Reference,
         RefPtr,
+        ConstRefPtr,
         WeakPtr,
-        RawPtr
+        ConstWeakPtr,
+        RawPtr,
+        ConstRawPtr
     };
     enum Constness
     {

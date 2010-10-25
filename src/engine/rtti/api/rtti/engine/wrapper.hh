@@ -12,7 +12,14 @@ namespace BugEngine { namespace RTTI
 template< typename T, typename Owner, T (Owner::*Field) >
 static inline Value get(Value& from)
 {
-    return Value(from.as<Owner>().*Field);
+    if(from.isConst())
+    {
+        return Value(Value::ByRef(from.as<const Owner>().*Field));
+    }
+    else
+    {
+        return Value(Value::ByRef(from.as<Owner>().*Field));
+    }
 }
 
 template< typename T, typename Owner, T (Owner::*Field) >
