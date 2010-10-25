@@ -15,29 +15,43 @@ private:
     TypeInfo    m_type;
     union
     {
-        char                            m_buffer[32];
+        char                            m_buffer[63];
         struct
         {
             void*                       m_pointer;
             bool                        m_deallocate;
         };
     };
+    bool        m_reference;
 private:
     inline void* memory();
     inline const void* memory() const;
+private:
+    template< typename T >
+    struct ByRefType
+    {
+        T& value;
+        explicit ByRefType(T& t) : value(t) { }
+    };
 public:
     template< typename T > explicit inline Value(T t);
     inline Value(const Value& other);
+    template< typename T > explicit inline Value(ByRefType<T> t);
     inline ~Value();
+
+    template< typename T > inline Value& operator=(const T& t);
+    inline Value& operator=(const Value& other);
 
     inline TypeInfo type() const;
 
     template< typename T > inline const T& as() const;
     template< typename T > inline T& as();
 
-    inline Value& operator=(const Value& other);
-
     inline Value operator()(const char *prop);
+
+    template< typename T >
+    static ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
+    inline bool isConst() const;
 };
 
 }

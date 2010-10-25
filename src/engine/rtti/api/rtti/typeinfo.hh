@@ -13,11 +13,7 @@ template< typename T >
 struct be_typeid
 {
     static const RTTI::ClassInfo* const klass;
-    static const TypeInfo type()
-    {
-        TypeInfo i = { klass, TypeInfo::Class, TypeInfo::Mutable };
-        return i;
-    }
+    static const TypeInfo type();
 };
 
 }

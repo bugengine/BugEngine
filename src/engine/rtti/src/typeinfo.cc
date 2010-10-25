@@ -14,13 +14,14 @@ size_t TypeInfo::size() const
     {
     case Class:
         return metaclass->size;
-    case Reference:
-        return sizeof(void*);
     case RawPtr:
+    case ConstRawPtr:
         return sizeof(raw<char>);
     case RefPtr:
+    case ConstRefPtr:
         return sizeof(ref<minitl::refcountable>);
     case WeakPtr:
+    case ConstWeakPtr:
         return sizeof(weak<minitl::refcountable>);
     default:
         be_notreached();
@@ -47,14 +48,18 @@ minitl::format<> TypeInfo::name() const
     {
     case Class:
         return n;
-    case Reference:
-        return minitl::format<>("%s&") | n;
     case RawPtr:
         return minitl::format<>("raw<%s>") | n;
+    case ConstRawPtr:
+        return minitl::format<>("raw<const %s>") | n;
     case RefPtr:
         return minitl::format<>("ref<%s>") | n;
+    case ConstRefPtr:
+        return minitl::format<>("ref<const %s>") | n;
     case WeakPtr:
         return minitl::format<>("weak<%s>") | n;
+    case ConstWeakPtr:
+        return minitl::format<>("weak<const %s>") | n;
     default:
         be_notreached();
         return "";
@@ -67,15 +72,17 @@ void TypeInfo::copy(const void* source, void* dest) const
     {
     case Class:
         return metaclass->copy(source, dest);
-    case Reference:
     case RawPtr:
+    case ConstRawPtr:
         memcpy(dest, source, sizeof(void*));
         return;
     case RefPtr:
-        new (dest) ref<minitl::refcountable>(*(ref<minitl::refcountable>*)source);
+    case ConstRefPtr:
+        new (dest) const ref<const minitl::refcountable>(*(const ref<const minitl::refcountable>*)source);
         return;
     case WeakPtr:
-        new (dest) weak<minitl::refcountable>(*(weak<minitl::refcountable>*)source);
+    case ConstWeakPtr:
+        new (dest) const weak<const minitl::refcountable>(*(const weak<const minitl::refcountable>*)source);
         return;
     default:
         be_notreached();
@@ -89,14 +96,16 @@ void TypeInfo::destroy(void* ptr) const
     {
     case Class:
         return metaclass->destroy(ptr);
-    case Reference:
     case RawPtr:
+    case ConstRawPtr:
         return;
     case RefPtr:
-        (*(ref<minitl::refcountable>*)ptr).~ref();
+    case ConstRefPtr:
+        (*(const ref<const minitl::refcountable>*)ptr).~ref();
         return;
     case WeakPtr:
-        (*(weak<minitl::refcountable>*)ptr).~weak();
+    case ConstWeakPtr:
+        (*(const weak<const minitl::refcountable>*)ptr).~weak();
         return;
     default:
         be_notreached();
@@ -125,10 +134,23 @@ static struct A
 {
     A()
     {
-        ::BugEngine::Value v (*::BugEngine::be_typeid<BugEngine::RTTI::ClassInfo>().klass);
+        using namespace BugEngine;
+        // local copy
+        RTTI::ClassInfo ci = *be_typeid<RTTI::ClassInfo>().klass;
+        Value v(Value::ByRef(ci));
+        Value v2(Value::ByRef(*be_typeid<RTTI::ClassInfo>().klass)); //klass est const donc v2 est const aussi
         OutputDebugString((::minitl::format<>("type: %s\n") | v.type().name()).c_str());
-        ::BugEngine::Value name = v("name");
+        Value name = Value::ByRef(v("name"));
+        OutputDebugString((::minitl::format<>("name: %s\n") | name.as< const raw<const char> >().m_ptr).c_str());
+        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
+        raw<const char> c = {"blabla"};
+        name = c;
         OutputDebugString((::minitl::format<>("name: %s\n") | name.as< raw<const char> >().m_ptr).c_str());
+        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
+        v("name") = c;
+        OutputDebugString((::minitl::format<>("name: %s\n") | name.as< raw<const char> >().m_ptr).c_str());
+        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
+        v2("name") = c;
     }
     ~A()
     {

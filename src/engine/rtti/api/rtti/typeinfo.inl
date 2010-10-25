@@ -26,93 +26,68 @@ struct RefType
 template< typename T >
 struct RefType<const T>
 {
-    typedef T Type;
-    enum { Reference = TypeInfo::Class, Constness = TypeInfo::Const };
+    typedef typename RefType<T>::Type Type;
+    enum { Reference = RefType<T>::Reference, Constness = TypeInfo::Const };
 };
+
 template< typename T >
 struct RefType< T& >
 {
-    typedef T Type;
-    enum { Reference = TypeInfo::Class, Constness = RefType<T>::Constness };
+    typedef typename RefType<T>::Type Type;
+    enum { Reference = RefType<T>::Reference, Constness = RefType<T>::Constness };
 };
 
 template< typename T >
 struct RefType< ref<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::RefPtr, Constness = RefType<T>::Constness };
+    enum { Reference = TypeInfo::RefPtr, Constness = TypeInfo::Mutable };
+};
+
+template< typename T >
+struct RefType< ref<const T> >
+{
+    typedef typename RefType<T>::Type Type;
+    enum { Reference = TypeInfo::ConstRefPtr, Constness = TypeInfo::Mutable };
 };
 
 template< typename T >
 struct RefType< weak<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::WeakPtr, Constness = RefType<T>::Constness };
+    enum { Reference = TypeInfo::WeakPtr, Constness = TypeInfo::Mutable };
+};
+
+template< typename T >
+struct RefType< weak<const T> >
+{
+    typedef typename RefType<T>::Type Type;
+    enum { Reference = TypeInfo::ConstWeakPtr, Constness = TypeInfo::Mutable };
 };
 
 template< typename T >
 struct RefType< raw<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::RawPtr, Constness = RefType<T>::Constness };
+    enum { Reference = TypeInfo::RawPtr, Constness = TypeInfo::Mutable };
 };
 
+template< typename T >
+struct RefType< raw<const T> >
+{
+    typedef typename RefType<T>::Type Type;
+    enum { Reference = TypeInfo::ConstRawPtr, Constness = TypeInfo::Mutable };
+};
 
 }
 
-template< typename T >
-struct be_typeid< const T >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::Class, TypeInfo::Const }; return i; }
-};
 
 template< typename T >
-struct be_typeid< T& >
+const TypeInfo be_typeid< T >::type()
 {
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::Reference, TypeInfo::Mutable }; return i; }
-};
-
-template< typename T >
-struct be_typeid< const T& >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::Reference, TypeInfo::Const }; return i; }
-};
-
-template< typename T >
-struct be_typeid< raw<T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::RawPtr, TypeInfo::Mutable }; return i; }
-};
-
-template< typename T >
-struct be_typeid< raw<const T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::RawPtr, TypeInfo::Const }; return i; }
-};
-
-template< typename T >
-struct be_typeid< ref<T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::RefPtr, TypeInfo::Mutable }; return i; }
-};
-
-template< typename T >
-struct be_typeid< ref<const T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::RefPtr, TypeInfo::Const }; return i; }
-};
-
-template< typename T >
-struct be_typeid< weak<T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::WeakPtr, TypeInfo::Mutable }; return i; }
-};
-
-template< typename T >
-struct be_typeid< weak<const T> >
-{
-    static inline TypeInfo type() { TypeInfo i = { be_typeid<T>::klass, TypeInfo::WeakPtr, TypeInfo::Const }; return i; }
-};
+    TypeInfo i = { be_typeid<typename RTTI::RefType<T>::Type>::klass, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness) };
+    return i;
+}
 
 }
 
