@@ -85,7 +85,7 @@ struct RefType< raw<const T> >
 template< typename T >
 const TypeInfo be_typeid< T >::type()
 {
-    TypeInfo i = { be_typeid<typename RTTI::RefType<T>::Type>::klass, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness) };
+    TypeInfo i = { { be_typeid<typename RTTI::RefType<T>::Type>::klass }, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness) };
     return i;
 }
 

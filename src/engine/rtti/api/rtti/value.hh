@@ -49,8 +49,8 @@ public:
 
     inline Value operator()(const char *prop);
 
-    template< typename T >
-    static ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
+    template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
+    template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }
     inline bool isConst() const;
 };
 

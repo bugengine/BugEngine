@@ -25,7 +25,8 @@ static inline Value get(Value& from)
 template< typename T, typename Owner, T (Owner::*Field) >
 static inline void set(Value& object, Value& value)
 {
-    from.as<Owner>().*Field = value.as<T>();
+    be_assert_recover(!object.isConst(), "Setting property on const object", return);
+    object.as<Owner>().*Field = value.as<T>();
 }
 
 }}

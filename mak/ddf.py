@@ -12,6 +12,7 @@ parser.add_option("-o", "--output", dest="folder", help="Places the output into 
 parser.add_option("--cpp", dest="cpp", help="extension used for source implementation", default='.cc')
 parser.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
 parser.add_option("-D", dest="macrofile", action="append", help="add the content of <macrofile> to the macros, one macro per line")
+parser.add_option("-p", "--pch", dest="pch", help="insert an include for precompiled header at the start of the file")
 
 
 # Reserved words
@@ -1062,7 +1063,7 @@ def p_error(errtoken):
 
 
 
-def doParse(source, output, temppath, macro = [], macrofile = []):
+def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
 	lexer = ply.lex.lex()
 	lexer.inside = 0
 	lexer.sourcename = source
@@ -1106,6 +1107,8 @@ def doParse(source, output, temppath, macro = [], macrofile = []):
 		implementation = open(output, 'w')
 	except IOError,e:
 		raise Exception("cannot open output file %s : %s" % (output, str(e)))
+	if pch:
+		implementation.write("#include <%s>\n" % pch)
 	yacc.namespace.dump(implementation)
 
 	return 0
@@ -1129,7 +1132,7 @@ if __name__ == '__main__':
 			raise Exception("source file and target file are the same: %s" % outputname)
 
 		path = os.path.abspath(os.path.split(sys.argv[0])[0])
-		if doParse(sourcename, outputname, path, options.macro, options.macrofile) > 0:
+		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch) > 0:
 			exit(1)
 	exit(0)
 
