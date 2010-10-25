@@ -101,11 +101,11 @@ void TypeInfo::destroy(void* ptr) const
         return;
     case RefPtr:
     case ConstRefPtr:
-        (*(const ref<const minitl::refcountable>*)ptr).~ref();
+        (*(ref<const minitl::refcountable>*)ptr).~ref();
         return;
     case WeakPtr:
     case ConstWeakPtr:
-        (*(const weak<const minitl::refcountable>*)ptr).~weak();
+        (*(weak<const minitl::refcountable>*)ptr).~weak();
         return;
     default:
         be_notreached();
