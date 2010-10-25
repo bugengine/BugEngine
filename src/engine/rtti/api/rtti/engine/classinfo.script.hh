@@ -18,7 +18,7 @@ struct MethodInfo;
 
 struct ClassInfo
 {
-    friend struct TypeInfo;
+    friend struct BugEngine::TypeInfo;
 public:
     raw<const char>         name;
     raw<const ClassInfo>    parent;

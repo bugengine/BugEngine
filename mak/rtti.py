@@ -95,7 +95,7 @@ class Class(Container):
 			file.write("    static const ::BugEngine::RTTI::PropertyInfo s_%sProperties[] = {\n" % decl)
 			index = 0
 			for type,name in self.members:
-				file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass } , ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, &::BugEngine::RTTI::get<%s, %s, &%s::%s > }" % (name, type, type, type, type, self.fullname, self.fullname, name))
+				file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass } , ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, &::BugEngine::RTTI::get< %s, %s, &%s::%s >, &::BugEngine::RTTI::set< %s, %s, &%s::%s > }" % (name, type, type, type, type, self.fullname, self.fullname, name, type, self.fullname, self.fullname, name))
 				index += 1
 				if index < len(self.members):
 					file.write(",\n")

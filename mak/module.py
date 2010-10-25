@@ -313,11 +313,9 @@ class module:
 					if file.endswith('.script'+ext):
 						generatedcfile = os.path.join(path, filename+'.cc')
 						result.addFile(sources.datasource(file, generatedcfile, platforms, archs, True))
-						result.addFile(sources.generatedcppsource(filename+'.cc', platforms, archs, True))
+						result.addFile(sources.generatedcppsource(filename+'.cc', platforms, archs, True, self.usepch))
 					else:
 						result.addFile(sources.hsource(file, platforms, archs, doprocess))
-				elif ext in set(['.ogg', '.lua', '.nut', '.dd', '.cg', '.pcf', '.ttf', '.fon', '.tga']):
-					result.addFile( sources.deployedsource(file, local, 'data', platforms, archs, doprocess ) )
 		return result
 
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):

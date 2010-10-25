@@ -27,7 +27,7 @@ public:
     istring(const char *begin, const char *end);
     istring(const std::string& other);
     istring(const istring& other);
-    template< size_t SIZE >
+    template< u16 SIZE >
     istring(const minitl::format<SIZE>& f)
         :   m_index(init(f))
     {
@@ -142,25 +142,25 @@ namespace minitl
 {
 inline size_t hash_value(const BugEngine::istring& key) { return key.hash(); }
 
-template< size_t size >
+template< u16 size >
 const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::istring& value)
 {
     return format | value.c_str();
 }
 
-template< size_t size >
+template< u16 size >
 const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::inamespace& value)
 {
     return format | value.str().c_str();
 }
 
-template< size_t size >
+template< u16 size >
 const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::ipath& value)
 {
     return format | value.str().c_str();
 }
 
-template< size_t size >
+template< u16 size >
 const minitl::format<size>& operator|(const minitl::format<size>& format, const BugEngine::ifilename& value)
 {
     return format | value.str().c_str();

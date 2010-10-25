@@ -86,8 +86,8 @@ class cppsource(source):
 		self.usepch = usepch
 
 class generatedcppsource(cppsource):
-	def __init__( self, filename, platforms, archs, process):
-		cppsource.__init__( self, filename, platforms, archs, process, False )
+	def __init__( self, filename, platforms, archs, process, usepch = False ):
+		cppsource.__init__( self, filename, platforms, archs, process, usepch )
 	def make_source(self, bld, env, prefix, relative, result):
 		pass
 	def generated(self):

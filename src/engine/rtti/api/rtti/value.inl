@@ -48,6 +48,15 @@ inline Value::Value(ByRefType<Value> t)
 {
 }
 
+template<>
+inline Value::Value(ByRefType<const Value> t)
+:   m_type(t.value.m_type)
+,   m_pointer(t.value.m_pointer)
+,   m_deallocate(0)
+,   m_reference(true)
+{
+}
+
 Value::~Value()
 {
     if(!m_reference)
@@ -127,7 +136,7 @@ const void* Value::memory() const
 
 inline Value Value::operator()(const char *prop)
 {
-    return ByRef(m_type.property(prop)->get(*this));
+    return Value(ByRef(m_type.property(prop)->get(*this)));
 }
 
 inline bool Value::isConst() const
