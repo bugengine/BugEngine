@@ -29,6 +29,12 @@ static inline void set(Value& object, Value& value)
     object.as<Owner>().*Field = value.as<T>();
 }
 
+struct ClassInfoRegistration
+{
+    ClassInfoRegistration(const ClassInfo* classinfo);
+    ~ClassInfoRegistration();
+};
+
 }}
 
 /*****************************************************************************/

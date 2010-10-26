@@ -76,7 +76,8 @@ class Enum(Container):
 		file.write("#line %d\n" % (self.line))
 		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
 		file.write("#line %d\n" % (self.line))
-		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< void >::klass }, { 0 }, sizeof(%s), 0, { 0 } };\n" % (decl, decl, self.fullname))
+		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< void >::klass }, { 0 }, { 0 }, { 0 }, sizeof(%s), 0, { 0 } };\n" % (decl, decl, self.fullname))
+		file.write("    static const ::BugEngine::RTTI::ClassInfoRegistration s_%sClassRegistration (&s_%sClass);\n" % (decl, decl))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
@@ -110,7 +111,8 @@ class Class(Container):
 		file.write("#line %d\n" % (self.line))
 		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
 		file.write("#line %d\n" % (self.line))
-		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< %s >::klass }, { 0 }, sizeof(%s), %s, { %s } };\n" % (decl, decl, self.inherits, self.fullname, propCount, props))
+		file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< %s >::klass }, { 0 }, { 0 }, { 0 }, sizeof(%s), %s, { %s } };\n" % (decl, decl, self.inherits, self.fullname, propCount, props))
+		file.write("    static const ::BugEngine::RTTI::ClassInfoRegistration s_%sClassRegistration (&s_%sClass);\n" % (decl, decl))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
