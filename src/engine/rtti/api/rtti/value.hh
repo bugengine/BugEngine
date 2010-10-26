@@ -9,6 +9,11 @@
 namespace BugEngine
 {
 
+namespace RTTI
+{
+class Namespace;
+}
+
 class Value
 {
 private:
@@ -36,6 +41,7 @@ private:
 public:
     template< typename T > explicit inline Value(T t);
     inline Value(const Value& other);
+    inline Value(RTTI::Namespace& ns);
     template< typename T > explicit inline Value(ByRefType<T> t);
     inline ~Value();
 

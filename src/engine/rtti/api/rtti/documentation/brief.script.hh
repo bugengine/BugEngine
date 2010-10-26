@@ -12,18 +12,6 @@ struct Brief
 {
 };
 
-struct Extra : public Brief
-{
-    struct B
-    {
-    };
-    typedef B OtherB;
-
-    struct C : public OtherB
-    {
-    };
-};
-
 }}
 
 /*****************************************************************************/

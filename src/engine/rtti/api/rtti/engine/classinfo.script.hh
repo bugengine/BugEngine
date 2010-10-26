@@ -20,12 +20,14 @@ struct ClassInfo
 {
     friend struct BugEngine::TypeInfo;
 public:
-    raw<const char>         name;
-    raw<const ClassInfo>    parent;
-    raw<const ClassInfo>    metaclass;
-    size_t                  size;
-    size_t                  propertyCount;
-    raw<PropertyInfo const> properties;
+    raw<const char>                 name;
+    raw<const ClassInfo>            parent;
+    raw<const ClassInfo>            metaclass;
+    mutable raw<const ClassInfo>    child;
+    mutable raw<const ClassInfo>    next;
+    size_t                          size;
+    size_t                          propertyCount;
+    raw<PropertyInfo const>         properties;
 private:
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;
