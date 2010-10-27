@@ -9,7 +9,7 @@
 #include   <rtti/stdafx.h>
 #include   <system/stdafx.h>
 #include   <graphics/stdafx.h>
-#include   <win32/stdafx.h>
+#include   <windowing/stdafx.h>
 
 #ifdef BE_COMPILER_MSVC
 # pragma warning(disable:4985)

@@ -27,6 +27,7 @@ def build(bld):
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
 	X11				= module.external('X11')
+	win32			= module.external('win32')
 
 	freetype		= module.external('freetype')
 
@@ -35,7 +36,6 @@ def build(bld):
 
 	bullet			= module.external('bullet')
 
-	win32			= module.external('win32')
 	pthreads		= module.external('pthreads')
 
 	lualib			= module.external('lualib')
@@ -55,11 +55,10 @@ def build(bld):
 	discworld		= module.game('discworld',      [core, rtti, system, input, graphics, audio, physics, mobile, main])
 	editor			= module.tool('editor',         [core, rtti, system, input, graphics, audio, physics, mobile, main], platforms=['pc'])
 
-	win32			= module.library('win32',       [discworld], category='plugin', platforms=['win32'])
-	X				= module.library('X',           [discworld, X11], category='plugin', platforms=['posix'])
+	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin', platforms=['win32'])
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, win32, X, opengl], platforms=['pc'])
-	renderDx9		= module.plugin('renderDx9',    [discworld, win32, cgDx, directx9], platforms=['win32'])
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['pc'])
+	renderDx9		= module.plugin('renderDx9',    [discworld, windowing, cgDx, directx9], platforms=['win32'])
 	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])

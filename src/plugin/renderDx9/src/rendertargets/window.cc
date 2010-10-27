@@ -24,7 +24,7 @@ LPDIRECT3DVERTEXBUFFER9 g_pVB;
 
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   Win32::Window(renderer, flags)
+:   Windowing::Window(renderer, flags)
 ,   m_closed(0)
 {
     D3DPRESENT_PARAMETERS d3dpp;
@@ -107,7 +107,7 @@ void Window::end(PresentMode present)
     if(m_closed > 0)
     {
         m_swapChain = be_checked_cast<Renderer>(m_renderer)->release(m_swapChain);
-        Win32::Window::close();
+        Windowing::Window::close();
     }
     else if(present == Present && m_swapChain->swapchain)
     {
