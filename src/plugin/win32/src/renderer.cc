@@ -133,7 +133,7 @@ UINT Renderer::messageCount() const
 
 void Renderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
 {
-    PostThreadMessageA(m_windowManagementThread.id(), msg, wParam, lParam);
+    PostThreadMessageA((DWORD)m_windowManagementThread.id(), msg, wParam, lParam);
 }
 
 void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
