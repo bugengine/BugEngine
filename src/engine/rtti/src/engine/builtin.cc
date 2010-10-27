@@ -12,7 +12,7 @@ namespace BugEngine
 namespace Builtin
 {
     static const char *const s_voidName = "void";
-    static const RTTI::ClassInfo s_voidClass =  { { s_voidName }, { &s_voidClass }, {0}, 0, 0, {0} };
+    static const RTTI::ClassInfo s_voidClass =  { { s_voidName }, { &s_voidClass }, {0}, {0}, {0}, 0, 0, {0} };
 };
 template< > const RTTI::ClassInfo* const be_typeid<void>::klass = &Builtin::s_voidClass;
 

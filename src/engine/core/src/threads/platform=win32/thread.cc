@@ -120,7 +120,7 @@ unsigned long Thread::currentId()
     return GetCurrentThreadId();
 }
 
-const istring& Thread::name()
+istring Thread::name()
 {
     return *st_name;
 }

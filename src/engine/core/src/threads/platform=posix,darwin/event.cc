@@ -3,8 +3,8 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/event.hh>
+#include    <core/timer.hh>
 #include    <cerrno>
-
 
 namespace BugEngine
 {

@@ -111,7 +111,7 @@ unsigned long Thread::currentId()
     return LWP_GetSelf();
 }
 
-const istring& Thread::name()
+istring Thread::name()
 {
     return *st_name;
 }

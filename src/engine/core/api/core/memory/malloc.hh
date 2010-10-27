@@ -142,7 +142,9 @@ struct Arena
 # define    malloca    _alloca
 # define    freea      _freea
 #else
-# include <malloc.h>
+# if !defined(BE_PLATFORM_MACOS)
+#  include <malloc.h>
+# endif
 # define    malloca     alloca
 # define    freea(p)
 #endif

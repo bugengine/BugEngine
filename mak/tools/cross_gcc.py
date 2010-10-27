@@ -5,9 +5,6 @@ import re
 from TaskGen import feature, before, extension, after
 import os
 
-def set_options(opt):
-	opt.add_option('--target', action='store', default='', help='select target for GCC')
-
 @conftest
 def get_native_gcc_target(conf):
 	if not conf.env['GCC_NATIVE_TARGET']:
@@ -30,6 +27,7 @@ def parse_gcc_target(target):
 			  ('i486', 'x86'),
 			  ('i586', 'x86'),
 			  ('i686', 'x86'),
+			  ('x86', 'x86'),
 			  ('arm-eabi', 'arm7'),
 			  ('mipsel', 'mips'),
 			  ('mips', 'mips'),
@@ -48,15 +46,12 @@ def parse_gcc_target(target):
 
 @conftest
 def find_cross_gcc(conf):
-	try: target = Options.options.target
-	except: target = None
-	if not target:
-		target = conf.env['GCC_TARGET']
+	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
 	versionsmall = '.'.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
-		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target)
+		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target) or 'unknown'
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+versionsmall, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)

@@ -381,9 +381,14 @@ def p_cs_template_params_list(t):
 ###################################
 # type
 
-def p_type_modifier(t):
+def p_type_modifier_1(t):
 	"""
 		type_modifier : MUTABLE
+	"""
+	t[0] = ""
+
+def p_type_modifier_2(t):
+	"""
 		type_modifier : CONST
 		type_modifier : VOLATILE
 	"""

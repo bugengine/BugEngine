@@ -43,7 +43,7 @@ public:
     static void             sleep(int milliseconds);
     static void             yield();
     static unsigned long    currentId();
-    static const istring&   name();
+    static istring          name();
 };
 
 }

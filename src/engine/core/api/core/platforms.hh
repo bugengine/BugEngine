@@ -31,9 +31,9 @@ static inline void displayError()
 # define OutputDebugString(s) printf("%s", s)
 #endif
 
-#if defined(_AMD64)
+#if defined(_AMD64) || defined(_PPC64)
 # define BE_64
-#elif defined(_X86)
+#elif defined(_X86) || defined(_PPC)
 # define BE_32
 #else
 # error "unknown arch"

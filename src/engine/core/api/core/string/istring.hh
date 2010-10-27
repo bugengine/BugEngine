@@ -49,7 +49,7 @@ public:
 
 class be_api(CORE) igenericnamespace
 {
-    enum
+    enum NamespaceSize
     {
         MaxNamespaceSize = 15
     };
@@ -77,7 +77,7 @@ public:
 
 be_api(CORE) bool startswith(const igenericnamespace& start, const igenericnamespace& full);
 be_api(CORE) bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2);
-    
+
 class be_api(CORE) inamespace : public igenericnamespace
 {
 public:

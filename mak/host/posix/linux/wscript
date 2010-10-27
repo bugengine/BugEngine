@@ -1,7 +1,3 @@
-# set win32 specific options
-# detect tools : msvc, mingw
-
-
 import os
 import re
 import Utils
