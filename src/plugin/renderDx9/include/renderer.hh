@@ -4,7 +4,7 @@
 #ifndef BE_DX9_RENDERER_HH_
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
-#include    <win32/renderer.hh>
+#include    <windowing/renderer.hh>
 #include    <system/filesystem.hh>
 #include    <d3d9.h>
 
@@ -27,7 +27,7 @@ class VertexBuffer;
 class IndexBuffer;
 class TextureBuffer;
 
-class Renderer : public Win32::Renderer
+class Renderer : public Windowing::Renderer
 {
     friend class Window;
     friend class VertexBuffer;

@@ -98,7 +98,7 @@ void Renderer::createContextAsync(D3DPRESENT_PARAMETERS& params)
 {
     ContextCreationEvent event;
     event.params = params;
-    postMessage(WM_USER+Win32::Renderer::messageCount()+BE_WIN32_CREATECONTEXT, (WPARAM)&event, 0);
+    postMessage(WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_CREATECONTEXT, (WPARAM)&event, 0);
     event.event.wait();
     return;
 }
@@ -106,7 +106,7 @@ void Renderer::createContextAsync(D3DPRESENT_PARAMETERS& params)
 void Renderer::destroyContextAsync()
 {
     ContextCreationEvent event;
-    postMessage(WM_USER+Win32::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT, (WPARAM)&event, 0);
+    postMessage(WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT, (WPARAM)&event, 0);
     event.event.wait();
     return;
 }
@@ -173,20 +173,20 @@ void Renderer::drawBatch(const Batch& b)
 
 UINT Renderer::messageCount() const
 {
-    return 2+Win32::Renderer::messageCount();
+    return 2+Windowing::Renderer::messageCount();
 }
 
 void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
     be_forceuse(wParam);
     be_forceuse(lParam);
-    if(msg == WM_USER+Win32::Renderer::messageCount()+BE_WIN32_CREATECONTEXT)
+    if(msg == WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_CREATECONTEXT)
     {
         ContextCreationEvent* event = (ContextCreationEvent*)wParam;
         createContext(event->params);
         event->event.set();
     }
-    else if(msg == WM_USER+Win32::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT)
+    else if(msg == WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT)
     {
         ContextCreationEvent* event = (ContextCreationEvent*)wParam;
         if(m_device)
@@ -200,13 +200,13 @@ void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
     }
     else
     {
-        Win32::Renderer::handleMessage(msg, wParam, lParam);
+        Windowing::Renderer::handleMessage(msg, wParam, lParam);
     }
 }
 
 void Renderer::flush()
 {
-    Win32::Renderer::flush();
+    Windowing::Renderer::flush();
     static Timer t;
     static int frames = 0;
     if(++frames % 100 == 0)

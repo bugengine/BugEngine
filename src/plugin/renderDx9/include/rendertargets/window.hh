@@ -6,13 +6,13 @@
 /*****************************************************************************/
 #include    <graphics/renderer/irenderer.hh>
 #include    <renderer.hh>
-#include    <win32/window.hh>
+#include    <windowing/window.hh>
 #include    <d3d9.h>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-class Window : public Win32::Window
+class Window : public Windowing::Window
 {
     friend class Renderer;
 private:

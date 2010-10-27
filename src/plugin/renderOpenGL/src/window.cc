@@ -115,11 +115,7 @@ void Window::end(PresentMode present)
         clearCurrent();
         if(m_closed > 0 && m_window)
         {
-    #ifdef BE_PLATFORM_WIN32
-            Win32::Window::close();
-    #else
-            X::Window::close();
-    #endif
+            Windowing::Window::close();
             /*if(m_glContext)
             {
                 wglDeleteContext(m_glContext);
