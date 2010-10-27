@@ -113,14 +113,14 @@ void Thread::yield()
 #endif
 }
 
-unsigned long Thread::id() const
+u64 Thread::id() const
 {
     return m_id;
 }
 
-unsigned long Thread::currentId()
+u64 Thread::currentId()
 {
-    return (unsigned long)pthread_self();
+    return (u64)pthread_self();
 }
 
 istring Thread::name()

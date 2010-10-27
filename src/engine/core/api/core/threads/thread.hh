@@ -37,12 +37,12 @@ public:
 
     void setPriority(Priority p);
 
-    unsigned long   id() const;
+    u64 id() const;
     void wait() const;
 
     static void             sleep(int milliseconds);
     static void             yield();
-    static unsigned long    currentId();
+    static u64              currentId();
     static istring          name();
 };
 
