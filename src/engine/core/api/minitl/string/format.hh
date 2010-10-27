@@ -13,10 +13,10 @@ template< u16 size = 512 >
 class format
 {
 private:
-    char    m_buffer[size];
-    char*   m_firstFormat;
+    mutable char    m_buffer[size];
+    mutable char*   m_firstFormat;
 private:
-    void findToken();
+    void findToken() const;
 public:
     inline format(const char *format);
     inline ~format();
@@ -25,7 +25,7 @@ public:
     inline const char* c_str() const;
 
     inline const char *token() const;
-    inline void put(const char *value);
+    inline void put(const char *value) const;
 };
 
 
@@ -39,7 +39,7 @@ format<size>::format(const char *format)
 }
 
 template< u16 size >
-void format<size>::findToken()
+void format<size>::findToken() const
 {
     while(*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
     {
@@ -73,7 +73,7 @@ const char* format<size>::token() const
 }
 
 template< u16 size >
-void format<size>::put(const char *value)
+void format<size>::put(const char *value) const
 {
     if(!value)
         value = "(null)";
@@ -85,7 +85,7 @@ void format<size>::put(const char *value)
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, char value)
+const format<size>& operator|(const format<size>& f, char value)
 {
     char str[2] = {value, 0};
     f.put(str);
@@ -93,28 +93,28 @@ format<size>& operator|(format<size>& f, char value)
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, char *value)
+const format<size>& operator|(const format<size>& f, char *value)
 {
     f.put(value);
     return f;
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, const char* value)
+const format<size>& operator|(const format<size>& f, const char* value)
 {
     f.put(value);
     return f;
 }
 
 template< u16 size, u16 osize >
-format<size>& operator|(format<size>& f, const format<osize>& value)
+const format<size>& operator|(const format<size>& f, const format<osize>& value)
 {
     f.put(value.c_str());
     return f;
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, i64 value)
+const format<size>& operator|(const format<size>& f, i64 value)
 {
     char result[16];
     char* buf = result;
@@ -134,7 +134,7 @@ format<size>& operator|(format<size>& f, i64 value)
 
 
 template< u16 size >
-format<size>& operator|(format<size>& f, u64 value)
+const format<size>& operator|(const format<size>& f, u64 value)
 {
     char result[16];
     char* buf = result;
@@ -149,31 +149,31 @@ format<size>& operator|(format<size>& f, u64 value)
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, i32 value)
+const format<size>& operator|(const format<size>& f, i32 value)
 {
     return f | (i64)value;
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, i16 value)
+const format<size>& operator|(const format<size>& f, i16 value)
 {
     return f | (i64)value;
 }
 
 template< u16 size >
-format<size>& operator|(format<size>& f, i8 value)
+const format<size>& operator|(const format<size>& f, i8 value)
 {
     return f | (i64)value;
 }
 
 template< u16 size, typename T >
-format<size>& operator|(format<size>& f, T value)
+const format<size>& operator|(const format<size>& f, T value)
 {
     return f | static_cast<u64>(value);
 }
 
 template< u16 size, typename T >
-format<size>& operator|(format<size>& f, const T* value)
+const format<size>& operator|(const format<size>& f, const T* value)
 {
     static const size_t s = 2+sizeof(value)*2;
     char result[s+1];
@@ -191,7 +191,7 @@ format<size>& operator|(format<size>& f, const T* value)
 }
 
 template< u16 size, typename T >
-format<size>& operator|(format<size>& f, T* value)
+const format<size>& operator|(const format<size>& f, T* value)
 {
     return f | (const T*)value;
 }

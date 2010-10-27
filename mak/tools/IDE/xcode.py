@@ -113,7 +113,7 @@ class Project:
 	def __init__(self):
 		pass
 
-projects = {
+xcodeprojects = {
 	'xcode2': ('XCode 2.5', 42),
 }
 
@@ -140,7 +140,7 @@ def generateProject(task):
 GenerateProject = Task.task_type_from_func('generateProject', generateProject)
 
 solutions = {}
-def create_project(t):
+def create_xcode_project(t):
 	toolName = t.features[0]
 	if not solutions.has_key(toolName):
 		appname = getattr(Utils.g_module, 'APPNAME', 'noname')
@@ -148,7 +148,7 @@ def create_project(t):
 		solution = GenerateProject(env=t.env)
 		solution.set_outputs(t.path.find_or_declare(outname))
 		solution.name = appname
-		solution.version = projects[toolName][1]
+		solution.version = xcodeprojects[toolName][1]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
@@ -168,6 +168,6 @@ def create_project(t):
 	#solution.projects.append(t)
 	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
 
-for pname in projects.keys():
-	feature(pname)(create_project)
+for pname in xcodeprojects.keys():
+	feature(pname)(create_xcode_project)
 
