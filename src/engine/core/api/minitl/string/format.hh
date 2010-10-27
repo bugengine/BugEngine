@@ -29,16 +29,19 @@ public:
     template< u16 osize >
     const format<size>& operator|(const format<osize>& value) const;
     const format<size>& operator|(char value) const;
-    const format<size>& operator|(u64 value) const;
-    const format<size>& operator|(i64 value) const;
-    const format<size>& operator|(i32 value) const;
-    const format<size>& operator|(i16 value) const;
     template< typename T >
     const format<size>& operator|(T* value) const;
     template< typename T >
     const format<size>& operator|(const T* value) const;
-    template< typename T >
-    const format<size>& operator|(T value) const;
+    const format<size>& operator|(u8 value) const;
+    const format<size>& operator|(u16 value) const;
+    const format<size>& operator|(u32 value) const;
+    const format<size>& operator|(u64 value) const;
+    const format<size>& operator|(i8 value) const;
+    const format<size>& operator|(i16 value) const;
+    const format<size>& operator|(i32 value) const;
+    const format<size>& operator|(i64 value) const;
+    const format<size>& operator|(size_t value) const;
 };
 
 
@@ -161,6 +164,24 @@ const format<size>& format<size>::operator|(u64 value) const
 }
 
 template< u16 size >
+const format<size>& format<size>::operator|(u32 value) const
+{
+    return *this | (u64)value;
+}
+
+template< u16 size >
+const format<size>& format<size>::operator|(u16 value) const
+{
+    return *this | (u64)value;
+}
+
+template< u16 size >
+const format<size>& format<size>::operator|(u8 value) const
+{
+    return *this | (u64)value;
+}
+
+template< u16 size >
 const format<size>& format<size>::operator|(i32 value) const
 {
     return *this | (i64)value;
@@ -173,10 +194,9 @@ const format<size>& format<size>::operator|(i16 value) const
 }
 
 template< u16 size >
-template< typename T >
-const format<size>& format<size>::operator|(T value) const
+const format<size>& format<size>::operator|(i8 value) const
 {
-    return *this | static_cast<u64>(value);
+    return *this | (i64)value;
 }
 
 template< u16 size >

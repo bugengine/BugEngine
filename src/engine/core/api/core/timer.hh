@@ -5,6 +5,12 @@
 #define BE_CORE_TIMER_HH_
 /*****************************************************************************/
 
+#ifdef BE_PLATFORM_MACOS
+# include   <mach/mach_time.h>
+# define CLOCK_REALTIME 0
+be_api(CORE) void clock_gettime(int, timespec* time);
+#endif
+
 namespace BugEngine
 {
 

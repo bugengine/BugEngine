@@ -2,6 +2,8 @@
 
 import os
 import Utils
+import Configure
+from Logs import info,warn
 
 def set_options(opt):
 	try:
@@ -14,7 +16,23 @@ def set_options(opt):
 	except OSError:
 		pass
 
-def configure(conf):
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
+	newenv = conf.env
+	newenv['GCC_VERSION']	= version
+	newenv['GCC_TARGET']	= gcc_target
+	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	conf.check_tool('cross_gcc', tooldir='mak/tools')
+
+
+def add_gcc_flags_to_env(conf):
+	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+	conf.env.append_unique('LINKFLAGS', ['-ldl', '-rdynamic', '-Wl,-E'])
+	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+
+def add_darwin_flags_to_env(conf):
 	import Options
 	conf.env['PLATFORM'] = 'darwin'
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk, 'usr', 'include')])
@@ -23,7 +41,7 @@ def configure(conf):
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
-	
+
 	conf.env.append_unique('CCDEFINES', ['POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env.append_unique('CXXDEFINES', ['POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
@@ -35,7 +53,28 @@ def configure(conf):
 									'lib':		'lib',
 									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('data', 'plugins') }
-									
+
+def configure(conf):
+	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
+		if target.find('darwin') != -1:
+			newenv = conf.set_env_name('temp', conf.env.copy())
+			conf.setenv('temp')
+			try:
+				add_gcc_to_env(conf, version, toolchaindir, target)
+				add_gcc_flags_to_env(conf)
+				name = 'gcc-darwin-'+newenv['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+				newenv.set_variant(name)
+				add_darwin_flags_to_env(conf)
+				newenv = conf.set_env_name(name, newenv)
+				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
+				del conf.all_envs['temp']
+				conf.setenv('default')
+				conf.env['BUILD_VARIANTS'].append(name)
+			except Exception, e:
+				warn('gcc not available: '+e.__class__.__name__+" "+str(e))
+				conf.setenv('default')
+				del conf.all_envs['temp']
 
 def build(bld):
 	pass

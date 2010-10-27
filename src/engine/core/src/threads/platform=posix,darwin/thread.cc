@@ -5,6 +5,7 @@
 #include    <core/threads/thread.hh>
 
 #include    <cerrno>
+#include    <core/timer.hh>
 
 #ifdef BE_PLATFORM_SUN
 # include   <thread.h>
@@ -12,9 +13,6 @@
 
 namespace BugEngine
 {
-
-static BE_THREAD_LOCAL const istring* st_name;
-
 
 class Thread::ThreadParams
 {
@@ -48,7 +46,6 @@ Thread::ThreadParams::~ThreadParams()
 void* Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = reinterpret_cast<ThreadParams*>(params);
-    st_name = &(p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
     return 0;
 }
@@ -87,8 +84,8 @@ void Thread::resume()
 
 void Thread::sleep(int milliseconds)
 {
-#ifdef BE_PLATFORM_BSD
-    timespec r = { };
+#if defined(BE_PLATFORM_BSD) || defined(BE_PLATFORM_MACOS)
+    timespec r = { 0, 0 };
     r.tv_nsec = milliseconds * 1000000;
     r.tv_sec  = r.tv_nsec / 1000000000;
     r.tv_nsec = r.tv_nsec % 1000000000;
@@ -109,7 +106,7 @@ void Thread::yield()
 {
 #ifdef BE_PLATFORM_SUN
     thr_yield();
-#elif defined(BE_PLATFORM_LINUX)
+#elif defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_MACOS)
     sched_yield();
 #else
     pthread_yield();
@@ -126,9 +123,9 @@ unsigned long Thread::currentId()
     return (unsigned long)pthread_self();
 }
 
-const istring& Thread::name()
+istring Thread::name()
 {
-    return *st_name;
+    return minitl::format<>("thread %d") | currentId();
 }
 
 void Thread::wait() const
@@ -140,7 +137,7 @@ void Thread::wait() const
 void Thread::setPriority(Priority p)
 {
     sched_param param;
-#if defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_BSD)
+#if defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_BSD) || defined(BE_PLATFORM_MACOS)
     param.sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
 #else
     param.__sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;

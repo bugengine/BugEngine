@@ -5,6 +5,7 @@
 #include    <core/threads/semaphore.hh>
 #include    <semaphore.h>
 #include    <cerrno>
+#include    <core/timer.hh>
 
 namespace BugEngine
 {
@@ -29,6 +30,9 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
 {
+#ifdef BE_PLATFORM_MACOS
+    int result = sem_wait(reinterpret_cast<sem_t*>(m_data));
+#else
     timespec abstime;
     clock_gettime(CLOCK_REALTIME, &abstime);
     abstime.tv_nsec += (timeout * 1000000);
@@ -36,6 +40,7 @@ Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
     abstime.tv_nsec = abstime.tv_nsec % 1000000000;
     int result = sem_timedwait( reinterpret_cast<sem_t*>(m_data),
                                 &abstime);
+#endif
     if(result == 0)
     {
         return Finished;
