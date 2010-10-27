@@ -14,9 +14,7 @@ template< typename T, int ARENA >
 class list<T, ARENA>::item : public intrusive_list<typename list<T, ARENA>::item>::item
 {
     friend class list<T, ARENA>;
-    template< typename >
-    friend class list<T, ARENA>::base_iterator;
-private:
+public:
     T   m_object;
 private:
     item(const T& object);
