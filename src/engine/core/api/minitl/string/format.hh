@@ -13,10 +13,10 @@ template< u16 size = 512 >
 class format
 {
 private:
-    mutable char    m_buffer[size];
-    mutable char*   m_firstFormat;
+    char    m_buffer[size];
+    char*   m_firstFormat;
 private:
-    void findToken() const;
+    void findToken();
 public:
     inline format(const char *format);
     inline ~format();
@@ -24,24 +24,8 @@ public:
     inline operator const char* () const;
     inline const char* c_str() const;
 
-    const format<size>& operator|(char* value) const;
-    const format<size>& operator|(const char* value) const;
-    template< u16 osize >
-    const format<size>& operator|(const format<osize>& value) const;
-    const format<size>& operator|(char value) const;
-    template< typename T >
-    const format<size>& operator|(T* value) const;
-    template< typename T >
-    const format<size>& operator|(const T* value) const;
-    const format<size>& operator|(u8 value) const;
-    const format<size>& operator|(u16 value) const;
-    const format<size>& operator|(u32 value) const;
-    const format<size>& operator|(u64 value) const;
-    const format<size>& operator|(i8 value) const;
-    const format<size>& operator|(i16 value) const;
-    const format<size>& operator|(i32 value) const;
-    const format<size>& operator|(i64 value) const;
-    const format<size>& operator|(size_t value) const;
+    inline const char *token() const;
+    inline void put(const char *value);
 };
 
 
@@ -55,7 +39,7 @@ format<size>::format(const char *format)
 }
 
 template< u16 size >
-void format<size>::findToken() const
+void format<size>::findToken()
 {
     while(*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
     {
@@ -83,23 +67,13 @@ const char* format<size>::c_str() const
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(char value) const
+const char* format<size>::token() const
 {
-    m_firstFormat[0] = value;
-    memmove(m_firstFormat+1, m_firstFormat+2, size-(m_firstFormat+2-m_buffer));
-    m_firstFormat++;
-    findToken();
-    return *this;
+    return m_firstFormat;
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(char *value) const
-{
-    return *this | (const char *)value;
-}
-
-template< u16 size >
-const format<size>& format<size>::operator|(const char* value) const
+void format<size>::put(const char *value)
 {
     if(!value)
         value = "(null)";
@@ -108,18 +82,39 @@ const format<size>& format<size>::operator|(const char* value) const
     strncpy(m_firstFormat, value, s);
     m_firstFormat += s;
     findToken();
-    return *this;
 }
 
 template< u16 size >
-template< u16 osize >
-const format<size>& format<size>::operator|(const format<osize>& value) const
+format<size>& operator|(format<size>& f, char value)
 {
-    return *this | value.c_str();
+    char str[2] = {value, 0};
+    f.put(str);
+    return f;
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(i64 value) const
+format<size>& operator|(format<size>& f, char *value)
+{
+    f.put(value);
+    return f;
+}
+
+template< u16 size >
+format<size>& operator|(format<size>& f, const char* value)
+{
+    f.put(value);
+    return f;
+}
+
+template< u16 size, u16 osize >
+format<size>& operator|(format<size>& f, const format<osize>& value)
+{
+    f.put(value.c_str());
+    return f;
+}
+
+template< u16 size >
+format<size>& operator|(format<size>& f, i64 value)
 {
     char result[16];
     char* buf = result;
@@ -132,19 +127,14 @@ const format<size>& format<size>::operator|(i64 value) const
         *(buf++) = (char)(value%10)+'0';
         value /= 10;
     } while (value);
-    size_t s = buf-result;
-    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
-    while(buf-- != result)
-    {
-        *(m_firstFormat++) = *buf;
-    }
-    findToken();
-    return *this;
+    *buf = 0;
+    f.put(result);
+    return f;
 }
 
 
 template< u16 size >
-const format<size>& format<size>::operator|(u64 value) const
+format<size>& operator|(format<size>& f, u64 value)
 {
     char result[16];
     char* buf = result;
@@ -153,93 +143,59 @@ const format<size>& format<size>::operator|(u64 value) const
         *(buf++) = (char)(value%10)+'0';
         value /= 10;
     } while (value);
-    size_t s = buf-result;
-    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
-    while(buf-- != result)
-    {
-        *(m_firstFormat++) = *buf;
-    }
-    findToken();
-    return *this;
+    *buf = 0;
+    f.put(result);
+    return f;
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(u32 value) const
+format<size>& operator|(format<size>& f, i32 value)
 {
-    return *this | (u64)value;
+    return f | (i64)value;
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(u16 value) const
+format<size>& operator|(format<size>& f, i16 value)
 {
-    return *this | (u64)value;
+    return f | (i64)value;
 }
 
 template< u16 size >
-const format<size>& format<size>::operator|(u8 value) const
+format<size>& operator|(format<size>& f, i8 value)
 {
-    return *this | (u64)value;
+    return f | (i64)value;
 }
 
-template< u16 size >
-const format<size>& format<size>::operator|(i32 value) const
+template< u16 size, typename T >
+format<size>& operator|(format<size>& f, T value)
 {
-    return *this | (i64)value;
+    return f | static_cast<u64>(value);
 }
 
-template< u16 size >
-const format<size>& format<size>::operator|(i16 value) const
-{
-    return *this | (i64)value;
-}
-
-template< u16 size >
-const format<size>& format<size>::operator|(i8 value) const
-{
-    return *this | (i64)value;
-}
-
-template< u16 size >
-template< typename T >
-const format<size>& format<size>::operator|(T* value) const
+template< u16 size, typename T >
+format<size>& operator|(format<size>& f, const T* value)
 {
     static const size_t s = 2+sizeof(value)*2;
-    char result[s];
+    char result[s+1];
     result[0] = '0';
     result[1] = 'x';
+    result[s] = 0;
     for(size_t i = 0; i < sizeof(value)*2; ++i)
     {
         result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
         if(result[i+2] > '9')
             result[i+2] = result[i+2]+'A'-'9'-1;
     }
-    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
-    strncpy(m_firstFormat, result, s);
-    m_firstFormat += s;
-    findToken();
-    return *this;
+    f.put(result);
+    return f;
 }
 
-template< u16 size >
-template< typename T >
-const format<size>& format<size>::operator|(const T* value) const
+template< u16 size, typename T >
+format<size>& operator|(format<size>& f, T* value)
 {
-    static const size_t s = 2+sizeof(value)*2;
-    char result[s];
-    result[0] = '0';
-    result[1] = 'x';
-    for(size_t i = 0; i < sizeof(value)*2; ++i)
-    {
-        result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
-        if(result[i+2] > '9')
-            result[i+2] = result[i+2]+'A'-'9'-1;
-    }
-    memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
-    strncpy(m_firstFormat, result, s);
-    m_firstFormat += s;
-    findToken();
-    return *this;
+    return f | (const T*)value;
 }
+
 
 }
 
