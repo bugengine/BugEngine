@@ -14,10 +14,8 @@ template< typename T, int ARENA >
 class list<T, ARENA>::item : public intrusive_list<typename list<T, ARENA>::item>::item
 {
     friend class list<T, ARENA>;
-    friend class list<T, ARENA>::iterator;
-    friend class list<T, ARENA>::const_iterator;
-    friend class list<T, ARENA>::reverse_iterator;
-    friend class list<T, ARENA>::const_reverse_iterator;
+    template< typename >
+    friend class list<T, ARENA>::base_iterator;
 private:
     T   m_object;
 private:

@@ -110,12 +110,12 @@ void Thread::yield()
     Sleep(0);
 }
 
-unsigned long Thread::id() const
+u64 Thread::id() const
 {
     return m_id;
 }
 
-unsigned long Thread::currentId()
+u64 Thread::currentId()
 {
     return GetCurrentThreadId();
 }
