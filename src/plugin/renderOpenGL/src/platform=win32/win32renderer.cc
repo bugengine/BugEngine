@@ -15,15 +15,70 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-Renderer::~Renderer()
+class Renderer::Context : public minitl::refcountable
+{
+    friend class Renderer;
+private:
+    HGLRC   m_glContext;
+public:
+    Context();
+    ~Context();
+};
+
+Renderer::Context::Context()
+:   m_glContext(0)
+{
+}
+
+Renderer::Context::~Context()
 {
     if(m_glContext)
         wglDeleteContext(m_glContext);
 }
 
+
+class Window::Context : public minitl::refcountable
+{
+    friend class Renderer;
+    friend class Window;
+private:
+    HGLRC       m_glContext;
+    HDC         m_dc;
+public:
+    Context();
+    ~Context();
+};
+
+Window::Context::Context()
+:   m_glContext(0)
+,   m_dc(0)
+{
+}
+
+Window::Context::~Context()
+{
+    /*if(m_glContext)
+    {
+        wglDeleteContext(m_glContext);
+        m_glContext = 0;
+    }*/
+}
+
+//------------------------------------------------------------------------
+
+Renderer::Renderer(weak<const FileSystem> filesystem)
+    :   m_context(scoped<Context>::create<Arena::General>())
+    ,   m_filesystem(filesystem)
+{
+}
+
+Renderer::~Renderer()
+{
+}
+
 void Renderer::attachWindow(Window* w)
 {
-    HDC hDC = GetDC(w->m_window);
+    HDC hDC = GetDC(*(HWND*)w->getWindowHandle());
     static const PIXELFORMATDESCRIPTOR pfd =
     {
         sizeof(PIXELFORMATDESCRIPTOR),
@@ -45,12 +100,66 @@ void Renderer::attachWindow(Window* w)
     };
     GLuint pixelFormat = ChoosePixelFormat(hDC, &pfd);
     SetPixelFormat(hDC, pixelFormat, &pfd);
-    if(!m_glContext)
+    if(!m_context->m_glContext)
     {
-        m_glContext = wglCreateContext(hDC);
+        m_context->m_glContext = wglCreateContext(hDC);
     }
-    w->m_glContext = m_glContext;
+    w->m_context->m_dc = hDC;
+    w->m_context->m_glContext = m_context->m_glContext;
     //wglShareLists(m_glContext, w->m_glContext);
+}
+
+//------------------------------------------------------------------------
+
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   Windowing::Window(renderer, flags)
+,   m_context(scoped<Context>::create<Arena::General>())
+,   m_closed(0)
+{
+    renderer->attachWindow(this);
+}
+
+Window::~Window()
+{
+}
+
+void Window::setCurrent()
+{
+    if(!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
+    {
+        char *errorMessage;
+        ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            ::GetLastError(),
+            0,
+            reinterpret_cast<LPTSTR>(&errorMessage),
+            0,
+            NULL);
+        be_error(errorMessage);
+        ::LocalFree(errorMessage);
+    }
+}
+
+void Window::clearCurrent()
+{
+    if(!wglMakeCurrent(0, 0))
+    {
+        char *errorMessage;
+        ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            ::GetLastError(),
+            0,
+            reinterpret_cast<LPTSTR>(&errorMessage),
+            0,
+            NULL);
+        be_error(errorMessage);
+        ::LocalFree(errorMessage);
+    }
+}
+
+void Window::present()
+{
+    SwapBuffers(m_context->m_dc);
 }
 
 }}}

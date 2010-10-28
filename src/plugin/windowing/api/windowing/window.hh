@@ -14,15 +14,17 @@ class Renderer;
 
 class Window : public IRenderTarget
 {
+private:
+    class PlatformWindow;
+    scoped<PlatformWindow>  m_window;
 protected:
-    HWND            m_window;
-    HDC             m_dc;
+    void* getWindowHandle() const;
+    bool isClosed() const;
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
 
     void close() override;
-
     uint2 getDimensions() const override;
 };
 

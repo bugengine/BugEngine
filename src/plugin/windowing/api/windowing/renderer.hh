@@ -5,39 +5,32 @@
 #define BE_WINDOWING_RENDERER_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/irenderer.hh>
-#include    <core/threads/thread.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
 class Window;
-class RendererData;
 struct WindowCreationFlags;
 
 class Renderer : public IRenderer
 {
     friend class Window;
 private:
-    istring         m_windowClassName;
-    WNDCLASSEX      m_wndClassEx;
-    Thread          m_windowManagementThread;
-private:
-    static intptr_t updateWindows(intptr_t p1, intptr_t p2);
+    class PlatformRenderer;
+    friend class PlatformRenderer;
+    scoped<PlatformRenderer>    m_platformRenderer;
 protected:
     void            flush() override;
-private:
-    HWND            createWindowImplementation(const WindowCreationFlags* flags) const;
-    void            destroyWindowImplementation(HWND hWnd);
-protected:
-    virtual UINT    messageCount() const;
-    virtual void    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
-    void            postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const;
+    void            createContextAsync(void* params);
+    void            destroyContextAsync(void* params);
 public:
     Renderer();
     ~Renderer();
 
     uint2           getScreenSize() override;
-    const istring&  getWindowClassName() const;
+
+    virtual void    createContext(void* params);
+    virtual void    destroyContext(void* params);
 };
 
 }}}

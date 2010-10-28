@@ -12,13 +12,39 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 #define GLX_CONTEXT_MINOR_VERSION_ARB       0x2092
 typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
+class Renderer::Context
+{
+    friend class Renderer;
+private:
+    GLXContext  m_glContext;
+public:
+    Context();
+    ~Context();
+};
+
+Renderer::Context::Context()
+{
+}
+
+Renderer::Context::~Context()
+{
+    if(m_glContext)
+        wglDeleteContext(m_glContext);
+}
+
+Renderer::Renderer(weak<const FileSystem> filesystem)
+    :   m_context(scoped<Context>::create<Arena::General>())
+    ,   m_filesystem(filesystem)
+{
+}
+
 Renderer::~Renderer()
 {
 }
 
 void Renderer::attachWindow(Window* w)
 {
-    if(!m_glContext)
+    if(!m_context->m_glContext)
     {
         glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
         if(glXCreateContextAttribsARB)
@@ -30,7 +56,7 @@ void Renderer::attachWindow(Window* w)
                     //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                     None
                 };
-            m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
+            m_context->m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
             if(!m_glContext)
             {
                 attribs[1] = 1;
@@ -41,12 +67,47 @@ void Renderer::attachWindow(Window* w)
         }
         else
         {
-            m_glContext = glXCreateNewContext(m_display, m_fbConfig, GLX_RGBA_TYPE, 0, True);
+            m_context->m_glContext = glXCreateNewContext(m_display, m_fbConfig, GLX_RGBA_TYPE, 0, True);
         }
         XSync(m_display, false);
     }
-    w->m_glContext = m_glContext;
+    w->m_glContext = m_context->m_glContext;
 }
+
+//------------------------------------------------------------------------
+
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   Windowing::Window(renderer, flags)
+,   m_closed(0)
+{
+    renderer->attachWindow(this);
+}
+
+Window::~Window()
+{
+}
+
+void Window::setCurrent()
+{
+    if(m_window)
+    {
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, m_window, be_checked_cast<Renderer>(m_renderer)->m_glContext);
+    }
+}
+
+void Window::clearCurrent()
+{
+    if(m_window)
+    {
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, 0, 0);
+    }
+}
+
+void Window::present()
+{
+    glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
+}
+
 
 }}}
 

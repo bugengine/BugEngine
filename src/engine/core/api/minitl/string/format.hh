@@ -117,18 +117,19 @@ template< u16 size >
 const format<size>& operator|(const format<size>& f, i64 value)
 {
     char result[16];
-    char* buf = result;
-    if(value < 0)
-    {
-        *(buf++) = '-';
-    }
+    result[15] = 0;
+    char* buf = result+14;
+    bool sign = (value < 0);
     do
     {
-        *(buf++) = (char)(value%10)+'0';
+        *(buf--) = (char)(value%10)+'0';
         value /= 10;
     } while (value);
-    *buf = 0;
-    f.put(result);
+    if(sign)
+    {
+        *(buf--) = '-';
+    }
+    f.put(buf+1);
     return f;
 }
 
@@ -137,14 +138,14 @@ template< u16 size >
 const format<size>& operator|(const format<size>& f, u64 value)
 {
     char result[16];
-    char* buf = result;
+    result[15] = 0;
+    char* buf = result+14;
     do
     {
-        *(buf++) = (char)(value%10)+'0';
+        *(buf--) = (char)(value%10)+'0';
         value /= 10;
     } while (value);
-    *buf = 0;
-    f.put(result);
+    f.put(buf+1);
     return f;
 }
 
