@@ -4,6 +4,8 @@
 #include    <windowing/stdafx.h>
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
+#include    <win32/platformrenderer.hh>
+#include    <win32/platformwindow.hh>
 
 namespace BugEngine
 {
@@ -13,24 +15,12 @@ namespace BugEngine
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
-    
-struct WindowCreationFlags
-{
-    const char *className;
-    const char *title;
-    int x;
-    int y;
-    RECT size;
-    DWORD flags;
-    bool fullscreen;
-};
 
-
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   IRenderTarget(renderer)
+Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> window, WindowFlags flags)
+:   m_renderer(renderer)
 {
     WindowCreationFlags f;
-    f.className = renderer->getWindowClassName().c_str();
+    f.className = renderer->m_platformRenderer->getWindowClassName().c_str();
     f.title = flags.title.c_str();
     f.flags = flags.border ? WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX : WS_POPUP;
     f.x = flags.position.x();
@@ -42,13 +32,26 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
     f.fullscreen = !flags.border;
     if(flags.border)
         AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
-    m_window = renderer->createWindowImplementation(&f);
-    m_dc = GetDC(m_window);
+    m_window = renderer->m_platformRenderer->createWindowImplementation(&f);
     if(!m_window)
     {
         BE_WIN32_PRINTERROR();
     }
-    SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG)this);
+    SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG)window.operator->());
+}
+
+Window::PlatformWindow::~PlatformWindow()
+{
+    HWND hWnd = m_window;
+    m_window = 0;
+    if(hWnd)
+        be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->destroyWindowImplementation(hWnd);
+}
+
+Window::Window(weak<Renderer> renderer, WindowFlags flags)
+:   IRenderTarget(renderer)
+,   m_window(scoped<PlatformWindow>::create<Arena::General>(renderer, this, flags))
+{
 }
 
 Window::~Window()
@@ -58,17 +61,25 @@ Window::~Window()
 
 void Window::close()
 {
-    HWND hWnd = m_window;
-    m_window = 0;
-    if(hWnd)
-        be_checked_cast<Renderer>(m_renderer)->destroyWindowImplementation(hWnd);
+    m_window = scoped<PlatformWindow>();
+}
+
+bool Window::isClosed() const
+{
+    return m_window == 0;
 }
 
 uint2 Window::getDimensions() const
 {
     RECT r;
-    GetClientRect(m_window, &r);
+    GetClientRect(m_window->m_window, &r);
     return int2(r.right-r.left, r.bottom-r.top);
+}
+
+void* Window::getWindowHandle() const
+{
+    be_assert_recover(m_window, "no window implementation is created", return 0);
+    return (void*)&m_window->m_window;
 }
 
 }}}

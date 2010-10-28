@@ -31,7 +31,7 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
     ZeroMemory(&d3dpp, sizeof(d3dpp));
     d3dpp.Windowed = !flags.fullscreen;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    d3dpp.hDeviceWindow = m_window;
+    d3dpp.hDeviceWindow = *(HWND*)getWindowHandle();
     d3dpp.BackBufferWidth = flags.size.x();
     d3dpp.BackBufferHeight = flags.size.y();
     d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;

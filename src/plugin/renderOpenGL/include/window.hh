@@ -16,15 +16,12 @@ class Window : public Windowing::Window
 {
     friend class Renderer;
 private:
-    #ifdef BE_PLATFORM_WIN32
-        HGLRC       m_glContext;
-    #else
-        GLXContext  m_glContext;
-    #endif
+    class Context;
+    scoped<Context> m_context;
     i_u8            m_closed;
 private:
-    inline void setCurrent();
-    inline void clearCurrent();
+    void setCurrent();
+    void clearCurrent();
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
@@ -34,6 +31,7 @@ public:
 
     void close() override;
     bool closed() const override;
+    void present();
 };
 
 }}}

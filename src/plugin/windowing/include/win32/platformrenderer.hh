@@ -1,16 +1,15 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WIN32_RENDERER_HH_
-#define BE_WIN32_RENDERER_HH_
+#ifndef BE_WINDOWING_WIN32_PLATFORMRENDERER_HH_
+#define BE_WINDOWING_WIN32_PLATFORMRENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/irenderer.hh>
 #include    <core/threads/thread.hh>
+#include    <windows.h>
 
-namespace BugEngine { namespace Graphics { namespace Win32
+
+namespace BugEngine { namespace Graphics { namespace Windowing
 {
-
-class Window;
 
 struct WindowCreationFlags
 {
@@ -23,31 +22,27 @@ struct WindowCreationFlags
     bool fullscreen;
 };
 
-class Renderer : public IRenderer
+class Renderer::PlatformRenderer : public minitl::refcountable
 {
-    friend class Window;
 private:
+    weak<Renderer>  m_renderer;
     istring         m_windowClassName;
     WNDCLASSEX      m_wndClassEx;
     Thread          m_windowManagementThread;
 private:
     static intptr_t updateWindows(intptr_t p1, intptr_t p2);
-protected:
-    void            flush() override;
-private:
+public:
+    PlatformRenderer(weak<Renderer> renderer);
+    ~PlatformRenderer();
+
     HWND            createWindowImplementation(const WindowCreationFlags* flags) const;
     void            destroyWindowImplementation(HWND hWnd);
-protected:
-    virtual UINT    messageCount() const;
-    virtual void    handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
-    void            postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const;
-public:
-    Renderer();
-    ~Renderer();
 
-    uint2           getScreenSize() override;
+    void            postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const;
+    void            handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
     const istring&  getWindowClassName() const;
 };
+
 
 }}}
 

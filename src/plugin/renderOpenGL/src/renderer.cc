@@ -12,12 +12,6 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-Renderer::Renderer(weak<const FileSystem> filesystem)
-:   m_glContext(0)
-,   m_filesystem(filesystem)
-{
-}
-
 ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
     return ref<Window>::create<Arena::General>(this, flags);

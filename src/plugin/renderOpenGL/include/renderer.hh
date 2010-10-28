@@ -23,12 +23,9 @@ class Renderer : public Windowing::Renderer
     friend class ShaderPipeline;
     friend class TexturePipeline;
 private:
-#   ifdef BE_PLATFORM_WIN32
-    HGLRC                       m_glContext;
-#   else
-    GLXContext                  m_glContext;
-#   endif
-    weak<const FileSystem>      m_filesystem;
+    class Context;
+    scoped<Context>         m_context;
+    weak<const FileSystem>  m_filesystem;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();

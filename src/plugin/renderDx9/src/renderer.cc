@@ -21,18 +21,6 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-#define BE_WIN32_CREATECONTEXT 0
-#define BE_WIN32_DESTROYCONTEXT 1
-
-namespace
-{
-    struct ContextCreationEvent
-    {
-        D3DPRESENT_PARAMETERS   params;
-        Event                   event;
-    };
-}
-
 Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
@@ -45,7 +33,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
-    destroyContextAsync();
+    destroyContextAsync(0);
     int refCnt = m_directx->Release();
     be_forceuse(refCnt);
     be_assert(refCnt == 0, "Dx refcount is not 0");
@@ -61,7 +49,7 @@ Renderer::SwapchainItem Renderer::createSwapChain(D3DPRESENT_PARAMETERS params)
     }
     else
     {
-        createContextAsync(params);
+        createContextAsync((void*)&params);
         m_deviceSwapChain = it;
         d3d_checkResult(m_device->GetSwapChain(0, &it->swapchain));
         //d3d_checkResult(m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
@@ -75,8 +63,9 @@ Renderer::SwapchainItem Renderer::createSwapChain(D3DPRESENT_PARAMETERS params)
     return it;
 }
 
-void Renderer::createContext(D3DPRESENT_PARAMETERS& params)
+void Renderer::createContext(void* params_)
 {
+    D3DPRESENT_PARAMETERS& params = *(D3DPRESENT_PARAMETERS*)params_;
     if(m_device)
     {
         d3d_checkResult(m_device->Reset(&params));
@@ -94,21 +83,15 @@ void Renderer::createContext(D3DPRESENT_PARAMETERS& params)
     }
 }
 
-void Renderer::createContextAsync(D3DPRESENT_PARAMETERS& params)
+void Renderer::destroyContext(void* params)
 {
-    ContextCreationEvent event;
-    event.params = params;
-    postMessage(WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_CREATECONTEXT, (WPARAM)&event, 0);
-    event.event.wait();
-    return;
-}
-
-void Renderer::destroyContextAsync()
-{
-    ContextCreationEvent event;
-    postMessage(WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT, (WPARAM)&event, 0);
-    event.event.wait();
-    return;
+    if(m_device)
+    {
+        int refCnt = m_device->Release();
+        be_forceuse(refCnt);
+        be_assert(refCnt == 0, "device refcount is not 0");
+        m_device = 0;
+    }
 }
 
 Renderer::SwapchainItem Renderer::release(SwapchainItem swapchain)
@@ -171,39 +154,6 @@ void Renderer::drawBatch(const Batch& b)
     d3d_checkResult(m_device->DrawIndexedPrimitive(type, 0, 0, b.nbVertices, 0, primitiveCount));
 }
 
-UINT Renderer::messageCount() const
-{
-    return 2+Windowing::Renderer::messageCount();
-}
-
-void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    be_forceuse(wParam);
-    be_forceuse(lParam);
-    if(msg == WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_CREATECONTEXT)
-    {
-        ContextCreationEvent* event = (ContextCreationEvent*)wParam;
-        createContext(event->params);
-        event->event.set();
-    }
-    else if(msg == WM_USER+Windowing::Renderer::messageCount()+BE_WIN32_DESTROYCONTEXT)
-    {
-        ContextCreationEvent* event = (ContextCreationEvent*)wParam;
-        if(m_device)
-        {
-            int refCnt = m_device->Release();
-            be_forceuse(refCnt);
-            be_assert(refCnt == 0, "device refcount is not 0");
-            m_device = 0;
-        }
-        event->event.set();
-    }
-    else
-    {
-        Windowing::Renderer::handleMessage(msg, wParam, lParam);
-    }
-}
-
 void Renderer::flush()
 {
     Windowing::Renderer::flush();
@@ -231,12 +181,12 @@ void Renderer::flush()
                 }
                 if(d3d_checkResult(m_device->TestCooperativeLevel()) != D3DERR_DEVICELOST)
                 {
-                    createContextAsync(m_deviceSwapChain->params);
+                    createContextAsync((void*)&m_deviceSwapChain->params);
                 }
             }
             else
             {
-                destroyContextAsync();
+                destroyContextAsync(0);
             }
         }
         break;

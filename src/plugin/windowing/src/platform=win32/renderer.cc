@@ -4,9 +4,8 @@
 #include    <windowing/stdafx.h>
 #include    <windowing/renderer.hh>
 #include    <windowing/window.hh>
+#include    <win32/platformrenderer.hh>
 #include    <core/threads/event.hh>
-#include    <windows.h>
-
 #pragma warning(disable:4311 4312 4355)
 
 namespace BugEngine
@@ -18,21 +17,10 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
-
-struct WindowCreationFlags
-{
-    const char *className;
-    const char *title;
-    int x;
-    int y;
-    RECT size;
-    DWORD flags;
-    bool fullscreen;
-};
-
-
 #define WM_BE_CREATEWINDOW  0
 #define WM_BE_DESTROYWINDOW 1
+#define WM_BE_CREATECONTEXT 2
+#define WM_BE_DESTROYCONTEXT 3
 
 namespace
 {
@@ -42,6 +30,12 @@ namespace
         HWND                 hWnd;
         Event                event;
     };
+    struct ContextCreationEvent
+    {
+        void*   params;
+        Event   event;
+    };
+
 
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
@@ -87,9 +81,28 @@ namespace
     }
 }
 
-Renderer::Renderer()
-:   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
-,   m_windowManagementThread("WindowManagement", &Renderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)
+intptr_t Renderer::PlatformRenderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
+{
+    weak<Renderer::PlatformRenderer> renderer(reinterpret_cast<Renderer::PlatformRenderer*>(p1));
+    MSG msg;
+    while(::GetMessage(&msg, 0, 0, 0))
+    {
+        if(msg.message >= WM_USER && msg.message < WM_APP)
+        {
+            renderer->handleMessage(msg.message, msg.wParam, msg.lParam);
+        }
+        else
+        {
+            DispatchMessage(&msg);
+        }
+    }
+    return 0;
+}
+
+Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
+:   m_renderer(renderer)
+,   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
+,   m_windowManagementThread("WindowManagement", &Renderer::PlatformRenderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -108,49 +121,18 @@ Renderer::Renderer()
     RegisterClassEx(&m_wndClassEx);
 }
 
-Renderer::~Renderer()
+Renderer::PlatformRenderer::~PlatformRenderer()
 {
     postMessage(WM_QUIT, 0, 0);
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
 }
 
-HWND Renderer::createWindowImplementation(const WindowCreationFlags* flags) const
-{
-    WindowCreationEvent event;
-    event.flags = flags;
-    postMessage(WM_USER+WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
-    event.event.wait();
-    return event.hWnd;
-}
-
-void Renderer::destroyWindowImplementation(HWND hWnd)
-{
-    postMessage(WM_USER+WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
-}
-
-uint2 Renderer::getScreenSize()
-{
-    RECT rect;
-    GetWindowRect(GetDesktopWindow(),&rect);
-    return uint2(rect.right - rect.left, rect.bottom - rect.top);
-}
-
-const istring& Renderer::getWindowClassName() const
-{
-    return m_windowClassName;
-}
-
-UINT Renderer::messageCount() const
-{
-    return 2;
-}
-
-void Renderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
+void Renderer::PlatformRenderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
 {
     PostThreadMessageA((DWORD)m_windowManagementThread.id(), msg, wParam, lParam);
 }
 
-void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+void Renderer::PlatformRenderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
     be_forceuse(wParam);
     be_forceuse(lParam);
@@ -178,32 +160,90 @@ void Renderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
         }
         break;
+    case WM_USER+WM_BE_CREATECONTEXT:
+        {
+            ContextCreationEvent* event = (ContextCreationEvent*)wParam;
+            m_renderer->createContext(event->params);
+            event->event.set();
+        }
+        break;
+    case WM_USER+WM_BE_DESTROYCONTEXT:
+        {
+            ContextCreationEvent* event = (ContextCreationEvent*)wParam;
+            m_renderer->destroyContext(0);
+            event->event.set();
+        }
+        break;
     default:
         be_assert(false, "unhandled message type %d" | msg);
         break;
     }
 }
 
+HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags* flags) const
+{
+    WindowCreationEvent event;
+    event.flags = flags;
+    postMessage(WM_USER+WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
+    event.event.wait();
+    return event.hWnd;
+}
+
+const istring& Renderer::PlatformRenderer::getWindowClassName() const
+{
+    return m_windowClassName;
+}
+
+void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
+{
+    postMessage(WM_USER+WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
+}
+
+//-----------------------------------------------------------------------------
+
+Renderer::Renderer()
+    :   m_platformRenderer(scoped<PlatformRenderer>::create<Arena::General>(this))
+{
+}
+
+Renderer::~Renderer()
+{
+}
+
 void Renderer::flush()
 {
 }
 
-intptr_t Renderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
+uint2 Renderer::getScreenSize()
 {
-    weak<Renderer> renderer(reinterpret_cast<Renderer*>(p1));
-    MSG msg;
-    while(::GetMessage(&msg, 0, 0, 0))
-    {
-        if(msg.message >= WM_USER && msg.message < WM_APP)
-        {
-            renderer->handleMessage(msg.message, msg.wParam, msg.lParam);
-        }
-        else
-        {
-            DispatchMessage(&msg);
-        }
-    }
-    return 0;
+    RECT rect;
+    GetWindowRect(GetDesktopWindow(),&rect);
+    return uint2(rect.right - rect.left, rect.bottom - rect.top);
+}
+
+void Renderer::createContextAsync(void* params)
+{
+    ContextCreationEvent event;
+    event.params = params;
+    m_platformRenderer->postMessage(WM_USER+WM_BE_CREATECONTEXT, (WPARAM)&event, 0);
+    event.event.wait();
+    return;
+}
+
+void Renderer::destroyContextAsync(void* params)
+{
+    ContextCreationEvent event;
+    m_platformRenderer->postMessage(WM_USER+WM_BE_DESTROYCONTEXT, (WPARAM)&event, 0);
+    event.event.wait();
+    return;
+}
+
+void Renderer::createContext(void* params)
+{
+}
+
+void Renderer::destroyContext(void* params)
+{
 }
 
 }}}
