@@ -5,6 +5,9 @@
 #include    <renderer.hh>
 #include    <window.hh>
 
+#include    <GL/gl3.h>
+#include    <GL/glext.h>
+#include    <GL/wglext.h>
 
 namespace BugEngine
 {
