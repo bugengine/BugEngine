@@ -8,6 +8,8 @@
 
 #include    <window.hh>
 
+#include    <GL/gl3.h>
+
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {

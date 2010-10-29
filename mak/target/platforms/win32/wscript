@@ -97,10 +97,11 @@ def configure(conf):
 			try:
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf)
-				add_win32_flags_to_env(conf)
 
 				name = 'gcc-win32-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
 				newenv.set_variant(name)
+				add_win32_flags_to_env(conf)
+
 				newenv = conf.set_env_name(name, newenv)
 				Utils.pprint('NORMAL', 'configure for tool %s' % name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
