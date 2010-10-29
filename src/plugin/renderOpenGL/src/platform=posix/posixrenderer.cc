@@ -5,6 +5,11 @@
 #include    <renderer.hh>
 #include    <window.hh>
 
+#include    <GL/gl3.h>
+#include    <GL/glext.h>
+#include    <GL/glx.h>
+#include    <GL/glxext.h>
+
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
@@ -28,8 +33,8 @@ Renderer::Context::Context()
 
 Renderer::Context::~Context()
 {
-    if(m_glContext)
-        wglDeleteContext(m_glContext);
+    //if(m_glContext)
+    //    glXDestroyContext(m_glContext);
 }
 
 Renderer::Renderer(weak<const FileSystem> filesystem)

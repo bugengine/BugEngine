@@ -1,15 +1,16 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <X/stdafx.h>
-#include    <X/renderer.hh>
-#include    <X/window.hh>
+#include    <windowing/stdafx.h>
+#include    <windowing/renderer.hh>
+#include    <windowing/window.hh>
+#include    <posix/platformrenderer.hh>
 #include    <GL/glx.h>
 #include    <core/threads/event.hh>
 #include    <X11/keysym.h>
 #include    <X11/Xatom.h>
 
-namespace BugEngine { namespace Graphics { namespace X
+namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
 namespace
@@ -39,7 +40,7 @@ namespace
     }
 }
 
-Renderer::Renderer()
+Renderer::PlatformRenderer::PlatformRenderer()
 :   m_display(XOpenDisplay(0))
 ,   m_screen(XDefaultScreen(m_display))
 ,   m_rootWindow(XRootWindow(m_display, m_screen))
@@ -47,24 +48,46 @@ Renderer::Renderer()
 ,   m_visual(glXGetVisualFromFBConfig(m_display, m_fbConfig))
 ,   m_windowProperty(XInternAtom(m_display, "BE_WINDOW", False))
 {
-    XSetErrorHandler(&Renderer::xError);
+    XSetErrorHandler(&Renderer::PlatformRenderer::xError);
     XSync(m_display, false);
 }
 
-Renderer::~Renderer()
+Renderer::PlatformRenderer::~PlatformRenderer()
 {
     XFree(m_visual);
     if(m_display)
         XCloseDisplay(m_display);
 }
 
-uint2 Renderer::getScreenSize()
+static const char *s_messages[] =
 {
-    Screen* s = XScreenOfDisplay(m_display, m_screen);
-    return uint2(XWidthOfScreen(s), XHeightOfScreen(s));
+    "Success"
+    "BadRequest",
+    "BadValue",
+    "BadWindow",
+    "BadPixmap",
+    "BadAtom",
+    "BadCursor",
+    "BadFont",
+    "BadMatch",
+    "BadDrawable",
+    "BadAccess",
+    "BadAlloc",
+    "BadColor",
+    "BadGC",
+    "BadIDChoice",
+    "BadName",
+    "BadLength",
+    "BadImplementation"
+};
+
+int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
+{
+    be_assert(false, "X11 error: %s"|s_messages[event->error_code]);
+    return 0;
 }
 
-::Window Renderer::createWindow(const WindowFlags& flags)
+::Window Renderer::PlatformRenderer::createWindow(const WindowFlags& flags)
 {
     XSetWindowAttributes attributes;
     attributes.colormap = XCreateColormap(m_display, XRootWindow(m_display, m_visual->screen), m_visual->visual, AllocNone);
@@ -90,13 +113,31 @@ uint2 Renderer::getScreenSize()
     return result;
 }
 
+
+
+
+Renderer::Renderer()
+:   m_platformRenderer(scoped<PlatformRenderer>::create<Arena::General>())
+{
+}
+
+Renderer::~Renderer()
+{
+}
+
+uint2 Renderer::getScreenSize()
+{
+    Screen* s = XScreenOfDisplay(m_platformRenderer->m_display, m_platformRenderer->m_screen);
+    return uint2(XWidthOfScreen(s), XHeightOfScreen(s));
+}
+
 void Renderer::flush()
 {
     XEvent event;
     /* wait for events*/ 
-    while(XPending(m_display) > 0)
+    while(XPending(m_platformRenderer->m_display) > 0)
     {
-        XNextEvent(m_display, &event);
+        XNextEvent(m_platformRenderer->m_display, &event);
         switch (event.type)
         {
         case DestroyNotify:
@@ -120,7 +161,7 @@ void Renderer::flush()
                 int format;
                 unsigned long nbItems;
                 unsigned long leftBytes;
-                XGetWindowProperty(m_display, event.xkey.window, m_windowProperty, 0, sizeof(Window*)/4,
+                XGetWindowProperty(m_platformRenderer->m_display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
                                    False, XA_INTEGER, &type, &format, &nbItems, &leftBytes, (unsigned char**)&w);
                 be_assert(w, "could not retrieve engine window handle from X11 window");
                 be_info("%d items: %p" | nbItems | (const void*)w);
@@ -134,33 +175,22 @@ void Renderer::flush()
     }
 }
 
-static const char *s_messages[] =
+void Renderer::createContextAsync(void* params)
 {
-    "Success"
-    "BadRequest",
-    "BadValue",
-    "BadWindow",
-    "BadPixmap",
-    "BadAtom",
-    "BadCursor",
-    "BadFont",
-    "BadMatch",
-    "BadDrawable",
-    "BadAccess",
-    "BadAlloc",
-    "BadColor",
-    "BadGC",
-    "BadIDChoice",
-    "BadName",
-    "BadLength",
-    "BadImplementation"
-};
-
-int Renderer::xError(::Display* display, XErrorEvent* event)
-{
-    be_assert(false, "X11 error: %s"|s_messages[event->error_code]);
-    return 0;
+    return createContext(params);
 }
 
+void Renderer::destroyContextAsync(void* params)
+{
+    return destroyContext(params);
+}
+
+void Renderer::createContext(void*)
+{
+}
+
+void Renderer::destroyContext(void*)
+{
+}
 
 }}}
