@@ -28,13 +28,14 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', ['-ldl', '-rdynamic', '-Wl,-E'])
+	conf.env.append_unique('LINKFLAGS', ['-framework', 'OpenGL'])
 	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_darwin_flags_to_env(conf):
 	import Options
 	conf.env['PLATFORM'] = 'darwin'
+	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk, 'usr', 'include')])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
