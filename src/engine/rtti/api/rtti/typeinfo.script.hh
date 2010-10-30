@@ -30,7 +30,7 @@ struct TypeInfo
     Type                            type;
     Constness                       constness;
 
-    size_t                          size() const;
+    u32                             size() const;
     minitl::format<>                name() const;
     void                            copy(const void* source, void* dest) const;
     void                            create(void* obj) const;

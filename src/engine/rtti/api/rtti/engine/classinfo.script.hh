@@ -25,8 +25,8 @@ public:
     raw<const ClassInfo>            metaclass;
     mutable raw<const ClassInfo>    child;
     mutable raw<const ClassInfo>    next;
-    size_t                          size;
-    size_t                          propertyCount;
+    u16                             size;
+    u16                             propertyCount;
     raw<PropertyInfo const>         properties;
 private:
     void copy(const void* src, void* dst) const;

@@ -19,7 +19,7 @@ struct ParamInfo
 struct OverloadInfo
 {
     raw<const ClassInfo>    returntype;
-    size_t                  paramCount;
+    u16                     paramCount;
     raw<const ParamInfo>    parameters;
     Value                   (*method)(Value* params, size_t paramCount);
 };
@@ -27,7 +27,7 @@ struct OverloadInfo
 struct MethodInfo
 {
     raw<const char>         name;
-    size_t                  overloadCount;
+    u16                     overloadCount;
     raw<const OverloadInfo> overloads;
 };
 
