@@ -17,9 +17,55 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 #define GLX_CONTEXT_MINOR_VERSION_ARB       0x2092
 typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
-class Renderer::Context
+class Renderer::Context : public minitl::refcountable
 {
     friend class Renderer;
+private:
+    ::Display*  m_display;
+    GLXContext  m_glContext;
+public:
+    Context(::Display* display, ::GLXFBConfig fbConfig);
+    ~Context();
+};
+
+Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
+:   m_display(display)
+{
+    glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
+    if(glXCreateContextAttribsARB)
+    {
+        int attribs[] =
+            {
+                GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+                //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                None
+            };
+        m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
+        if(!m_glContext)
+        {
+            attribs[1] = 1;
+            attribs[3] = 0;
+            m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
+        }
+        be_info("Creating OpenGL %d.%d context" | attribs[1] | attribs[3]);
+    }
+    else
+    {
+        m_glContext = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE, 0, True);
+    }
+    XSync(display, false);
+}
+
+Renderer::Context::~Context()
+{
+}
+
+
+class Window::Context : public minitl::refcountable
+{
+    friend class Renderer;
+    friend class Window;
 private:
     GLXContext  m_glContext;
 public:
@@ -27,19 +73,20 @@ public:
     ~Context();
 };
 
-Renderer::Context::Context()
+Window::Context::Context()
+:   m_glContext(0)
 {
 }
 
-Renderer::Context::~Context()
+Window::Context::~Context()
 {
-    //if(m_glContext)
-    //    glXDestroyContext(m_glContext);
 }
+
+//------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-    :   m_context(scoped<Context>::create<Arena::General>())
-    ,   m_filesystem(filesystem)
+:   m_context()
+,   m_filesystem(filesystem)
 {
 }
 
@@ -51,38 +98,22 @@ void Renderer::attachWindow(Window* w)
 {
     if(!m_context->m_glContext)
     {
-        glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
-        if(glXCreateContextAttribsARB)
-        {
-            int attribs[] =
-                {
-                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-                    GLX_CONTEXT_MINOR_VERSION_ARB, 0,
-                    //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-                    None
-                };
-            m_context->m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
-            if(!m_glContext)
-            {
-                attribs[1] = 1;
-                attribs[3] = 0;
-                m_glContext = glXCreateContextAttribsARB(m_display, m_fbConfig, 0, True, attribs);
-            }
-            be_info("Creating OpenGL %d.%d context" | attribs[1] | attribs[3]);
-        }
-        else
-        {
-            m_context->m_glContext = glXCreateNewContext(m_display, m_fbConfig, GLX_RGBA_TYPE, 0, True);
-        }
-        XSync(m_display, false);
+        createContext(0);
     }
-    w->m_glContext = m_context->m_glContext;
+    w->m_context->m_glContext = m_context->m_glContext;
+}
+
+void Renderer::createContextAsync(void* params)
+{
+    struct { ::Display* display; ::GLXFBConfig fbConfig; } *p = params;
+    m_context = scoped<Context>::create<Arena::General>(p->display, p->fbConfig);
 }
 
 //------------------------------------------------------------------------
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
+,   m_context(scoped<Contect>::create<Arena::General>())
 ,   m_closed(0)
 {
     renderer->attachWindow(this);
@@ -94,23 +125,23 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(m_window)
+    if(m_context->m_window)
     {
-        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, m_window, be_checked_cast<Renderer>(m_renderer)->m_glContext);
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, m_context->m_window, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
     }
 }
 
 void Window::clearCurrent()
 {
-    if(m_window)
+    if(m_context->m_window)
     {
-        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_display, 0, 0);
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, 0, 0);
     }
 }
 
 void Window::present()
 {
-    glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_display, m_window);
+    glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, m_context->m_window);
 }
 
 
