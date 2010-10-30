@@ -20,6 +20,7 @@ typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXC
 class Renderer::Context : public minitl::refcountable
 {
     friend class Renderer;
+    friend class Window;
 private:
     ::Display*  m_display;
     GLXContext  m_glContext;
@@ -92,28 +93,37 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
+    destroyContextAsync(0);
 }
 
 void Renderer::attachWindow(Window* w)
 {
-    if(!m_context->m_glContext)
+    if(!m_context)
     {
-        createContext(0);
+        createContextAsync(0);
     }
     w->m_context->m_glContext = m_context->m_glContext;
 }
 
-void Renderer::createContextAsync(void* params)
+void Renderer::createContext(void* params)
 {
-    struct { ::Display* display; ::GLXFBConfig fbConfig; } *p = params;
+    const struct DisplayInfo
+    {
+        ::Display* display;
+        ::GLXFBConfig fbConfig;
+    } *p = (const DisplayInfo*)params;
     m_context = scoped<Context>::create<Arena::General>(p->display, p->fbConfig);
+}
+
+void Renderer::destroyContext(void*)
+{
 }
 
 //------------------------------------------------------------------------
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
-,   m_context(scoped<Contect>::create<Arena::General>())
+,   m_context(scoped<Context>::create<Arena::General>())
 ,   m_closed(0)
 {
     renderer->attachWindow(this);
@@ -125,15 +135,16 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(m_context->m_window)
+    if(!isClosed())
     {
-        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, m_context->m_window, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
+        ::Window* w = (::Window*)getWindowHandle();
+        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
     }
 }
 
 void Window::clearCurrent()
 {
-    if(m_context->m_window)
+    if(!isClosed())
     {
         glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, 0, 0);
     }
@@ -141,7 +152,11 @@ void Window::clearCurrent()
 
 void Window::present()
 {
-    glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, m_context->m_window);
+    if(!isClosed())
+    {
+        ::Window* w = (::Window*)getWindowHandle();
+        glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w);
+    }
 }
 
 

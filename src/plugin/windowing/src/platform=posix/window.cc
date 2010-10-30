@@ -55,6 +55,19 @@ void Window::close()
     }
 }
 
+bool Window::isClosed() const
+{
+    return m_window == 0;
+}
+
+void* Window::getWindowHandle() const
+{
+    be_assert_recover(m_window, "no window implementation is created", return 0);
+    return (void*)&m_window->m_window;
+}
+
+
+
 uint2 Window::getDimensions() const
 {
     return int2(1920, 1200);

@@ -43,7 +43,9 @@ public:
 private:
     void                            attachWindow(Window* w);
     void                            drawBatch(const Batch& b);
-
+protected:
+    void                            createContext(void* params) override;
+    void                            destroyContext(void* params) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

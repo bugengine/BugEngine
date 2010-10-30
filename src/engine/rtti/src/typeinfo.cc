@@ -150,7 +150,6 @@ static struct A
         v("name") = c;
         OutputDebugString((::minitl::format<>("name: %s\n") | name.as< raw<const char> >().m_ptr).c_str());
         OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
-        v2("name") = c;
         
         RTTI::ClassInfo root = *be_typeid<void>().klass;
     }
