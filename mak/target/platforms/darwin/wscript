@@ -36,7 +36,7 @@ def add_darwin_flags_to_env(conf):
 	import Options
 	conf.env['PLATFORM'] = 'darwin'
 	conf.env['STATIC'] = 1
-	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk, 'usr', 'include')])
+	conf.env.append_unique('CCFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
