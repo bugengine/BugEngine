@@ -112,6 +112,14 @@ void Renderer::attachWindow(Window* w)
     //wglShareLists(m_glContext, w->m_glContext);
 }
 
+void Renderer::createContext(void*)
+{
+}
+
+void Renderer::destroyContext(void*)
+{
+}
+
 //------------------------------------------------------------------------
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
