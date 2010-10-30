@@ -96,7 +96,7 @@ def find_cross_gcc(conf):
 	conf.env.append_unique('ASFLAGS', '-c')
 
 	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
 
 	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
