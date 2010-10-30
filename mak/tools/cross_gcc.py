@@ -28,6 +28,7 @@ def parse_gcc_target(target):
 			  ('i586', 'x86'),
 			  ('i686', 'x86'),
 			  ('arm-eabi', 'arm7'),
+			  ('arm', 'arm'),
 			  ('mipsel', 'mips'),
 			  ('mips', 'mips'),
 			  ('Gekko', 'mips'),

@@ -35,6 +35,8 @@ static inline void displayError()
 # define BE_64
 #elif defined(_X86) || defined(_PPC)
 # define BE_32
+#elif defined(_ARM)
+# define BE_32
 #else
 # error "unknown arch"
 #endif
@@ -83,7 +85,13 @@ static inline void displayError()
 # define BE_PLATFORM_PS3        1
 # define BE_PLATFORM_CONSOLE    1
 #else
-# error "unknown platform"
+# ifndef _PLATFORM
+#  error "Unknown platform"
+# else
+#  define PLATFORM_INCLUDE "core/platforms/"##_PLATFORM##".hh"
+#  include PLATFORM_INCLUDE
+#  undef PLATFORM_INCLUDE
+# endif
 #endif
 
 /*****************************************************************************/

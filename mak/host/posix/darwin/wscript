@@ -10,6 +10,8 @@ import Options
 from Logs import info,warn
 
 os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
+for l in os.listdir('/Developer/Platforms/'):
+	os.environ['PATH'] = ('/Developer/Platforms/%s/Developer/usr/bin:'%l)+os.environ['PATH']
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):

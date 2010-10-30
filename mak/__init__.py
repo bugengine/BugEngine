@@ -9,9 +9,3 @@ platformaliases = {
 	'posix': 	['linux', 'sunos', 'freebsd'],
 }
 
-if os.path.isdir('extra'):
-	for f in os.listdir('extra'):
-		if f in ['.svn', '.cvs']:
-			continue
-		if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
-			allplatforms.append(f)
