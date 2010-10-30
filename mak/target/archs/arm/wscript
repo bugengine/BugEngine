@@ -1,0 +1,17 @@
+# set arm7 specific options
+
+import os
+
+def set_options(opt):
+	pass
+
+def configure(conf):
+	conf.env['ARCHITECTURE'] = 'arm'
+	conf.env.append_unique('CCDEFINES', ['ARM', '_ARM', '__ARM__'])
+	conf.env.append_unique('CXXDEFINES', ['ARM', '_ARM', '__ARM__'])
+	conf.env['AS'] = conf.env['CC']
+	conf.env.append_unique('CCFLAGS', ['-mthumb'])
+	conf.env.append_unique('CXXFLAGS', ['-mthumb'])
+
+def build(bld):
+	pass

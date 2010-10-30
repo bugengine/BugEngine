@@ -12,8 +12,11 @@
 # define be_break()              __asm("trap")
 #elif defined(_MIPS)
 # define be_break()              __asm("break")
+#elif defined(_ARM)
+# define be_break()
 #else
 # error "Breakpoint not supported on this platform"
+# define be_break()
 #endif
 
 #include <stdint.h>

@@ -27,6 +27,12 @@ def set_options(opt):
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
 				opt.sub_options(os.path.join('target', l, target))
+	if os.path.isdir('extra'):
+		for f in os.listdir('extra'):
+			if f in ['.svn', '.cvs']:
+				continue
+			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
+				opt.sub_options(os.path.join('..', 'extra', f))
 	opt.add_option( '--projects',
 					action='store',
 					default='',
@@ -43,7 +49,7 @@ def set_options(opt):
 def configure(conf):
 	conf.env['ARCHITECTURES'] = mak.allarchs
 	conf.env['PLATFORMS']	  = mak.allplatforms
-	conf.env['OPTIMS']		  = mak.alloptims
+	conf.env['OPTIMS']	  = mak.alloptims
 
 	conf.sub_config(os.path.join('host', os.name))
 	for p in mak.allplatforms:

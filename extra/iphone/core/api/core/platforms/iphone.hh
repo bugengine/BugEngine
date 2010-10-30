@@ -1,0 +1,13 @@
+/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+   see LICENSE for detail */
+
+#ifndef BE_CORE_PLATFORM_IPHONE_HH_
+#define BE_CORE_PLATFORM_IPHONE_HH_
+/*****************************************************************************/
+
+#define BE_PLATFORM_NAME       iPhone
+#define BE_PLATFORM_IPHONE     1
+#error "Proof :)"
+
+/*****************************************************************************/
+#endif

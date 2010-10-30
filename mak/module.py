@@ -4,11 +4,18 @@ import Options
 import misc
 import mak
 
-alloptims		= mak.alloptims
-allplatforms	= mak.allplatforms
-allarchs		= mak.allarchs
+alloptims		= mak.alloptims[:]
+allplatforms		= mak.allplatforms[:]
+allarchs		= mak.allarchs[:]
 
 platformaliases = mak.platformaliases
+if os.path.isdir('extra'):
+	for f in os.listdir('extra'):
+		if f in ['.svn', '.cvs']:
+			continue
+		if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
+			allplatforms.append(f)
+
 
 def expandPlatforms(platforms):
 	result = []
