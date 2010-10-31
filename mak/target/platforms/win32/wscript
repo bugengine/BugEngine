@@ -70,8 +70,8 @@ def add_win32_flags_to_env(conf):
 	conf.env['shlib_PATTERN']	= '%s.dll'
 	conf.env['program_PATTERN'] = '%s.exe'
 
-	conf.env.append_unique('CCDEFINES', ['WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
-	conf.env.append_unique('CXXDEFINES', ['WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
+	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_win32', 'WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
+	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_win32', 'WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
 	if conf.env['GCC_CONFIGURED_ARCH'] == 'amd64':
 		conf.env.append_unique('CCDEFINES', ['_WIN64'])
 		conf.env.append_unique('CXXDEFINES', ['_WIN64'])
