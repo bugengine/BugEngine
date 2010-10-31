@@ -7,7 +7,6 @@
 
 #define BE_PLATFORM_NAME       iPhone
 #define BE_PLATFORM_IPHONE     1
-#error "Proof :)"
 
 /*****************************************************************************/
 #endif
