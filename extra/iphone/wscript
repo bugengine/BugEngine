@@ -43,8 +43,8 @@ def add_darwin_flags_to_env(conf):
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
 
-	conf.env.append_unique('CCDEFINES', ['IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__', '_PLATFORM=iphone'])
-	conf.env.append_unique('CXXDEFINES', ['IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__', '_PLATFORM=iphone'])
+	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__', '_PLATFORM=iphone'])
+	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__', '_PLATFORM=iphone'])
 	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',

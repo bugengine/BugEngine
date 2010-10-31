@@ -76,7 +76,6 @@ class module:
 				  archs,
 				  sourcelist,
 				):
-				
 		while None in depends:
 			depends.remove(None)
 		self.name	  = name
