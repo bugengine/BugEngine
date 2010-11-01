@@ -6,6 +6,7 @@ import os
 import Utils
 import Configure
 import Logs
+import Options
 from Logs import info,warn
 
 os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
@@ -40,9 +41,16 @@ def get_available_gcc(conf):
 
 def set_options(opt):
 	Utils.pprint('NORMAL', 'Host system is Win32')
+	opt.add_option( '--no-msvc',
+					action='store_false',
+					dest="msvc",
+					default=True,
+					help='Disable MSVC toolchains')
+	pass
 
 def configure(conf):
 	conf.check_tool('flex bison data', tooldir=['mak/tools'])
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
-	get_available_msvc(conf)
+	if Options.options.msvc:
+		get_available_msvc(conf)

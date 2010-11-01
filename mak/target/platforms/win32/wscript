@@ -7,17 +7,13 @@ except:
 	pass
 
 import Utils
+import Options
 from Logs import info,warn
 
 # adds MSVC vars to environment
 def add_msvc_to_env(conf, compiler, version, target, platform, tname):
-	name = '%s-%s-%s-%s' %(compiler, platform, target, version)
-	info('configure for tool %s' % name)
-	newenv = conf.set_env_name(name, conf.env.copy())
-	newenv.set_variant(name)
-	newenv['MSVC_VERSIONS'] = [compiler+' '+version]
-	newenv['MSVC_TARGETS'] = [target]
-	conf.setenv(name)
+	conf.env['MSVC_VERSIONS'] = [compiler+' '+version]
+	conf.env['MSVC_TARGETS'] = [target]
 	conf.check_tool('msvc')
 
 	conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
@@ -36,12 +32,8 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 	conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['LINKFLAGS_final'] = ['/DEBUG']
 
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', tname))
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
 
-
-def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
+def add_win32_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
 	newenv['GCC_VERSION']	= version
 	newenv['GCC_TARGET']	= gcc_target
@@ -52,7 +44,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	conf.check_tool('winres')
 
 
-def add_gcc_flags_to_env(conf):
+def add_win32_gcc_flags_to_env(conf):
 	conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
 	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 	conf.env.append_unique('CCFLAGS', '-mwindows')
@@ -95,8 +87,8 @@ def configure(conf):
 			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.setenv('temp')
 			try:
-				add_gcc_to_env(conf, version, toolchaindir, target)
-				add_gcc_flags_to_env(conf)
+				add_win32_gcc_to_env(conf, version, toolchaindir, target)
+				add_win32_gcc_flags_to_env(conf)
 
 				name = 'gcc-win32-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
 				newenv.set_variant(name)
@@ -113,9 +105,22 @@ def configure(conf):
 				conf.setenv('default')
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
+			newenv = conf.set_env_name('temp', conf.env.copy())
+			conf.setenv('temp')
 			try:
 				add_msvc_to_env(conf, compiler, version, target, platform, tname)
+
+				name = '%s-%s-%s-%s' %(compiler, platform, target, version)
+				newenv.set_variant(name)
 				add_win32_flags_to_env(conf)
+
+				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				newenv = conf.set_env_name(name, newenv)
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', tname))
+
+				del conf.all_envs['temp']
+				conf.setenv('default')
+				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception, e:
 				warn('msvc not available: '+str(e))
 				conf.setenv('default')
