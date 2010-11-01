@@ -21,6 +21,8 @@
 #  include <minitl/interlocked/gcc/amd64/interlocked.inl>
 # elif defined(_POWERPC)
 #  include <minitl/interlocked/gcc/ppc/interlocked.inl>
+# elif defined(_ARM)
+#  include <minitl/interlocked/gcc/arm/interlocked.inl>
 # else
 #  error Architecture not implemented on GCC
 # endif
