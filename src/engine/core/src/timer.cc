@@ -4,15 +4,45 @@
 #include    <core/stdafx.h>
 #include    <core/timer.hh>
 
-#ifdef BE_PLATFORM_MACOS
-void clock_gettime(int, timespec* time)
+namespace BugEngine
 {
-    static mach_timebase_info_data_t info = { 0, 0 };
-    if(info.denom == 0)
-        mach_timebase_info(&info);
-    u64 tick = mach_absolute_time() * info.numer/info.denom;
-    time->tv_sec = tick/1000000000;
-    time->tv_nsec = tick-time->tv_sec*1000000000;
-}
-#endif
 
+Timer::Timer() 
+:   m_total(0)
+,   m_start(0)
+{
+    start();
+}
+
+Timer::~Timer()
+{
+}
+
+void Timer::start()
+{
+    m_start = tick();
+}
+
+u64 Timer::stop()
+{
+    u64 stop = tick();
+    m_total += (stop - m_start);
+    return m_total;
+}
+
+void Timer::reset()
+{
+    m_total = 0;
+}
+
+u64 Timer::elapsed() const
+{
+    return tick() - m_start;
+}
+
+u64 Timer::total() const
+{
+    return m_total;
+}
+
+}
