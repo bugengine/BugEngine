@@ -19,19 +19,9 @@ namespace BugEngine
 class Scheduler::Worker
 {
 protected:
-    struct WorkReport : public minitl::inode
-    {
-        const ITask*    task;
-        tick_type       start;
-        tick_type       stop;
-    };
-protected:
     static const int s_frameCount = 8;
 private:
     size_t const                                m_workerId;
-    WorkReport*                                 m_frames[s_frameCount];
-    volatile size_t                             m_currentFrame;
-    minitl::pool<Arena::General, WorkReport>    m_reportPool;
     Thread                                      m_workThread;
 protected:
     void unhook(ScheduledTasks::ITaskItem* prev, ScheduledTasks::ITaskItem* t);
@@ -40,9 +30,6 @@ public:
     ~Worker();
 
     bool doWork(Scheduler* sc);
-
-    WorkReport* startTimer(weak<const ITask> t);
-    void stopTimer(WorkReport* r);
 
     void frameUpdate();
 
@@ -54,12 +41,8 @@ private:
 
 Scheduler::Worker::Worker(Scheduler* scheduler, size_t workerId)
 :   m_workerId(workerId)
-,   m_currentFrame(0)
-,   m_reportPool(1024*s_frameCount)
 ,   m_workThread(istring(minitl::format<>("worker %u") | workerId), &Scheduler::Worker::work, reinterpret_cast<intptr_t>(this), reinterpret_cast<intptr_t>(scheduler), Thread::Highest)
 {
-    for(int i = 0; i < s_frameCount; ++i)
-        m_frames[i] = 0;
 }
 
 Scheduler::Worker::~Worker()
@@ -79,47 +62,15 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
     }
     else
     {
-        WorkReport* r = startTimer(target->m_owner);
         target->run(sc);
-        stopTimer(r);
     }
     be_assert(sc->m_runningTasks > 0, "running task count should be more than 1");
     return --sc->m_runningTasks == 0;
 }
 
 
-Scheduler::Worker::WorkReport* Scheduler::Worker::startTimer(weak<const ITask> t)
-{
-    WorkReport* r = m_reportPool.allocate();
-    r->task = t.operator->();
-    r->start = tick();
-    return r;
-}
-
-void Scheduler::Worker::stopTimer(WorkReport* r)
-{
-    r->stop = tick();
-    size_t currentFrame = m_currentFrame;
-    r->next = m_frames[currentFrame];
-    m_frames[currentFrame] = r;
-}
-
 void Scheduler::Worker::frameUpdate()
 {
-    size_t previousFrame = (m_currentFrame+1) % s_frameCount;
-    WorkReport* r = m_frames[previousFrame];
-    while(r)
-    {
-        WorkReport* old = r;
-        r = static_cast<WorkReport*>((minitl::inode*)r->next);
-        m_reportPool.release(old);
-    }
-    m_frames[previousFrame] = m_reportPool.allocate();
-    m_frames[previousFrame]->task = 0;
-    m_frames[previousFrame]->start = tick();
-    m_frames[previousFrame]->stop = m_frames[previousFrame]->start;
-    m_frames[previousFrame]->next = 0;
-    m_currentFrame = previousFrame;
 }
 
 intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
@@ -159,8 +110,6 @@ Scheduler::Scheduler()
 ,   m_synchro(0, 65535)
 ,   m_taskPool(65535, 16)
 ,   m_frameCount(0)
-,   m_lastFrameTick(m_currentFrameTick)
-,   m_currentFrameTick(tick())
 ,   m_end()
 ,   m_tasks()
 ,   m_runningTasks(0)
@@ -182,15 +131,16 @@ Scheduler::~Scheduler()
 
 void Scheduler::frameUpdate()
 {
-    m_lastFrameTick = m_currentFrameTick;
-    m_currentFrameTick = tick();
-    be_assert(m_currentFrameTick >= m_lastFrameTick, "processor clock seems to be in the past");
-    m_frameTime = m_timer.tick();
+    m_timer.stop();
+    //float time = Timer::now();
+    //send(time)
     for(size_t i = 0; i < m_workers.size(); ++i)
     {
         m_workers[i]->frameUpdate();
     }
     m_frameCount++;
+    m_timer.reset();
+    m_timer.start();
 }
 
 void Scheduler::queue(ScheduledTasks::ITaskItem* task)

@@ -6,7 +6,7 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		PreprocessorDefinitions="_X64;_AMD64;_AMD64_;WIN32;_WIN32;_WIN64;WIN64;_M_AMD64;_WIN32_WINNT=0x0502"
+		PreprocessorDefinitions="_X64;_AMD64;_AMD64_;WIN32;_WIN32;_WIN64;WIN64;_M_AMD64;_WIN32_WINNT=0x0502;BE_PLATFORM=platform_win32"
 		EnableEnhancedInstructionSet="0"
 	/>
 	<Tool

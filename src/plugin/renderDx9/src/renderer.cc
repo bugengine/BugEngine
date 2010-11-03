@@ -157,10 +157,8 @@ void Renderer::drawBatch(const Batch& b)
 void Renderer::flush()
 {
     Windowing::Renderer::flush();
-    static Timer t;
-    static int frames = 0;
-    if(++frames % 100 == 0)
-        OutputDebugString((minitl::format<>("%d\n") | (100/t.tick())).c_str());
+    //static Timer t;
+    //static int frames = 0;
     switch(m_deviceState)
     {
     case DeviceLost:

@@ -20,7 +20,7 @@
 #endif
 
 #ifndef BE_PLATFORM
-# error "Unknown platform: you need to define _PLATFORM"
+# error "Unknown platform: you need to define BE_PLATFORM"
 #else
 # define BE_PLATFORM_INCLUDE_ core/platforms/BE_PLATFORM.hh
 # include BE_STRINGIZE(BE_PLATFORM_INCLUDE_)

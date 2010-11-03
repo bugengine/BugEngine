@@ -24,7 +24,7 @@ static inline void displayError()
 }
 #define BE_WIN32_PRINTERROR()       displayError()
 #define BE_WIN32_CHECKRESULT(x)     if((x) == (UINT)-1) BE_WIN32_PRINTERROR()
-#endif
+
 
 #ifdef _AMD64
 # define BE_PLATFORM_NAME      Win64
