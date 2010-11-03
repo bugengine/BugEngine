@@ -5,7 +5,10 @@
 #include    <core/timer.hh>
 #include    <time.h>
 
-u64 Timer::system_tick()
+namespace BugEngine
+{
+
+u64 Timer::tick()
 {
 #if defined (BE_COMPILER_GCC) || defined(BE_COMPILER_SUNCC)
 # if defined(_X86)
@@ -43,13 +46,13 @@ u64 Timer::system_tick()
     clock_gettime(CLOCK_REALTIME, &t);
     return ((u64)t.tv_sec * 1000000000 + (u64)t.tv_nsec);
 #endif
-+}
+}
 
 float Timer::now()
 {
     timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
-    return (float)t.tv_sec * 1000.0f + (float)t.tv_nsec / 1000000.0f
+    return (float)t.tv_sec * 1000.0f + (float)t.tv_nsec / 1000000.0f;
 }
 
 }
