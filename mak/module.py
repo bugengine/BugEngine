@@ -152,7 +152,7 @@ class module:
 				except KeyError:
 					self.localarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'include')])
 			if os.path.isdir(os.path.join('extra', platform, category, name, 'src')):
-				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], archs, sourcelist), 'extrasrc')
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], archs, sourcelist), 'src')
 			if pdir.directories or pdir.files:
 				platformsdirectory.addDirectory(pdir, platform)
 				pdir.prefix = os.path.join(platform, category, name)

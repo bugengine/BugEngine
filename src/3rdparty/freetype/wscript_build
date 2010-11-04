@@ -1,5 +1,5 @@
 if not m.has_key(name):
-	opts = coptions(defines=['FT2_BUILD_LIBRARY', 'FT_OPTION_AUTOFIT2'])
+	opts = coptions(defines=['FT2_BUILD_LIBRARY', 'FT_OPTION_AUTOFIT2', 'DARWIN_NO_CARBON'])
 	sources = [	'psnames/psnames.c',
 				'bdf/bdf.c',
 				'smooth/smooth.c',

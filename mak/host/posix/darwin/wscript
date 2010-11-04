@@ -15,6 +15,7 @@ for l in os.listdir('/Developer/Platforms/'):
 
 # gets a list of the GCC toolchains installed
 def get_available_gcc(conf):
+	versions = set([])
 	toolchaindirs=set([])
 	conf.env['GCC_TARGETS'] = []
 	for dir in os.environ['PATH'].split(':'):
@@ -29,7 +30,9 @@ def get_available_gcc(conf):
 						continue
 					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
 						continue
-					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
+					if target+'/'+version not in versions:
+						conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
+						versions.add(target+'/'+version)
 
 def set_options(opt):
 	pass

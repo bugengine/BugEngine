@@ -41,7 +41,7 @@ class directory:
 	def make_sources(self, bld, env, prefix, relative = ''):
 		result = []
 		for name, d in self.directories.iteritems():
-			result += d.make_sources(bld, env, os.path.join(prefix, name), os.path.join(relative, name))
+			result += d.make_sources(bld, env, os.path.join(prefix, d.prefix), os.path.join(relative, d.prefix))
 		for f in self.files:
 			f.make_source(bld, env, prefix, relative, result)
 		return result
