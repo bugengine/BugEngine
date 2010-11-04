@@ -5,7 +5,10 @@
 #include    <core/timer.hh>
 #include    <mach/mach_time.h>
 
-u64 Timer::system_tick()
+namespace BugEngine
+{
+
+u64 Timer::tick()
 {
 #if defined(_X86)
     u64 x = 0;

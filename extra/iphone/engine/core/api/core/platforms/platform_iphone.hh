@@ -7,6 +7,7 @@
 
 #define BE_PLATFORM_NAME       iPhone
 #define BE_PLATFORM_IPHONE     1
+#define BE_PLATFORM_MACOS      1
 
 /*****************************************************************************/
 #endif

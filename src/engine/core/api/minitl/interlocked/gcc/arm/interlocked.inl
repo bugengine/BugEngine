@@ -112,9 +112,9 @@ struct InterlockedType<4>
          long result;
 
         __asm__ __volatile__(
-                "       strex %0, %2, [%1]\n"
+                "       strex %0, %2, [%3]\n"
             : "=&r"(result), "+m"(*p)
-            : "r"(v)
+            : "r"(v), "r"(p)
             : "cc");
 
         return !(result&2);  
