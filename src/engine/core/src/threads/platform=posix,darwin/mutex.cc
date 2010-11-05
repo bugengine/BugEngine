@@ -26,7 +26,7 @@ void Mutex::release()
     pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_data));
 }
 
-Threads::Waitable::WaitResult Mutex::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Mutex::wait()
 {
     pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(m_data));
     return Finished;

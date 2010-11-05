@@ -54,6 +54,8 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
     static const i32& s_taskCount = 16;
 
     ScheduledTasks::ITaskItem* target = sc->pop();
+    if(!target)
+        return false;
     if(!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
         ScheduledTasks::ITaskItem* newTarget = target->split(sc);
@@ -79,7 +81,7 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
     Scheduler* sc = reinterpret_cast<Scheduler*>(p2);
     while(sc->m_running)
     {
-        if(sc->m_synchro.wait(10) == Threads::Waitable::Finished)
+        if(sc->m_synchro.wait() == Threads::Waitable::Finished)
             if(w->doWork(sc))
                 sc->m_end.set();
     }
@@ -125,6 +127,7 @@ Scheduler::Scheduler()
 Scheduler::~Scheduler()
 {
     m_running = false;
+    m_synchro.release((int)m_workers.size());
     for(size_t i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }

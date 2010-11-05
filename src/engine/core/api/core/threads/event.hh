@@ -22,7 +22,7 @@ public:
     void pulse();
     void lock();
     void unlock();
-    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
+    virtual Waitable::WaitResult wait() override;
 };
 
 }

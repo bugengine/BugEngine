@@ -18,14 +18,10 @@ public:
     enum WaitResult
     {
         Finished,
-        TimeOut,
         Abandoned
     };
-    enum
-    {
-        Forever = 0xffffffff
-    };
-    virtual WaitResult wait(unsigned int waitTime = Forever) = 0;
+protected:
+    virtual WaitResult wait() = 0;
 };
 
 }}

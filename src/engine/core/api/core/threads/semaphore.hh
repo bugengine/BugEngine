@@ -18,7 +18,7 @@ public:
     ~Semaphore();
 
     void release(int count);
-    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
+    virtual Waitable::WaitResult wait() override;
 };
 
 }

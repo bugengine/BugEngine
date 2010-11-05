@@ -27,7 +27,7 @@ void Semaphore::release(int count)
         LWP_SemPost(*reinterpret_cast<sem_t*>(m_data));
 }
 
-Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Semaphore::wait()
 {
     LWP_SemWait(*reinterpret_cast<sem_t*>(m_data));
     return Finished;
