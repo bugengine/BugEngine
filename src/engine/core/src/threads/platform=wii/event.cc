@@ -48,22 +48,14 @@ void Event::unlock()
     LWP_MutexUnlock(*reinterpret_cast<mutex_t*>(m_lock));
 }
 
-Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Event::wait()
 {
-    timespec time;
-    time.tv_nsec = timeout % 1000;
-    time.tv_sec = timeout / 1000;
-    time.tv_sec += time.tv_nsec % 1000000000;
-    time.tv_nsec = time.tv_nsec % 1000000000;
-    int result = LWP_CondTimedWait( *reinterpret_cast<cond_t*>(m_data),
-                                    *reinterpret_cast<mutex_t*>(m_lock),
-                                    &time);
+    int result = LWP_CondWait( *reinterpret_cast<cond_t*>(m_data),
+                               *reinterpret_cast<mutex_t*>(m_lock));
     switch(result)
     {
     case 0:
         return Finished;
-    case ETIMEDOUT:
-        return TimeOut;
     default:
         be_notreached();
         return Abandoned;

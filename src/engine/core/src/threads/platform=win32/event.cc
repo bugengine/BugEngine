@@ -32,15 +32,13 @@ void Event::unlock()
 {
 }
 
-Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Event::wait()
 {
-    DWORD rcode = WaitForSingleObject((HANDLE)m_data, timeout);
+    DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
     switch(rcode)
     {
     case WAIT_OBJECT_0:
         return Finished;
-    case WAIT_TIMEOUT:
-        return TimeOut;
     case WAIT_FAILED:
         be_notreached();
     case WAIT_ABANDONED:

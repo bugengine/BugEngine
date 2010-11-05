@@ -21,7 +21,7 @@ public:
     ~Mutex();
 private:
     void release();
-    virtual Waitable::WaitResult wait(unsigned int waitTime = Forever) override;
+    virtual Waitable::WaitResult wait() override;
 };
 
 class ScopedMutexLock

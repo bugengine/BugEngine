@@ -28,33 +28,17 @@ void Semaphore::release(int count)
         sem_post(reinterpret_cast<sem_t*>(m_data));
 }
 
-Threads::Waitable::WaitResult Semaphore::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Semaphore::wait()
 {
-#ifdef BE_PLATFORM_MACOS
     int result = sem_wait(reinterpret_cast<sem_t*>(m_data));
-#else
-    timespec abstime;
-    clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += (timeout * 1000000);
-    abstime.tv_sec += abstime.tv_nsec / 1000000000;
-    abstime.tv_nsec = abstime.tv_nsec % 1000000000;
-    int result = sem_timedwait( reinterpret_cast<sem_t*>(m_data),
-                                &abstime);
-#endif
     if(result == 0)
     {
         return Finished;
     }
     else
     {
-        switch(errno)
-        {
-        case ETIMEDOUT:
-            return TimeOut;
-        default:
-            be_notreached();
-            return Abandoned;
-        }
+        be_notreached();
+        return Abandoned;
     }
 }
 

@@ -47,23 +47,14 @@ void Event::unlock()
     pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_lock));
 }
 
-Threads::Waitable::WaitResult Event::wait(unsigned int timeout)
+Threads::Waitable::WaitResult Event::wait()
 {
-    timespec abstime;
-    clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += timeout % 1000;
-    abstime.tv_sec += timeout / 1000;
-    abstime.tv_sec += abstime.tv_nsec % 1000000000;
-    abstime.tv_nsec = abstime.tv_nsec % 1000000000;
-    int result = pthread_cond_timedwait( reinterpret_cast<pthread_cond_t*>(m_data),
-                                         reinterpret_cast<pthread_mutex_t*>(m_lock),
-                                         &abstime);
+    int result = pthread_cond_wait( reinterpret_cast<pthread_cond_t*>(m_data),
+                                    reinterpret_cast<pthread_mutex_t*>(m_lock));
     switch(result)
     {
     case 0:
         return Finished;
-    case ETIMEDOUT:
-        return TimeOut;
     default:
         be_notreached();
         return Abandoned;
