@@ -63,11 +63,11 @@ class directory:
 class source:
 	def __init__( self, filename, platforms, archs, process ):
 		self.filename	= filename
-		self.platforms	= platforms
+		self.platforms	= sorted([p for p in platforms])
 		self.archs		= archs
 		self.process	= process
 	def make_source(self, bld, env, prefix, relative, result):
-		if self.process and env['PLATFORM'] in self.platforms and env['ARCHITECTURE'] in self.archs:
+		if self.process and set(env['PLATFORM']) & set(self.platforms) and env['ARCHITECTURE'] in self.archs:
 			result.append(os.path.join(prefix,	self.filename))
 	def __cmp__(self,other):
 		return cmp(self.filename,other.filename)
@@ -119,7 +119,7 @@ class deployedsource(source):
 		self.outdir = outdir
 		self.type = type
 	def make_source(self, bld, env, prefix, relative, result):
-		if self.process and env['PLATFORM'] in self.platforms and env['ARCHITECTURE'] in self.archs:
+		if self.process and set(env['PLATFORM']) & set(self.platforms) and env['ARCHITECTURE'] in self.archs:
 			bld.install_files(os.path.join(env['PREFIX'], env['DEPLOY']['prefix'], env['DEPLOY'][self.type], self.outdir), os.path.join(prefix, self.filename), env=env)
 
 class datasource(source):

@@ -1,6 +1,7 @@
 # set linux specific options
 
 import os
+import mak
 import Utils
 from Logs import info,warn
 
@@ -27,7 +28,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_freebsd_flags_to_env(conf):
-	conf.env['PLATFORM'] = 'freebsd'
+	conf.env['PLATFORM'] = mak.allplatforms['freebsd']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -45,6 +46,7 @@ def add_freebsd_flags_to_env(conf):
 									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def configure(conf):
+	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('freebsd') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
@@ -71,4 +73,4 @@ def configure(conf):
 
 
 def build(bld):
-	pass
+	mak.allplatforms['darwin'] = ['freebsd', 'posix', 'pc']

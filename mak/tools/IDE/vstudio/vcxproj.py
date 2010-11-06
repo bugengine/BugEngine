@@ -15,8 +15,11 @@ def getFileDeployPath(type):
 
 class VCxproj:
 	extensions = ['.vcxproj', '.vcxproj.filters']
+	vcplatforms = { 'Win32':('win32', 'x86'), 'x64':('win32', 'amd64'), 'Xbox 360':('xbox360', 'ppc') }
 
 	def __init__(self, filename, name, category, versionName, versionNumber, type, depends):
+		if 'xbox360' not in mak.allplatforms.keys() and 'Xbox 360' in VCxproj.vcplatforms.keys():
+			del VCxproj.vcplatforms['Xbox 360']
 		self.versionName = versionName
 		self.versionNumber = versionNumber
 		self.name = name
@@ -122,13 +125,12 @@ class VCxproj:
 	def addCppFile(self, path, filter, filename, source):
 		self.output.write('    <ClCompile Include="%s">\n' % filename)
 		self.output.write('      <ObjectFileName>$(IntDir)%s\\</ObjectFileName>\n' % path)
-		if ('win32' not in source.platforms) or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		if source.usepch:
 			if os.path.join(path, source.filename) == self.pchname:
 				self.output.write('      <PrecompiledHeader>Create</PrecompiledHeader>\n')
@@ -141,13 +143,12 @@ class VCxproj:
 
 	def addRcFile(self, path, filter, filename, source):
 		self.output.write('    <ResourceCompile Include="%s">\n' % filename)
-		if 'win32' not in source.platforms or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('    </ResourceCompile>\n')
 		self.filters.write('    <ResourceCompile Include="%s">\n' % filename)
 		self.filters.write('      <Filter>%s</Filter>\n' % filter)
@@ -161,13 +162,12 @@ class VCxproj:
 
 	def addBisonFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
-		if 'win32' not in source.platforms or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
 		self.output.write('      <Outputs>%s;%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp, '$(IntDir)'+source.generatedh))
 		self.output.write('      <Message>bison %s</Message>\n' % filename)
@@ -178,13 +178,12 @@ class VCxproj:
 
 	def addDataFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
-		if 'win32' not in source.platforms or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -D $(SolutionDir)mak/macros_ignore -p %s -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], self.pchstop, os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
 		self.output.write('      <Message>ddf %s</Message>\n' % filename)
 		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
@@ -196,13 +195,12 @@ class VCxproj:
 
 	def addFlexFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
-		if 'win32' not in source.platforms or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; flex.exe -o&quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
 		self.output.write('      <Outputs>%s</Outputs>\n' % ('$(IntDir)'+source.generatedcpp))
 		self.output.write('      <Message>flex %s</Message>\n' % filename)
@@ -213,13 +211,12 @@ class VCxproj:
 
 	def addDeployedFile(self, path, filter, filename, source):
 		self.output.write('    <CustomBuild Include="%s">\n' % filename)
-		if 'win32' not in source.platforms or not source.process:
+		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			if 'x86' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'Win32\'">true</ExcludedFromBuild>\n')
-			if 'amd64' not in source.archs:
-				self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'x64\'">true</ExcludedFromBuild>\n')
+			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
+					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		outputpath = os.path.join('$(OutDir)'+getFileDeployPath(source.type), source.outdir)
 		self.output.write('      <Command>(if not exist "%s" mkdir "%s") &amp;&amp; copy "%s" "%s" /y</Command>\n' % (outputpath, outputpath, filename, os.path.join(outputpath,source.filename)))
 		self.output.write('      <Outputs>%s</Outputs>\n' % os.path.join(outputpath,source.filename))

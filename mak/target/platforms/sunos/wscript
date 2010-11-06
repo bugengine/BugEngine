@@ -1,6 +1,7 @@
 # set SunOS specific options
 
 import os
+import mak
 import Utils
 import Logs
 import Options
@@ -27,7 +28,7 @@ def add_gcc_flags_to_env(conf, toolchaindir):
 
 
 def add_sunos_flags_to_env(conf):
-	conf.env['PLATFORM'] = 'sunos'
+	conf.env['PLATFORM'] = mak.allplatforms['sunos']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -46,6 +47,7 @@ def add_sunos_flags_to_env(conf):
 			
 
 def configure(conf):
+	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('solaris') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
@@ -70,4 +72,4 @@ def configure(conf):
 						
 
 def build(bld):
-	pass
+	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']

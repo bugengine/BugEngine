@@ -1,6 +1,7 @@
 # set linux specific options
 
 import os
+import mak
 import Utils
 from Logs import info,warn
 
@@ -25,7 +26,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_linux_flags_to_env(conf):
-	conf.env['PLATFORM'] = 'linux'
+	conf.env['PLATFORM'] = mak.allplatforms['linux']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -43,6 +44,7 @@ def add_linux_flags_to_env(conf):
 									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def configure(conf):
+	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('linux') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
@@ -66,4 +68,4 @@ def configure(conf):
 
 
 def build(bld):
-	pass
+	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
