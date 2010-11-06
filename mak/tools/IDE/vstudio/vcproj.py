@@ -26,6 +26,9 @@ class VCproj:
 	archs = { 'Win32':'x86', 'x64':'amd64', 'Xbox 360':'ppc' }
 
 	def __init__(self, filename, name, category, versionName, versionNumber, type, depends):
+		if 'xbox360' not in mak.allplatforms.keys() and 'Xbox 360' in VCproj.vcplatforms.keys():
+			del VCproj.vcplatforms['Xbox 360']
+			del VCproj.archs['Xbox 360']
 		self.versionName = versionName
 		self.versionNumber = versionNumber
 		self.name = name
@@ -157,7 +160,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -180,7 +183,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -197,7 +200,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -218,7 +221,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -239,7 +242,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -261,7 +264,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if VCproj.vcplatforms[platform] not in source.platforms or not source.process:
+				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:

@@ -1,6 +1,7 @@
 # set win32 specific options
 
 import os
+import mak
 try:
 	import Tools.msvc
 except:
@@ -57,7 +58,7 @@ def add_win32_gcc_flags_to_env(conf):
 
 
 def add_win32_flags_to_env(conf):
-	conf.env['PLATFORM'] = 'win32'
+	conf.env['PLATFORM'] = mak.allplatforms['win32']
 	conf.env['library_PATTERN'] = '%s.lib'
 	conf.env['shlib_PATTERN']	= '%s.dll'
 	conf.env['program_PATTERN'] = '%s.exe'
@@ -82,6 +83,7 @@ def set_options(opt):
 	pass
 
 def configure(conf):
+	mak.allplatforms['win32'] = ['win32', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('mingw') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
@@ -127,4 +129,4 @@ def configure(conf):
 
 
 def build(bld):
-	pass
+	mak.allplatforms['win32'] = ['win32', 'pc']

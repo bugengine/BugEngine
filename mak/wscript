@@ -3,7 +3,6 @@
 import os
 import re
 import Options
-from Logs import warn
 from TaskGen import taskgen,feature,before,after
 import Task
 import Node
@@ -14,12 +13,6 @@ import Utils
 
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
-def expandPlatforms(platforms):
-	result = []
-	for p in platforms:
-		try: result += mak.platformaliases[p]
-		except KeyError: result += [p]
-	return result
 
 def set_options(opt):
 	opt.sub_options(os.path.join('host', os.name))
@@ -40,20 +33,19 @@ def set_options(opt):
 	opt.add_option( '--toolchains',
 					action='store',
 					default='',
-					help='build for the selected toolchains; default is the most adapted toolchain, version release, static')
+					help='build for the selected toolchains')
 	opt.add_option( '--master',
 					action='store_true',
 					default=True,
 					help='build with master files')
 
 def configure(conf):
-	conf.env['ARCHITECTURES'] = mak.allarchs
-	conf.env['PLATFORMS']	  = mak.allplatforms
-	conf.env['OPTIMS']	  = mak.alloptims
+	conf.env['ARCHITECTURES']	= mak.allarchs
 
 	conf.sub_config(os.path.join('host', os.name))
-	for p in mak.allplatforms:
-		conf.sub_config(os.path.join('target', 'platforms', p))
+	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
+			if platform not in ['.svn', '.cvs']:
+				conf.sub_config(os.path.join('target', 'platforms', platform))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
 			if f in ['.svn', '.cvs']:
@@ -106,6 +98,9 @@ def build(bld):
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
 				bld.add_subdirs(os.path.join('target', l, target))
+	for target in os.listdir(os.path.join('extra')):
+		if target not in ['.svn', '.cvs']:
+			bld.add_subdirs(os.path.join('..', 'extra', target))
 	import Options
 	if not Options.options.toolchains:
 		Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
@@ -144,8 +139,8 @@ def filter_sources(self):
 					rejectedsources.append(source)
 					continue
 			if tail[0:9] == 'platform=':
-				platforms=(tail[9:].split(','))
-				if not v['PLATFORM'] in expandPlatforms(platforms):
+				platforms=set(tail[9:].split(','))
+				if not set(v['PLATFORM']) & platforms:
 					try: self.allsources[tail].append(source)
 					except KeyError: self.allsources[tail] = [source]
 					rejectedsources.append(source)
@@ -187,7 +182,7 @@ MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
 def add_extra_outputs(self):
 	if self.env['CC_NAME'] == 'msvc':
 		self.link_task.outputs.append(self.link_task.outputs[0].change_ext('.pdb'))
-	if 'win32' == self.env['PLATFORM']:
+	if 'win32' in self.env['PLATFORM']:
 		dll = self.link_task.outputs[0]
 		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
 		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())

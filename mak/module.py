@@ -3,26 +3,7 @@ import sources
 import Options
 import misc
 import mak
-
-alloptims		= mak.alloptims[:]
-allplatforms		= mak.allplatforms[:]
-allarchs		= mak.allarchs[:]
-
-platformaliases = mak.platformaliases
-if os.path.isdir('extra'):
-	for f in os.listdir('extra'):
-		if f in ['.svn', '.cvs']:
-			continue
-		if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
-			allplatforms.append(f)
-
-
-def expandPlatforms(platforms):
-	result = []
-	for p in platforms:
-		try: result += platformaliases[p]
-		except KeyError: result += [p]
-	return result
+from Logs import warn
 
 class coptions:
 	def __init__( self,
@@ -83,8 +64,8 @@ class module:
 		self.depends  = depends
 		self.tasks = {}
 		self.root = os.path.join('src', category, name)
-		self.platforms = expandPlatforms(platforms)
-		self.archs = archs
+		self.platforms = set(platforms or mak.allplatforms.keys())
+		self.archs = archs or mak.allarchs[:]
 		self.projects = {}
 		sourcelist = [os.path.normpath(i) for i in sourcelist]
 		self.plugins  = []
@@ -128,86 +109,82 @@ class module:
 		self.sourcetree		   = sources.directory()
 		self.sourcetree.prefix = os.path.join('src', category, name)
 		if os.path.isdir(os.path.join('src', category, name, 'include')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, self.platforms, archs), 'include')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, self.platforms, self.archs), 'include')
 		if os.path.isdir(os.path.join('src', category, name, 'api')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, self.platforms, archs), 'api')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, self.platforms, self.archs), 'api')
 		if os.path.isdir(os.path.join('src', category, name, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, self.platforms, archs, sourcelist), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, self.platforms, self.archs, sourcelist), 'data')
 		if os.path.isdir(os.path.join('src', category, name, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, self.platforms, archs, sourcelist), 'src')
+			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, self.platforms, self.archs, sourcelist), 'src')
 
 		platformsdirectory = sources.directory()
-		for platform in self.platforms:
+		for platform in os.listdir(os.path.join('extra')):
 			pdir = sources.directory()
 			if os.path.isdir(os.path.join('extra', platform, category, name, 'api')):
-				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'api'), '', 0, self.platforms, archs), 'api')
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'api'), '', 0, [platform], self.archs), 'api')
 				try:
 					self.globalarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'api'))
 				except KeyError:
 					self.globalarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'api')])
 			if os.path.isdir(os.path.join('extra', platform, category, name, 'include')):
-				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'include'), '', 0, self.platforms, archs), 'include')
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'include'), '', 0, [platform], self.archs), 'include')
 				try:
 					self.localarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'include'))
 				except KeyError:
 					self.localarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'include')])
 			if os.path.isdir(os.path.join('extra', platform, category, name, 'src')):
-				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], archs, sourcelist), 'src')
+				pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], self.archs, sourcelist), 'src')
 			if pdir.directories or pdir.files:
 				platformsdirectory.addDirectory(pdir, platform)
 				pdir.prefix = os.path.join(platform, category, name)
 				self.sourcetree.addDirectory(platformsdirectory, 'platforms')
 		platformsdirectory.prefix = os.path.join('..', '..', '..', 'extra')
 
-		for arch in allarchs:
+		for arch in mak.allarchs:
 			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, self.platforms, [arch]), 'lib.'+arch)
 			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
 				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, self.platforms, [arch]), 'bin.'+arch)
 
-	def getoptions(self, platform, arch):
+	def getoptions(self, platforms, arch):
 		options = coptions()
 		options.merge(self.localoptions)
-		options.merge(self.getglobaloptions(platform, arch))
+		options.merge(self.getglobaloptions(platforms, arch))
 
 		for key,aoptions in self.localarchoptions.iteritems():
 			try:
 				p,a = key.split('-')
-				p = expandPlatforms([p])
-				if a == arch and platform in p:
+				if a == arch and p in platforms:
 					options.merge(aoptions)
 			except:
-				p = expandPlatforms([key])
-				if arch in p or platform in p:
+				if key == arch or key in platforms:
 					options.merge(aoptions)
 		return options
 
-	def getglobaloptions(self, platform, arch):
+	def getglobaloptions(self, platforms, arch):
 		options = coptions()
 		try:
-			options.merge(self.gobaloptioncache[platform+"-"+arch])
+			options.merge(self.gobaloptioncache[str(platforms)+"-"+arch])
 		except KeyError:
-			if not platform in self.platforms or not arch in self.archs:
+			if not set(platforms) & self.platforms or not arch in self.archs:
 				return options
 			options.merge(self.globaloptions)
 			for d in self.depends:
-				options.merge(d.getglobaloptions(platform, arch))
+				options.merge(d.getglobaloptions(platforms, arch))
 			for key,aoptions in self.globalarchoptions.iteritems():
 				try:
 					p,a = key.split('-')
-					p = expandPlatforms([p])
-					if a == arch and platform in p:
+					if a == arch and p in platforms:
 						options.merge(aoptions)
 				except:
-					p = expandPlatforms([key])
-					if arch in p or platform in p:
+					if key == arch or key in platforms:
 						options.merge(aoptions)
-			self.gobaloptioncache[platform+"-"+arch] = options
+			self.gobaloptioncache[str(platforms)+"-"+arch] = options
 		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
 		if not self.tasks.has_key(variant):
-			if type=='dummy' or not env['PLATFORM'] in self.platforms or not env['ARCHITECTURE'] in self.archs:
+			if type=='dummy' or not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
@@ -278,7 +255,7 @@ class module:
 				continue
 			elif os.path.isdir(os.path.join(path,file)):
 				if file[0:9] == 'platform=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, expandPlatforms(file[9:].split(',')), archs, sourcelist), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs, sourcelist), file )
 				elif file[0:5] == 'arch=':
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(','), sourcelist), file )
 				else:
@@ -325,8 +302,8 @@ class module:
 		return result
 
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):
-		if not platforms: platforms=allplatforms
-		if not archs: archs=allarchs
+		if not platforms: platforms=mak.allplatforms.keys()
+		if not archs: archs=mak.allarchs[:]
 		self.sourcetree.addFullFile( filename, sources.deployedsource(os.path.split(filename)[1], outputdir, deploytype, platforms, archs, 1) )
 
 	def deployDirectory( self, dirname, outputdir, deploytype, platforms = None, archs = None ):
@@ -360,10 +337,11 @@ class module:
 				task.type			= self.__class__.__name__
 				task.category		= self.category
 				platforms = {}
-				for platform in self.platforms or allplatforms:
-					for arch in self.archs or allarchs:
-						options = self.getoptions(platform, arch)
-						platforms[platform+'-'+arch] = options
+				for platform,aliases in mak.allplatforms.iteritems():
+					if set(aliases) & self.platforms:
+						for arch in self.archs:
+							options = self.getoptions(aliases, arch)
+							platforms[platform+'-'+arch] = options
 				task.platforms		= platforms
 				self.projects[p] = task
 
@@ -386,8 +364,8 @@ class library(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		self.install_path = 'lib'
@@ -422,8 +400,8 @@ class shared_library(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		self.install_path = 'bin'
@@ -458,8 +436,8 @@ class static_library(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		self.install_path = 'lib'
@@ -492,8 +470,8 @@ class plugin(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		self.install_path = 'plugin'
@@ -534,8 +512,8 @@ class game(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				  plugins=[]
 				):
@@ -578,8 +556,8 @@ class tool(game):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				  plugins=[]
 				):
@@ -607,8 +585,8 @@ class test(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		module.__init__(self,
@@ -643,8 +621,8 @@ class util(module):
 				  globaloptions = coptions(),
 				  localarchoptions = {},
 				  globalarchoptions = {},
-				  platforms = allplatforms,
-				  archs = allarchs,
+				  platforms = [],
+				  archs = [],
 				  sources=[],
 				):
 		module.__init__(self,
