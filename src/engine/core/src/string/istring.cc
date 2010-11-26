@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <core/threads/criticalsection.hh>
+#include    <minitl/container/algorithm.hh>
 #include    <cstring>
 
 
@@ -35,7 +36,7 @@ private:
     friend struct lessWithOffset;
     friend struct equaltoWithOffset;
 private:
-    typedef minitl::map< const char *, StringCache*, minitl::less<const char *> > StringIndex;
+    typedef minitl::hashmap< const char *, StringCache*, Arena::General, minitl::hash<const char *> > StringIndex;
 private:
     static Buffer*  getBuffer();
 public:
@@ -62,7 +63,7 @@ private:
 public:
     void retain(void) const     { m_refCount++; }
     void release(void) const    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
-    size_t hash() const         { return m_hash; }
+    u64 hash() const            { return m_hash; }
     size_t size() const         { return m_length; }
     const char *str() const     { return reinterpret_cast<const char *>(this+1); }
 };
@@ -131,8 +132,7 @@ StringCache* StringCache::unique(const char *val)
     try
     {
         static StringCache::StringIndex g_strings;
-        StringIndex::const_iterator it;
-        it = g_strings.find(val);
+        StringIndex::const_iterator it = g_strings.find(val);
         if(it != g_strings.end())
         {
             return it->second;
@@ -147,7 +147,7 @@ StringCache* StringCache::unique(const char *val)
             (void)(new(cache) StringCache(hashval, len));
             strcpy(data, val);
 
-            std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
+            minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(minitl::make_pair(data, cache));
             return cache;
         }
     }
@@ -199,14 +199,6 @@ istring::istring(const char *begin, const char *end)
 {
 }
 
-istring::istring(const std::string& other)
-:   m_index(init(other.c_str()))
-#ifdef BE_DEBUG
-,   m_str(m_index->str())
-#endif
-{
-}
-
 istring::istring(const istring& other)
 :   m_index(other.m_index)
 #ifdef BE_DEBUG
@@ -231,7 +223,7 @@ istring& istring::operator=(const istring& other)
     return *this;
 }
 
-size_t istring::hash() const
+u64 istring::hash() const
 {
     return m_index->hash();
 }
@@ -244,11 +236,6 @@ size_t istring::size() const
 const char *istring::c_str() const
 {
     return m_index->str();
-}
-
-std::string istring::str() const
-{
-    return std::string(c_str());
 }
 
 bool istring::operator==(const istring& other) const
@@ -325,25 +312,18 @@ igenericnamespace::igenericnamespace(const char *str, const char* sep)
     parse(str, str+strlen(str), sep, m_namespace, m_size);
 }
 
-std::string igenericnamespace::tostring(const std::string& sep) const
+template< u16 MAXLENGTH >
+minitl::format<MAXLENGTH> igenericnamespace::tostring(const char* sep) const
 {
-    if(m_size == 0)
-        return "";
-
-    size_t len = m_size;
-    for(size_t i = 1; i < m_size; ++i)
+    minitl::format<MAXLENGTH> result("");
+    if(m_size > 0)
     {
-        len += sep.size();
-        len += m_namespace[i].size();
-    }
-
-    std::string result;
-    result.reserve(len+1);
-    result += m_namespace[0].c_str();
-    for(size_t i = 1; i < m_size; ++i)
-    {
-        result += sep;
-        result += m_namespace[i].c_str();
+        result.append(m_namespace[0].c_str());
+        for(size_t i = 1; i < m_size; ++i)
+        {
+            result.append(sep);
+            result.append(m_namespace[i].c_str());
+        }
     }
     return result;
 }
@@ -407,7 +387,7 @@ bool startswith(const igenericnamespace& start, const igenericnamespace& full)
 
 bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2)
 {
-    for(size_t i = 0; i < std::min(ns1.size(), ns2.size()); ++i)
+    for(size_t i = 0; i < minitl::min(ns1.size(), ns2.size()); ++i)
     {
         if(ns1[i] < ns2[i])
             return true;
@@ -429,14 +409,9 @@ inamespace::inamespace(const char* _str)
 {
 }
 
-inamespace::inamespace(const std::string& _str)
-:   igenericnamespace(_str.c_str(), ".")
+minitl::format<inamespace::MaxNamespaceLength> inamespace::str() const
 {
-}
-
-std::string inamespace::str() const
-{
-    return igenericnamespace::tostring(".");
+    return igenericnamespace::tostring<inamespace::MaxNamespaceLength>(".");
 }
 
 inamespace& inamespace::operator+=(const istring& str2)
@@ -490,17 +465,12 @@ ipath::ipath(const char *begin, const char *end)
 {
 }
 
-ipath::ipath(const std::string& _str)
-:   igenericnamespace(_str.c_str(), "/\\")
-{
-}
-
-std::string ipath::str() const
+minitl::format<ipath::MaxFilenameLength> ipath::str() const
 {
 #   ifdef BE_PLATFORM_WIN32
-    return igenericnamespace::tostring("\\");
+    return igenericnamespace::tostring<ipath::MaxFilenameLength>("\\");
 #   else
-    return igenericnamespace::tostring("/");
+    return igenericnamespace::tostring<ipath::MaxFilenameLength>("/");
 #   endif
 }
 
@@ -530,17 +500,12 @@ ifilename::ifilename(const char *_str)
 {
 }
 
-ifilename::ifilename(const std::string& _str)
-:   igenericnamespace(_str.c_str(), "/\\")
-{
-}
-
-std::string ifilename::str() const
+minitl::format<ifilename::MaxFilenameLength> ifilename::str() const
 {
 #   ifdef BE_PLATFORM_WIN32
-    return igenericnamespace::tostring("\\");
+    return igenericnamespace::tostring<ifilename::MaxFilenameLength>("\\");
 #   else
-    return igenericnamespace::tostring("/");
+    return igenericnamespace::tostring<ifilename::MaxFilenameLength>("/");
 #   endif
 }
 

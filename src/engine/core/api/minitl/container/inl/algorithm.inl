@@ -10,7 +10,7 @@
 namespace minitl
 {
 
-namespace _
+namespace impl
 {
 
 template< typename ITERATOR, typename COMPARE >
@@ -40,6 +40,12 @@ void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
     for(; first != last; ++first) f(*first);
 }
 
+template< typename ITERATOR, typename T >
+void fill(ITERATOR first, ITERATOR last, const T& value)
+{
+    for(; first != last; ++first) *first = value;
+}
+
 template< typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 {
@@ -64,11 +70,23 @@ void sort(ITERATOR first, ITERATOR last, COMPARE s)
         ITERATOR reallast = last - 1;
         ITERATOR t = first + d/2;
         swap(*t, *reallast);
-        t = partition(first, reallast, _::SortPredicate<ITERATOR, COMPARE>(reallast));
+        t = partition(first, reallast, impl::SortPredicate<ITERATOR, COMPARE>(reallast));
         swap(*t, *reallast);
         sort(first, t, s);
         sort(t, last, s);
     }
+}
+
+template< typename T >
+T min(T t1, T t2)
+{
+    return t1 < t2 ? t1 : t2;
+}
+
+template< typename T >
+T max(T t1, T t2)
+{
+    return t1 > t2 ? t1 : t2;
 }
 
 }

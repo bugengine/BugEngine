@@ -559,7 +559,7 @@ bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const mi
     CompilationUnit u;
     if(fillNode(buffer, u, abbrev, abbreviations, ptrSize))
     {
-        bool result = units.insert(std::make_pair(u.range, u)).second;
+        bool result = units.insert(minitl::make_pair(u.range, u)).second;
         (void)result;
         be_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name | u.range.begin | u.range.end);
     }

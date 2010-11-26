@@ -25,7 +25,6 @@ public:
     istring();
     istring(const char *str);
     istring(const char *begin, const char *end);
-    istring(const std::string& other);
     istring(const istring& other);
     template< u16 SIZE >
     istring(const minitl::format<SIZE>& f)
@@ -38,9 +37,8 @@ public:
     istring& operator=(const istring&);
 
     const char *c_str() const;
-    std::string str()   const;
     size_t size() const;
-    size_t hash() const;
+    u64 hash() const;
 
     bool operator==(const istring& other) const;
     bool operator!=(const istring& other) const;
@@ -49,10 +47,8 @@ public:
 
 class be_api(CORE) igenericnamespace
 {
-    enum NamespaceSize
-    {
-        MaxNamespaceSize = 15
-    };
+public:
+    enum { MaxNamespaceSize = 15 };
 private:
     istring m_namespace[MaxNamespaceSize];
     u32     m_size;
@@ -61,6 +57,8 @@ protected:
     explicit igenericnamespace(const istring& onlycomponent);
     igenericnamespace(const char *str, const char* sep);
     igenericnamespace(const char *begin, const char *end, const char* sep);
+    template< u16 MAXLENGTH >
+    minitl::format<MAXLENGTH> tostring(const char *separator) const;
 public:
     size_t size() const;
     const istring& operator[](size_t index) const;
@@ -68,8 +66,6 @@ public:
     void push_back(const istring& component);
     void pop_back();
     void pop_front();
-
-    std::string tostring(const std::string& separator) const;
 
     bool operator==(const igenericnamespace& other) const;
     bool operator!=(const igenericnamespace& other) const;
@@ -81,13 +77,13 @@ be_api(CORE) bool operator<(const igenericnamespace& ns1, const igenericnamespac
 class be_api(CORE) inamespace : public igenericnamespace
 {
 public:
+    enum { MaxNamespaceLength = 4096 };
     explicit inamespace(const istring& onlycomponent);
     inamespace(const char *str);
-    inamespace(const std::string& str);
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~inamespace() {}
 
-    std::string str() const;
+    minitl::format<MaxNamespaceLength> str() const;
 
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
@@ -103,13 +99,13 @@ be_api(CORE) inamespace operator+(const inamespace& ns1, const inamespace& ns2);
 class be_api(CORE) ifilename : public igenericnamespace
 {
 public:
+    enum { MaxFilenameLength = 1024 };
     explicit ifilename(const istring& onlycomponent);
     ifilename(const char *str);
-    ifilename(const std::string& str);
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ifilename() {}
 
-    std::string str() const;
+    minitl::format<MaxFilenameLength> str() const;
 private:
     ifilename();
 };
@@ -117,14 +113,14 @@ private:
 class be_api(CORE) ipath : public igenericnamespace
 {
 public:
+    enum { MaxFilenameLength = 1024 };
     explicit ipath(const istring& onlycomponent);
     ipath(const char *str);
     ipath(const char *begin, const char *end);
-    ipath(const std::string& str);
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ipath() {}
 
-    std::string str() const;
+    minitl::format<MaxFilenameLength> str() const;
 
     ipath& operator+=(const ipath& other);
 private:
@@ -165,6 +161,13 @@ const format<size>& operator|(const format<size>& f, const BugEngine::ifilename&
 {
     return f | value.str().c_str();
 }
+
+template<>
+struct hash<BugEngine::istring>
+{
+    inline u64 operator()(const BugEngine::istring& v)                               { return v.hash(); }
+    inline int operator()(const BugEngine::istring& v1, const BugEngine::istring& v2){ return v1 == v2; }
+};
 
 }
 

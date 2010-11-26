@@ -58,7 +58,7 @@ private:
     };
 private:
     template< Endianness e > class Buffer;
-    typedef minitl::map<AddressRange, CompilationUnit>  UnitMap;
+    typedef minitl::hashmap<AddressRange, CompilationUnit, Arena::DebugData>  UnitMap;
 private:
     const u64           m_begin;
     const u64           m_end;

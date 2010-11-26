@@ -12,12 +12,6 @@
 namespace BugEngine
 {
 
-EException::EException(const std::string& msg) :
-    runtime_error(msg)
-{
-    Logger::root()->log(logFatal, "", 0, msg.c_str());
-}
-
 const char* ILogListener::s_logNames[] =
 {
     " SPAM  ",
@@ -58,11 +52,11 @@ ref<Logger> Logger::instance(const inamespace& name)
 
     for(size_t i = 0; i < name.size(); ++i)
     {
-        std::map< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
+        minitl::hashmap< istring, ref<Logger>, Arena::DebugData >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
         {
             ref<Logger> next = ref<Logger>::create<Arena::DebugData>(result, name[i]);
-            result->m_children.insert(std::make_pair(name[i], next));
+            result->m_children.insert(minitl::make_pair(name[i], next));
             result = next;
         }
         else

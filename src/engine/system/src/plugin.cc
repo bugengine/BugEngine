@@ -5,7 +5,7 @@
 #include    <system/plugin.hh>
 #include    <cstring>
 
-namespace BugEngine { namespace _
+namespace BugEngine { namespace impl
 {
 
 #ifdef BE_STATIC

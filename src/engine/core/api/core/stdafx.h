@@ -39,8 +39,7 @@ struct StaticAssert_;
 template< >
 struct StaticAssert_<true>
 {
-    struct Defined
-    {};
+    struct Defined {};
 };
 
 #define StaticAssert(expr) StaticAssert_<expr>::Defined ;
@@ -68,12 +67,10 @@ T be_align(T value, size_t alignment)
 #include    <cstdlib>
 #include    <cstdio>
 #include    <cstring>
-#include    <string>
+#include    <minitl/container/pair.hh>
 #include    <minitl/container/vector.hh>
 #include    <minitl/container/list.hh>
-#include    <minitl/container/stack.hh>
 #include    <minitl/container/hash_map.hh>
-#include    <minitl/container/hash_set.hh>
 #include    <minitl/interlocked/interlocked.hh>
 #include    <minitl/string/format.hh>
 

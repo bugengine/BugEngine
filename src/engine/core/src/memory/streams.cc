@@ -3,6 +3,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/memory/streams.hh>
+#include    <minitl/container/algorithm.hh>
 
 namespace BugEngine
 {
@@ -22,7 +23,7 @@ void* IMemoryStream::memory()
 
 i64 IMemoryStream::read(void* buffer, i64 _size)
 {
-    i64 toread = std::min(_size,size()-offset());
+    i64 toread = minitl::min(_size,size()-offset());
     memcpy(buffer, memory(), be_checked_numcast<size_t>(toread));
     seek(eSeekMove, toread);
     return toread;

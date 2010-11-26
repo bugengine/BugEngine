@@ -16,8 +16,10 @@ namespace BugEngine
 static HANDLE loadPlugin(const istring &pluginName)
 {
     SetLastError(0);
-    std::string pluginDir = Environment::getEnvironment().getDataDirectory().str();
-    std::string pluginPath = pluginDir + "/plugins/" + pluginName.c_str() + ".dll";
+    minitl::format<> plugingFile = minitl::format<>("%s.dll") | pluginName;
+    const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
+    static const ipath pluginSubdir = ipath("plugins");
+    minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
     HANDLE h = LoadLibrary(pluginPath.c_str());
     if(!h)
     {

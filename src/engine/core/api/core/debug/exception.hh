@@ -4,15 +4,18 @@
 #ifndef _CORE_DEBUG_EXCEPTION_H_
 #define _CORE_DEBUG_EXCEPTION_H_
 /*****************************************************************************/
-#include    <stdexcept>
 
 namespace BugEngine
 {
 
-class be_api(CORE) EException : public std::runtime_error
+class be_api(CORE) Exception
 {
 public:
-    EException(const std::string& msg);
+    const minitl::format<> what;
+    Exception(const minitl::format<> msg)
+        :   what(msg)
+    {
+    }
 };
 
 }

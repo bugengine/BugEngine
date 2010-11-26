@@ -8,7 +8,7 @@
 namespace minitl
 {
 
-namespace _
+namespace impl
 {
 
 template< typename ITERATOR, typename ITERATOR_TYPE >
@@ -40,7 +40,7 @@ typename iterator_traits<ITERATOR>::iterator_category   iterator_category(const 
 template< typename ITERATOR >
 typename iterator_traits<ITERATOR>::difference_type distance(const ITERATOR& first, const ITERATOR& last)
 {
-    return _::distance(first, last, iterator_category(first));
+    return impl::distance(first, last, iterator_category(first));
 }
 
 template< typename T >

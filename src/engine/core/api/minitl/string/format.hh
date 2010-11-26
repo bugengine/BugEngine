@@ -26,6 +26,7 @@ public:
 
     inline const char *token() const;
     inline void put(const char *value) const;
+    inline void append(const char *value);
 };
 
 
@@ -196,6 +197,19 @@ const format<size>& operator|(const format<size>& f, T* value)
 {
     return f | (const T*)value;
 }
+
+template< u16 size >
+void format<size>::append(const char *value)
+{
+    size_t s = strlen(m_buffer);
+    strncat(m_buffer + s, value, size-s-1);
+    if(!m_firstFormat)
+    {
+        m_firstFormat = m_buffer + s;
+        findToken();
+    }
+}
+
 
 
 }
