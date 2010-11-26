@@ -22,7 +22,7 @@ FileSystem::FileSystemMountPoint::~FileSystemMountPoint()
 
 weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)
 {
-    std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, scoped<FileSystemMountPoint>()));
+    minitl::pair<ChildrenMap::iterator, bool> result = m_children.insert(minitl::make_pair(child, scoped<FileSystemMountPoint>()));
     if(result.second)
         result.first->second = scoped<FileSystemMountPoint>::create<Arena::General>();
     return result.first->second;
@@ -130,16 +130,16 @@ size_t FileSystem::age(const ifilename& /*file*/) const
     return 0;
 }
 
-std::set<ifilename> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
+minitl::vector<ifilename, Arena::TemporaryData> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
 {
     be_unimplemented();
-    return std::set<ifilename>();
+    return minitl::vector<ifilename, Arena::TemporaryData>();
 }
 
-std::set<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
+minitl::vector<ipath, Arena::TemporaryData> FileSystem::listDirectories(const ipath& /*prefix*/)
 {
     be_unimplemented();
-    return std::set<ipath>();
+    return minitl::vector<ipath, Arena::TemporaryData>();
 }
 
 }

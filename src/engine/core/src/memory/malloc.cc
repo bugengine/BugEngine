@@ -4,6 +4,9 @@
 #include    <core/stdafx.h>
 #include    <core/memory/malloc.hh>
 
+#ifdef BE_COMPILER_MSVC
+#include    <crtdbg.h>
+#endif
 
 namespace BugEngine
 {

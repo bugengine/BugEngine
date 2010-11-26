@@ -7,7 +7,7 @@
 
 #include    <stdexcept>
 
-namespace BugEngine { namespace _
+namespace BugEngine { namespace impl
 {
 
 class be_api(SYSTEM) PluginList
@@ -37,45 +37,45 @@ private:
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
     static klass* be_createPlugin params { void* m = BugEngine::Memory<klass::Arena>::allocArray<klass>(1); return new(m) klass args; } \
     static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::Memory<klass::Arena>::free(cls); }              \
-    static BugEngine::_::PluginList s_##name##Plugin( #name,                                                                            \
-                                              reinterpret_cast<BugEngine::_::PluginList::Create>(be_createPlugin),                      \
-                                              reinterpret_cast<BugEngine::_::PluginList::Destroy>(be_destroyPlugin));
+    static BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                         \
+                                                         reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),        \
+                                                         reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin));
 
 namespace BugEngine
 {
 
 template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
-:   m_handle(_::PluginList::findPlugin(pluginName.c_str()))
+:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
     if(m_handle)
     {
-        m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const _::PluginList*>(m_handle)->create))();
+        m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const impl::PluginList*>(m_handle)->create))();
     }
 }
 
 template< typename Interface >
 template< typename T1 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
-:   m_handle(_::PluginList::findPlugin(pluginName.c_str()))
+:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
     if(m_handle)
     {
-        m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const _::PluginList*>(m_handle)->create))(param1);
+        m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1);
     }
 }
 
 template< typename Interface >
 template< typename T1, typename T2 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
-:   m_handle(_::PluginList::findPlugin(pluginName.c_str()))
+:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
     if(m_handle)
     {
-        m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const _::PluginList*>(m_handle)->create))(param1, param2);
+        m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1, param2);
     }
 }
 
@@ -84,7 +84,7 @@ Plugin<Interface>::~Plugin(void)
 {
     if(m_handle)
     {
-        (reinterpret_cast<void(*)(Interface*)>(static_cast<const _::PluginList*>(m_handle)->destroy))(m_interface);
+        (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
     }
 }
 

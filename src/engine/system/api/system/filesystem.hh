@@ -20,32 +20,29 @@ enum FileOpenMode
     eReadWrite
 };
 
-//lint -esym(1712,EFileNotFound)
-class EFileNotFound : public EException
+class EFileNotFound : public Exception
 {
 public:
-    EFileNotFound(const ifilename& file) :
-        EException("file " + file.str() + " does not exist")
+    EFileNotFound(const ifilename& file)
+        :   Exception(minitl::format<>("file %s does not exist") | file)
     {
     }
 };
 
-//lint -esym(1712,ENoCreate)
-class ENoCreate : public EException
+class ENoCreate : public Exception
 {
 public:
-    ENoCreate(const ifilename& file) :
-        EException("cannot create file " + file.str())
+    ENoCreate(const ifilename& file)
+        :   Exception(minitl::format<>("cannot create file %s") | file)
     {
     }
 };
 
-//lint -esym(1712,EReadOnly)
-class EReadOnly : public EException
+class EReadOnly : public Exception
 {
 public:
-    EReadOnly(const ifilename& file) :
-        EException("cannot open file " + file.str() + " in read-write mode")
+    EReadOnly(const ifilename& file)
+        :   Exception(minitl::format<>("cannot open file %s in read-write mode") | file)
     {
     }
 };
@@ -56,7 +53,7 @@ private:
     class FileSystemMountPoint : public pointer
     {
     public:
-        typedef std::map< istring, scoped<FileSystemMountPoint> > ChildrenMap;
+        typedef minitl::hashmap< istring, scoped<FileSystemMountPoint>, Arena::General > ChildrenMap;
     private:
         ref<const FileSystemComponent>  m_component;
         ChildrenMap                     m_children;
@@ -85,8 +82,8 @@ public:
     ref<IMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
     size_t age(const ifilename& file) const;
 
-    std::set<ifilename> listFiles(const ipath& prefix, const char* extension = 0);
-    std::set<ipath> listDirectories(const ipath& prefix);
+    minitl::vector<ifilename, Arena::TemporaryData> listFiles(const ipath& prefix, const char* extension = 0);
+    minitl::vector<ipath, Arena::TemporaryData> listDirectories(const ipath& prefix);
 };
 
 }

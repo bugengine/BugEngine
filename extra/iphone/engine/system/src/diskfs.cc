@@ -113,7 +113,7 @@ bool DiskFS::writable() const
 
 ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
-    std::string fullname = (m_prefix+filename).str();
+    minitl::format<ifilename::MaxFilenameLength> fullname = (m_prefix+filename).str();
     if(mode == eReadOnly)
     {
         int file = ::open(fullname.c_str(), O_RDONLY);
@@ -134,7 +134,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
 
 size_t DiskFS::age(const ifilename& file) const
 {
-    std::string name = (m_prefix+file).str();
+    minitl::format<ifilename::MaxFilenameLength> name = (m_prefix+file).str();
 
     return 0;
 }

@@ -24,11 +24,20 @@ void swap(T& a, T& b);
 template< typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f);
 
+template< typename ITERATOR, typename T >
+void fill(ITERATOR first, ITERATOR last, const T& value);
+
 template< typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p);
 
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE f);
+
+template< typename T >
+T min(T t1, T t2);
+
+template< typename T >
+T max(T t1, T t2);
 
 }
 

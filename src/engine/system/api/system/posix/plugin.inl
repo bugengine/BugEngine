@@ -5,7 +5,6 @@
 #include    <system/plugin.hh>
 #include    <core/environment.hh>
 
-#include    <stdexcept>
 #include    <dlfcn.h>
 
 

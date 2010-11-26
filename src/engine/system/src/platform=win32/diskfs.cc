@@ -111,7 +111,7 @@ bool DiskFS::writable() const
 
 ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
-    std::string fullname = (m_prefix+filename).str();
+    minitl::format<ifilename::MaxFilenameLength> fullname = (m_prefix+filename).str();
     if(mode == eReadOnly)
     {
         HANDLE file = CreateFile(fullname.c_str(), GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
@@ -123,7 +123,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         else
         {
             DWORD sizehigh;
-            HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, (m_prefix+filename).tostring("/").c_str());
+            HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, fullname.c_str());
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
             return ref<MemoryFileMap>::create<Arena::General>(memory, GetFileSize(file, &sizehigh), file, filemap);
         }
@@ -134,8 +134,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
 
 size_t DiskFS::age(const ifilename& file) const
 {
-    std::string name = (m_prefix+file).str();
-
+    minitl::format<ifilename::MaxFilenameLength> fullname = (m_prefix+file).str();
     return 0;
 }
 
