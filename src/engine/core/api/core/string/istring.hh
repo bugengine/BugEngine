@@ -136,7 +136,7 @@ be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
 namespace minitl
 {
-inline size_t hash_value(const BugEngine::istring& key) { return key.hash(); }
+inline size_t hash_value(const BugEngine::istring& key) { return (size_t)key.hash(); }
 
 template< u16 size >
 const format<size>& operator|(const format<size>& f, const BugEngine::istring& value)
