@@ -28,7 +28,8 @@ T* pool<ARENA, T>::allocate()
 {
     void* result = (void*)m_items.pop();
     be_assert(result >= m_pool && result < m_end, "allocated a node that is outside the node range");
-    return new(T)result;
+    new(result) T;
+    return (T*)result;
 }
 
 
@@ -38,7 +39,7 @@ T* pool<ARENA, T>::allocate(const T1& t1)
 {
     void* result = (void*)m_items.pop();
     be_assert(result >= m_pool && result < m_end, "allocated a node that is outside the node range");
-    return new(T)result(t1);
+    return new(result) T(t1);
 }
 
 template< int ARENA, typename T >
@@ -47,7 +48,7 @@ T* pool<ARENA, T>::allocate(const T1& t1, const T2& t2)
 {
     void* result = (void*)m_items.pop();
     be_assert(result >= m_pool && result < m_end, "allocated a node that is outside the node range");
-    return new(T)result(t1, t2);
+    return new(result) T(t1, t2);
 }
 
 template< int ARENA, typename T >
@@ -56,7 +57,7 @@ T* pool<ARENA, T>::allocate(const T1& t1, const T2& t2, const T3& t3)
 {
     void* result = (void*)m_items.pop();
     be_assert(result >= m_pool && result < m_end, "allocated a node that is outside the node range");
-    return new(T)result(t1, t2);
+    return new(result) T(t1, t2, t3);
 }
 
 template< int ARENA, typename T >

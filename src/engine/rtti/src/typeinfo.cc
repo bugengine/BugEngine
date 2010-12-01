@@ -138,7 +138,7 @@ static struct A
         // local copy
         RTTI::ClassInfo ci = *be_typeid<RTTI::ClassInfo>().klass;
         Value v(Value::ByRef(ci));
-        Value v2(Value::ByRef(*be_typeid<RTTI::ClassInfo>().klass)); //klass est const donc v2 est const aussi
+        Value v2(Value::ByRef(*be_typeid<RTTI::ClassInfo>().klass));
         OutputDebugString((::minitl::format<>("type: %s\n") | v.type().name()).c_str());
         Value name = v("name");
         OutputDebugString((::minitl::format<>("name: %s\n") | name.as< const raw<const char> >().m_ptr).c_str());
