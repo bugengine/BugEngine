@@ -22,7 +22,7 @@ Application::Application(int argc, const char *argv[])
     m_tasks.push_back(updateTask);
 
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(gameArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
-    //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create<Arena::General>("memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
+    //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create(gameArena(), "memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
     m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create(gameArena(), "application", color32(255,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[1]));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[2]));

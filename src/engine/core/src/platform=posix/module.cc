@@ -36,12 +36,12 @@ ref<const Module> Module::self()
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
-            s_module = ref<Elf>::create<Arena::DebugData>(filename, lmap->l_addr);
+            s_module = ref<Elf>::create(debugArena(), filename, lmap->l_addr);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<Elf>::create<Arena::DebugData>(lmap->l_name, lmap->l_addr);
+            ref<Module> newModule = ref<Elf>::create(debugArena(), lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module = newModule;
         }

@@ -42,7 +42,7 @@ Keyboard::Keyboard(size_t /*numControls*/)
             }
             else
             {
-                ref<GroupControl> g = ref<GroupControl>::create<Arena::General>(mappedName);
+                ref<GroupControl> g = ref<GroupControl>::create(gameArena(), mappedName);
                 getKeyboard().addControl(g);
                 getKeyboard().addControlAlias("US", keyName, g);
                 g->add(ctrl);

@@ -117,7 +117,7 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 
 
 Renderer::Renderer()
-:   m_platformRenderer(scoped<PlatformRenderer>::create<Arena::General>())
+:   m_platformRenderer(scoped<PlatformRenderer>::create(gameArena()))
 {
 }
 

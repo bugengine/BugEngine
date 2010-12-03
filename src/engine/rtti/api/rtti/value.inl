@@ -14,7 +14,7 @@ namespace BugEngine
 template< typename T >
 Value::Value(T t)
 :   m_type(be_typeid<T>::type())
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? Memory<Arena::General>::alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? gameArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
