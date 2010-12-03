@@ -125,7 +125,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         else
         {
             off_t size = lseek(file,0,SEEK_END);
-            return ref<MemoryFileMap>::create<Arena::General>(file, size);
+            return ref<MemoryFileMap>::create(gameArena(), file, size);
         }
     }
     else

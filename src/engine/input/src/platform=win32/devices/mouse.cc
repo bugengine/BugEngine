@@ -32,7 +32,7 @@ Mouse::Mouse(size_t numButtons)
         }
         else
         {
-            ref<GroupControl> g = ref<GroupControl>::create<Arena::General>(f);
+            ref<GroupControl> g = ref<GroupControl>::create(gameArena(), f);
             getMouse().addControl(g);
             g->add(ctrl);
         }*/

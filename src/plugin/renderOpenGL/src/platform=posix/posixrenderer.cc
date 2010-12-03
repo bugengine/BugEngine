@@ -112,7 +112,7 @@ void Renderer::createContext(void* params)
         ::Display* display;
         ::GLXFBConfig fbConfig;
     } *p = (const DisplayInfo*)params;
-    m_context = scoped<Context>::create<Arena::General>(p->display, p->fbConfig);
+    m_context = scoped<Context>::create(gameArena(), p->display, p->fbConfig);
 }
 
 void Renderer::destroyContext(void*)
@@ -123,7 +123,7 @@ void Renderer::destroyContext(void*)
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
-,   m_context(scoped<Context>::create<Arena::General>())
+,   m_context(scoped<Context>::create(gameArena()))
 ,   m_closed(0)
 {
     renderer->attachWindow(this);

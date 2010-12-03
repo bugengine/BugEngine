@@ -64,7 +64,7 @@ int be_main (weak<BugEngine::Application> app)
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
-        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create<BugEngine::Arena::General>(scene, w));
+        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(gameArena(), scene, w));
         app->setScene(node);
     }
 
