@@ -23,20 +23,20 @@ const char* ILogListener::s_logNames[] =
 };
 
 
-Logger::Logger() :
-    m_listeners(),
-    m_children(),
-    m_name("")
+Logger::Logger()
+:   m_listeners(debugArena())
+,   m_children(debugArena())
+,   m_name("")
 {
 }
 
 
 
 Logger::Logger(ref<Logger> parent, const istring& name)
-    :   m_listeners()
-    ,   m_children()
-    ,   m_parent(parent)
-    ,   m_name(name)
+:   m_listeners(debugArena())
+,   m_children(debugArena())
+,   m_parent(parent)
+,   m_name(name)
 {
 }
 
@@ -52,10 +52,10 @@ ref<Logger> Logger::instance(const inamespace& name)
 
     for(size_t i = 0; i < name.size(); ++i)
     {
-        minitl::hashmap< istring, ref<Logger>, Arena::DebugData >::iterator it = result->m_children.find(name[i]);
+        minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if(it == result->m_children.end())
         {
-            ref<Logger> next = ref<Logger>::create<Arena::DebugData>(result, name[i]);
+            ref<Logger> next = ref<Logger>::create(debugArena(), result, name[i]);
             result->m_children.insert(minitl::make_pair(name[i], next));
             result = next;
         }
@@ -67,7 +67,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 
 ref<Logger> Logger::root()
 {
-    static ref<Logger> s_rootLogger = ref<Logger>::create<Arena::DebugData>();
+    static ref<Logger> s_rootLogger = ref<Logger>::create(debugArena());
     return s_rootLogger;
 }
 
@@ -84,7 +84,7 @@ void Logger::addListener(ILogListener* listener)
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
-    for(minitl::vector< ILogListener*, Arena::DebugData >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for(minitl::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }

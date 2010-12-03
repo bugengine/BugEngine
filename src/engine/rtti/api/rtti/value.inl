@@ -23,7 +23,7 @@ Value::Value(T t)
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? Memory<Arena::General>::alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? gameArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
@@ -64,7 +64,7 @@ Value::~Value()
         m_type.destroy(memory());
         if(m_type.size() > sizeof(m_buffer) && m_deallocate)
         {
-            Memory<Arena::General>::free(m_pointer);
+            gameArena().free(m_pointer);
         }
     }
 }

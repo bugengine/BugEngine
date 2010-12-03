@@ -21,7 +21,7 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
-    return ref<Window>::create<Arena::General>(this, flags);
+    return ref<Window>::create(gameArena(), this, flags);
 }
 
 ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)

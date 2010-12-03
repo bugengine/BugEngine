@@ -50,7 +50,7 @@ Window::PlatformWindow::~PlatformWindow()
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create<Arena::General>(renderer, this, flags))
+,   m_window(scoped<PlatformWindow>::create(gameArena(), renderer, this, flags))
 {
 }
 

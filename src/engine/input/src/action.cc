@@ -13,6 +13,7 @@ namespace BugEngine { namespace Input
 Action::Action(const istring& name, const InputMap* owner)
 :   m_name(name)
 ,   m_owner(owner)
+,   m_controls(gameArena())
 {
 }
 
@@ -73,7 +74,7 @@ void Action::mapControl(Control* c)
 
 void Action::unmapControl(Control* c)
 {
-    for(minitl::vector<Control*, Arena::General>::iterator it = m_controls.begin(); it != m_controls.end(); )
+    for(minitl::vector<Control*>::iterator it = m_controls.begin(); it != m_controls.end(); )
     {
         if(*it == c)
         {

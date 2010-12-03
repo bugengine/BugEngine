@@ -71,7 +71,7 @@ static int __main(int argc, const char *argv[])
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
-        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create<BugEngine::Arena::General>(argc, argv);
+        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::gameArena(), argc, argv);
         result = be_main(locApplication);
     }
     catch(std::runtime_error& er)

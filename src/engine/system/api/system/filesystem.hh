@@ -53,7 +53,7 @@ private:
     class FileSystemMountPoint : public pointer
     {
     public:
-        typedef minitl::hashmap< istring, scoped<FileSystemMountPoint>, Arena::General > ChildrenMap;
+        typedef minitl::hashmap< istring, scoped<FileSystemMountPoint> > ChildrenMap;
     private:
         ref<const FileSystemComponent>  m_component;
         ChildrenMap                     m_children;
@@ -82,8 +82,8 @@ public:
     ref<IMemoryStream> open(const ifilename& file, FileOpenMode mode) const;
     size_t age(const ifilename& file) const;
 
-    minitl::vector<ifilename, Arena::TemporaryData> listFiles(const ipath& prefix, const char* extension = 0);
-    minitl::vector<ipath, Arena::TemporaryData> listDirectories(const ipath& prefix);
+    minitl::vector<ifilename> listFiles(const ipath& prefix, const char* extension = 0);
+    minitl::vector<ipath> listDirectories(const ipath& prefix);
 };
 
 }

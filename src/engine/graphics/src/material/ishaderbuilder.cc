@@ -8,7 +8,7 @@ namespace BugEngine { namespace Graphics
 {
 
 IShaderBuilder::IShaderBuilder()
-    :   m_stream(100000)
+    :   m_stream(tempArena(), 10000)
 {
 }
 

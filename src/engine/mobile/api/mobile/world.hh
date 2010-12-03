@@ -16,10 +16,10 @@ class be_api(MOBILE) World : public minitl::refcountable
 {
     friend class WorldScene;
 private:
-    Plugin<Physics::IWorld>                                     m_physicsSystem;
-    Plugin<Audio::IWorld>                                       m_audioSystem;
-    minitl::vector<ref<ITask>, Arena::General>                  m_tasks;
-    minitl::vector<ITask::CallbackConnection, Arena::General>   m_callbacks;
+    Plugin<Physics::IWorld>                     m_physicsSystem;
+    Plugin<Audio::IWorld>                       m_audioSystem;
+    minitl::vector< ref<ITask> >                m_tasks;
+    minitl::vector<ITask::CallbackConnection>   m_callbacks;
 private:
     void copyWorld();
     void updateWorld();

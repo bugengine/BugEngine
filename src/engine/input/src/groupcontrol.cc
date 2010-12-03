@@ -11,6 +11,7 @@ namespace BugEngine { namespace Input
 
 GroupControl::GroupControl(const istring& name)
 :   Control(name)
+,   m_controls(gameArena())
 {
 }
 

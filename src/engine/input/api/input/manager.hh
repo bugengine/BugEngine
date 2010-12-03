@@ -14,7 +14,7 @@ class be_api(INPUT) Manager
 {
 private:
     class WindowCommunication;
-    typedef minitl::hashmap< void*, ref<Device>, Arena::General >   DeviceList;
+    typedef minitl::hashmap< void*, ref<Device> >   DeviceList;
 private:
     WindowCommunication&    m_communication;
     Thread                  m_inputThread;

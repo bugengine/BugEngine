@@ -11,6 +11,8 @@
 namespace BugEngine
 {
 
+Allocator& stringArena();
+
 
 class StringCache
 {
@@ -19,10 +21,10 @@ private:
     class Buffer
     {
     private:
-        Buffer*                             m_next;
-        Memory<Arena::General>::Block<byte> m_buffer;
-        i_size_t                            m_used;
-        static const size_t                 s_capacity = 1024*200;
+        Buffer*                 m_next;
+        Allocator::Block<byte>  m_buffer;
+        i_size_t                m_used;
+        static const size_t     s_capacity = 1024*200;
     private:
         StringCache*    reserveNext(size_t size);
     public:
@@ -36,7 +38,7 @@ private:
     friend struct lessWithOffset;
     friend struct equaltoWithOffset;
 private:
-    typedef minitl::hashmap< const char *, StringCache*, Arena::General, minitl::hash<const char *> > StringIndex;
+    typedef minitl::hashmap< const char *, StringCache*, minitl::hash<const char *> > StringIndex;
 private:
     static Buffer*  getBuffer();
 public:
@@ -76,7 +78,7 @@ StringCache::Buffer* StringCache::getBuffer()
 
 StringCache::Buffer::Buffer()
 :   m_next(0)
-,   m_buffer(s_capacity)
+,   m_buffer(stringArena(), s_capacity)
 ,   m_used(0)
 {
 }
@@ -131,7 +133,7 @@ StringCache* StringCache::unique(const char *val)
     ScopedCriticalSection scope(s_lock);
     try
     {
-        static StringCache::StringIndex g_strings;
+        static StringCache::StringIndex g_strings(stringArena());
         StringIndex::const_iterator it = g_strings.find(val);
         if(it != g_strings.end())
         {

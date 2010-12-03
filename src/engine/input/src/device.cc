@@ -13,9 +13,9 @@ Device::Device(const istring& name, size_t numControls)
 :   /*m_deviceNamespace(RTTI::Namespace::root()->createNamespace("input")->createNamespace("devices")->createNamespace(name))
 ,*/   m_name(name)
 ,   m_numControls(numControls)
-,   m_active(numControls)
-,   m_lastFrame(numControls)
-,   m_buffer(numControls)
+,   m_active(gameArena(), numControls)
+,   m_lastFrame(gameArena(), numControls)
+,   m_buffer(gameArena(), numControls)
 {
     minitl::fill((float*)m_active, (float*)m_active+numControls, 0.0f);
     minitl::fill((float*)m_lastFrame, (float*)m_lastFrame+numControls, 0.0f);

@@ -11,7 +11,8 @@ namespace BugEngine { namespace Input
 {
 
 InputMap::InputMap()
-:   m_active(false)
+:   m_actions(gameArena())
+,   m_active(false)
 {
 }
 
@@ -23,7 +24,7 @@ weak<Action> InputMap::addAction(ActionId id, const istring& name)
 {
     if(id >= m_actions.size())
         m_actions.resize(id+1);
-    ref<Action> result = ref<Action>::create<Arena::General>(name, this); 
+    ref<Action> result = ref<Action>::create(gameArena(), name, this); 
     m_actions[id] = result;
     return result;
 }

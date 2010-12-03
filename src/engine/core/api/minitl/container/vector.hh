@@ -10,7 +10,7 @@
 namespace minitl
 {
 
-template< typename T, int ARENA >
+template< typename T >
 class vector
 {
 private:
@@ -34,13 +34,17 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    typename BugEngine::Memory<ARENA>::template Block<T>    m_memory;
-    T*                                                      m_end;
-    T*                                                      m_capacity;
+    BugEngine::Allocator::Block<T>  m_memory;
+    T*                              m_end;
+    T*                              m_capacity;
 private:
     void grow(size_type capacity);
 public:
-    vector();
+    explicit vector(BugEngine::Allocator& allocator, size_type count = 0);
+    vector(const vector<T>& other);
+    vector& operator=(const vector<T>& other);
+    template< typename ITERATOR >
+    vector(BugEngine::Allocator& allocator, ITERATOR first, iterator last);
     ~vector();
 
     iterator                begin();
@@ -59,6 +63,8 @@ public:
     const_reference         operator[](size_type i) const;
 
     void                    push_back(const_reference r);
+    template< typename ITERATOR >
+    void                    push_back(ITERATOR first, ITERATOR last);
     iterator                erase(iterator it);
     iterator                erase(iterator begin, iterator end);
 

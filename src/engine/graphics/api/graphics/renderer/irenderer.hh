@@ -76,8 +76,6 @@ public:
     virtual ref<IRenderTarget>      createRenderBuffer(TextureFlags flags) = 0;
     virtual ref<IRenderTarget>      createMultipleRenderBuffer(TextureFlags flags, size_t count) = 0;
     virtual bool                    multithreaded() const = 0;
-public:
-    enum { Arena = BugEngine::Arena::General };
 };
 
 }}

@@ -19,11 +19,11 @@ void ref<T>::swap(ref<T>& other)
 
 
 template< typename T >
-ref<T>::ref(T* value, Deleter* deleter)
+ref<T>::ref(T* value, BugEngine::Allocator& deleter)
 :   m_ptr(value)
 {
-    be_assert(value->m_deleter == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
-    value->m_deleter = deleter;
+    be_assert(value->m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
+    value->m_allocator = &deleter;
     minitl::addref(value);
 }
 

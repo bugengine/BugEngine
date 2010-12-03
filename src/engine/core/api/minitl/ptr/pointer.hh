@@ -11,7 +11,6 @@ namespace minitl
 template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;
-typedef void (Deleter)(const void* ptr);
 
 template< typename T >
 static void checked_destroy(const T*);
@@ -26,13 +25,13 @@ class pointer
     template< typename T >  friend class scoped;
     template< typename T >  friend void checked_delete(const T*);
 private:
-    Deleter*    m_deleter;
+    ::BugEngine::Allocator* m_allocator;
 #ifdef BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
 public:
     pointer()
-    :   m_deleter(0)
+    :   m_allocator(0)
 #ifdef BE_ENABLE_WEAKCHECK
     ,   m_weakCount(0)
 #endif

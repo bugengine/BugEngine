@@ -9,24 +9,24 @@
 namespace minitl
 {
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-class hashmap<Key, Value, Arena, Hash>::base_iterator
-    :   public random_access_iterator<typename POLICY::value_type, typename hashmap<Key, Value, Arena, Hash>::difference_type>
+class hashmap<Key, Value, Hash>::base_iterator
+    :   public bidirectional_iterator<typename POLICY::value_type, typename hashmap<Key, Value, Hash>::difference_type>
 {
-    friend class hashmap<Key, Value, Arena, Hash>;
+    friend class hashmap<Key, Value, Hash>;
 public:
-    typedef          random_access_iterator_tag         iterator_category;
+    typedef          bidirectional_iterator_tag         iterator_category;
     typedef typename POLICY::value_type                 value_type;
     typedef typename POLICY::pointer                    pointer;
     typedef typename POLICY::reference                  reference;
     typedef typename POLICY::size_type                  size_type;
     typedef typename POLICY::difference_type            difference_type;
 private:
-    const hashmap<Key, Value, Arena, Hash>* m_owner;
+    const hashmap<Key, Value, Hash>* m_owner;
     typename POLICY::pointer                m_iterator;
 private:
-    base_iterator(const hashmap<Key, Value, Arena, Hash>* owner, typename POLICY::pointer it);
+    base_iterator(const hashmap<Key, Value, Hash>* owner, typename POLICY::pointer it);
 public:
     base_iterator();
     template< typename OTHERPOLICY >
@@ -92,123 +92,123 @@ public:
     typename POLICY::reference  operator*() const;
 };
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::base_iterator()
+hashmap<Key, Value, Hash>::base_iterator<POLICY>::base_iterator()
 :   m_owner(0)
 ,   m_iterator(0)
 {
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::base_iterator(const hashmap<Key, Value, Arena, Hash>* owner, typename POLICY::pointer it)
+hashmap<Key, Value, Hash>::base_iterator<POLICY>::base_iterator(const hashmap<Key, Value, Hash>* owner, typename POLICY::pointer it)
 :   m_owner(owner)
 ,   m_iterator(it)
 {
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
 template< typename OTHERPOLICY >
-hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::base_iterator(const base_iterator<OTHERPOLICY>& other)
+hashmap<Key, Value, Hash>::base_iterator<POLICY>::base_iterator(const base_iterator<OTHERPOLICY>& other)
 :   m_owner(other.m_owner)
 ,   m_iterator(other.m_iterator)
 {
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::~base_iterator()
+hashmap<Key, Value, Hash>::base_iterator<POLICY>::~base_iterator()
 {
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-bool hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other)
+bool hashmap<Key, Value, Hash>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other)
 {
     return m_iterator == other.m_iterator;
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-bool hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other)
+bool hashmap<Key, Value, Hash>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other)
 {
     return m_iterator != other.m_iterator;
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-typename POLICY::pointer hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::operator->() const
+typename POLICY::pointer hashmap<Key, Value, Hash>::base_iterator<POLICY>::operator->() const
 {
     return m_iterator;
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
+template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
-typename POLICY::reference hashmap<Key, Value, Arena, Hash>::base_iterator<POLICY>::operator*() const
+typename POLICY::reference hashmap<Key, Value, Hash>::base_iterator<POLICY>::operator*() const
 {
     return *m_iterator;
 }
 
 
-template< typename Key, typename Value, int Arena, typename Hash >
-struct hashmap<Key, Value, Arena, Hash>::iterator_policy
+template< typename Key, typename Value, typename Hash >
+struct hashmap<Key, Value, Hash>::iterator_policy
 {
-    typedef typename hashmap<Key, Value, Arena, Hash>::value_type       value_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::pointer          pointer;
-    typedef typename hashmap<Key, Value, Arena, Hash>::reference        reference;
-    typedef typename hashmap<Key, Value, Arena, Hash>::size_type        size_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::difference_type  difference_type;
+    typedef typename hashmap<Key, Value, Hash>::value_type       value_type;
+    typedef typename hashmap<Key, Value, Hash>::pointer          pointer;
+    typedef typename hashmap<Key, Value, Hash>::reference        reference;
+    typedef typename hashmap<Key, Value, Hash>::size_type        size_type;
+    typedef typename hashmap<Key, Value, Hash>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
-template< typename Key, typename Value, int Arena, typename Hash >
-struct hashmap<Key, Value, Arena, Hash>::const_iterator_policy
+template< typename Key, typename Value, typename Hash >
+struct hashmap<Key, Value, Hash>::const_iterator_policy
 {
-    typedef typename hashmap<Key, Value, Arena, Hash>::value_type const value_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::const_pointer    pointer;
-    typedef typename hashmap<Key, Value, Arena, Hash>::const_reference  reference;
-    typedef typename hashmap<Key, Value, Arena, Hash>::size_type        size_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::difference_type  difference_type;
+    typedef typename hashmap<Key, Value, Hash>::value_type const value_type;
+    typedef typename hashmap<Key, Value, Hash>::const_pointer    pointer;
+    typedef typename hashmap<Key, Value, Hash>::const_reference  reference;
+    typedef typename hashmap<Key, Value, Hash>::size_type        size_type;
+    typedef typename hashmap<Key, Value, Hash>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
-template< typename Key, typename Value, int Arena, typename Hash >
-struct hashmap<Key, Value, Arena, Hash>::reverse_iterator_policy
+template< typename Key, typename Value, typename Hash >
+struct hashmap<Key, Value, Hash>::reverse_iterator_policy
 {
-    typedef typename hashmap<Key, Value, Arena, Hash>::value_type       value_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::pointer          pointer;
-    typedef typename hashmap<Key, Value, Arena, Hash>::reference        reference;
-    typedef typename hashmap<Key, Value, Arena, Hash>::size_type        size_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::difference_type  difference_type;
+    typedef typename hashmap<Key, Value, Hash>::value_type       value_type;
+    typedef typename hashmap<Key, Value, Hash>::pointer          pointer;
+    typedef typename hashmap<Key, Value, Hash>::reference        reference;
+    typedef typename hashmap<Key, Value, Hash>::size_type        size_type;
+    typedef typename hashmap<Key, Value, Hash>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
-template< typename Key, typename Value, int Arena, typename Hash >
-struct hashmap<Key, Value, Arena, Hash>::const_reverse_iterator_policy
+template< typename Key, typename Value, typename Hash >
+struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
 {
-    typedef typename hashmap<Key, Value, Arena, Hash>::value_type const value_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::const_pointer    pointer;
-    typedef typename hashmap<Key, Value, Arena, Hash>::const_reference  reference;
-    typedef typename hashmap<Key, Value, Arena, Hash>::size_type        size_type;
-    typedef typename hashmap<Key, Value, Arena, Hash>::difference_type  difference_type;
+    typedef typename hashmap<Key, Value, Hash>::value_type const value_type;
+    typedef typename hashmap<Key, Value, Hash>::const_pointer    pointer;
+    typedef typename hashmap<Key, Value, Hash>::const_reference  reference;
+    typedef typename hashmap<Key, Value, Hash>::size_type        size_type;
+    typedef typename hashmap<Key, Value, Hash>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
 
 
-template< typename Key, typename Value, int Arena, typename Hash >
-hashmap< Key, Value, Arena, Hash >::hashmap(size_type reserved)
-:   m_objects(reserved)
-,   m_hashes(reserved)
+template< typename Key, typename Value, typename Hash >
+hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& allocator, size_type reserved)
+:   m_objects(allocator, reserved)
+,   m_hashes(allocator, reserved)
 ,   m_size(0)
 ,   m_capacity(reserved)
 {
 }
 
-template< typename Key, typename Value, int Arena, typename Hash >
-void hashmap< Key, Value, Arena, Hash >::reserve(size_type reserved)
+template< typename Key, typename Value, typename Hash >
+void hashmap< Key, Value, Hash >::reserve(size_type reserved)
 {
     if(reserved <= m_capacity)
         return;

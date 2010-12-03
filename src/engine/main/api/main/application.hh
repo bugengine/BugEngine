@@ -14,13 +14,13 @@ namespace BugEngine
 class Application : public minitl::refcountable
 {
 private:
-    scoped<Scheduler>                                               m_scheduler;
-    ref<Graphics::INode>                                            m_scene;
-    ITask::CallbackConnection                                       m_startSceneUpdate;
-    ITask::CallbackConnection                                       m_endSceneUpdate;
-    minitl::vector<ref<ITask>, Arena::General>                      m_tasks;
-    minitl::vector<TaskGroup::TaskStartConnection, Arena::General>  m_startConnections;
-    minitl::vector<TaskGroup::TaskEndConnection, Arena::General>    m_endConnections;
+    scoped<Scheduler>                               m_scheduler;
+    ref<Graphics::INode>                            m_scene;
+    ITask::CallbackConnection                       m_startSceneUpdate;
+    ITask::CallbackConnection                       m_endSceneUpdate;
+    minitl::vector< ref<ITask> >                    m_tasks;
+    minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
+    minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
 private:
     void frameUpdate();
 public:

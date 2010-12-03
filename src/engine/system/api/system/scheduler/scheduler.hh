@@ -39,9 +39,9 @@ public:
         PriorityCount = 3
     };
 private:
-    minitl::vector< Worker*, Arena::General >   m_workers;
+    minitl::vector<Worker*>                     m_workers;
     Semaphore                                   m_synchro;
-    minitl::pool< Arena::General, char[128] >   m_taskPool;
+    minitl::pool<char[128]>                     m_taskPool;
     unsigned int                                m_frameCount;
     Timer                                       m_timer;
     Event                                       m_end;

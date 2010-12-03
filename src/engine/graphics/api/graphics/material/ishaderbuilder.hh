@@ -13,7 +13,7 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) IShaderBuilder
 {
 private:
-    MemoryStream<Arena::TemporaryData> m_stream;
+    MemoryStream m_stream;
 public:
     IShaderBuilder();
     ~IShaderBuilder();
