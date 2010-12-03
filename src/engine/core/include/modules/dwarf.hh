@@ -22,10 +22,10 @@ private:
     class StringBuffer : public refcountable
     {
     private:
-        const ref<const StringBuffer>           m_next;
-        u64 const                               m_size;
-        u64                                     m_current;
-        Memory<Arena::DebugData>::Block<char>   m_buffer;
+        const ref<const StringBuffer>   m_next;
+        u64 const                       m_size;
+        u64                             m_current;
+        Allocator::Block<char>          m_buffer;
     public:
         StringBuffer(size_t size, ref<const StringBuffer> next = ref<const StringBuffer>());
         ~StringBuffer();
@@ -58,7 +58,7 @@ private:
     };
 private:
     template< Endianness e > class Buffer;
-    typedef minitl::hashmap<AddressRange, CompilationUnit, Arena::DebugData>  UnitMap;
+    typedef minitl::hashmap<AddressRange, CompilationUnit>  UnitMap;
 private:
     const u64           m_begin;
     const u64           m_end;
@@ -70,11 +70,11 @@ private:
     template< Endianness e >
     void parse(const Module& m);
     template< Endianness e >
-    bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation, Arena::TemporaryData>& abbreviations, u8 ptrSize);
+    bool readInfos(Buffer<e>& buffer, UnitMap& units, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
     template< Endianness e >
-    bool fillNode(Buffer<e>& buffer, CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation, Arena::TemporaryData>& abbreviations, u8 ptrSize);
+    bool fillNode(Buffer<e>& buffer, CompilationUnit& unit, const Dwarf::Abbreviation& abbrev, const minitl::vector<Dwarf::Abbreviation>& abbreviations, u8 ptrSize);
     template< Endianness e >
-    bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation, Arena::TemporaryData>& abbreviations);
+    bool readAbbreviation(Buffer<e>& buffer, minitl::vector<Dwarf::Abbreviation>& abbreviations);
 public:
     DwarfModule(const ifilename& moduleName, const Module& m, u64 begin, u64 size);
     ~DwarfModule();

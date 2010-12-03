@@ -20,7 +20,7 @@ private:
 private:
     inline void swap(ref& other);
 private:
-    inline ref(T* value, Deleter* deleter);
+    inline ref(T* value, BugEngine::Allocator& deleter);
 public:
     inline ref();
     inline ref(const ref& other);

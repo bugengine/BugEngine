@@ -40,9 +40,9 @@ public:
     void addStartTask(weak<ITask> task);
     bool removeStartTask(weak<ITask> task);
 private:
-    minitl::vector< weak<ITask>, Arena::General >   m_startTasks;
-    i_u32                                           m_endTaskCount;
-    ref<Callback>                                   m_completionCallback;
+    minitl::vector< weak<ITask> >   m_startTasks;
+    i_u32                           m_endTaskCount;
+    ref<Callback>                   m_completionCallback;
 };
 
 class be_api(SYSTEM) TaskGroup::TaskStartConnection

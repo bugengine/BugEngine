@@ -10,11 +10,11 @@ namespace minitl
 {
 
 template< typename T >
-scoped<T>::scoped(T* value, Deleter* deleter)
+scoped<T>::scoped(T* value, BugEngine::Allocator& allocator)
 :   m_ptr(value)
 {
-    be_assert(value->m_deleter == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
-    value->m_deleter = deleter;
+    be_assert(value->m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
+    value->m_allocator = &allocator;
 }
 
 template< typename T >

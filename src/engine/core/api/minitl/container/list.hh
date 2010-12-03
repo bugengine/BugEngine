@@ -10,7 +10,7 @@
 namespace minitl
 {
 
-template< typename T, int ARENA >
+template< typename T >
 class list
 {
 private:
@@ -38,8 +38,9 @@ public:
 private:
     intrusive_list<item>    m_list;
     size_type               m_size;
+    BugEngine::Allocator&   m_allocator;
 public:
-    list();
+    list(BugEngine::Allocator& allocator);
     ~list();
 
     iterator                begin();

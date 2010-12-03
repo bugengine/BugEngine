@@ -10,15 +10,16 @@ namespace BugEngine { namespace Graphics
 
 MultiNode::MultiNode()
 :   INode()
-,   m_globalTask(ref<TaskGroup>::create<Arena::General>("updateMultiScene", color32(255, 0, 0)))
-,   m_renderTask(ref<TaskGroup>::create<Arena::General>("renderMultiScene", color32(255, 0, 0)))
-,   m_syncTask(ref<TaskGroup>::create<Arena::General>("syncMultiScene", color32(255, 0, 0)))
-,   m_dispatchTask(ref<TaskGroup>::create<Arena::General>("dispatchMultiScene", color32(255, 0, 0)))
-,   m_cleanTask(ref< Task< MethodCaller<MultiNode, &MultiNode::clean> > >::create<Arena::General>("cleanNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::clean>(this)))
+,   m_globalTask(ref<TaskGroup>::create(gameArena(), "updateMultiScene", color32(255, 0, 0)))
+,   m_renderTask(ref<TaskGroup>::create(gameArena(), "renderMultiScene", color32(255, 0, 0)))
+,   m_syncTask(ref<TaskGroup>::create(gameArena(), "syncMultiScene", color32(255, 0, 0)))
+,   m_dispatchTask(ref<TaskGroup>::create(gameArena(), "dispatchMultiScene", color32(255, 0, 0)))
+,   m_cleanTask(ref< Task< MethodCaller<MultiNode, &MultiNode::clean> > >::create(gameArena(), "cleanNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::clean>(this)))
 ,   m_endSyncConnection(m_syncTask, m_cleanTask)
 ,   m_startGlobalConnection(m_globalTask, m_renderTask)
 ,   m_endGlobalConnection(m_globalTask, m_syncTask)
 ,   m_jobGraph(m_renderTask, m_syncTask, m_dispatchTask)
+,   m_nodes(gameArena())
 ,   m_mainNodes(0)
 {
 }
@@ -29,7 +30,7 @@ MultiNode::~MultiNode()
 
 void MultiNode::clean()
 {
-    for(minitl::vector<NodeInfo, Arena::General>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
+    for(minitl::vector<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
     {
         if(it->node->closed())
         {
@@ -64,9 +65,9 @@ void MultiNode::addNode(scoped<INode> node, NodeType type)
     m_nodes.push_back(NodeInfo(node, this, type));
     if(type == MainWindow)
         m_mainNodes++;
-    minitl::vector<NodeInfo, Arena::General>::reverse_iterator it = m_nodes.rbegin();
+    minitl::vector<NodeInfo>::reverse_iterator it = m_nodes.rbegin();
     be_assert(it != m_nodes.rend(), "Added node but list is still empty");
-    minitl::vector<NodeInfo, Arena::General>::reverse_iterator it2 = it++;
+    minitl::vector<NodeInfo>::reverse_iterator it2 = it++;
     if(it != m_nodes.rend())
     {
         it->chainDispatch = ITask::CallbackConnection(it->node->dispatchTask(), it2->node->dispatchTask()->startCallback());

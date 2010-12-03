@@ -40,5 +40,65 @@ void IMemoryStream::write(void* buffer, i64 _size)
 
 /*****************************************************************************/
 
+MemoryStream::MemoryStream(Allocator& allocator, i64 size)
+    :   m_memory(allocator, (size_t)size)
+    ,   m_size(size)
+    ,   m_offset(0)
+{
+}
+
+
+MemoryStream::~MemoryStream()
+{
+}
+
+void* MemoryStream::basememory()
+{
+    return m_memory;
+}
+
+i64 MemoryStream::size() const
+{
+    return m_size;
+}
+
+i64 MemoryStream::offset() const
+{
+    return m_offset;
+}
+
+void MemoryStream::seek(SeekMethod method, i64 offset)
+{
+    switch(method)
+    {
+    case eSeekMove:
+        m_offset += offset;
+        break;
+    case eSeekFromStart:
+        m_offset = offset;
+        break;
+    case eSeekFromEnd:
+        m_offset = m_size + offset;
+        break;
+    default:
+        be_notreached();
+    }
+    if(m_offset < 0) m_offset = 0;
+    if(m_offset > m_size) m_offset = m_size;
+}
+
+void MemoryStream::resize(i64 size)
+{
+    if(!m_memory.resize((size_t)size))
+    {
+        m_memory.realloc((size_t)size);
+    }
+}
+
+bool MemoryStream::writable() const
+{
+    return true;
+}
+
 
 }

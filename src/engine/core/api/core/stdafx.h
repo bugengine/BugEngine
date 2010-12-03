@@ -33,6 +33,18 @@
 #include    <core/platforms.hh>
 #include    <core/features.hh>
 
+#if defined(building_core) || defined(CORE_EXPORTS)
+# define    COREEXPORT          BE_EXPORT
+#elif defined(core_dll)
+# define    COREEXPORT          BE_IMPORT
+#else
+# define    COREEXPORT
+#endif
+#define     NOEXPORT
+#define     NONEEXPORT
+#define     FORCEEXPORT         BE_EXPORT
+#define     be_api(module) module##EXPORT
+
 template< bool p >
 struct StaticAssert_;
 
@@ -50,18 +62,6 @@ T be_align(T value, size_t alignment)
     size_t v = (size_t)(value);
     return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
 }
-
-#if defined(building_core) || defined(CORE_EXPORTS)
-# define    COREEXPORT          BE_EXPORT
-#elif defined(core_dll)
-# define    COREEXPORT          BE_IMPORT
-#else
-# define    COREEXPORT
-#endif
-#define     NOEXPORT
-#define     NONEEXPORT
-#define     FORCEEXPORT         BE_EXPORT
-#define     be_api(module) module##EXPORT
 
 #include    <core/memory/malloc.hh>
 #include    <cstdlib>

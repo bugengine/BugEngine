@@ -31,7 +31,7 @@ struct MallocInitializer
 
 static MallocInitializer s_initializer;
 
-
+/*
 template< >
 be_api(CORE) void* Memory<Arena::General>::internalAlloc(size_t size, size_t alignment)
 {
@@ -63,8 +63,6 @@ be_api(CORE) void Memory<Arena::General>::internalFree(const void* pointer)
 #endif
 }
 
-
-/* TODO: create a real fast temporary memory allocator */
 template< >
 be_api(CORE) void* Memory<Arena::TemporaryData>::internalAlloc(size_t size, size_t alignment)
 {
@@ -125,6 +123,6 @@ be_api(CORE) void Memory<Arena::DebugData>::internalFree(const void* pointer)
 #else
     return ::free(const_cast<void*>(pointer));
 #endif
-}
+}*/
 
 }

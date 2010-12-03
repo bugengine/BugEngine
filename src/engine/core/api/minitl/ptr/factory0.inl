@@ -1,5 +1,5 @@
-template< int ARENA > static inline be_pointer_<T> create()
+static inline be_pointer_<T> create(::BugEngine::Allocator& allocator)
 {
-    void* mem = BugEngine::Memory<ARENA>::alloc(sizeof(T), be_alignof(T));
-    return be_pointer_<T>(new(mem) T, &BugEngine::Memory<ARENA>::free);
+    void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+    return be_pointer_<T>(new(mem) T, allocator);
 }

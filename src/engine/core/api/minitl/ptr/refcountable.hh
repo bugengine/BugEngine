@@ -27,9 +27,9 @@ static inline void checked_delete(const T* ptr)
 {
     if(ptr)
     {
-        Deleter* d = ptr->m_deleter;
+        BugEngine::Allocator* d = ptr->m_allocator;
         checked_destroy(ptr);
-        (*d)(ptr);
+        d->free(ptr);
     }
 }
 

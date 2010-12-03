@@ -6,37 +6,7 @@
 
 namespace BugEngine
 {
-
-template< >
-void* Memory<Arena::Plugin>::internalAlloc(size_t size, size_t alignment)
-{
-#ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
-#else
-    return ::malloc(size);
-#endif
-}
-
-template< >
-void* Memory<Arena::Plugin>::internalRealloc(void* ptr, size_t size, size_t alignment)
-{
-#ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
-#else
-    return ::realloc(ptr, size);
-#endif
-}
-
-template< >
-void Memory<Arena::Plugin>::internalFree(const void* pointer)
-{
-#ifdef _MSC_VER
-    return ::_aligned_free(const_cast<void*>(pointer));
-#else
-    return ::free(const_cast<void*>(pointer));
-#endif
-}
-
+    Allocator& bulletArena();
 }
 
 namespace BugEngine { namespace Physics { namespace Bullet
@@ -44,17 +14,17 @@ namespace BugEngine { namespace Physics { namespace Bullet
 
 static BE_NOINLINE void* allocate(size_t size)
 {
-    return Memory<Arena::Plugin>::alloc(size, 16);
+    return bulletArena().alloc(size, 16);
 }
 
 static BE_NOINLINE void* allocate(size_t size, int align)
 {
-    return Memory<Arena::Plugin>::alloc(size, align);
+    return bulletArena().alloc(size, align);
 }
 
 static BE_NOINLINE void free(void* block)
 {
-    return Memory<Arena::Plugin>::free(block);
+    return bulletArena().free(block);
 }
 
 BulletWorld::WorldSetup::WorldSetup()

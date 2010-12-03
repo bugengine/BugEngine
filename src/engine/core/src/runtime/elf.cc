@@ -302,7 +302,7 @@ void Elf::parse(FILE* f)
     fseek(f, be_checked_numcast<long>(header.shoffset), SEEK_SET);
     fread(sections, header.shentsize, header.shnum, f);
 
-    Memory<Arena::TemporaryData>::Block<char> stringPool(be_checked_numcast<size_t>(sections[header.shstrndx].size));
+    Allocator::Block<char> stringPool(tempArena(), be_checked_numcast<size_t>(sections[header.shstrndx].size));
     fseek(f, be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
     fread(stringPool, 1, be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
     
@@ -324,7 +324,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     const Section& debug_link = (*this)[".gnu_debuglink"];
     if(debug_link)
     {
-        Memory<Arena::TemporaryData>::Block<char> filename(be_checked_numcast<size_t>(debug_link.fileSize));
+        Allocator::Block<char> filename(tempArena(), be_checked_numcast<size_t>(debug_link.fileSize));
         readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }

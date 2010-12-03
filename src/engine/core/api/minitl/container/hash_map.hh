@@ -14,7 +14,7 @@ namespace minitl
 template< typename T >
 struct hash;
 
-template< typename Key, typename Value, int Arena, typename Hash = minitl::hash<Key> >
+template< typename Key, typename Value, typename Hash = minitl::hash<Key> >
 class hashmap
 {
 private:
@@ -37,12 +37,12 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    minitl::pool<Arena, value_type>                         m_objects;
-    typename BugEngine::Memory<Arena>::Block<value_type*>   m_hashes;
-    size_type                                               m_size;
-    size_type                                               m_capacity;
+    minitl::pool<value_type>                    m_objects;
+    BugEngine::Allocator::Block<value_type*>    m_hashes;
+    size_type                                   m_size;
+    size_type                                   m_capacity;
 public:
-    hashmap(size_type reserved = 0);
+    hashmap(BugEngine::Allocator& allocator, size_type reserved = 0);
     ~hashmap();
 
     void                            reserve(size_type size);

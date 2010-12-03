@@ -38,7 +38,7 @@ private:
         D3DPRESENT_PARAMETERS   params;
         LPDIRECT3DSWAPCHAIN9    swapchain;
     };
-    typedef minitl::list<SwapchainDesc, Arena::General>::iterator SwapchainItem;
+    typedef minitl::list<SwapchainDesc>::iterator SwapchainItem;
 private:
     enum DeviceState
     {
@@ -47,14 +47,14 @@ private:
         DeviceRestored
     };
 private:
-    LPDIRECT3D9                                     m_directx;
-    LPDIRECT3DDEVICE9                               m_device;
-    D3DCAPS9                                        m_caps;
-    CGcontext                                       m_context;
-    weak<const FileSystem>                          m_filesystem;
-    minitl::list<SwapchainDesc, Arena::General>     m_swapchains;
-    SwapchainItem                                   m_deviceSwapChain;
-    DeviceState                                     m_deviceState;
+    LPDIRECT3D9                 m_directx;
+    LPDIRECT3DDEVICE9           m_device;
+    D3DCAPS9                    m_caps;
+    CGcontext                   m_context;
+    weak<const FileSystem>      m_filesystem;
+    minitl::list<SwapchainDesc> m_swapchains;
+    SwapchainItem               m_deviceSwapChain;
+    DeviceState                 m_deviceState;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();

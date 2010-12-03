@@ -7,27 +7,27 @@
 
 void* operator new(size_t size) throw(std::bad_alloc)
 {
-    return BugEngine::Memory<BugEngine::Arena::General>::alloc(size, 16);
+    return BugEngine::gameArena().alloc(size, 16);
 }
 
 void* operator new(size_t size, size_t alignment) throw(std::bad_alloc)
 {
-    return BugEngine::Memory<BugEngine::Arena::General>::alloc(size, alignment);
+    return BugEngine::gameArena().alloc(size, alignment);
 }
 
 void* operator new[](size_t size) throw(std::bad_alloc)
 {
-    return BugEngine::Memory<BugEngine::Arena::General>::alloc(size, 16);
+    return BugEngine::gameArena().alloc(size, 16);
 }
 
 void operator delete(void* ptr) throw()
 {
-    return BugEngine::Memory<BugEngine::Arena::General>::free(ptr);
+    return BugEngine::gameArena().free(ptr);
 }
 
 void operator delete[](void* ptr) throw()
 {
-    return BugEngine::Memory<BugEngine::Arena::General>::free(ptr);
+    return BugEngine::gameArena().free(ptr);
 }
 
 /*****************************************************************************/

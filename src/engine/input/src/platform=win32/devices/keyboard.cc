@@ -32,7 +32,7 @@ Keyboard::Keyboard(size_t /*numControls*/)
             ActivateKeyboardLayout(usLayout, 0);
             GetKeyNameTextA(i<<16, keyName, 256);
             ActivateKeyboardLayout(oldLayout, 0);
-            ref<Control> ctrl = ref<DeviceControl>::create<Arena::General>(mappedName, this, i);
+            ref<Control> ctrl = ref<DeviceControl>::create(gameArena(), mappedName, this, i);
             addControl(ctrl);
             addControlAlias("US", keyName, ctrl);
             /* TODO Value v = getKeyboard().getNamespace()->get(istring(mappedName));

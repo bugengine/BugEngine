@@ -26,6 +26,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 ,   m_device(0)
 ,   m_context(cgCreateContext())
 ,   m_filesystem(filesystem)
+,   m_swapchains(gameArena())
 ,   m_deviceState(DeviceLost)
 {
     m_directx->GetDeviceCaps(0, D3DDEVTYPE_HAL, &m_caps);
@@ -113,7 +114,7 @@ Renderer::SwapchainItem Renderer::release(SwapchainItem swapchain)
 
 ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {
-    return ref<Window>::create<Arena::General>(this, flags);
+    return ref<Window>::create(gameArena(), this, flags);
 }
 
 ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)
@@ -163,7 +164,7 @@ void Renderer::flush()
     {
     case DeviceLost:
         {
-            for(minitl::list<SwapchainDesc, Arena::General>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
+            for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
             {
                 if(it->swapchain)
                 {
@@ -193,7 +194,7 @@ void Renderer::flush()
             if(!m_swapchains.empty())
             {
                 d3d_checkResult(m_device->GetSwapChain(0, &m_deviceSwapChain->swapchain));
-                for(minitl::list<SwapchainDesc, Arena::General>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
+                for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
                 {
                     if(it != m_deviceSwapChain)
                     {

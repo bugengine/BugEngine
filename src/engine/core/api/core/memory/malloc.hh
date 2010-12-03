@@ -10,33 +10,28 @@
 namespace BugEngine
 {
 
-template< int ARENA >
-class Memory
+class be_api(CORE) Allocator
 {
-private:
-    static void* internalAlloc(size_t size, size_t alignment);
-    static void* internalRealloc(void* ptr, size_t size, size_t alignment);
-    static void  internalFree(const void* pointer);
-public:
-    static inline void* alloc(size_t size, size_t alignment = 16);
-    static inline void* realloc(void* ptr, size_t size, size_t alignment);
-    static inline void  free(const void* pointer);
-    template< typename T >
-    static inline T* allocArray(size_t count, size_t alignment = be_alignof(T));
 public:
     template< typename T >
     class Block
     {
     private:
-        T* m_data;
+        Allocator&  m_allocator;
+        T*          m_data;
     public:
-        Block(size_t count, size_t alignment = be_alignof(T))
-            :   m_data(Memory<ARENA>::template allocArray<T>(count, alignment))
+        Block(Allocator& allocator, size_t count, size_t alignment = be_alignof(T))
+            :   m_allocator(allocator)
+            ,   m_data(allocator.allocArray<T>(count, alignment))
         {
         };
         ~Block()
         {
-            Memory<ARENA>::free(m_data);
+            m_allocator.free(m_data);
+        }
+        inline Allocator& arena()
+        {
+            return m_allocator;
         }
         T* data()
         {
@@ -54,10 +49,15 @@ public:
         {
             return m_data;
         }
+        bool resize(size_t count, size_t alignment = be_alignof(T))
+        {
+            size_t size = be_align(sizeof(T),alignment)*count;
+            return m_allocator.resize(m_data, size);
+        }
         void realloc(size_t count, size_t alignment = be_alignof(T))
         {
             size_t size = be_align(sizeof(T),alignment)*count;
-            m_data = (T*)Memory<ARENA>::realloc(m_data, size, alignment);
+            m_data = (T*)m_allocator.realloc(m_data, size);
         }
         void swap(Block<T>& other)
         {
@@ -69,37 +69,50 @@ public:
         Block(const Block& other);
         Block& operator=(const Block& other);
     };
+private:
+    virtual void* internalAlloc(size_t size, size_t alignment) = 0;
+    virtual bool  internalResize(void* ptr, size_t size) = 0;
+    virtual void* internalRealloc(void* ptr, size_t size) = 0;
+    virtual void  internalFree(const void* pointer) = 0;
+public:
+    inline void* alloc(size_t size, size_t alignment = 16);
+    inline bool  resize(void* ptr, size_t size);
+    inline void* realloc(void* ptr, size_t size);
+    inline void  free(const void* pointer);
+    template< typename T >
+    inline T* allocArray(size_t count, size_t alignment = be_alignof(T));
 };
 
-template< int ARENA >
-void* Memory<ARENA>::alloc(size_t size, size_t alignment)
+void* Allocator::alloc(size_t size, size_t alignment)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
     return internalAlloc(size, alignment);
 }
 
-template< int ARENA >
-void* Memory<ARENA>::realloc(void* ptr, size_t size, size_t alignment)
+bool  Allocator::resize(void* ptr, size_t size)
 {
-    if(!ptr)
-        return alloc(size, alignment);
 #ifdef BE_MEMORY_TRACKING
 #endif
-    return internalRealloc(ptr, size, alignment);
+    return internalResize(ptr, size);
 }
 
-template< int ARENA >
-void  Memory<ARENA>::free(const void* pointer)
+void* Allocator::realloc(void* ptr, size_t size)
+{
+#ifdef BE_MEMORY_TRACKING
+#endif
+    return internalRealloc(ptr, size);
+}
+
+void  Allocator::free(const void* pointer)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
     internalFree(pointer);
 }
 
-template< int ARENA >
 template< typename T >
-T* Memory<ARENA>::allocArray(size_t count, size_t alignment)
+T* Allocator::allocArray(size_t count, size_t alignment)
 {
     if(!count)
         return 0;
@@ -109,21 +122,10 @@ T* Memory<ARENA>::allocArray(size_t count, size_t alignment)
     return reinterpret_cast<T*>(r);
 }
 
-struct Arena
-{
-    enum
-    {
-        // engine section
-        General         = 0x1000,
-        TemporaryData   = 0x1001,
-        DebugData       = 0x1002,
-        Rtti            = 0x1002,
-        // game section
-        Game            = 0x1100,
-        // plugin section
-        Plugin          = 0x2000
-    };
-};
+be_api(CORE) Allocator& gameArena();
+be_api(CORE) Allocator& tempArena();
+be_api(CORE) Allocator& debugArena();
+be_api(CORE) Allocator& rttiArena();
 
 }
 

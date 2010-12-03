@@ -202,7 +202,7 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 //-----------------------------------------------------------------------------
 
 Renderer::Renderer()
-    :   m_platformRenderer(scoped<PlatformRenderer>::create<Arena::General>(this))
+    :   m_platformRenderer(scoped<PlatformRenderer>::create(gameArena(), this))
 {
 }
 

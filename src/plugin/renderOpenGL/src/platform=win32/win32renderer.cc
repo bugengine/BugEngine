@@ -70,7 +70,7 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-    :   m_context(scoped<Context>::create<Arena::General>())
+    :   m_context(scoped<Context>::create(gameArena()))
     ,   m_filesystem(filesystem)
 {
 }
@@ -124,7 +124,7 @@ void Renderer::destroyContext(void*)
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
-,   m_context(scoped<Context>::create<Arena::General>())
+,   m_context(scoped<Context>::create(gameArena()))
 ,   m_closed(0)
 {
     renderer->attachWindow(this);

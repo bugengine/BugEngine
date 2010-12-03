@@ -9,12 +9,12 @@
 namespace minitl
 {
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-class vector<T, ARENA>::base_iterator
-    :   public random_access_iterator<T, typename vector<T, ARENA>::difference_type>
+class vector<T>::base_iterator
+    :   public random_access_iterator<T, typename vector<T>::difference_type>
 {
-    friend class vector<T, ARENA>;
+    friend class vector<T>;
 public:
     typedef          random_access_iterator_tag         iterator_category;
     typedef typename POLICY::value_type                 value_type;
@@ -23,10 +23,10 @@ public:
     typedef typename POLICY::size_type                  size_type;
     typedef typename POLICY::difference_type            difference_type;
 private:
-    const vector<T, ARENA>*     m_owner;
+    const vector<T>*            m_owner;
     typename POLICY::pointer    m_iterator;
 private:
-    base_iterator(const vector<T, ARENA>* owner, typename POLICY::pointer it);
+    base_iterator(const vector<T>* owner, typename POLICY::pointer it);
 public:
     base_iterator();
     template< typename OTHERPOLICY >
@@ -92,121 +92,140 @@ public:
     typename POLICY::reference  operator*() const;
 };
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-vector<T, ARENA>::base_iterator<POLICY>::base_iterator()
+vector<T>::base_iterator<POLICY>::base_iterator()
 :   m_owner(0)
 ,   m_iterator(0)
 {
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-vector<T, ARENA>::base_iterator<POLICY>::base_iterator(const vector<T, ARENA>* owner, typename POLICY::pointer it)
+vector<T>::base_iterator<POLICY>::base_iterator(const vector<T>* owner, typename POLICY::pointer it)
 :   m_owner(owner)
 ,   m_iterator(it)
 {
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
 template< typename OTHERPOLICY >
-vector<T, ARENA>::base_iterator<POLICY>::base_iterator(const base_iterator<OTHERPOLICY>& other)
+vector<T>::base_iterator<POLICY>::base_iterator(const base_iterator<OTHERPOLICY>& other)
 :   m_owner(other.m_owner)
 ,   m_iterator(other.m_iterator)
 {
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-vector<T, ARENA>::base_iterator<POLICY>::~base_iterator()
+vector<T>::base_iterator<POLICY>::~base_iterator()
 {
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-bool vector<T, ARENA>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other)
+bool vector<T>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other)
 {
     return m_iterator == other.m_iterator;
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-bool vector<T, ARENA>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other)
+bool vector<T>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other)
 {
     return m_iterator != other.m_iterator;
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-typename POLICY::pointer vector<T, ARENA>::base_iterator<POLICY>::operator->() const
+typename POLICY::pointer vector<T>::base_iterator<POLICY>::operator->() const
 {
     return m_iterator;
 }
 
-template< typename T, int ARENA >
+template< typename T >
 template< typename POLICY >
-typename POLICY::reference vector<T, ARENA>::base_iterator<POLICY>::operator*() const
+typename POLICY::reference vector<T>::base_iterator<POLICY>::operator*() const
 {
     return *m_iterator;
 }
 
 
-template< typename T, int ARENA >
-struct vector<T, ARENA>::iterator_policy
+template< typename T >
+struct vector<T>::iterator_policy
 {
-    typedef typename vector<T, ARENA>::value_type       value_type;
-    typedef typename vector<T, ARENA>::pointer          pointer;
-    typedef typename vector<T, ARENA>::reference        reference;
-    typedef typename vector<T, ARENA>::size_type        size_type;
-    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    typedef typename vector<T>::value_type       value_type;
+    typedef typename vector<T>::pointer          pointer;
+    typedef typename vector<T>::reference        reference;
+    typedef typename vector<T>::size_type        size_type;
+    typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
-template< typename T, int ARENA >
-struct vector<T, ARENA>::const_iterator_policy
+template< typename T >
+struct vector<T>::const_iterator_policy
 {
-    typedef typename vector<T, ARENA>::value_type const value_type;
-    typedef typename vector<T, ARENA>::const_pointer    pointer;
-    typedef typename vector<T, ARENA>::const_reference  reference;
-    typedef typename vector<T, ARENA>::size_type        size_type;
-    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    typedef typename vector<T>::value_type const value_type;
+    typedef typename vector<T>::const_pointer    pointer;
+    typedef typename vector<T>::const_reference  reference;
+    typedef typename vector<T>::size_type        size_type;
+    typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
 };
 
-template< typename T, int ARENA >
-struct vector<T, ARENA>::reverse_iterator_policy
+template< typename T >
+struct vector<T>::reverse_iterator_policy
 {
-    typedef typename vector<T, ARENA>::value_type       value_type;
-    typedef typename vector<T, ARENA>::pointer          pointer;
-    typedef typename vector<T, ARENA>::reference        reference;
-    typedef typename vector<T, ARENA>::size_type        size_type;
-    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    typedef typename vector<T>::value_type       value_type;
+    typedef typename vector<T>::pointer          pointer;
+    typedef typename vector<T>::reference        reference;
+    typedef typename vector<T>::size_type        size_type;
+    typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
-template< typename T, int ARENA >
-struct vector<T, ARENA>::const_reverse_iterator_policy
+template< typename T >
+struct vector<T>::const_reverse_iterator_policy
 {
-    typedef typename vector<T, ARENA>::value_type const value_type;
-    typedef typename vector<T, ARENA>::const_pointer    pointer;
-    typedef typename vector<T, ARENA>::const_reference  reference;
-    typedef typename vector<T, ARENA>::size_type        size_type;
-    typedef typename vector<T, ARENA>::difference_type  difference_type;
+    typedef typename vector<T>::value_type const value_type;
+    typedef typename vector<T>::const_pointer    pointer;
+    typedef typename vector<T>::const_reference  reference;
+    typedef typename vector<T>::size_type        size_type;
+    typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
 };
 
 
-template< typename T, int ARENA >
-vector<T, ARENA>::vector()
-:   m_memory(0)
+template< typename T >
+vector<T>::vector(BugEngine::Allocator& allocator, size_type count)
+:   m_memory(allocator, count)
 ,   m_end(m_memory)
 ,   m_capacity(m_memory)
 {
 }
 
-template< typename T, int ARENA >
-vector<T, ARENA>::~vector()
+template< typename T >
+template< typename ITERATOR >
+vector<T>::vector(BugEngine::Allocator& allocator, ITERATOR first, iterator last)
+    :   m_memory(allocator)
+    ,   m_end(m_memory)
+    ,   m_capacity(m_memory)
+{
+    push_back(first, last);
+
+}
+
+template< typename T >
+vector<T>& vector<T>::operator=(const vector<T>& other)
+{
+    clear();
+    push_back(other.begin(), other.end());
+    return *this;
+}
+
+template< typename T >
+vector<T>::~vector()
 {
     for(const_pointer t = m_memory; t != m_end; t = advance(t, 1))
     {
@@ -214,97 +233,111 @@ vector<T, ARENA>::~vector()
     }
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::iterator                 vector<T, ARENA>::begin()
+template< typename T >
+typename vector<T>::iterator                 vector<T>::begin()
 {
     return iterator(this, m_memory);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::iterator                 vector<T, ARENA>::end()
+template< typename T >
+typename vector<T>::iterator                 vector<T>::end()
 {
     return iterator(this, m_end);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_iterator           vector<T, ARENA>::begin() const
+template< typename T >
+typename vector<T>::const_iterator           vector<T>::begin() const
 {
     return const_iterator(this, m_memory);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_iterator           vector<T, ARENA>::end() const
+template< typename T >
+typename vector<T>::const_iterator           vector<T>::end() const
 {
     return const_iterator(this, m_end);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::reverse_iterator         vector<T, ARENA>::rbegin()
+template< typename T >
+typename vector<T>::reverse_iterator         vector<T>::rbegin()
 {
     return reverse_iterator(this, advance(m_end, -1));
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::reverse_iterator         vector<T, ARENA>::rend()
+template< typename T >
+typename vector<T>::reverse_iterator         vector<T>::rend()
 {
     return reverse_iterator(this, advance(m_memory.data(), -1));
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_reverse_iterator   vector<T, ARENA>::rbegin() const
+template< typename T >
+typename vector<T>::const_reverse_iterator   vector<T>::rbegin() const
 {
     return const_reverse_iterator(this, advance(m_end, -1));
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_reverse_iterator   vector<T, ARENA>::rend() const
+template< typename T >
+typename vector<T>::const_reverse_iterator   vector<T>::rend() const
 {
     return const_reverse_iterator(this, advance(m_memory.data(), -1));
 }
 
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::size_type                vector<T, ARENA>::size() const
+template< typename T >
+typename vector<T>::size_type                vector<T>::size() const
 {
     return distance(m_memory.data(), m_end);
 }
 
-template< typename T, int ARENA >
-bool                                                vector<T, ARENA>::empty() const
+template< typename T >
+bool                                                vector<T>::empty() const
 {
     return m_end == m_memory;
 }
 
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::reference                vector<T, ARENA>::operator[](size_type i)
+template< typename T >
+typename vector<T>::reference                vector<T>::operator[](size_type i)
 {
     return *advance(m_memory.data(), i);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_reference          vector<T, ARENA>::operator[](size_type i) const
+template< typename T >
+typename vector<T>::const_reference          vector<T>::operator[](size_type i) const
 {
     return *advance(m_memory.data(), i);
 }
 
 
-template< typename T, int ARENA >
-void                                                vector<T, ARENA>::push_back(const_reference r)
+template< typename T >
+void                                                vector<T>::push_back(const_reference r)
 {
     grow(size() + 1);
     new(m_end) T(r);
     m_end = advance(m_end, 1);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::iterator                 vector<T, ARENA>::erase(iterator it)
+template< typename T >
+template< typename ITERATOR >
+void                                                vector<T>::push_back(ITERATOR first, ITERATOR last)
+{
+    size_type count = minitl::distance(first, last);
+    grow(size() + count);
+    while(first != last)
+    {
+        new(m_end) T(*first);
+        m_end = advance(m_end, 1);
+        ++first;
+    }
+}
+
+template< typename T >
+typename vector<T>::iterator                 vector<T>::erase(iterator it)
 {
     return erase(it, it+1);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::iterator                 vector<T, ARENA>::erase(iterator first, iterator last)
+template< typename T >
+typename vector<T>::iterator                 vector<T>::erase(iterator first, iterator last)
 {
     be_assert_recover(first.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
     be_assert_recover(last.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
@@ -328,37 +361,37 @@ typename vector<T, ARENA>::iterator                 vector<T, ARENA>::erase(iter
 }
 
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::reference                vector<T, ARENA>::front()
+template< typename T >
+typename vector<T>::reference                vector<T>::front()
 {
     be_assert(!empty(), "getting front of empty vector");
     return *m_memory;
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::reference                vector<T, ARENA>::back()
+template< typename T >
+typename vector<T>::reference                vector<T>::back()
 {
     be_assert(!empty(), "getting back of empty vector");
     return *advance(m_end, -1);
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_reference          vector<T, ARENA>::front() const
+template< typename T >
+typename vector<T>::const_reference          vector<T>::front() const
 {
     be_assert(!empty(), "getting front of empty vector");
     return *m_memory;
 }
 
-template< typename T, int ARENA >
-typename vector<T, ARENA>::const_reference          vector<T, ARENA>::back() const
+template< typename T >
+typename vector<T>::const_reference          vector<T>::back() const
 {
     be_assert(!empty(), "getting front of empty vector");
     return *m_memory;
 }
 
 
-template< typename T, int ARENA >
-void                                                vector<T, ARENA>::resize(size_type size)
+template< typename T >
+void                                                vector<T>::resize(size_type size)
 {
     size_type s = distance(m_memory.data(), m_end);
     if(size > s)
@@ -378,16 +411,16 @@ void                                                vector<T, ARENA>::resize(siz
     }
 }
 
-template< typename T, int ARENA >
-void                                                vector<T, ARENA>::clear()
+template< typename T >
+void                                                vector<T>::clear()
 {
     for(pointer t = m_memory.data(); t != m_end; ++t)
         t->~T();
     m_end = m_memory.data();
 }
 
-template< typename T, int ARENA >
-void                                                vector<T, ARENA>::grow(size_type size)
+template< typename T >
+void                                                vector<T>::grow(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
     if(size > capacity)
@@ -401,7 +434,7 @@ void                                                vector<T, ARENA>::grow(size_
         size = size >> 32 | size;
     #endif
         size++;
-        typename BugEngine::Memory<ARENA>::template Block<T> block(size);
+        BugEngine::Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
         for(pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
         {

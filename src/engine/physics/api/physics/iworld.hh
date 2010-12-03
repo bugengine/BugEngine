@@ -16,8 +16,6 @@ public:
     ~IWorld();
     
     virtual void step() = 0;
-public:
-    enum { Arena = BugEngine::Arena::General };
 };
 
 }}

@@ -13,6 +13,7 @@ namespace BugEngine
 
 FileSystem::FileSystemMountPoint::FileSystemMountPoint(ref<const FileSystemComponent> component)
 :   m_component(component)
+,   m_children(gameArena())
 {
 }
 
@@ -24,7 +25,7 @@ weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCr
 {
     minitl::pair<ChildrenMap::iterator, bool> result = m_children.insert(minitl::make_pair(child, scoped<FileSystemMountPoint>()));
     if(result.second)
-        result.first->second = scoped<FileSystemMountPoint>::create<Arena::General>();
+        result.first->second = scoped<FileSystemMountPoint>::create(gameArena());
     return result.first->second;
 }
 
@@ -73,7 +74,7 @@ bool FileSystem::FileSystemMountPoint::empty() const
 //-----------------------------------------------------------------------------
 
 FileSystem::FileSystem(void)
-: m_root(scoped<FileSystemMountPoint>::create<Arena::General>())
+: m_root(scoped<FileSystemMountPoint>::create(gameArena()))
 {
 }
 
@@ -130,16 +131,16 @@ size_t FileSystem::age(const ifilename& /*file*/) const
     return 0;
 }
 
-minitl::vector<ifilename, Arena::TemporaryData> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
+minitl::vector<ifilename> FileSystem::listFiles(const ipath& /*prefix*/, const char* /*extension*/)
 {
     be_unimplemented();
-    return minitl::vector<ifilename, Arena::TemporaryData>();
+    return minitl::vector<ifilename>(tempArena());
 }
 
-minitl::vector<ipath, Arena::TemporaryData> FileSystem::listDirectories(const ipath& /*prefix*/)
+minitl::vector<ipath> FileSystem::listDirectories(const ipath& /*prefix*/)
 {
     be_unimplemented();
-    return minitl::vector<ipath, Arena::TemporaryData>();
+    return minitl::vector<ipath>(tempArena());
 }
 
 }

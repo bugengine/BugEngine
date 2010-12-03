@@ -11,14 +11,15 @@ ITask::ITask(istring name, color32 color, Scheduler::Priority priority)
 :   name(name)
 ,   color(color)
 ,   priority(priority)
-,   m_start(ref<ChainCallback>::create<Arena::General>(this))
+,   m_callbacks(gameArena())
+,   m_start(ref<ChainCallback>::create(gameArena(), this))
 {
 }
 
 ITask::~ITask()
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list<weak<ICallback>, Arena::General>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         bool result = (*it)->onDisconnected(this);
         be_forceuse(result);
@@ -29,7 +30,7 @@ ITask::~ITask()
 void ITask::end(weak<Scheduler> sc) const
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list<weak<ICallback>, Arena::General>::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::list< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onCompleted(sc, this);
     }
@@ -45,7 +46,7 @@ void ITask::addCallback(weak<ICallback> callback, ICallback::CallbackStatus stat
 bool ITask::removeCallback(weak<ICallback> callback)
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list<weak<ICallback>, Arena::General>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for(minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         if(*it == callback)
         {
@@ -79,7 +80,7 @@ ITask::ICallback::~ICallback()
 ITask::ChainCallback::ChainCallback(weak<ITask> task)
 :   ICallback()
 ,   m_starts(task)
-,   m_startedBy()
+,   m_startedBy(gameArena())
 ,   m_completed(0)
 {
 }
@@ -114,7 +115,7 @@ void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 
 bool ITask::ChainCallback::onDisconnected(weak<ITask> from)
 {
-    for(minitl::vector< weak<ITask>, Arena::General >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
+    for(minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
     {
         if((*it) == from)
         {

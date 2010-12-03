@@ -18,7 +18,7 @@ class scoped
 private:
     mutable T*  m_ptr;
 private:
-    scoped(T* value, Deleter* deleter);
+    scoped(T* value, BugEngine::Allocator& deleter);
 public:
     inline scoped();
     inline ~scoped();
