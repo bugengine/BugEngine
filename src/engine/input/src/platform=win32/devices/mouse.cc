@@ -23,7 +23,7 @@ Mouse::Mouse(size_t numButtons)
     for(size_t i = 0; i < numButtons; ++i)
     {
         minitl::format<> f = minitl::format<>("Button %u") | i;
-        ref<Control> ctrl = ref<DeviceControl>::create(gameArena(), f, this, i);
+        ref<Control> ctrl = ref<DeviceControl>::create(inputArena(), f, this, i);
         addControl(ctrl);
         /*TODO Value v = getMouse().getNamespace()->get(f);
         if(v)
@@ -32,7 +32,7 @@ Mouse::Mouse(size_t numButtons)
         }
         else
         {
-            ref<GroupControl> g = ref<GroupControl>::create(gameArena(), f);
+            ref<GroupControl> g = ref<GroupControl>::create(inputArena(), f);
             getMouse().addControl(g);
             g->add(ctrl);
         }*/

@@ -1,5 +1,6 @@
 %{
 #include <core/stdafx.h>
+#include <ctype.h>
 
 #define yylval  be_settings_lval
 #include "settings.bison.hh"

@@ -13,7 +13,7 @@ namespace BugEngine { namespace Input
 Action::Action(const istring& name, const InputMap* owner)
 :   m_name(name)
 ,   m_owner(owner)
-,   m_controls(gameArena())
+,   m_controls(inputArena())
 {
 }
 

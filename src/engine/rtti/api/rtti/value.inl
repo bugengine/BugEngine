@@ -14,7 +14,7 @@ namespace BugEngine
 template< typename T >
 Value::Value(T t)
 :   m_type(be_typeid<T>::type())
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? gameArena().alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
@@ -23,7 +23,7 @@ Value::Value(T t)
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? gameArena().alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
@@ -64,7 +64,7 @@ Value::~Value()
         m_type.destroy(memory());
         if(m_type.size() > sizeof(m_buffer) && m_deallocate)
         {
-            gameArena().free(m_pointer);
+            rttiArena().free(m_pointer);
         }
     }
 }

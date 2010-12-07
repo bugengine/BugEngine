@@ -11,8 +11,8 @@ ITask::ITask(istring name, color32 color, Scheduler::Priority priority)
 :   name(name)
 ,   color(color)
 ,   priority(priority)
-,   m_callbacks(gameArena())
-,   m_start(ref<ChainCallback>::create(gameArena(), this))
+,   m_callbacks(taskArena())
+,   m_start(ref<ChainCallback>::create(taskArena(), this))
 {
 }
 
@@ -80,7 +80,7 @@ ITask::ICallback::~ICallback()
 ITask::ChainCallback::ChainCallback(weak<ITask> task)
 :   ICallback()
 ,   m_starts(task)
-,   m_startedBy(gameArena())
+,   m_startedBy(taskArena())
 ,   m_completed(0)
 {
 }

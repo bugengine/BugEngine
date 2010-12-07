@@ -108,9 +108,9 @@ void  Scheduler::release_task(void* task, size_t size)
 }
 
 Scheduler::Scheduler()
-:   m_workers(gameArena())
+:   m_workers(taskArena())
 ,   m_synchro(0, 65535)
-,   m_taskPool(gameArena(), 65535, 16)
+,   m_taskPool(taskArena(), 65535, 16)
 ,   m_frameCount(0)
 ,   m_end()
 ,   m_tasks()

@@ -5,8 +5,6 @@
 #include    <system/plugin.hh>
 #include    <core/environment.hh>
 
-#include    <stdexcept>
-
 namespace BugEngine { namespace impl
 {
 
@@ -35,8 +33,8 @@ private:
 }}
 
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
-    static klass* be_createPlugin params { void* m = BugEngine::Memory<klass::Arena>::allocArray<klass>(1); return new(m) klass args; } \
-    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::Memory<klass::Arena>::free(cls); }              \
+    static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
+    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }              \
     static BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                         \
                                                          reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),        \
                                                          reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin));

@@ -236,7 +236,7 @@ bool                                                list<T>::empty() const
 template< typename T >
 void                                                list<T>::push_front(const_reference r)
 {
-    item* m = m_allocator.allocArray<item>(1);
+    item* m = m_allocator.alloc<item>();
     new(m) item(r);
     ++m_size;
     m_list.push_front(*m);
@@ -245,7 +245,7 @@ void                                                list<T>::push_front(const_re
 template< typename T >
 void                                                list<T>::push_back(const_reference r)
 {
-    item* m = m_allocator.allocArray<item>(1);
+    item* m = m_allocator.alloc<item>();
     new(m) item(r);
     ++m_size;
     m_list.push_back(*m);
@@ -254,7 +254,7 @@ void                                                list<T>::push_back(const_ref
 template< typename T >
 typename list<T>::iterator                   list<T>::insert(iterator after, const_reference r)
 {
-    item* m = m_allocator.allocArray<item>(1);
+    item* m = m_allocator.alloc<item>();
     new(m) item(r);
     ++m_size;
     return iterator(m_list.insert(after, *m));

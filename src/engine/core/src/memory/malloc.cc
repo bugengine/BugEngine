@@ -3,126 +3,40 @@
 
 #include    <core/stdafx.h>
 #include    <core/memory/malloc.hh>
-
-#ifdef BE_COMPILER_MSVC
-#include    <crtdbg.h>
-#endif
+#include    <core/memory/allocators/general.hh>
 
 namespace BugEngine
 {
 
-struct MallocInitializer
+Allocator& gameArena()
 {
-    bool initialized;
-    MallocInitializer()
-        :   initialized(false)
-    {
-#ifdef  BE_ENABLE_MEMORY_TRACKING
-# ifdef BE_COMPILER_MSVC
-        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
-# endif
-#endif
-        initialized = true;
-    }
-    ~MallocInitializer()
-    {
-    }
-};
-
-static MallocInitializer s_initializer;
-
-/*
-template< >
-be_api(CORE) void* Memory<Arena::General>::internalAlloc(size_t size, size_t alignment)
-{
-    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
-#ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
-#else
-    return ::malloc(size);
-#endif
+    static GeneralAllocator s_allocator;
+    return s_allocator;
 }
 
-template< >
-be_api(CORE) void* Memory<Arena::General>::internalRealloc(void* ptr, size_t size, size_t alignment)
+Allocator& tempArena()
 {
-#ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
-#else
-    return ::realloc(ptr, size);
-#endif
+    return gameArena();
 }
 
-template< >
-be_api(CORE) void Memory<Arena::General>::internalFree(const void* pointer)
+Allocator& debugArena()
 {
-#ifdef _MSC_VER
-    return ::_aligned_free(const_cast<void*>(pointer));
-#else
-    return ::free(const_cast<void*>(pointer));
-#endif
+    return gameArena();
 }
 
-template< >
-be_api(CORE) void* Memory<Arena::TemporaryData>::internalAlloc(size_t size, size_t alignment)
+Allocator& rttiArena()
 {
-    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
-#ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
-#else
-    return ::malloc(size);
-#endif
+    return gameArena();
 }
 
-template< >
-be_api(CORE) void* Memory<Arena::TemporaryData>::internalRealloc(void* ptr, size_t size, size_t alignment)
+Allocator& taskArena()
 {
-#ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
-#else
-    return ::realloc(ptr, size);
-#endif
+    return gameArena();
 }
 
-template< >
-be_api(CORE) void Memory<Arena::TemporaryData>::internalFree(const void* pointer)
+Allocator& inputArena()
 {
-#ifdef _MSC_VER
-    return ::_aligned_free(const_cast<void*>(pointer));
-#else
-    return ::free(const_cast<void*>(pointer));
-#endif
+    return gameArena();
 }
-
-template< >
-be_api(CORE) void* Memory<Arena::DebugData>::internalAlloc(size_t size, size_t alignment)
-{
-    be_assert(s_initializer.initialized, "new was called before the memory system was initialized");
-#ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
-#else
-    return ::malloc(size);
-#endif
-}
-
-template< >
-be_api(CORE) void* Memory<Arena::DebugData>::internalRealloc(void* ptr, size_t size, size_t alignment)
-{
-#ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
-#else
-    return ::realloc(ptr, size);
-#endif
-}
-
-template< >
-be_api(CORE) void Memory<Arena::DebugData>::internalFree(const void* pointer)
-{
-#ifdef _MSC_VER
-    return ::_aligned_free(const_cast<void*>(pointer));
-#else
-    return ::free(const_cast<void*>(pointer));
-#endif
-}*/
 
 }

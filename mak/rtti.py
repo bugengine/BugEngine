@@ -71,7 +71,7 @@ class Enum(Container):
 
 	def dump(self, file, namespace, index):
 		file.write("")
-		decl = "class%d" % index
+		decl = "enum%s" % name.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
 		file.write("#line %d\n" % (self.line))
 		file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
@@ -89,7 +89,7 @@ class Class(Container):
 
 	def dump(self, file, namespace, index):
 		file.write("")
-		decl = "class%d" % index
+		decl = "class%s" % name.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
 		if self.members:
 			file.write("#line %d\n" % (self.line))

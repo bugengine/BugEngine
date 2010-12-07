@@ -71,12 +71,11 @@ static int __main(int argc, const char *argv[])
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
-        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::gameArena(), argc, argv);
+        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         result = be_main(locApplication);
     }
-    catch(std::runtime_error& er)
+    catch(...)
     {
-        fprintf(stderr, "%s\n", er.what());
     }
 
     return result;
