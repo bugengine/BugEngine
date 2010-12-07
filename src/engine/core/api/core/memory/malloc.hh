@@ -22,7 +22,7 @@ public:
     public:
         Block(Allocator& allocator, size_t count, size_t alignment = be_alignof(T))
             :   m_allocator(allocator)
-            ,   m_data(allocator.allocArray<T>(count, alignment))
+            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), alignment)*count, alignment))
         {
         };
         ~Block()
@@ -51,13 +51,13 @@ public:
         }
         bool resize(size_t count, size_t alignment = be_alignof(T))
         {
-            size_t size = be_align(sizeof(T),alignment)*count;
+            size_t size = be_align(sizeof(T), alignment)*count;
             return m_allocator.resize(m_data, size);
         }
         void realloc(size_t count, size_t alignment = be_alignof(T))
         {
-            size_t size = be_align(sizeof(T),alignment)*count;
-            m_data = (T*)m_allocator.realloc(m_data, size);
+            size_t size = be_align(sizeof(T), alignment)*count;
+            m_data = (T*)m_allocator.realloc(m_data, size, alignment);
         }
         void swap(Block<T>& other)
         {
@@ -69,18 +69,19 @@ public:
         Block(const Block& other);
         Block& operator=(const Block& other);
     };
-private:
+protected:
     virtual void* internalAlloc(size_t size, size_t alignment) = 0;
     virtual bool  internalResize(void* ptr, size_t size) = 0;
-    virtual void* internalRealloc(void* ptr, size_t size) = 0;
+    virtual void* internalRealloc(void* ptr, size_t size, size_t alignment) = 0;
     virtual void  internalFree(const void* pointer) = 0;
+    virtual ~Allocator() { }
 public:
     inline void* alloc(size_t size, size_t alignment = 16);
     inline bool  resize(void* ptr, size_t size);
-    inline void* realloc(void* ptr, size_t size);
+    inline void* realloc(void* ptr, size_t size, size_t alignment);
     inline void  free(const void* pointer);
     template< typename T >
-    inline T* allocArray(size_t count, size_t alignment = be_alignof(T));
+    inline T* alloc();
 };
 
 void* Allocator::alloc(size_t size, size_t alignment)
@@ -97,11 +98,11 @@ bool  Allocator::resize(void* ptr, size_t size)
     return internalResize(ptr, size);
 }
 
-void* Allocator::realloc(void* ptr, size_t size)
+void* Allocator::realloc(void* ptr, size_t size, size_t alignment)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
-    return internalRealloc(ptr, size);
+    return internalRealloc(ptr, size, alignment);
 }
 
 void  Allocator::free(const void* pointer)
@@ -112,20 +113,17 @@ void  Allocator::free(const void* pointer)
 }
 
 template< typename T >
-T* Allocator::allocArray(size_t count, size_t alignment)
+T* Allocator::alloc()
 {
-    if(!count)
-        return 0;
-    size_t size = be_align(sizeof(T),alignment)*count;
-    void* r = internalAlloc(size, alignment);
-    memset(r, 0, size);
-    return reinterpret_cast<T*>(r);
+    return (T*)alloc(sizeof(T), be_alignof(T));
 }
 
 be_api(CORE) Allocator& gameArena();
 be_api(CORE) Allocator& tempArena();
 be_api(CORE) Allocator& debugArena();
 be_api(CORE) Allocator& rttiArena();
+be_api(CORE) Allocator& taskArena();
+be_api(CORE) Allocator& inputArena();
 
 }
 
@@ -138,7 +136,6 @@ be_api(CORE) Allocator& rttiArena();
 #ifdef BE_PLATFORM_SUN
 # include   <alloca.h>
 #endif
-#include    <new>
 
 #ifdef _MSC_VER
 # define    malloca    _alloca
@@ -151,6 +148,7 @@ be_api(CORE) Allocator& rttiArena();
 # define    freea(p)
 #endif
 
+#include    <new>
 
 /*****************************************************************************/
 #endif

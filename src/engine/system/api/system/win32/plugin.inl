@@ -1,13 +1,12 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <stdexcept>
 #include    <core/environment.hh>
 
 #include    <winerror.h>
 
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
-    extern "C" FORCEEXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().allocArray<klass>(1); return new(m) klass args; } \
+    extern "C" FORCEEXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" FORCEEXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 
 namespace BugEngine

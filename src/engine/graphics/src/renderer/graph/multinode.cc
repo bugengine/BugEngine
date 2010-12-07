@@ -10,16 +10,16 @@ namespace BugEngine { namespace Graphics
 
 MultiNode::MultiNode()
 :   INode()
-,   m_globalTask(ref<TaskGroup>::create(gameArena(), "updateMultiScene", color32(255, 0, 0)))
-,   m_renderTask(ref<TaskGroup>::create(gameArena(), "renderMultiScene", color32(255, 0, 0)))
-,   m_syncTask(ref<TaskGroup>::create(gameArena(), "syncMultiScene", color32(255, 0, 0)))
-,   m_dispatchTask(ref<TaskGroup>::create(gameArena(), "dispatchMultiScene", color32(255, 0, 0)))
-,   m_cleanTask(ref< Task< MethodCaller<MultiNode, &MultiNode::clean> > >::create(gameArena(), "cleanNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::clean>(this)))
+,   m_globalTask(ref<TaskGroup>::create(taskArena(), "updateMultiScene", color32(255, 0, 0)))
+,   m_renderTask(ref<TaskGroup>::create(taskArena(), "renderMultiScene", color32(255, 0, 0)))
+,   m_syncTask(ref<TaskGroup>::create(taskArena(), "syncMultiScene", color32(255, 0, 0)))
+,   m_dispatchTask(ref<TaskGroup>::create(taskArena(), "dispatchMultiScene", color32(255, 0, 0)))
+,   m_cleanTask(ref< Task< MethodCaller<MultiNode, &MultiNode::clean> > >::create(taskArena(), "cleanNodes", color32(255,255,0), MethodCaller<MultiNode, &MultiNode::clean>(this)))
 ,   m_endSyncConnection(m_syncTask, m_cleanTask)
 ,   m_startGlobalConnection(m_globalTask, m_renderTask)
 ,   m_endGlobalConnection(m_globalTask, m_syncTask)
 ,   m_jobGraph(m_renderTask, m_syncTask, m_dispatchTask)
-,   m_nodes(gameArena())
+,   m_nodes(taskArena())
 ,   m_mainNodes(0)
 {
 }

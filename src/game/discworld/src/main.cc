@@ -24,7 +24,7 @@ int be_main (weak<BugEngine::Application> app)
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-    ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::gameArena());
+    ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::rttiArena());
 
     //BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
     //p->doFile("data/scripts/main.lua");
@@ -41,7 +41,7 @@ int be_main (weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
     /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
 
-    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::gameArena());
+    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
     {
 
         ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
@@ -56,15 +56,15 @@ int be_main (weak<BugEngine::Application> app)
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 
-        ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::gameArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::gameArena(), world);
+        ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::taskArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
 
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::gameArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
-        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(gameArena(), scene, w));
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
+        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(taskArena(), scene, w));
         app->setScene(node);
     }
 

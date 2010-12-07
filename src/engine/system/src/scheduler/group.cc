@@ -9,9 +9,9 @@ namespace BugEngine
 
 TaskGroup::TaskGroup(istring name, color32 color)
 :   ITask(name, color, Scheduler::High)
-,   m_startTasks(gameArena())
+,   m_startTasks(taskArena())
 ,   m_endTaskCount(0)
-,   m_completionCallback(ref<Callback>::create(gameArena(), this))
+,   m_completionCallback(ref<Callback>::create(taskArena(), this))
 {
 }
 

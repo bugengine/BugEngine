@@ -11,7 +11,10 @@
 namespace BugEngine
 {
 
-Allocator& stringArena();
+static inline Allocator& stringArena()
+{
+    return gameArena();
+}
 
 
 class StringCache
@@ -134,7 +137,7 @@ StringCache* StringCache::unique(const char *val)
     try
     {
         static StringCache::StringIndex g_strings(stringArena());
-        StringIndex::const_iterator it = g_strings.find(val);
+        StringIndex& str = g_strings.find(val);
         if(it != g_strings.end())
         {
             return it->second;
