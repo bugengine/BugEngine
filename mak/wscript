@@ -98,9 +98,10 @@ def build(bld):
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
 				bld.add_subdirs(os.path.join('target', l, target))
-	for target in os.listdir(os.path.join('extra')):
-		if target not in ['.svn', '.cvs']:
-			bld.add_subdirs(os.path.join('..', 'extra', target))
+	if os.path.isdir('extra'):
+		for target in os.listdir(os.path.join('extra')):
+			if target not in ['.svn', '.cvs']:
+				bld.add_subdirs(os.path.join('..', 'extra', target))
 	import Options
 	if not Options.options.toolchains:
 		Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
