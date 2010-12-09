@@ -56,7 +56,7 @@ ref<Logger> Logger::instance(const inamespace& name)
         if(it == result->m_children.end())
         {
             ref<Logger> next = ref<Logger>::create(debugArena(), result, name[i]);
-            result->m_children.insert(minitl::make_pair(name[i], next));
+            result->m_children.insert(std::make_pair(name[i], next));
             result = next;
         }
         else
