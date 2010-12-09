@@ -7,6 +7,7 @@
 #include    <minitl/container/pair.hh>
 #include    <minitl/container/traits.hh>
 #include    <minitl/memory/pool.hh>
+#include    <map>
 
 namespace minitl
 {
@@ -14,9 +15,15 @@ namespace minitl
 template< typename T >
 struct hash;
 
+
 template< typename Key, typename Value, typename Hash = minitl::hash<Key> >
-class hashmap
+class hashmap : public std::map<Key, Value>
 {
+public:
+    hashmap(BugEngine::Allocator& allocator, size_type reserved = 0);
+    ~hashmap();
+};
+/*{
 private:
     template< typename POLICY > class base_iterator;
     struct iterator_policy;
@@ -69,7 +76,7 @@ public:
 
     minitl::pair<iterator, bool>    insert(const Key& k, const Value& value);
     minitl::pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);
-};
+};*/
 
 }
 

@@ -23,7 +23,7 @@ FileSystem::FileSystemMountPoint::~FileSystemMountPoint()
 
 weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)
 {
-    minitl::pair<ChildrenMap::iterator, bool> result = m_children.insert(minitl::make_pair(child, scoped<FileSystemMountPoint>()));
+    std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, scoped<FileSystemMountPoint>()));
     if(result.second)
         result.first->second = scoped<FileSystemMountPoint>::create(gameArena());
     return result.first->second;

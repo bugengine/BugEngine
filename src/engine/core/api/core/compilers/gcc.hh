@@ -31,6 +31,10 @@ typedef uint32_t                u32;
 typedef uint64_t                u64;
 typedef u8                      byte;
 
+#if __GXX_EXPERIMENTAL_CXX0X__
+# define BE_HAS_MOVE_SEMANTICS
+#endif
+
 #define override
 #define BE_THREAD_LOCAL         __thread
 #define BE_NOINLINE             __attribute__((noinline))

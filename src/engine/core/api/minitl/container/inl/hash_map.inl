@@ -8,7 +8,7 @@
 
 namespace minitl
 {
-
+    /*
 template< typename Key, typename Value, typename Hash >
 template< typename POLICY >
 class hashmap<Key, Value, Hash>::base_iterator
@@ -221,9 +221,19 @@ void hashmap< Key, Value, Hash >::reserve(size_type reserved)
         m_objects.release(entry);
     }
 }
+*/
 
 
+template< typename Key, typename Value, typename Hash >
+hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& allocator, size_type reserved)
+:   map()
+{
+}
 
+template< typename Key, typename Value, typename Hash >
+hashmap< Key, Value, Hash >::~hashmap()
+{
+}
 
 }
 

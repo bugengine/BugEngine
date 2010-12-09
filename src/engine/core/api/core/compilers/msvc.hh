@@ -53,6 +53,10 @@ typedef u8                      byte;
 # define BE_IMPORT
 #endif
 
+#if _MSC_VER >= 1600
+# define BE_HAS_MOVE_SEMANTICS
+#endif
+
 #if _MSC_VER >= 1300
 # ifndef _XBOX
 #  include <intrin.h>

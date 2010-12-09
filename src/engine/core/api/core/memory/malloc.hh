@@ -29,7 +29,7 @@ public:
         {
             m_allocator.free(m_data);
         }
-        inline Allocator& arena()
+        inline Allocator& arena() const
         {
             return m_allocator;
         }

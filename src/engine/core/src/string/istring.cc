@@ -16,6 +16,14 @@ static inline Allocator& stringArena()
     return gameArena();
 }
 
+struct hashIstring
+{
+    bool operator()(const char *str1, const char *str2)
+    {
+        return strcmp(str1, str2) <= 0;
+    }
+};
+
 
 class StringCache
 {
@@ -41,7 +49,7 @@ private:
     friend struct lessWithOffset;
     friend struct equaltoWithOffset;
 private:
-    typedef minitl::hashmap< const char *, StringCache*, minitl::hash<const char *> > StringIndex;
+    typedef minitl::hashmap< const char *, StringCache*, hashIstring > StringIndex;
 private:
     static Buffer*  getBuffer();
 public:
@@ -136,8 +144,8 @@ StringCache* StringCache::unique(const char *val)
     ScopedCriticalSection scope(s_lock);
     try
     {
-        static StringCache::StringIndex g_strings(stringArena());
-        StringIndex& str = g_strings.find(val);
+        static StringIndex g_strings(stringArena());
+        StringIndex::iterator it = g_strings.find(val);
         if(it != g_strings.end())
         {
             return it->second;
@@ -152,7 +160,7 @@ StringCache* StringCache::unique(const char *val)
             (void)(new(cache) StringCache(hashval, len));
             strcpy(data, val);
 
-            minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(minitl::make_pair(data, cache));
+            std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
             return cache;
         }
     }

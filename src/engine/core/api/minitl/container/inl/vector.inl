@@ -206,6 +206,15 @@ vector<T>::vector(BugEngine::Allocator& allocator, size_type count)
 }
 
 template< typename T >
+vector<T>::vector(const vector& other)
+    :   m_memory(other.m_memory.arena(), other.size())
+    ,   m_end(m_memory)
+    ,   m_capacity(m_memory)
+{
+    push_back(other.begin(), other.end());
+}
+
+template< typename T >
 template< typename ITERATOR >
 vector<T>::vector(BugEngine::Allocator& allocator, ITERATOR first, iterator last)
     :   m_memory(allocator)
