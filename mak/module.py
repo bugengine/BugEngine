@@ -47,6 +47,7 @@ def expand(modules):
 class module:
 	def __init__( self,
 				  name,
+				  dstname,
 				  depends,
 				  category,
 				  localoptions,
@@ -60,6 +61,7 @@ class module:
 		while None in depends:
 			depends.remove(None)
 		self.name	  = name
+		self.dstname = dstname
 		self.category = category
 		self.depends  = depends
 		self.tasks = {}
@@ -192,7 +194,7 @@ class module:
 			else:
 				optim,compiler,platform,architecture,version = variant.split('-')
 				task					= bld.new_task_gen()
-				task.target				= self.name
+				task.target				= self.dstname
 				task.env				= env.copy()
 				task.type				= type
 				task.features			= ['cc', 'cxx', type]
@@ -217,9 +219,9 @@ class module:
 						t = d.tasks[variant]
 						if t:
 							if t.type == 'cobjects' and d in self.depends+extradepends:
-								task.add_objects.append(d.name)
+								task.add_objects.append(d.dstname)
 							else:
-								task.uselib_local.append(d.name)
+								task.uselib_local.append(d.dstname)
 							task.inheritedoptions.merge(t.inheritedoptions)
 						dps += [dep for dep in d.depends if dep not in seen]
 				task.options			= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
@@ -331,8 +333,8 @@ class module:
 				task = bld.new_task_gen()
 				task.features		= [p]
 				task.depends		= [d.projects[p] for d in self.depends]
-				task.target			= self.name+'.'+p
-				task.name			= self.name
+				task.target			= self.dstname+'.'+p
+				task.name			= self.dstname
 				task.env			= bld.env
 				task.sourcetree		= self.sourcetree
 				task.type			= self.__class__.__name__
@@ -368,10 +370,12 @@ class library(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		self.install_path = 'lib'
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -404,10 +408,12 @@ class shared_library(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		self.install_path = 'bin'
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -440,10 +446,12 @@ class static_library(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		self.install_path = 'lib'
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -474,10 +482,12 @@ class plugin(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		self.install_path = 'plugin'
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -516,12 +526,14 @@ class game(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
-				  plugins=[]
+				  plugins=[],
+				  dstname = None,
 				):
 		self.plugins = plugins
 		self.install_path = 'bin'
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -560,7 +572,8 @@ class tool(game):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
-				  plugins=[]
+				  plugins=[],
+				  dstname = None,
 				):
 		game.__init__(self,
 						name,
@@ -573,7 +586,8 @@ class tool(game):
 						platforms,
 						archs,
 						sources,
-						plugins)
+						plugins,
+						dstname)
 
 
 """ unit test """
@@ -589,9 +603,11 @@ class test(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,
@@ -625,9 +641,11 @@ class util(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
+				  dstname = None,
 				):
 		module.__init__(self,
 						name,
+						dstname or name,
 						depends,
 						category,
 						localoptions,

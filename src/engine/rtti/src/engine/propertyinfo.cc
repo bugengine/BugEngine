@@ -7,4 +7,14 @@
 namespace BugEngine { namespace RTTI
 {
 
+PropertyInfo::PropertyInfo(const istring& name, const TypeInfo& type)
+    :   name(name)
+    ,   type(type)
+{
+}
+
+PropertyInfo::~PropertyInfo()
+{
+}
+
 }}

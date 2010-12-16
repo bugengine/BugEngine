@@ -113,7 +113,7 @@ global_macro_map = {
 }
 
 def t_ID(t):
-	r'~?[a-zA-Z_\$][a-zA-Z_0-9\$]*[ \t]*'
+	r'[a-zA-Z_\$][a-zA-Z_0-9\$]*[ \t]*'
 	t.value = t.value.strip()
 	try:
 		remove_paren = t.lexer.macro_map[t.value]
@@ -912,6 +912,9 @@ def p_method(t):
 def p_constructor(t):
 	"""
 		method : type LPAREN params_list RPAREN method_modifier_right
+		method : NOT ID LPAREN params_list RPAREN method_modifier_right
+		method : namelist ID LPAREN params_list RPAREN method_modifier_right
+		method : namelist NOT ID LPAREN params_list RPAREN method_modifier_right
 	"""
 	pass
 
@@ -950,6 +953,8 @@ def p_method_decl_or_impl(t):
 	"""
 		decl : method SEMI
 		decl : method initializers LBRACE skiplist_all RBRACE
+		decl : modifier_list method SEMI
+		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
 	"""
 	pass
 

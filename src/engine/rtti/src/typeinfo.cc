@@ -35,10 +35,10 @@ minitl::format<> TypeInfo::name() const
     switch(constness)
     {
     case Const:
-        n = minitl::format<>("const %s") | metaclass->name.m_ptr;
+        n = minitl::format<>("const %s") | metaclass->name;
         break;
     case Mutable:
-        n = minitl::format<>(metaclass->name.m_ptr);
+        n = minitl::format<>("%s") | metaclass->name;
         break;
     default:
         be_notreached();
@@ -115,19 +115,19 @@ void TypeInfo::destroy(void* ptr) const
 
 const RTTI::PropertyInfo* TypeInfo::property(const char *name) const
 {
-    for(const RTTI::ClassInfo* klass = metaclass.m_ptr; klass != 0; klass = klass->parent.m_ptr)
+    for(ref<const RTTI::ClassInfo> klass = metaclass; klass != 0; klass = klass->parent)
     {
-        for(size_t i = 0; i < klass->propertyCount; ++i)
+        /*for(size_t i = 0; i < klass->propertyCount; ++i)
         {
             if(strcmp(name, klass->properties.m_ptr[i].name.m_ptr) == 0)
                 return &klass->properties.m_ptr[i];
-        }
+        }*/
     }
     return 0;
 }
 
 }
-
+/*
 #include <rtti/value.hh>
 
 static struct A
@@ -157,3 +157,4 @@ static struct A
     {
     }
 } s_a;
+*/

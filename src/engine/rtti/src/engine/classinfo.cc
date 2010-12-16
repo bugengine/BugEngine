@@ -3,31 +3,32 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/classinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/wrapper.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
-void ClassInfo::copy(const void *src, void* dst) const
+ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<const ClassInfo> metaclass, u32 size)
+    :   name(name)
+    ,   parent(parent)
+    ,   metaclass(metaclass)
+    ,   size(size)
+    ,   m_properties(rttiArena())
+    ,   m_methods(rttiArena())
 {
-    memcpy(dst, src, size);
 }
 
-void ClassInfo::destroy(void*) const
+ClassInfo::~ClassInfo()
 {
 }
 
-ClassInfoRegistration::ClassInfoRegistration(const ClassInfo* classinfo)
+void ClassInfo::copy(const void* src, void* dst) const
 {
-    const ClassInfo* parent = classinfo->parent.m_ptr;
-    if(parent != classinfo)
-    {
-        classinfo->next.m_ptr = parent->child.m_ptr;
-        parent->child.m_ptr = classinfo;
-    }
 }
 
-ClassInfoRegistration::~ClassInfoRegistration()
+void ClassInfo::destroy(void* src) const
 {
 }
 

@@ -17,17 +17,17 @@ class Namespace;
 class Value
 {
 private:
-    TypeInfo    m_type;
+    TypeInfo        m_type;
     union
     {
-        char                            m_buffer[63];
+        char        m_buffer[63];
         struct
         {
-            void*                       m_pointer;
-            bool                        m_deallocate;
+            void*   m_pointer;
+            bool    m_deallocate;
         };
     };
-    bool        m_reference;
+    bool            m_reference;
 private:
     inline void* memory();
     inline const void* memory() const;

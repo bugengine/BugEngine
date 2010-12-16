@@ -14,10 +14,14 @@ class Value;
 namespace BugEngine { namespace RTTI
 {
 
-struct PropertyInfo
+class PropertyInfo : public minitl::refcountable
 {
-    raw<const char>         name;
-    TypeInfo                type;
+public:
+    const istring   name;
+    const TypeInfo  type;
+    PropertyInfo(const istring& name, const TypeInfo& type);
+    ~PropertyInfo();
+public:
     Value                   (*get)(Value& object);
     void                    (*set)(Value& object, Value& value);
 };
