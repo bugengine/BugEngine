@@ -19,7 +19,7 @@
 #include    <rtti/namespace.hh>
 
 /*---------------------------------------------------------------------------*/
-int be_main (weak<BugEngine::Application> app)
+int be_main(weak<BugEngine::Application> app)
 {
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));

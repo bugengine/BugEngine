@@ -24,11 +24,12 @@ struct OverloadInfo
     Value                   (*method)(Value* params, size_t paramCount);
 };
 
-struct MethodInfo
+class MethodInfo : public minitl::refcountable
 {
-    raw<const char>         name;
-    u16                     overloadCount;
-    raw<const OverloadInfo> overloads;
+public:
+    const istring   name;
+
+    Value operator()(Value* values, u32 paramCount);
 };
 
 }}

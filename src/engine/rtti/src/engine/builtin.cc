@@ -8,7 +8,7 @@
 
 namespace BugEngine
 {
-
+/*
 namespace Builtin
 {
     static const char *const s_voidName = "void";
@@ -36,5 +36,5 @@ BE_MAKE_BUILTIN_TYPE(i8);
 BE_MAKE_BUILTIN_TYPE(i16);
 BE_MAKE_BUILTIN_TYPE(i32);
 BE_MAKE_BUILTIN_TYPE(i64);
-
+*/
 }

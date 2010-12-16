@@ -26,9 +26,15 @@ struct TypeInfo
         Mutable,
         Const
     };
-    raw<const RTTI::ClassInfo>      metaclass;
-    Type                            type;
-    Constness                       constness;
+
+    ref<const RTTI::ClassInfo> const    metaclass;
+    Type const                          type;
+    Constness const                     constness;
+
+
+    inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
+    inline ~TypeInfo();
+
 
     u32                             size() const;
     minitl::format<>                name() const;
@@ -37,6 +43,18 @@ struct TypeInfo
     void                            destroy(void* obj) const;
     const RTTI::PropertyInfo*       property(const char *prop) const;
 };
+
+
+TypeInfo::TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness)
+    :   metaclass(metaclass)
+    ,   type(type)
+    ,   constness(constness)
+{
+}
+
+TypeInfo::~TypeInfo()
+{
+}
 
 }
 

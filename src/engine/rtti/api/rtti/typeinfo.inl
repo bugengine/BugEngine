@@ -81,7 +81,6 @@ struct RefType< raw<const T> >
 
 }
 
-
 template< typename T >
 const TypeInfo be_typeid< T >::type()
 {

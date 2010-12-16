@@ -40,9 +40,6 @@
 #else
 # define    COREEXPORT
 #endif
-#define     NOEXPORT
-#define     NONEEXPORT
-#define     FORCEEXPORT         BE_EXPORT
 #define     be_api(module) module##EXPORT
 
 template< bool p >

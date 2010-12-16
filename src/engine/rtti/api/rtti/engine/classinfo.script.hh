@@ -13,21 +13,27 @@ struct TypeInfo;
 namespace BugEngine { namespace RTTI
 {
 
-struct PropertyInfo;
-struct MethodInfo;
+class PropertyInfo;
+class MethodInfo;
 
-struct ClassInfo
+class ClassInfo : public minitl::refcountable
 {
     friend struct BugEngine::TypeInfo;
 public:
-    raw<const char>                 name;
-    raw<const ClassInfo>            parent;
-    raw<const ClassInfo>            metaclass;
-    mutable raw<const ClassInfo>    child;
-    mutable raw<const ClassInfo>    next;
-    u16                             size;
-    u16                             propertyCount;
-    raw<PropertyInfo const>         properties;
+    const inamespace                                    name;
+    const ref<const ClassInfo>                          parent;
+    const ref<const ClassInfo>                          metaclass;
+    const u32                                           size;
+private:
+    minitl::hashmap< istring, ref<const PropertyInfo> > m_properties;
+    minitl::hashmap< istring, ref<const MethodInfo> >   m_methods;
+    ref<const MethodInfo>                               m_constructor;
+    ref<const MethodInfo>                               m_destructor;
+public:
+    ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<const ClassInfo> metaclass, u32 size);
+    ~ClassInfo();
+
+    ref<const PropertyInfo> operator[](const istring& prop) const;
 private:
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

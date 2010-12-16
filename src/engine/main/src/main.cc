@@ -12,17 +12,6 @@
 
 #include    <core/memory/new.inl>
 
-#ifdef _GP2X
-#include    <unistd.h>
-static void launch_gp2xmenu(void)
-{
-    printf("returning to menu...\n");
-    char **args = { 0 };
-    chdir("/usr/gp2x");
-    execv("/usr/gp2x/gp2xmenu", args);
-}
-#endif
-
 namespace
 {
     class LogListener : public BugEngine::ILogListener
@@ -62,23 +51,17 @@ namespace
 /*****************************************************************************/
 static int __main(int argc, const char *argv[])
 {
-	BugEngine::Environment::getEnvironment().init(argc, argv);
-#   ifdef _GP2X
-    atexit(launch_gp2xmenu);
-#   endif
-    int result = EXIT_FAILURE;
-
+    BugEngine::Environment::getEnvironment().init(argc, argv);
     try
     {
         BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
-        result = be_main(locApplication);
+        return be_main(locApplication);
     }
     catch(...)
     {
+        return EXIT_FAILURE;
     }
-
-    return result;
 }
 /*****************************************************************************/
 #if defined(BE_PLATFORM_WIN32)
