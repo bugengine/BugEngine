@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_MEMORY_ALLOCATORS_GENERAL_HH_
-#define BE_CORE_MEMORY_ALLOCATORS_GENERAL_HH_
+#ifndef BE_CORE_MEMORY_ALLOCATORS_STACK_HH_
+#define BE_CORE_MEMORY_ALLOCATORS_STACKL_HH_
 /*****************************************************************************/
 #include    <core/memory/malloc.hh>
 

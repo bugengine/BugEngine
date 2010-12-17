@@ -35,7 +35,7 @@ public:
 public:
     bool operator==(const base_iterator<POLICY>& other);
     bool operator!=(const base_iterator<POLICY>& other);
-    
+
     base_iterator<POLICY>& operator=(const base_iterator<POLICY>& other)
     {
         m_owner = other.m_owner;
@@ -226,7 +226,6 @@ void hashmap< Key, Value, Hash >::reserve(size_type reserved)
 
 template< typename Key, typename Value, typename Hash >
 hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& allocator, size_type reserved)
-:   map()
 {
 }
 
