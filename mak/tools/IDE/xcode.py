@@ -47,10 +47,14 @@ class XCodeProject:
 		w("\t\tname = \"%s\";\n" % name)
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
+		subdirs = []
+		for n,d in tree.directories.iteritems():
+			subdirs.append((n, d))
+		subdirs.sort(key = lambda i: i[0])
+		for n,d in subdirs:
+			w("\t\t\t%s,\n"%d.id)
 		for file in tree.files:
 			w("\t\t\t%s,\n"%file.id)
-		for n,d in tree.directories.iteritems():
-			w("\t\t\t%s,\n"%d.id)
 		w("\t\t);\n")
 		w("\t};\n")
 		for n,d in tree.directories.iteritems():
@@ -68,12 +72,11 @@ class XCodeProject:
 				filetype = "sourcecode.c.cpp"
 			else:
 				filetype = "sourcecode.c.h"
-			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = %s; path = \"%s\" ; sourceTree = \"<group>\"; };\n" % (file.id, filetype, filename))
+			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = %s; name = \"%s\"; path = \"%s\" ; sourceTree = \"<group>\"; };\n" % (file.id, filetype, os.path.split(filename)[1], filename))
 
 	def writePBXBuildFile(self):
 		w = self.file.write
 		w("/* Begin PBXBuildFile section */\n")
-		print self.projects
 		for d in self.projects:
 			self.pbxBuildTree(d.sourceTree)
 		w("/* End PBXBuildFile section */\n\n")
@@ -93,12 +96,16 @@ class XCodeProject:
 		w("\t\tname = BugEngine;\n")
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
+		projects = []
 		for d in self.projects:
+			projects.append((d.projectCategory+'.'+d.projectName, d))
+		projects.sort(key = lambda i: i[0])
+		for name, d in projects:
 			w("\t\t\t%s,\n"%d.sourceTree.id)
 		w("\t\t);\n")
 		w("\t};\n")
-		for d in self.projects:
-			self.pbxDirTree(d.sourceTree, d.projectName)
+		for name, d in projects:
+			self.pbxDirTree(d.sourceTree, name)
 		w("/* End PBXGroup section */\n\n")
 
 	def writePBXNativeTarget(self):
