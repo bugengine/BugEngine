@@ -16,6 +16,7 @@ class XCodeProject:
 		self.version = version
 		self.projects = projects
 		self.projectID = newid()
+		self.configurationsID = newid()
 
 	def writeHeader(self):
 		w = self.file.write
@@ -24,14 +25,14 @@ class XCodeProject:
 		w("	archiveVersion = 1;\n")
 		w("	classes = {\n")
 		w("	};\n")
-		w("	objectVersion = %d;\n" % self.version)
+		w("	objectVersion = %d;\n" % self.version[1])
 		w("	objects = {\n\n")
 
 	def writePBXBuildFile(self):
 		w = self.file.write
 		w("/* Begin PBXBuildFile section */\n")
 		for d in self.projects:
-			pass
+
 		w("/* End PBXBuildFile section */\n\n")
 
 	def writePBXFileReference(self):
@@ -74,13 +75,15 @@ class XCodeProject:
 		w("/* Begin PBXProject section */\n")
 		w("\t%s /* Project object */ = {\n" % self.projectID)
 		w("\t\tisa = PBXProject;\n")
-		w("\t\thasScannedForEncodings = 1;\n")
+		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
+		w("\t\tbuildConfigurationList = %s;\n" % self.configurationsID)
+		w("\t\thasScannedForEncodings = 0;\n")
 		w("\t\tprojectDirPath=\"\";\n")
 		w("\t\ttargets = (\n")
-		w("\t\t);\n")
-		w("\t};\n")
 		for d in self.projects:
 			pass
+		w("\t\t);\n")
+		w("\t};\n")
 		w("/* End PBXProject section */\n\n")
 
 	def writePBXSourcesBuildPhase(self):
@@ -103,6 +106,7 @@ class XCodeProject:
 		for d in self.projects:
 			pass
 		w("/* End XCConfigurationList section */\n\n")
+		self.writeXCBuildConfiguration()
 
 	def writeFooter(self):
 		self.file.write("\t};\n")
@@ -114,7 +118,8 @@ class Project:
 		pass
 
 xcodeprojects = {
-	'xcode2': ('XCode 2.5', 42),
+	'xcode2': ('Xcode 2.5', 42),
+	'xcode3': ('Xcode 3.1', 45),
 }
 
 allconfigs = ['debug','release','profile','final']
@@ -133,7 +138,6 @@ def generateProject(task):
 	solution.writePBXNativeTarget()
 	solution.writePBXProject()
 	solution.writePBXSourcesBuildPhase()
-	solution.writeXCBuildConfiguration()
 	solution.writeXCConfigurationList()
 	solution.writeFooter()
 
@@ -148,7 +152,7 @@ def create_xcode_project(t):
 		solution = GenerateProject(env=t.env)
 		solution.set_outputs(t.path.find_or_declare(outname))
 		solution.name = appname
-		solution.version = xcodeprojects[toolName][1]
+		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']

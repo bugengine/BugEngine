@@ -16,6 +16,15 @@ def set_options(opt):
 						help='Use iPhoneOS sdk')
 	except OSError:
 		pass
+	try:
+		sdks = os.listdir(os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs'))
+		opt.add_option( '--iphonesimulator-sdk',
+						action='store',
+						default=sdks[-1],
+						dest='iphonesimulator_sdk',
+						help='Use iPhoneSimulator sdk')
+	except OSError:
+		pass
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
@@ -33,9 +42,32 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
+def add_darwin_simulator_flags_to_env(conf):
+	import Options
+	conf.env['PLATFORM'] = mak.allplatforms['iphone']
+	conf.env['STATIC'] = 1
+	conf.env.append_unique('CCFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env['library_PATTERN'] = '%s.a'
+	conf.env['shlib_PATTERN']   = '%s.so'
+	conf.env['program_PATTERN'] = '%s'
+
+	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
+	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
+	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['DEPLOY']			= { 'prefix':	'',
+									'bin':		'bin',
+									'etc':		'etc',
+									'runbin':	'bin',
+									'api':		'include',
+									'lib':		'lib',
+									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
+									'plugin':	os.path.join('data', 'plugins') }
+
 def add_darwin_flags_to_env(conf):
 	import Options
-	conf.env['PLATFORM'] = mak.allplatforms['darwin']
+	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CCFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
@@ -57,27 +89,50 @@ def add_darwin_flags_to_env(conf):
 									'plugin':	os.path.join('data', 'plugins') }
 
 def configure(conf):
+	import Options
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
-		if target.find('darwin') != -1 and target.find('arm') != -1:
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
-			try:
-				add_gcc_to_env(conf, version, toolchaindir, target)
-				add_gcc_flags_to_env(conf)
-				name = 'gcc-iphone-'+newenv['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-				newenv.set_variant(name)
-				add_darwin_flags_to_env(conf)
-				newenv = conf.set_env_name(name, newenv)
-				Utils.pprint('NORMAL', 'configure for tool %s' % name)
-				conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
-				del conf.all_envs['temp']
-				conf.setenv('default')
-				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception, e:
-				warn('gcc not available: '+e.__class__.__name__+" "+str(e))
-				conf.setenv('default')
-				del conf.all_envs['temp']
+		if Options.options.iphone_sdk:
+			if target.find('darwin') != -1 and target.find('arm') != -1:
+				newenv = conf.set_env_name('temp', conf.env.copy())
+				conf.setenv('temp')
+				try:
+					add_gcc_to_env(conf, version, toolchaindir, target)
+					add_gcc_flags_to_env(conf)
+					name = 'gcc-iphone-'+newenv['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+					newenv.set_variant(name)
+					add_darwin_flags_to_env(conf)
+					newenv = conf.set_env_name(name, newenv)
+					Utils.pprint('NORMAL', 'configure for tool %s' % name)
+					conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
+					del conf.all_envs['temp']
+					conf.setenv('default')
+					conf.env['BUILD_VARIANTS'].append(name)
+				except Exception, e:
+					warn('gcc not available: '+e.__class__.__name__+" "+str(e))
+					conf.setenv('default')
+					del conf.all_envs['temp']
+		if Options.options.iphonesimulator_sdk:
+			if target.find('darwin') != -1 and target.find('i686') != -1:
+				newenv = conf.set_env_name('temp', conf.env.copy())
+				conf.setenv('temp')
+				try:
+					add_gcc_to_env(conf, version, toolchaindir, target)
+					add_gcc_flags_to_env(conf)
+					name = 'gcc-iphone-'+newenv['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
+					newenv.set_variant(name)
+					add_darwin_simulator_flags_to_env(conf)
+					newenv = conf.set_env_name(name, newenv)
+					Utils.pprint('NORMAL', 'configure for tool %s' % name)
+					conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
+					del conf.all_envs['temp']
+					conf.setenv('default')
+					conf.env['BUILD_VARIANTS'].append(name)
+				except Exception, e:
+					warn('gcc not available: '+e.__class__.__name__+" "+str(e))
+					conf.setenv('default')
+					del conf.all_envs['temp']
 
 def build(bld):
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
+

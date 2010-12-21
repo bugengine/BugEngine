@@ -57,7 +57,7 @@ def build(bld):
 
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['pc'])
+	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['win32', 'linux'])
 	renderDx9		= module.plugin('renderDx9',    [discworld, windowing, cgDx, directx9], platforms=['win32'])
 	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
 	lua				= module.plugin('lua',          [discworld, lualib])

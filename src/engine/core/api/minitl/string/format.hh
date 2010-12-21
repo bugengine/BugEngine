@@ -121,6 +121,7 @@ const format<size>& operator|(const format<size>& f, i64 value)
     result[15] = 0;
     char* buf = result+14;
     bool sign = (value < 0);
+    value = sign? -value : value;
     do
     {
         *(buf--) = (char)(value%10)+'0';

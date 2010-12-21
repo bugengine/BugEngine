@@ -30,6 +30,8 @@ public:
     const istring   name;
 
     Value operator()(Value* values, u32 paramCount);
+
+    MethodInfo(istring name);
 };
 
 }}
