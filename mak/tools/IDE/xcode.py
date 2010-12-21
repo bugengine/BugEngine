@@ -17,6 +17,7 @@ class XCodeProject:
 		self.projects = projects
 		self.projectID = newid()
 		self.configurationsID = newid()
+		self.mainGroup = newid()
 
 	def writeHeader(self):
 		w = self.file.write
@@ -28,40 +29,77 @@ class XCodeProject:
 		w("	objectVersion = %d;\n" % self.version[1])
 		w("	objects = {\n\n")
 
+	def pbxBuildTree(self, tree):
+		w = self.file.write
+		tree.id = newid()
+		for name,dir in tree.directories.iteritems():
+			self.pbxBuildTree(dir)
+		for file in tree.files:
+			file.id = newid()
+			file.buildid = newid()
+			if not isinstance(file, mak.sources.hsource):
+				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
+
+	def pbxDirTree(self, tree, name):
+		w = self.file.write
+		w("\t%s = {\n" % tree.id)
+		w("\t\tisa = PBXGroup;\n")
+		w("\t\tname = \"%s\";\n" % name)
+		w("\t\tsourceTree = \"<group>\";\n")
+		w("\t\tchildren = (\n")
+		for file in tree.files:
+			w("\t\t\t%s,\n"%file.id)
+		for n,d in tree.directories.iteritems():
+			w("\t\t\t%s,\n"%d.id)
+		w("\t\t);\n")
+		w("\t};\n")
+		for n,d in tree.directories.iteritems():
+			self.pbxDirTree(d, n)
+
+	def pbxFileRefTree(self, tree, path=''):
+		w = self.file.write
+		for name,dir in tree.directories.iteritems():
+			self.pbxFileRefTree(dir, os.path.join(path, tree.prefix))
+		for file in tree.files:
+			filename = os.path.join(path, tree.prefix, file.filename)
+			if isinstance(file, mak.sources.hsource):
+				filetype = "sourcecode.c.h"
+			elif isinstance(file, mak.sources.cppsource):
+				filetype = "sourcecode.c.cpp"
+			else:
+				filetype = "sourcecode.c.h"
+			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = %s; path = \"%s\" ; sourceTree = \"<group>\"; };\n" % (file.id, filetype, filename))
+
 	def writePBXBuildFile(self):
 		w = self.file.write
 		w("/* Begin PBXBuildFile section */\n")
+		print self.projects
 		for d in self.projects:
-
+			self.pbxBuildTree(d.sourceTree)
 		w("/* End PBXBuildFile section */\n\n")
 
 	def writePBXFileReference(self):
 		w = self.file.write
 		w("/* Begin PBXFileReference section */\n")
 		for d in self.projects:
-			pass
+			self.pbxFileRefTree(d.sourceTree)
 		w("/* End PBXFileReference section */\n\n")
 
-	def writePBXFrameworksBuildPhase(self):
+	def writePBXGroup(self):
 		w = self.file.write
-		w("/* Begin PBXFrameworksBuildPhase section */\n")
+		w("/* Begin PBXGroup section */\n")
+		w("\t%s = {\n" % self.mainGroup)
+		w("\t\tisa = PBXGroup;\n")
+		w("\t\tname = BugEngine;\n")
+		w("\t\tsourceTree = \"<group>\";\n")
+		w("\t\tchildren = (\n")
 		for d in self.projects:
-			pass
-		w("/* End PBXFrameworksBuildPhase section */\n\n")
-
-	def writePBXBuildGroup(self):
-		w = self.file.write
-		w("/* Begin PBXBuildGroup section */\n")
+			w("\t\t\t%s,\n"%d.sourceTree.id)
+		w("\t\t);\n")
+		w("\t};\n")
 		for d in self.projects:
-			pass
-		w("/* End PBXBuildGroup section */\n\n")
-
-	def writePBXHeadersBuildPhase(self):
-		w = self.file.write
-		w("/* Begin PBXHeadersBuildPhase section */\n")
-		for d in self.projects:
-			pass
-		w("/* End PBXHeadersBuildPhase section */\n\n")
+			self.pbxDirTree(d.sourceTree, d.projectName)
+		w("/* End PBXGroup section */\n\n")
 
 	def writePBXNativeTarget(self):
 		w = self.file.write
@@ -77,8 +115,9 @@ class XCodeProject:
 		w("\t\tisa = PBXProject;\n")
 		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
 		w("\t\tbuildConfigurationList = %s;\n" % self.configurationsID)
-		w("\t\thasScannedForEncodings = 0;\n")
+		w("\t\thasScannedForEncodings = 1;\n")
 		w("\t\tprojectDirPath=\"\";\n")
+		w("\t\tmainGroup = %s;\n" % self.mainGroup)
 		w("\t\ttargets = (\n")
 		for d in self.projects:
 			pass
@@ -132,9 +171,9 @@ def generateProject(task):
 	solution.writeHeader()
 	solution.writePBXBuildFile()
 	solution.writePBXFileReference()
-	solution.writePBXFrameworksBuildPhase()
-	solution.writePBXBuildGroup()
-	solution.writePBXHeadersBuildPhase()
+	#solution.writePBXFrameworksBuildPhase()
+	solution.writePBXGroup()
+	#solution.writePBXHeadersBuildPhase()
 	solution.writePBXNativeTarget()
 	solution.writePBXProject()
 	solution.writePBXSourcesBuildPhase()
@@ -169,7 +208,7 @@ def create_xcode_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	#solution.projects.append(t)
+	solution.projects.append(project)
 	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
 
 for pname in xcodeprojects.keys():
