@@ -394,7 +394,7 @@ class library(module):
 		task = self.gentask(builder, env, envname, 'cobjects', options, blacklist=blacklist)
 
 
-			
+
 """ shared lib """
 class shared_library(module):
 	def __init__( self,
@@ -468,7 +468,7 @@ class static_library(module):
 				d._post(builder, env, envname, blacklist)
 		options = coptions()
 		task = self.gentask(builder, env, envname, 'cstaticlib', options, coptions(), blacklist=blacklist)
-			
+
 """ plugin """
 class plugin(module):
 	def __init__( self,

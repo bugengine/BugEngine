@@ -40,7 +40,7 @@ class XCodeProject:
 			if not isinstance(file, mak.sources.hsource):
 				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
 
-	def pbxDirTree(self, tree, name):
+	def pbxDirTree(self, tree, name, children = []):
 		w = self.file.write
 		w("\t%s = {\n" % tree.id)
 		w("\t\tisa = PBXGroup;\n")
@@ -55,6 +55,8 @@ class XCodeProject:
 			w("\t\t\t%s,\n"%d.id)
 		for file in tree.files:
 			w("\t\t\t%s,\n"%file.id)
+		for id in children:
+			w("\t\t\t%s,\n"%id)
 		w("\t\t);\n")
 		w("\t};\n")
 		for n,d in tree.directories.iteritems():
@@ -86,6 +88,10 @@ class XCodeProject:
 		w("/* Begin PBXFileReference section */\n")
 		for d in self.projects:
 			self.pbxFileRefTree(d.sourceTree)
+			if d.type in ['game', 'tool']:
+				d.applicationId = newid()
+				d.targetId = newid()
+				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
 		w("/* End PBXFileReference section */\n\n")
 
 	def writePBXGroup(self):
@@ -105,14 +111,30 @@ class XCodeProject:
 		w("\t\t);\n")
 		w("\t};\n")
 		for name, d in projects:
-			self.pbxDirTree(d.sourceTree, name)
+			children = []
+			if d.type in ['game', 'tool']:
+				children.append(d.applicationId)
+			self.pbxDirTree(d.sourceTree, name, children)
 		w("/* End PBXGroup section */\n\n")
 
 	def writePBXNativeTarget(self):
 		w = self.file.write
 		w("/* Begin PBXNativeTarget section */\n")
 		for d in self.projects:
-			pass
+			if d.type in ['game', 'tool']:
+				w("\t%s = {\n" % d.targetId)
+				w("\t\tisa = PBXNativeTarget;\n")
+				w("\t\tbuildPhases = (\n")
+				w("\t\t);\n")
+				w("\t\tbuildRules = (\n")
+				w("\t\t);\n")
+				w("\t\tdependencies = (\n")
+				w("\t\t);\n")
+				w("\t\tname = %s;\n" % d.projectName)
+				w("\t\tproductName = %s;\n" % d.projectName)
+				w("\t\tproductReference = %s;\n" % d.applicationId)
+				w("\t\tproductType = \"com.apple.product-type.application\";\n")
+				w("\t};\n")
 		w("/* End PBXNativeTarget section */\n\n")
 
 	def writePBXProject(self):
@@ -127,7 +149,8 @@ class XCodeProject:
 		w("\t\tmainGroup = %s;\n" % self.mainGroup)
 		w("\t\ttargets = (\n")
 		for d in self.projects:
-			pass
+			if d.type in ['game', 'tool']:
+				w("\t\t\t%s,\n" % d.targetId)
 		w("\t\t);\n")
 		w("\t};\n")
 		w("/* End PBXProject section */\n\n")
