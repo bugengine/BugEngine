@@ -6,52 +6,48 @@ Supported platforms
 ----------------------
 
 The following platforms are currently tested and known to build & work :
-- win32 with GCC 4.3 amd 4.4
-- win32 with visual studio 2005/2008
-- win32 with visual studio 2005-2008 express
+- win32 with GCC 4.3/4.4/4.5
+- win32 with visual studio 2005/2008/2010/express editions
 - win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2010
 - win32 with Intel compiler 10 or 11
 
 - linux amd64 with GCC 4.1 to 4.4
 - linux powerpc (G5) with GCC 4.1 to 4.4
 
+- MacOS X 10.4 to 10.6 (ppc and x86) with GCC 4.0 or 4.2
+
+- OpenSolaris/Solaris 10 with GCC
+- FreeBSD with GCC
+
+- OpenPandora (arm)
+- Maemo (Nokia)
+- iPhone with GCC 4.0 or 4.2
+
 the following platforms are not tested but should work :
 - linux x86 with GCC
 - linux powerpc 64
 
 the following platforms will work in the future :
-- linux with OpenCC compiler (from AMD)
-- linux with Intel compiler
-- linux with sunCC
-- solaris 10 on x86 (gcc or sunCC)
-- OpenSolaris on x86 (gcc or sunCC)
-- darwin (MacOS X) on x86 (gcc)
-- darwin (MacOS X) on powerpc (gcc)
-- freebsd x86
+- sunCC (linux, solaris)
 - wii
 - psp
 
-The engine will build for all platforms but the editor will only be built for a PC architecture (not on consoles)
 
-
-Any OS with accelerated 3D should be supported
-Some platforms might need minor fix from time to time (i.e. x86 might be broken when a checkin was only tested on amd64)
-
+The engine is built for all platforms but the editor is build only for PC architectures
+Porting to a new architecture should be quite easy
 
 
 
 Building
 -----------
 
-The requirements fro building BugEngine are quite low :
+The requirements for building BugEngine are quite low:
 You need one of the supported compilers installed and working
 You need python installed (I use 2.4 and 2.5)
-You need Flex and Bison in the path
+You need Flex and Bison
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC
-(supported MSVC versions are 2005, 2008 and express editions
-2010 beta 2 should work also)
+waf can also be used to generate projects for MSVC 2005, 2008, 2010 including express versions, and XCode
 
 
 Configuring
@@ -61,10 +57,9 @@ In the root folder of the project, run
 > python waf configure
 it will detect all the supported toolchains and try and pick the most appropriated one
 (it doesn't always pick the best one)
-the last line in the output sums up which version and compiler was picked.
-you can choose manually from the available toolchains with the --toolchains=...
-option
-the format of the toolchain is variant-compiler-platform-architecture-version
+The last line in the output sums up which version and compiler was picked.
+You can choose manually from the available toolchains with the --toolchains option.
+The format of the toolchain is variant-compiler-platform-architecture-version
 where variant is one of the build variants in debug, release, profile, final
 compiler is the name of the compiler in msvc, wsdk (windows sdk), gcc, icc, opencc, suncc
 platform is the name of the platform in linux, win32, freebsd, darwin, psp, wii...
@@ -83,7 +78,7 @@ Discovering
 ..............
 
 The project trys to automatically find the compilers and you usually don't need to
-specify a path or anything. This is particukary comfortable on Win32 where you
+specify a path or anything. This is more comfortable on Win32 where you
 don't need to set the MSVC environment for the project to build.
 Waf will automatically detect which compilers are installed and configure them properly,
 even if visual studio was not installed in the default path.
@@ -108,7 +103,7 @@ To generate the project files, configure the project (which toolchain is selecte
 actually matter) and run
 > python waf install --projects=[ide list]
 where [ide-list] is the list of projects you'd like to generate in
-vs2005, vs2008, vs2010, vs2005e or vs2008e
+vs2005, vs2008, vs2010, vs2005e or vs2008e, or xcode2, xcode3
 > python waf install --projects=vs2005e,vs2010
 will create a set of projects and a solution for Visual Studio 2005 express, and another set of
 projects and solutions for Visual Studio 2010.
