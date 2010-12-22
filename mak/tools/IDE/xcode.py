@@ -17,6 +17,7 @@ class XCodeProject:
 		self.projects = projects
 		self.projectID = newid()
 		self.configurationsID = newid()
+		self.buildSettingsId = (newid(), [newid()])
 		self.mainGroup = newid()
 
 	def writeHeader(self):
@@ -91,6 +92,7 @@ class XCodeProject:
 			if d.type in ['game', 'tool']:
 				d.applicationId = newid()
 				d.targetId = newid()
+				d.phaseId = [newid(), newid(), newid()]
 				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
 		w("/* End PBXFileReference section */\n\n")
 
@@ -124,7 +126,9 @@ class XCodeProject:
 			if d.type in ['game', 'tool']:
 				w("\t%s = {\n" % d.targetId)
 				w("\t\tisa = PBXNativeTarget;\n")
+				w("\t\tbuildConfigurationList = %s;\n" % self.buildSettingsId[0])
 				w("\t\tbuildPhases = (\n")
+				w("\t\t\t%s,\n" % d.phaseId[0])
 				w("\t\t);\n")
 				w("\t\tbuildRules = (\n")
 				w("\t\t);\n")
@@ -159,21 +163,38 @@ class XCodeProject:
 		w = self.file.write
 		w("/* Begin PBXSourcesBuildPhase section */\n")
 		for d in self.projects:
-			pass
+			if d.type in ['game', 'tool']:
+				w("\t%s = {\n" % d.phaseId[0])
+				w("\t\tisa = PBXSourcesBuildPhase;\n")
+				w("\t\tbuildActiobMask = 2147483647;\n")
+				w("\t\tfiles = (\n")
+				w("\t\t);\n")
+				w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
+				w("\t};\n")
 		w("/* End PBXSourcesBuildPhase section */\n\n")
 
 	def writeXCBuildConfiguration(self):
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
-		for d in self.projects:
-			pass
+		w("\t%s = {\n" % self.buildSettingsId[1][0])
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t};\n")
+		w("\t\tname = Default;\n")
+		w("\t};\n")
 		w("/* End XCBuildConfiguration section */\n\n")
 
 	def writeXCConfigurationList(self):
 		w = self.file.write
 		w("/* Begin XCConfigurationList section */\n")
-		for d in self.projects:
-			pass
+		w("\t%s = {\n" % self.buildSettingsId[0])
+		w("\t\tisa = XCConfigurationList;\n")
+		w("\t\tbuildConfigurations = (\n")
+		w("\t\t\t%s,\n" % self.buildSettingsId[1][0])
+		w("\t\t);\n")
+		w("\t\tdefaultConfigurationIsVisible = 0;\n")
+		w("\t\tdefaultConfigurationName = Default;\n")
+		w("\t};\n")
 		w("/* End XCConfigurationList section */\n\n")
 		self.writeXCBuildConfiguration()
 
