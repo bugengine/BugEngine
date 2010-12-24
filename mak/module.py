@@ -339,6 +339,7 @@ class module:
 				task.sourcetree		= self.sourcetree
 				task.type			= self.__class__.__name__
 				task.category		= self.category
+				task.usemaster		= self.usemaster
 				platforms = {}
 				for platform,aliases in mak.allplatforms.iteritems():
 					if set(aliases) & self.platforms:
@@ -655,6 +656,7 @@ class util(module):
 						platforms,
 						archs,
 						sources)
+		self.usemaster = False
 
 	def _post(self, builder, env, envname, blacklist=[]):
 		for d in self.depends:

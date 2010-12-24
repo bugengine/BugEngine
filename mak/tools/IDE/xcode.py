@@ -30,15 +30,15 @@ class XCodeProject:
 		w("	objectVersion = %d;\n" % self.version[1])
 		w("	objects = {\n\n")
 
-	def pbxBuildTree(self, tree):
+	def pbxBuildTree(self, tree, process):
 		w = self.file.write
 		tree.id = newid()
 		for name,dir in tree.directories.iteritems():
-			self.pbxBuildTree(dir)
+			self.pbxBuildTree(dir, process)
 		for file in tree.files:
 			file.id = newid()
 			file.buildid = newid()
-			if not isinstance(file, mak.sources.hsource):
+			if process and not isinstance(file, mak.sources.hsource):
 				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
 
 	def pbxDirTree(self, tree, name, children = []):
@@ -81,13 +81,19 @@ class XCodeProject:
 		w = self.file.write
 		w("/* Begin PBXBuildFile section */\n")
 		for d in self.projects:
-			self.pbxBuildTree(d.sourceTree)
+			if d.usemaster:
+				d.masterid = newid()
+				d.masterbuildid = newid()
+				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (d.masterbuildid, d.masterid))
+			self.pbxBuildTree(d.sourceTree, not d.usemaster)
 		w("/* End PBXBuildFile section */\n\n")
 
 	def writePBXFileReference(self):
 		w = self.file.write
 		w("/* Begin PBXFileReference section */\n")
 		for d in self.projects:
+			if d.usemaster:
+				w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.cpp; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
 				d.applicationId = newid()
@@ -114,6 +120,8 @@ class XCodeProject:
 		w("\t};\n")
 		for name, d in projects:
 			children = []
+			if d.usemaster:
+				children.append(d.masterid)
 			if d.type in ['game', 'tool']:
 				children.append(d.applicationId)
 			self.pbxDirTree(d.sourceTree, name, children)
@@ -214,6 +222,17 @@ xcodeprojects = {
 
 allconfigs = ['debug','profile','final']
 
+def writemaster(sourcetree, f, path = ''):
+	for source in sourcetree.files:
+		if isinstance(source, mak.sources.cppsource):
+			f.write("#if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.archs]))
+			f.write("# if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.platforms]))
+			f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
+			f.write("# endif\n")
+			f.write("#endif\n")
+	for name,directory in sourcetree.directories.iteritems():
+		writemaster(directory, f, os.path.join(path, sourcetree.prefix))
+
 def generateProject(task):
 	solution = XCodeProject( task.name,
 							 task.outputs[0].bldpath(task.env),
@@ -230,14 +249,17 @@ def generateProject(task):
 	solution.writePBXSourcesBuildPhase()
 	solution.writeXCConfigurationList()
 	solution.writeFooter()
+	for p in task.projects:
+		if p.usemaster:
+			writemaster(p.sourceTree, open(p.masterfile.bldpath(task.env), 'w'))
 
 GenerateProject = Task.task_type_from_func('generateProject', generateProject)
 
 solutions = {}
 def create_xcode_project(t):
 	toolName = t.features[0]
+	appname = getattr(Utils.g_module, 'APPNAME', 'noname')
 	if not solutions.has_key(toolName):
-		appname = getattr(Utils.g_module, 'APPNAME', 'noname')
 		outname = 'project.pbxproj'
 		solution = GenerateProject(env=t.env)
 		solution.set_outputs(t.path.find_or_declare(outname))
@@ -250,6 +272,7 @@ def create_xcode_project(t):
 		solutions[toolName] = solution
 	solution = solutions[toolName]
 
+
 	project = Project()
 	project.type			= t.type
 	#project.allplatforms    = projects[toolName][2]
@@ -259,6 +282,13 @@ def create_xcode_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
+	project.usemaster		= t.usemaster
+	if t.usemaster:
+		filename = "master-%s.cpp" % t.name
+		node = t.path.find_or_declare(filename)
+		solution.set_outputs(node)
+		project.masterfile = node
+		project.masterfilename = os.path.join(appname+'.'+toolName+'.xcodeproj/', filename)
 	solution.projects.append(project)
 	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
 
