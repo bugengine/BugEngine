@@ -6,17 +6,12 @@
 /*****************************************************************************/
 
 #define     BE_OPTIM_LEVEL_DEBUG    1
-#define     BE_OPTIM_LEVEL_RELEASE  2
-#define     BE_OPTIM_LEVEL_FINAL    3
+#define     BE_OPTIM_LEVEL_FINAL    2
 
 #ifdef _DEBUG
 # define    BE_DEBUG        1
 # define    BE_FLAVOUR      Debug
 # define    BE_OPTIM_LEVEL  BE_OPTIM_LEVEL_DEBUG
-#elif !defined(NDEBUG)
-# define    BE_RELEASE      1
-# define    BE_FLAVOUR      Release
-# define    BE_OPTIM_LEVEL  BE_OPTIM_LEVEL_RELEASE
 #else
 # define    BE_FINAL        1
 # define    BE_FLAVOUR      Final
@@ -29,11 +24,8 @@
 
 #if BE_OPTIM_LEVEL_AT_MOST(BE_OPTIM_LEVEL_DEBUG)
 # define BE_ENABLE_ASSERT               1
-# define BE_ENABLE_WEAKCHECK
-# define BE_ENABLE_DEBUG_ITERATORS
-#endif
-
-#if BE_OPTIM_LEVEL_AT_MOST(BE_OPTIM_LEVEL_RELEASE)
+# define BE_ENABLE_WEAKCHECK            1
+# define BE_ENABLE_DEBUG_ITERATORS      1
 # define BE_ENABLE_LOGGING              1
 # define BE_ENABLE_MEMORY_TRACKING      1
 #endif

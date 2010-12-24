@@ -104,11 +104,6 @@ def find_cross_gcc(conf):
 	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g']
 	conf.env['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 
-	conf.env['CCFLAGS_release'] = ['-pipe', '-g', '-O1']
-	conf.env['CXXFLAGS_release'] = ['-pipe', '-g', '-O1', '-Wno-invalid-offsetof']
-	conf.env['ASFLAGS_release'] = ['-pipe', '-g', '-O1']
-	conf.env['LINKFLAGS_release'] = ['-pipe', '-g']
-
 	conf.env['CCFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	conf.env['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	conf.env['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']

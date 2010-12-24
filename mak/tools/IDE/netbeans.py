@@ -5,7 +5,7 @@ import Task
 import os
 import mak
 
-allconfigs = ['debug','release','profile','final']
+allconfigs = ['debug','profile','final']
 
 def addFolder(file, tree, name, path, tabs):
 	file.write(tabs+'<logicalFolder name="%s" displayName="%s" projectFiles="true">\n' % (name, name))
