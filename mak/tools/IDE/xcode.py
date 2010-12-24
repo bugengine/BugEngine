@@ -167,6 +167,14 @@ class XCodeProject:
 		w("\t};\n")
 		w("/* End PBXProject section */\n\n")
 
+	def writeSources(self, sources):
+		w = self.file.write
+		for name,d in sources.directories.iteritems():
+			self.writeSources(d)
+		for file in sources.files:
+			if not isinstance(file, mak.sources.hsource):
+				w("\t\t\t%s,\n" % file.buildid)
+
 	def writePBXSourcesBuildPhase(self):
 		w = self.file.write
 		w("/* Begin PBXSourcesBuildPhase section */\n")
@@ -174,14 +182,18 @@ class XCodeProject:
 			if d.type in ['game', 'tool']:
 				w("\t%s = {\n" % d.phaseId[0])
 				w("\t\tisa = PBXSourcesBuildPhase;\n")
-				w("\t\tbuildActiobMask = 2147483647;\n")
+				w("\t\tbuildActionMask = 2147483647;\n")
 				w("\t\tfiles = (\n")
+				if d.usemaster:
+					w("\t\t\t%s,\n" % d.masterbuildid)
+				else:
+					self.writeSources(d.sourceTree)
 				w("\t\t);\n")
 				w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
 				w("\t};\n")
 		w("/* End PBXSourcesBuildPhase section */\n\n")
 
-	def writeXCBuildConfiguration(self):
+	def writeXCBuildConfiguration(self, project):
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
 		w("\t%s = {\n" % self.buildSettingsId[1][0])
@@ -266,6 +278,7 @@ def create_xcode_project(t):
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
+		solution.chmod = 0444
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []
@@ -283,6 +296,7 @@ def create_xcode_project(t):
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
 	project.usemaster		= t.usemaster
+	project.depends			= t.depends
 	if t.usemaster:
 		filename = "master-%s.cpp" % t.name
 		node = t.path.find_or_declare(filename)
