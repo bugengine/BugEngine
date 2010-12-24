@@ -17,7 +17,7 @@ projects = {
 	'vs2010':	(('Visual Studio 2010', '11.00'),(vstudio.vcxproj.VCxproj, '4.0'), ['Win32', 'x64', 'Xbox 360']),
 }
 
-allconfigs = ['debug','release','profile','final']
+allconfigs = ['debug','profile','final']
 
 def generateSolution(task):
 	solution = vstudio.solution.Solution( task.name,

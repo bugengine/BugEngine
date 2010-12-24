@@ -134,7 +134,7 @@ class XCodeProject:
 				w("\t\t);\n")
 				w("\t\tdependencies = (\n")
 				w("\t\t);\n")
-				w("\t\tname = %s;\n" % d.projectName)
+				w("\t\tname = \"%s\";\n" % (d.projectName))
 				w("\t\tproductName = %s;\n" % d.projectName)
 				w("\t\tproductReference = %s;\n" % d.applicationId)
 				w("\t\tproductType = \"com.apple.product-type.application\";\n")
@@ -212,7 +212,7 @@ xcodeprojects = {
 	'xcode3': ('Xcode 3.1', 45),
 }
 
-allconfigs = ['debug','release','profile','final']
+allconfigs = ['debug','profile','final']
 
 def generateProject(task):
 	solution = XCodeProject( task.name,
