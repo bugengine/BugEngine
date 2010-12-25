@@ -1,0 +1,4 @@
+ARCHS = $(ARCHS_UNIVERSAL_IPHONE_OS)
+SDKROOT = iphoneos
+CODE_SIGN_IDENTITY = 
+CODE_SIGN_IDENTITY[sdk=iphoneos*] = iPhone Developer

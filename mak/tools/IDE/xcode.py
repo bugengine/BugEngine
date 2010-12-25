@@ -16,7 +16,13 @@ class XCodeProject:
 		self.version = version
 		self.projects = projects
 		self.projectID = newid()
-		self.buildSettingsId = (newid(), [('debug', newid()), ('profile', newid()), ('final', newid())])
+		self.buildSettingsId = (newid(),
+					[('iphone-debug', newid(), newid(), newid()),
+					 ('iphone-profile', newid(), newid(), newid()),
+					 ('iphone-final', newid(), newid(), newid()),
+					 ('osx-debug', newid(), newid(), newid()),
+					 ('osx-profile', newid(), newid(), newid()),
+					 ('osx-final', newid(), newid(), newid())])
 		self.mainGroup = newid()
 
 	def writeHeader(self):
@@ -90,6 +96,8 @@ class XCodeProject:
 	def writePBXFileReference(self):
 		w = self.file.write
 		w("/* Begin PBXFileReference section */\n")
+		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
+			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
 		for d in self.projects:
 			if d.usemaster:
 				w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.cpp; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
@@ -98,18 +106,32 @@ class XCodeProject:
 				d.applicationId = newid()
 				d.targetId = newid()
 				d.phaseId = [newid(), newid(), newid()]
-				d.buildSettingsId = (newid(), [('debug', newid()), ('profile', newid()), ('final', newid())])
+				d.buildSettingsId = (newid(),
+						[('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid()),
+						 ('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid())])
 				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
 		w("/* End PBXFileReference section */\n\n")
 
 	def writePBXGroup(self):
 		w = self.file.write
 		w("/* Begin PBXGroup section */\n")
+		makid = newid()
+		w("\t%s = {\n" % makid)
+		w("\t\tisa = PBXGroup;\n")
+		w("\t\tname = config;\n")
+		w("\t\tsourceTree = \"<group>\";\n")
+		w("\t\tchildren = (\n")
+		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
+			w("\t\t\t%s,\n" % fileref)
+		w("\t\t);\n")
+		w("\t};\n")
+
 		w("\t%s = {\n" % self.mainGroup)
 		w("\t\tisa = PBXGroup;\n")
 		w("\t\tname = BugEngine;\n")
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
+		w("\t\t\t%s,\n" % makid)
 		projects = []
 		for d in self.projects:
 			projects.append((d.projectCategory+'.'+d.projectName, d))
@@ -196,9 +218,10 @@ class XCodeProject:
 	def writeXCBuildConfiguration(self):
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
-		for name, setting in self.buildSettingsId[1]:
+		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
 			w("\t%s = {\n" % setting)
 			w("\t\tisa = XCBuildConfiguration;\n")
+			w("\t\tbaseConfigurationReference = %s;\n" % fileref)
 			w("\t\tbuildSettings = {\n")
 			w("\t\t};\n")
 			w("\t\tname = %s;\n" % name)
@@ -222,7 +245,7 @@ class XCodeProject:
 		w("\t%s = {\n" % self.buildSettingsId[0])
 		w("\t\tisa = XCConfigurationList;\n")
 		w("\t\tbuildConfigurations = (\n")
-		for name, setting in self.buildSettingsId[1]:
+		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
 			w("\t\t\t%s,\n" % setting)
 		w("\t\t);\n")
 		w("\t\tdefaultConfigurationIsVisible = 0;\n")
