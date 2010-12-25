@@ -16,8 +16,7 @@ class XCodeProject:
 		self.version = version
 		self.projects = projects
 		self.projectID = newid()
-		self.configurationsID = newid()
-		self.buildSettingsId = (newid(), [newid()])
+		self.buildSettingsId = (newid(), [('debug', newid()), ('profile', newid()), ('final', newid())])
 		self.mainGroup = newid()
 
 	def writeHeader(self):
@@ -99,6 +98,7 @@ class XCodeProject:
 				d.applicationId = newid()
 				d.targetId = newid()
 				d.phaseId = [newid(), newid(), newid()]
+				d.buildSettingsId = (newid(), [('debug', newid()), ('profile', newid()), ('final', newid())])
 				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
 		w("/* End PBXFileReference section */\n\n")
 
@@ -134,7 +134,7 @@ class XCodeProject:
 			if d.type in ['game', 'tool']:
 				w("\t%s = {\n" % d.targetId)
 				w("\t\tisa = PBXNativeTarget;\n")
-				w("\t\tbuildConfigurationList = %s;\n" % self.buildSettingsId[0])
+				w("\t\tbuildConfigurationList = %s;\n" % d.buildSettingsId[0])
 				w("\t\tbuildPhases = (\n")
 				w("\t\t\t%s,\n" % d.phaseId[0])
 				w("\t\t);\n")
@@ -155,7 +155,7 @@ class XCodeProject:
 		w("\t%s /* Project object */ = {\n" % self.projectID)
 		w("\t\tisa = PBXProject;\n")
 		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
-		w("\t\tbuildConfigurationList = %s;\n" % self.configurationsID)
+		w("\t\tbuildConfigurationList = %s;\n" % self.buildSettingsId[0])
 		w("\t\thasScannedForEncodings = 1;\n")
 		w("\t\tprojectDirPath=\"\";\n")
 		w("\t\tmainGroup = %s;\n" % self.mainGroup)
@@ -193,30 +193,53 @@ class XCodeProject:
 				w("\t};\n")
 		w("/* End PBXSourcesBuildPhase section */\n\n")
 
-	def writeXCBuildConfiguration(self, project):
+	def writeXCBuildConfiguration(self):
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
-		w("\t%s = {\n" % self.buildSettingsId[1][0])
-		w("\t\tisa = XCBuildConfiguration;\n")
-		w("\t\tbuildSettings = {\n")
-		w("\t\t};\n")
-		w("\t\tname = Default;\n")
-		w("\t};\n")
+		for name, setting in self.buildSettingsId[1]:
+			w("\t%s = {\n" % setting)
+			w("\t\tisa = XCBuildConfiguration;\n")
+			w("\t\tbuildSettings = {\n")
+			w("\t\t};\n")
+			w("\t\tname = %s;\n" % name)
+			w("\t};\n")
+		for d in self.projects:
+			if d.type in ['game', 'tool']:
+				for name, setting in d.buildSettingsId[1]:
+					w("\t%s = {\n" % setting)
+					w("\t\tisa = XCBuildConfiguration;\n")
+					w("\t\tbuildSettings = {\n")
+					w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
+					w("\t\t};\n")
+					w("\t\tname = %s;\n" % name)
+					w("\t};\n")
 		w("/* End XCBuildConfiguration section */\n\n")
 
 	def writeXCConfigurationList(self):
+		self.writeXCBuildConfiguration()
 		w = self.file.write
 		w("/* Begin XCConfigurationList section */\n")
 		w("\t%s = {\n" % self.buildSettingsId[0])
 		w("\t\tisa = XCConfigurationList;\n")
 		w("\t\tbuildConfigurations = (\n")
-		w("\t\t\t%s,\n" % self.buildSettingsId[1][0])
+		for name, setting in self.buildSettingsId[1]:
+			w("\t\t\t%s,\n" % setting)
 		w("\t\t);\n")
 		w("\t\tdefaultConfigurationIsVisible = 0;\n")
-		w("\t\tdefaultConfigurationName = Default;\n")
+		w("\t\tdefaultConfigurationName = %s;\n" % self.buildSettingsId[1][0][0])
 		w("\t};\n")
+		for d in self.projects:
+			if d.type in ['game', 'tool']:
+				w("\t%s = {\n" % d.buildSettingsId[0])
+				w("\t\tisa = XCConfigurationList;\n")
+				w("\t\tbuildConfigurations = (\n")
+				for name, setting in d.buildSettingsId[1]:
+					w("\t\t\t%s,\n" % setting)
+				w("\t\t);\n")
+				w("\t\tdefaultConfigurationIsVisible = 0;\n")
+				w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
+				w("\t};\n")
 		w("/* End XCConfigurationList section */\n\n")
-		self.writeXCBuildConfiguration()
 
 	def writeFooter(self):
 		self.file.write("\t};\n")
@@ -231,8 +254,6 @@ xcodeprojects = {
 	'xcode2': ('Xcode 2.5', 42),
 	'xcode3': ('Xcode 3.1', 45),
 }
-
-allconfigs = ['debug','profile','final']
 
 def writemaster(sourcetree, f, path = ''):
 	for source in sourcetree.files:
