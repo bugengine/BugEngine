@@ -99,17 +99,19 @@ class XCodeProject:
 		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
 			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
 		for d in self.projects:
+			d.targetId = newid()
+			d.phaseId = [newid(), newid(), newid()]
+			d.applicationId = newid()
 			if d.usemaster:
 				w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.cpp; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
-				d.applicationId = newid()
-				d.targetId = newid()
-				d.phaseId = [newid(), newid(), newid()]
-				d.buildSettingsId = (newid(),
+				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
+			elif d.type in ['library', 'static_library', 'plugin']:
+				w("\t%s = { isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = \"lib%s.a\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
+			d.buildSettingsId = (newid(),
 						[('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid()),
 						 ('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid())])
-				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
 		w("/* End PBXFileReference section */\n\n")
 
 	def writePBXGroup(self):
@@ -144,31 +146,41 @@ class XCodeProject:
 			children = []
 			if d.usemaster:
 				children.append(d.masterid)
-			if d.type in ['game', 'tool']:
+			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
 				children.append(d.applicationId)
 			self.pbxDirTree(d.sourceTree, name, children)
 		w("/* End PBXGroup section */\n\n")
+
+	def writeTarget(self, d):
+		w = self.file.write
+		w("\t%s = {\n" % d.targetId)
+		w("\t\tisa = PBXNativeTarget;\n")
+		w("\t\tbuildConfigurationList = %s;\n" % d.buildSettingsId[0])
+		w("\t\tbuildPhases = (\n")
+		w("\t\t\t%s,\n" % d.phaseId[0])
+		w("\t\t);\n")
+		w("\t\tbuildRules = (\n")
+		w("\t\t);\n")
+		w("\t\tdependencies = (\n")
+		w("\t\t);\n")
+		w("\t\tname = \"%s\";\n" % (d.projectName))
+		w("\t\tproductName = %s;\n" % d.projectName)
+		w("\t\tproductReference = %s;\n" % d.applicationId)
+		if d.type in ['game', 'tool']:
+			w("\t\tproductType = \"com.apple.product-type.application\";\n")
+		elif d.type in ['library', 'static_library', 'plugin']:
+			w("\t\tproductType = \"com.apple.product-type.library.static\";\n")
+		w("\t};\n")
 
 	def writePBXNativeTarget(self):
 		w = self.file.write
 		w("/* Begin PBXNativeTarget section */\n")
 		for d in self.projects:
 			if d.type in ['game', 'tool']:
-				w("\t%s = {\n" % d.targetId)
-				w("\t\tisa = PBXNativeTarget;\n")
-				w("\t\tbuildConfigurationList = %s;\n" % d.buildSettingsId[0])
-				w("\t\tbuildPhases = (\n")
-				w("\t\t\t%s,\n" % d.phaseId[0])
-				w("\t\t);\n")
-				w("\t\tbuildRules = (\n")
-				w("\t\t);\n")
-				w("\t\tdependencies = (\n")
-				w("\t\t);\n")
-				w("\t\tname = \"%s\";\n" % (d.projectName))
-				w("\t\tproductName = %s;\n" % d.projectName)
-				w("\t\tproductReference = %s;\n" % d.applicationId)
-				w("\t\tproductType = \"com.apple.product-type.application\";\n")
-				w("\t};\n")
+				self.writeTarget(d)
+		for d in self.projects:
+			if d.type in ['library', 'static_library', 'plugin']:
+				self.writeTarget(d)
 		w("/* End PBXNativeTarget section */\n\n")
 
 	def writePBXProject(self):
@@ -184,6 +196,9 @@ class XCodeProject:
 		w("\t\ttargets = (\n")
 		for d in self.projects:
 			if d.type in ['game', 'tool']:
+				w("\t\t\t%s,\n" % d.targetId)
+		for d in self.projects:
+			if d.type in ['library', 'static_library', 'plugin']:
 				w("\t\t\t%s,\n" % d.targetId)
 		w("\t\t);\n")
 		w("\t};\n")
@@ -201,21 +216,40 @@ class XCodeProject:
 		w = self.file.write
 		w("/* Begin PBXSourcesBuildPhase section */\n")
 		for d in self.projects:
-			if d.type in ['game', 'tool']:
-				w("\t%s = {\n" % d.phaseId[0])
-				w("\t\tisa = PBXSourcesBuildPhase;\n")
-				w("\t\tbuildActionMask = 2147483647;\n")
-				w("\t\tfiles = (\n")
-				if d.usemaster:
-					w("\t\t\t%s,\n" % d.masterbuildid)
-				else:
-					self.writeSources(d.sourceTree)
-				w("\t\t);\n")
-				w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
-				w("\t};\n")
+			w("\t%s = {\n" % d.phaseId[0])
+			w("\t\tisa = PBXSourcesBuildPhase;\n")
+			w("\t\tbuildActionMask = 2147483647;\n")
+			w("\t\tfiles = (\n")
+			if d.usemaster:
+				w("\t\t\t%s,\n" % d.masterbuildid)
+			else:
+				self.writeSources(d.sourceTree)
+			w("\t\t);\n")
+			w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
+			w("\t};\n")
 		w("/* End PBXSourcesBuildPhase section */\n\n")
 
+
 	def writeXCBuildConfiguration(self):
+		def toXCodeArch(arch):
+			if arch == 'x86':
+				return 'i386'
+			elif arch == 'amd64':
+				return 'x86_64'
+			elif arch == 'arm':
+				return 'arm*'
+			elif arch == 'ppc':
+				return 'ppc*'
+			else:
+				return arch
+		def toSDK(platform):
+			if platform == 'darwin':
+				return 'osx', 'macosx*'
+			elif platform == 'iphone':
+				return 'iphone', 'iphoneos*'
+			else:
+				return '', ''
+
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
 		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
@@ -227,15 +261,20 @@ class XCodeProject:
 			w("\t\tname = %s;\n" % name)
 			w("\t};\n")
 		for d in self.projects:
-			if d.type in ['game', 'tool']:
-				for name, setting in d.buildSettingsId[1]:
-					w("\t%s = {\n" % setting)
-					w("\t\tisa = XCBuildConfiguration;\n")
-					w("\t\tbuildSettings = {\n")
-					w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
-					w("\t\t};\n")
-					w("\t\tname = %s;\n" % name)
-					w("\t};\n")
+			for name, setting in d.buildSettingsId[1]:
+				w("\t%s = {\n" % setting)
+				w("\t\tisa = XCBuildConfiguration;\n")
+				w("\t\tbuildSettings = {\n")
+				w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
+				for platform, options in d.platforms.iteritems():
+					platform,arch = platform.split('-')
+					platform, sdk = toSDK(platform)
+					if platform and name.startswith(platform):
+						arch = toXCodeArch(arch)
+						w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[sdk=%s][arch=%s]\" = %s;\n" % (sdk, arch, " ".join(options.defines)))
+				w("\t\t};\n")
+				w("\t\tname = %s;\n" % name)
+				w("\t};\n")
 		w("/* End XCBuildConfiguration section */\n\n")
 
 	def writeXCConfigurationList(self):
@@ -252,16 +291,15 @@ class XCodeProject:
 		w("\t\tdefaultConfigurationName = %s;\n" % self.buildSettingsId[1][0][0])
 		w("\t};\n")
 		for d in self.projects:
-			if d.type in ['game', 'tool']:
-				w("\t%s = {\n" % d.buildSettingsId[0])
-				w("\t\tisa = XCConfigurationList;\n")
-				w("\t\tbuildConfigurations = (\n")
-				for name, setting in d.buildSettingsId[1]:
-					w("\t\t\t%s,\n" % setting)
-				w("\t\t);\n")
-				w("\t\tdefaultConfigurationIsVisible = 0;\n")
-				w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
-				w("\t};\n")
+			w("\t%s = {\n" % d.buildSettingsId[0])
+			w("\t\tisa = XCConfigurationList;\n")
+			w("\t\tbuildConfigurations = (\n")
+			for name, setting in d.buildSettingsId[1]:
+				w("\t\t\t%s,\n" % setting)
+			w("\t\t);\n")
+			w("\t\tdefaultConfigurationIsVisible = 0;\n")
+			w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
+			w("\t};\n")
 		w("/* End XCConfigurationList section */\n\n")
 
 	def writeFooter(self):
@@ -333,7 +371,7 @@ def create_xcode_project(t):
 	project = Project()
 	project.type			= t.type
 	#project.allplatforms    = projects[toolName][2]
-	#project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
+	project.platforms 		= t.platforms
 	project.version 		= toolName
 	project.projectCategory = t.category
 	project.projectName 	= t.name
