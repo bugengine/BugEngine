@@ -43,15 +43,13 @@ class XCodeProject:
 		for file in tree.files:
 			file.id = newid()
 			file.buildid = newid()
-			if process and not isinstance(file, mak.sources.hsource):
+			if process and file.process and not isinstance(file, mak.sources.hsource):
 				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
 
 	def pbxDirTree(self, tree, name, children = []):
 		w = self.file.write
 		w("\t%s = {\n" % tree.id)
 		w("\t\tisa = PBXGroup;\n")
-		w("\t\tname = \"%s\";\n" % name)
-		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
 		subdirs = []
 		for n,d in tree.directories.iteritems():
@@ -64,6 +62,8 @@ class XCodeProject:
 		for id in children:
 			w("\t\t\t%s,\n"%id)
 		w("\t\t);\n")
+		w("\t\tname = \"%s\";\n" % name)
+		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
 		for n,d in tree.directories.iteritems():
 			self.pbxDirTree(d, n)
@@ -120,18 +120,16 @@ class XCodeProject:
 		makid = newid()
 		w("\t%s = {\n" % makid)
 		w("\t\tisa = PBXGroup;\n")
-		w("\t\tname = config;\n")
-		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
 		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
 			w("\t\t\t%s,\n" % fileref)
 		w("\t\t);\n")
+		w("\t\tname = config;\n")
+		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
 
 		w("\t%s = {\n" % self.mainGroup)
 		w("\t\tisa = PBXGroup;\n")
-		w("\t\tname = BugEngine;\n")
-		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t\tchildren = (\n")
 		w("\t\t\t%s,\n" % makid)
 		projects = []
@@ -141,6 +139,8 @@ class XCodeProject:
 		for name, d in projects:
 			w("\t\t\t%s,\n"%d.sourceTree.id)
 		w("\t\t);\n")
+		w("\t\tname = BugEngine;\n")
+		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
 		for name, d in projects:
 			children = []
@@ -188,11 +188,12 @@ class XCodeProject:
 		w("/* Begin PBXProject section */\n")
 		w("\t%s /* Project object */ = {\n" % self.projectID)
 		w("\t\tisa = PBXProject;\n")
-		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
 		w("\t\tbuildConfigurationList = %s;\n" % self.buildSettingsId[0])
+		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
 		w("\t\thasScannedForEncodings = 1;\n")
-		w("\t\tprojectDirPath=\"\";\n")
 		w("\t\tmainGroup = %s;\n" % self.mainGroup)
+		w("\t\tprojectDirPath=\"\";\n")
+		w("\t\tprojectRoot=\"\";\n")
 		w("\t\ttargets = (\n")
 		for d in self.projects:
 			if d.type in ['game', 'tool']:
@@ -209,7 +210,7 @@ class XCodeProject:
 		for name,d in sources.directories.iteritems():
 			self.writeSources(d)
 		for file in sources.files:
-			if not isinstance(file, mak.sources.hsource):
+			if file.process and not isinstance(file, mak.sources.hsource):
 				w("\t\t\t%s,\n" % file.buildid)
 
 	def writePBXSourcesBuildPhase(self):
@@ -263,21 +264,25 @@ class XCodeProject:
 			w("\t\tname = %s;\n" % name)
 			w("\t};\n")
 		for d in self.projects:
-			for name, setting in d.buildSettingsId[1]:
-				w("\t%s = {\n" % setting)
-				w("\t\tisa = XCBuildConfiguration;\n")
-				w("\t\tbuildSettings = {\n")
-				w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
-				for platform, options in d.platforms.iteritems():
-					p, arch = platform.split('-')
-					p, sdk = toSDK(p)
-					arch = toXCodeArch(arch)
-					if p and arch and name.startswith(p):
-						w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = \"$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM) %s\";\n" % (arch, " ".join(options.defines).replace('"', '\\"')))
-						w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = \"%s\";\n" % (arch, " ".join("\"%s\"" % i for i in options.includedir).replace('"', '\\"')))
-				w("\t\t};\n")
-				w("\t\tname = %s;\n" % name)
-				w("\t};\n")
+			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
+				for name, setting in d.buildSettingsId[1]:
+					w("\t%s = {\n" % setting)
+					w("\t\tisa = XCBuildConfiguration;\n")
+					w("\t\tbuildSettings = {\n")
+					for platform, options in d.platforms.iteritems():
+						p, arch = platform.split('-')
+						p, sdk = toSDK(p)
+						arch = toXCodeArch(arch)
+						if p and arch and name.startswith(p):
+							w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i.replace('"', '\\"') for i in ["$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM)"]+[o for o in options.defines])))
+							if options.includedir:
+								w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i for i in options.includedir)))
+							#w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = \"$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM) %s\";\n" % (arch, " ".join(options.defines).replace('"', '\\"')))
+							#w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = \"%s\";\n" % (arch, " ".join("\"%s\"" % i for i in options.includedir).replace('"', '\\"')))
+					w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
+					w("\t\t};\n")
+					w("\t\tname = \"%s\";\n" % name)
+					w("\t};\n")
 		w("/* End XCBuildConfiguration section */\n\n")
 
 	def writeXCConfigurationList(self):
@@ -291,18 +296,19 @@ class XCodeProject:
 			w("\t\t\t%s,\n" % setting)
 		w("\t\t);\n")
 		w("\t\tdefaultConfigurationIsVisible = 0;\n")
-		w("\t\tdefaultConfigurationName = %s;\n" % self.buildSettingsId[1][0][0])
+		w("\t\tdefaultConfigurationName = \"%s\";\n" % self.buildSettingsId[1][0][0])
 		w("\t};\n")
 		for d in self.projects:
-			w("\t%s = {\n" % d.buildSettingsId[0])
-			w("\t\tisa = XCConfigurationList;\n")
-			w("\t\tbuildConfigurations = (\n")
-			for name, setting in d.buildSettingsId[1]:
-				w("\t\t\t%s,\n" % setting)
-			w("\t\t);\n")
-			w("\t\tdefaultConfigurationIsVisible = 0;\n")
-			w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
-			w("\t};\n")
+			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
+				w("\t%s = {\n" % d.buildSettingsId[0])
+				w("\t\tisa = XCConfigurationList;\n")
+				w("\t\tbuildConfigurations = (\n")
+				for name, setting in d.buildSettingsId[1]:
+					w("\t\t\t%s,\n" % setting)
+				w("\t\t);\n")
+				w("\t\tdefaultConfigurationIsVisible = 0;\n")
+				w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
+				w("\t};\n")
 		w("/* End XCConfigurationList section */\n\n")
 
 	def writeFooter(self):
@@ -363,7 +369,7 @@ def create_xcode_project(t):
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
-		solution.chmod = 0444
+		#solution.chmod = 0444
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []
