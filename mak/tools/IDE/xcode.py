@@ -8,7 +8,7 @@ import random
 import time
 
 def newid():
-	return "{0:04X}{1:04X}{2:04X}{3:012d}".format(random.randint(0, 32767), random.randint(0, 32767), random.randint(0, 32767), int(time.time()))
+	return "%04X%04X%04X%012d" % (random.randint(0, 32767), random.randint(0, 32767), random.randint(0, 32767), int(time.time()))
 
 class XCodeProject:
 	def __init__(self, name, path, version, projects):
@@ -80,7 +80,7 @@ class XCodeProject:
 				filetype = "sourcecode.c.cpp"
 			else:
 				filetype = "sourcecode.c.h"
-			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = %s; name = \"%s\"; path = \"%s\" ; sourceTree = \"<group>\"; };\n" % (file.id, filetype, os.path.split(filename)[1], filename))
+			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"<group>\";\n\t};\n" % (file.id, filetype, os.path.split(filename)[1], filename))
 
 	def writePBXBuildFile(self):
 		w = self.file.write
@@ -97,18 +97,18 @@ class XCodeProject:
 		w = self.file.write
 		w("/* Begin PBXFileReference section */\n")
 		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
-			w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
+			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = text.xcconfig;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
 		for d in self.projects:
 			d.targetId = newid()
 			d.phaseId = [newid(), newid(), newid()]
 			d.applicationId = newid()
 			if d.usemaster:
-				w("\t%s = { isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.cpp; name = \"%s\"; path = \"%s\" ; sourceTree = \"SOURCE_ROOT\"; };\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
+				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.c.cpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
-				w("\t%s = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = \"%s.app\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
+				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = wrapper.application;\n\t\tincludeInIndex = 0;\n\t\tpath = \"%s.app\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
 			elif d.type in ['library', 'static_library', 'plugin']:
-				w("\t%s = { isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = \"lib%s.a\" ; sourceTree = BUILT_PRODUCTS_DIR; };\n" % (d.applicationId, d.projectName))
+				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = archive.ar;\n\t\tincludeInIndex = 0;\n\t\tpath = \"lib%s.a\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
 			d.buildSettingsId = (newid(),
 						[('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid()),
 						 ('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid())])
@@ -239,9 +239,11 @@ class XCodeProject:
 			elif arch == 'arm':
 				return 'arm*'
 			elif arch == 'ppc':
-				return 'ppc*'
+				return 'ppc'
+			elif arch == 'ppc64':
+				return 'ppc64'
 			else:
-				return arch
+				return ''
 		def toSDK(platform):
 			if platform == 'darwin':
 				return 'osx', 'macosx*'
@@ -267,11 +269,12 @@ class XCodeProject:
 				w("\t\tbuildSettings = {\n")
 				w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
 				for platform, options in d.platforms.iteritems():
-					platform,arch = platform.split('-')
-					platform, sdk = toSDK(platform)
-					if platform and name.startswith(platform):
-						arch = toXCodeArch(arch)
-						w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[sdk=%s][arch=%s]\" = %s;\n" % (sdk, arch, " ".join(options.defines)))
+					p, arch = platform.split('-')
+					p, sdk = toSDK(p)
+					arch = toXCodeArch(arch)
+					if p and arch and name.startswith(p):
+						w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = \"$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM) %s\";\n" % (arch, " ".join(options.defines).replace('"', '\\"')))
+						w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = \"%s\";\n" % (arch, " ".join("\"%s\"" % i for i in options.includedir).replace('"', '\\"')))
 				w("\t\t};\n")
 				w("\t\tname = %s;\n" % name)
 				w("\t};\n")
