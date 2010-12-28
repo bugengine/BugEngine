@@ -17,12 +17,12 @@ class XCodeProject:
 		self.projects = projects
 		self.projectID = newid()
 		self.buildSettingsId = (newid(),
-					[('iphone-debug', newid(), newid(), newid()),
-					 ('iphone-profile', newid(), newid(), newid()),
-					 ('iphone-final', newid(), newid(), newid()),
-					 ('osx-debug', newid(), newid(), newid()),
+					[('osx-debug', newid(), newid(), newid()),
+					 ('osx-final', newid(), newid(), newid()),
 					 ('osx-profile', newid(), newid(), newid()),
-					 ('osx-final', newid(), newid(), newid())])
+					 ('iphone-debug', newid(), newid(), newid()),
+					 ('iphone-profile', newid(), newid(), newid()),
+					 ('iphone-final', newid(), newid(), newid())])
 		self.mainGroup = newid()
 
 	def writeHeader(self):
@@ -35,16 +35,24 @@ class XCodeProject:
 		w("	objectVersion = %d;\n" % self.version[1])
 		w("	objects = {\n\n")
 
-	def pbxBuildTree(self, tree, process):
+	def pbxBuildTree(self, tree, processcpp):
 		w = self.file.write
 		tree.id = newid()
 		for name,dir in tree.directories.iteritems():
-			self.pbxBuildTree(dir, process)
+			self.pbxBuildTree(dir, processcpp)
 		for file in tree.files:
 			file.id = newid()
 			file.buildid = newid()
-			if process and file.process and not isinstance(file, mak.sources.hsource):
-				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
+			if file.process:
+				if isinstance(file, mak.sources.cppsource) and not isinstance(file, mak.sources.generatedcppsource):
+					if processcpp:
+						w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
+				elif isinstance(file, mak.sources.datasource):
+					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
+				elif isinstance(file, mak.sources.lexsource):
+					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
+				elif isinstance(file, mak.sources.yaccsource):
+					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
 
 	def pbxDirTree(self, tree, name, children = []):
 		w = self.file.write
@@ -74,13 +82,28 @@ class XCodeProject:
 			self.pbxFileRefTree(dir, os.path.join(path, tree.prefix))
 		for file in tree.files:
 			filename = os.path.join(path, tree.prefix, file.filename)
+			sourceroot = "SOURCE_ROOT"
+			if isinstance(file, mak.sources.generatedcppsource) or isinstance(file, mak.sources.generatedhsource):
+				continue
 			if isinstance(file, mak.sources.hsource):
-				filetype = "sourcecode.c.h"
+				if file.filename[-2:] == '.h':
+					filetype = "sourcecode.c.h"
+				else:
+					filetype = "sourcecode.cpp.h"
 			elif isinstance(file, mak.sources.cppsource):
-				filetype = "sourcecode.c.cpp"
+				if file.filename[-2:] == '.c':
+					filetype = "sourcecode.c.c"
+				else:
+					filetype = "sourcecode.cpp.cpp"
+			elif isinstance(file, mak.sources.datasource):
+				filetype = "sourcecode."
+			elif isinstance(file, mak.sources.lexsource):
+				filetype = "sourcecode.lex"
+			elif isinstance(file, mak.sources.yaccsource):
+				filetype = "sourcecode.yacc"
 			else:
-				filetype = "sourcecode.c.h"
-			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"<group>\";\n\t};\n" % (file.id, filetype, os.path.split(filename)[1], filename))
+				filetype = "text"
+			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = %s;\n\t};\n" % (file.id, filetype, os.path.split(filename)[1], filename, sourceroot))
 
 	def writePBXBuildFile(self):
 		w = self.file.write
@@ -100,7 +123,7 @@ class XCodeProject:
 			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = text.xcconfig;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
 		for d in self.projects:
 			d.targetId = newid()
-			d.phaseId = [newid(), newid(), newid()]
+			d.phaseId = [newid()]
 			d.applicationId = newid()
 			if d.usemaster:
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.c.cpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
@@ -110,8 +133,8 @@ class XCodeProject:
 			elif d.type in ['library', 'static_library', 'plugin']:
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = archive.ar;\n\t\tincludeInIndex = 0;\n\t\tpath = \"lib%s.a\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
 			d.buildSettingsId = (newid(),
-						[('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid()),
-						 ('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid())])
+						[('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid()),
+						 ('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid())])
 		w("/* End PBXFileReference section */\n\n")
 
 	def writePBXGroup(self):
@@ -153,13 +176,59 @@ class XCodeProject:
 
 	def writeTarget(self, d):
 		w = self.file.write
+
+		dataid = newid()
+		w("\t%s = {\n" % dataid)
+		w("\t\tisa = PBXBuildRule;\n")
+		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
+		w("\t\tfilePatterns = \"*.script.hh\";\n")
+		w("\t\tfileType = pattern.proxy;\n")
+		w("\t\tisEditable = 1;\n")
+		w("\t\toutputFiles = (\n")
+		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
+		w("\t\t);\n")
+		w("\t\tscript = \"python mak/ddf.py -o\\\"$DERIVED_FILES_DIR\\\" -D mak/macros_ignore \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t};\n")
+
+		flexid = newid()
+		w("\t%s = {\n" % flexid)
+		w("\t\tisa = PBXBuildRule;\n")
+		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
+		w("\t\tfilePatterns = \"*.ll\";\n")
+		w("\t\tfileType = pattern.proxy;\n")
+		w("\t\tisEditable = 1;\n")
+		w("\t\toutputFiles = (\n")
+		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
+		w("\t\t);\n")
+		w("\t\tscript = \"/Developer/usr/bin/flex -o \\\"$DERIVED_FILES_DIR/$INPUT_FILE_BASE.cc\\\" \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t};\n")
+
+		bisonid = newid()
+		w("\t%s = {\n" % bisonid)
+		w("\t\tisa = PBXBuildRule;\n")
+		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
+		w("\t\tfilePatterns = \"*.yy\";\n")
+		w("\t\tfileType = pattern.proxy;\n")
+		w("\t\tisEditable = 1;\n")
+		w("\t\toutputFiles = (\n")
+		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
+		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).hh\",\n")
+		w("\t\t);\n")
+		w("\t\tscript = \"/Developer/usr/bin/bison -d -o\\\"$DERIVED_FILES_DIR/$INPUT_FILE_BASE.cc\\\" \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t};\n")
+
+
 		w("\t%s = {\n" % d.targetId)
 		w("\t\tisa = PBXNativeTarget;\n")
 		w("\t\tbuildConfigurationList = %s;\n" % d.buildSettingsId[0])
 		w("\t\tbuildPhases = (\n")
-		w("\t\t\t%s,\n" % d.phaseId[0])
+		for phase in d.phaseId:
+			w("\t\t\t%s,\n" % phase)
 		w("\t\t);\n")
 		w("\t\tbuildRules = (\n")
+		w("\t\t\t%s,\n" % dataid)
+		w("\t\t\t%s,\n" % flexid)
+		w("\t\t\t%s,\n" % bisonid)
 		w("\t\t);\n")
 		w("\t\tdependencies = (\n")
 		w("\t\t);\n")
@@ -205,26 +274,32 @@ class XCodeProject:
 		w("\t};\n")
 		w("/* End PBXProject section */\n\n")
 
-	def writeSources(self, sources):
+	def writeSources(self, sources, all):
 		w = self.file.write
 		for name,d in sources.directories.iteritems():
-			self.writeSources(d)
+			self.writeSources(d, all)
 		for file in sources.files:
-			if file.process and not isinstance(file, mak.sources.hsource):
-				w("\t\t\t%s,\n" % file.buildid)
+			if file.process:
+				if isinstance(file, mak.sources.generatedcppsource):
+					continue
+				elif isinstance(file, mak.sources.cppsource) and all:
+					w("\t\t\t%s,\n" % file.buildid)
+				else:
+					w("\t\t\t%s,\n" % file.buildid)
 
 	def writePBXSourcesBuildPhase(self):
 		w = self.file.write
 		w("/* Begin PBXSourcesBuildPhase section */\n")
 		for d in self.projects:
-			w("\t%s = {\n" % d.phaseId[0])
+			w("\t%s = {\n" % d.phaseId[-1])
 			w("\t\tisa = PBXSourcesBuildPhase;\n")
 			w("\t\tbuildActionMask = 2147483647;\n")
 			w("\t\tfiles = (\n")
 			if d.usemaster:
 				w("\t\t\t%s,\n" % d.masterbuildid)
+				self.writeSources(d.sourceTree, False)
 			else:
-				self.writeSources(d.sourceTree)
+				self.writeSources(d.sourceTree, True)
 			w("\t\t);\n")
 			w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
 			w("\t};\n")
@@ -327,7 +402,7 @@ xcodeprojects = {
 
 def writemaster(sourcetree, f, path = ''):
 	for source in sourcetree.files:
-		if isinstance(source, mak.sources.cppsource):
+		if isinstance(source, mak.sources.cppsource) and not isinstance(source, mak.sources.generatedcppsource):
 			f.write("#if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.archs]))
 			f.write("# if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.platforms]))
 			f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
@@ -347,9 +422,9 @@ def generateProject(task):
 	#solution.writePBXFrameworksBuildPhase()
 	solution.writePBXGroup()
 	#solution.writePBXHeadersBuildPhase()
+	solution.writePBXSourcesBuildPhase()
 	solution.writePBXNativeTarget()
 	solution.writePBXProject()
-	solution.writePBXSourcesBuildPhase()
 	solution.writeXCConfigurationList()
 	solution.writeFooter()
 	for p in task.projects:
@@ -369,7 +444,7 @@ def create_xcode_project(t):
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
-		#solution.chmod = 0444
+		solution.chmod = 0444
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []
