@@ -19,6 +19,8 @@
 #  include <minitl/interlocked/gcc/x86/interlocked.inl>
 # elif defined(_AMD64)
 #  include <minitl/interlocked/gcc/amd64/interlocked.inl>
+# elif defined(_POWERPC) and defined(__LP64__)
+#  include <minitl/interlocked/gcc/ppc64/interlocked.inl>
 # elif defined(_POWERPC)
 #  include <minitl/interlocked/gcc/ppc/interlocked.inl>
 # elif defined(_ARM)
