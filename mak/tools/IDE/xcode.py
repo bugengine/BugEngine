@@ -354,7 +354,10 @@ class XCodeProject:
 								w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i for i in options.includedir)))
 							#w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = \"$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM) %s\";\n" % (arch, " ".join(options.defines).replace('"', '\\"')))
 							#w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = \"%s\";\n" % (arch, " ".join("\"%s\"" % i for i in options.includedir).replace('"', '\\"')))
-					w("\t\t\tPRODUCT_NAME = %s;\n" % d.projectName)
+					if d.type not in ['game', 'tool']:
+						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % ("bugengine_"+d.projectName))
+					else:
+						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % d.projectName)
 					w("\t\t};\n")
 					w("\t\tname = \"%s\";\n" % name)
 					w("\t};\n")
