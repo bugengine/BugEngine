@@ -25,6 +25,12 @@ class XCodeProject:
 					 ('iphone-final', newid(), newid(), newid())])
 		self.mainGroup = newid()
 
+	def getProject(self, d):
+		for p in self.projects:
+			if p.projectName == d.name and p.projectCategory == d.category:
+				return p
+		return None
+
 	def writeHeader(self):
 		w = self.file.write
 		w("// !$*UTF8*$!\n")
@@ -129,6 +135,7 @@ class XCodeProject:
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.c.cpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
+				d.phaseId.append(newid())
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = wrapper.application;\n\t\tincludeInIndex = 0;\n\t\tpath = \"%s.app\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
 			elif d.type in ['library', 'static_library', 'plugin']:
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = archive.ar;\n\t\tincludeInIndex = 0;\n\t\tpath = \"lib%s.a\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
@@ -217,6 +224,28 @@ class XCodeProject:
 		w("\t\tscript = \"/Developer/usr/bin/bison -d -o\\\"$DERIVED_FILES_DIR/$INPUT_FILE_BASE.cc\\\" \\\"$INPUT_FILE_PATH\\\"\";\n")
 		w("\t};\n")
 
+		dependencies = []
+		for p in d.depends:
+			project = self.getProject(p)
+			if project.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
+				dependency = newid()
+				dependencies.append(dependency)
+				proxyId = getattr(project, 'proxyId', '')
+				if not proxyId:
+					project.proxyId = newid()
+					w("\t%s = {\n" % project.proxyId)
+					w("\t\tisa = PBXContainerItemProxy;\n")
+					w("\t\tcontainerPortal = %s;\n" % self.projectID)
+					w("\t\tproxyType = 1;\n")
+					w("\t\tremoteGlobalIdString = %s;\n" % project.targetId)
+					w("\t\tremoteInfo = \"%s\";\n" % project.projectName)
+					w("\t};\n")
+				w("\t%s = {\n" % dependency)
+				w("\t\tisa = PBXTargetDependency;\n")
+				w("\t\ttarget = %s;\n" % project.targetId)
+				w("\t\ttargetProxy = %s;\n" % project.proxyId)
+				w("\t};\n")
+
 
 		w("\t%s = {\n" % d.targetId)
 		w("\t\tisa = PBXNativeTarget;\n")
@@ -231,6 +260,8 @@ class XCodeProject:
 		w("\t\t\t%s,\n" % bisonid)
 		w("\t\t);\n")
 		w("\t\tdependencies = (\n")
+		for i in dependencies:
+			w("\t\t\t%s,\n" % i)
 		w("\t\t);\n")
 		w("\t\tname = \"%s\";\n" % (d.projectName))
 		w("\t\tproductName = %s;\n" % d.projectName)
@@ -291,7 +322,7 @@ class XCodeProject:
 		w = self.file.write
 		w("/* Begin PBXSourcesBuildPhase section */\n")
 		for d in self.projects:
-			w("\t%s = {\n" % d.phaseId[-1])
+			w("\t%s = {\n" % d.phaseId[0])
 			w("\t\tisa = PBXSourcesBuildPhase;\n")
 			w("\t\tbuildActionMask = 2147483647;\n")
 			w("\t\tfiles = (\n")
@@ -303,6 +334,32 @@ class XCodeProject:
 			w("\t\t);\n")
 			w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
 			w("\t};\n")
+			if d.type in ['game', 'tool']:
+				w("\t%s = {\n" % d.phaseId[1])
+				w("\t\tisa = PBXFrameworksBuildPhase;\n")
+				w("\t\tbuildActionMask = 2147483647;\n")
+				w("\t\tfiles = (\n")
+				buildLibs = []
+				seen = set([d])
+				projects = d.depends[:]
+				while projects:
+					p = projects.pop(0)
+					project = self.getProject(p)
+					if project in seen:
+						continue
+					seen.add(project)
+					projects += p.depends
+					if project.type in ['game', 'tool', 'static_library', 'library', 'plugin']:
+						buildId = newid()
+						buildLibs.append((project.applicationId, buildId))
+						w("\t\t\t%s,\n" % buildId)
+				w("\t\t);\n")
+				w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
+				w("\t};\n")
+				for fileId, buildId in buildLibs:
+					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (buildId, fileId))
+
+
 		w("/* End PBXSourcesBuildPhase section */\n\n")
 
 
@@ -352,8 +409,6 @@ class XCodeProject:
 							w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i.replace('"', '\\"') for i in ["$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM)"]+[o for o in options.defines])))
 							if options.includedir:
 								w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i for i in options.includedir)))
-							#w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = \"$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM) %s\";\n" % (arch, " ".join(options.defines).replace('"', '\\"')))
-							#w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = \"%s\";\n" % (arch, " ".join("\"%s\"" % i for i in options.includedir).replace('"', '\\"')))
 					if d.type not in ['game', 'tool']:
 						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % ("bugengine_"+d.projectName))
 					else:
@@ -466,6 +521,10 @@ def create_xcode_project(t):
 	project.sourceTree 		= t.sourcetree
 	project.usemaster		= t.usemaster
 	project.depends			= t.depends
+	for i in t.depends:
+		if i.type in ['game', 'tool']:
+			i.depends.append(t)
+			t.depends.remove(i)
 	if t.usemaster:
 		filename = "master-%s.cpp" % t.name
 		node = t.path.find_or_declare(filename)
