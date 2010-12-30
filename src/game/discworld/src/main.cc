@@ -21,7 +21,6 @@
 /*---------------------------------------------------------------------------*/
 int be_main(weak<BugEngine::Application> app)
 {
-    return 0;
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
@@ -40,12 +39,10 @@ int be_main(weak<BugEngine::Application> app)
     f.triplebuffered = false;
 
     BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
-    return 0;
     /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
 
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
     {
-
         ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
         ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
