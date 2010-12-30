@@ -258,13 +258,28 @@ class module:
 				continue
 			elif os.path.isdir(os.path.join(path,file)):
 				if file[0:9] == 'platform=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, file[9:].split(','), archs, sourcelist), file )
+					newplatforms = []
+					for p in file[9:].split(','):
+						for pname, pgroup in mak.allplatforms.iteritems():
+							if p in pgroup:
+								newplatforms.append(pname)
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, newplatforms, archs, sourcelist), file )
 				elif file[0:5] == 'arch=':
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, file[5:].split(','), sourcelist), file )
+					newarchs = [a for a in file[5:].split(',') if a in archs]
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, newarchs, sourcelist), file )
 				else:
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs, sourcelist), file )
 			else:
 				filename, ext = os.path.splitext(file)
+				fileplatforms = platforms
+				filearchs = archs
+				if filename.find('-') != -1:
+					_, specials = filename.split('-')
+					if specials.startswith("p="):
+						fileplatforms = specials[2:].split(',')
+					elif specials.startswith("a="):
+						filearchs = specials[2:].split(',')
+
 				fullname = os.path.join(path, file)
 				if sourcelist:
 					if fullname in sourcelist or os.path.join(local,file) in sourcelist:
@@ -275,33 +290,33 @@ class module:
 					doprocess = process
 
 				newexts = { '.ll':('.cc','.hh'), '.yy': ('.cc','.hh'), '.l':('.c', '.h'), '.y':('.c', '.h') }
-				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.S', '.bin', '.grit']):
-					result.addFile(sources.cppsource(file, platforms, archs, doprocess, self.usepch))
+				if ext in set(['.cc', '.cpp', '.cxx', '.c', '.C', '.s', '.S', '.bin', '.grit', '.m', '.mm']):
+					result.addFile(sources.cppsource(file, fileplatforms, filearchs, doprocess, self.usepch))
 				elif ext in set(['.rc']):
-					result.addFile(sources.rcsource(file, platforms, archs, doprocess))
+					result.addFile(sources.rcsource(file, fileplatforms, filearchs, doprocess))
 				elif ext in set(['.y', '.yy']):
 					cext, hext = newexts[ext]
 					generatedcfile = os.path.join(path, filename+cext)
 					generatedhfile = os.path.join(path, filename+hext)
-					result.addFile(sources.yaccsource(file, generatedcfile, generatedhfile, platforms, archs, doprocess))
-					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, doprocess))
-					result.addFile(sources.generatedhsource(filename+hext, platforms, archs, doprocess))
+					result.addFile(sources.yaccsource(file, generatedcfile, generatedhfile, fileplatforms, filearchs, doprocess))
+					result.addFile(sources.generatedcppsource(filename+cext, fileplatforms, filearchs, doprocess))
+					result.addFile(sources.generatedhsource(filename+hext, fileplatforms, filearchs, doprocess))
 				elif ext in set(['.l', '.ll']):
 					cext, hext = newexts[ext]
 					generatedcfile = os.path.join(path, filename+cext)
-					result.addFile(sources.lexsource(file, generatedcfile, platforms, archs, doprocess))
-					result.addFile(sources.generatedcppsource(filename+cext, platforms, archs, doprocess))
+					result.addFile(sources.lexsource(file, generatedcfile, fileplatforms, filearchs, doprocess))
+					result.addFile(sources.generatedcppsource(filename+cext, fileplatforms, filearchs, doprocess))
 				elif ext in set(['.def']):
 					self.localoptions.deffile = fullname
-					result.addFile(sources.source(file,platforms,archs, doprocess))
-					result.addFile(sources.hsource(file,platforms,archs, doprocess))
+					result.addFile(sources.source(file, fileplatforms, filearchs, doprocess))
+					result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 				elif ext in set(['.h', '.hpp', '.hh', '.hxx', '.inl']):
 					if file.endswith('.script'+ext):
 						generatedcfile = os.path.join(path, filename+'.cc')
-						result.addFile(sources.datasource(file, generatedcfile, platforms, archs, True))
-						result.addFile(sources.generatedcppsource(filename+'.cc', platforms, archs, True, self.usepch))
+						result.addFile(sources.datasource(file, generatedcfile, fileplatforms, filearchs, True))
+						result.addFile(sources.generatedcppsource(filename+'.cc', fileplatforms, filearchs, True, self.usepch))
 					else:
-						result.addFile(sources.hsource(file, platforms, archs, doprocess))
+						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 		return result
 
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):
