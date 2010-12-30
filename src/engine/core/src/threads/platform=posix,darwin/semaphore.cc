@@ -29,7 +29,6 @@ Semaphore::~Semaphore()
     {
         be_error("sem_close returned %d" | result);
     }
-    delete reinterpret_cast<sem_t*>(m_data);
 }
 
 void Semaphore::release(int count)

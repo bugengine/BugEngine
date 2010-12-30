@@ -99,6 +99,10 @@ class XCodeProject:
 			elif isinstance(file, mak.sources.cppsource):
 				if file.filename[-2:] == '.c':
 					filetype = "sourcecode.c.c"
+				elif file.filename[-2:] == '.m':
+					filetype = "sourcecode.c.objc"
+				elif file.filename[-3:] == '.mm':
+					filetype = "sourcecode.cpp.objcpp"
 				else:
 					filetype = "sourcecode.cpp.cpp"
 			elif isinstance(file, mak.sources.datasource):
@@ -132,7 +136,7 @@ class XCodeProject:
 			d.phaseId = [newid()]
 			d.applicationId = newid()
 			if d.usemaster:
-				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.c.cpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
+				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.cpp.objcpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
 				d.phaseId.append(newid())
@@ -454,8 +458,7 @@ class Project:
 		pass
 
 xcodeprojects = {
-	'xcode2': ('Xcode 2.5', 42),
-	'xcode3': ('Xcode 3.1', 45),
+	'xcode': ('Xcode 3.1', 45),
 }
 
 def writemaster(sourcetree, f, path = ''):
@@ -477,9 +480,7 @@ def generateProject(task):
 	solution.writeHeader()
 	solution.writePBXBuildFile()
 	solution.writePBXFileReference()
-	#solution.writePBXFrameworksBuildPhase()
 	solution.writePBXGroup()
-	#solution.writePBXHeadersBuildPhase()
 	solution.writePBXSourcesBuildPhase()
 	solution.writePBXNativeTarget()
 	solution.writePBXProject()
@@ -526,7 +527,7 @@ def create_xcode_project(t):
 			i.depends.append(t)
 			t.depends.remove(i)
 	if t.usemaster:
-		filename = "master-%s.cpp" % t.name
+		filename = "master-%s.mm" % t.name
 		node = t.path.find_or_declare(filename)
 		solution.set_outputs(node)
 		project.masterfile = node
