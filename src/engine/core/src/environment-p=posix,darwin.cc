@@ -74,10 +74,10 @@ const istring& Environment::getUser() const
 }
 size_t Environment::getProcessorCount() const
 {
-#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN)
+#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_MACOS)
     return sysconf(_SC_NPROCESSORS_ONLN);
 #else
-    int numCPU;
+    int numCPU = 0;
     int mib[4];
     size_t len;
 
