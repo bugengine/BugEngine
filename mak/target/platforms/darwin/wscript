@@ -57,7 +57,7 @@ def add_darwin_flags_to_env(conf):
 									'plugin':	os.path.join('data', 'plugins') }
 
 def configure(conf):
-	mak.allplatforms['darwin'] = ['darwin', 'pc']
+	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('darwin') != -1 and target.find('arm') == -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
@@ -80,4 +80,4 @@ def configure(conf):
 				del conf.all_envs['temp']
 
 def build(bld):
-	mak.allplatforms['darwin'] = ['darwin', 'pc']
+	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']

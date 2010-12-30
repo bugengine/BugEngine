@@ -131,6 +131,7 @@ class XCodeProject:
 		w("/* Begin PBXFileReference section */\n")
 		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
 			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = text.xcconfig;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
+			#w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tlastKnownFileType = wrapper.framework;\n\t\tname = \"%s\";\n\t\tpath = \"/System/Library/Framework/%s.framework\";\n\t\tsourceTree = \"<absolute>\";\n\t};\n" % (fileref, name, name)))
 		for d in self.projects:
 			d.targetId = newid()
 			d.phaseId = [newid()]
@@ -382,7 +383,7 @@ class XCodeProject:
 			else:
 				return ''
 		def toSDK(platform):
-			if platform == 'darwin':
+			if platform == 'osx':
 				return 'osx', 'macosx*'
 			elif platform == 'iphone':
 				return 'iphone', 'iphoneos*'
