@@ -66,7 +66,11 @@ class module:
 		self.depends  = depends
 		self.tasks = {}
 		self.root = os.path.join('src', category, name)
-		self.platforms = set(platforms or mak.allplatforms.keys())
+		self.platforms = set([])
+		for p in platforms or mak.allplatforms.keys():
+			for pname, pgroup in mak.allplatforms.iteritems():
+				if p in pgroup:
+					self.platforms.add(pname)
 		self.archs = archs or mak.allarchs[:]
 		self.projects = {}
 		sourcelist = [os.path.normpath(i) for i in sourcelist]
@@ -261,7 +265,7 @@ class module:
 					newplatforms = []
 					for p in file[9:].split(','):
 						for pname, pgroup in mak.allplatforms.iteritems():
-							if p in pgroup:
+							if p in pgroup and pname in platforms:
 								newplatforms.append(pname)
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, newplatforms, archs, sourcelist), file )
 				elif file[0:5] == 'arch=':
@@ -276,7 +280,11 @@ class module:
 				if filename.find('-') != -1:
 					_, specials = filename.split('-')
 					if specials.startswith("p="):
-						fileplatforms = specials[2:].split(',')
+						fileplatforms = []
+						for p in specials[2:].split(','):
+							for pname, pgroup in mak.allplatforms.iteritems():
+								if p in pgroup and pname in platforms:
+									fileplatforms.append(pname)
 					elif specials.startswith("a="):
 						filearchs = specials[2:].split(',')
 
