@@ -53,7 +53,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
 {
     static const i32& s_taskCount = 16;
 
-    ScheduledTasks::ITaskItem* target = sc->pop();
+    ScheduledTasks::ITaskItem* target = sc->pop(Random);
     if(!target)
         return false;
     if(!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
@@ -83,7 +83,7 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
     {
         if(sc->m_synchro.wait() == Threads::Waitable::Finished)
             if(w->doWork(sc))
-                sc->m_end.set();
+                sc->m_mainThreadSynchro.release(1);
     }
     return 0;
 }
@@ -110,14 +110,16 @@ void  Scheduler::release_task(void* task, size_t size)
 Scheduler::Scheduler()
 :   m_workers(taskArena())
 ,   m_synchro(0, 65535)
+,   m_mainThreadSynchro(0, 65535)
 ,   m_taskPool(taskArena(), 65535, 16)
 ,   m_frameCount(0)
 ,   m_end()
 ,   m_tasks()
+,   m_mainThreadTasks()
 ,   m_runningTasks(0)
 ,   m_running(true)
 {
-    const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
+    const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount() - 1;
     for(size_t i = 0; i < g_numWorkers; ++i)
     {
         m_workers.push_back(new Worker(this, i));
@@ -149,29 +151,51 @@ void Scheduler::frameUpdate()
 void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 {
     int priority = task->m_owner->priority;
-    m_tasks[priority].push(task);
     m_runningTasks ++;
-    m_synchro.release(1);
+    if(task->m_owner->affinity == Random)
+    {
+        m_tasks[priority].push(task);
+        m_synchro.release(1);
+    }
+    else
+    {
+        m_mainThreadTasks[priority].push(task);
+        m_mainThreadSynchro.release(1);
+    }
 }
 
-ScheduledTasks::ITaskItem* Scheduler::pop()
+ScheduledTasks::ITaskItem* Scheduler::pop(Affinity affinity)
 {
+    minitl::istack<ScheduledTasks::ITaskItem>* tasks = affinity == Random ? m_tasks : m_mainThreadTasks;
     for(unsigned int i = High; i != Low; --i)
     {
-        ScheduledTasks::ITaskItem* t = m_tasks[i].pop();
+        ScheduledTasks::ITaskItem* t = tasks[i].pop();
         if(t)
             return t;
     }
     return 0;
 }
 
-void Scheduler::wait()
+void Scheduler::mainThreadJoin()
 {
-    while(m_runningTasks)
+    while(true)
     {
-        m_end.lock();
-        m_end.wait();
-        m_end.unlock();
+        if(m_mainThreadSynchro.wait() == Threads::Waitable::Finished)
+        {
+            ScheduledTasks::ITaskItem* t = pop(MainThread);
+            if(t)
+            {
+                t->run(this);
+                if(--m_runningTasks == 0)
+                {
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 }
 

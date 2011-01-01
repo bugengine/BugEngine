@@ -56,6 +56,7 @@ public:
     const istring               name;
     const color32               color;
     const Scheduler::Priority   priority;
+    const Scheduler::Affinity   affinity;
 private:
     minitl::list< weak<ICallback> > m_callbacks;
     ref<ICallback>                  m_start;
@@ -72,7 +73,7 @@ public:
     weak<ICallback> startCallback();
 
 protected:
-    ITask(istring name, color32 color, Scheduler::Priority priority);
+    ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity);
 private:
     ITask& operator=(const ITask& other);
     ITask(const ITask& other);

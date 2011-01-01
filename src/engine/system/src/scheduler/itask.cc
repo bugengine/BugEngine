@@ -7,10 +7,11 @@
 namespace BugEngine
 {
 
-ITask::ITask(istring name, color32 color, Scheduler::Priority priority)
+    ITask::ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity)
 :   name(name)
 ,   color(color)
 ,   priority(priority)
+,   affinity(affinity)
 ,   m_callbacks(taskArena())
 ,   m_start(ref<ChainCallback>::create(taskArena(), this))
 {

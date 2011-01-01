@@ -38,19 +38,26 @@ public:
         High = 2,
         PriorityCount = 3
     };
+    enum Affinity
+    {
+        Random = 0,
+        MainThread = 1
+    };
 private:
     minitl::vector<Worker*>                     m_workers;
     Semaphore                                   m_synchro;
+    Semaphore                                   m_mainThreadSynchro;
     minitl::pool<char[128]>                     m_taskPool;
     unsigned int                                m_frameCount;
     Timer                                       m_timer;
     Event                                       m_end;
 private: //friend Worker
     minitl::istack<ScheduledTasks::ITaskItem>   m_tasks[PriorityCount];
+    minitl::istack<ScheduledTasks::ITaskItem>   m_mainThreadTasks[PriorityCount];
     i_u32                                       m_runningTasks;
     bool volatile                               m_running;
 private:
-    ScheduledTasks::ITaskItem* pop();
+    ScheduledTasks::ITaskItem* pop(Affinity affinity);
     void queue(ScheduledTasks::ITaskItem* task);
     void split(ScheduledTasks::ITaskItem* t, size_t count);
     void* allocate_task(size_t size);
@@ -63,7 +70,7 @@ public:
     ~Scheduler();
 
     void frameUpdate();
-    void wait();
+    void mainThreadJoin();
 private:
     Scheduler(const Scheduler& other);
     Scheduler& operator=(const Scheduler& other);
