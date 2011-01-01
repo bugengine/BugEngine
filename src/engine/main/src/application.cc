@@ -7,6 +7,8 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
+#include    <Cocoa/Cocoa.h>
+
 namespace BugEngine
 {
 
@@ -47,7 +49,7 @@ void Application::frameUpdate()
 int Application::run()
 {
     m_tasks[0]->run(m_scheduler);
-    m_scheduler->wait();
+    m_scheduler->mainThreadJoin();
     return 0;
 }
 
