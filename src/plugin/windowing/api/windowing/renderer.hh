@@ -22,15 +22,15 @@ private:
 protected:
     void            flush() override;
     void            createContextAsync(void* params);
-    void            destroyContextAsync(void* params);
+    void            destroyContextAsync();
 public:
     Renderer();
     ~Renderer();
 
     uint2           getScreenSize() override;
 
-    virtual void    createContext(void* params);
-    virtual void    destroyContext(void* params);
+    virtual void    createContext(void* params) = 0;
+    virtual void    destroyContext() = 0;
 };
 
 }}}

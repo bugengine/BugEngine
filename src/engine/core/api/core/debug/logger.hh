@@ -61,22 +61,22 @@ private:
 };
 
 #ifdef _DEBUG
-# define  be_spam(msg)        Logger::root()->log(logSpam, __FILE__, __LINE__, (minitl::format<2048>)msg)
-# define  be_debug(msg)       Logger::root()->log(logDebug, __FILE__, __LINE__, (minitl::format<2048>)msg)
+# define  be_spam(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logSpam, __FILE__, __LINE__, (minitl::format<2048>)msg)
+# define  be_debug(msg)       ::BugEngine::Logger::root()->log(::BugEngine::logDebug, __FILE__, __LINE__, (minitl::format<2048>)msg)
 #else
 # define  be_spam(msg)
 # define  be_debug(msg)
 #endif
 
 #ifndef NDEBUG
-# define  be_info(msg)        Logger::root()->log(logInfo, __FILE__, __LINE__, (minitl::format<2048>)msg)
+# define  be_info(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logInfo, __FILE__, __LINE__, (minitl::format<2048>)msg)
 #else
 # define  be_info(msg)
 #endif
 
-#define  be_warning(msg)      Logger::root()->log(logWarning, __FILE__, __LINE__, (minitl::format<2048>)msg)
-#define  be_error(msg)        Logger::root()->log(logError, __FILE__, __LINE__, (minitl::format<2048>)msg)
-#define  be_fatal(msg)        Logger::root()->log(logFatal, __FILE__, __LINE__, (minitl::format<2048>)msg)
+#define  be_warning(msg)      ::BugEngine::Logger::root()->log(::BugEngine::logWarning, __FILE__, __LINE__, (minitl::format<2048>)msg)
+#define  be_error(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logError, __FILE__, __LINE__, (minitl::format<2048>)msg)
+#define  be_fatal(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logFatal, __FILE__, __LINE__, (minitl::format<2048>)msg)
 
 }
 

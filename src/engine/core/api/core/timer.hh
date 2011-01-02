@@ -15,7 +15,6 @@ private:
     u64         m_start;
 private:
     static u64 tick();
-    static float now();
 public:
     Timer();
     ~Timer();
@@ -25,6 +24,8 @@ public:
     void reset();
     u64  total() const;
     u64  elapsed() const;
+
+    static float now();
 };
 
 }

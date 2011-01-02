@@ -15,10 +15,11 @@ Semaphore::Semaphore(int initialCount, int maxCount)
 {
     static unsigned int s_semId = 0;
     minitl::format<> name = minitl::format<>("/bugengine/%d/%d") | 0 | s_semId++; // TODO: process ID
-    m_data = sem_open(name, O_CREAT, 0770, initialCount);
-    if (!m_data)
+    m_data = sem_open(name, O_CREAT|O_EXCL, 0770, initialCount);
+    if (m_data == SEM_FAILED)
     {
         be_error("sem_open returned 0");
+        perror("");
     }
 }
 

@@ -170,7 +170,7 @@ void Renderer::PlatformRenderer::handleMessage(UINT msg, WPARAM wParam, LPARAM l
     case WM_USER+WM_BE_DESTROYCONTEXT:
         {
             ContextCreationEvent* event = (ContextCreationEvent*)wParam;
-            m_renderer->destroyContext(0);
+            m_renderer->destroyContext();
             event->event.set();
         }
         break;
@@ -236,14 +236,6 @@ void Renderer::destroyContextAsync(void* params)
     m_platformRenderer->postMessage(WM_USER+WM_BE_DESTROYCONTEXT, (WPARAM)&event, 0);
     event.event.wait();
     return;
-}
-
-void Renderer::createContext(void* params)
-{
-}
-
-void Renderer::destroyContext(void* params)
-{
 }
 
 }}}
