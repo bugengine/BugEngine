@@ -93,7 +93,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
-    destroyContextAsync(0);
+    destroyContextAsync();
 }
 
 void Renderer::attachWindow(Window* w)
@@ -115,7 +115,7 @@ void Renderer::createContext(void* params)
     m_context = scoped<Context>::create(gameArena(), p->display, p->fbConfig);
 }
 
-void Renderer::destroyContext(void*)
+void Renderer::destroyContext()
 {
 }
 

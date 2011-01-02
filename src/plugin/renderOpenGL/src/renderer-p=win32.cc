@@ -116,7 +116,7 @@ void Renderer::createContext(void*)
 {
 }
 
-void Renderer::destroyContext(void*)
+void Renderer::destroyContext()
 {
 }
 

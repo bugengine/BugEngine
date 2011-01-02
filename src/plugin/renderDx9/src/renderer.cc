@@ -34,7 +34,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
-    destroyContextAsync(0);
+    destroyContextAsync();
     int refCnt = m_directx->Release();
     be_forceuse(refCnt);
     be_assert(refCnt == 0, "Dx refcount is not 0");
@@ -84,7 +84,7 @@ void Renderer::createContext(void* params_)
     }
 }
 
-void Renderer::destroyContext(void* params)
+void Renderer::destroyContext()
 {
     if(m_device)
     {
@@ -185,7 +185,7 @@ void Renderer::flush()
             }
             else
             {
-                destroyContextAsync(0);
+                destroyContextAsync();
             }
         }
         break;

@@ -33,8 +33,8 @@ void Window::begin(ClearMode clear)
         setCurrent();
         if (clear == IRenderTarget::Clear)
         {
-            //glClearColor(0.3f, 0.3f, 03.f, 1.0f);
-            //glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
         }
     }
 }
@@ -43,7 +43,7 @@ void Window::end(PresentMode presentMode)
 {
     if(!isClosed())
     {
-        //glFlush();
+        glFlush();
         if(presentMode == Present)
         {
             present();
@@ -52,11 +52,6 @@ void Window::end(PresentMode presentMode)
         if(m_closed > 0 && !isClosed())
         {
             Windowing::Window::close();
-            /*if(m_glContext)
-            {
-                wglDeleteContext(m_glContext);
-                m_glContext = 0;
-            }*/
         }
     }
 }
