@@ -74,7 +74,7 @@ private:
     void                            drawBatch(const Batch& b);
     void                            flush() override;
     void                            createContext(void* params) override;
-    void                            destroyContext(void* params) override;
+    void                            destroyContext() override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
