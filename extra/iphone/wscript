@@ -92,7 +92,7 @@ def configure(conf):
 	import Options
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
-		if Options.options.iphone_sdk:
+		if getattr(Options.options, 'iphone_sdk', None):
 			if target.find('darwin') != -1 and target.find('arm') != -1:
 				newenv = conf.set_env_name('temp', conf.env.copy())
 				conf.setenv('temp')
@@ -112,7 +112,7 @@ def configure(conf):
 					warn('gcc not available: '+e.__class__.__name__+" "+str(e))
 					conf.setenv('default')
 					del conf.all_envs['temp']
-		if Options.options.iphonesimulator_sdk:
+		if getattr(Options.options, 'iphonesimulator_sdk', None):
 			if target.find('darwin') != -1 and target.find('i686') != -1:
 				newenv = conf.set_env_name('temp', conf.env.copy())
 				conf.setenv('temp')
