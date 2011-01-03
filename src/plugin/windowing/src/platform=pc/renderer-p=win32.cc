@@ -40,7 +40,6 @@ namespace
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         static unsigned int nbWindows = 0;
-        
         switch( msg )
         {
             case WM_CLOSE:
@@ -230,7 +229,7 @@ void Renderer::createContextAsync(void* params)
     return;
 }
 
-void Renderer::destroyContextAsync(void* params)
+void Renderer::destroyContextAsync()
 {
     ContextCreationEvent event;
     m_platformRenderer->postMessage(WM_USER+WM_BE_DESTROYCONTEXT, (WPARAM)&event, 0);

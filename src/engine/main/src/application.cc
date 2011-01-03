@@ -7,8 +7,6 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
-#include    <Cocoa/Cocoa.h>
-
 namespace BugEngine
 {
 
