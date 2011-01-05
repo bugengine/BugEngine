@@ -11,37 +11,21 @@ namespace BugEngine
 {
 
 Semaphore::Semaphore(int initialCount, int maxCount)
-:   m_data(0)
+:   m_data(new sem_t)
 {
-    static unsigned int s_semId = 0;
-    minitl::format<> name = minitl::format<>("/bugengine/%d/%d") | 0 | s_semId++; // TODO: process ID
-    m_data = sem_open(name, O_CREAT|O_EXCL, 0770, initialCount);
-    if (m_data == SEM_FAILED)
-    {
-        be_error("sem_open returned 0");
-        perror("");
-    }
+    sem_init(reinterpret_cast<sem_t*>(m_data), 0, initialCount);
 }
 
 Semaphore::~Semaphore()
 {
-    int result = sem_close(reinterpret_cast<sem_t*>(m_data));
-    if (result)
-    {
-        be_error("sem_close returned %d" | result);
-    }
+    sem_destroy(reinterpret_cast<sem_t*>(m_data));
+    delete reinterpret_cast<sem_t*>(m_data);
 }
 
 void Semaphore::release(int count)
 {
     for(int i = 0; i < count; ++i)
-    {
-        int result = sem_post(reinterpret_cast<sem_t*>(m_data));
-        if (result)
-        {
-            be_error("sem_post returned %d" | result);
-        }
-    }
+        sem_post(reinterpret_cast<sem_t*>(m_data));
 }
 
 Threads::Waitable::WaitResult Semaphore::wait()
@@ -53,8 +37,6 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
     else
     {
-        be_error("sem_wait returned %d" | result);
-        perror("sem_wait");
         be_notreached();
         return Abandoned;
     }
@@ -62,3 +44,5 @@ Threads::Waitable::WaitResult Semaphore::wait()
 
 
 }
+
+
