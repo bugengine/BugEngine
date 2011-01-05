@@ -181,9 +181,9 @@ void Renderer::createContextAsync(void*)
     return createContext(&params);
 }
 
-void Renderer::destroyContextAsync(void* params)
+void Renderer::destroyContextAsync()
 {
-    return destroyContext(params);
+    return destroyContext();
 }
 
 }}}

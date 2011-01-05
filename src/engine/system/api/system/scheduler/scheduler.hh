@@ -47,7 +47,8 @@ private:
     minitl::vector<Worker*>                     m_workers;
     Semaphore                                   m_synchro;
     Semaphore                                   m_mainThreadSynchro;
-    minitl::pool<char[128]>                     m_taskPool;
+    struct Buffer { char buffer[128]; };
+    minitl::pool<Buffer>                        m_taskPool;
     unsigned int                                m_frameCount;
     Timer                                       m_timer;
     Event                                       m_end;

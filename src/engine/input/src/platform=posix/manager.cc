@@ -36,6 +36,7 @@ Manager::WindowCommunication& Manager::WindowCommunication::getCommunication()
 Manager::Manager()
 :   m_communication(WindowCommunication::getCommunication())
 ,   m_inputThread("Input", &Manager::waitInput, 0, 0, Thread::Critical, false)
+,   m_devices(inputArena())
 {
 }
 

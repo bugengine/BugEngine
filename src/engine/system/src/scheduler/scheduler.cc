@@ -104,7 +104,7 @@ void  Scheduler::release_task(void* task, size_t size)
     if(size > 128)
         delete[] (char*)task;
     else
-        m_taskPool.release((char(*)[128])task);
+        m_taskPool.release((Buffer*)task);
 }
 
 Scheduler::Scheduler()
