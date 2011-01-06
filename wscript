@@ -63,7 +63,7 @@ def build(bld):
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet]
+	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, lua]
 	discworld.post(bld)
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')

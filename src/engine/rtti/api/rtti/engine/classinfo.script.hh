@@ -17,8 +17,8 @@ class PropertyInfo;
 class MethodInfo;
 class Namespace;
 
-class ClassInfo : public minitl::refcountable
-                , public minitl::intrusive_list<const ClassInfo>::item
+class be_api(RTTI) ClassInfo : public minitl::refcountable
+                             , public minitl::intrusive_list<const ClassInfo>::item
 {
     friend struct BugEngine::TypeInfo;
     friend class Namespace;

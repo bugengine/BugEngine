@@ -113,19 +113,6 @@ void TypeInfo::destroy(void* ptr) const
     }
 }
 
-const RTTI::PropertyInfo* TypeInfo::property(const char *name) const
-{
-    for(ref<const RTTI::ClassInfo> klass = metaclass; klass != 0; klass = klass->parent)
-    {
-        /*for(size_t i = 0; i < klass->propertyCount; ++i)
-        {
-            if(strcmp(name, klass->properties.m_ptr[i].name.m_ptr) == 0)
-                return &klass->properties.m_ptr[i];
-        }*/
-    }
-    return 0;
-}
-
 }
 /*
 #include <rtti/value.hh>
