@@ -17,13 +17,21 @@ namespace BugEngine { namespace RTTI
 class PropertyInfo : public minitl::refcountable
 {
 public:
-    const istring   name;
-    const TypeInfo  type;
-    PropertyInfo(const istring& name, const TypeInfo& type);
-    ~PropertyInfo();
+    enum PropertyFlags
+    {
+        Get,
+        Set,
+        GetSet
+    };
 public:
-    Value                   (*get)(Value& object);
-    void                    (*set)(Value& object, Value& value);
+    const TypeInfo      type;
+    const PropertyFlags flags;
+public:
+    PropertyInfo(const TypeInfo& type, PropertyFlags flags = GetSet);
+    ~PropertyInfo();
+
+    virtual Value get(Value& object) const;
+    virtual void  set(Value& object, Value& value) const;
 };
 
 }}

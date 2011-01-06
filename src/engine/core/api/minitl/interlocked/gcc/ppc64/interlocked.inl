@@ -10,7 +10,7 @@ namespace minitl { namespace interlocked_impl
 
 template< unsigned size >
 struct InterlockedType;
-	
+
 template<>
 struct InterlockedType<8>
 {
@@ -71,14 +71,14 @@ struct InterlockedType<8>
         fetch_and_set(p, v);
         return v;
     }
-	
+
     struct tagged_t
     {
         typedef long        value_t;
         typedef value_t     tag_t;
         
         BE_SET_ALIGNMENT(4) volatile value_t     m_value;
-		
+
         tagged_t(long value = 0)
         :   m_value(value)
         {
@@ -120,7 +120,7 @@ struct InterlockedType<8>
         return result;
     }
 };
-	
+
 template<>
 struct InterlockedType<4>
 {

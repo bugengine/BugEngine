@@ -44,8 +44,8 @@ class Root(Container):
 		file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
 		index = Container.dump(self, file, namespace, index)
 		file.write("namespace BugEngine {\n\n")
-		#for fullname,classname in self.classes:
-		#	file.write("    template< > const RTTI::ClassInfo* const be_typeid< %s >::klass = &%s;\n" % (fullname, classname))
+		for fullname,classname in self.classes:
+			file.write("    template< > ref<const RTTI::ClassInfo> const be_typeid< %s >::klass() { return %s(); }\n" % (fullname, classname))
 		file.write("}\n")
 		return index
 
@@ -58,10 +58,10 @@ class Namespace(Container):
 		Container.__init__(self, parent, name, line)
 
 	def dump(self, file, namespace, index):
-		#file.write("#line %d\n" % self.line)
-		#file.write("namespace %s {\n\n" % self.name)
+		file.write("#line %d\n" % self.line)
+		file.write("namespace %s {\n" % self.name)
 		index = Container.dump(self, file, namespace + '::' + self.name, index)
-		#file.write("}\n")
+		file.write("}\n")
 		self.parent.classes += self.classes
 		return index
 
@@ -73,11 +73,9 @@ class Enum(Container):
 		file.write("")
 		decl = "enum%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
-		#file.write("#line %d\n" % (self.line))
-		#file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
-		#file.write("#line %d\n" % (self.line))
-		#file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< void >::klass }, { 0 }, { 0 }, { 0 }, sizeof(%s), 0, { 0 } };\n" % (decl, decl, self.fullname))
-		#file.write("    static const ::BugEngine::RTTI::ClassInfoRegistration s_%sClassRegistration (&s_%sClass);\n" % (decl, decl))
+		file.write("#line %d\n" % (self.line))
+		file.write("    static inline ref<::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
+		file.write("    { static ref<::BugEngine::RTTI::ClassInfo> klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s)); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
@@ -91,6 +89,9 @@ class Class(Container):
 		file.write("")
 		decl = "class%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
+		file.write("#line %d\n" % (self.line))
+		file.write("    static inline ref<::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
+		file.write("    { static ref<::BugEngine::RTTI::ClassInfo> klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< %s >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s)); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.inherits, self.fullname))
 		if self.members:
 			#file.write("#line %d\n" % (self.line))
 			#file.write("    static const ::BugEngine::RTTI::PropertyInfo s_%sProperties[] = {\n" % decl)
@@ -105,14 +106,6 @@ class Class(Container):
 			#file.write("    };\n")
 			props = "s_%sProperties" % decl
 			propCount = "(sizeof(s_%sProperties)/sizeof(s_%sProperties[0]))" % (decl, decl)
-		else:
-			props = "0"
-			propCount = 0
-		#file.write("#line %d\n" % (self.line))
-		#file.write("    static const char * const s_%sName = \"%s\";\n" % (decl, self.fullname))
-		#file.write("#line %d\n" % (self.line))
-		#file.write("    static const ::BugEngine::RTTI::ClassInfo s_%sClass = { { s_%sName }, { ::BugEngine::be_typeid< %s >::klass }, { 0 }, { 0 }, { 0 }, sizeof(%s), %s, { %s } };\n" % (decl, decl, self.inherits, self.fullname, propCount, props))
-		#file.write("    static const ::BugEngine::RTTI::ClassInfoRegistration s_%sClassRegistration (&s_%sClass);\n" % (decl, decl))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index

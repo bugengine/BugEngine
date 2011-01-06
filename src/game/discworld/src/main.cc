@@ -16,7 +16,8 @@
 
 #include    <mobile/world.hh>
 
-#include    <rtti/namespace.hh>
+#include    <rtti/namespace.script.hh>
+#include    <rtti/typeinfo.hh>
 
 /*---------------------------------------------------------------------------*/
 int be_main(weak<BugEngine::Application> app)
@@ -25,6 +26,7 @@ int be_main(weak<BugEngine::Application> app)
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
     ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::rttiArena());
+    root->registerClassRoot(BugEngine::be_typeid<void>::klass());
 
     //BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
     //p->doFile("data/scripts/main.lua");

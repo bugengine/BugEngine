@@ -8,33 +8,17 @@
 
 namespace BugEngine
 {
-/*
-namespace Builtin
+
+template< > ref<const RTTI::ClassInfo> const be_typeid< void >::klass()
 {
-    static const char *const s_voidName = "void";
-    static const RTTI::ClassInfo s_voidClass =  { { s_voidName }, { &s_voidClass }, {0}, {0}, {0}, 0, 0, {0} };
-};
-template< > const RTTI::ClassInfo* const be_typeid<void>::klass = &Builtin::s_voidClass;
+    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), sizeof(minitl::refcountable));
+    return klass;
+}
 
-#define BE_MAKE_BUILTIN_TYPE(type_)                                                                 \
-namespace Builtin                                                                                   \
-{                                                                                                   \
-    static const char *const s_##type_##Name = #type_;                                              \
-    static const RTTI::ClassInfo s_##type_##Class =                                                 \
-        { {s_##type_##Name}, {&s_voidClass}, {0}, {0}, {0},                                         \
-        sizeof(type_), 0, { 0 } };                                                                  \
-        static const RTTI::ClassInfoRegistration s_##type_##ClassRegistration(& s_##type_##Class);  \
-};                                                                                                  \
-    template< > const RTTI::ClassInfo* const be_typeid<type_>::klass = &Builtin::s_##type_##Class;  \
+template< > ref<const RTTI::ClassInfo> const be_typeid< ::minitl::refcountable >::klass()
+{
+    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("minitl.refcountable"), be_typeid< void >::klass(), ref<RTTI::ClassInfo>(), sizeof(minitl::refcountable));
+    return klass;
+}
 
-BE_MAKE_BUILTIN_TYPE(char);
-BE_MAKE_BUILTIN_TYPE(u8);
-BE_MAKE_BUILTIN_TYPE(u16);
-BE_MAKE_BUILTIN_TYPE(u32);
-BE_MAKE_BUILTIN_TYPE(u64);
-BE_MAKE_BUILTIN_TYPE(i8);
-BE_MAKE_BUILTIN_TYPE(i16);
-BE_MAKE_BUILTIN_TYPE(i32);
-BE_MAKE_BUILTIN_TYPE(i64);
-*/
 }

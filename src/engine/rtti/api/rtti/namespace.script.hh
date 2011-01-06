@@ -18,12 +18,18 @@ class Namespace : public minitl::refcountable
 {
     friend class ::BugEngine::Value;
 private:
-    raw<const ClassInfo>    m_classInfo;
+    class PropertyInfo;
+    friend class PropertyInfo;
+private:
+    ref<ClassInfo>  m_classInfo;
+private:
+    weak<Namespace> getOrCreateNamespace(const inamespace& name);
 public:
     Namespace();
     ~Namespace();
 
     void add(const istring name, Value value);
+    void registerClassRoot(weak<const ClassInfo> klass);
 };
 
 }}

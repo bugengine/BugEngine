@@ -26,8 +26,9 @@ protected:
     ~item();
     item(const item& other);
     item& operator=(const item& other);
-
+private:
     void insert(const T* after) const;
+protected:
     void unhook() const;
 };
 
@@ -340,7 +341,7 @@ typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, IN
 {
     while(first != last)
     {
-        item* i = first.m_iterator;
+        const item* i = first.m_iterator;
         ++first;
         i->unhook();
     }
@@ -378,7 +379,7 @@ void                                                        intrusive_list<T, IN
     iterator last = end();
     while(first != last)
     {
-        item* i = first.m_iterator;
+        const item* i = first.m_iterator;
         ++first;
         i->unhook();
     }

@@ -12,6 +12,13 @@ static inline bool operator==(TypeInfo t1, TypeInfo t2)
 {
     return t1.metaclass == t2.metaclass && t1.type == t2.type && t1.constness == t2.constness;
 }
+static inline bool operator<=(TypeInfo t1, TypeInfo t2)
+{
+    return     (t1.type & TypeInfo::ConstMask) == (t2.type & TypeInfo::ConstMask)
+            && t1.type <= t2.type
+            && t2.metaclass->isA(t1.metaclass)
+            && t1.constness <= t2.constness;
+}
 
 namespace RTTI
 {
@@ -82,10 +89,9 @@ struct RefType< raw<const T> >
 }
 
 template< typename T >
-const TypeInfo be_typeid< T >::type()
+TypeInfo be_typeid< T >::type()
 {
-    TypeInfo i = { { be_typeid<typename RTTI::RefType<T>::Type>::klass }, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness) };
-    return i;
+    return TypeInfo(be_typeid<typename RTTI::RefType<T>::Type>::klass(), TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness));
 }
 
 }

@@ -64,8 +64,8 @@ public:
     const istring& operator[](size_t index) const;
 
     void push_back(const istring& component);
-    void pop_back();
-    void pop_front();
+    istring pop_back();
+    istring pop_front();
 
     bool operator==(const igenericnamespace& other) const;
     bool operator!=(const igenericnamespace& other) const;

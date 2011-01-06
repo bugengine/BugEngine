@@ -13,18 +13,21 @@ struct TypeInfo
 {
     enum Type
     {
-        Class,
-        RefPtr,
-        ConstRefPtr,
-        WeakPtr,
-        ConstWeakPtr,
-        RawPtr,
-        ConstRawPtr
+        ConstMask       = 0xF,
+        ConstBit        = 0x10,
+
+        Class           = 0,
+        ConstRefPtr     = 1,
+        ConstWeakPtr    = 2,
+        ConstRawPtr     = 3,
+        RefPtr          = ConstRefPtr | ConstBit,
+        WeakPtr         = ConstWeakPtr | ConstBit,
+        RawPtr          = ConstRawPtr | ConstBit,
     };
     enum Constness
     {
-        Mutable,
-        Const
+        Mutable = 0,
+        Const = 1
     };
 
     ref<const RTTI::ClassInfo> const    metaclass;

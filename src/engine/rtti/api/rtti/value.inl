@@ -11,6 +11,14 @@
 namespace BugEngine
 {
 
+Value::Value()
+:   m_type(be_typeid<void>::type())
+,   m_pointer(0)
+,   m_deallocate(0)
+,   m_reference(false)
+{
+}
+
 template< typename T >
 Value::Value(T t)
 :   m_type(be_typeid<T>::type())
@@ -18,6 +26,17 @@ Value::Value(T t)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
+    m_type.copy(&t, memory());
+}
+
+template< typename T >
+Value::Value(T t, TypeInfo typeinfo)
+:   m_type(typeinfo)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
+,   m_deallocate(m_pointer != 0)
+,   m_reference(false)
+{
+    //be_assert(typeinfo >= be_typeid<T>::type());
     m_type.copy(&t, memory());
 }
 
@@ -106,7 +125,7 @@ template< typename T >
 T& Value::as()
 {
     be_assert(minitl::is_const<T>::Value || (m_type.constness != TypeInfo::Const), "Value is const");
-    be_assert(be_typeid<T>::type().metaclass == m_type.metaclass, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type().name());
+    be_assert(be_typeid<T>::type()<=m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type().name());
     return *(T*)memory();
 }
 
