@@ -20,7 +20,7 @@ struct hashIstring
 {
     bool operator()(const char *str1, const char *str2)
     {
-        return strcmp(str1, str2) <= 0;
+        return strcmp(str1, str2) < 0;
     }
 };
 
@@ -59,7 +59,7 @@ private:
     mutable i_u32  m_refCount;
     size_t  m_hash;
     size_t  m_length;
-#   ifndef  NDEBUG
+#   ifdef  BE_DEBUG
     size_t  m_gard;
 #   endif
 private:
@@ -67,7 +67,7 @@ private:
         m_refCount(0),
         m_hash(_hash),
         m_length(len)
-#   ifndef  NDEBUG
+#   ifdef  BE_DEBUG
         ,m_gard(0xDEADBEEF)
 #   endif
     {
@@ -142,34 +142,25 @@ StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    try
+    static StringIndex g_strings(stringArena());
+    StringIndex::iterator it = g_strings.find(val);
+    if(it != g_strings.end())
     {
-        static StringIndex g_strings(stringArena());
-        StringIndex::iterator it = g_strings.find(val);
-        if(it != g_strings.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            size_t len = strlen(val);
-            StringCache* cache = getBuffer()->reserve(len);
-            char *data = (char*)cache + sizeof(StringCache);
-
-            size_t hashval = minitl::str_hash(val,len);
-            (void)(new(cache) StringCache(hashval, len));
-            strcpy(data, val);
-
-            std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
-            return cache;
-        }
+        return it->second;
     }
-    catch(...)
+    else
     {
-        be_notreached();
-        exit(1);
-    }
+        size_t len = strlen(val);
+        StringCache* cache = getBuffer()->reserve(len);
+        char *data = (char*)cache + sizeof(StringCache);
 
+        size_t hashval = minitl::str_hash(val,len);
+        (void)(new(cache) StringCache(hashval, len));
+        strcpy(data, val);
+
+        std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
+        return cache;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -358,16 +349,19 @@ void igenericnamespace::push_back(const istring& component)
     m_namespace[m_size++] = component;
 }
 
-void igenericnamespace::pop_back()
+istring igenericnamespace::pop_back()
 {
-    m_size --;
+    --m_size;
+    return m_namespace[m_size];
 }
 
-void igenericnamespace::pop_front()
+istring igenericnamespace::pop_front()
 {
+    istring i = m_namespace[0];
     for(size_t i = 1; i < m_size; ++i)
         m_namespace[i-1] = m_namespace[i];
     m_size--;
+    return i;
 }
 
 bool igenericnamespace::operator==(const igenericnamespace& other) const

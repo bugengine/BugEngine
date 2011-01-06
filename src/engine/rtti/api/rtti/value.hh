@@ -39,9 +39,10 @@ private:
         explicit ByRefType(T& t) : value(t) { }
     };
 public:
+    inline Value();
     template< typename T > explicit inline Value(T t);
+    template< typename T > explicit inline Value(T t, TypeInfo typeinfo);
     inline Value(const Value& other);
-    inline Value(RTTI::Namespace& ns);
     template< typename T > explicit inline Value(ByRefType<T> t);
     inline ~Value();
 

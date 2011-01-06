@@ -3,18 +3,31 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
-PropertyInfo::PropertyInfo(const istring& name, const TypeInfo& type)
-    :   name(name)
-    ,   type(type)
+PropertyInfo::PropertyInfo(const TypeInfo& type, PropertyFlags flags)
+    :   type(type)
+    ,   flags(flags)
 {
 }
 
 PropertyInfo::~PropertyInfo()
 {
 }
+
+Value PropertyInfo::get(Value& object) const
+{
+    be_notreached();
+    return Value();
+}
+
+void PropertyInfo::set(Value& object, Value& value) const
+{
+    be_notreached();
+}
+
 
 }}

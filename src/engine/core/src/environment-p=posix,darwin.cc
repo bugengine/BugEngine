@@ -33,14 +33,14 @@ void Environment::init(int argc, const char *argv[])
         filename--;
     }
     m_game = filename+1;
-	filename--;
+    filename--;
     while(*filename != '/' && filename != argv[0])
     {
         filename--;
     }
-	m_dataDirectory = ipath(argv[0], filename);
-	m_dataDirectory += "share";
-	m_dataDirectory += "bugengine";
+    m_dataDirectory = ipath(argv[0], filename);
+    m_dataDirectory += "share";
+    m_dataDirectory += "bugengine";
 }
 
 Environment::~Environment()

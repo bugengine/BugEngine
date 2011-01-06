@@ -911,9 +911,9 @@ def p_method(t):
 
 def p_constructor(t):
 	"""
+		method : type LPAREN RPAREN method_modifier_right
 		method : type LPAREN params_list RPAREN method_modifier_right
 		method : NOT ID LPAREN params_list RPAREN method_modifier_right
-		method : namelist ID LPAREN params_list RPAREN method_modifier_right
 		method : namelist NOT ID LPAREN params_list RPAREN method_modifier_right
 	"""
 	pass

@@ -16,8 +16,8 @@ template< typename T >
 struct hash;
 
 
-template< typename Key, typename Value, typename Hash = minitl::hash<Key> >
-class hashmap : public std::map<Key, Value>
+template< typename Key, typename Value, typename Hash = std::less<Key> >
+class hashmap : public std::map<Key, Value, Hash>
 {
 public:
     hashmap(BugEngine::Allocator& allocator, size_type reserved = 0);

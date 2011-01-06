@@ -21,7 +21,7 @@ private:
 public:
     static Environment& getEnvironment();
 
-	void init(int argc, const char *argv[]);
+    void init(int argc, const char *argv[]);
 
     const ipath&    getHomeDirectory() const;
     const ipath&    getDataDirectory() const;
