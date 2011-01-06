@@ -4,6 +4,8 @@
 #ifndef BE_RTTI_TYPEINFO_INL_
 #define BE_RTTI_TYPEINFO_INL_
 /*****************************************************************************/
+#include    <rtti/engine/classinfo.script.hh>
+
 
 namespace BugEngine
 {

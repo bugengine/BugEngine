@@ -153,11 +153,6 @@ const void* Value::memory() const
     }
 }
 
-inline Value Value::operator()(const char *prop)
-{
-    return Value(ByRef(m_type.property(prop)->get(*this)));
-}
-
 inline bool Value::isConst() const
 {
     return m_type.constness == TypeInfo::Const;

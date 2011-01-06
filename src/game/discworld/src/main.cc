@@ -17,7 +17,9 @@
 #include    <mobile/world.hh>
 
 #include    <rtti/namespace.script.hh>
+#include    <rtti/scripting.hh>
 #include    <rtti/typeinfo.hh>
+#include    <rtti/value.hh>
 
 /*---------------------------------------------------------------------------*/
 int be_main(weak<BugEngine::Application> app)
@@ -28,8 +30,8 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::rttiArena());
     root->registerClassRoot(BugEngine::be_typeid<void>::klass());
 
-    //BugEngine::Plugin<BugEngine::Script> p("lua", filesystem);
-    //p->doFile("data/scripts/main.lua");
+    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root));
+    p->doFile("data/scripts/main.lua");
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);

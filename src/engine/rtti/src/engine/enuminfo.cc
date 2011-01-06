@@ -2,6 +2,7 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
+#include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/enuminfo.script.hh>
 
 namespace BugEngine { namespace RTTI

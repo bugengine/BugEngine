@@ -6,24 +6,17 @@
 #include    <context.h>
 
 #include    <core/memory/streams.hh>
-#include    <rtti/namespace.hh>
+#include    <rtti/namespace.script.hh>
 
 
 namespace BugEngine { namespace Lua
 {
 
-const luaL_Reg Context::s_refObjectMetaTable[] = {
-    {"__gc",        Context::objectGC<ref>},
-    {"__tostring",  Context::objectToString<ref>},
-    {"__index",     Context::objectGet<ref>},
-    {"__call",      Context::objectCall<ref>},
-    {0, 0}
-};
-const luaL_Reg Context::s_weakObjectMetaTable[] = {
-    {"__gc",        Context::objectGC<weak>},
-    {"__tostring",  Context::objectToString<weak>},
-    {"__index",     Context::objectGet<weak>},
-    {"__call",      Context::objectCall<weak>},
+const luaL_Reg Context::s_valueMetaTable[] = {
+    {"__gc",        Context::valueGC},
+    {"__tostring",  Context::valueToString},
+    {"__index",     Context::valueGet},
+    {"__call",      Context::valueCall},
     {0, 0}
 };
 
@@ -64,27 +57,25 @@ static const luaL_Reg base_funcs[] = {
 
 void* Context::luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize)
 {
-    UNUSED(ud);
-    UNUSED(osize);
     if(nsize)
     {
         if(osize)
         {
-            return Malloc::internalRealloc(ptr, nsize, 16);
+            return rttiArena().realloc(ptr, nsize, 16);
         }
         else
         {
-            return Malloc::internalAlloc(nsize, 16);
+            return rttiArena().alloc(nsize, 16);
         }
     }
     else
     {
-        Malloc::internalFree(ptr);
+        rttiArena().free(ptr);
         return 0;
     }
 }
 
-Context::Context(weak<const FileSystem> filesystem)
+Context::Context(weak<const FileSystem> filesystem, Value root)
 :   m_state(lua_newstate(&Context::luaAlloc, 0))
 ,   m_filesystem(filesystem)
 {
@@ -95,10 +86,9 @@ Context::Context(weak<const FileSystem> filesystem)
     luaopen_debug(m_state);
 
     luaL_register(m_state, "_G", base_funcs);
-    luaL_register(m_state, "bugrefobject", s_refObjectMetaTable);
-    luaL_register(m_state, "bugweakobject", s_weakObjectMetaTable);
+    luaL_register(m_state, "bugvalue", s_valueMetaTable);
 
-    push(m_state, ref<Object>(RTTI::Namespace::root()));
+    push(m_state, root);
     lua_setglobal(m_state, "BugEngine");
     lua_pop(m_state, 1);
 }
@@ -125,22 +115,14 @@ void Context::doFile(weak<IMemoryStream> file)
     be_assert(result == 0, lua_tostring(m_state, -1));
 }
 
-void Context::push(lua_State* state, ref<Object> o)
+void Context::push(lua_State* state, const Value& v)
 {
-    void* userdata = lua_newuserdata(state, sizeof(ref<Object>));
-    new(userdata) ref<Object>(o);
-    lua_getglobal(state, "bugrefobject");
+    void* userdata = lua_newuserdata(state, sizeof(Value));
+    new(userdata) Value(v);
+    lua_getglobal(state, "bugvalue");
     lua_setmetatable(state, -2);
 }
-
-void Context::push(lua_State* state, weak<Object> o)
-{
-    void* userdata = lua_newuserdata(state, sizeof(weak<Object>));
-    new(userdata) weak<Object>(o);
-    lua_getglobal(state, "bugweakobject");
-    lua_setmetatable(state, -2);
-}
-
+/*
 void Context::push(lua_State* state, const Value& v)
 {
     switch(v.type())
@@ -171,7 +153,7 @@ void Context::push(lua_State* state, const Value& v)
         be_unimplemented();
         break;
     }
-}
+}*/
 
 Value Context::get(lua_State *state, int index)
 {
@@ -180,33 +162,24 @@ Value Context::get(lua_State *state, int index)
     {
     case LUA_TSTRING:
         {
-            return Value(std::string(lua_tostring(state, index)));
+            return Value(); //std::string(lua_tostring(state, index))
         }
     case LUA_TBOOLEAN:
         {
-            return Value(lua_toboolean(state, index)?true:false);
+            return Value(); //lua_toboolean(state, index)?true:false);
         }
     case LUA_TNUMBER:
         {
-            return Value(double(lua_tonumber(state, index)));
+            return Value(); //double(lua_tonumber(state, index)));
         }
     case LUA_TUSERDATA:
         {
             lua_getmetatable(state, index);
-            lua_getglobal(state, "bugrefobject");
+            lua_getglobal(state, "bugvalue");
             if(lua_rawequal(state, -1, -2))
             {
                 lua_pop(state, 2);
-                ref<Object>* robject = (ref<Object>*)lua_touserdata(state, index);
-                return Value(*robject);
-            }
-            lua_pop(state, 1);
-            lua_getglobal(state, "bugweakobject");
-            if(lua_rawequal(state, -1, -2))
-            {
-                lua_pop(state, 2);
-                weak<Object>* wobject = (weak<Object>*)lua_touserdata(state, index);
-                return Value(*wobject);
+                return *(Value*)lua_touserdata(state, index);
             }
             else
             {
@@ -220,33 +193,25 @@ Value Context::get(lua_State *state, int index)
     }
 }
 
-template< template< typename > class ptr >
-int Context::objectGC(lua_State *state)
+int Context::valueGC(lua_State *state)
 {
-    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -1);
-    userdata->~ptr<Object>();
+    Value* userdata = (Value*)lua_touserdata(state, -1);
+    userdata->~Value();
     return 0;
 }
 
-template< template< typename > class ptr >
-int Context::objectToString(lua_State *state)
+int Context::valueToString(lua_State *state)
 {
-    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -1);
-    lua_pushfstring(state, "[%s object @0x%p]", (*userdata)->metaclass()->name().c_str(), (*userdata).operator->());
+    Value* userdata = (Value*)lua_touserdata(state, -1);
+    lua_pushfstring(state, "[%s object @0x%p]", userdata->type().name(), userdata);
     return 1;
 }
 
-template< template< typename > class ptr >
-int Context::objectGet(lua_State *state)
+int Context::valueGet(lua_State *state)
 {
-    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, -2);
-    if(!*userdata)
-    {
-        lua_pushnil(state);
-        return 1;
-    }
+    Value* userdata = (Value*)lua_touserdata(state, -2);
     const char *name = lua_tostring(state, -1);
-    weak<const RTTI::Property> p = (*userdata)->metaclass()->getProperty(name);
+    weak<const RTTI::PropertyInfo> p = userdata->type().metaclass->getProperty(name);
     if(!p)
     {
         lua_pushnil(state);
@@ -257,10 +222,9 @@ int Context::objectGet(lua_State *state)
     return 1;
 }
 
-template< template< typename > class ptr >
-int Context::objectCall(lua_State *state)
+int Context::valueCall(lua_State *state)
 {
-    int i;
+    /*int i;
     int top = lua_gettop(state);
     ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, 1);
 
@@ -293,7 +257,8 @@ int Context::objectCall(lua_State *state)
     else
     {
         return 0;
-    }
+    }*/
+    return 0;
 }
 
 void Context::printStack(lua_State* l)
@@ -320,8 +285,8 @@ void Context::printStack(lua_State* l)
             break;
         case LUA_TUSERDATA:
             {
-                Object** userdata = (Object**)lua_touserdata(l, -i);
-                printf("object : [%s object @0x%p]\n", (*userdata)->metaclass()->name().c_str(), (*userdata));
+                Value* userdata = (Value*)lua_touserdata(l, -i);
+                printf("object : [%s object @0x%p]\n", userdata->type().name().c_str(), userdata);
             }
             break;
         default:

@@ -14,7 +14,7 @@ class Value;
 namespace BugEngine { namespace RTTI
 {
 
-class PropertyInfo : public minitl::refcountable
+class be_api(RTTI) PropertyInfo : public minitl::refcountable
 {
 public:
     enum PropertyFlags

@@ -123,8 +123,38 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         else
         {
             DWORD sizehigh;
-            HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, fullname.c_str());
+            HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, 0);
+            if(!filemap)
+            {
+                char *errorMessage = 0;
+                int errorCode = ::GetLastError();
+                FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                    NULL,
+                    errorCode,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    reinterpret_cast<LPSTR>(&errorMessage),
+                    0,
+                    NULL);
+                errorCode = ::GetLastError();
+                be_error("%s : %s"|fullname|errorMessage);
+                ::LocalFree(errorMessage);
+            }
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
+            if(!memory)
+            {
+                char *errorMessage = 0;
+                int errorCode = ::GetLastError();
+                FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                    NULL,
+                    errorCode,
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    reinterpret_cast<LPSTR>(&errorMessage),
+                    0,
+                    NULL);
+                errorCode = ::GetLastError();
+                be_error("%s : %s"|fullname|errorMessage);
+                ::LocalFree(errorMessage);
+            }
             return ref<MemoryFileMap>::create(gameArena(), memory, GetFileSize(file, &sizehigh), file, filemap);
         }
     }
