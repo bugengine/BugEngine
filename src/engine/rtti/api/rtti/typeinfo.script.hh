@@ -8,6 +8,8 @@
 namespace BugEngine
 {
 
+class Value;
+
 namespace RTTI
 {
 class ClassInfo;
@@ -16,9 +18,11 @@ class PropertyInfo;
 
 struct be_api(RTTI) TypeInfo
 {
+    friend class Value;
+
     enum Type
     {
-        ConstMask       = 0xF,
+        TypeMask        = 0xF,
         ConstBit        = 0x10,
 
         Class           = 0,
@@ -46,10 +50,11 @@ struct be_api(RTTI) TypeInfo
 
     u32                             size() const;
     minitl::format<>                name() const;
+private:
+    void*                           rawget(const void*) const;
     void                            copy(const void* source, void* dest) const;
     void                            create(void* obj) const;
     void                            destroy(void* obj) const;
-    weak<const RTTI::PropertyInfo>  property(const istring& prop) const;
 };
 
 

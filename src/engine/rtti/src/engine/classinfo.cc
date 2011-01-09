@@ -10,11 +10,12 @@
 namespace BugEngine { namespace RTTI
 {
 
-ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<const ClassInfo> metaclass, u32 size)
-    :   name(name)
+ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<ClassInfo> metaclass, u32 size, i32 offset)
+    :   Namespace(metaclass)
+    ,   name(name)
     ,   parent(parent)
-    ,   metaclass(metaclass)
     ,   size(size)
+    ,   offset(offset)
     ,   m_properties(rttiArena())
     ,   m_inTree(true)
 {
@@ -28,11 +29,12 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<co
     }
 }
 
-ClassInfo::ClassInfo(ref<const ClassInfo> parent)
-    :   name("anonymous")
+ClassInfo::ClassInfo(ref<const ClassInfo> parent, ref<ClassInfo> metaclass)
+    :   Namespace(metaclass)
+    ,   name("anonymous")
     ,   parent(parent)
-    ,   metaclass()
     ,   size(0)
+    ,   offset(0)
     ,   m_properties(rttiArena())
     ,   m_inTree(false)
 {

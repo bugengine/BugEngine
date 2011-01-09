@@ -8,26 +8,15 @@
 namespace BugEngine { namespace RTTI
 {
 
-PropertyInfo::PropertyInfo(const TypeInfo& type, PropertyFlags flags)
+PropertyInfo::PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from), void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value))
     :   type(type)
-    ,   flags(flags)
+    ,   get(get)
+    ,   set(set)
 {
 }
 
 PropertyInfo::~PropertyInfo()
 {
 }
-
-Value PropertyInfo::get(Value& object) const
-{
-    be_notreached();
-    return Value();
-}
-
-void PropertyInfo::set(Value& object, Value& value) const
-{
-    be_notreached();
-}
-
 
 }}

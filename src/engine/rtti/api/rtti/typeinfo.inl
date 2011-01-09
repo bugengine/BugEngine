@@ -16,7 +16,7 @@ static inline bool operator==(TypeInfo t1, TypeInfo t2)
 }
 static inline bool operator<=(TypeInfo t1, TypeInfo t2)
 {
-    return     (t1.type & TypeInfo::ConstMask) == (t2.type & TypeInfo::ConstMask)
+    return     (t1.type & TypeInfo::TypeMask) == (t2.type & TypeInfo::TypeMask)
             && t1.type <= t2.type
             && t2.metaclass->isA(t1.metaclass)
             && t1.constness <= t2.constness;

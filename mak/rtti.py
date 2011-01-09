@@ -14,12 +14,13 @@ class Container:
 		self.members = []
 		self.line = line
 		self.classes = []
+		self.visibility = 'public'
 
 	def addObject(self, object):
 		self.objects.append(object)
 
-	def addMember(self, type, name):
-		self.members.append((type, name))
+	def addMember(self, type, name, line):
+		self.members.append((type, name, self.visibility, line))
 
 	def dump(self, file, namespace, index):
 		for o in self.objects:
@@ -75,7 +76,7 @@ class Enum(Container):
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
 		file.write("#line %d\n" % (self.line))
 		file.write("    static inline ref<::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
-		file.write("    { static ref<::BugEngine::RTTI::ClassInfo> klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s)); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
+		file.write("    { static ref<::BugEngine::RTTI::ClassInfo> klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s), 0); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index
@@ -89,23 +90,22 @@ class Class(Container):
 		file.write("")
 		decl = "class%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl + "Class"))
-		file.write("#line %d\n" % (self.line))
 		file.write("    static inline ref<::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
-		file.write("    { static ref<::BugEngine::RTTI::ClassInfo> klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< %s >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s)); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.inherits, self.fullname))
-		if self.members:
-			#file.write("#line %d\n" % (self.line))
-			#file.write("    static const ::BugEngine::RTTI::PropertyInfo s_%sProperties[] = {\n" % decl)
-			index = 0
-			for type,name in self.members:
+		file.write("    {\n")
+		file.write("        static ref<::BugEngine::RTTI::ClassInfo> klass;\n")
+		file.write("        if(!klass)\n")
+		file.write("        {\n")
+		file.write("#line %d\n" % (self.line))
+		file.write("            klass = ref<::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< %s >::klass(), ref<::BugEngine::RTTI::ClassInfo>(), sizeof(%s), (i32)(ptrdiff_t)static_cast<%s*>((%s*)0));\n" % (self.fullname[2:].replace('::', '.'), self.inherits, self.fullname, self.inherits, self.fullname))
+		for type,name,visibility,line in self.members:
+			if visibility == 'be_published':
+				file.write("#line %d\n" % (line))
+				type = "::BugEngine::TypeInfo(::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass(), ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness))" % (type, type, type)
+				file.write("            klass->addProperty(\"%s\", ref<::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), %s));\n" % (name, type))
 				#file.write("        { { \"%s\" }, { { ::BugEngine::be_typeid< ::BugEngine::RTTI::RefType< %s >::Type >::klass } , ::BugEngine::TypeInfo::Type(::BugEngine::RTTI::RefType< %s >::Reference), ::BugEngine::TypeInfo::Constness(::BugEngine::RTTI::RefType< %s >::Constness) }, &::BugEngine::RTTI::get< %s, %s, &%s::%s >, &::BugEngine::RTTI::set< %s, %s, &%s::%s > }" % (name, type, type, type, type, self.fullname, self.fullname, name, type, self.fullname, self.fullname, name))
-				index += 1
-				#if index < len(self.members):
-				#	file.write(",\n")
-				#else:
-				#	file.write("\n")
-			#file.write("    };\n")
-			props = "s_%sProperties" % decl
-			propCount = "(sizeof(s_%sProperties)/sizeof(s_%sProperties[0]))" % (decl, decl)
+		file.write("        }\n");
+		file.write("    return klass;\n");
+		file.write("    }\n")
 		index = Container.dump(self, file, namespace, index+1)
 		self.parent.classes += self.classes
 		return index

@@ -30,13 +30,23 @@ Value::Value(T t)
 }
 
 template< typename T >
+Value::Value(T t, ref<const RTTI::ClassInfo> metaclass)
+:   m_type(TypeInfo(metaclass, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness)))
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
+,   m_deallocate(m_pointer != 0)
+,   m_reference(false)
+{
+    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
+    m_type.copy(&t, memory());
+}
+template< typename T >
 Value::Value(T t, TypeInfo typeinfo)
 :   m_type(typeinfo)
 ,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
-    //be_assert(typeinfo >= be_typeid<T>::type());
+    be_assert(be_typeid<T>::type() <= typeinfo, "specific typeinfo %s and typeid %s are not compatible" | typeinfo.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
@@ -90,12 +100,21 @@ Value::~Value()
 
 Value& Value::operator=(const Value& v)
 {
-    be_assert_recover(v.m_type.metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
-    be_assert_recover(m_type.constness != TypeInfo::Const, "Value is const", return *this);
-    void* mem = memory();
-    m_type.destroy(mem);
-    m_type.copy(v.memory(), mem);
-    return *this;
+    if(m_reference)
+    {
+        be_assert_recover(v.m_type.metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
+        be_assert_recover(m_type.constness != TypeInfo::Const, "Value is const", return *this);
+        void* mem = memory();
+        m_type.destroy(mem);
+        m_type.copy(v.memory(), mem);
+        return *this;
+    }
+    else
+    {
+        this->~Value();
+        new ((void*)this) Value(v);
+        return *this;
+    }
 }
 
 template< typename T >
@@ -153,9 +172,41 @@ const void* Value::memory() const
     }
 }
 
-inline bool Value::isConst() const
+bool Value::isConst() const
 {
     return m_type.constness == TypeInfo::Const;
+}
+
+Value::operator const void*() const
+{
+    return (const void*)(m_type.metaclass != be_typeid<void>::klass());
+}
+
+bool Value::operator!() const
+{
+    return m_type.metaclass == be_typeid<void>::klass();
+}
+
+void* Value::rawget() const
+{
+    return m_type.rawget(memory());
+}
+
+Value Value::operator[](const istring& name)
+{
+    void* data = rawget();
+    weak<const RTTI::ClassInfo> klass = m_type.metaclass;
+    weak<const RTTI::PropertyInfo> prop = klass->getProperty(name);
+    while(!prop)
+    {
+        data = (void*)((char*)data + klass->offset);
+        klass = klass->parent;
+        if(!klass)
+            return Value();
+        else
+            prop = klass->getProperty(name);
+    }
+    return prop->get(prop, data);
 }
 
 }

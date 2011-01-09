@@ -66,6 +66,27 @@ minitl::format<> TypeInfo::name() const
     }
 }
 
+void* TypeInfo::rawget(const void* data) const
+{
+    switch(type)
+    {
+    case Class:
+        return (void*)data;
+    case RawPtr:
+    case ConstRawPtr:
+        return *(void**)data;
+    case RefPtr:
+    case ConstRefPtr:
+        return ((ref<minitl::refcountable>*)data)->operator->();
+    case WeakPtr:
+    case ConstWeakPtr:
+        return ((weak<minitl::refcountable>*)data)->operator->();
+    default:
+        be_notreached();
+        return 0;
+    }
+}
+
 void TypeInfo::copy(const void* source, void* dest) const
 {
     switch(type)

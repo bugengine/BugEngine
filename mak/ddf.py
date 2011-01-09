@@ -20,7 +20,7 @@ reserved = (
 		'BE_PUBLISH',
 		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
 		'USING', 'NEW', 'DELETE',
-		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
+		'PUBLIC', 'PROTECTED', 'PRIVATE', 'BE_PUBLISHED', 'FRIEND',
 		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
 		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
 		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW'
@@ -565,7 +565,7 @@ def p_variable_decl(t):
 	"""
 		decl : type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	t.parser.namespace.addMember(t[1]+t[3], t[2])
+	t.parser.namespace.addMember(t[1]+t[3], t[2], t.lineno(6))
 
 def p_variable_decl_2(t):
 	"""
@@ -575,7 +575,7 @@ def p_variable_decl_2(t):
 		pass
 		#t.parser.namespace.meta.addMember(t[1]+t[3], t[2])
 	else:
-		t.parser.namespace.addMember(t[1]+t[3], t[2])
+		t.parser.namespace.addMember(t[2]+t[4], t[3], t.lineno(7))
 
 ###################################
 # Value
@@ -768,6 +768,7 @@ def p_visibility(t):
 		visibility : PUBLIC
 		visibility : PROTECTED
 		visibility : PRIVATE
+		visibility : BE_PUBLISHED
 	"""
 	t[0] =t[1]
 
@@ -785,7 +786,7 @@ def p_declare_visibility(t):
 	"""
 		decl : visibility COLON
 	"""
-	pass
+	t.parser.namespace.visibility = t[1]
 
 ###################################
 # parent
@@ -808,7 +809,7 @@ def p_extra_parents(t):
 		extra_parents : COMMA visibility_opt name extra_parents
 	"""
 	if len(t) > 1:
-		if t[2] == 'PUBLIC':
+		if t[2] == 'public':
 			t[0] = t[3]
 		else:
 			t[0] = t[4]
@@ -818,13 +819,25 @@ def p_extra_parents(t):
 
 ###################################
 # class
-def p_struct_or_class(t):
+def p_struct_kw(t):
 	"""
-		class : CLASS
-		class : STRUCT
-		class : UNION
+		struct : STRUCT
+		struct : UNION
 	"""
 	pass
+	
+def p_class_kw(t):
+	"""
+		class : CLASS
+	"""
+	pass
+
+def p_struct_header(t):
+	"""
+		struct_header : name_opt parent_opt LBRACE
+	"""
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3))
+	t.parser.namespace.visibility = 'be_published'
 
 def p_class_header(t):
 	"""
@@ -834,14 +847,16 @@ def p_class_header(t):
 
 def p_class(t):
 	"""
-		simple_type :	class class_header decls RBRACE
+		simple_type : class class_header decls RBRACE
+		simple_type : struct struct_header decls RBRACE
 	"""
 	t[0] = t.parser.namespace.fullname
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_decl(t):
 	"""
-		simple_type :	class name
+		simple_type : class name
+		simple_type : struct name
 	"""
 	t[0] = rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname
 

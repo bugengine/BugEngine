@@ -12,6 +12,7 @@ namespace BugEngine
 namespace RTTI
 {
 class Namespace;
+class ClassInfo;
 }
 
 class Value
@@ -31,6 +32,7 @@ private:
 private:
     inline void* memory();
     inline const void* memory() const;
+    inline void* rawget() const;
 private:
     template< typename T >
     struct ByRefType
@@ -41,6 +43,7 @@ private:
 public:
     inline Value();
     template< typename T > explicit inline Value(T t);
+    template< typename T > explicit inline Value(T t, ref<const RTTI::ClassInfo> metaclass);
     template< typename T > explicit inline Value(T t, TypeInfo typeinfo);
     inline Value(const Value& other);
     template< typename T > explicit inline Value(ByRefType<T> t);
@@ -57,6 +60,11 @@ public:
     template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
     template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }
     inline bool isConst() const;
+
+    inline operator const void*() const;
+    inline bool operator!() const;
+
+    inline Value operator[](const istring& name);
 };
 
 }

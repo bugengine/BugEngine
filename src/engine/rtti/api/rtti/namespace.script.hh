@@ -4,7 +4,6 @@
 #ifndef BE_RTTI_NAMESPACE_HH_
 #define BE_RTTI_NAMESPACE_HH_
 /*****************************************************************************/
-#include    <rtti/engine/classinfo.script.hh>
 
 namespace BugEngine
 {
@@ -14,16 +13,20 @@ class Value;
 namespace BugEngine { namespace RTTI
 {
 
+class ClassInfo;
+
 class Namespace : public minitl::refcountable
 {
     friend class ::BugEngine::Value;
 private:
-    class PropertyInfo;
-    friend class PropertyInfo;
+    class MetaPropertyInfo;
+    friend class MetaPropertyInfo;
+public:
+    ref<ClassInfo> const    metaclass;
 private:
-    ref<ClassInfo>  m_classInfo;
-private:
-    weak<Namespace> getOrCreateNamespace(const inamespace& name);
+    weak<const Namespace> getOrCreateNamespace(const inamespace& name);
+protected:
+    Namespace(ref<ClassInfo> metaclass);
 public:
     Namespace();
     ~Namespace();
