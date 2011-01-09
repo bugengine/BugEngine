@@ -11,14 +11,13 @@ namespace BugEngine
 
 template< > ref<const RTTI::ClassInfo> const be_typeid< void >::klass()
 {
-    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), sizeof(minitl::refcountable));
+    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
     return klass;
 }
 
 template< > ref<const RTTI::ClassInfo> const be_typeid< ::minitl::refcountable >::klass()
 {
-    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("minitl.refcountable"), be_typeid< void >::klass(), ref<RTTI::ClassInfo>(), sizeof(minitl::refcountable));
-    return klass;
+    return  be_typeid< void >::klass();
 }
 
 }

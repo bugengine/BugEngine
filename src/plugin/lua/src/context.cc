@@ -89,7 +89,7 @@ Context::Context(weak<const FileSystem> filesystem, Value root)
     luaL_register(m_state, "bugvalue", s_valueMetaTable);
 
     push(m_state, root);
-    lua_setglobal(m_state, "BugEngine");
+    lua_setglobal(m_state, "engine");
     lua_pop(m_state, 1);
 }
 
@@ -211,13 +211,12 @@ int Context::valueGet(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -2);
     const char *name = lua_tostring(state, -1);
-    weak<const RTTI::PropertyInfo> p = userdata->type().metaclass->getProperty(name);
-    if(!p)
+    Value v = (*userdata)[name];
+    if(!v)
     {
         lua_pushnil(state);
         return 1;
     }
-    Value v = p->get(*userdata);
     push(state, v);
     return 1;
 }

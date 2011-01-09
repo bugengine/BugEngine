@@ -16,22 +16,15 @@ namespace BugEngine { namespace RTTI
 
 class be_api(RTTI) PropertyInfo : public minitl::refcountable
 {
-public:
-    enum PropertyFlags
-    {
-        Get,
-        Set,
-        GetSet
-    };
+    friend class Value;
 public:
     const TypeInfo      type;
-    const PropertyFlags flags;
 public:
-    PropertyInfo(const TypeInfo& type, PropertyFlags flags = GetSet);
-    ~PropertyInfo();
-
-    virtual Value get(Value& object) const;
-    virtual void  set(Value& object, Value& value) const;
+    PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from) = 0, void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value) = 0);
+    virtual ~PropertyInfo();
+private:
+    Value (*get)(weak<const PropertyInfo> _this, void* from);
+    void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value);
 };
 
 }}

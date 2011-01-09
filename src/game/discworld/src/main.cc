@@ -30,7 +30,7 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::rttiArena());
     root->registerClassRoot(BugEngine::be_typeid<void>::klass());
 
-    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root));
+    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root, root->metaclass));
     p->doFile("data/scripts/main.lua");
 
     BugEngine::Graphics::WindowFlags f;

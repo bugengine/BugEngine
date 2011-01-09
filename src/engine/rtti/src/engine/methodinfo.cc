@@ -13,4 +13,3 @@ MethodInfo::MethodInfo(istring name)
 }
 
 }}
-

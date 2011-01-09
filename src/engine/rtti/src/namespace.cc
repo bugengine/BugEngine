@@ -1,42 +1,54 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include   <rtti/stdafx.h>
-#include   <rtti/namespace.script.hh>
-#include   <rtti/engine/propertyinfo.script.hh>
-#include   <rtti/value.hh>
+#include    <rtti/stdafx.h>
+#include    <rtti/namespace.script.hh>
+#include    <rtti/engine/classinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
-class Namespace::PropertyInfo : public RTTI::PropertyInfo
+class Namespace::MetaPropertyInfo : public RTTI::PropertyInfo
 {
 private:
     const Value m_value;
 public:
-    PropertyInfo(Value v);
-    ~PropertyInfo();
+    MetaPropertyInfo(Value v);
+    ~MetaPropertyInfo();
 
-    virtual Value get(Value& from) const override;
+    static Value get(weak<const PropertyInfo> _this, void* from);
 };
 
-Namespace::PropertyInfo::PropertyInfo(Value v)
-    :   RTTI::PropertyInfo(v.type(), RTTI::PropertyInfo::Get)
+Namespace::MetaPropertyInfo::MetaPropertyInfo(Value v)
+    :   RTTI::PropertyInfo(v.type(), &get, 0)
     ,   m_value(v)
 {
 }
 
-Namespace::PropertyInfo::~PropertyInfo()
+Namespace::MetaPropertyInfo::~MetaPropertyInfo()
 {
 }
 
-Value Namespace::PropertyInfo::get(Value& object) const
+Value Namespace::MetaPropertyInfo::get(weak<const PropertyInfo> _this, void* from)
 {
-    return m_value;
+    return be_checked_cast< const MetaPropertyInfo >(_this)->m_value;
+}
+
+static ref<ClassInfo> metametaclass()
+{
+    static ref<ClassInfo> s_metametaClass = ref<ClassInfo>::create(rttiArena(), be_typeid<ClassInfo>::klass(), ref<ClassInfo>());
+    return s_metametaClass;
+}
+
+Namespace::Namespace(ref<ClassInfo> metaclass)
+    :   metaclass(metaclass)
+{
 }
 
 Namespace::Namespace()
-    :   m_classInfo(ref<RTTI::ClassInfo>::create(rttiArena(), be_typeid< Namespace >::klass()))
+    :   metaclass(ref<RTTI::ClassInfo>::create(rttiArena(), be_typeid<Namespace>::klass(), metametaclass()))
 {
 }
 
@@ -44,41 +56,52 @@ Namespace::~Namespace()
 {
 }
 
-weak<Namespace> Namespace::getOrCreateNamespace(const inamespace& name)
+weak<const Namespace> Namespace::getOrCreateNamespace(const inamespace& name)
 {
-    weak<Namespace> ns = this;
-    for(size_t i = 0; i < name.size()-1; ++i)
+    Value ns = Value(weak<const Namespace>(this), metaclass);
+    for(size_t i = 0; i < name.size(); ++i)
     {
-        weak<const RTTI::PropertyInfo> prop = ns->m_classInfo->getProperty(name[i]);
-        if(! prop)
+        Value v = ns[name[i]];
+        weak<const Namespace> namespace_;
+        if ((ns.type().type & TypeInfo::TypeMask) == TypeInfo::ConstWeakPtr)
+            namespace_ = ns.as< weak<const Namespace> >();
+        else
+            namespace_ = ns.as< ref<const Namespace> >();
+        if(!v)
         {
-            ref<Namespace> newns = ref<Namespace>::create(rttiArena());
-            ref<const PropertyInfo> prop = ref<const PropertyInfo>::create(rttiArena(), Value(newns, TypeInfo(newns->m_classInfo, TypeInfo::RefPtr, TypeInfo::Mutable)));
-            ns->m_classInfo->addProperty(name[i], prop);
-            ns = newns;
+            ref<const Namespace> newns = ref<const Namespace>::create(rttiArena());
+            ref<const MetaPropertyInfo> prop = ref<const MetaPropertyInfo>::create(rttiArena(), Value(newns, TypeInfo(newns->metaclass, TypeInfo::RefPtr, TypeInfo::Mutable)));
+            namespace_->metaclass->addProperty(name[i], prop);
+            ns = Value(weak<const Namespace>(newns), newns->metaclass);
         }
         else
         {
-            be_assert(be_typeid< ref<Namespace> >::type() <= prop->type, "property of invalid type");
-            Value v = prop->get(Value(ns));
-            ns = v.as< ref<Namespace> >();
+            ns = v;
+            if(! (be_typeid< ref<const Namespace> >::type() <= ns.type() || be_typeid< weak<const Namespace> >::type() <= ns.type()))
+            {
+                inamespace shortname(name);
+                for(size_t j = 1; j < i; ++j)
+                    shortname.push_back(name[i]);
+                be_error("Unable to convert value %s of type %s to a Namespace" | name | ns.type().name());
+                return weak<const Namespace>();
+            }
         }
     }
-    return ns;
+
+    if ((ns.type().type & TypeInfo::TypeMask) == TypeInfo::ConstWeakPtr)
+        return ns.as< weak<const Namespace> >();
+    else
+        return ns.as< ref<const Namespace> >();
 }
 
 void Namespace::registerClassRoot(weak<const ClassInfo> klass)
 {
-    be_assert(be_typeid<void>::type() <= be_typeid<void>::type(), "internal error");
-    be_assert(be_typeid<void>::type() <= be_typeid< Namespace >::type(), "internal error");
-    be_assert(be_typeid< ref<minitl::refcountable> >::type() <= be_typeid< ref<Namespace> >::type(), "internal error");
-    be_assert(be_typeid< ref< const Namespace> >::type() <= be_typeid< ref<Namespace> >::type(), "internal error");
-    be_assert(!(be_typeid< ref< Namespace> >::type() <= be_typeid< ref<const Namespace> >::type()), "internal error");
-    be_assert(!(be_typeid< ref< Namespace> >::type() <= be_typeid< ref<minitl::refcountable> >::type()), "internal error");
-    weak<Namespace> ns = getOrCreateNamespace(klass->name);
+    Value v = Value(be_typeid<void>::klass());
+    v["name"];
+    weak<const Namespace> ns = getOrCreateNamespace(klass->name);
     be_assert_recover(ns, "impossible to create namespace %s" | klass->name, return);
-    ref<const PropertyInfo> prop = ref<const PropertyInfo>::create(rttiArena(), Value(klass));
-    ns->m_classInfo->addProperty(klass->name[klass->name.size()-1], prop);
+    ref<const MetaPropertyInfo> prop = ref<const MetaPropertyInfo>::create(rttiArena(), Value(klass));
+    ns->metaclass->addProperty(klass->name[klass->name.size()-1], prop);
     for(minitl::intrusive_list<const ClassInfo>::iterator it = klass->m_children.begin(); it != klass->m_children.end(); ++it)
     {
         registerClassRoot(it.operator->());
