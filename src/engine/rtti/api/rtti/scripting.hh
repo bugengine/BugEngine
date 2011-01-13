@@ -14,7 +14,7 @@ class Scripting
 {
 public:
     virtual void doFile(const ifilename& file) = 0;
-    virtual void doFile(weak<IMemoryStream> stream) = 0;
+    virtual void doFile(weak<IMemoryStream> stream, const char *filename = 0) = 0;
 };
 
 }

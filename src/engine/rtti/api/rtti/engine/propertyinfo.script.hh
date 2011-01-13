@@ -21,7 +21,7 @@ public:
     const TypeInfo      type;
 public:
     PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from) = 0, void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value) = 0);
-    virtual ~PropertyInfo();
+    ~PropertyInfo();
 private:
     Value (*get)(weak<const PropertyInfo> _this, void* from);
     void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value);

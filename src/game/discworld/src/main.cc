@@ -27,9 +27,7 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
-    ref<BugEngine::RTTI::Namespace> root = ref<BugEngine::RTTI::Namespace>::create(BugEngine::rttiArena());
-    root->registerClassRoot(BugEngine::be_typeid<void>::klass());
-
+    weak<const BugEngine::RTTI::Namespace> root = BugEngine::RTTI::Namespace::rttiRoot();
     BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root, root->metaclass));
     p->doFile("data/scripts/main.lua");
 

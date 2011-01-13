@@ -10,20 +10,6 @@
 namespace BugEngine { namespace RTTI
 {
 
-struct ParamInfo
-{
-    raw<const char>         name;
-    raw<const ClassInfo>    type;
-};
-
-struct OverloadInfo
-{
-    raw<const ClassInfo>    returntype;
-    u16                     paramCount;
-    raw<const ParamInfo>    parameters;
-    Value                   (*method)(Value* params, size_t paramCount);
-};
-
 class MethodInfo : public minitl::refcountable
 {
 public:

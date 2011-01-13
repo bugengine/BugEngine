@@ -4,7 +4,6 @@
 
 #include    <core/stdafx.h>
 #include    <core/debug/logger.hh>
-#include    <core/debug/exception.hh>
 
 #include    <minitl/ptr/scopedptr.hh>
 

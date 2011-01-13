@@ -120,7 +120,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         if(file == -1)
         {
             printf("%s\n", fullname.c_str());
-            throw EFileNotFound(filename);
+            return ref<IMemoryStream>();
         }
         else
         {
@@ -129,7 +129,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         }
     }
     else
-        throw EFileNotFound(filename);
+        return ref<IMemoryStream>();
 }
 
 size_t DiskFS::age(const ifilename& file) const
