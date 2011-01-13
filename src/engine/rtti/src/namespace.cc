@@ -18,7 +18,7 @@ public:
     MetaPropertyInfo(Value v);
     ~MetaPropertyInfo();
 
-    static Value get(weak<const PropertyInfo> _this, void* from);
+    static Value get(weak<const PropertyInfo> _this, void* from, bool isConst);
 };
 
 Namespace::MetaPropertyInfo::MetaPropertyInfo(Value v)
@@ -31,7 +31,7 @@ Namespace::MetaPropertyInfo::~MetaPropertyInfo()
 {
 }
 
-Value Namespace::MetaPropertyInfo::get(weak<const PropertyInfo> _this, void* from)
+Value Namespace::MetaPropertyInfo::get(weak<const PropertyInfo> _this, void* from, bool isConst)
 {
     return be_checked_cast< const MetaPropertyInfo >(_this)->m_value;
 }
