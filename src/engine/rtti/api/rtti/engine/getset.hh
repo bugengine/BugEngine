@@ -10,23 +10,23 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename T, typename Owner, T (Owner::*Field) >
-static inline Value get(Value& from)
+static inline Value get(weak<const PropertyInfo> _this, void* from, bool isConst)
 {
-    if(from.isConst())
+    if(isConst)
     {
-        return Value(Value::ByRef(from.as<const Owner>().*Field));
+        return Value(Value::ByRef((const Owner*)from->*Field));
     }
     else
     {
-        return Value(Value::ByRef(from.as<Owner>().*Field));
+        return Value(Value::ByRef((Owner*)from->*Field));
     }
 }
 
 template< typename T, typename Owner, T (Owner::*Field) >
-static inline void set(Value& object, Value& value)
+static inline void set(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst)
 {
-    be_assert_recover(!object.isConst(), "Setting property on const object", return);
-    object.as<Owner>().*Field = value.as<T>();
+    be_assert_recover(!isConst, "Setting property on const object", return);
+    (Owner*)from->*Field = value.as<T>();
 }
 
 }}

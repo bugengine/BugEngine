@@ -313,7 +313,7 @@ def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
 	"""
-	t[0] = (t[1]+t[3], t[2])
+	t[0] = (t[1][1]+t[3], t[2])
 
 def p_function_param(t):
 	"""
@@ -408,7 +408,7 @@ def p_integer_type(t):
 	"""
 		simple_type : integer_type_list integer_type
 	"""
-	t[0] = t[1] + " " + t[2]
+	t[0] = ('', t[1] + " " + t[2])
 
 def p_integer_type_item(t):
 	"""
@@ -450,20 +450,20 @@ def p_type_name(t):
 	"""
 		simple_type : name
 	"""
-	t[0] = t[1]
+	t[0] = ('', t[1])
 
 def p_type_const(t):
 	"""
 		simple_type : type_modifier simple_type
 	"""
-	t[0] = t[1] + " " + t[2]
+	t[0] = (t[1]+" "+t[2][0], t[1] + " " + t[2][1])
 
 def p_complex_type(t):
 	"""
 		type : simple_type type_modifier_list
 	"""
 	if t[2]:
-		t[0] = t[1] + " " + t[2]
+		t[0] = (t[2], t[1][1] + " " + t[2])
 	else:
 		t[0] = t[1]
 
@@ -472,7 +472,7 @@ def p_complex_type_2(t):
 		type : type TIMES type_modifier_list
 		type : type AND type_modifier_list
 	"""
-	t[0] = t[1] + " " + t[2] + " " + t[3]
+	t[0] = (t[3], t[1][1] + " " + t[2] + " " + t[3])
 
 ###################################
 # function pointers
@@ -491,26 +491,26 @@ def p_function_pointer_name(t):
 	"""
 		function_pointer_with_name : type LPAREN ID RPAREN LPAREN params_list RPAREN
 	"""
-	t[0] = (t[1] + t[2] + t[4] + t[5] + typeList(t[6]) + t[7], t[3])
+	t[0] = (t[1][1] + t[2] + t[4] + t[5] + typeList(t[6]) + t[7], t[3])
 
 def p_function_pointer_name_2(t):
 	"""
 		function_pointer_with_name : type LPAREN pointer_on_member ID RPAREN LPAREN params_list RPAREN
 	"""
-	t[0] = (t[1] + t[2] + t[3] + t[5] + t[6] + typeList(t[7]) + t[8], t[4])
+	t[0] = (t[1][1] + t[2] + t[3] + t[5] + t[6] + typeList(t[7]) + t[8], t[4])
 
 def p_function_pointer_no_name(t):
 	"""
 		function_pointer_with_name : type LPAREN RPAREN LPAREN params_list RPAREN
 		function_pointer_without_name : type LPAREN pointer_on_member RPAREN LPAREN params_list RPAREN
 	"""
-	t[0] = " ".join(t[1:])
+	t[0] = t[1][1]+" "+" ".join(t[2:])
 
 def p_function_pointer_type(t):
 	"""
 		type : function_pointer_without_name
 	"""
-	t[0] = t[1]
+	t[0] = ('', t[1])
 
 ###################################
 # decls
@@ -565,7 +565,7 @@ def p_variable_decl(t):
 	"""
 		decl : type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	t.parser.namespace.addMember(t[1]+t[3], t[2], t.lineno(6))
+	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0], t[2], t.lineno(6))
 
 def p_variable_decl_2(t):
 	"""
@@ -575,7 +575,7 @@ def p_variable_decl_2(t):
 		pass
 		#t.parser.namespace.meta.addMember(t[1]+t[3], t[2])
 	else:
-		t.parser.namespace.addMember(t[2]+t[4], t[3], t.lineno(7))
+		t.parser.namespace.addMember(t[2][1]+t[4], t[1][0], t[3], t.lineno(7))
 
 ###################################
 # Value
@@ -849,7 +849,7 @@ def p_class(t):
 		simple_type : class class_header decls RBRACE
 		simple_type : struct struct_header decls RBRACE
 	"""
-	t[0] = t.parser.namespace.fullname
+	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_decl(t):
@@ -857,7 +857,7 @@ def p_class_decl(t):
 		simple_type : class name
 		simple_type : struct name
 	"""
-	t[0] = rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname
+	t[0] = ('', rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname)
 
 
 def p_enum_values(t):
@@ -884,7 +884,7 @@ def p_enum(t):
 	"""
 		simple_type :	enum_header enum_values RBRACE
 	"""
-	t[0] = t.parser.namespace.fullname
+	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
 
 ###################################

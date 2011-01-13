@@ -215,6 +215,25 @@ int Context::valueGC(lua_State *state)
 int Context::valueToString(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -1);
+    if(userdata->type().type == TypeInfo::Class)
+    {
+        weak<const RTTI::ClassInfo> metaclass = userdata->type().metaclass;
+        if (metaclass == be_typeid< inamespace >::klass())
+        {
+            lua_pushfstring(state, "%s", userdata->as<const inamespace>().str().c_str());
+            return 1;
+        }
+        if (metaclass == be_typeid< istring >::klass())
+        {
+            lua_pushfstring(state, "%s", userdata->as<const istring>().c_str());
+            return 1;
+        }
+        if (metaclass == be_typeid< ifilename >::klass())
+        {
+            lua_pushfstring(state, "%s", userdata->as<const ifilename>().str().c_str());
+            return 1;
+        }
+    }
     lua_pushfstring(state, "[%s object @0x%p]", userdata->type().name().c_str(), userdata);
     return 1;
 }

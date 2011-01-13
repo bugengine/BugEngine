@@ -52,11 +52,12 @@ Value::Value(T t, TypeInfo typeinfo)
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
-,   m_deallocate(m_pointer != 0)
-,   m_reference(false)
+,   m_pointer(other.m_reference ? other.m_pointer : (m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0))
+,   m_deallocate(other.m_reference ? false : (m_pointer != 0))
+,   m_reference(other.m_reference)
 {
-    m_type.copy(other.memory(), memory());
+    if(!m_reference)
+        m_type.copy(other.memory(), memory());
 }
 
 template< typename T >
@@ -208,7 +209,7 @@ Value Value::operator[](const istring& name)
     }
     if(prop->get)
     {
-        return prop->get(prop, data);
+        return prop->get(prop, data, isConst());
     }
     else
     {

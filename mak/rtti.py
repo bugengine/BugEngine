@@ -21,8 +21,8 @@ class Container:
 	def addObject(self, object):
 		self.objects.append(object)
 
-	def addMember(self, type, name, line):
-		self.members.append((type, name, self.visibility, line))
+	def addMember(self, type, attr, name, line):
+		self.members.append((type, name, attr, self.visibility, line))
 
 	def dump(self, file, namespace, index):
 		for o in self.objects:
@@ -153,15 +153,20 @@ class Class(Container):
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
-		for type,name,visibility,line in self.members:
+		for type,name,attr,visibility,line in self.members:
 			if visibility == 'public':
 				#file.write("#line %d\n" % (line))
-				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type()));\n" % (name, type))
+				getter = '&::BugEngine::RTTI::get< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
+				if attr.find('const') == -1:
+					setter = ', &::BugEngine::RTTI::set< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
+				else:
+					setter = ''
+				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
 		file.write("    }\n")
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
-		for type,name,visibility,line in self.members:
+		for type,name,attr,visibility,line in self.members:
 			if visibility == 'public':
 				#file.write("#line %d\n" % (line))
 				file.write("        klass->removeProperty(\"%s\");\n" % (name))

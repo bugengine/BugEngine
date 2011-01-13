@@ -8,7 +8,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-PropertyInfo::PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from), void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value))
+PropertyInfo::PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from, bool isConst), void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst))
     :   type(type)
     ,   get(get)
     ,   set(set)

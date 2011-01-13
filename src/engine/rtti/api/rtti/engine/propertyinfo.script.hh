@@ -20,11 +20,11 @@ class be_api(RTTI) PropertyInfo : public minitl::refcountable
 public:
     const TypeInfo      type;
 public:
-    PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from) = 0, void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value) = 0);
+    PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from, bool isConst) = 0, void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst) = 0);
     ~PropertyInfo();
 private:
-    Value (*get)(weak<const PropertyInfo> _this, void* from);
-    void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value);
+    Value (*get)(weak<const PropertyInfo> _this, void* from, bool isConst);
+    void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst);
 };
 
 }}
