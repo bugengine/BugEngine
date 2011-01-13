@@ -16,7 +16,7 @@ namespace BugEngine { namespace RTTI
 
 class be_api(RTTI) PropertyInfo : public minitl::refcountable
 {
-    friend class Value;
+    friend class BugEngine::Value;
 public:
     const TypeInfo      type;
 public:
