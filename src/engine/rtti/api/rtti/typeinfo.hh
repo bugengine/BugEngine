@@ -16,6 +16,8 @@ struct be_api(RTTI) be_typeid
     static TypeInfo type();
 };
 
+template< > ref<const RTTI::ClassInfo> const be_typeid< void >::klass();
+
 }
 
 #include <rtti/typeinfo.inl>
