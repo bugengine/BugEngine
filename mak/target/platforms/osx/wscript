@@ -35,7 +35,7 @@ def add_gcc_flags_to_env(conf):
 
 def add_darwin_flags_to_env(conf):
 	import Options
-	conf.env['PLATFORM'] = mak.allplatforms['darwin']
+	conf.env['PLATFORM'] = mak.allplatforms['osx']
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CCFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
