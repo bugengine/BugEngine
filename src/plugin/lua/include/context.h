@@ -22,7 +22,7 @@ public:
     ~Context();
 
     void doFile(const ifilename& file) override;
-    void doFile(weak<IMemoryStream> stream) override;
+    void doFile(weak<IMemoryStream> stream, const char *filename) override;
 
 private:
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);

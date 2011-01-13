@@ -20,7 +20,7 @@ reserved = (
 		'BE_PUBLISH',
 		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
 		'USING', 'NEW', 'DELETE',
-		'PUBLIC', 'PROTECTED', 'PRIVATE', 'BE_PUBLISHED', 'FRIEND',
+		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
 		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
 		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
 		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW'
@@ -768,7 +768,6 @@ def p_visibility(t):
 		visibility : PUBLIC
 		visibility : PROTECTED
 		visibility : PRIVATE
-		visibility : BE_PUBLISHED
 	"""
 	t[0] =t[1]
 
@@ -836,14 +835,14 @@ def p_struct_header(t):
 	"""
 		struct_header : name_opt parent_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3))
-	t.parser.namespace.visibility = 'be_published'
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
+	t.parser.namespace.visibility = 'public'
 
 def p_class_header(t):
 	"""
 		class_header : name_opt parent_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3))
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
 
 def p_class(t):
 	"""
@@ -879,7 +878,7 @@ def p_enum_header(t):
 	"""
 		enum_header :	ENUM name_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Enum(t.parser.namespace, t[2], t.lineno(3))
+	t.parser.namespace = rtti.Enum(t.parser.namespace, t[2], t.lineno(3), t.parser.namespace.visibility)
 	
 def p_enum(t):
 	"""

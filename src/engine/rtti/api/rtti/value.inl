@@ -206,7 +206,15 @@ Value Value::operator[](const istring& name)
         else
             prop = klass->getProperty(name);
     }
-    return prop->get(prop, data);
+    if(prop->get)
+    {
+        return prop->get(prop, data);
+    }
+    else
+    {
+        be_error("Property %s of class %s (actual type %s) is not readable" | name | klass->name | m_type.metaclass->name);
+        return Value();
+    }
 }
 
 }

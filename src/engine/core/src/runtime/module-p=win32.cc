@@ -18,7 +18,9 @@ namespace BugEngine { namespace Runtime
 ref<const Module> Module::self()
 {
     static ref<Module> s_module;
-    ref<Module> module;
+    static ref<Module> module;
+    static size_t seen = 0;
+
     HANDLE process = ::GetCurrentProcess();
     DWORD requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
@@ -26,13 +28,13 @@ ref<const Module> Module::self()
     Allocator::Block<HMODULE> hmodules(tempArena(), moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
-    for(size_t i = 0; i < requiredSize/sizeof(HMODULE); i++)
+    for(; seen < moduleCount; seen++)
     {
         char moduleName[32768];
         MODULEINFO info;
-        ::GetModuleFileNameEx(process, hmodules[i], moduleName, sizeof(moduleName));
-        ::GetModuleInformation(process, hmodules[i], &info, sizeof(info));
-        if(i == 0)
+        ::GetModuleFileNameEx(process, hmodules[seen], moduleName, sizeof(moduleName));
+        ::GetModuleInformation(process, hmodules[seen], &info, sizeof(info));
+        if(seen == 0)
         {
             s_module = ref<PE>::create(debugArena(), moduleName, (u64)info.lpBaseOfDll);
             module = s_module;

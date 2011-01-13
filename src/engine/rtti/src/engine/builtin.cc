@@ -3,21 +3,57 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
-#include    <rtti/engine/classinfo.script.hh>
-#include    <rtti/engine/wrapper.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/namespace.script.hh>
+#include    <rtti/engine/getset.hh>
 
 namespace BugEngine
 {
 
 template< > ref<const RTTI::ClassInfo> const be_typeid< void >::klass()
 {
-    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
+    static ref<const RTTI::ClassInfo> klass;
+    if(!klass)
+    {
+        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
+    }
     return klass;
 }
 
 template< > ref<const RTTI::ClassInfo> const be_typeid< ::minitl::refcountable >::klass()
 {
-    return  be_typeid< void >::klass();
+    static ref<const RTTI::ClassInfo> klass;
+    if(!klass)
+    {
+        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
+    }
+    return klass;
 }
+
+#define BE_MAKE_BUILTIN(type,parent)                                                                    \
+template< > ref<const RTTI::ClassInfo> const be_typeid<type>::klass()                                   \
+{                                                                                                       \
+    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(),                 \
+                                                                           inamespace(#type),           \
+                                                                           ref<RTTI::ClassInfo>(),      \
+                                                                           ref<RTTI::ClassInfo>(),      \
+                                                                           sizeof(type),                \
+                                                                           0);                          \
+    return klass;                                                                                       \
+}
+
+BE_MAKE_BUILTIN(u8, void);
+BE_MAKE_BUILTIN(u16, void);
+BE_MAKE_BUILTIN(u32, void);
+BE_MAKE_BUILTIN(u64, void);
+BE_MAKE_BUILTIN(i8, void);
+BE_MAKE_BUILTIN(i16, void);
+BE_MAKE_BUILTIN(i32, void);
+BE_MAKE_BUILTIN(i64, void);
+BE_MAKE_BUILTIN(istring, void);
+BE_MAKE_BUILTIN(inamespace, void);
+BE_MAKE_BUILTIN(ifilename, void);
+
+#undef BE_MAKE_BUILTIN
 
 }

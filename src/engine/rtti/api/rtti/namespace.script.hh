@@ -24,15 +24,24 @@ private:
 public:
     ref<ClassInfo> const    metaclass;
 private:
-    weak<const Namespace> getOrCreateNamespace(const inamespace& name);
+    mutable u32             m_propertyCount;
 protected:
     Namespace(ref<ClassInfo> metaclass);
 public:
     Namespace();
     ~Namespace();
 
-    void add(const istring name, Value value);
-    void registerClassRoot(weak<const ClassInfo> klass);
+    void add(const inamespace& name, const Value& value) const;
+    void add(const istring& name, const Value& value) const;
+    void remove(const inamespace& name) const;
+    void remove(const istring& name) const;
+
+    static weak<const Namespace> rttiRoot();
+
+    bool empty() const { return m_propertyCount == 0; }
+private:
+    enum CreationPolicy { DoNotCreate, Create };
+    weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;
 };
 
 }}

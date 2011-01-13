@@ -117,8 +117,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         HANDLE file = CreateFile(fullname.c_str(), GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
         if(file == INVALID_HANDLE_VALUE)
         {
-            //DWORD err = GetLastError();
-            throw EFileNotFound(filename);
+            return ref<IMemoryStream>();
         }
         else
         {
@@ -159,7 +158,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         }
     }
     else
-        throw EFileNotFound(filename);
+        return ref<IMemoryStream>();
 }
 
 size_t DiskFS::age(const ifilename& file) const

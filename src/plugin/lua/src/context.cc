@@ -101,13 +101,20 @@ Context::~Context()
 void Context::doFile(const ifilename& file)
 {
     ref<IMemoryStream> stream = m_filesystem->open(file, eReadOnly);
-    doFile(stream);
+    if(stream)
+    {
+        doFile(stream, file.str().c_str());
+    }
+    else
+    {
+        be_error("Couldn't open file %s" | file);
+    }
 }
 
-void Context::doFile(weak<IMemoryStream> file)
+void Context::doFile(weak<IMemoryStream> file, const char *filename)
 {
     int result;
-    result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), "");
+    result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), filename);
     if(result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
@@ -117,6 +124,11 @@ void Context::doFile(weak<IMemoryStream> file)
 
 void Context::push(lua_State* state, const Value& v)
 {
+    const TypeInfo& t = v.type();
+    if(t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
+    {
+    }
+
     void* userdata = lua_newuserdata(state, sizeof(Value));
     new(userdata) Value(v);
     lua_getglobal(state, "bugvalue");
@@ -203,7 +215,7 @@ int Context::valueGC(lua_State *state)
 int Context::valueToString(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -1);
-    lua_pushfstring(state, "[%s object @0x%p]", userdata->type().name(), userdata);
+    lua_pushfstring(state, "[%s object @0x%p]", userdata->type().name().c_str(), userdata);
     return 1;
 }
 

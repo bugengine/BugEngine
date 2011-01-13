@@ -5,7 +5,6 @@
 #define BE_SYSTEM_FILESYSTEM_HH_
 /*****************************************************************************/
 #include    <core/string/istring.hh>
-#include    <core/debug/exception.hh>
 
 namespace BugEngine
 {
@@ -18,33 +17,6 @@ enum FileOpenMode
 {
     eReadOnly,
     eReadWrite
-};
-
-class EFileNotFound : public Exception
-{
-public:
-    EFileNotFound(const ifilename& file)
-        :   Exception(minitl::format<>("file %s does not exist") | file)
-    {
-    }
-};
-
-class ENoCreate : public Exception
-{
-public:
-    ENoCreate(const ifilename& file)
-        :   Exception(minitl::format<>("cannot create file %s") | file)
-    {
-    }
-};
-
-class EReadOnly : public Exception
-{
-public:
-    EReadOnly(const ifilename& file)
-        :   Exception(minitl::format<>("cannot open file %s in read-write mode") | file)
-    {
-    }
 };
 
 class be_api(SYSTEM) FileSystem : public minitl::refcountable

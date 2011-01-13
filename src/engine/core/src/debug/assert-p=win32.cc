@@ -82,10 +82,10 @@ namespace BugEngine { namespace Debug
             Runtime::Callstack::Address address[128];
             size_t result = Runtime::Callstack::backtrace(address, 128, 1);
 
-            static ref<const Runtime::Module> executable = Runtime::Module::self();
+            ref<const Runtime::Module> executable = Runtime::Module::self();
             static weak<const Runtime::Module> last = executable;
             static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols);
-            while(last->next())
+            while(last && last->next())
             {
                 last = last->next();
                 Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
