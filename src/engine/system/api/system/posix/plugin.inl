@@ -71,7 +71,7 @@ Plugin<Interface>::~Plugin(void)
         void (*_fini)(Interface*) = reinterpret_cast<void (*)(Interface*)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_destroyPlugin")));
         if(_fini)
             _fini(m_interface); 
-        dlclose(m_handle);
+        //dlclose(m_handle);
     }
 }
 

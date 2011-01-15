@@ -56,7 +56,10 @@ Renderer::PlatformRenderer::~PlatformRenderer()
 {
     XFree(m_visual);
     if(m_display)
+    {
+        printf("bla\n");
         XCloseDisplay(m_display);
+    }
 }
 
 static const char *s_messages[] =
@@ -156,17 +159,18 @@ void Renderer::flush()
         case KeyPress:
             if (XLookupKeysym(&event.xkey, 0) == XK_Escape)
             {
-                Window* w = 0;
                 ::Atom type;
                 int format;
                 unsigned long nbItems;
                 unsigned long leftBytes;
+                unsigned char *result = 0;
                 XGetWindowProperty(m_platformRenderer->m_display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
-                                   False, XA_INTEGER, &type, &format, &nbItems, &leftBytes, (unsigned char**)&w);
-                be_assert(w, "could not retrieve engine window handle from X11 window");
-                be_info("%d items: %p" | nbItems | (const void*)w);
+                                   False, AnyPropertyType, &type, &format, &nbItems, &leftBytes, &result);
+                be_assert(result, "could not retrieve engine window handle from X11 window");
+                Window *w = *(Window**)result;
+                be_info("%d items (%d): %p" | nbItems | leftBytes | w);
                 w->close();
-                XFree(w);
+                XFree(result);
             }
             break;
         default:
