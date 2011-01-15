@@ -36,8 +36,7 @@ Window::Window(weak<Renderer> renderer, WindowFlags flags)
 {
     Window* w = this;
     XChangeProperty(renderer->m_platformRenderer->m_display, m_window->m_window, renderer->m_platformRenderer->m_windowProperty,
-                    XA_INTEGER, 32, PropModeReplace, (const unsigned char*)&w, sizeof(w)/4);
-    be_info("%p" | (const void*)w);
+                    XA_INTEGER, 8, PropModeReplace, (unsigned char *)&w, sizeof(w));
 }
 
 Window::~Window()
