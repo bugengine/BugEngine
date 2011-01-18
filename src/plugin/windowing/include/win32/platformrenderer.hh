@@ -28,18 +28,12 @@ private:
     weak<Renderer>  m_renderer;
     istring         m_windowClassName;
     WNDCLASSEX      m_wndClassEx;
-    Thread          m_windowManagementThread;
-private:
-    static intptr_t updateWindows(intptr_t p1, intptr_t p2);
 public:
     PlatformRenderer(weak<Renderer> renderer);
     ~PlatformRenderer();
 
     HWND            createWindowImplementation(const WindowCreationFlags* flags) const;
     void            destroyWindowImplementation(HWND hWnd);
-
-    void            postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const;
-    void            handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
     const istring&  getWindowClassName() const;
 };
 

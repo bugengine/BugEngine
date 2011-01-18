@@ -7,8 +7,8 @@
 namespace BugEngine { namespace RTTI
 {
 
-MethodInfo::MethodInfo(istring name)
-    :   name(name)
+MethodInfo::MethodInfo()
+    :   overloads(rttiArena())
 {
 }
 

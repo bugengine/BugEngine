@@ -69,8 +69,10 @@ void Renderer::createContext(void* params_)
     D3DPRESENT_PARAMETERS& params = *(D3DPRESENT_PARAMETERS*)params_;
     if(m_device)
     {
-        d3d_checkResult(m_device->Reset(&params));
-        m_deviceState = DeviceRestored;
+        if(!FAILED(d3d_checkResult(m_device->Reset(&params))))
+        {
+            m_deviceState = DeviceRestored;
+        }
     }
     else
     {
@@ -160,54 +162,46 @@ void Renderer::flush()
     Windowing::Renderer::flush();
     //static Timer t;
     //static int frames = 0;
-    switch(m_deviceState)
+    if (m_deviceState == DeviceLost)
     {
-    case DeviceLost:
+        for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
         {
+            if(it->swapchain)
+            {
+                it->swapchain->Release();
+                it->swapchain = 0;
+            }
+        }
+        if(!m_swapchains.empty())
+        {
+            if(m_deviceSwapChain == m_swapchains.end())
+            {
+                m_deviceSwapChain = m_swapchains.begin();
+            }
+            if(d3d_checkResult(m_device->TestCooperativeLevel()) != D3DERR_DEVICELOST)
+            {
+                createContextAsync((void*)&m_deviceSwapChain->params);
+            }
+        }
+        else
+        {
+            destroyContextAsync();
+        }
+    }
+    if (m_deviceState == DeviceRestored)
+    {
+        if(!m_swapchains.empty())
+        {
+            d3d_checkResult(m_device->GetSwapChain(0, &m_deviceSwapChain->swapchain));
             for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
             {
-                if(it->swapchain)
+                if(it != m_deviceSwapChain)
                 {
-                    it->swapchain->Release();
-                    it->swapchain = 0;
+                    d3d_checkResult(m_device->CreateAdditionalSwapChain(&it->params, &it->swapchain));
                 }
             }
-            if(!m_swapchains.empty())
-            {
-                if(m_deviceSwapChain == m_swapchains.end())
-                {
-                    m_deviceSwapChain = m_swapchains.begin();
-                }
-                if(d3d_checkResult(m_device->TestCooperativeLevel()) != D3DERR_DEVICELOST)
-                {
-                    createContextAsync((void*)&m_deviceSwapChain->params);
-                }
-            }
-            else
-            {
-                destroyContextAsync();
-            }
+            m_deviceState = DeviceReady;
         }
-        break;
-    case DeviceRestored:
-        {
-            if(!m_swapchains.empty())
-            {
-                d3d_checkResult(m_device->GetSwapChain(0, &m_deviceSwapChain->swapchain));
-                for(minitl::list<SwapchainDesc>::iterator it = m_swapchains.begin(); it != m_swapchains.end(); ++it)
-                {
-                    if(it != m_deviceSwapChain)
-                    {
-                        d3d_checkResult(m_device->CreateAdditionalSwapChain(&it->params, &it->swapchain));
-                    }
-                }
-                m_deviceState = DeviceReady;
-            }
-        }
-        break;
-
-    default:
-        break;
     }
 }
 

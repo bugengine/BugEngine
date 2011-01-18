@@ -18,7 +18,6 @@ class Window : public Windowing::Window
 private:
     class Context;
     scoped<Context> m_context;
-    i_u8            m_closed;
 private:
     void setCurrent();
     void clearCurrent();
@@ -29,8 +28,6 @@ public:
     void begin(ClearMode clear) override;
     void end(PresentMode present) override;
 
-    void close() override;
-    bool closed() const override;
     void present();
 };
 

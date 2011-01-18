@@ -18,7 +18,6 @@ class Window : public Windowing::Window
 private:
     Renderer::SwapchainItem m_swapChain;
     WindowFlags             m_flags;
-    i_u8                    m_closed;
 private:
     void setCurrent();
     void recreate(WindowFlags flags);
@@ -30,7 +29,6 @@ public:
     void end(PresentMode present) override;
 
     void close() override;
-    bool closed() const override;
 };
 
 }}}

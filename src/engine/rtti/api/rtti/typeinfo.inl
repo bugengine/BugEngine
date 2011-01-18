@@ -91,10 +91,28 @@ struct RefType< raw<const T> >
 }
 
 template< typename T >
-TypeInfo be_typeid< T >::type()
+struct be_api(RTTI) be_typeid< minitl::vector<T> >
 {
-    return TypeInfo(be_typeid<typename RTTI::RefType<T>::Type>::klass(), TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness));
-}
+    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
+    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
+private:
+    class PropertyBuilder
+    {
+        PropertyBuilder()
+        {
+        }
+        ~PropertyBuilder()
+        {
+        }
+    };
+    static ref<RTTI::ClassInfo> klassBuilder()
+    {
+        static ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
+        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
+        return klass;
+    }
+    static PropertyBuilder s_properties;
+};
 
 }
 

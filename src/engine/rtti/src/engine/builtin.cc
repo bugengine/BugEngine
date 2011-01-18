@@ -10,36 +10,28 @@
 namespace BugEngine
 {
 
-template< > ref<const RTTI::ClassInfo> const be_typeid< void >::klass()
+template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
 {
-    static ref<const RTTI::ClassInfo> klass;
-    if(!klass)
-    {
-        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
-    }
+    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
     return klass;
 }
 
-template< > ref<const RTTI::ClassInfo> const be_typeid< ::minitl::refcountable >::klass()
+template< > ref<RTTI::ClassInfo> be_typeid< ::minitl::refcountable >::klassBuilder()
 {
-    static ref<const RTTI::ClassInfo> klass;
-    if(!klass)
-    {
-        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
-    }
+    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
     return klass;
 }
 
-#define BE_MAKE_BUILTIN(type,parent)                                                                    \
-template< > ref<const RTTI::ClassInfo> const be_typeid<type>::klass()                                   \
-{                                                                                                       \
-    static ref<const RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(),                 \
-                                                                           inamespace(#type),           \
-                                                                           ref<RTTI::ClassInfo>(),      \
-                                                                           ref<RTTI::ClassInfo>(),      \
-                                                                           sizeof(type),                \
-                                                                           0);                          \
-    return klass;                                                                                       \
+#define BE_MAKE_BUILTIN(type,parent)                                                            \
+template< > ref<RTTI::ClassInfo> be_typeid<type>::klassBuilder()                                \
+{                                                                                               \
+    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(),               \
+                                                                     inamespace(#type),         \
+                                                                     ref<RTTI::ClassInfo>(),    \
+                                                                     ref<RTTI::ClassInfo>(),    \
+                                                                     sizeof(type),              \
+                                                                     0);                        \
+    return klass;                                                                               \
 }
 
 BE_MAKE_BUILTIN(u8, void);

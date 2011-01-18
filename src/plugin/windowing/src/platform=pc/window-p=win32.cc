@@ -64,7 +64,7 @@ void Window::close()
     m_window = scoped<PlatformWindow>();
 }
 
-bool Window::isClosed() const
+bool Window::closed() const
 {
     return m_window == 0;
 }

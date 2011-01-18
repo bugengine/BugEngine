@@ -10,14 +10,24 @@
 namespace BugEngine { namespace RTTI
 {
 
+struct ParamInfo
+{
+    istring         name;
+    TypeInfo const  type;
+};
+
+struct OverloadInfo
+{
+    TypeInfo const              returnType;
+    minitl::vector<ParamInfo>   params;
+};
+
 class MethodInfo : public minitl::refcountable
 {
 public:
-    const istring   name;
+    minitl::vector<OverloadInfo>    overloads;
 
-    Value operator()(Value* values, u32 paramCount);
-
-    MethodInfo(istring name);
+    MethodInfo();
 };
 
 }}
