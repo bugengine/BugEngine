@@ -17,11 +17,6 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
-#define WM_BE_CREATEWINDOW  0
-#define WM_BE_DESTROYWINDOW 1
-#define WM_BE_CREATECONTEXT 2
-#define WM_BE_DESTROYCONTEXT 3
-
 namespace
 {
     struct WindowCreationEvent
@@ -80,28 +75,9 @@ namespace
     }
 }
 
-intptr_t Renderer::PlatformRenderer::updateWindows(intptr_t p1, intptr_t /*p2*/)
-{
-    weak<Renderer::PlatformRenderer> renderer(reinterpret_cast<Renderer::PlatformRenderer*>(p1));
-    MSG msg;
-    while(::GetMessage(&msg, 0, 0, 0))
-    {
-        if(msg.message >= WM_USER && msg.message < WM_APP)
-        {
-            renderer->handleMessage(msg.message, msg.wParam, msg.lParam);
-        }
-        else
-        {
-            DispatchMessage(&msg);
-        }
-    }
-    return 0;
-}
-
 Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
 :   m_renderer(renderer)
 ,   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)this)
-,   m_windowManagementThread("WindowManagement", &Renderer::PlatformRenderer::updateWindows, (intptr_t)this, 0, Thread::AboveNormal)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -122,70 +98,21 @@ Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    postMessage(WM_QUIT, 0, 0);
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
-}
-
-void Renderer::PlatformRenderer::postMessage(UINT msg, WPARAM wParam, LPARAM lParam) const
-{
-    PostThreadMessageA((DWORD)m_windowManagementThread.id(), msg, wParam, lParam);
-}
-
-void Renderer::PlatformRenderer::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    be_forceuse(wParam);
-    be_forceuse(lParam);
-    switch(msg)
-    {
-    case WM_USER+WM_BE_CREATEWINDOW:
-        {
-            WindowCreationEvent* event = (WindowCreationEvent*)wParam;
-            event->hWnd = CreateWindowEx( event->flags->fullscreen ? WS_EX_TOPMOST : 0,
-                event->flags->className,
-                event->flags->title,
-                event->flags->flags,
-                event->flags->x, event->flags->y,
-                event->flags->size.right-event->flags->size.left, event->flags->size.bottom-event->flags->size.top,
-                NULL, NULL, hDllInstance, NULL );
-            ShowWindow(event->hWnd, SW_SHOW);
-            UpdateWindow(event->hWnd);
-            event->event.set();
-        }
-        break;
-
-    case WM_USER+WM_BE_DESTROYWINDOW:
-        {
-            HWND hWnd = (HWND)wParam;
-            DestroyWindow(hWnd);
-        }
-        break;
-    case WM_USER+WM_BE_CREATECONTEXT:
-        {
-            ContextCreationEvent* event = (ContextCreationEvent*)wParam;
-            m_renderer->createContext(event->params);
-            event->event.set();
-        }
-        break;
-    case WM_USER+WM_BE_DESTROYCONTEXT:
-        {
-            ContextCreationEvent* event = (ContextCreationEvent*)wParam;
-            m_renderer->destroyContext();
-            event->event.set();
-        }
-        break;
-    default:
-        be_assert(false, "unhandled message type %d" | msg);
-        break;
-    }
 }
 
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags* flags) const
 {
-    WindowCreationEvent event;
-    event.flags = flags;
-    postMessage(WM_USER+WM_BE_CREATEWINDOW, (WPARAM)&event, 0);
-    event.event.wait();
-    return event.hWnd;
+    HWND hWnd = CreateWindowEx( flags->fullscreen ? WS_EX_TOPMOST : 0,
+                                flags->className,
+                                flags->title,
+                                flags->flags,
+                                flags->x, flags->y,
+                                flags->size.right-flags->size.left, flags->size.bottom-flags->size.top,
+                                NULL, NULL, hDllInstance, NULL );
+    ShowWindow(hWnd, SW_SHOW);
+    UpdateWindow(hWnd);
+    return hWnd;
 }
 
 const istring& Renderer::PlatformRenderer::getWindowClassName() const
@@ -195,7 +122,7 @@ const istring& Renderer::PlatformRenderer::getWindowClassName() const
 
 void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 {
-    postMessage(WM_USER+WM_BE_DESTROYWINDOW, (WPARAM)hWnd, 0);
+    DestroyWindow(hWnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -211,6 +138,12 @@ Renderer::~Renderer()
 
 void Renderer::flush()
 {
+    MSG msg;
+    while(::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+    {
+        DispatchMessage(&msg);
+    }
+    return;
 }
 
 uint2 Renderer::getScreenSize()
@@ -222,19 +155,12 @@ uint2 Renderer::getScreenSize()
 
 void Renderer::createContextAsync(void* params)
 {
-    ContextCreationEvent event;
-    event.params = params;
-    m_platformRenderer->postMessage(WM_USER+WM_BE_CREATECONTEXT, (WPARAM)&event, 0);
-    event.event.wait();
-    return;
+    createContext(params);
 }
 
 void Renderer::destroyContextAsync()
 {
-    ContextCreationEvent event;
-    m_platformRenderer->postMessage(WM_USER+WM_BE_DESTROYCONTEXT, (WPARAM)&event, 0);
-    event.event.wait();
-    return;
+    destroyContext();
 }
 
 }}}

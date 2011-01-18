@@ -125,7 +125,6 @@ void Renderer::destroyContext()
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
 ,   m_context(scoped<Context>::create(gameArena()))
-,   m_closed(0)
 {
     renderer->attachWindow(this);
 }

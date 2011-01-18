@@ -19,7 +19,7 @@ private:
     scoped<PlatformWindow>  m_window;
 protected:
     void* getWindowHandle() const;
-    bool isClosed() const;
+    bool closed() const override;
 public:
     Window(weak<Renderer> renderer, WindowFlags flags);
     ~Window();
