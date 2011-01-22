@@ -63,7 +63,7 @@ class Root(Container):
 
 		for fullname,classname in self.classes:
 			name = fullname[2:].replace('::', '.')
-			file.write("    be_typeid< %s >::PropertyBuilder::PropertyBuilder()\n" % (fullname))
+			file.write("    template< > be_typeid< %s >::PropertyBuilder::PropertyBuilder()\n" % (fullname))
 			file.write("    {\n")
 			file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 			file.write("        {\n")
@@ -76,7 +76,7 @@ class Root(Container):
 
 		for fullname,classname in self.classes[::-1]:
 			name = fullname[2:].replace('::', '.')
-			file.write("    be_typeid< %s >::PropertyBuilder::~PropertyBuilder()\n" % (fullname))
+			file.write("    template< > be_typeid< %s >::PropertyBuilder::~PropertyBuilder()\n" % (fullname))
 			file.write("    {\n")
 			file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 			file.write("        {\n")
@@ -85,7 +85,7 @@ class Root(Container):
 			file.write("            ns->remove(name);\n")
 			file.write("        }\n")
 			file.write("    }\n")
-			file.write("    be_typeid< %s >::PropertyBuilder be_typeid< %s >::s_properties;\n" % (fullname, fullname))
+			file.write("    template< > be_typeid< %s >::PropertyBuilder be_typeid< %s >::s_properties;\n" % (fullname, fullname))
 
 		file.write("}\n")
 		return index

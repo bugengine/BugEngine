@@ -124,7 +124,6 @@ void Renderer::destroyContext()
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
 ,   m_context(scoped<Context>::create(gameArena()))
-,   m_closed(0)
 {
     renderer->attachWindow(this);
 }
@@ -135,7 +134,7 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(!isClosed())
+    if(!closed())
     {
         ::Window* w = (::Window*)getWindowHandle();
         glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
@@ -144,7 +143,7 @@ void Window::setCurrent()
 
 void Window::clearCurrent()
 {
-    if(!isClosed())
+    if(!closed())
     {
         glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, 0, 0);
     }
@@ -152,7 +151,7 @@ void Window::clearCurrent()
 
 void Window::present()
 {
-    if(!isClosed())
+    if(!closed())
     {
         ::Window* w = (::Window*)getWindowHandle();
         glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w);

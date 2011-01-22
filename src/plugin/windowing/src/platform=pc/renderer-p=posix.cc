@@ -57,7 +57,6 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     XFree(m_visual);
     if(m_display)
     {
-        printf("bla\n");
         XCloseDisplay(m_display);
     }
 }
@@ -126,6 +125,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+    flush();
 }
 
 uint2 Renderer::getScreenSize()
