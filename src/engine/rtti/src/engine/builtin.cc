@@ -29,7 +29,7 @@ template< > ref<RTTI::ClassInfo> be_typeid<type>::klassBuilder()                
                                                                      inamespace(#type),         \
                                                                      ref<RTTI::ClassInfo>(),    \
                                                                      ref<RTTI::ClassInfo>(),    \
-                                                                     sizeof(type),              \
+                                                                     (u32)sizeof(type),         \
                                                                      0);                        \
     return klass;                                                                               \
 }
@@ -45,6 +45,7 @@ BE_MAKE_BUILTIN(i64, void);
 BE_MAKE_BUILTIN(istring, void);
 BE_MAKE_BUILTIN(inamespace, void);
 BE_MAKE_BUILTIN(ifilename, void);
+BE_MAKE_BUILTIN(minitl::format<>, void);
 
 #undef BE_MAKE_BUILTIN
 

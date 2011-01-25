@@ -35,7 +35,7 @@ public:
 public:
     bool operator==(const base_iterator<POLICY>& other);
     bool operator!=(const base_iterator<POLICY>& other);
-    
+
     base_iterator<POLICY>& operator=(const base_iterator<POLICY>& other)
     {
         m_owner = other.m_owner;
@@ -320,7 +320,7 @@ typename vector<T>::const_reference          vector<T>::operator[](size_type i) 
 template< typename T >
 void                                                vector<T>::push_back(const_reference r)
 {
-    grow(size() + 1);
+    reserve(size() + 1);
     new(m_end) T(r);
     m_end = advance(m_end, 1);
 }
@@ -330,7 +330,7 @@ template< typename ITERATOR >
 void                                                vector<T>::push_back(ITERATOR first, ITERATOR last)
 {
     size_type count = minitl::distance(first, last);
-    grow(size() + count);
+    reserve(size() + count);
     while(first != last)
     {
         new(m_end) T(*first);
@@ -405,7 +405,7 @@ void                                                vector<T>::resize(size_type 
     size_type s = distance(m_memory.data(), m_end);
     if(size > s)
     {
-        grow(size);
+        reserve(size);
         pointer newend = advance(m_memory.data(), size);
         for(pointer t = m_end; t != newend; ++t)
             new(t) T;
@@ -429,7 +429,7 @@ void                                                vector<T>::clear()
 }
 
 template< typename T >
-void                                                vector<T>::grow(size_type size)
+void                                                vector<T>::reserve(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
     if(size > capacity)

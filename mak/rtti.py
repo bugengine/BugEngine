@@ -13,7 +13,7 @@ class Container:
 			self.fullname = ''
 		self.objects = []
 		self.members = []
-		self.methods = []
+		self.methods = {}
 		self.line = line
 		self.classes = []
 		self.scope = scope
@@ -25,8 +25,12 @@ class Container:
 	def addMember(self, type, attr, name, line):
 		self.members.append((type, name, attr, self.visibility, line))
 
-	def addMethod(self, type, name, line):
-		self.methods.append((type, name, self.visibility, line))
+	def addMethod(self, name, attr, rtype, params, line):
+		if self.visibility == 'public':
+			if self.methods.has_key(name):
+				self.methods[name].append((rtype, params, attr, self.visibility, line))
+			else:
+				self.methods[name] = [(rtype, params, attr, self.visibility, line)]
 
 	def dump(self, file, namespace, index):
 		for o in self.objects:
@@ -117,7 +121,7 @@ class Enum(Container):
 		self.classes.append((self.fullname, namespace + '::s_' + decl))
 		file.write("#line %d\n" % (self.line))
 		file.write("    static inline ref< ::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
-		file.write("    { static ref< ::BugEngine::RTTI::ClassInfo> klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref< ::BugEngine::RTTI::ClassInfo>(), sizeof(%s), 0); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
+		file.write("    { static ref< ::BugEngine::RTTI::ClassInfo> klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref< ::BugEngine::RTTI::ClassInfo>(), be_checked_numcast<u32>(sizeof(%s)), 0); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
@@ -148,12 +152,12 @@ class Class(Container):
 		file.write("            return klass;\n")
 		if self.inherits != 'void':
 			file.write("        minitl::ref<const ::BugEngine::RTTI::ClassInfo> parent = ::BugEngine::be_typeid< %s >::klass();\n" % self.inherits)
-			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(rttiArena(), ::BugEngine::inamespace(\"%s\"), parent->metaclass);\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
+			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent->metaclass);\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
 		else:
 			file.write("        minitl::ref<const ::BugEngine::RTTI::ClassInfo> parent;\n")
-			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< ::BugEngine::RTTI::ClassInfo>::klass());\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
+			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< ::BugEngine::RTTI::ClassInfo>::klass());\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
 		file.write("#line %d\n" % (self.line))
-		file.write("        klass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent, metaclass, sizeof(%s), (i32)(ptrdiff_t)static_cast<%s*>((%s*)1)-1);\n" % (self.fullname[2:].replace('::', '.'), self.fullname, self.inherits, self.fullname))
+		file.write("        klass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent, metaclass, be_checked_numcast<u32>(sizeof(%s)), be_checked_numcast<i32>((ptrdiff_t)static_cast<%s*>((%s*)1)-1));\n" % (self.fullname[2:].replace('::', '.'), self.fullname, self.inherits, self.fullname))
 		file.write("        return klass;\n");
 		file.write("    }\n")
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
@@ -168,15 +172,17 @@ class Class(Container):
 				else:
 					setter = ''
 				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
-		for method,name,visibility,line in self.methods:
-			if visibility == 'public':
+		for name, overloads in self.methods.iteritems():
+			file.write("        {\n")
+			file.write("            ref<::BugEngine::RTTI::MethodInfo> mi = minitl::ref<::BugEngine::RTTI::MethodInfo>::create(::BugEngine::rttiArena());\n")
+			file.write("            mi->overloads.reserve(%d);\n" % len(overloads))
+			for rtype, params, attrs, visibility, line in overloads:
+				print rtype, name, params, attrs
 				file.write("#line %d\n" % (line))
-				getter = '&::BugEngine::RTTI::get< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
-				if attr.find('const') == -1:
-					setter = ', &::BugEngine::RTTI::set< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
-				else:
-					setter = ''
-				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
+				file.write("            mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type()));\n" % rtype)
+				for ptype, pname in params:
+					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
+			file.write("        }\n")
 		file.write("    }\n")
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")

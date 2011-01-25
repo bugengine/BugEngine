@@ -290,9 +290,14 @@ def p_unused(t):
 def p_param_name_opt(t):
 	"""
 		param_name_opt :
+	"""
+	t[0] = '?'
+
+def p_param_name_opt_2(t):
+	"""
 		param_name_opt : ID
 	"""
-	pass
+	t[0] = t[1]
 
 def p_param_value_opt(t):
 	"""
@@ -676,7 +681,7 @@ def p_operator_name(t):
 		operator_name : namelist OPERATOR
 		operator_name : SCOPE namelist OPERATOR
 	"""
-	
+
 def expandname(name, container):
 	for c in container.objects:
 		if name == c.name:
@@ -824,7 +829,7 @@ def p_struct_kw(t):
 		struct : UNION
 	"""
 	pass
-	
+
 def p_class_kw(t):
 	"""
 		class : CLASS
@@ -879,7 +884,7 @@ def p_enum_header(t):
 		enum_header :	ENUM name_opt LBRACE
 	"""
 	t.parser.namespace = rtti.Enum(t.parser.namespace, t[2], t.lineno(3), t.parser.namespace.visibility)
-	
+
 def p_enum(t):
 	"""
 		simple_type :	enum_header enum_values RBRACE
@@ -921,27 +926,52 @@ def p_method(t):
 	"""
 		method : type name LPAREN params_list RPAREN method_modifier_right
 	"""
-	pass
+	t[0] = (t[2], t[6], t[1][1], t[4], t.lineno(3))
 
 def p_constructor(t):
 	"""
 		method : type LPAREN RPAREN method_modifier_right
+	"""
+	t[0] = ('?ctor', t[4], 'void', [], t.lineno(2))
+
+def p_constructor_2(t):
+	"""
 		method : type LPAREN params_list RPAREN method_modifier_right
+	"""
+	t[0] = ('?ctor', t[5], 'void', t[3], t.lineno(2))
+
+def p_destructor(t):
+	"""
 		method : NOT ID LPAREN params_list RPAREN method_modifier_right
+	"""
+	t[0] = ('?dtor', t[6], 'void', t[4], t.lineno(3))
+
+def p_destructor_2(t):
+	"""
 		method : namelist NOT ID LPAREN params_list RPAREN method_modifier_right
 	"""
-	pass
+	t[0] = ('?dtor', t[7], 'void', t[5], t.lineno(4))
 
 def p_operator_function(t):
 	"""
 		method : type operator_name operator LPAREN params_list RPAREN method_modifier_right
 		method : type operator_name LT LPAREN params_list RPAREN method_modifier_right
 		method : type operator_name GT LPAREN params_list RPAREN method_modifier_right
+	"""
+	t[0] = (t[3], t[7], t[1][1], t[5], t.lineno(4))
+
+def p_operator_function_2(t):
+	"""
 		method : type operator_name LBRACKET RBRACKET LPAREN params_list RPAREN method_modifier_right
 		method : type operator_name LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
+	"""
+	t[0] = (t[3]+t[4], t[8], t[1][1], t[6], t.lineno(5))
+
+def p_operator_function_cast(t):
+	"""
 		method : operator_name type LPAREN params_list RPAREN method_modifier_right
 	"""
-	pass
+	t[0] = (t[2][1], t[6], t[2][1], t[4], t.lineno(3))
 
 def p_initializers(t):
 	"""
@@ -967,10 +997,20 @@ def p_method_decl_or_impl(t):
 	"""
 		decl : method SEMI
 		decl : method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], t[1][4])
+
+def p_method_decl_or_impl_2(t):
+	"""
 		decl : modifier_list method SEMI
+	"""
+	#t.parser.namespace.addMethod(t[2][0], t[2][1]+t[1], t[2][2], t[2][3], t[2][4])
+
+def p_method_decl_or_impl_3(t):
+	"""
 		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
 	"""
-	pass
+	#t.parser.namespace.addMethod(t[2][0], t[2][1]+t[0], t[2][2], t[2][3], t[2][4])
 
 ###################################
 # skiplist

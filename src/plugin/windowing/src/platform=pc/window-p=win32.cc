@@ -37,7 +37,7 @@ Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> win
     {
         BE_WIN32_PRINTERROR();
     }
-    SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG)window.operator->());
+    SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG_PTR)window.operator->());
 }
 
 Window::PlatformWindow::~PlatformWindow()
