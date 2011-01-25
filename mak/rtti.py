@@ -174,7 +174,7 @@ class Class(Container):
 				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
 		for name, overloads in self.methods.iteritems():
 			file.write("        {\n")
-			file.write("            ref<::BugEngine::RTTI::MethodInfo> mi = minitl::ref<::BugEngine::RTTI::MethodInfo>::create(::BugEngine::rttiArena());\n")
+			file.write("            ref< ::BugEngine::RTTI::MethodInfo > mi = minitl::ref< ::BugEngine::RTTI::MethodInfo >::create(::BugEngine::rttiArena());\n")
 			file.write("            mi->overloads.reserve(%d);\n" % len(overloads))
 			for rtype, params, attrs, visibility, line in overloads:
 				print rtype, name, params, attrs
@@ -186,7 +186,7 @@ class Class(Container):
 		file.write("    }\n")
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
-		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
+		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo > klass = s_%sClass();\n" % decl)
 		for type,name,attr,visibility,line in self.members:
 			if visibility == 'public':
 				file.write("#line %d\n" % (line))

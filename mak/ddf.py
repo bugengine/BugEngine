@@ -15,6 +15,7 @@ parser.add_option("-D", dest="macrofile", action="append", help="add the content
 parser.add_option("-p", "--pch", dest="pch", help="insert an include for precompiled header at the start of the file")
 
 
+
 # Reserved words
 reserved = (
 		'BE_PUBLISH',
