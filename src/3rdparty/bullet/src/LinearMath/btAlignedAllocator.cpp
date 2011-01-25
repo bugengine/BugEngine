@@ -62,11 +62,11 @@ static inline void *btAlignedAllocDefault(size_t size, int alignment)
 {
   void *ret;
   char *real;
-  unsigned long offset;
+  size_t offset;
 
   real = (char *)sAllocFunc(size + sizeof(void *) + (alignment-1));
   if (real) {
-    offset = (alignment - (unsigned long)(real + sizeof(void *))) & (alignment-1);
+    offset = (alignment - (size_t)(real + sizeof(void *))) & (alignment-1);
     ret = (void *)((real + sizeof(void *)) + offset);
     *((void **)(ret)-1) = (void *)(real);
   } else {
@@ -165,11 +165,11 @@ void*	btAlignedAllocInternal	(size_t size, int alignment)
 	ptr = sAlignedAllocFunc(size, alignment);
 #else
   char *real;
-  unsigned long offset;
+  size_t offset;
 
   real = (char *)sAllocFunc(size + sizeof(void *) + (alignment-1));
   if (real) {
-    offset = (alignment - (unsigned long)(real + sizeof(void *))) & (alignment-1);
+    offset = (alignment - (size_t)(real + sizeof(void *))) & (alignment-1);
     ptr = (void *)((real + sizeof(void *)) + offset);
     *((void **)(ptr)-1) = (void *)(real);
   } else {

@@ -37,8 +37,6 @@ private:
     BugEngine::Allocator::Block<T>  m_memory;
     T*                              m_end;
     T*                              m_capacity;
-private:
-    void grow(size_type capacity);
 public:
     explicit vector(BugEngine::Allocator& allocator, size_type count = 0);
     vector(const vector<T>& other);
@@ -73,6 +71,7 @@ public:
     const_reference         front() const;
     const_reference         back() const;
 
+    void                    reserve(size_type capacity);
     void                    resize(size_type size);
     void                    clear();
 };

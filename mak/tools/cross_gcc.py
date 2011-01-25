@@ -117,7 +117,6 @@ def find_cross_gcc(conf):
 	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
 		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
 		conf.env.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
-
 	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
 		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
 		conf.env.append_unique('CCFLAGS', flags)
