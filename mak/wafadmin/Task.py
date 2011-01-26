@@ -527,10 +527,10 @@ class Task(TaskBase):
 		"string to display to the user"
 		env = self.env
 		src_str = ' '.join([a.nice_path(env) for a in self.inputs])
-		tgt_str = ' '.join([a.nice_path(env) for a in self.outputs])
+		tgt_str = ' '.join([os.path.split(a.nice_path(env))[1] for a in self.outputs])
 		if self.outputs: sep = ' -> '
 		else: sep = ''
-		return '%s: %s%s%s\n' % (self.__class__.__name__.replace('_task', ''), src_str, sep, tgt_str)
+		return '[%s]: %s%s%s\n' % (self.__class__.__name__.replace('_task', '').center(8), src_str, sep, tgt_str)
 
 	def __repr__(self):
 		return "".join(['\n\t{task: ', self.__class__.__name__, " ", ",".join([x.name for x in self.inputs]), " -> ", ",".join([x.name for x in self.outputs]), '}'])
