@@ -34,6 +34,7 @@ template< > ref<RTTI::ClassInfo> be_typeid<type>::klassBuilder()                
     return klass;                                                                               \
 }
 
+BE_MAKE_BUILTIN(bool, void);
 BE_MAKE_BUILTIN(u8, void);
 BE_MAKE_BUILTIN(u16, void);
 BE_MAKE_BUILTIN(u32, void);

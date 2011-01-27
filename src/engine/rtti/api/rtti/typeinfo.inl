@@ -114,6 +114,29 @@ private:
     static PropertyBuilder s_properties;
 };
 
+template< typename T1, typename T2, typename T3 >
+struct be_api(RTTI) be_typeid< minitl::hashmap<T1, T2, T3> >
+{
+    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
+    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
+private:
+    class PropertyBuilder
+    {
+        PropertyBuilder()
+        {
+        }
+        ~PropertyBuilder()
+        {
+        }
+    };
+    static ref<RTTI::ClassInfo> klassBuilder()
+    {
+        static ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
+        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
+        return klass;
+    }
+    static PropertyBuilder s_properties;
+};
 }
 
 /*****************************************************************************/

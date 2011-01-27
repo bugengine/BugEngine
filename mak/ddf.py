@@ -18,7 +18,7 @@ parser.add_option("-p", "--pch", dest="pch", help="insert an include for precomp
 
 # Reserved words
 reserved = (
-		'BE_PUBLISH',
+		'PUBLISHED',
 		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
 		'USING', 'NEW', 'DELETE',
 		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
@@ -771,6 +771,7 @@ def p_namelist(t):
 # visibility
 def p_visibility(t):
 	"""
+		visibility : PUBLISHED
 		visibility : PUBLIC
 		visibility : PROTECTED
 		visibility : PRIVATE
@@ -842,13 +843,14 @@ def p_struct_header(t):
 		struct_header : name_opt parent_opt LBRACE
 	"""
 	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
-	t.parser.namespace.visibility = 'public'
+	t.parser.namespace.visibility = 'published'
 
 def p_class_header(t):
 	"""
 		class_header : name_opt parent_opt LBRACE
 	"""
 	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
+	t.parser.namespace.visibility = 'protected'
 
 def p_class(t):
 	"""
