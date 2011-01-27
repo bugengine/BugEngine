@@ -26,7 +26,7 @@ class Container:
 		self.members.append((type, name, attr, self.visibility, line))
 
 	def addMethod(self, name, attr, rtype, params, line):
-		if self.visibility == 'public':
+		if self.visibility == 'published':
 			if self.methods.has_key(name):
 				self.methods[name].append((rtype, params, attr, self.visibility, line))
 			else:
@@ -34,7 +34,8 @@ class Container:
 
 	def dump(self, file, namespace, index):
 		for o in self.objects:
-			index = o.dump(file, namespace, index)
+			if o.scope == 'public' or o.scope == 'published':
+				index = o.dump(file, namespace, index)
 		return index
 
 class Root(Container):
@@ -115,8 +116,6 @@ class Enum(Container):
 		Container.__init__(self, parent, name, line, scope)
 
 	def dump(self, file, namespace, index):
-		if self.scope != 'public':
-			return
 		decl = "enum%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl))
 		file.write("#line %d\n" % (self.line))
@@ -140,8 +139,6 @@ class Class(Container):
 		self.inherits = inherits or 'void'
 
 	def dump(self, file, namespace, index):
-		if self.scope != 'public':
-			return
 		decl = "class%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl))
 		file.write("    static inline minitl::ref< ::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
@@ -164,7 +161,7 @@ class Class(Container):
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
 		for type,name,attr,visibility,line in self.members:
-			if visibility == 'public':
+			if visibility == 'published':
 				file.write("#line %d\n" % (line))
 				getter = '&::BugEngine::RTTI::get< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
 				if attr.find('const') == -1:
@@ -180,6 +177,10 @@ class Class(Container):
 				print rtype, name, params, attrs
 				file.write("#line %d\n" % (line))
 				file.write("            mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type()));\n" % rtype)
+				if "const" in attrs:
+					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
+				else:
+					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (self.fullname))
 				for ptype, pname in params:
 					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
 			file.write("        }\n")

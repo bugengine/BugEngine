@@ -19,7 +19,7 @@
 # define     RTTIEXPORT
 #endif
 
-#define be_published public
+#define published public
 
 /*****************************************************************************/
 #endif

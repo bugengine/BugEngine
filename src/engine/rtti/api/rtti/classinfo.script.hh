@@ -23,14 +23,13 @@ class be_api(RTTI) ClassInfo : public Namespace
     friend struct BugEngine::TypeInfo;
     friend class Namespace;
     friend class Value;
-public:
+published:
     const inamespace                                    name;
     const ref<const ClassInfo>                          parent;
     const u32                                           size;
     const i32                                           offset;
-private:
-    minitl::hashmap< istring, ref<const PropertyInfo> > m_properties;
-public:
+    minitl::hashmap< istring, ref<const PropertyInfo> > properties;
+published:
     ClassInfo(const inamespace& name, ref<const ClassInfo> parent);
     ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<ClassInfo> metaclass, u32 size, i32 offset);
     ~ClassInfo();

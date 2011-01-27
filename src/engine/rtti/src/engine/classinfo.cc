@@ -15,7 +15,7 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<Cl
     ,   parent(parent)
     ,   size(size)
     ,   offset(offset)
-    ,   m_properties(rttiArena())
+    ,   properties(rttiArena())
 {
 }
 
@@ -25,7 +25,7 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent)
     ,   parent(parent)
     ,   size(0)
     ,   offset(0)
-    ,   m_properties(rttiArena())
+    ,   properties(rttiArena())
 {
 }
 
@@ -43,18 +43,18 @@ void ClassInfo::destroy(void* src) const
 
 void ClassInfo::addProperty(const istring& name, ref<const PropertyInfo> prop)
 {
-    m_properties[name] = prop;
+    properties[name] = prop;
 }
 
 void ClassInfo::removeProperty(const istring& name)
 {
-    m_properties.erase(name);
+    properties.erase(name);
 }
 
 weak<const PropertyInfo> ClassInfo::getProperty(const istring& name) const
 {
-    minitl::hashmap< istring, ref<const PropertyInfo> >::const_iterator it = m_properties.find(name);
-    if (it != m_properties.end())
+    minitl::hashmap< istring, ref<const PropertyInfo> >::const_iterator it = properties.find(name);
+    if (it != properties.end())
         return it->second;
     else
         return weak<const PropertyInfo>();
