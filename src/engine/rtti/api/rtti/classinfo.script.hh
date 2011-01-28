@@ -29,7 +29,9 @@ published:
     const u32                                           size;
     const i32                                           offset;
     minitl::hashmap< istring, ref<const PropertyInfo> > properties;
-published:
+    ref<MethodInfo>                                     call;
+    ref<MethodInfo>                                     index;
+public:
     ClassInfo(const inamespace& name, ref<const ClassInfo> parent);
     ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<ClassInfo> metaclass, u32 size, i32 offset);
     ~ClassInfo();
@@ -39,6 +41,8 @@ published:
     weak<const PropertyInfo> getProperty(const istring& name) const;
 
     bool isA(weak<const ClassInfo> klass) const;
+public:
+    Value operator()(Value* params, size_t nparams) const;
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;
