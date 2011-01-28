@@ -254,9 +254,9 @@ int Context::valueGet(lua_State *state)
 
 int Context::valueCall(lua_State *state)
 {
-    /*int i;
+    int i;
     int top = lua_gettop(state);
-    ptr<Object>* userdata = (ptr<Object>*)lua_touserdata(state, 1);
+    Value* userdata = (Value*)lua_touserdata(state, 1);
 
     void* v = 0;
     Value* values = 0;
@@ -270,7 +270,8 @@ int Context::valueCall(lua_State *state)
             values[i-2] = get(state, i);
         }
     }
-    Value result = (*userdata)->metaclass()->call(values, top-1);
+
+    Value result = userdata->type().metaclass->operator()(values, top-1);
 
     if(top-1)
     {
@@ -287,7 +288,7 @@ int Context::valueCall(lua_State *state)
     else
     {
         return 0;
-    }*/
+    }
     return 0;
 }
 

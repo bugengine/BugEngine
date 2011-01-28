@@ -47,7 +47,7 @@ struct be_api(RTTI) TypeInfo
     inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
     inline ~TypeInfo();
 
-
+public:
     u32                             size() const;
     minitl::format<>                name() const;
 private:

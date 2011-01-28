@@ -170,13 +170,19 @@ class Class(Container):
 					setter = ''
 				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
 		for name, overloads in self.methods.iteritems():
+			if name == "?ctor" or name == "?dtor":
+				continue
 			file.write("        {\n")
 			file.write("            ref< ::BugEngine::RTTI::MethodInfo > mi = minitl::ref< ::BugEngine::RTTI::MethodInfo >::create(::BugEngine::rttiArena());\n")
 			file.write("            mi->overloads.reserve(%d);\n" % len(overloads))
 			for rtype, params, attrs, visibility, line in overloads:
 				print rtype, name, params, attrs
 				file.write("#line %d\n" % (line))
-				file.write("            mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type()));\n" % rtype)
+				paramtypes = ', '.join(ptype for ptype, pname in params)
+				method = "(%s(%s::*)(%s))&%s::%s" % (rtype, self.fullname, paramtypes, self.fullname, name)
+				if paramtypes: paramtypes = ', '+paramtypes
+				call = "&BugEngine::RTTI::call%d<%s%s, %s>" % (len(params), self.fullname, paramtypes, method)
+				file.write("            mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s));\n" % (rtype, call))
 				if "const" in attrs:
 					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
 				else:

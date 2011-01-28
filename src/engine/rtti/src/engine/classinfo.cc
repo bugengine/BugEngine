@@ -72,4 +72,11 @@ bool ClassInfo::isA(weak<const ClassInfo> klass) const
     return false;
 }
 
+Value ClassInfo::operator()(Value* params, size_t nparams) const
+{
+    be_assert_recover(call != 0, "Object of type %s is not callable" | name, return Value());
+    return call->call(params, nparams);
+}
+
+
 }}
