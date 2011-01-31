@@ -1,5 +1,7 @@
 import os
 
+showline = 0
+
 class Container:
 	def __init__(self, parent, name, line, scope):
 		self.parent = parent
@@ -32,10 +34,10 @@ class Container:
 			else:
 				self.methods[name] = [(rtype, params, attr, self.visibility, line)]
 
-	def dump(self, file, namespace, index):
+	def dump(self, file, namespace, index, nested):
 		for o in self.objects:
 			if o.scope == 'public' or o.scope == 'published':
-				index = o.dump(file, namespace, index)
+				index = o.dump(file, namespace, index, nested)
 		return index
 
 class Root(Container):
@@ -43,7 +45,7 @@ class Root(Container):
 		Container.__init__(self, None, '', 1, 'public')
 		self.source = source
 
-	def dump(self, file, namespace = '', index = 0):
+	def dump(self, file, namespace = '', index = 0, nested = False):
 		file.write("#include    <rtti/stdafx.h>\n")
 		file.write("#include    <%s>\n" % self.source)
 		file.write("#include    <rtti/typeinfo.hh>\n")
@@ -54,8 +56,8 @@ class Root(Container):
 		file.write("#include    <rtti/engine/enuminfo.script.hh>\n")
 		file.write("#include    <rtti/engine/getset.hh>\n")
 		file.write("\n")
-		file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
-		index = Container.dump(self, file, namespace, index)
+		if showline: file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
+		index = Container.dump(self, file, namespace, index, False)
 		file.write("namespace BugEngine {\n\n")
 		for fullname,classname in self.classes:
 			file.write("    template< > ref<RTTI::ClassInfo> be_typeid< %s >::klassBuilder() { return %sClass(); }\n" % (fullname, classname))
@@ -70,13 +72,8 @@ class Root(Container):
 			name = fullname[2:].replace('::', '.')
 			file.write("    template< > be_typeid< %s >::PropertyBuilder::PropertyBuilder()\n" % (fullname))
 			file.write("    {\n")
-			file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
-			file.write("        {\n")
-			file.write("            inamespace name = inamespace(\"%s\");\n" % (name))
-			file.write("            weak<const RTTI::ClassInfo> cs = %sClass();\n" % (classname))
-			file.write("            ns->add(name, Value(cs));\n")
-			file.write("            %sRegisterProperties();\n" % classname)
-			file.write("        }\n")
+			file.write("        weak<const RTTI::ClassInfo> cs = %sClass();\n" % (classname))
+			file.write("        %sRegisterProperties();\n" % classname)
 			file.write("    }\n")
 
 		for fullname,classname in self.classes[::-1]:
@@ -84,11 +81,9 @@ class Root(Container):
 			file.write("    template< > be_typeid< %s >::PropertyBuilder::~PropertyBuilder()\n" % (fullname))
 			file.write("    {\n")
 			file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
-			file.write("        {\n")
-			file.write("            %sUnregisterProperties();\n" % classname)
-			file.write("            inamespace name = inamespace(\"%s\");\n" % (name))
-			file.write("            ns->remove(name);\n")
-			file.write("        }\n")
+			file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
+			file.write("        ns->remove(name);\n")
+			file.write("        %sUnregisterProperties();\n" % classname)
 			file.write("    }\n")
 			file.write("    template< > be_typeid< %s >::PropertyBuilder be_typeid< %s >::s_properties;\n" % (fullname, fullname))
 
@@ -103,10 +98,10 @@ class Namespace(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line, 'public')
 
-	def dump(self, file, namespace, index):
-		file.write("#line %d\n" % self.line)
+	def dump(self, file, namespace, index, nested):
+		if showline: file.write("#line %d\n" % self.line)
 		file.write("namespace %s {\n" % self.name)
-		index = Container.dump(self, file, namespace + '::' + self.name, index)
+		index = Container.dump(self, file, namespace + '::' + self.name, index, False)
 		file.write("}\n")
 		self.parent.classes += self.classes
 		return index
@@ -115,12 +110,25 @@ class Enum(Container):
 	def __init__(self, parent, name, line, scope):
 		Container.__init__(self, parent, name, line, scope)
 
-	def dump(self, file, namespace, index):
+	def dump(self, file, namespace, index, nested):
 		decl = "enum%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl))
-		file.write("#line %d\n" % (self.line))
+		if showline: file.write("#line %d\n" % (self.line))
+		name = self.fullname[2:].replace('::', '.')
 		file.write("    static inline ref< ::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
-		file.write("    { static ref< ::BugEngine::RTTI::ClassInfo> klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref< ::BugEngine::RTTI::ClassInfo>(), be_checked_numcast<u32>(sizeof(%s)), 0); return klass; }\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
+		file.write("    {\n")
+		file.write("        ::BugEngine::Logger::root();\n")
+		file.write("        static minitl::ref< ::BugEngine::RTTI::ClassInfo> klass;\n")
+		file.write("        if(klass)\n")
+		file.write("            return klass;\n")
+		if nested:
+			file.write("        ::BugEngine::be_typeid< %s >::klass();\n" % '::'.join(self.fullname.split('::')[:-1]))
+		file.write("        klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), ref< ::BugEngine::RTTI::ClassInfo>(), be_checked_numcast<u32>(sizeof(%s)), 0);\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
+		file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
+		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
+		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
+		file.write("        return klass;\n");
+		file.write("    }\n");
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
@@ -129,7 +137,7 @@ class Enum(Container):
 		file.write("    {\n")
 		file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
 		file.write("    }\n")
-		index = Container.dump(self, file, namespace, index+1)
+		index = Container.dump(self, file, namespace, index+1, nested)
 		self.parent.classes += self.classes
 		return index
 
@@ -138,68 +146,123 @@ class Class(Container):
 		Container.__init__(self, parent, name, line, scope)
 		self.inherits = inherits or 'void'
 
-	def dump(self, file, namespace, index):
+	def dump(self, file, namespace, index, nested):
 		decl = "class%s" % self.fullname.replace(':', '_')
 		self.classes.append((self.fullname, namespace + '::s_' + decl))
+		self.writeClass(file, decl, nested)
+		self.buildProperties(file, decl)
+		self.cleanProperties(file, decl)
+		index = Container.dump(self, file, namespace, index+1, True)
+		self.parent.classes += self.classes
+		return index
+
+	def writeClass(self, file, decl, nested):
+		name = self.fullname[2:].replace('::', '.')
 		file.write("    static inline minitl::ref< ::BugEngine::RTTI::ClassInfo> s_%sClass()\n" % decl)
 		file.write("    {\n")
 		file.write("        ::BugEngine::Logger::root();\n")
 		file.write("        static minitl::ref< ::BugEngine::RTTI::ClassInfo> klass;\n")
 		file.write("        if(klass)\n")
 		file.write("            return klass;\n")
+		if nested:
+			file.write("        ::BugEngine::be_typeid< %s >::klass();\n" % '::'.join(self.fullname.split('::')[:-1]))
 		if self.inherits != 'void':
 			file.write("        minitl::ref<const ::BugEngine::RTTI::ClassInfo> parent = ::BugEngine::be_typeid< %s >::klass();\n" % self.inherits)
+			file.write("        if(klass)\n")
+			file.write("            return klass;\n")
 			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent->metaclass);\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
 		else:
 			file.write("        minitl::ref<const ::BugEngine::RTTI::ClassInfo> parent;\n")
 			file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> metaclass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< ::BugEngine::RTTI::ClassInfo>::klass());\n" % (self.fullname[2:].replace('::', '.')+'.metaclass'))
-		file.write("#line %d\n" % (self.line))
-		file.write("        klass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent, metaclass, be_checked_numcast<u32>(sizeof(%s)), be_checked_numcast<i32>((ptrdiff_t)static_cast<%s*>((%s*)1)-1));\n" % (self.fullname[2:].replace('::', '.'), self.fullname, self.inherits, self.fullname))
+		if showline: file.write("#line %d\n" % (self.line))
+		file.write("        klass = minitl::ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent, metaclass, be_checked_numcast<u32>(sizeof(%s)), be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1));\n" % (self.fullname[2:].replace('::', '.'), self.fullname, self.inherits, self.fullname))
+		file.write("        weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
+		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
+		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
 		file.write("        return klass;\n");
 		file.write("    }\n")
+
+
+	def buildProperties(self, file, decl):
+		for name, overloads in self.methods.iteritems():
+			if name[0] == "?":
+				continue
+			file.write("    ref< ::BugEngine::RTTI::MethodInfo const > s_%s_%s;\n" % (decl, name))
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
 		for type,name,attr,visibility,line in self.members:
 			if visibility == 'published':
-				file.write("#line %d\n" % (line))
+				if showline: file.write("        #line %d\n" % (line))
 				getter = '&::BugEngine::RTTI::get< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
 				if attr.find('const') == -1:
 					setter = ', &::BugEngine::RTTI::set< %s, %s, &%s::%s >' % (type, self.fullname, self.fullname, name)
 				else:
 					setter = ''
-				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo>::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
+				file.write("        klass->addProperty(\"%s\", minitl::ref< ::BugEngine::RTTI::PropertyInfo >::create(::BugEngine::rttiArena(), BugEngine::be_typeid< %s >::type(), %s %s));\n" % (name, type, getter, setter))
+		self.buildMethods(file, decl)
+
+
+	def buildMethods(self, file, decl):
+		methodindex = 0
 		for name, overloads in self.methods.iteritems():
 			if name == "?ctor" or name == "?dtor":
 				continue
 			file.write("        {\n")
-			file.write("            ref< ::BugEngine::RTTI::MethodInfo > mi = minitl::ref< ::BugEngine::RTTI::MethodInfo >::create(::BugEngine::rttiArena());\n")
+			file.write("            ref< ::BugEngine::RTTI::MethodInfo> mi = minitl::ref< ::BugEngine::RTTI::MethodInfo >::create(::BugEngine::rttiArena());\n")
 			file.write("            mi->overloads.reserve(%d);\n" % len(overloads))
 			for rtype, params, attrs, visibility, line in overloads:
-				print rtype, name, params, attrs
-				file.write("#line %d\n" % (line))
+				if showline: file.write("            #line %d\n" % (line))
 				paramtypes = ', '.join(ptype for ptype, pname in params)
-				method = "(%s(%s::*)(%s))&%s::%s" % (rtype, self.fullname, paramtypes, self.fullname, name)
-				if paramtypes: paramtypes = ', '+paramtypes
-				call = "&BugEngine::RTTI::call%d<%s%s, %s>" % (len(params), self.fullname, paramtypes, method)
-				file.write("            mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s));\n" % (rtype, call))
-				if "const" in attrs:
-					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
+				if name == '?call':
+					method = "&%s::%s" % (self.fullname, "operator()")
 				else:
-					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (self.fullname))
+					method = "&%s::%s" % (self.fullname, name)
+				if paramtypes: paramtypes = ', '+paramtypes
+				
+				if "const" in attrs:
+					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callConst< %s >" % (self.fullname, rtype, paramtypes, method)
+				else:
+					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::call< %s >" % (self.fullname, rtype, paramtypes, method)
+				file.write("            if (BugEngine::RTTI::callhelper< %s, %s%s >::VarArg)\n" % (self.fullname, rtype, paramtypes))
+				file.write("            {\n")
+				file.write("                mi->vararg.call = %s;\n" % call)
+				file.write("            }\n")
+				file.write("            else\n")
+				file.write("            {\n")
+				file.write("                mi->overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s));\n" % (rtype, call))
+				if "const" in attrs:
+					file.write("                mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
+				else:
+					file.write("                mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (self.fullname))
 				for ptype, pname in params:
-					file.write("            mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
+					file.write("                mi->overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
+				file.write("            }\n")
+				methodindex = methodindex + 1
+			if name == '?call':
+				file.write("            klass->callOperator = mi;\n")
+			else:
+				methodname = "s_%s_%s" % (decl, name)
+				file.write("            %s = mi;\n" % methodname)
+				getter = '&::BugEngine::RTTI::staticget< ref<const ::BugEngine::RTTI::MethodInfo>, &%s >' % methodname
+				file.write("            klass->addProperty(\"%s\", minitl::ref<const ::BugEngine::RTTI::PropertyInfo >::create(::BugEngine::rttiArena(), BugEngine::be_typeid< ref<const ::BugEngine::RTTI::MethodInfo> >::type(), %s));\n" % (name, getter))
 			file.write("        }\n")
 		file.write("    }\n")
+
+
+	def cleanProperties(self, file, decl):
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo > klass = s_%sClass();\n" % decl)
+		file.write("        klass->callOperator = ref<const ::BugEngine::RTTI::MethodInfo>();\n")
 		for type,name,attr,visibility,line in self.members:
-			if visibility == 'public':
-				file.write("#line %d\n" % (line))
+			if visibility == 'published':
+				if showline: file.write("        #line %d\n" % (line))
 				file.write("        klass->removeProperty(\"%s\");\n" % (name))
+		for name, overloads in self.methods.iteritems():
+			if name[0] == "?":
+				continue
+			file.write("        klass->removeProperty(\"%s\");\n" % (name))
+			file.write("        s_%s_%s = ref<const ::BugEngine::RTTI::MethodInfo>();\n" % (decl, name))
 		file.write("    }\n")
-		index = Container.dump(self, file, namespace, index+1)
-		self.parent.classes += self.classes
-		return index
 

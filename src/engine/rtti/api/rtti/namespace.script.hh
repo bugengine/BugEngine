@@ -28,7 +28,7 @@ private:
 protected:
     Namespace(ref<ClassInfo> metaclass);
 public:
-    Namespace();
+    Namespace(const inamespace& ns);
     ~Namespace();
 
     void add(const inamespace& name, const Value& value) const;

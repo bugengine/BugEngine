@@ -135,18 +135,71 @@ TypeInfo Value::type() const
 }
 
 template< typename T >
-const T& Value::as() const
+const T Value::as() const
 {
-    be_assert(be_typeid<T>::type() == m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type().name());
-    return *(const T*)memory();
+    TypeInfo ti = be_typeid<const T>::type();
+    be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    const void* mem = memory();
+    ref<const minitl::refcountable>   rptr;
+    weak<const minitl::refcountable>  wptr;
+    const minitl::refcountable*       obj;
+    int targetType = ti.type & TypeInfo::TypeMask;
+    switch(m_type.type & TypeInfo::TypeMask)
+    {
+    case TypeInfo::ConstRefPtr:
+        if (targetType == TypeInfo::ConstRefPtr)
+            break;
+        rptr = *(ref<const minitl::refcountable>*)mem;
+        wptr = rptr;
+        mem = (const void*)&wptr;
+    case TypeInfo::ConstWeakPtr:
+        if (targetType == TypeInfo::ConstWeakPtr)
+            break;
+        wptr = *(weak<const minitl::refcountable>*)mem;
+        obj = wptr.operator->();
+        mem = (const void*)&obj;
+    case TypeInfo::ConstRawPtr:
+        if (targetType == TypeInfo::ConstRawPtr)
+            break;
+        mem = *(const void**)mem;
+    default:
+        break;
+    }
+    return *(const T*)mem;
 }
 
 template< typename T >
-T& Value::as()
+T Value::as()
 {
-    be_assert(minitl::is_const<T>::Value || (m_type.constness != TypeInfo::Const), "Value is const");
-    be_assert(be_typeid<T>::type()<=m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | be_typeid<T>::type().name());
-    return *(T*)memory();
+    TypeInfo ti = be_typeid<T>::type();
+    be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    void* mem = memory();
+    ref<minitl::refcountable>   rptr;
+    weak<minitl::refcountable>  wptr;
+    minitl::refcountable*       obj;
+    int targetType = ti.type & TypeInfo::TypeMask;
+    switch(m_type.type & TypeInfo::TypeMask)
+    {
+    case TypeInfo::ConstRefPtr:
+        if (targetType == TypeInfo::ConstRefPtr)
+            break;
+        rptr = *(ref<minitl::refcountable>*)mem;
+        wptr = rptr;
+        mem = (void*)&wptr;
+    case TypeInfo::ConstWeakPtr:
+        if (targetType == TypeInfo::ConstWeakPtr)
+            break;
+        wptr = *(weak<minitl::refcountable>*)mem;
+        obj = wptr.operator->();
+        mem = (void*)&obj;
+    case TypeInfo::ConstRawPtr:
+        if (targetType == TypeInfo::ConstRawPtr)
+            break;
+        mem = *(void**)mem;
+    default:
+        break;
+    }
+    return *(T*)mem;
 }
 
 void* Value::memory()

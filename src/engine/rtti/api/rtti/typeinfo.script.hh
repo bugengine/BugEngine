@@ -23,20 +23,20 @@ struct be_api(RTTI) TypeInfo
     enum Type
     {
         TypeMask        = 0xF,
-        ConstBit        = 0x10,
+        MutableBit      = 0x10,
 
         Class           = 0,
-        ConstRefPtr     = 1,
+        ConstRawPtr     = 1,
         ConstWeakPtr    = 2,
-        ConstRawPtr     = 3,
-        RefPtr          = ConstRefPtr | ConstBit,
-        WeakPtr         = ConstWeakPtr | ConstBit,
-        RawPtr          = ConstRawPtr | ConstBit,
+        ConstRefPtr     = 3,
+        RawPtr          = ConstRawPtr | MutableBit,
+        WeakPtr         = ConstWeakPtr | MutableBit,
+        RefPtr          = ConstRefPtr | MutableBit,
     };
     enum Constness
     {
-        Mutable = 0,
-        Const = 1
+        Const = 0,
+        Mutable = 1
     };
 
     ref<const RTTI::ClassInfo> const    metaclass;
@@ -47,7 +47,7 @@ struct be_api(RTTI) TypeInfo
     inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
     inline ~TypeInfo();
 
-public:
+published:
     u32                             size() const;
     minitl::format<>                name() const;
 private:

@@ -45,8 +45,8 @@ Namespace::Namespace(ref<ClassInfo> metaclass)
 {
 }
 
-Namespace::Namespace()
-    :   metaclass(ref<ClassInfo>::create(rttiArena(), inamespace("namespace"), be_typeid<Namespace>::klass()))
+Namespace::Namespace(const inamespace& ns)
+    :   metaclass(ref<ClassInfo>::create(rttiArena(), ns, be_typeid<Namespace>::klass()))
     ,   m_propertyCount(0)
 {
 }
@@ -58,19 +58,18 @@ Namespace::~Namespace()
 weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPolicy policy) const
 {
     Value ns = Value(weak<const Namespace>(this), metaclass);
+    inamespace shortname("mc");
     for(size_t i = 0; i < name.size()-1; ++i)
     {
+        shortname.push_back(name[i]);
         Value v = ns[name[i]];
         weak<const Namespace> namespace_;
-        if ((ns.type().type & TypeInfo::TypeMask) == TypeInfo::ConstWeakPtr)
-            namespace_ = ns.as< weak<const Namespace> >();
-        else
-            namespace_ = ns.as< ref<const Namespace> >();
+        namespace_ = ns.as< weak<const Namespace> >();
         if(!v)
         {
             if(policy == Create)
             {
-                ref<const Namespace> newns = ref<const Namespace>::create(rttiArena());
+                ref<const Namespace> newns = ref<const Namespace>::create(rttiArena(), shortname);
                 namespace_->add(name[i], Value(newns, TypeInfo(newns->metaclass, TypeInfo::RefPtr, TypeInfo::Mutable)));
                 namespace_->m_propertyCount++;
                 ns = Value(weak<const Namespace>(newns), newns->metaclass);
@@ -83,21 +82,15 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
         else
         {
             ns = v;
-            if(! (be_typeid< ref<const Namespace> >::type() <= ns.type() || be_typeid< weak<const Namespace> >::type() <= ns.type()))
+            if(! (be_typeid< weak<const Namespace> >::type() <= ns.type()))
             {
-                inamespace shortname(name);
-                for(size_t j = 1; j < i; ++j)
-                    shortname.push_back(name[i]);
                 be_error("Unable to convert value %s of type %s to a Namespace" | name | ns.type().name());
                 return weak<const Namespace>();
             }
         }
     }
 
-    if ((ns.type().type & TypeInfo::TypeMask) == TypeInfo::ConstWeakPtr)
-        return ns.as< weak<const Namespace> >();
-    else
-        return ns.as< ref<const Namespace> >();
+    return ns.as< weak<const Namespace> >();
 }
 
 void Namespace::add(const inamespace& name, const Value& value) const
@@ -125,6 +118,8 @@ void Namespace::remove(const inamespace& name) const
         ns->metaclass->removeProperty(name[name.size()-1]);
         if(ns->m_propertyCount == 0 && name.size() > 1)
         {
+            ref<ClassInfo> ci = ns->metaclass;
+            be_forceuse(ci);
             // remove weak reference before deleting the namespace
             ns = weak<const Namespace>();
             inamespace nsname = name;
@@ -142,7 +137,7 @@ void Namespace::remove(const istring& name) const
 
 weak<const Namespace> Namespace::rttiRoot()
 {
-    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena());
+    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena(), inamespace(""));
     return s_root;
 }
 
