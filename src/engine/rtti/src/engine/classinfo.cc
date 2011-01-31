@@ -43,6 +43,12 @@ void ClassInfo::destroy(void* src) const
 
 void ClassInfo::addProperty(const istring& name, ref<const PropertyInfo> prop)
 {
+    be_assert(properties.find(name) == properties.end(), "Property %s already exists in class %s!" | name | this->name);
+    properties[name] = prop;
+}
+
+void ClassInfo::replaceProperty(const istring& name, ref<const PropertyInfo> prop)
+{
     properties[name] = prop;
 }
 
@@ -72,11 +78,21 @@ bool ClassInfo::isA(weak<const ClassInfo> klass) const
     return false;
 }
 
-Value ClassInfo::operator()(Value* params, size_t nparams) const
+Value ClassInfo::call(Value* params, size_t nparams) const
 {
-    be_assert_recover(call != 0, "Object of type %s is not callable" | name, return Value());
-    return call->call(params, nparams);
+    be_assert_recover(callOperator != 0, "Object of type %s is not callable" | name, return Value());
+    return callOperator->operator()(params, nparams);
 }
 
+
+void ClassInfo::test(weak<ClassInfo const> p1) const
+{
+    be_info("Hello, world 1! from %s and %s" | name | p1->name);
+}
+
+void ClassInfo::test(weak<ClassInfo const> p1, weak<ClassInfo const> p2) const
+{
+    be_info("Hello, world 2! from %s, %s and %s" | name | p1->name | p2->name);
+}
 
 }}

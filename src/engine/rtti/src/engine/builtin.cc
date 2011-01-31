@@ -48,6 +48,7 @@ BE_MAKE_BUILTIN(istring, void);
 BE_MAKE_BUILTIN(inamespace, void);
 BE_MAKE_BUILTIN(ifilename, void);
 BE_MAKE_BUILTIN(minitl::format<>, void);
+BE_MAKE_BUILTIN(Value, void);
 
 #undef BE_MAKE_BUILTIN
 

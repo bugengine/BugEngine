@@ -216,8 +216,8 @@ vector<T>::vector(const vector& other)
 
 template< typename T >
 template< typename ITERATOR >
-vector<T>::vector(BugEngine::Allocator& allocator, ITERATOR first, iterator last)
-    :   m_memory(allocator)
+vector<T>::vector(BugEngine::Allocator& allocator, ITERATOR first, ITERATOR last)
+    :   m_memory(allocator, minitl::distance(first, last))
     ,   m_end(m_memory)
     ,   m_capacity(m_memory)
 {
@@ -321,7 +321,7 @@ template< typename T >
 void                                                vector<T>::push_back(const_reference r)
 {
     reserve(size() + 1);
-    new(m_end) T(r);
+    new((void*)m_end) T(r);
     m_end = advance(m_end, 1);
 }
 
@@ -333,7 +333,7 @@ void                                                vector<T>::push_back(ITERATO
     reserve(size() + count);
     while(first != last)
     {
-        new(m_end) T(*first);
+        new((void*)m_end) T(*first);
         m_end = advance(m_end, 1);
         ++first;
     }
@@ -362,7 +362,7 @@ typename vector<T>::iterator                 vector<T>::erase(iterator first, it
     pointer t2 = last.m_iterator;
     for( ; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
     {
-        new(t) T(*t2);
+        new((void*)t) T(*t2);
         t2->~T();
     }
     m_end = t;
@@ -408,7 +408,7 @@ void                                                vector<T>::resize(size_type 
         reserve(size);
         pointer newend = advance(m_memory.data(), size);
         for(pointer t = m_end; t != newend; ++t)
-            new(t) T;
+            new((void*)t) T;
         m_end = newend;
     }
     else
@@ -447,7 +447,7 @@ void                                                vector<T>::reserve(size_type
         pointer t = block;
         for(pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
         {
-            new(t) T(*t2);
+            new((void*)t) T(*t2);
             t2->~T();
         }
         m_memory.swap(block);

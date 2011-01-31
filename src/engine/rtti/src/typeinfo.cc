@@ -33,37 +33,37 @@ u32 TypeInfo::size() const
 minitl::format<> TypeInfo::name() const
 {
     minitl::format<> n("");
+    if(type & MutableBit)
+        n = minitl::format<>("%s") | metaclass->name;
+    else
+        n = minitl::format<>("const %s") | metaclass->name;
+
+    switch(type & TypeMask)
+    {
+    case Class:
+        break;
+    case ConstRawPtr:
+        n = minitl::format<>("raw<%s>") | n;
+        break;
+    case ConstWeakPtr:
+        n = minitl::format<>("weak<%s>") | n;
+        break;
+    case ConstRefPtr:
+        n = minitl::format<>("ref<%s>") | n;
+        break;
+    default:
+        be_notreached();
+    }
+
     switch(constness)
     {
     case Const:
-        n = minitl::format<>("const %s") | metaclass->name;
-        break;
+        return minitl::format<>("const %s") | n;
     case Mutable:
-        n = minitl::format<>("%s") | metaclass->name;
-        break;
-    default:
-        be_notreached();
-        return "";
-    }
-    switch(type)
-    {
-    case Class:
         return n;
-    case RawPtr:
-        return minitl::format<>("raw<%s>") | n;
-    case ConstRawPtr:
-        return minitl::format<>("raw<const %s>") | n;
-    case RefPtr:
-        return minitl::format<>("ref<%s>") | n;
-    case ConstRefPtr:
-        return minitl::format<>("ref<const %s>") | n;
-    case WeakPtr:
-        return minitl::format<>("weak<%s>") | n;
-    case ConstWeakPtr:
-        return minitl::format<>("weak<const %s>") | n;
     default:
         be_notreached();
-        return "";
+        return n;
     }
 }
 
@@ -123,11 +123,11 @@ void TypeInfo::destroy(void* ptr) const
         return;
     case RefPtr:
     case ConstRefPtr:
-        (*(ref<const minitl::refcountable>*)ptr).~ref();
+        ((ref<const minitl::refcountable>*)ptr)->~ref();
         return;
     case WeakPtr:
     case ConstWeakPtr:
-        (*(weak<const minitl::refcountable>*)ptr).~weak();
+        ((weak<const minitl::refcountable>*)ptr)->~weak();
         return;
     default:
         be_notreached();
@@ -136,34 +136,3 @@ void TypeInfo::destroy(void* ptr) const
 }
 
 }
-/*
-#include <rtti/value.hh>
-
-static struct A
-{
-    A()
-    {
-        using namespace BugEngine;
-        // local copy
-        RTTI::ClassInfo ci = *be_typeid<RTTI::ClassInfo>().klass;
-        Value v(Value::ByRef(ci));
-        Value v2(Value::ByRef(*be_typeid<RTTI::ClassInfo>().klass));
-        OutputDebugString((::minitl::format<>("type: %s\n") | v.type().name()).c_str());
-        Value name = v("name");
-        OutputDebugString((::minitl::format<>("name: %s\n") | name.as< const raw<const char> >().m_ptr).c_str());
-        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
-        raw<const char> c = {"blabla"};
-        name = c;
-        OutputDebugString((::minitl::format<>("name: %s\n") | name.as< raw<const char> >().m_ptr).c_str());
-        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
-        v("name") = c;
-        OutputDebugString((::minitl::format<>("name: %s\n") | name.as< raw<const char> >().m_ptr).c_str());
-        OutputDebugString((::minitl::format<>("name: %s\n") | ci.name.m_ptr).c_str());
-
-        RTTI::ClassInfo root = *be_typeid<void>().klass;
-    }
-    ~A()
-    {
-    }
-} s_a;
-*/

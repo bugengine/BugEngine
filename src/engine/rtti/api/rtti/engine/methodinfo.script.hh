@@ -22,10 +22,10 @@ public:
 class OverloadInfo
 {
 published:
-    TypeInfo const              returnType;
-    minitl::vector<ParamInfo>   params;
+    TypeInfo const                  returnType;
+    minitl::vector<const ParamInfo> params;
 public:
-    Value (*call)(Value* params, size_t nparams);
+    mutable Value (*call)(Value* params, size_t nparams);
 
     OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, size_t nparams))
         :   returnType(returnType)
@@ -38,12 +38,11 @@ class MethodInfo : public minitl::refcountable
 {
 published:
     minitl::vector<OverloadInfo>    overloads;
-
-    MethodInfo();
+    OverloadInfo const              vararg;
 published:
-    void test(ref<const ClassInfo> p1, ref<const ClassInfo> p2);
+    Value operator()(Value* params, size_t nparams) const;
 public:
-    Value call(Value* params, size_t nparams) const;
+    MethodInfo();
 };
 
 }}

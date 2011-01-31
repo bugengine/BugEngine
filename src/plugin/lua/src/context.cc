@@ -254,31 +254,24 @@ int Context::valueGet(lua_State *state)
 
 int Context::valueCall(lua_State *state)
 {
-    int i;
     int top = lua_gettop(state);
     Value* userdata = (Value*)lua_touserdata(state, 1);
 
     void* v = 0;
     Value* values = 0;
-    if(top > 1)
-    {
-        v = malloca(sizeof(Value)*(top));
-        values = new(v) Value[top-1];
+    v = malloca(be_align(sizeof(Value), be_alignof(Value))*(top));
+    values = (Value*)v;
 
-        for (i = 2; i <= top; i++)
-        {
-            values[i-2] = get(state, i);
-        }
+    for (int i = 1; i <= top; i++)
+    {
+        new((void*)(&values[i-1])) Value(get(state, i));
     }
 
-    Value result = userdata->type().metaclass->operator()(values, top-1);
+    Value result = userdata->type().metaclass->call(values, top);
 
-    if(top-1)
-    {
-        for(int i = 0; i < top-1; ++i)
-            values[i].~Value();
-        freea(v);
-    }
+    for(int i = top; i > 0; --i)
+        values[i-1].~Value();
+    freea(v);
 
     if(result)
     {

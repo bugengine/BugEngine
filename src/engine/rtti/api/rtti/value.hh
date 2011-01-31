@@ -21,7 +21,7 @@ private:
     TypeInfo        m_type;
     union
     {
-        char        m_buffer[63];
+        char        m_buffer[47];
         struct
         {
             void*   m_pointer;
@@ -54,8 +54,8 @@ public:
 
     inline TypeInfo type() const;
 
-    template< typename T > inline const T& as() const;
-    template< typename T > inline T& as();
+    template< typename T > inline const T as() const;
+    template< typename T > inline T as();
 
     template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
     template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }

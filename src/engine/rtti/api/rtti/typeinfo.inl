@@ -16,7 +16,7 @@ static inline bool operator==(TypeInfo t1, TypeInfo t2)
 }
 static inline bool operator<=(TypeInfo t1, TypeInfo t2)
 {
-    return     (t1.type & TypeInfo::TypeMask) == (t2.type & TypeInfo::TypeMask)
+    return     (t1.type & TypeInfo::TypeMask) <= (t2.type & TypeInfo::TypeMask)
             && t1.type <= t2.type
             && t2.metaclass->isA(t1.metaclass)
             && t1.constness <= t2.constness;
@@ -131,8 +131,13 @@ private:
     };
     static ref<RTTI::ClassInfo> klassBuilder()
     {
-        static ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
-        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
+        static ref<RTTI::ClassInfo> klass;
+        if (klass)
+            return klass;
+        ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
+        if (klass)
+            return klass;
+        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
         return klass;
     }
     static PropertyBuilder s_properties;

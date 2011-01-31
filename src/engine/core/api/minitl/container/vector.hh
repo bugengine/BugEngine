@@ -42,7 +42,7 @@ public:
     vector(const vector<T>& other);
     vector& operator=(const vector<T>& other);
     template< typename ITERATOR >
-    vector(BugEngine::Allocator& allocator, ITERATOR first, iterator last);
+    vector(BugEngine::Allocator& allocator, ITERATOR first, ITERATOR last);
     ~vector();
 
     iterator                begin();

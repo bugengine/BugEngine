@@ -9,10 +9,11 @@ namespace BugEngine { namespace RTTI
 
 MethodInfo::MethodInfo()
     :   overloads(rttiArena())
+    ,   vararg(be_typeid<void>::type(), NULL)
 {
 }
 
-Value MethodInfo::call(Value* params, size_t nparams) const
+Value MethodInfo::operator()(Value* params, size_t nparams) const
 {
     for (minitl::vector<OverloadInfo>::const_iterator it = overloads.begin(); it != overloads.end(); ++it)
     {
@@ -21,13 +22,10 @@ Value MethodInfo::call(Value* params, size_t nparams) const
             return it->call(params, nparams);
         }
     }
+    if(vararg.call)
+        return vararg.call(params, nparams);
     be_notreached();
     return Value();
-}
-
-void MethodInfo::test(ref<ClassInfo const> p1, ref<ClassInfo const> p2)
-{
-    printf("Hello, world!\n");
 }
 
 }}
