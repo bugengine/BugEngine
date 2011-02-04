@@ -16,6 +16,8 @@ namespace BugEngine
 
 template< typename Body >
 class Task;
+class TaskGroup;
+
 namespace ScheduledTasks
 {
 class ITaskItem;
@@ -30,6 +32,7 @@ private:
     friend class ScheduledTasks::ITaskItem;
     template< typename Body >
     friend class Task;
+    friend class TaskGroup;
 public:
     enum Priority
     {
