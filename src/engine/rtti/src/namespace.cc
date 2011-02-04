@@ -118,8 +118,6 @@ void Namespace::remove(const inamespace& name) const
         ns->metaclass->removeProperty(name[name.size()-1]);
         if(ns->m_propertyCount == 0 && name.size() > 1)
         {
-            ref<ClassInfo> ci = ns->metaclass;
-            be_forceuse(ci);
             // remove weak reference before deleting the namespace
             ns = weak<const Namespace>();
             inamespace nsname = name;
@@ -137,7 +135,8 @@ void Namespace::remove(const istring& name) const
 
 weak<const Namespace> Namespace::rttiRoot()
 {
-    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena(), inamespace(""));
+    be_typeid<Namespace>::klass();
+    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena(), inamespace("$"));
     return s_root;
 }
 
