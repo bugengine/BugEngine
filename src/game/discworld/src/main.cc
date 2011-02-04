@@ -45,7 +45,7 @@ int be_main(weak<BugEngine::Application> app)
 
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
     {
-        ref<BugEngine::Graphics::IRenderTarget> w = display->createRenderWindow(f);
+        ref<BugEngine::Graphics::IRenderTarget> w1 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
         ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
@@ -60,7 +60,7 @@ int be_main(weak<BugEngine::Application> app)
         ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::taskArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
         ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
 
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w), BugEngine::Graphics::MultiNode::MainWindow);
+        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w1), BugEngine::Graphics::MultiNode::MainWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
