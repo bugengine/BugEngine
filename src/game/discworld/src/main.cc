@@ -31,29 +31,30 @@ int be_main(weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root, root->metaclass));
     p->doFile("data/scripts/main.lua");
 
+    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
+    /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
+
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);
-    f.size = BugEngine::uint2(480, 480);
+    f.size = display->getScreenSize();
     f.title = "discworld v0.01";
     f.border = true;
     f.fullscreen = false;
     f.vsync = false;
     f.triplebuffered = false;
 
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
-    /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
 
     scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
     {
         ref<BugEngine::Graphics::IRenderTarget> w1 = display->createRenderWindow(f);
         f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
-        f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
-        f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w4 = display->createRenderWindow(f);
-        f.position += BugEngine::int2(100, 100);
-        ref<BugEngine::Graphics::IRenderTarget> w5 = display->createRenderWindow(f);
+        //ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
+        //f.position += BugEngine::int2(100, 100);
+        //ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
+        //f.position += BugEngine::int2(100, 100);
+        //ref<BugEngine::Graphics::IRenderTarget> w4 = display->createRenderWindow(f);
+        //f.position += BugEngine::int2(100, 100);
+        //ref<BugEngine::Graphics::IRenderTarget> w5 = display->createRenderWindow(f);
 
         //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
 
@@ -61,10 +62,10 @@ int be_main(weak<BugEngine::Application> app)
         ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
 
         node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w1), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
+        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
+        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
+        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
+        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
         //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(taskArena(), scene, w));
         app->setScene(node);
     }

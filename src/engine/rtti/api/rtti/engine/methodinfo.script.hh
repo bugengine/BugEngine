@@ -25,9 +25,9 @@ published:
     TypeInfo const                  returnType;
     minitl::vector<const ParamInfo> params;
 public:
-    mutable Value (*call)(Value* params, size_t nparams);
+    mutable Value (*call)(Value* params, u32 nparams);
 
-    OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, size_t nparams))
+    OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, u32 nparams))
         :   returnType(returnType)
         ,   params(rttiArena())
         ,   call(call)
@@ -40,7 +40,7 @@ published:
     minitl::vector<OverloadInfo>    overloads;
     OverloadInfo const              vararg;
 published:
-    Value operator()(Value* params, size_t nparams) const;
+    Value operator()(Value* params, u32 nparams) const;
 public:
     MethodInfo();
 };

@@ -150,7 +150,6 @@ void Renderer::destroyContext()
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
-,   m_closed(0)
 {
     renderer->attachWindow(this);
 }
@@ -161,7 +160,7 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(!isClosed())
+    if(!closed())
     {
         [m_context->m_view->m_context makeCurrentContext];
     }
@@ -169,7 +168,7 @@ void Window::setCurrent()
 
 void Window::clearCurrent()
 {
-    if(!isClosed())
+    if(!closed())
     {
         [NSOpenGLContext clearCurrentContext];
     }
@@ -177,7 +176,7 @@ void Window::clearCurrent()
 
 void Window::present()
 {
-    if(!isClosed())
+    if(!closed())
     {
         CGLFlushDrawable(m_context->m_context);
     }

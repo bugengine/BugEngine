@@ -22,7 +22,7 @@ class be_api(RTTI) ClassInfo : public Namespace
 {
     friend struct BugEngine::TypeInfo;
     friend class Namespace;
-    friend class Value;
+    friend class BugEngine::Value;
 published:
     const inamespace                                    name;
     const ref<const ClassInfo>                          parent;

@@ -13,7 +13,7 @@ MethodInfo::MethodInfo()
 {
 }
 
-Value MethodInfo::operator()(Value* params, size_t nparams) const
+Value MethodInfo::operator()(Value* params, u32 nparams) const
 {
     for (minitl::vector<OverloadInfo>::const_iterator it = overloads.begin(); it != overloads.end(); ++it)
     {
