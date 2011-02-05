@@ -15,12 +15,12 @@ class Window::PlatformWindow : public minitl::refcountable
 private:
     NSWindow*   m_window;
 public:
-    PlatformWindow();
+    PlatformWindow(WindowFlags flags);
     ~PlatformWindow();
 };
 
-Window::PlatformWindow::PlatformWindow()
-    :   m_window([[NSWindow alloc] initWithContentRect:NSMakeRect(0, 100, 200, 200)
+Window::PlatformWindow::PlatformWindow(WindowFlags flags)
+    :   m_window([[NSWindow alloc] initWithContentRect:NSMakeRect(flags.position.x(), flags.position.y(), flags.size.x(), flags.size.y())
                                              styleMask:NSTitledWindowMask | NSResizableWindowMask
                                                backing:NSBackingStoreBuffered
                                                  defer:NO])
@@ -35,7 +35,7 @@ Window::PlatformWindow::~PlatformWindow()
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create(gameArena()))
+,   m_window(scoped<PlatformWindow>::create(gameArena(), flags))
 {
 }
 
@@ -52,7 +52,7 @@ void Window::close()
     }
 }
 
-bool Window::isClosed() const
+bool Window::closed() const
 {
     return m_window == 0;
 }

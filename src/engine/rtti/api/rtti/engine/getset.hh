@@ -29,7 +29,7 @@ static inline Value staticget(weak<const PropertyInfo> _this, void* from, bool i
 }
 
 template< typename T >
-static inline Value call(Value& _this, Value* params, size_t paramCount)
+static inline Value call(Value& _this, Value* params, u32 paramCount)
 {
     return _this.as<const T&>()(params, paramCount);
 }
@@ -59,7 +59,7 @@ struct callhelper< T, void >
 {
     enum {VarArg = 0 };
     template< void(T::*method)() >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -67,7 +67,7 @@ struct callhelper< T, void >
         return Value();
     }
     template< void(T::*method)() const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -81,14 +81,14 @@ struct callhelper< T, R >
 {
     enum {VarArg = 0 };
     template< R(T::*method)() >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
         return Value((params[0].as<T*>()->*method)());
     }
     template< R(T::*method)() const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -102,7 +102,7 @@ struct callhelper< T, void, P1 >
 {
     enum {VarArg = 0 };
     template< void(T::*method)(P1) >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -111,7 +111,7 @@ struct callhelper< T, void, P1 >
         return Value();
     }
     template< void(T::*method)(P1) const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -126,7 +126,7 @@ struct callhelper< T, R, P1 >
 {
     enum {VarArg = 0 };
     template< R(T::*method)(P1) >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -134,7 +134,7 @@ struct callhelper< T, R, P1 >
         return Value((params[0].as<T*>()->*method)(params[1].as<P1>()));
     }
     template< R(T::*method)(P1) const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -150,7 +150,7 @@ struct callhelper< T, void, P1, P2 >
 {
     enum {VarArg = 0 };
     template< void(T::*method)(P1, P2) >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 3, "expecting 3 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -160,7 +160,7 @@ struct callhelper< T, void, P1, P2 >
         return Value();
     }
     template< void(T::*method)(P1, P2) const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 3, "expecting 3 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -176,7 +176,7 @@ struct callhelper< T, R, P1, P2 >
 {
     enum {VarArg = 0 };
     template< R(T::*method)(P1, P2) >
-    static Value call(Value* params, size_t paramCount)
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 3, "expecting 3 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -185,7 +185,7 @@ struct callhelper< T, R, P1, P2 >
         return Value((params[0].as<T*>()->*method)(params[1].as<P1>(), params[2].as<P2>()));
     }
     template< R(T::*method)(P1, P2) const >
-    static Value callConst(Value* params, size_t paramCount)
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(paramCount == 3, "expecting 3 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
@@ -196,17 +196,17 @@ struct callhelper< T, R, P1, P2 >
 };
 
 template< typename T >
-struct callhelper< T, Value, Value*, size_t >
+struct callhelper< T, Value, Value*, u32 >
 {
     enum {VarArg = 1 };
-    template< Value(T::*method)(Value*, size_t) >
-    static Value call(Value* params, size_t paramCount)
+    template< Value(T::*method)(Value*, u32) >
+    static Value call(Value* params, u32 paramCount)
     {
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
         return (params[0].as<T*>()->*method)(params + 1, paramCount - 1);
     }
-    template< Value(T::*method)(Value*, size_t) const >
-    static Value callConst(Value* params, size_t paramCount)
+    template< Value(T::*method)(Value*, u32) const >
+    static Value callConst(Value* params, u32 paramCount)
     {
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
         return (params[0].as<const T*>()->*method)(params + 1, paramCount - 1);
