@@ -20,11 +20,11 @@ class weak
     template< typename U, typename V >
     friend weak<U> be_const_cast(weak<V> v);
 private:
-    T* m_ptr;
+    const pointer* m_ptr;
 private:
     void swap(weak& other)
     {
-        T* tmp = other.m_ptr;
+        const minitl::pointer* tmp = other.m_ptr;
         other.m_ptr = m_ptr;
         m_ptr = tmp; 
     }
@@ -46,10 +46,10 @@ public:
     template< typename U >
     weak& operator=(U* other) { weak(other).swap(*this); return *this; }
 
-    T* operator->() const { return m_ptr; }
+    T* operator->() const { return static_cast<T*>(const_cast<minitl::pointer*>(m_ptr)); }
     operator const void*() const { return m_ptr; }
     bool operator!() const { return m_ptr == 0; }
-    T& operator*() { return *m_ptr; }
+    T& operator*() { return *static_cast<T*>(const_cast<minitl::pointer*>(m_ptr)); }
 
     void clear() { minitl::decweak(m_ptr); m_ptr = 0; }
 };

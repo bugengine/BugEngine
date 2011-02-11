@@ -16,7 +16,7 @@ class ref
     template< typename U, typename V > friend ref<U> be_checked_cast(ref<V> v);
     template< typename U, typename V > friend ref<U> be_const_cast(ref<V> v);
 private:
-    T*          m_ptr;
+    const minitl::refcountable* m_ptr;
 private:
     inline void swap(ref& other);
 private:
