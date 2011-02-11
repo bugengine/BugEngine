@@ -84,15 +84,4 @@ Value ClassInfo::call(Value* params, size_t nparams) const
     return callOperator->operator()(params, nparams);
 }
 
-
-void ClassInfo::test(weak<ClassInfo const> p1) const
-{
-    be_info("Hello, world 1! from %s and %s" | name | p1->name);
-}
-
-void ClassInfo::test(weak<ClassInfo const> p1, weak<ClassInfo const> p2) const
-{
-    be_info("Hello, world 2! from %s, %s and %s" | name | p1->name | p2->name);
-}
-
 }}

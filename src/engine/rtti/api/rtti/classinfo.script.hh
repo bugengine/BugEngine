@@ -42,9 +42,6 @@ public:
     weak<const PropertyInfo> getProperty(const istring& name) const;
 published:
     bool isA(weak<const ClassInfo> klass) const;
-published:
-    void test(weak<const ClassInfo> p1, weak<const ClassInfo> p2) const;
-    void test(weak<const ClassInfo> p1) const;
 public:
     Value call(Value* params, size_t nparams) const;
 private: // friend Value
