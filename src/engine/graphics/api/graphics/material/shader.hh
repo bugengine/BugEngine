@@ -16,7 +16,7 @@ class be_api(GRAPHICS) Shader : public Resource
 {
 private:
     ref<Shaders::Node> m_root;
-public:
+published:
     Shader();
     ~Shader();
 

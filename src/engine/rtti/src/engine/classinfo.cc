@@ -16,6 +16,9 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<Cl
     ,   size(size)
     ,   offset(offset)
     ,   properties(rttiArena())
+    ,   tags(rttiArena())
+    ,   copyconstructor(0)
+    ,   destructor(0)
 {
 }
 
@@ -26,6 +29,9 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent)
     ,   size(0)
     ,   offset(0)
     ,   properties(rttiArena())
+    ,   tags(rttiArena())
+    ,   copyconstructor(0)
+    ,   destructor(0)
 {
 }
 
@@ -35,10 +41,14 @@ ClassInfo::~ClassInfo()
 
 void ClassInfo::copy(const void* src, void* dst) const
 {
+    be_assert_recover(copyconstructor, "no copy for type %s" | name, return);
+    (*copyconstructor)(src, dst);
 }
 
 void ClassInfo::destroy(void* src) const
 {
+    be_assert_recover(destructor, "no destructor for type %s" | name, return);
+    (*destructor)(src);
 }
 
 void ClassInfo::addProperty(const istring& name, ref<const PropertyInfo> prop)
@@ -82,6 +92,19 @@ Value ClassInfo::call(Value* params, size_t nparams) const
 {
     be_assert_recover(callOperator != 0, "Object of type %s is not callable" | name, return Value());
     return callOperator->operator()(params, nparams);
+}
+
+Value ClassInfo::getTag(const TypeInfo& type) const
+{
+    return Value();
+}
+
+Value ClassInfo::getTag() const
+{
+    if(!tags.empty())
+        return tags[0];
+    else
+        return Value();
 }
 
 }}

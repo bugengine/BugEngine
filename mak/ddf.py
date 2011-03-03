@@ -545,13 +545,14 @@ def p_modifier_list(t):
 	"""
 		modifier_list : modifier_left
 	"""
-	t[0] = [t[1]]
+	t[0] = set([t[1]])
 
 def p_modifier_list_2(t):
 	"""
 		modifier_list : modifier_list modifier_left
 	"""
-	t[0] = t[1] + [t[2]]
+	t[0] = t[1]
+	t[0].add(t[2])
 
 def p_field_length_opt(t):
 	"""
@@ -841,14 +842,14 @@ def p_struct_header(t):
 	"""
 		struct_header : name_opt parent_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility, True)
 	t.parser.namespace.visibility = 'published'
 
 def p_class_header(t):
 	"""
 		class_header : name_opt parent_opt LBRACE
 	"""
-	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility)
+	t.parser.namespace = rtti.Class(t.parser.namespace, t[1], t[2], t.lineno(3), t.parser.namespace.visibility, False)
 	t.parser.namespace.visibility = 'protected'
 
 def p_class(t):
@@ -879,7 +880,7 @@ def p_enum_value(t):
 	"""
 		enum_value : ID param_value_opt
 	"""
-	pass
+	t.parser.namespace.addEnumValue(t[1])
 
 def p_enum_header(t):
 	"""
@@ -934,12 +935,14 @@ def p_constructor(t):
 	"""
 		method : type LPAREN RPAREN method_modifier_right
 	"""
+	t[4].add('static')
 	t[0] = ('?ctor', t[4], 'void', [], t.lineno(2))
 
 def p_constructor_2(t):
 	"""
 		method : type LPAREN params_list RPAREN method_modifier_right
 	"""
+	t[5].add('static')
 	t[0] = ('?ctor', t[5], 'void', t[3], t.lineno(2))
 
 def p_destructor(t):
@@ -1011,13 +1014,13 @@ def p_method_decl_or_impl_2(t):
 	"""
 		decl : modifier_list method SEMI
 	"""
-	#t.parser.namespace.addMethod(t[2][0], t[2][1]+t[1], t[2][2], t[2][3], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[2][4])
 
 def p_method_decl_or_impl_3(t):
 	"""
 		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
 	"""
-	#t.parser.namespace.addMethod(t[2][0], t[2][1]+t[0], t[2][2], t[2][3], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[2][4])
 
 ###################################
 # skiplist

@@ -5,6 +5,7 @@
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
 #include    <rtti/scripting.hh>
+#include    <rtti/classinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <system/filesystem.hh>
 
