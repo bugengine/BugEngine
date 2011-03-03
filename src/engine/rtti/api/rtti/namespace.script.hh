@@ -31,6 +31,7 @@ public:
     Namespace(const inamespace& ns);
     ~Namespace();
 
+published:
     void add(const inamespace& name, const Value& value) const;
     void add(const istring& name, const Value& value) const;
     void remove(const inamespace& name) const;

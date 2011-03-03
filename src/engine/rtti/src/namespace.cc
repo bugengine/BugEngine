@@ -63,15 +63,13 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
     {
         shortname.push_back(name[i]);
         Value v = ns[name[i]];
-        weak<const Namespace> namespace_;
-        namespace_ = ns.as< weak<const Namespace> >();
+        weak<const Namespace> nsobj = ns.as< weak<const Namespace> >();
         if(!v)
         {
             if(policy == Create)
             {
                 ref<const Namespace> newns = ref<const Namespace>::create(rttiArena(), shortname);
-                namespace_->add(name[i], Value(newns, TypeInfo(newns->metaclass, TypeInfo::RefPtr, TypeInfo::Mutable)));
-                namespace_->m_propertyCount++;
+                nsobj->add(name[i], Value(newns, TypeInfo(newns->metaclass, TypeInfo::RefPtr, TypeInfo::Mutable)));
                 ns = Value(weak<const Namespace>(newns), newns->metaclass);
             }
             else

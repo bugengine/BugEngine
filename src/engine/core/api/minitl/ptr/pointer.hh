@@ -46,6 +46,9 @@ private:
     void  operator&() const;
     void* operator new(size_t size)                  { return ::operator new(size); }
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
+private: // entity behavior
+    pointer(const pointer& other);
+    pointer& operator=(const pointer& other);
 protected:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

@@ -89,7 +89,7 @@ Context::Context(weak<const FileSystem> filesystem, Value root)
     luaL_register(m_state, "bugvalue", s_valueMetaTable);
 
     push(m_state, root);
-    lua_setglobal(m_state, "engine");
+    lua_setglobal(m_state, "game");
     lua_pop(m_state, 1);
 }
 
@@ -254,6 +254,7 @@ int Context::valueGet(lua_State *state)
 
 int Context::valueCall(lua_State *state)
 {
+    printStack(state);
     int top = lua_gettop(state);
     Value* userdata = (Value*)lua_touserdata(state, 1);
 
@@ -290,31 +291,31 @@ void Context::printStack(lua_State* l)
     int i;
     int top = lua_gettop(l);
 
-    printf("total in stack %d\n",top);
+    be_debug("total in stack %d\n"|top);
 
     for (i = 1; i <= top; i++)
     {
         int t = lua_type(l, -i);
-        printf("%4d  %4d  ", -i, top-i+1);
+        be_debug("%d  %d  " | -i | top-i+1);
         switch (t)
         {
         case LUA_TSTRING:
-            printf("string: '%s'\n", lua_tostring(l, -i));
+            be_debug("string: '%s'\n" | lua_tostring(l, -i));
             break;  
         case LUA_TBOOLEAN:
-            printf("boolean %s\n",lua_toboolean(l, -i) ? "true" : "false");
+            be_debug("boolean %s\n" |lua_toboolean(l, -i) ? "true" : "false");
             break;  
         case LUA_TNUMBER:
-            printf("number: %g\n", lua_tonumber(l, -i));
+            be_debug("number: %g\n" | lua_tonumber(l, -i));
             break;
         case LUA_TUSERDATA:
             {
                 Value* userdata = (Value*)lua_touserdata(l, -i);
-                printf("object : [%s object @0x%p]\n", userdata->type().name().c_str(), userdata);
+                be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
             }
             break;
         default:
-            printf("%s\n", lua_typename(l, t));
+            be_debug("%s\n" | lua_typename(l, t));
             break;
         }
     }

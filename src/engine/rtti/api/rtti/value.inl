@@ -5,6 +5,7 @@
 #define BE_RTTI_VALUE_INL_
 /*****************************************************************************/
 #include   <rtti/value.hh>
+#include   <rtti/typeinfo.hh>
 #include   <rtti/engine/propertyinfo.script.hh>
 #include   <minitl/type/typemanipulation.hh>
 
@@ -36,7 +37,6 @@ Value::Value(T t, ref<const RTTI::ClassInfo> metaclass)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
-    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 template< typename T >
@@ -137,6 +137,7 @@ TypeInfo Value::type() const
 template< typename T >
 const T Value::as() const
 {
+    typedef typename minitl::remove_reference<T>::type REALTYPE;
     TypeInfo ti = be_typeid<const T>::type();
     be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     const void* mem = memory();
@@ -165,12 +166,13 @@ const T Value::as() const
     default:
         break;
     }
-    return *(const T*)mem;
+    return *(const REALTYPE*)mem;
 }
 
 template< typename T >
 T Value::as()
 {
+    typedef typename minitl::remove_reference<T>::type REALTYPE;
     TypeInfo ti = be_typeid<T>::type();
     be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     void* mem = memory();
@@ -199,7 +201,7 @@ T Value::as()
     default:
         break;
     }
-    return *(T*)mem;
+    return *(REALTYPE*)mem;
 }
 
 void* Value::memory()

@@ -17,6 +17,7 @@ class ClassInfo;
 
 class Value
 {
+    friend class ::BugEngine::RTTI::ClassInfo;
 private:
     TypeInfo        m_type;
     union
@@ -40,6 +41,8 @@ private:
         T& value;
         explicit ByRefType(T& t) : value(t) { }
     };
+private:
+    template< typename T > explicit inline Value(TypeInfo typeinfo);
 public:
     inline Value();
     template< typename T > explicit inline Value(T t);
@@ -69,7 +72,7 @@ public:
 
 }
 
-#include <rtti/value.inl>
+#include <rtti/classinfo.script.hh>
 
 /*****************************************************************************/
 #endif
