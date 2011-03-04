@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include   <rtti/value.hh>
 #include   <rtti/typeinfo.hh>
-#include   <rtti/engine/propertyinfo.script.hh>
+#include   <rtti/classinfo.script.hh>
 #include   <minitl/type/typemanipulation.hh>
 
 namespace BugEngine
@@ -27,26 +27,18 @@ Value::Value(T t)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
+    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
 template< typename T >
-Value::Value(T t, ref<const RTTI::ClassInfo> metaclass)
-:   m_type(TypeInfo(metaclass, TypeInfo::Type(RTTI::RefType<T>::Reference), TypeInfo::Constness(RTTI::RefType<T>::Constness)))
+Value::Value(T t, ConstifyType constify)
+:   m_type(be_typeid<T>::type(), TypeInfo::Constify)
 ,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
-    m_type.copy(&t, memory());
-}
-template< typename T >
-Value::Value(T t, TypeInfo typeinfo)
-:   m_type(typeinfo)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
-,   m_deallocate(m_pointer != 0)
-,   m_reference(false)
-{
-    be_assert(be_typeid<T>::type() <= typeinfo, "specific typeinfo %s and typeid %s are not compatible" | typeinfo.name() | be_typeid<T>::type().name());
+    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
@@ -58,6 +50,14 @@ Value::Value(const Value& other)
 {
     if(!m_reference)
         m_type.copy(other.memory(), memory());
+}
+
+Value::Value(TypeInfo type, void* location)
+:   m_type(type)
+,   m_pointer(location)
+,   m_deallocate(false)
+,   m_reference(true)
+{
 }
 
 template< typename T >
@@ -191,6 +191,7 @@ T Value::as()
     case TypeInfo::ConstWeakPtr:
         if (targetType == TypeInfo::ConstWeakPtr)
             break;
+        // TODO: multiple inheritance will crash
         wptr = *(weak<minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (void*)&obj;
@@ -250,30 +251,12 @@ void* Value::rawget() const
 
 Value Value::operator[](const istring& name)
 {
-    void* data = rawget();
-    weak<const RTTI::ClassInfo> klass = m_type.metaclass;
-    weak<const RTTI::PropertyInfo> prop = klass->getProperty(name);
-    while(!prop)
-    {
-        data = (void*)((char*)data + klass->offset);
-        klass = klass->parent;
-        if(!klass)
-            return Value();
-        else
-            prop = klass->getProperty(name);
-    }
-    if(prop->get)
-    {
-        return prop->get(prop, data, isConst());
-    }
-    else
-    {
-        be_error("Property %s of class %s (actual type %s) is not readable" | name | klass->name | m_type.metaclass->name);
-        return Value();
-    }
+    return m_type.metaclass->get(*this, name);
 }
 
 }
+
+#include    <rtti/typeinfo.inl>
 
 /*****************************************************************************/
 #endif

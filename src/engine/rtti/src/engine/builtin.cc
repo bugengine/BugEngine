@@ -15,7 +15,7 @@ namespace BugEngine
 
 template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
 {
-    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
+    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), 0, 0);
     klass->copyconstructor = &RTTI::nullconstructor<0>;
     klass->destructor = &RTTI::nulldestructor;
     return klass;
@@ -23,7 +23,7 @@ template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
 
 template< > ref<RTTI::ClassInfo> be_typeid< ::minitl::refcountable >::klassBuilder()
 {
-    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), ref<RTTI::ClassInfo>(), 0, 0);
+    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), 0, 0);
     return klass;
 }
 
@@ -32,7 +32,6 @@ template< > ref<RTTI::ClassInfo> be_typeid<type>::klassBuilder()                
 {                                                                                               \
     static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(),               \
                                                                      inamespace(#type),         \
-                                                                     ref<RTTI::ClassInfo>(),    \
                                                                      ref<RTTI::ClassInfo>(),    \
                                                                      (u32)sizeof(type),         \
                                                                      0);                        \

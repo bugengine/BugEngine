@@ -14,17 +14,19 @@ class Value;
 namespace BugEngine { namespace RTTI
 {
 
-class be_api(RTTI) PropertyInfo : public minitl::refcountable
+struct be_api(RTTI) PropertyInfo
 {
     friend class BugEngine::Value;
 published:
+    const TypeInfo      owner;
     const TypeInfo      type;
-public:
-    PropertyInfo(const TypeInfo& type, Value (*get)(weak<const PropertyInfo> _this, void* from, bool isConst) = 0, void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst) = 0);
+    const u32           offset;
+published:
+    PropertyInfo(const TypeInfo& owner, const TypeInfo& type, u32 offset);
     ~PropertyInfo();
-private:
-    Value (*get)(weak<const PropertyInfo> _this, void* from, bool isConst);
-    void  (*set)(weak<const PropertyInfo> _this, void* from, Value& value, bool isConst);
+
+    Value get(Value& from) const;
+    void  set(Value& from, const Value& value) const;
 };
 
 }}

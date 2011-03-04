@@ -19,7 +19,7 @@
 #include    <rtti/namespace.script.hh>
 #include    <rtti/scripting.hh>
 #include    <rtti/typeinfo.hh>
-#include    <rtti/value.hh>
+#include    <rtti/value.inl>
 
 /*---------------------------------------------------------------------------*/
 int be_main(weak<BugEngine::Application> app)
@@ -28,10 +28,10 @@ int be_main(weak<BugEngine::Application> app)
     filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
 
     weak<const BugEngine::RTTI::Namespace> root = BugEngine::RTTI::Namespace::rttiRoot();
-    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root, root->metaclass));
+    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root));
     p->doFile("data/scripts/main.lua");
 
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL", weak<BugEngine::FileSystem>(filesystem));
+    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));
     /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
 
     BugEngine::Graphics::WindowFlags f;

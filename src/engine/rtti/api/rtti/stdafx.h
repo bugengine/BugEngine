@@ -19,7 +19,9 @@
 # define     RTTIEXPORT
 #endif
 
-#define published public
+#define     published           public
+#define     be_tag(v)
+#define     be_meta(metatype)
 
 /*****************************************************************************/
 #endif

@@ -13,7 +13,6 @@ class Value;
 namespace RTTI
 {
 class ClassInfo;
-class PropertyInfo;
 }
 
 struct be_api(RTTI) TypeInfo
@@ -38,12 +37,17 @@ struct be_api(RTTI) TypeInfo
         Const = 0,
         Mutable = 1
     };
+    enum ConstifyType
+    {
+        Constify
+    };
 
     ref<const RTTI::ClassInfo> const    metaclass;
     Type const                          type;
     Constness const                     constness;
 
     inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
+    inline TypeInfo(const TypeInfo& other, ConstifyType constify);
     inline ~TypeInfo();
 
     u32                             size() const;
@@ -60,6 +64,13 @@ TypeInfo::TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness co
     :   metaclass(metaclass)
     ,   type(type)
     ,   constness(constness)
+{
+}
+
+TypeInfo::TypeInfo(const TypeInfo& other, ConstifyType constify)
+    :   metaclass(other.metaclass)
+    ,   type(other.type)
+    ,   constness(Const)
 {
 }
 

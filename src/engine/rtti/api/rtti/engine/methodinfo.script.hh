@@ -10,7 +10,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-class ParamInfo
+struct be_api(RTTI) ParamInfo
 {
 published:
     istring const   name;
@@ -19,26 +19,27 @@ public:
     ParamInfo(const istring& name, const TypeInfo& type) : name(name), type(type) { }
 };
 
-class OverloadInfo
+struct be_api(RTTI) OverloadInfo
 {
 published:
     TypeInfo const                  returnType;
     minitl::vector<const ParamInfo> params;
+    bool                            vararg;
 public:
-    mutable Value (*call)(Value* params, u32 nparams);
+    Value (*call)(Value* params, u32 nparams);
 
-    OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, u32 nparams))
+    OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, u32 nparams), bool vararg = false)
         :   returnType(returnType)
         ,   params(rttiArena())
+        ,   vararg(vararg)
         ,   call(call)
     { }
 };
 
-class MethodInfo : public minitl::refcountable
+struct be_api(RTTI) MethodInfo
 {
 published:
-    minitl::vector<OverloadInfo>    overloads;
-    OverloadInfo const              vararg;
+    minitl::vector<OverloadInfo>  overloads;
 published:
     Value operator()(Value* params, u32 nparams) const;
 public:
