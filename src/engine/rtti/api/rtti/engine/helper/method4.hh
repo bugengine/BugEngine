@@ -4,7 +4,6 @@
 #ifndef BE_RTTI_ENGINE_HELPER_METHOD4_HH_
 #define BE_RTTI_ENGINE_HELPER_METHOD4_HH_
 /*****************************************************************************/
-#include   <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -36,7 +35,7 @@ struct callhelper< T, void, P1, P2, P3, P4 >
         be_assert_recover(be_typeid<P2>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[2].type().name(), return Value());
         be_assert_recover(be_typeid<P3>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[3].type().name(), return Value());
         be_assert_recover(be_typeid<P4>::type() <= params[4].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[4].type().name(), return Value());
-        (params[0].as<T*>()->*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>());
+        (params[0].as<T&>().*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>());
         return Value();
     }
 
@@ -49,7 +48,7 @@ struct callhelper< T, void, P1, P2, P3, P4 >
         be_assert_recover(be_typeid<P2>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[2].type().name(), return Value());
         be_assert_recover(be_typeid<P3>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[3].type().name(), return Value());
         be_assert_recover(be_typeid<P4>::type() <= params[4].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[4].type().name(), return Value());
-        (params[0].as<const T*>()->*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>());
+        (params[0].as<const T&>().*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>());
         return Value();
     }
 };
@@ -79,7 +78,7 @@ struct callhelper< T, R, P1, P2, P3, P4 >
         be_assert_recover(be_typeid<P2>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[2].type().name(), return Value());
         be_assert_recover(be_typeid<P3>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[3].type().name(), return Value());
         be_assert_recover(be_typeid<P4>::type() <= params[4].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[4].type().name(), return Value());
-        return Value((params[0].as<T*>()->*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>()));
+        return Value((params[0].as<T&>().*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>()));
     }
 
     template< R(T::*method)(P1, P2, P3, P4) const >
@@ -91,7 +90,7 @@ struct callhelper< T, R, P1, P2, P3, P4 >
         be_assert_recover(be_typeid<P2>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[2].type().name(), return Value());
         be_assert_recover(be_typeid<P3>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[3].type().name(), return Value());
         be_assert_recover(be_typeid<P4>::type() <= params[4].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[4].type().name(), return Value());
-        return Value((params[0].as<const T*>()->*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>()));
+        return Value((params[0].as<const T&>().*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>()));
     }
 };
 

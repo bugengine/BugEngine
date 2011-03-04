@@ -5,34 +5,47 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/value.inl>
 
 namespace BugEngine { namespace RTTI
 {
 
-ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<ClassInfo> metaclass, u32 size, i32 offset)
-    :   Namespace(metaclass)
+ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 size, i32 offset)
+    :   Namespace()
     ,   name(name)
     ,   parent(parent)
     ,   size(size)
     ,   offset(offset)
     ,   properties(rttiArena())
+    ,   methods(rttiArena())
     ,   tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
 {
+    if (parent)
+    {
+        properties.insert(parent->properties.begin(), parent->properties.end());
+        methods.insert(parent->methods.begin(), parent->methods.end());
+    }
 }
 
 ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent)
-    :   Namespace(ref<ClassInfo>())
+    :   Namespace()
     ,   name(name)
     ,   parent(parent)
     ,   size(0)
     ,   offset(0)
     ,   properties(rttiArena())
+    ,   methods(rttiArena())
     ,   tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
 {
+    if (parent)
+    {
+        properties.insert(parent->properties.begin(), parent->properties.end());
+        methods.insert(parent->methods.begin(), parent->methods.end());
+    }
 }
 
 ClassInfo::~ClassInfo()
@@ -51,29 +64,43 @@ void ClassInfo::destroy(void* src) const
     (*destructor)(src);
 }
 
-void ClassInfo::addProperty(const istring& name, ref<const PropertyInfo> prop)
+void ClassInfo::addProperty(istring name, const PropertyInfo& prop)
 {
     be_assert(properties.find(name) == properties.end(), "Property %s already exists in class %s!" | name | this->name);
-    properties[name] = prop;
+    properties.insert(std::make_pair(name, prop));
 }
 
-void ClassInfo::replaceProperty(const istring& name, ref<const PropertyInfo> prop)
-{
-    properties[name] = prop;
-}
-
-void ClassInfo::removeProperty(const istring& name)
+void ClassInfo::removeProperty(istring name)
 {
     properties.erase(name);
 }
 
-weak<const PropertyInfo> ClassInfo::getProperty(const istring& name) const
+void ClassInfo::addMethod(istring name, const MethodInfo& m)
 {
-    minitl::hashmap< istring, ref<const PropertyInfo> >::const_iterator it = properties.find(name);
+    be_assert(methods.find(name) == methods.end(), "Method %s already exists in class %s!" | name | this->name);
+    methods.insert(std::make_pair(name, m));
+}
+
+void ClassInfo::removeMethod(istring name)
+{
+    methods.erase(name);
+}
+
+Value ClassInfo::get(Value& from, istring name) const
+{
+    minitl::hashmap< istring, const PropertyInfo >::const_iterator it = properties.find(name);
     if (it != properties.end())
-        return it->second;
+        return it->second.get(from);
     else
-        return weak<const PropertyInfo>();
+    {
+        minitl::hashmap< istring, const MethodInfo >::const_iterator it = methods.find(name);
+        if (it != methods.end())
+            return Value(Value::ByRef(it->second));
+        else
+        {
+            return Value();
+        }
+    }
 }
 
 bool ClassInfo::isA(weak<const ClassInfo> klass) const
@@ -88,18 +115,12 @@ bool ClassInfo::isA(weak<const ClassInfo> klass) const
     return false;
 }
 
-Value ClassInfo::call(Value* params, size_t nparams) const
+Value ClassInfo::operator()(Value* params, size_t nparams) const
 {
-    be_assert_recover(callOperator != 0, "Object of type %s is not callable" | name, return Value());
-    return callOperator->operator()(params, nparams);
+    return constructor(params, nparams);
 }
 
 Value ClassInfo::getTag(const TypeInfo& type) const
-{
-    return Value();
-}
-
-Value ClassInfo::getTag() const
 {
     if(!tags.empty())
         return tags[0];

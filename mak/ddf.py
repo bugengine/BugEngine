@@ -24,7 +24,8 @@ reserved = (
 		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
 		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
 		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
-		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW'
+		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW',
+		'BE_TAG', 'BE_META'
 	)
 
 tokens = reserved + (
@@ -860,13 +861,21 @@ def p_class(t):
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
 
+def p_class_2(t):
+	"""
+		simple_type : BE_META LPAREN name RPAREN class class_header decls RBRACE
+		simple_type : BE_META LPAREN name RPAREN struct struct_header decls RBRACE
+	"""
+	t[0] = ('', t.parser.namespace.fullname)
+	t.parser.namespace.metaclass = t[3]
+	t.parser.namespace = t.parser.namespace.parent
+
 def p_class_decl(t):
 	"""
 		simple_type : class name
 		simple_type : struct name
 	"""
 	t[0] = ('', rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname)
-
 
 def p_enum_values(t):
 	"""
@@ -1057,6 +1066,8 @@ def p_keyword(t):
 				| OPERATOR
 				| TYPEDEF
 				| THROW
+				| BE_TAG
+				| BE_META
 	"""
 	t[0] = t[1]
 

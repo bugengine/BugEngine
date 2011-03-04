@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_TYPEINFO_INL_
 #define BE_RTTI_TYPEINFO_INL_
 /*****************************************************************************/
+#include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
 
@@ -107,8 +108,7 @@ private:
     };
     static ref<RTTI::ClassInfo> klassBuilder()
     {
-        static ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
-        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
+        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector"), ref<RTTI::ClassInfo>(), 0, 0);
         return klass;
     }
     static PropertyBuilder s_properties;
@@ -134,10 +134,7 @@ private:
         static ref<RTTI::ClassInfo> klass;
         if (klass)
             return klass;
-        ref<RTTI::ClassInfo> metaclass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap.metaclass"), be_typeid<RTTI::ClassInfo>::klass());
-        if (klass)
-            return klass;
-        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), metaclass, 0, 0);
+        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), 0, 0);
         return klass;
     }
     static PropertyBuilder s_properties;

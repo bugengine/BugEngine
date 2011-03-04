@@ -2,52 +2,19 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
+#include    <rtti/typeinfo.hh>
+#include    <rtti/typeinfo.inl>
 #include    <rtti/namespace.script.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/value.hh>
+#include    <rtti/value.inl>
 
 namespace BugEngine { namespace RTTI
 {
 
-class Namespace::MetaPropertyInfo : public RTTI::PropertyInfo
-{
-private:
-    const Value m_value;
-public:
-    MetaPropertyInfo(Value v);
-    ~MetaPropertyInfo();
-
-    static Value get(weak<const PropertyInfo> _this, void* from, bool isConst);
-};
-
-Namespace::MetaPropertyInfo::MetaPropertyInfo(Value v)
-    :   RTTI::PropertyInfo(v.type(), &get, 0)
-    ,   m_value(v)
-{
-}
-
-Namespace::MetaPropertyInfo::~MetaPropertyInfo()
-{
-}
-
-Value Namespace::MetaPropertyInfo::get(weak<const PropertyInfo> _this, void* from, bool isConst)
-{
-    return be_checked_cast< const MetaPropertyInfo >(_this)->m_value;
-}
-
-//-------------------------------------------------------------------------
-
-Namespace::Namespace(ref<ClassInfo> metaclass)
-    :   metaclass(metaclass)
-    ,   m_propertyCount(0)
-{
-}
-
-Namespace::Namespace(const inamespace& ns)
-    :   metaclass(ref<ClassInfo>::create(rttiArena(), ns, be_typeid<Namespace>::klass()))
-    ,   m_propertyCount(0)
+Namespace::Namespace()
+    :   m_decls(rttiArena())
 {
 }
 
@@ -55,22 +22,20 @@ Namespace::~Namespace()
 {
 }
 
-weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPolicy policy) const
+weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPolicy policy)const 
 {
-    Value ns = Value(weak<const Namespace>(this), metaclass);
-    inamespace shortname("mc");
+    Value ns = Value(weak<const Namespace>(this));
     for(size_t i = 0; i < name.size()-1; ++i)
     {
-        shortname.push_back(name[i]);
         Value v = ns[name[i]];
         weak<const Namespace> nsobj = ns.as< weak<const Namespace> >();
         if(!v)
         {
             if(policy == Create)
             {
-                ref<const Namespace> newns = ref<const Namespace>::create(rttiArena(), shortname);
-                nsobj->add(name[i], Value(newns, TypeInfo(newns->metaclass, TypeInfo::RefPtr, TypeInfo::Mutable)));
-                ns = Value(weak<const Namespace>(newns), newns->metaclass);
+                ref<Namespace> newns = ref<Namespace>::create(rttiArena());
+                nsobj->add(name[i], Value(newns));
+                ns = Value(weak<const Namespace>(newns));
             }
             else
             {
@@ -93,28 +58,25 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
 
 void Namespace::add(const inamespace& name, const Value& value) const
 {
-    weak<const Namespace> ns = getNamespace(name, Create);
+    weak<Namespace> ns = getNamespace(name, Create);
     if(ns)
     {
-        ns->m_propertyCount++;
-        ns->metaclass->addProperty(name[name.size()-1], ref<const MetaPropertyInfo>::create(rttiArena(), value));
+        ns->add(name[name.size()-1], value);
     }
 }
 
 void Namespace::add(const istring& name, const Value& value) const
 {
-    m_propertyCount++;
-    metaclass->addProperty(name, ref<const MetaPropertyInfo>::create(rttiArena(), value));
+    m_decls.insert(std::make_pair(name, value));
 }
 
 void Namespace::remove(const inamespace& name) const
 {
-    weak<const Namespace> ns = getNamespace(name, DoNotCreate);
+    weak<Namespace> ns = getNamespace(name, DoNotCreate);
     if(ns)
     {
-        ns->m_propertyCount--;
-        ns->metaclass->removeProperty(name[name.size()-1]);
-        if(ns->m_propertyCount == 0 && name.size() > 1)
+        ns->remove(name[name.size()-1]);
+        if(ns->empty() && name.size() > 1)
         {
             // remove weak reference before deleting the namespace
             ns = weak<const Namespace>();
@@ -127,14 +89,22 @@ void Namespace::remove(const inamespace& name) const
 
 void Namespace::remove(const istring& name) const
 {
-    m_propertyCount--;
-    metaclass->removeProperty(name);
+    m_decls.erase(name);
+}
+
+Value Namespace::get(const istring& name) const
+{
+    minitl::hashmap<istring, Value>::const_iterator it = m_decls.find(name);
+    if(it != m_decls.end())
+        return it->second;
+    else
+        return Value();
 }
 
 weak<const Namespace> Namespace::rttiRoot()
 {
     be_typeid<Namespace>::klass();
-    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena(), inamespace("$"));
+    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena());
     return s_root;
 }
 

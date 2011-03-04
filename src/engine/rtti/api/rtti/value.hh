@@ -11,13 +11,14 @@ namespace BugEngine
 
 namespace RTTI
 {
-class Namespace;
 class ClassInfo;
+struct PropertyInfo;
 }
 
 class Value
 {
     friend class ::BugEngine::RTTI::ClassInfo;
+    friend struct ::BugEngine::RTTI::PropertyInfo;
 private:
     TypeInfo        m_type;
     union
@@ -42,12 +43,13 @@ private:
         explicit ByRefType(T& t) : value(t) { }
     };
 private:
-    template< typename T > explicit inline Value(TypeInfo typeinfo);
+    inline Value(TypeInfo typeinfo, void* location);
 public:
+    enum ConstifyType { Constify };
+
     inline Value();
     template< typename T > explicit inline Value(T t);
-    template< typename T > explicit inline Value(T t, ref<const RTTI::ClassInfo> metaclass);
-    template< typename T > explicit inline Value(T t, TypeInfo typeinfo);
+    template< typename T > explicit inline Value(T t, ConstifyType constify);
     inline Value(const Value& other);
     template< typename T > explicit inline Value(ByRefType<T> t);
     inline ~Value();
@@ -71,8 +73,6 @@ public:
 };
 
 }
-
-#include <rtti/classinfo.script.hh>
 
 /*****************************************************************************/
 #endif

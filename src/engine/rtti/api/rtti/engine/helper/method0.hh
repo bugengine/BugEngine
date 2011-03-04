@@ -4,7 +4,6 @@
 #ifndef BE_RTTI_ENGINE_HELPER_METHOD0_HH_
 #define BE_RTTI_ENGINE_HELPER_METHOD0_HH_
 /*****************************************************************************/
-#include   <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -27,7 +26,7 @@ struct callhelper< T, void >
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
-        (params[0].as<T*>()->*method)();
+        (params[0].as<T&>().*method)();
         return Value();
     }
 
@@ -36,7 +35,7 @@ struct callhelper< T, void >
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
-        (params[0].as<const T*>()->*method)();
+        (params[0].as<const T&>().*method)();
         return Value();
     }
 };
@@ -58,7 +57,7 @@ struct callhelper< T, R >
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
-        return Value((params[0].as<T*>()->*method)());
+        return Value((params[0].as<T&>().*method)());
     }
 
     template< R(T::*method)() const >
@@ -66,7 +65,7 @@ struct callhelper< T, R >
     {
         be_assert_recover(paramCount == 1, "expecting 1 parameter; got %d" | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
-        return Value((params[0].as<const T*>()->*method)());
+        return Value((params[0].as<const T&>().*method)());
     }
 };
 

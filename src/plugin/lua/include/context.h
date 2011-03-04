@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <rtti/scripting.hh>
 #include    <rtti/classinfo.script.hh>
-#include    <rtti/value.hh>
+#include    <rtti/value.inl>
 #include    <system/filesystem.hh>
 
 namespace BugEngine { namespace Lua

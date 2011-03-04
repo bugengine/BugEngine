@@ -3,6 +3,7 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
+#include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 

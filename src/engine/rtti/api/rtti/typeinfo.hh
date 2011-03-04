@@ -87,7 +87,5 @@ template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder();
 
 }
 
-#include <rtti/classinfo.script.hh>
-
 /*****************************************************************************/
 #endif

@@ -206,7 +206,7 @@ istring::istring(const char *begin, const char *end)
 istring::istring(const istring& other)
 :   m_index(other.m_index)
 #ifdef BE_DEBUG
-,   m_str(m_index->str())
+,   m_str(other.m_str)
 #endif
 {
     m_index->retain();

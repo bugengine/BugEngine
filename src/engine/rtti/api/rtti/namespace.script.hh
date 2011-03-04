@@ -15,20 +15,16 @@ namespace BugEngine { namespace RTTI
 
 class ClassInfo;
 
-class Namespace : public minitl::refcountable
+be_meta(Namespace::MetaClassInfo)
+class be_api(RTTI) Namespace : public minitl::refcountable
 {
     friend class ::BugEngine::Value;
+published:
+    class be_api(RTTI) MetaClassInfo;
 private:
-    class MetaPropertyInfo;
-    friend class MetaPropertyInfo;
-public:
-    ref<ClassInfo> const    metaclass;
-private:
-    mutable u32             m_propertyCount;
-protected:
-    Namespace(ref<ClassInfo> metaclass);
-public:
-    Namespace(const inamespace& ns);
+    mutable minitl::hashmap<istring, Value> m_decls;
+published:
+    Namespace();
     ~Namespace();
 
 published:
@@ -36,10 +32,11 @@ published:
     void add(const istring& name, const Value& value) const;
     void remove(const inamespace& name) const;
     void remove(const istring& name) const;
+    Value get(const istring& name) const;
 
     static weak<const Namespace> rttiRoot();
 
-    bool empty() const { return m_propertyCount == 0; }
+    bool empty() const { return m_decls.empty(); }
 private:
     enum CreationPolicy { DoNotCreate, Create };
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;

@@ -5,7 +5,10 @@
 #define BE_RTTI_CLASSINFO_HH_
 /*****************************************************************************/
 #include    <rtti/namespace.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/value.hh>
+
 
 namespace BugEngine
 {
@@ -15,42 +18,50 @@ struct TypeInfo;
 namespace BugEngine { namespace RTTI
 {
 
-class PropertyInfo;
-class MethodInfo;
+struct PropertyInfo;
+struct MethodInfo;
 
+
+be_meta(ClassInfo::MetaClassInfo)
 class be_api(RTTI) ClassInfo : public Namespace
 {
     friend struct BugEngine::TypeInfo;
     friend class Namespace;
     friend class BugEngine::Value;
 published:
-    const inamespace                                    name;
-    const ref<const ClassInfo>                          parent;
-    const u32                                           size;
-    const i32                                           offset;
-    minitl::hashmap< istring, ref<const PropertyInfo> > properties;
-    minitl::vector<Value>                               tags;
+    class be_api(RTTI) MetaClassInfo;
+    friend class MetaClassInfo;
+published:
+    const inamespace                                name;
+    const ref<const ClassInfo>                      parent;
+    const u32                                       size;
+    const i32                                       offset;
+    minitl::hashmap< istring, const PropertyInfo>   properties;
+    minitl::hashmap< istring, const MethodInfo>     methods;
+    minitl::vector<Value>                           tags;
+    MethodInfo                                      constructor;
+    MethodInfo                                      call;
 public:
-    ref<const MethodInfo>                               callOperator;
     void (*copyconstructor)(const void* src, void* dst);
     void (*destructor)(void* src);
 published:
     ClassInfo(const inamespace& name, ref<const ClassInfo> parent);
-    ClassInfo(const inamespace& name, ref<const ClassInfo> parent, ref<ClassInfo> metaclass, u32 size, i32 offset);
+    ClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 size, i32 offset);
     ~ClassInfo();
 
 published:
-    void addProperty(const istring& name, ref<const PropertyInfo> prop);
-    void replaceProperty(const istring& name, ref<const PropertyInfo> prop);
-    void removeProperty(const istring& name);
-    weak<const PropertyInfo> getProperty(const istring& name) const;
+    void addProperty(istring name, const PropertyInfo& prop);
+    void removeProperty(istring name);
+    void addMethod(istring name, const MethodInfo& method);
+    void removeMethod(istring name);
+
+    virtual Value get(Value& from, istring name) const;
+
     Value getTag(const TypeInfo& type) const;
-    Value getTag() const;
     bool isA(weak<const ClassInfo> klass) const;
 
+    Value operator()(Value* params, size_t nparams) const;
 public:
-    Value call(Value* params, size_t nparams) const;
-
     template< typename T >
     static Value constructPtr(weak<const ClassInfo> c)
     {
@@ -144,8 +155,7 @@ private: // friend Value
 
 }}
 
-#include    <rtti/typeinfo.inl>
-#include    <rtti/value.inl>
+#include    <rtti/engine/metaclassinfo.script.hh>
 
 /*****************************************************************************/
 #endif
