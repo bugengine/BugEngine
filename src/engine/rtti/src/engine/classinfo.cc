@@ -7,6 +7,7 @@
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/value.inl>
 
+
 namespace BugEngine { namespace RTTI
 {
 

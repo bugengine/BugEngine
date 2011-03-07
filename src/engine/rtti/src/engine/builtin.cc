@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include    <rtti/stdafx.h>
-#include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/namespace.script.hh>

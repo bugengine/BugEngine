@@ -27,19 +27,28 @@ typedef u8                      byte;
 #endif
 #define _CRT_SECURE_NO_DEPRECATE 1
 
+#pragma warning(default:4263)   // member function does not override any base class virtual member function
+#pragma warning(default:4264)   // no override available for virtual member function from base 'class'; function is hidden
+#pragma warning(default:4265)   // class has virtual functions, but destructor is not virtual
+#pragma warning(default:4266)   // no override available for virtual member function from base 'type'; function is hidden
+#pragma warning(default:4906)   // wide string literal cast to 'LPSTR'
+#pragma warning(default:4946)   // reinterpret_cast used between related classes
+
+#pragma warning(error:4715)     // not all control paths return a value
+
 #pragma warning(disable:4275)
 #ifdef NDEBUG
-# pragma warning(error:4541)   // 'dynamic_cast' used on polymorphic type with '/GR-'
-# pragma warning(disable:4530) // C++ exception handler used, but unwind semantics are not enabled
-# pragma warning(disable:4100) // unreferenced formal parameter
+# pragma warning(error:4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'
+# pragma warning(disable:4530)  // C++ exception handler used, but unwind semantics are not enabled
+# pragma warning(disable:4100)  // unreferenced formal parameter
 #endif
 #pragma warning(disable:4251)
-#pragma warning(disable:4355)  // this used in base member initialization list
-#pragma warning(disable:4290)  // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#pragma warning(disable:4481)  // use of "override" extension
+#pragma warning(disable:4355)   // this used in base member initialization list
+#pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+#pragma warning(disable:4481)   // use of "override" extension
 #pragma warning(disable:4127)
-#pragma warning(disable:4709)  // comma operator used in []
-#pragma warning(disable:4505)  // unreferenced local function has been removed
+#pragma warning(disable:4709)   // comma operator used in []
+#pragma warning(disable:4505)   // unreferenced local function has been removed
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline
