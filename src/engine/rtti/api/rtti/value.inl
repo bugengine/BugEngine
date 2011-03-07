@@ -4,10 +4,11 @@
 #ifndef BE_RTTI_VALUE_INL_
 #define BE_RTTI_VALUE_INL_
 /*****************************************************************************/
-#include   <rtti/value.hh>
-#include   <rtti/typeinfo.hh>
-#include   <rtti/classinfo.script.hh>
-#include   <minitl/type/typemanipulation.hh>
+#include    <rtti/value.hh>
+#include    <rtti/typeinfo.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <minitl/type/typemanipulation.hh>
+#include    <rtti/typeinfo.inl>
 
 namespace BugEngine
 {
@@ -23,7 +24,7 @@ Value::Value()
 template< typename T >
 Value::Value(T t)
 :   m_type(be_typeid<T>::type())
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
@@ -34,7 +35,7 @@ Value::Value(T t)
 template< typename T >
 Value::Value(T t, ConstifyType constify)
 :   m_type(be_typeid<T>::type(), TypeInfo::Constify)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
 ,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
@@ -44,7 +45,7 @@ Value::Value(T t, ConstifyType constify)
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_pointer(other.m_reference ? other.m_pointer : (m_type.size() > sizeof(m_buffer) ? rttiArena().alloc(m_type.size()) : 0))
+,   m_pointer(other.m_reference ? other.m_pointer : (m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0))
 ,   m_deallocate(other.m_reference ? false : (m_pointer != 0))
 ,   m_reference(other.m_reference)
 {
@@ -94,7 +95,7 @@ Value::~Value()
         m_type.destroy(memory());
         if(m_type.size() > sizeof(m_buffer) && m_deallocate)
         {
-            rttiArena().free(m_pointer);
+            scriptArena().free(m_pointer);
         }
     }
 }

@@ -29,6 +29,11 @@ Allocator& rttiArena()
     return gameArena();
 }
 
+Allocator& scriptArena()
+{
+    return gameArena();
+}
+
 Allocator& taskArena()
 {
     return gameArena();

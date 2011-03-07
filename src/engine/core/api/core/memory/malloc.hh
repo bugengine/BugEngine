@@ -122,6 +122,7 @@ be_api(CORE) Allocator& gameArena();
 be_api(CORE) Allocator& tempArena();
 be_api(CORE) Allocator& debugArena();
 be_api(CORE) Allocator& rttiArena();
+be_api(CORE) Allocator& scriptArena();
 be_api(CORE) Allocator& taskArena();
 be_api(CORE) Allocator& inputArena();
 

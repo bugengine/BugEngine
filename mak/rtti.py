@@ -233,22 +233,20 @@ class Class(Container):
 			for rtype, params, attrs, visibility, line in overloads:
 				if showline: file.write("            #line %d\n" % (line))
 				paramtypes = ', '.join(ptype for ptype, pname in params)
+				if paramtypes: paramtypes = ', '+paramtypes
 				if name == '?call':
 					method = "&%s::%s" % (self.fullname, "operator()")
 				elif name == '?ctor':
 					rtype = 'BugEngine::Value'
 					if self.value:
-						method = "&::BugEngine::RTTI::ClassInfo::construct< weak<const ::BugEngine::RTTI::ClassInfo>, %s >" % paramtypes
+						method = "&::BugEngine::RTTI::ClassInfo::construct%d< %s %s >" % (len(params), self.fullname, paramtypes)
 					else:
-						method = "&::BugEngine::RTTI::ClassInfo::constructPtr< %s >" % paramtypes
+						method = "&::BugEngine::RTTI::ClassInfo::constructPtr%d< %s %s >" % (len(params), self.fullname, paramtypes)
 				else:
 					method = "&%s::%s" % (self.fullname, name)
 
-				if paramtypes: paramtypes = ', '+paramtypes
 				if name == '?ctor':
 					membername = '::BugEngine::RTTI::ClassInfo'
-					params = [('weak<const ::BugEngine::RTTI::ClassInfo>', '')] + params
-					paramtypes = ', weak<const ::BugEngine::RTTI::ClassInfo>' + paramtypes
 				else:
 					membername = self.fullname
 				if 'const' in attrs:
@@ -273,14 +271,7 @@ class Class(Container):
 					file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
 				file.write("            }\n")
 				methodindex = methodindex + 1
-			if name == '?call':
-				#file.write("            klass->callOperator = mi;\n")
-				pass
-			elif name == '?ctor':
-				#file.write("            klass->metaclass->callOperator = mi;\n")
-				pass
-			else:
-				file.write("            klass->addMethod(\"%s\", mi);\n" % (name))
+			file.write("            klass->addMethod(\"%s\", mi);\n" % (name))
 			file.write("        }\n")
 
 

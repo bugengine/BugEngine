@@ -48,8 +48,6 @@ struct callhelper;
 
 }}
 
-#pragma warning(push)
-#pragma warning(disable:4715)
 #include    <rtti/engine/helper/method0.hh>
 #include    <rtti/engine/helper/method1.hh>
 #include    <rtti/engine/helper/method2.hh>
@@ -58,7 +56,6 @@ struct callhelper;
 #include    <rtti/engine/helper/method5.hh>
 #include    <rtti/engine/helper/method6.hh>
 #include    <rtti/engine/helper/methodvararg.hh>
-#pragma warning(pop)
 
 /*****************************************************************************/
 #endif

@@ -296,7 +296,7 @@ void Context::printStack(lua_State* l)
     for (i = 1; i <= top; i++)
     {
         int t = lua_type(l, -i);
-        be_debug("%d  %d  " | -i | top-i+1);
+        be_debug("%d  %d  " | -i | (top-i+1));
         switch (t)
         {
         case LUA_TSTRING:
