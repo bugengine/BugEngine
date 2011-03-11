@@ -94,38 +94,42 @@ def find_cross_gcc(conf):
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc gxx gas')
-	conf.env.append_unique('ASFLAGS', '-c')
 
-	conf.env['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	conf.env['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
+def add_standard_gcc_flags(conf):
+	v = conf.env
+	v.append_unique('ASFLAGS', '-c')
 
-	conf.env['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	conf.env['LINKFLAGS_debug'] = ['-pipe', '-g']
-	conf.env['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	v['CCFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
 
-	conf.env['CCFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	conf.env['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
+	v['CCFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	v['LINKFLAGS_debug'] = ['-pipe', '-g']
+	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 
-	conf.env['CCFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	conf.env['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	conf.env['LINKFLAGS_final'] = ['-pipe', '-g', '-s']
+	v['CCFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
+
+	v['CCFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['LINKFLAGS_final'] = ['-pipe', '-g', '-s']
 
 	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
-		conf.env.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
-		conf.env.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
+		v.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
+		v.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
 	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
 		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
-		conf.env.append_unique('CCFLAGS', flags)
-		conf.env.append_unique('CXXFLAGS', flags)
-		conf.env.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
-		conf.env.append_unique('LINKFLAGS', flags)
+		v.append_unique('CCFLAGS', flags)
+		v.append_unique('CXXFLAGS', flags)
+		v.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
+		v.append_unique('LINKFLAGS', flags)
 
 
 detect = '''
 get_native_gcc_target
 find_cross_gcc
+add_standard_gcc_flags
 '''

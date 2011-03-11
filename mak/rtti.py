@@ -213,7 +213,7 @@ class Class(Container):
 		for type,name,attr,visibility,line in self.members:
 			if visibility == 'published':
 				if showline: file.write("        #line %d\n" % (line))
-				file.write("        klass->addProperty(\"%s\", ::BugEngine::RTTI::PropertyInfo(type, BugEngine::be_typeid< %s >::type(), (u32)(char*)(&((%s*)0)->%s)));\n" % (name, type, self.fullname, name))
+				file.write("        klass->addProperty(\"%s\", ::BugEngine::RTTI::PropertyInfo(type, BugEngine::be_typeid< %s >::type(), be_checked_numcast<u32>((char*)(&((%s*)0)->%s)-(char*)0)));\n" % (name, type, self.fullname, name))
 		self.buildMethods(file, decl)
 		file.write("    }\n")
 
