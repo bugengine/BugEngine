@@ -5,7 +5,7 @@
 #include    <renderer.hh>
 #include    <window.hh>
 
-#include    <GL/gl3.h>
+#include    <GL/gl.h>
 #include    <GL/glext.h>
 #include    <GL/glx.h>
 #include    <GL/glxext.h>

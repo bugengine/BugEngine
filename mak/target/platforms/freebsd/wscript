@@ -2,6 +2,7 @@
 
 import os
 import mak
+import mak.tools.cross_gcc
 import Utils
 from Logs import info,warn
 
@@ -18,6 +19,7 @@ def get_host_gcc(conf):
 	if os.uname()[-1] == 'amd64':
 		conf.env['CCFLAGS'] += ['-m64']
 		conf.env['CXXFLAGS'] += ['-m64']
+	mak.tools.cross_gcc.add_standard_gcc_flags(conf)
 
 
 def add_gcc_flags_to_env(conf):
@@ -48,7 +50,7 @@ def add_freebsd_flags_to_env(conf):
 def configure(conf):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
-		if target.find('freebsd') != -1:
+		if version.find('freebsd') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.setenv('temp')
 			try:

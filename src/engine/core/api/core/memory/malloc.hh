@@ -142,7 +142,7 @@ be_api(CORE) Allocator& inputArena();
 # define    malloca    _alloca
 # define    freea      _freea
 #else
-# if !defined(BE_PLATFORM_MACOS)
+# if !defined(BE_PLATFORM_MACOS) && !defined(BE_PLATFORM_BSD)
 #  include <malloc.h>
 # endif
 # define    malloca     alloca
