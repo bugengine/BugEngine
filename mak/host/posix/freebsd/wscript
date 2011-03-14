@@ -17,14 +17,24 @@ def get_available_gcc(conf):
 	for dir in os.environ['PATH'].split(':'):
 		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
 	for toolchaindir in toolchaindirs:
-		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
-			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
+		if not os.path.isdir(os.path.join(toolchaindir,'lib')):
+			continue
+		for lib in os.listdir(os.path.join(toolchaindir,'lib')):
+			if lib == 'gcc':
+				libdir = os.path.join(toolchaindir, 'lib', lib)
+			elif lib.startswith('gcc'):
+				libdir = os.path.join(toolchaindir, 'lib', lib, 'gcc')
+			else:
+				continue
+			for target in os.listdir(libdir):
 				if target in ['.svn', '.cvs']:
 					continue
-				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
+				print target
+				for version in os.listdir(os.path.join(libdir, target)):
+					print version
 					if version in ['.svn', '.cvs']:
 						continue
-					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
+					if os.path.islink(os.path.join(libdir, target, version)):
 						continue
 					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
 
@@ -35,5 +45,4 @@ def configure(conf):
 	conf.check_tool("bison flex data", tooldir=['mak/tools'])
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
-	conf.env['GCC_TARGETS'].append(('freebsd', '', ''))
 

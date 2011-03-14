@@ -44,8 +44,11 @@ typedef u8                      byte;
 #ifdef _WIN32
 # define BE_EXPORT              __declspec(dllexport)
 # define BE_IMPORT              __declspec(dllimport)
-#else
+#elif __GNUC__ > 3
 # define BE_EXPORT              __attribute__ ((visibility("default")))
+# define BE_IMPORT
+#else
+# define BE_EXPORT
 # define BE_IMPORT
 #endif
 

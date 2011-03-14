@@ -50,25 +50,32 @@ def find_cross_gcc(conf):
 	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
 	versionsmall = '.'.join(version.split('.')[0:2])
+	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
 		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target) or 'unknown'
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+versionsmall, var='CC', path_list=v['GCC_PATH'])
+		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc'+versionverysmall, var='CC', path_list=v['GCC_PATH'])
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+version, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++'+versionverysmall, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+version, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
+		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++'+versionverysmall, var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++', var='CXX', path_list=v['GCC_PATH'])
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
 
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+versionsmall, var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp'+versionverysmall, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
+		if not v['CPP']: v['CPP'] = conf.find_program('cpp'+versionverysmall, var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: v['CPP'] = conf.find_program('cpp', var='CPP', path_list=v['GCC_PATH'])
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
@@ -95,6 +102,7 @@ def find_cross_gcc(conf):
 
 	conf.check_tool('gcc gxx gas')
 
+@conftest
 def add_standard_gcc_flags(conf):
 	v = conf.env
 	v.append_unique('ASFLAGS', '-c')
@@ -133,3 +141,4 @@ get_native_gcc_target
 find_cross_gcc
 add_standard_gcc_flags
 '''
+
