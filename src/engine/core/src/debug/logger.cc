@@ -41,7 +41,7 @@ Logger::Logger(ref<Logger> parent, const istring& name)
 
 Logger::~Logger()
 {
-    for(size_t i = 0; i < m_listeners.size(); ++i)
+    for (size_t i = 0; i < m_listeners.size(); ++i)
         delete m_listeners[i];
 }
 
@@ -49,10 +49,10 @@ ref<Logger> Logger::instance(const inamespace& name)
 {
     ref<Logger> result = root();
 
-    for(size_t i = 0; i < name.size(); ++i)
+    for (size_t i = 0; i < name.size(); ++i)
     {
         minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
-        if(it == result->m_children.end())
+        if (it == result->m_children.end())
         {
             ref<Logger> next = ref<Logger>::create(debugArena(), result, name[i]);
             result->m_children.insert(std::make_pair(name[i], next));
@@ -83,12 +83,12 @@ void Logger::addListener(ILogListener* listener)
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
-    for(minitl::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for (minitl::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }
 
-    if(m_parent)
+    if (m_parent)
     {
         result |= m_parent->log(level, filename, line, msg);
     }

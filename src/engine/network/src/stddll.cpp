@@ -12,7 +12,7 @@ extern "C" BOOL WINAPI DllMain( HINSTANCE hinstDLL,
                                 DWORD fdwReason,
                                 LPVOID /*lpvReserved*/)
 {
-    if( fdwReason == DLL_PROCESS_ATTACH)
+    if (fdwReason == DLL_PROCESS_ATTACH)
     {
         BugEngine::hDllInstance = hinstDLL; 
     }

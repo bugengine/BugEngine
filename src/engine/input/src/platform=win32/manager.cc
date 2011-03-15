@@ -58,7 +58,7 @@ Manager::Manager()
     BE_WIN32_CHECKRESULT(GetRawInputDeviceList(0, &numDevices, sizeof(RAWINPUTDEVICELIST)));
     RAWINPUTDEVICELIST* lst = (RAWINPUTDEVICELIST*)malloca(numDevices*sizeof(RAWINPUTDEVICELIST));
     BE_WIN32_CHECKRESULT(GetRawInputDeviceList(lst, &numDevices, sizeof(RAWINPUTDEVICELIST)));
-    for(u32 i = 0; i < numDevices; ++i)
+    for (u32 i = 0; i < numDevices; ++i)
     {
         RID_DEVICE_INFO info;
         unsigned size = info.cbSize = sizeof(info);
@@ -108,7 +108,7 @@ Manager::~Manager()
 weak<Device> Manager::getDevice(void* handle)
 {
     DeviceList::iterator it = m_devices.find(handle);
-    if(it != m_devices.end())
+    if (it != m_devices.end())
         return it->second;
     else
         return weak<Device>();
@@ -116,7 +116,7 @@ weak<Device> Manager::getDevice(void* handle)
 
 void Manager::update() const
 {
-    for(DeviceList::const_iterator it = m_devices.begin(); it != m_devices.end(); ++it)
+    for (DeviceList::const_iterator it = m_devices.begin(); it != m_devices.end(); ++it)
         it->second->update();
 }
 
@@ -140,7 +140,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
             case RIM_TYPEKEYBOARD:
                 {
                     weak<Device> d = m->getDevice(rinput->header.hDevice);
-                    if(d)
+                    if (d)
                     {
                         float value = (rinput->data.keyboard.Message == WM_KEYDOWN||rinput->data.keyboard.Message == WM_SYSKEYDOWN) ? 1.0f : 0.0f;
                         be_checked_cast<Keyboard>(d)->getBuffer()[rinput->data.keyboard.MakeCode] = value;
@@ -190,7 +190,7 @@ intptr_t Manager::waitInput(intptr_t /*p1*/, intptr_t /*p2*/)
     comm.m_event.set();
 
     MSG msg;
-    while(GetMessage(&msg, 0, 0, 0))
+    while (GetMessage(&msg, 0, 0, 0))
     {
         switch(msg.message)
         {

@@ -42,11 +42,11 @@ format<size>::format(const char *format)
 template< u16 size >
 void format<size>::findToken() const
 {
-    while(*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
+    while (*m_firstFormat && (m_firstFormat[1] == '%' || m_firstFormat[0] != '%'))
     {
         m_firstFormat++;
     }
-    if(!m_firstFormat[0])
+    if (!m_firstFormat[0])
         m_firstFormat = 0;
 }
 
@@ -76,7 +76,7 @@ const char* format<size>::token() const
 template< u16 size >
 void format<size>::put(const char *value) const
 {
-    if(!value)
+    if (!value)
         value = "(null)";
     size_t s = strlen(value);
     memmove(m_firstFormat+s, m_firstFormat+2, size-(m_firstFormat+s-m_buffer));
@@ -127,7 +127,7 @@ const format<size>& operator|(const format<size>& f, i64 value)
         *(buf--) = (char)(value%10)+'0';
         value /= 10;
     } while (value);
-    if(sign)
+    if (sign)
     {
         *(buf--) = '-';
     }
@@ -183,10 +183,10 @@ const format<size>& operator|(const format<size>& f, const T* value)
     result[0] = '0';
     result[1] = 'x';
     result[s] = 0;
-    for(size_t i = 0; i < sizeof(value)*2; ++i)
+    for (size_t i = 0; i < sizeof(value)*2; ++i)
     {
         result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
-        if(result[i+2] > '9')
+        if (result[i+2] > '9')
             result[i+2] = result[i+2]+'A'-'9'-1;
     }
     f.put(result);
@@ -204,7 +204,7 @@ void format<size>::append(const char *value)
 {
     size_t s = strlen(m_buffer);
     strncat(m_buffer + s, value, size-s-1);
-    if(!m_firstFormat)
+    if (!m_firstFormat)
     {
         m_firstFormat = m_buffer + s;
         findToken();

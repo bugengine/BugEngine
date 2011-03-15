@@ -30,10 +30,10 @@ Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> win
     f.size.top    = 0;
     f.size.bottom = flags.size.y();
     f.fullscreen = !flags.border;
-    if(flags.border)
+    if (flags.border)
         AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
     m_window = renderer->m_platformRenderer->createWindowImplementation(&f);
-    if(!m_window)
+    if (!m_window)
     {
         BE_WIN32_PRINTERROR();
     }
@@ -44,7 +44,7 @@ Window::PlatformWindow::~PlatformWindow()
 {
     HWND hWnd = m_window;
     m_window = 0;
-    if(hWnd)
+    if (hWnd)
         be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 

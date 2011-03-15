@@ -20,19 +20,19 @@ SettingsManager* SettingsManager::getManager()
 SettingsManager::SettingsManager()
 {
     be_settings_in = fopen("engine.cfg", "r");
-    if(be_settings_in)
+    if (be_settings_in)
     {
         be_settings_parse(this);
     }
     ifilename p = Environment::getEnvironment().getHomeDirectory() + ifilename("engine.cfg");
     be_settings_in = fopen(p.str().c_str(), "r");
-    if(be_settings_in)
+    if (be_settings_in)
     {
         be_settings_parse(this);
     }
     p = Environment::getEnvironment().getHomeDirectory() + ipath(Environment::getEnvironment().getGame()) + ifilename("engine.cfg");
     be_settings_in = fopen(p.str().c_str(), "r");
-    if(be_settings_in)
+    if (be_settings_in)
     {
         be_settings_parse(this);
     }

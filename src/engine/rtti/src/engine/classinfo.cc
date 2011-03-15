@@ -107,9 +107,9 @@ Value ClassInfo::get(Value& from, istring name) const
 bool ClassInfo::isA(weak<const ClassInfo> klass) const
 {
     weak<const ClassInfo> ci = this;
-    while(ci)
+    while (ci)
     {
-        if(ci == klass)
+        if (ci == klass)
             return true;
         ci = ci->parent;
     }
@@ -123,10 +123,12 @@ Value ClassInfo::operator()(Value* params, size_t nparams) const
 
 Value ClassInfo::getTag(const TypeInfo& type) const
 {
-    if(!tags.empty())
-        return tags[0];
-    else
-        return Value();
+    for (minitl::vector< Value >::const_iterator it = tags.begin(); it != tags.end(); ++it)
+    {
+        if (type <= it->type())
+            return *it;
+    }
+    return Value();
 }
 
 }}

@@ -36,13 +36,13 @@ void Environment::init(int /*argc*/, const char *argv[])
     size_t s = strlen(argv[0])-1;
     do
     {
-        if(exe[s] == '\\' || exe[s] == '/')
+        if (exe[s] == '\\' || exe[s] == '/')
             break;
         s--;
     }
-    while(s != 0);
+    while (s != 0);
     size_t begin = s;
-    while(exe[s] && exe[s] != '.')
+    while (exe[s] && exe[s] != '.')
         s++;
     m_dataDirectory = ipath(exe, exe+begin);
     m_dataDirectory.push_back(istring("data"));

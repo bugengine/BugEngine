@@ -45,6 +45,7 @@ def build(bld):
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
+	package			= module.library('package',     [core, rtti, system] )
 	input			= module.library('input',       [core, rtti] )
 	graphics		= module.library('graphics',    [core, rtti, system, input, freetype ] )
 	audio			= module.library('audio',       [core, rtti, system, oggvorbis] )
@@ -52,8 +53,8 @@ def build(bld):
 	mobile			= module.library('mobile',      [core, rtti, system, graphics, audio, physics, input] )
 	main			= module.library('main',        [core, rtti, system, input, graphics, audio, physics, mobile])
 
-	discworld		= module.game('discworld',      [core, rtti, system, input, graphics, audio, physics, mobile, main])
-	editor			= module.tool('editor',         [core, rtti, system, input, graphics, audio, physics, mobile, main], platforms=['pc'])
+	discworld		= module.game('discworld',      [core, rtti, system, package, input, graphics, audio, physics, mobile, main])
+	editor			= module.tool('editor',         [core, rtti, system, package, input, graphics, audio, physics, mobile, main], platforms=['pc'])
 
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])

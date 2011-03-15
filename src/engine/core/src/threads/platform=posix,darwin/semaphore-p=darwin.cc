@@ -23,7 +23,7 @@ Semaphore::~Semaphore()
 
 void Semaphore::release(int count)
 {
-    for(int i = 0; i < count; ++i)
+    for (int i = 0; i < count; ++i)
     {
         MPSignalSemaphore(*(MPSemaphoreID*)m_data);
     }
@@ -32,7 +32,7 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int result = MPWaitOnSemaphore(*(MPSemaphoreID*)m_data, kDurationForever);
-    if(result == 0)
+    if (result == 0)
     {
         return Finished;
     }

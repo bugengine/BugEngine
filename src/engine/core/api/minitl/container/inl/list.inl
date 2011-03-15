@@ -275,7 +275,7 @@ typename list<T>::iterator                   list<T>::erase(iterator it)
 template< typename T >
 typename list<T>::iterator                   list<T>::erase(iterator first, iterator last)
 {
-    while(first != last)
+    while (first != last)
     {
         const item* i = first.item();
         first = m_list.erase(first);

@@ -23,7 +23,7 @@ static inline void displayError()
     ::LocalFree(msg);
 }
 #define BE_WIN32_PRINTERROR()       displayError()
-#define BE_WIN32_CHECKRESULT(x)     if((x) == (UINT)-1) BE_WIN32_PRINTERROR()
+#define BE_WIN32_CHECKRESULT(x)     if ((x) == (UINT)-1) BE_WIN32_PRINTERROR()
 
 
 #ifdef _AMD64

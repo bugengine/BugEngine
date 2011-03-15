@@ -49,7 +49,7 @@ Value::Value(const Value& other)
 ,   m_deallocate(other.m_reference ? false : (m_pointer != 0))
 ,   m_reference(other.m_reference)
 {
-    if(!m_reference)
+    if (!m_reference)
         m_type.copy(other.memory(), memory());
 }
 
@@ -90,10 +90,10 @@ inline Value::Value(ByRefType<const Value> t)
 
 Value::~Value()
 {
-    if(!m_reference)
+    if (!m_reference)
     {
         m_type.destroy(memory());
-        if(m_type.size() > sizeof(m_buffer) && m_deallocate)
+        if (m_type.size() > sizeof(m_buffer) && m_deallocate)
         {
             scriptArena().free(m_pointer);
         }
@@ -102,7 +102,7 @@ Value::~Value()
 
 Value& Value::operator=(const Value& v)
 {
-    if(m_reference)
+    if (m_reference)
     {
         be_assert_recover(v.m_type.metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
         be_assert_recover(m_type.constness != TypeInfo::Const, "Value is const", return *this);
@@ -208,7 +208,7 @@ T Value::as()
 
 void* Value::memory()
 {
-    if(!m_reference && m_type.size() <= sizeof(m_buffer))
+    if (!m_reference && m_type.size() <= sizeof(m_buffer))
     {
         return m_buffer;
     }
@@ -220,7 +220,7 @@ void* Value::memory()
 
 const void* Value::memory() const
 {
-    if(!m_reference && m_type.size() <= sizeof(m_buffer))
+    if (!m_reference && m_type.size() <= sizeof(m_buffer))
     {
         return m_buffer;
     }

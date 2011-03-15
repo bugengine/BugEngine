@@ -24,17 +24,17 @@ Environment::Environment()
 void Environment::init(int argc, const char *argv[])
 {
     const char* filename = argv[0];
-    while(*filename != 0)
+    while (*filename != 0)
     {
         filename++;
     }
-    while(*filename != '/' && filename != argv[0])
+    while (*filename != '/' && filename != argv[0])
     {
         filename--;
     }
     m_game = filename+1;
     filename--;
-    while(*filename != '/' && filename != argv[0])
+    while (*filename != '/' && filename != argv[0])
     {
         filename--;
     }

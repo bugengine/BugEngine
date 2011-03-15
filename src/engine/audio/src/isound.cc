@@ -52,7 +52,7 @@ ISound::ISound(weak<IWorld> owner, ref<IMemoryStream> soundfile)
 
 ISound::~ISound()
 {
-    if(m_data)
+    if (m_data)
     {
         ov_clear(static_cast<OggVorbis_File*>(m_data));
         delete static_cast<OggVorbis_File*>(m_data);
@@ -76,7 +76,7 @@ size_t ISound::read(void* buffer, size_t size, int& frequency, int& channels) co
 
 void ISound::reset()
 {
-    if(m_data)
+    if (m_data)
     {
         ov_clear(static_cast<OggVorbis_File*>(m_data));
         delete static_cast<OggVorbis_File*>(m_data);
@@ -88,7 +88,7 @@ void ISound::reset()
 bool ISound::lock(weak<ISource> from)
 {
     be_forceuse(from);
-    if(m_locked)
+    if (m_locked)
         return false;
     m_locked = true;
     return true;

@@ -29,7 +29,7 @@ void Window::begin(ClearMode clear)
 void Window::end(PresentMode presentMode)
 {
     glFlush();
-    if(presentMode == Present)
+    if (presentMode == Present)
     {
         present();
     }

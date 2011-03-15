@@ -38,7 +38,7 @@ Application::~Application(void)
 
 void Application::frameUpdate()
 {
-    if(m_scene && m_scene->closed())
+    if (m_scene && m_scene->closed())
     {
         setScene(scoped<Graphics::INode>());
     }
@@ -53,7 +53,7 @@ int Application::run()
 
 void Application::setScene(scoped<Graphics::INode> scene)
 {
-    if(scene)
+    if (scene)
     {
         m_startSceneUpdate = ITask::CallbackConnection(m_tasks[0], scene->updateTask()->startCallback());
         m_endSceneUpdate = ITask::CallbackConnection(scene->updateTask(),m_tasks[0]->startCallback());

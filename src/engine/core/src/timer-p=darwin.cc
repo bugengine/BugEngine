@@ -43,7 +43,7 @@ u64 Timer::tick()
 float Timer::now()
 {
     static mach_timebase_info_data_t info = { 0, 0 };
-    if(info.denom == 0)
+    if (info.denom == 0)
         mach_timebase_info(&info);
     return ((float)mach_absolute_time())*1000.0f*info.numer/info.denom;
 }

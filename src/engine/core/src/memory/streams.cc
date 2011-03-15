@@ -32,7 +32,7 @@ i64 IMemoryStream::read(void* buffer, i64 _size)
 void IMemoryStream::write(void* buffer, i64 _size)
 {
     be_assert(writable(), "writing in a read-only memory stream");
-    if(_size > size()-offset())
+    if (_size > size()-offset())
         resize(offset()+_size);
     memcpy(memory(),buffer,be_checked_numcast<size_t>(_size));
     seek(eSeekMove, _size);
@@ -83,13 +83,13 @@ void MemoryStream::seek(SeekMethod method, i64 offset)
     default:
         be_notreached();
     }
-    if(m_offset < 0) m_offset = 0;
-    if(m_offset > m_size) m_offset = m_size;
+    if (m_offset < 0) m_offset = 0;
+    if (m_offset > m_size) m_offset = m_size;
 }
 
 void MemoryStream::resize(i64 size)
 {
-    if(!m_memory.resize((size_t)size))
+    if (!m_memory.resize((size_t)size))
     {
         m_memory.realloc((size_t)size);
     }

@@ -19,7 +19,7 @@ static void* loadLibrary(const istring& pluginName)
 {
     minitl::format<> f = (minitl::format<>("lib%s.so") | pluginName.c_str());
     void* handle = dlopen((Environment::getEnvironment().getDataDirectory() + ipath("plugins") + ifilename(f.c_str())).str().c_str(), RTLD_NOW|RTLD_LOCAL);
-    if(!handle)
+    if (!handle)
     {
         be_error(dlerror());
     }
@@ -30,7 +30,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
 :   m_handle(loadLibrary(pluginName))
 {
-    if(m_handle)
+    if  (m_handle)
     {
         Interface* (*_init)(void) = reinterpret_cast<Interface* (*)(void)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
         be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
@@ -43,7 +43,7 @@ template< typename T1 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 :   m_handle(loadLibrary(pluginName))
 {
-    if(m_handle)
+    if (m_handle)
     {
         Interface* (*_init)(T1) = reinterpret_cast<Interface* (*)(T1)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
         be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
@@ -56,7 +56,7 @@ template< typename T1, typename T2 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 :   m_handle(loadLibrary(pluginName))
 {
-    if(m_handle)
+    if (m_handle)
     {
         Interface* (*_init)(T1, T2) = reinterpret_cast<Interface* (*)(T1, T2)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
         be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
@@ -66,10 +66,10 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if(m_handle)
+    if (m_handle)
     {
         void (*_fini)(Interface*) = reinterpret_cast<void (*)(Interface*)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_destroyPlugin")));
-        if(_fini)
+        if (_fini)
             _fini(m_interface); 
         //dlclose(m_handle);
     }

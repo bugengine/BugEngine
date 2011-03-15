@@ -37,22 +37,22 @@ void swap(T& a, T& b)
 template< typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
 {
-    for(; first != last; ++first) f(*first);
+    for (; first != last; ++first) f(*first);
 }
 
 template< typename ITERATOR, typename T >
 void fill(ITERATOR first, ITERATOR last, const T& value)
 {
-    for(; first != last; ++first) *first = value;
+    for (; first != last; ++first) *first = value;
 }
 
 template< typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 {
     ITERATOR middle = first;
-    for( ; first != last; ++first)
+    for ( ; first != last; ++first)
     {
-        if(!p(*first))
+        if (!p(*first))
         {
             minitl::swap(*first, *middle);
             ++middle;
@@ -65,7 +65,7 @@ template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
     typename ITERATOR::difference_type d = distance(first, last);
-    if(d > 1)
+    if (d > 1)
     {
         ITERATOR reallast = last - 1;
         ITERATOR t = first + d/2;

@@ -25,7 +25,7 @@ DwarfModule::StringBuffer::~StringBuffer()
 
 const char* DwarfModule::StringBuffer::store(const char* string, size_t size)
 {
-    if(m_size-m_current > size)
+    if (m_size-m_current > size)
     {
         char* buffer = m_buffer+m_current;
         m_current += size + 1;
@@ -86,15 +86,15 @@ struct Unit
 
 bool DwarfModule::AddressRange::consistent(AddressRange range1, AddressRange range2)
 {
-    if(range1.begin > range1.end)
+    if (range1.begin > range1.end)
         return false;
-    if(range2.begin > range2.end)
+    if (range2.begin > range2.end)
         return false;
-    if(range1.begin <= range2.begin)
+    if (range1.begin <= range2.begin)
     {
         return range1.end <= range2.end;
     }
-    else if(range1.begin <= range2.end)
+    else if (range1.begin <= range2.end)
     {
         return range1.end <= range2.end;
     }
@@ -175,7 +175,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
     memcpy(&m, m_buffer+m_position, 4);
     value.value = m;
     m_position += 4;
-    if(value.value == 0xffffffff)
+    if (value.value == 0xffffffff)
     {
         Integer<u64,endianness> m;
         memcpy(&m, m_buffer+m_position, 8);
@@ -189,7 +189,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwarf::offset_t& value)
 {
-    if(m_64)
+    if (m_64)
     {
         Integer<u64,endianness> m;
         memcpy(&m, m_buffer+m_position, 8);
@@ -216,7 +216,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
         value.value += ((*(m_buffer+m_position)) & 0x7f) << i;
         i+=7;
         m_position++;
-    } while((*(m_buffer+m_position-1)) & 0x80);
+    } while ((*(m_buffer+m_position-1)) & 0x80);
     return *this;
 }
 
@@ -280,11 +280,11 @@ DwarfModule::~DwarfModule()
 
 bool DwarfModule::resolve(u64 address, Symbol& symbol) const
 {
-    if(address >= m_begin && address < m_end)
+    if (address >= m_begin && address < m_end)
     {
         AddressRange r; r.begin = r.end = address;
         UnitMap::const_iterator it = m_units.find(r);
-        if(it != m_units.end())
+        if (it != m_units.end())
         {
             fillSymbol(symbol, address, m_moduleName[m_moduleName.size()-1].c_str(), it->second.name, "", 0);
         }
@@ -307,28 +307,28 @@ void DwarfModule::parse(const Module& module)
     u8* lineProgram = 0;
 
     const Module::Section& debug_str = module[".debug_str"];
-    if(debug_str)
+    if (debug_str)
     {
         m_strings = ref<StringBuffer>::create(debugArena(), be_checked_numcast<size_t>(debug_str.fileSize), m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
     debugInfo = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_info.fileSize));
-    if(debug_info)
+    if (debug_info)
     {
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
     debugAbbrev = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_abbrev.fileSize));
-    if(debug_abbrev)
+    if (debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
     lineProgram = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_line.fileSize));
-    if(debug_line)
+    if (debug_line)
     {
         module.readSection(debug_line, lineProgram);
     }
@@ -337,7 +337,7 @@ void DwarfModule::parse(const Module& module)
     Buffer<endianness> abbreviations(debugAbbrev, debugAbbrevSize);
     Buffer<endianness> info(debugInfo, debugInfoSize);
 
-    while(info)
+    while (info)
     {
         Dwarf::Unit unit;
 
@@ -348,7 +348,7 @@ void DwarfModule::parse(const Module& module)
         info >> unit.ptrSize;
 
         abbreviations.seek(unit.abbrev);
-        while(readAbbreviation(abbreviations, abbrev)) /*again*/;
+        while (readAbbreviation(abbreviations, abbrev)) /*again*/;
         readInfos(info, m_units, abbrev, unit.ptrSize);
     }
 }
@@ -358,12 +358,12 @@ const char * DwarfModule::storeString(const char *string)
     size_t size = strlen(string);
     const char *result = 0;
     be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
-    if(!m_strings)
+    if (!m_strings)
     {
         m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize);
     }
     result = m_strings->store(string, size);
-    if(!result)
+    if (!result)
     {
         m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize, m_strings);
         result = m_strings->store(string, size);
@@ -382,10 +382,10 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
 {
     Dwarf::uleb128_t code;
     buffer >> code;
-    if(code == 0)
+    if (code == 0)
         return false;
 
-    if(abbreviations.size() < code)
+    if (abbreviations.size() < code)
         abbreviations.resize(be_checked_numcast<size_t>(code.value));
     Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast<size_t>(code.value)-1];
 
@@ -396,14 +396,14 @@ bool DwarfModule::readAbbreviation(Buffer<endianness>& buffer, minitl::vector<Dw
     {
         buffer >> abbrev.properties[abbrev.propertyCount].attribute;
         buffer >> abbrev.properties[abbrev.propertyCount].type;
-        if(abbrev.properties[abbrev.propertyCount].attribute == 0)
+        if (abbrev.properties[abbrev.propertyCount].attribute == 0)
         {
             be_assert(abbrev.properties[abbrev.propertyCount].type == 0, "inconsistent entry with attribute %d and type %d" | abbrev.properties[abbrev.propertyCount].attribute | abbrev.properties[abbrev.propertyCount].type);
             return true;
         }
         abbrev.propertyCount++;
         be_assert(abbrev.propertyCount < Dwarf::Attribute_max, "too many attributes");
-    } while(true);
+    } while (true);
 }
 
 template< Endianness endianness >
@@ -411,26 +411,26 @@ bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const
 {
     be_forceuse(r);
     unsigned attributesMatched = 0; 
-    for(unsigned i = 0; i < abbrev.propertyCount; ++i)
+    for (unsigned i = 0; i < abbrev.propertyCount; ++i)
     {
         u64 attribute = abbrev.properties[i].attribute;
         u64 type = abbrev.properties[i].type;
-        if(type == Dwarf::Type_indirect)
+        if (type == Dwarf::Type_indirect)
         {
             Dwarf::uleb128_t indirectType;
             buffer >> indirectType;
             type = indirectType;
         }
 
-        if(attribute == Dwarf::Attribute_name)
+        if (attribute == Dwarf::Attribute_name)
         {
             attributesMatched++;
         }
-        else if(attribute == Dwarf::Attribute_low_pc)
+        else if (attribute == Dwarf::Attribute_low_pc)
         {
             attributesMatched++;
         }
-        else if(attribute == Dwarf::Attribute_high_pc)
+        else if (attribute == Dwarf::Attribute_high_pc)
         {
             attributesMatched++;
         }
@@ -474,7 +474,7 @@ bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const
 
             case Dwarf::Type_string:
                 u8 c;
-                do { buffer >> c; } while(c);
+                do { buffer >> c; } while (c);
                 break;
 
             case Dwarf::Type_block:
@@ -540,10 +540,10 @@ bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const
                 break;
         };
     }
-    if(abbrev.children)
+    if (abbrev.children)
     {
         UnitMap m(tempArena());
-        while(readInfos(buffer, m, abbreviations, ptrSize)) /* Again */;
+        while (readInfos(buffer, m, abbreviations, ptrSize)) /* Again */;
     }
     return false; //attributesMatched == 3;
 }
@@ -554,11 +554,11 @@ bool DwarfModule::readInfos(Buffer<endianness>& buffer, UnitMap& units, const mi
     Dwarf::uleb128_t l;
 
     buffer >> l;
-    if(l == 0)
+    if (l == 0)
         return false;
     const Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast<size_t>(l.value)-1];
     CompilationUnit u;
-    if(fillNode(buffer, u, abbrev, abbreviations, ptrSize))
+    if (fillNode(buffer, u, abbrev, abbreviations, ptrSize))
     {
         bool result = units.insert(std::make_pair(u.range, u)).second;
         (void)result;

@@ -139,7 +139,7 @@ Renderer::~Renderer()
 void Renderer::flush()
 {
     MSG msg;
-    while(::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+    while (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
     {
         DispatchMessage(&msg);
     }

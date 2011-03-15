@@ -20,13 +20,13 @@ size_t Mouse::s_miceCount = 0;
 Mouse::Mouse(size_t numButtons)
 :   Device((minitl::format<>("Mouse%u") | s_miceCount++).c_str(), numButtons+2)
 {
-    for(size_t i = 0; i < numButtons; ++i)
+    for (size_t i = 0; i < numButtons; ++i)
     {
         minitl::format<> f = minitl::format<>("Button %u") | i;
         ref<Control> ctrl = ref<DeviceControl>::create(inputArena(), f, this, i);
         addControl(ctrl);
         /*TODO Value v = getMouse().getNamespace()->get(f);
-        if(v)
+        if (v)
         {
             v.as< ref<GroupControl> >()->add(ctrl);
         }

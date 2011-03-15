@@ -33,7 +33,7 @@ Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
 :   m_display(display)
 {
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
-    if(glXCreateContextAttribsARB)
+    if (glXCreateContextAttribsARB)
     {
         int attribs[] =
             {
@@ -43,7 +43,7 @@ Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
                 None
             };
         m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
-        if(!m_glContext)
+        if (!m_glContext)
         {
             attribs[1] = 1;
             attribs[3] = 0;
@@ -98,7 +98,7 @@ Renderer::~Renderer()
 
 void Renderer::attachWindow(Window* w)
 {
-    if(!m_context)
+    if (!m_context)
     {
         createContextAsync(0);
     }
@@ -134,7 +134,7 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(!closed())
+    if (!closed())
     {
         ::Window* w = (::Window*)getWindowHandle();
         glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
@@ -143,7 +143,7 @@ void Window::setCurrent()
 
 void Window::clearCurrent()
 {
-    if(!closed())
+    if (!closed())
     {
         glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, 0, 0);
     }
@@ -151,7 +151,7 @@ void Window::clearCurrent()
 
 void Window::present()
 {
-    if(!closed())
+    if (!closed())
     {
         ::Window* w = (::Window*)getWindowHandle();
         glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w);

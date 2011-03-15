@@ -25,9 +25,9 @@ PluginList::PluginList(const char* name, Create c, Destroy d)
 
 PluginList::~PluginList()
 {
-    for(size_t i = 0; i < s_currentPlugin; ++i)
+    for (size_t i = 0; i < s_currentPlugin; ++i)
     {
-        if(s_plugins[i] == this)
+        if (s_plugins[i] == this)
         {
             s_plugins[i] = s_plugins[--s_currentPlugin];
             return;
@@ -38,9 +38,9 @@ PluginList::~PluginList()
 
 PluginList* PluginList::findPlugin(const char *name)
 {
-    for(size_t i = 0; i < s_currentPlugin; ++i)
+    for (size_t i = 0; i < s_currentPlugin; ++i)
     {
-        if(strcmp(name, s_plugins[i]->name) ==0)
+        if (strcmp(name, s_plugins[i]->name) ==0)
         {
             return s_plugins[i];
         }

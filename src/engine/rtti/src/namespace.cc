@@ -25,13 +25,13 @@ Namespace::~Namespace()
 weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPolicy policy)const 
 {
     Value ns = Value(weak<const Namespace>(this));
-    for(size_t i = 0; i < name.size()-1; ++i)
+    for (size_t i = 0; i < name.size()-1; ++i)
     {
         Value v = ns[name[i]];
         weak<const Namespace> nsobj = ns.as< weak<const Namespace> >();
-        if(!v)
+        if (!v)
         {
-            if(policy == Create)
+            if (policy == Create)
             {
                 ref<Namespace> newns = ref<Namespace>::create(rttiArena());
                 nsobj->add(name[i], Value(newns));
@@ -45,7 +45,7 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
         else
         {
             ns = v;
-            if(! (be_typeid< weak<const Namespace> >::type() <= ns.type()))
+            if (! (be_typeid< weak<const Namespace> >::type() <= ns.type()))
             {
                 be_error("Unable to convert value %s of type %s to a Namespace" | name | ns.type().name());
                 return weak<const Namespace>();
@@ -59,7 +59,7 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
 void Namespace::add(const inamespace& name, const Value& value) const
 {
     weak<Namespace> ns = getNamespace(name, Create);
-    if(ns)
+    if (ns)
     {
         ns->add(name[name.size()-1], value);
     }
@@ -73,10 +73,10 @@ void Namespace::add(const istring& name, const Value& value) const
 void Namespace::remove(const inamespace& name) const
 {
     weak<Namespace> ns = getNamespace(name, DoNotCreate);
-    if(ns)
+    if (ns)
     {
         ns->remove(name[name.size()-1]);
-        if(ns->empty() && name.size() > 1)
+        if (ns->empty() && name.size() > 1)
         {
             // remove weak reference before deleting the namespace
             ns = weak<const Namespace>();
@@ -95,7 +95,7 @@ void Namespace::remove(const istring& name) const
 Value Namespace::get(const istring& name) const
 {
     minitl::hashmap<istring, Value>::const_iterator it = m_decls.find(name);
-    if(it != m_decls.end())
+    if (it != m_decls.end())
         return it->second;
     else
         return Value();

@@ -11,12 +11,12 @@ i64 strToInteger(const char *text)
 {
     bool negate = false;
     i64 result = 0;
-    if(*text == '-')
+    if (*text == '-')
     {
         negate = true;
         text++;
     }
-    while(isdigit(*text))
+    while (isdigit(*text))
     {
         result = result * 10 + (*text-'0');
     }
@@ -73,7 +73,7 @@ static struct Cleanup
     }
     ~Cleanup()
     {
-        if(YY_CURRENT_BUFFER)
+        if (YY_CURRENT_BUFFER)
         {
             yy_delete_buffer(YY_CURRENT_BUFFER);
         }

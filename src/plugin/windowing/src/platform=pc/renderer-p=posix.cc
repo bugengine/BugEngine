@@ -55,7 +55,7 @@ Renderer::PlatformRenderer::PlatformRenderer()
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
     XFree(m_visual);
-    if(m_display)
+    if (m_display)
     {
         XCloseDisplay(m_display);
     }
@@ -107,7 +107,7 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
                                     m_visual->visual,
                                     attributeMask,
                                     &attributes);
-    if(result)
+    if (result)
     {
         XMapRaised(m_display, result);
     }
@@ -138,7 +138,7 @@ void Renderer::flush()
 {
     XEvent event;
     /* wait for events*/ 
-    while(XPending(m_platformRenderer->m_display) > 0)
+    while (XPending(m_platformRenderer->m_display) > 0)
     {
         XNextEvent(m_platformRenderer->m_display, &event);
         switch (event.type)

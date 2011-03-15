@@ -248,7 +248,7 @@ Elf::Elf(const char *filename, u64 baseAddress)
 ,   m_endianness(msb_invalid)
 {
     FILE* file = fopen(filename, "rb");
-    if(file)
+    if (file)
     {
         be_debug("loading file %s" | filename);
         ElfIdentification id;
@@ -256,22 +256,22 @@ Elf::Elf(const char *filename, u64 baseAddress)
         be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
         m_class = (ElfClass)id.klass;
         m_endianness = (ElfEndianness)id.msb;
-        if(id.klass == klass_32 && id.msb == msb_littleendian)
+        if (id.klass == klass_32 && id.msb == msb_littleendian)
         {
             be_debug("32 bits little-endian");
             Elf::parse<klass_32, msb_littleendian>(file);
         }
-        else if(id.klass == klass_64 && id.msb == msb_littleendian)
+        else if (id.klass == klass_64 && id.msb == msb_littleendian)
         {
             be_debug("64 bits little-endian");
             Elf::parse<klass_64, msb_littleendian>(file);
         }
-        else if(id.klass == klass_32 && id.msb == msb_bigendian)
+        else if (id.klass == klass_32 && id.msb == msb_bigendian)
         {
             be_debug("32 bits big-endian");
             Elf::parse<klass_32, msb_bigendian>(file);
         }
-        else if(id.klass == klass_64 && id.msb == msb_bigendian)
+        else if (id.klass == klass_64 && id.msb == msb_bigendian)
         {
             be_debug("64 bits big-endian");
             Elf::parse<klass_64, msb_bigendian>(file);
@@ -306,7 +306,7 @@ void Elf::parse(FILE* f)
     fseek(f, be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
     fread(stringPool, 1, be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
     
-    for(int i = 0; i < header.shnum; ++i)
+    for (int i = 0; i < header.shnum; ++i)
     {
         Section sec = { stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
         m_sections.push_back(sec);
@@ -322,7 +322,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     result.offset = m_baseAddress + code.offset;
     result.size = code.size;
     const Section& debug_link = (*this)[".gnu_debuglink"];
-    if(debug_link)
+    if (debug_link)
     {
         Allocator::Block<char> filename(tempArena(), be_checked_numcast<size_t>(debug_link.fileSize));
         readSection(debug_link, filename);

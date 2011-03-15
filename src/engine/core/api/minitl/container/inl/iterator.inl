@@ -15,7 +15,7 @@ template< typename ITERATOR, typename ITERATOR_TYPE >
 static typename iterator_traits<ITERATOR>::difference_type distance(const ITERATOR& t1, const ITERATOR& t2, ITERATOR_TYPE type)
 {
     typename ITERATOR::difference_type result = 0;
-    while(t1 != t2)
+    while (t1 != t2)
     {
         result++;
         ++t1;

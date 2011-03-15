@@ -24,15 +24,15 @@ class Container:
 	def addObject(self, object):
 		self.objects.append(object)
 
-	def addMember(self, type, attr, name, line):
-		self.members.append((type, name, attr, self.visibility, line))
+	def addMember(self, type, attr, name, tags, line):
+		self.members.append((type, name, attr, self.visibility, tags, line))
 
-	def addMethod(self, name, attr, rtype, params, line):
+	def addMethod(self, name, attr, rtype, params, tags, line):
 		if self.visibility == 'published':
 			if self.methods.has_key(name):
-				self.methods[name].append((rtype, params, attr, self.visibility, line))
+				self.methods[name].append((rtype, params, attr, self.visibility, tags, line))
 			else:
-				self.methods[name] = [(rtype, params, attr, self.visibility, line)]
+				self.methods[name] = [(rtype, params, attr, self.visibility, tags, line)]
 
 	def dump(self, file, namespace, index, nested):
 		for o in self.objects:
@@ -128,7 +128,7 @@ class Enum(Container):
 		file.write("    {\n")
 		file.write("        ::BugEngine::Logger::root();\n")
 		file.write("        static minitl::ref< ::BugEngine::RTTI::ClassInfo> klass;\n")
-		file.write("        if(klass)\n")
+		file.write("        if (klass)\n")
 		file.write("            return klass;\n")
 		if nested  or self.name.find('::') != -1:
 			file.write("        ::BugEngine::be_typeid< %s >::klass();\n" % '::'.join(self.fullname.split('::')[:-1]))
@@ -164,6 +164,7 @@ class Class(Container):
 		self.inherits = inherits or 'void'
 		self.value = value
 		self.metaclass = '::BugEngine::RTTI::ClassInfo'
+		self.tags = []
 
 	def dump(self, file, namespace, index, nested):
 		decl = "class%s" % self.fullname.replace(':', '_')
@@ -181,7 +182,7 @@ class Class(Container):
 		file.write("    {\n")
 		file.write("        ::BugEngine::Logger::root();\n")
 		file.write("        static minitl::ref< ::BugEngine::RTTI::ClassInfo> klass;\n")
-		file.write("        if(klass)\n")
+		file.write("        if (klass)\n")
 		file.write("            return klass;\n")
 		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
 		if nested or self.name.find('::') != -1:
@@ -196,6 +197,8 @@ class Class(Container):
 		if self.value:
 			file.write("        klass->copyconstructor = &::BugEngine::RTTI::wrapCopy< %s >;\n" % (self.fullname))
 			file.write("        klass->destructor = &::BugEngine::RTTI::wrapDestroy< %s >;\n" % (self.fullname))
+		for tag in self.tags:
+			file.write("        klass->tags.push_back(Value(%s));\n" % tag)
 		file.write("        weak<RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
 		file.write("        return klass;\n");
@@ -203,14 +206,11 @@ class Class(Container):
 
 
 	def buildProperties(self, file, decl):
-		for name, overloads in self.methods.iteritems():
-			if name[0] == "?":
-				continue
 		file.write("    static inline void s_%sRegisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
 		file.write("        ::BugEngine::TypeInfo type = ::BugEngine::be_typeid< %s >::type();\n" % self.fullname)
-		for type,name,attr,visibility,line in self.members:
+		for type,name,attr,visibility,tags,line in self.members:
 			if visibility == 'published':
 				if showline: file.write("        #line %d\n" % (line))
 				file.write("        klass->addProperty(\"%s\", ::BugEngine::RTTI::PropertyInfo(type, BugEngine::be_typeid< %s >::type(), be_checked_numcast<u32>((char*)(&((%s*)0)->%s)-(char*)0)));\n" % (name, type, self.fullname, name))
@@ -230,7 +230,7 @@ class Class(Container):
 			else:
 				file.write("            ::BugEngine::RTTI::MethodInfo mi;\n")
 			file.write("            mi.overloads.reserve(%d);\n" % len(overloads))
-			for rtype, params, attrs, visibility, line in overloads:
+			for rtype, params, attrs, visibility, tags, line in overloads:
 				if showline: file.write("            #line %d\n" % (line))
 				paramtypes = ', '.join(ptype for ptype, pname in params)
 				if paramtypes: paramtypes = ', '+paramtypes
@@ -279,7 +279,8 @@ class Class(Container):
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo > klass = s_%sClass();\n" % decl)
-		for type,name,attr,visibility,line in self.members:
+		file.write("        klass->tags.clear();\n")
+		for type,name,attr,visibility,tags,line in self.members:
 			if visibility == 'published':
 				if showline: file.write("        #line %d\n" % (line))
 				file.write("        klass->removeProperty(\"%s\");\n" % (name))
