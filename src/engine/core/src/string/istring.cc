@@ -159,6 +159,7 @@ StringCache* StringCache::unique(const char *val)
         strcpy(data, val);
 
         std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair(data, cache));
+        be_forceuse(insertresult);
         return cache;
     }
 }
