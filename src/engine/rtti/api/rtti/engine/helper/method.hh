@@ -28,9 +28,9 @@ static inline void wrapDestroy(void* src)
 }
 
 template< size_t size >
-static inline void nullconstructor(const void* src, void* dst) { memcpy(dst, src, size); }
+inline void nullconstructor(const void* src, void* dst) { memcpy(dst, src, size); }
 template< >
-static inline void nullconstructor<0>(const void* src, void* dst) {}
+inline void nullconstructor<0>(const void* src, void* dst) {}
 static inline void nulldestructor(void*) { }
 
 
