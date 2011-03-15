@@ -171,7 +171,7 @@ public:
 template <typename T>
 static inline void			ZeroInitialize(T& value)
 {
-	static const T	zerodummy;
+	static const T	zerodummy = T();
 	value=zerodummy;
 }
 //
