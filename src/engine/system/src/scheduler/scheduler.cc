@@ -54,9 +54,9 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
     static const i32& s_taskCount = 16;
 
     ScheduledTasks::ITaskItem* target = sc->pop(Random);
-    if(!target)
+    if (!target)
         return false;
-    if(!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
+    if (!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
         ScheduledTasks::ITaskItem* newTarget = target->split(sc);
         sc->queue(newTarget);
@@ -79,10 +79,10 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
 {
     Worker* w = reinterpret_cast<Worker*>(p1);
     Scheduler* sc = reinterpret_cast<Scheduler*>(p2);
-    while(sc->m_running)
+    while (sc->m_running)
     {
-        if(sc->m_synchro.wait() == Threads::Waitable::Finished)
-            if(w->doWork(sc))
+        if (sc->m_synchro.wait() == Threads::Waitable::Finished)
+            if (w->doWork(sc))
                 sc->m_mainThreadSynchro.release(1);
     }
     return 0;
@@ -93,7 +93,7 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
 
 void* Scheduler::allocate_task(size_t size)
 {
-    if(size > 128)
+    if (size > 128)
         return new char[size];
     else
         return (void*)m_taskPool.allocate();
@@ -101,7 +101,7 @@ void* Scheduler::allocate_task(size_t size)
 
 void  Scheduler::release_task(void* task, size_t size)
 {
-    if(size > 128)
+    if (size > 128)
         delete[] (char*)task;
     else
         m_taskPool.release((Buffer*)task);
@@ -120,7 +120,7 @@ Scheduler::Scheduler()
 ,   m_running(true)
 {
     const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
-    for(size_t i = 0; i < g_numWorkers; ++i)
+    for (size_t i = 0; i < g_numWorkers; ++i)
     {
         m_workers.push_back(new Worker(this, i));
     }
@@ -130,7 +130,7 @@ Scheduler::~Scheduler()
 {
     m_running = false;
     m_synchro.release((int)m_workers.size());
-    for(size_t i = 0; i < m_workers.size(); ++i)
+    for (size_t i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }
 
@@ -139,7 +139,7 @@ void Scheduler::frameUpdate()
     m_timer.stop();
     //float time = Timer::now();
     //send(time)
-    for(size_t i = 0; i < m_workers.size(); ++i)
+    for (size_t i = 0; i < m_workers.size(); ++i)
     {
         m_workers[i]->frameUpdate();
     }
@@ -152,7 +152,7 @@ void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 {
     int priority = task->m_owner->priority;
     m_runningTasks ++;
-    if(task->m_owner->affinity == Random)
+    if (task->m_owner->affinity == Random)
     {
         m_tasks[priority].push(task);
         m_synchro.release(1);
@@ -167,10 +167,10 @@ void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 ScheduledTasks::ITaskItem* Scheduler::pop(Affinity affinity)
 {
     minitl::istack<ScheduledTasks::ITaskItem>* tasks = affinity == Random ? m_tasks : m_mainThreadTasks;
-    for(unsigned int i = High; i != Low; --i)
+    for (unsigned int i = High; i != Low; --i)
     {
         ScheduledTasks::ITaskItem* t = tasks[i].pop();
-        if(t)
+        if (t)
             return t;
     }
     return 0;
@@ -178,15 +178,15 @@ ScheduledTasks::ITaskItem* Scheduler::pop(Affinity affinity)
 
 void Scheduler::mainThreadJoin()
 {
-    while(true)
+    while (true)
     {
-        if(m_mainThreadSynchro.wait() == Threads::Waitable::Finished)
+        if (m_mainThreadSynchro.wait() == Threads::Waitable::Finished)
         {
             ScheduledTasks::ITaskItem* t = pop(MainThread);
-            if(t)
+            if (t)
             {
                 t->run(this);
-                if(--m_runningTasks == 0)
+                if (--m_runningTasks == 0)
                 {
                     break;
                 }

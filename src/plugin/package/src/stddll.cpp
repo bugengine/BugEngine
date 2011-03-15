@@ -1,9 +1,9 @@
-#include    <vge/core/stdafx.h>
+#include    <stdafx.h>
 
-#if defined(WIN32) && defined(_DLL)
-#include <windows.h>
+#if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)
+#include <core/memory/new.inl>
 
-namespace VGE
+namespace BugEngine
 {
     HINSTANCE hDllInstance;
 }
@@ -14,7 +14,7 @@ extern "C" BOOL WINAPI DllMain( HINSTANCE hinstDLL,
 {
     if( fdwReason == DLL_PROCESS_ATTACH)
     {
-        VGE::hDllInstance = hinstDLL; 
+        BugEngine::hDllInstance = hinstDLL; 
     }
     return TRUE;
 }

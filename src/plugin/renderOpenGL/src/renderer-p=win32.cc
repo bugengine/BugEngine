@@ -35,7 +35,7 @@ Renderer::Context::Context()
 
 Renderer::Context::~Context()
 {
-    if(m_glContext)
+    if (m_glContext)
         wglDeleteContext(m_glContext);
 }
 
@@ -60,7 +60,7 @@ Window::Context::Context()
 
 Window::Context::~Context()
 {
-    /*if(m_glContext)
+    /*if (m_glContext)
     {
         wglDeleteContext(m_glContext);
         m_glContext = 0;
@@ -103,7 +103,7 @@ void Renderer::attachWindow(Window* w)
     };
     GLuint pixelFormat = ChoosePixelFormat(hDC, &pfd);
     SetPixelFormat(hDC, pixelFormat, &pfd);
-    if(!m_context->m_glContext)
+    if (!m_context->m_glContext)
     {
         m_context->m_glContext = wglCreateContext(hDC);
     }
@@ -135,7 +135,7 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
+    if (!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
     {
         char *errorMessage;
         ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -152,7 +152,7 @@ void Window::setCurrent()
 
 void Window::clearCurrent()
 {
-    if(!wglMakeCurrent(0, 0))
+    if (!wglMakeCurrent(0, 0))
     {
         char *errorMessage;
         ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,

@@ -29,9 +29,9 @@ const istring& Action::name() const
 float Action::value() const
 {
     float value = 0.0;
-    if(m_owner->active()) for(size_t i = 0; i < m_controls.size(); ++i)
+    if (m_owner->active()) for (size_t i = 0; i < m_controls.size(); ++i)
     {
-        if(m_controls[i]->value() > value)
+        if (m_controls[i]->value() > value)
             value = m_controls[i]->value();
     }
     return value;
@@ -39,9 +39,9 @@ float Action::value() const
 
 bool Action::isDown() const
 {
-    if(m_owner->active()) for(size_t i = 0; i < m_controls.size(); ++i)
+    if (m_owner->active()) for (size_t i = 0; i < m_controls.size(); ++i)
     {
-        if(m_controls[i]->isDown())
+        if (m_controls[i]->isDown())
             return true;
     }
     return false;
@@ -49,9 +49,9 @@ bool Action::isDown() const
 
 bool Action::wentDown() const
 {
-    if(m_owner->active()) for(size_t i = 0; i < m_controls.size(); ++i)
+    if (m_owner->active()) for (size_t i = 0; i < m_controls.size(); ++i)
     {
-        if(m_controls[i]->wentDown())
+        if (m_controls[i]->wentDown())
             return true;
     }
     return false;
@@ -59,9 +59,9 @@ bool Action::wentDown() const
 
 bool Action::wentUp() const
 {
-    if(m_owner->active()) for(size_t i = 0; i < m_controls.size(); ++i)
+    if (m_owner->active()) for (size_t i = 0; i < m_controls.size(); ++i)
     {
-        if(m_controls[i]->wentUp())
+        if (m_controls[i]->wentUp())
             return true;
     }
     return false;
@@ -74,9 +74,9 @@ void Action::mapControl(Control* c)
 
 void Action::unmapControl(Control* c)
 {
-    for(minitl::vector<Control*>::iterator it = m_controls.begin(); it != m_controls.end(); )
+    for (minitl::vector<Control*>::iterator it = m_controls.begin(); it != m_controls.end(); )
     {
-        if(*it == c)
+        if (*it == c)
         {
             it = m_controls.erase(it);
         }

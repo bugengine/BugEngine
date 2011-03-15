@@ -31,7 +31,7 @@ Callstack::Address::Address(const Address& other)
 
 Callstack::Address& Callstack::Address::operator=(const Address& other)
 {
-    if(&other != this)
+    if (&other != this)
     {
         m_address = other.m_address;
     }

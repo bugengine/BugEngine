@@ -122,7 +122,7 @@ struct VertexDescription :  public VertexDescription< typename Queue::queue >
         desc[VertexComponents-1].offset = pflags.vertexSize;
         desc[VertexComponents-1].type = VertexElementInfo::VertexElementType(VertexElementTypeMapToIndex<typename Queue::VertexSemanticType>::Index);
         desc[VertexComponents-1].semantic = VertexSemantics(Queue::semantic);
-        if(VertexComponents > 1)
+        if (VertexComponents > 1)
             memcpy(desc, pflags.info, sizeof(VertexElementInfo)*(VertexComponents-1));
 
         flags.vertexSize = sizeof(typename Queue::VertexSemanticType) + pflags.vertexSize;

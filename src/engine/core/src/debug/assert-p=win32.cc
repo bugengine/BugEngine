@@ -85,16 +85,16 @@ namespace BugEngine { namespace Debug
             ref<const Runtime::Module> executable = Runtime::Module::self();
             static weak<const Runtime::Module> last = executable;
             static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols);
-            while(last && last->next())
+            while (last && last->next())
             {
                 last = last->next();
                 Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
                 s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
             }
-            for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+            for (Runtime::Callstack::Address* a = address; a < address+result; ++a)
             {
                 Runtime::Symbol s;
-                if(s_symbols)
+                if (s_symbols)
                 {
                     s_symbols->resolve(*a, s);
                 }
@@ -109,7 +109,7 @@ namespace BugEngine { namespace Debug
                                        0, 
                                        AssertionDialogProc,
                                        (LPARAM)&dlgParams[0]);
-        if(locr == -1)
+        if (locr == -1)
         {
             char *errorMessage;
             (void)::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,

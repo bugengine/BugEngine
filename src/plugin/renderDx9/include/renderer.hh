@@ -14,7 +14,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 static inline HRESULT d3d_checkResult(HRESULT r)
 {
-    if(FAILED(r))
+    if (FAILED(r))
     {
         be_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
     }

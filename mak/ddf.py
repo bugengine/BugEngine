@@ -573,7 +573,7 @@ def p_variable_decl(t):
 	"""
 		decl : type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0], t[2], t.lineno(6))
+	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0], t[2], [], t.lineno(6))
 
 def p_variable_decl_2(t):
 	"""
@@ -582,7 +582,7 @@ def p_variable_decl_2(t):
 	if 'static' in t[1]:
 		t.parser.namespace.meta.addMember(t[1]+t[3], t[2])
 	else:
-		t.parser.namespace.addMember(t[2][1]+t[4], t[1][0], t[3], t.lineno(7))
+		t.parser.namespace.addMember(t[2][1]+t[4], t[1][0], t[3], [], t.lineno(7))
 
 ###################################
 # Value
@@ -825,6 +825,32 @@ def p_extra_parents(t):
 
 
 ###################################
+# tags
+def p_tags(t):
+	"""
+		tags : tag taglist
+	"""
+	t[0] = [t[1]] + t[2]
+
+def p_taglist(t):
+	"""
+		taglist : 
+	"""
+	t[0] = []
+
+def p_taglist_2(t):
+	"""
+		taglist : tag taglist
+	"""
+	t[0] = [t[1]] + t[2]
+	
+def p_tag(t):
+	"""
+		tag : BE_TAG LPAREN skiplist RPAREN
+	"""
+	t[0] = t[3]
+
+###################################
 # class
 def p_struct_kw(t):
 	"""
@@ -855,19 +881,40 @@ def p_class_header(t):
 
 def p_class(t):
 	"""
-		simple_type : class class_header decls RBRACE
-		simple_type : struct struct_header decls RBRACE
+		class_def : class class_header decls RBRACE
+		class_def : struct struct_header decls RBRACE
+	"""
+
+def p_class_2(t):
+	"""
+		simple_type : class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
 
-def p_class_2(t):
+def p_class_3(t):
 	"""
-		simple_type : BE_META LPAREN name RPAREN class class_header decls RBRACE
-		simple_type : BE_META LPAREN name RPAREN struct struct_header decls RBRACE
+		simple_type : BE_META LPAREN name RPAREN class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace.metaclass = t[3]
+	t.parser.namespace = t.parser.namespace.parent
+
+def p_class_4(t):
+	"""
+		simple_type : tags class_def
+	"""
+	t[0] = ('', t.parser.namespace.fullname)
+	t.parser.namespace.tags = t[1]
+	t.parser.namespace = t.parser.namespace.parent
+
+def p_class_5(t):
+	"""
+		simple_type : tags BE_META LPAREN name RPAREN class_def
+	"""
+	t[0] = ('', t.parser.namespace.fullname)
+	t.parser.namespace.tags = t[1]
+	t.parser.namespace.metaclass = t[4]
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_decl(t):
@@ -1017,19 +1064,19 @@ def p_method_decl_or_impl(t):
 		decl : method SEMI
 		decl : method initializers LBRACE skiplist_all RBRACE
 	"""
-	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], t[1][4])
+	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], [], t[1][4])
 
 def p_method_decl_or_impl_2(t):
 	"""
 		decl : modifier_list method SEMI
 	"""
-	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
 
 def p_method_decl_or_impl_3(t):
 	"""
 		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
 	"""
-	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
 
 ###################################
 # skiplist

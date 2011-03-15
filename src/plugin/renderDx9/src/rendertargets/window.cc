@@ -39,7 +39,7 @@ Window::~Window()
 
 void Window::setCurrent()
 {
-    if(m_swapChain->swapchain)
+    if (m_swapChain->swapchain)
     {
         LPDIRECT3DSURFACE9 backBuffer;
         d3d_checkResult(m_swapChain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer ));
@@ -50,10 +50,10 @@ void Window::setCurrent()
 
 void Window::begin(ClearMode clear)
 {
-    if(m_swapChain->swapchain)
+    if (m_swapChain->swapchain)
     {
         setCurrent();
-        if(clear == Clear)
+        if (clear == Clear)
         {
             d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0));
         }
@@ -69,12 +69,12 @@ void Window::close()
 
 void Window::end(PresentMode present)
 {
-    if(m_swapChain->swapchain)
+    if (m_swapChain->swapchain)
     {
         d3d_checkResult(be_checked_cast<Renderer>(m_renderer)->m_device->EndScene());
-        if(present == Present)
+        if (present == Present)
         {
-            if(d3d_checkResult(m_swapChain->swapchain->Present(NULL, NULL, NULL, NULL, 0)) == D3DERR_DEVICELOST)
+            if (d3d_checkResult(m_swapChain->swapchain->Present(NULL, NULL, NULL, NULL, 0)) == D3DERR_DEVICELOST)
                 be_checked_cast<Renderer>(m_renderer)->m_deviceState = Renderer::DeviceLost;
         }
     }

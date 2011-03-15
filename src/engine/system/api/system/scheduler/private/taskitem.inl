@@ -48,7 +48,7 @@ void TaskItem<Range, Body>::run(weak<Scheduler> sc)
 {
     m_body(m_range);
     weak< const Task<Body> > owner = be_checked_cast< const Task<Body> >(m_owner);
-    if(++owner->m_taskCompleted == owner->m_taskCount)
+    if (++owner->m_taskCompleted == owner->m_taskCount)
     {
         owner->end(sc);
     }

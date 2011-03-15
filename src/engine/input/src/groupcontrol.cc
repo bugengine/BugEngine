@@ -22,39 +22,39 @@ GroupControl::~GroupControl()
 float GroupControl::value() const
 {
     float value = 0.0f;
-    for(size_t i = 0; i < m_controls.size(); ++i)
+    for (size_t i = 0; i < m_controls.size(); ++i)
         value += m_controls[i]->value();
     return clamp(value, -1.0f, 1.0f);
 }
 
 bool GroupControl::isDown() const
 {
-    for(size_t i = 0; i < m_controls.size(); ++i)
-        if(m_controls[i]->isDown())
+    for (size_t i = 0; i < m_controls.size(); ++i)
+        if (m_controls[i]->isDown())
             return true;
     return false;
 }
 
 bool GroupControl::wasDown() const
 {
-    for(size_t i = 0; i < m_controls.size(); ++i)
-        if(m_controls[i]->wasDown())
+    for (size_t i = 0; i < m_controls.size(); ++i)
+        if (m_controls[i]->wasDown())
             return true;
     return false;
 }
 
 bool GroupControl::wentDown() const
 {
-    for(size_t i = 0; i < m_controls.size(); ++i)
-        if(m_controls[i]->wentDown())
+    for (size_t i = 0; i < m_controls.size(); ++i)
+        if (m_controls[i]->wentDown())
             return true;
     return false;
 }
 
 bool GroupControl::wentUp() const
 {
-    for(size_t i = 0; i < m_controls.size(); ++i)
-        if(m_controls[i]->wentUp())
+    for (size_t i = 0; i < m_controls.size(); ++i)
+        if (m_controls[i]->wentUp())
             return true;
     return false;
 }

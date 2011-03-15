@@ -103,12 +103,12 @@ StringCache* StringCache::Buffer::reserve(size_t size)
 {
     size_t allsize = be_align(size+1+sizeof(StringCache), be_alignof(StringCache));
     be_assert(allsize < s_capacity, "string size is bigger than pool size");
-    if(m_used > s_capacity)
+    if (m_used > s_capacity)
     {
         return reserveNext(size);
     }
     size_t offset = m_used.addExchange(allsize);
-    if(offset+allsize < s_capacity)
+    if (offset+allsize < s_capacity)
     {
         return (StringCache*)(m_buffer+offset);
     }
@@ -120,7 +120,7 @@ StringCache* StringCache::Buffer::reserve(size_t size)
 
 StringCache* StringCache::Buffer::reserveNext(size_t size)
 {
-    if(!m_next)
+    if (!m_next)
     {
         m_next = new Buffer;
     }
@@ -144,7 +144,7 @@ StringCache* StringCache::unique(const char *val)
     ScopedCriticalSection scope(s_lock);
     static StringIndex g_strings(stringArena());
     StringIndex::iterator it = g_strings.find(val);
-    if(it != g_strings.end())
+    if (it != g_strings.end())
     {
         return it->second;
     }
@@ -220,7 +220,7 @@ istring::~istring()
 
 istring& istring::operator=(const istring& other)
 {
-    if(&other == this)
+    if (&other == this)
         return *this;
     other.m_index->retain();
     m_index->release();
@@ -262,10 +262,10 @@ bool istring::operator<(const istring& other) const
 static inline const char* findnext(const char* str, const char *sep, size_t len)
 {
     const char *result = str;
-    while(*result)
+    while (*result)
     {
-        for(size_t i = 0; i < len && *result; ++i)
-            if(*result == sep[i])
+        for (size_t i = 0; i < len && *result; ++i)
+            if (*result == sep[i])
                 return result;
         result++;
     }
@@ -276,14 +276,14 @@ static void parse(const char *str, const char *end, const char *sep, istring* bu
 {
     size_t numsep = strlen(sep);
 
-    if(str && *str)
+    if (str && *str)
     {
         const char *ss = str;
-        while(*ss && ss < end)
+        while (*ss && ss < end)
         {
             ss = findnext(str, sep, numsep);
             buffer[size++] = istring(str,ss);
-            if(*ss) ss++;
+            if (*ss) ss++;
             str=ss;
         }
     }
@@ -321,10 +321,10 @@ template< u16 MAXLENGTH >
 minitl::format<MAXLENGTH> igenericnamespace::tostring(const char* sep) const
 {
     minitl::format<MAXLENGTH> result("");
-    if(m_size > 0)
+    if (m_size > 0)
     {
         result.append(m_namespace[0].c_str());
-        for(size_t i = 1; i < m_size; ++i)
+        for (size_t i = 1; i < m_size; ++i)
         {
             result.append(sep);
             result.append(m_namespace[i].c_str());
@@ -359,7 +359,7 @@ istring igenericnamespace::pop_back()
 istring igenericnamespace::pop_front()
 {
     istring i = m_namespace[0];
-    for(size_t i = 1; i < m_size; ++i)
+    for (size_t i = 1; i < m_size; ++i)
         m_namespace[i-1] = m_namespace[i];
     m_size--;
     return i;
@@ -367,39 +367,39 @@ istring igenericnamespace::pop_front()
 
 bool igenericnamespace::operator==(const igenericnamespace& other) const
 {
-    if( this->size() != other.size())
+    if ( this->size() != other.size())
         return false;
-    for(size_t i = 0; i < other.size(); ++i)
-        if(m_namespace[i] != other[i])
+    for (size_t i = 0; i < other.size(); ++i)
+        if (m_namespace[i] != other[i])
             return false;
     return true;
 }
 
 bool igenericnamespace::operator!=(const igenericnamespace& other) const
 {
-    if( this->size() != other.size())
+    if ( this->size() != other.size())
         return true;
-    for(size_t i = 0; i < other.size(); ++i)
-        if(m_namespace[i] != other[i])
+    for (size_t i = 0; i < other.size(); ++i)
+        if (m_namespace[i] != other[i])
             return true;
     return false;
 }
 
 bool startswith(const igenericnamespace& start, const igenericnamespace& full)
 {
-    for(size_t i = 0; i < start.size(); ++i)
-        if(start[i] != full[i])
+    for (size_t i = 0; i < start.size(); ++i)
+        if (start[i] != full[i])
             return false;
     return true;
 }
 
 bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2)
 {
-    for(size_t i = 0; i < minitl::min(ns1.size(), ns2.size()); ++i)
+    for (size_t i = 0; i < minitl::min(ns1.size(), ns2.size()); ++i)
     {
-        if(ns1[i] < ns2[i])
+        if (ns1[i] < ns2[i])
             return true;
-        else if(ns2[i] < ns1[i])
+        else if (ns2[i] < ns1[i])
             return false;
     }
     return ns1.size() < ns2.size();
@@ -429,7 +429,7 @@ inamespace& inamespace::operator+=(const istring& str2)
 
 inamespace& inamespace::operator+=(const inamespace& str2)
 {
-    for(size_t i = 0; i < str2.size(); ++i)
+    for (size_t i = 0; i < str2.size(); ++i)
         push_back(str2[i]);
     return *this;
 }
@@ -484,7 +484,7 @@ minitl::format<ipath::MaxFilenameLength> ipath::str() const
 
 ipath& ipath::operator+=(const ipath& str2)
 {
-    for(size_t i = 0; i < str2.size(); ++i)
+    for (size_t i = 0; i < str2.size(); ++i)
         push_back(str2[i]);
     return *this;
 }
@@ -520,9 +520,9 @@ minitl::format<ifilename::MaxFilenameLength> ifilename::str() const
 ifilename operator+(const ipath& path, const ifilename& file)
 {
     ifilename result("");
-    for(size_t i = 0; i < path.size(); ++i)
+    for (size_t i = 0; i < path.size(); ++i)
         result.push_back(path[i]);
-    for(size_t i = 0; i < file.size(); ++i)
+    for (size_t i = 0; i < file.size(); ++i)
         result.push_back(file[i]);
     return result;
 }

@@ -30,15 +30,15 @@ MultiNode::~MultiNode()
 
 void MultiNode::clean()
 {
-    for(minitl::vector<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
+    for (minitl::vector<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
     {
-        if(it->node->closed())
+        if (it->node->closed())
         {
-            if(it->type == MainWindow)
+            if (it->type == MainWindow)
                 m_mainNodes--;
-            if(it != m_nodes.begin())
+            if (it != m_nodes.begin())
             {
-                if(it+1 != m_nodes.end())
+                if (it+1 != m_nodes.end())
                 {
                     (it-1)->chainDispatch = ITask::CallbackConnection((it-1)->node->dispatchTask(), (it+1)->node->dispatchTask()->startCallback());
                 }
@@ -54,7 +54,7 @@ void MultiNode::clean()
             ++it;
         }
     }
-    if(m_mainNodes == 0)
+    if (m_mainNodes == 0)
     {
         m_nodes.clear();
     }
@@ -63,12 +63,12 @@ void MultiNode::clean()
 void MultiNode::addNode(scoped<INode> node, NodeType type)
 {
     m_nodes.push_back(NodeInfo(node, this, type));
-    if(type == MainWindow)
+    if (type == MainWindow)
         m_mainNodes++;
     minitl::vector<NodeInfo>::reverse_iterator it = m_nodes.rbegin();
     be_assert(it != m_nodes.rend(), "Added node but list is still empty");
     minitl::vector<NodeInfo>::reverse_iterator it2 = it++;
-    if(it != m_nodes.rend())
+    if (it != m_nodes.rend())
     {
         it->chainDispatch = ITask::CallbackConnection(it->node->dispatchTask(), it2->node->dispatchTask()->startCallback());
     }

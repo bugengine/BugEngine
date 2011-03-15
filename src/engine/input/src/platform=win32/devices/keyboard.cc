@@ -25,9 +25,9 @@ Keyboard::Keyboard(size_t /*numControls*/)
 
     char keyName[256];
     char mappedName[256];
-    for(LONG i = 0; i < 256; ++i)
+    for (LONG i = 0; i < 256; ++i)
     {
-        if(GetKeyNameTextA(i<<16, mappedName, 256) != 0)
+        if (GetKeyNameTextA(i<<16, mappedName, 256) != 0)
         {
             ActivateKeyboardLayout(usLayout, 0);
             GetKeyNameTextA(i<<16, keyName, 256);
@@ -36,7 +36,7 @@ Keyboard::Keyboard(size_t /*numControls*/)
             addControl(ctrl);
             addControlAlias("US", keyName, ctrl);
             /* TODO Value v = getKeyboard().getNamespace()->get(istring(mappedName));
-            if(v)
+            if (v)
             {
                 v.as< ref<GroupControl> >()->add(ctrl);
             }

@@ -58,7 +58,7 @@ protected:
 inline void addweak(const pointer* ptr)
 {
 #ifdef BE_ENABLE_WEAKCHECK
-    if(ptr)
+    if (ptr)
         ++ptr->m_weakCount;
 #endif
 }
@@ -66,7 +66,7 @@ inline void addweak(const pointer* ptr)
 inline void decweak(const pointer* ptr)
 {
 #ifdef BE_ENABLE_WEAKCHECK
-    if(!ptr)
+    if (!ptr)
         return;
     be_assert(ptr->m_weakCount, "object has no weak reference; cannot dereference it again");
     --ptr->m_weakCount;

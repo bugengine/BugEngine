@@ -47,7 +47,7 @@ Plugin<Interface>::Plugin(const istring &pluginName)
 :   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if (m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const impl::PluginList*>(m_handle)->create))();
     }
@@ -59,7 +59,7 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 :   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if  (m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1);
     }
@@ -71,7 +71,7 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 :   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if (m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1, param2);
     }
@@ -80,7 +80,7 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if(m_handle)
+    if (m_handle)
     {
         (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
     }

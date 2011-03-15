@@ -25,7 +25,7 @@ Namespace::MetaClassInfo::~MetaClassInfo()
 Value Namespace::MetaClassInfo::get(Value& from, istring name) const
 {
     Value r = ClassInfo::get(from, name);
-    if(!r)
+    if (!r)
     {
         r = from.as<const Namespace&>().get(name);
     }
@@ -50,7 +50,7 @@ ClassInfo::MetaClassInfo::~MetaClassInfo()
 Value ClassInfo::MetaClassInfo::get(Value& from, istring name) const
 {
     Value r = Namespace::MetaClassInfo::get(from, name);
-    if(!r)
+    if (!r)
     {
         
     }

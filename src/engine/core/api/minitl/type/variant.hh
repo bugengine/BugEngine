@@ -116,7 +116,7 @@ inline void destroy<void>(size_t typeindex, unsigned char *data)
 template< typename typelist >
 inline void destroy(size_t typeindex, unsigned char *data)
 {
-    if(typeindex == typelist::IndexOf)
+    if (typeindex == typelist::IndexOf)
     {
         typedef typename typelist::Type thistype;
         reinterpret_cast<thistype*>(data)->~thistype();
@@ -139,7 +139,7 @@ inline void copy<void>(size_t typeindex, unsigned char* dest, const unsigned cha
 template< typename typelist >
 inline void copy(size_t typeindex, unsigned char* dest, const unsigned char* src)
 {
-    if(typeindex == typelist::IndexOf)
+    if (typeindex == typelist::IndexOf)
     {
         typedef typename typelist::Type thistype;
         new(dest) thistype(*reinterpret_cast<const thistype*>(src));

@@ -28,13 +28,13 @@ ref<const Module> Module::self()
     Allocator::Block<HMODULE> hmodules(tempArena(), moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
-    for(; seen < moduleCount; seen++)
+    for (; seen < moduleCount; seen++)
     {
         char moduleName[32768];
         MODULEINFO info;
         ::GetModuleFileNameEx(process, hmodules[seen], moduleName, sizeof(moduleName));
         ::GetModuleInformation(process, hmodules[seen], &info, sizeof(info));
-        if(seen == 0)
+        if (seen == 0)
         {
             s_module = ref<PE>::create(debugArena(), moduleName, (u64)info.lpBaseOfDll);
             module = s_module;

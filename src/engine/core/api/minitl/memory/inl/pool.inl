@@ -14,7 +14,7 @@ pool<T>::pool(BugEngine::Allocator& allocator, size_t capacity, size_t alignment
 :   m_pool(allocator, capacity, alignment)
 ,   m_end(&m_pool[capacity])
 {
-    for(size_t i = 0; i < capacity-1; ++i)
+    for (size_t i = 0; i < capacity-1; ++i)
         m_items.push((inode*)(&m_pool[i]));
 }
 

@@ -25,14 +25,14 @@ ref<const Module> Module::self()
     void* handle = dlopen(0, RTLD_LAZY|RTLD_NOLOAD);
     link_map* lmap;
     dlinfo(handle, 0, &lmap);
-    for(int i = 0; lmap; lmap=lmap->l_next, i++)
+    for (int i = 0; lmap; lmap=lmap->l_next, i++)
     {
-        if(i == 0)
+        if (i == 0)
         {
             /* main executable */
             /* filename seems broken */
             FILE* cmdline = fopen("/proc/self/cmdline", "r");
-            if(!cmdline)
+            if (!cmdline)
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);

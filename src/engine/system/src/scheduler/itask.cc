@@ -20,7 +20,7 @@ namespace BugEngine
 ITask::~ITask()
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         bool result = (*it)->onDisconnected(this);
         be_forceuse(result);
@@ -31,7 +31,7 @@ ITask::~ITask()
 void ITask::end(weak<Scheduler> sc) const
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::list< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onCompleted(sc, this);
     }
@@ -47,9 +47,9 @@ void ITask::addCallback(weak<ICallback> callback, ICallback::CallbackStatus stat
 bool ITask::removeCallback(weak<ICallback> callback)
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
-        if(*it == callback)
+        if (*it == callback)
         {
             bool result = (*it)->onDisconnected(this);
             m_callbacks.erase(it);
@@ -88,7 +88,7 @@ ITask::ChainCallback::ChainCallback(weak<ITask> task)
 
 ITask::ChainCallback::~ChainCallback()
 {
-    while(!m_startedBy.empty())
+    while (!m_startedBy.empty())
     {
         bool result = m_startedBy.back()->removeCallback(this);
         be_forceuse(result);
@@ -98,7 +98,7 @@ ITask::ChainCallback::~ChainCallback()
 
 void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const
 {
-    if(++m_completed == m_startedBy.size())
+    if (++m_completed == m_startedBy.size())
     {
         m_completed = 0;
         m_starts->run(scheduler);
@@ -108,7 +108,7 @@ void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITa
 void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 {
     m_startedBy.push_back(to);
-    if(status == Completed)
+    if (status == Completed)
     {
         m_completed++;
     }
@@ -116,9 +116,9 @@ void ITask::ChainCallback::onConnected(weak<ITask> to, CallbackStatus status)
 
 bool ITask::ChainCallback::onDisconnected(weak<ITask> from)
 {
-    for(minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
+    for (minitl::vector< weak<ITask> >::iterator it = m_startedBy.begin(); it != m_startedBy.end(); ++it)
     {
-        if((*it) == from)
+        if ((*it) == from)
         {
             m_startedBy.erase(it);
             return true;
@@ -139,7 +139,7 @@ ITask::CallbackConnection::CallbackConnection(weak<ITask> task, weak<ICallback> 
 :   m_task(task)
 ,   m_callback(callback)
 {
-    if(m_task)
+    if (m_task)
     {
         m_task->addCallback(m_callback, status);
     }
@@ -149,7 +149,7 @@ ITask::CallbackConnection::CallbackConnection(const CallbackConnection& other)
 :   m_task(other.m_task)
 ,   m_callback(other.m_callback)
 {
-    if(m_task)
+    if (m_task)
     {
         m_task->addCallback(m_callback, ICallback::Pending);
     }
@@ -157,7 +157,7 @@ ITask::CallbackConnection::CallbackConnection(const CallbackConnection& other)
 
 ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackConnection& other)
 {
-    if(m_task)
+    if (m_task)
     {
         bool result = m_task->removeCallback(m_callback);
         be_forceuse(result);
@@ -165,7 +165,7 @@ ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackCo
     }
     m_task = other.m_task;
     m_callback = other.m_callback;
-    if(m_task)
+    if (m_task)
     {
         m_task->addCallback(m_callback, ICallback::Pending);
     }
@@ -174,7 +174,7 @@ ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackCo
 
 ITask::CallbackConnection::~CallbackConnection()
 {
-    if(m_task)
+    if (m_task)
     {
         bool result = m_task->removeCallback(m_callback);
         be_forceuse(result);

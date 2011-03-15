@@ -295,7 +295,7 @@ template< typename T, int INDEX >
 typename intrusive_list<T, INDEX>::size_type                intrusive_list<T, INDEX>::size() const
 {
     size_type size = 0;
-    for(const item* t = m_root.m_next; t != m_root.m_previous; t = t->m_next)
+    for (const item* t = m_root.m_next; t != m_root.m_previous; t = t->m_next)
     {
         size++;
     }
@@ -339,7 +339,7 @@ typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, IN
 template< typename T, int INDEX >
 typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, INDEX>::erase(iterator first, iterator last)
 {
-    while(first != last)
+    while (first != last)
     {
         const item* i = first.m_iterator;
         ++first;
@@ -377,7 +377,7 @@ void                                                        intrusive_list<T, IN
 {
     iterator first = begin();
     iterator last = end();
-    while(first != last)
+    while (first != last)
     {
         const item* i = first.m_iterator;
         ++first;

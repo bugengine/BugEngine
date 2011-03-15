@@ -20,7 +20,7 @@ static HANDLE loadPlugin(const istring &pluginName)
     static const ipath pluginSubdir = ipath("plugins");
     minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
     HANDLE h = LoadLibrary(pluginPath.c_str());
-    if(!h)
+    if (!h)
     {
         char *errorMessage = 0;
         int errorCode = ::GetLastError();
@@ -43,10 +43,10 @@ Plugin<Interface>::Plugin(const istring &pluginName)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if (m_handle)
     {
         Interface* (*be_pluginCreate)(void) = reinterpret_cast<Interface* (*)(void)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
-        if(!be_pluginCreate)
+        if (!be_pluginCreate)
         {
             char *errorMessage;
             ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -72,10 +72,10 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if (m_handle)
     {
         Interface* (*be_pluginCreate)(T1) = reinterpret_cast<Interface* (*)(T1)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
-        if(!be_pluginCreate)
+        if (!be_pluginCreate)
         {
             char *errorMessage;
             ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -101,10 +101,10 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
 {
-    if(m_handle)
+    if (m_handle)
     {
         Interface* (*be_pluginCreate)(T1, T2) = reinterpret_cast<Interface* (*)(T1, T2)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
-        if(!be_pluginCreate)
+        if (!be_pluginCreate)
         {
             char *errorMessage;
             ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -127,10 +127,10 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if(m_handle)
+    if (m_handle)
     {
         void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
-        if(be_pluginDestroy)
+        if (be_pluginDestroy)
             (*be_pluginDestroy)(m_interface); 
         FreeLibrary(static_cast<HMODULE>(m_handle));
     }

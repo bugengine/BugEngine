@@ -76,8 +76,8 @@ void MemoryFileMap::seek(SeekMethod method, i64 _offset)
         default:
             be_notreached();
     }
-    if(m_offset < 0) m_offset = 0;
-    if(m_offset > m_size) m_offset = m_size;
+    if (m_offset < 0) m_offset = 0;
+    if (m_offset > m_size) m_offset = m_size;
 }
 
 void MemoryFileMap::resize(i64 size)
@@ -112,10 +112,10 @@ bool DiskFS::writable() const
 ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
     minitl::format<ifilename::MaxFilenameLength> fullname = (m_prefix+filename).str();
-    if(mode == eReadOnly)
+    if (mode == eReadOnly)
     {
         HANDLE file = CreateFile(fullname.c_str(), GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
-        if(file == INVALID_HANDLE_VALUE)
+        if (file == INVALID_HANDLE_VALUE)
         {
             return ref<IMemoryStream>();
         }
@@ -123,7 +123,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
         {
             DWORD sizehigh;
             HANDLE filemap = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, 0);
-            if(!filemap)
+            if (!filemap)
             {
                 char *errorMessage = 0;
                 int errorCode = ::GetLastError();
@@ -139,7 +139,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
                 ::LocalFree(errorMessage);
             }
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
-            if(!memory)
+            if (!memory)
             {
                 char *errorMessage = 0;
                 int errorCode = ::GetLastError();

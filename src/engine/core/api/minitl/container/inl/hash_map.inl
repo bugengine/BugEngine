@@ -210,11 +210,11 @@ hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& allocator, size_type 
 template< typename Key, typename Value, typename Hash >
 void hashmap< Key, Value, Hash >::reserve(size_type reserved)
 {
-    if(reserved <= m_capacity)
+    if (reserved <= m_capacity)
         return;
     BugEngine::Memory<Arena>::Block<value_type*> newhashes(reserved);
     minitl::pool<Arena, value_type*> newobjects(reserved);
-    for(value_type** it = m_hashes.data; it < m_hashes.data+m_capacity; ++it)
+    for (value_type** it = m_hashes.data; it < m_hashes.data+m_capacity; ++it)
     {
         value_type* entry = *it;
         newobjects.allocate(*entry);

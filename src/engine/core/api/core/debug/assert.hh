@@ -32,7 +32,7 @@ be_api(CORE) AssertionCallback_t getAssertionCallback();
 # define    be_assert_impl_(cond,message,code)                                                  \
     do {                                                                                        \
         static bool be_ignore_ = false;                                                         \
-        if(!be_ignore_ && !(cond))                                                              \
+        if (!be_ignore_ && !(cond))                                                             \
         {                                                                                       \
             BugEngine::Debug::AssertionResult be_r_;                                            \
             minitl::format<4096> be_msg_ = (minitl::format<4096>)message;                       \

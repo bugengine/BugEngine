@@ -31,16 +31,16 @@ AssertionResult defaultAssertionCallback( const char *file,
     static ref<const Runtime::Module> executable = Runtime::Module::self();
     static weak<const Runtime::Module> last = executable;
     static ref<const Runtime::SymbolResolver> s_symbols = executable ? Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols) : ref<const Runtime::SymbolResolver>();
-    while(last && last->next())
+    while (last && last->next())
     {
         last = last->next();
         Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
         s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
     }
-    if(s_symbols)
+    if (s_symbols)
     {
         fprintf(stderr, "Callstack:\n");
-        for(Runtime::Callstack::Address* a = address; a < address+result; ++a)
+        for (Runtime::Callstack::Address* a = address; a < address+result; ++a)
         {
             s_symbols->resolve(*a, s);
             fprintf(stderr, "[%16p] %s - %s:%d - %s\n", (void*)s.address(), s.module(), s.filename(), s.line(), s.function());

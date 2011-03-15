@@ -12,7 +12,7 @@ namespace BugEngine { namespace RTTI
 template< typename T, typename Owner, T (Owner::*Field) >
 static inline Value get(weak<const PropertyInfo> _this, void* from, bool isConst)
 {
-    if(isConst)
+    if (isConst)
     {
         return Value(Value::ByRef((const Owner*)from->*Field));
     }

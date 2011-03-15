@@ -44,7 +44,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
     case SymbolInformations::PEDwarf:
         {
             PE pe(infos.filename.str().c_str(), 0);
-            if(pe)
+            if (pe)
             {
                 ref<SymbolResolver> resolver = ref<DwarfModule>::create(debugArena(), infos.filename, pe, infos.offset, infos.size);
                 resolver->m_next = next;
@@ -55,7 +55,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
     case SymbolInformations::ELFDwarf:
         {
             Elf elf(infos.filename.str().c_str(), 0);
-            if(elf)
+            if (elf)
             {
                 ref<SymbolResolver> resolver = ref<DwarfModule>::create(debugArena(), infos.filename, elf, infos.offset, infos.size);
                 resolver->m_next = next;
@@ -74,7 +74,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
 bool SymbolResolver::resolve(Callstack::Address& address, Symbol& symbol) const
 {
     fillSymbol(symbol, address.address(), "unknown module", "?", "?", 0);
-    if(!resolve(address.address(), symbol))
+    if (!resolve(address.address(), symbol))
     {
         return m_next ? m_next->resolve(address, symbol) : false;
     }

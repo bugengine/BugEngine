@@ -22,7 +22,7 @@ InputMap::~InputMap()
 
 weak<Action> InputMap::addAction(ActionId id, const istring& name)
 {
-    if(id >= m_actions.size())
+    if (id >= m_actions.size())
         m_actions.resize(id+1);
     ref<Action> result = ref<Action>::create(inputArena(), name, this); 
     m_actions[id] = result;

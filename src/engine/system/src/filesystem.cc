@@ -24,7 +24,7 @@ FileSystem::FileSystemMountPoint::~FileSystemMountPoint()
 weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCreate(const istring& child)
 {
     std::pair<ChildrenMap::iterator, bool> result = m_children.insert(std::make_pair(child, scoped<FileSystemMountPoint>()));
-    if(result.second)
+    if (result.second)
         result.first->second = scoped<FileSystemMountPoint>::create(gameArena());
     return result.first->second;
 }
@@ -32,7 +32,7 @@ weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::getOrCr
 weak<FileSystem::FileSystemMountPoint> FileSystem::FileSystemMountPoint::get(const istring& child)
 {
     ChildrenMap::iterator it = m_children.find(child);
-    if(it != m_children.end())
+    if (it != m_children.end())
     {
         return it->second;
     }
@@ -85,7 +85,7 @@ FileSystem::~FileSystem(void)
 void FileSystem::mount(const ipath& prefix, ref<const FileSystemComponent> component)
 {
     weak<FileSystemMountPoint> mountPoint = m_root;
-    for(size_t i = 0; i < prefix.size(); ++i)
+    for (size_t i = 0; i < prefix.size(); ++i)
     {
         mountPoint = mountPoint->getOrCreate(prefix[i]);
     }
@@ -97,7 +97,7 @@ void FileSystem::umount(const ipath& prefix)
 {
     weak<FileSystemMountPoint> mountPoint = m_root;
     weak<FileSystemMountPoint> parent     = 0;
-    for(size_t i = 0; i < prefix.size(); ++i)
+    for (size_t i = 0; i < prefix.size(); ++i)
     {
         parent = mountPoint;
         mountPoint = mountPoint->get(prefix[i]);
@@ -105,7 +105,7 @@ void FileSystem::umount(const ipath& prefix)
     }
 
     mountPoint->umount();
-    if(parent && mountPoint->empty())
+    if (parent && mountPoint->empty())
         parent->erase(prefix[prefix.size()-1]);
 }
 
@@ -114,11 +114,11 @@ ref<IMemoryStream> FileSystem::open(const ifilename& file, FileOpenMode mode) co
     weak<FileSystemMountPoint> mountPoint = m_root;
     weak<FileSystemMountPoint> bestmatch = mountPoint;
     ifilename suffix = file;
-    for(size_t i = 0; (i < file.size()-1) && mountPoint; ++i)
+    for (size_t i = 0; (i < file.size()-1) && mountPoint; ++i)
     {
         bestmatch = mountPoint;
         mountPoint = mountPoint->get(suffix[0]);
-        if(mountPoint)
+        if (mountPoint)
             suffix.pop_front();
     }
     be_assert(bestmatch, "cannot open file %s" | file.str().c_str());

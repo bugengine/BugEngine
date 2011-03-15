@@ -236,7 +236,7 @@ vector<T>& vector<T>::operator=(const vector<T>& other)
 template< typename T >
 vector<T>::~vector()
 {
-    for(const_pointer t = m_memory; t != m_end; t = advance(t, 1))
+    for (const_pointer t = m_memory; t != m_end; t = advance(t, 1))
     {
         t->~T();
     }
@@ -331,7 +331,7 @@ void                                                vector<T>::push_back(ITERATO
 {
     size_type count = minitl::distance(first, last);
     reserve(size() + count);
-    while(first != last)
+    while (first != last)
     {
         new((void*)m_end) T(*first);
         m_end = advance(m_end, 1);
@@ -354,13 +354,13 @@ typename vector<T>::iterator                 vector<T>::erase(iterator first, it
     be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end, return first);
     be_assert_recover(first.m_iterator <= last.m_iterator,"first %p is not before last %p" | first.m_iterator | last.m_iterator, return first);
 
-    for(pointer t = first.m_iterator; t != last.m_iterator; t = advance(t, 1))
+    for (pointer t = first.m_iterator; t != last.m_iterator; t = advance(t, 1))
     {
         t->~T();
     }
     pointer t = first.m_iterator;
     pointer t2 = last.m_iterator;
-    for( ; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
+    for ( ; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
     {
         new((void*)t) T(*t2);
         t2->~T();
@@ -403,18 +403,18 @@ template< typename T >
 void                                                vector<T>::resize(size_type size)
 {
     size_type s = distance(m_memory.data(), m_end);
-    if(size > s)
+    if (size > s)
     {
         reserve(size);
         pointer newend = advance(m_memory.data(), size);
-        for(pointer t = m_end; t != newend; ++t)
+        for (pointer t = m_end; t != newend; ++t)
             new((void*)t) T;
         m_end = newend;
     }
     else
     {
         pointer newend = advance(m_memory.data(), size);
-        for(pointer t = newend; t != m_end; ++t)
+        for (pointer t = newend; t != m_end; ++t)
             t->~T();
         m_end = newend;
     }
@@ -423,7 +423,7 @@ void                                                vector<T>::resize(size_type 
 template< typename T >
 void                                                vector<T>::clear()
 {
-    for(pointer t = m_memory.data(); t != m_end; ++t)
+    for (pointer t = m_memory.data(); t != m_end; ++t)
         t->~T();
     m_end = m_memory.data();
 }
@@ -432,7 +432,7 @@ template< typename T >
 void                                                vector<T>::reserve(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
-    if(size > capacity)
+    if (size > capacity)
     {
         size = size >> 1  | size;
         size = size >> 2  | size;
@@ -445,7 +445,7 @@ void                                                vector<T>::reserve(size_type
         size++;
         BugEngine::Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
-        for(pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
+        for (pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
         {
             new((void*)t) T(*t2);
             t2->~T();

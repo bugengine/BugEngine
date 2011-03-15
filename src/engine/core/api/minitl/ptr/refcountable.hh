@@ -16,7 +16,7 @@ static inline void checked_destroy(const T* ptr)
 {
     char typeMustBeComplete[sizeof(T)];
     (void)typeMustBeComplete;
-    if(ptr)
+    if (ptr)
     {
         ptr->~T();
     }
@@ -25,7 +25,7 @@ static inline void checked_destroy(const T* ptr)
 template< typename T >
 static inline void checked_delete(const T* ptr)
 {
-    if(ptr)
+    if (ptr)
     {
         BugEngine::Allocator* d = ptr->m_allocator;
         checked_destroy(ptr);
@@ -60,17 +60,17 @@ protected:
 
 inline void addref(const refcountable* ptr)
 {
-    if(ptr)
+    if (ptr)
         ++ptr->m_refCount;
 }
 
 template< typename T >
 inline const T* decref(const T *ptr)
 {
-    if(!ptr)
+    if (!ptr)
         return 0;
     be_assert(ptr->m_refCount > 0, "object has no reference; cannot dereference it again");
-    if(! --ptr->m_refCount)
+    if (! --ptr->m_refCount)
     {
         checked_delete<const T>(ptr);
         return 0;

@@ -34,7 +34,7 @@ u32 TypeInfo::size() const
 minitl::format<> TypeInfo::name() const
 {
     minitl::format<> n("");
-    if(type && type & MutableBit)
+    if (type && type & MutableBit)
         n = minitl::format<>("%s") | metaclass->name;
     else
         n = minitl::format<>("const %s") | metaclass->name;

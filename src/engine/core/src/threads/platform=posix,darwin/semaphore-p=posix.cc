@@ -24,14 +24,14 @@ Semaphore::~Semaphore()
 
 void Semaphore::release(int count)
 {
-    for(int i = 0; i < count; ++i)
+    for (int i = 0; i < count; ++i)
         sem_post(reinterpret_cast<sem_t*>(m_data));
 }
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int result = sem_wait(reinterpret_cast<sem_t*>(m_data));
-    if(result == 0)
+    if (result == 0)
     {
         return Finished;
     }

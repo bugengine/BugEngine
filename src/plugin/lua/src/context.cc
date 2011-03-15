@@ -36,7 +36,7 @@ static int luaPrint (lua_State *L)
             return luaL_error(L, LUA_QL("tostring") " must return a string to "
                                  LUA_QL("print"));
         lua_Debug ar;
-        if(lua_getstack (L, 1, &ar))
+        if (lua_getstack (L, 1, &ar))
         {
             lua_getinfo(L, "Snl", &ar);
             Logger::root()->log(logInfo, ar.source, ar.currentline, s);
@@ -57,9 +57,9 @@ static const luaL_Reg base_funcs[] = {
 
 void* Context::luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize)
 {
-    if(nsize)
+    if (nsize)
     {
-        if(osize)
+        if (osize)
         {
             return rttiArena().realloc(ptr, nsize, 16);
         }
@@ -101,7 +101,7 @@ Context::~Context()
 void Context::doFile(const ifilename& file)
 {
     ref<IMemoryStream> stream = m_filesystem->open(file, eReadOnly);
-    if(stream)
+    if (stream)
     {
         doFile(stream, file.str().c_str());
     }
@@ -115,7 +115,7 @@ void Context::doFile(weak<IMemoryStream> file, const char *filename)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), filename);
-    if(result == 0)
+    if (result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
@@ -125,7 +125,7 @@ void Context::doFile(weak<IMemoryStream> file, const char *filename)
 void Context::push(lua_State* state, const Value& v)
 {
     const TypeInfo& t = v.type();
-    if(t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
+    if (t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
     {
     }
 
@@ -188,7 +188,7 @@ Value Context::get(lua_State *state, int index)
         {
             lua_getmetatable(state, index);
             lua_getglobal(state, "bugvalue");
-            if(lua_rawequal(state, -1, -2))
+            if (lua_rawequal(state, -1, -2))
             {
                 lua_pop(state, 2);
                 return *(Value*)lua_touserdata(state, index);
@@ -215,7 +215,7 @@ int Context::valueGC(lua_State *state)
 int Context::valueToString(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -1);
-    if(userdata->type().type == TypeInfo::Class)
+    if (userdata->type().type == TypeInfo::Class)
     {
         weak<const RTTI::ClassInfo> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
@@ -243,7 +243,7 @@ int Context::valueGet(lua_State *state)
     Value* userdata = (Value*)lua_touserdata(state, -2);
     const char *name = lua_tostring(state, -1);
     Value v = (*userdata)[name];
-    if(!v)
+    if (!v)
     {
         lua_pushnil(state);
         return 1;
@@ -270,11 +270,11 @@ int Context::valueCall(lua_State *state)
 
     Value result = userdata->type().metaclass->call(values, top);
 
-    for(int i = top; i > 0; --i)
+    for (int i = top; i > 0; --i)
         values[i-1].~Value();
     freea(v);
 
-    if(result)
+    if (result)
     {
         push(state, result);
         return 1;

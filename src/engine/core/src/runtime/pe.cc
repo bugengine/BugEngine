@@ -384,7 +384,7 @@ PE::PE(const char *filename, u64 baseAddress)
     MSDosHeader dosh;
     ImageHeader   imageHeader;
     m_file = fopen(filename, "rb");
-    if(m_file)
+    if (m_file)
     {
         fread(&dosh, sizeof(dosh), 1, m_file);
         fseek(m_file, dosh.offset, SEEK_SET);
@@ -394,19 +394,19 @@ PE::PE(const char *filename, u64 baseAddress)
         {
             Allocator::Block<u8> block(tempArena(), imageHeader.optionalHeaderSize);
             fread(block, imageHeader.optionalHeaderSize, 1, m_file);
-            if(*(i16*)(u8*)block == ImageHeader::Header_Pe32Header)
+            if (*(i16*)(u8*)block == ImageHeader::Header_Pe32Header)
             {
                 PEHeader* header = reinterpret_cast<PEHeader*>((u8*)block);
-                if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
+                if (header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
                     debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
                     debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
                 }
             }
-            else if(*(i16*)(u8*)block == ImageHeader::Header_Pe32PlusHeader)
+            else if (*(i16*)(u8*)block == ImageHeader::Header_Pe32PlusHeader)
             {
                 PEPlusHeader* header = reinterpret_cast<PEPlusHeader*>((u8*)block);
-                if(header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
+                if (header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
                     debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
                     debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
@@ -421,19 +421,19 @@ PE::PE(const char *filename, u64 baseAddress)
         Allocator::Block<SectionHeader> sections(tempArena(), imageHeader.sectionCount);
         fread(sections, sizeof(SectionHeader), imageHeader.sectionCount, m_file);
 
-        if(debugEntryVirtualAdress && debugEntrySize)
+        if (debugEntryVirtualAdress && debugEntrySize)
         {
             be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the debug section; expected a multiple of %d, got %d" | sizeof(DebugEntry) | debugEntrySize);
             size_t debugEntryCount = debugEntrySize / sizeof(DebugEntry);
-            for(u16 section = 0; section <  imageHeader.sectionCount; ++section)
+            for (u16 section = 0; section <  imageHeader.sectionCount; ++section)
             {
-                if(sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset + sections[section].size) > debugEntryVirtualAdress)
+                if (sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset + sections[section].size) > debugEntryVirtualAdress)
                 {
                     be_info("loading debug info from section %s" | sections[section].name);
                     Allocator::Block<DebugEntry> entries(tempArena(), debugEntryCount);
                     fseek(m_file, static_cast<long>(sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET);
                     fread(entries, sizeof(DebugEntry), debugEntryCount, m_file);
-                    for(size_t i = 0; i < debugEntryCount; ++i)
+                    for (size_t i = 0; i < debugEntryCount; ++i)
                     {
                         switch(entries[i].type)
                         {
@@ -482,13 +482,13 @@ PE::PE(const char *filename, u64 baseAddress)
         strings->size = stringTableSize;
         fread(strings->strings, 1, stringTableSize-4, m_file);
 
-        for(u16 section = 0; section <  imageHeader.sectionCount; ++section)
+        for (u16 section = 0; section <  imageHeader.sectionCount; ++section)
         {
             char* name = sections[section].name;
-            if(name[0] == '/')
+            if (name[0] == '/')
             {
                 int offset = 0;
-                for(int i = 1; i < 8 && name[i]; ++i)
+                for (int i = 1; i < 8 && name[i]; ++i)
                 {
                     be_assert(name[i] >= '0' && name[i] <= '9', "unexpected character in section name %s : %c" | name | name[i]);
                     offset = offset*10 + name[i]-'0';
@@ -501,7 +501,7 @@ PE::PE(const char *filename, u64 baseAddress)
         const Section& code = (*this)[".text"];
         be_assert(code, "No .text section in executable %s" | m_filename);
         const Section& debug_link = (*this)[".gnu_debuglink"];
-        if(debug_link)
+        if (debug_link)
         {
             Allocator::Block<char> filename(tempArena(), be_checked_numcast<size_t>(debug_link.fileSize));
             readSection(debug_link, filename);
@@ -510,7 +510,7 @@ PE::PE(const char *filename, u64 baseAddress)
             m_symbolInformations.offset = m_baseAddress + code.offset;
             m_symbolInformations.size = code.size;
         }
-        else if((*this)[".debug_info"])
+        else if ((*this)[".debug_info"])
         {
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = m_filename;
