@@ -115,6 +115,7 @@ class Enum(Container):
 	def __init__(self, parent, name, line, scope):
 		Container.__init__(self, parent, name, line, scope)
 		self.values = []
+		self.tags = []
 
 	def addEnumValue(self, name):
 		self.values.append(name)
@@ -133,6 +134,8 @@ class Enum(Container):
 		if nested  or self.name.find('::') != -1:
 			file.write("        ::BugEngine::be_typeid< %s >::klass();\n" % '::'.join(self.fullname.split('::')[:-1]))
 		file.write("        klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), be_checked_numcast<u32>(sizeof(%s)), 0);\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
+		for tag in self.tags:
+			file.write("        klass->tags.push_back(Value(%s));\n" % tag)
 		file.write("        weak<RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")

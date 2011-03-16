@@ -887,14 +887,14 @@ def p_class(t):
 
 def p_class_2(t):
 	"""
-		simple_type : class_def
+		decl : class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_3(t):
 	"""
-		simple_type : BE_META LPAREN name RPAREN class_def
+		decl : BE_META LPAREN name RPAREN class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace.metaclass = t[3]
@@ -902,7 +902,7 @@ def p_class_3(t):
 
 def p_class_4(t):
 	"""
-		simple_type : tags class_def
+		decl : tags class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace.tags = t[1]
@@ -910,7 +910,7 @@ def p_class_4(t):
 
 def p_class_5(t):
 	"""
-		simple_type : tags BE_META LPAREN name RPAREN class_def
+		decl : tags BE_META LPAREN name RPAREN class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace.tags = t[1]
@@ -944,9 +944,16 @@ def p_enum_header(t):
 	"""
 	t.parser.namespace = rtti.Enum(t.parser.namespace, t[2], t.lineno(3), t.parser.namespace.visibility)
 
+def p_enum_header_2(t):
+	"""
+		enum_header :	tags ENUM name_opt LBRACE
+	"""
+	t.parser.namespace = rtti.Enum(t.parser.namespace, t[3], t.lineno(4), t.parser.namespace.visibility)
+	t.parser.namespace.tags = t[1]
+
 def p_enum(t):
 	"""
-		simple_type :	enum_header enum_values RBRACE
+		decl :	enum_header enum_values RBRACE
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
 	t.parser.namespace = t.parser.namespace.parent
@@ -1068,15 +1075,34 @@ def p_method_decl_or_impl(t):
 
 def p_method_decl_or_impl_2(t):
 	"""
+		decl : tags method SEMI
+		decl : tags method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[2][0], t[2][1], t[2][2], t[2][3], t[1], t[2][4])
+
+def p_method_decl_or_impl_3(t):
+	"""
 		decl : modifier_list method SEMI
 	"""
 	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
 
-def p_method_decl_or_impl_3(t):
+def p_method_decl_or_impl_4(t):
+	"""
+		decl : tags modifier_list method SEMI
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[1], t[3][2], t[3][3], t[1], t[3][4])
+
+def p_method_decl_or_impl_5(t):
 	"""
 		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
 	"""
 	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
+
+def p_method_decl_or_impl_6(t):
+	"""
+		decl : tags modifier_list method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[1], t[3][2], t[3][3], t[1], t[3][4])
 
 ###################################
 # skiplist
