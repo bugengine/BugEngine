@@ -14,7 +14,7 @@ namespace BugEngine { namespace RTTI
 {
 
 Namespace::Namespace()
-    :   m_decls(rttiArena())
+    :   decls(rttiArena())
 {
 }
 
@@ -67,7 +67,7 @@ void Namespace::add(const inamespace& name, const Value& value) const
 
 void Namespace::add(const istring& name, const Value& value) const
 {
-    m_decls.insert(std::make_pair(name, value));
+    decls.insert(std::make_pair(name, value));
 }
 
 void Namespace::remove(const inamespace& name) const
@@ -89,13 +89,13 @@ void Namespace::remove(const inamespace& name) const
 
 void Namespace::remove(const istring& name) const
 {
-    m_decls.erase(name);
+    decls.erase(name);
 }
 
 Value Namespace::get(const istring& name) const
 {
-    minitl::hashmap<istring, Value>::const_iterator it = m_decls.find(name);
-    if (it != m_decls.end())
+    minitl::hashmap<istring, Value>::const_iterator it = decls.find(name);
+    if (it != decls.end())
         return it->second;
     else
         return Value();

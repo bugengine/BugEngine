@@ -44,6 +44,8 @@ private:
     };
 private:
     inline Value(TypeInfo typeinfo, void* location);
+    enum ReserveType { Reserve };
+    inline Value(TypeInfo type, ReserveType);
 public:
     enum ConstifyType { Constify };
 

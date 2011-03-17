@@ -254,7 +254,6 @@ int Context::valueGet(lua_State *state)
 
 int Context::valueCall(lua_State *state)
 {
-    printStack(state);
     int top = lua_gettop(state);
     Value* userdata = (Value*)lua_touserdata(state, 1);
 

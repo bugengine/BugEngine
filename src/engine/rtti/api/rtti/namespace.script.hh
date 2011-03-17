@@ -21,8 +21,7 @@ class be_api(RTTI) Namespace : public minitl::refcountable
     friend class ::BugEngine::Value;
 published:
     class be_api(RTTI) MetaClassInfo;
-private:
-    mutable minitl::hashmap<istring, Value> m_decls;
+    mutable minitl::hashmap<istring, Value> decls;
 published:
     Namespace();
     ~Namespace();
@@ -36,7 +35,7 @@ published:
 
     static weak<const Namespace> rttiRoot();
 
-    bool empty() const { return m_decls.empty(); }
+    bool empty() const { return decls.empty(); }
 private:
     enum CreationPolicy { DoNotCreate, Create };
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;

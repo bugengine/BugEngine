@@ -154,8 +154,12 @@ class Enum(Container):
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
-		for enum in self.values:
-			file.write("        klass->remove(BugEngine::istring(\"%s\"));\n" % (enum))
+		file.write("        klass->tags.clear();\n")
+		file.write("        klass->methods.clear();\n")
+		file.write("        klass->properties.clear();\n")
+		file.write("        klass->constructor.overloads.clear();\n")
+		file.write("        klass->call.overloads.clear();\n")
+		file.write("        klass->decls.clear();\n")
 		file.write("    }\n")
 		index = Container.dump(self, file, namespace, index+1, nested)
 		self.parent.classes += self.classes
@@ -283,13 +287,10 @@ class Class(Container):
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo > klass = s_%sClass();\n" % decl)
 		file.write("        klass->tags.clear();\n")
-		for type,name,attr,visibility,tags,line in self.members:
-			if visibility == 'published':
-				if showline: file.write("        #line %d\n" % (line))
-				file.write("        klass->removeProperty(\"%s\");\n" % (name))
-		for name, overloads in self.methods.iteritems():
-			if name[0] == "?":
-				continue
-			file.write("        klass->removeMethod(\"%s\");\n" % (name))
+		file.write("        klass->methods.clear();\n")
+		file.write("        klass->properties.clear();\n")
+		file.write("        klass->constructor.overloads.clear();\n")
+		file.write("        klass->call.overloads.clear();\n")
+		file.write("        klass->decls.clear();\n")
 		file.write("    }\n")
 
