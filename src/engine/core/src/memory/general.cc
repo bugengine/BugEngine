@@ -34,7 +34,7 @@ void* GeneralAllocator::internalAlloc(size_t size, size_t alignment)
 #endif
 }
 
-bool GeneralAllocator::internalResize(void* ptr, size_t size)
+bool GeneralAllocator::internalResize(void* /*ptr*/, size_t /*size*/)
 {
     return false;
 }

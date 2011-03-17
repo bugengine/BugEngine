@@ -42,6 +42,7 @@ typedef u8                      byte;
 # pragma warning(disable:4530)  // C++ exception handler used, but unwind semantics are not enabled
 # pragma warning(disable:4100)  // unreferenced formal parameter
 #endif
+#pragma warning(disable:4201)   // nonstandard extension used : nameless struct/union
 #pragma warning(disable:4251)
 #pragma warning(disable:4355)   // this used in base member initialization list
 #pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)

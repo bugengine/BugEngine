@@ -4,7 +4,6 @@
 #ifndef BE_GRAPHICS_MATERIAL_TEXTURE_HH_
 #define BE_GRAPHICS_MATERIAL_TEXTURE_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
 
 namespace BugEngine { namespace Graphics
 {

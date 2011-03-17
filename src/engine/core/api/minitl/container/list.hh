@@ -67,6 +67,8 @@ public:
     const_reference         back() const;
 
     void                    clear();
+private:
+    list& operator=(const list& other);
 };
 
 }

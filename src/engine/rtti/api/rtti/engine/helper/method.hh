@@ -24,13 +24,14 @@ static inline void wrapCopy(const void* src, void* dst)
 template< typename T >
 static inline void wrapDestroy(void* src)
 {
+	be_forceuse(src);
     ((T*)src)->~T();
 }
 
 template< size_t size >
 inline void nullconstructor(const void* src, void* dst) { memcpy(dst, src, size); }
 template< >
-inline void nullconstructor<0>(const void* src, void* dst) {}
+inline void nullconstructor<0>(const void* /*src*/, void* /*dst*/) {}
 static inline void nulldestructor(void*) { }
 
 

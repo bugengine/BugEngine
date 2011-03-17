@@ -41,6 +41,8 @@ private:
     {
         T& value;
         explicit ByRefType(T& t) : value(t) { }
+    private:
+        ByRefType& operator=(const ByRefType& other);
     };
 private:
     inline Value(TypeInfo typeinfo, void* location);

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/material/shader.hh>
+#include    <graphics/material/shader.script.hh>
 
 namespace BugEngine { namespace Graphics
 {

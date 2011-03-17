@@ -327,6 +327,10 @@ class module:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 		return result
 
+	def addFile( self, filename ):
+		s = sources.dummysource(os.path.split(filename)[1], mak.allplatforms.keys(), mak.allarchs[:])
+		self.sourcetree.addFullFile( filename, s )
+
 	def deploy( self, filename, outputdir, deploytype, platforms = None, archs = None ):
 		if not platforms: platforms=mak.allplatforms.keys()
 		if not archs: archs=mak.allarchs[:]
