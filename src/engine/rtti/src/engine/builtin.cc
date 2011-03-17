@@ -22,8 +22,7 @@ template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
 
 template< > ref<RTTI::ClassInfo> be_typeid< ::minitl::refcountable >::klassBuilder()
 {
-    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), 0, 0);
-    return klass;
+    return be_typeid< void >::klass();
 }
 
 #define BE_MAKE_BUILTIN(type,parent)                                                            \

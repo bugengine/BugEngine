@@ -61,6 +61,14 @@ Value::Value(TypeInfo type, void* location)
 {
 }
 
+Value::Value(TypeInfo type, ReserveType)
+:   m_type(type)
+,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
+,   m_deallocate(m_pointer != 0)
+,   m_reference(false)
+{
+}
+
 template< typename T >
 Value::Value(ByRefType<T> t)
 :   m_type(be_typeid<T>::type())
