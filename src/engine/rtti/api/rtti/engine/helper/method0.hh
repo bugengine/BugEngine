@@ -14,7 +14,7 @@ struct callhelper< T, void >
     enum {VarArg = 0 };
 
     template< void(*method)() >
-    static Value callStatic(Value* params, u32 paramCount)
+    static Value callStatic(Value* /*params*/, u32 paramCount)
     {
         be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
         (*method)();
@@ -46,7 +46,7 @@ struct callhelper< T, R >
     enum {VarArg = 0 };
 
     template< R(*method)() >
-    static Value callStatic(Value* params, u32 paramCount)
+    static Value callStatic(Value* /*params*/, u32 paramCount)
     {
         be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
         return Value((*method)());

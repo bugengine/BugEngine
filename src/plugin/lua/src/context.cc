@@ -55,7 +55,7 @@ static const luaL_Reg base_funcs[] = {
 };
 
 
-void* Context::luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize)
+void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 {
     if (nsize)
     {
@@ -282,7 +282,6 @@ int Context::valueCall(lua_State *state)
     {
         return 0;
     }
-    return 0;
 }
 
 void Context::printStack(lua_State* l)

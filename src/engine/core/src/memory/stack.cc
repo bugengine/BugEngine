@@ -24,7 +24,7 @@ void* StackAllocator::internalAlloc(size_t size, size_t alignment)
 #endif
 }
 
-bool StackAllocator::internalResize(void* ptr, size_t size)
+bool StackAllocator::internalResize(void* /*ptr*/, size_t /*size*/)
 {
     return false;
 }
@@ -34,6 +34,7 @@ void* StackAllocator::internalRealloc(void* ptr, size_t size, size_t alignment)
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, size, alignment);
 #else
+    be_forceuse(alignment);
     return ::realloc(ptr, size);
 #endif
 }

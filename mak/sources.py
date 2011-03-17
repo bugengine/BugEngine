@@ -76,6 +76,10 @@ class source:
 	def generated(self):
 		return False
 
+class dummysource(source):
+	def __init__( self, filename, platforms, archs ):
+		source.__init__( self, filename, platforms, archs, False )
+
 class rcsource(source):
 	def __init__( self, filename, platforms, archs, process ):
 		source.__init__( self, filename, platforms, archs, process )

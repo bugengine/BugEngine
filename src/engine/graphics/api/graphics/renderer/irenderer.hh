@@ -7,7 +7,7 @@
 #include    <graphics/renderer/buffer/vertexdesc.hh>
 #include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/renderer/buffer/gpubuffer.hh>
-#include    <graphics/material/shader.hh>
+#include    <graphics/material/shader.script.hh>
 
 namespace BugEngine { namespace Graphics
 {

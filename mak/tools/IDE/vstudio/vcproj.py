@@ -56,6 +56,8 @@ class VCproj:
 			print 'dunno project type : '+type
 
 	def writeHeader(self, configs, platforms, options):
+		if 'xbox360' not in mak.allplatforms.keys():
+			platforms = [p for p in platforms if not p == 'Xbox 360']
 		self.configs = configs
 		self.platforms = platforms
 		self.output.write('<VisualStudioProject\n	ProjectType="Visual C++"\n	Version="%s"\n	Name="%s"\n	ProjectGUID="%s"\n	RootNamespace="%s"\n	Keyword="Win32Proj">\n' % (self.versionNumber, self.category+'.'+self.name, solution.generateGUID(self.targetName, self.name), self.name))
@@ -76,6 +78,7 @@ class VCproj:
 
 
 
+			self.pchstop = opts.pchstop
 			for config in configs:
 				props =	{
 					'VCPreBuildEventTool': { },
@@ -155,12 +158,12 @@ class VCproj:
 		self.output.write('	</Globals>\n')
 		self.output.write('</VisualStudioProject>\n')
 
-	def addCppFile(self, path, filename, source, tabs):
+	def addCppFile(self, path, filename, source, tabs, usepch):
 		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -173,6 +176,8 @@ class VCproj:
 						self.output.write(tabs+'		UsePrecompiledHeader="1"\n')
 					else:
 						self.output.write(tabs+'		UsePrecompiledHeader="2"\n')
+				else:
+					self.output.write(tabs+'		UsePrecompiledHeader="0"\n')
 				self.output.write(tabs+'		ObjectFile="$(IntDir)%s\\"\n' % path)
 				self.output.write(tabs+'	/>\n')
 				self.output.write(tabs+'	</FileConfiguration>\n')
@@ -183,7 +188,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -200,7 +205,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -221,7 +226,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -230,8 +235,9 @@ class VCproj:
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
 				self.output.write(tabs+'		Description="datagen &quot;$(InputPath)&quot;"\n')
-				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -D $(SolutionDir)mak/macros_ignore -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
+				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -p &quot;%s&quot; -D $(SolutionDir)mak/macros_ignore -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], self.pchstop, os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
 				self.output.write(tabs+'		Outputs="&quot;%s&quot;"\n' % ('$(IntDir)'+source.generatedcpp))
+				self.output.write(tabs+'		AdditionalDependencies="&quot;$(SolutionDir)/mak/rtti.py;$(SolutionDir)/mak/ddf.py&quot;"\n')
 				self.output.write(tabs+'	/>\n')
 				self.output.write(tabs+'	</FileConfiguration>\n')
 		self.output.write(tabs+'</File>\n')
@@ -242,7 +248,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -264,7 +270,7 @@ class VCproj:
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
-				if not (mak.allplatforms[VCproj.vcplatforms[platform]] & set(source.platforms)) or not source.process:
+				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
 					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
 				else:
 					if self.archs[platform] not in source.archs:
@@ -279,6 +285,8 @@ class VCproj:
 				self.output.write(tabs+'	</FileConfiguration>\n')
 		self.output.write(tabs+'</File>\n')
 
+	def addDummyFile(self, path, filename, source, tabs):
+		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
 
 	def addFiles(self, path, directory, tabs):
 		for subname,subdir in directory.directories.iteritems():
@@ -293,7 +301,7 @@ class VCproj:
 			if isinstance(source, mak.sources.hsource):
 				self.addHFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.cppsource):
-				self.addCppFile(path, filename, source, tabs)
+				self.addCppFile(path, filename, source, tabs, source.usepch)
 			elif isinstance(source, mak.sources.rcsource):
 				self.addRcFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.datasource):
@@ -304,6 +312,8 @@ class VCproj:
 				self.addBisonFile(path, filename, source, tabs)
 			elif isinstance(source, mak.sources.deployedsource):
 				self.addDeployedFile(path, filename, source, tabs)
+			elif isinstance(source, mak.sources.dummysource):
+				self.addDummyFile(path, filename, source, tabs)
 
 	def addDirectory(self, sources):
 		self.output.write('	<Files>\n')

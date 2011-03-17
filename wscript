@@ -40,8 +40,9 @@ def build(bld):
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
+	mak				= module.external('mak')
 
-	core			= module.library('core',        [dbghelp, win32, pthreads])
+	core			= module.library('core',        [dbghelp, win32, pthreads, mak])
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )

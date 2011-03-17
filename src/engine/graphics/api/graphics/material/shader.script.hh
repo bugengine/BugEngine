@@ -4,22 +4,21 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADER_HH_
 #define BE_GRAPHICS_MATERIAL_SHADER_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
-#include    <graphics/material/shaders/node.hh>
+#include    <graphics/material/shaders/node.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
 class IShaderBuilder;
 
-class be_api(GRAPHICS) Shader : public Resource
+class be_api(GRAPHICS) Shader : public minitl::refcountable
 {
 private:
     ref<Shaders::Node> m_root;
 published:
     Shader();
     ~Shader();
-
+public:
     void buildSource(const IShaderBuilder& builder) const;
 };
 

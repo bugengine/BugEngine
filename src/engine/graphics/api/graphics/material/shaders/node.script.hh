@@ -4,7 +4,6 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADERS_NODE_HH_
 #define BE_GRAPHICS_MATERIAL_SHADERS_NODE_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
 #include    <core/memory/streams.hh>
 
 namespace BugEngine { namespace Graphics
@@ -17,10 +16,10 @@ namespace BugEngine { namespace Graphics { namespace Shaders
 
 class be_api(GRAPHICS) Node : public minitl::refcountable
 {
-public:
+protected:
     Node();
     ~Node();
-
+public:
     virtual void buildSource(const IShaderBuilder& stream) = 0;
 };
 

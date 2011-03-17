@@ -198,7 +198,8 @@ class Class(Container):
 		else:
 			file.write("        minitl::ref<const ::BugEngine::RTTI::ClassInfo> parent;\n")
 		if showline: file.write("#line %d\n" % (self.line))
-		file.write("        be_assert_recover(!klass, \"Class %s was constructed as a side effect of constructing its parent\" | name, return klass);\n")
+		file.write("        if (klass)\n")
+		file.write("            return klass;\n")
 		file.write("        klass = minitl::ref< %s >::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), parent, be_checked_numcast<u32>(sizeof(%s)), be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1));\n" % (self.metaclass, self.fullname[2:].replace('::', '.'), self.fullname, self.inherits, self.fullname))
 		if self.value:
 			file.write("        klass->copyconstructor = &::BugEngine::RTTI::wrapCopy< %s >;\n" % (self.fullname))

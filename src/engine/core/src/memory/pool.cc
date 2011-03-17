@@ -25,7 +25,7 @@ void* PoolAllocator::internalAlloc(size_t size, size_t alignment)
 #endif
 }
 
-bool PoolAllocator::internalResize(void* ptr, size_t size)
+bool PoolAllocator::internalResize(void* /*ptr*/, size_t /*size*/)
 {
     return false;
 }

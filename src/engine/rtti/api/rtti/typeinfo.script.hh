@@ -47,12 +47,13 @@ struct be_api(RTTI) TypeInfo
     Constness const                     constness;
 
     inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
-    inline TypeInfo(const TypeInfo& other, ConstifyType constify);
+    inline TypeInfo(const TypeInfo& other, ConstifyType);
     inline ~TypeInfo();
 
     u32                             size() const;
     minitl::format<>                name() const;
 private:
+    TypeInfo& operator=(const TypeInfo&);
     void*                           rawget(const void*) const;
     void                            copy(const void* source, void* dest) const;
     void                            create(void* obj) const;
@@ -67,7 +68,7 @@ TypeInfo::TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness co
 {
 }
 
-TypeInfo::TypeInfo(const TypeInfo& other, ConstifyType constify)
+TypeInfo::TypeInfo(const TypeInfo& other, ConstifyType)
     :   metaclass(other.metaclass)
     ,   type(other.type)
     ,   constness(Const)

@@ -4,7 +4,6 @@
 #ifndef BE_GRAPHICS_RENDERER_BUFFER_GPUBUFFER_HH_
 #define BE_GRAPHICS_RENDERER_BUFFER_GPUBUFFER_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -13,7 +12,7 @@ struct GpuMapFlags
 {
 };
 
-class be_api(GRAPHICS) GpuBuffer : public Resource
+class be_api(GRAPHICS) GpuBuffer
 {
 protected:
     GpuBuffer();
