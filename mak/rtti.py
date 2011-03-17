@@ -56,7 +56,6 @@ class Root(Container):
 		file.write("#include    <rtti/namespace.script.hh>\n")
 		file.write("#include    <rtti/engine/methodinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/propertyinfo.script.hh>\n")
-		file.write("#include    <rtti/engine/enuminfo.script.hh>\n")
 		file.write("#include    <rtti/engine/helper/get.hh>\n")
 		file.write("#include    <rtti/engine/helper/set.hh>\n")
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
