@@ -1,0 +1,15 @@
+if not m.has_key(name):
+	m[name] = util(name, [], 'engine')
+	m[name].sourcetree.prefix = ''
+
+	def addEntries(p, path, recurse):
+		for entries in os.listdir(path):
+			if entries == '.svn' or entries == '.cvs' or entries == 'win32':
+				continue
+			entry = os.path.join(path, entries)
+			if os.path.isdir(entry):
+				recurse(p, entry, recurse)
+			elif entries == 'wscript' or entries == 'wscript_build' or entries.endswith('.py'):
+				p.addFile(entry)
+	addEntries(m[name], 'mak', addEntries)
+
