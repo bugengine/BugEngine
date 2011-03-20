@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_MATERIAL_SHADERS_NODE_HH_
-#define BE_GRAPHICS_MATERIAL_SHADERS_NODE_HH_
+#ifndef BE_GRAPHICS_MATERIAL_SHADERS_NODE_SCRIPT_HH_
+#define BE_GRAPHICS_MATERIAL_SHADERS_NODE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <core/memory/streams.hh>
 
