@@ -30,7 +30,7 @@ struct be_api(RTTI) TypeInfo
         ConstRefPtr     = 3,
         RawPtr          = ConstRawPtr | MutableBit,
         WeakPtr         = ConstWeakPtr | MutableBit,
-        RefPtr          = ConstRefPtr | MutableBit,
+        RefPtr          = ConstRefPtr | MutableBit
     };
     enum Constness
     {

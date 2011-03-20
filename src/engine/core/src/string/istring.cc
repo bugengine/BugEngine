@@ -18,7 +18,7 @@ static inline Allocator& stringArena()
 
 struct hashIstring
 {
-    bool operator()(const char *str1, const char *str2)
+    bool operator()(const char *str1, const char *str2) const
     {
         return strcmp(str1, str2) < 0;
     }

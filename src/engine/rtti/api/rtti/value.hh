@@ -21,14 +21,15 @@ class Value
     friend struct ::BugEngine::RTTI::PropertyInfo;
 private:
     TypeInfo        m_type;
+    struct Reference
+    {
+        void*           m_pointer;
+        bool            m_deallocate;
+    };
     union
     {
-        char        m_buffer[47];
-        struct
-        {
-            void*   m_pointer;
-            bool    m_deallocate;
-        };
+        char            m_buffer[47];
+        Reference       m_ref;
     };
     bool            m_reference;
 private:
