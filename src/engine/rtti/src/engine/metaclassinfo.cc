@@ -22,12 +22,12 @@ Namespace::MetaClassInfo::~MetaClassInfo()
 {
 }
 
-Value Namespace::MetaClassInfo::get(Value& from, istring name) const
+Value Namespace::MetaClassInfo::get(Value& from, istring propname) const
 {
-    Value r = ClassInfo::get(from, name);
+    Value r = ClassInfo::get(from, propname);
     if (!r)
     {
-        r = from.as<const Namespace&>().get(name);
+        r = from.as<const Namespace&>().get(propname);
     }
     return r;
 }
@@ -47,12 +47,11 @@ ClassInfo::MetaClassInfo::~MetaClassInfo()
 {
 }
 
-Value ClassInfo::MetaClassInfo::get(Value& from, istring name) const
+Value ClassInfo::MetaClassInfo::get(Value& from, istring propname) const
 {
-    Value r = Namespace::MetaClassInfo::get(from, name);
+    Value r = Namespace::MetaClassInfo::get(from, propname);
     if (!r)
     {
-        
     }
     return r;
 }

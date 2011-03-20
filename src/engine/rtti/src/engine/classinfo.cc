@@ -11,12 +11,12 @@
 namespace BugEngine { namespace RTTI
 {
 
-ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 size, i32 offset)
+ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_, u32 size_, i32 offset_)
     :   Namespace()
-    ,   name(name)
-    ,   parent(parent)
-    ,   size(size)
-    ,   offset(offset)
+    ,   name(name_)
+    ,   parent(parent_)
+    ,   size(size_)
+    ,   offset(offset_)
     ,   properties(rttiArena())
     ,   methods(rttiArena())
     ,   tags(rttiArena())
@@ -30,10 +30,10 @@ ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 si
     }
 }
 
-ClassInfo::ClassInfo(const inamespace& name, ref<const ClassInfo> parent)
+ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_)
     :   Namespace()
-    ,   name(name)
-    ,   parent(parent)
+    ,   name(name_)
+    ,   parent(parent_)
     ,   size(0)
     ,   offset(0)
     ,   properties(rttiArena())
@@ -65,36 +65,36 @@ void ClassInfo::destroy(void* src) const
     (*destructor)(src);
 }
 
-void ClassInfo::addProperty(istring name, const PropertyInfo& prop)
+void ClassInfo::addProperty(istring propname, const PropertyInfo& prop)
 {
-    be_assert(properties.find(name) == properties.end(), "Property %s already exists in class %s!" | name | this->name);
-    properties.insert(std::make_pair(name, prop));
+    be_assert(properties.find(propname) == properties.end(), "Property %s already exists in class %s!" | propname | name);
+    properties.insert(std::make_pair(propname, prop));
 }
 
-void ClassInfo::removeProperty(istring name)
+void ClassInfo::removeProperty(istring propname)
 {
-    properties.erase(name);
+    properties.erase(propname);
 }
 
-void ClassInfo::addMethod(istring name, const MethodInfo& m)
+void ClassInfo::addMethod(istring methodname, const MethodInfo& m)
 {
-    be_assert(methods.find(name) == methods.end(), "Method %s already exists in class %s!" | name | this->name);
-    methods.insert(std::make_pair(name, m));
+    be_assert(methods.find(methodname) == methods.end(), "Method %s already exists in class %s!" | methodname | name);
+    methods.insert(std::make_pair(methodname, m));
 }
 
-void ClassInfo::removeMethod(istring name)
+void ClassInfo::removeMethod(istring methodname)
 {
-    methods.erase(name);
+    methods.erase(methodname);
 }
 
-Value ClassInfo::get(Value& from, istring name) const
+Value ClassInfo::get(Value& from, istring propname) const
 {
-    minitl::hashmap< istring, const PropertyInfo >::const_iterator it = properties.find(name);
+    minitl::hashmap< istring, const PropertyInfo >::const_iterator it = properties.find(propname);
     if (it != properties.end())
         return it->second.get(from);
     else
     {
-        minitl::hashmap< istring, const MethodInfo >::const_iterator it = methods.find(name);
+        minitl::hashmap< istring, const MethodInfo >::const_iterator it = methods.find(propname);
         if (it != methods.end())
             return Value(Value::ByRef(it->second));
         else
