@@ -30,13 +30,13 @@ struct be_api(RTTI) be_typeid< T& > : public be_typeid<T>
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< const T& > : public be_typeid<T>
+struct be_api(RTTI) be_typeid< const T >
 {
     static inline TypeInfo                      type()  { TypeInfo type = be_typeid<T>::type(); return TypeInfo(type.metaclass, type.type, TypeInfo::Const); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< const T >
+struct be_api(RTTI) be_typeid< const T& > : public be_typeid<const T>
 {
     static inline TypeInfo                      type()  { TypeInfo type = be_typeid<T>::type(); return TypeInfo(type.metaclass, type.type, TypeInfo::Const); }
 };
