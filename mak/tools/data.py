@@ -13,7 +13,8 @@ def scan(self):
 	return ([], [])
 
 def doParseData(task):
-	return mak.ddf.doParse(task.inputs[0].abspath(task.env), task.outputs[0].bldpath(task.env), path, [], ['../../mak/macros_ignore'])
+	return mak.ddf.doParse(task.inputs[0].abspath(task.env), task.outputs[0].bldpath(task.env), path, [], ['../../mak/macros_ignore'], task.pch)
+
 cls = Task.task_type_from_func('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc', before='cc cxx')
 cls.scan = scan
 
@@ -22,7 +23,10 @@ def datagen(self, node):
 	outs = []
 	outs.append(node.change_ext('.cc'))
 	tsk = self.create_task('datagen', node, outs)
-	# and the c/cxx file must be compiled too
+	try:
+		tsk.pch = self.pchheader
+	except AttributeError:
+		tsk.pch = ''
 	names = ['mak/ddf.py', 'mak/rtti.py']
 	for i in names:
 		tsk.add_file_dependency(i)
