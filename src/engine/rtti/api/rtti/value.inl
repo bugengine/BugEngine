@@ -22,10 +22,10 @@ Value::Value()
 template< typename T >
 Value::Value(T t)
 :   m_type(be_typeid<T>::type())
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
-,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = m_ref.m_pointer != 0;
     be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
@@ -33,65 +33,65 @@ Value::Value(T t)
 template< typename T >
 Value::Value(T t, ConstifyType constify)
 :   m_type(be_typeid<T>::type(), TypeInfo::Constify)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
-,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = m_ref.m_pointer != 0;
     be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_pointer(other.m_reference ? other.m_pointer : (m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0))
-,   m_deallocate(other.m_reference ? false : (m_pointer != 0))
 ,   m_reference(other.m_reference)
 {
+    m_ref.m_pointer = other.m_reference ? other.m_ref.m_pointer : (m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0);
+    m_ref.m_deallocate = other.m_reference ? false : (m_ref.m_pointer != 0);
     if (!m_reference)
         m_type.copy(other.memory(), memory());
 }
 
 Value::Value(TypeInfo type, void* location)
 :   m_type(type)
-,   m_pointer(location)
-,   m_deallocate(false)
 ,   m_reference(true)
 {
+    m_ref.m_pointer = location;
+    m_ref.m_deallocate = false;
 }
 
 Value::Value(TypeInfo type, ReserveType)
 :   m_type(type)
-,   m_pointer(m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0)
-,   m_deallocate(m_pointer != 0)
 ,   m_reference(false)
 {
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = m_ref.m_pointer != 0;
 }
 
 template< typename T >
 Value::Value(ByRefType<T> t)
 :   m_type(be_typeid<T>::type())
-,   m_pointer(const_cast<void*>((const void*)&t.value))
-,   m_deallocate(0)
 ,   m_reference(true)
 {
+    m_ref.m_pointer = const_cast<void*>((const void*)&t.value);
+    m_ref.m_deallocate = false;
 }
 
 template<>
 inline Value::Value(ByRefType<Value> t)
 :   m_type(t.value.m_type)
-,   m_pointer(t.value.m_pointer)
-,   m_deallocate(0)
 ,   m_reference(true)
 {
+    m_ref.m_pointer = t.value.m_ref.m_pointer;
+    m_ref.m_deallocate = false;
 }
 
 template<>
 inline Value::Value(ByRefType<const Value> t)
 :   m_type(t.value.m_type)
-,   m_pointer(t.value.m_pointer)
-,   m_deallocate(0)
 ,   m_reference(true)
 {
+    m_ref.m_pointer = t.value.m_ref.m_pointer;
+    m_ref.m_deallocate = false;
 }
 
 Value::~Value()
@@ -99,9 +99,9 @@ Value::~Value()
     if (!m_reference)
     {
         m_type.destroy(memory());
-        if (m_type.size() > sizeof(m_buffer) && m_deallocate)
+        if (m_type.size() > sizeof(m_buffer) && m_ref.m_deallocate)
         {
-            scriptArena().free(m_pointer);
+            scriptArena().free(m_ref.m_pointer);
         }
     }
 }
@@ -220,7 +220,7 @@ void* Value::memory()
     }
     else
     {
-        return m_pointer;
+        return m_ref.m_pointer;
     }
 }
 
@@ -232,7 +232,7 @@ const void* Value::memory() const
     }
     else
     {
-        return m_pointer;
+        return m_ref.m_pointer;
     }
 }
 

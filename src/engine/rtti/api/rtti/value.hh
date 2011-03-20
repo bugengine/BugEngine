@@ -28,8 +28,8 @@ private:
     };
     union
     {
-        char            m_buffer[47];
         Reference       m_ref;
+        char            m_buffer[47];
     };
     bool            m_reference;
 private:
