@@ -42,9 +42,10 @@ def get_available_gcc(conf):
 
 def set_options(opt):
 	Utils.pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
-						
+
 def configure(conf):
-	conf.env['BUILD_VARIANTS'] = []
 	conf.check_tool('bison flex data', tooldir='mak/tools')
+	conf.env['HOST'] = 'sunos'
+	conf.env['BUILD_VARIANTS'] = []
 	#get_available_suncc(conf)
 	get_available_gcc(conf)

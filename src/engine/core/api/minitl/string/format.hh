@@ -163,12 +163,6 @@ const format<size>& operator|(const format<size>& f, i16 value)
     return f | (i64)value;
 }
 
-template< u16 size >
-const format<size>& operator|(const format<size>& f, i8 value)
-{
-    return f | (i64)value;
-}
-
 template< u16 size, typename T >
 const format<size>& operator|(const format<size>& f, T value)
 {

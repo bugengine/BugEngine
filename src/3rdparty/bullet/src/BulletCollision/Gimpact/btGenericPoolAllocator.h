@@ -21,9 +21,9 @@ subject to the following restrictions:
 #ifndef BT_GENERIC_POOL_ALLOCATOR_H
 #define BT_GENERIC_POOL_ALLOCATOR_H
 
-#include <limits.h>
-#include <stdio.h>
-#include <string.h>
+#include <climits>
+#include <cstdio>
+#include <cstring>
 #include "LinearMath/btAlignedAllocator.h"
 
 #define BT_UINT_MAX UINT_MAX

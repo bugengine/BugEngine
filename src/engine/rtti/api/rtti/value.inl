@@ -15,8 +15,6 @@ namespace BugEngine
 
 Value::Value()
 :   m_type(be_typeid<void>::type())
-,   m_pointer(0)
-,   m_deallocate(0)
 ,   m_reference(false)
 {
 }

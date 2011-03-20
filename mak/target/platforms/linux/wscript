@@ -9,14 +9,24 @@ from Logs import info,warn
 def set_options(opt):
 	pass
 
+def add_suncc_to_env(conf):
+	conf.check_tool('suncc suncxx')
+
+def add_suncc_flags_to_env(conf):
+	v = conf.env
+	conf.env.append_unique('CCFLAGS', [])
+	conf.env.append_unique('CXXFLAGS', ['-library=no%Cstd,stlport4'])
+	conf.env.append_unique('LDFLAGS', ['-fPIC', '-library=no%Cstd,stlport4', '-staticlib=%all'])
+
+
+
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
-	newenv['GCC_VERSION']	= version
-	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	newenv['GCC_VERSION']   = version
+	newenv['GCC_TARGET']    = gcc_target
+	newenv['GCC_PATH']              = [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+													   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
 	conf.check_tool('cross_gcc', tooldir='mak/tools')
-
 
 def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fPIC'])
@@ -45,6 +55,23 @@ def add_linux_flags_to_env(conf):
 
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
+	if conf.env['HOST'] == 'linux':
+		try:
+			newenv = conf.set_env_name('temp', conf.env.copy())
+			conf.setenv('temp')
+			add_suncc_to_env(conf)
+			add_suncc_flags_to_env(conf)
+			name = 'suncc-linux-??-??'
+			newenv.set_variant(name)
+			add_linux_flags_to_env(conf)
+			newenv = conf.set_env_name(name, newenv)
+			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', 'x86'))
+			del conf.all_envs['temp']
+			conf.setenv('default')
+			conf.env['BUILD_VARIANTS'].append(name)
+		except Exception, e:
+			print e
+			conf.setenv('default')
 	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
 		if target.find('linux') != -1:
 			newenv = conf.set_env_name('temp', conf.env.copy())

@@ -39,6 +39,7 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool("bison flex data", tooldir=['mak/tools'])
+	conf.env['HOST'] = 'darwin'
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
 

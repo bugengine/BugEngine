@@ -50,6 +50,7 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool('flex bison data', tooldir=['mak/tools'])
+	conf.env['HOST'] = 'win32'
 	conf.env['BUILD_VARIANTS'] = []
 	get_available_gcc(conf)
 	if Options.options.msvc:
