@@ -10,10 +10,10 @@
 namespace BugEngine { namespace RTTI
 {
 
-PropertyInfo::PropertyInfo(const TypeInfo& owner, const TypeInfo& type, u32 offset)
-    :   owner(owner)
-    ,   type(type)
-    ,   offset(offset)
+PropertyInfo::PropertyInfo(const TypeInfo& owner_, const TypeInfo& type_, u32 offset_)
+    :   owner(owner_)
+    ,   type(type_)
+    ,   offset(offset_)
 {
 }
 
@@ -24,14 +24,14 @@ PropertyInfo::~PropertyInfo()
 Value PropertyInfo::get(Value& from) const
 {
     be_assert(from.type() <= owner, "getting property on object of type %s, while expecting type %s" | from.type().name() | owner.name());
-    i32 offset = this->offset + (from.type().metaclass->offset - owner.metaclass->offset);
+    i32 propoffset = offset + (from.type().metaclass->offset - owner.metaclass->offset);
     if (from.isConst())
     {
-        return Value(TypeInfo(type, TypeInfo::Constify), (void*)((char*)from.rawget() + offset));
+        return Value(TypeInfo(type, TypeInfo::Constify), (void*)((char*)from.rawget() + propoffset));
     }
     else
     {
-        return Value(type, (void*)((char*)from.rawget() + offset));
+        return Value(type, (void*)((char*)from.rawget() + propoffset));
     }
 }
 
