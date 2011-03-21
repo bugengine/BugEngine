@@ -16,7 +16,7 @@ def add_suncc_flags_to_env(conf):
 	v = conf.env
 	conf.env.append_unique('CCFLAGS', [])
 	conf.env.append_unique('CXXFLAGS', ['-library=no%Cstd,stlport4'])
-	conf.env.append_unique('LDFLAGS', ['-fPIC', '-library=no%Cstd,stlport4', '-staticlib=%all'])
+	conf.env.append_unique('LINKFLAGS', ['-library=no%Cstd,stlport4', '-staticlib=%all', '-ldl'])
 
 
 
