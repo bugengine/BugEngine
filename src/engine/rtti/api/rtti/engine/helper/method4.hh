@@ -51,6 +51,28 @@ struct callhelper< T, void, P1, P2, P3, P4 >
         (params[0].as<const T&>().*method)(params[1].as<P1>(), params[2].as<P2>(), params[3].as<P3>(), params[4].as<P4>());
         return Value();
     }
+
+    static Value constructPtr(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 4, "expecting 4 parameter; got %d" | paramCount, return Value());
+        be_assert_recover(be_typeid<P1>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<P1>::type().name() | params[0].type().name(), return Value());
+        be_assert_recover(be_typeid<P2>::type() <= params[1].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[1].type().name(), return Value());
+        be_assert_recover(be_typeid<P3>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[2].type().name(), return Value());
+        be_assert_recover(be_typeid<P4>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[3].type().name(), return Value());
+        return Value(ref<T>::create(scriptArena(), params[0].as<P1>(), params[1].as<P2>(), params[2].as<P3>(), params[3].as<P4>()));
+    }
+
+    static Value construct(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 4, "expecting 4 parameter; got %d" | paramCount, return Value());
+        be_assert_recover(be_typeid<P1>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<P1>::type().name() | params[0].type().name(), return Value());
+        be_assert_recover(be_typeid<P2>::type() <= params[1].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[1].type().name(), return Value());
+        be_assert_recover(be_typeid<P3>::type() <= params[2].type(), "expected parameter of type %s; got %s" | be_typeid<P3>::type().name() | params[2].type().name(), return Value());
+        be_assert_recover(be_typeid<P4>::type() <= params[3].type(), "expected parameter of type %s; got %s" | be_typeid<P4>::type().name() | params[3].type().name(), return Value());
+        Value v(be_typeid<T>::type(), Value::Reserve);
+        new(v.memory()) T(params[0].as<P1>(), params[1].as<P2>(), params[2].as<P3>(), params[3].as<P4>());
+        return v;
+    }
 };
 
 template< typename T, typename R, typename P1, typename P2, typename P3, typename P4 >

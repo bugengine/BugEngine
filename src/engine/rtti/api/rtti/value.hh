@@ -13,12 +13,36 @@ namespace RTTI
 {
 class ClassInfo;
 struct PropertyInfo;
+template<   typename T,
+            typename R,
+            typename P1,
+            typename P2,
+            typename P3,
+            typename P4,
+            typename P5,
+            typename P6,
+            typename P7,
+            typename P8,
+            typename P9 >
+struct callhelper;
 }
 
 class Value
 {
     friend class ::BugEngine::RTTI::ClassInfo;
     friend struct ::BugEngine::RTTI::PropertyInfo;
+    template<   typename T,
+                typename R,
+                typename P1,
+                typename P2,
+                typename P3,
+                typename P4,
+                typename P5,
+                typename P6,
+                typename P7,
+                typename P8,
+                typename P9 >
+    friend struct ::BugEngine::RTTI::callhelper;
 private:
     TypeInfo        m_type;
     struct Reference
@@ -46,9 +70,10 @@ private:
         ByRefType& operator=(const ByRefType& other);
     };
 private:
-    inline Value(TypeInfo typeinfo, void* location);
     enum ReserveType { Reserve };
+
     inline Value(TypeInfo type, ReserveType);
+    inline Value(TypeInfo typeinfo, void* location);
 public:
     enum ConstifyType { Constify };
 

@@ -45,6 +45,24 @@ struct callhelper< T, void, P1, P2 >
         (params[0].as<const T&>().*method)(params[1].as<P1>(), params[2].as<P2>());
         return Value();
     }
+
+    static Value constructPtr(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
+        be_assert_recover(be_typeid<P1>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<P1>::type().name() | params[0].type().name(), return Value());
+        be_assert_recover(be_typeid<P2>::type() <= params[1].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[1].type().name(), return Value());
+        return Value(ref<T>::create(scriptArena(), params[0].as<P1>(), params[1].as<P2>()));
+    }
+
+    static Value construct(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 2, "expecting 2 parameter; got %d" | paramCount, return Value());
+        be_assert_recover(be_typeid<P1>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<P1>::type().name() | params[0].type().name(), return Value());
+        be_assert_recover(be_typeid<P2>::type() <= params[1].type(), "expected parameter of type %s; got %s" | be_typeid<P2>::type().name() | params[1].type().name(), return Value());
+        Value v(be_typeid<T>::type(), Value::Reserve);
+        new(v.memory()) T(params[0].as<P1>(), params[1].as<P2>());
+        return v;
+    }
 };
 
 template< typename T, typename R, typename P1, typename P2 >

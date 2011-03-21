@@ -38,6 +38,20 @@ struct callhelper< T, void >
         (params[0].as<const T&>().*method)();
         return Value();
     }
+
+    static Value constructPtr(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
+        return Value(ref<T>::create(scriptArena()));
+    }
+
+    static Value construct(Value* params, u32 paramCount)
+    {
+        be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
+        Value v(be_typeid<T>::type(), Value::Reserve);
+        new(v.memory()) T();
+        return v;
+    }
 };
 
 template< typename T, typename R >
