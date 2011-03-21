@@ -94,14 +94,10 @@ struct InterlockedType<4>
         tagged_t result;
         tagged_t dst(condition.taggedvalue.tag+1, v);
         __asm__ __volatile__ (
-                "pushl %%ebx\n\t"
-                "movl  (%%ecx),%%ebx\n\t"
-                "movl  4(%%ecx),%%ecx\n\t"
-                "lock\n\t cmpxchg8b %2\n\t"
-                "popl  %%ebx"
-                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*(i64 *)p)
-                 : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "c"(&dst)
-                 : "memory", "esp");
+                "lock;  cmpxchg8b %2\n\t"
+                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
+                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
+                 : "memory", "cc");
         return result.taggedvalue.tag == condition.taggedvalue.tag;
     }
 };

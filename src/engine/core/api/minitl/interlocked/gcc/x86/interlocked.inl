@@ -113,7 +113,6 @@ struct InterlockedType<4>
                  : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
                  : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
                  : "memory", "cc"
-
         );
     #endif
         return result.taggedvalue.tag == condition.taggedvalue.tag;
