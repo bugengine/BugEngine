@@ -241,11 +241,18 @@ class Class(Container):
 			for rtype, params, attrs, visibility, tags, line in overloads:
 				if showline: file.write("            #line %d\n" % (line))
 				paramtypes = ', '.join(ptype for ptype, pname in params)
-				if paramtypes: paramtypes = ', '+paramtypes
-				if name == '?call':
-					method = "&%s::%s" % (self.fullname, "operator()")
+				if 'static' in attrs:
+					ptr = "%s (*) (%s)" % (rtype, paramtypes)
+				elif 'const' in attrs:
+					ptr = "%s (%s::*) (%s) const" % (rtype, self.fullname, paramtypes)
 				else:
-					method = "&%s::%s" % (self.fullname, name)
+					ptr = "%s (%s::*) (%s)" % (rtype, self.fullname, paramtypes)
+
+				if name == '?call':
+					method = "(%s)&%s::%s" % (ptr, self.fullname, "operator()")
+				else:
+					method = "(%s)&%s::%s" % (ptr, self.fullname, name)
+				if paramtypes: paramtypes = ', '+paramtypes
 
 				if name == '?ctor':
 					if self.value:
