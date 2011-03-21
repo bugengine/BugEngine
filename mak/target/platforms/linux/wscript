@@ -9,16 +9,11 @@ from Logs import info,warn
 def set_options(opt):
 	pass
 
-def add_suncc_to_env(conf):
-	conf.check_tool('suncc suncxx')
-
 def add_suncc_flags_to_env(conf):
 	v = conf.env
-	conf.env.append_unique('CCFLAGS', [])
-	conf.env.append_unique('CXXFLAGS', ['-library=no%Cstd,stlport4'])
-	conf.env.append_unique('LINKFLAGS', ['-library=no%Cstd,stlport4', '-staticlib=%all', '-ldl'])
-
-
+	conf.env.append_unique('CCFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-fPIC', '-DPIC', '-D__PIC__'])
+	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-fPIC', '-DPIC', '-D__PIC__', '-library=Crun,stlport4,Cstd'])
+	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4,Cstd', '-staticlib=%all', '-ldl', '-lm'])
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
@@ -59,12 +54,14 @@ def configure(conf):
 		try:
 			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.setenv('temp')
-			add_suncc_to_env(conf)
+			conf.check_tool('cross_suncc', tooldir='mak/tools')
 			add_suncc_flags_to_env(conf)
-			name = 'suncc-linux-??-??'
+			name = 'suncc-linux-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
 			newenv.set_variant(name)
 			add_linux_flags_to_env(conf)
 			newenv = conf.set_env_name(name, newenv)
+			Utils.pprint('NORMAL', 'configure for tool %s' % name)
+			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', 'x86'))
 			del conf.all_envs['temp']
 			conf.setenv('default')
