@@ -244,25 +244,20 @@ class Class(Container):
 				if paramtypes: paramtypes = ', '+paramtypes
 				if name == '?call':
 					method = "&%s::%s" % (self.fullname, "operator()")
-				elif name == '?ctor':
-					rtype = 'BugEngine::Value'
-					if self.value:
-						method = "&::BugEngine::RTTI::ClassInfo::construct%d< %s %s >" % (len(params), self.fullname, paramtypes)
-					else:
-						method = "&::BugEngine::RTTI::ClassInfo::constructPtr%d< %s %s >" % (len(params), self.fullname, paramtypes)
 				else:
 					method = "&%s::%s" % (self.fullname, name)
 
 				if name == '?ctor':
-					membername = '::BugEngine::RTTI::ClassInfo'
-				else:
-					membername = self.fullname
-				if 'const' in attrs:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callConst< %s >" % (membername, rtype, paramtypes, method)
+					if self.value:
+						call = "&BugEngine::RTTI::callhelper< %s, %s%s >::construct" % (self.fullname, 'void', paramtypes)
+					else:
+						call = "&BugEngine::RTTI::callhelper< %s, %s%s >::constructPtr" % (self.fullname, 'void', paramtypes)
+				elif 'const' in attrs:
+					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callConst< %s >" % (self.fullname, rtype, paramtypes, method)
 				elif 'static' in attrs:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callStatic< %s >" % (membername, rtype, paramtypes, method)
+					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callStatic< %s >" % (self.fullname, rtype, paramtypes, method)
 				else:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::call< %s >" % (membername, rtype, paramtypes, method)
+					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::call< %s >" % (self.fullname, rtype, paramtypes, method)
 				file.write("            if (BugEngine::RTTI::callhelper< %s, %s%s >::VarArg)\n" % (self.fullname, rtype, paramtypes))
 				file.write("            {\n")
 				file.write("                mi.overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s, true));\n" % (rtype, call))
@@ -272,9 +267,9 @@ class Class(Container):
 				file.write("                mi.overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s, false));\n" % (rtype, call))
 				if 'static' not in attrs:
 					if "const" in attrs:
-						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (membername))
+						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
 					else:
-						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (membername))
+						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (self.fullname))
 				for ptype, pname in params:
 					file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
 				file.write("            }\n")
