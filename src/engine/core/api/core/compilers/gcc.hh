@@ -39,6 +39,7 @@ typedef u8                      byte;
 #define BE_THREAD_LOCAL         __thread
 #define BE_NOINLINE             __attribute__((noinline))
 #define BE_ALWAYSINLINE         __attribute__((always_inline))
+#define BE_SELECTOVERLOAD(o)	
 
 #define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
 #ifdef _WIN32

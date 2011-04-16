@@ -5,7 +5,7 @@
 #define BE_CORE_COMPILERS_INTEL_H_
 /*****************************************************************************/
 
-#define be_alignof(t)          __alignof(t)
+#define be_alignof(t)           __alignof(t)
 
 typedef signed __int8           i8;
 typedef signed __int16          i16;
@@ -26,23 +26,24 @@ typedef u8                      byte;
 
 #pragma warning(disable:4275)
 #ifdef NDEBUG
-# pragma warning(error:4541)   // 'dynamic_cast' used on polymorphic type with '/GR-'
-# pragma warning(disable:4530) // C++ exception handler used, but unwind semantics are not enabled
-# pragma warning(disable:4100) // unreferenced formal parameter
+# pragma warning(error:4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'
+# pragma warning(disable:4530)  // C++ exception handler used, but unwind semantics are not enabled
+# pragma warning(disable:4100)  // unreferenced formal parameter
 #endif
 #pragma warning(disable:4251)
-#pragma warning(disable:4355)  // this used in base member initialization list
-#pragma warning(disable:4290)  // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#pragma warning(disable:4481)  // use of "override" extension
+#pragma warning(disable:4355)   // this used in base member initialization list
+#pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+#pragma warning(disable:4481)   // use of "override" extension
 #pragma warning(disable:4127)
-#define BE_THREAD_LOCAL        __declspec(thread)
-#define BE_NOINLINE            __declspec(noinline)
-#define BE_ALWAYSINLINE        inline
+#define BE_THREAD_LOCAL         __declspec(thread)
+#define BE_NOINLINE             __declspec(noinline)
+#define BE_ALWAYSINLINE         inline
+#define BE_SELECTOVERLOAD(o)    (o)
 
 #define BE_SET_ALIGNMENT(n)     __declspec(align(n)) 
 #ifdef _WIN32
-# define BE_EXPORT               __declspec(dllexport)
-# define BE_IMPORT               __declspec(dllimport)
+# define BE_EXPORT              __declspec(dllexport)
+# define BE_IMPORT              __declspec(dllimport)
 #else
 # define BE_EXPORT
 # define BE_IMPORT

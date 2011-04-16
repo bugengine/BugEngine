@@ -249,9 +249,9 @@ class Class(Container):
 					ptr = "%s (%s::*) (%s)" % (rtype, self.fullname, paramtypes)
 
 				if name == '?call':
-					method = "(%s)&%s::%s" % (ptr, self.fullname, "operator()")
+					method = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, self.fullname, "operator()")
 				else:
-					method = "(%s)&%s::%s" % (ptr, self.fullname, name)
+					method = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, self.fullname, name)
 				if paramtypes: paramtypes = ', '+paramtypes
 
 				if name == '?ctor':

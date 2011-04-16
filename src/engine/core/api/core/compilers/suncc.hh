@@ -28,6 +28,7 @@ typedef u8                      byte;
 #define BE_THREAD_LOCAL         __thread
 #define BE_NOINLINE            
 #define BE_ALWAYSINLINE         inline
+#define BE_SELECTOVERLOAD(o)    (o)
 
 #define BE_EXPORT               __global
 #define BE_IMPORT
