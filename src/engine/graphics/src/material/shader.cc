@@ -7,7 +7,8 @@
 namespace BugEngine { namespace Graphics
 {
 
-Shader::Shader()
+Shader::Shader(ref<Shaders::Node> root)
+    :   m_root(root)
 {
 }
 

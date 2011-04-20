@@ -60,7 +60,13 @@ published:
     Value getTag(const TypeInfo& type) const;
     bool isA(weak<const ClassInfo> klass) const;
 
-    Value operator()(Value* params, size_t nparams) const;
+public:
+    template< typename T >
+    inline Value getTag() const { return getTag(be_typeid<T>::type());}
+    template< typename T >
+    inline bool isA() const { return isA(be_typeid<T>::klass()); }
+
+    Value operator()(Value* params, u32 nparams) const;
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;
