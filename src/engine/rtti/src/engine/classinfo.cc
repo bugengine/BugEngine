@@ -116,7 +116,7 @@ bool ClassInfo::isA(weak<const ClassInfo> klass) const
     return false;
 }
 
-Value ClassInfo::operator()(Value* params, size_t nparams) const
+Value ClassInfo::operator()(Value* params, u32 nparams) const
 {
     return constructor(params, nparams);
 }

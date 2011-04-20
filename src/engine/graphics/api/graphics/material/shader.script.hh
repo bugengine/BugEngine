@@ -16,7 +16,7 @@ class be_api(GRAPHICS) Shader : public minitl::refcountable
 private:
     ref<Shaders::Node> m_root;
 published:
-    Shader();
+    Shader(ref<Shaders::Node> root);
     ~Shader();
 public:
     void buildSource(const IShaderBuilder& builder) const;
