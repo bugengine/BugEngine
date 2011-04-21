@@ -136,4 +136,22 @@ void TypeInfo::destroy(void* ptr) const
     }
 }
 
+u32 TypeInfo::distance(const TypeInfo& other) const
+{
+    u32 result = 0;
+    if (constness < other.constness)
+        return 1000000;
+    else
+        result += constness - other.constness;
+    if ((type & TypeMask) < (other.type & TypeMask))
+        return 1000000;
+    else
+        result += (type & TypeMask) - (other.type & TypeMask);
+    if ((type & MutableBit) < (other.type & MutableBit))
+        return 1000000;
+    else
+        result += (type & MutableBit) - (other.type & MutableBit);
+    return result + metaclass->distance(other.metaclass);
+}
+
 }

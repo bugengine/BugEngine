@@ -60,13 +60,11 @@ published:
     Value getTag(const TypeInfo& type) const;
     bool isA(weak<const ClassInfo> klass) const;
 
-public:
-    template< typename T >
-    inline Value getTag() const { return getTag(be_typeid<T>::type());}
-    template< typename T >
-    inline bool isA() const { return isA(be_typeid<T>::klass()); }
-
     Value operator()(Value* params, u32 nparams) const;
+public:
+    template< typename T > Value getTag() const { return getTag(be_typeid<T>::type()); }
+    template< typename T > bool  isA() const    { return isA(be_typeid<T>::type()); }
+    u32 distance(weak<const ClassInfo> other) const;
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

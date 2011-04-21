@@ -5,7 +5,7 @@
 #define BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 /*****************************************************************************/
 #include    <graphics/material/shaders/node.script.hh>
-
+#include    <rtti/classinfo.script.hh>
 namespace BugEngine { namespace Graphics
 {
 
