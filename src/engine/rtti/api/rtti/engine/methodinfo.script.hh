@@ -34,6 +34,7 @@ public:
         ,   vararg(vararg)
         ,   call(call)
     { }
+    u32 distance(Value* p, u32 nparams) const;
 };
 
 struct be_api(RTTI) MethodInfo

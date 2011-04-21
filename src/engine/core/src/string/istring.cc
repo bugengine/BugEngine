@@ -225,6 +225,9 @@ istring& istring::operator=(const istring& other)
     other.m_index->retain();
     m_index->release();
     m_index = other.m_index;
+#ifdef BE_DEBUG
+    m_str = other.m_str;
+#endif
     return *this;
 }
 

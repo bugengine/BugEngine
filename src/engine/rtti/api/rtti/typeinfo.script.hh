@@ -52,6 +52,9 @@ struct be_api(RTTI) TypeInfo
 
     u32                             size() const;
     minitl::format<>                name() const;
+    u32                             distance(const TypeInfo& other) const;
+public:
+    enum { MaxTypeDistance = 1000000 };
 private:
     TypeInfo& operator=(const TypeInfo&);
     void*                           rawget(const void*) const;

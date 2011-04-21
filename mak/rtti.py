@@ -20,7 +20,7 @@ class Container:
 		self.line = line
 		self.classes = []
 		self.scope = scope
-		self.visibility = 'public'
+		self.visibility = 'published'
 
 	def addObject(self, object):
 		self.objects.append(object)
@@ -37,7 +37,7 @@ class Container:
 
 	def dump(self, file, namespace, index, nested):
 		for o in self.objects:
-			if o.scope == 'public' or o.scope == 'published':
+			if o.scope == 'published':
 				index = o.dump(file, namespace, index, nested)
 		return index
 
@@ -101,7 +101,7 @@ class Typedef(Container):
 
 class Namespace(Container):
 	def __init__(self, parent, name, line):
-		Container.__init__(self, parent, name, line, 'public')
+		Container.__init__(self, parent, name, line, 'published')
 
 	def dump(self, file, namespace, index, nested):
 		if showline: file.write("#line %d\n" % self.line)

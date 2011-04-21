@@ -131,4 +131,18 @@ Value ClassInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
+u32 ClassInfo::distance(weak<const ClassInfo> other) const
+{
+    weak<const ClassInfo> ci = this;
+    u32 result = 0;
+    while (ci)
+    {
+        if (ci == other)
+            return result;
+        ci = ci->parent;
+        result++;
+    }
+    return TypeInfo::MaxTypeDistance;
+}
+
 }}
