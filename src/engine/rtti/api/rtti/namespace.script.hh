@@ -20,7 +20,7 @@ class be_api(RTTI) Namespace : public minitl::refcountable
 {
     friend class ::BugEngine::Value;
 published:
-    class be_api(RTTI) MetaClassInfo;
+    class MetaClassInfo;
     mutable minitl::hashmap<istring, Value> decls;
 published:
     Namespace();

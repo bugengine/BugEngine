@@ -6,7 +6,7 @@ import Utils
 from Logs import info,warn
 
 
-def set_options(opt):
+def options(opt):
 	pass
 
 def add_suncc_flags_to_env(conf):

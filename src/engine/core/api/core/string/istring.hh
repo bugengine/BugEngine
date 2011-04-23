@@ -48,7 +48,7 @@ public:
 class be_api(CORE) igenericnamespace
 {
 public:
-    enum { MaxNamespaceSize = 15 };
+    enum Constants { MaxNamespaceSize = 15 };
 private:
     istring m_namespace[MaxNamespaceSize];
     u32     m_size;

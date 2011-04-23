@@ -29,7 +29,7 @@ class be_api(RTTI) ClassInfo : public Namespace
     friend class Namespace;
     friend class BugEngine::Value;
 published:
-    class be_api(RTTI) MetaClassInfo;
+    class MetaClassInfo;
     friend class MetaClassInfo;
 published:
     const inamespace                                name;

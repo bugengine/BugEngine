@@ -6,7 +6,7 @@ import Utils
 import Configure
 from Logs import info,warn
 
-def set_options(opt):
+def options(opt):
 	try:
 		sdks = os.listdir(os.path.join('/Developer', 'SDKs'))
 		opt.add_option( '--darwin-sdk',

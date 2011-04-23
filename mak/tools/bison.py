@@ -6,7 +6,7 @@
 "Bison processing"
 
 import Task
-from TaskGen import extension
+from mak.waflib.TaskGen import extension
 import re
 import Utils
 import os
@@ -30,7 +30,7 @@ def post_run_bison(task):
 cls.post_run_orig = cls.post_run
 cls.post_run = post_run_bison
 
-@extension(['.y', '.yc', '.yy'])
+@extension('.y', '.yc', '.yy')
 def big_bison(self, node):
 	"""when it becomes complicated (unlike flex), the old recipes work better (cwd)"""
 	has_h = '-d' in self.env['BISONFLAGS']
@@ -52,7 +52,7 @@ def big_bison(self, node):
 	# and the c/cxx file must be compiled too
 	self.allnodes.append(outs[0])
 
-def detect(conf):
+def configure(conf):
 	bison = conf.find_program('bison', var='BISON', mandatory=True)
 	v = conf.env
 	v['BISONFLAGS'] = '-d'

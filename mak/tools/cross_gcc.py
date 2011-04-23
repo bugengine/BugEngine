@@ -4,6 +4,7 @@ import Utils
 import re
 from TaskGen import feature, before, extension, after
 import os
+from mak.waflib.Errors import ConfigurationError
 
 @conftest
 def get_native_gcc_target(conf):
@@ -54,50 +55,43 @@ def find_cross_gcc(conf):
 	if target:
 		v = conf.env
 		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target) or 'unknown'
-		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+version, var='CC', path_list=v['GCC_PATH'])
-		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc-'+versionsmall, var='CC', path_list=v['GCC_PATH'])
-		if not v['CC']: v['CC'] = conf.find_program(target+'-gcc'+versionverysmall, var='CC', path_list=v['GCC_PATH'])
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall]:
+			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False):
+				break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
-
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+version, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++'+versionverysmall, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+version, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++-'+versionsmall, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++'+versionverysmall, var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-g++', var='CXX', path_list=v['GCC_PATH'])
-		if not v['CXX']: v['CXX'] = conf.find_program(target+'-c++', var='CXX', path_list=v['GCC_PATH'])
+		
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False):
+				break
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
 
-		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp-'+versionsmall, var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp'+versionverysmall, var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program(target+'-cpp', var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version, var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program('cpp-'+version[0:3], var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program('cpp'+versionverysmall, var='CPP', path_list=v['GCC_PATH'])
-		if not v['CPP']: v['CPP'] = conf.find_program('cpp', var='CPP', path_list=v['GCC_PATH'])
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False):
+				break
+		if not v['CPP']:
+			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False):
+					break
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		if not v['AS']: v['AS'] = v['CC']
 
-		if not v['AR']: v['AR'] = conf.find_program(target+'-gar', var='AR', path_list=v['GCC_PATH'])
-		if not v['AR']: v['AR'] = conf.find_program(target+'-ar', var='AR', path_list=v['GCC_PATH'])
+		for ar in [target+'-gar', target+'-ar', 'gar', 'ar']:
+			if conf.find_program(ar, var='AR', path_list=v['GCC_PATH'], mandatory=False):
+				break
 		if not v['AR']:
-			v['AR'] = conf.find_program('gar', var='AR', path_list=v['GCC_PATH'])
-		if not v['AR']:
-			v['AR'] = conf.find_program('gar', var='AR')
-		if not v['AR']:
-			v['AR'] = conf.find_program('ar', var='AR', path_list=v['GCC_PATH'])
+			for ar in ['gar', 'ar']:
+				if conf.find_program(ar, var='AR', mandatory=False):
+					break
 		if not v['AR']: conf.fatal('unable to find ar for target %s' % target)
 
-		if not v['RANLIB']: v['RANLIB'] = conf.find_program(target+'-ranlib', var='RANLIB', path_list=v['GCC_PATH'])
+		for ranlib in [target+'-ranlib', target+'-granlib', 'ranlib', 'granlib']:
+			if conf.find_program(ranlib, var='RANLIB', path_list=v['GCC_PATH'], mandatory=False):
+				break
 		if not v['RANLIB']:
-			v['RANLIB'] = conf.find_program('granlib', var='RANLIB', path_list=v['GCC_PATH'])
-		if not v['RANLIB']:
-			v['RANLIB'] = conf.find_program('ranlib', var='RANLIB', path_list=v['GCC_PATH'])
-		if not v['RANLIB']:
-			v['RANLIB'] = conf.find_program('granlib', var='RANLIB')
+			for ranlib in ['ranlib', 'granlib', 'ranlib', 'granlib']:
+				if conf.find_program(ranlib, var='RANLIB', mandatory=False):
+					break
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 
 	conf.check_tool('gcc gxx gas')
@@ -136,7 +130,7 @@ def add_standard_gcc_flags(conf):
 		v.append_unique('LINKFLAGS', flags)
 
 
-detect = '''
+configure = '''
 get_native_gcc_target
 find_cross_gcc
 add_standard_gcc_flags

@@ -14,7 +14,7 @@ namespace BugEngine { namespace Graphics { namespace Windowing
 
 Renderer::PlatformRenderer::PlatformRenderer()
 {
-    NSAutoreleasePool* m_pool = [[NSAutoreleasePool alloc] init];
+    m_pool = [[NSAutoreleasePool alloc] init];
     m_application = [NSApplication sharedApplication];
 
     NSMenu* menu = [[NSMenu alloc] initWithTitle:@"bugengine"];

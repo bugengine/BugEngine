@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import Task
-from TaskGen import extension
+from mak.waflib.TaskGen import extension
 import mak.ddf
 import os
 import sys
@@ -18,7 +18,7 @@ def doParseData(task):
 cls = Task.task_type_from_func('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc', before='cc cxx')
 cls.scan = scan
 
-@extension(['.h', '.hh', '.hxx'])
+@extension('.h', '.hh', '.hxx')
 def datagen(self, node):
 	outs = []
 	outs.append(node.change_ext('.cc'))
@@ -33,6 +33,6 @@ def datagen(self, node):
 
 	self.allnodes.append(outs[0])
 
-def detect(conf):
+def configure(conf):
 	pass
 

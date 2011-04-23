@@ -2,7 +2,7 @@
 
 import os
 
-def set_options(opt):
+def options(opt):
 	pass
 
 def configure(conf):

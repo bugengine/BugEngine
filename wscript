@@ -7,10 +7,10 @@ import Environment
 import Scripting
 import Logs
 
-srcdir = '.'
-blddir = '.build/waf'
+top = '.'
+out = '.build/waf'
 
-def set_options(opt):
+def options(opt):
 	opt.sub_options('mak')
 
 def configure(conf):
