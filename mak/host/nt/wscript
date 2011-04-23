@@ -39,7 +39,7 @@ def get_available_gcc(conf):
 					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
 
 
-def set_options(opt):
+def options(opt):
 	Utils.pprint('NORMAL', 'Host system is Win32')
 	opt.add_option( '--no-msvc',
 					action='store_false',

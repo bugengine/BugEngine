@@ -3,7 +3,7 @@
 import os
 from Logs import warn
 
-def set_options(opt):
+def options(opt):
 	osname = os.uname()[0].lower()
 	opt.sub_options(osname)
 

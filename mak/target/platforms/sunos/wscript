@@ -7,7 +7,7 @@ import Logs
 import Options
 from Logs import info,warn
 
-def set_options(opt):
+def options(opt):
 	pass
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):

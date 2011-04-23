@@ -1,7 +1,6 @@
 import os
 import sources
 import Options
-import misc
 import mak
 from Logs import warn
 

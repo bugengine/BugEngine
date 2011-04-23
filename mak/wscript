@@ -3,10 +3,9 @@
 import os
 import re
 import Options
-from TaskGen import taskgen,feature,before,after
+from mak.waflib.TaskGen import taskgen_method,feature,before,after,extension
 import Task
 import Node
-import misc
 import module
 import mak
 import Utils
@@ -14,7 +13,7 @@ import Utils
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
 
-def set_options(opt):
+def options(opt):
 	opt.sub_options(os.path.join('host', os.name))
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
@@ -120,8 +119,18 @@ def build(bld):
 	global builder
 	mak.builder = bld
 
-@taskgen
-@feature('cc','cxx')
+@extension('.m')
+def m_hook(self, node):
+	"""Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
+	return self.create_compiled_task('c', node)
+
+@extension('.mm')
+def mm_hook(self, node):
+	"""Alias .m files to be compiled the same as .cxx files, gcc will do the right thing."""
+	return self.create_compiled_task('cxx', node)
+
+@taskgen_method
+@feature('c','cxx')
 @before('apply_core')
 def filter_sources(self):
 	v = self.env
@@ -149,7 +158,7 @@ def filter_sources(self):
 	for src in rejectedsources:
 		self.source.remove(src)
 
-@taskgen
+@taskgen_method
 @feature('cprogram', 'cshlib', 'cstaticlib')
 @after('apply_link')
 @before('apply_lib_vars')
@@ -164,7 +173,7 @@ def add_extra_libs(self):
 		else:
 			env.append_value('LIBPATH', libpath)
 
-@taskgen
+@taskgen_method
 @feature('cobjects')
 def add_cobjects_method(self):
 	pass
@@ -240,7 +249,7 @@ def apply_lib_vars_cprogram(self):
 			uselib = [v]+uselib
 
 
-@taskgen
+@taskgen_method
 @feature('cc','cxx')
 @before('apply_core')
 @after('filter_sources')

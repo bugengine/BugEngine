@@ -81,7 +81,7 @@ def add_win32_flags_to_env(conf):
 									'plugin':	os.path.join('data', 'plugins') }
 
 
-def set_options(opt):
+def options(opt):
 	pass
 
 def configure(conf):
