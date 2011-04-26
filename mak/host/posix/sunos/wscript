@@ -2,8 +2,7 @@
 # detect tools : gcc, suncc
 
 import os
-import Utils
-from Logs import warn
+from Logs import warn,pprint
 
 def get_available_suncc(conf):
 	newenv = conf.env.copy()
@@ -41,7 +40,7 @@ def get_available_gcc(conf):
 
 
 def options(opt):
-	Utils.pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
+	pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
 
 def configure(conf):
 	conf.check_tool('bison flex data', tooldir='mak/tools')

@@ -3,11 +3,10 @@
 
 
 import os
-import Utils
 import Configure
-import Logs
 import Options
-from Logs import info,warn
+from Logs import info,warn,pprint
+import mak.waflib.Tools.msvc
 
 os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
 
@@ -17,9 +16,9 @@ def get_available_msvc(conf):
 	allversions = conf.get_msvc_versions()
 	for (compiler, targets) in allversions:
 		compiler,version = compiler.split()
-		for (target, (tname, platform, paths)) in targets:
+		for (target, (tname, paths)) in targets:
 			if tname in conf.env['ARCHITECTURES']:
-				conf.env['MSVC_TARGETS'].append((compiler, version, target, platform, tname))
+				conf.env['MSVC_TARGETS'].append((compiler, version, target, 'win32', tname))
 
 
 # gets a list of the GCC toolchains installed
@@ -40,7 +39,7 @@ def get_available_gcc(conf):
 
 
 def options(opt):
-	Utils.pprint('NORMAL', 'Host system is Win32')
+	pprint('NORMAL', 'Host system is Win32')
 	opt.add_option( '--no-msvc',
 					action='store_false',
 					dest="msvc",

@@ -3,8 +3,7 @@
 import os
 import mak
 import mak.tools.cross_gcc
-import Utils
-from Logs import info,warn
+from Logs import info,warn,pprint
 
 
 def options(opt):
@@ -58,7 +57,7 @@ def configure(conf):
 				newenv.set_variant(name)
 				add_freebsd_flags_to_env(conf)
 				newenv = conf.set_env_name(name, newenv)
-				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				pprint('NORMAL', 'configure for tool %s' % name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
 				del conf.all_envs['temp']
 				conf.setenv('default')
