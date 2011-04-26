@@ -2,8 +2,7 @@
 
 import os
 import mak
-import Utils
-from Logs import info,warn
+from Logs import info,warn,pprint
 
 
 def options(opt):
@@ -60,7 +59,7 @@ def configure(conf):
 			newenv.set_variant(name)
 			add_linux_flags_to_env(conf)
 			newenv = conf.set_env_name(name, newenv)
-			Utils.pprint('NORMAL', 'configure for tool %s' % name)
+			pprint('NORMAL', 'configure for tool %s' % name)
 			newenv = conf.set_env_name('temp', conf.env.copy())
 			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', 'x86'))
 			del conf.all_envs['temp']
@@ -81,7 +80,7 @@ def configure(conf):
 				newenv.set_variant(name)
 				add_linux_flags_to_env(conf)
 				newenv = conf.set_env_name(name, newenv)
-				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				pprint('NORMAL', 'configure for tool %s' % name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
 				del conf.all_envs['temp']
 				conf.setenv('default')

@@ -2,9 +2,8 @@
 
 import os
 import mak
-import Utils
 import Configure
-from Logs import info,warn
+from Logs import info,warn,pprint
 
 def options(opt):
 	try:
@@ -103,7 +102,7 @@ def configure(conf):
 					newenv.set_variant(name)
 					add_darwin_flags_to_env(conf)
 					newenv = conf.set_env_name(name, newenv)
-					Utils.pprint('NORMAL', 'configure for tool %s' % name)
+					pprint('NORMAL', 'configure for tool %s' % name)
 					conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
 					del conf.all_envs['temp']
 					conf.setenv('default')
@@ -123,7 +122,7 @@ def configure(conf):
 					newenv.set_variant(name)
 					add_darwin_simulator_flags_to_env(conf)
 					newenv = conf.set_env_name(name, newenv)
-					Utils.pprint('NORMAL', 'configure for tool %s' % name)
+					pprint('NORMAL', 'configure for tool %s' % name)
 					conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', newenv['GCC_CONFIGURED_ARCH']))
 					del conf.all_envs['temp']
 					conf.setenv('default')

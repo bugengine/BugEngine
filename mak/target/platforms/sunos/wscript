@@ -2,10 +2,9 @@
 
 import os
 import mak
-import Utils
 import Logs
 import Options
-from Logs import info,warn
+from Logs import info,warn,pprint
 
 def options(opt):
 	pass
@@ -60,7 +59,7 @@ def configure(conf):
 				newenv.set_variant(name)
 				add_sunos_flags_to_env(conf)
 				newenv = conf.set_env_name(name, newenv)
-				Utils.pprint('NORMAL', 'configure for tool %s' % name)
+				pprint('NORMAL', 'configure for tool %s' % name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
 				del conf.all_envs['temp']
 				conf.setenv('default')
