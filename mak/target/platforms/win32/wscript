@@ -2,11 +2,6 @@
 
 import os
 import mak
-try:
-	import Tools.msvc
-except:
-	pass
-
 import Options
 from Logs import info,warn,pprint
 
@@ -85,49 +80,39 @@ def options(opt):
 
 def configure(conf):
 	mak.allplatforms['win32'] = ['win32', 'pc']
-	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('mingw') != -1:
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
+			name = 'gcc-win32-%s-%s' %(arch, version.replace('-', '_'))
+			defaultenv = conf.get_env()
+			conf.setenv(name, conf.env.derive())
 			try:
 				add_win32_gcc_to_env(conf, version, toolchaindir, target)
 				add_win32_gcc_flags_to_env(conf)
-
-				name = 'gcc-win32-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-				newenv.set_variant(name)
 				add_win32_flags_to_env(conf)
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
 
-				newenv = conf.set_env_name(name, newenv)
 				pprint('NORMAL', 'configure for tool %s' % name)
-				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
-				del conf.all_envs['temp']
-				conf.setenv('default')
+				conf.set_env(defaultenv)
 				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception, e:
+			except Exception as e:
 				warn('gcc not available: '+str(e))
-				conf.setenv('default')
+				conf.set_env(defaultenv)
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
+			name = '%s-%s-%s-%s' %(compiler, platform, target, version)
+			defaultenv = conf.get_env()
+			conf.setenv(name, conf.env.derive())
 			try:
-				print 'bla'
 				add_msvc_to_env(conf, compiler, version, target, platform, tname)
-
-				name = '%s-%s-%s-%s' %(compiler, platform, target, version)
-				newenv.set_variant(name)
 				add_win32_flags_to_env(conf)
-
-				pprint('NORMAL', 'configure for tool %s' % name)
-				newenv = conf.set_env_name(name, newenv)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', tname))
 
-				del conf.all_envs['temp']
-				conf.setenv('default')
+				pprint('NORMAL', 'configure for tool %s' % name)
+				conf.set_env(defaultenv)
 				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception, e:
+			except Exception as e:
 				warn('msvc not available: '+str(e))
-				conf.setenv('default')
+				conf.set_env(defaultenv)
 
 
 def build(bld):

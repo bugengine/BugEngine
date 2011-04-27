@@ -1,5 +1,5 @@
 import os
-import solution
+from mak.tools.IDE.vstudio import solution
 import mak.sources
 import string
 from xml.dom import minidom
@@ -53,7 +53,7 @@ class VCproj:
 		elif type == 'test':
 			self.projectType = '1'
 		else:
-			print 'dunno project type : '+type
+			print('dunno project type : '+type)
 
 	def writeHeader(self, configs, platforms, options):
 		if 'xbox360' not in mak.allplatforms.keys():

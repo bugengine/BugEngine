@@ -2,7 +2,8 @@ import os
 import re
 import Configure
 import Options
-from Logs import info,warn
+from Logs import info,warn,pprint
+import mak.tools.cross_gcc
 
 def add_opencc_to_env(conf, version, toolchaindir, target):
 	arch,compiler,platform = target.split('-')
@@ -38,43 +39,6 @@ def get_available_opencc(conf):
 						continue
 					name = add_opencc_to_env(conf, version, os.path.join(toolchaindir), target)
 
-def get_available_suncc(conf):
-	newenv = conf.env.copy()
-	conf.set_env_name('temp',newenv)
-	conf.setenv('temp')
-	try:
-		conf.check_tool('cross_suncc', tooldir='mak/tools')
-		name = 'suncc-linux-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
-		Utils.pprint('NORMAL', '=> configured for tool %s' % name)
-		conf.set_env_name(name, newenv)
-		newenv.set_variant(name)
-		conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'linux'))
-		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['SUNCC_TARGET']))
-		del conf.all_envs['temp']
-		conf.setenv('default')
-		conf.env['BUILD_VARIANTS'].append(name)
-	except Exception, e:
-		warn('suncc not available: '+str(e)) 
-		conf.setenv('default')
-
-# gets a list of the GCC toolchains installed
-def get_available_gcc(conf):
-	toolchaindirs=set([])
-	conf.env['GCC_TARGETS'] = []
-	for dir in os.environ['PATH'].split(':'):
-		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
-	for toolchaindir in toolchaindirs:
-		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
-			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
-				if target in ['.svn', '.cvs']:
-					continue
-				if os.path.isdir(os.path.join(toolchaindir,'lib','gcc', target)):
-					for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
-						if version in ['.svn', '.cvs']:
-							continue
-						if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
-							continue
-						conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
 
 def options(opt):
 	pass
@@ -83,5 +47,5 @@ def configure(conf):
 	conf.check_tool("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'linux'
 	conf.env['BUILD_VARIANTS'] = []
-	get_available_gcc(conf)
+	conf.get_available_gcc()
 

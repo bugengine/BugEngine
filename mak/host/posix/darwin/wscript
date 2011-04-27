@@ -5,32 +5,12 @@
 import os
 import Configure
 import Options
-from Logs import info,warn
+from Logs import info,warn,pprint
+import mak.tools.cross_gcc
 
 os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
 for l in os.listdir('/Developer/Platforms/'):
 	os.environ['PATH'] = ('/Developer/Platforms/%s/Developer/usr/bin:'%l)+os.environ['PATH']
-
-# gets a list of the GCC toolchains installed
-def get_available_gcc(conf):
-	versions = set([])
-	toolchaindirs=set([])
-	conf.env['GCC_TARGETS'] = []
-	for dir in os.environ['PATH'].split(':'):
-		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
-	for toolchaindir in toolchaindirs:
-		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
-			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
-				if target in ['.svn', '.cvs']:
-					continue
-				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
-					if version in ['.svn', '.cvs']:
-						continue
-					if os.path.islink(os.path.join(toolchaindir, 'lib', 'gcc', target, version)):
-						continue
-					if target+'/'+version not in versions:
-						conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
-						versions.add(target+'/'+version)
 
 def options(opt):
 	pass
@@ -39,5 +19,5 @@ def configure(conf):
 	conf.check_tool("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'darwin'
 	conf.env['BUILD_VARIANTS'] = []
-	get_available_gcc(conf)
+	conf.get_available_gcc()
 

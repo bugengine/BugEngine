@@ -1,5 +1,5 @@
 import os
-import solution
+from mak.tools.IDE.vstudio import solution
 import mak.sources
 
 
@@ -46,7 +46,7 @@ class VCxproj:
 		elif type == 'test':
 			self.projectType = 'Application'
 		else:
-			print 'dunno project type : '+type
+			print('dunno project type : '+type)
 
 	def writeHeader(self, configs, platforms, options):
 		self.filters.write('<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')

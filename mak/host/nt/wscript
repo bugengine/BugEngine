@@ -6,6 +6,7 @@ import os
 import Configure
 import Options
 from Logs import info,warn,pprint
+import mak.tools.cross_gcc
 import mak.waflib.Tools.msvc
 
 os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
@@ -21,23 +22,6 @@ def get_available_msvc(conf):
 				conf.env['MSVC_TARGETS'].append((compiler, version, target, 'win32', tname))
 
 
-# gets a list of the GCC toolchains installed
-def get_available_gcc(conf):
-	toolchaindirs=[]
-	conf.env['GCC_TARGETS'] = []
-	for dir in os.environ['PATH'].split(';'):
-		toolchaindirs.append(os.path.join(dir, '..'))
-	for toolchaindir in toolchaindirs:
-		if os.path.isdir(os.path.join(toolchaindir,'lib','gcc')):
-			for target in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc')):
-				if target in ['.svn', '.cvs']:
-					continue
-				for version in os.listdir(os.path.join(toolchaindir, 'lib', 'gcc', target)):
-					if version in ['.svn', '.cvs']:
-						continue
-					conf.env['GCC_TARGETS'].append((version, toolchaindir, target))
-
-
 def options(opt):
 	pprint('NORMAL', 'Host system is Win32')
 	opt.add_option( '--no-msvc',
@@ -51,6 +35,6 @@ def configure(conf):
 	conf.check_tool('flex bison data', tooldir=['mak/tools'])
 	conf.env['HOST'] = 'win32'
 	conf.env['BUILD_VARIANTS'] = []
-	get_available_gcc(conf)
+	conf.get_available_gcc()
 	if Options.options.msvc:
 		get_available_msvc(conf)
