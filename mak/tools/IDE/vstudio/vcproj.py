@@ -141,10 +141,10 @@ class VCproj:
 				self.output.write('			ConfigurationType="%s"\n' % self.projectType)
 				self.output.write('			CharacterSet="2"\n')
 				self.output.write('			>\n')
-				for key,values in props.iteritems():
+				for key,values in props.items():
 					self.output.write('			<Tool\n')
 					self.output.write('				Name="%s"\n' % key)
-					for attribute,value in values.iteritems():
+					for attribute,value in values.items():
 						self.output.write('				%s="%s"\n' % (attribute,value))
 
 					self.output.write('			/>\n')
@@ -289,7 +289,7 @@ class VCproj:
 		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
 
 	def addFiles(self, path, directory, tabs):
-		for subname,subdir in directory.directories.iteritems():
+		for subname,subdir in directory.directories.items():
 			self.output.write(tabs+'<Filter Name="%s">\n' % subname)
 			self.addFiles(os.path.join(path, subdir.prefix), subdir, tabs+'	')
 			self.output.write(tabs+'</Filter>\n')

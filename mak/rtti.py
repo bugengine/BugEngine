@@ -227,7 +227,7 @@ class Class(Container):
 
 	def buildMethods(self, file, decl):
 		methodindex = 0
-		for name, overloads in self.methods.iteritems():
+		for name, overloads in self.methods.items():
 			if name == "?dtor":
 				continue
 			file.write("        {\n")
