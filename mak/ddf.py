@@ -1241,7 +1241,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
 		for f in macrofile:
 			try:
 				macros = open(f, 'r')
-			except IOError,e:
+			except IOError as e:
 				raise Exception("cannot open macro file %s : %s" % (f, str(e)))
 			for m in macros.readlines():
 				m = m.strip()
@@ -1252,7 +1252,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
 
 	try:
 		input = open(source, 'r')
-	except IOError,e:
+	except IOError as e:
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 
 
@@ -1264,7 +1264,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
 
 	try:
 		implementation = open(output, 'w')
-	except IOError,e:
+	except IOError as e:
 		raise Exception("cannot open output file %s : %s" % (output, str(e)))
 	if pch:
 		implementation.write("#include <%s>\n" % pch)

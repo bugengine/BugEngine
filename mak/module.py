@@ -695,6 +695,6 @@ def external( name,
 			  localoptions = coptions(),
 			  globaloptions = coptions()):
 	file = open(os.path.join('src', '3rdparty', name, 'wscript_build'), 'r')
-	exec file
+	exec(file)
 	if file: file.close()
 	return m[name]

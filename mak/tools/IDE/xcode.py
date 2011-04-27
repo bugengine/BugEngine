@@ -504,7 +504,6 @@ def create_xcode_project(t):
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
-		solution.chmod = 0444
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []

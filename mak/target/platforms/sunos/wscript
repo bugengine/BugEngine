@@ -31,7 +31,7 @@ def add_sunos_flags_to_env(conf):
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
-	
+
 	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_sunos', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_sunos', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
@@ -43,32 +43,28 @@ def add_sunos_flags_to_env(conf):
 									'lib':		'lib',
 									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('share', 'bugengine', 'plugins')  }
-			
 
 def configure(conf):
 	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']
-	for (version, toolchaindir, target) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('solaris') != -1:
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
+			name = 'gcc-sunos-'+arch+'-'+version.replace('-','_')
+			defaultenv = conf.get_env()
+			conf.setenv(name, conf.env.derive())
 			try:
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf, toolchaindir)
-
-				name = 'gcc-sunos-'+conf.env['GCC_CONFIGURED_ARCH']+'-'+version.replace('-','_')
-				newenv.set_variant(name)
 				add_sunos_flags_to_env(conf)
-				newenv = conf.set_env_name(name, newenv)
-				pprint('NORMAL', 'configure for tool %s' % name)
-				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['GCC_CONFIGURED_ARCH']))
-				del conf.all_envs['temp']
-				conf.setenv('default')
-				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception, e:
-				warn('gcc not available: '+str(e)) 
-				conf.setenv('default')
+				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
 
-						
+				pprint('NORMAL', 'configure for tool %s' % name)
+
+				conf.set_env(defaultenv)
+				conf.env['BUILD_VARIANTS'].append(name)
+			except Exception as e:
+				warn('gcc not available: '+str(e))
+				conf.set_env(defaultenv)
+
 
 def build(bld):
 	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']

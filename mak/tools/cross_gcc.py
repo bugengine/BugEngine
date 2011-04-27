@@ -40,11 +40,37 @@ def parse_gcc_target(target):
 			  ('psp', 'mips'),
 			  ('mingw32', 'x86'),
 			  ('ppu', 'powerpc'),
-			  ('spu', 'powerpc')]
+			  ('spu', 'spu')]
 	for gccname,aname in archs:
 		if target.find(gccname) != -1:
 				return aname
 
+@conftest
+def get_available_gcc(conf):
+	toolchaindirs=set([])
+	conf.env['GCC_TARGETS'] = []
+	for dir in os.environ['PATH'].split(':'):
+		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
+	for toolchaindir in toolchaindirs:
+		if not os.path.isdir(os.path.join(toolchaindir,'lib')):
+			continue
+		for lib in os.listdir(os.path.join(toolchaindir,'lib')):
+			if lib == 'gcc':
+				libdir = os.path.join(toolchaindir, 'lib', lib)
+			elif lib.startswith('gcc'):
+				libdir = os.path.join(toolchaindir, 'lib', lib, 'gcc')
+			else:
+				continue
+			for target in os.listdir(libdir):
+				if target in ['.svn', '.cvs']:
+					continue
+				for version in os.listdir(os.path.join(libdir, target)):
+					if version in ['.svn', '.cvs']:
+						continue
+					if os.path.islink(os.path.join(libdir, target, version)):
+						continue
+					arch = parse_gcc_target(target) or 'unknown'
+					conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 
 @conftest
 def find_cross_gcc(conf):
@@ -54,12 +80,11 @@ def find_cross_gcc(conf):
 	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
-		v['GCC_CONFIGURED_ARCH'] = parse_gcc_target(target) or 'unknown'
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall]:
 			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False):
 				break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
-		
+
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
 			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False):
 				break
@@ -93,7 +118,6 @@ def find_cross_gcc(conf):
 				if conf.find_program(ranlib, var='RANLIB', mandatory=False):
 					break
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
-
 	conf.check_tool('gcc gxx gas')
 
 @conftest
@@ -118,16 +142,6 @@ def add_standard_gcc_flags(conf):
 	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g', '-s']
-
-	if v['GCC_CONFIGURED_ARCH'] in ['amd64', 'x86']:
-		v.append_unique('CCFLAGS', ['-mfpmath=sse', '-msse2'])
-		v.append_unique('CXXFLAGS', ['-mfpmath=sse', '-msse2'])
-	if v['GCC_CONFIGURED_PLATFORM'] == 'wii':
-		flags = ['-mcpu=750', '-mrvl', '-meabi', '-msdata=eabi', '-mhard-float', '-fmodulo-sched', '-ffunction-sections', '-fdata-sections', '-mregnames', '-Wa,-mgekko']
-		v.append_unique('CCFLAGS', flags)
-		v.append_unique('CXXFLAGS', flags)
-		v.append_unique('ASFLAGS', flags+['-mregnames', '-D_LANGUAGE_ASSEMBLY'])
-		v.append_unique('LINKFLAGS', flags)
 
 
 configure = '''

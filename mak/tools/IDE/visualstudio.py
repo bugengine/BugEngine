@@ -4,28 +4,26 @@ import Utils
 import Task
 import os
 import mak
-import vstudio.solution
-import vstudio.vcproj
-import vstudio.vcxproj
+from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
 
 projects = {
-	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vstudio.vcproj.VCproj, '7.10'), ['Win32']),
-	'vs2005':	(('Visual Studio 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00'), ['Win32', 'x64', 'Xbox 360']),
-	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vstudio.vcproj.VCproj, '8.00'), ['Win32']),
-	'vs2008':	(('Visual Studio 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00'), ['Win32', 'x64', 'Xbox 360']),
-	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vstudio.vcproj.VCproj, '9.00'), ['Win32']),
-	'vs2010':	(('Visual Studio 2010', '11.00'),(vstudio.vcxproj.VCxproj, '4.0'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10'), ['Win32']),
+	'vs2005':	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00'), ['Win32']),
+	'vs2008':	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00'), ['Win32']),
+	'vs2010':	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0'), ['Win32', 'x64', 'Xbox 360']),
 }
 
 allconfigs = ['debug','profile','final']
 
 def generateSolution(task):
-	solution = vstudio.solution.Solution( task.name,
-										  task.outputs[0].bldpath(task.env),
-										  task.version,
-										  task.versionNumber,
-										  task.versionName,
-										 )
+	solution = solution.Solution( task.name,
+								  task.outputs[0].bldpath(task.env),
+								  task.version,
+								  task.versionNumber,
+								  task.versionName,
+								 )
 	solution.writeHeader()
 	# adds games and exes first
 	for d in task.depends:

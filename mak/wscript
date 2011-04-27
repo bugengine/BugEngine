@@ -4,11 +4,10 @@ import os
 import re
 import Options
 from mak.waflib.TaskGen import taskgen_method,feature,before,after,extension
-import Task
-import Node
+from waflib import Task,Node,Errors
 import module
 import mak
-import Utils
+from Logs import pprint
 
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
@@ -76,20 +75,13 @@ def configure(conf):
 		for v in allvariants:
 			for e in selectedtoolchains:
 				if e.match(v):
-					Utils.pprint('GREEN', 'selected variant %s for build' % v)
+					pprint('GREEN', 'selected variant %s for build' % v)
 					selectedvariants.append(v)
 		if not selectedvariants:
 			conf.fatal('No toolchain matches the pattern %s, available : %s' % (Options.options.toolchains,str(allvariants)))
 	else:
 		conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
-		Utils.pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
-	unusedvariants = []
-	for envname,env in conf.all_envs.iteritems():
-		if not envname in conf.env['BUILD_VARIANTS'] and envname != 'default':
-			unusedvariants.append(envname)
-	for envname in unusedvariants:
-		del conf.all_envs[envname]
-
+		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
 
 
 def build(bld):
@@ -114,7 +106,7 @@ def build(bld):
 			for e in selectedtoolchains:
 				if e.match(v):
 					selectedvariants.append(v)
-					Utils.pprint('GREEN', 'selected variant %s for build' % v)
+					pprint('GREEN', 'selected variant %s for build' % v)
 	bld.env['BUILD_VARIANTS'] = selectedvariants
 	global builder
 	mak.builder = bld
@@ -214,7 +206,7 @@ def apply_lib_vars_cprogram(self):
 
 		y = self.name_to_obj(x)
 		if not y:
-			raise Utils.WafError("object '%s' was not found in uselib_local (required by '%s')" % (x, self.name))
+			raise Errors.WafError("object '%s' was not found in uselib_local (required by '%s')" % (x, self.name))
 
 		# object has ancestors to process: add them to the end of the list
 		if getattr(y, 'uselib_local', None):
