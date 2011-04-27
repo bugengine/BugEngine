@@ -1,8 +1,7 @@
-if not m.has_key(name):
-    directx = external('DirectX')
-    includedir=[os.path.join('src', '3rdparty', name, 'api')]
-    exparchoptions = {
-        'win32-x86': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.x86')], libs=['d3d10', 'd3d10_1']),
-        'win32-amd64': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.amd64')], libs=['d3d10', 'd3d10_1'])
-        }
-    m[name] = util( name, [directx], '3rdparty', coptions(), coptions(includedir=includedir), {}, exparchoptions, platforms=['win32'])
+directx = external('DirectX')
+includedir=[os.path.join('src', '3rdparty', name, 'api')]
+exparchoptions = {
+	'win32-x86': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.x86')], libs=['d3d10', 'd3d10_1']),
+	'win32-amd64': coptions(libdir=[os.path.join('src', '3rdparty', name, 'lib.amd64')], libs=['d3d10', 'd3d10_1'])
+	}
+m[name] = util( name, [directx], '3rdparty', coptions(), coptions(includedir=includedir), {}, exparchoptions, platforms=['win32'])

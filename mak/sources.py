@@ -30,7 +30,7 @@ class directory:
 		pathlist.reverse()
 		pwd = self
 		for dir in pathlist[:-1]:
-			if pwd.directories.has_key(dir):
+			if dir in pwd:
 				pwd = pwd.directories[dir]
 			else:
 				nextpwd = directory()
@@ -40,7 +40,7 @@ class directory:
 
 	def make_sources(self, bld, env, prefix, relative = ''):
 		result = []
-		for name, d in self.directories.iteritems():
+		for name, d in self.directories.items():
 			result += d.make_sources(bld, env, os.path.join(prefix, d.prefix), os.path.join(relative, d.prefix))
 		for f in self.files:
 			f.make_source(bld, env, prefix, relative, result)
@@ -53,7 +53,7 @@ class directory:
 			md5.update(',')
 			value.hash(md5)
 		md5.update(';')
-		for name, value in self.directories.iteritems():
+		for name, value in self.directories.items():
 			md5.update(name)
 			md5.update(':')
 			value.hash(md5)
@@ -69,8 +69,8 @@ class source:
 	def make_source(self, bld, env, prefix, relative, result):
 		if self.process and set(env['PLATFORM']) & set(self.platforms) and env['ARCHITECTURE'] in self.archs:
 			result.append(os.path.join(prefix,	self.filename))
-	def __cmp__(self,other):
-		return cmp(self.filename,other.filename)
+	def __lt__(self,other):
+		return self.filename < other.filename
 	def hash(self, md5):
 		md5.update(self.filename)
 	def generated(self):

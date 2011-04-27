@@ -119,7 +119,7 @@ class VCxproj:
 		self.filters.write('    <Filter Include="%s">\n' % name)
 		self.filters.write('      <UniqueIdentifier>%s</UniqueIdentifier>\n' % solution.generateGUID(name,name))
 		self.filters.write('    </Filter>\n')
-		for subname,subdir in directory.directories.iteritems():
+		for subname,subdir in directory.directories.items():
 			self.addFilter(os.path.join(name,subname), subdir)
 
 	def addCppFile(self, path, filter, filename, source):
@@ -128,7 +128,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		if source.usepch:
@@ -146,7 +146,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('    </ResourceCompile>\n')
@@ -165,7 +165,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
@@ -181,7 +181,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -D $(SolutionDir)mak/macros_ignore -p %s -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], self.pchstop, os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
@@ -199,7 +199,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		self.output.write('      <Command>set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; flex.exe -o&quot;%s&quot; &quot;$(ProjectDir)%s&quot;</Command>\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
@@ -222,7 +222,7 @@ class VCxproj:
 		if not source.process:
 			self.output.write('      <ExcludedFromBuild>true</ExcludedFromBuild>\n')
 		else:
-			for platform, (p, a) in VCxproj.vcplatforms.iteritems():
+			for platform, (p, a) in VCxproj.vcplatforms.items():
 				if not (set(mak.allplatforms[p]) & set(source.platforms)) or not a in source.archs:
 					self.output.write('      <ExcludedFromBuild Condition="\'$(Platform)\'==\'%s\'">true</ExcludedFromBuild>\n' % platform)
 		outputpath = os.path.join('$(OutDir)'+getFileDeployPath(source.type), source.outdir)
@@ -234,7 +234,7 @@ class VCxproj:
 		self.filters.write('    </CustomBuild>\n')
 
 	def addFiles(self, path, filter, directory, runtypes):
-		for subname,subdir in directory.directories.iteritems():
+		for subname,subdir in directory.directories.items():
 			self.addFiles(os.path.join(path, subdir.prefix), os.path.join(filter, subname), subdir, runtypes)
 		for source in directory.files:
 			if not source.generated():
@@ -248,7 +248,7 @@ class VCxproj:
 	def addDirectory(self, sources):
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		for name,subdir in sources.directories.iteritems():
+		for name,subdir in sources.directories.items():
 			self.addFilter(name, subdir)
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')

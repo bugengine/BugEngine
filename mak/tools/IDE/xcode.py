@@ -44,7 +44,7 @@ class XCodeProject:
 	def pbxBuildTree(self, tree, processcpp):
 		w = self.file.write
 		tree.id = newid()
-		for name,dir in tree.directories.iteritems():
+		for name,dir in tree.directories.items():
 			self.pbxBuildTree(dir, processcpp)
 		for file in tree.files:
 			file.id = newid()
@@ -66,7 +66,7 @@ class XCodeProject:
 		w("\t\tisa = PBXGroup;\n")
 		w("\t\tchildren = (\n")
 		subdirs = []
-		for n,d in tree.directories.iteritems():
+		for n,d in tree.directories.items():
 			subdirs.append((n, d))
 		subdirs.sort(key = lambda i: i[0])
 		for n,d in subdirs:
@@ -79,12 +79,12 @@ class XCodeProject:
 		w("\t\tname = \"%s\";\n" % name)
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
-		for n,d in tree.directories.iteritems():
+		for n,d in tree.directories.items():
 			self.pbxDirTree(d, n)
 
 	def pbxFileRefTree(self, tree, path=''):
 		w = self.file.write
-		for name,dir in tree.directories.iteritems():
+		for name,dir in tree.directories.items():
 			self.pbxFileRefTree(dir, os.path.join(path, tree.prefix))
 		for file in tree.files:
 			filename = os.path.join(path, tree.prefix, file.filename)
@@ -312,7 +312,7 @@ class XCodeProject:
 
 	def writeSources(self, sources, all):
 		w = self.file.write
-		for name,d in sources.directories.iteritems():
+		for name,d in sources.directories.items():
 			self.writeSources(d, all)
 		for file in sources.files:
 			if file.process:
@@ -406,7 +406,7 @@ class XCodeProject:
 					w("\t%s = {\n" % setting)
 					w("\t\tisa = XCBuildConfiguration;\n")
 					w("\t\tbuildSettings = {\n")
-					for platform, options in d.platforms.iteritems():
+					for platform, options in d.platforms.items():
 						p, arch = platform.split('-')
 						p, sdk = toSDK(p)
 						arch = toXCodeArch(arch)
@@ -470,7 +470,7 @@ def writemaster(sourcetree, f, path = ''):
 			f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
 			f.write("# endif\n")
 			f.write("#endif\n")
-	for name,directory in sourcetree.directories.iteritems():
+	for name,directory in sourcetree.directories.items():
 		writemaster(directory, f, os.path.join(path, sourcetree.prefix))
 
 def generateProject(task):

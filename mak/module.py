@@ -67,7 +67,7 @@ class module:
 		self.root = os.path.join('src', category, name)
 		self.platforms = set([])
 		for p in platforms or mak.allplatforms.keys():
-			for pname, pgroup in mak.allplatforms.iteritems():
+			for pname, pgroup in mak.allplatforms.items():
 				if p in pgroup:
 					self.platforms.add(pname)
 		self.archs = archs or mak.allarchs[:]
@@ -157,7 +157,7 @@ class module:
 		options.merge(self.localoptions)
 		options.merge(self.getglobaloptions(platforms, arch))
 
-		for key,aoptions in self.localarchoptions.iteritems():
+		for key,aoptions in self.localarchoptions.items():
 			try:
 				p,a = key.split('-')
 				if a == arch and p in platforms:
@@ -177,7 +177,7 @@ class module:
 			options.merge(self.globaloptions)
 			for d in self.depends:
 				options.merge(d.getglobaloptions(platforms, arch))
-			for key,aoptions in self.globalarchoptions.iteritems():
+			for key,aoptions in self.globalarchoptions.items():
 				try:
 					p,a = key.split('-')
 					if a == arch and p in platforms:
@@ -263,7 +263,7 @@ class module:
 				if file[0:9] == 'platform=':
 					newplatforms = []
 					for p in file[9:].split(','):
-						for pname, pgroup in mak.allplatforms.iteritems():
+						for pname, pgroup in mak.allplatforms.items():
 							if p in pgroup and pname in platforms:
 								newplatforms.append(pname)
 					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, newplatforms, archs, sourcelist), file )
@@ -281,7 +281,7 @@ class module:
 					if specials.startswith("p="):
 						fileplatforms = []
 						for p in specials[2:].split(','):
-							for pname, pgroup in mak.allplatforms.iteritems():
+							for pname, pgroup in mak.allplatforms.items():
 								if p in pgroup and pname in platforms:
 									fileplatforms.append(pname)
 					elif specials.startswith("a="):
@@ -367,7 +367,7 @@ class module:
 				task.category		= self.category
 				task.usemaster		= self.usemaster
 				platforms = {}
-				for platform,aliases in mak.allplatforms.iteritems():
+				for platform,aliases in mak.allplatforms.items():
 					if set(aliases) & self.platforms:
 						for arch in self.archs:
 							options = self.getoptions(aliases, arch)
@@ -694,7 +694,9 @@ def external( name,
 			  depends = [],
 			  localoptions = coptions(),
 			  globaloptions = coptions()):
-	file = open(os.path.join('src', '3rdparty', name, 'wscript_build'), 'r')
-	exec(file)
-	if file: file.close()
+	if not name in m:
+		filename = os.path.join('src', '3rdparty', name, 'wscript_build')
+		file = open(filename, 'r')
+		exec(compile(file.read(), filename, 'exec'))
+		if file: file.close()
 	return m[name]

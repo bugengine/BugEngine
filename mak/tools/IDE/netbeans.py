@@ -9,7 +9,7 @@ allconfigs = ['debug','profile','final']
 
 def addFolder(file, tree, name, path, tabs):
 	file.write(tabs+'<logicalFolder name="%s" displayName="%s" projectFiles="true">\n' % (name, name))
-	for dname, d in tree.directories.iteritems():
+	for dname, d in tree.directories.items():
 		addFolder(file, d, dname, path + '/' + dname, tabs+'  ')
 	for f in tree.files:
 		file.write(tabs+'  <itemPath>%s</itemPath>\n' % (path + '/' + f.filename))

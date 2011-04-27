@@ -1,3 +1,2 @@
-if not m.has_key(name):
-    m[name] = library( name, [], '3rdparty', coptions(defines=['__STRICT_ANSI__']))
-    m[name].usemaster = False
+m[name] = library( name, [], '3rdparty', coptions(defines=['__STRICT_ANSI__']))
+m[name].usemaster = False
