@@ -16,7 +16,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_TARGET']	= gcc_target
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.check_tool('cross_gcc', tooldir='mak/tools')
+	conf.load('cross_gcc', tooldir='mak/tools')
 
 
 def add_gcc_flags_to_env(conf):
@@ -26,7 +26,7 @@ def add_gcc_flags_to_env(conf):
 	#conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 	#conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_freebsd_flags_to_env(conf):
+def add_freebsd_flags_to_env(conf, name):
 	conf.env['PLATFORM'] = mak.allplatforms['freebsd']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
@@ -34,7 +34,7 @@ def add_freebsd_flags_to_env(conf):
 
 	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_freebsd', 'FREEBSD', '_FREEBSD', '_FREEBSD_', '__FREEBSD__'])
 	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_freebsd', 'FREEBSD', '_FREEBSD', '_FREEBSD_', '__FREEBSD__'])
-	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['PREFIX']			= os.path.abspath(name)
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
@@ -48,24 +48,21 @@ def configure(conf):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('freebsd') != -1:
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
+			name = 'gcc-freebsd-'+arch+'-'+version.replace('-','_')
+			conf.setenv(name, conf.env.derive())
 			try:
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf)
-				name = 'gcc-freebsd-'+newenv['GCC_CONFIGURED_ARCH']+'-'+version.replace('-', '_')
-				newenv.set_variant(name)
-				add_freebsd_flags_to_env(conf)
-				newenv = conf.set_env_name(name, newenv)
-				pprint('NORMAL', 'configure for tool %s' % name)
+				add_freebsd_flags_to_env(conf, name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
-				del conf.all_envs['temp']
-				conf.setenv('default')
+
+				pprint('GREEN', 'configure for tool %s' % name)
+
+				conf.variant = ''
 				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception as e:
 				warn('gcc not available: '+str(e))
-				conf.setenv('default')
-
+				conf.variant = ''
 
 
 def build(bld):

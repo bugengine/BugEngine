@@ -22,7 +22,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_TARGET']	= gcc_target
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.check_tool('cross_gcc', tooldir='mak/tools')
+	conf.load('cross_gcc', tooldir='mak/tools')
 
 
 def add_gcc_flags_to_env(conf):
@@ -32,7 +32,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_darwin_flags_to_env(conf):
+def add_darwin_flags_to_env(conf, name):
 	import Options
 	conf.env['PLATFORM'] = mak.allplatforms['osx']
 	conf.env['STATIC'] = 1
@@ -45,7 +45,7 @@ def add_darwin_flags_to_env(conf):
 
 	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_darwin', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_darwin', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
-	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['PREFIX']			= os.path.abspath(name)
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
@@ -60,20 +60,19 @@ def configure(conf):
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('darwin') != -1 and target.find('arm') == -1:
 			name = 'gcc-darwin-'+arch+'-'+version.replace('-','_')
-			defaultenv = conf.get_env()
 			conf.setenv(name, conf.env.derive())
 			try:
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf)
-				add_darwin_flags_to_env(conf)
+				add_darwin_flags_to_env(conf, name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
 
-				pprint('NORMAL', 'configure for tool %s' % name)
-				conf.set_env(defaultenv)
+				pprint('GREEN', 'configure for tool %s' % name)
+				conf.variant = ''
 				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception as e:
 				warn('gcc not available: '+e.__class__.__name__+" "+str(e))
-				conf.set_env(defaultenv)
+				conf.variant = ''
 
 def build(bld):
 	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']

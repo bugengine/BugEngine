@@ -75,6 +75,8 @@ def get_available_gcc(conf):
 						continue
 					if os.path.islink(os.path.join(libdir, target, version)):
 						continue
+					if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
+						continue
 					arch = parse_gcc_target(target) or 'unknown'
 					conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 
@@ -124,7 +126,7 @@ def find_cross_gcc(conf):
 				if conf.find_program(ranlib, var='RANLIB', mandatory=False):
 					break
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
-	conf.check_tool('gcc gxx gas')
+	conf.load('gcc gxx gas')
 
 @conftest
 def add_standard_gcc_flags(conf):
