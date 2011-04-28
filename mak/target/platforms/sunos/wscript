@@ -54,7 +54,7 @@ def configure(conf):
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf, toolchaindir)
 				add_sunos_flags_to_env(conf, name)
-				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
+				conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch))
 
 				pprint('GREEN', 'configure for tool %s' % name)
 

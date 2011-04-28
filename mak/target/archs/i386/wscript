@@ -3,11 +3,11 @@
 import os
 
 def options(opt):
-	opt.sub_options('../x86')
+	opt.recurse('../x86')
 	pass
 
 def configure(conf):
-	conf.sub_config('../x86')
+	conf.recurse('../x86')
 
 def build(bld):
 	pass
