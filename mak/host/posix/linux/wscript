@@ -48,4 +48,5 @@ def configure(conf):
 	conf.env['HOST'] = 'linux'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()
+	print (conf.env.GCC_TARGETS)
 
