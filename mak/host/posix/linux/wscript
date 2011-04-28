@@ -4,26 +4,7 @@ import Configure
 import Options
 from Logs import info,warn,pprint
 import mak.tools.cross_gcc
-
-def add_opencc_to_env(conf, version, toolchaindir, target):
-	arch,compiler,platform = target.split('-')
-	try:
-		newenv = conf.set_env_name('temp', conf.env.copy())
-		conf.setenv('temp')
-		newenv['CC'] = conf.find_program('opencc-'+version, var='CC')
-		newenv['CXX'] = conf.find_program('openCC-'+version, var='CXX')
-		conf.check_tool('gcc gxx', tooldir='mak/tools')
-		name = '-'.join(['opencc', platform, arch, version.replace('-','_')])
-		newenv.set_variant(name)
-		Utils.pprint('NORMAL', 'configure for tool %s' % name)
-		conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', platform))
-		conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
-		newenv = conf.set_env_name(name, newenv)
-		del conf.all_envs['temp']
-		conf.setenv('default')
-		conf.env['BUILD_VARIANTS'].append(name)
-	except:
-		conf.setenv('default')
+import mak.tools.cross_suncc
 
 def get_available_opencc(conf):
 	paths = ['/usr/local', '/opt', '/', '/usr']
@@ -44,9 +25,9 @@ def options(opt):
 	pass
 
 def configure(conf):
-	conf.check_tool("bison flex data", tooldir=['mak/tools'])
+	conf.load("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'linux'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()
-	print (conf.env.GCC_TARGETS)
+	conf.get_available_suncc()
 

@@ -43,12 +43,16 @@ def configure(conf):
 	conf.sub_config(os.path.join('host', os.name))
 	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
 			if platform not in ['.svn', '.cvs']:
+				pprint('BLUE', '==================================')
+				pprint('BLUE', '= configure for target '+platform)
 				conf.sub_config(os.path.join('target', 'platforms', platform))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
 			if f in ['.svn', '.cvs']:
 				continue
 			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
+				pprint('BLUE', '==================================')
+				pprint('BLUE', '= configure for target '+f)
 				conf.sub_config(os.path.join('..', 'extra', f))
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:

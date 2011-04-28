@@ -13,7 +13,7 @@ def options(opt):
 	pprint('NORMAL', 'Host system is FreeBSD')
 
 def configure(conf):
-	conf.check_tool("bison flex data", tooldir=['mak/tools'])
+	conf.load("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'freebsd'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()

@@ -8,10 +8,17 @@ from Logs import info,warn,pprint
 def options(opt):
 	pass
 
-def add_suncc_flags_to_env(conf):
+def add_suncc_flags_to_env(conf, arch):
 	v = conf.env
-	conf.env.append_unique('CCFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-fPIC', '-DPIC', '-D__PIC__'])
-	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-fPIC', '-DPIC', '-D__PIC__', '-library=Crun,stlport4,Cstd'])
+	conf.env['STATIC'] = True
+	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
+		conf.env.append_unique('CCFLAGS', ['-m32'])
+		conf.env.append_unique('CXXFLAGS', ['-m32'])
+	elif arch in ['x86_64', 'x64', 'amd64']:
+		conf.env.append_unique('CCFLAGS', ['-m64'])
+		conf.env.append_unique('CXXFLAGS', ['-m64'])
+	conf.env.append_unique('CCFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4,Cstd'])
 	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4,Cstd', '-staticlib=%all', '-ldl', '-lm'])
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
@@ -20,7 +27,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_TARGET']    = gcc_target
 	newenv['GCC_PATH']              = [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 													   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.check_tool('cross_gcc', tooldir='mak/tools')
+	conf.load('cross_gcc', tooldir='mak/tools')
 
 def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fPIC'])
@@ -29,7 +36,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_linux_flags_to_env(conf):
+def add_linux_flags_to_env(conf, name):
 	conf.env['PLATFORM'] = mak.allplatforms['linux']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
@@ -37,7 +44,7 @@ def add_linux_flags_to_env(conf):
 
 	conf.env.append_unique('CCDEFINES', ['BE_PLATFORM=platform_linux', 'LINUX', '_LINUX', '_LINUX_', '__LINUX__'])
 	conf.env.append_unique('CXXDEFINES', ['BE_PLATFORM=platform_linux', 'LINUX', '_LINUX', '_LINUX_', '__LINUX__'])
-	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['PREFIX']			= os.path.abspath(name)
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
@@ -49,41 +56,41 @@ def add_linux_flags_to_env(conf):
 
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
-	for version,platform,arch in conf.env.SUNCC_TARGETS:
-		if platform != 'linux':
+	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
+		if platform.lower() != 'Linux':
 			continue
 		name = 'suncc-linux-'+arch+'-'+version.replace('-','_')
-		defaultenv = conf.get_env()
 		conf.setenv(name, conf.env.derive())
 		try:
-			conf.check_tool('cross_suncc', tooldir='mak/tools')
-			add_suncc_flags_to_env(conf)
-			add_linux_flags_to_env(conf)
+			conf.env.CC = compilerc
+			conf.env.CXX = compilercxx
+			conf.load('cross_suncc', tooldir='mak/tools')
+			add_suncc_flags_to_env(conf, arch)
+			add_linux_flags_to_env(conf, name)
 			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
-			pprint('NORMAL', 'configure for tool %s' % name)
-			conf.set_env(defaultenv)
+			pprint('GREEN', 'configure for tool %s' % name)
+			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
 			warn('suncc not available: '+str(e))
-			conf.set_env(defaultenv)
+			conf.variant = ''
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('linux') != -1:
 			name = 'gcc-linux-'+arch+'-'+version.replace('-','_')
-			defaultenv = conf.get_env()
 			conf.setenv(name, conf.env.derive())
 			try:
 				add_gcc_to_env(conf, version, toolchaindir, target)
 				add_gcc_flags_to_env(conf)
-				add_linux_flags_to_env(conf)
+				add_linux_flags_to_env(conf, name)
 				conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
 
-				pprint('NORMAL', 'configure for tool %s' % name)
-				conf.set_env(defaultenv)
+				pprint('GREEN', 'configure for tool %s' % name)
+
+				conf.variant = ''
 				conf.env['BUILD_VARIANTS'].append(name)
 			except Exception as e:
 				warn('gcc not available: '+str(e))
-				conf.set_env(defaultenv)
-
+				conf.variant = ''
 
 def build(bld):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']

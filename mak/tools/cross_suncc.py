@@ -1,15 +1,17 @@
-from Configure import conftest
-import Utils
+from waflib.Configure import conftest
+from waflib import Utils
 import re
 
 format = re.compile('^cc: Sun.*C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 
 @conftest
-def find_suncc(conf):
-	cc = conf.find_program('suncc', mandatory=False)
-	if cc:
-		conf.get_suncc_targets(cc)
-
+def get_available_suncc(conf):
+	conf.env.SUNCC_TARGETS = []
+	cc = conf.find_program('suncc', mandatory=False, var='detect_suncc')
+	cxx = conf.find_program('sunCC', mandatory=False, var='detect_suncxx')
+	if cc and cxx:
+		conf.get_suncc_targets_32(cc, cxx)
+		conf.get_suncc_targets_64(cc, cxx)
 
 def to32bits(arch):
 	if arch == 'amd64' or arch == 'x86_64' or arch == 'x64':
@@ -22,30 +24,32 @@ def to64bits(arch):
 	return arch
 
 @conftest
-def get_suncc_targets(conf, cc):
-	cmd = [cc, '-V', '-m32']
+def get_suncc_targets(conf, cc, cxx, flag):
+	cmd = [cc, '-V', flag]
 	try:
-		p = Utils.pproc.Popen(cmd, stdin=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE)
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 		out = p.communicate()[1]
-	except:
-		return
+		retcode = p.returncode
+	except Exception:
+		return None
+	if p.returncode:
+		return None
 	out = str(out).split('\n')
 	line = out[0]
-	result = format.match(line)
+	return format.match(line)
+
+@conftest
+def get_suncc_targets_32(conf, cc, cxx):
+	result = conf.get_suncc_targets(cc, cxx, '-m32')
 	if result:
-		conf.env['SUNCC_TARGETS'].append(result.group(1), result.group(2), to32bits(result.group(3)))
-	cmd = [cc, '-V', '-m64']
-	try:
-		p = Utils.pproc.Popen(cmd, stdin=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE)
-		out = p.communicate()[1]
-	except:
-		return
-	out = str(out).split('\n')
-	line = out[0]
-	result = format.match(line)
+		conf.env.SUNCC_TARGETS.append((cc, cxx, result.group(1), result.group(2), to32bits(result.group(3))))
+
+@conftest
+def get_suncc_targets_64(conf, cc, cxx):
+	result = conf.get_suncc_targets(cc, cxx, '-m64')
 	if result:
-		conf.env['SUNCC_TARGETS'].append(result.group(1), result.group(2), to64bits(result.group(3)))
+		conf.env.SUNCC_TARGETS.append((cc, cxx, result.group(1), result.group(2), to64bits(result.group(3))))
 
 def configure(conf):
-	conf.check_tool('suncc suncxx')
+	conf.load('suncc suncxx')
 

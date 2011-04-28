@@ -4,28 +4,14 @@
 import os
 from Logs import warn,pprint
 import mak.tools.cross_gcc
-
-def get_available_suncc(conf):
-	newenv = conf.env.copy()
-	conf.set_env_name('temp',newenv)
-	conf.setenv('temp')
-	conf.check_tool('cross_suncc', tooldir='mak/tools')
-	name = 'suncc-sunos-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
-	Utils.pprint('NORMAL', '=> configured for tool %s' % name)
-	conf.set_env_name(name, newenv)
-	newenv.set_variant(name)
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'platforms', 'sunos'))
-	conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', conf.env['SUNCC_TARGET']))
-	del conf.all_envs['temp']
-	conf.setenv('default')
-	conf.env['BUILD_VARIANTS'].append(name)
+import mak.tools.cross_suncc
 
 def options(opt):
 	pprint('NORMAL', 'Host system is SunOS/Solaris/OpenSolaris.org')
 
 def configure(conf):
-	conf.check_tool('bison flex data', tooldir='mak/tools')
+	conf.load('bison flex data', tooldir='mak/tools')
 	conf.env['HOST'] = 'sunos'
 	conf.env['BUILD_VARIANTS'] = []
-	#get_available_suncc(conf)
+	conf.get_available_suncc()
 	conf.get_available_gcc()
