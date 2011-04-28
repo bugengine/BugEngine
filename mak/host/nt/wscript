@@ -32,7 +32,8 @@ def options(opt):
 	pass
 
 def configure(conf):
-	conf.load('flex bison data', tooldir=['mak/tools'])
+	conf.load('flex bison')
+	conf.load('data', tooldir=['mak/tools'])
 	conf.env['HOST'] = 'win32'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()

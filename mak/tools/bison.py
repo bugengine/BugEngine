@@ -6,13 +6,13 @@
 "Bison processing"
 
 import Task
-from mak.waflib.TaskGen import extension
+from mak.waflib import TaskGen
 import re
 import Utils
 import os
 
 bison = '${BISON} ${BISONFLAGS} ${SRC[0].abspath()} -o ${TGT[0].name}'
-cls = Task.simple_task_type('bison', bison, 'GREEN', ext_in='.yc .y .yy', ext_out='.c .cxx .h .l', before='cxx')
+cls = Task.simple_task_type('bison', bison, 'GREEN', ext_in=['.yc', '.y', '.yy'], ext_out='.cxx .h', before='cxx')
 def post_run_bison(task):
 	source = task.outputs[0]
 	header = task.outputs[1]
@@ -30,7 +30,7 @@ def post_run_bison(task):
 cls.post_run_orig = cls.post_run
 cls.post_run = post_run_bison
 
-@extension('.y', '.yc', '.yy')
+@TaskGen.extension('.y', '.yc', '.yy')
 def big_bison(self, node):
 	"""when it becomes complicated (unlike flex), the old recipes work better (cwd)"""
 	has_h = '-d' in self.env['BISONFLAGS']
