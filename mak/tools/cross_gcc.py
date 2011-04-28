@@ -61,10 +61,16 @@ def get_available_gcc(conf):
 				libdir = os.path.join(toolchaindir, 'lib', lib, 'gcc')
 			else:
 				continue
+			if not os.path.isdir(libdir):
+				continue
 			for target in os.listdir(libdir):
+				if not os.path.isdir(os.path.join(libdir, target)):
+					continue
 				if target in ['.svn', '.cvs']:
 					continue
 				for version in os.listdir(os.path.join(libdir, target)):
+					if not os.path.isdir(os.path.join(libdir, target, version)):
+						continue
 					if version in ['.svn', '.cvs']:
 						continue
 					if os.path.islink(os.path.join(libdir, target, version)):

@@ -49,25 +49,23 @@ def add_linux_flags_to_env(conf):
 
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
-	if conf.env['HOST'] == 'linux':
+	for version,platform,arch in conf.env.SUNCC_TARGETS:
+		if platform != 'linux':
+			continue
+		name = 'suncc-linux-'+arch+'-'+version.replace('-','_')
+		defaultenv = conf.get_env()
+		conf.setenv(name, conf.env.derive())
 		try:
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.setenv('temp')
 			conf.check_tool('cross_suncc', tooldir='mak/tools')
 			add_suncc_flags_to_env(conf)
-			name = 'suncc-linux-'+conf.env['SUNCC_TARGET']+'-'+conf.env['SUNCC_VERSION']
-			newenv.set_variant(name)
 			add_linux_flags_to_env(conf)
-			newenv = conf.set_env_name(name, newenv)
+			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', arch))
 			pprint('NORMAL', 'configure for tool %s' % name)
-			newenv = conf.set_env_name('temp', conf.env.copy())
-			conf.sub_config(os.path.join('..', '..', '..', 'target', 'archs', 'x86'))
-			del conf.all_envs['temp']
-			conf.setenv('default')
+			conf.set_env(defaultenv)
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
 			warn('suncc not available: '+str(e))
-			conf.setenv('default')
+			conf.set_env(defaultenv)
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('linux') != -1:
 			name = 'gcc-linux-'+arch+'-'+version.replace('-','_')
