@@ -30,7 +30,7 @@ class directory:
 		pathlist.reverse()
 		pwd = self
 		for dir in pathlist[:-1]:
-			if dir in pwd:
+			if dir in pwd.directories:
 				pwd = pwd.directories[dir]
 			else:
 				nextpwd = directory()
