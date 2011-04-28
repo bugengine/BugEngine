@@ -3,11 +3,11 @@
 import os
 
 def options(opt):
-	opt.sub_options('../amd64')
+	opt.recurse('../amd64')
 	pass
 
 def configure(conf):
-	conf.sub_config('../amd64')
+	conf.recurse('../amd64')
 
 def build(bld):
 	pass

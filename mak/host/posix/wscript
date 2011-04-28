@@ -5,8 +5,8 @@ from Logs import warn
 
 def options(opt):
 	osname = os.uname()[0].lower()
-	opt.sub_options(osname)
+	opt.recurse(osname)
 
 def configure(conf):
 	osname = os.uname()[0].lower()
-	conf.sub_config(osname)
+	conf.recurse(osname)
