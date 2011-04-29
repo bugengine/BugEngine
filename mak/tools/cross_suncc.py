@@ -1,10 +1,10 @@
-from waflib.Configure import conftest
+from waflib.Configure import conf
 from waflib import Utils
 import re
 
 format = re.compile('^cc: Sun.*C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 
-@conftest
+@conf
 def get_available_suncc(conf):
 	conf.env.SUNCC_TARGETS = []
 	cc = conf.find_program('suncc', mandatory=False, var='detect_suncc')
@@ -23,7 +23,7 @@ def to64bits(arch):
 		return 'amd64'
 	return arch
 
-@conftest
+@conf
 def get_suncc_targets(conf, cc, cxx, flag):
 	cmd = [cc, '-V', flag]
 	try:
@@ -38,13 +38,13 @@ def get_suncc_targets(conf, cc, cxx, flag):
 	line = out[0]
 	return format.match(line)
 
-@conftest
+@conf
 def get_suncc_targets_32(conf, cc, cxx):
 	result = conf.get_suncc_targets(cc, cxx, '-m32')
 	if result:
 		conf.env.SUNCC_TARGETS.append((cc, cxx, result.group(1), result.group(2), to32bits(result.group(3))))
 
-@conftest
+@conf
 def get_suncc_targets_64(conf, cc, cxx):
 	result = conf.get_suncc_targets(cc, cxx, '-m64')
 	if result:

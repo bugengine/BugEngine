@@ -1,7 +1,6 @@
-from TaskGen import feature
-from Configure import conf
-import Utils
-import Task
+from waflib.TaskGen import feature
+from waflib.Configure import conf
+from waflib import Utils, Task
 import os
 import mak
 from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
@@ -47,8 +46,8 @@ def generateProject(task):
 	project.addDirectory(task.sourceTree)
 	project.writeFooter()
 
-GenerateSolution = Task.task_type_from_func('generateSolution', generateSolution)
-GenerateProject = Task.task_type_from_func('generateProject', generateProject)
+GenerateSolution = Task.task_factory('generateSolution', generateSolution)
+GenerateProject = Task.task_factory('generateProject', generateProject)
 
 def filterplatforms(type,platforms,depends):
 	supportedplatforms = {'win32-x86': 'Win32', 'win32-amd64': 'x64', 'xbox360-ppc':'Xbox 360'}

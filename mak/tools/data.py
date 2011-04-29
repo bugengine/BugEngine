@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import Task
-from mak.waflib.TaskGen import extension
+from waflib import Task
+from waflib.TaskGen import extension
 import mak.ddf
 import os
 import sys
@@ -15,7 +15,7 @@ def scan(self):
 def doParseData(task):
 	return mak.ddf.doParse(task.inputs[0].abspath(task.env), task.outputs[0].bldpath(task.env), path, [], ['../../mak/macros_ignore'], task.pch)
 
-cls = Task.task_type_from_func('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc', before='cc cxx')
+cls = Task.task_factory('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc', before='cc cxx')
 cls.scan = scan
 
 @extension('.h', '.hh', '.hxx')

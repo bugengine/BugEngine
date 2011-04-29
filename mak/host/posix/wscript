@@ -1,7 +1,6 @@
 # set posix specific options
 
 import os
-from Logs import warn
 
 def options(opt):
 	osname = os.uname()[0].lower()

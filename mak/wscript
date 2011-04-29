@@ -2,12 +2,11 @@
 
 import os
 import re
-import Options
-from mak.waflib.TaskGen import taskgen_method,feature,before,after,extension
-from waflib import Task,Node,Errors
-import module
+from waflib.TaskGen import taskgen_method,feature,before,after,extension
+from waflib import Options,Task,Node,Errors
 import mak
-from Logs import pprint
+from mak import module
+from waflib.Logs import pprint
 
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
@@ -63,12 +62,12 @@ def configure(conf):
 	for optim in mak.alloptims:
 		for envname in conf.env['BUILD_VARIANTS']:
 			name = optim+'-'+envname
-			env = conf.set_env_name(name, conf.all_envs[envname].copy())
-			env.set_variant(name)
-			env['OPTIMISATION'] = optim
-			env['PREFIX'] = name
+			conf.setenv(name, conf.all_envs[envname])
+			conf.env['OPTIMISATION'] = optim
+			conf.env['PREFIX'] = name
 			selectedvariants.append(name)
 
+	conf.variant = ''
 	conf.env['BUILD_VARIANTS'] = selectedvariants
 
 	if Options.options.toolchains:
@@ -92,12 +91,11 @@ def build(bld):
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
-				bld.add_subdirs(os.path.join('target', l, target))
+				bld.recurse(os.path.join('target', l, target))
 	if os.path.isdir('extra'):
 		for target in os.listdir(os.path.join('extra')):
 			if target not in ['.svn', '.cvs']:
-				bld.add_subdirs(os.path.join('..', 'extra', target))
-	import Options
+				bld.recurse(os.path.join('..', 'extra', target))
 	if not Options.options.toolchains:
 		Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
 	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
@@ -180,7 +178,7 @@ def createmasterfile(task):
 		f.write('#include "../%s"\n' % src.bldpath(task.env).replace('\\','/'))
 	f.close()
 
-MasterTask = Task.task_type_from_func("MkMaster", createmasterfile)
+MasterTask = Task.task_factory("MkMaster", createmasterfile)
 
 @feature('cprogram', 'cshlib')
 @after('apply_link')

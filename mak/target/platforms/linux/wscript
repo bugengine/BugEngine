@@ -2,7 +2,7 @@
 
 import os
 import mak
-from Logs import info,warn,pprint
+from waflib.Logs import info,warn,pprint
 
 
 def options(opt):

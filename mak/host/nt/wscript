@@ -5,9 +5,9 @@
 import os
 import Configure
 import Options
-from Logs import info,warn,pprint
+from waflib.Logs import info,warn,pprint
 import mak.tools.cross_gcc
-import mak.waflib.Tools.msvc
+import waflib.Tools.msvc
 
 os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
 

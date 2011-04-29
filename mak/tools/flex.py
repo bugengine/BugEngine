@@ -5,11 +5,11 @@
 
 "flex processing"
 
-import Task
-from mak.waflib.TaskGen import extension
+from waflib import Task
+from waflib.TaskGen import extension
 
 flex = '${FLEX} ${FLEXFLAGS} -o${TGT[0].bldpath(env)} ${SRC[0].abspath()}'
-cls = Task.simple_task_type('flex', flex, 'GREEN', ext_in='.l .ll', ext_out='.c .cc', before='c cxx', shell=False)
+cls = Task.task_factory('flex', flex, 'GREEN', ext_in='.l .ll', ext_out='.c .cc', before='c cxx', shell=False)
 
 def exec_command_flex(self, *k, **kw):
 	if isinstance(k[0], list):

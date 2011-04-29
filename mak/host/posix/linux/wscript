@@ -1,8 +1,8 @@
 import os
 import re
-import Configure
-import Options
-from Logs import info,warn,pprint
+from waflib import Configure
+from waflib import Options
+from waflib.Logs import info,warn,pprint
 import mak.tools.cross_gcc
 import mak.tools.cross_suncc
 
