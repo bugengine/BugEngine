@@ -5,10 +5,9 @@
 
 "flex processing"
 
-from waflib import Task
-from waflib.TaskGen import extension
+from waflib import Task,TaskGen
 
-flex = '${FLEX} ${FLEXFLAGS} -o${TGT[0].bldpath(env)} ${SRC[0].abspath()}'
+flex = '${FLEX} ${FLEXFLAGS} -o${TGT[0].abspath()} ${SRC[0].abspath()}'
 cls = Task.task_factory('flex', flex, 'GREEN', ext_in='.l .ll', ext_out='.c .cc', before='c cxx', shell=False)
 
 def exec_command_flex(self, *k, **kw):
@@ -27,7 +26,7 @@ def exec_command_flex(self, *k, **kw):
 
 cls.exec_command = exec_command_flex
 
-@extension('.l', '.ll')
+@TaskGen.extension('.l', '.ll')
 def big_flex(self, node):
 	outs = []
 	if node.name.endswith('.ll'):
@@ -38,7 +37,7 @@ def big_flex(self, node):
 	tsk = self.create_task('flex', node, outs)
 	tsk.set_outputs(outs)
 	# and the c/cxx file must be compiled too
-	self.allnodes.append(outs[0])
+	self.source.append(outs[0])
 
 def configure(conf):
 	flex = conf.find_program('flex', var='FLEX', mandatory=True)

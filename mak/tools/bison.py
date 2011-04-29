@@ -16,11 +16,11 @@ def post_run_bison(task):
 	header = task.outputs[1]
 	env = task.env
 	try:
-		os.stat(header.abspath(env))
+		os.stat(header.abspath())
 	except OSError:
 		try:
 			oldheader = source.change_ext(source.suffix()+'.h')
-			os.rename(oldheader.abspath(env), header.abspath(env))
+			os.rename(oldheader.abspath(), header.abspath())
 		except OSError:
 			pass
 	task.post_run_orig()
@@ -45,10 +45,10 @@ def big_bison(self, node):
 
 	tsk = self.create_task('bison', node, outs)
 	tsk.set_outputs(outs)
-	tsk.cwd = node.bld_dir(tsk.env)
+	tsk.cwd = node.parent.get_bld().abspath()
 
 	# and the c/cxx file must be compiled too
-	self.allnodes.append(outs[0])
+	self.source.append(outs[0])
 
 def configure(conf):
 	bison = conf.find_program('bison', var='BISON', mandatory=True)

@@ -7,8 +7,7 @@ def options(opt):
 
 def configure(conf):
 	conf.env['ARCHITECTURE'] = 'ia64'
-	conf.env.append_unique('CCDEFINES', ['_IA64', '_IA64', '_IA64_', '_M_IA64', '_ITANIUM'])
-	conf.env.append_unique('CXXDEFINES', ['_IA64', '_IA64', '_IA64_', '_M_IA64', '_ITANIUM'])
+	conf.env.append_unique('DEFINES', ['_IA64', '_IA64', '_IA64_', '_M_IA64', '_ITANIUM'])
 
 def build(bld):
 	pass

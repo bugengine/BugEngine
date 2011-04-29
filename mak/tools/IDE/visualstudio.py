@@ -18,7 +18,7 @@ allconfigs = ['debug','profile','final']
 
 def generateSolution(task):
 	solution = solution.Solution( task.name,
-								  task.outputs[0].bldpath(task.env),
+								  task.outputs[0].bldpath(),
 								  task.version,
 								  task.versionNumber,
 								  task.versionName,
@@ -34,7 +34,7 @@ def generateSolution(task):
 	solution.writeFooter(task.allplatforms, allconfigs)
 
 def generateProject(task):
-	project = task.projectClass( task.outputs[0].bldpath(task.env),
+	project = task.projectClass( task.outputs[0].bldpath(),
 								 task.projectName,
 								 task.projectCategory,
 								 task.version,
@@ -65,7 +65,7 @@ def filterplatforms(type,platforms,depends):
 solutions = {}
 def create_project(t):
 	toolName = t.features[0]
-	if not solutions.has_key(toolName):
+	if not toolname in solutions:
 		appname = getattr(Utils.g_module, 'APPNAME', 'noname')
 		outname = appname+'.'+toolName+'.sln'
 		solution = GenerateSolution(env=t.env)
@@ -73,7 +73,7 @@ def create_project(t):
 		solution.versionName, solution.versionNumber = projects[toolName][0]
 		solution.allplatforms    = projects[toolName][2]
 		solution.set_outputs(t.path.find_or_declare(outname))
-		solution.install_path = t.path.srcpath(t.env)
+		solution.install_path = t.path.srcpath()
 		solution.depends = []
 		solution.dep_vars = ['MSVC_PROJECT_DEPENDS']
 		solution.env['MSVC_PROJECT_DEPENDS'] = []

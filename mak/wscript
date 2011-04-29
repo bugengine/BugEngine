@@ -132,7 +132,7 @@ def filter_sources(self):
 	rejectedsources = []
 	self.allsources = {}
 	for source in self.source:
-		head,tail = os.path.split(source)
+		head,tail = os.path.split(source.abspath())
 		while tail:
 			head,tail = os.path.split(head)
 			if tail[0:5] == 'arch=':
@@ -153,138 +153,7 @@ def filter_sources(self):
 		self.source.remove(src)
 
 @taskgen_method
-@feature('cprogram', 'cshlib', 'cstaticlib')
-@after('apply_link')
-@before('apply_lib_vars')
-def add_extra_libs(self):
-	env = self.env
-	for lib in getattr(self,'extralibs',[]):
-		env.append_value('LIB', lib)
-	for libpath in getattr(self,'extralibdirs',[]):
-		libpathnode = self.path.find_dir(libpath)
-		if libpathnode:
-			if not libpathnode.srcpath(self.env) in env['LIBPATH']: env.append_value('LIBPATH', libpathnode.srcpath(self.env))
-		else:
-			env.append_value('LIBPATH', libpath)
-
-@taskgen_method
 @feature('cobjects')
 def add_cobjects_method(self):
 	pass
-
-def createmasterfile(task):
-	f = open(task.outputs[0].bldpath(task.env), 'w')
-	for src in task.inputs:
-		f.write('#include "../%s"\n' % src.bldpath(task.env).replace('\\','/'))
-	f.close()
-
-MasterTask = Task.task_factory("MkMaster", createmasterfile)
-
-@feature('cprogram', 'cshlib')
-@after('apply_link')
-@before('apply_link_vars')
-def add_extra_outputs(self):
-	if self.env['CC_NAME'] == 'msvc':
-		self.link_task.outputs.append(self.link_task.outputs[0].change_ext('.pdb'))
-	if 'win32' in self.env['PLATFORM']:
-		dll = self.link_task.outputs[0]
-		implib = dll.parent.find_or_declare(self.env['implib_PATTERN'] % os.path.split(self.target)[1])
-		self.env.append_value('LINKFLAGS', (self.env['IMPLIB_ST'] % implib.bldpath(self.env)).split())
-		self.link_task.outputs.append(implib)
-
-@feature('cc', 'cxx')
-@after('apply_link', 'init_cc', 'init_cxx')
-@before('apply_lib_vars')
-def apply_lib_vars_cprogram(self):
-	env = self.env
-	uselib = self.to_list(self.uselib)
-	seen = []
-	names = self.to_list(self.uselib_local)[:] # consume a copy of the list of names
-	while names:
-		x = names.pop(0)
-		# visit dependencies only once
-		if x in seen:
-			continue
-
-		y = self.name_to_obj(x)
-		if not y:
-			raise Errors.WafError("object '%s' was not found in uselib_local (required by '%s')" % (x, self.name))
-
-		# object has ancestors to process: add them to the end of the list
-		if getattr(y, 'uselib_local', None):
-			lst = y.to_list(y.uselib_local)
-			for u in lst:
-				if not u in seen:
-					names.append(u)
-
-		# safe to process the current object
-		y.post()
-		seen.append(x)
-
-		libname = y.target[y.target.rfind(os.sep) + 1:]
-		if 'cprogram' in y.features:
-			if 'win32' in env['PLATFORM']:
-				env.append_value('LIB', libname)
-
-		# set the dependency over the link task
-		if self.link_task is not None and y.link_task is not None:
-			self.link_task.set_run_after(y.link_task)
-			dep_nodes = getattr(self.link_task, 'dep_nodes', [])
-			self.link_task.dep_nodes = dep_nodes + y.link_task.outputs
-
-			# add the link path too
-			tmp_path = y.link_task.outputs[0].parent.bldpath(self.env)
-			if not tmp_path in env['LIBPATH']: env.prepend_value('LIBPATH', tmp_path)
-
-		# add ancestors uselib too
-		morelibs = y.to_list(y.uselib)
-		for v in morelibs:
-			if v in uselib: continue
-			uselib = [v]+uselib
-
-
-@taskgen_method
-@feature('cc','cxx')
-@before('apply_core')
-@after('filter_sources')
-def make_masterfiles(self):
-	if Options.options.master and self.usemaster and self.source:
-		self.originalsources = self.source
-		self.originalsources.sort()
-		self.mastertasks = []
-		self.source = []
-		mastertask = None
-		cindex	 = 0
-		cppindex = 0
-		cnumleft = 0
-		cppnumleft = 0
-		for f in self.originalsources:
-			if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx']:
-				self.source.append(f)
-				continue
-			srcnode = self.path.find_resource(f)
-			if os.path.splitext(f)[1] == '.c':
-				if cnumleft == 0:
-					cnumleft = 30
-					masterfile = self.target+'-c-master%d.c' % cindex
-					cindex = cindex + 1
-					self.source.append(masterfile)
-					mastertask = MasterTask(self.env,)
-					node = self.path.find_or_declare(masterfile)
-					mastertask.set_outputs(node)
-					self.mastertasks.append(mastertask)
-				cnumleft = cnumleft - 1
-				mastertask.set_inputs(srcnode)
-			else:
-				if cppnumleft == 0:
-					cppnumleft = 30
-					masterfile = self.target+'-cpp-master%d.cpp' % cppindex
-					cppindex = cppindex + 1
-					self.source.append(masterfile)
-					mastertask = MasterTask(self.env,)
-					node = self.path.find_or_declare(masterfile)
-					mastertask.set_outputs(node)
-					self.mastertasks.append(mastertask)
-				cppnumleft = cppnumleft - 1
-				mastertask.set_inputs(srcnode)
 

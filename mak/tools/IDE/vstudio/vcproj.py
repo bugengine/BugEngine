@@ -126,7 +126,7 @@ class VCproj:
 					document = minidom.parse("../../mak/msvc/vs200x/%s.vsprops"%sheet)
 					for tool in document.getElementsByTagName("Tool"):
 						name = tool.attributes['Name'].value
-						if not props.has_key(name):
+						if not name in props:
 							props[name] = { }
 						for attribute in tool.attributes.values():
 							if attribute.name == 'Name': continue

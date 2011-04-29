@@ -30,7 +30,7 @@ class Container:
 
 	def addMethod(self, name, attr, rtype, params, tags, line):
 		if self.visibility == 'published':
-			if self.methods.has_key(name):
+			if name in self.methods:
 				self.methods[name].append((rtype, params, attr, self.visibility, tags, line))
 			else:
 				self.methods[name] = [(rtype, params, attr, self.visibility, tags, line)]

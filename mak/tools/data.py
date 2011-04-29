@@ -13,7 +13,7 @@ def scan(self):
 	return ([], [])
 
 def doParseData(task):
-	return mak.ddf.doParse(task.inputs[0].abspath(task.env), task.outputs[0].bldpath(task.env), path, [], ['../../mak/macros_ignore'], task.pch)
+	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), path, [], ['mak/macros_ignore'], task.pch)
 
 cls = Task.task_factory('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc', before='cc cxx')
 cls.scan = scan
@@ -28,10 +28,10 @@ def datagen(self, node):
 	except AttributeError:
 		tsk.pch = ''
 	names = ['mak/ddf.py', 'mak/rtti.py']
-	for i in names:
-		tsk.add_file_dependency(i)
+	#for i in names:
+	#	tsk.add_file_dependency(i)
 
-	self.allnodes.append(outs[0])
+	self.source.append(outs[0])
 
 def configure(conf):
 	pass

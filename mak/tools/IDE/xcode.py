@@ -474,7 +474,7 @@ def writemaster(sourcetree, f, path = ''):
 
 def generateProject(task):
 	solution = XCodeProject( task.name,
-							 task.outputs[0].bldpath(task.env),
+							 task.outputs[0].bldpath(),
 							 task.version,
 							 task.projects)
 	solution.writeHeader()
@@ -488,7 +488,7 @@ def generateProject(task):
 	solution.writeFooter()
 	for p in task.projects:
 		if p.usemaster:
-			writemaster(p.sourceTree, open(p.masterfile.bldpath(task.env), 'w'))
+			writemaster(p.sourceTree, open(p.masterfile.bldpath(), 'w'))
 
 GenerateProject = Task.task_factory('generateProject', generateProject)
 
@@ -496,13 +496,13 @@ solutions = {}
 def create_xcode_project(t):
 	toolName = t.features[0]
 	appname = getattr(Utils.g_module, 'APPNAME', 'noname')
-	if not solutions.has_key(toolName):
+	if not toolName in solutions:
 		outname = 'project.pbxproj'
 		solution = GenerateProject(env=t.env)
 		solution.set_outputs(t.path.find_or_declare(outname))
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
-		solution.install_path = t.path.srcpath(t.env)+'/'+appname+'.'+toolName+'.xcodeproj/'
+		solution.install_path = t.path.srcpath()+'/'+appname+'.'+toolName+'.xcodeproj/'
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []
