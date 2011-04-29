@@ -208,8 +208,7 @@ class module:
 				task.uselib = [optim]
 				if self.category != '3rdparty':
 					task.uselib.append('warnall')
-				task.uselib_local = []
-				task.add_objects = []
+				task.use = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
 				dps = self.depends + extradepends
 				seen = set()
@@ -221,10 +220,7 @@ class module:
 					if d not in blacklist:
 						t = d.tasks[variant]
 						if t:
-							if t.type == 'cobjects' and d in self.depends+extradepends:
-								task.add_objects.append(d.dstname)
-							else:
-								task.uselib_local.append(d.dstname)
+							task.use.append(d.dstname)
 							task.inheritedoptions.merge(t.inheritedoptions)
 						dps += [dep for dep in d.depends if dep not in seen]
 				task.options			= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
@@ -243,8 +239,8 @@ class module:
 
 				task.defines			= [d for d in task.options.defines]
 				task.includes			= [i for i in task.options.includedir]
-				task.extralibdirs		= [l for l in task.options.libdir]
-				task.extralibs			= [l for l in task.options.libs]
+				task.libpath		= [l for l in task.options.libdir]
+				task.lib			= [l for l in task.options.libs]
 
 				task.source				= self.sourcetree.make_sources(bld, env, self.root)
 				task.do_install			= 1
