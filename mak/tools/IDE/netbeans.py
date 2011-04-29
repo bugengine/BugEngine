@@ -15,7 +15,7 @@ def addFolder(file, tree, name, path, tabs):
 	file.write(tabs+'</logicalFolder>\n')
 
 def generateProject(task):
-	file = open(task.outputs[0].bldpath(task.env), 'w')
+	file = open(task.outputs[0].bldpath(), 'w')
 	file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
 	file.write('<project xmlns="http://www.netbeans.org/ns/project/1">\n')
 	file.write('    <type>org.netbeans.modules.cnd.makeproject</type>\n')
@@ -32,7 +32,7 @@ def generateProject(task):
 	file.write('    </configuration>\n')
 	file.write('</project>\n')
 
-	file = open(task.outputs[1].bldpath(task.env), 'w')
+	file = open(task.outputs[1].bldpath(), 'w')
 	file.write('<?xml version="1.0" encoding="UTF-8"?>')
 	file.write('<configurationDescriptor version="62">')
 	addFolder(file, task.sourceTree, 'root', '../../../src/%s/%s' %(task.projectCategory, task.projectName), '  ')
@@ -97,7 +97,7 @@ def create_netbeans_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	project.install_path	= os.path.join(t.path.srcpath(t.env), '.build', toolName, t.category+'.'+t.name, 'nbproject')
+	project.install_path	= os.path.join(t.path.srcpath(), '.build', toolName, t.category+'.'+t.name, 'nbproject')
 
 	project.set_outputs([t.path.find_or_declare(os.path.join('src', t.category, t.name, 'project.xml'))])
 	project.set_outputs([t.path.find_or_declare(os.path.join('src', t.category, t.name, 'configurations.xml'))])

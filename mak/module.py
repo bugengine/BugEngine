@@ -189,7 +189,7 @@ class module:
 		return options
 
 	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
-		if not self.tasks.has_key(variant):
+		if not variant in self.tasks:
 			if type=='dummy' or not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
@@ -200,7 +200,7 @@ class module:
 				task.target				= self.dstname
 				task.env				= env
 				task.type				= type
-				task.features			= ['cc', 'cxx', type]
+				task.features			= ['c', 'cxx', type]
 				task.usemaster			= self.usemaster
 
 				task.inheritedoptions	= coptions()
@@ -355,7 +355,7 @@ class module:
 		for d in self.depends:
 			d.makeproject(bld)
 		for p in bld.env['PROJECTS']:
-			if not self.projects.has_key(p):
+			if not p in self.projects.has_key:
 				task = bld.new_task_gen()
 				task.features		= [p]
 				task.depends		= [d.projects[p] for d in self.depends]
@@ -494,7 +494,7 @@ class static_library(module):
 			if d not in blacklist:
 				d._post(builder, env, envname, blacklist)
 		options = coptions()
-		task = self.gentask(builder, env, envname, 'cstaticlib', options, coptions(), blacklist=blacklist)
+		task = self.gentask(builder, env, envname, 'cstlib', options, coptions(), blacklist=blacklist)
 
 """ plugin """
 class plugin(module):
@@ -580,7 +580,7 @@ class game(module):
 			for d in self.plugins:
 				d._post(builder, env, envname, [self]+blacklist)
 			task = self.gentask(builder, env, envname, 'cprogram', options, extradepends=self.plugins, blacklist=[self]+blacklist)
-		elif not self.tasks.has_key(envname):
+		elif not envname in self.tasks:
 			task = self.gentask(builder, env, envname, 'cprogram', options, blacklist=blacklist)
 			for d in self.plugins:
 				d._post(builder, env, envname, blacklist)

@@ -7,8 +7,7 @@ def options(opt):
 
 def configure(conf):
 	conf.env['ARCHITECTURE'] = 'mips'
-	conf.env.append_unique('CCDEFINES', ['_MIPS'])
-	conf.env.append_unique('CXXDEFINES', ['_MIPS'])
+	conf.env.append_unique('DEFINES', ['_MIPS'])
 
 def build(bld):
 	pass
