@@ -1,12 +1,11 @@
-from Configure import conftest
-import Options
-import Utils
+from waflib.TaskGen import feature, before, extension, after
+from waflib.Configure import conf
+from waflib import Options, Utils
 import re
-from TaskGen import feature, before, extension, after
 import os
 from mak.waflib.Errors import ConfigurationError
 
-@conftest
+@conf
 def get_native_gcc_target(conf):
 	if not conf.env['GCC_NATIVE_TARGET']:
 		cmd = ['gcc', '-v']
@@ -45,7 +44,7 @@ def parse_gcc_target(target):
 		if target.find(gccname) != -1:
 				return aname
 
-@conftest
+@conf
 def get_available_gcc(conf):
 	toolchaindirs=set([])
 	conf.env['GCC_TARGETS'] = []
@@ -80,7 +79,7 @@ def get_available_gcc(conf):
 					arch = parse_gcc_target(target) or 'unknown'
 					conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 
-@conftest
+@conf
 def find_cross_gcc(conf):
 	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
@@ -128,7 +127,7 @@ def find_cross_gcc(conf):
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 	conf.load('gcc gxx gas')
 
-@conftest
+@conf
 def add_standard_gcc_flags(conf):
 	v = conf.env
 	v.append_unique('ASFLAGS', '-c')

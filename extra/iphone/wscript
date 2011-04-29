@@ -2,8 +2,7 @@
 
 import os
 import mak
-import Configure
-from Logs import info,warn,pprint
+from waflib.Logs import info,warn,pprint
 
 def options(opt):
 	try:
@@ -42,7 +41,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_darwin_simulator_flags_to_env(conf):
-	import Options
+	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CCFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
@@ -65,7 +64,7 @@ def add_darwin_simulator_flags_to_env(conf):
 									'plugin':	os.path.join('data', 'plugins') }
 
 def add_darwin_flags_to_env(conf):
-	import Options
+	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CCFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
@@ -88,7 +87,7 @@ def add_darwin_flags_to_env(conf):
 									'plugin':	os.path.join('data', 'plugins') }
 
 def configure(conf):
-	import Options
+	from waflib import Options
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('darwin') != -1:

@@ -2,8 +2,7 @@
 
 import os
 import mak
-import Options
-from Logs import info,warn,pprint
+from waflib.Logs import info,warn,pprint
 
 # adds MSVC vars to environment
 def add_msvc_to_env(conf, compiler, version, target, platform, tname):

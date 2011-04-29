@@ -3,7 +3,7 @@
 import os
 import mak
 import mak.tools.cross_gcc
-from Logs import info,warn,pprint
+from waflib.Logs import info,warn,pprint
 
 
 def options(opt):

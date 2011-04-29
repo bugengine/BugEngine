@@ -1,7 +1,6 @@
-from TaskGen import feature
-from Configure import conf
-import Utils
-import Task
+from waflib.TaskGen import feature
+from waflib.Configure import conf
+from waflib import Utils, Task
 import os
 import mak
 import random
@@ -491,7 +490,7 @@ def generateProject(task):
 		if p.usemaster:
 			writemaster(p.sourceTree, open(p.masterfile.bldpath(task.env), 'w'))
 
-GenerateProject = Task.task_type_from_func('generateProject', generateProject)
+GenerateProject = Task.task_factory('generateProject', generateProject)
 
 solutions = {}
 def create_xcode_project(t):

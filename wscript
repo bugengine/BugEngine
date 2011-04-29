@@ -3,22 +3,20 @@ APPNAME = "BugEngine"
 
 from mak import module
 import os
-import Environment
-import Scripting
-import Logs
+from waflib import Logs
 
 top = '.'
 out = '.build/waf'
 
 def options(opt):
-	opt.sub_options('mak')
+	opt.recurse('mak')
 
 def configure(conf):
-	conf.sub_config('mak')
+	conf.recurse('mak')
 
 
 def build(bld):
-	bld.add_subdirs('mak')
+	bld.recurse('mak')
 
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')

@@ -1,8 +1,8 @@
 import os
-import sources
-import Options
 import mak
-from Logs import warn
+import sources
+from waflib import Options
+from waflib import Logs
 
 class coptions:
 	def __init__( self,
@@ -196,9 +196,9 @@ class module:
 				self.sourcetree.make_sources(bld, env, self.root)
 			else:
 				optim,compiler,platform,architecture,version = variant.split('-')
-				task					= bld.new_task_gen()
+				task					= bld()
 				task.target				= self.dstname
-				task.env				= env.copy()
+				task.env				= env
 				task.type				= type
 				task.features			= ['cc', 'cxx', type]
 				task.usemaster			= self.usemaster

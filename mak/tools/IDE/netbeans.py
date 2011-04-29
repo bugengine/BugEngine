@@ -1,7 +1,6 @@
-from TaskGen import feature
-from Configure import conf
-import Utils
-import Task
+from waflib.TaskGen import feature
+from waflib.Configure import conf
+from waflib import Utils, Task
 import os
 import mak
 
@@ -14,7 +13,7 @@ def addFolder(file, tree, name, path, tabs):
 	for f in tree.files:
 		file.write(tabs+'  <itemPath>%s</itemPath>\n' % (path + '/' + f.filename))
 	file.write(tabs+'</logicalFolder>\n')
-	
+
 def generateProject(task):
 	file = open(task.outputs[0].bldpath(task.env), 'w')
 	file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
@@ -32,7 +31,7 @@ def generateProject(task):
 	file.write('        </data>\n')
 	file.write('    </configuration>\n')
 	file.write('</project>\n')
-	
+
 	file = open(task.outputs[1].bldpath(task.env), 'w')
 	file.write('<?xml version="1.0" encoding="UTF-8"?>')
 	file.write('<configurationDescriptor version="62">')
@@ -85,7 +84,7 @@ def generateProject(task):
 
 	return
 
-GenerateProject = Task.task_type_from_func('generateProject', generateProject)
+GenerateProject = Task.task_factory('generateProject', generateProject)
 
 @feature('netbeans')
 def create_netbeans_project(t):
