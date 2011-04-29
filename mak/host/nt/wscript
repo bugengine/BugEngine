@@ -3,8 +3,6 @@
 
 
 import os
-import Configure
-import Options
 from waflib.Logs import info,warn,pprint
 import mak.tools.cross_gcc
 import waflib.Tools.msvc
@@ -37,5 +35,6 @@ def configure(conf):
 	conf.env['HOST'] = 'win32'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()
+	from waflib import Options
 	if Options.options.msvc:
 		get_available_msvc(conf)
