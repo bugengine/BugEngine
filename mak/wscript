@@ -2,11 +2,12 @@
 
 import os
 import re
-from waflib.TaskGen import taskgen_method,feature,before,after,extension
+from waflib.TaskGen import taskgen_method,feature,before_method,after_method,extension
 from waflib import Options,Task,Node,Errors
 import mak
 from mak import module
 from waflib.Logs import pprint
+from waflib.Tools import ccroot
 
 from mak.tools.IDE import visualstudio,netbeans,xcode
 
@@ -120,12 +121,12 @@ def m_hook(self, node):
 
 @extension('.mm')
 def mm_hook(self, node):
-	"""Alias .m files to be compiled the same as .cxx files, gcc will do the right thing."""
+	"""Alias .mm files to be compiled the same as .cxx files, gcc will do the right thing."""
 	return self.create_compiled_task('cxx', node)
 
 @taskgen_method
 @feature('c','cxx')
-@before('apply_core')
+@before_method('apply_core')
 def filter_sources(self):
 	v = self.env
 	self.source = self.to_list(self.source)
@@ -151,9 +152,4 @@ def filter_sources(self):
 					continue
 	for src in rejectedsources:
 		self.source.remove(src)
-
-@taskgen_method
-@feature('cobjects')
-def add_cobjects_method(self):
-	pass
 
