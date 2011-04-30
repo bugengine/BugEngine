@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/threads/thread.hh>
 
+#include    <pthread.h>
 #include    <cerrno>
 #include    <core/timer.hh>
 

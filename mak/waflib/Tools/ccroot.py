@@ -244,19 +244,20 @@ def use_rec(self, name, **kw):
 	if getattr(self, 'link_task', None):
 		if has_link:
 			if (not is_static) or (is_static and stlib):
-				var = isinstance(y.link_task, stlink_task) and 'STLIB' or 'LIB'
-				self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
+				if (not 'cprogram' in y.features and not 'cxxprogram' in y.features) or self.env.DEST_BINFMT == 'pe':
+					var = isinstance(y.link_task, stlink_task) and 'STLIB' or 'LIB'
+					self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
 
-				# the order
-				self.link_task.set_run_after(y.link_task)
+					# the order
+					self.link_task.set_run_after(y.link_task)
 
-				# for the recompilation
-				self.link_task.dep_nodes.extend(y.link_task.outputs)
+					# for the recompilation
+					self.link_task.dep_nodes.extend(y.link_task.outputs)
 
-				# add the link path too
-				tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
-				if not tmp_path in self.env[var + 'PATH']:
-					self.env.prepend_value(var + 'PATH', [tmp_path])
+					# add the link path too
+					tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
+					if not tmp_path in self.env[var + 'PATH']:
+						self.env.prepend_value(var + 'PATH', [tmp_path])
 
 			#if is_static and stlib:
 			#	self.link_task.inputs.extend(y.link_task.inputs)

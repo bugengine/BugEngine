@@ -198,7 +198,8 @@ class module:
 				optim,compiler,platform,architecture,version = variant.split('-')
 				task					= bld()
 				task.target				= self.dstname
-				task.env				= env
+				task.env				= env.derive()
+				task.env.detach()
 				task.type				= type
 				task.features			= ['c', 'cxx', type]
 				task.usemaster			= self.usemaster
@@ -237,8 +238,8 @@ class module:
 				except AttributeError:
 					pass
 
-				task.defines			= [d for d in task.options.defines]
-				task.includes			= [i for i in task.options.includedir]
+				task.private_defines	= [d for d in task.options.defines]
+				task.private_includes	= [i for i in task.options.includedir]
 				task.libpath		= [l for l in task.options.libdir]
 				task.lib			= [l for l in task.options.libs]
 

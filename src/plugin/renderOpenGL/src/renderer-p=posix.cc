@@ -37,19 +37,24 @@ Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
     {
         int attribs[] =
             {
-                GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-                GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+                GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                GLX_CONTEXT_MINOR_VERSION_ARB, 1,
                 //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                 None
             };
         m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
         if (!m_glContext)
         {
+            attribs[1] = 2;
+            attribs[3] = 0;
+            m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
+        }
+        if (!m_glContext)
+        {
             attribs[1] = 1;
             attribs[3] = 0;
             m_glContext = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
         }
-        be_info("Creating OpenGL %d.%d context" | attribs[1] | attribs[3]);
     }
     else
     {
@@ -101,6 +106,10 @@ void Renderer::attachWindow(Window* w)
     if (!m_context)
     {
         createContextAsync(0);
+        ::Window* handle = (::Window*)(w->getWindowHandle());
+        glXMakeCurrent(m_context->m_display, *handle, m_context->m_glContext);
+        be_info("Creating OpenGL %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
+        glXMakeCurrent(m_context->m_display, *handle, 0);
     }
     w->m_context->m_glContext = m_context->m_glContext;
 }

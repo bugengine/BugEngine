@@ -10,7 +10,7 @@ def configure(conf):
 	conf.env.append_unique('DEFINES', ['ARM7', '_ARM7', '__ARM7__'])
 	conf.env['AS'] = conf.env['CC']
 	conf.env.append_unique('ASFLAGS', ['-c', '-x', 'assembler-with-cpp', '-mthumb', '-mthumb-interwork', '-mcpu=arm7tdmi', '-DARM7', '-DSYS_NDS', '-DSYS_NDS7'])
-	conf.env.append_unique('CCFLAGS', ['-mthumb', '-mthumb-interwork', '-mcpu=arm7tdmi', '-mtune=arm7tdmi'])
+	conf.env.append_unique('CFLAGS', ['-mthumb', '-mthumb-interwork', '-mcpu=arm7tdmi', '-mtune=arm7tdmi'])
 	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mthumb-interwork', '-mcpu=arm7tdmi', '-mtune=arm7tdmi'])
 	conf.env.append_unique('LINKFLAGS', ['-specs=ds_arm7.specs'])
 
