@@ -4,6 +4,9 @@
 #include    <windowing/stdafx.h>
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
+#include    <posix/platformrenderer.hh>
+#include    <X11/X.h>
+#include    <X11/Xlib.h>
 #include    <X11/Xatom.h>
 
 namespace BugEngine { namespace Graphics { namespace Windowing

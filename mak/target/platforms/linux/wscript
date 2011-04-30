@@ -12,12 +12,12 @@ def add_suncc_flags_to_env(conf, arch):
 	v = conf.env
 	conf.env['STATIC'] = True
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
-		conf.env.append_unique('CCFLAGS', ['-m32'])
+		conf.env.append_unique('CFLAGS', ['-m32'])
 		conf.env.append_unique('CXXFLAGS', ['-m32'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
-		conf.env.append_unique('CCFLAGS', ['-m64'])
+		conf.env.append_unique('CFLAGS', ['-m64'])
 		conf.env.append_unique('CXXFLAGS', ['-m64'])
-	conf.env.append_unique('CCFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4,Cstd'])
 	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4,Cstd', '-staticlib=%all', '-ldl', '-lm'])
 
@@ -30,10 +30,10 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	conf.load('cross_gcc', tooldir='mak/tools')
 
 def add_gcc_flags_to_env(conf):
-	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', ['-ldl', '-rdynamic', '-Wl,-E'])
-	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_linux_flags_to_env(conf, name):

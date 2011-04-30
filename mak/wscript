@@ -153,3 +153,15 @@ def filter_sources(self):
 	for src in rejectedsources:
 		self.source.remove(src)
 
+@feature('c', 'cxx')
+@before_method('apply_incpaths')
+@after_method('propagate_uselib_vars')
+def private_headers(self):
+	self.env.append_value('DEFINES', getattr(self, 'private_defines', []))
+	self.env.append_value('INCLUDES', getattr(self, 'private_includes', []))
+
+@feature('cobjects')
+def dummy_cobjects(self):
+	pass
+
+

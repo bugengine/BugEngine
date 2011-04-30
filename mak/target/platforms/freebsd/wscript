@@ -20,10 +20,10 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_gcc_flags_to_env(conf):
-	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-Wl,-E'])
-	#conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	#conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	#conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_freebsd_flags_to_env(conf, name):

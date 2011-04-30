@@ -10,19 +10,19 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 	conf.env['MSVC_TARGETS'] = [target]
 	conf.load('msvc')
 
-	conf.env['CCFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
+	conf.env['CFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	conf.env['LINKFLAGS_debug'] = ['/DEBUG']
 
-	conf.env['CCFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
+	conf.env['CFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
 	conf.env['CXXFLAGS_release'] = ['/O2', '/Ob2', '/Zi', '/MT', '/EHsc']
 	conf.env['LINKFLAGS_release'] = ['/DEBUG']
 
-	conf.env['CCFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	conf.env['CFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['CXXFLAGS_profile'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['LINKFLAGS_profile'] = ['/DEBUG']
 
-	conf.env['CCFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	conf.env['CFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['LINKFLAGS_final'] = ['/DEBUG']
 
@@ -39,11 +39,11 @@ def add_win32_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_win32_gcc_flags_to_env(conf):
-	conf.env['CCFLAGS_warnall'] += ['-Wno-comments']
+	conf.env['CFLAGS_warnall'] += ['-Wno-comments']
 	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
 	conf.env['shlib_CXXFLAGS'] = []
-	conf.env['shlib_CCFLAGS'] = []
-	conf.env.append_unique('CCFLAGS', '-mwindows')
+	conf.env['shlib_CFLAGS'] = []
+	conf.env.append_unique('CFLAGS', '-mwindows')
 	conf.env.append_unique('CXXFLAGS', '-mwindows')
 	conf.env.append_unique('LINKFLAGS', '-mwindows')
 	conf.env.append_unique('LINKFLAGS', '-static-libgcc')

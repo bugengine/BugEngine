@@ -5,6 +5,7 @@
 #include    <core/threads/event.hh>
 #include    <core/timer.hh>
 #include    <cerrno>
+#include    <pthread.h>
 
 
 namespace BugEngine
