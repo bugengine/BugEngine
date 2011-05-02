@@ -50,12 +50,12 @@ class directory:
 		if not md5:
 			md5 = createMd5()
 		for value in self.files:
-			md5.update(',')
+			md5.update(','.encode())
 			value.hash(md5)
-		md5.update(';')
+		md5.update(';'.encode())
 		for name, value in self.directories.items():
-			md5.update(name)
-			md5.update(':')
+			md5.update(name.encode())
+			md5.update(':'.encode())
 			value.hash(md5)
 		return md5.digest()
 
@@ -72,7 +72,7 @@ class source:
 	def __lt__(self,other):
 		return self.filename < other.filename
 	def hash(self, md5):
-		md5.update(self.filename)
+		md5.update(self.filename.encode())
 	def generated(self):
 		return False
 

@@ -1223,12 +1223,12 @@ def p_error(errtoken):
 
 
 def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
-	print (source, "=>", output)
+	print (temppath)
 	lexer = ply.lex.lex()
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
-	yacc = ply.yacc.yacc(method='LALR', debugfile=os.path.join(temppath, 'parser.out'), tabmodule=os.path.join(temppath, 'parsetab'), picklefile=sys.argv[0]+'c')
+	yacc = ply.yacc.yacc(method='LALR', debugfile='parser.out', picklefile=os.path.join(temppath, 'parsetab'), outputdir=temppath)
 	yacc.namespace = rtti.Root(source)
 
 	lexer.macro_map = dict(global_macro_map)

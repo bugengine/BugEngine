@@ -244,6 +244,9 @@ class module:
 				task.lib			= [l for l in task.options.libs]
 
 				task.source				= self.sourcetree.make_sources(bld, env, self.root)
+				print(Options.options)
+				if Options.options.master and task.usemaster and task.source:
+					task.features.append('master')
 				task.do_install			= 1
 			self.tasks[variant]		= task
 		return self.tasks[variant]
@@ -352,8 +355,8 @@ class module:
 		for d in self.depends:
 			d.makeproject(bld)
 		for p in bld.env['PROJECTS']:
-			if not p in self.projects.has_key:
-				task = bld.new_task_gen()
+			if not p in self.projects:
+				task = bld()
 				task.features		= [p]
 				task.depends		= [d.projects[p] for d in self.depends]
 				task.target			= self.dstname+'.'+p

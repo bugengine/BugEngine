@@ -82,7 +82,7 @@ yaccdevel   = 0                # Set to True if developing yacc.  This turns off
 
 resultlimit = 40               # Size limit of results when running in debug mode.
 
-pickle_protocol = 0            # Protocol to use when writing pickle files
+pickle_protocol = -1           # Protocol to use when writing pickle files
 
 import re, types, sys, os.path
 
@@ -3086,8 +3086,8 @@ def yacc(method='LALR', debug=yaccdebug, module=None, tabmodule=tab_module, star
     except VersionError:
         e = sys.exc_info()
         errorlog.warning(str(e))
-    except Exception:
-        pass
+    except Exception as e:
+        print(e)
 
     if debuglog is None:
         if debug:

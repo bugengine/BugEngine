@@ -1,6 +1,6 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Utils, Task
+from waflib import Task
 import os
 import mak
 
