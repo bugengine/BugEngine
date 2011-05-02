@@ -2,7 +2,7 @@
 
 import os
 import re
-from waflib.TaskGen import taskgen_method,feature,before_method,after_method,extension
+from waflib.TaskGen import taskgen_method,feature,before_method,after_method,extension,before
 from waflib import Options,Task,Node,Errors
 import mak
 from mak import module
@@ -27,14 +27,17 @@ def options(opt):
 	opt.add_option( '--projects',
 					action='store',
 					default='',
+					dest='projects',
 					help='build projects for the selected IDEs')
 	opt.add_option( '--toolchains',
 					action='store',
 					default='',
+					dest='toolchains',
 					help='build for the selected toolchains')
 	opt.add_option( '--master',
 					action='store_true',
 					default=True,
+					dest='master',
 					help='build with master files')
 
 def configure(conf):
@@ -86,7 +89,23 @@ def configure(conf):
 	else:
 		conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
 		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
+	conf.env.store('.build/be_toolchains.py')
 
+def selectToolchains(ctx):
+	if not Options.options.toolchains:
+		Options.options.toolchains = ctx.env['SELECTED_TOOLCHAINS']
+	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
+	selectedvariants = []
+	if Options.options.projects:
+		ctx.env['PROJECTS'] = Options.options.projects.split(',')
+	else:
+		allvariants = ctx.env['BUILD_VARIANTS']
+		for v in allvariants:
+			for e in selectedtoolchains:
+				if e.match(v):
+					selectedvariants.append(v)
+					pprint('GREEN', 'selected variant %s for build' % v)
+	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
 	for l in 'platforms','archs':
@@ -97,22 +116,18 @@ def build(bld):
 		for target in os.listdir(os.path.join('extra')):
 			if target not in ['.svn', '.cvs']:
 				bld.recurse(os.path.join('..', 'extra', target))
-	if not Options.options.toolchains:
-		Options.options.toolchains = bld.env['SELECTED_TOOLCHAINS']
-	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
-	selectedvariants = []
-	if Options.options.projects:
-		bld.env['PROJECTS'] = Options.options.projects.split(',')
-	else:
-		allvariants = bld.env['BUILD_VARIANTS']
-		for v in allvariants:
-			for e in selectedtoolchains:
-				if e.match(v):
-					selectedvariants.append(v)
-					pprint('GREEN', 'selected variant %s for build' % v)
-	bld.env['BUILD_VARIANTS'] = selectedvariants
+	selectToolchains(bld)
 	global builder
 	mak.builder = bld
+
+def clean(ctx):
+	selectToolchains(ctx)
+
+def install(ctx):
+	selectToolchains(ctx)
+
+def uninstall(ctx):
+	selectToolchains(ctx)
 
 @extension('.m')
 def m_hook(self, node):
@@ -126,14 +141,14 @@ def mm_hook(self, node):
 
 @taskgen_method
 @feature('c','cxx')
-@before_method('apply_core')
+@before_method('process_source')
 def filter_sources(self):
 	v = self.env
 	self.source = self.to_list(self.source)
 	rejectedsources = []
 	self.allsources = {}
 	for source in self.source:
-		head,tail = os.path.split(source.abspath())
+		head,tail = os.path.split(source)
 		while tail:
 			head,tail = os.path.split(head)
 			if tail[0:5] == 'arch=':
@@ -165,3 +180,60 @@ def dummy_cobjects(self):
 	pass
 
 
+
+
+def createmasterfile(task):
+	f = open(task.outputs[0].abspath(), 'w')
+	for src in task.inputs:
+		f.write('#include "%s"\n' % src.abspath().replace('\\','/'))
+	f.close()
+
+MasterTask = Task.task_factory("MkMaster", createmasterfile)
+
+@taskgen_method
+@feature('master')
+@before_method('process_source')
+@after_method('filter_sources')
+@before('c', 'cxx')
+def make_masterfiles(self):
+	self.originalsources = self.source[:]
+	self.originalsources.sort()
+	self.mastertasks = []
+	self.source = []
+	mastertask = None
+	cindex	 = 0
+	cppindex = 0
+	cnumleft = 0
+	cppnumleft = 0
+	for f in self.originalsources:
+		if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx', '.hh']:
+			self.source.append(f)
+			continue
+		if os.path.splitext(f)[1] == '.hh':
+			self.source.append(f)
+			srcnode = self.path.find_resource(f).change_ext('.cc')
+		else:
+			srcnode = self.path.find_resource(f)
+		if os.path.splitext(f)[1] == '.c':
+			if cnumleft == 0:
+				cnumleft = 30
+				masterfile = self.target+'-c-master%d.c' % cindex
+				cindex = cindex + 1
+				self.source.append(masterfile)
+				node = self.path.find_or_declare(masterfile)
+				mastertask = self.create_task("MkMaster", [], node)
+				self.mastertasks.append(mastertask)
+			cnumleft = cnumleft - 1
+			mastertask.set_inputs(srcnode)
+		else:
+			if cppnumleft == 0:
+				cppnumleft = 30
+				masterfile = self.target+'-cpp-master%d.cpp' % cppindex
+				cppindex = cppindex + 1
+				self.source.append(masterfile)
+				node = self.path.find_or_declare(masterfile)
+				mastertask = self.create_task("MkMaster", [], node)
+				mastertask.set_outputs(node)
+				self.mastertasks.append(mastertask)
+			cppnumleft = cppnumleft - 1
+			mastertask.set_inputs(srcnode)

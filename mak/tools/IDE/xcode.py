@@ -1,6 +1,6 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Utils, Task
+from waflib import Context, Task
 import os
 import mak
 import random
@@ -495,7 +495,7 @@ GenerateProject = Task.task_factory('generateProject', generateProject)
 solutions = {}
 def create_xcode_project(t):
 	toolName = t.features[0]
-	appname = getattr(Utils.g_module, 'APPNAME', 'noname')
+	appname = getattr(Context.g_module, 'APPNAME', 'noname')
 	if not toolName in solutions:
 		outname = 'project.pbxproj'
 		solution = GenerateProject(env=t.env)

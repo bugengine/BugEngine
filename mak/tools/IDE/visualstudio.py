@@ -1,6 +1,6 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Utils, Task
+from waflib import Context, Task
 import os
 import mak
 from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
@@ -65,8 +65,8 @@ def filterplatforms(type,platforms,depends):
 solutions = {}
 def create_project(t):
 	toolName = t.features[0]
-	if not toolname in solutions:
-		appname = getattr(Utils.g_module, 'APPNAME', 'noname')
+	if not toolName in solutions:
+		appname = getattr(Context.g_module, 'APPNAME', 'noname')
 		outname = appname+'.'+toolName+'.sln'
 		solution = GenerateSolution(env=t.env)
 		solution.version = toolName
@@ -81,7 +81,7 @@ def create_project(t):
 	solution = solutions[toolName]
 	projectClass,versionNumber = projects[toolName][1]
 
-	project = GenerateProject(env=t.env.copy())
+	project = GenerateProject(env=t.env.derive())
 	project.type			= t.type
 	project.allplatforms    = projects[toolName][2]
 	project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
@@ -92,7 +92,7 @@ def create_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	project.install_path	= os.path.join(t.path.srcpath(t.env), '.build', toolName)
+	project.install_path	= os.path.join(t.path.srcpath(), '.build', toolName)
 	project.depends         = t.depends
 
 	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]

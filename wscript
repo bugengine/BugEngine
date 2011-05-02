@@ -3,7 +3,7 @@ APPNAME = "BugEngine"
 
 from mak import module
 import os
-from waflib import Logs
+from waflib import Options, Logs
 
 top = '.'
 out = '.build/waf'
@@ -17,6 +17,9 @@ def configure(conf):
 
 def build(bld):
 	bld.recurse('mak')
+	if not bld.variant and not bld.env.PROJECTS:
+		Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
+		return
 
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
@@ -69,3 +72,27 @@ def build(bld):
 	#testsuite		= module.library('testsuite', category='test')
 	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)
 
+
+
+from waflib.Build import BuildContext, InstallContext, UninstallContext
+from waflib import ConfigSet
+try:
+	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
+	for toolchain in env.BUILD_VARIANTS:
+		for y in (BuildContext, InstallContext, UninstallContext):
+			name = y.__name__.replace('Context','').lower()
+			class tmp(y):
+				cmd = name + '_' + toolchain
+				variant = toolchain
+except:
+	pass
+
+def install(context):
+	context.recurse('mak')
+	if context.variant == '':
+		Options.commands.extend(['install_' + i for i in context.env.BUILD_VARIANTS])
+
+def uninstall(context):
+	context.recurse('mak')
+	if context.variant == '':
+		Options.commands.extend(['uninstall_' + i for i in context.env.BUILD_VARIANTS])
