@@ -3,9 +3,7 @@
 
 
 import os
-import Configure
-import Options
-from Logs import info,warn,pprint
+from waflib.Logs import pprint
 import mak.tools.cross_gcc
 
 os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']

@@ -32,7 +32,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 def add_darwin_flags_to_env(conf, name):
-	import Options
+	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['osx']
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])

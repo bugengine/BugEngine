@@ -1,7 +1,6 @@
 import os
 import mak
 import sources
-from waflib import Options
 from waflib import Logs
 
 class coptions:
@@ -244,8 +243,7 @@ class module:
 				task.lib			= [l for l in task.options.libs]
 
 				task.source				= self.sourcetree.make_sources(bld, env, self.root)
-				print(Options.options)
-				if Options.options.master and task.usemaster and task.source:
+				if task.usemaster and task.source:
 					task.features.append('master')
 				task.do_install			= 1
 			self.tasks[variant]		= task

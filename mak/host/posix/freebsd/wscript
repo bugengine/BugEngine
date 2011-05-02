@@ -4,9 +4,7 @@
 
 import os
 import re
-import Configure
-import Options
-from Logs import info,warn,pprint
+from waflib.Logs import pprint
 import mak.tools.cross_gcc
 
 def options(opt):
