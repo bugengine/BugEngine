@@ -196,6 +196,8 @@ MasterTask = Task.task_factory("MkMaster", createmasterfile)
 @after_method('filter_sources')
 @before('c', 'cxx')
 def make_masterfiles(self):
+	if not Options.options.master:
+		return
 	self.originalsources = self.source[:]
 	self.originalsources.sort()
 	self.mastertasks = []
