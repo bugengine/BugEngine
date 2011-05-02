@@ -1223,7 +1223,6 @@ def p_error(errtoken):
 
 
 def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
-	print (temppath)
 	lexer = ply.lex.lex()
 	lexer.inside = 0
 	lexer.sourcename = source

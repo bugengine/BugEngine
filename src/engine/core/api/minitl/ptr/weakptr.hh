@@ -26,7 +26,7 @@ private:
     {
         const minitl::pointer* tmp = other.m_ptr;
         other.m_ptr = m_ptr;
-        m_ptr = tmp; 
+        m_ptr = tmp;
     }
 public:
     weak() : m_ptr(0) {}

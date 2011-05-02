@@ -5,13 +5,14 @@
 #define BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 /*****************************************************************************/
 #include    <graphics/material/shaders/node.script.hh>
-#include    <rtti/classinfo.script.hh>
+#include    <system/resource/resource.script.hh>
+
 namespace BugEngine { namespace Graphics
 {
 
 class IShaderBuilder;
 
-class be_api(GRAPHICS) Shader : public minitl::refcountable
+class be_api(GRAPHICS) Shader : public Resource
 {
 private:
     ref<Shaders::Node> m_root;
