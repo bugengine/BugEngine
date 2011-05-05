@@ -17,24 +17,24 @@ projects = {
 allconfigs = ['debug','profile','final']
 
 def generateSolution(task):
-	solution = solution.Solution( task.name,
-								  task.outputs[0].bldpath(),
-								  task.version,
-								  task.versionNumber,
-								  task.versionName,
-								 )
-	solution.writeHeader()
+	s = solution.Solution( task.name,
+						   task.outputs[0].abspath(),
+						   task.version,
+						   task.versionNumber,
+						   task.versionName,
+						)
+	s.writeHeader()
 	# adds games and exes first
 	for d in task.depends:
 		if d.type == 'game':
-			solution.addProject(d)
+			s.addProject(d)
 	for d in task.depends:
 		if d.type != 'game':
-			solution.addProject(d)
-	solution.writeFooter(task.allplatforms, allconfigs)
+			s.addProject(d)
+	s.writeFooter(task.allplatforms, allconfigs)
 
 def generateProject(task):
-	project = task.projectClass( task.outputs[0].bldpath(),
+	project = task.projectClass( task.outputs[0].abspath(),
 								 task.projectName,
 								 task.projectCategory,
 								 task.version,
@@ -46,8 +46,8 @@ def generateProject(task):
 	project.addDirectory(task.sourceTree)
 	project.writeFooter()
 
-GenerateSolution = Task.task_factory('generateSolution', generateSolution)
-GenerateProject = Task.task_factory('generateProject', generateProject)
+GenerateSolution = Task.task_factory('GenerateSolution', func=generateSolution)
+GenerateProject = Task.task_factory('GenerateProject', func=generateProject)
 
 def filterplatforms(type,platforms,depends):
 	supportedplatforms = {'win32-x86': 'Win32', 'win32-amd64': 'x64', 'xbox360-ppc':'Xbox 360'}
@@ -68,12 +68,14 @@ def create_project(t):
 	if not toolName in solutions:
 		appname = getattr(Context.g_module, 'APPNAME', 'noname')
 		outname = appname+'.'+toolName+'.sln'
-		solution = GenerateSolution(env=t.env)
+		solution = t.create_task("GenerateSolution")
+		solution.env=t.env
 		solution.version = toolName
 		solution.versionName, solution.versionNumber = projects[toolName][0]
 		solution.allplatforms    = projects[toolName][2]
-		solution.set_outputs(t.path.find_or_declare(outname))
-		solution.install_path = t.path.srcpath()
+		outnode = t.path.find_or_declare(outname)
+		solution.set_outputs(outnode)
+		t.bld.install_files(t.path.srcpath(), outnode)
 		solution.depends = []
 		solution.dep_vars = ['MSVC_PROJECT_DEPENDS']
 		solution.env['MSVC_PROJECT_DEPENDS'] = []
@@ -81,7 +83,8 @@ def create_project(t):
 	solution = solutions[toolName]
 	projectClass,versionNumber = projects[toolName][1]
 
-	project = GenerateProject(env=t.env.derive())
+	project = t.create_task("GenerateProject")
+	project.env=t.env.derive()
 	project.type			= t.type
 	project.allplatforms    = projects[toolName][2]
 	project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
@@ -92,14 +95,16 @@ def create_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	project.install_path	= os.path.join(t.path.srcpath(), '.build', toolName)
 	project.depends         = t.depends
 
+	install_path	= os.path.join(t.path.srcpath(), '.build', toolName)
 	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]
 	t.outname = os.path.join('.build', toolName, outname)
 	for extension in projectClass.extensions:
 		outname = t.category+'.'+t.name+'.'+toolName+extension
-		project.set_outputs([t.path.find_or_declare(outname)])
+		outnode = t.path.find_or_declare(outname)
+		project.set_outputs(outnode)
+		t.bld.install_files(install_path, outnode)
 	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree.hash()
 	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
 	project.dep_vars = ['MSVC_PROJECT_SOURCES', 'MSVC_PROJECT_FLAGS']
@@ -109,4 +114,7 @@ def create_project(t):
 
 for pname in projects.keys():
 	feature(pname)(create_project)
+
+def configure(ctx):
+	pass
 

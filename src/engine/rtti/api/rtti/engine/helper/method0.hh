@@ -39,7 +39,7 @@ struct callhelper< T, void >
         return Value();
     }
 
-    static Value constructPtr(Value* params, u32 paramCount)
+    static Value constructPtr(Value* /*params*/, u32 paramCount)
     {
         be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
         return Value(ref<T>::create(scriptArena()));

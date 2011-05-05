@@ -87,12 +87,3 @@ try:
 except:
 	pass
 
-def install(context):
-	context.recurse('mak')
-	if context.variant == '':
-		Options.commands.extend(['install_' + i for i in context.env.BUILD_VARIANTS])
-
-def uninstall(context):
-	context.recurse('mak')
-	if context.variant == '':
-		Options.commands.extend(['uninstall_' + i for i in context.env.BUILD_VARIANTS])

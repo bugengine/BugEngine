@@ -1,6 +1,7 @@
 import os
 from mak.tools.IDE.vstudio import solution
-import mak.sources
+import mak
+from mak import sources
 
 
 def getFileDeployPath(type):
@@ -245,48 +246,48 @@ class VCxproj:
 				if isinstance(source, type):
 					function(path, filter, filename, source)
 
-	def addDirectory(self, sources):
+	def addDirectory(self, sourceDir):
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		for name,subdir in sources.directories.items():
+		for name,subdir in sourceDir.directories.items():
 			self.addFilter(name, subdir)
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.lexsource, self.addFlexFile), (mak.sources.yaccsource, self.addBisonFile), (mak.sources.deployedsource, self.addDeployedFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.lexsource, self.addFlexFile), (sources.yaccsource, self.addBisonFile), (sources.deployedsource, self.addDeployedFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.cppsource, self.addCppFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.cppsource, self.addCppFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.rcsource, self.addRcFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.rcsource, self.addRcFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.datasource, self.addDataFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.datasource, self.addDataFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.hsource, self.addHFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.hsource, self.addHFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
 		self.output.write('  <ItemGroup>\n')
 		self.filters.write('  <ItemGroup>\n')
-		self.addFiles(sources.prefix, '', sources, [(mak.sources.dummysource, self.addDummyFile)])
+		self.addFiles(sourceDir.prefix, '', sourceDir, [(sources.dummysource, self.addDummyFile)])
 		self.output.write('  </ItemGroup>\n')
 		self.filters.write('  </ItemGroup>\n')
 
