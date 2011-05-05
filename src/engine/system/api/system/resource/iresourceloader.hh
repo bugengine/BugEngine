@@ -9,7 +9,7 @@ namespace BugEngine
 {
 
 class Resource;
-class ResourceHandle;
+struct ResourceHandle;
 
 class IResourceLoader : public minitl::refcountable
 {

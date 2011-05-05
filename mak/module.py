@@ -1,6 +1,6 @@
 import os
 import mak
-import sources
+from mak import sources
 from waflib import Logs
 
 class coptions:
@@ -372,6 +372,7 @@ class module:
 							platforms[platform+'-'+arch] = options
 				task.platforms		= platforms
 				self.projects[p] = task
+				bld.add_to_group(task)
 
 	def post(self, builder):
 		self.makeproject(builder)

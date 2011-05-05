@@ -5,9 +5,9 @@ import string
 from xml.dom import minidom
 
 def xmlify(s):
-	s = string.replace(s, "&", "&amp;") # do this first
-	s = string.replace(s, "'", "&apos;")
-	s = string.replace(s, '"', "&quot;")
+	s = s.replace("&", "&amp;") # do this first
+	s = s.replace("'", "&apos;")
+	s = s.replace('"', "&quot;")
 	return s
 
 def getFileDeployPath(type):
@@ -123,7 +123,7 @@ class VCproj:
 					props['VCLinkerTool']['OutputFile'] = "$(OutDir)%s.exe" % self.name
 
 				for sheet in set([config, platform, self.type, self.category]):
-					document = minidom.parse("../../mak/msvc/vs200x/%s.vsprops"%sheet)
+					document = minidom.parse("mak/msvc/vs200x/%s.vsprops"%sheet)
 					for tool in document.getElementsByTagName("Tool"):
 						name = tool.attributes['Name'].value
 						if not name in props:
