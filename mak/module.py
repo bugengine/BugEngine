@@ -239,7 +239,7 @@ class module:
 
 				task.private_defines	= [d for d in task.options.defines]
 				task.private_includes	= [i for i in task.options.includedir]
-				task.libpath		= [l for l in task.options.libdir]
+				task.libpath		= [os.path.abspath(l) for l in task.options.libdir]
 				task.lib			= [l for l in task.options.libs]
 
 				task.source				= self.sourcetree.make_sources(bld, env, self.root)
