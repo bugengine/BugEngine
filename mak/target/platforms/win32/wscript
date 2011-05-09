@@ -47,9 +47,7 @@ def add_win32_gcc_flags_to_env(conf):
 	conf.env.append_unique('CXXFLAGS', '-mwindows')
 	conf.env.append_unique('LINKFLAGS', '-mwindows')
 	conf.env.append_unique('LINKFLAGS', '-static-libgcc')
-	conf.env.append_unique('LINKFLAGS', '-Wl,-Bstatic')
-	conf.env.append_unique('LINKFLAGS', '-lstdc++')
-	conf.env.append_unique('LINKFLAGS', '-Wl,-Bdynamic')
+	conf.env.append_unique('LINKFLAGS', '-static-libstdc++')
 
 
 def add_win32_flags_to_env(conf, name, arch):
