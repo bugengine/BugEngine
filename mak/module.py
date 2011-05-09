@@ -364,6 +364,7 @@ class module:
 				task.type			= self.__class__.__name__
 				task.category		= self.category
 				task.usemaster		= self.usemaster
+				task.pchstop		= self.localoptions.pchstop
 				platforms = {}
 				for platform,aliases in mak.allplatforms.items():
 					if set(aliases) & self.platforms:
