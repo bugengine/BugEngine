@@ -198,7 +198,7 @@ class XCodeProject:
 		w("\t\toutputFiles = (\n")
 		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
 		w("\t\t);\n")
-		w("\t\tscript = \"python mak/ddf.py -o\\\"$DERIVED_FILES_DIR\\\" -D mak/macros_ignore \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t\tscript = \"python mak/ddf.py --pch \\\"%s\\\" -o\\\"$DERIVED_FILES_DIR\\\" -D mak/macros_ignore \\\"$INPUT_FILE_PATH\\\"\";\n" % d.pchstop)
 		w("\t};\n")
 
 		flexid = newid()
@@ -474,7 +474,7 @@ def writemaster(sourcetree, f, path = ''):
 
 def generateProject(task):
 	solution = XCodeProject( task.name,
-							 task.outputs[0].bldpath(),
+							 task.outputs[0].abspath(),
 							 task.version,
 							 task.projects)
 	solution.writeHeader()
@@ -488,7 +488,7 @@ def generateProject(task):
 	solution.writeFooter()
 	for p in task.projects:
 		if p.usemaster:
-			writemaster(p.sourceTree, open(p.masterfile.bldpath(), 'w'))
+			writemaster(p.sourceTree, open(p.masterfile.abspath(), 'w'))
 
 GenerateProject = Task.task_factory('generateProject', generateProject)
 
@@ -498,8 +498,11 @@ def create_xcode_project(t):
 	appname = getattr(Context.g_module, 'APPNAME', 'noname')
 	if not toolName in solutions:
 		outname = 'project.pbxproj'
-		solution = GenerateProject(env=t.env)
-		solution.set_outputs(t.path.find_or_declare(outname))
+		solution = t.create_task('generateProject')
+		solution.env = t.env.derive()
+		outnode = t.path.find_or_declare(outname)
+		solution.set_outputs(outnode)
+		t.bld.install_files(appname+'.'+toolName+'.xcodeproj/', outnode)
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath()+'/'+appname+'.'+toolName+'.xcodeproj/'
@@ -521,6 +524,7 @@ def create_xcode_project(t):
 	project.sourceTree 		= t.sourcetree
 	project.usemaster		= t.usemaster
 	project.depends			= t.depends
+	project.pchstop			= t.pchstop
 	for i in t.depends:
 		if i.type in ['game', 'tool']:
 			i.depends.append(t)
@@ -529,6 +533,7 @@ def create_xcode_project(t):
 		filename = "master-%s.mm" % t.name
 		node = t.path.find_or_declare(filename)
 		solution.set_outputs(node)
+		t.bld.install_files(appname+'.'+toolName+'.xcodeproj/', node)
 		project.masterfile = node
 		project.masterfilename = os.path.join(appname+'.'+toolName+'.xcodeproj/', filename)
 	solution.projects.append(project)

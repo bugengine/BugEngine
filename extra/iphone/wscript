@@ -2,6 +2,7 @@
 
 import os
 import mak
+from waflib import Context
 from waflib.Logs import info,warn,pprint
 
 def options(opt):
@@ -30,21 +31,21 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_TARGET']	= gcc_target
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.check_tool('cross_gcc', tooldir='mak/tools')
+	conf.load('cross_gcc', tooldir='mak/tools')
 
 
 def add_gcc_flags_to_env(conf):
-	conf.env.append_unique('CCFLAGS', ['-fPIC'])
+	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', ['-framework', 'OpenGLES'])
-	conf.env.append_unique('CCFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_darwin_simulator_flags_to_env(conf):
+def add_darwin_simulator_flags_to_env(conf, variant):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
-	conf.env.append_unique('CCFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
@@ -52,21 +53,21 @@ def add_darwin_simulator_flags_to_env(conf):
 	conf.env['program_PATTERN'] = '%s'
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
-	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['PREFIX']			= variant
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
 									'runbin':	'bin',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
+									'data':		os.path.join('share', getattr(Context.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('data', 'plugins') }
 
-def add_darwin_flags_to_env(conf):
+def add_darwin_flags_to_env(conf, variant):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
-	conf.env.append_unique('CCFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
+	conf.env.append_unique('CFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
@@ -74,14 +75,14 @@ def add_darwin_flags_to_env(conf):
 	conf.env['program_PATTERN'] = '%s'
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
-	conf.env['PREFIX']			= os.path.abspath(conf.env['_VARIANT_'])
+	conf.env['PREFIX']			= variant
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'bin',
 									'etc':		'etc',
 									'runbin':	'bin',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
+									'data':		os.path.join('share', getattr(Context.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('data', 'plugins') }
 
 def configure(conf):
@@ -92,20 +93,22 @@ def configure(conf):
 			if (	(getattr(Options.options, 'iphone_sdk', None) and target.find('arm') != -1)
 				or	(getattr(Options.options, 'iphonesimulator_sdk', None) and target.find('i686') != -1)):
 				name = 'gcc-iphone-%s-%s' %(arch, version.replace('-', '_'))
-				defaultenv = conf.get_env()
 				conf.setenv(name, conf.env.derive())
 				try:
 					add_gcc_to_env(conf, version, toolchaindir, target)
 					add_gcc_flags_to_env(conf)
-					add_darwin_flags_to_env(conf)
-					conf.sub_config(os.path.join('..', '..', 'mak', 'target', 'archs', arch))
+					if target.find('arm') != -1:
+						add_darwin_flags_to_env(conf, name)
+					else:
+						add_darwin_simulator_flags_to_env(conf, name)
+					conf.recurse(os.path.join('..', '..', 'mak', 'target', 'archs', arch), once=False)
 
-					pprint('NORMAL', 'configure for tool %s' % name)
-					conf.set_env(defaultenv)
+					pprint('GREEN', 'configure for tool %s' % name)
+					conf.variant = ''
 					conf.env['BUILD_VARIANTS'].append(name)
 				except Exception as e:
 					warn('gcc not available: '+e.__class__.__name__+" "+str(e))
-				conf.set_env(defaultenv)
+					conf.variant = ''
 
 def build(bld):
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
