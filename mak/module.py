@@ -372,7 +372,6 @@ class module:
 							platforms[platform+'-'+arch] = options
 				task.platforms		= platforms
 				self.projects[p] = task
-				bld.add_to_group(task)
 
 	def post(self, builder):
 		self.makeproject(builder)

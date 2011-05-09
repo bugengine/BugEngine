@@ -175,7 +175,7 @@ def filter_sources(self):
 @after_method('propagate_uselib_vars')
 def private_headers(self):
 	self.env.append_value('DEFINES', getattr(self, 'private_defines', []))
-	self.env.append_value('INCLUDES', getattr(self, 'private_includes', []))
+	self.env.append_value('INCLUDES', ['.']+getattr(self, 'private_includes', []))
 
 @feature('cobjects')
 def dummy_cobjects(self):
@@ -187,7 +187,7 @@ def dummy_cobjects(self):
 def createmasterfile(task):
 	f = open(task.outputs[0].abspath(), 'w')
 	for src in task.inputs:
-		f.write('#include "%s"\n' % src.abspath().replace('\\','/'))
+		f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
 	f.close()
 
 MasterTask = Task.task_factory("MkMaster", createmasterfile)
@@ -241,5 +241,4 @@ def make_masterfiles(self):
 				self.mastertasks.append(mastertask)
 			cppnumleft = cppnumleft - 1
 			mastertask.set_inputs(srcnode)
-
 
