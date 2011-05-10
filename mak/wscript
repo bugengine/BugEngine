@@ -46,11 +46,6 @@ def configure(conf):
 	#conf.load('parallel_debug', tooldir='mak/waflib/extras')
 	conf.load('visualstudio netbeans xcode', tooldir='mak/tools/IDE')
 	conf.recurse(os.path.join('host', os.name))
-	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
-			if platform not in ['.svn', '.cvs']:
-				pprint('BLUE', '==================================')
-				pprint('BLUE', '= configure for target '+platform)
-				conf.recurse(os.path.join('target', 'platforms', platform))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
 			if f in ['.svn', '.cvs']:
@@ -59,6 +54,16 @@ def configure(conf):
 				pprint('BLUE', '==================================')
 				pprint('BLUE', '= configure for target '+f)
 				conf.recurse(os.path.join('..', 'extra', f))
+	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
+		if platform == conf.env.HOST: continue
+		if platform not in ['.svn', '.cvs']:
+			pprint('BLUE', '==================================')
+			pprint('BLUE', '= configure for target '+platform)
+			conf.recurse(os.path.join('target', 'platforms', platform))
+	pprint('BLUE', '==================================')
+	pprint('BLUE', '= configure for target '+conf.env.HOST)
+	conf.recurse(os.path.join('target', 'platforms', conf.env.HOST))
+
 
 	if len(conf.env['BUILD_VARIANTS']) == 0:
 		raise SystemExit("no match found : make sure you selected a valid toolchain")
