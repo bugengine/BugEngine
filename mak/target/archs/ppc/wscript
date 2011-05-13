@@ -1,4 +1,4 @@
-# set amd64 specific options
+# set PowerPC specific options
 
 import os
 
