@@ -3,10 +3,10 @@
 import os
 
 def options(opt):
-	opt.recurse('../ppc')
+	opt.recurse('../ppc', once=False)
 
 def configure(conf):
-	conf.recurse('../ppc')
+	conf.recurse('../ppc', once=False)
 
 def build(bld):
-	pass
+	bld.recurse('../ppc', once=False)

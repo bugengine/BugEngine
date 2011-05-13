@@ -60,13 +60,14 @@ def build(bld):
 
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
+	renderNull	= module.plugin('renderNull', 	[discworld])
 	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['pc'])
 	renderDx9		= module.plugin('renderDx9',    [discworld, windowing, cgDx, directx9], platforms=['win32'])
 	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, physicsBullet, lua]
+	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, lua]
 	discworld.post(bld)
 	editor.post(bld)
 	#testsuite		= module.library('testsuite', category='test')
