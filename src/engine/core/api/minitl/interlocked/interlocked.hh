@@ -15,16 +15,14 @@
 #  error Architecture not implemented on MSVC
 # endif
 #elif defined(BE_COMPILER_INTEL) || defined(BE_COMPILER_GCC)
-# if defined(_X86)
+# if defined(_X86) || defined(_AMD64)
 #  include <minitl/interlocked/gcc/x86/interlocked.inl>
-# elif defined(_AMD64)
-#  include <minitl/interlocked/gcc/amd64/interlocked.inl>
-# elif defined(_POWERPC) and defined(__LP64__)
-#  include <minitl/interlocked/gcc/ppc64/interlocked.inl>
 # elif defined(_POWERPC)
 #  include <minitl/interlocked/gcc/ppc/interlocked.inl>
 # elif defined(_ARM)
 #  include <minitl/interlocked/gcc/arm/interlocked.inl>
+# elif defined(_MIPS)
+#  include <minitl/interlocked/gcc/mips/interlocked.inl>
 # else
 #  error Architecture not implemented on GCC
 # endif

@@ -9,15 +9,57 @@
 # define OutputDebugString(s) printf("%s", s)
 #endif
 
-#if defined(_AMD64) || defined(_PPC64)
-# define BE_64
-#elif defined(_X86) || defined(_PPC)
-# define BE_32
+
+#ifdef _PPC
+
+/* POWERPC*********************/
+# define    BE_BIGENDIAN
+# ifdef _PPC64
+#  define   BE_64
+# else
+#  define   BE_32
+# endif
+
 #elif defined(_ARM)
-# define BE_32
+
+/* ARM Big and little endian **/
+# if defined(_ARMEL)
+#  define   BE_LITTLEENDIAN
+# else
+#  define   BE_BIGENDIAN
+# endif
+
+#elif defined(_X86)
+
+/* x86 ************************/
+# define    BE_32
+# define    BE_LITTLEENDIAN
+
+#elif defined(_AMD64)
+
+/* amd64 **********************/
+# define    BE_32
+# define    BE_LITTLEENDIAN
+
+#elif defined(_MIPS)
+
+/* MIPS Big and little endian */
+# if defined(_MIPSEL)
+#  define   BE_LITTLEENDIAN
+# else
+#  define   BE_BIGENDIAN
+# endif
+# if defined(_MIPS64)
+#  define   BE_64
+# else
+#  define   BE_32
+# endif
+
 #else
 # error "unknown arch"
 #endif
+
+
 
 #ifndef BE_PLATFORM
 # error "Unknown platform: you need to define BE_PLATFORM"

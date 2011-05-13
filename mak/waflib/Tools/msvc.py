@@ -154,7 +154,7 @@ echo LIB=%%LIB%%
 	env.update(os.environ)
 	env.update(PATH = path)
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
-	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH)
+	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH, silent=True)
 	cxx = conf.cmd_to_list(cxx)
 
 	# delete CL if exists. because it could contain parameters wich can change cl's behaviour rather catastrophically.
