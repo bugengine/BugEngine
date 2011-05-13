@@ -1,13 +1,12 @@
-# set amd64 specific options
+# set x86 specific options
 
 import os
 
 def options(opt):
-	opt.recurse('../x86')
-	pass
+	opt.recurse('../x86', once=False)
 
 def configure(conf):
-	conf.recurse('../x86')
+	conf.recurse('../x86', once=False)
 
 def build(bld):
-	pass
+	bld.recurse('../x86', once=False)
