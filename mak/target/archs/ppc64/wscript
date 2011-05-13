@@ -1,4 +1,4 @@
-# set amd64 specific options
+# set PowerPC 64 specific options
 
 import os
 
@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
 	conf.env['ARCHITECTURE'] = 'ppc'
-	conf.env.append_unique('DEFINES', ['BE_BIGENDIAN', '_POWERPC', '_PPC'])
+	conf.env.append_unique('DEFINES', ['_POWERPC', '_PPC', '_POWERPC64', '_PPC64'])
 
 def build(bld):
 	pass

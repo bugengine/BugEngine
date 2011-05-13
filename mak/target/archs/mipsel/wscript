@@ -1,4 +1,4 @@
-# set mips specific options
+# set mips endian little specific options
 
 import os
 
@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
 	conf.env['ARCHITECTURE'] = 'mips'
-	conf.env.append_unique('DEFINES', ['_MIPS'])
+	conf.env.append_unique('DEFINES', ['_MIPS', '_MIPSEL'])
 
 def build(bld):
 	pass

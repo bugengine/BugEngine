@@ -39,7 +39,9 @@ def parse_gcc_target(target):
 			  ('psp', 'mips'),
 			  ('mingw32', 'x86'),
 			  ('ppu', 'powerpc'),
-			  ('spu', 'spu')]
+			  ('spu', 'spu'),
+			  ('ee', 'mipsel64'),
+			  ('iop', 'mipsel')]
 	for gccname,aname in archs:
 		if target.find(gccname) != -1:
 				return aname
@@ -54,30 +56,32 @@ def get_available_gcc(conf):
 		if not os.path.isdir(os.path.join(toolchaindir,'lib')):
 			continue
 		for lib in os.listdir(os.path.join(toolchaindir,'lib')):
-			if lib == 'gcc':
+			if lib.startswith('gcc'):
 				libdir = os.path.join(toolchaindir, 'lib', lib)
-			elif lib.startswith('gcc'):
-				libdir = os.path.join(toolchaindir, 'lib', lib, 'gcc')
 			else:
 				continue
 			if not os.path.isdir(libdir):
 				continue
-			for target in os.listdir(libdir):
-				if not os.path.isdir(os.path.join(libdir, target)):
+			for subdir in ['', 'gcc']:
+				libdir = os.path.join(libdir, subdir)
+				if not os.path.isdir(libdir):
 					continue
-				if target in ['.svn', '.cvs']:
-					continue
-				for version in os.listdir(os.path.join(libdir, target)):
-					if not os.path.isdir(os.path.join(libdir, target, version)):
+				for target in os.listdir(libdir):
+					if not os.path.isdir(os.path.join(libdir, target)):
 						continue
-					if version in ['.svn', '.cvs']:
+					if target in ['.svn', '.cvs']:
 						continue
-					if os.path.islink(os.path.join(libdir, target, version)):
-						continue
-					if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
-						continue
-					arch = parse_gcc_target(target) or 'unknown'
-					conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
+					for version in os.listdir(os.path.join(libdir, target)):
+						if not os.path.isdir(os.path.join(libdir, target, version)):
+							continue
+						if version in ['.svn', '.cvs']:
+							continue
+						if os.path.islink(os.path.join(libdir, target, version)):
+							continue
+						if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
+							continue
+						arch = parse_gcc_target(target) or 'unknown'
+						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 
 @conf
 def find_cross_gcc(conf):
@@ -87,44 +91,47 @@ def find_cross_gcc(conf):
 	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
-		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall]:
-			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False):
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
-			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False):
+			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
-			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False):
+			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CPP']:
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
-				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False):
+				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		if not v['AS']: v['AS'] = v['CC']
 
 		for ar in [target+'-gar', target+'-ar', 'gar', 'ar']:
-			if conf.find_program(ar, var='AR', path_list=v['GCC_PATH'], mandatory=False):
+			if conf.find_program(ar, var='AR', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['AR']:
 			for ar in ['gar', 'ar']:
-				if conf.find_program(ar, var='AR', mandatory=False):
+				if conf.find_program(ar, var='AR', mandatory=False, silent=True):
 					break
 		if not v['AR']: conf.fatal('unable to find ar for target %s' % target)
 
 		for ranlib in [target+'-ranlib', target+'-granlib', 'ranlib', 'granlib']:
-			if conf.find_program(ranlib, var='RANLIB', path_list=v['GCC_PATH'], mandatory=False):
+			if conf.find_program(ranlib, var='RANLIB', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['RANLIB']:
 			for ranlib in ['ranlib', 'granlib', 'ranlib', 'granlib']:
-				if conf.find_program(ranlib, var='RANLIB', mandatory=False):
+				if conf.find_program(ranlib, var='RANLIB', mandatory=False, silent=True):
 					break
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
+		if not v['WINRC']:
+			if not conf.find_program('mingw32-windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+				conf.find_program('windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True)
 	conf.load('gcc gxx gas')
 
 @conf

@@ -4,7 +4,6 @@ import os
 
 def options(opt):
 	opt.recurse('../amd64')
-	pass
 
 def configure(conf):
 	conf.recurse('../amd64')
