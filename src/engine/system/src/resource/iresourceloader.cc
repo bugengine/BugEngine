@@ -2,6 +2,6 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/resource/iresourceloader.hh>
+#include    <system/resource/iresourceloader.script.hh>
 
 

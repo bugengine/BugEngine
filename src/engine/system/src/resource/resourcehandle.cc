@@ -3,7 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/resource/resourcehandle.hh>
-#include    <system/resource/iresourceloader.hh>
+#include    <system/resource/iresourceloader.script.hh>
 
 namespace BugEngine
 {

@@ -27,6 +27,13 @@ public:
     void* getResource(weak<const IResourceLoader> owner) const;
 };
 
+struct ResourceLoader
+{
+    ResourceLoader(ref<const IResourceLoader> loader) : loader(loader)  { }
+    ~ResourceLoader()                                                   { }
+    ref<const IResourceLoader> loader;
+};
+
 }
 
 /*****************************************************************************/
