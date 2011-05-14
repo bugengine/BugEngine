@@ -5,3 +5,15 @@
 #include    <system/resource/iresourceloader.script.hh>
 
 
+namespace BugEngine
+{
+
+IResourceLoader::IResourceLoader()
+{
+}
+
+IResourceLoader::~IResourceLoader()
+{
+}
+
+}

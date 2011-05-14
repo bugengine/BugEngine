@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 #define BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 /*****************************************************************************/
-#include    <graphics/material/shaders/node.script.hh>
+#include    <graphics/objects/shaders/node.script.hh>
 #include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Graphics
@@ -12,6 +12,7 @@ namespace BugEngine { namespace Graphics
 
 class IShaderBuilder;
 
+be_tag(ResourceLoaders())
 class be_api(GRAPHICS) Shader : public Resource
 {
 private:

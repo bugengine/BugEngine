@@ -4,15 +4,17 @@
 #ifndef BE_GRAPHICS_MATERIAL_TEXTURE_HH_
 #define BE_GRAPHICS_MATERIAL_TEXTURE_HH_
 /*****************************************************************************/
+#include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class be_api(GRAPHICS) Texture
+be_tag(ResourceLoaders())
+class be_api(GRAPHICS) Texture : public Resource
 {
 public:
     Texture();
-    virtual ~Texture();
+    ~Texture();
 };
 
 }}

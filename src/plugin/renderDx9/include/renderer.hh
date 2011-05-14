@@ -71,7 +71,6 @@ public:
 
     weak<const FileSystem>          filesystem() const { return m_filesystem; }
 private:
-    void                            drawBatch(const Batch& b);
     void                            flush() override;
     void                            createContext(void* params) override;
     void                            destroyContext() override;

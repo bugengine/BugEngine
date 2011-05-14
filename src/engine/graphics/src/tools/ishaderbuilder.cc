@@ -2,16 +2,17 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/material/shaderparam.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-ShaderParam::ShaderParam()
+IShaderBuilder::IShaderBuilder()
+    :   m_stream(tempArena(), 10000)
 {
 }
 
-ShaderParam::~ShaderParam()
+IShaderBuilder::~IShaderBuilder()
 {
 }
 

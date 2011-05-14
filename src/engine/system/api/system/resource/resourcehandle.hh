@@ -10,6 +10,7 @@ namespace BugEngine
 {
 
 class IResourceLoader;
+
 struct ResourceHandle
 {
     weak<const IResourceLoader> owner;
