@@ -19,9 +19,9 @@ ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_, u32 
     ,   offset(offset_)
     ,   properties(rttiArena())
     ,   methods(rttiArena())
-    ,   tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
+    ,   m_tags(rttiArena())
 {
     if (parent)
     {
@@ -38,9 +38,9 @@ ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_)
     ,   offset(0)
     ,   properties(rttiArena())
     ,   methods(rttiArena())
-    ,   tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
+    ,   m_tags(rttiArena())
 {
     if (parent)
     {
@@ -123,12 +123,26 @@ Value ClassInfo::operator()(Value* params, u32 nparams) const
 
 Value ClassInfo::getTag(const TypeInfo& type) const
 {
-    for (minitl::vector< Value >::const_iterator it = tags.begin(); it != tags.end(); ++it)
+    for (minitl::vector< Value >::iterator it = m_tags.begin(); it != m_tags.end(); ++it)
     {
         if (type <= it->type())
-            return *it;
+        {
+            for (minitl::vector< Value >::const_iterator it2 = it+1; it2 != m_tags.end(); ++it2)
+            {
+                if (type <= it2->type())
+                {
+                    be_warning("several tags match for type %s: value selected is %s, conflict value %s" | type.name() | it->type().name() | it2->type().name());
+                }
+            }
+            return Value(Value::ByRef(*it));
+        }
     }
     return Value();
+}
+
+Value ClassInfo::getTag(ref<const ClassInfo> type) const
+{
+    return getTag(TypeInfo(type, TypeInfo::Class, TypeInfo::Mutable));
 }
 
 u32 ClassInfo::distance(weak<const ClassInfo> other) const

@@ -66,5 +66,40 @@ void* Resource::getResource(weak<const IResourceLoader> loader) const
     return 0;
 }
 
+ResourceLoaders::ResourceLoaders()
+    :   loaders(rttiArena())
+{
+}
+
+ResourceLoaders::~ResourceLoaders()
+{
+}
+
+void ResourceLoaders::add(weak<const IResourceLoader> loader)
+{
+    for(minitl::vector< weak<const IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
+    {
+        if (*it == loader)
+        {
+            be_error("Added loader twice");
+            return;
+        }
+    }
+    loaders.push_back(loader);
+}
+
+void ResourceLoaders::remove(weak<const IResourceLoader> loader)
+{
+    for(minitl::vector< weak<const IResourceLoader> >::iterator it = loaders.begin(); it != loaders.end(); ++it)
+    {
+        if (*it == loader)
+        {
+            loaders.erase(it);
+            return;
+        }
+    }
+    be_error("Loader was not in the list of loaders for this type");
+}
+
 }
 

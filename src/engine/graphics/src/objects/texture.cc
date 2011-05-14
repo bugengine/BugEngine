@@ -2,16 +2,16 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/renderer/buffer/gpubuffer.hh>
+#include    <graphics/objects/texture.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-GpuBuffer::GpuBuffer()
+Texture::Texture()
 {
 }
 
-GpuBuffer::~GpuBuffer()
+Texture::~Texture()
 {
 }
 

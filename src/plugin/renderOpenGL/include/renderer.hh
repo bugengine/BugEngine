@@ -9,23 +9,21 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
+class MeshLoader;
+class TextureLoader;
+class ShaderLoader;
 class Window;
-class VertexBuffer;
-class IndexBuffer;
-class TextureBuffer;
 
 class Renderer : public Windowing::Renderer
 {
     friend class Window;
-    friend class VertexBuffer;
-    friend class IndexBuffer;
-    friend class TextureBuffer;
-    friend class ShaderPipeline;
-    friend class TexturePipeline;
 private:
     class Context;
-    scoped<Context>         m_context;
-    weak<const FileSystem>  m_filesystem;
+    scoped<Context>             m_context;
+    weak<const FileSystem>      m_filesystem;
+    scoped<const MeshLoader>    m_meshLoader;
+    scoped<const TextureLoader> m_textureLoader;
+    scoped<const ShaderLoader>  m_shaderLoader;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
@@ -42,7 +40,6 @@ public:
     weak<const FileSystem>          filesystem() const  { return m_filesystem; }
 private:
     void                            attachWindow(Window* w);
-    void                            drawBatch(const Batch& b);
 protected:
     void                            createContext(void* params) override;
     void                            destroyContext() override;

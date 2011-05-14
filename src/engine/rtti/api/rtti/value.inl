@@ -81,16 +81,16 @@ inline Value::Value(ByRefType<Value> t)
 :   m_type(t.value.m_type)
 ,   m_reference(true)
 {
-    m_ref.m_pointer = t.value.m_ref.m_pointer;
+    m_ref.m_pointer = t.value.memory();
     m_ref.m_deallocate = false;
 }
 
 template<>
 inline Value::Value(ByRefType<const Value> t)
-:   m_type(t.value.m_type)
+:   m_type(t.value.m_type, TypeInfo::Constify)
 ,   m_reference(true)
 {
-    m_ref.m_pointer = t.value.m_ref.m_pointer;
+    m_ref.m_pointer = const_cast<void*>(t.value.memory());
     m_ref.m_deallocate = false;
 }
 
@@ -136,9 +136,14 @@ Value& Value::operator=(const T& t)
     return *this;
 }
 
-TypeInfo Value::type() const
+TypeInfo Value::type()
 {
     return m_type;
+}
+
+TypeInfo Value::type() const
+{
+    return TypeInfo(m_type, TypeInfo::Constify);
 }
 
 template< typename T >

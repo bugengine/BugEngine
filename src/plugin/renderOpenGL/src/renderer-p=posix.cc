@@ -4,6 +4,9 @@
 #include    <stdafx.h>
 #include    <renderer.hh>
 #include    <window.hh>
+#include    <loaders/meshloader.script.hh>
+#include    <loaders/textureloader.script.hh>
+#include    <loaders/shaderloader.script.hh>
 
 #include    <GL/gl.h>
 #include    <GL/glext.h>
@@ -93,6 +96,9 @@ Window::Context::~Context()
 Renderer::Renderer(weak<const FileSystem> filesystem)
 :   m_context()
 ,   m_filesystem(filesystem)
+,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
+,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
+,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena()))
 {
 }
 

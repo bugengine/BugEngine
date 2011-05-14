@@ -129,34 +129,6 @@ ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, 
     return ref<Window>();
 }
 
-void Renderer::drawBatch(const Batch& b)
-{
-    //weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
-    //weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
-
-    //d3d_checkResult(m_device->SetVertexDeclaration(_vb->m_vertexDecl));
-    //d3d_checkResult(m_device->SetStreamSource(0, _vb->m_buffer, 0, _vb->m_vertexStride));
-    //d3d_checkResult(m_device->SetIndices(_ib->m_buffer));
-
-    D3DPRIMITIVETYPE type;
-    int primitiveCount = 0;
-    switch(b.ptype)
-    {
-    case Batch::RptLineList:
-        type = D3DPT_LINELIST;
-        primitiveCount = b.nbVertices/2;
-        break;
-    case Batch::RptTriangleList:
-        type = D3DPT_TRIANGLELIST;
-        primitiveCount = b.nbVertices/3;
-        break;
-    case Batch::RptTriangleStrip:
-    case Batch::RptTriangleFan:
-    default: be_notreached(); type = D3DPT_TRIANGLELIST; primitiveCount = b.nbVertices;
-    }
-    d3d_checkResult(m_device->DrawIndexedPrimitive(type, 0, 0, b.nbVertices, 0, primitiveCount));
-}
-
 void Renderer::flush()
 {
     Windowing::Renderer::flush();

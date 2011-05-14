@@ -136,7 +136,7 @@ class Enum(Container):
 			file.write("        ::BugEngine::be_typeid< %s >::klass();\n" % '::'.join(self.fullname.split('::')[:-1]))
 		file.write("        klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), be_checked_numcast<u32>(sizeof(%s)), 0);\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
 		for tag in self.tags:
-			file.write("        klass->tags.push_back(Value(%s));\n" % tag)
+			file.write("        klass->addTag(%s);\n" % tag)
 		file.write("        weak<RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
@@ -155,7 +155,7 @@ class Enum(Container):
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::ref< ::BugEngine::RTTI::ClassInfo> klass = s_%sClass();\n" % decl)
-		file.write("        klass->tags.clear();\n")
+		file.write("        klass->clearTags();\n")
 		file.write("        klass->methods.clear();\n")
 		file.write("        klass->properties.clear();\n")
 		file.write("        klass->constructor.overloads.clear();\n")
@@ -207,7 +207,7 @@ class Class(Container):
 			file.write("        klass->copyconstructor = &::BugEngine::RTTI::wrapCopy< %s >;\n" % (self.fullname))
 			file.write("        klass->destructor = &::BugEngine::RTTI::wrapDestroy< %s >;\n" % (self.fullname))
 		for tag in self.tags:
-			file.write("        klass->tags.push_back(Value(%s));\n" % tag)
+			file.write("        klass->addTag(%s);\n" % tag)
 		file.write("        weak<RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();\n")
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
 		file.write("        return klass;\n");
@@ -290,7 +290,7 @@ class Class(Container):
 		file.write("    static inline void s_%sUnregisterProperties()\n" % decl)
 		file.write("    {\n")
 		file.write("        minitl::weak< ::BugEngine::RTTI::ClassInfo > klass = s_%sClass();\n" % decl)
-		file.write("        klass->tags.clear();\n")
+		file.write("        klass->clearTags();\n")
 		file.write("        klass->methods.clear();\n")
 		file.write("        klass->properties.clear();\n")
 		file.write("        klass->constructor.overloads.clear();\n")

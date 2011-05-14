@@ -86,7 +86,8 @@ public:
 
     template< typename T > inline Value& operator=(const T& t);
     inline Value& operator=(const Value& other);
-
+    
+    inline TypeInfo type();
     inline TypeInfo type() const;
 
     template< typename T > inline const T as() const;

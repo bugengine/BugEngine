@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <minitl/ptr/refcountable.hh>
 #include    <system/resource/resourcehandle.hh>
+#include    <system/resource/iresourceloader.script.hh>
 
 namespace BugEngine
 {
@@ -13,6 +14,7 @@ namespace BugEngine
 class IResourceLoader;
 
 class be_api(SYSTEM) Resource : public minitl::refcountable
+                              , public minitl::intrusive_list<Resource>::item
 {
     friend class IResourceLoader;
 private:
@@ -27,11 +29,14 @@ public:
     void* getResource(weak<const IResourceLoader> owner) const;
 };
 
-struct ResourceLoader
+struct be_api(SYSTEM) ResourceLoaders
 {
-    ResourceLoader(ref<const IResourceLoader> loader) : loader(loader)  { }
-    ~ResourceLoader()                                                   { }
-    ref<const IResourceLoader> loader;
+    ResourceLoaders();
+    ~ResourceLoaders();
+    minitl::vector< weak<const IResourceLoader> > loaders;
+
+    void add(weak<const IResourceLoader> loader);
+    void remove(weak<const IResourceLoader> loader);
 };
 
 }

@@ -34,26 +34,6 @@ ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, 
     return ref<Window>();
 }
 
-void Renderer::drawBatch(const Batch& b)
-{
-    //weak<const VertexBuffer> _vb = be_checked_cast<const VertexBuffer>(b.vertices);
-    //weak<const IndexBuffer> _ib = be_checked_cast<const IndexBuffer>(b.indices);
-    //be_forceuse(_vb);
-    //be_forceuse(_ib);
-
-    switch(b.ptype)
-    {
-    case Batch::RptLineList:
-        break;
-    case Batch::RptTriangleList:
-        break;
-    case Batch::RptTriangleStrip:
-    case Batch::RptTriangleFan:
-    default:
-        be_notreached();
-    }
-}
-
 void Renderer::flush()
 {
     Windowing::Renderer::flush();

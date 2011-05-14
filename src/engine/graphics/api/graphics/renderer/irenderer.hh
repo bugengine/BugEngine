@@ -4,10 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERER_IRENDERER_HH_
 #define BE_GRAPHICS_RENDERER_IRENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/buffer/vertexdesc.hh>
 #include    <graphics/renderer/irendertarget.hh>
-#include    <graphics/renderer/buffer/gpubuffer.hh>
-#include    <graphics/material/shader.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -39,21 +36,6 @@ struct TextureFlags
 {
     uint2           size;
     TextureFormat   format;
-};
-
-struct Batch : public minitl::inode
-{
-    enum RenderPrimitiveType
-    {
-        RptLineList,
-        RptTriangleList,
-        RptTriangleStrip,
-        RptTriangleFan
-    };
-    RenderPrimitiveType                     ptype;
-    const GpuBuffer*                        vertices;
-    int                                     nbVertices;
-    const GpuBuffer*                        indices;
 };
 
 class be_api(GRAPHICS) IRenderer : public minitl::pointer
