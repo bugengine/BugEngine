@@ -30,7 +30,7 @@ struct InterlockedType<4>
     {
         value_t old = *p;
         *p = v;
-        return v;
+        return old;
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
@@ -51,7 +51,7 @@ struct InterlockedType<4>
     {
         typedef BE_SET_ALIGNMENT(4) i32         value_t;
         typedef BE_SET_ALIGNMENT(4) i32         counter_t;
-        typedef tagged_t    tag_t;
+        typedef counter_t    tag_t;
         BE_SET_ALIGNMENT(8) struct
         {
             volatile counter_t   tag;
@@ -84,7 +84,7 @@ struct InterlockedType<4>
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
-        return p;
+        return p.taggedvalue.tag;
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
@@ -128,7 +128,7 @@ struct InterlockedType<8>
     {
         value_t old = *p;
         *p = v;
-        return v;
+        return old;
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
@@ -150,7 +150,7 @@ struct InterlockedType<8>
     {
         typedef BE_SET_ALIGNMENT(8) i64         value_t;
         typedef BE_SET_ALIGNMENT(8) i64         counter_t;
-        typedef tagged_t    tag_t;
+        typedef counter_t    tag_t;
         BE_SET_ALIGNMENT(16) struct
         {
             volatile counter_t   tag;
@@ -183,7 +183,7 @@ struct InterlockedType<8>
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
-        return p;
+        return p.taggedvalue.tag;
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
