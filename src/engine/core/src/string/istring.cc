@@ -320,22 +320,6 @@ igenericnamespace::igenericnamespace(const char *str, const char* sep)
     parse(str, str+strlen(str), sep, m_namespace, m_size);
 }
 
-template< u16 MAXLENGTH >
-minitl::format<MAXLENGTH> igenericnamespace::tostring(const char* sep) const
-{
-    minitl::format<MAXLENGTH> result("");
-    if (m_size > 0)
-    {
-        result.append(m_namespace[0].c_str());
-        for (size_t i = 1; i < m_size; ++i)
-        {
-            result.append(sep);
-            result.append(m_namespace[i].c_str());
-        }
-    }
-    return result;
-}
-
 size_t igenericnamespace::size() const
 {
     return m_size;
