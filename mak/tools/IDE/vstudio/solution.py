@@ -15,7 +15,10 @@ def _hexdigest(s):
 	h = string.hexdigits
 	r = ''
 	for c in s:
-		i = c
+		try:
+			i = ord(c)
+		except:
+			i = c
 		r = r + h[(i >> 4) & 0xF] + h[i & 0xF]
 	return r
 
