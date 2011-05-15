@@ -7,8 +7,9 @@
 namespace BugEngine { namespace Graphics
 {
 
-Shader::Shader(ref<Shaders::Node> root)
-    :   m_root(root)
+Shader::Shader(ShaderType type, ref<Shaders::Node> root)
+    :   type(type)
+    ,   root(root)
 {
 }
 
@@ -18,7 +19,7 @@ Shader::~Shader()
 
 void Shader::buildSource(const IShaderBuilder& builder) const
 {
-    m_root->buildSource(builder);
+    root->buildSource(builder);
 }
 
 }}

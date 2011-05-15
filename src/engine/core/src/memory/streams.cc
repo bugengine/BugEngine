@@ -21,6 +21,11 @@ void* IMemoryStream::memory()
     return static_cast<void*>(static_cast<char*>(basememory())+offset());
 }
 
+const void* IMemoryStream::memory() const
+{
+    return static_cast<const void*>(static_cast<const char*>(basememory())+offset());
+}
+
 i64 IMemoryStream::read(void* buffer, i64 _size)
 {
     i64 toread = minitl::min(_size,size()-offset());
@@ -29,7 +34,7 @@ i64 IMemoryStream::read(void* buffer, i64 _size)
     return toread;
 }
 
-void IMemoryStream::write(void* buffer, i64 _size)
+void IMemoryStream::write(const void* buffer, i64 _size)
 {
     be_assert(writable(), "writing in a read-only memory stream");
     if (_size > size()-offset())
@@ -53,6 +58,11 @@ MemoryStream::~MemoryStream()
 }
 
 void* MemoryStream::basememory()
+{
+    return m_memory;
+}
+
+const void* MemoryStream::basememory() const
 {
     return m_memory;
 }

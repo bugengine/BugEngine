@@ -20,7 +20,7 @@ protected:
     Node();
     ~Node();
 public:
-    virtual void buildSource(const IShaderBuilder& stream) = 0;
+    virtual void buildSource(const IShaderBuilder& stream) const = 0;
 };
 
 }}}

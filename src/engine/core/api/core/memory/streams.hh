@@ -22,15 +22,17 @@ public:
     IMemoryStream();
     virtual ~IMemoryStream();
 
-    virtual void*  basememory() = 0;
-    virtual void*  memory();
-    virtual i64    offset() const = 0;
-    virtual i64    size() const = 0;
-    virtual void   seek(SeekMethod method, i64 offset) = 0;
-    virtual i64    read(void* buffer, i64 size);
-    virtual void   write(void *buffer, i64 size);
-    virtual void   resize(i64 size) = 0;
-    virtual bool   writable() const = 0;
+    virtual void*       basememory() = 0;
+    virtual void*       memory();
+    virtual const void* basememory() const = 0;
+    virtual const void* memory() const;
+    virtual i64         offset() const = 0;
+    virtual i64         size() const = 0;
+    virtual void        seek(SeekMethod method, i64 offset) = 0;
+    virtual i64         read(void* buffer, i64 size);
+    virtual void        write(const void *buffer, i64 size);
+    virtual void        resize(i64 size) = 0;
+    virtual bool        writable() const = 0;
 };
 
 class be_api(CORE) MemoryStream : public IMemoryStream
@@ -43,12 +45,13 @@ public:
     MemoryStream(Allocator& allocator, i64 size = 0);
     virtual ~MemoryStream();
 
-    virtual void*  basememory() override;
-    virtual i64    size() const override;
-    virtual i64    offset() const override;
-    virtual void   seek(SeekMethod method, i64 offset) override;
-    virtual void   resize(i64 size) override;
-    virtual bool   writable() const override;
+    virtual void*       basememory() override;
+    virtual const void* basememory() const override;
+    virtual i64         size() const override;
+    virtual i64         offset() const override;
+    virtual void        seek(SeekMethod method, i64 offset) override;
+    virtual void        resize(i64 size) override;
+    virtual bool        writable() const override;
 };
 
 }

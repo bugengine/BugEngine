@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RENDERERNULL_RENDERER_HH_
-#define BE_RENDERERNULL_RENDERER_HH_
+#ifndef BE_RENDERNULL_RENDERER_HH_
+#define BE_RENDERNULL_RENDERER_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/irenderer.hh>
 #include    <system/filesystem.hh>
@@ -10,10 +10,17 @@
 namespace BugEngine { namespace Graphics { namespace NullRenderer
 {
 
+class MeshLoader;
+class TextureLoader;
+class ShaderLoader;
+
 class Renderer : public IRenderer
 {
 private:
     weak<const FileSystem>  m_filesystem;
+    scoped<MeshLoader>      m_meshLoader;
+    scoped<TextureLoader>   m_textureLoader;
+    scoped<ShaderLoader>    m_shaderLoader;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();

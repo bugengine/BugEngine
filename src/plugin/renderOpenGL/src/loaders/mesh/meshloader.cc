@@ -3,16 +3,9 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
-#include    <loaders/meshloader.script.hh>
+#include    <loaders/mesh/meshloader.script.hh>
 #include    <graphics/objects/mesh.script.hh>
 
-#ifdef BE_PLATFORM_MACOS
-# include   <OpenGL/OpenGL.h>
-# include   <OpenGL/gl.h>
-#else
-# include   <GL/gl.h>
-# include   <GL/gl3.h>
-#endif
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {

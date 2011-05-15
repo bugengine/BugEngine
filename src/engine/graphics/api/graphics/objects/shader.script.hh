@@ -15,10 +15,19 @@ class IShaderBuilder;
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) Shader : public Resource
 {
-private:
-    ref<Shaders::Node> m_root;
 published:
-    Shader(ref<Shaders::Node> root);
+    enum ShaderType
+    {
+        Vertex,
+        Fragment,
+        Geometry
+    };
+
+published:
+    const ref<const Shaders::Node>  root;
+    const ShaderType                type;
+
+    Shader(ShaderType type, ref<Shaders::Node> root);
     ~Shader();
 public:
     void buildSource(const IShaderBuilder& builder) const;

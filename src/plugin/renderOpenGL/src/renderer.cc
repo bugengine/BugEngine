@@ -8,13 +8,6 @@
 
 #include    <window.hh>
 
-#ifdef BE_PLATFORM_MACOS
-# include   <OpenGL/OpenGL.h>
-# include   <OpenGL/gl.h>
-#else
-# include   <GL/gl.h>
-# include   <GL/gl3.h>
-#endif
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
