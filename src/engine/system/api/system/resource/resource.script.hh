@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <minitl/ptr/refcountable.hh>
 #include    <system/resource/resourcehandle.hh>
-#include    <system/resource/iresourceloader.script.hh>
 
 namespace BugEngine
 {
@@ -40,6 +39,8 @@ struct be_api(SYSTEM) ResourceLoaders
 };
 
 }
+
+#include    <system/resource/iresourceloader.script.hh>
 
 /*****************************************************************************/
 #endif
