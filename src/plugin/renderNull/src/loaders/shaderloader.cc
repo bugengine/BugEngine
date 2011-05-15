@@ -6,15 +6,7 @@
 #include    <loaders/shaderloader.script.hh>
 #include    <graphics/objects/shader.script.hh>
 
-#ifdef BE_PLATFORM_MACOS
-# include   <OpenGL/OpenGL.h>
-# include   <OpenGL/gl.h>
-#else
-# include   <GL/gl.h>
-# include   <GL/gl3.h>
-#endif
-
-namespace BugEngine { namespace Graphics { namespace OpenGL
+namespace BugEngine { namespace Graphics { namespace NullRenderer
 {
 
 ShaderLoader::ShaderLoader()

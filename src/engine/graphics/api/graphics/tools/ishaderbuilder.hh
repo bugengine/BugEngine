@@ -13,10 +13,18 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) IShaderBuilder
 {
 private:
-    MemoryStream m_stream;
+    MemoryStream    m_stream;
+    i32             m_indent;
 public:
     IShaderBuilder();
     ~IShaderBuilder();
+
+    const char *text() const;
+    i64         textSize() const;
+protected:
+    void indent();
+    void unindent();
+    void write(const char *text);
 };
 
 }}

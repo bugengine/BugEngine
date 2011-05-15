@@ -4,9 +4,9 @@
 #include    <stdafx.h>
 #include    <renderer.hh>
 #include    <window.hh>
-#include    <loaders/meshloader.script.hh>
-#include    <loaders/textureloader.script.hh>
-#include    <loaders/shaderloader.script.hh>
+#include    <loaders/mesh/meshloader.script.hh>
+#include    <loaders/texture/textureloader.script.hh>
+#include    <loaders/shader/shaderloader.script.hh>
 
 #include    <Cocoa/Cocoa.h>
 #include    <OpenGL/OpenGL.h>

@@ -20,13 +20,14 @@ private:
 public:
     MemoryFileMap(void* memory, size_t size, HANDLE file, HANDLE filemap);
     ~MemoryFileMap();
-
-    virtual void* basememory() override;
-    virtual i64   size() const override;
-    virtual i64   offset() const override;
-    virtual void  seek(SeekMethod method, i64 offset) override;
-    virtual void  resize(i64 size) override;
-    virtual bool  writable() const override;
+    
+    virtual void*       basememory() override;
+    virtual const void* basememory() const override;
+    virtual i64         size() const override;
+    virtual i64         offset() const override;
+    virtual void        seek(SeekMethod method, i64 offset) override;
+    virtual void        resize(i64 size) override;
+    virtual bool        writable() const override;
 };
 
 MemoryFileMap::MemoryFileMap(void* memory, size_t size, HANDLE file, HANDLE filemap) :
@@ -46,6 +47,11 @@ MemoryFileMap::~MemoryFileMap()
 }
 
 void* MemoryFileMap::basememory()
+{
+    return m_pointer;
+}
+
+const void* MemoryFileMap::basememory() const
 {
     return m_pointer;
 }

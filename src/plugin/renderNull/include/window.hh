@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RENDERERNULL_WINDOW_HH_
-#define BE_RENDERERNULL_WINDOW_HH_
+#ifndef BE_RENDERNULL_WINDOW_HH_
+#define BE_RENDERNULL_WINDOW_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/renderer/irenderer.hh>
