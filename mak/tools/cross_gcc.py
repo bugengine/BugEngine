@@ -82,7 +82,7 @@ def get_available_gcc(conf):
 							continue
 						arch = parse_gcc_target(target) or 'unknown'
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
-	conf.env['GCC_TARGETS'].sort(key= lambda (x,y,z,w): (target, arch, x))
+	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
 
 @conf

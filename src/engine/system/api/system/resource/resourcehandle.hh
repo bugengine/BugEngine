@@ -4,7 +4,6 @@
 #ifndef BE_SYSTEM_RESOURCE_RESOURCEHANDLE_HH_
 #define BE_SYSTEM_RESOURCE_RESOURCEHANDLE_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable.hh>
 
 namespace BugEngine
 {

@@ -19,9 +19,9 @@ ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_, u32 
     ,   offset(offset_)
     ,   properties(rttiArena())
     ,   methods(rttiArena())
+    ,   m_tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
-    ,   m_tags(rttiArena())
 {
     if (parent)
     {
@@ -38,9 +38,9 @@ ClassInfo::ClassInfo(const inamespace& name_, ref<const ClassInfo> parent_)
     ,   offset(0)
     ,   properties(rttiArena())
     ,   methods(rttiArena())
+    ,   m_tags(rttiArena())
     ,   copyconstructor(0)
     ,   destructor(0)
-    ,   m_tags(rttiArena())
 {
     if (parent)
     {

@@ -21,14 +21,14 @@ protected:
     ~IResourceLoader();
 
     template< typename T > void attach()
-    { 
-        Value v = be_typeid<T>::klass()->getTag<ResourceLoaders>();
+    {
+        Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be attached" |  be_typeid<T>::type().name(), return);
         v.as<ResourceLoaders&>().add(this);
     }
     template< typename T > void detach()
     {
-        Value v = be_typeid<T>::klass()->getTag<ResourceLoaders>();
+        Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be detached" |  be_typeid<T>::type().name(), return);
         v.as<ResourceLoaders&>().remove(this);
     }
