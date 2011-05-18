@@ -21,7 +21,7 @@
 # include   <OpenGL/OpenGL.h>
 # include   <OpenGL/gl.h>
 #else
-# include   <GL/gl3.h>
+# include   <GL/gl.h>
 # include   <GL/glext.h>
 #endif
 

@@ -2,6 +2,7 @@
 
 import os
 import mak
+from waflib import Context
 from waflib.Logs import info,warn,pprint
 
 def options(opt):
@@ -20,8 +21,6 @@ def add_gcc_flags_to_env(conf, toolchaindir):
 	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-R', os.path.abspath(os.path.join(toolchaindir, 'lib'))])
-	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
 
 def add_sunos_flags_to_env(conf, name):
@@ -38,7 +37,7 @@ def add_sunos_flags_to_env(conf, name):
 									'runbin':	'lib',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Utils.g_module, 'APPNAME', 'noname')),
+									'data':		os.path.join('share', getattr(Context.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('share', 'bugengine', 'plugins')  }
 
 def configure(conf):

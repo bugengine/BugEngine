@@ -9,6 +9,7 @@
 #define yynerrs be_settings_nerrs
 
 
+#define __attribute__(x)
 #define YYPARSE_PARAM param
 #include    <core/stdafx.h>
 
