@@ -2,7 +2,7 @@
 # detect tools : gcc, suncc
 
 import os
-from Logs import warn,pprint
+from waflib.Logs import warn,pprint
 import mak.tools.cross_gcc
 import mak.tools.cross_suncc
 

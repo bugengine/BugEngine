@@ -8,8 +8,8 @@ namespace BugEngine { namespace Graphics
 {
 
 Shader::Shader(ShaderType type, ref<Shaders::Node> root)
-    :   type(type)
-    ,   root(root)
+    :   root(root)
+    ,   type(type)
 {
 }
 
