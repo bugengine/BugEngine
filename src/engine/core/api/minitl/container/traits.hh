@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_TRAITS_
 #define BE_MINITL_CONTAINER_TRAITS_
 /*****************************************************************************/
+#include <string.h>
 
 namespace minitl
 {
@@ -69,7 +70,7 @@ struct less;
 template< >
 struct less<const char*>
 {
-    bool operator()(const char* str1, const char *str2) const { return strcmp(str1, str2) < 0; }
+    bool operator()(const char* str1, const char *str2) const { return ::strcmp(str1, str2) < 0; }
 };
 
 }

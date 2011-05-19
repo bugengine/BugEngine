@@ -56,7 +56,7 @@ def add_linux_flags_to_env(conf, name):
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
 	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
-		if platform.lower() != 'Linux':
+		if platform.lower() != 'linux':
 			continue
 		name = 'suncc-linux-'+arch+'-'+version.replace('-','_')
 		conf.setenv(name, conf.env.derive())

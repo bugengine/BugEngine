@@ -8,6 +8,23 @@ from waflib.Logs import info,warn,pprint
 def options(opt):
 	pass
 
+
+
+def add_suncc_flags_to_env(conf, arch):
+	v = conf.env
+	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
+		conf.env.append_unique('CFLAGS', ['-m32'])
+		conf.env.append_unique('CXXFLAGS', ['-m32'])
+	elif arch in ['x86_64', 'x64', 'amd64']:
+		conf.env.append_unique('CFLAGS', ['-m64'])
+		conf.env.append_unique('CXXFLAGS', ['-m64'])
+	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-ldl', '-lm'])
+
+
+
+
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
 	newenv['GCC_VERSION']	= version
@@ -18,9 +35,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_gcc_flags_to_env(conf, toolchaindir):
-	conf.env.append_unique('CFLAGS', ['-fPIC'])
-	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-R', os.path.abspath(os.path.join(toolchaindir, 'lib'))])
+	conf.env.append_unique('CFLAGS', ['-fpic', '-fno-jump-tables'])
+	conf.env.append_unique('CXXFLAGS', ['-fpic', '-fno-jump-tables'])
+	conf.env.append_unique('LINKFLAGS', ['-static-libgcc', '-Wl,-Bstatic', '-lstdc++', '-Wl,-Bdynamic'])
 
 
 def add_sunos_flags_to_env(conf, name):
@@ -42,6 +59,24 @@ def add_sunos_flags_to_env(conf, name):
 
 def configure(conf):
 	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']
+	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
+		if platform.lower() != 'sunos':
+			continue
+		name = 'suncc-sunos-'+arch+'-'+version.replace('-','_')
+		conf.setenv(name, conf.env.derive())
+		try:
+			conf.env.CC = compilerc
+			conf.env.CXX = compilercxx
+			conf.load('cross_suncc', tooldir='mak/tools')
+			add_suncc_flags_to_env(conf, arch)
+			add_sunos_flags_to_env(conf, name)
+			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+			pprint('GREEN', 'configure for tool %s' % name)
+			conf.variant = ''
+			conf.env['BUILD_VARIANTS'].append(name)
+		except Exception as e:
+			warn('suncc not available: '+str(e))
+			conf.variant = ''
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('solaris') != -1:
 			name = 'gcc-sunos-'+arch+'-'+version.replace('-','_')
