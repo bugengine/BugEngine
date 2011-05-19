@@ -7,8 +7,8 @@ format = re.compile('^cc: Sun.*C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 @conf
 def get_available_suncc(conf):
 	conf.env.SUNCC_TARGETS = []
-	cc = conf.find_program('suncc', mandatory=False, var='detect_suncc')
-	cxx = conf.find_program('sunCC', mandatory=False, var='detect_suncxx')
+	cc = conf.find_program('suncc', mandatory=False, var='detect_suncc', silent=True)
+	cxx = conf.find_program('sunCC', mandatory=False, var='detect_suncxx', silent=True)
 	if cc and cxx:
 		conf.get_suncc_targets_32(cc, cxx)
 		conf.get_suncc_targets_64(cc, cxx)
