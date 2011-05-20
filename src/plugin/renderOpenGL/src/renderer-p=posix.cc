@@ -35,7 +35,7 @@ public:
     ~Context();
 };
 
-static GLXContext createContext(::Display* display, ::GLXFBConfig fbConfig)
+static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
 {
     GLXContext context = 0;
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
@@ -71,7 +71,7 @@ static GLXContext createContext(::Display* display, ::GLXFBConfig fbConfig)
 
 Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
 :   m_display(display)
-,   m_glContext(createContext(display, fbConfig))
+,   m_glContext(createGLXContext(display, fbConfig))
 ,   shaderext()
 {
     XSync(m_display, false);

@@ -3,13 +3,14 @@
 
 #include    <stdafx.h>
 #include    <extensions.hh>
+#include    <GL/glx.h>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void* glGetExtension(const char *name)
+Extension glGetExtension(const char *name)
 {
-    return glXGetProcAddress(name);
+    return glXGetProcAddress((const GLubyte*)name);
 }
 
 }}}

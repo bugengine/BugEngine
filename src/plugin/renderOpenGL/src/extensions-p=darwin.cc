@@ -7,7 +7,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void* glGetExtension(const char *name)
+Extension glGetExtension(const char *name)
 {
     return 0; // for now
 }
