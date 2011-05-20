@@ -15,7 +15,7 @@ protected:
     Method();
     ~Method();
 public:
-    virtual void buildSource(const IShaderBuilder& stream) const override;
+    virtual void buildSource(IShaderBuilder& stream) const override;
 };
 
 }}}
