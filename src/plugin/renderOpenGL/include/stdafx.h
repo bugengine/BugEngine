@@ -15,8 +15,6 @@
 #include    <windowing/renderer.hh>
 
 
-#define GL_GLEXT_PROTOTYPES 1
-#define GL3_PROTOTYPES 1
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenGL/OpenGL.h>
 # include   <OpenGL/gl.h>

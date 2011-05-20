@@ -13,6 +13,8 @@ class MeshLoader;
 class TextureLoader;
 class ShaderLoader;
 class Window;
+struct ShaderExtensions;
+
 
 class Renderer : public Windowing::Renderer
 {
@@ -38,6 +40,9 @@ public:
     void                            flush() override;
 
     weak<const FileSystem>          filesystem() const  { return m_filesystem; }
+
+public:
+    const ShaderExtensions&         shaderext() const;
 private:
     void                            attachWindow(Window* w);
 protected:

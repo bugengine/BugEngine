@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <extensions.hh>
 #include    <window.hh>
 #include    <loaders/mesh/meshloader.script.hh>
 #include    <loaders/texture/textureloader.script.hh>
@@ -15,6 +16,7 @@
 {
 @public
     NSOpenGLContext*        m_context;
+    ShaderExtensions        shaderext;
 }
 
 - (id) initWithFrame:(NSRect) frame context:(NSOpenGLContext*) context;
@@ -124,7 +126,7 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 ,   m_filesystem(filesystem)
 ,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
 ,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
-,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena()))
+,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena(), this))
 {
 }
 
@@ -150,6 +152,12 @@ void Renderer::createContext(void* params)
 void Renderer::destroyContext()
 {
     m_context = scoped<Renderer::Context>();
+}
+
+const ShaderExtensions& Renderer::shaderext() const
+{
+    be_assert(m_context, "extensions required before context was created");
+    return m_context->shaderext;
 }
 
 //------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <extensions.hh>
 #include    <window.hh>
 #include    <loaders/mesh/meshloader.script.hh>
 #include    <loaders/texture/textureloader.script.hh>
@@ -24,13 +25,23 @@ class Renderer::Context : public minitl::refcountable
     friend class Renderer;
 private:
     HGLRC   m_glContext;
+    struct ContextScope
+    {
+        ContextScope(HGLRC context, HDC dc) { wglMakeCurrent(dc, context); }
+        ~ContextScope()                     { wglMakeCurrent(0, 0); }
+    };
+    ContextScope m_contextScope;
 public:
-    Context();
+    const ShaderExtensions  shaderext;
+public:
+    Context(HDC dc);
     ~Context();
 };
 
-Renderer::Context::Context()
-:   m_glContext(0)
+Renderer::Context::Context(HDC dc)
+:   m_glContext(wglCreateContext(dc))
+,   m_contextScope(m_glContext, dc)
+,   shaderext()
 {
 }
 
@@ -71,11 +82,11 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-    :   m_context(scoped<Context>::create(gameArena()))
+    :   m_context()
     ,   m_filesystem(filesystem)
     ,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
     ,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
-    ,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena()))
+    ,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena(), this))
 {
 }
 
@@ -107,9 +118,9 @@ void Renderer::attachWindow(Window* w)
     };
     GLuint pixelFormat = ChoosePixelFormat(hDC, &pfd);
     SetPixelFormat(hDC, pixelFormat, &pfd);
-    if (!m_context->m_glContext)
+    if (!m_context)
     {
-        m_context->m_glContext = wglCreateContext(hDC);
+        m_context = scoped<Context>::create(gameArena(), hDC);
     }
     w->m_context->m_dc = hDC;
     w->m_context->m_glContext = m_context->m_glContext;
@@ -122,6 +133,12 @@ void Renderer::createContext(void*)
 
 void Renderer::destroyContext()
 {
+}
+
+const ShaderExtensions& Renderer::shaderext() const
+{
+    be_assert(m_context, "extensions required before context was created");
+    return m_context->shaderext;
 }
 
 //------------------------------------------------------------------------
