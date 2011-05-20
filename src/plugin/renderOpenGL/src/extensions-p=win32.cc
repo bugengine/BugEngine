@@ -7,9 +7,9 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void* glGetExtension(const char *name)
+Extension glGetExtension(const char *name)
 {
-    return wglGetProcAddress(name);
+    return (Extension)wglGetProcAddress(name);
 }
 
 }}}

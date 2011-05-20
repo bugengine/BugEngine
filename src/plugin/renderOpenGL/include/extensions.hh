@@ -8,7 +8,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void* glGetExtension(const char *name);
+typedef void(*Extension)();
+Extension glGetExtension(const char *name);
 
 struct ShaderExtensions
 {
