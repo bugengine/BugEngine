@@ -26,6 +26,8 @@ public:
     void load(weak<const IResourceLoader> loader) const;
     void unload(weak<const IResourceLoader> loader) const;
     void* getResource(weak<const IResourceLoader> owner) const;
+
+    static void load(const Value& v);
 };
 
 struct be_api(SYSTEM) ResourceLoaders
@@ -36,6 +38,7 @@ struct be_api(SYSTEM) ResourceLoaders
 
     void add(weak<const IResourceLoader> loader);
     void remove(weak<const IResourceLoader> loader);
+    void load(const Resource& resource) const;
 };
 
 }

@@ -1,26 +1,21 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_MATERIAL_SHADERS_NODE_SCRIPT_HH_
-#define BE_GRAPHICS_MATERIAL_SHADERS_NODE_SCRIPT_HH_
+#ifndef BE_GRAPHICS_MATERIAL_SHADERS_METHOD_SCRIPT_HH_
+#define BE_GRAPHICS_MATERIAL_SHADERS_METHOD_SCRIPT_HH_
 /*****************************************************************************/
-#include    <core/memory/streams.hh>
-
-namespace BugEngine { namespace Graphics
-{
-class IShaderBuilder;
-}}
+#include    <graphics/objects/shaders/node.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
-class be_api(GRAPHICS) Node : public minitl::refcountable
+class be_api(GRAPHICS) Method : public Node
 {
 protected:
-    Node();
-    ~Node();
+    Method();
+    ~Method();
 public:
-    virtual void buildSource(IShaderBuilder& stream) const = 0;
+    virtual void buildSource(const IShaderBuilder& stream) const override;
 };
 
 }}}
