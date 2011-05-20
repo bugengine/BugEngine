@@ -9,17 +9,22 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
+class Renderer;
+struct ShaderExtensions;
+
 class ShaderLoader : public IResourceLoader
 {
+private:
+    weak<const Renderer>    m_renderer;
 public:
-    ShaderLoader();
+    ShaderLoader(weak<const Renderer> renderer);
     ~ShaderLoader();
 public:
     struct ShaderContext
     {
         GLuint  shader;
 
-        ShaderContext(GLenum shaderType, const char *text, i64 textSize);
+        ShaderContext(const ShaderExtensions& shaderexts, GLenum shaderType, const char *text, i64 textSize);
         ~ShaderContext();
     };
 

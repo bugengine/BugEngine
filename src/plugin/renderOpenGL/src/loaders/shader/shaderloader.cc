@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <extensions.hh>
 #include    <loaders/shader/shaderloader.script.hh>
 #include    <loaders/shader/glshaderbuilder.hh>
 #include    <graphics/objects/shader.script.hh>
@@ -10,19 +11,20 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-ShaderLoader::ShaderContext::ShaderContext(GLenum shaderType, const char *text, i64 textSize)
-    :   shader(glCreateShader(shaderType))
+ShaderLoader::ShaderContext::ShaderContext(const ShaderExtensions& shaderext, GLenum shaderType, const char *text, i64 textSize)
+    :   shader(shaderext.glCreateShader(shaderType))
 {
     GLint size = be_checked_numcast<GLint>(textSize);
-    glShaderSource(shader, 1, &text, &size);
-    glCompileShader(shader);
+    shaderext.glShaderSource(shader, 1, &text, &size);
+    shaderext.glCompileShader(shader);
 }
 
 ShaderLoader::ShaderContext::~ShaderContext()
 {
 }
 
-ShaderLoader::ShaderLoader()
+ShaderLoader::ShaderLoader(weak<const Renderer> renderer)
+    :   m_renderer(renderer)
 {
     attach<Shader>();
 }
@@ -47,7 +49,7 @@ void* ShaderLoader::load(weak<const Resource> source) const
     }
     GLShaderBuilder builder;
     shader->buildSource(builder);
-    ShaderContext* context = new ShaderContext(shaderType, builder.text(), builder.textSize());
+    ShaderContext* context = new ShaderContext(m_renderer->shaderext(), shaderType, builder.text(), builder.textSize());
 
     return context;
 }

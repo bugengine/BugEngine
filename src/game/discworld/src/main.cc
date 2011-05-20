@@ -31,9 +31,9 @@ int be_main(weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root));
     p->doFile("data/scripts/main.lua");
 
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderNull",  weak<BugEngine::FileSystem>(filesystem));
-    /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));*/
-    /*BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));*/
+    //BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderNull",  weak<BugEngine::FileSystem>(filesystem));
+    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));
+    //BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
     BugEngine::Graphics::WindowFlags f;
     f.position = BugEngine::int2(0,0);
