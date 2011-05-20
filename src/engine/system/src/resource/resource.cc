@@ -66,6 +66,15 @@ void* Resource::getResource(weak<const IResourceLoader> loader) const
     return 0;
 }
 
+void Resource::load(const Value& v)
+{
+    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "Not a resource to load, skipping", return);
+    const Resource& resource = v.as<const Resource&>();
+    Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
+    be_assert_recover(resourceloaders, "No resource loader on type %s" | v.type().name(), return);
+    v.as<const ResourceLoaders&>().load(resource);
+}
+
 ResourceLoaders::ResourceLoaders()
     :   loaders(rttiArena())
 {
@@ -99,6 +108,14 @@ void ResourceLoaders::remove(weak<const IResourceLoader> loader)
         }
     }
     be_error("Loader was not in the list of loaders for this type");
+}
+
+void ResourceLoaders::load(const Resource& resource) const
+{
+    for(minitl::vector< weak<const IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
+    {
+        resource.load(*it);
+    }
 }
 
 }

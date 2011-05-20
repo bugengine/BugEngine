@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 #define BE_GRAPHICS_MATERIAL_SHADER_SCRIPT_HH_
 /*****************************************************************************/
-#include    <graphics/objects/shaders/node.script.hh>
+#include    <graphics/objects/shaders/method.script.hh>
 #include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Graphics
@@ -24,13 +24,13 @@ published:
     };
 
 published:
-    const ref<const Shaders::Node>  root;
-    const ShaderType                type;
+    const ref<const Shaders::Method>    main;
+    const ShaderType                    type;
 
-    Shader(ShaderType type, ref<Shaders::Node> root);
+    Shader(ShaderType type, ref<Shaders::Method> main);
     ~Shader();
 public:
-    void buildSource(const IShaderBuilder& builder) const;
+    void buildSource(IShaderBuilder& builder) const;
 };
 
 }}

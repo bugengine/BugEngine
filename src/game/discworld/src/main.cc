@@ -13,6 +13,8 @@
 #include    <graphics/renderer/graph/scenenode.hh>
 #include    <graphics/renderer/graph/multinode.hh>
 
+#include    <graphics/objects/shader.script.hh>
+#include    <graphics/objects/shaders/method.script.hh>
 
 #include    <mobile/world.hh>
 
@@ -21,7 +23,12 @@
 #include    <rtti/typeinfo.hh>
 #include    <rtti/value.inl>
 
-/*---------------------------------------------------------------------------*/
+static BugEngine::Value buildShader()
+{
+    ref<BugEngine::Graphics::Shader> result = ref<BugEngine::Graphics::Shader>::create(BugEngine::gameArena(), BugEngine::Graphics::Shader::Vertex, ref<BugEngine::Graphics::Shaders::Method>());
+    return BugEngine::Value(result);
+}
+
 int be_main(weak<BugEngine::Application> app)
 {
     ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
@@ -71,6 +78,9 @@ int be_main(weak<BugEngine::Application> app)
         app->setScene(node);
     }
 
+    BugEngine::Value shader = buildShader();
+    BugEngine::Resource::load(shader);
+
     return app->run();
 }
-/*---------------------------------------------------------------------------*/
+
