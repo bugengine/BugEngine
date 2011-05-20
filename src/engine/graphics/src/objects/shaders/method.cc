@@ -16,7 +16,7 @@ Method::~Method()
 }
 
 
-void Method::buildSource(const IShaderBuilder& stream) const
+void Method::buildSource(IShaderBuilder& stream) const
 {
 }
 
