@@ -17,6 +17,25 @@ ShaderLoader::ShaderContext::ShaderContext(const ShaderExtensions& shaderext, GL
     GLint size = be_checked_numcast<GLint>(textSize);
     shaderext.glShaderSource(shader, 1, &text, &size);
     shaderext.glCompileShader(shader);
+#ifdef BE_DEBUG
+    GLint errors, loglength;
+    shaderext.glGetObjectParameteriv(shader, GL_OBJECT_COMPILE_STATUS_ARB, &errors);
+    shaderext.glGetObjectParameteriv(shader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &loglength);
+    if (errors || loglength)
+    {
+        GLsizei maxLength = loglength, result;
+        Allocator::Block<GLcharARB> log(tempArena(), loglength);
+        shaderext.glGetInfoLog(shader, maxLength, &result, log.data());
+        if (errors)
+        {
+            be_error(log.data());
+        }
+        else
+        {
+            be_warning(log.data());
+        }
+    }
+#endif
 }
 
 ShaderLoader::ShaderContext::~ShaderContext()

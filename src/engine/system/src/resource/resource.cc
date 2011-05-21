@@ -72,7 +72,7 @@ void Resource::load(const Value& v)
     const Resource& resource = v.as<const Resource&>();
     Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
     be_assert_recover(resourceloaders, "No resource loader on type %s" | v.type().name(), return);
-    v.as<const ResourceLoaders&>().load(resource);
+    resourceloaders.as<const ResourceLoaders&>().load(resource);
 }
 
 ResourceLoaders::ResourceLoaders()

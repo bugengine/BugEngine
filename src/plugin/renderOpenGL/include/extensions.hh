@@ -16,10 +16,14 @@ struct ShaderExtensions
     typedef GLhandleARB (*glCreateShaderObjectARBProc)(GLenum);
     typedef void (*glShaderSourceARBProc)(GLhandleARB, GLsizei, const GLcharARB **, const GLint *);
     typedef void (*glCompileShaderARBProc)(GLhandleARB);
+    typedef void (*glGetObjectParameterivARBProc)(GLhandleARB, GLenum, GLint*);
+    typedef void (*glGetInfoLogARBProc)(GLhandleARB, GLsizei, GLsizei*, GLcharARB*);
 
     const glCreateShaderObjectARBProc   glCreateShader;
     const glShaderSourceARBProc         glShaderSource;
     const glCompileShaderARBProc        glCompileShader;
+    const glGetObjectParameterivARBProc glGetObjectParameteriv;
+    const glGetInfoLogARBProc           glGetInfoLog;
     ShaderExtensions();
 };
 

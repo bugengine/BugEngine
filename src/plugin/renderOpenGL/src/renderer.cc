@@ -3,14 +3,37 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
-
-#include    <input/inputmap.hh>
-
 #include    <window.hh>
+
+#include    <system/resource/resource.script.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
+
+Renderer::GPUResource::GPUResource(weak<const Resource> from)
+    :   owner(from)
+    ,   resource(0)
+{
+}
+
+Renderer::GPUResource::~GPUResource()
+{
+    if (resource) unload();
+}
+
+void Renderer::GPUResource::load()
+{
+    be_assert(resource == 0, "GPU resource is already loaded!");
+    resource = doLoad();
+}
+
+void Renderer::GPUResource::unload()
+{
+    be_assert(resource != 0, "GPU resource is not loaded!");
+    doUnload();
+    resource = 0;
+}
 
 ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
 {

@@ -6,7 +6,11 @@
 /*****************************************************************************/
 #include    <system/filesystem.hh>
 
-namespace BugEngine { namespace Graphics { namespace OpenGL
+namespace BugEngine {
+
+class Resource;
+
+namespace Graphics { namespace OpenGL
 {
 
 class MeshLoader;
@@ -19,6 +23,22 @@ struct ShaderExtensions;
 class Renderer : public Windowing::Renderer
 {
     friend class Window;
+public:
+    class GPUResource : public minitl::inode, public minitl::intrusive_list<GPUResource>::item
+    {
+    public:
+        GPUResource(weak<const Resource> from);
+        virtual ~GPUResource();
+
+        const weak<const Resource>  owner;
+        GLuint                      resource;
+
+        void load();
+        void unload();
+    private:
+        virtual GLuint doLoad() = 0;
+        virtual void doUnload() = 0;
+    };
 private:
     class Context;
     scoped<Context>             m_context;
