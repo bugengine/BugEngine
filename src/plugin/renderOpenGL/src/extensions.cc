@@ -11,6 +11,8 @@ ShaderExtensions::ShaderExtensions()
     :   glCreateShader((glCreateShaderObjectARBProc)glGetExtension("glCreateShaderObjectARB"))
     ,   glShaderSource((glShaderSourceARBProc)glGetExtension("glShaderSourceARB"))
     ,   glCompileShader((glCompileShaderARBProc)glGetExtension("glCompileShaderARB"))
+    ,   glGetObjectParameteriv((glGetObjectParameterivARBProc)glGetExtension("glGetObjectParameterivARB"))
+    ,   glGetInfoLog((glGetInfoLogARBProc)glGetExtension("glGetInfoLogARB"))
 {
 }
 
