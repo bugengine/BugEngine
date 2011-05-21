@@ -24,6 +24,7 @@ private:
     class Context;
     scoped<Context>                 m_context;
     weak<const FileSystem>          m_filesystem;
+    scoped<const IResourceLoader>   m_renderTargetLoader;
     scoped<const IResourceLoader>   m_meshLoader;
     scoped<const IResourceLoader>   m_textureLoader;
     scoped<const IResourceLoader>   m_shaderLoader;

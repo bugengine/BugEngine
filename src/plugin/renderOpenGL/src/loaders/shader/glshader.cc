@@ -64,7 +64,7 @@ void GLShader::load(weak<IRenderer> renderer)
 #endif
 }
 
-void  GLShader::unload(weak<IRenderer> renderer)
+void GLShader::unload(weak<IRenderer> renderer)
 {
 }
 

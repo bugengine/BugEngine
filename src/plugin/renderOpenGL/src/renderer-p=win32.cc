@@ -7,9 +7,11 @@
 #include    <window.hh>
 
 #include    <graphics/renderer/gpuresourceloader.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 #include    <graphics/objects/mesh.script.hh>
 #include    <graphics/objects/texture.script.hh>
 #include    <graphics/objects/shader.script.hh>
+#include    <loaders/rendertarget/glrendertarget.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
@@ -90,6 +92,7 @@ Window::Context::~Context()
 Renderer::Renderer(weak<const FileSystem> filesystem)
     :   m_context()
     ,   m_filesystem(filesystem)
+    ,   m_renderTargetLoader(scoped<const GPUResourceLoader<RenderTarget, GLRenderTarget> >::create(gameArena(), this))
     ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(gameArena(), this))
     ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(gameArena(), this))
     ,   m_shaderLoader(scoped<const GPUResourceLoader<Shader, GLShader> >::create(gameArena(), this))
