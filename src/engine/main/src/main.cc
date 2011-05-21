@@ -10,8 +10,6 @@
 #include    <cstdio>
 #include    <cstdlib>
 
-#include    <core/memory/new.inl>
-
 namespace
 {
     class LogListener : public BugEngine::ILogListener

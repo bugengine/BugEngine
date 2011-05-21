@@ -18,9 +18,6 @@ class Renderer : public IRenderer
 {
 private:
     weak<const FileSystem>  m_filesystem;
-    scoped<MeshLoader>      m_meshLoader;
-    scoped<TextureLoader>   m_textureLoader;
-    scoped<ShaderLoader>    m_shaderLoader;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();

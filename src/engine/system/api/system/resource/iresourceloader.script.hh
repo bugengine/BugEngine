@@ -17,8 +17,7 @@ class be_api(SYSTEM) IResourceLoader : public minitl::refcountable
     friend class Resource;
 public:
     IResourceLoader();
-protected:
-    ~IResourceLoader();
+    virtual ~IResourceLoader();
 
     template< typename T > void attach()
     {
@@ -34,8 +33,8 @@ protected:
     }
 
 public:
-    virtual void* load(weak<const Resource> source) const = 0;
-    virtual void  unload(const void* resource) const = 0;
+    virtual void* load(weak<const Resource> source) = 0;
+    virtual void  unload(const void* resource) = 0;
 };
 
 }

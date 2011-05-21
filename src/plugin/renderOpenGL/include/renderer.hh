@@ -8,14 +8,11 @@
 
 namespace BugEngine {
 
-class Resource;
+class IResourceLoader;
 
 namespace Graphics { namespace OpenGL
 {
 
-class MeshLoader;
-class TextureLoader;
-class ShaderLoader;
 class Window;
 struct ShaderExtensions;
 
@@ -23,29 +20,13 @@ struct ShaderExtensions;
 class Renderer : public Windowing::Renderer
 {
     friend class Window;
-public:
-    class GPUResource : public minitl::inode, public minitl::intrusive_list<GPUResource>::item
-    {
-    public:
-        GPUResource(weak<const Resource> from);
-        virtual ~GPUResource();
-
-        const weak<const Resource>  owner;
-        GLuint                      resource;
-
-        void load();
-        void unload();
-    private:
-        virtual GLuint doLoad() = 0;
-        virtual void doUnload() = 0;
-    };
 private:
     class Context;
-    scoped<Context>             m_context;
-    weak<const FileSystem>      m_filesystem;
-    scoped<const MeshLoader>    m_meshLoader;
-    scoped<const TextureLoader> m_textureLoader;
-    scoped<const ShaderLoader>  m_shaderLoader;
+    scoped<Context>                 m_context;
+    weak<const FileSystem>          m_filesystem;
+    scoped<const IResourceLoader>   m_meshLoader;
+    scoped<const IResourceLoader>   m_textureLoader;
+    scoped<const IResourceLoader>   m_shaderLoader;
 public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();

@@ -3,29 +3,27 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
-#include    <loaders/mesh/meshloader.script.hh>
+#include    <loaders/mesh/glmesh.hh>
 #include    <graphics/objects/mesh.script.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-MeshLoader::MeshLoader()
+GLMesh::GLMesh(weak<const Resource> resource)
+    :   IGPUResource(resource)
 {
-    attach<Mesh>();
 }
 
-MeshLoader::~MeshLoader()
+GLMesh::~GLMesh()
 {
-    detach<Mesh>();
 }
 
-void* MeshLoader::load(weak<const Resource> source) const
+void GLMesh::load(weak<IRenderer> renderer)
 {
-    return 0;
 }
 
-void  MeshLoader::unload(const void* resource) const
+void GLMesh::unload(weak<IRenderer> renderer)
 {
 }
 

@@ -23,9 +23,9 @@ protected:
     Resource();
     ~Resource();
 public:
-    void load(weak<const IResourceLoader> loader) const;
-    void unload(weak<const IResourceLoader> loader) const;
-    void* getResource(weak<const IResourceLoader> owner) const;
+    void load(weak<IResourceLoader> loader) const;
+    void unload(weak<IResourceLoader> loader) const;
+    void* getResource(weak<IResourceLoader> owner) const;
 
     static void load(const Value& v);
 };
@@ -34,10 +34,10 @@ struct be_api(SYSTEM) ResourceLoaders
 {
     ResourceLoaders();
     ~ResourceLoaders();
-    minitl::vector< weak<const IResourceLoader> > loaders;
+    minitl::vector< weak<IResourceLoader> > loaders;
 
-    void add(weak<const IResourceLoader> loader);
-    void remove(weak<const IResourceLoader> loader);
+    void add(weak<IResourceLoader> loader);
+    void remove(weak<IResourceLoader> loader);
     void load(const Resource& resource) const;
 };
 
