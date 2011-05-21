@@ -16,7 +16,7 @@ Resource::~Resource()
 {
 }
 
-void Resource::load(weak<const IResourceLoader> loader) const
+void Resource::load(weak<IResourceLoader> loader) const
 {
     ResourceHandle* handle = 0;
     for(int i = 0; i < MaxResourceCount; ++i)
@@ -42,7 +42,7 @@ void Resource::load(weak<const IResourceLoader> loader) const
     }
 }
 
-void Resource::unload(weak<const IResourceLoader> loader) const
+void Resource::unload(weak<IResourceLoader> loader) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
@@ -54,7 +54,7 @@ void Resource::unload(weak<const IResourceLoader> loader) const
     }
 }
 
-void* Resource::getResource(weak<const IResourceLoader> loader) const
+void* Resource::getResource(weak<IResourceLoader> loader) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
@@ -84,9 +84,9 @@ ResourceLoaders::~ResourceLoaders()
 {
 }
 
-void ResourceLoaders::add(weak<const IResourceLoader> loader)
+void ResourceLoaders::add(weak<IResourceLoader> loader)
 {
-    for(minitl::vector< weak<const IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
+    for(minitl::vector< weak<IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
     {
         if (*it == loader)
         {
@@ -97,9 +97,9 @@ void ResourceLoaders::add(weak<const IResourceLoader> loader)
     loaders.push_back(loader);
 }
 
-void ResourceLoaders::remove(weak<const IResourceLoader> loader)
+void ResourceLoaders::remove(weak<IResourceLoader> loader)
 {
-    for(minitl::vector< weak<const IResourceLoader> >::iterator it = loaders.begin(); it != loaders.end(); ++it)
+    for(minitl::vector< weak<IResourceLoader> >::iterator it = loaders.begin(); it != loaders.end(); ++it)
     {
         if (*it == loader)
         {
@@ -112,7 +112,7 @@ void ResourceLoaders::remove(weak<const IResourceLoader> loader)
 
 void ResourceLoaders::load(const Resource& resource) const
 {
-    for(minitl::vector< weak<const IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
+    for(minitl::vector< weak<IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
     {
         resource.load(*it);
     }

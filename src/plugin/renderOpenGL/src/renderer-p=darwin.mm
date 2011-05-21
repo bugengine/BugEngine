@@ -5,9 +5,15 @@
 #include    <renderer.hh>
 #include    <extensions.hh>
 #include    <window.hh>
-#include    <loaders/mesh/meshloader.script.hh>
-#include    <loaders/texture/textureloader.script.hh>
-#include    <loaders/shader/shaderloader.script.hh>
+
+#include    <graphics/renderer/igpuloader.hh>
+#include    <graphics/objects/mesh.script.hh>
+#include    <graphics/objects/texture.script.hh>
+#include    <graphics/objects/shader.script.hh>
+#include    <loaders/mesh/glmesh.hh>
+#include    <loaders/texture/gltexture.hh>
+#include    <loaders/shader/glshader.hh>
+
 
 #include    <Cocoa/Cocoa.h>
 #include    <OpenGL/OpenGL.h>

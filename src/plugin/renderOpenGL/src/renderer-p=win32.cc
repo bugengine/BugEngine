@@ -5,9 +5,15 @@
 #include    <renderer.hh>
 #include    <extensions.hh>
 #include    <window.hh>
-#include    <loaders/mesh/meshloader.script.hh>
-#include    <loaders/texture/textureloader.script.hh>
-#include    <loaders/shader/shaderloader.script.hh>
+
+#include    <graphics/renderer/gpuresourceloader.hh>
+#include    <graphics/objects/mesh.script.hh>
+#include    <graphics/objects/texture.script.hh>
+#include    <graphics/objects/shader.script.hh>
+#include    <loaders/mesh/glmesh.hh>
+#include    <loaders/texture/gltexture.hh>
+#include    <loaders/shader/glshader.hh>
+
 
 #include    <GL/wglext.h>
 
@@ -25,12 +31,6 @@ class Renderer::Context : public minitl::refcountable
     friend class Renderer;
 private:
     HGLRC   m_glContext;
-    struct ContextScope
-    {
-        ContextScope(HGLRC context, HDC dc) { wglMakeCurrent(dc, context); }
-        ~ContextScope()                     { wglMakeCurrent(0, 0); }
-    };
-    ContextScope m_contextScope;
 public:
     const ShaderExtensions  shaderext;
 public:
@@ -38,11 +38,17 @@ public:
     ~Context();
 };
 
+static HGLRC createContext(HDC dc)
+{
+    HGLRC rc = wglCreateContext(dc);
+    wglMakeCurrent(dc, rc);
+}
+
 Renderer::Context::Context(HDC dc)
-:   m_glContext(wglCreateContext(dc))
-,   m_contextScope(m_glContext, dc)
+:   m_glContext()
 ,   shaderext()
 {
+    wglMakeCurrent(dc, 0);
 }
 
 Renderer::Context::~Context()
@@ -84,9 +90,9 @@ Window::Context::~Context()
 Renderer::Renderer(weak<const FileSystem> filesystem)
     :   m_context()
     ,   m_filesystem(filesystem)
-    ,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
-    ,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
-    ,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena(), this))
+    ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(gameArena(), this))
+    ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(gameArena(), this))
+    ,   m_shaderLoader(scoped<const GPUResourceLoader<Shader, GLShader> >::create(gameArena(), this))
 {
 }
 
@@ -173,7 +179,7 @@ void Window::setCurrent()
 
 void Window::clearCurrent()
 {
-    if (!wglMakeCurrent(0, 0))
+    if (!wglMakeCurrent(m_context->m_dc, NULL))
     {
         char *errorMessage;
         ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,

@@ -12,8 +12,8 @@ class IResourceLoader;
 
 struct ResourceHandle
 {
-    weak<const IResourceLoader> owner;
-    void*                       resource;
+    weak<IResourceLoader>   owner;
+    void*                   resource;
 
     ResourceHandle();
     ~ResourceHandle();
