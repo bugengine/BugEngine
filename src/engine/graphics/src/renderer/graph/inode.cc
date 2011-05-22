@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/renderer/graph/inode.hh>
+#include    <graph/inode.hh>
 
 
 namespace BugEngine { namespace Graphics

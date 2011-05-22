@@ -22,11 +22,6 @@ static inline HRESULT d3d_checkResult(HRESULT r)
 }
 
 
-class Window;
-class VertexBuffer;
-class IndexBuffer;
-class TextureBuffer;
-
 class Renderer : public Windowing::Renderer
 {
     friend class Window;
@@ -61,10 +56,6 @@ public:
 
     SwapchainItem                   createSwapChain(D3DPRESENT_PARAMETERS params);
     SwapchainItem                   release(SwapchainItem swapchain);
-
-    ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
-    ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
-    ref<Graphics::IRenderTarget>    createMultipleRenderBuffer(TextureFlags flags, size_t count) override;
 
     u32                             getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
     bool                            multithreaded() const override { return false; }

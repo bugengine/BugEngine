@@ -22,10 +22,6 @@ public:
     Renderer(weak<const FileSystem> filesystem);
     ~Renderer();
 
-    ref<Graphics::IRenderTarget>    createRenderWindow(WindowFlags flags) override;
-    ref<Graphics::IRenderTarget>    createRenderBuffer(TextureFlags flags) override;
-    ref<Graphics::IRenderTarget>    createMultipleRenderBuffer(TextureFlags flags, size_t count) override;
-
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
     bool                            multithreaded() const override {return true; }
 

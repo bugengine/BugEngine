@@ -7,9 +7,19 @@
 namespace BugEngine { namespace Graphics
 {
 
-RenderTarget::RenderTarget(TargetType type, u16 width, u16 height)
+RenderTarget::RenderTarget(u16 width, u16 height)
     :   m_dimensions(width, height)
-    ,   m_type(type)
+    ,   m_type(Buffer)
+    ,   m_title()
+    ,   m_fullscreen(false)
+{
+}
+
+RenderTarget::RenderTarget(u16 width, u16 height, istring title, bool fullscreen)
+    :   m_dimensions(width, height)
+    ,   m_type(Buffer)
+    ,   m_title(title)
+    ,   m_fullscreen(false)
 {
 }
 

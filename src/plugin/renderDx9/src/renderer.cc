@@ -114,21 +114,6 @@ Renderer::SwapchainItem Renderer::release(SwapchainItem swapchain)
     return m_swapchains.end();
 }
 
-ref<IRenderTarget> Renderer::createRenderWindow(WindowFlags flags)
-{
-    return ref<Window>::create(gameArena(), this, flags);
-}
-
-ref<IRenderTarget> Renderer::createRenderBuffer(TextureFlags /*flags*/)
-{
-    return ref<Window>();
-}
-
-ref<IRenderTarget> Renderer::createMultipleRenderBuffer(TextureFlags /*flags*/, size_t /*count*/)
-{
-    return ref<Window>();
-}
-
 void Renderer::flush()
 {
     Windowing::Renderer::flush();

@@ -5,7 +5,6 @@
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
 #include    <mobile/world.hh>
-#include    <graphics/renderer/graph/inode.hh>
 #include    <system/scheduler/task/group.hh>
 
 namespace BugEngine
@@ -15,7 +14,7 @@ class Application : public minitl::refcountable
 {
 private:
     scoped<Scheduler>                               m_scheduler;
-    ref<Graphics::INode>                            m_scene;
+    ref<World>                                      m_world;
     ITask::CallbackConnection                       m_startSceneUpdate;
     ITask::CallbackConnection                       m_endSceneUpdate;
     minitl::vector< ref<ITask> >                    m_tasks;
@@ -29,7 +28,7 @@ public:
 
     int run(void);
 
-    void setScene(scoped<Graphics::INode> node);
+    void setScene(scoped<World> world);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

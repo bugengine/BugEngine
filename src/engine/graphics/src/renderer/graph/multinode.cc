@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <graphics/renderer/graph/multinode.hh>
+#include    <graph/multinode.hh>
 #include    <system/scheduler/task/method.hh>
 
 namespace BugEngine { namespace Graphics
