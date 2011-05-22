@@ -13,6 +13,7 @@
 #include    <graphics/renderer/graph/scenenode.hh>
 #include    <graphics/renderer/graph/multinode.hh>
 
+#include    <graphics/objects/rendertarget.script.hh>
 #include    <graphics/objects/shader.script.hh>
 #include    <graphics/objects/shaders/method.script.hh>
 
@@ -22,6 +23,16 @@
 #include    <rtti/scripting.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/value.inl>
+
+static BugEngine::Value buildRenderTarget()
+{
+    ref<BugEngine::Graphics::RenderTarget> result = ref<BugEngine::Graphics::RenderTarget>::create(BugEngine::gameArena(), 800, 600, "discworld v0.1", false);
+    return BugEngine::Value(result);
+}
+
+static BugEngine::Value buildRenderTree()
+{
+}
 
 static BugEngine::Value buildShader()
 {
@@ -42,42 +53,23 @@ int be_main(weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));
     //BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
-    BugEngine::Graphics::WindowFlags f;
-    f.position = BugEngine::int2(0,0);
-    f.size = display->getScreenSize();
-    f.title = "discworld v0.01";
-    f.border = true;
-    f.fullscreen = false;
-    f.vsync = false;
-    f.triplebuffered = false;
 
-
-    scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
+    //scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
     {
-        ref<BugEngine::Graphics::IRenderTarget> w1 = display->createRenderWindow(f);
-        f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w2 = display->createRenderWindow(f);
-        //f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w3 = display->createRenderWindow(f);
-        //f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w4 = display->createRenderWindow(f);
-        //f.position += BugEngine::int2(100, 100);
-        //ref<BugEngine::Graphics::IRenderTarget> w5 = display->createRenderWindow(f);
+        //ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::taskArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+        //ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
 
-        //ref<BugEngine::Graphics::IRenderTarget> gbuffer = display->createRenderBuffer(f);
-
-        ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::taskArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-        ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
-
-        node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w1), BugEngine::Graphics::MultiNode::MainWindow);
+        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w1), BugEngine::Graphics::MultiNode::MainWindow);
         //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
         //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
         //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
         //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
         //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(taskArena(), scene, w));
-        app->setScene(node);
+        //app->setScene(node);
     }
 
+    BugEngine::Value window = buildRenderTarget();
+    BugEngine::Resource::load(window);
     BugEngine::Value shader = buildShader();
     BugEngine::Resource::load(shader);
 

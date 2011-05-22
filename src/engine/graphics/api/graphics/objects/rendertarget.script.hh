@@ -17,8 +17,11 @@ published:
 private:
     uint2       m_dimensions;
     TargetType  m_type;
+    istring     m_title;
+    bool        m_fullscreen;
 published:
-    RenderTarget(TargetType type, u16 width, u16 height);
+    RenderTarget(u16 width, u16 height);
+    RenderTarget(u16 width, u16 height, istring title, bool fullscreen);
     ~RenderTarget();
 };
 

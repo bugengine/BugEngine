@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERER_GRAPH_MULTINODE_HH_
 #define BE_GRAPHICS_RENDERER_GRAPH_MULTINODE_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/graph/inode.hh>
+#include    <graph/inode.hh>
 #include    <system/scheduler/task/group.hh>
 
 

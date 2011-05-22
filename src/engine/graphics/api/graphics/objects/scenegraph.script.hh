@@ -1,22 +1,20 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_SCENE_ISCENE_HH_
-#define BE_GRAPHICS_SCENE_ISCENE_HH_
+#ifndef BE_GRAPHICS_OBJECTS_SCENEGRAPH_SCRIPT_HH_
+#define BE_GRAPHICS_OBJECTS_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable.hh>
-#include    <system/scheduler/task/itask.hh>
+#include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class IScene : public minitl::refcountable
+be_tag(ResourceLoaders())
+class be_api(GRAPHICS) SceneGraph : public Resource
 {
-public:
-    IScene();
-    virtual ~IScene();
-
-    virtual weak<ITask> updateTask() const = 0;
+published:
+    SceneGraph();
+    ~SceneGraph();
 };
 
 }}
