@@ -152,8 +152,8 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   Windowing::Window(renderer, flags)
+Window::Window(weak<Renderer> renderer)
+:   Windowing::Window(renderer)
 ,   m_context(scoped<Context>::create(gameArena()))
 {
     renderer->attachWindow(this);

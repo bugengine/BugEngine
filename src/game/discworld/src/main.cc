@@ -10,9 +10,8 @@
 #include    <mobile/worldscene.hh>
 
 #include    <graphics/renderer/irenderer.hh>
-#include    <graphics/renderer/graph/scenenode.hh>
-#include    <graphics/renderer/graph/multinode.hh>
 
+#include    <graphics/objects/scenegraph.script.hh>
 #include    <graphics/objects/rendertarget.script.hh>
 #include    <graphics/objects/shader.script.hh>
 #include    <graphics/objects/shaders/method.script.hh>
@@ -75,4 +74,3 @@ int be_main(weak<BugEngine::Application> app)
 
     return app->run();
 }
-

@@ -17,12 +17,10 @@ class Window : public Windowing::Window
     friend class Renderer;
 private:
     Renderer::SwapchainItem m_swapChain;
-    WindowFlags             m_flags;
 private:
     void setCurrent();
-    void recreate(WindowFlags flags);
 public:
-    Window(weak<Renderer> renderer, WindowFlags flags);
+    Window(weak<Renderer> renderer);
     ~Window();
 
     void begin(ClearMode clear) override;

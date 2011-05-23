@@ -22,7 +22,7 @@ private:
     void setCurrent();
     void clearCurrent();
 public:
-    Window(weak<Renderer> renderer, WindowFlags flags);
+    Window(weak<Renderer> renderer);
     ~Window();
 
     void begin(ClearMode clear) override;

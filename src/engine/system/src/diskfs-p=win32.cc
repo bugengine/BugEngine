@@ -143,6 +143,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
                 errorCode = ::GetLastError();
                 be_error("%s : %s"|fullname|errorMessage);
                 ::LocalFree(errorMessage);
+                return ref<IMemoryStream>();
             }
             LPVOID memory = MapViewOfFile(filemap, FILE_MAP_READ, 0, 0, 0);
             if (!memory)
@@ -159,6 +160,7 @@ ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) co
                 errorCode = ::GetLastError();
                 be_error("%s : %s"|fullname|errorMessage);
                 ::LocalFree(errorMessage);
+                return ref<IMemoryStream>();
             }
             return ref<MemoryFileMap>::create(gameArena(), memory, GetFileSize(file, &sizehigh), file, filemap);
         }

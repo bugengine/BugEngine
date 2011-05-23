@@ -4,7 +4,7 @@
 #ifndef BE_WINDOWING_WINDOW_HH_
 #define BE_WINDOWING_WINDOW_HH_
 /*****************************************************************************/
-#include    <graphics/objects/rendertarget.script.hh>
+#include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/renderer/irenderer.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
@@ -21,7 +21,7 @@ protected:
     void* getWindowHandle() const;
     bool closed() const override;
 public:
-    Window(weak<Renderer> renderer, WindowFlags flags);
+    Window(weak<Renderer> renderer);
     ~Window();
 
     void close() override;

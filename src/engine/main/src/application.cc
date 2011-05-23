@@ -7,6 +7,8 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
+#include    <mobile/worldscene.hh>
+
 namespace BugEngine
 {
 
@@ -38,10 +40,10 @@ Application::~Application(void)
 
 void Application::frameUpdate()
 {
-    if (m_scene && m_scene->closed())
-    {
-        setScene(scoped<Graphics::INode>());
-    }
+    //if (m_scene && m_scene->closed())
+    //{
+    //    setScene(scoped<WorldScene>());
+    //}
 }
 
 int Application::run()
@@ -51,7 +53,7 @@ int Application::run()
     return 0;
 }
 
-void Application::setScene(scoped<Graphics::INode> scene)
+void Application::setScene(scoped<WorldScene> scene)
 {
     if (scene)
     {

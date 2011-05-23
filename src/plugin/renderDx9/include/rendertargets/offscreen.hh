@@ -20,7 +20,7 @@ private:
 private:
     void setCurrent();
 public:
-    OffscreenRenderTarget(weak<Renderer> renderer, TextureFlags flags);
+    OffscreenRenderTarget(weak<Renderer> renderer);
     ~OffscreenRenderTarget();
 
     void begin(ClearMode clear) override;

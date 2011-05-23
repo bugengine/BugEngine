@@ -17,9 +17,8 @@ void Window::end(PresentMode presentMode)
 {
 }
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
+Window::Window(weak<Renderer> renderer)
 :   IRenderTarget(renderer)
-,   m_flags(flags)
 ,   m_closed(false)
 {
 }

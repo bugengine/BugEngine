@@ -16,22 +16,21 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
-Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> window, WindowFlags flags)
+Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> window)
 :   m_renderer(renderer)
 {
     WindowCreationFlags f;
     f.className = renderer->m_platformRenderer->getWindowClassName().c_str();
-    f.title = flags.title.c_str();
-    f.flags = flags.border ? WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX : WS_POPUP;
-    f.x = flags.position.x();
-    f.y = flags.position.y();
+    f.title = "TODO";
+    f.flags = /*TODO*/ WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    f.x = 0;
+    f.y = 0;
     f.size.left   = 0;
-    f.size.right  = flags.size.x();
+    f.size.right  = 800;
     f.size.top    = 0;
-    f.size.bottom = flags.size.y();
-    f.fullscreen = !flags.border;
-    if (flags.border)
-        AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
+    f.size.bottom = 600;
+    f.fullscreen = false;
+    AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
     m_window = renderer->m_platformRenderer->createWindowImplementation(&f);
     if (!m_window)
     {
@@ -48,9 +47,9 @@ Window::PlatformWindow::~PlatformWindow()
         be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
+Window::Window(weak<Renderer> renderer)
 :   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create(gameArena(), renderer, this, flags))
+,   m_window(scoped<PlatformWindow>::create(gameArena(), renderer, this))
 {
 }
 

@@ -17,7 +17,7 @@ private:
     weak<Renderer>  m_renderer;
     HWND            m_window;
 public:
-    PlatformWindow(weak<Renderer> renderer, weak<Window> window, WindowFlags flags);
+    PlatformWindow(weak<Renderer> renderer, weak<Window> window);
     ~PlatformWindow();
 };
 
