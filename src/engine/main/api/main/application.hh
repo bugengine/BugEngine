@@ -4,17 +4,18 @@
 #ifndef BE_MAIN_APPLICATION_HH_
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
-#include    <mobile/world.hh>
 #include    <system/scheduler/task/group.hh>
 
 namespace BugEngine
 {
 
+class WorldScene;
+
 class Application : public minitl::refcountable
 {
 private:
     scoped<Scheduler>                               m_scheduler;
-    ref<World>                                      m_world;
+    ref<WorldScene>                                 m_scene;
     ITask::CallbackConnection                       m_startSceneUpdate;
     ITask::CallbackConnection                       m_endSceneUpdate;
     minitl::vector< ref<ITask> >                    m_tasks;
@@ -28,7 +29,7 @@ public:
 
     int run(void);
 
-    void setScene(scoped<World> world);
+    void setScene(scoped<WorldScene> scene);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

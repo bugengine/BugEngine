@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-OffscreenRenderTarget::OffscreenRenderTarget(weak<Renderer> renderer, TextureFlags /*flags*/)
+OffscreenRenderTarget::OffscreenRenderTarget(weak<Renderer> renderer)
 :   IRenderTarget(renderer)
 {
 }

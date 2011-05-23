@@ -15,19 +15,19 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   Windowing::Window(renderer, flags)
+Window::Window(weak<Renderer> renderer)
+:   Windowing::Window(renderer)
 {
     D3DPRESENT_PARAMETERS d3dpp;
     ZeroMemory(&d3dpp, sizeof(d3dpp));
-    d3dpp.Windowed = !flags.fullscreen;
+    d3dpp.Windowed = true;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     d3dpp.hDeviceWindow = *(HWND*)getWindowHandle();
-    d3dpp.BackBufferWidth = flags.size.x();
-    d3dpp.BackBufferHeight = flags.size.y();
+    d3dpp.BackBufferWidth = 800;
+    d3dpp.BackBufferHeight = 600;
     d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
-    d3dpp.BackBufferCount = flags.vsync ? (flags.triplebuffered ? 2 : 1) : 1;
-    d3dpp.PresentationInterval = flags.vsync ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+    d3dpp.BackBufferCount = 1;
+    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     m_swapChain = be_checked_cast<Renderer>(m_renderer)->createSwapChain(d3dpp);
 }

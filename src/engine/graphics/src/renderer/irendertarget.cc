@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
-#include    <irendertarget.hh>
+#include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/renderer/irenderer.hh>
 #include    <system/scheduler/task/task.hh>
 #include    <system/scheduler/range/onestep.hh>

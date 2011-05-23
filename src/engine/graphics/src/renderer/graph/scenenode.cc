@@ -3,7 +3,7 @@
 
 #include    <graphics/stdafx.h>
 #include    <graph/scenenode.hh>
-#include    <irendertarget.hh>
+#include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/scene/iscene.hh>
 
 #include    <system/scheduler/task/method.hh>

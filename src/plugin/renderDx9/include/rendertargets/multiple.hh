@@ -18,7 +18,7 @@ class MultipleRenderTarget : public Graphics::IRenderTarget
 private:
     void setCurrent();
 public:
-    MultipleRenderTarget(weak<Renderer> renderer, TextureFlags flags);
+    MultipleRenderTarget(weak<Renderer> renderer);
     ~MultipleRenderTarget();
 
     void begin(ClearMode clear) override;

@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-MultipleRenderTarget::MultipleRenderTarget(weak<Renderer> renderer, TextureFlags /*flags*/)
+MultipleRenderTarget::MultipleRenderTarget(weak<Renderer> renderer)
 :   IRenderTarget(renderer)
 {
 }
