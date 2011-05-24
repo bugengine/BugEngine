@@ -11,13 +11,14 @@ namespace BugEngine { namespace Graphics
 {
 
 class IRenderer;
+template< typename T, typename U >
 class GPUResourceLoader;
 
 class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
                                     ,   public minitl::inode
                                     ,   public minitl::intrusive_list<IGPUResource>::item
 {
-    friend class GPUResourceLoader;
+    template< typename T, typename U > friend class GPUResourceLoader;
 protected:
     const weak<const Resource>  m_resource;
     const weak<IRenderer>       m_renderer;

@@ -12,7 +12,7 @@ namespace BugEngine { namespace Graphics { namespace Windowing
 
 class Renderer;
 
-class Window : public minitl::refcountable
+class Window : public IRenderTarget
 {
 private:
     class PlatformWindow;
@@ -21,8 +21,11 @@ protected:
     void* getWindowHandle() const;
     bool closed() const;
 public:
-    Window(weak<Renderer> renderer);
+    Window(weak<const RenderTarget> resource, weak<const Renderer> renderer);
     ~Window();
+
+    void load();
+    void unload();
 
     void close();
     uint2 getDimensions() const;

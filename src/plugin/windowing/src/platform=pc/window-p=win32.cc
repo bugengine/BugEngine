@@ -6,6 +6,7 @@
 #include    <windowing/renderer.hh>
 #include    <win32/platformrenderer.hh>
 #include    <win32/platformwindow.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 
 namespace BugEngine
 {
@@ -47,12 +48,23 @@ Window::PlatformWindow::~PlatformWindow()
         m_renderer->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
-Window::Window(weak<Renderer> renderer)
-:   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer, this))
+Window::Window(weak<const RenderTarget> resource, weak<const Renderer> renderer)
+:   IRenderTarget(resource, renderer)
+,   m_window(scoped<PlatformWindow>())
 {
 }
 
 Window::~Window()
+{
+    close();
+}
+
+void Window::load()
+{
+    m_window = scoped<PlatformWindow>::create(m_renderer->arena(), m_renderer, this);
+}
+
+void Window::unload()
 {
     close();
 }

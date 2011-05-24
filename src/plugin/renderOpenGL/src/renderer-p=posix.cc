@@ -120,14 +120,15 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
-    destroyContextAsync();
+    destroyContext();
 }
 
 void Renderer::attachWindow(Window* w)
 {
     if (!m_context)
     {
-        createContextAsync(0);
+        struct { ::Display* display; ::GLXFBConfig fbConfig; } params = { m_platformRenderer->m_display, m_platformRenderer->m_fbConfig };
+        createContext(&params);
         ::Window* handle = (::Window*)(w->getWindowHandle());
         glXMakeCurrent(m_context->m_display, *handle, m_context->m_glContext);
         be_info("Creating OpenGL %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));

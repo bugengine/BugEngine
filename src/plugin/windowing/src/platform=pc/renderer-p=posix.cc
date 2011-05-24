@@ -179,15 +179,4 @@ void Renderer::flush()
     }
 }
 
-void Renderer::createContextAsync(void*)
-{
-    struct { ::Display* display; ::GLXFBConfig fbConfig; } params = { m_platformRenderer->m_display, m_platformRenderer->m_fbConfig };
-    return createContext(&params);
-}
-
-void Renderer::destroyContextAsync()
-{
-    return destroyContext();
-}
-
 }}}

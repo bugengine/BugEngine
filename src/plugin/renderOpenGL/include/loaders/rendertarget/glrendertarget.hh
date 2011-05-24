@@ -13,16 +13,20 @@ class Renderer;
 
 class GLRenderTarget : public IRenderTarget
 {
-private:
 public:
     GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLRenderTarget();
+
+    void setCurrent();
+    void clearCurrent();
 
     virtual void load() override;
     virtual void unload() override;
 
     void begin(ClearMode clear) override;
     void end(PresentMode present) override;
+
+    bool closed() const override { return false; }
 
     void present();
 };

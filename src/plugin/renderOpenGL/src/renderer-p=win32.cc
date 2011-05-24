@@ -4,7 +4,6 @@
 #include    <stdafx.h>
 #include    <renderer.hh>
 #include    <extensions.hh>
-#include    <window.hh>
 
 #include    <graphics/renderer/gpuresourceloader.hh>
 #include    <graphics/objects/rendertarget.script.hh>
@@ -12,6 +11,7 @@
 #include    <graphics/objects/texture.script.hh>
 #include    <graphics/objects/shader.script.hh>
 #include    <loaders/rendertarget/glrendertarget.hh>
+#include    <loaders/rendertarget/glwindow.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
@@ -61,10 +61,10 @@ Renderer::Context::~Context()
 }
 
 
-class Window::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::refcountable
 {
     friend class Renderer;
-    friend class Window;
+    friend class GLWindow;
 private:
     HGLRC       m_glContext;
     HDC         m_dc;
@@ -73,13 +73,13 @@ public:
     ~Context();
 };
 
-Window::Context::Context()
+GLWindow::Context::Context()
 :   m_glContext(0)
 ,   m_dc(0)
 {
 }
 
-Window::Context::~Context()
+GLWindow::Context::~Context()
 {
     /*if (m_glContext)
     {
@@ -91,9 +91,10 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-    :   Window::Renderer(gameArena())
+    :   Windowing::Renderer(gameArena())
     ,   m_context()
     ,   m_filesystem(filesystem)
+    ,   m_windowLoader(scoped<const GPUResourceLoader<RenderWindow, GLWindow> >::create(arena(), this))
     ,   m_renderTargetLoader(scoped<const GPUResourceLoader<RenderTarget, GLRenderTarget> >::create(arena(), this))
     ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(arena(), this))
     ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(arena(), this))
@@ -105,7 +106,7 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::attachWindow(Window* w)
+void Renderer::attachWindow(GLWindow* w) const
 {
     HDC hDC = GetDC(*(HWND*)w->getWindowHandle());
     static const PIXELFORMATDESCRIPTOR pfd =
@@ -154,18 +155,29 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-Window::Window(weak<Renderer> renderer)
-:   Windowing::Window(renderer)
-,   m_context(scoped<Context>::create(renderer->arena()))
-{
-    renderer->attachWindow(this);
-}
-
-Window::~Window()
+GLWindow::GLWindow(weak<const RenderTarget> rendertarget, weak<const Renderer> renderer)
+:   Windowing::Window(rendertarget, renderer)
 {
 }
 
-void Window::setCurrent()
+GLWindow::~GLWindow()
+{
+}
+
+void GLWindow::load()
+{
+    Window::load();
+    m_context = scoped<Context>::create(m_renderer->arena());
+    be_checked_cast<const Renderer>(m_renderer)->attachWindow(this);
+}
+
+void GLWindow::unload()
+{
+    Window::unload();
+    m_context = scoped<Context>();
+}
+
+void GLWindow::setCurrent()
 {
     if (!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
     {
@@ -182,7 +194,7 @@ void Window::setCurrent()
     }
 }
 
-void Window::clearCurrent()
+void GLWindow::clearCurrent()
 {
     if (!wglMakeCurrent(m_context->m_dc, NULL))
     {
@@ -199,7 +211,7 @@ void Window::clearCurrent()
     }
 }
 
-void Window::present()
+void GLWindow::present()
 {
     SwapBuffers(m_context->m_dc);
 }

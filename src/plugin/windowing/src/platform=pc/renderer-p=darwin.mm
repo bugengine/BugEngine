@@ -71,14 +71,4 @@ void Renderer::flush()
     m_platformRenderer->flush();
 }
 
-void Renderer::createContextAsync(void* params)
-{
-    createContext(params);
-}
-
-void Renderer::destroyContextAsync()
-{
-    destroyContext();
-}
-
 }}}

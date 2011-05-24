@@ -25,7 +25,7 @@
 
 static BugEngine::Value buildRenderTarget()
 {
-    ref<BugEngine::Graphics::RenderTarget> result = ref<BugEngine::Graphics::RenderTarget>::create(BugEngine::gameArena(), 800, 600, "discworld v0.1", false);
+    ref<BugEngine::Graphics::RenderWindow> result = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), 800, 600, "discworld v0.1", false);
     return BugEngine::Value(result);
 }
 
@@ -74,6 +74,10 @@ int be_main(weak<BugEngine::Application> app)
     BugEngine::Resource::load(window);
     //BugEngine::Resource::load(rendertree);
     BugEngine::Resource::load(shader);
+
+    BugEngine::Resource::unload(shader);
+    //BugEngine::Resource::unload(rendertree);
+    BugEngine::Resource::unload(window);
 
     return app->run();
 }
