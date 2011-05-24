@@ -4,20 +4,15 @@
 #ifndef BE_MOBILE_WORLDSCENE_HH_
 #define BE_MOBILE_WORLDSCENE_HH_
 /*****************************************************************************/
-#include    <mobile/world.hh>
-#include    <graphics/scene/scene.hh>
+#include    <mobile/world.script.hh>
+#include    <graphics/scene/iscene.script.hh>
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/range/onestep.hh>
 
 namespace BugEngine
 {
 
-struct Space
-{
-    typedef range_onestep Node;
-};
-
-class be_api(MOBILE) WorldScene : public Graphics::Scene<Space>
+class be_api(MOBILE) WorldScene : public Graphics::IScene
 {
 private:
     ref<World>      m_world;

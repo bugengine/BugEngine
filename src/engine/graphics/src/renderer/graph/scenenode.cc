@@ -4,7 +4,7 @@
 #include    <graphics/stdafx.h>
 #include    <graph/scenenode.hh>
 #include    <graphics/renderer/irendertarget.hh>
-#include    <graphics/scene/iscene.hh>
+#include    <graphics/scene/iscene.script.hh>
 
 #include    <system/scheduler/task/method.hh>
 

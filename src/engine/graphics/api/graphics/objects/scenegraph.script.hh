@@ -5,6 +5,7 @@
 #define BE_GRAPHICS_OBJECTS_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
+#include    <graphics/scene/iscene.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -12,11 +13,7 @@ namespace BugEngine { namespace Graphics
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) SceneGraph : public Resource
 {
-private:
-    ref<IScene> m_scene;
-    ref<SceneGraph> m_
 published:
-    SceneGraph(ref<IScene> scene);
     SceneGraph();
     ~SceneGraph();
 };
