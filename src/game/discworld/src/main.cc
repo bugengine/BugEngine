@@ -7,7 +7,7 @@
 
 #include    <system/filesystem.hh>
 #include    <system/diskfs.hh>
-#include    <mobile/worldscene.hh>
+#include    <mobile/worldscene.script.hh>
 
 #include    <graphics/renderer/irenderer.hh>
 
@@ -16,7 +16,7 @@
 #include    <graphics/objects/shader.script.hh>
 #include    <graphics/objects/shaders/method.script.hh>
 
-#include    <mobile/world.hh>
+#include    <mobile/world.script.hh>
 
 #include    <rtti/namespace.script.hh>
 #include    <rtti/scripting.hh>

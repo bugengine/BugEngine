@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <mobile/stdafx.h>
-#include    <mobile/world.hh>
+#include    <mobile/world.script.hh>
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 

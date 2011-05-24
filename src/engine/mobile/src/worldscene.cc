@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <mobile/stdafx.h>
-#include    <mobile/worldscene.hh>
+#include    <mobile/worldscene.script.hh>
 
 namespace BugEngine
 {

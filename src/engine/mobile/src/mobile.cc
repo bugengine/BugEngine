@@ -2,4 +2,4 @@
    see LICENSE for detail */
 
 #include    <mobile/stdafx.h>
-#include    <mobile/mobile.hh>
+#include    <mobile/mobile.script.hh>
