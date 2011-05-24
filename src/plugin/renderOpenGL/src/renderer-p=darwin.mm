@@ -58,7 +58,7 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 class Renderer::Context : public minitl::refcountable
 {
     friend class Renderer;
-    friend class Window;
+    friend class GLWindow;
 private:
     NSOpenGLPixelFormat*    m_pixelFormat;
     NSOpenGLContext*        m_context;
@@ -95,10 +95,10 @@ Renderer::Context::~Context()
 }
 
 
-class Window::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::refcountable
 {
     friend class Renderer;
-    friend class Window;
+    friend class GLWindow;
 private:
     NSWindow*               m_window;
     BugEngineOpenGLView*    m_view;
@@ -108,7 +108,7 @@ public:
     ~Context();
 };
 
-Window::Context::Context(NSWindow* window, NSOpenGLContext* context)
+GLWindow::Context::Context(NSWindow* window, NSOpenGLContext* context)
     :   m_window(window)
     ,   m_view([[BugEngineOpenGLView alloc] initWithFrame:[m_window contentRectForFrameRect:[m_window frame]]
                                                   context: context])
@@ -119,7 +119,7 @@ Window::Context::Context(NSWindow* window, NSOpenGLContext* context)
     [m_view->m_context setView: m_view];
 }
 
-Window::Context::~Context()
+GLWindow::Context::~Context()
 {
     [m_window setContentView:nil];
     [m_view release];
@@ -128,7 +128,7 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-:   Window::Renderer(gameArena())
+:   Windowing::Renderer(gameArena())
 ,   m_context(scoped<Renderer::Context>::create(arena()))
 ,   m_filesystem(filesystem)
 ,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
@@ -139,16 +139,16 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 
 Renderer::~Renderer()
 {
-    destroyContextAsync();
+    destroyContext();
 }
 
-void Renderer::attachWindow(Window* w)
+void Renderer::attachWindow(GLWindow* w)
 {
     NSWindow* window = (NSWindow*)w->getWindowHandle();
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
     be_assert(window, "No native window created for BugEngine window");
-    w->m_context = scoped<Window::Context>::create(arena(), window, context);
+    w->m_context = scoped<GLWindow::Context>::create(arena(), window, context);
     [context release];
 }
 
@@ -169,17 +169,17 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
+GLWindow::GLWindow(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
 {
     renderer->attachWindow(this);
 }
 
-Window::~Window()
+GLWindow::~GLWindow()
 {
 }
 
-void Window::setCurrent()
+void GLWindow::setCurrent()
 {
     if(!closed())
     {
@@ -187,7 +187,7 @@ void Window::setCurrent()
     }
 }
 
-void Window::clearCurrent()
+void GLWindow::clearCurrent()
 {
     if(!closed())
     {
@@ -195,7 +195,7 @@ void Window::clearCurrent()
     }
 }
 
-void Window::present()
+void GLWindow::present()
 {
     if(!closed())
     {

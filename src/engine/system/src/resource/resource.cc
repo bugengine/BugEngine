@@ -49,6 +49,8 @@ void Resource::unload(weak<IResourceLoader> loader) const
         if (m_handles[i].owner == loader)
         {
             m_handles[i].owner->unload(m_handles[i].resource);
+            m_handles[i].owner = 0;
+            m_handles[i].resource = 0;
             return;
         }
     }
@@ -73,6 +75,15 @@ void Resource::load(const Value& v)
     Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
     be_assert_recover(resourceloaders, "No resource loader on type %s" | v.type().name(), return);
     resourceloaders.as<const ResourceLoaders&>().load(resource);
+}
+
+void Resource::unload(const Value& v)
+{
+    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "Not a resource to load, skipping", return);
+    const Resource& resource = v.as<const Resource&>();
+    Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
+    be_assert_recover(resourceloaders, "No resource loader on type %s" | v.type().name(), return);
+    resourceloaders.as<const ResourceLoaders&>().unload(resource);
 }
 
 ResourceLoaders::ResourceLoaders()
@@ -115,6 +126,14 @@ void ResourceLoaders::load(const Resource& resource) const
     for(minitl::vector< weak<IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
     {
         resource.load(*it);
+    }
+}
+
+void ResourceLoaders::unload(const Resource& resource) const
+{
+    for(minitl::vector< weak<IResourceLoader> >::const_iterator it = loaders.begin(); it != loaders.end(); ++it)
+    {
+        resource.unload(*it);
     }
 }
 

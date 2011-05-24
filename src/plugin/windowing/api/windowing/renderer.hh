@@ -21,8 +21,6 @@ private:
     scoped<PlatformRenderer>    m_platformRenderer;
 protected:
     void            flush() override;
-    void            createContextAsync(void* params);
-    void            destroyContextAsync();
 public:
     Renderer(Allocator& allocator);
     ~Renderer();

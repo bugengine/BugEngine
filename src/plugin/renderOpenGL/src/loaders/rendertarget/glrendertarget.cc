@@ -48,4 +48,16 @@ void GLRenderTarget::end(PresentMode presentMode)
 }
 
 
+void GLRenderTarget::setCurrent()
+{
+}
+
+void GLRenderTarget::clearCurrent()
+{
+}
+
+void GLRenderTarget::present()
+{
+}
+
 }}}

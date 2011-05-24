@@ -18,11 +18,12 @@ protected:
     const weak<IRenderer>               m_renderer;
     minitl::vector< ref<GPUResource> >  m_resources;
     minitl::vector< ref<GPUResource> >  m_pendingDelete;
-    minitl::istack< GPUResource> >      m_toLoad;
+    minitl::istack< GPUResource >       m_toLoad;
 public:
     GPUResourceLoader(weak<IRenderer> renderer)
         :   m_renderer(renderer)
         ,   m_resources(renderer->arena())
+        ,   m_pendingDelete(renderer->arena())
         ,   m_toLoad()
     {
         attach<SystemResource>();
@@ -35,7 +36,7 @@ public:
 
     virtual void* load(weak<const Resource> source) override
     {
-        GPUResource resource = ref<GPUResource>::create(m_renderer->arena(), m_renderer, source);
+        ref<GPUResource> resource = ref<GPUResource>::create(m_renderer->arena(), m_renderer, source);
         resource->m_index = be_checked_numcast<i32>(m_resources.size());
         m_resources.push_back(resource);
         return resource.operator->();
@@ -43,13 +44,13 @@ public:
     virtual void  unload(const void* resource) override
     {
         weak<const GPUResource> gpuresource((const GPUResource*) resource);
-        be_assert_recover(resource->m_index >= 0, "invalid resource index", return);
-        be_assert_recover(resource->m_index < m_resources.size(), "invalid resource index", return);
-        be_assert_recover(m_resources[resource->m_index] == gpuresource, "invalid resource index", return);
-        m_pendingDelete.append(m_resources[resource->m_index]);
-        m_resources.back()->m_index = resource->m_index;
-        m_resources[resource->m_index] = m_resources.back();
-        m_resources.pop_back();
+        be_assert_recover(gpuresource->m_index >= 0, "invalid resource index", return);
+        be_assert_recover(gpuresource->m_index < m_resources.size(), "invalid resource index", return);
+        be_assert_recover(m_resources[gpuresource->m_index] == gpuresource, "invalid resource index", return);
+        m_pendingDelete.push_back(m_resources[gpuresource->m_index]);
+        m_resources.back()->m_index = gpuresource->m_index;
+        m_resources[gpuresource->m_index] = m_resources.back();
+        m_resources.erase(m_resources.end()-1);
     }
 };
 

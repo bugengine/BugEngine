@@ -141,14 +141,4 @@ uint2 Renderer::getScreenSize()
     return uint2(rect.right - rect.left, rect.bottom - rect.top);
 }
 
-void Renderer::createContextAsync(void* params)
-{
-    createContext(params);
-}
-
-void Renderer::destroyContextAsync()
-{
-    destroyContext();
-}
-
 }}}

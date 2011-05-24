@@ -29,8 +29,6 @@ public:
     IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer);
     virtual ~IRenderTarget();
 
-    virtual uint2   getDimensions() const = 0;
-    virtual void    close() = 0;
     virtual void    begin(ClearMode clear) = 0;
     virtual void    end(PresentMode present) = 0;
 

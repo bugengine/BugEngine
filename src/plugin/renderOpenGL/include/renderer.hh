@@ -13,17 +13,18 @@ class IResourceLoader;
 namespace Graphics { namespace OpenGL
 {
 
-class Window;
+class GLWindow;
 struct ShaderExtensions;
 
 
 class Renderer : public Windowing::Renderer
 {
-    friend class Window;
+    friend class GLWindow;
 private:
     class Context;
-    scoped<Context>                 m_context;
+    mutable scoped<Context>         m_context;
     weak<const FileSystem>          m_filesystem;
+    scoped<const IResourceLoader>   m_windowLoader;
     scoped<const IResourceLoader>   m_renderTargetLoader;
     scoped<const IResourceLoader>   m_meshLoader;
     scoped<const IResourceLoader>   m_textureLoader;
@@ -42,7 +43,7 @@ public:
 public:
     const ShaderExtensions&         shaderext() const;
 private:
-    void                            attachWindow(Window* w);
+    void                            attachWindow(GLWindow* w) const;
 protected:
     void                            createContext(void* params) override;
     void                            destroyContext() override;
