@@ -9,15 +9,18 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
+class Renderer;
+
 class GLTexture : public IGPUResource
 {
 public:
-    GLTexture(weak<const Resource> resource);
+    GLTexture(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLTexture();
 
-    virtual void load(weak<IRenderer> renderer) override;
-    virtual void unload(weak<IRenderer> renderer) override;
+    virtual void load() override;
+    virtual void unload() override;
 };
+
 
 }}}
 

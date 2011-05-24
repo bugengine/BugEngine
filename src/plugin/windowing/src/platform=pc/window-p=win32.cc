@@ -31,7 +31,7 @@ Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> win
     f.size.bottom = 600;
     f.fullscreen = false;
     AdjustWindowRect(&f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
-    m_window = renderer->m_platformRenderer->createWindowImplementation(&f);
+    m_window = renderer->m_platformRenderer->createWindowImplementation(f);
     if (!m_window)
     {
         BE_WIN32_PRINTERROR();
@@ -44,12 +44,11 @@ Window::PlatformWindow::~PlatformWindow()
     HWND hWnd = m_window;
     m_window = 0;
     if (hWnd)
-        be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->destroyWindowImplementation(hWnd);
+        m_renderer->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
 Window::Window(weak<Renderer> renderer)
-:   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create(gameArena(), renderer, this))
+:   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer, this))
 {
 }
 

@@ -32,7 +32,7 @@ public:
     PlatformRenderer(weak<Renderer> renderer);
     ~PlatformRenderer();
 
-    HWND            createWindowImplementation(const WindowCreationFlags* flags) const;
+    HWND            createWindowImplementation(const WindowCreationFlags& flags) const;
     void            destroyWindowImplementation(HWND hWnd);
     const istring&  getWindowClassName() const;
 };

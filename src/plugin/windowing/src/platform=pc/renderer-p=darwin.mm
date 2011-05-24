@@ -48,8 +48,9 @@ void Renderer::PlatformRenderer::flush()
     }
 }
 
-Renderer::Renderer()
-    :   m_platformRenderer(scoped<PlatformRenderer>::create(gameArena()))
+Renderer::Renderer(Allocator& arena)
+    :   IRenderer(arena)
+    ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {
 }
 

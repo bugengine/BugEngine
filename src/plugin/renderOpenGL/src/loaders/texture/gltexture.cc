@@ -10,8 +10,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLTexture::GLTexture(weak<const Resource> resource)
-    :   IGPUResource(resource)
+GLTexture::GLTexture(weak<const Resource> resource, weak<const Renderer> renderer)
+    :   IGPUResource(resource, renderer)
 {
 }
 
@@ -19,12 +19,11 @@ GLTexture::~GLTexture()
 {
 }
 
-void GLTexture::load(weak<IRenderer> renderer)
+void GLTexture::load()
 {
 }
 
-void GLTexture::unload(weak<IRenderer> renderer)
+void GLTexture::unload()
 {
 }
-
 }}}

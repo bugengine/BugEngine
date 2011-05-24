@@ -19,20 +19,7 @@ namespace BugEngine { namespace Graphics { namespace Windowing
 
 namespace
 {
-    struct WindowCreationEvent
-    {
-        const WindowCreationFlags* flags;
-        HWND                 hWnd;
-        Event                event;
-    };
-    struct ContextCreationEvent
-    {
-        void*   params;
-        Event   event;
-    };
-
-
-    LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         static unsigned int nbWindows = 0;
         switch( msg )
@@ -101,14 +88,14 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     UnregisterClass(m_windowClassName.c_str(), hDllInstance);
 }
 
-HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags* flags) const
+HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
 {
-    HWND hWnd = CreateWindowEx( flags->fullscreen ? WS_EX_TOPMOST : 0,
-                                flags->className,
-                                flags->title,
-                                flags->flags,
-                                flags->x, flags->y,
-                                flags->size.right-flags->size.left, flags->size.bottom-flags->size.top,
+    HWND hWnd = CreateWindowEx( flags.fullscreen ? WS_EX_TOPMOST : 0,
+                                flags.className,
+                                flags.title,
+                                flags.flags,
+                                flags.x, flags.y,
+                                flags.size.right-flags.size.left, flags.size.bottom-flags.size.top,
                                 NULL, NULL, hDllInstance, NULL );
     ShowWindow(hWnd, SW_SHOW);
     UpdateWindow(hWnd);
@@ -127,8 +114,9 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer()
-    :   m_platformRenderer(scoped<PlatformRenderer>::create(gameArena(), this))
+Renderer::Renderer(Allocator& allocator)
+    :   IRenderer(allocator)
+    ,   m_platformRenderer(scoped<PlatformRenderer>::create(allocator, this))
 {
 }
 

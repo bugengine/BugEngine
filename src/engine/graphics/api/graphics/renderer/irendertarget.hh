@@ -4,17 +4,17 @@
 #ifndef BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
 #define BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
 /*****************************************************************************/
-#include   <system/scheduler/task/group.hh>
+#include    <system/scheduler/task/group.hh>
+#include    <graphics/renderer/igpuresource.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
 class IRenderer;
+class RenderTarget;
 
-class be_api(GRAPHICS) IRenderTarget : public minitl::refcountable
+class be_api(GRAPHICS) IRenderTarget : public IGPUResource
 {
-protected:
-    weak<IRenderer> const   m_renderer;
 public:
     enum ClearMode
     {
@@ -26,7 +26,7 @@ public:
         DontPresent,
         Present
     };
-    IRenderTarget(weak<IRenderer> renderer);
+    IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer);
     virtual ~IRenderTarget();
 
     virtual uint2   getDimensions() const = 0;

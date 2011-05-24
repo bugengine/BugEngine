@@ -12,20 +12,20 @@ namespace BugEngine { namespace Graphics { namespace Windowing
 
 class Renderer;
 
-class Window : public IRenderTarget
+class Window : public minitl::refcountable
 {
 private:
     class PlatformWindow;
     scoped<PlatformWindow>  m_window;
 protected:
     void* getWindowHandle() const;
-    bool closed() const override;
+    bool closed() const;
 public:
     Window(weak<Renderer> renderer);
     ~Window();
 
-    void close() override;
-    uint2 getDimensions() const override;
+    void close();
+    uint2 getDimensions() const;
 };
 
 }}}

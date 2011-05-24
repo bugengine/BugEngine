@@ -13,9 +13,10 @@
 namespace BugEngine { namespace Graphics
 {
 
-IRenderer::IRenderer()
-    :   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, Scheduler::MainThread))
+IRenderer::IRenderer(Allocator& allocator)
+    :   m_allocator(allocator)
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena()))
+    ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, Scheduler::MainThread))
 {
 }
 
@@ -26,6 +27,11 @@ IRenderer::~IRenderer()
 weak<ITask> IRenderer::syncTask()
 {
     return m_syncTask;
+}
+
+Allocator& IRenderer::arena() const
+{
+    return m_allocator;
 }
 
 }}

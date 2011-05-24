@@ -4,14 +4,16 @@
 #include    <graphics/stdafx.h>
 #include    <graphics/renderer/irendertarget.hh>
 #include    <graphics/renderer/irenderer.hh>
+#include    <graphics/objects/rendertarget.script.hh>
+
 #include    <system/scheduler/task/task.hh>
 #include    <system/scheduler/range/onestep.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-IRenderTarget::IRenderTarget(weak<IRenderer> renderer)
-:   m_renderer(renderer)
+IRenderTarget::IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer)
+:   IGPUResource(rendertarget, renderer)
 {
 }
 
