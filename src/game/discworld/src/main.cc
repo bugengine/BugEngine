@@ -31,6 +31,7 @@ static BugEngine::Value buildRenderTarget()
 
 static BugEngine::Value buildRenderTree()
 {
+    return BugEngine::Value();
 }
 
 static BugEngine::Value buildShader()
@@ -68,8 +69,10 @@ int be_main(weak<BugEngine::Application> app)
     }
 
     BugEngine::Value window = buildRenderTarget();
-    BugEngine::Resource::load(window);
+    BugEngine::Value rendertree = buildRenderTree();
     BugEngine::Value shader = buildShader();
+    BugEngine::Resource::load(window);
+    //BugEngine::Resource::load(rendertree);
     BugEngine::Resource::load(shader);
 
     return app->run();

@@ -10,8 +10,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLRenderTarget::GLRenderTarget(weak<const Resource> resource)
-    :   IGPUResource(resource)
+GLRenderTarget::GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer)
+    :   IRenderTarget(resource, renderer)
 {
 }
 
@@ -19,12 +19,33 @@ GLRenderTarget::~GLRenderTarget()
 {
 }
 
-void GLRenderTarget::load(weak<IRenderer> renderer)
+void GLRenderTarget::load()
 {
 }
 
-void GLRenderTarget::unload(weak<IRenderer> renderer)
+void GLRenderTarget::unload()
 {
 }
+
+void GLRenderTarget::begin(ClearMode clear)
+{
+    setCurrent();
+    if (clear == IRenderTarget::Clear)
+    {
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+}
+
+void GLRenderTarget::end(PresentMode presentMode)
+{
+    glFlush();
+    if (presentMode == Present)
+    {
+        present();
+    }
+    clearCurrent();
+}
+
 
 }}}

@@ -21,14 +21,10 @@ private:
 private:
     void setCurrent();
     void clearCurrent();
+    void present();
 public:
     Window(weak<Renderer> renderer);
     ~Window();
-
-    void begin(ClearMode clear) override;
-    void end(PresentMode present) override;
-
-    void present();
 };
 
 }}}

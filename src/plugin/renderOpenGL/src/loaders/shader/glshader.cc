@@ -11,8 +11,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLShader::GLShader(weak<const Resource> resource)
-    :   IGPUResource(resource)
+GLShader::GLShader(weak<const Resource> resource, weak<const Renderer> renderer)
+    :   IGPUResource(resource, renderer)
 {
 }
 
@@ -20,7 +20,7 @@ GLShader::~GLShader()
 {
 }
 
-void GLShader::load(weak<IRenderer> renderer)
+void GLShader::load()
 {
     weak<const Shader> shader = be_checked_cast<const Shader>(m_resource);
     GLenum shaderType = GL_VERTEX_SHADER;
@@ -37,7 +37,7 @@ void GLShader::load(weak<IRenderer> renderer)
     GLShaderBuilder builder;
     shader->buildSource(builder);
 
-    const ShaderExtensions& shaderext = be_checked_cast<Renderer>(renderer)->shaderext();
+    const ShaderExtensions& shaderext = be_checked_cast<const Renderer>(m_renderer)->shaderext();
     m_shader = shaderext.glCreateShader(shaderType);
     GLint size = be_checked_numcast<GLint>(builder.textSize());
     const GLcharARB* text = (GLcharARB*)builder.text();
@@ -64,7 +64,7 @@ void GLShader::load(weak<IRenderer> renderer)
 #endif
 }
 
-void GLShader::unload(weak<IRenderer> renderer)
+void GLShader::unload()
 {
 }
 

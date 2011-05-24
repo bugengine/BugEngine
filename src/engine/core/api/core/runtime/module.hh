@@ -27,7 +27,7 @@ public:
         u64             fileSize;
 
         bool operator !() const { return fileSize == 0; }
-        operator void* () const { return (void*)fileSize; }
+        operator void* () const { return (void*)(intptr_t)fileSize; }
     };
 private:
     friend class Section;

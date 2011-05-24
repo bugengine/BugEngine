@@ -11,18 +11,23 @@ namespace BugEngine { namespace Graphics
 {
 
 class IRenderer;
+class GPUResourceLoader;
 
-class be_api(GRAPHICS) IGPUResource : public minitl::inode
-                                    , public minitl::intrusive_list<IGPUResource>::item
+class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
+                                    ,   public minitl::inode
+                                    ,   public minitl::intrusive_list<IGPUResource>::item
 {
+    friend class GPUResourceLoader;
 protected:
     const weak<const Resource>  m_resource;
+    const weak<IRenderer>       m_renderer;
+    mutable i32                 m_index;
 public:
-    IGPUResource(weak<const Resource> resource);
+    IGPUResource(weak<const Resource> resource, weak<const IRenderer> renderer);
     virtual ~IGPUResource();
 
-    virtual void load(weak<IRenderer> renderer) = 0;
-    virtual void unload(weak<IRenderer> renderer) = 0;
+    virtual void load() = 0;
+    virtual void unload() = 0;
 };
 
 }}

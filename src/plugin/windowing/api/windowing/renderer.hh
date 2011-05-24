@@ -24,7 +24,7 @@ protected:
     void            createContextAsync(void* params);
     void            destroyContextAsync();
 public:
-    Renderer();
+    Renderer(Allocator& allocator);
     ~Renderer();
 
     uint2           getScreenSize() override;

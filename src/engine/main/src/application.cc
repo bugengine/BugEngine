@@ -7,7 +7,7 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
-#include    <mobile/worldscene.hh>
+#include    <mobile/worldscene.script.hh>
 
 namespace BugEngine
 {

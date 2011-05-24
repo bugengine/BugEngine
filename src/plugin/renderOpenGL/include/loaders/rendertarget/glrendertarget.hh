@@ -9,14 +9,22 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class GLRenderTarget : public IGPUResource
+class Renderer;
+
+class GLRenderTarget : public IRenderTarget
 {
+private:
 public:
-    GLRenderTarget(weak<const Resource> resource);
+    GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLRenderTarget();
 
-    virtual void load(weak<IRenderer> renderer) override;
-    virtual void unload(weak<IRenderer> renderer) override;
+    virtual void load() override;
+    virtual void unload() override;
+
+    void begin(ClearMode clear) override;
+    void end(PresentMode present) override;
+
+    void present();
 };
 
 }}}

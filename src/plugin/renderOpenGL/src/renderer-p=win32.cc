@@ -40,14 +40,15 @@ public:
     ~Context();
 };
 
-static HGLRC createContext(HDC dc)
+static HGLRC createGLContext(HDC dc)
 {
     HGLRC rc = wglCreateContext(dc);
     wglMakeCurrent(dc, rc);
+    return rc;
 }
 
 Renderer::Context::Context(HDC dc)
-:   m_glContext()
+:   m_glContext(createGLContext(dc))
 ,   shaderext()
 {
     wglMakeCurrent(dc, 0);
@@ -90,12 +91,13 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-    :   m_context()
+    :   Window::Renderer(gameArena())
+    ,   m_context()
     ,   m_filesystem(filesystem)
-    ,   m_renderTargetLoader(scoped<const GPUResourceLoader<RenderTarget, GLRenderTarget> >::create(gameArena(), this))
-    ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(gameArena(), this))
-    ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(gameArena(), this))
-    ,   m_shaderLoader(scoped<const GPUResourceLoader<Shader, GLShader> >::create(gameArena(), this))
+    ,   m_renderTargetLoader(scoped<const GPUResourceLoader<RenderTarget, GLRenderTarget> >::create(arena(), this))
+    ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(arena(), this))
+    ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(arena(), this))
+    ,   m_shaderLoader(scoped<const GPUResourceLoader<Shader, GLShader> >::create(arena(), this))
 {
 }
 
@@ -129,7 +131,7 @@ void Renderer::attachWindow(Window* w)
     SetPixelFormat(hDC, pixelFormat, &pfd);
     if (!m_context)
     {
-        m_context = scoped<Context>::create(gameArena(), hDC);
+        m_context = scoped<Context>::create(arena(), hDC);
     }
     w->m_context->m_dc = hDC;
     w->m_context->m_glContext = m_context->m_glContext;
@@ -154,7 +156,7 @@ const ShaderExtensions& Renderer::shaderext() const
 
 Window::Window(weak<Renderer> renderer)
 :   Windowing::Window(renderer)
-,   m_context(scoped<Context>::create(gameArena()))
+,   m_context(scoped<Context>::create(renderer->arena()))
 {
     renderer->attachWindow(this);
 }

@@ -17,10 +17,11 @@ namespace BugEngine { namespace Graphics
 class be_api(GRAPHICS) IRenderer : public minitl::pointer
 {
 private:
-    scoped<IResourceLoader>         m_sceneLoader;
-    ref<ITask>                      m_syncTask;
+    Allocator&              m_allocator;
+    scoped<IResourceLoader> m_sceneLoader;
+    ref<ITask>              m_syncTask;
 protected:
-    IRenderer();
+    IRenderer(Allocator& allocator);
     virtual ~IRenderer();
 protected:
     virtual void                    flush() = 0;
@@ -31,6 +32,8 @@ public:
 
     virtual u32                     getMaxSimultaneousRenderTargets() const = 0;
     virtual bool                    multithreaded() const = 0;
+
+            Allocator&              arena() const;
 };
 
 }}

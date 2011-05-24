@@ -128,11 +128,12 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-:   m_context(scoped<Renderer::Context>::create(gameArena()))
+:   Window::Renderer(gameArena())
+,   m_context(scoped<Renderer::Context>::create(arena()))
 ,   m_filesystem(filesystem)
-,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
-,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
-,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena(), this))
+,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
+,   m_textureLoader(scoped<const TextureLoader>::create(arena()))
+,   m_shaderLoader(scoped<const ShaderLoader>::create(arena(), this))
 {
 }
 
@@ -147,7 +148,7 @@ void Renderer::attachWindow(Window* w)
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
     be_assert(window, "No native window created for BugEngine window");
-    w->m_context = scoped<Window::Context>::create(gameArena(), window, context);
+    w->m_context = scoped<Window::Context>::create(arena(), window, context);
     [context release];
 }
 

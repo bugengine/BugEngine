@@ -109,11 +109,12 @@ Window::Context::~Context()
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-:   m_context()
+:   Window::Renderer(gameArena())
+,   m_context()
 ,   m_filesystem(filesystem)
-,   m_meshLoader(scoped<const MeshLoader>::create(gameArena()))
-,   m_textureLoader(scoped<const TextureLoader>::create(gameArena()))
-,   m_shaderLoader(scoped<const ShaderLoader>::create(gameArena(), this))
+,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
+,   m_textureLoader(scoped<const TextureLoader>::create(arena()))
+,   m_shaderLoader(scoped<const ShaderLoader>::create(arena(), this))
 {
 }
 
@@ -142,7 +143,7 @@ void Renderer::createContext(void* params)
         ::Display* display;
         ::GLXFBConfig fbConfig;
     } *p = (const DisplayInfo*)params;
-    m_context = scoped<Context>::create(gameArena(), p->display, p->fbConfig);
+    m_context = scoped<Context>::create(arena(), p->display, p->fbConfig);
 }
 
 void Renderer::destroyContext()
@@ -159,7 +160,7 @@ const ShaderExtensions& Renderer::shaderext() const
 
 Window::Window(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
-,   m_context(scoped<Context>::create(gameArena()))
+,   m_context(scoped<Context>::create(renderer->arena()))
 {
     renderer->attachWindow(this);
 }

@@ -10,8 +10,8 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLMesh::GLMesh(weak<const Resource> resource)
-    :   IGPUResource(resource)
+GLMesh::GLMesh(weak<const Resource> resource, weak<const Renderer> renderer)
+    :   IGPUResource(resource, renderer)
 {
 }
 
@@ -19,11 +19,11 @@ GLMesh::~GLMesh()
 {
 }
 
-void GLMesh::load(weak<IRenderer> renderer)
+void GLMesh::load()
 {
 }
 
-void GLMesh::unload(weak<IRenderer> renderer)
+void GLMesh::unload()
 {
 }
 
