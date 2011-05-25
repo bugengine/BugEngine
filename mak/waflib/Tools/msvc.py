@@ -132,6 +132,7 @@ echo LIB=%%LIB%%
 	sout = conf.cmd_and_log(['cmd', '/E:on', '/V:on', '/C', batfile.abspath()])
 	lines = sout.splitlines()
 
+	if not lines[0]: lines=lines[1:]
 	for x in ('Setting environment', 'Setting SDK environment', 'Intel(R) C++ Compiler', 'Intel Parallel Studio'):
 		if lines[0].find(x) != -1:
 			break
