@@ -22,7 +22,7 @@ template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
 
 template< > ref<RTTI::ClassInfo> be_typeid< ::minitl::refcountable >::klassBuilder()
 {
-    return be_typeid< void >::klass();
+    return be_const_cast<RTTI::ClassInfo>(be_typeid< void >::klass());
 }
 
 #define BE_MAKE_BUILTIN(type,parent)                                                            \
@@ -35,7 +35,7 @@ template< > ref<RTTI::ClassInfo> be_typeid< type >::klassBuilder()              
                                                                      0);                        \
     klass->copyconstructor = &RTTI::nullconstructor<sizeof(type)>;                              \
     klass->destructor = &RTTI::nulldestructor;                                                  \
-    weak<RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();                                     \
+    weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();                                     \
     ns->add(inamespace(#type), Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\
     return klass;                                                                               \
 }

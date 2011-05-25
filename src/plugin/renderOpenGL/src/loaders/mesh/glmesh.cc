@@ -19,7 +19,7 @@ GLMesh::~GLMesh()
 {
 }
 
-void GLMesh::load()
+void GLMesh::load(weak<const Resource> resource)
 {
 }
 

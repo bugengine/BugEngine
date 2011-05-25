@@ -164,9 +164,9 @@ GLWindow::~GLWindow()
 {
 }
 
-void GLWindow::load()
+void GLWindow::load(weak<const Resource> resource)
 {
-    Window::load();
+    Window::load(resource);
     m_context = scoped<Context>::create(m_renderer->arena());
     be_checked_cast<const Renderer>(m_renderer)->attachWindow(this);
 }

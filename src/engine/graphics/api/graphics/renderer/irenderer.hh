@@ -26,7 +26,7 @@ protected:
 protected:
     virtual void                    flush() = 0;
 public:
-            weak<ITask>             syncTask();
+            weak<ITask>             syncTask() const;
 
     virtual uint2                   getScreenSize() = 0;
 

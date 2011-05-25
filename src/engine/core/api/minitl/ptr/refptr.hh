@@ -20,6 +20,7 @@ private:
 private:
     inline void swap(ref& other);
 private:
+    inline ref(T* value);
     inline ref(T* value, BugEngine::Allocator& deleter);
 public:
     inline ref();

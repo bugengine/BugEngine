@@ -17,7 +17,7 @@ public:
     GLTexture(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLTexture();
 
-    virtual void load() override;
+    virtual void load(weak<const Resource> resource) override;
     virtual void unload() override;
 };
 

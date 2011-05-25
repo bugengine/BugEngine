@@ -58,7 +58,7 @@ weak<const Namespace> Namespace::getNamespace(const inamespace& name, CreationPo
 
 void Namespace::add(const inamespace& name, const Value& value) const
 {
-    weak<Namespace> ns = getNamespace(name, Create);
+    weak<const Namespace> ns = getNamespace(name, Create);
     if (ns)
     {
         ns->add(name[name.size()-1], value);
@@ -72,7 +72,7 @@ void Namespace::add(const istring& name, const Value& value) const
 
 void Namespace::remove(const inamespace& name) const
 {
-    weak<Namespace> ns = getNamespace(name, DoNotCreate);
+    weak<const Namespace> ns = getNamespace(name, DoNotCreate);
     if (ns)
     {
         ns->remove(name[name.size()-1]);

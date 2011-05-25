@@ -14,10 +14,10 @@ class Window::PlatformWindow : public minitl::refcountable
 {
     friend class Window;
 private:
-    weak<Renderer>  m_renderer;
-    HWND            m_window;
+    weak<const Renderer>    m_renderer;
+    HWND                    m_window;
 public:
-    PlatformWindow(weak<Renderer> renderer, weak<Window> window);
+    PlatformWindow(weak<const Renderer> renderer, weak<Window> window);
     ~PlatformWindow();
 };
 

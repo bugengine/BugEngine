@@ -19,6 +19,13 @@ void ref<T>::swap(ref<T>& other)
 
 
 template< typename T >
+ref<T>::ref(T* value)
+:   m_ptr(value)
+{
+    minitl::addref(value);
+}
+
+template< typename T >
 ref<T>::ref(T* value, BugEngine::Allocator& deleter)
 :   m_ptr(value)
 {
@@ -43,7 +50,7 @@ ref<T>::ref(const ref& other)
 template< typename T >
 template< typename U >
 ref<T>::ref(const ref<U> other)
-:   m_ptr(other.operator->())
+:   m_ptr(static_cast<T*>(other.operator->()))
 {
     addref(m_ptr);
 }
@@ -51,7 +58,7 @@ ref<T>::ref(const ref<U> other)
 template< typename T >
 template< typename U >
 ref<T>::ref(const scoped<U> other)
-:   m_ptr(other.operator->())
+:   m_ptr(static_cast<T*>(other.operator->()))
 {
     addref(m_ptr);
     other.m_ptr = 0;

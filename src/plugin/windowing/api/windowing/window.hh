@@ -24,8 +24,8 @@ public:
     Window(weak<const RenderTarget> resource, weak<const Renderer> renderer);
     ~Window();
 
-    void load();
-    void unload();
+    void load(weak<const Resource> resource) override;
+    void unload() override;
 
     void close();
     uint2 getDimensions() const;
