@@ -17,7 +17,7 @@ public:
     GLMesh(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLMesh();
 
-    virtual void load() override;
+    virtual void load(weak<const Resource> resource) override;
     virtual void unload() override;
 };
 

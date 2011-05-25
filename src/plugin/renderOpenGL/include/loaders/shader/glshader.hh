@@ -19,7 +19,7 @@ public:
     GLShader(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLShader();
 
-    virtual void load() override;
+    virtual void load(weak<const Resource> resource) override;
     virtual void unload() override;
 };
 

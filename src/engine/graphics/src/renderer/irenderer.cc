@@ -24,7 +24,7 @@ IRenderer::~IRenderer()
 {
 }
 
-weak<ITask> IRenderer::syncTask()
+weak<ITask> IRenderer::syncTask() const
 {
     return m_syncTask;
 }

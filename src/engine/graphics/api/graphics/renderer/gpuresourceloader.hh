@@ -36,7 +36,7 @@ public:
 
     virtual void* load(weak<const Resource> source) override
     {
-        ref<GPUResource> resource = ref<GPUResource>::create(m_renderer->arena(), m_renderer, source);
+        ref<GPUResource> resource = ref<GPUResource>::create(m_renderer->arena(), source, m_renderer);
         resource->m_index = be_checked_numcast<i32>(m_resources.size());
         m_resources.push_back(resource);
         return resource.operator->();
@@ -47,6 +47,7 @@ public:
         be_assert_recover(gpuresource->m_index >= 0, "invalid resource index", return);
         be_assert_recover(gpuresource->m_index < m_resources.size(), "invalid resource index", return);
         be_assert_recover(m_resources[gpuresource->m_index] == gpuresource, "invalid resource index", return);
+        gpuresource->m_resource = 0;
         m_pendingDelete.push_back(m_resources[gpuresource->m_index]);
         m_resources.back()->m_index = gpuresource->m_index;
         m_resources[gpuresource->m_index] = m_resources.back();

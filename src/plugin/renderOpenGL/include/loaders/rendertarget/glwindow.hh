@@ -23,7 +23,7 @@ private:
     void clearCurrent();
     void present();
 private:
-    void load() override;
+    void load(weak<const Resource> resource) override;
     void unload() override;
 public:
     virtual void    begin(ClearMode clear) override;

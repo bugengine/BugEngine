@@ -20,14 +20,15 @@ class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
 {
     template< typename T, typename U > friend class GPUResourceLoader;
 protected:
-    const weak<const Resource>  m_resource;
-    const weak<IRenderer>       m_renderer;
-    mutable i32                 m_index;
+    const weak<const IRenderer>     m_renderer;
+private:
+    mutable weak<const Resource>    m_resource;
+    mutable i32                     m_index;
 public:
     IGPUResource(weak<const Resource> resource, weak<const IRenderer> renderer);
     virtual ~IGPUResource();
 
-    virtual void load() = 0;
+    virtual void load(weak<const Resource> resource) = 0;
     virtual void unload() = 0;
 };
 

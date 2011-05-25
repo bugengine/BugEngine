@@ -17,7 +17,7 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
-Window::PlatformWindow::PlatformWindow(weak<Renderer> renderer, weak<Window> window)
+Window::PlatformWindow::PlatformWindow(weak<const Renderer> renderer, weak<Window> window)
 :   m_renderer(renderer)
 {
     WindowCreationFlags f;
@@ -59,7 +59,7 @@ Window::~Window()
     close();
 }
 
-void Window::load()
+void Window::load(weak<const Resource> resource)
 {
     m_window = scoped<PlatformWindow>::create(m_renderer->arena(), m_renderer, this);
 }

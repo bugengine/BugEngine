@@ -20,9 +20,9 @@ GLShader::~GLShader()
 {
 }
 
-void GLShader::load()
+void GLShader::load(weak<const Resource> resource)
 {
-    weak<const Shader> shader = be_checked_cast<const Shader>(m_resource);
+    weak<const Shader> shader = be_checked_cast<const Shader>(resource);
     GLenum shaderType = GL_VERTEX_SHADER;
     switch(shader->type)
     {

@@ -19,7 +19,7 @@ GLRenderTarget::~GLRenderTarget()
 {
 }
 
-void GLRenderTarget::load()
+void GLRenderTarget::load(weak<const Resource> resource)
 {
 }
 
