@@ -14,6 +14,9 @@ class Renderer;
 class GLRenderTarget : public IRenderTarget
 {
 private:
+    void setCurrent();
+    void clearCurrent();
+    bool closed() const override;
 public:
     GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer);
     ~GLRenderTarget();

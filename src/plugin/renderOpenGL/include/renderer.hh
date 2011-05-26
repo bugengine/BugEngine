@@ -34,7 +34,7 @@ public:
     ~Renderer();
 
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
-    bool                            multithreaded() const override {return true; }
+    bool                            multithreaded() const override { return true; }
 
     void                            flush() override;
 

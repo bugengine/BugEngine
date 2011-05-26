@@ -35,6 +35,7 @@ struct be_api(SYSTEM) ResourceLoaders
 {
     ResourceLoaders();
     ~ResourceLoaders();
+
     minitl::vector< weak<IResourceLoader> > loaders;
 
     void add(weak<IResourceLoader> loader);

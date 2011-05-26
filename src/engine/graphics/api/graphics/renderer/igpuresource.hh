@@ -15,7 +15,6 @@ template< typename T, typename U >
 class GPUResourceLoader;
 
 class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
-                                    ,   public minitl::inode
                                     ,   public minitl::intrusive_list<IGPUResource>::item
 {
     template< typename T, typename U > friend class GPUResourceLoader;
