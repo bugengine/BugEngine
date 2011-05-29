@@ -5,7 +5,6 @@
 #include    <renderer.hh>
 #include    <extensions.hh>
 
-#include    <graphics/renderer/gpuresourceloader.hh>
 #include    <graphics/objects/rendertarget.script.hh>
 #include    <graphics/objects/mesh.script.hh>
 #include    <graphics/objects/texture.script.hh>
@@ -94,11 +93,6 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
     :   Windowing::Renderer(gameArena())
     ,   m_context()
     ,   m_filesystem(filesystem)
-    ,   m_windowLoader(scoped<const GPUResourceLoader<RenderWindow, GLWindow> >::create(arena(), this))
-    ,   m_renderTargetLoader(scoped<const GPUResourceLoader<RenderTarget, GLRenderTarget> >::create(arena(), this))
-    ,   m_meshLoader(scoped<const GPUResourceLoader<Mesh, GLMesh> >::create(arena(), this))
-    ,   m_textureLoader(scoped<const GPUResourceLoader<Texture, GLTexture> >::create(arena(), this))
-    ,   m_shaderLoader(scoped<const GPUResourceLoader<Shader, GLShader> >::create(arena(), this))
 {
 }
 

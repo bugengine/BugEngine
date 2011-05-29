@@ -2,13 +2,14 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/resource/iresourceloader.script.hh>
+#include    <system/resource/resourceloader.hh>
 
 
 namespace BugEngine
 {
 
-IResourceLoader::IResourceLoader()
+IResourceLoader::IResourceLoader(weak<pointer> loader)
+    :   m_loader(loader)
 {
 }
 

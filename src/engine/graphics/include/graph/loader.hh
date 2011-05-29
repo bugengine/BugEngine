@@ -4,19 +4,19 @@
 #ifndef BE_GRAPHICS_RENDERER_GRAPH_LOADER_HH_
 #define BE_GRAPHICS_RENDERER_GRAPH_LOADER_HH_
 /*****************************************************************************/
-#include    <system/resource/iresourceloader.script.hh>
+#include    <graphics/objects/scenegraph.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class SceneGraphLoader : public IResourceLoader
+class SceneGraphLoader : public minitl::pointer
 {
 public:
     SceneGraphLoader();
     ~SceneGraphLoader();
 private:
-    virtual void* load(weak<const Resource> source) override;
-    virtual void  unload(const void* resource) override;
+    void* load(weak<const SceneGraph> source);
+    void  unload(const void* resource);
 };
 
 }}

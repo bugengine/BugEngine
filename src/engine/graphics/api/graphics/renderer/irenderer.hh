@@ -8,18 +8,19 @@
 namespace BugEngine
 {
 class ITask;
-class IResourceLoader;
 }
 
 namespace BugEngine { namespace Graphics
 {
 
+class SceneGraphLoader;
+
 class be_api(GRAPHICS) IRenderer : public minitl::pointer
 {
 private:
-    Allocator&              m_allocator;
-    scoped<IResourceLoader> m_sceneLoader;
-    ref<ITask>              m_syncTask;
+    Allocator&                  m_allocator;
+    scoped<SceneGraphLoader>    m_sceneLoader;
+    ref<ITask>                  m_syncTask;
 protected:
     IRenderer(Allocator& allocator);
     virtual ~IRenderer();
