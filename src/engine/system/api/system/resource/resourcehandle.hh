@@ -12,8 +12,8 @@ class IResourceLoader;
 
 struct ResourceHandle
 {
-    weak<IResourceLoader>   owner;
-    void*                   resource;
+    weak<const minitl::pointer> owner;
+    void*                       resource;
 
     ResourceHandle();
     ~ResourceHandle();

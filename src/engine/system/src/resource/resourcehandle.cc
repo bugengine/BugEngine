@@ -3,7 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/resource/resourcehandle.hh>
-#include    <system/resource/iresourceloader.script.hh>
+#include    <system/resource/resourceloader.hh>
 
 namespace BugEngine
 {
@@ -16,10 +16,8 @@ ResourceHandle::ResourceHandle()
 
 ResourceHandle::~ResourceHandle()
 {
-    if (owner)
-    {
-        owner->unload(resource);
-    }
+    be_assert(owner == 0, "resource handle destroyed but hasn't been properly unloaded");
+    be_assert(resource == 0, "resource handle destroyed but hasn't been properly unloaded");
 }
 
 }
