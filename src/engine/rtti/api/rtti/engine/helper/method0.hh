@@ -45,7 +45,7 @@ struct callhelper< T, void >
         return Value(ref<T>::create(scriptArena()));
     }
 
-    static Value construct(Value* params, u32 paramCount)
+    static Value construct(Value* /*params*/, u32 paramCount)
     {
         be_assert_recover(paramCount == 0, "expecting 0 parameter; got %d" | paramCount, return Value());
         Value v(be_typeid<T>::type(), Value::Reserve);

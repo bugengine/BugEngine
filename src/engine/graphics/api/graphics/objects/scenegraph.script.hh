@@ -11,11 +11,11 @@ namespace BugEngine { namespace Graphics
 {
 
 be_tag(ResourceLoaders())
-class be_api(GRAPHICS) SceneNode : public Resource
+class be_api(GRAPHICS) SceneGraph : public Resource
 {
 published:
-    SceneNode(ref<IScene> scene, ref<IRenderTarget> rendertarget);
-    ~SceneNode();
+    SceneGraph();
+    ~SceneGraph();
 };
 
 

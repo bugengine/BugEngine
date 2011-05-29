@@ -25,7 +25,7 @@
 
 static BugEngine::Value buildRenderTarget()
 {
-    ref<BugEngine::Graphics::RenderWindow> result = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), 800, 600, "discworld v0.1", false);
+    ref<BugEngine::Graphics::RenderWindow> result = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
     return BugEngine::Value(result);
 }
 

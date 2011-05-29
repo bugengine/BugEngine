@@ -19,12 +19,12 @@ SceneGraphLoader::~SceneGraphLoader()
 {
 }
 
-void* SceneGraphLoader::load(weak<const Resource> source)
+void* SceneGraphLoader::load(weak<const Resource> /*source*/)
 {
     return 0; //new Node
 }
 
-void SceneGraphLoader::unload(const void* resource)
+void SceneGraphLoader::unload(const void* /*resource*/)
 {
 }
 
