@@ -19,7 +19,7 @@ RenderTarget::~RenderTarget()
 RenderWindow::RenderWindow(u16 width, u16 height, istring title, bool fullscreen)
     :   RenderTarget(width, height)
     ,   m_title(title)
-    ,   m_fullscreen(false)
+    ,   m_fullscreen(fullscreen)
 {
 }
 

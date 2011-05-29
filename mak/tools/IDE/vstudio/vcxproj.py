@@ -67,6 +67,7 @@ class VCxproj:
 		self.output.write('  </PropertyGroup>\n')
 		self.output.write('  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />\n')
 		self.output.write('  <ImportGroup Label="PropertySheets">\n')
+		self.output.write('    <Import Project="$(SolutionDir)\\mak\\msvc\\%s\\cat%s.props" />\n' % (self.versionName, self.category))
 		self.output.write('    <Import Project="$(SolutionDir)\\mak\\msvc\\%s\\%s.props" />\n' % (self.versionName, self.type))
 		self.output.write('  </ImportGroup>\n')
 		for platform in platforms:

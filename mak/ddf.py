@@ -509,7 +509,7 @@ def p_function_pointer_name_2(t):
 
 def p_function_pointer_no_name(t):
 	"""
-		function_pointer_with_name : type LPAREN RPAREN LPAREN params_list RPAREN
+		function_pointer_without_name : type LPAREN RPAREN LPAREN params_list RPAREN
 		function_pointer_without_name : type LPAREN pointer_on_member RPAREN LPAREN params_list RPAREN
 	"""
 	t[0] = t[1][1]+" "+" ".join(t[2:])
@@ -525,9 +525,13 @@ def p_function_pointer_type(t):
 def p_typedef(t):
 	"""
 		decl : TYPEDEF type ID
-		decl : TYPEDEF function_pointer_with_name
 	"""
 	rtti.Typedef(t.parser.namespace, t[3], t.lineno(1))
+def p_typedef2(t):
+	"""
+		decl : TYPEDEF function_pointer_with_name
+	"""
+	rtti.Typedef(t.parser.namespace, t[2][1], t.lineno(1))
 
 
 def p_modifier_left(t):

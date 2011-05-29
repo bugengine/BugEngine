@@ -25,6 +25,9 @@ struct ShaderExtensions
     const glGetObjectParameterivARBProc glGetObjectParameteriv;
     const glGetInfoLogARBProc           glGetInfoLog;
     ShaderExtensions();
+
+private:
+    ShaderExtensions& operator=(const ShaderExtensions&);
 };
 
 }}}
