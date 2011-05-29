@@ -5,19 +5,43 @@
 #define BE_GRAPHICS_OBJECTS_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
-#include    <graphics/scene/iscene.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-be_tag(ResourceLoaders())
-class be_api(GRAPHICS) SceneGraph : public Resource
+class IScene;
+class RenderTarget;
+class SceneGraphLoader;
+
+class be_api(GRAPHICS) RenderNode : public Resource
 {
-published:
-    SceneGraph();
-    ~SceneGraph();
+protected:
+    RenderNode();
+    ~RenderNode();
 };
 
+be_tag(ResourceLoaders())
+class be_api(GRAPHICS) RenderScene : public RenderNode
+{
+    friend class SceneGraphLoader;
+private:
+    ref<IScene>         m_scene;
+    ref<RenderTarget>   m_rendertarget;
+published:
+    RenderScene(ref<IScene> scene, ref<RenderTarget> rendertarget);
+    ~RenderScene();
+};
+
+be_tag(ResourceLoaders())
+class be_api(GRAPHICS) RenderSequence : public RenderNode
+{
+    friend class SceneGraphLoader;
+private:
+    minitl::vector< ref<const RenderNode> > m_nodes;
+published:
+    RenderSequence(const minitl::vector< ref<const RenderNode> >& nodes);
+    ~RenderSequence();
+};
 
 }}
 

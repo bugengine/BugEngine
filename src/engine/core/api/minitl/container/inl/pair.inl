@@ -9,6 +9,13 @@ namespace minitl
 {
 
 template< typename T1, typename T2 >
+pair<T1, T2>::pair()
+    :   first()
+    ,   second()
+{
+}
+
+template< typename T1, typename T2 >
 pair<T1, T2>::pair(const T1& t1, const T2& t2)
     :   first(t1)
     ,   second(t2)

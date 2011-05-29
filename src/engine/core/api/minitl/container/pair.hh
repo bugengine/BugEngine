@@ -13,6 +13,7 @@ struct pair
 {
     T1 first;
     T2 second;
+    inline pair();
     inline pair(const T1& t1, const T2& t2);
     template< typename U1, typename U2 > inline pair(const pair<U1, U2>& p);
 };

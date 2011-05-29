@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-SceneNode::SceneNode(ref<IScene> scene, ref<IRenderTarget> renderTarget)
+SceneNode::SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget)
 :   INode()
 ,   m_renderTask(ref<TaskGroup>::create(taskArena(), "renderScene", color32(255, 0, 0)))
 ,   m_dispatchTask(ref< Task< MethodCaller<SceneNode, &SceneNode::dispatch> > >::create(taskArena(), "dispatch", color32(255,255,0), MethodCaller<SceneNode, &SceneNode::dispatch>(this), Scheduler::High))

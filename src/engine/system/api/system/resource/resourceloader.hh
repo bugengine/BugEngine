@@ -10,8 +10,6 @@ namespace BugEngine
 {
 
 class Resource;
-struct ResourceHandle;
-struct ResourceLoaders;
 
 class be_api(SYSTEM) IResourceLoader : public minitl::refcountable
 {
@@ -23,8 +21,8 @@ protected:
     IResourceLoader(weak<minitl::pointer> loader);
     ~IResourceLoader();
 
-    virtual void* load(weak<const Resource> resource) const = 0;
-    virtual void unload(const void* resource) const = 0;
+    virtual ResourceHandle load(weak<const Resource> resource) const = 0;
+    virtual void unload(const ResourceHandle& resource) const = 0;
 };
 
 template< typename Owner, typename R >
@@ -32,8 +30,8 @@ class ResourceLoader : public IResourceLoader
 {
     friend struct ResourceLoaders;
 private:
-    typedef void* (Owner::*LoadMethod)(weak<const R> r);
-    typedef void (Owner::*UnloadMethod)(const void* resource);
+    typedef ResourceHandle (Owner::*LoadMethod)(weak<const R> r);
+    typedef void (Owner::*UnloadMethod)(const ResourceHandle& resource);
     const LoadMethod    m_load;
     const UnloadMethod  m_unload;
 public:
@@ -41,8 +39,8 @@ public:
     ResourceLoader(weak<Owner> owner, LoadMethod load, UnloadMethod unload);
     ~ResourceLoader();
 private:
-    void* load(weak<const Resource> resource) const  override;
-    void unload(const void* resource) const override;
+    ResourceHandle load(weak<const Resource> resource) const  override;
+    void unload(const ResourceHandle& resource) const override;
 };
 
 }
@@ -51,4 +49,3 @@ private:
 
 /*****************************************************************************/
 #endif
-

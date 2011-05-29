@@ -18,23 +18,23 @@ Resource::~Resource()
 
 void Resource::load(weak<const IResourceLoader> loader) const
 {
-    ResourceHandle* handle = 0;
+    minitl::pair< weak<minitl::pointer>, ResourceHandle >* handle = 0;
     for(int i = 0; i < MaxResourceCount; ++i)
     {
-        if (m_handles[i].owner == loader->m_loader)
+        if (m_handles[i].first == loader->m_loader)
         {
             be_warning("resource already loaded; skipping");
             return;
         }
-        else if(m_handles[i].owner == 0)
+        else if(!handle && m_handles[i].first == 0)
         {
             handle = &m_handles[i];
         }
     }
     if (handle)
     {
-        handle->owner = loader->m_loader;
-        handle->resource = loader->load(this);
+        handle->first = loader->m_loader;
+        handle->second = loader->load(this);
     }
     else
     {
@@ -46,31 +46,32 @@ void Resource::unload(weak<const IResourceLoader> loader) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
-        if (m_handles[i].owner == loader->m_loader)
+        if (m_handles[i].first == loader->m_loader)
         {
-            loader->unload(m_handles[i].resource);
-            m_handles[i].owner = 0;
-            m_handles[i].resource = 0;
+            loader->unload(m_handles[i].second);
+            m_handles[i].first = 0;
+            m_handles[i].second.handle = scoped<minitl::pointer>();
+            m_handles[i].second.id.intId = 0;
             return;
         }
     }
 }
 
-void* Resource::getResource(weak<const minitl::pointer> owner) const
+const ResourceHandle& Resource::getResource(weak<const minitl::pointer> owner) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
-        if (m_handles[i].owner == owner)
+        if (m_handles[i].first == owner)
         {
-            return m_handles[i].resource;
+            return m_handles[i].second;
         }
     }
-    return 0;
+    return ResourceHandle::null();
 }
 
 void Resource::load(const Value& v)
 {
-    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "not a resource to load, skipping", return);
+    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "value of type %s is not a Resource, skipping" | v.type().name(), return);
     Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
     be_assert_recover(resourceloaders, "no resource loader on type %s" | v.type().name(), return);
     resourceloaders.as<const ResourceLoaders&>().load(v);
@@ -78,7 +79,7 @@ void Resource::load(const Value& v)
 
 void Resource::unload(const Value& v)
 {
-    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "not a resource to load, skipping", return);
+    be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "value of type %s is not a Resource, skipping" | v.type().name(), return);
     Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
     be_assert_recover(resourceloaders, "no resource loader on type %s" | v.type().name(), return);
     resourceloaders.as<const ResourceLoaders&>().unload(v);

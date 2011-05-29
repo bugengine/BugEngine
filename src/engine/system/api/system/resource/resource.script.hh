@@ -19,7 +19,7 @@ class be_api(SYSTEM) Resource : public minitl::refcountable
     friend struct ResourceLoaders;
 private:
     enum { MaxResourceCount = 4 };
-    mutable ResourceHandle  m_handles[MaxResourceCount];
+    mutable minitl::pair<weak<pointer>, ResourceHandle> m_handles[MaxResourceCount];
 protected:
     Resource();
     ~Resource();
@@ -29,7 +29,7 @@ private:
 public:
     static void load(const Value& value);
     static void unload(const Value& value);
-    void* getResource(weak<const minitl::pointer> owner) const;
+    const ResourceHandle& getResource(weak<const minitl::pointer> owner) const;
 };
 
 struct be_api(SYSTEM) ResourceLoaders
@@ -40,7 +40,7 @@ public:
     ~ResourceLoaders();
 
     template< typename T, typename Owner >
-    static void attach(weak<Owner> owner, void*(Owner::*load)(weak<const T> t), void (Owner::*unload)(const void*))
+    static void attach(weak<Owner> owner, ResourceHandle(Owner::*load)(weak<const T> t), void (Owner::*unload)(const ResourceHandle& handle))
     {
         Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be attached" |  be_typeid<T>::type().name(), return);
