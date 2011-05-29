@@ -22,7 +22,7 @@ public:
 private:
     struct NodeInfo
     {
-        ref<INode>                      node;
+        weak<INode>                      node;
         TaskGroup::TaskStartConnection  renderStartConnection;
         TaskGroup::TaskEndConnection    renderEndConnection;
         TaskGroup::TaskStartConnection  syncStartConnection;
@@ -31,7 +31,7 @@ private:
         TaskGroup::TaskEndConnection    dispatchEndConnection;
         ITask::CallbackConnection       chainDispatch;
         NodeType                        type;
-        NodeInfo(scoped<INode> node, weak<MultiNode> owner, NodeType type);
+        NodeInfo(weak<INode> node, weak<MultiNode> owner, NodeType type);
     };
     friend struct NodeInfo;
 private:
@@ -49,10 +49,8 @@ private:
 private:
     void clean();
 public:
-    MultiNode();
+    MultiNode(const minitl::vector< minitl::weak<INode> >& nodes);
     ~MultiNode();
-
-    void addNode(scoped<INode> node, NodeType type);
 
     virtual bool closed() const override;
     virtual weak<ITask> updateTask() override;

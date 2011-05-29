@@ -28,13 +28,13 @@ weak<Owner> ResourceLoader<Owner, R>::owner() const
 }
 
 template< typename Owner, typename R >
-void* ResourceLoader<Owner, R>::load(weak<const Resource> resource) const
+ResourceHandle ResourceLoader<Owner, R>::load(weak<const Resource> resource) const
 {
     return (owner().operator->()->*m_load)(be_checked_cast<const R>(resource));
 }
 
 template< typename Owner, typename R >
-void ResourceLoader<Owner, R>::unload(const void* resource) const
+void ResourceLoader<Owner, R>::unload(const ResourceHandle& resource) const
 {
     (owner().operator->()->*m_unload)(resource);
 }

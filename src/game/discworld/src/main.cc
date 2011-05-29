@@ -23,22 +23,6 @@
 #include    <rtti/typeinfo.hh>
 #include    <rtti/value.inl>
 
-static BugEngine::Value buildRenderTarget()
-{
-    ref<BugEngine::Graphics::RenderWindow> result = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
-    return BugEngine::Value(result);
-}
-
-static BugEngine::Value buildRenderTree()
-{
-    return BugEngine::Value();
-}
-
-static BugEngine::Value buildShader()
-{
-    ref<BugEngine::Graphics::Shader> result = ref<BugEngine::Graphics::Shader>::create(BugEngine::gameArena(), BugEngine::Graphics::Shader::Vertex, ref<BugEngine::Graphics::Shaders::Method>());
-    return BugEngine::Value(result);
-}
 
 int be_main(weak<BugEngine::Application> app)
 {
@@ -53,31 +37,21 @@ int be_main(weak<BugEngine::Application> app)
     BugEngine::Plugin<BugEngine::Graphics::IRenderer> display("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));
     //BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderDx9", weak<BugEngine::FileSystem>(filesystem));
 
+    ref<BugEngine::Graphics::RenderWindow> w1 = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
+    ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::gameArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
+    ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::gameArena(), world);
+    ref<BugEngine::Graphics::RenderScene> renderscene = ref<BugEngine::Graphics::RenderScene>::create(BugEngine::gameArena(), scene, w1);
+    minitl::vector< ref<const BugEngine::Graphics::RenderNode> > scenes(BugEngine::gameArena());
+    scenes.push_back(renderscene);
+    ref<BugEngine::Graphics::RenderSequence> node = ref<BugEngine::Graphics::RenderSequence>::create(BugEngine::gameArena(), scenes);
 
-    //scoped<BugEngine::Graphics::MultiNode> node = scoped<BugEngine::Graphics::MultiNode>::create(BugEngine::taskArena());
-    {
-        //ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::taskArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-        //ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::taskArena(), world);
+    BugEngine::Resource::load(BugEngine::Value(w1));
+    BugEngine::Resource::load(BugEngine::Value(renderscene));
+    BugEngine::Resource::load(BugEngine::Value(node));
 
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w1), BugEngine::Graphics::MultiNode::MainWindow);
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w2), BugEngine::Graphics::MultiNode::MainWindow);
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w3), BugEngine::Graphics::MultiNode::MainWindow);
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w4), BugEngine::Graphics::MultiNode::ToolWindow);
-        //node->addNode(scoped<BugEngine::Graphics::SceneNode>::create(BugEngine::taskArena(), scene, w5), BugEngine::Graphics::MultiNode::ToolWindow);
-        //app->setScene(scoped<BugEngine::Graphics::SceneNode>::create(taskArena(), scene, w));
-        //app->setScene(node);
-    }
-
-    BugEngine::Value window = buildRenderTarget();
-    BugEngine::Value rendertree = buildRenderTree();
-    BugEngine::Value shader = buildShader();
-    BugEngine::Resource::load(window);
-    //BugEngine::Resource::load(rendertree);
-    BugEngine::Resource::load(shader);
-
-    BugEngine::Resource::unload(shader);
-    //BugEngine::Resource::unload(rendertree);
-    BugEngine::Resource::unload(window);
+    BugEngine::Resource::unload(BugEngine::Value(node));
+    BugEngine::Resource::unload(BugEngine::Value(renderscene));
+    BugEngine::Resource::unload(BugEngine::Value(w1));
 
     return app->run();
 }

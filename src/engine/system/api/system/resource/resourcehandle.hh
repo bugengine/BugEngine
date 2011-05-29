@@ -12,11 +12,21 @@ class IResourceLoader;
 
 struct ResourceHandle
 {
-    weak<const minitl::pointer> owner;
-    void*                       resource;
+    union Id
+    {
+        void*   ptrId;
+        u32     intId;
+    };
+    scoped<minitl::pointer> handle;
+    Id                      id;
 
     ResourceHandle();
     ~ResourceHandle();
+
+    static const ResourceHandle& null();
+
+    inline operator const void*() const { return (const void*)(this - &null()); }
+    bool operator!() const              { return this->operator const void*() == 0; }
 };
 
 }

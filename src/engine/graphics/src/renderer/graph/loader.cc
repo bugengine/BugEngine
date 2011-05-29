@@ -4,30 +4,55 @@
 #include    <graphics/stdafx.h>
 #include    <graph/loader.hh>
 
+#include    <graphics/renderer/irenderer.hh>
 #include    <graph/scenenode.hh>
 #include    <graph/multinode.hh>
+#include    <graphics/scene/iscene.script.hh>
 #include    <graphics/objects/scenegraph.script.hh>
+#include    <graphics/objects/rendertarget.script.hh>
+#include    <graphics/renderer/irendertarget.hh>
 
 
 namespace BugEngine { namespace Graphics
 {
 
-SceneGraphLoader::SceneGraphLoader()
+SceneGraphLoader::SceneGraphLoader(weak<const IRenderer> renderer)
+    :   m_renderer(renderer)
 {
-    ResourceLoaders::attach<SceneGraph, SceneGraphLoader>(this, &SceneGraphLoader::load, &SceneGraphLoader::unload);
+    ResourceLoaders::attach<RenderScene, SceneGraphLoader>(this, &SceneGraphLoader::load, &SceneGraphLoader::unload);
+    ResourceLoaders::attach<RenderSequence, SceneGraphLoader>(this, &SceneGraphLoader::load, &SceneGraphLoader::unload);
 }
 
 SceneGraphLoader::~SceneGraphLoader()
 {
-    ResourceLoaders::detach<SceneGraph, SceneGraphLoader>(this);
+    ResourceLoaders::detach<RenderSequence, SceneGraphLoader>(this);
+    ResourceLoaders::detach<RenderScene, SceneGraphLoader>(this);
 }
 
-void* SceneGraphLoader::load(weak<const SceneGraph> /*source*/)
+ResourceHandle SceneGraphLoader::load(weak<const RenderScene> source)
 {
-    return 0; //new Node
+    ResourceHandle handle;
+    weak<minitl::pointer> renderhandle = source->m_rendertarget->getResource(m_renderer).handle;
+    be_assert_recover(renderhandle, "can't create scene node: render target has not been created yet", return handle);
+    handle.handle = scoped<SceneNode>::create(gameArena(), source->m_scene, be_checked_cast<IRenderTarget>(renderhandle));
+    return handle;
 }
 
-void SceneGraphLoader::unload(const void* /*resource*/)
+ResourceHandle SceneGraphLoader::load(weak<const RenderSequence> source)
+{
+    ResourceHandle handle;
+    minitl::vector< weak<INode> > nodes (tempArena());
+    for (minitl::vector< ref<const RenderNode> >::const_iterator it = source->m_nodes.begin(); it != source->m_nodes.end(); ++it)
+    {
+        weak<minitl::pointer> childhandle = (*it)->getResource(this).handle;
+        be_assert(childhandle, "dependent node was not loaded properly");
+        if (childhandle) nodes.push_back(be_checked_cast<INode>(childhandle));
+    }
+    handle.handle = scoped<MultiNode>::create(gameArena(), nodes);
+    return handle;
+}
+
+void SceneGraphLoader::unload(const ResourceHandle& /*resource*/)
 {
 }
 

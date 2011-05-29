@@ -8,16 +8,23 @@
 namespace BugEngine
 {
 
+static ResourceHandle::Id defaultId() { ResourceHandle::Id id =  { 0 }; return id; }
 ResourceHandle::ResourceHandle()
-    :   owner(0)
-    ,   resource(0)
+    :   handle()
+    ,   id(defaultId())
 {
 }
 
 ResourceHandle::~ResourceHandle()
 {
-    be_assert(owner == 0, "resource handle destroyed but hasn't been properly unloaded");
-    be_assert(resource == 0, "resource handle destroyed but hasn't been properly unloaded");
+    be_assert(handle == 0, "resource handle destroyed but hasn't been properly unloaded");
+    be_assert(id.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
+}
+
+const ResourceHandle& ResourceHandle::null()
+{
+    static ResourceHandle s_nullHandle;
+    return s_nullHandle;
 }
 
 }

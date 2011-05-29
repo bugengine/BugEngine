@@ -18,15 +18,15 @@ class SceneNode : public INode
 private:
     ref<TaskGroup>                  m_renderTask;
     ref<ITask>                      m_dispatchTask;
-    ref<IScene>                     m_scene;
-    ref<IRenderTarget>              m_renderTarget;
+    weak<IScene>                    m_scene;
+    weak<IRenderTarget>             m_renderTarget;
     TaskGroup::TaskStartConnection  m_renderStartTask;
     TaskGroup::TaskEndConnection    m_renderEndTask;
     AsyncDispatchJobGraph           m_jobGraph;
 private:
     void dispatch();
 public:
-    SceneNode(ref<IScene> scene, ref<IRenderTarget> renderTarget);
+    SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget);
     ~SceneNode();
 
     virtual bool closed() const override;
