@@ -27,17 +27,6 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 	conf.env['LINKFLAGS_final'] = ['/DEBUG']
 
 
-def add_win32_gcc_to_env(conf, version, toolchaindir, gcc_target):
-	newenv = conf.env
-	newenv['GCC_VERSION']	= version
-	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.load('cross_gcc', tooldir='mak/tools')
-	conf.env['WINRC'] = conf.find_program('%s-windres' %gcc_target, path_list = conf.env['PATH'], var='WINRC')
-	conf.load('winres')
-
-
 def add_win32_gcc_flags_to_env(conf):
 	conf.env['CFLAGS_warnall'] += ['-Wno-comments']
 	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
@@ -77,20 +66,7 @@ def configure(conf):
 	mak.allplatforms['win32'] = ['win32', 'pc']
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('mingw') != -1:
-			name = 'gcc-win32-%s-%s' %(arch, version.replace('-', '_'))
-			conf.setenv(name, conf.env.derive())
-			try:
-				add_win32_gcc_to_env(conf, version, toolchaindir, target)
-				add_win32_gcc_flags_to_env(conf)
-				add_win32_flags_to_env(conf, name, arch)
-				conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
-
-				pprint('GREEN', 'configure for tool %s' % name)
-				conf.variant = ''
-				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception as e:
-				warn('gcc not available: '+str(e))
-				conf.variant = ''
+			conf.create_gcc_env(version, toolchaindir, target, 'win32', arch, add_win32_gcc_flags_to_env, add_win32_flags_to_env)
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
 			name = '%s-%s-%s-%s' %(compiler, platform, target, version)
