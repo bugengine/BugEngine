@@ -28,11 +28,11 @@ IRenderer::IRenderer(Allocator& allocator)
 
 IRenderer::~IRenderer()
 {
-    ResourceLoaders::detach<Shader, IRenderer>(this);
-    ResourceLoaders::detach<Texture, IRenderer>(this);
+    //ResourceLoaders::detach<Shader, IRenderer>(this);
+    //ResourceLoaders::detach<Texture, IRenderer>(this);
     //ResourceLoaders::detach<Mesh, IRenderer>(this);
-    //ResourceLoaders::detach<RenderWindow, IRenderer>(this);
-    //ResourceLoaders::detach<RenderTarget, IRenderer>(this);
+    ResourceLoaders::detach<RenderWindow, IRenderer>(this);
+    ResourceLoaders::detach<RenderTarget, IRenderer>(this);
 }
 
 weak<ITask> IRenderer::syncTask() const

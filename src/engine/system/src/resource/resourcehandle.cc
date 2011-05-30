@@ -17,7 +17,6 @@ ResourceHandle::ResourceHandle()
 
 ResourceHandle::~ResourceHandle()
 {
-    be_assert(handle == 0, "resource handle destroyed but hasn't been properly unloaded");
     be_assert(id.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
 }
 
@@ -28,4 +27,3 @@ const ResourceHandle& ResourceHandle::null()
 }
 
 }
-

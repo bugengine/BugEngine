@@ -34,7 +34,7 @@ ResourceHandle SceneGraphLoader::load(weak<const RenderScene> source)
     ResourceHandle handle;
     weak<minitl::pointer> renderhandle = source->m_rendertarget->getResource(m_renderer).handle;
     be_assert_recover(renderhandle, "can't create scene node: render target has not been created yet", return handle);
-    handle.handle = scoped<SceneNode>::create(gameArena(), source->m_scene, be_checked_cast<IRenderTarget>(renderhandle));
+    handle.handle = ref<SceneNode>::create(gameArena(), source->m_scene, be_checked_cast<IRenderTarget>(renderhandle));
     return handle;
 }
 
@@ -48,7 +48,7 @@ ResourceHandle SceneGraphLoader::load(weak<const RenderSequence> source)
         be_assert(childhandle, "dependent node was not loaded properly");
         if (childhandle) nodes.push_back(be_checked_cast<INode>(childhandle));
     }
-    handle.handle = scoped<MultiNode>::create(gameArena(), nodes);
+    handle.handle = ref<MultiNode>::create(gameArena(), nodes);
     return handle;
 }
 
