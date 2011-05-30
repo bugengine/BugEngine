@@ -1,5 +1,6 @@
 from waflib.TaskGen import feature, before, extension, after
 from waflib.Configure import conf
+from waflib.Logs import warn,pprint
 from waflib import Options, Utils
 import re
 import os
@@ -20,6 +21,89 @@ def get_native_gcc_target(conf):
 		for line in out:
 			if line.startswith('Target:'):
 				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
+
+def allarchs(arch):
+	if arch == 'x86':
+		return [('-m32', 'x86'), ('-m64', 'amd64')]
+	elif arch == 'amd64':
+		return [('-m64', 'amd64'), ('-m32', 'x86')]
+	elif arch == 'arm':
+		return [('', 'arm')]
+	elif arch == 'mips':
+		return [('-m32', 'mips'), ('-m64', 'mips64')]
+	elif arch == 'mips64':
+		return [('-m64', 'mips64'), ('-m32', 'mips'),]
+	elif arch == 'mipsel':
+		return [('-m32', 'mipsel'), ('-m64', 'mipsel64')]
+	elif arch == 'mipsel64':
+		return [('-m64', 'mipsel64'), ('-m32', 'mipsel')]
+	elif arch == 'powerpc' or arch == 'ppc':
+		return [('-m32', 'powerpc'), ('-m64', 'ppc64')]
+	elif arch == 'powerpc64' or arch == 'ppc64':
+		return [('-m64', 'ppc64'), ('-m32', 'powerpc')]
+	elif arch == 'spu':
+		return ['', 'spu']
+	else:
+		warn('unknown architecture : %s' % arch)
+		return [('', arch)]
+
+
+@conf
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
+	newenv = conf.env
+	newenv['GCC_VERSION']	= version
+	newenv['GCC_TARGET']	= gcc_target
+	newenv['GCC_FLAGS']		= [flag]
+	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	conf.load('cross_gcc', tooldir='mak/tools')
+
+
+@conf
+def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, add_gcc_flags_to_env, add_platform_flags_to_env):
+	worked = False
+	for opt,arch in allarchs(originalarch):
+		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		pprint('BLUE', ' = %s =' % name)
+		conf.setenv(name, conf.env.derive())
+		try:
+			add_gcc_to_env(conf, version, toolchaindir, target, opt)
+			if platform == 'win32':
+				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')
+				conf.load('winres')
+			add_gcc_flags_to_env(conf)
+			add_platform_flags_to_env(conf, name, arch)
+
+			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+
+			pprint('GREEN', 'configure for tool %s' % name)
+			conf.variant = ''
+			conf.env['BUILD_VARIANTS'].append(name)
+			worked = True
+		except Exception as e:
+			warn('gcc not available: '+str(e))
+			conf.variant = ''
+	if not worked:
+		arch = originalarch
+		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		pprint('BLUE', ' = %s =' % name)
+		conf.setenv(name, conf.env.derive())
+		try:
+			add_gcc_to_env(conf, version, toolchaindir, target, '')
+			if platform == 'win32':
+				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')
+				conf.load('winres')
+			add_gcc_flags_to_env(conf)
+			add_platform_flags_to_env(conf, name, arch)
+
+			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+
+			pprint('GREEN', 'configure for tool %s' % name)
+			conf.variant = ''
+			conf.env['BUILD_VARIANTS'].append(name)
+		except Exception as e:
+			warn('gcc not available: '+str(e))
+			conf.variant = ''
 
 def parse_gcc_target(target):
 	archs = [ ('i686-w64', 'amd64'),
@@ -97,6 +181,16 @@ def find_cross_gcc(conf):
 			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
+		cmd = [v['CC']] + conf.env['GCC_FLAGS'] + ['-dM', '-E', '-']
+		try:
+			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+			p.stdin.write('\n'.encode())
+			out = p.communicate()[0]
+			if p.returncode != 0:
+				conf.fatal('could not run the compiler %r' % str(cmd))
+		except:
+			conf.fatal('could not run the compiler %r' % str(cmd))
+
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
 			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
@@ -140,7 +234,12 @@ def find_cross_gcc(conf):
 def add_standard_gcc_flags(conf):
 	v = conf.env
 	v.append_unique('ASFLAGS', '-c')
+	v['CFLAGS'] = v['GCC_FLAGS']
+	v['CXXFLAGS'] = v['GCC_FLAGS']
+	v['LINKFLAGS'] = v['GCC_FLAGS']
 
+	v['CFLAGS_warnnone'] = ['-w']
+	v['CXXFLAGS_warnnone'] = ['-w']
 	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
 	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
 
