@@ -11,8 +11,6 @@ namespace BugEngine { namespace Graphics
 {
 
 class IRenderer;
-template< typename T, typename U >
-class GPUResourceLoader;
 
 class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
                                     ,   public minitl::intrusive_list<IGPUResource>::item
