@@ -13,6 +13,8 @@ namespace BugEngine
 class IResourceLoader;
 struct ResourceLoaders;
 
+template< typename Owner, typename T > class ResourceLoader;
+
 class be_api(SYSTEM) Resource : public minitl::refcountable
                               , public minitl::intrusive_list<Resource>::item
 {
@@ -44,7 +46,7 @@ public:
     {
         Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be attached" |  be_typeid<T>::type().name(), return);
-        v.as<ResourceLoaders&>().add(ref< const ResourceLoader<Owner, T> >::create(rttiArena(), owner, load, unload));
+        v.as<ResourceLoaders&>().add(ref< ResourceLoader<Owner, T> >::create(rttiArena(), owner, load, unload));
     }
 
     template< typename T, typename Owner >
