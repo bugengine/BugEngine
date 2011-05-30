@@ -17,8 +17,8 @@ struct ResourceHandle
         void*   ptrId;
         u32     intId;
     };
-    scoped<minitl::pointer> handle;
-    Id                      id;
+    ref<minitl::refcountable>   handle;
+    Id                          id;
 
     ResourceHandle();
     ~ResourceHandle();
