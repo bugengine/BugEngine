@@ -155,7 +155,7 @@ echo LIB=%%LIB%%
 	env.update(os.environ)
 	env.update(PATH = path)
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
-	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH)
+	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH, silent=True)
 	cxx = conf.cmd_to_list(cxx)
 
 	# delete CL if exists. because it could contain parameters wich can change cl's behaviour rather catastrophically.
@@ -232,7 +232,7 @@ def gather_wince_supported_platforms():
 			ce_sdk = ''
 	if not ce_sdk:
 		return supported_wince_platforms
-	
+
 	ce_index = 0
 	while 1:
 		try:
@@ -590,7 +590,10 @@ def autodetect(conf):
 	v['INCLUDES'] = includes
 	v['LIBPATH'] = libdirs
 	v['MSVC_COMPILER'] = compiler
-	v['MSVC_VERSION'] = version
+	try:
+		v['MSVC_VERSION'] = float(version)
+	except:
+		v['MSVC_VERSION'] = float(version[:-3])
 
 def _get_prog_names(conf, compiler):
 	if compiler=='intel':
@@ -614,10 +617,7 @@ def find_msvc(conf):
 	v = conf.env
 	path = v['PATH']
 	compiler = v['MSVC_COMPILER']
-	try:
-		version = float(v['MSVC_VERSION'])
-	except:
-		version = float(v['MSVC_VERSION'][:-3])
+	version = v['MSVC_VERSION']
 
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
 	v.MSVC_MANIFEST = (compiler == 'msvc' and version >= 8) or (compiler == 'wsdk' and version >= 6) or (compiler == 'intel' and version >= 11)
