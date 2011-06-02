@@ -14,11 +14,13 @@ namespace BugEngine { namespace Graphics
 
 SceneNode::SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget)
 :   INode()
-,   m_renderTask(ref<TaskGroup>::create(taskArena(), "renderScene", color32(255, 0, 0)))
-,   m_dispatchTask(ref< Task< MethodCaller<SceneNode, &SceneNode::dispatch> > >::create(taskArena(), "dispatch", color32(255,255,0), MethodCaller<SceneNode, &SceneNode::dispatch>(this), Scheduler::High))
+,   m_renderTask(ref< Task< MethodCaller<SceneNode, &SceneNode::render> > >::create(taskArena(), "renderScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::render>(this)))
 ,   m_scene(scene)
 ,   m_renderTarget(renderTarget)
-,   m_jobGraph(m_renderTask, m_renderTarget->syncTask(), m_dispatchTask)
+,   m_startRenderConnection(m_scene->updateTask(), m_renderTask->startCallback())
+,   m_startUpdateConnection(m_renderTask, m_scene->updateTask()->startCallback(), ITask::ICallback::Completed)
+,   m_startFlush(m_renderTask, m_renderTarget->syncTask()->startCallback())
+,   m_startRender(m_renderTarget->syncTask(), m_renderTask->startCallback(), ITask::ICallback::Completed)
 {
 }
 
@@ -26,11 +28,11 @@ SceneNode::~SceneNode()
 {
 }
 
-void SceneNode::dispatch()
+void SceneNode::render()
 {
-    m_renderTarget->begin(IRenderTarget::Clear);
+    //m_renderTarget->begin(IRenderTarget::Clear);
     //m_renderTarget->drawBatches(m_batches);
-    m_renderTarget->end(IRenderTarget::Present);
+    //m_renderTarget->end(IRenderTarget::Present);
 }
 
 weak<ITask> SceneNode::updateTask()
@@ -41,16 +43,6 @@ weak<ITask> SceneNode::updateTask()
 weak<ITask> SceneNode::renderTask()
 {
     return m_renderTask;
-}
-
-weak<ITask> SceneNode::syncTask()
-{
-    return m_renderTarget->syncTask();
-}
-
-weak<ITask> SceneNode::dispatchTask()
-{
-    return m_dispatchTask;
 }
 
 }}

@@ -13,49 +13,29 @@ namespace BugEngine { namespace Graphics
 
 class MultiNode : public INode
 {
-public:
-    enum NodeType
-    {
-        ToolWindow,
-        MainWindow
-    };
 private:
     struct NodeInfo
     {
-        weak<INode>                      node;
+        weak<INode>                     node;
+        ITask::CallbackConnection       chainUpdate;
         TaskGroup::TaskStartConnection  renderStartConnection;
         TaskGroup::TaskEndConnection    renderEndConnection;
-        TaskGroup::TaskStartConnection  syncStartConnection;
-        ITask::CallbackConnection       syncEndConnection;
-        TaskGroup::TaskStartConnection  dispatchStartConnection;
-        TaskGroup::TaskEndConnection    dispatchEndConnection;
-        ITask::CallbackConnection       chainDispatch;
-        NodeType                        type;
-        NodeInfo(weak<INode> node, weak<MultiNode> owner, NodeType type);
+        ITask::CallbackConnection       chainRender;
+        NodeInfo(weak<INode> node, weak<MultiNode> owner, weak<INode> prevNode);
     };
     friend struct NodeInfo;
 private:
-    ref<TaskGroup>                  m_globalTask;
+    ref<TaskGroup>                  m_updateTask;
     ref<TaskGroup>                  m_renderTask;
-    ref<TaskGroup>                  m_syncTask;
-    ref<TaskGroup>                  m_dispatchTask;
-    ref<ITask>                      m_cleanTask;
-    TaskGroup::TaskEndConnection    m_endSyncConnection;
-    TaskGroup::TaskStartConnection  m_startGlobalConnection;
-    TaskGroup::TaskEndConnection    m_endGlobalConnection;
-    AsyncDispatchJobGraph           m_jobGraph;
+    ITask::CallbackConnection       m_startUpdateConnection;
+    ITask::CallbackConnection       m_startRenderConnection;
     minitl::vector<NodeInfo>        m_nodes;
-    u32                             m_mainNodes;
-private:
-    void clean();
 public:
     MultiNode(const minitl::vector< minitl::weak<INode> >& nodes);
     ~MultiNode();
 
     virtual weak<ITask> updateTask() override;
     virtual weak<ITask> renderTask() override;
-    virtual weak<ITask> syncTask() override;
-    virtual weak<ITask> dispatchTask() override;
 };
 
 }}
