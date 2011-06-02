@@ -18,7 +18,7 @@ private:
     void clearCurrent();
     bool closed() const override;
 public:
-    GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer);
+    GLRenderTarget(weak<const Resource> resource, weak<Renderer> renderer);
     ~GLRenderTarget();
 
     virtual void load(weak<const Resource> resource) override;

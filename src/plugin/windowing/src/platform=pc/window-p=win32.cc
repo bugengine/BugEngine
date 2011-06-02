@@ -48,7 +48,7 @@ Window::PlatformWindow::~PlatformWindow()
         m_renderer->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
-Window::Window(weak<const RenderTarget> resource, weak<const Renderer> renderer)
+Window::Window(weak<const RenderTarget> resource, weak<Renderer> renderer)
 :   IRenderTarget(resource, renderer)
 ,   m_window(scoped<PlatformWindow>())
 {

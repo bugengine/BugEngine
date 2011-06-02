@@ -16,7 +16,7 @@ class GLShader : public IGPUResource
 private:
     GLhandleARB m_shader;
 public:
-    GLShader(weak<const Resource> resource, weak<const Renderer> renderer);
+    GLShader(weak<const Resource> resource, weak<Renderer> renderer);
     ~GLShader();
 
     virtual void load(weak<const Resource> resource) override;

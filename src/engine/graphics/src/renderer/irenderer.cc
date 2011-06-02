@@ -18,6 +18,7 @@ IRenderer::IRenderer(Allocator& allocator)
     :   m_allocator(allocator)
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena(), this))
     ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, Scheduler::MainThread))
+    ,   m_deletedObjects(allocator)
 {
     ResourceLoaders::attach<RenderTarget, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
     ResourceLoaders::attach<RenderWindow, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
@@ -45,18 +46,26 @@ Allocator& IRenderer::arena() const
     return m_allocator;
 }
 
-ResourceHandle IRenderer::load(weak<const RenderTarget> /*rendertarget*/)
+ResourceHandle IRenderer::load(weak<const RenderTarget> rendertarget)
 {
-    return ResourceHandle();
+    ResourceHandle handle;
+    ref<IGPUResource> resource = createRenderTarget(rendertarget);
+    handle.handle = resource;
+    m_pendingRenderTargets.push_back(*resource);
+    return handle;
 }
 
-ResourceHandle IRenderer::load(weak<const RenderWindow> /*renderwindow*/)
+ResourceHandle IRenderer::load(weak<const RenderWindow> renderwindow)
 {
-    return ResourceHandle();
+    ResourceHandle handle;
+    handle.handle = createRenderWindow(renderwindow);
+    return handle;
 }
 
-void IRenderer::destroy(const ResourceHandle& /*r*/)
+void IRenderer::destroy(const ResourceHandle& r)
 {
+    be_checked_cast<IGPUResource>(r.handle)->m_resource = 0;
+    m_deletedObjects.push_back(r.handle);
 }
 
 }}

@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLRenderTarget::GLRenderTarget(weak<const Resource> resource, weak<const Renderer> renderer)
+GLRenderTarget::GLRenderTarget(weak<const Resource> resource, weak<Renderer> renderer)
     :   IRenderTarget(resource, renderer)
 {
 }

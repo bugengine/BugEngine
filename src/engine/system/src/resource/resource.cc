@@ -50,7 +50,7 @@ void Resource::unload(weak<const IResourceLoader> loader) const
         {
             loader->unload(m_handles[i].second);
             m_handles[i].first = 0;
-            m_handles[i].second.handle = scoped<minitl::pointer>();
+            m_handles[i].second.handle = ref<minitl::refcountable>();
             m_handles[i].second.id.intId = 0;
             return;
         }
