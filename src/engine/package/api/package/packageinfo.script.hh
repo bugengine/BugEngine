@@ -8,7 +8,6 @@
 namespace BugEngine
 {
 
-be_tag(42)
 struct PackageInfo
 {
 };

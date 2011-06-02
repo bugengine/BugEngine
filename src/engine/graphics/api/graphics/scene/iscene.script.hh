@@ -6,11 +6,13 @@
 /*****************************************************************************/
 #include    <minitl/ptr/refcountable.hh>
 #include    <system/scheduler/task/itask.hh>
+#include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
 
-class IScene : public minitl::refcountable
+be_tag(ResourceLoaders())
+class IScene : public Resource
 {
 public:
     IScene();

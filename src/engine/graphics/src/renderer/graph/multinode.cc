@@ -42,39 +42,6 @@ MultiNode::~MultiNode()
 
 void MultiNode::clean()
 {
-    for (minitl::vector<NodeInfo>::iterator it = m_nodes.begin(); it != m_nodes.end(); )
-    {
-        if (it->node->closed())
-        {
-            if (it->type == MainWindow)
-                m_mainNodes--;
-            if (it != m_nodes.begin())
-            {
-                if (it+1 != m_nodes.end())
-                {
-                    (it-1)->chainDispatch = ITask::CallbackConnection((it-1)->node->dispatchTask(), (it+1)->node->dispatchTask()->startCallback());
-                }
-                else
-                {
-                    (it-1)->chainDispatch = ITask::CallbackConnection();
-                }
-            }
-            it = m_nodes.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-    if (m_mainNodes == 0)
-    {
-        m_nodes.clear();
-    }
-}
-
-bool MultiNode::closed() const
-{
-    return m_mainNodes == 0;
 }
 
 weak<ITask> MultiNode::updateTask()

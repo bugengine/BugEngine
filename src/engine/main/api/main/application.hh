@@ -5,19 +5,22 @@
 #define BE_MAIN_APPLICATION_HH_
 /*****************************************************************************/
 #include    <system/scheduler/task/group.hh>
+#include    <system/resource/resourcehandle.hh>
 
 namespace BugEngine
 {
 
-class WorldScene;
+namespace Graphics
+{
+class IScene;
+}
 
 class Application : public minitl::refcountable
 {
 private:
+    class SceneResource;
+private:
     scoped<Scheduler>                               m_scheduler;
-    ref<WorldScene>                                 m_scene;
-    ITask::CallbackConnection                       m_startSceneUpdate;
-    ITask::CallbackConnection                       m_endSceneUpdate;
     minitl::vector< ref<ITask> >                    m_tasks;
     minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
     minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
@@ -29,7 +32,8 @@ public:
 
     int run(void);
 
-    void setScene(scoped<WorldScene> scene);
+    ResourceHandle addScene(weak<const Graphics::IScene> scene);
+    void removeScene(const ResourceHandle& handle);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

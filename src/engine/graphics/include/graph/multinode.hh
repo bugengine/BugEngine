@@ -52,7 +52,6 @@ public:
     MultiNode(const minitl::vector< minitl::weak<INode> >& nodes);
     ~MultiNode();
 
-    virtual bool closed() const override;
     virtual weak<ITask> updateTask() override;
     virtual weak<ITask> renderTask() override;
     virtual weak<ITask> syncTask() override;
