@@ -14,7 +14,7 @@ class Renderer;
 class GLMesh : public IGPUResource
 {
 public:
-    GLMesh(weak<const Resource> resource, weak<const Renderer> renderer);
+    GLMesh(weak<const Resource> resource, weak<Renderer> renderer);
     ~GLMesh();
 
     virtual void load(weak<const Resource> resource) override;

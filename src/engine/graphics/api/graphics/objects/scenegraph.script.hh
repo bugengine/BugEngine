@@ -5,6 +5,8 @@
 #define BE_GRAPHICS_OBJECTS_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
+#include    <graphics/scene/iscene.script.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics
 {

@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLShader::GLShader(weak<const Resource> resource, weak<const Renderer> renderer)
+GLShader::GLShader(weak<const Resource> resource, weak<Renderer> renderer)
     :   IGPUResource(resource, renderer)
 {
 }

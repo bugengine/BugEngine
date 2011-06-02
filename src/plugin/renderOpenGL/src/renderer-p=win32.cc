@@ -149,8 +149,8 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<const RenderTarget> rendertarget, weak<const Renderer> renderer)
-:   Windowing::Window(rendertarget, renderer)
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer)
+:   Windowing::Window(renderwindow, renderer)
 {
 }
 

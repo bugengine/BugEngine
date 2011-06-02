@@ -15,14 +15,14 @@ class IRenderer;
 class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
                                     ,   public minitl::intrusive_list<IGPUResource>::item
 {
-    template< typename T, typename U > friend class GPUResourceLoader;
+    friend class IRenderer;
 protected:
-    const weak<const IRenderer>     m_renderer;
+    const weak<IRenderer>           m_renderer;
 private:
     mutable weak<const Resource>    m_resource;
     mutable i32                     m_index;
 public:
-    IGPUResource(weak<const Resource> resource, weak<const IRenderer> renderer);
+    IGPUResource(weak<const Resource> resource, weak<IRenderer> renderer);
     virtual ~IGPUResource();
 
     virtual void load(weak<const Resource> resource) = 0;

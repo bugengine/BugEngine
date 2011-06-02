@@ -25,11 +25,12 @@ class IGPUResource;
 
 class be_api(GRAPHICS) IRenderer : public minitl::pointer
 {
-private:
-    Allocator&                              m_allocator;
-    scoped<SceneGraphLoader>                m_sceneLoader;
-    ref<ITask>                              m_syncTask;
-    minitl::intrusive_list<IGPUResource>    m_resources;
+protected:
+    Allocator&                                  m_allocator;
+    scoped<SceneGraphLoader>                    m_sceneLoader;
+    ref<ITask>                                  m_syncTask;
+    minitl::vector< ref<minitl::refcountable> > m_deletedObjects;
+    minitl::intrusive_list<IGPUResource>        m_pendingRenderTargets;
 protected:
     IRenderer(Allocator& allocator);
     virtual ~IRenderer();

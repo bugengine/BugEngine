@@ -26,7 +26,7 @@ public:
         DontPresent,
         Present
     };
-    IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer);
+    IRenderTarget(weak<const RenderTarget> rendertarget, weak<IRenderer> renderer);
     virtual ~IRenderTarget();
 
     virtual void    begin(ClearMode clear) = 0;

@@ -21,7 +21,7 @@ protected:
     void* getWindowHandle() const;
     bool closed() const;
 public:
-    Window(weak<const RenderTarget> resource, weak<const Renderer> renderer);
+    Window(weak<const RenderTarget> resource, weak<Renderer> renderer);
     ~Window();
 
     void load(weak<const Resource> resource) override;

@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <renderer.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 #include    <loaders/rendertarget/glrendertarget.hh>
 #include    <loaders/rendertarget/glwindow.hh>
 
@@ -21,7 +22,7 @@ ref<IGPUResource> Renderer::createRenderTarget(weak<const RenderTarget> renderta
 
 ref<IGPUResource> Renderer::createRenderWindow(weak<const RenderWindow> renderwindow)
 {
-    return ref<GLWindow>();
+    return ref<GLWindow>::create(m_allocator, renderwindow, this);
 }
 
 }}}
