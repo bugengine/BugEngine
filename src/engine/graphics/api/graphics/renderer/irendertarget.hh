@@ -33,7 +33,6 @@ public:
     virtual void    end(PresentMode present) = 0;
 
     weak<ITask>     syncTask() const;
-    virtual bool    closed() const = 0;
 private:
     IRenderTarget& operator=(const IRenderTarget& other);
     IRenderTarget(const IRenderTarget& other);

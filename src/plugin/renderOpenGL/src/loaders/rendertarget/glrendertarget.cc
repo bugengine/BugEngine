@@ -60,9 +60,4 @@ void GLRenderTarget::present()
 {
 }
 
-bool GLRenderTarget::closed() const
-{
-    return false;
-}
-
 }}}

@@ -47,12 +47,16 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::Graphics::RenderSequence> node = ref<BugEngine::Graphics::RenderSequence>::create(BugEngine::gameArena(), scenes);
 
     BugEngine::Resource::load(BugEngine::Value(w1));
+    BugEngine::Resource::load(BugEngine::Value(scene));
     BugEngine::Resource::load(BugEngine::Value(renderscene));
     BugEngine::Resource::load(BugEngine::Value(node));
 
+    app->run();
+
     BugEngine::Resource::unload(BugEngine::Value(node));
     BugEngine::Resource::unload(BugEngine::Value(renderscene));
+    BugEngine::Resource::unload(BugEngine::Value(scene));
     BugEngine::Resource::unload(BugEngine::Value(w1));
 
-    return app->run();
+    return 0;
 }

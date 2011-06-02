@@ -20,8 +20,6 @@ private:
     ref<ITask>                      m_dispatchTask;
     weak<IScene>                    m_scene;
     weak<IRenderTarget>             m_renderTarget;
-    TaskGroup::TaskStartConnection  m_renderStartTask;
-    TaskGroup::TaskEndConnection    m_renderEndTask;
     AsyncDispatchJobGraph           m_jobGraph;
 private:
     void dispatch();
@@ -29,7 +27,6 @@ public:
     SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget);
     ~SceneNode();
 
-    virtual bool closed() const override;
     virtual weak<ITask> updateTask() override;
     virtual weak<ITask> renderTask() override;
     virtual weak<ITask> syncTask() override;

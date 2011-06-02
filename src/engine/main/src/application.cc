@@ -6,11 +6,33 @@
 
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
+#include    <graphics/scene/iscene.script.hh>
 
 #include    <mobile/worldscene.script.hh>
 
+
 namespace BugEngine
 {
+
+class Application::SceneResource : public minitl::refcountable
+{
+private:
+    ITask::CallbackConnection                       m_startSceneUpdate;
+    ITask::CallbackConnection                       m_endSceneUpdate;
+public:
+    SceneResource(weak<const Graphics::IScene> scene, weak<ITask> task);
+    ~SceneResource();
+};
+
+Application::SceneResource::SceneResource(weak<const Graphics::IScene> scene, weak<ITask> task)
+    :   m_startSceneUpdate(task, scene->updateTask()->startCallback())
+    ,   m_endSceneUpdate(scene->updateTask(), task->startCallback())
+{
+}
+
+Application::SceneResource::~SceneResource()
+{
+}
 
 Application::Application(int argc, const char *argv[])
 :   m_scheduler(scoped<Scheduler>::create(taskArena()))
@@ -32,18 +54,17 @@ Application::Application(int argc, const char *argv[])
     m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[1]));
     m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[2]));
     //m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[3]));
+
+    ResourceLoaders::attach< Graphics::IScene, Application >(this, &Application::addScene, &Application::removeScene);
 }
 
 Application::~Application(void)
 {
+    ResourceLoaders::detach< Graphics::IScene, Application >(this);
 }
 
 void Application::frameUpdate()
 {
-    //if (m_scene && m_scene->closed())
-    //{
-    //    setScene(scoped<WorldScene>());
-    //}
 }
 
 int Application::run()
@@ -53,19 +74,15 @@ int Application::run()
     return 0;
 }
 
-void Application::setScene(scoped<WorldScene> scene)
+ResourceHandle Application::addScene(weak<const Graphics::IScene> scene)
 {
-    if (scene)
-    {
-        m_startSceneUpdate = ITask::CallbackConnection(m_tasks[0], scene->updateTask()->startCallback());
-        m_endSceneUpdate = ITask::CallbackConnection(scene->updateTask(),m_tasks[0]->startCallback());
-    }
-    else
-    {
-        m_startSceneUpdate = ITask::CallbackConnection();
-        m_endSceneUpdate = ITask::CallbackConnection();
-    }
-    m_scene = scene;
+    ResourceHandle handle;
+    handle.handle = ref<SceneResource>::create(taskArena(), scene, m_tasks[0]);
+    return handle;
+}
+
+void Application::removeScene(const ResourceHandle& /*handle*/)
+{
 }
 
 }
