@@ -21,14 +21,13 @@ private:
     scoped<PlatformRenderer>    m_platformRenderer;
 protected:
     void            flush() override;
+protected:
+    void*           createDummyHandle();
 public:
     Renderer(Allocator& allocator);
     ~Renderer();
 
     uint2           getScreenSize() override;
-
-    virtual void    createContext(void* params) = 0;
-    virtual void    destroyContext() = 0;
 };
 
 }}}

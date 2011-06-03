@@ -30,9 +30,9 @@ SceneNode::~SceneNode()
 
 void SceneNode::render()
 {
-    //m_renderTarget->begin(IRenderTarget::Clear);
+    m_renderTarget->begin(IRenderTarget::DontClear);
     //m_renderTarget->drawBatches(m_batches);
-    //m_renderTarget->end(IRenderTarget::Present);
+    m_renderTarget->end(IRenderTarget::Present);
 }
 
 weak<ITask> SceneNode::updateTask()

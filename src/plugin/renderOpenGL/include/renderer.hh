@@ -42,9 +42,6 @@ private:
 private:
     ref<IGPUResource>               createRenderTarget(weak<const RenderTarget> rendertarget) override;
     ref<IGPUResource>               createRenderWindow(weak<const RenderWindow> renderwindow) override;
-protected:
-    void                            createContext(void* params) override;
-    void                            destroyContext() override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

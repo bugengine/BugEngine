@@ -147,10 +147,6 @@ void Renderer::createContext(void* params)
     m_context = scoped<Context>::create(arena(), p->display, p->fbConfig);
 }
 
-void Renderer::destroyContext()
-{
-}
-
 const ShaderExtensions& Renderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
