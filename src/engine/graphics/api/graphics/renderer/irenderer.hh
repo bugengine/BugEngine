@@ -42,7 +42,7 @@ private:
     //        ResourceHandle  load(weak<const Shader> shader);
     //        ResourceHandle  load(weak<const Texture> texture);
 protected:
-    virtual void                flush() = 0;
+    virtual void                flush();
     virtual ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) = 0;
     virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) = 0;
     //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) = 0;

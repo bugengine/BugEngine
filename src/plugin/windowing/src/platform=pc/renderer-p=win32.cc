@@ -21,26 +21,22 @@ namespace
 {
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
-        static unsigned int nbWindows = 0;
         switch( msg )
         {
             case WM_CLOSE:
                 {
                     Window* win = (Window*)(GetWindowLongPtr(hWnd,GWLP_USERDATA));
                     be_assert(win, "BugEngine window not associated with hWnd");
-                    win->close();
+                    //win->close();
                     break;
                 }
 
             case WM_CREATE:
                 {
-                    nbWindows++;
                     break;
                 }
 
             case WM_DESTROY:
-                be_assert(nbWindows, "trying to destroy a window but no window was registered");
-                nbWindows--;
                 break;
 
             case WM_PAINT:
@@ -126,6 +122,7 @@ Renderer::~Renderer()
 
 void Renderer::flush()
 {
+    IRenderer::flush();
     MSG msg;
     while (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
     {
