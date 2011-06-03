@@ -58,7 +58,9 @@ ResourceHandle IRenderer::load(weak<const RenderTarget> rendertarget)
 ResourceHandle IRenderer::load(weak<const RenderWindow> renderwindow)
 {
     ResourceHandle handle;
-    handle.handle = createRenderWindow(renderwindow);
+    ref<IGPUResource> resource = createRenderWindow(renderwindow);
+    handle.handle = resource;
+    m_pendingRenderTargets.push_back(*resource);
     return handle;
 }
 
@@ -66,6 +68,16 @@ void IRenderer::destroy(const ResourceHandle& r)
 {
     be_checked_cast<IGPUResource>(r.handle)->m_resource = 0;
     m_deletedObjects.push_back(r.handle);
+}
+
+void IRenderer::flush()
+{
+    m_deletedObjects.clear();
+    for(minitl::intrusive_list<IGPUResource>::iterator it = m_pendingRenderTargets.begin(); it != m_pendingRenderTargets.end(); ++it)
+    {
+        it->load(it->m_resource);
+    }
+    m_pendingRenderTargets.clear();
 }
 
 }}
