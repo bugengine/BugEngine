@@ -21,7 +21,6 @@ Window::PlatformWindow::PlatformWindow(weak<const Renderer> renderer, weak<Windo
 :   m_renderer(renderer)
 {
     WindowCreationFlags f;
-    f.className = renderer->m_platformRenderer->getWindowClassName().c_str();
     f.title = "TODO";
     f.flags = /*TODO*/ WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     f.x = 0;
@@ -38,6 +37,8 @@ Window::PlatformWindow::PlatformWindow(weak<const Renderer> renderer, weak<Windo
         BE_WIN32_PRINTERROR();
     }
     SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG_PTR)window.operator->());
+    ShowWindow(m_window, SW_SHOW);
+    UpdateWindow(m_window);
 }
 
 Window::PlatformWindow::~PlatformWindow()

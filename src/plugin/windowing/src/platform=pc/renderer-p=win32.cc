@@ -31,14 +31,6 @@ namespace
                     break;
                 }
 
-            case WM_CREATE:
-                {
-                    break;
-                }
-
-            case WM_DESTROY:
-                break;
-
             case WM_PAINT:
                 {
                     ValidateRect(hWnd, NULL);
@@ -65,7 +57,7 @@ Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
     m_wndClassEx.cbSize         = sizeof(WNDCLASSEX);
-    m_wndClassEx.style          = CS_HREDRAW | CS_VREDRAW | CS_CLASSDC;
+    m_wndClassEx.style          = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     m_wndClassEx.lpfnWndProc    = WindowProc;
     m_wndClassEx.hInstance      = hDllInstance;
     m_wndClassEx.hIcon          = LoadIcon(hDllInstance, (LPCTSTR)IDI_BE_ICON);
@@ -87,14 +79,12 @@ Renderer::PlatformRenderer::~PlatformRenderer()
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
 {
     HWND hWnd = CreateWindowEx( flags.fullscreen ? WS_EX_TOPMOST : 0,
-                                flags.className,
+                                m_windowClassName.c_str(),
                                 flags.title,
                                 flags.flags,
                                 flags.x, flags.y,
                                 flags.size.right-flags.size.left, flags.size.bottom-flags.size.top,
                                 NULL, NULL, hDllInstance, NULL );
-    ShowWindow(hWnd, SW_SHOW);
-    UpdateWindow(hWnd);
     return hWnd;
 }
 

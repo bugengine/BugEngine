@@ -13,7 +13,6 @@ namespace BugEngine { namespace Graphics { namespace Windowing
 
 struct WindowCreationFlags
 {
-    const char *className;
     const char *title;
     int x;
     int y;

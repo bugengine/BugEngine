@@ -11,22 +11,28 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 void GLWindow::begin(ClearMode clear)
 {
-    setCurrent();
-    if (clear == IRenderTarget::Clear)
+    if (m_context)
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        setCurrent();
+        if (clear == IRenderTarget::Clear)
+        {
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
     }
 }
 
 void GLWindow::end(PresentMode presentMode)
 {
-    glFlush();
-    if (presentMode == Present)
+    if (m_context)
     {
-        present();
+        glFlush();
+        if (presentMode == Present)
+        {
+            present();
+        }
+        clearCurrent();
     }
-    clearCurrent();
 }
 
 }}}

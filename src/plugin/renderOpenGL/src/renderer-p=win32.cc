@@ -27,36 +27,129 @@ namespace BugEngine
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
+static const PIXELFORMATDESCRIPTOR s_pfd =
+{
+    sizeof(PIXELFORMATDESCRIPTOR),
+    1,
+    PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+    PFD_TYPE_RGBA,
+    32,
+    0, 0, 0, 0, 0, 0,
+    0,
+    0,
+    0,
+    0, 0, 0, 0,
+    24,
+    0,
+    0,
+    PFD_MAIN_PLANE,
+    0,
+    0, 0, 0
+};
+
 class Renderer::Context : public minitl::refcountable
 {
     friend class Renderer;
 private:
-    HGLRC   m_glContext;
+    HWND                            m_dummyHwnd;
+    HDC                             m_dummyDC;
+    HGLRC                           m_glContext;
+    const PFNWGLSWAPINTERVALEXTPROC m_setSwapInterval;
 public:
     const ShaderExtensions  shaderext;
 public:
-    Context(HDC dc);
+    Context(weak<const Renderer> renderer);
     ~Context();
 };
 
-static HGLRC createGLContext(HDC dc)
+static HWND createDummyWnd(weak<const Renderer> renderer)
 {
-    HGLRC rc = wglCreateContext(dc);
-    wglMakeCurrent(dc, rc);
+    minitl::format<> classname = minitl::format<>("__be__%p__") | (const void*)renderer;
+    HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0);
+    return hWnd;
+}
+
+static HGLRC createGLContext(weak<const Renderer> renderer, HDC hdc)
+{
+    GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
+    SetPixelFormat(hdc, pixelFormat, &s_pfd);
+
+    PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
+
+    {
+        HWND hwnd = createDummyWnd(renderer);
+        HDC dc = GetDC(hwnd);
+        GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
+        SetPixelFormat(dc, pixelFormat, &s_pfd);
+
+        // phony context to 
+        HGLRC glrc = wglCreateContext(dc);
+        wglMakeCurrent(dc, glrc);
+
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+
+        wglMakeCurrent(0, 0);
+        wglDeleteContext(glrc);
+        ReleaseDC(hwnd, dc);
+        DestroyWindow(hwnd);
+    }
+    int attribs[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
+                WGL_CONTEXT_MINOR_VERSION_ARB,  1,
+                WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                0
+            };
+    HGLRC rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+    if(!rc)
+    {
+        attribs[1] = 3;
+        attribs[3] = 2;
+        rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+    }
+    if(!rc)
+    {
+        attribs[1] = 3;
+        attribs[3] = 0;
+        rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+    }
+    if(!rc)
+    {
+        attribs[1] = 2;
+        attribs[3] = 0;
+        rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+    }
+    if(!rc)
+    {
+        be_error("Could not create a GL context");
+    }
+    else
+    {
+        wglMakeCurrent(hdc, rc);
+        be_info("Created OpenGL context %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
+    }
     return rc;
 }
 
-Renderer::Context::Context(HDC dc)
-:   m_glContext(createGLContext(dc))
+Renderer::Context::Context(weak<const Renderer> renderer)
+:   m_dummyHwnd(createDummyWnd(renderer))
+,   m_dummyDC(GetDC(m_dummyHwnd))
+,   m_glContext(createGLContext(renderer, m_dummyDC))
+,   m_setSwapInterval((PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT"))
 ,   shaderext()
 {
-    wglMakeCurrent(dc, 0);
+    (*m_setSwapInterval)(1);
+    wglMakeCurrent(0, 0);
 }
 
 Renderer::Context::~Context()
 {
+    wglMakeCurrent(0, 0);
     if (m_glContext)
         wglDeleteContext(m_glContext);
+    ReleaseDC(m_dummyHwnd, m_dummyDC);
+    DestroyWindow(m_dummyHwnd);
 }
 
 
@@ -91,8 +184,8 @@ GLWindow::Context::~Context()
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
     :   Windowing::Renderer(gameArena())
-    ,   m_context()
     ,   m_filesystem(filesystem)
+    ,   m_context(scoped<Context>::create(gameArena(), this))
 {
 }
 
@@ -102,43 +195,13 @@ Renderer::~Renderer()
 
 void Renderer::attachWindow(GLWindow* w) const
 {
-    HDC hDC = GetDC(*(HWND*)w->getWindowHandle());
-    static const PIXELFORMATDESCRIPTOR pfd =
-    {
-        sizeof(PIXELFORMATDESCRIPTOR),
-        1,
-        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-        PFD_TYPE_RGBA,
-        32,
-        0, 0, 0, 0, 0, 0,
-        0,
-        0,
-        0,
-        0, 0, 0, 0,
-        24,
-        0,
-        0,
-        PFD_MAIN_PLANE,
-        0,
-        0, 0, 0
-    };
-    GLuint pixelFormat = ChoosePixelFormat(hDC, &pfd);
-    SetPixelFormat(hDC, pixelFormat, &pfd);
-    if (!m_context)
-    {
-        m_context = scoped<Context>::create(arena(), hDC);
-    }
+    HWND wnd = *(HWND*)w->getWindowHandle();
+    HDC hDC = GetDC(wnd);
+    GLuint pixelFormat = ChoosePixelFormat(hDC, &s_pfd);
+    SetPixelFormat(hDC, pixelFormat, &s_pfd);
     w->m_context->m_dc = hDC;
     w->m_context->m_glContext = m_context->m_glContext;
-    //wglShareLists(m_glContext, w->m_glContext);
-}
-
-void Renderer::createContext(void*)
-{
-}
-
-void Renderer::destroyContext()
-{
+    ReleaseDC(wnd, hDC);
 }
 
 const ShaderExtensions& Renderer::shaderext() const

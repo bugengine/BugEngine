@@ -152,15 +152,6 @@ void Renderer::attachWindow(GLWindow* w)
     [context release];
 }
 
-void Renderer::createContext(void* params)
-{
-}
-
-void Renderer::destroyContext()
-{
-    m_context = scoped<Renderer::Context>();
-}
-
 const ShaderExtensions& Renderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
