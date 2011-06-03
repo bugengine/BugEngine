@@ -25,8 +25,8 @@ namespace
         {
             case WM_CLOSE:
                 {
-                    Window* win = (Window*)(GetWindowLongPtr(hWnd,GWLP_USERDATA));
-                    be_assert(win, "BugEngine window not associated with hWnd");
+                    //Window* win = (Window*)(GetWindowLongPtr(hWnd,GWLP_USERDATA));
+                    //be_assert(win, "BugEngine window not associated with hWnd");
                     //win->close();
                     break;
                 }

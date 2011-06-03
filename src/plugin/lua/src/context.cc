@@ -309,6 +309,7 @@ void Context::printStack(lua_State* l)
         case LUA_TUSERDATA:
             {
                 Value* userdata = (Value*)lua_touserdata(l, -i);
+                be_forceuse(userdata);
                 be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
             }
             break;
