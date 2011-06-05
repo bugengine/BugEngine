@@ -2,24 +2,17 @@
    see LICENSE for detail */
 
 #include    <input/stdafx.h>
-#include    <input/control.hh>
-
+#include    <input/controllers/controller.hh>
 
 namespace BugEngine { namespace Input
 {
 
-Control::Control(const istring& name)
-:   m_name(name)
+Controller::Controller()
 {
 }
 
-Control::~Control()
+Controller::~Controller()
 {
-}
-
-const istring& Control::name() const
-{
-    return m_name;
 }
 
 }}

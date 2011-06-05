@@ -15,12 +15,13 @@ void Renderer::flush()
 {
     static int frames = 0;
     static float now = Timer::now();
-    if (++frames%10000 == 0)
+    if (++frames%100 == 0)
     {
         float time = Timer::now();
-        OutputDebugString((minitl::format<>("%d\n") | (int)(1000.0f*10000.0f / (time - now)) ).c_str());
+        OutputDebugString((minitl::format<>("%d\n") | (int)(1000.0f*100.0f / (time - now)) ).c_str());
         now = time;
     }
+
     Windowing::Renderer::flush();
 }
 
