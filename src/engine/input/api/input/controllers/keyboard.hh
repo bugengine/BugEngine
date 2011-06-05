@@ -1,21 +1,20 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_INPUT_DEVICE_MOUSE_HH_
-#define BE_INPUT_DEVICE_MOUSE_HH_
+#ifndef BE_INPUT_CONTROLLERS_KEYBOARD_HH_
+#define BE_INPUT_CONTROLLERS_KEYBOARD_HH_
 /*****************************************************************************/
-#include    <input/device.hh>
+#include    <input/controllers/controller.hh>
+
 
 namespace BugEngine { namespace Input
 {
 
-class be_api(INPUT) Mouse : public Device
+class Keyboard : public Controller
 {
-private:
-    static size_t   s_miceCount;
 public:
-    Mouse(size_t numButtons);
-    ~Mouse();
+    Keyboard();
+    ~Keyboard();
 };
 
 }}

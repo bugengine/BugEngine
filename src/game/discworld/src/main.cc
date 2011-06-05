@@ -41,20 +41,20 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::Graphics::RenderWindow> w1 = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
     ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::gameArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
     ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::gameArena(), world);
-    ref<BugEngine::Graphics::RenderScene> renderscene = ref<BugEngine::Graphics::RenderScene>::create(BugEngine::gameArena(), scene, w1);
+    ref<BugEngine::Graphics::RenderScene> renderscene1 = ref<BugEngine::Graphics::RenderScene>::create(BugEngine::gameArena(), scene, w1);
     minitl::vector< ref<const BugEngine::Graphics::RenderNode> > scenes(BugEngine::gameArena());
-    scenes.push_back(renderscene);
+    scenes.push_back(renderscene1);
     ref<BugEngine::Graphics::RenderSequence> node = ref<BugEngine::Graphics::RenderSequence>::create(BugEngine::gameArena(), scenes);
 
     BugEngine::Resource::load(BugEngine::Value(w1));
     BugEngine::Resource::load(BugEngine::Value(scene));
-    BugEngine::Resource::load(BugEngine::Value(renderscene));
+    BugEngine::Resource::load(BugEngine::Value(renderscene1));
     BugEngine::Resource::load(BugEngine::Value(node));
 
     app->run();
 
     BugEngine::Resource::unload(BugEngine::Value(node));
-    BugEngine::Resource::unload(BugEngine::Value(renderscene));
+    BugEngine::Resource::unload(BugEngine::Value(renderscene1));
     BugEngine::Resource::unload(BugEngine::Value(scene));
     BugEngine::Resource::unload(BugEngine::Value(w1));
 
