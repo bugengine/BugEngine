@@ -146,6 +146,8 @@ void Scheduler::frameUpdate()
     m_frameCount++;
     m_timer.reset();
     m_timer.start();
+
+    OutputDebugString((minitl::format<>("Jobs: %d\n") | m_runningTasks).c_str());
 }
 
 void Scheduler::queue(ScheduledTasks::ITaskItem* task)

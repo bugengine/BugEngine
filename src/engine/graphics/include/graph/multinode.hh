@@ -27,6 +27,7 @@ private:
     ref<TaskGroup>                  m_updateTask;
     ref<ITask>                      m_dispatchTask;
     ITask::CallbackConnection       m_startDispatchConnection;
+    ITask::CallbackConnection       m_waitOnDispatchConnection;
     minitl::vector<NodeInfo>        m_nodes;
 private:
     void dispatch();
