@@ -17,20 +17,22 @@ class SceneNode : public INode
 {
 private:
     ref<ITask>                  m_renderTask;
+    ref<ITask>                  m_dispatchTask;
     weak<IScene>                m_scene;
     weak<IRenderTarget>         m_renderTarget;
-    ITask::CallbackConnection   m_startUpdateConnection;
-    ITask::CallbackConnection   m_startRenderConnection;
-    ITask::CallbackConnection   m_startFlush;
     ITask::CallbackConnection   m_startRender;
+    ITask::CallbackConnection   m_startDispatch;
+    ITask::CallbackConnection   m_startFlush;
+    ITask::CallbackConnection   m_waitOnFlush;
 private:
     void render();
+    void dispatch();
 public:
     SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget);
     ~SceneNode();
 
     virtual weak<ITask> updateTask() override;
-    virtual weak<ITask> renderTask() override;
+    virtual weak<ITask> dispatchTask() override;
 };
 
 }}

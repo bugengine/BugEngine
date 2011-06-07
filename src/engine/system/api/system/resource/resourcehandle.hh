@@ -18,7 +18,7 @@ struct ResourceHandle
         u32     intId;
     };
     ref<minitl::refcountable>   handle;
-    Id                          id;
+    mutable Id                  cache;
 
     ResourceHandle();
     ~ResourceHandle();
