@@ -28,7 +28,7 @@ weak<ITask> IRenderTarget::syncTask() const
 
 void IRenderTarget::drawBatches(const Batch* /*batches*/, size_t /*count*/) const
 {
-    begin(IRenderTarget::DontClear);
+    begin(IRenderTarget::Clear);
     //m_renderTarget->drawBatches(m_batches);
     end(IRenderTarget::Present);
 }
