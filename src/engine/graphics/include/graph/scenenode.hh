@@ -23,6 +23,7 @@ private:
     ITask::CallbackConnection   m_startRender;
     ITask::CallbackConnection   m_startDispatch;
     ITask::CallbackConnection   m_startFlush;
+    ITask::CallbackConnection   m_waitOnRender;
     ITask::CallbackConnection   m_waitOnFlush;
 private:
     void render();
