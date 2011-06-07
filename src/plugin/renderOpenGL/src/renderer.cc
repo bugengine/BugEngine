@@ -18,7 +18,7 @@ void Renderer::flush()
     if (++frames%100 == 0)
     {
         float time = Timer::now();
-        OutputDebugString((minitl::format<>("%d\n") | (int)(1000.0f*100.0f / (time - now)) ).c_str());
+        be_debug("FPS: %d" | (int)(1000.0f*100.0f / (time - now)));
         now = time;
     }
 
