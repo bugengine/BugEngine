@@ -55,6 +55,7 @@ private:
     HDC                             m_dummyDC;
     HGLRC                           m_glContext;
     const PFNWGLSWAPINTERVALEXTPROC m_setSwapInterval;
+    u64                             m_threadId;
 public:
     const ShaderExtensions  shaderext;
 public:
@@ -138,9 +139,9 @@ Renderer::Context::Context(weak<const Renderer> renderer)
 ,   m_glContext(createGLContext(renderer, m_dummyDC))
 ,   m_setSwapInterval((PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT"))
 ,   shaderext()
+,   m_threadId(Thread::currentId())
 {
     (*m_setSwapInterval)(1);
-    wglMakeCurrent(0, 0);
 }
 
 Renderer::Context::~Context()
@@ -155,24 +156,32 @@ Renderer::Context::~Context()
 
 class GLWindow::Context : public minitl::refcountable
 {
-    friend class Renderer;
     friend class GLWindow;
 private:
     HGLRC       m_glContext;
+    HWND        m_hwnd;
     HDC         m_dc;
+    HDC         m_defaultDc;
+    u64         m_threadId;
 public:
-    Context();
+    Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId);
     ~Context();
 };
 
-GLWindow::Context::Context()
-:   m_glContext(0)
-,   m_dc(0)
+GLWindow::Context::Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId)
+:   m_glContext(rc)
+,   m_hwnd(hwnd)
+,   m_dc(GetDC(hwnd))
+,   m_defaultDc(defaultDc)
+,   m_threadId(threadId)
 {
+    GLuint pixelFormat = ChoosePixelFormat(m_dc, &s_pfd);
+    SetPixelFormat(m_dc, pixelFormat, &s_pfd);
 }
 
 GLWindow::Context::~Context()
 {
+    ReleaseDC(m_hwnd, m_dc);
     /*if (m_glContext)
     {
         wglDeleteContext(m_glContext);
@@ -193,15 +202,11 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::attachWindow(GLWindow* w) const
+void Renderer::attachWindow(weak<GLWindow> w) const
 {
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
-    HDC hDC = GetDC(wnd);
-    GLuint pixelFormat = ChoosePixelFormat(hDC, &s_pfd);
-    SetPixelFormat(hDC, pixelFormat, &s_pfd);
-    w->m_context->m_dc = hDC;
-    w->m_context->m_glContext = m_context->m_glContext;
-    ReleaseDC(wnd, hDC);
+    w->m_context = scoped<GLWindow::Context>::create(arena(), m_context->m_glContext, wnd, m_context->m_dummyDC, m_context->m_threadId);
 }
 
 const ShaderExtensions& Renderer::shaderext() const
@@ -214,6 +219,7 @@ const ShaderExtensions& Renderer::shaderext() const
 
 GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer)
 :   Windowing::Window(renderwindow, renderer)
+,   m_context(scoped<Context>())
 {
 }
 
@@ -224,18 +230,19 @@ GLWindow::~GLWindow()
 void GLWindow::load(weak<const Resource> resource)
 {
     Window::load(resource);
-    m_context = scoped<Context>::create(m_renderer->arena());
     be_checked_cast<const Renderer>(m_renderer)->attachWindow(this);
 }
 
 void GLWindow::unload()
 {
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
     m_context = scoped<Context>();
 }
 
-void GLWindow::setCurrent()
+void GLWindow::setCurrent() const
 {
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     if (!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
     {
         char *errorMessage;
@@ -251,9 +258,10 @@ void GLWindow::setCurrent()
     }
 }
 
-void GLWindow::clearCurrent()
+void GLWindow::clearCurrent() const
 {
-    if (!wglMakeCurrent(m_context->m_dc, NULL))
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    if (!wglMakeCurrent(m_context->m_defaultDc, m_context->m_glContext))
     {
         char *errorMessage;
         ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -268,8 +276,9 @@ void GLWindow::clearCurrent()
     }
 }
 
-void GLWindow::present()
+void GLWindow::present() const
 {
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     SwapBuffers(m_context->m_dc);
 }
 

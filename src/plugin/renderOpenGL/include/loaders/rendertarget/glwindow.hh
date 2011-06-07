@@ -19,15 +19,15 @@ private:
     class Context;
     scoped<Context> m_context;
 private:
-    void setCurrent();
-    void clearCurrent();
-    void present();
+    void setCurrent() const;
+    void clearCurrent() const;
+    void present() const;
 private:
     void load(weak<const Resource> resource) override;
     void unload() override;
 public:
-    virtual void    begin(ClearMode clear) override;
-    virtual void    end(PresentMode present) override;
+    virtual void    begin(ClearMode clear) const override;
+    virtual void    end(PresentMode present) const override;
 public:
     GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer);
     ~GLWindow();

@@ -27,7 +27,7 @@ void GLRenderTarget::unload()
 {
 }
 
-void GLRenderTarget::begin(ClearMode clear)
+void GLRenderTarget::begin(ClearMode clear) const
 {
     setCurrent();
     if (clear == IRenderTarget::Clear)
@@ -37,7 +37,7 @@ void GLRenderTarget::begin(ClearMode clear)
     }
 }
 
-void GLRenderTarget::end(PresentMode presentMode)
+void GLRenderTarget::end(PresentMode presentMode) const
 {
     glFlush();
     if (presentMode == Present)
@@ -48,15 +48,15 @@ void GLRenderTarget::end(PresentMode presentMode)
 }
 
 
-void GLRenderTarget::setCurrent()
+void GLRenderTarget::setCurrent() const
 {
 }
 
-void GLRenderTarget::clearCurrent()
+void GLRenderTarget::clearCurrent() const
 {
 }
 
-void GLRenderTarget::present()
+void GLRenderTarget::present() const
 {
 }
 

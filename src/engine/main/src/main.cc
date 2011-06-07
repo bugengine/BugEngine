@@ -3,8 +3,6 @@
 
 #include    <main/stdafx.h>
 #include    <main/main.hh>
-#include    <input/inputmap.hh>
-#include    <system/scheduler/scheduler.hh>
 #include    <core/environment.hh>
 
 #include    <cstdio>

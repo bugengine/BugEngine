@@ -26,13 +26,19 @@ public:
         DontPresent,
         Present
     };
+    struct Batch
+    {
+    };
+private:
+    virtual void    begin(ClearMode clear) const = 0;
+    virtual void    end(PresentMode present) const = 0;
+protected:
     IRenderTarget(weak<const RenderTarget> rendertarget, weak<IRenderer> renderer);
+public:
     virtual ~IRenderTarget();
 
-    virtual void    begin(ClearMode clear) = 0;
-    virtual void    end(PresentMode present) = 0;
-
     weak<ITask>     syncTask() const;
+    void            drawBatches(const Batch* batches, size_t count) const;
 private:
     IRenderTarget& operator=(const IRenderTarget& other);
     IRenderTarget(const IRenderTarget& other);

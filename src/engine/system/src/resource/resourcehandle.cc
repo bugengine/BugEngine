@@ -11,13 +11,13 @@ namespace BugEngine
 static ResourceHandle::Id defaultId() { ResourceHandle::Id id =  { 0 }; return id; }
 ResourceHandle::ResourceHandle()
     :   handle()
-    ,   id(defaultId())
+    ,   cache(defaultId())
 {
 }
 
 ResourceHandle::~ResourceHandle()
 {
-    be_assert(id.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
+    be_assert(cache.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
 }
 
 const ResourceHandle& ResourceHandle::null()

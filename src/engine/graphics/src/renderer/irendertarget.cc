@@ -26,4 +26,11 @@ weak<ITask> IRenderTarget::syncTask() const
     return m_renderer->syncTask();
 }
 
+void IRenderTarget::drawBatches(const Batch* /*batches*/, size_t /*count*/) const
+{
+    begin(IRenderTarget::DontClear);
+    //m_renderTarget->drawBatches(m_batches);
+    end(IRenderTarget::Present);
+}
+
 }}

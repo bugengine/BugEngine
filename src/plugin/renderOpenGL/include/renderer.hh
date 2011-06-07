@@ -38,7 +38,7 @@ public:
 public:
     const ShaderExtensions&         shaderext() const;
 private:
-    void                            attachWindow(GLWindow* w) const;
+    void                            attachWindow(weak<GLWindow> w) const;
 private:
     ref<IGPUResource>               createRenderTarget(weak<const RenderTarget> rendertarget) override;
     ref<IGPUResource>               createRenderWindow(weak<const RenderWindow> renderwindow) override;

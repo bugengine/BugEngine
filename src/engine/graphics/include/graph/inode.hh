@@ -24,7 +24,7 @@ public:
     virtual ~INode();
 
     virtual weak<ITask> updateTask() = 0;
-    virtual weak<ITask> renderTask() = 0;
+    virtual weak<ITask> dispatchTask() = 0;
 };
 
 }}

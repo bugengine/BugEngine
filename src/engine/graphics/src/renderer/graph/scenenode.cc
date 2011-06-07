@@ -15,12 +15,13 @@ namespace BugEngine { namespace Graphics
 SceneNode::SceneNode(weak<IScene> scene, weak<IRenderTarget> renderTarget)
 :   INode()
 ,   m_renderTask(ref< Task< MethodCaller<SceneNode, &SceneNode::render> > >::create(taskArena(), "renderScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::render>(this)))
+,   m_dispatchTask(ref< Task< MethodCaller<SceneNode, &SceneNode::dispatch> > >::create(taskArena(), "dispatchScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::dispatch>(this), Scheduler::High, renderTarget->syncTask()->affinity))
 ,   m_scene(scene)
 ,   m_renderTarget(renderTarget)
-,   m_startRenderConnection(m_scene->updateTask(), m_renderTask->startCallback())
-,   m_startUpdateConnection(m_renderTask, m_scene->updateTask()->startCallback(), ITask::ICallback::Completed)
-,   m_startFlush(m_renderTask, m_renderTarget->syncTask()->startCallback())
-,   m_startRender(m_renderTarget->syncTask(), m_renderTask->startCallback(), ITask::ICallback::Completed)
+,   m_startRender(m_scene->updateTask(), m_renderTask->startCallback())
+,   m_startDispatch(m_renderTask, m_dispatchTask->startCallback())
+,   m_startFlush(m_dispatchTask, m_renderTarget->syncTask()->startCallback())
+,   m_waitOnFlush(m_renderTarget->syncTask(), m_dispatchTask->startCallback(), ITask::ICallback::Completed)
 {
 }
 
@@ -30,9 +31,11 @@ SceneNode::~SceneNode()
 
 void SceneNode::render()
 {
-    m_renderTarget->begin(IRenderTarget::DontClear);
-    //m_renderTarget->drawBatches(m_batches);
-    m_renderTarget->end(IRenderTarget::Present);
+}
+
+void SceneNode::dispatch()
+{
+    m_renderTarget->drawBatches(0, 0);
 }
 
 weak<ITask> SceneNode::updateTask()
@@ -40,9 +43,9 @@ weak<ITask> SceneNode::updateTask()
     return m_scene->updateTask();
 }
 
-weak<ITask> SceneNode::renderTask()
+weak<ITask> SceneNode::dispatchTask()
 {
-    return m_renderTask;
+    return m_dispatchTask;
 }
 
 }}

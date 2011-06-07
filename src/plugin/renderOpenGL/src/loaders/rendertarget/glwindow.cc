@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void GLWindow::begin(ClearMode clear)
+void GLWindow::begin(ClearMode clear) const
 {
     if (m_context)
     {
@@ -22,7 +22,7 @@ void GLWindow::begin(ClearMode clear)
     }
 }
 
-void GLWindow::end(PresentMode presentMode)
+void GLWindow::end(PresentMode presentMode) const
 {
     if (m_context)
     {
