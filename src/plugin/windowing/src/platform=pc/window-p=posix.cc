@@ -8,7 +8,7 @@
 #include    <X11/X.h>
 #include    <X11/Xlib.h>
 #include    <X11/Xatom.h>
-#include    <graphics/objects/rendertarget.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
@@ -39,14 +39,28 @@ Window::PlatformWindow::~PlatformWindow()
 
 Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
 :   IRenderTarget(resource, renderer)
-,   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer->m_platformRenderer->m_display, renderer->m_platformRenderer->createWindow(0, 0, 800, 600)))
+,   m_window()
 {
-    Window* w = this;
-    XChangeProperty(renderer->m_platformRenderer->m_display, m_window->m_window, renderer->m_platformRenderer->m_windowProperty,
-                    XA_INTEGER, 8, PropModeReplace, (unsigned char *)&w, sizeof(w));
 }
 
 Window::~Window()
+{
+    close();
+}
+
+void Window::load(weak<const Resource> resource)
+{
+    m_window = scoped<PlatformWindow>::create(m_renderer->arena(),
+                                              be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
+                                              be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->createWindow(0, 0, 800, 600));
+    Window* w = this;
+    XChangeProperty(be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
+                    m_window->m_window,
+                    be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_windowProperty,
+                    XA_INTEGER, 8, PropModeReplace, (unsigned char *)&w, sizeof(w));
+}
+
+void Window::unload()
 {
     close();
 }

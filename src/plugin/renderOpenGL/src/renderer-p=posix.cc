@@ -26,17 +26,26 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 #define GLX_CONTEXT_MINOR_VERSION_ARB       0x2092
 typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
+struct PlatformData
+{
+    ::Display*      display;
+    ::GLXFBConfig   fbConfig;
+    ::XVisualInfo*  visual;
+};
+
 class Renderer::Context : public minitl::refcountable
 {
     friend class Renderer;
-    friend class Window;
+    friend class GLWindow;
 private:
     ::Display*  m_display;
+    ::Window    m_defaultWindow;
     GLXContext  m_glContext;
+    u64         m_threadId;
 public:
     const ShaderExtensions  shaderext;
 public:
-    Context(::Display* display, ::GLXFBConfig fbConfig);
+    Context(PlatformData* data);
     ~Context();
 };
 
@@ -74,32 +83,61 @@ static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
     return context;
 }
 
-Renderer::Context::Context(::Display* display, ::GLXFBConfig fbConfig)
-:   m_display(display)
-,   m_glContext(createGLXContext(display, fbConfig))
+static ::Window createDefaultWindow(::Display* display, ::XVisualInfo* visual)
+{
+    XSetWindowAttributes attributes;
+    attributes.colormap = XCreateColormap(display, XRootWindow(display, visual->screen), visual->visual, AllocNone);
+    attributes.border_pixel = 0;
+    attributes.override_redirect = false; //flags.fullscreen
+    attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
+    int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
+    ::Window result = XCreateWindow(display,
+                                    XRootWindow(display, visual->screen),
+                                    1, 1,
+                                    1, 1,
+                                    1,
+                                    visual->depth,
+                                    InputOutput,
+                                    visual->visual,
+                                    attributeMask,
+                                    &attributes);
+    XSync(display, false);
+    return result;
+}
+
+
+Renderer::Context::Context(PlatformData* data)
+:   m_display(data->display)
+,   m_glContext(createGLXContext(data->display, data->fbConfig))
+,   m_defaultWindow(createDefaultWindow(m_display, data->visual))
+,   m_threadId(Thread::currentId())
 ,   shaderext()
 {
-    XSync(m_display, false);
+    glXMakeCurrent(m_display, m_defaultWindow, m_glContext);
+    be_info("Creating OpenGL %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
 }
 
 Renderer::Context::~Context()
 {
+    XDestroyWindow(m_display, m_defaultWindow);
 }
 
 
 class GLWindow::Context : public minitl::refcountable
 {
     friend class Renderer;
-    friend class Window;
+    friend class GLWindow;
 private:
     GLXContext  m_glContext;
+    u64         m_threadId;
 public:
-    Context();
+    Context(GLXContext context, u64 threadId);
     ~Context();
 };
 
-GLWindow::Context::Context()
-:   m_glContext(0)
+GLWindow::Context::Context(GLXContext context, u64 threadId)
+:   m_glContext(context)
+,   m_threadId(threadId)
 {
 }
 
@@ -111,7 +149,7 @@ GLWindow::Context::~Context()
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
 :   Windowing::Renderer(gameArena())
-,   m_context()
+,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
 ,   m_filesystem(filesystem)
 {
 }
@@ -122,26 +160,8 @@ Renderer::~Renderer()
 
 void Renderer::attachWindow(weak<GLWindow> w) const
 {
-    if (!m_context)
-    {
-        struct { ::Display* display; ::GLXFBConfig fbConfig; } params = { m_platformRenderer->m_display, m_platformRenderer->m_fbConfig };
-        createContext(&params);
-        ::Window* handle = (::Window*)(w->getWindowHandle());
-        glXMakeCurrent(m_context->m_display, *handle, m_context->m_glContext);
-        be_info("Creating OpenGL %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
-        glXMakeCurrent(m_context->m_display, *handle, 0);
-    }
-    w->m_context->m_glContext = m_context->m_glContext;
-}
-
-void Renderer::createContext(void* params)
-{
-    const struct DisplayInfo
-    {
-        ::Display* display;
-        ::GLXFBConfig fbConfig;
-    } *p = (const DisplayInfo*)params;
-    m_context = scoped<Context>::create(arena(), p->display, p->fbConfig);
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    w->m_context = scoped<GLWindow::Context>::create(arena(), m_context->m_glContext, m_context->m_threadId);
 }
 
 const ShaderExtensions& Renderer::shaderext() const
@@ -152,38 +172,57 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<Renderer> renderer, WindowFlags flags)
-:   Windowing::Window(renderer, flags)
-,   m_context(scoped<Context>::create(renderer->arena()))
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer)
+:   Windowing::Window(renderwindow, renderer)
+,   m_context(scoped<Context>())
 {
-    renderer->attachWindow(this);
 }
 
 GLWindow::~GLWindow()
 {
 }
 
-void GLWindow::setCurrent()
+void GLWindow::load(weak<const Resource> resource)
+{
+    Window::load(resource);
+    be_checked_cast<const Renderer>(m_renderer)->attachWindow(this);
+}
+
+void GLWindow::unload()
+{
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    Window::unload();
+    m_context = scoped<Context>();
+}
+
+void GLWindow::setCurrent() const
 {
     if (!closed())
     {
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
-        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w, be_checked_cast<Renderer>(m_renderer)->m_context->m_glContext);
+        weak<Renderer::Context> c = be_checked_cast<Renderer>(m_renderer)->m_context;
+        if(!glXMakeCurrent(c->m_display, *w, c->m_glContext))
+            be_error("Unable to set current context");
     }
 }
 
-void GLWindow::clearCurrent()
+void GLWindow::clearCurrent() const
 {
     if (!closed())
     {
-        glXMakeCurrent(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, 0, 0);
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+        weak<Renderer::Context> c = be_checked_cast<Renderer>(m_renderer)->m_context;
+        if(!glXMakeCurrent(c->m_display, c->m_defaultWindow, c->m_glContext))
+            be_error("Unable to clear current context");
     }
 }
 
-void GLWindow::present()
+void GLWindow::present() const
 {
     if (!closed())
     {
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
         glXSwapBuffers(be_checked_cast<Renderer>(m_renderer)->m_context->m_display, *w);
     }

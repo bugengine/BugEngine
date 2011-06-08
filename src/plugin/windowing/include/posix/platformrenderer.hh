@@ -11,16 +11,20 @@
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
 
+struct PlatformData
+{
+    ::Display*      display;
+    ::GLXFBConfig   fbConfig;
+    ::XVisualInfo*  visual;
+    PlatformData(::Display* display);
+};
+
 class Renderer::PlatformRenderer : public minitl::refcountable
 {
     friend class Renderer;
     friend class Window;
 private:
-    ::Display*      m_display;
-    int             m_screen;
-    ::Window        m_rootWindow;
-    GLXFBConfig     m_fbConfig;
-    ::XVisualInfo*  m_visual;
+    PlatformData    m_platformData;
     ::Atom          m_windowProperty;
 private:
     static int xError(::Display* display, XErrorEvent* event);
