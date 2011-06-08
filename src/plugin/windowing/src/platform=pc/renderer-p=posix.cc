@@ -89,18 +89,18 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
     return 0;
 }
 
-::Window Renderer::PlatformRenderer::createWindow(const WindowFlags& flags)
+::Window Renderer::PlatformRenderer::createWindow(i16 x, i16 y, u16 w, u16 h)
 {
     XSetWindowAttributes attributes;
     attributes.colormap = XCreateColormap(m_display, XRootWindow(m_display, m_visual->screen), m_visual->visual, AllocNone);
     attributes.border_pixel = 0;
-    attributes.override_redirect = flags.fullscreen;
+    attributes.override_redirect = false; //flags.fullscreen
     attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result = XCreateWindow(m_display,
                                     XRootWindow(m_display, m_visual->screen),
-                                    flags.position.x(), flags.position.y(),
-                                    flags.size.x(), flags.size.y(),
+                                    x, y,
+                                    w, h,
                                     1,
                                     m_visual->depth,
                                     InputOutput,
