@@ -4,12 +4,13 @@
 #include    <stdafx.h>
 #include    <renderer.hh>
 #include    <extensions.hh>
-#include    <window.hh>
 
-#include    <graphics/renderer/igpuloader.hh>
+
+#include    <graphics/objects/rendertarget.script.hh>
 #include    <graphics/objects/mesh.script.hh>
 #include    <graphics/objects/texture.script.hh>
 #include    <graphics/objects/shader.script.hh>
+#include    <loaders/rendertarget/glwindow.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
@@ -86,7 +87,7 @@ Renderer::Context::~Context()
 }
 
 
-class Window::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::refcountable
 {
     friend class Renderer;
     friend class Window;
@@ -97,33 +98,29 @@ public:
     ~Context();
 };
 
-Window::Context::Context()
+GLWindow::Context::Context()
 :   m_glContext(0)
 {
 }
 
-Window::Context::~Context()
+GLWindow::Context::~Context()
 {
 }
 
 //------------------------------------------------------------------------
 
 Renderer::Renderer(weak<const FileSystem> filesystem)
-:   Window::Renderer(gameArena())
+:   Windowing::Renderer(gameArena())
 ,   m_context()
 ,   m_filesystem(filesystem)
-,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
-,   m_textureLoader(scoped<const TextureLoader>::create(arena()))
-,   m_shaderLoader(scoped<const ShaderLoader>::create(arena(), this))
 {
 }
 
 Renderer::~Renderer()
 {
-    destroyContext();
 }
 
-void Renderer::attachWindow(Window* w)
+void Renderer::attachWindow(weak<GLWindow> w) const
 {
     if (!m_context)
     {
@@ -155,18 +152,18 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
+GLWindow::GLWindow(weak<Renderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
 ,   m_context(scoped<Context>::create(renderer->arena()))
 {
     renderer->attachWindow(this);
 }
 
-Window::~Window()
+GLWindow::~GLWindow()
 {
 }
 
-void Window::setCurrent()
+void GLWindow::setCurrent()
 {
     if (!closed())
     {
@@ -175,7 +172,7 @@ void Window::setCurrent()
     }
 }
 
-void Window::clearCurrent()
+void GLWindow::clearCurrent()
 {
     if (!closed())
     {
@@ -183,7 +180,7 @@ void Window::clearCurrent()
     }
 }
 
-void Window::present()
+void GLWindow::present()
 {
     if (!closed())
     {

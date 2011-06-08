@@ -27,7 +27,7 @@ private:
 public:
     PlatformRenderer();
     ~PlatformRenderer();
-    ::Window createWindow(const WindowFlags& flags);
+    ::Window createWindow(i16 x, i16 y, u16 w, u16 h);
 };
 
 }}}

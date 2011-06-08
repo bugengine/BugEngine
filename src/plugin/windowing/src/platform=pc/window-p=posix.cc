@@ -36,9 +36,9 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer->m_platformRenderer->m_display, renderer->m_platformRenderer->createWindow(flags)))
+Window::Window(weak<const RenderTarget> resource, weak<Renderer> renderer)
+:   IRenderTarget(resource, renderer)
+,   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer->m_platformRenderer->m_display, renderer->m_platformRenderer->createWindow(0, 0, 800, 600)))
 {
     Window* w = this;
     XChangeProperty(renderer->m_platformRenderer->m_display, m_window->m_window, renderer->m_platformRenderer->m_windowProperty,
