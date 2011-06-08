@@ -64,7 +64,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 	worked = False
 	for opt,arch in allarchs(originalarch):
 		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
-		pprint('BLUE', ' = %s =' % name)
 		conf.setenv(name, conf.env.derive())
 		try:
 			add_gcc_to_env(conf, version, toolchaindir, target, opt)
@@ -81,12 +80,10 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.env['BUILD_VARIANTS'].append(name)
 			worked = True
 		except Exception as e:
-			warn('gcc not available: '+str(e))
 			conf.variant = ''
 	if not worked:
 		arch = originalarch
 		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
-		pprint('BLUE', ' = %s =' % name)
 		conf.setenv(name, conf.env.derive())
 		try:
 			add_gcc_to_env(conf, version, toolchaindir, target, '')
@@ -102,7 +99,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
-			warn('gcc not available: '+str(e))
 			conf.variant = ''
 
 def parse_gcc_target(target):
