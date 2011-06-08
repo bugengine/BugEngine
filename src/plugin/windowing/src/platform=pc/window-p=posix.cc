@@ -8,6 +8,7 @@
 #include    <X11/X.h>
 #include    <X11/Xlib.h>
 #include    <X11/Xatom.h>
+#include    <graphics/objects/rendertarget.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
@@ -36,7 +37,7 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<const RenderTarget> resource, weak<Renderer> renderer)
+Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
 :   IRenderTarget(resource, renderer)
 ,   m_window(scoped<PlatformWindow>::create(renderer->arena(), renderer->m_platformRenderer->m_display, renderer->m_platformRenderer->createWindow(0, 0, 800, 600)))
 {
