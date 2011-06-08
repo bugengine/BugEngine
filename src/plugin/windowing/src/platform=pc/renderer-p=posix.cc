@@ -40,24 +40,27 @@ namespace
     }
 }
 
+PlatformData::PlatformData(::Display* display)
+:   display(display)
+,   fbConfig(selectGLXFbConfig(display, XDefaultScreen(display)))
+,   visual(glXGetVisualFromFBConfig(display, fbConfig))
+{
+}
+
 Renderer::PlatformRenderer::PlatformRenderer()
-:   m_display(XOpenDisplay(0))
-,   m_screen(XDefaultScreen(m_display))
-,   m_rootWindow(XRootWindow(m_display, m_screen))
-,   m_fbConfig(selectGLXFbConfig(m_display, m_screen))
-,   m_visual(glXGetVisualFromFBConfig(m_display, m_fbConfig))
-,   m_windowProperty(XInternAtom(m_display, "BE_WINDOW", False))
+:   m_platformData(XOpenDisplay(0))
+,   m_windowProperty(XInternAtom(m_platformData.display, "BE_WINDOW", False))
 {
     XSetErrorHandler(&Renderer::PlatformRenderer::xError);
-    XSync(m_display, false);
+    XSync(m_platformData.display, false);
 }
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    XFree(m_visual);
-    if (m_display)
+    XFree(m_platformData.visual);
+    if (m_platformData.display)
     {
-        XCloseDisplay(m_display);
+        XCloseDisplay(m_platformData.display);
     }
 }
 
@@ -92,26 +95,26 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 ::Window Renderer::PlatformRenderer::createWindow(i16 x, i16 y, u16 w, u16 h)
 {
     XSetWindowAttributes attributes;
-    attributes.colormap = XCreateColormap(m_display, XRootWindow(m_display, m_visual->screen), m_visual->visual, AllocNone);
+    attributes.colormap = XCreateColormap(m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen), m_platformData.visual->visual, AllocNone);
     attributes.border_pixel = 0;
     attributes.override_redirect = false; //flags.fullscreen
     attributes.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
-    ::Window result = XCreateWindow(m_display,
-                                    XRootWindow(m_display, m_visual->screen),
+    ::Window result = XCreateWindow(m_platformData.display,
+                                    XRootWindow(m_platformData.display, m_platformData.visual->screen),
                                     x, y,
                                     w, h,
                                     1,
-                                    m_visual->depth,
+                                    m_platformData.visual->depth,
                                     InputOutput,
-                                    m_visual->visual,
+                                    m_platformData.visual->visual,
                                     attributeMask,
                                     &attributes);
     if (result)
     {
-        XMapRaised(m_display, result);
+        XMapRaised(m_platformData.display, result);
     }
-    XSync(m_display, false);
+    XSync(m_platformData.display, false);
     return result;
 }
 
@@ -130,17 +133,18 @@ Renderer::~Renderer()
 
 uint2 Renderer::getScreenSize()
 {
-    Screen* s = XScreenOfDisplay(m_platformRenderer->m_display, m_platformRenderer->m_screen);
+    Screen* s = XScreenOfDisplay(m_platformRenderer->m_platformData.display, XDefaultScreen(m_platformRenderer->m_platformData.display));
     return uint2(XWidthOfScreen(s), XHeightOfScreen(s));
 }
 
 void Renderer::flush()
 {
+    IRenderer::flush();
     XEvent event;
-    /* wait for events*/ 
-    while (XPending(m_platformRenderer->m_display) > 0)
+    /* wait for events*/
+    while (XPending(m_platformRenderer->m_platformData.display) > 0)
     {
-        XNextEvent(m_platformRenderer->m_display, &event);
+        XNextEvent(m_platformRenderer->m_platformData.display, &event);
         switch (event.type)
         {
         case DestroyNotify:
@@ -164,7 +168,7 @@ void Renderer::flush()
                 unsigned long nbItems;
                 unsigned long leftBytes;
                 unsigned char *result = 0;
-                XGetWindowProperty(m_platformRenderer->m_display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
+                XGetWindowProperty(m_platformRenderer->m_platformData.display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
                                    False, AnyPropertyType, &type, &format, &nbItems, &leftBytes, &result);
                 be_assert(result, "could not retrieve engine window handle from X11 window");
                 Window *w = *(Window**)result;
@@ -177,6 +181,11 @@ void Renderer::flush()
             break;
         }
     }
+}
+
+void* Renderer::getPlatformData()
+{
+    return &m_platformRenderer->m_platformData;
 }
 
 }}}

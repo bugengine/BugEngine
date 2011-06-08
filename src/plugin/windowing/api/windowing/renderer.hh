@@ -28,6 +28,7 @@ public:
     ~Renderer();
 
     uint2           getScreenSize() override;
+    void*           getPlatformData();
 };
 
 }}}

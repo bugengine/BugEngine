@@ -83,7 +83,7 @@ static HGLRC createGLContext(weak<const Renderer> renderer, HDC hdc)
         GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
         SetPixelFormat(dc, pixelFormat, &s_pfd);
 
-        // phony context to 
+        // phony context to get the context creation method
         HGLRC glrc = wglCreateContext(dc);
         wglMakeCurrent(dc, glrc);
 
@@ -138,8 +138,8 @@ Renderer::Context::Context(weak<const Renderer> renderer)
 ,   m_dummyDC(GetDC(m_dummyHwnd))
 ,   m_glContext(createGLContext(renderer, m_dummyDC))
 ,   m_setSwapInterval((PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT"))
-,   shaderext()
 ,   m_threadId(Thread::currentId())
+,   shaderext()
 {
     (*m_setSwapInterval)(1);
 }

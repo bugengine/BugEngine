@@ -52,7 +52,8 @@ float Timer::now()
 {
     timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
-    return (float)t.tv_sec * 1000.0f + (float)t.tv_nsec / 1000000.0f;
+    static time_t s_start = t.tv_sec;
+    return (float)(t.tv_sec-s_start)*1000.0f + (float)t.tv_nsec / 1000000.0f;
 }
 
 }
