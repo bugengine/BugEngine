@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <graphics/objects/texture.script.hh>
 
@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLTexture::GLTexture(weak<const Resource> resource, weak<Renderer> renderer)
+GLTexture::GLTexture(weak<const Resource> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
 {
 }

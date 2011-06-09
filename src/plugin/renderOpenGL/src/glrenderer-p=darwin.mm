@@ -2,11 +2,9 @@
  see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <extensions.hh>
-#include    <window.hh>
 
-#include    <graphics/renderer/igpuloader.hh>
 #include    <graphics/objects/mesh.script.hh>
 #include    <graphics/objects/texture.script.hh>
 #include    <graphics/objects/shader.script.hh>
@@ -55,9 +53,9 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Renderer::Context : public minitl::refcountable
+class GLRenderer::Context : public minitl::refcountable
 {
-    friend class Renderer;
+    friend class GLRenderer;
     friend class GLWindow;
 private:
     NSOpenGLPixelFormat*    m_pixelFormat;
@@ -80,7 +78,7 @@ static const NSOpenGLPixelFormatAttribute s_attributes[] = {
     (NSOpenGLPixelFormatAttribute)0
 };
 
-Renderer::Context::Context()
+GLRenderer::Context::Context()
     :   m_pixelFormat([[NSOpenGLPixelFormat alloc] initWithAttributes: s_attributes])
     ,   m_context([[NSOpenGLContext alloc] initWithFormat: m_pixelFormat shareContext: nil])
 {
@@ -88,7 +86,7 @@ Renderer::Context::Context()
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
 }
 
-Renderer::Context::~Context()
+GLRenderer::Context::~Context()
 {
     [m_context release];
     [m_pixelFormat release];
@@ -97,7 +95,7 @@ Renderer::Context::~Context()
 
 class GLWindow::Context : public minitl::refcountable
 {
-    friend class Renderer;
+    friend class GLRenderer;
     friend class GLWindow;
 private:
     NSWindow*               m_window;
@@ -127,9 +125,9 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-Renderer::Renderer(weak<const FileSystem> filesystem)
+GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
 :   Windowing::Renderer(gameArena())
-,   m_context(scoped<Renderer::Context>::create(arena()))
+,   m_context(scoped<Context>::create(arena()))
 ,   m_filesystem(filesystem)
 ,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
 ,   m_textureLoader(scoped<const TextureLoader>::create(arena()))
@@ -137,12 +135,12 @@ Renderer::Renderer(weak<const FileSystem> filesystem)
 {
 }
 
-Renderer::~Renderer()
+GLRenderer::~GLRenderer()
 {
     destroyContext();
 }
 
-void Renderer::attachWindow(GLWindow* w)
+void GLRenderer::attachWindow(GLWindow* w)
 {
     NSWindow* window = (NSWindow*)w->getWindowHandle();
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
@@ -152,7 +150,7 @@ void Renderer::attachWindow(GLWindow* w)
     [context release];
 }
 
-const ShaderExtensions& Renderer::shaderext() const
+const ShaderExtensions& GLRenderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
     return m_context->shaderext;
@@ -160,7 +158,7 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<Renderer> renderer, WindowFlags flags)
+GLWindow::GLWindow(weak<GLRenderer> renderer, WindowFlags flags)
 :   Windowing::Window(renderer, flags)
 {
     renderer->attachWindow(this);

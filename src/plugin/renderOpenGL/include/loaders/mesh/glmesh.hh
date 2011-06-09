@@ -9,12 +9,12 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Renderer;
+class GLRenderer;
 
 class GLMesh : public IGPUResource
 {
 public:
-    GLMesh(weak<const Resource> resource, weak<Renderer> renderer);
+    GLMesh(weak<const Resource> resource, weak<GLRenderer> renderer);
     ~GLMesh();
 
     virtual void load(weak<const Resource> resource) override;

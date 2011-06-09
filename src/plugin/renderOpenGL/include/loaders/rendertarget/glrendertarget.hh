@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Renderer;
+class GLRenderer;
 
 class GLRenderTarget : public IRenderTarget
 {
@@ -17,7 +17,7 @@ private:
     void setCurrent() const;
     void clearCurrent() const;
 public:
-    GLRenderTarget(weak<const Resource> resource, weak<Renderer> renderer);
+    GLRenderTarget(weak<const Resource> resource, weak<GLRenderer> renderer);
     ~GLRenderTarget();
 
     virtual void load(weak<const Resource> resource) override;
