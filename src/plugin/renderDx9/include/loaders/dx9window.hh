@@ -13,7 +13,6 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 class Dx9Window : public Windowing::Window
 {
-    friend class Renderer;
 private:
     LPDIRECT3DSWAPCHAIN9 m_swapChain;
 private:

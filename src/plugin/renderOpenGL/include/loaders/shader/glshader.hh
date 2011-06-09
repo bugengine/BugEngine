@@ -9,14 +9,14 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Renderer;
+class GLRenderer;
 
 class GLShader : public IGPUResource
 {
 private:
     GLhandleARB m_shader;
 public:
-    GLShader(weak<const Resource> resource, weak<Renderer> renderer);
+    GLShader(weak<const Resource> resource, weak<GLRenderer> renderer);
     ~GLShader();
 
     virtual void load(weak<const Resource> resource) override;

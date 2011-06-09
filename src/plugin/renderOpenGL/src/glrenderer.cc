@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <graphics/objects/rendertarget.script.hh>
 #include    <loaders/rendertarget/glrendertarget.hh>
 #include    <loaders/rendertarget/glwindow.hh>
@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-void Renderer::flush()
+void GLRenderer::flush()
 {
     static int frames = 0;
     static float now = Timer::now();
@@ -25,12 +25,12 @@ void Renderer::flush()
     Windowing::Renderer::flush();
 }
 
-ref<IGPUResource> Renderer::createRenderTarget(weak<const RenderTarget> rendertarget)
+ref<IGPUResource> GLRenderer::createRenderTarget(weak<const RenderTarget> rendertarget)
 {
     return ref<GLRenderTarget>();
 }
 
-ref<IGPUResource> Renderer::createRenderWindow(weak<const RenderWindow> renderwindow)
+ref<IGPUResource> GLRenderer::createRenderWindow(weak<const RenderWindow> renderwindow)
 {
     return ref<GLWindow>::create(m_allocator, renderwindow, this);
 }

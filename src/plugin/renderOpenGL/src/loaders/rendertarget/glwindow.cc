@@ -3,7 +3,6 @@
 
 #include    <stdafx.h>
 #include    <loaders/rendertarget/glwindow.hh>
-#include    <renderer.hh>
 
 
 namespace BugEngine { namespace Graphics { namespace OpenGL

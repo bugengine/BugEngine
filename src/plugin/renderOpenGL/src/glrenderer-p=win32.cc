@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <extensions.hh>
 
 #include    <graphics/objects/rendertarget.script.hh>
@@ -47,9 +47,9 @@ static const PIXELFORMATDESCRIPTOR s_pfd =
     0, 0, 0
 };
 
-class Renderer::Context : public minitl::refcountable
+class GLRenderer::Context : public minitl::refcountable
 {
-    friend class Renderer;
+    friend class GLRenderer;
 private:
     HWND                            m_dummyHwnd;
     HDC                             m_dummyDC;
@@ -59,18 +59,18 @@ private:
 public:
     const ShaderExtensions  shaderext;
 public:
-    Context(weak<const Renderer> renderer);
+    Context(weak<const GLRenderer> renderer);
     ~Context();
 };
 
-static HWND createDummyWnd(weak<const Renderer> renderer)
+static HWND createDummyWnd(weak<const GLRenderer> renderer)
 {
     minitl::format<> classname = minitl::format<>("__be__%p__") | (const void*)renderer;
     HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0);
     return hWnd;
 }
 
-static HGLRC createGLContext(weak<const Renderer> renderer, HDC hdc)
+static HGLRC createGLContext(weak<const GLRenderer> renderer, HDC hdc)
 {
     GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
     SetPixelFormat(hdc, pixelFormat, &s_pfd);
@@ -133,7 +133,7 @@ static HGLRC createGLContext(weak<const Renderer> renderer, HDC hdc)
     return rc;
 }
 
-Renderer::Context::Context(weak<const Renderer> renderer)
+GLRenderer::Context::Context(weak<const GLRenderer> renderer)
 :   m_dummyHwnd(createDummyWnd(renderer))
 ,   m_dummyDC(GetDC(m_dummyHwnd))
 ,   m_glContext(createGLContext(renderer, m_dummyDC))
@@ -144,7 +144,7 @@ Renderer::Context::Context(weak<const Renderer> renderer)
     (*m_setSwapInterval)(1);
 }
 
-Renderer::Context::~Context()
+GLRenderer::Context::~Context()
 {
     wglMakeCurrent(0, 0);
     if (m_glContext)
@@ -191,25 +191,25 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-Renderer::Renderer(weak<const FileSystem> filesystem)
+GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
     :   Windowing::Renderer(gameArena())
     ,   m_filesystem(filesystem)
     ,   m_context(scoped<Context>::create(gameArena(), this))
 {
 }
 
-Renderer::~Renderer()
+GLRenderer::~GLRenderer()
 {
 }
 
-void Renderer::attachWindow(weak<GLWindow> w) const
+void GLRenderer::attachWindow(weak<GLWindow> w) const
 {
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
     w->m_context = scoped<GLWindow::Context>::create(arena(), m_context->m_glContext, wnd, m_context->m_dummyDC, m_context->m_threadId);
 }
 
-const ShaderExtensions& Renderer::shaderext() const
+const ShaderExtensions& GLRenderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
     return m_context->shaderext;
@@ -217,7 +217,7 @@ const ShaderExtensions& Renderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer)
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer)
 :   Windowing::Window(renderwindow, renderer)
 ,   m_context(scoped<Context>())
 {
@@ -230,7 +230,7 @@ GLWindow::~GLWindow()
 void GLWindow::load(weak<const Resource> resource)
 {
     Window::load(resource);
-    be_checked_cast<const Renderer>(m_renderer)->attachWindow(this);
+    be_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
 }
 
 void GLWindow::unload()

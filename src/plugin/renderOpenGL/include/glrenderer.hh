@@ -17,7 +17,7 @@ class GLWindow;
 struct ShaderExtensions;
 
 
-class Renderer : public Windowing::Renderer
+class GLRenderer : public Windowing::Renderer
 {
     friend class GLWindow;
 private:
@@ -25,8 +25,8 @@ private:
     mutable scoped<Context>         m_context;
     weak<const FileSystem>          m_filesystem;
 public:
-    Renderer(weak<const FileSystem> filesystem);
-    ~Renderer();
+    GLRenderer(weak<const FileSystem> filesystem);
+    ~GLRenderer();
 
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
     bool                            multithreaded() const override { return true; }

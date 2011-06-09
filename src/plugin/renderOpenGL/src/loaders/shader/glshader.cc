@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <extensions.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/shader/glshaderbuilder.hh>
@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLShader::GLShader(weak<const Resource> resource, weak<Renderer> renderer)
+GLShader::GLShader(weak<const Resource> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
 {
 }
@@ -37,7 +37,7 @@ void GLShader::load(weak<const Resource> resource)
     GLShaderBuilder builder;
     shader->buildSource(builder);
 
-    const ShaderExtensions& shaderext = be_checked_cast<const Renderer>(m_renderer)->shaderext();
+    const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();
     m_shader = shaderext.glCreateShader(shaderType);
     GLint size = be_checked_numcast<GLint>(builder.textSize());
     const GLcharARB* text = (GLcharARB*)builder.text();

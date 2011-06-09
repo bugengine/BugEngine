@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(renderOpenGL, BugEngine::Graphics::OpenGL::Renderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));
+BE_PLUGIN_REGISTER(renderOpenGL, BugEngine::Graphics::OpenGL::GLRenderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));

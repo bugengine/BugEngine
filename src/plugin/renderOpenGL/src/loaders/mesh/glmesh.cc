@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <glrenderer.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <graphics/objects/mesh.script.hh>
 
@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLMesh::GLMesh(weak<const Resource> resource, weak<Renderer> renderer)
+GLMesh::GLMesh(weak<const Resource> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
 {
 }

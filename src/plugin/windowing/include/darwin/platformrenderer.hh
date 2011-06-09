@@ -9,7 +9,7 @@
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
-    
+
 class Renderer::PlatformRenderer : public minitl::refcountable
 {
 private:
@@ -20,7 +20,7 @@ public:
     ~PlatformRenderer();
     void flush();
 };
-    
+
 
 }}}
 

@@ -10,11 +10,11 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-class Renderer;
+class GLRenderer;
 
 class GLWindow : public Windowing::Window
 {
-    friend class Renderer;
+    friend class GLRenderer;
 private:
     class Context;
     scoped<Context> m_context;
@@ -29,7 +29,7 @@ public:
     virtual void    begin(ClearMode clear) const override;
     virtual void    end(PresentMode present) const override;
 public:
-    GLWindow(weak<const RenderWindow> renderwindow, weak<Renderer> renderer);
+    GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer);
     ~GLWindow();
 };
 

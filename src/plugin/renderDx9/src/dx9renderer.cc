@@ -93,8 +93,16 @@ Dx9Renderer::~Dx9Renderer()
 void Dx9Renderer::flush()
 {
     Windowing::Renderer::flush();
-    //static Timer t;
-    //static int frames = 0;
+
+    static int frames = 0;
+    static float now = Timer::now();
+    if (++frames%100 == 0)
+    {
+        float time = Timer::now();
+        be_debug("FPS: %d" | (int)(1000.0f*100.0f / (time - now)));
+        now = time;
+    }
+
     if (m_deviceState == DeviceLost)
     {
         // TODO: unload
