@@ -19,7 +19,6 @@ private:
     scoped<PlatformWindow>  m_window;
 protected:
     void* getWindowHandle() const;
-    bool closed() const;
 public:
     Window(weak<const RenderWindow> resource, weak<Renderer> renderer);
     ~Window();
@@ -27,7 +26,6 @@ public:
     void load(weak<const Resource> resource) override;
     void unload() override;
 
-    void close();
     uint2 getDimensions() const;
 };
 

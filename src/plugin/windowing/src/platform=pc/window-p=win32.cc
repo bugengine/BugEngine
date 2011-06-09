@@ -57,7 +57,6 @@ Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
 
 Window::~Window()
 {
-    close();
 }
 
 void Window::load(weak<const Resource> resource)
@@ -67,17 +66,7 @@ void Window::load(weak<const Resource> resource)
 
 void Window::unload()
 {
-    close();
-}
-
-void Window::close()
-{
     m_window = scoped<PlatformWindow>();
-}
-
-bool Window::closed() const
-{
-    return m_window == 0;
 }
 
 uint2 Window::getDimensions() const

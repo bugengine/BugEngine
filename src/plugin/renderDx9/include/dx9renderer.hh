@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <windowing/renderer.hh>
 #include    <system/filesystem.hh>
+
 #include    <d3d9.h>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9
@@ -21,19 +22,12 @@ static inline HRESULT d3d_checkResult(HRESULT r)
     return r;
 }
 
+class Dx9Window;
+class Dx9RenderTarget;
 
-class Renderer : public Windowing::Renderer
+class Dx9Renderer : public Windowing::Renderer
 {
-    friend class Window;
-    friend class VertexBuffer;
-    friend class IndexBuffer;
-private:
-    struct SwapchainDesc
-    {
-        D3DPRESENT_PARAMETERS   params;
-        LPDIRECT3DSWAPCHAIN9    swapchain;
-    };
-    typedef minitl::list<SwapchainDesc>::iterator SwapchainItem;
+    friend class Dx9Window;
 private:
     enum DeviceState
     {
@@ -42,20 +36,18 @@ private:
         DeviceRestored
     };
 private:
+    HWND                        m_dummyWindow;
+    D3DPRESENT_PARAMETERS       m_dummyParams;
     LPDIRECT3D9                 m_directx;
     LPDIRECT3DDEVICE9           m_device;
     D3DCAPS9                    m_caps;
     CGcontext                   m_context;
     weak<const FileSystem>      m_filesystem;
-    minitl::list<SwapchainDesc> m_swapchains;
-    SwapchainItem               m_deviceSwapChain;
     DeviceState                 m_deviceState;
+    u64                         m_threadId;
 public:
-    Renderer(weak<const FileSystem> filesystem);
-    ~Renderer();
-
-    SwapchainItem                   createSwapChain(D3DPRESENT_PARAMETERS params);
-    SwapchainItem                   release(SwapchainItem swapchain);
+    Dx9Renderer(weak<const FileSystem> filesystem);
+    ~Dx9Renderer();
 
     u32                             getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
     bool                            multithreaded() const override { return false; }
@@ -63,8 +55,9 @@ public:
     weak<const FileSystem>          filesystem() const { return m_filesystem; }
 private:
     void                            flush() override;
-    void                            createContext(void* params) override;
-    void                            destroyContext() override;
+
+    ref<IGPUResource>               createRenderTarget(weak<const RenderTarget> rendertarget) override;
+    ref<IGPUResource>               createRenderWindow(weak<const RenderWindow> renderwindow) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

@@ -172,7 +172,7 @@ GLWindow::~GLWindow()
 
 void GLWindow::setCurrent()
 {
-    if(!closed())
+    if(m_context)
     {
         [m_context->m_view->m_context makeCurrentContext];
     }
@@ -180,7 +180,7 @@ void GLWindow::setCurrent()
 
 void GLWindow::clearCurrent()
 {
-    if(!closed())
+    if(m_context)
     {
         [NSOpenGLContext clearCurrentContext];
     }
@@ -188,7 +188,7 @@ void GLWindow::clearCurrent()
 
 void GLWindow::present()
 {
-    if(!closed())
+    if(m_context)
     {
         CGLFlushDrawable(m_context->m_context);
     }
