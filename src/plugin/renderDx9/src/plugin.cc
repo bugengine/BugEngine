@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <dx9renderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(renderDx9, BugEngine::Graphics::DirectX9::Renderer, (weak<const BugEngine::FileSystem> filesystem), (filesystem));
+BE_PLUGIN_REGISTER(renderDx9, BugEngine::Graphics::DirectX9::Dx9Renderer, (weak<const BugEngine::FileSystem> filesystem), (filesystem));
