@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <renderer.hh>
+#include    <nullrenderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(renderNull, BugEngine::Graphics::NullRenderer::Renderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));
+BE_PLUGIN_REGISTER(renderNull, BugEngine::Graphics::Null::NullRenderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));
