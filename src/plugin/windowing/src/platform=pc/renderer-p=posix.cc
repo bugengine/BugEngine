@@ -173,7 +173,6 @@ void Renderer::flush()
                 be_assert(result, "could not retrieve engine window handle from X11 window");
                 Window *w = *(Window**)result;
                 be_info("%d items (%d): %p" | nbItems | leftBytes | w);
-                w->close();
                 XFree(result);
             }
             break;

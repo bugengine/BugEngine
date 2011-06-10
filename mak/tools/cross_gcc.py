@@ -24,23 +24,23 @@ def get_native_gcc_target(conf):
 
 def allarchs(arch):
 	if arch == 'x86':
-		return [('-m32', 'x86'), ('-m64', 'amd64')]
-	elif arch == 'amd64':
 		return [('-m64', 'amd64'), ('-m32', 'x86')]
+	elif arch == 'amd64':
+		return [('-m32', 'x86'), ('-m64', 'amd64')]
 	elif arch == 'arm':
 		return [('', 'arm')]
 	elif arch == 'mips':
-		return [('-m32', 'mips'), ('-m64', 'mips64')]
+		return [('-m64', 'mips64'), ('-m32', 'mips')]
 	elif arch == 'mips64':
-		return [('-m64', 'mips64'), ('-m32', 'mips'),]
+		return [('-m32', 'mips'), ('-m64', 'mips64')]
 	elif arch == 'mipsel':
-		return [('-m32', 'mipsel'), ('-m64', 'mipsel64')]
-	elif arch == 'mipsel64':
 		return [('-m64', 'mipsel64'), ('-m32', 'mipsel')]
+	elif arch == 'mipsel64':
+		return [('-m32', 'mipsel'), ('-m64', 'mipsel64')]
 	elif arch == 'powerpc' or arch == 'ppc':
-		return [('-m32', 'powerpc'), ('-m64', 'ppc64')]
+		return [('-m64', arch+'64'), ('-m32', arch)]
 	elif arch == 'powerpc64' or arch == 'ppc64':
-		return [('-m64', 'ppc64'), ('-m32', 'powerpc')]
+		return [('-m32', arch[:-2]), ('-m64', arch)]
 	elif arch == 'spu':
 		return ['', 'spu']
 	else:
