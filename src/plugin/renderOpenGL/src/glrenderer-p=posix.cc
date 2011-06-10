@@ -197,7 +197,7 @@ void GLWindow::unload()
 
 void GLWindow::setCurrent() const
 {
-    if (!closed())
+    if (m_context)
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
@@ -209,7 +209,7 @@ void GLWindow::setCurrent() const
 
 void GLWindow::clearCurrent() const
 {
-    if (!closed())
+    if (m_context)
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         weak<GLRenderer::Context> c = be_checked_cast<GLRenderer>(m_renderer)->m_context;
@@ -220,7 +220,7 @@ void GLWindow::clearCurrent() const
 
 void GLWindow::present() const
 {
-    if (!closed())
+    if (m_context)
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
