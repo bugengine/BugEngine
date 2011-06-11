@@ -63,7 +63,11 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, add_gcc_flags_to_env, add_platform_flags_to_env):
 	worked = False
 	for opt,arch in allarchs(originalarch):
-		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		name=origname = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		index=1
+		while name in conf.env['BUILD_VARIANTS']:
+			name = origname+'-%d'%index
+			index=index+1
 		conf.setenv(name, conf.env.derive())
 		try:
 			add_gcc_to_env(conf, version, toolchaindir, target, opt)

@@ -44,6 +44,11 @@ def add_win32_flags_to_env(conf, name, arch):
 	conf.env['library_PATTERN'] = '%s.lib'
 	conf.env['shlib_PATTERN']	= '%s.dll'
 	conf.env['program_PATTERN'] = '%s.exe'
+	if conf.env['CC_NAME'] == 'gcc':
+		if arch in ['amd64', 'x64', 'x86_64']:
+			conf.env['WINRCFLAGS'].append('--target=pe-x86-64')
+		else:
+			conf.env['WINRCFLAGS'].append('--target=pe-i386')
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_win32', 'WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
 	if arch in ['amd64', 'x64', 'x86_64']:

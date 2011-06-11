@@ -17,7 +17,7 @@ static inline HRESULT d3d_checkResult(HRESULT r)
 {
     if (FAILED(r))
     {
-        be_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
+        //be_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
     }
     return r;
 }

@@ -9,7 +9,6 @@
 #define yynerrs be_settings_nerrs
 
 
-#define __attribute__(x)
 #define YYPARSE_PARAM param
 #include    <core/stdafx.h>
 
@@ -34,6 +33,7 @@ int         g_settingsLine = 0;
 int         g_settingsColumnBefore = 0;
 int         g_settingsColumnAfter = 0;
 
+#define __attribute__(x)
 %}
 
 
