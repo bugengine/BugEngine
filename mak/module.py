@@ -194,7 +194,7 @@ class module:
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
 			else:
-				optim,compiler,platform,architecture,version = variant.split('-')
+				optim,compiler,platform,architecture,version = variant.split('-')[0:5]
 				task					= bld()
 				task.target				= self.dstname
 				task.env				= env.derive()
