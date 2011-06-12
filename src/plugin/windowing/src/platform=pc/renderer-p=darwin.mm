@@ -49,7 +49,7 @@ void Renderer::PlatformRenderer::flush()
 }
 
 Renderer::Renderer(Allocator& arena)
-    :   IRenderer(arena)
+    :   IRenderer(arena, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {
 }

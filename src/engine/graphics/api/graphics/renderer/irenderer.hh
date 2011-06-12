@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resourcehandle.hh>
 #include    <graphics/renderer/igpuresource.hh>
+#include    <system/scheduler/scheduler.hh>
 
 namespace BugEngine
 {
@@ -32,7 +33,7 @@ protected:
     minitl::vector< ref<minitl::refcountable> > m_deletedObjects;
     minitl::intrusive_list<IGPUResource>        m_pendingRenderTargets;
 protected:
-    IRenderer(Allocator& allocator);
+    IRenderer(Allocator& allocator, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
 private:
             void            destroy(const ResourceHandle& r);

@@ -14,10 +14,10 @@
 namespace BugEngine { namespace Graphics
 {
 
-IRenderer::IRenderer(Allocator& allocator)
+IRenderer::IRenderer(Allocator& allocator, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena(), this))
-    ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, Scheduler::MainThread))
+    ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
     ,   m_deletedObjects(allocator)
 {
     ResourceLoaders::attach<RenderTarget, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
