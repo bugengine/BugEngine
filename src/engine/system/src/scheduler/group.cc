@@ -8,7 +8,7 @@ namespace BugEngine
 {
 
 TaskGroup::TaskGroup(istring name, color32 color)
-    :   ITask(name, color, Scheduler::High, Scheduler::Random)
+    :   ITask(name, color, Scheduler::High, Scheduler::DontCare)
 ,   m_startTasks(taskArena())
 ,   m_endTaskCount(0)
 ,   m_completionCallback(ref<Callback>::create(taskArena(), this))

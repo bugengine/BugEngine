@@ -53,7 +53,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
 {
     static const i32& s_taskCount = 16;
 
-    ScheduledTasks::ITaskItem* target = sc->pop(Random);
+    ScheduledTasks::ITaskItem* target = sc->pop(DontCare);
     if (!target)
         return false;
     if (!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
@@ -152,7 +152,7 @@ void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 {
     int priority = task->m_owner->priority;
     m_runningTasks ++;
-    if (task->m_owner->affinity == Random)
+    if (task->m_owner->affinity == DontCare)
     {
         m_tasks[priority].push(task);
         m_synchro.release(1);
@@ -166,7 +166,7 @@ void Scheduler::queue(ScheduledTasks::ITaskItem* task)
 
 ScheduledTasks::ITaskItem* Scheduler::pop(Affinity affinity)
 {
-    minitl::istack<ScheduledTasks::ITaskItem>* tasks = affinity == Random ? m_tasks : m_mainThreadTasks;
+    minitl::istack<ScheduledTasks::ITaskItem>* tasks = affinity == DontCare ? m_tasks : m_mainThreadTasks;
     for (unsigned int i = High; i != Low; --i)
     {
         ScheduledTasks::ITaskItem* t = tasks[i].pop();

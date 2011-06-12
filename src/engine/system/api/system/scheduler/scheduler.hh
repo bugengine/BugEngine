@@ -43,7 +43,7 @@ public:
     };
     enum Affinity
     {
-        Random = 0,
+        DontCare = 0,
         MainThread = 1
     };
 private:
