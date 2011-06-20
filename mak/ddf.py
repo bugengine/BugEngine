@@ -323,6 +323,12 @@ def p_param(t):
 	"""
 	t[0] = (t[1][1]+t[3], t[2])
 
+def p_param_tag(t):
+	"""
+		param : tags type param_name_opt array_opt param_value_opt
+	"""
+	t[0] = (t[2][1]+t[4], t[3])
+
 def p_function_param(t):
 	"""
 		param : function_pointer_with_name param_value_opt

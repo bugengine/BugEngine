@@ -7,14 +7,14 @@
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
-Method::Method()
+Method::Method(minitl::vector< ref<Param> > output)
+    :   output(output)
 {
 }
 
 Method::~Method()
 {
 }
-
 
 void Method::buildSource(IShaderBuilder& /*stream*/) const
 {

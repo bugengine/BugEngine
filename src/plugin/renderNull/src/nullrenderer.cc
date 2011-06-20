@@ -5,8 +5,10 @@
 #include    <nullrenderer.hh>
 
 #include    <graphics/objects/rendertarget.script.hh>
+#include    <graphics/objects/shader.script.hh>
 #include    <loaders/nullrendertarget.hh>
 #include    <loaders/nullwindow.hh>
+#include    <loaders/nullshader.hh>
 
 namespace BugEngine { namespace Graphics { namespace Null
 {
@@ -43,6 +45,26 @@ ref<IGPUResource> NullRenderer::createRenderTarget(weak<const RenderTarget> rend
 ref<IGPUResource> NullRenderer::createRenderWindow(weak<const RenderWindow> renderwindow)
 {
     return ref<NullWindow>::create(m_allocator, renderwindow, this);
+}
+
+ref<IGPUResource> NullRenderer::createShaderProgram(weak<const ShaderProgram> shader)
+{
+    return ref<NullShaderProgram>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> NullRenderer::createVertexShader(weak<const VertexShader> shader)
+{
+    return ref<NullShader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> NullRenderer::createGeometryShader(weak<const GeometryShader> shader)
+{
+    return ref<NullShader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> NullRenderer::createFragmentShader(weak<const FragmentShader> shader)
+{
+    return ref<NullShader>::create(m_allocator, shader, this);
 }
 
 }}}

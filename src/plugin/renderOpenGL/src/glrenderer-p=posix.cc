@@ -114,7 +114,7 @@ GLRenderer::Context::Context(PlatformData* data)
 ,   shaderext()
 {
     glXMakeCurrent(m_display, m_defaultWindow, m_glContext);
-    be_info("Creating OpenGL %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
+    be_info("Creating OpenGL %s (%s) on %s" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
 }
 
 GLRenderer::Context::~Context()

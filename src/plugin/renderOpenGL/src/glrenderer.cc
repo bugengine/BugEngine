@@ -4,8 +4,10 @@
 #include    <stdafx.h>
 #include    <glrenderer.hh>
 #include    <graphics/objects/rendertarget.script.hh>
+#include    <graphics/objects/shader.script.hh>
 #include    <loaders/rendertarget/glrendertarget.hh>
 #include    <loaders/rendertarget/glwindow.hh>
+#include    <loaders/shader/glshader.hh>
 #include    <core/timer.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
@@ -33,6 +35,26 @@ ref<IGPUResource> GLRenderer::createRenderTarget(weak<const RenderTarget> render
 ref<IGPUResource> GLRenderer::createRenderWindow(weak<const RenderWindow> renderwindow)
 {
     return ref<GLWindow>::create(m_allocator, renderwindow, this);
+}
+
+ref<IGPUResource> GLRenderer::createShaderProgram(weak<const ShaderProgram> shader)
+{
+    return ref<GLShaderProgram>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> GLRenderer::createVertexShader(weak<const VertexShader> shader)
+{
+    return ref<GLShader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> GLRenderer::createGeometryShader(weak<const GeometryShader> shader)
+{
+    return ref<GLShader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> GLRenderer::createFragmentShader(weak<const FragmentShader> shader)
+{
+    return ref<GLShader>::create(m_allocator, shader, this);
 }
 
 }}}
