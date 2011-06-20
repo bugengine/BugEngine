@@ -10,6 +10,7 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 GLShaderBuilder::GLShaderBuilder()
 {
+    write("#version 140");
 }
 
 GLShaderBuilder::~GLShaderBuilder()

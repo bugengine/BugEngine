@@ -26,37 +26,53 @@
 
 int be_main(weak<BugEngine::Application> app)
 {
-    ref<BugEngine::FileSystem> filesystem = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
-    filesystem->mount("data", ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory(), true));
+    using namespace BugEngine;
+    using namespace BugEngine::Graphics;
 
-    weak<const BugEngine::RTTI::Namespace> root = BugEngine::RTTI::Namespace::rttiRoot();
+    ref<FileSystem> filesystem = ref<FileSystem>::create(gameArena());
+    filesystem->mount("data", ref<DiskFS>::create(gameArena(), Environment::getEnvironment().getDataDirectory(), true));
 
-    BugEngine::Plugin<BugEngine::Scripting> p("lua", weak<BugEngine::FileSystem>(filesystem), BugEngine::Value(root));
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display1("renderNull",  weak<BugEngine::FileSystem>(filesystem));
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display2("renderOpenGL",  weak<BugEngine::FileSystem>(filesystem));
-    BugEngine::Plugin<BugEngine::Graphics::IRenderer> display3("renderDx9", weak<BugEngine::FileSystem>(filesystem));
+    weak<const RTTI::Namespace> root = RTTI::Namespace::rttiRoot();
+
+    Plugin<Scripting> p("lua", weak<FileSystem>(filesystem), Value(root));
+    Plugin<IRenderer> display1("renderNull",  weak<FileSystem>(filesystem));
+    Plugin<IRenderer> display2("renderOpenGL",  weak<FileSystem>(filesystem));
+    Plugin<IRenderer> display3("renderDx9", weak<FileSystem>(filesystem));
 
     p->doFile("data/scripts/main.lua");
 
-    ref<BugEngine::Graphics::RenderWindow> w1 = ref<BugEngine::Graphics::RenderWindow>::create(BugEngine::gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
-    ref<BugEngine::World> world = ref<BugEngine::World>::create(BugEngine::gameArena(), "physicsBullet", "audioOpenAL", BugEngine::float3(1000.0f, 1000.0f, 1000.0f));
-    ref<BugEngine::Graphics::IScene> scene = ref<BugEngine::WorldScene>::create(BugEngine::gameArena(), world);
-    ref<BugEngine::Graphics::RenderScene> renderscene1 = ref<BugEngine::Graphics::RenderScene>::create(BugEngine::gameArena(), scene, w1);
-    minitl::vector< ref<const BugEngine::Graphics::RenderNode> > scenes(BugEngine::gameArena());
-    scenes.push_back(renderscene1);
-    ref<BugEngine::Graphics::RenderSequence> node = ref<BugEngine::Graphics::RenderSequence>::create(BugEngine::gameArena(), scenes);
 
-    BugEngine::Resource::load(BugEngine::Value(w1));
-    BugEngine::Resource::load(BugEngine::Value(scene));
-    BugEngine::Resource::load(BugEngine::Value(renderscene1));
-    BugEngine::Resource::load(BugEngine::Value(node));
+
+    ref<Shaders::Uniform> color = ref<Shaders::Uniform>::create(gameArena(), "color");
+    ref<VertexShader> vshader = ref<VertexShader>::create(gameArena(), ref<const Shaders::Node>(), color, ref<const Shaders::Node>(), ref<const Shaders::Node>());
+    ref<FragmentShader> fshader = ref<FragmentShader>::create(gameArena(), ref<const Shaders::Node>(), ref<const Shaders::Node>(), ref<const Shaders::Node>(), ref<const Shaders::Node>());
+    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), vshader, ref<GeometryShader>(), fshader);
+
+    ref<RenderWindow> w1 = ref<RenderWindow>::create(gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
+    ref<World> world = ref<World>::create(gameArena(), "physicsBullet", "audioOpenAL", float3(1000.0f, 1000.0f, 1000.0f));
+    ref<IScene> scene = ref<WorldScene>::create(gameArena(), world);
+    ref<RenderScene> renderscene1 = ref<RenderScene>::create(gameArena(), scene, w1);
+    minitl::vector< ref<const RenderNode> > scenes(gameArena());
+    scenes.push_back(renderscene1);
+    ref<RenderSequence> node = ref<RenderSequence>::create(gameArena(), scenes);
+    
+    Resource::load(Value(vshader));
+    Resource::load(Value(fshader));
+    Resource::load(Value(program));
+    Resource::load(Value(w1));
+    Resource::load(Value(scene));
+    Resource::load(Value(renderscene1));
+    Resource::load(Value(node));
 
     app->run();
 
-    BugEngine::Resource::unload(BugEngine::Value(node));
-    BugEngine::Resource::unload(BugEngine::Value(renderscene1));
-    BugEngine::Resource::unload(BugEngine::Value(scene));
-    BugEngine::Resource::unload(BugEngine::Value(w1));
+    Resource::unload(Value(node));
+    Resource::unload(Value(renderscene1));
+    Resource::unload(Value(scene));
+    Resource::unload(Value(w1));
+    Resource::unload(Value(fshader));
+    Resource::unload(Value(vshader));
+    Resource::unload(Value(program));
 
     return 0;
 }

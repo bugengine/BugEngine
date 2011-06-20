@@ -128,7 +128,7 @@ static HGLRC createGLContext(weak<const GLRenderer> renderer, HDC hdc)
     else
     {
         wglMakeCurrent(hdc, rc);
-        be_info("Created OpenGL context %s (%s)" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR));
+        be_info("Created OpenGL context %s (%s) on %s" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
     }
     return rc;
 }

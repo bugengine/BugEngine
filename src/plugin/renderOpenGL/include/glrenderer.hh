@@ -6,11 +6,17 @@
 /*****************************************************************************/
 #include    <system/filesystem.hh>
 
-namespace BugEngine {
+namespace BugEngine { namespace Graphics
+{
 
-class IResourceLoader;
+class RenderTarget;
+class RenderWindow;
+class Mesh;
+class Texture;
+class Shader;
 
-namespace Graphics { namespace OpenGL
+
+namespace OpenGL
 {
 
 class GLWindow;
@@ -29,7 +35,6 @@ public:
     ~GLRenderer();
 
     u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
-    bool                            multithreaded() const override { return true; }
 
     void                            flush() override;
 
@@ -42,6 +47,10 @@ private:
 private:
     ref<IGPUResource>               createRenderTarget(weak<const RenderTarget> rendertarget) override;
     ref<IGPUResource>               createRenderWindow(weak<const RenderWindow> renderwindow) override;
+    ref<IGPUResource>               createShaderProgram(weak<const ShaderProgram> shader) override;
+    ref<IGPUResource>               createVertexShader(weak<const VertexShader> shader) override;
+    ref<IGPUResource>               createGeometryShader(weak<const GeometryShader> shader) override;
+    ref<IGPUResource>               createFragmentShader(weak<const FragmentShader> shader) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

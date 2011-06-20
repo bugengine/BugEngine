@@ -20,7 +20,10 @@ class SceneGraphLoader;
 class RenderTarget;
 class RenderWindow;
 class Mesh;
-class Shader;
+class ShaderProgram;
+class VertexShader;
+class GeometryShader;
+class FragmentShader;
 class Texture;
 class IGPUResource;
 
@@ -32,6 +35,7 @@ protected:
     ref<ITask>                                  m_syncTask;
     minitl::vector< ref<minitl::refcountable> > m_deletedObjects;
     minitl::intrusive_list<IGPUResource>        m_pendingRenderTargets;
+    minitl::intrusive_list<IGPUResource>        m_pendingShaders;
 protected:
     IRenderer(Allocator& allocator, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
@@ -40,14 +44,20 @@ private:
             ResourceHandle  load(weak<const RenderTarget> rendertarget);
             ResourceHandle  load(weak<const RenderWindow> renderwindow);
     //        ResourceHandle  load(weak<const Mesh> mesh);
-    //        ResourceHandle  load(weak<const Shader> shader);
+            ResourceHandle  load(weak<const ShaderProgram> program);
+            ResourceHandle  load(weak<const VertexShader> shader);
+            ResourceHandle  load(weak<const GeometryShader> shader);
+            ResourceHandle  load(weak<const FragmentShader> shader);
     //        ResourceHandle  load(weak<const Texture> texture);
 protected:
     virtual void                flush();
     virtual ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) = 0;
     virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) = 0;
     //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) = 0;
-    //virtual ref<IGPUResource>   createShader(weak<const Shader> shader) = 0;
+    virtual ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) = 0;
+    virtual ref<IGPUResource>   createVertexShader(weak<const VertexShader> shader) = 0;
+    virtual ref<IGPUResource>   createGeometryShader(weak<const GeometryShader> shader) = 0;
+    virtual ref<IGPUResource>   createFragmentShader(weak<const FragmentShader> shader) = 0;
     //virtual ref<IGPUResource>   createTexture(weak<const Texture> texture) = 0;
 public:
             weak<ITask>         syncTask() const;
@@ -55,7 +65,6 @@ public:
     virtual uint2               getScreenSize() = 0;
 
     virtual u32                 getMaxSimultaneousRenderTargets() const = 0;
-    virtual bool                multithreaded() const = 0;
 
             Allocator&          arena() const;
 };

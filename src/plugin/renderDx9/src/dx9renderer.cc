@@ -5,10 +5,10 @@
 #include    <dx9renderer.hh>
 
 #include    <loaders/dx9window.hh>
+#include    <loaders/dx9shader.hh>
 #include    <graphics/objects/rendertarget.script.hh>
+#include    <graphics/objects/shader.script.hh>
 
-
-#pragma warning(disable:4311 4312 4355)
 
 
 namespace BugEngine
@@ -129,6 +129,26 @@ ref<IGPUResource> Dx9Renderer::createRenderTarget(weak<const RenderTarget> rende
 ref<IGPUResource> Dx9Renderer::createRenderWindow(weak<const RenderWindow> renderwindow)
 {
     return ref<Dx9Window>::create(m_allocator, renderwindow, this);
+}
+
+ref<IGPUResource> Dx9Renderer::createShaderProgram(weak<const ShaderProgram> shader)
+{
+    return ref<Dx9ShaderProgram>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> Dx9Renderer::createVertexShader(weak<const VertexShader> shader)
+{
+    return ref<Dx9Shader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> Dx9Renderer::createGeometryShader(weak<const GeometryShader> shader)
+{
+    return ref<Dx9Shader>::create(m_allocator, shader, this);
+}
+
+ref<IGPUResource> Dx9Renderer::createFragmentShader(weak<const FragmentShader> shader)
+{
+    return ref<Dx9Shader>::create(m_allocator, shader, this);
 }
 
 }}}

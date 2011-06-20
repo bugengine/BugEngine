@@ -31,7 +31,7 @@ void NullWindow::present() const
 {
 }
 
-void NullWindow::load(weak<const Resource> resource)
+void NullWindow::load(weak<const Resource> /*resource*/)
 {
 }
 

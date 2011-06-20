@@ -11,8 +11,43 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLShader::GLShader(weak<const Resource> resource, weak<GLRenderer> renderer)
+GLShaderProgram::GLShaderProgram(weak<const Resource> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
+{
+}
+
+GLShaderProgram::~GLShaderProgram()
+{
+}
+
+void GLShaderProgram::load(weak<const Resource> /*resource*/)
+{
+}
+
+void GLShaderProgram::unload()
+{
+}
+
+
+
+GLShader::GLShader(weak<const VertexShader> resource, weak<GLRenderer> renderer)
+    :   IGPUResource(resource, renderer)
+    ,   m_shaderType(GL_VERTEX_SHADER)
+    ,   m_shader(0)
+{
+}
+
+GLShader::GLShader(weak<const GeometryShader> resource, weak<GLRenderer> renderer)
+    :   IGPUResource(resource, renderer)
+    ,   m_shaderType(GL_GEOMETRY_SHADER)
+    ,   m_shader(0)
+{
+}
+
+GLShader::GLShader(weak<const FragmentShader> resource, weak<GLRenderer> renderer)
+    :   IGPUResource(resource, renderer)
+    ,   m_shaderType(GL_FRAGMENT_SHADER)
+    ,   m_shader(0)
 {
 }
 
@@ -23,42 +58,32 @@ GLShader::~GLShader()
 void GLShader::load(weak<const Resource> resource)
 {
     weak<const Shader> shader = be_checked_cast<const Shader>(resource);
-    GLenum shaderType = GL_VERTEX_SHADER;
-    switch(shader->type)
-    {
-    case Shader::Vertex:    shaderType = GL_VERTEX_SHADER; break;
-    case Shader::Fragment:  shaderType = GL_FRAGMENT_SHADER; break;
-    case Shader::Geometry:  shaderType = GL_GEOMETRY_SHADER; break;
-    default:
-        be_error("Unknown shader type: %d" | shader->type);
-        return;
-    }
 
     GLShaderBuilder builder;
     shader->buildSource(builder);
 
     const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();
-    m_shader = shaderext.glCreateShader(shaderType);
+    m_shader = shaderext.glCreateShader(m_shaderType);
     GLint size = be_checked_numcast<GLint>(builder.textSize());
     const GLcharARB* text = (GLcharARB*)builder.text();
     shaderext.glShaderSource(m_shader, 1, &text, &size);
     shaderext.glCompileShader(m_shader);
 #ifdef BE_DEBUG
-    GLint errors, loglength;
-    shaderext.glGetObjectParameteriv(m_shader, GL_OBJECT_COMPILE_STATUS_ARB, &errors);
+    GLint success, loglength;
+    shaderext.glGetObjectParameteriv(m_shader, GL_OBJECT_COMPILE_STATUS_ARB, &success);
     shaderext.glGetObjectParameteriv(m_shader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &loglength);
-    if (errors || loglength)
+    if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;
         Allocator::Block<GLcharARB> log(tempArena(), loglength);
         shaderext.glGetInfoLog(m_shader, maxLength, &result, log.data());
-        if (errors)
+        if (!success)
         {
             be_error(log.data());
         }
         else
         {
-            be_warning(log.data());
+            be_info(log.data());
         }
     }
 #endif

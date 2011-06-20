@@ -3,7 +3,46 @@
 
 #include    <stdafx.h>
 #include    <loaders/dx9shader.hh>
+//#include    <loaders/dx9shaderbuilder.hh>
+#include    <graphics/objects/shader.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
+
+Dx9ShaderProgram::Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<Dx9Renderer> renderer)
+    :   IGPUResource(resource, renderer)
+{
+}
+
+Dx9ShaderProgram::~Dx9ShaderProgram()
+{
+}
+
+void Dx9ShaderProgram::load(weak<const Resource> resource)
+{
+}
+
+void Dx9ShaderProgram::unload()
+{
+}
+
+
+
+Dx9Shader::Dx9Shader(weak<const Shader> resource, weak<Dx9Renderer> renderer)
+    :   IGPUResource(resource, renderer)
+{
+}
+
+Dx9Shader::~Dx9Shader()
+{
+}
+
+void Dx9Shader::load(weak<const Resource> resource)
+{
+}
+
+void Dx9Shader::unload()
+{
+}
+
 }}}

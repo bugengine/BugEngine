@@ -11,12 +11,27 @@ namespace BugEngine { namespace Graphics { namespace OpenGL
 
 class GLRenderer;
 
+class GLShaderProgram : public IGPUResource
+{
+private:
+    GLhandleARB m_shaderProgram;
+public:
+    GLShaderProgram(weak<const Resource> resource, weak<GLRenderer> renderer);
+    ~GLShaderProgram();
+
+    virtual void load(weak<const Resource> resource) override;
+    virtual void unload() override;
+};
+
 class GLShader : public IGPUResource
 {
 private:
+    GLenum      m_shaderType;
     GLhandleARB m_shader;
 public:
-    GLShader(weak<const Resource> resource, weak<GLRenderer> renderer);
+    GLShader(weak<const VertexShader> resource, weak<GLRenderer> renderer);
+    GLShader(weak<const GeometryShader> resource, weak<GLRenderer> renderer);
+    GLShader(weak<const FragmentShader> resource, weak<GLRenderer> renderer);
     ~GLShader();
 
     virtual void load(weak<const Resource> resource) override;
