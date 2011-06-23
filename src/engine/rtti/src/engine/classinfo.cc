@@ -68,7 +68,7 @@ void ClassInfo::destroy(void* src) const
 void ClassInfo::addProperty(istring propname, const PropertyInfo& prop)
 {
     be_assert(properties.find(propname) == properties.end(), "Property %s already exists in class %s!" | propname | name);
-    properties.insert(std::make_pair(propname, prop));
+    properties.insert(std::make_pair<istring, const PropertyInfo>(propname, prop));
 }
 
 void ClassInfo::removeProperty(istring propname)
@@ -79,7 +79,7 @@ void ClassInfo::removeProperty(istring propname)
 void ClassInfo::addMethod(istring methodname, const MethodInfo& m)
 {
     be_assert(methods.find(methodname) == methods.end(), "Method %s already exists in class %s!" | methodname | name);
-    methods.insert(std::make_pair(methodname, m));
+    methods.insert(std::make_pair<istring, const MethodInfo>(methodname, m));
 }
 
 void ClassInfo::removeMethod(istring methodname)

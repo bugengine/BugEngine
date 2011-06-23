@@ -15,12 +15,14 @@ def add_suncc_flags_to_env(conf, arch):
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
 		conf.env.append_unique('CFLAGS', ['-m32'])
 		conf.env.append_unique('CXXFLAGS', ['-m32'])
+		conf.env.append_unique('LINKFLAGS', ['-m32'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
 		conf.env.append_unique('CFLAGS', ['-m64'])
 		conf.env.append_unique('CXXFLAGS', ['-m64'])
+		conf.env.append_unique('LINKFLAGS', ['-m64'])
 	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-ldl', '-lm'])
+	conf.env.append_unique('LINKFLAGS', ['-lposix4', '-mt', '-znow', '-xldscope=hidden', '-Kpic', '-ldl', '-lm'])
 
 
 
@@ -37,7 +39,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 def add_gcc_flags_to_env(conf, toolchaindir):
 	conf.env.append_unique('CFLAGS', ['-fpic', '-fno-jump-tables'])
 	conf.env.append_unique('CXXFLAGS', ['-fpic', '-fno-jump-tables'])
-	conf.env.append_unique('LINKFLAGS', ['-static-libgcc', '-Wl,-Bstatic', '-lstdc++', '-Wl,-Bdynamic'])
+	conf.env.append_unique('LINKFLAGS', ['-static-libgcc', '-lposix4', '-Wl,-Bstatic', '-lstdc++', '-Wl,-Bdynamic'])
 
 
 def add_sunos_flags_to_env(conf, name):
