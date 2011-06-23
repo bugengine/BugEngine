@@ -44,7 +44,7 @@ MemoryFileMap::MemoryFileMap(int file, off_t size) :
 
 MemoryFileMap::~MemoryFileMap()
 {
-    munmap(m_pointer,m_size);
+    munmap((char*)m_pointer,m_size);
     close(m_file);
 }
 
