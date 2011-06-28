@@ -54,8 +54,8 @@ def build(bld):
 	main			= module.library('main',        [core, rtti, system, input, graphics, audio, physics, mobile])
 
 	discworld		= module.game('discworld',      [core, rtti, system, package, input, graphics, audio, physics, mobile, main])
-	editor			= module.tool('editor',         [core, rtti, system, package, input, graphics, audio, physics, mobile, main], platforms=['pc'])
 
+	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
 	renderNull		= module.plugin('renderNull', 	[discworld])

@@ -13,5 +13,13 @@
 #include    <audio/stdafx.h>
 #include    <mobile/stdafx.h>
 
+#if defined(building_main) || defined(MAIN_EXPORTS)
+# define     MAINEXPORT          BE_EXPORT
+#elif defined(rtti_dll)
+# define     MAINEXPORT          BE_IMPORT
+#else
+# define     MAINEXPORT
+#endif
+
 /*****************************************************************************/
 #endif
