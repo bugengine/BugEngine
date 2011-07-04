@@ -20,7 +20,8 @@ Shader::~Shader()
 VertexShader::VertexShader( ref<const Shaders::Node> position,
                             ref<const Shaders::Node> color,
                             ref<const Shaders::Node> uv1,
-                            ref<const Shaders::Node> uv2)
+                            ref<const Shaders::Node> uv2,
+                            minitl::vector< ref<const Shaders::Node> > outputs)
     :   position(position)
     ,   color(color)
     ,   uv1(uv1)

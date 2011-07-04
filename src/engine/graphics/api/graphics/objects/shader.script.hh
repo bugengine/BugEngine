@@ -30,6 +30,7 @@ public:
     virtual void buildSource(IShaderBuilder& stream) const = 0;
 };
 
+
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) VertexShader : public Shader
 {
@@ -42,12 +43,14 @@ published:
     VertexShader( be_tag(Optional()) ref<const Shaders::Node> position,
                   be_tag(Optional()) ref<const Shaders::Node> color,
                   be_tag(Optional()) ref<const Shaders::Node> uv1,
-                  be_tag(Optional()) ref<const Shaders::Node> uv2);
+                  be_tag(Optional()) ref<const Shaders::Node> uv2,
+                                     minitl::vector< ref<const Shaders::Node> > );
     ~VertexShader();
 
 public:
     void buildSource(IShaderBuilder& stream) const override;
 };
+
 
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) GeometryShader : public Shader
@@ -77,6 +80,7 @@ published:
 public:
     void buildSource(IShaderBuilder& stream) const override;
 };
+
 
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) ShaderProgram : public Resource
