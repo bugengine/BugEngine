@@ -67,6 +67,19 @@ static HWND createDummyWnd(weak<const GLRenderer> renderer)
 {
     minitl::format<> classname = minitl::format<>("__be__%p__") | (const void*)renderer;
     HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0);
+    if (!hWnd)
+    {
+        char *errorMessage;
+        ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            ::GetLastError(),
+            0,
+            reinterpret_cast<LPTSTR>(&errorMessage),
+            0,
+            NULL);
+        be_error(errorMessage);
+        ::LocalFree(errorMessage);
+    }
     return hWnd;
 }
 
@@ -94,41 +107,51 @@ static HGLRC createGLContext(weak<const GLRenderer> renderer, HDC hdc)
         ReleaseDC(hwnd, dc);
         DestroyWindow(hwnd);
     }
-    int attribs[] =
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
-                WGL_CONTEXT_MINOR_VERSION_ARB,  1,
-                WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-                0
-            };
-    HGLRC rc = wglCreateContextAttribsARB(hdc, 0, attribs);
-    if(!rc)
+    HGLRC rc = 0;
+    if (wglCreateContextAttribsARB)
     {
-        attribs[1] = 3;
-        attribs[3] = 2;
+        int attribs[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
+                    WGL_CONTEXT_MINOR_VERSION_ARB,  1,
+                    WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    0
+                };
         rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        if(!rc)
+        {
+            attribs[1] = 3;
+            attribs[3] = 2;
+            rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        }
+        if(!rc)
+        {
+            attribs[1] = 3;
+            attribs[3] = 0;
+            rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        }
+        if(!rc)
+        {
+            attribs[1] = 2;
+            attribs[3] = 0;
+            rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        }
     }
+
     if(!rc)
     {
-        attribs[1] = 3;
-        attribs[3] = 0;
-        rc = wglCreateContextAttribsARB(hdc, 0, attribs);
+        rc = wglCreateContext(hdc);
     }
-    if(!rc)
-    {
-        attribs[1] = 2;
-        attribs[3] = 0;
-        rc = wglCreateContextAttribsARB(hdc, 0, attribs);
-    }
-    if(!rc)
-    {
-        be_error("Could not create a GL context");
-    }
-    else
+
+    if(rc)
     {
         wglMakeCurrent(hdc, rc);
         be_info("Created OpenGL context %s (%s) on %s" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
+    }
+    else
+    {
+        be_error("Could not create a GL context");
     }
     return rc;
 }
@@ -141,7 +164,6 @@ GLRenderer::Context::Context(weak<const GLRenderer> renderer)
 ,   m_threadId(Thread::currentId())
 ,   shaderext()
 {
-    (*m_setSwapInterval)(1);
 }
 
 GLRenderer::Context::~Context()
@@ -207,6 +229,10 @@ void GLRenderer::attachWindow(weak<GLWindow> w) const
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
     w->m_context = scoped<GLWindow::Context>::create(arena(), m_context->m_glContext, wnd, m_context->m_dummyDC, m_context->m_threadId);
+    w->setCurrent();
+    if (m_context->m_setSwapInterval)
+        (*m_context->m_setSwapInterval)(0);
+    w->clearCurrent();
 }
 
 const ShaderExtensions& GLRenderer::shaderext() const

@@ -15,6 +15,8 @@ class GLShaderProgram : public IGPUResource
 {
 private:
     GLhandleARB m_shaderProgram;
+private:
+    void attach(weak<const Shader> shader);
 public:
     GLShaderProgram(weak<const Resource> resource, weak<GLRenderer> renderer);
     ~GLShaderProgram();
@@ -25,6 +27,7 @@ public:
 
 class GLShader : public IGPUResource
 {
+    friend class GLShaderProgram;
 private:
     GLenum      m_shaderType;
     GLhandleARB m_shader;

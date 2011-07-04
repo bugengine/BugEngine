@@ -39,6 +39,8 @@ def build(bld):
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
+	angelcodelib	= module.external('angelcodelib')
+
 	mak				= module.external('mak')
 
 	core			= module.library('core',        [dbghelp, win32, mak])
@@ -64,12 +66,10 @@ def build(bld):
 	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
+	angelcode		= module.plugin('angelcode',    [discworld, angelcodelib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, lua]
+	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, lua, squirrel, angelcode]
 	discworld.post(bld)
-	editor.post(bld)
-	#testsuite		= module.library('testsuite', category='test')
-	#atomic_test		= module.test('atomic', [core, testsuite]).post(bld)
 
 
 

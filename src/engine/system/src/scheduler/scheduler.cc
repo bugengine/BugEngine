@@ -3,7 +3,6 @@
 
 #include    <system/stdafx.h>
 #include    <core/environment.hh>
-#include    <core/settings/manager.hh>
 #include    <system/scheduler/scheduler.hh>
 #include    <core/threads/mutex.hh>
 #include    <system/scheduler/task/task.hh>
