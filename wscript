@@ -61,14 +61,16 @@ def build(bld):
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
 	renderNull		= module.plugin('renderNull', 	[discworld])
+	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
 	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['pc'])
 	renderDx9		= module.plugin('renderDx9',    [discworld, windowing, cgDx, directx9], platforms=['win32'])
 	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
+	package			= module.plugin('package',      [discworld])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 	angelcode		= module.plugin('angelcode',    [discworld, angelcodelib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, lua, squirrel, angelcode]
+	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel, angelcode]
 	discworld.post(bld)
 
 
