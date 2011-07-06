@@ -17,10 +17,6 @@ def configure(conf):
 
 def build(bld):
 	bld.recurse('mak')
-	if not bld.variant and not bld.env.PROJECTS:
-		Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
-		return
-
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
 	directx10		= module.external('DirectX10')
@@ -47,7 +43,6 @@ def build(bld):
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
-	package			= module.library('package',     [core, rtti, system] )
 	input			= module.library('input',       [core, rtti] )
 	graphics		= module.library('graphics',    [core, rtti, system, input, freetype ] )
 	audio			= module.library('audio',       [core, rtti, system, oggvorbis] )
@@ -55,7 +50,7 @@ def build(bld):
 	mobile			= module.library('mobile',      [core, rtti, system, graphics, audio, physics, input] )
 	main			= module.library('main',        [core, rtti, system, input, graphics, audio, physics, mobile])
 
-	discworld		= module.game('discworld',      [core, rtti, system, package, input, graphics, audio, physics, mobile, main])
+	discworld		= module.game('discworld',      [core, rtti, system, input, graphics, audio, physics, mobile, main])
 
 	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
@@ -72,19 +67,3 @@ def build(bld):
 
 	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel, angelcode]
 	discworld.post(bld)
-
-
-
-from waflib.Build import BuildContext, InstallContext, UninstallContext
-from waflib import ConfigSet
-try:
-	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
-	for toolchain in env.BUILD_VARIANTS:
-		for y in (BuildContext, InstallContext, UninstallContext):
-			name = y.__name__.replace('Context','').lower()
-			class tmp(y):
-				cmd = name + '_' + toolchain
-				variant = toolchain
-except:
-	pass
-
