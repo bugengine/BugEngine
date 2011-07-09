@@ -65,6 +65,7 @@ T be_align(T value, size_t alignment)
 #include    <cstdio>
 #include    <cstring>
 #include    <minitl/container/pair.hh>
+#include    <minitl/container/array.hh>
 #include    <minitl/container/vector.hh>
 #include    <minitl/container/list.hh>
 #include    <minitl/container/hash_map.hh>

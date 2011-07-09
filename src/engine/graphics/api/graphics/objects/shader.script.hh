@@ -35,16 +35,15 @@ be_tag(ResourceLoaders())
 class be_api(GRAPHICS) VertexShader : public Shader
 {
 published:
-    const ref<const Shaders::Node>  position;
-    const ref<const Shaders::Node>  color;
-    const ref<const Shaders::Node>  uv1;
-    const ref<const Shaders::Node>  uv2;
+    const ref<const Shaders::Node>                      position;
+    const ref<const Shaders::Node>                      diffuse;
+    const ref<const Shaders::Node>                      specular;
+    const minitl::array< ref<const Shaders::Node>, 16 > varying;
 published:
-    VertexShader( be_tag(Optional()) ref<const Shaders::Node> position,
-                  be_tag(Optional()) ref<const Shaders::Node> color,
-                  be_tag(Optional()) ref<const Shaders::Node> uv1,
-                  be_tag(Optional()) ref<const Shaders::Node> uv2,
-                                     minitl::vector< ref<const Shaders::Node> > );
+    VertexShader(                    ref<const Shaders::Node> position,
+                  be_tag(Optional()) ref<const Shaders::Node> diffuse,
+                  be_tag(Optional()) ref<const Shaders::Node> specular,
+                                     minitl::array< ref<const Shaders::Node>, 18 > varying);
     ~VertexShader();
 
 public:
@@ -66,15 +65,11 @@ be_tag(ResourceLoaders())
 class be_api(GRAPHICS) FragmentShader : public Shader
 {
 published:
-    const ref<const Shaders::Node>  position;
     const ref<const Shaders::Node>  color;
-    const ref<const Shaders::Node>  uv1;
-    const ref<const Shaders::Node>  uv2;
+    const ref<const Shaders::Node>  depth;
 published:
-    FragmentShader( be_tag(Optional()) ref<const Shaders::Node> position,
-                    be_tag(Optional()) ref<const Shaders::Node> color,
-                    be_tag(Optional()) ref<const Shaders::Node> uv1,
-                    be_tag(Optional()) ref<const Shaders::Node> uv2);
+    FragmentShader(                    ref<const Shaders::Node> color,
+                    be_tag(Optional()) ref<const Shaders::Node> depth);
     ~FragmentShader();
 
 public:
