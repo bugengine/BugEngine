@@ -18,14 +18,13 @@ Shader::~Shader()
 
 
 VertexShader::VertexShader( ref<const Shaders::Node> position,
-                            ref<const Shaders::Node> color,
-                            ref<const Shaders::Node> uv1,
-                            ref<const Shaders::Node> uv2,
-                            minitl::vector< ref<const Shaders::Node> > outputs)
+                            ref<const Shaders::Node> diffuse,
+                            ref<const Shaders::Node> specular,
+                            minitl::array< ref<const Shaders::Node>, 18 > varying)
     :   position(position)
-    ,   color(color)
-    ,   uv1(uv1)
-    ,   uv2(uv2)
+    ,   diffuse(diffuse)
+    ,   specular(specular)
+    ,   varying(varying)
 {
 }
 
@@ -51,14 +50,9 @@ void GeometryShader::buildSource(IShaderBuilder& /*stream*/) const
 }
 
 
-FragmentShader::FragmentShader( ref<const Shaders::Node> position,
-                            ref<const Shaders::Node> color,
-                            ref<const Shaders::Node> uv1,
-                            ref<const Shaders::Node> uv2)
-    :   position(position)
-    ,   color(color)
-    ,   uv1(uv1)
-    ,   uv2(uv2)
+FragmentShader::FragmentShader( ref<const Shaders::Node> color, ref<const Shaders::Node> depth)
+    :   color(color)
+    ,   depth(depth)
 {
 }
 
