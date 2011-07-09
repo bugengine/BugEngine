@@ -114,6 +114,29 @@ private:
     static PropertyBuilder s_properties;
 };
 
+template< typename T, size_t SIZE >
+struct be_api(RTTI) be_typeid< minitl::array<T,SIZE> >
+{
+    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
+    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
+private:
+    class PropertyBuilder
+    {
+        PropertyBuilder()
+        {
+        }
+        ~PropertyBuilder()
+        {
+        }
+    };
+    static ref<RTTI::ClassInfo> klassBuilder()
+    {
+        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("array"), ref<RTTI::ClassInfo>(), 0, 0);
+        return klass;
+    }
+    static PropertyBuilder s_properties;
+};
+
 template< typename T1, typename T2, typename T3 >
 struct be_api(RTTI) be_typeid< minitl::hashmap<T1, T2, T3> >
 {
