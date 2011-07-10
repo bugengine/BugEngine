@@ -54,8 +54,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 	newenv['GCC_VERSION']	= version
 	newenv['GCC_TARGET']	= gcc_target
 	newenv['GCC_FLAGS']		= [flag]
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
+	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, '..', 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, '..', '..', 'bin')),
+							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin'))]
 	conf.load('cross_gcc', tooldir='mak/tools')
 
 
@@ -130,18 +131,36 @@ def parse_gcc_target(target):
 		if target.find(gccname) != -1:
 				return aname
 
+def add_ld_so(conf, file, toolchaindirs):
+	f = open(file, 'r')
+	for line in f:
+		line = line.strip()
+		if not line:
+			continue
+		elif line.startswith('#'):
+			continue
+		elif line.startswith('include'):
+			continue
+		else:
+			toolchaindirs.add(line)
+
 @conf
 def get_available_gcc(conf):
 	toolchaindirs=set([])
 	conf.env['GCC_TARGETS'] = []
 	for dir in os.environ['PATH'].split(':'):
-		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..')))
+		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', 'lib')))
+	if os.path.isfile('/etc/ld.so.conf'):
+		add_ld_so(conf, '/etc/ld.so.conf', toolchaindirs)
+	if os.path.isdir('/etc/ld.so.conf.d'):
+		for f in os.listdir('/etc/ld.so.conf.d'):
+			add_ld_so(conf, '/etc/ld.so.conf.d/'+f, toolchaindirs)
 	for toolchaindir in toolchaindirs:
-		if not os.path.isdir(os.path.join(toolchaindir,'lib')):
+		if not os.path.isdir(toolchaindir):
 			continue
-		for lib in os.listdir(os.path.join(toolchaindir,'lib')):
+		for lib in os.listdir(os.path.join(toolchaindir)):
 			if lib.startswith('gcc'):
-				libdir = os.path.join(toolchaindir, 'lib', lib)
+				libdir = os.path.join(toolchaindir, lib)
 			else:
 				continue
 			if not os.path.isdir(libdir):
@@ -167,6 +186,7 @@ def get_available_gcc(conf):
 						arch = parse_gcc_target(target) or 'unknown'
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
+	print conf.env.GCC_TARGETS
 
 
 @conf
