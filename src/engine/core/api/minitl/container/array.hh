@@ -34,45 +34,43 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    T*  m_end;
     u8  m_memory[SIZE*sizeof(T)];
+    T*  m_end;
 public:
-    inline explicit array(size_type count = 0);
-    template< typename T1, size_t SIZE1 >
-    inline array(const array<T1,SIZE1>& other);
-    template< typename T1, size_t SIZE1 >
-    inline array& operator=(const array<T1, SIZE1>& other);
-    template< typename ITERATOR >
-    array(ITERATOR first, ITERATOR last);
-    ~array();
+                                        inline explicit array(size_type count = 0);
+                                        inline array(const array<T, SIZE>& other);
+    template< typename T1, size_t S1 >  inline array(const array<T1,S1>& other);
+    template< typename IT >             inline array(IT first, IT last);
+                                        inline ~array();
 
-    iterator                begin();
-    iterator                end();
-    const_iterator          begin() const;
-    const_iterator          end() const;
-    reverse_iterator        rbegin();
-    reverse_iterator        rend();
-    const_reverse_iterator  rbegin() const;
-    const_reverse_iterator  rend() const;
+                                        inline array&                  operator=(const array<T, SIZE>& other);
+    template< typename T1, size_t S1 >  inline array&                  operator=(const array<T1, S1>& other);
+                                        inline iterator                begin();
+                                        inline iterator                end();
+                                        inline const_iterator          begin() const;
+                                        inline const_iterator          end() const;
+                                        inline reverse_iterator        rbegin();
+                                        inline reverse_iterator        rend();
+                                        inline const_reverse_iterator  rbegin() const;
+                                        inline const_reverse_iterator  rend() const;
 
-    size_type               size() const;
-    bool                    empty() const;
+                                        inline size_type               size() const;
+                                        inline bool                    empty() const;
 
-    reference               operator[](size_type i);
-    const_reference         operator[](size_type i) const;
+                                        inline reference               operator[](size_type i);
+                                        inline const_reference         operator[](size_type i) const;
 
-    void                    push_back(const_reference r);
-    template< typename ITERATOR >
-    void                    push_back(ITERATOR first, ITERATOR last);
-    iterator                erase(iterator it);
-    iterator                erase(iterator begin, iterator end);
+                                        inline void                    push_back(const_reference r);
+    template< typename IT >             inline void                    push_back(IT first, IT last);
+                                        inline iterator                erase(iterator it);
+                                        inline iterator                erase(iterator begin, iterator end);
 
-    reference               front();
-    reference               back();
-    const_reference         front() const;
-    const_reference         back() const;
+                                        inline reference               front();
+                                        inline reference               back();
+                                        inline const_reference         front() const;
+                                        inline const_reference         back() const;
 
-    void                    clear();
+                                        inline void                    clear();
 };
 
 }
