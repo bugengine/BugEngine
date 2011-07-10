@@ -199,14 +199,23 @@ struct array<T,SIZE>::const_reverse_iterator_policy
 
 template< typename T, size_t SIZE >
 array<T,SIZE>::array(size_type count)
-:   m_end((pointer)m_memory)
+:   m_end(reinterpret_cast<pointer>(m_memory))
 {
+    for(size_type s = 0; s < count; ++s)
+        push_back(T());
+}
+
+template< typename T, size_t SIZE >
+array<T,SIZE>::array(const array<T, SIZE>& other)
+    :   m_end(reinterpret_cast<pointer>(m_memory))
+{
+    push_back(other.begin(), other.end());
 }
 
 template< typename T, size_t SIZE >
 template< typename T1, size_t SIZE1 >
 array<T,SIZE>::array(const array<T1, SIZE1>& other)
-    :   m_end((pointer)m_memory)
+    :   m_end(reinterpret_cast<pointer>(m_memory))
 {
     push_back(other.begin(), other.end());
 }
@@ -214,10 +223,19 @@ array<T,SIZE>::array(const array<T1, SIZE1>& other)
 template< typename T, size_t SIZE >
 template< typename ITERATOR >
 array<T,SIZE>::array(ITERATOR first, ITERATOR last)
-    :   m_end((pointer)m_memory)
+    :   m_end(reinterpret_cast<pointer>(m_memory))
 {
     push_back(first, last);
 }
+
+template< typename T, size_t SIZE >
+array<T,SIZE>& array<T,SIZE>::operator=(const array<T,SIZE>& other)
+{
+    clear();
+    push_back(other.begin(), other.end());
+    return *this;
+}
+
 
 template< typename T, size_t SIZE >
 template< typename T1, size_t SIZE1 >
@@ -397,9 +415,9 @@ typename array<T,SIZE>::const_reference          array<T,SIZE>::back() const
 template< typename T, size_t SIZE >
 void                                                array<T, SIZE>::clear()
 {
-    for (pointer t = m_memory; t != m_end; ++t)
+    for (pointer t = (pointer)m_memory; t != m_end; ++t)
         t->~T();
-    m_end = m_memory;
+    m_end = (pointer)m_memory;
 }
 
 }

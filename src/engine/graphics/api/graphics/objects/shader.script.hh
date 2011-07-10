@@ -38,7 +38,7 @@ published:
     const ref<const Shaders::Node>                      position;
     const ref<const Shaders::Node>                      diffuse;
     const ref<const Shaders::Node>                      specular;
-    const minitl::array< ref<const Shaders::Node>, 16 > varying;
+    const minitl::array< ref<const Shaders::Node>, 18 > varying;
 published:
     VertexShader(                    ref<const Shaders::Node> position,
                   be_tag(Optional()) ref<const Shaders::Node> diffuse,

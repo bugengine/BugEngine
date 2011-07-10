@@ -32,7 +32,7 @@ VertexShader::~VertexShader()
 {
 }
 
-void VertexShader::buildSource(IShaderBuilder& /*stream*/) const
+void VertexShader::buildSource(IShaderBuilder& /*builder*/) const
 {
 }
 
