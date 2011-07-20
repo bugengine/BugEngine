@@ -6,7 +6,7 @@ import os
 from waflib.Logs import pprint
 import mak.tools.cross_gcc
 
-os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
+os.environ['PATH'] = '/Developer/usr/bin:/Developer-old/usr/bin:'+os.environ['PATH']
 for l in os.listdir('/Developer/Platforms/'):
 	os.environ['PATH'] = ('/Developer/Platforms/%s/Developer/usr/bin:'%l)+os.environ['PATH']
 
@@ -15,7 +15,7 @@ def options(opt):
 
 def configure(conf):
 	conf.load("bison flex data", tooldir=['mak/tools'])
-	conf.env['HOST'] = 'darwin'
+	conf.env['HOST'] = 'osx'
 	conf.env['BUILD_VARIANTS'] = []
 	conf.get_available_gcc()
 

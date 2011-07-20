@@ -25,15 +25,6 @@ def options(opt):
 	except OSError:
 		pass
 
-def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
-	newenv = conf.env
-	newenv['GCC_VERSION']	= version
-	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
-	conf.load('cross_gcc', tooldir='mak/tools')
-
-
 def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
@@ -41,7 +32,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_darwin_simulator_flags_to_env(conf, variant):
+def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
@@ -63,7 +54,7 @@ def add_darwin_simulator_flags_to_env(conf, variant):
 									'data':		os.path.join('share', getattr(Context.g_module, 'APPNAME', 'noname')),
 									'plugin':	os.path.join('data', 'plugins') }
 
-def add_darwin_flags_to_env(conf, variant):
+def add_darwin_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['STATIC'] = 1
@@ -92,23 +83,10 @@ def configure(conf):
 		if target.find('darwin') != -1:
 			if (	(getattr(Options.options, 'iphone_sdk', None) and target.find('arm') != -1)
 				or	(getattr(Options.options, 'iphonesimulator_sdk', None) and target.find('i686') != -1)):
-				name = 'gcc-iphone-%s-%s' %(arch, version.replace('-', '_'))
-				conf.setenv(name, conf.env.derive())
-				try:
-					add_gcc_to_env(conf, version, toolchaindir, target)
-					add_gcc_flags_to_env(conf)
-					if target.find('arm') != -1:
-						add_darwin_flags_to_env(conf, name)
-					else:
-						add_darwin_simulator_flags_to_env(conf, name)
-					conf.recurse(os.path.join('..', '..', 'mak', 'target', 'archs', arch), once=False)
-
-					pprint('GREEN', 'configure for tool %s' % name)
-					conf.variant = ''
-					conf.env['BUILD_VARIANTS'].append(name)
-				except Exception as e:
-					warn('gcc not available: '+e.__class__.__name__+" "+str(e))
-					conf.variant = ''
+				if target.find('arm') != -1:
+					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, add_gcc_flags_to_env, add_darwin_flags_to_env)
+				else:
+					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, add_gcc_flags_to_env, add_darwin_simulator_flags_to_env)
 
 def build(bld):
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
