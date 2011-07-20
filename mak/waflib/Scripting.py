@@ -11,6 +11,8 @@ build_dir_override = None
 
 no_climb_commands = ['configure']
 
+default_cmd = "build"
+
 def waf_entry_point(current_directory, version, wafdir):
 	"""
 	This is the main entry point, all Waf execution starts here.
@@ -30,9 +32,9 @@ def waf_entry_point(current_directory, version, wafdir):
 		sys.exit(1)
 
 	if '--version' in sys.argv:
-		opt_obj = Options.OptionsContext()
-		opt_obj.curdir = current_directory
-		opt_obj.parse_args()
+		ctx = Context.create_context('options')
+		ctx.curdir = current_directory
+		ctx.parse_args()
 		sys.exit(0)
 
 	Context.waf_dir = wafdir
@@ -53,7 +55,7 @@ def waf_entry_point(current_directory, version, wafdir):
 			else:
 				# check if the folder was not moved
 				for x in [env.run_dir, env.top_dir, env.out_dir]:
-					if sys.platform == 'win32':
+					if Utils.is_win32:
 						if cur == x:
 							load = True
 							break
@@ -97,9 +99,9 @@ def waf_entry_point(current_directory, version, wafdir):
 	if not Context.run_dir:
 		if '-h' in sys.argv or '--help' in sys.argv:
 			Logs.warn('No wscript file found: the help message may be incomplete')
-			opt_obj = Options.OptionsContext()
-			opt_obj.curdir = current_directory
-			opt_obj.parse_args()
+			ctx = Context.create_context('options')
+			ctx.curdir = current_directory
+			ctx.parse_args()
 			sys.exit(0)
 		Logs.error('Waf: Run from a directory containing a file named %r' % Context.WSCRIPT_FILE)
 		sys.exit(1)
@@ -178,10 +180,10 @@ def parse_options():
 	Parse the command-line options and initialize the logging system.
 	Called by :py:func:`waflib.Scripting.waf_entry_point` during the initialization.
 	"""
-	Options.OptionsContext().execute()
+	Context.create_context('options').execute()
 
 	if not Options.commands:
-		Options.commands = ['build']
+		Options.commands = [default_cmd]
 
 	# process some internal Waf options
 	Logs.verbose = Options.options.verbose

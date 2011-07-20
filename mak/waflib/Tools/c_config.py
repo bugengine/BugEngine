@@ -626,9 +626,10 @@ class test_exec(Task.Task):
 			else:
 				self.generator.bld.retval = self.generator.bld.exec_command([self.inputs[0].abspath()])
 		else:
-			env = {}
+			env = self.env.env or {}
 			env.update(dict(os.environ))
-			env['LD_LIBRARY_PATH'] = self.inputs[0].parent.abspath()
+			for var in ('LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH', 'PATH'):
+				env[var] = self.inputs[0].parent.abspath() + os.path.pathsep + env.get(var, '')
 			if getattr(self.generator, 'define_ret', False):
 				self.generator.bld.retval = self.generator.bld.cmd_and_log([self.inputs[0].abspath()], env=env)
 			else:
@@ -656,7 +657,7 @@ def run_c_code(self, *k, **kw):
 	"""
 	Create a temporary build context to execute a build. A reference to that build
 	context is kept on self.test_bld for debugging purposes.
-	The parameters given in the arguments to this function are passes as arguments for
+	The parameters given in the arguments to this function are passed as arguments for
 	a single task generator created in the build. Only three parameters are obligatory:
 
 	:param features: features to pass to a task generator created in the build
@@ -683,7 +684,7 @@ def run_c_code(self, *k, **kw):
 
 	lst = [str(v) for (p, v) in kw.items() if p != 'env']
 	h = Utils.h_list(lst)
-	dir = self.bldnode.abspath() + os.sep + (sys.platform != 'win32' and '.' or '') + 'conf_check_' + Utils.to_hex(h)
+	dir = self.bldnode.abspath() + os.sep + (not Utils.is_win32 and '.' or '') + 'conf_check_' + Utils.to_hex(h)
 
 	try:
 		os.makedirs(dir)

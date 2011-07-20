@@ -187,7 +187,9 @@ class module:
 			self.gobaloptioncache[str(platforms)+"-"+arch] = options
 		return options
 
-	def gentask(self, bld, env, variant, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
+	def gentask(self, bld, type, options = coptions(), inheritedoptions = coptions(), extradepends = [], blacklist=[]):
+		env = bld.env
+		variant = bld.variant
 		if not variant in self.tasks:
 			if type=='dummy' or not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
@@ -380,9 +382,7 @@ class module:
 		self.makeproject(builder)
 		for d in self.plugins:
 			d.makeproject(builder)
-		for envname in builder.env['BUILD_VARIANTS']:
-			env = builder.all_envs[envname]
-			self._post(builder, env, envname)
+		self._post(builder)
 		return self
 
 """ simple objects """
@@ -414,12 +414,12 @@ class library(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist=[]):
+	def _post(self, builder, blacklist=[]):
 		for d in self.depends:
 			if d not in blacklist:
-				d._post(builder, env, envname, blacklist)
+				d._post(builder, blacklist)
 		options = coptions()
-		task = self.gentask(builder, env, envname, 'cobjects', options, blacklist=blacklist)
+		task = self.gentask(builder, 'cobjects', options, blacklist=blacklist)
 
 
 
@@ -452,14 +452,14 @@ class shared_library(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist=[]):
+	def _post(self, builder, blacklist=[]):
 		for d in self.depends:
 			if d not in blacklist:
-				d.post(builder, env, envname, blacklist)
+				d.post(builder, blacklist)
 		options = coptions()
 		options.defines.add('BUILDING_DLL')
 		options.defines.add('_USRDLL')
-		task = self.gentask(builder, env, envname, 'cshlib', options, blacklist=blacklist)
+		task = self.gentask(builder, 'cshlib', options, blacklist=blacklist)
 
 """ static lib """
 class static_library(module):
@@ -490,12 +490,12 @@ class static_library(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist):
+	def _post(self, builder, blacklist):
 		for d in self.depends:
 			if d not in blacklist:
-				d._post(builder, env, envname, blacklist)
+				d._post(builder, blacklist)
 		options = coptions()
-		task = self.gentask(builder, env, envname, 'cstlib', options, coptions(), blacklist=blacklist)
+		task = self.gentask(builder, 'cstlib', options, coptions(), blacklist=blacklist)
 
 """ plugin """
 class plugin(module):
@@ -526,20 +526,20 @@ class plugin(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist):
+	def _post(self, builder, blacklist):
 		for d in self.depends:
 			if d not in blacklist:
-				d._post(builder, env, envname, blacklist)
-		if env['STATIC']:
+				d._post(builder, blacklist)
+		if builder.env['STATIC']:
 			options = coptions()
-			task = self.gentask(builder, env, envname, 'cobjects', options, coptions(), blacklist=blacklist)
+			task = self.gentask(builder, 'cobjects', options, coptions(), blacklist=blacklist)
 		else:
 			options = coptions()
 			options.defines.add('BUILDING_DLL')
 			options.defines.add('_USRDLL')
-			task = self.gentask(builder, env, envname, 'cshlib', options, coptions(), blacklist = blacklist)
+			task = self.gentask(builder, 'cshlib', options, coptions(), blacklist = blacklist)
 			if task:
-				task.install_bindir = os.path.join(env['DEPLOY']['plugin'])
+				task.install_bindir = os.path.join(builder.env['DEPLOY']['plugin'])
 
 """ game """
 class game(module):
@@ -572,19 +572,19 @@ class game(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist=[]):
+	def _post(self, builder, blacklist=[]):
 		for d in self.depends:
 			if d not in blacklist:
-				d._post(builder, env, envname, blacklist)
+				d._post(builder,blacklist)
 		options = coptions()
-		if env['STATIC']:
+		if builder.env['STATIC']:
 			for d in self.plugins:
-				d._post(builder, env, envname, [self]+blacklist)
-			task = self.gentask(builder, env, envname, 'cprogram', options, extradepends=self.plugins, blacklist=[self]+blacklist)
-		elif not envname in self.tasks:
-			task = self.gentask(builder, env, envname, 'cprogram', options, blacklist=blacklist)
+				d._post(builder,[self]+blacklist)
+			task = self.gentask(builder, 'cprogram', options, extradepends=self.plugins, blacklist=[self]+blacklist)
+		elif not builder.variant in self.tasks:
+			task = self.gentask(builder, 'cprogram', options, blacklist=blacklist)
 			for d in self.plugins:
-				d._post(builder, env, envname, blacklist)
+				d._post(builder, blacklist)
 
 
 """ tool """
@@ -646,12 +646,12 @@ class test(module):
 						archs,
 						sources)
 
-	def _post(self, builder, env, envname, blacklist):
+	def _post(self, builder, blacklist):
 		for d in self.depends:
 			if d not in blacklist:
-				d._post(builder, env, envname, blacklist)
+				d._post(builder, blacklist)
 		options = coptions()
-		task = self.gentask(builder, env, envname, 'cprogram', options, coptions(), blacklist = blacklist)
+		task = self.gentask(builder, 'cprogram', options, coptions(), blacklist = blacklist)
 		task.subsystem = 'console'
 		task.do_install = 0
 		task.features.append("unittest")
@@ -685,10 +685,10 @@ class util(module):
 						sources)
 		self.usemaster = False
 
-	def _post(self, builder, env, envname, blacklist=[]):
+	def _post(self, builder, blacklist=[]):
 		for d in self.depends:
-			d._post(builder, env, envname, blacklist)
-		task = self.gentask(builder, env, envname, 'dummy')
+			d._post(builder,  blacklist)
+		task = self.gentask(builder, 'dummy')
 
 m={}
 def external( name,

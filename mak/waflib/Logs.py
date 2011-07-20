@@ -6,7 +6,7 @@
 logging, colors, terminal width and pretty-print
 """
 
-import os, re, logging, traceback, sys
+import os, re, traceback, sys
 
 try:
 	if 'NOCOLOR' not in os.environ:
@@ -14,6 +14,8 @@ try:
 except:
 	# optional module for colors on win32, just ignore if it cannot be imported
 	pass
+
+import logging # do it after
 
 LOG_FORMAT = "%(asctime)s %(c1)s%(zone)s%(c2)s %(message)s"
 HOUR_FORMAT = "%H:%M:%S"
@@ -42,7 +44,7 @@ if got_tty:
 	except AttributeError:
 		got_tty = False
 
-if not got_tty or 'NOCOLOR' in os.environ:
+if (not got_tty and os.environ.get('TERM', 'dumb') != 'msys') or 'NOCOLOR' in os.environ:
 	colors_lst['USE'] = False
 
 def get_term_cols():
@@ -79,10 +81,6 @@ get_term_cols.__doc__ = """
 	:return: the number of characters per line
 	:rtype: int
 	"""
-
-# test
-#if sys.platform == 'win32':
-#	colors_lst['USE'] = True
 
 def get_color(cl):
 	if not colors_lst['USE']: return ''
@@ -155,9 +153,10 @@ class formatter(logging.Formatter):
 		"""Messages in warning, error or info mode are displayed in color by default"""
 		if rec.levelno >= logging.WARNING or rec.levelno == logging.INFO:
 			try:
-				return '%s%s%s' % (rec.c1, rec.msg.decode('utf-8'), rec.c2)
+				msg = rec.msg.decode('utf-8')
 			except:
-				return rec.c1+rec.msg+rec.c2
+				msg = rec.msg
+			return '%s%s%s' % (rec.c1, msg, rec.c2)
 		return logging.Formatter.format(self, rec)
 
 log = None
