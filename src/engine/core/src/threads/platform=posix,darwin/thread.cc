@@ -11,6 +11,8 @@
 #ifdef BE_PLATFORM_SUN
 # include   <thread.h>
 #endif
+#include    <sched.h>
+int clock_nanosleep (const struct timespec *req, struct timespec *rem);
 
 namespace BugEngine
 {
@@ -85,22 +87,12 @@ void Thread::resume()
 
 void Thread::sleep(int milliseconds)
 {
-#if defined(BE_PLATFORM_BSD) || defined(BE_PLATFORM_MACOS)
     timespec r = { 0, 0 };
     r.tv_nsec = milliseconds * 1000000;
     r.tv_sec  = r.tv_nsec / 1000000000;
     r.tv_nsec = r.tv_nsec % 1000000000;
     while (nanosleep(&r, &r) == -1)
         /*again*/;
-#else
-    timespec abstime, r;
-    clock_gettime(CLOCK_REALTIME, &abstime);
-    abstime.tv_nsec += milliseconds * 1000000;
-    abstime.tv_sec += abstime.tv_nsec / 1000000000;
-    abstime.tv_nsec = abstime.tv_nsec % 1000000000;
-    while (clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &abstime, &r) == -1)
-        /*again*/;
-#endif
 }
 
 void Thread::yield()
@@ -138,11 +130,7 @@ void Thread::wait() const
 void Thread::setPriority(Priority p)
 {
     sched_param param;
-#if defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_BSD) || defined(BE_PLATFORM_MACOS)
     param.sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
-#else
-    param.__sched_priority = sched_get_priority_min(SCHED_RR)+(int)p;
-#endif
     pthread_setschedparam(*reinterpret_cast<pthread_t*>(m_data), SCHED_RR, &param);
 }
 
