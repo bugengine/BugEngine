@@ -53,7 +53,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 	newenv = conf.env
 	newenv['GCC_VERSION']	= version
 	newenv['GCC_TARGET']	= gcc_target
-	newenv['GCC_FLAGS']		= [flag]
+	newenv['GCC_FLAGS']		= flag and [flag] or []
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, '..', 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, '..', '..', 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin'))]
@@ -254,9 +254,10 @@ def find_cross_gcc(conf):
 def add_standard_gcc_flags(conf):
 	v = conf.env
 	v.append_unique('ASFLAGS', '-c')
-	v['CFLAGS'] = v['GCC_FLAGS']
-	v['CXXFLAGS'] = v['GCC_FLAGS']
-	v['LINKFLAGS'] = v['GCC_FLAGS']
+	if v['GCC_FLAGS']:
+		v['CFLAGS'] = v['GCC_FLAGS']
+		v['CXXFLAGS'] = v['GCC_FLAGS']
+		v['LINKFLAGS'] = v['GCC_FLAGS']
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
