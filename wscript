@@ -16,7 +16,11 @@ def configure(conf):
 
 
 def build(bld):
-	bld.recurse('mak')
+	if not bld.variant and not bld.env.PROJECTS:
+		bld.recurse('mak')
+		Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
+		return
+
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
 	directx10		= module.external('DirectX10')
@@ -67,3 +71,19 @@ def build(bld):
 
 	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel, angelcode]
 	discworld.post(bld)
+
+
+
+from waflib.Build import BuildContext, InstallContext, UninstallContext
+from waflib import ConfigSet
+try:
+	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
+	for toolchain in env.BUILD_VARIANTS:
+		for y in (BuildContext, InstallContext, UninstallContext):
+			name = y.__name__.replace('Context','').lower()
+			class tmp(y):
+				cmd = name + '_' + toolchain
+				variant = toolchain
+except:
+	pass
+

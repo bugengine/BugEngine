@@ -290,9 +290,17 @@ class TaskBase(evil):
 		"""
 		col1 = Logs.colors(self.color)
 		col2 = Logs.colors.NORMAL
+		master = self.master
+
+		def cur():
+			# the current task position, computed as late as possible
+			tmp = -1
+			if hasattr(master, 'ready'):
+				tmp -= master.ready.qsize()
+			return master.processed + tmp
 
 		if self.generator.bld.progress_bar == 1:
-			return self.generator.bld.progress_line(self.generator.bld.producer.processed-1, self.position[1], col1, col2)
+			return self.generator.bld.progress_line(cur(), master.total, col1, col2)
 
 		if self.generator.bld.progress_bar == 2:
 			ela = str(self.generator.bld.timer)
@@ -304,17 +312,16 @@ class TaskBase(evil):
 				outs = ','.join([n.name for n in self.outputs])
 			except AttributeError:
 				outs = ''
-			return '|Total %s|Current %s|Inputs %s|Outputs %s|Time %s|\n' % (self.position[1], self.generator.bld.producer.processed-1, ins, outs, ela)
+			return '|Total %s|Current %s|Inputs %s|Outputs %s|Time %s|\n' % (master.total, cur(), ins, outs, ela)
 
 		s = str(self)
 		if not s:
 			return None
 
-		total = self.position[1]
+		total = master.total
 		n = len(str(total))
 		fs = '[%%%dd/%%%dd] %%s%%s%%s' % (n, n)
-		# we could use self.position[0], but the threading can make the reading unreliable
-		return fs % (self.generator.bld.producer.processed-1, self.position[1], col1, s, col2)
+		return fs % (cur(), total, col1, s, col2)
 
 	def attr(self, att, default=None):
 		"""
@@ -696,8 +703,19 @@ class Task(TaskBase):
 			try:
 				if prev == self.compute_sig_implicit_deps():
 					return prev
-			except IOError: # raised if a file was renamed
-				pass
+			except:
+				# when a file was renamed (IOError usually), remove the stale nodes (headers in folders without source files)
+				# this will break the order calculation for headers created during the build in the source directory (should be uncommon)
+				# the behaviour will differ when top != out
+				for x in bld.node_deps.get(self.uid(), []):
+					if x.is_child_of(bld.srcnode):
+						try:
+							os.stat(x.abspath())
+						except:
+							try:
+								del x.parent.children[x.name]
+							except:
+								pass
 			del bld.task_sigs[(key, 'imp')]
 			raise Errors.TaskRescan('rescan')
 
@@ -714,8 +732,17 @@ class Task(TaskBase):
 		self.are_implicit_nodes_ready()
 
 		# recompute the signature and return it
-		bld.task_sigs[(key, 'imp')] = sig = self.compute_sig_implicit_deps()
-		return sig
+		try:
+			bld.task_sigs[(key, 'imp')] = sig = self.compute_sig_implicit_deps()
+		except:
+			if Logs.verbose:
+				for k in bld.node_deps.get(self.uid(), []):
+					try:
+						k.get_bld_sig()
+					except:
+						Logs.warn('Missing signature for node %r (may cause rebuilds)' % k)
+		else:
+			return sig
 
 	def compute_sig_implicit_deps(self):
 		"""
@@ -735,13 +762,8 @@ class Task(TaskBase):
 		# scanner returns a node that does not have a signature
 		# just *ignore* the error and let them figure out from the compiler output
 		# waf -k behaviour
-		try:
-			for k in bld.node_deps.get(self.uid(), []):
-				upd(k.get_bld_sig())
-		except:
-			if Logs.verbose:
-				Logs.warn('Missing signature for node %r (may cause rebuilds)' % k)
-
+		for k in bld.node_deps.get(self.uid(), []):
+			upd(k.get_bld_sig())
 		return self.m.digest()
 
 	def are_implicit_nodes_ready(self):
@@ -797,7 +819,7 @@ class Task(TaskBase):
 			return None
 
 		sig = self.signature()
-		ssig = Utils.to_hex(sig)
+		ssig = Utils.to_hex(self.uid()) + Utils.to_hex(sig)
 
 		# first try to access the cache folder for the task
 		dname = os.path.join(self.generator.bld.cache_global, ssig)
@@ -842,9 +864,11 @@ class Task(TaskBase):
 		# try to avoid data corruption as much as possible
 		if getattr(self, 'cached', None):
 			return None
+		if not getattr(self, 'outputs', None):
+			return None
 
 		sig = self.signature()
-		ssig = Utils.to_hex(sig)
+		ssig = Utils.to_hex(self.uid()) + Utils.to_hex(sig)
 		dname = os.path.join(self.generator.bld.cache_global, ssig)
 		tmpdir = tempfile.mkdtemp(prefix=self.generator.bld.cache_global + os.sep + 'waf')
 
@@ -1199,6 +1223,8 @@ def update_outputs(cls):
 		except KeyError:
 			pass
 		except IndexError:
+			pass
+		except AttributeError:
 			pass
 		return RUN_ME
 	cls.runnable_status = runnable_status

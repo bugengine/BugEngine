@@ -25,6 +25,7 @@ from waflib.TaskGen import extension, taskgen_method, before_method, after_metho
 from waflib.Configure import conf
 
 FRAG = '''
+#include <Python.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -276,7 +277,7 @@ def check_python_headers(conf):
 
 	# under certain conditions, python extensions must link to
 	# python libraries, not just python embedding programs.
-	if (sys.platform == 'win32' or sys.platform.startswith('os2')
+	if (Utils.is_win32 or sys.platform.startswith('os2')
 		or sys.platform == 'darwin' or dct['Py_ENABLE_SHARED']):
 		env['LIBPATH_PYEXT'] = env['LIBPATH_PYEMBED']
 		env['LIB_PYEXT'] = env['LIB_PYEMBED']
@@ -288,7 +289,7 @@ def check_python_headers(conf):
 
 	includes = []
 	if conf.env.PYTHON_CONFIG:
-		for incstr in conf.cmd_and_log(conf.env.PYTHON + [ conf.env.PYTHON_CONFIG, '--includes']).strip().split():
+		for incstr in conf.cmd_and_log([ conf.env.PYTHON_CONFIG, '--includes']).strip().split():
 			# strip the -I or /I
 			if (incstr.startswith('-I') or incstr.startswith('/I')):
 				incstr = incstr[2:]
@@ -363,7 +364,7 @@ def check_python_version(conf, minver=None):
 		if 'PYTHONDIR' in conf.environ:
 			pydir = conf.environ['PYTHONDIR']
 		else:
-			if sys.platform == 'win32':
+			if Utils.is_win32:
 				(python_LIBDEST, pydir) = \
 						conf.get_python_variables(
 											  ["get_config_var('LIBDEST') or ''",
@@ -385,7 +386,7 @@ def check_python_version(conf, minver=None):
 		if 'PYTHONARCHDIR' in conf.environ:
 			pyarchdir = conf.environ['PYTHONARCHDIR']
 		else:
-			pyarchdir = conf.get_python_variables(
+			(pyarchdir, ) = conf.get_python_variables(
 											["get_python_lib(plat_specific=1, standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']],
 											['from distutils.sysconfig import get_python_lib'])
 			if not pyarchdir:
