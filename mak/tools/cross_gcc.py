@@ -98,13 +98,14 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			add_gcc_flags_to_env(conf)
 			add_platform_flags_to_env(conf, name, arch)
 
-			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
 
 			pprint('GREEN', 'configure for tool %s' % name)
 			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
 			conf.variant = ''
+			print e
 
 def parse_gcc_target(target):
 	archs = [ ('i686-w64', 'amd64'),
@@ -186,7 +187,6 @@ def get_available_gcc(conf):
 						arch = parse_gcc_target(target) or 'unknown'
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
-	print conf.env.GCC_TARGETS
 
 
 @conf

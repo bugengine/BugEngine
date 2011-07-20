@@ -42,6 +42,7 @@ def options(opt):
 					help='build with master files')
 
 def configure(conf):
+	conf.mak = os.getcwd() + "/mak"
 	conf.env['ARCHITECTURES']	= mak.allarchs
 
 	#conf.load('parallel_debug', tooldir='mak/waflib/extras')
