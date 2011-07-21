@@ -82,7 +82,7 @@ void GLShaderProgram::unload()
 
 GLShader::GLShader(weak<const VertexShader> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
-    ,   m_shaderType(GL_VERTEX_SHADER_EXT)
+    ,   m_shaderType(GL_VERTEX_SHADER_ARB)
     ,   m_shader(0)
 {
 }
@@ -96,7 +96,7 @@ GLShader::GLShader(weak<const GeometryShader> resource, weak<GLRenderer> rendere
 
 GLShader::GLShader(weak<const FragmentShader> resource, weak<GLRenderer> renderer)
     :   IGPUResource(resource, renderer)
-    ,   m_shaderType(GL_FRAGMENT_SHADER_EXT)
+    ,   m_shaderType(GL_FRAGMENT_SHADER_ARB)
     ,   m_shader(0)
 {
 }

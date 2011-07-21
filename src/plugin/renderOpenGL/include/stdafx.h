@@ -15,10 +15,10 @@
 #include    <windowing/renderer.hh>
 
 
-#define GL_EXT_vertex_shader    1
-#define GL_EXT_fragment_shader  1
-#define GL_EXT_geometry_shader4 1
 #ifdef BE_PLATFORM_MACOS
+# define GL_ARB_vertex_shader    1
+# define GL_ARB_fragment_shader  1
+# define GL_EXT_geometry_shader4 1
 # include   <OpenGL/OpenGL.h>
 # include   <OpenGL/gl.h>
 #else
