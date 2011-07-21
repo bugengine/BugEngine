@@ -68,6 +68,7 @@ uint2 Renderer::getScreenSize()
 
 void Renderer::flush()
 {
+    IRenderer::flush();
     m_platformRenderer->flush();
 }
 
