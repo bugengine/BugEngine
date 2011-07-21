@@ -318,11 +318,12 @@ def process_use(self):
 		var = y.tmp_use_var
 		if var:
 			if var == 'LIB' or y.tmp_use_stlib:
-				self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
-				if link_task:
-					self.link_task.dep_nodes.extend(y.link_task.outputs)
-				tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
-				self.env.append_value(var + 'PATH', [tmp_path])
+				if (not 'cprogram' in y.features and not 'cxxprogram' in y.features) or self.env.DEST_BINFMT == 'pe':
+					self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
+					if link_task:
+						self.link_task.dep_nodes.extend(y.link_task.outputs)
+					tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
+					self.env.append_value(var + 'PATH', [tmp_path])
 		else:
 			if y.tmp_use_objects:
 				self.add_objects_from_tgen(y)
