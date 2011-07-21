@@ -8,9 +8,11 @@
 #include    <graphics/objects/mesh.script.hh>
 #include    <graphics/objects/texture.script.hh>
 #include    <graphics/objects/shader.script.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
+#include    <loaders/rendertarget/glwindow.hh>
 
 
 #include    <Cocoa/Cocoa.h>
@@ -19,8 +21,7 @@
 @interface BugEngineOpenGLView : NSView
 {
 @public
-    NSOpenGLContext*        m_context;
-    ShaderExtensions        shaderext;
+    NSOpenGLContext*                                m_context;
 }
 
 - (id) initWithFrame:(NSRect) frame context:(NSOpenGLContext*) context;
@@ -60,6 +61,7 @@ class GLRenderer::Context : public minitl::refcountable
 private:
     NSOpenGLPixelFormat*    m_pixelFormat;
     NSOpenGLContext*        m_context;
+    ShaderExtensions        m_shaderext;
 public:
     Context();
     ~Context();
@@ -101,16 +103,18 @@ private:
     NSWindow*               m_window;
     BugEngineOpenGLView*    m_view;
     CGLContextObj           m_context;
+    u64                     m_threadId;
 public:
-    Context(NSWindow* window, NSOpenGLContext* context);
+    Context(NSWindow* window, NSOpenGLContext* context, u64 threadId);
     ~Context();
 };
 
-GLWindow::Context::Context(NSWindow* window, NSOpenGLContext* context)
+GLWindow::Context::Context(NSWindow* window, NSOpenGLContext* context, u64 threadId)
     :   m_window(window)
     ,   m_view([[BugEngineOpenGLView alloc] initWithFrame:[m_window contentRectForFrameRect:[m_window frame]]
                                                   context: context])
     ,   m_context((CGLContextObj)[context CGLContextObj])
+    ,   m_threadId(threadId)
 {
     [window setContentView:m_view];
     [window makeKeyAndOrderFront: nil];
@@ -129,65 +133,78 @@ GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
 :   Windowing::Renderer(gameArena())
 ,   m_context(scoped<Context>::create(arena()))
 ,   m_filesystem(filesystem)
-,   m_meshLoader(scoped<const MeshLoader>::create(arena()))
-,   m_textureLoader(scoped<const TextureLoader>::create(arena()))
-,   m_shaderLoader(scoped<const ShaderLoader>::create(arena(), this))
 {
 }
 
 GLRenderer::~GLRenderer()
 {
-    destroyContext();
 }
 
-void GLRenderer::attachWindow(GLWindow* w)
+void GLRenderer::attachWindow(weak<GLWindow> w) const
 {
     NSWindow* window = (NSWindow*)w->getWindowHandle();
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
     be_assert(window, "No native window created for BugEngine window");
-    w->m_context = scoped<GLWindow::Context>::create(arena(), window, context);
+    w->m_context = scoped<GLWindow::Context>::create(arena(), window, context, Thread::currentId());
     [context release];
 }
 
 const ShaderExtensions& GLRenderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
-    return m_context->shaderext;
+    return m_context->m_shaderext;
 }
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<GLRenderer> renderer, WindowFlags flags)
-:   Windowing::Window(renderer, flags)
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer)
+:   Windowing::Window(renderwindow, renderer)
+,   m_context(scoped<Context>())
 {
-    renderer->attachWindow(this);
 }
 
 GLWindow::~GLWindow()
 {
 }
+    
+    
+void GLWindow::load(weak<const Resource> resource)
+{
+    Window::load(resource);
+    be_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
+}
 
-void GLWindow::setCurrent()
+void GLWindow::unload()
+{
+    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    Window::unload();
+    m_context = scoped<Context>();
+}
+
+void GLWindow::setCurrent() const
 {
     if(m_context)
     {
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         [m_context->m_view->m_context makeCurrentContext];
     }
 }
 
-void GLWindow::clearCurrent()
+void GLWindow::clearCurrent() const
 {
     if(m_context)
     {
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         [NSOpenGLContext clearCurrentContext];
     }
 }
 
-void GLWindow::present()
+void GLWindow::present() const
 {
     if(m_context)
     {
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         CGLFlushDrawable(m_context->m_context);
     }
 }

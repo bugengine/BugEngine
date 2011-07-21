@@ -418,6 +418,7 @@ static SQRegFunction stringlib_funcs[]={
 	_DECL_FUNC(split,3,_SC(".ss")),
 	{0,0}
 };
+#undef _DECL_FUNC
 
 
 SQInteger sqstd_register_stringlib(HSQUIRRELVM v)

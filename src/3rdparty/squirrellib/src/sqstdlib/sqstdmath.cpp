@@ -80,6 +80,7 @@ static SQRegFunction mathlib_funcs[] = {
 	_DECL_FUNC(abs,2,_SC(".n")),
 	{0,0},
 };
+#undef _DECL_FUNC
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
