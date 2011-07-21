@@ -129,6 +129,7 @@ static SQRegFunction systemlib_funcs[]={
 	_DECL_FUNC(rename,3,_SC(".ss")),
 	{0,0}
 };
+#undef _DECL_FUNC
 
 
 SQInteger sqstd_register_systemlib(HSQUIRRELVM v)

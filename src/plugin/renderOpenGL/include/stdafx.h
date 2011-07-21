@@ -15,6 +15,9 @@
 #include    <windowing/renderer.hh>
 
 
+#define GL_EXT_vertex_shader    1
+#define GL_EXT_fragment_shader  1
+#define GL_EXT_geometry_shader4 1
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenGL/OpenGL.h>
 # include   <OpenGL/gl.h>

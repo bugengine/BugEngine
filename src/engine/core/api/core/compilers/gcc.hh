@@ -42,12 +42,17 @@ typedef u8                      byte;
 #define BE_SELECTOVERLOAD(o)	
 
 #define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
-#ifdef _WIN32
-# define BE_EXPORT              __declspec(dllexport)
-# define BE_IMPORT              __declspec(dllimport)
-#elif __GNUC__ > 3
-# define BE_EXPORT              __attribute__ ((visibility("default")))
-# define BE_IMPORT
+#ifndef BE_STATIC
+# ifdef _WIN32
+#  define BE_EXPORT              __declspec(dllexport)
+#  define BE_IMPORT              __declspec(dllimport)
+# elif __GNUC__ > 3
+#  define BE_EXPORT              __attribute__ ((visibility("default")))
+#  define BE_IMPORT
+# else
+#  define BE_EXPORT
+#  define BE_IMPORT
+# endif
 #else
 # define BE_EXPORT
 # define BE_IMPORT

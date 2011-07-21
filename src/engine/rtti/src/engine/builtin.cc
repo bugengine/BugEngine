@@ -49,6 +49,31 @@ BE_MAKE_BUILTIN(i8, void);
 BE_MAKE_BUILTIN(i16, void);
 BE_MAKE_BUILTIN(i32, void);
 BE_MAKE_BUILTIN(i64, void);
+    
+BE_MAKE_BUILTIN(byte2, void);
+BE_MAKE_BUILTIN(byte3, void);
+BE_MAKE_BUILTIN(byte4, void);
+    
+BE_MAKE_BUILTIN(short2, void);
+BE_MAKE_BUILTIN(short3, void);
+BE_MAKE_BUILTIN(short4, void);
+
+BE_MAKE_BUILTIN(int2, void);
+BE_MAKE_BUILTIN(int3, void);
+BE_MAKE_BUILTIN(int4, void);
+
+BE_MAKE_BUILTIN(uint2, void);
+BE_MAKE_BUILTIN(uint3, void);
+BE_MAKE_BUILTIN(uint4, void);
+
+BE_MAKE_BUILTIN(bigint2, void);
+BE_MAKE_BUILTIN(bigint3, void);
+BE_MAKE_BUILTIN(bigint4, void);
+
+BE_MAKE_BUILTIN(float2, void);
+BE_MAKE_BUILTIN(float3, void);
+BE_MAKE_BUILTIN(float4, void);
+
 BE_MAKE_BUILTIN(istring, void);
 BE_MAKE_BUILTIN(inamespace, void);
 BE_MAKE_BUILTIN(ifilename, void);

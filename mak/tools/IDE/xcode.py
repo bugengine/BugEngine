@@ -136,7 +136,15 @@ class XCodeProject:
 			d.phaseId = [newid()]
 			d.applicationId = newid()
 			if d.usemaster:
-				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = sourcecode.cpp.objcpp;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, os.path.split(d.masterfilename)[1], d.masterfilename))
+				if d.masterfilename[-2:] == '.c':
+					filetype = "sourcecode.c.c"
+				elif d.masterfilename[-2:] == '.m':
+					filetype = "sourcecode.c.objc"
+				elif d.masterfilename[-3:] == '.mm':
+					filetype = "sourcecode.cpp.objcpp"
+				else:
+					filetype = "sourcecode.cpp.cpp"
+				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, filetype, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d.sourceTree)
 			if d.type in ['game', 'tool']:
 				d.phaseId.append(newid())
@@ -461,14 +469,25 @@ xcodeprojects = {
 	'xcode': ('Xcode 3.1', 45),
 }
 
+def hasObjectiveC(sourcetree):
+	for source in sourcetree.files:
+		if isinstance(source, mak.sources.cppsource):
+			if source.filename.endswith('.m') or source.filename.endswith('.mm'):
+				return True
+	for name,directory in sourcetree.directories.items():
+		if hasObjectiveC(directory):
+			return True
+	return False
+	
 def writemaster(sourcetree, f, path = ''):
 	for source in sourcetree.files:
 		if isinstance(source, mak.sources.cppsource) and not isinstance(source, mak.sources.generatedcppsource):
-			f.write("#if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.archs]))
-			f.write("# if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.platforms]))
-			f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
-			f.write("# endif\n")
-			f.write("#endif\n")
+			if source.archs and source.platforms:
+				f.write("#if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.archs]))
+				f.write("# if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.platforms]))
+				f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
+				f.write("# endif\n")
+				f.write("#endif\n")
 	for name,directory in sourcetree.directories.items():
 		writemaster(directory, f, os.path.join(path, sourcetree.prefix))
 
@@ -530,7 +549,7 @@ def create_xcode_project(t):
 			i.depends.append(t)
 			t.depends.remove(i)
 	if t.usemaster:
-		filename = "master-%s.mm" % t.name
+		filename = (hasObjectiveC(t.sourcetree) and "master-%s.mm" or "master-%s.cc") % t.name
 		node = t.path.find_or_declare(filename)
 		solution.set_outputs(node)
 		t.bld.install_files(appname+'.'+toolName+'.xcodeproj/', node)

@@ -5,6 +5,7 @@
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
 #include    <darwin/platformrenderer.hh>
+#include    <graphics/objects/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
@@ -15,12 +16,12 @@ class Window::PlatformWindow : public minitl::refcountable
 private:
     NSWindow*   m_window;
 public:
-    PlatformWindow(WindowFlags flags);
+    PlatformWindow(u32 w, u32 h);
     ~PlatformWindow();
 };
 
-Window::PlatformWindow::PlatformWindow(WindowFlags flags)
-    :   m_window([[NSWindow alloc] initWithContentRect:NSMakeRect(flags.position.x(), flags.position.y(), flags.size.x(), flags.size.y())
+Window::PlatformWindow::PlatformWindow(u32 w, u32 h)
+    :   m_window([[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, w, h)
                                              styleMask:NSTitledWindowMask | NSResizableWindowMask
                                                backing:NSBackingStoreBuffered
                                                  defer:NO])
@@ -33,32 +34,31 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<Renderer> renderer, WindowFlags flags)
-:   IRenderTarget(renderer)
-,   m_window(scoped<PlatformWindow>::create(renderer->arena(), flags))
+Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
+:   IRenderTarget(resource, renderer)
+,   m_window()
 {
 }
 
 Window::~Window()
 {
-    close();
 }
 
-void Window::close()
+void Window::load(weak<const Resource> resource)
 {
-    if(m_window)
-    {
-        m_window = scoped<PlatformWindow>();
-    }
+    uint2 dimensions = be_checked_cast<const RenderWindow>(resource)->dimensions;
+    m_window = scoped<PlatformWindow>::create(m_renderer->arena(), dimensions.x(), dimensions.y());
 }
 
-bool Window::closed() const
+void Window::unload()
 {
-    return m_window == 0;
+    m_window = scoped<PlatformWindow>();
 }
+	
 
 void* Window::getWindowHandle() const
 {
+    be_assert_recover(m_window, "no window implementation is created", return 0);
     return (void*)m_window->m_window;
 }
 

@@ -16,10 +16,11 @@ def configure(conf):
 
 
 def build(bld):
-	if not bld.variant and not bld.env.PROJECTS:
+	if not bld.variant:
 		bld.recurse('mak')
-		Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
-		return
+		if not bld.env.PROJECTS:
+			Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
+			return
 
 	dbghelp			= module.external('dbghelp')
 	directx9		= module.external('DirectX9')
