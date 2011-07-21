@@ -64,11 +64,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, add_gcc_flags_to_env, add_platform_flags_to_env):
 	worked = False
 	for opt,arch in allarchs(originalarch):
-		name=origname = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
-		index=1
-		while name in conf.env['BUILD_VARIANTS']:
-			name = origname+'-%d'%index
-			index=index+1
+		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		if name in conf.env['BUILD_VARIANTS']:
+			continue
 		conf.setenv(name, conf.env.derive())
 		try:
 			add_gcc_to_env(conf, version, toolchaindir, target, opt)
@@ -78,7 +76,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			add_gcc_flags_to_env(conf)
 			add_platform_flags_to_env(conf, name, arch)
 
-			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
 
 			pprint('GREEN', 'configure for tool %s' % name)
 			conf.variant = ''
@@ -86,9 +84,12 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			worked = True
 		except Exception as e:
 			conf.variant = ''
+			print e
 	if not worked:
 		arch = originalarch
 		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		if name in conf.env['BUILD_VARIANTS']:
+			return
 		conf.setenv(name, conf.env.derive())
 		try:
 			add_gcc_to_env(conf, version, toolchaindir, target, '')
@@ -105,7 +106,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
 			conf.variant = ''
-			print e
 
 def parse_gcc_target(target):
 	archs = [ ('i686-w64', 'amd64'),
@@ -146,10 +146,10 @@ def add_ld_so(conf, file, toolchaindirs):
 			toolchaindirs.add(line)
 
 @conf
-def get_available_gcc(conf):
+def get_available_gcc(conf, paths=[]):
 	toolchaindirs=set([])
 	conf.env['GCC_TARGETS'] = []
-	for dir in os.environ['PATH'].split(':'):
+	for dir in paths+[i for i in os.environ['PATH'].split(':') if i not in paths]:
 		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', 'lib')))
 	if os.path.isfile('/etc/ld.so.conf'):
 		add_ld_so(conf, '/etc/ld.so.conf', toolchaindirs)
