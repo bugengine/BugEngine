@@ -44,7 +44,7 @@ class Solution:
 	def __init__(self, name, filename, version, versionnumber, versionname):
 		self.name = name
 		self.filename = filename
-		self.guid = generateGUID(self.filename,self.name)
+		self.guid = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}" #vcproj/vcxproj
 		self.file = open(self.filename,'w')
 		self.projectlist = []
 		self.version = version
