@@ -50,6 +50,7 @@ static const PIXELFORMATDESCRIPTOR s_pfd =
 class GLRenderer::Context : public minitl::refcountable
 {
     friend class GLRenderer;
+    BE_NOCOPY(Context);
 private:
     HWND                            m_dummyHwnd;
     HDC                             m_dummyDC;
@@ -179,6 +180,7 @@ GLRenderer::Context::~Context()
 class GLWindow::Context : public minitl::refcountable
 {
     friend class GLWindow;
+    BE_NOCOPY(Context);
 private:
     HGLRC       m_glContext;
     HWND        m_hwnd;

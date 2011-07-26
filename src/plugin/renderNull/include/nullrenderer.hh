@@ -12,6 +12,7 @@ namespace BugEngine { namespace Graphics { namespace Null
 
 class NullRenderer : public IRenderer
 {
+    BE_NOCOPY(NullRenderer);
 private:
     weak<const FileSystem>  m_filesystem;
 public:

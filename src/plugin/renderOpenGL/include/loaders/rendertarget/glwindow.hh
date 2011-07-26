@@ -15,6 +15,7 @@ class GLRenderer;
 class GLWindow : public Windowing::Window
 {
     friend class GLRenderer;
+    BE_NOCOPY(GLWindow);
 private:
     class Context;
     scoped<Context> m_context;
