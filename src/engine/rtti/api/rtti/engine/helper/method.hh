@@ -24,7 +24,7 @@ static inline void wrapCopy(const void* src, void* dst)
 template< typename T >
 static inline void wrapDestroy(void* src)
 {
-	be_forceuse(src);
+    be_forceuse(src);
     ((T*)src)->~T();
 }
 
@@ -35,29 +35,135 @@ inline void nullconstructor<0>(const void* /*src*/, void* /*dst*/) {}
 static inline void nulldestructor(void*) { }
 
 
-template<   typename T,
-            typename R,
-            typename P1 = void,
-            typename P2 = void,
-            typename P3 = void,
-            typename P4 = void,
-            typename P5 = void,
-            typename P6 = void,
-            typename P7 = void,
-            typename P8 = void,
-            typename P9 = void >
-struct callhelper;
+template< typename T,
+          typename P1=void,
+          typename P2=void,
+          typename P3=void,
+          typename P4=void,
+          typename P5=void,
+          typename P6=void,
+          typename P7=void,
+          typename P8=void,
+          typename P9=void,
+          typename P10=void,
+          typename P11=void,
+          typename P12=void,
+          typename P13=void,
+          typename P14=void,
+          typename P15=void,
+          typename P16=void,
+          typename Dummy=void>
+struct procedurehelper;
+template< typename T,
+          typename R,
+          typename P1=void,
+          typename P2=void,
+          typename P3=void,
+          typename P4=void,
+          typename P5=void,
+          typename P6=void,
+          typename P7=void,
+          typename P8=void,
+          typename P9=void,
+          typename P10=void,
+          typename P11=void,
+          typename P12=void,
+          typename P13=void,
+          typename P14=void,
+          typename P15=void,
+          typename P16=void,
+          typename Dummy=void>
+struct functionhelper;
 
 
 }}
 
-#include    <rtti/engine/helper/method0.hh>
-#include    <rtti/engine/helper/method1.hh>
-#include    <rtti/engine/helper/method2.hh>
-#include    <rtti/engine/helper/method3.hh>
-#include    <rtti/engine/helper/method4.hh>
-#include    <rtti/engine/helper/method5.hh>
-#include    <rtti/engine/helper/method6.hh>
+#define BE_METHOD_PARAMS      0
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      1
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      2
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      3
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      4
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      5
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      6
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      7
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      8
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      9
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      10
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      11
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      12
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      13
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      14
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      15
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+#define BE_METHOD_PARAMS      16
+#include    <rtti/engine/helper/methods.hh>
+#undef BE_METHOD_PARAMS
+
+
+
 #include    <rtti/engine/helper/methodvararg.hh>
 
 /*****************************************************************************/

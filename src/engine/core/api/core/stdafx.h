@@ -5,11 +5,6 @@
 #define BE_CORE_STDAFX_H_
 /*****************************************************************************/
 
-
-#define     BE_STRINGIZE_IMPL(n)   #n
-#define     BE_STRINGIZE(n)        BE_STRINGIZE_IMPL(n)
-#define     BE_CONCAT_IMPL(i,j)    i##j
-#define     BE_CONCAT(i,j)         BE_CONCAT_IMPL(i,j)
 #ifndef BE_FILEID
 # ifdef     _WIN32
 #  define   BE_COUNTER          __COUNTER__
@@ -30,6 +25,7 @@
 #define     BE_HERE             BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
 #define     BE_NOCOPY(x)        private: x(const x&); x& operator=(const x&);
 
+#include    <core/preproc.hh>
 #include    <core/compilers.hh>
 #include    <core/platforms.hh>
 #include    <core/features.hh>

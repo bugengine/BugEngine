@@ -13,36 +13,50 @@ namespace RTTI
 {
 class ClassInfo;
 struct PropertyInfo;
-template<   typename T,
-            typename R,
-            typename P1,
-            typename P2,
-            typename P3,
-            typename P4,
-            typename P5,
-            typename P6,
-            typename P7,
-            typename P8,
-            typename P9 >
-struct callhelper;
+template< typename T,
+          typename P1,
+          typename P2,
+          typename P3,
+          typename P4,
+          typename P5,
+          typename P6,
+          typename P7,
+          typename P8,
+          typename P9,
+          typename P10,
+          typename P11,
+          typename P12,
+          typename P13,
+          typename P14,
+          typename P15,
+          typename P16,
+          typename Dummy>
+struct procedurehelper;
 }
 
 class Value
 {
-    friend class ::BugEngine::RTTI::ClassInfo;
-    friend struct ::BugEngine::RTTI::PropertyInfo;
-    template<   typename T,
-                typename R,
-                typename P1,
-                typename P2,
-                typename P3,
-                typename P4,
-                typename P5,
-                typename P6,
-                typename P7,
-                typename P8,
-                typename P9 >
-    friend struct ::BugEngine::RTTI::callhelper;
+    friend class RTTI::ClassInfo;
+    friend struct RTTI::PropertyInfo;
+    template< typename T,
+          typename P1,
+          typename P2,
+          typename P3,
+          typename P4,
+          typename P5,
+          typename P6,
+          typename P7,
+          typename P8,
+          typename P9,
+          typename P10,
+          typename P11,
+          typename P12,
+          typename P13,
+          typename P14,
+          typename P15,
+          typename P16,
+          typename Dummy>
+    friend struct RTTI::procedurehelper;
 private:
     TypeInfo        m_type;
     struct Reference

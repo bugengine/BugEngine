@@ -256,17 +256,24 @@ class Class(Container):
 				if paramtypes: paramtypes = ', '+paramtypes
 
 				if name == '?ctor':
-					if self.value:
-						call = "&BugEngine::RTTI::callhelper< %s, %s%s >::construct" % (self.fullname, 'void', paramtypes)
-					else:
-						call = "&BugEngine::RTTI::callhelper< %s, %s%s >::constructPtr" % (self.fullname, 'void', paramtypes)
-				elif 'const' in attrs:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callConst< %s >" % (self.fullname, rtype, paramtypes, method)
-				elif 'static' in attrs:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::callStatic< %s >" % (self.fullname, rtype, paramtypes, method)
+					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (self.fullname, paramtypes)
+				elif rtype != 'void':
+					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % (self.fullname, rtype, paramtypes)
 				else:
-					call = "&BugEngine::RTTI::callhelper< %s, %s%s >::call< %s >" % (self.fullname, rtype, paramtypes, method)
-				file.write("            if (BugEngine::RTTI::callhelper< %s, %s%s >::VarArg)\n" % (self.fullname, rtype, paramtypes))
+					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (self.fullname, paramtypes)
+				if name == '?ctor':
+					if self.value:
+						call = "&%s::construct" % helper
+					else:
+						call = "&%s::constructPtr" % helper
+				elif 'const' in attrs:
+						call = "&%s::callConst< %s >" % (helper, method)
+				elif 'static' in attrs:
+						call = "&%s::callStatic< %s >" % (helper, method)
+				else:
+					call = "&%s::call< %s >" % (helper, method)
+
+				file.write("            if (%s::VarArg)\n" % (helper))
 				file.write("            {\n")
 				file.write("                mi.overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s, true));\n" % (rtype, call))
 				file.write("            }\n")
