@@ -66,108 +66,108 @@
 #define BE_COMMA(cond)              BE_CONCAT(BE_COMMA_,BE_BOOL(cond))
 
 
-#define BE_PP_LIST_0(x,s)           
-#define BE_PP_LIST_1(x,s)           x##1
-#define BE_PP_LIST_2(x,s)           BE_PP_LIST_1(x,s) s x##2
-#define BE_PP_LIST_3(x,s)           BE_PP_LIST_2(x,s) s x##3
-#define BE_PP_LIST_4(x,s)           BE_PP_LIST_3(x,s) s x##4
-#define BE_PP_LIST_5(x,s)           BE_PP_LIST_4(x,s) s x##5
-#define BE_PP_LIST_6(x,s)           BE_PP_LIST_5(x,s) s x##6
-#define BE_PP_LIST_7(x,s)           BE_PP_LIST_6(x,s) s x##7
-#define BE_PP_LIST_8(x,s)           BE_PP_LIST_7(x,s) s x##8
-#define BE_PP_LIST_9(x,s)           BE_PP_LIST_8(x,s) s x##9
-#define BE_PP_LIST_10(x,s)          BE_PP_LIST_9(x,s) s x##10
-#define BE_PP_LIST_11(x,s)          BE_PP_LIST_10(x,s) s x##11
-#define BE_PP_LIST_12(x,s)          BE_PP_LIST_11(x,s) s x##12
-#define BE_PP_LIST_13(x,s)          BE_PP_LIST_12(x,s) s x##13
-#define BE_PP_LIST_14(x,s)          BE_PP_LIST_13(x,s) s x##14
-#define BE_PP_LIST_15(x,s)          BE_PP_LIST_14(x,s) s x##15
-#define BE_PP_LIST_16(x,s)          BE_PP_LIST_15(x,s) s x##16
+#define BE_PP_LIST_0(x)           
+#define BE_PP_LIST_1(x)           x##1
+#define BE_PP_LIST_2(x)           BE_PP_LIST_1(x) , x##2
+#define BE_PP_LIST_3(x)           BE_PP_LIST_2(x) , x##3
+#define BE_PP_LIST_4(x)           BE_PP_LIST_3(x) , x##4
+#define BE_PP_LIST_5(x)           BE_PP_LIST_4(x) , x##5
+#define BE_PP_LIST_6(x)           BE_PP_LIST_5(x) , x##6
+#define BE_PP_LIST_7(x)           BE_PP_LIST_6(x) , x##7
+#define BE_PP_LIST_8(x)           BE_PP_LIST_7(x) , x##8
+#define BE_PP_LIST_9(x)           BE_PP_LIST_8(x) , x##9
+#define BE_PP_LIST_10(x)          BE_PP_LIST_9(x) , x##10
+#define BE_PP_LIST_11(x)          BE_PP_LIST_10(x) , x##11
+#define BE_PP_LIST_12(x)          BE_PP_LIST_11(x) , x##12
+#define BE_PP_LIST_13(x)          BE_PP_LIST_12(x) , x##13
+#define BE_PP_LIST_14(x)          BE_PP_LIST_13(x) , x##14
+#define BE_PP_LIST_15(x)          BE_PP_LIST_14(x) , x##15
+#define BE_PP_LIST_16(x)          BE_PP_LIST_15(x) , x##16
 
-#define BE_LIST(count,s,x)          BE_CONCAT(BE_PP_LIST_, count)(x,s)
+#define BE_LIST(count,x)          BE_CONCAT(BE_PP_LIST_, count)(x)
 
-#define BE_PP_LIST2_0(x,y,s)        
-#define BE_PP_LIST2_1(x,y,s)        x##1 y
-#define BE_PP_LIST2_2(x,y,s)        BE_PP_LIST2_1(x,y,s) s x##2 y
-#define BE_PP_LIST2_3(x,y,s)        BE_PP_LIST2_2(x,y,s) s x##3 y
-#define BE_PP_LIST2_4(x,y,s)        BE_PP_LIST2_3(x,y,s) s x##4 y
-#define BE_PP_LIST2_5(x,y,s)        BE_PP_LIST2_4(x,y,s) s x##5 y
-#define BE_PP_LIST2_6(x,y,s)        BE_PP_LIST2_5(x,y,s) s x##6 y
-#define BE_PP_LIST2_7(x,y,s)        BE_PP_LIST2_6(x,y,s) s x##7 y
-#define BE_PP_LIST2_8(x,y,s)        BE_PP_LIST2_7(x,y,s) s x##8 y
-#define BE_PP_LIST2_9(x,y,s)        BE_PP_LIST2_8(x,y,s) s x##9 y
-#define BE_PP_LIST2_10(x,y,s)       BE_PP_LIST2_9(x,y,s) s x##10 y
-#define BE_PP_LIST2_11(x,y,s)       BE_PP_LIST2_10(x,y,s) s x##11 y
-#define BE_PP_LIST2_12(x,y,s)       BE_PP_LIST2_11(x,y,s) s x##12 y
-#define BE_PP_LIST2_13(x,y,s)       BE_PP_LIST2_12(x,y,s) s x##13 y
-#define BE_PP_LIST2_14(x,y,s)       BE_PP_LIST2_13(x,y,s) s x##14 y
-#define BE_PP_LIST2_15(x,y,s)       BE_PP_LIST2_14(x,y,s) s x##15 y
-#define BE_PP_LIST2_16(x,y,s)       BE_PP_LIST2_15(x,y,s) s x##16 y
+#define BE_PP_LIST2_0(x,y)        
+#define BE_PP_LIST2_1(x,y)        x##1 y
+#define BE_PP_LIST2_2(x,y)        BE_PP_LIST2_1(x,y) , x##2 y
+#define BE_PP_LIST2_3(x,y)        BE_PP_LIST2_2(x,y) , x##3 y
+#define BE_PP_LIST2_4(x,y)        BE_PP_LIST2_3(x,y) , x##4 y
+#define BE_PP_LIST2_5(x,y)        BE_PP_LIST2_4(x,y) , x##5 y
+#define BE_PP_LIST2_6(x,y)        BE_PP_LIST2_5(x,y) , x##6 y
+#define BE_PP_LIST2_7(x,y)        BE_PP_LIST2_6(x,y) , x##7 y
+#define BE_PP_LIST2_8(x,y)        BE_PP_LIST2_7(x,y) , x##8 y
+#define BE_PP_LIST2_9(x,y)        BE_PP_LIST2_8(x,y) , x##9 y
+#define BE_PP_LIST2_10(x,y)       BE_PP_LIST2_9(x,y) , x##10 y
+#define BE_PP_LIST2_11(x,y)       BE_PP_LIST2_10(x,y) , x##11 y
+#define BE_PP_LIST2_12(x,y)       BE_PP_LIST2_11(x,y) , x##12 y
+#define BE_PP_LIST2_13(x,y)       BE_PP_LIST2_12(x,y) , x##13 y
+#define BE_PP_LIST2_14(x,y)       BE_PP_LIST2_13(x,y) , x##14 y
+#define BE_PP_LIST2_15(x,y)       BE_PP_LIST2_14(x,y) , x##15 y
+#define BE_PP_LIST2_16(x,y)       BE_PP_LIST2_15(x,y) , x##16 y
  
-#define BE_LIST2(count,s,x,y)       BE_CONCAT(BE_PP_LIST2_, count)(x,y,s)
+#define BE_LIST2(count,x,y)       BE_CONCAT(BE_PP_LIST2_, count)(x,y)
 
 
-#define BE_PP_LIST3_0(x,y,z,s)   
-#define BE_PP_LIST3_1(x,y,z,s)      x##1 y##1 z
-#define BE_PP_LIST3_2(x,y,z,s)      BE_PP_LIST3_1(x,y,z,s) s x##2 y##2 z
-#define BE_PP_LIST3_3(x,y,z,s)      BE_PP_LIST3_2(x,y,z,s) s x##3 y##3 z
-#define BE_PP_LIST3_4(x,y,z,s)      BE_PP_LIST3_3(x,y,z,s) s x##4 y##4 z
-#define BE_PP_LIST3_5(x,y,z,s)      BE_PP_LIST3_4(x,y,z,s) s x##5 y##5 z
-#define BE_PP_LIST3_6(x,y,z,s)      BE_PP_LIST3_5(x,y,z,s) s x##6 y##6 z
-#define BE_PP_LIST3_7(x,y,z,s)      BE_PP_LIST3_6(x,y,z,s) s x##7 y##7 z
-#define BE_PP_LIST3_8(x,y,z,s)      BE_PP_LIST3_7(x,y,z,s) s x##8 y##8 z
-#define BE_PP_LIST3_9(x,y,z,s)      BE_PP_LIST3_8(x,y,z,s) s x##9 y##9 z
-#define BE_PP_LIST3_10(x,y,z,s)     BE_PP_LIST3_9(x,y,z,s) s x##10 y##10 z
-#define BE_PP_LIST3_11(x,y,z,s)     BE_PP_LIST3_10(x,y,z,s) s x##11 y##11 z
-#define BE_PP_LIST3_12(x,y,z,s)     BE_PP_LIST3_11(x,y,z,s) s x##12 y##12 z
-#define BE_PP_LIST3_13(x,y,z,s)     BE_PP_LIST3_12(x,y,z,s) s x##13 y##13 z
-#define BE_PP_LIST3_14(x,y,z,s)     BE_PP_LIST3_13(x,y,z,s) s x##14 y##14 z
-#define BE_PP_LIST3_15(x,y,z,s)     BE_PP_LIST3_14(x,y,z,s) s x##15 y##15 z
-#define BE_PP_LIST3_16(x,y,z,s)     BE_PP_LIST3_15(x,y,z,s) s x##16 y##16 z
+#define BE_PP_LIST3_0(x,y,z)   
+#define BE_PP_LIST3_1(x,y,z)      x##1 y##1 z
+#define BE_PP_LIST3_2(x,y,z)      BE_PP_LIST3_1(x,y,z) , x##2 y##2 z
+#define BE_PP_LIST3_3(x,y,z)      BE_PP_LIST3_2(x,y,z) , x##3 y##3 z
+#define BE_PP_LIST3_4(x,y,z)      BE_PP_LIST3_3(x,y,z) , x##4 y##4 z
+#define BE_PP_LIST3_5(x,y,z)      BE_PP_LIST3_4(x,y,z) , x##5 y##5 z
+#define BE_PP_LIST3_6(x,y,z)      BE_PP_LIST3_5(x,y,z) , x##6 y##6 z
+#define BE_PP_LIST3_7(x,y,z)      BE_PP_LIST3_6(x,y,z) , x##7 y##7 z
+#define BE_PP_LIST3_8(x,y,z)      BE_PP_LIST3_7(x,y,z) , x##8 y##8 z
+#define BE_PP_LIST3_9(x,y,z)      BE_PP_LIST3_8(x,y,z) , x##9 y##9 z
+#define BE_PP_LIST3_10(x,y,z)     BE_PP_LIST3_9(x,y,z) , x##10 y##10 z
+#define BE_PP_LIST3_11(x,y,z)     BE_PP_LIST3_10(x,y,z) , x##11 y##11 z
+#define BE_PP_LIST3_12(x,y,z)     BE_PP_LIST3_11(x,y,z) , x##12 y##12 z
+#define BE_PP_LIST3_13(x,y,z)     BE_PP_LIST3_12(x,y,z) , x##13 y##13 z
+#define BE_PP_LIST3_14(x,y,z)     BE_PP_LIST3_13(x,y,z) , x##14 y##14 z
+#define BE_PP_LIST3_15(x,y,z)     BE_PP_LIST3_14(x,y,z) , x##15 y##15 z
+#define BE_PP_LIST3_16(x,y,z)     BE_PP_LIST3_15(x,y,z) , x##16 y##16 z
  
-#define BE_LIST3(count,s,x,y,z)     BE_CONCAT(BE_PP_LIST3_, count)(x,y,z,s)
+#define BE_LIST3(count,x,y,z)     BE_CONCAT(BE_PP_LIST3_, count)(x,y,z)
 
-#define BE_PP_LIST4_0(x,y,z,u,s)    
-#define BE_PP_LIST4_1(x,y,z,u,s)    x##1 y##1 z##1 u
-#define BE_PP_LIST4_2(x,y,z,u,s)    BE_PP_LIST4_1(x,y,z,u,s) s x##2 y##2 z##2 u
-#define BE_PP_LIST4_3(x,y,z,u,s)    BE_PP_LIST4_2(x,y,z,u,s) s x##3 y##3 z##3 u
-#define BE_PP_LIST4_4(x,y,z,u,s)    BE_PP_LIST4_3(x,y,z,u,s) s x##4 y##4 z##4 u
-#define BE_PP_LIST4_5(x,y,z,u,s)    BE_PP_LIST4_4(x,y,z,u,s) s x##5 y##5 z##5 u
-#define BE_PP_LIST4_6(x,y,z,u,s)    BE_PP_LIST4_5(x,y,z,u,s) s x##6 y##6 z##6 u
-#define BE_PP_LIST4_7(x,y,z,u,s)    BE_PP_LIST4_6(x,y,z,u,s) s x##7 y##7 z##7 u
-#define BE_PP_LIST4_8(x,y,z,u,s)    BE_PP_LIST4_7(x,y,z,u,s) s x##8 y##8 z##8 u
-#define BE_PP_LIST4_9(x,y,z,u,s)    BE_PP_LIST4_8(x,y,z,u,s) s x##9 y##9 z##9 u
-#define BE_PP_LIST4_10(x,y,z,u,s)   BE_PP_LIST4_9(x,y,z,u,s) s x##10 y##10 z##10 u
-#define BE_PP_LIST4_11(x,y,z,u,s)   BE_PP_LIST4_10(x,y,z,u,s) s x##11 y##11 z##11 u
-#define BE_PP_LIST4_12(x,y,z,u,s)   BE_PP_LIST4_11(x,y,z,u,s) s x##12 y##12 z##12 u
-#define BE_PP_LIST4_13(x,y,z,u,s)   BE_PP_LIST4_12(x,y,z,u,s) s x##13 y##13 z##13 u
-#define BE_PP_LIST4_14(x,y,z,u,s)   BE_PP_LIST4_13(x,y,z,u,s) s x##14 y##14 z##14 u
-#define BE_PP_LIST4_15(x,y,z,u,s)   BE_PP_LIST4_14(x,y,z,u,s) s x##15 y##15 z##15 u
-#define BE_PP_LIST4_16(x,y,z,u,s)   BE_PP_LIST4_15(x,y,z,u,s) s x##16 y##16 z##16 u
+#define BE_PP_LIST4_0(x,y,z,u)    
+#define BE_PP_LIST4_1(x,y,z,u)    x##1 y##1 z##1 u
+#define BE_PP_LIST4_2(x,y,z,u)    BE_PP_LIST4_1(x,y,z,u) , x##2 y##2 z##2 u
+#define BE_PP_LIST4_3(x,y,z,u)    BE_PP_LIST4_2(x,y,z,u) , x##3 y##3 z##3 u
+#define BE_PP_LIST4_4(x,y,z,u)    BE_PP_LIST4_3(x,y,z,u) , x##4 y##4 z##4 u
+#define BE_PP_LIST4_5(x,y,z,u)    BE_PP_LIST4_4(x,y,z,u) , x##5 y##5 z##5 u
+#define BE_PP_LIST4_6(x,y,z,u)    BE_PP_LIST4_5(x,y,z,u) , x##6 y##6 z##6 u
+#define BE_PP_LIST4_7(x,y,z,u)    BE_PP_LIST4_6(x,y,z,u) , x##7 y##7 z##7 u
+#define BE_PP_LIST4_8(x,y,z,u)    BE_PP_LIST4_7(x,y,z,u) , x##8 y##8 z##8 u
+#define BE_PP_LIST4_9(x,y,z,u)    BE_PP_LIST4_8(x,y,z,u) , x##9 y##9 z##9 u
+#define BE_PP_LIST4_10(x,y,z,u)   BE_PP_LIST4_9(x,y,z,u) , x##10 y##10 z##10 u
+#define BE_PP_LIST4_11(x,y,z,u)   BE_PP_LIST4_10(x,y,z,u) , x##11 y##11 z##11 u
+#define BE_PP_LIST4_12(x,y,z,u)   BE_PP_LIST4_11(x,y,z,u) , x##12 y##12 z##12 u
+#define BE_PP_LIST4_13(x,y,z,u)   BE_PP_LIST4_12(x,y,z,u) , x##13 y##13 z##13 u
+#define BE_PP_LIST4_14(x,y,z,u)   BE_PP_LIST4_13(x,y,z,u) , x##14 y##14 z##14 u
+#define BE_PP_LIST4_15(x,y,z,u)   BE_PP_LIST4_14(x,y,z,u) , x##15 y##15 z##15 u
+#define BE_PP_LIST4_16(x,y,z,u)   BE_PP_LIST4_15(x,y,z,u) , x##16 y##16 z##16 u
  
-#define BE_LIST4(count,s,x,y,z,u)     BE_CONCAT(BE_PP_LIST4_, count)(x,y,z,u,s)
+#define BE_LIST4(count,x,y,z,u)     BE_CONCAT(BE_PP_LIST4_, count)(x,y,z,u)
 
 
 
-#define BE_PP_LIST5_0(x,y,z,u,v,s)    
-#define BE_PP_LIST5_1(x,y,z,u,v,s)    x##1 y##1 z##1 u##1 v
-#define BE_PP_LIST5_2(x,y,z,u,v,s)    BE_PP_LIST5_1(x,y,z,u,v,s) s x##2 y##2 z##2 u##2 v
-#define BE_PP_LIST5_3(x,y,z,u,v,s)    BE_PP_LIST5_2(x,y,z,u,v,s) s x##3 y##3 z##3 u##3 v
-#define BE_PP_LIST5_4(x,y,z,u,v,s)    BE_PP_LIST5_3(x,y,z,u,v,s) s x##4 y##4 z##4 u##4 v
-#define BE_PP_LIST5_5(x,y,z,u,v,s)    BE_PP_LIST5_4(x,y,z,u,v,s) s x##5 y##5 z##5 u##5 v
-#define BE_PP_LIST5_6(x,y,z,u,v,s)    BE_PP_LIST5_5(x,y,z,u,v,s) s x##6 y##6 z##6 u##6 v
-#define BE_PP_LIST5_7(x,y,z,u,v,s)    BE_PP_LIST5_6(x,y,z,u,v,s) s x##7 y##7 z##7 u##7 v
-#define BE_PP_LIST5_8(x,y,z,u,v,s)    BE_PP_LIST5_7(x,y,z,u,v,s) s x##8 y##8 z##8 u##8 v
-#define BE_PP_LIST5_9(x,y,z,u,v,s)    BE_PP_LIST5_8(x,y,z,u,v,s) s x##9 y##9 z##9 u##9 v
-#define BE_PP_LIST5_10(x,y,z,u,v,s)   BE_PP_LIST5_9(x,y,z,u,v,s) s x##10 y##10 z##10 u##10 v
-#define BE_PP_LIST5_11(x,y,z,u,v,s)   BE_PP_LIST5_10(x,y,z,u,v,s) s x##11 y##11 z##11 u##11 v
-#define BE_PP_LIST5_12(x,y,z,u,v,s)   BE_PP_LIST5_11(x,y,z,u,v,s) s x##12 y##12 z##12 u##12 v
-#define BE_PP_LIST5_13(x,y,z,u,v,s)   BE_PP_LIST5_12(x,y,z,u,v,s) s x##13 y##13 z##13 u##13 v
-#define BE_PP_LIST5_14(x,y,z,u,v,s)   BE_PP_LIST5_13(x,y,z,u,v,s) s x##14 y##14 z##14 u##14 v
-#define BE_PP_LIST5_15(x,y,z,u,v,s)   BE_PP_LIST5_14(x,y,z,u,v,s) s x##15 y##15 z##15 u##15 v
-#define BE_PP_LIST5_16(x,y,z,u,v,s)   BE_PP_LIST5_15(x,y,z,u,v,s) s x##16 y##16 z##16 u##16 v
+#define BE_PP_LIST5_0(x,y,z,u,v)    
+#define BE_PP_LIST5_1(x,y,z,u,v)    x##1 y##1 z##1 u##1 v
+#define BE_PP_LIST5_2(x,y,z,u,v)    BE_PP_LIST5_1(x,y,z,u,v)  x##2 y##2 z##2 u##2 v
+#define BE_PP_LIST5_3(x,y,z,u,v)    BE_PP_LIST5_2(x,y,z,u,v)  x##3 y##3 z##3 u##3 v
+#define BE_PP_LIST5_4(x,y,z,u,v)    BE_PP_LIST5_3(x,y,z,u,v)  x##4 y##4 z##4 u##4 v
+#define BE_PP_LIST5_5(x,y,z,u,v)    BE_PP_LIST5_4(x,y,z,u,v)  x##5 y##5 z##5 u##5 v
+#define BE_PP_LIST5_6(x,y,z,u,v)    BE_PP_LIST5_5(x,y,z,u,v)  x##6 y##6 z##6 u##6 v
+#define BE_PP_LIST5_7(x,y,z,u,v)    BE_PP_LIST5_6(x,y,z,u,v)  x##7 y##7 z##7 u##7 v
+#define BE_PP_LIST5_8(x,y,z,u,v)    BE_PP_LIST5_7(x,y,z,u,v)  x##8 y##8 z##8 u##8 v
+#define BE_PP_LIST5_9(x,y,z,u,v)    BE_PP_LIST5_8(x,y,z,u,v)  x##9 y##9 z##9 u##9 v
+#define BE_PP_LIST5_10(x,y,z,u,v)   BE_PP_LIST5_9(x,y,z,u,v)  x##10 y##10 z##10 u##10 v
+#define BE_PP_LIST5_11(x,y,z,u,v)   BE_PP_LIST5_10(x,y,z,u,v)  x##11 y##11 z##11 u##11 v
+#define BE_PP_LIST5_12(x,y,z,u,v)   BE_PP_LIST5_11(x,y,z,u,v)  x##12 y##12 z##12 u##12 v
+#define BE_PP_LIST5_13(x,y,z,u,v)   BE_PP_LIST5_12(x,y,z,u,v)  x##13 y##13 z##13 u##13 v
+#define BE_PP_LIST5_14(x,y,z,u,v)   BE_PP_LIST5_13(x,y,z,u,v)  x##14 y##14 z##14 u##14 v
+#define BE_PP_LIST5_15(x,y,z,u,v)   BE_PP_LIST5_14(x,y,z,u,v)  x##15 y##15 z##15 u##15 v
+#define BE_PP_LIST5_16(x,y,z,u,v)   BE_PP_LIST5_15(x,y,z,u,v)  x##16 y##16 z##16 u##16 v
  
-#define BE_LIST5(count,s,x,y,z,u,v)   BE_CONCAT(BE_PP_LIST5_, count)(x,y,z,u,v,s)
+#define BE_LIST5(count,x,y,z,u,v)   BE_CONCAT(BE_PP_LIST5_, count)(x,y,z,u,v)
 
 #define BE_FILL_0(x)                
 #define BE_FILL_1(x)                x
