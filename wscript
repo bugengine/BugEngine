@@ -40,7 +40,6 @@ def build(bld):
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
-	angelcodelib	= module.external('angelcodelib')
 
 	mak				= module.external('mak')
 
@@ -68,9 +67,8 @@ def build(bld):
 	package			= module.plugin('package',      [discworld])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
-	angelcode		= module.plugin('angelcode',    [discworld, angelcodelib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel, angelcode]
+	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel]
 	discworld.post(bld)
 
 

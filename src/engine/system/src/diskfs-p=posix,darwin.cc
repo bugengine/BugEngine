@@ -119,7 +119,9 @@ bool DiskFS::writable() const
 
 ref<IMemoryStream> DiskFS::open(const ifilename& filename, FileOpenMode mode) const
 {
-    minitl::format<ifilename::MaxFilenameLength> fullname = (m_prefix+filename).str();
+    minitl::format<ifilename::MaxFilenameLength> fullname = m_prefix.str();
+    fullname.append("/");
+    fullname.append(filename.str());
     if (mode == eReadOnly)
     {
         int file = ::open(fullname.c_str(), O_RDONLY);
