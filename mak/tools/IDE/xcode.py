@@ -23,6 +23,8 @@ class XCodeProject:
 					 ('iphone-profile', newid(), newid(), newid()),
 					 ('iphone-final', newid(), newid(), newid())])
 		self.mainGroup = newid()
+		for p in self.projects:
+			p.plist = {}
 
 	def getProject(self, d):
 		for p in self.projects:
@@ -81,10 +83,10 @@ class XCodeProject:
 		for n,d in tree.directories.items():
 			self.pbxDirTree(d, n)
 
-	def pbxFileRefTree(self, tree, path=''):
+	def pbxFileRefTree(self, p, tree, path=''):
 		w = self.file.write
 		for name,dir in tree.directories.items():
-			self.pbxFileRefTree(dir, os.path.join(path, tree.prefix))
+			self.pbxFileRefTree(p, dir, os.path.join(path, tree.prefix))
 		for file in tree.files:
 			filename = os.path.join(path, tree.prefix, file.filename)
 			sourceroot = "SOURCE_ROOT"
@@ -110,6 +112,15 @@ class XCodeProject:
 				filetype = "sourcecode.lex"
 			elif isinstance(file, mak.sources.yaccsource):
 				filetype = "sourcecode.yacc"
+			elif isinstance(file, mak.sources.deployedsource):
+				if file.filename.endswith('.plist'):
+					filetype = "text.plist.xml"
+					for name, _1, _2, _3 in self.buildSettingsId[1]:
+						platform, variant = name.split('-')
+						if platform in file.platforms:
+							p.plist[name] = filename
+				else:
+					filetype = "text"
 			else:
 				filetype = "text"
 			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = %s;\n\t};\n" % (file.id, filetype, os.path.split(filename)[1], filename, sourceroot))
@@ -145,7 +156,7 @@ class XCodeProject:
 				else:
 					filetype = "sourcecode.cpp.cpp"
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, filetype, os.path.split(d.masterfilename)[1], d.masterfilename))
-			self.pbxFileRefTree(d.sourceTree)
+			self.pbxFileRefTree(d, d.sourceTree)
 			if d.type in ['game', 'tool']:
 				d.phaseId.append(newid())
 				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = wrapper.application;\n\t\tincludeInIndex = 0;\n\t\tpath = \"%s.app\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
@@ -425,6 +436,8 @@ class XCodeProject:
 						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % ("bugengine_"+d.projectName))
 					else:
 						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % d.projectName)
+					if d.plist.has_key(name):
+						w("\t\t\tINFOPLIST_FILE = \"%s\";\n" % (d.plist[name]))
 					w("\t\t};\n")
 					w("\t\tname = \"%s\";\n" % name)
 					w("\t};\n")
@@ -466,7 +479,8 @@ class Project:
 		pass
 
 xcodeprojects = {
-	'xcode': ('Xcode 3.1', 45),
+	'xcode3': ('Xcode 3.X', 45),
+	'xcode4': ('Xcode 4.X', 46),
 }
 
 def hasObjectiveC(sourcetree):
@@ -515,16 +529,17 @@ solutions = {}
 def create_xcode_project(t):
 	toolName = t.features[0]
 	appname = getattr(Context.g_module, 'APPNAME', 'noname')
+	projectName = appname+'.'+toolName+'.xcodeproj/'
 	if not toolName in solutions:
-		outname = 'project.pbxproj'
+		outname = projectName+'project.pbxproj'
 		solution = t.create_task('generateProject')
 		solution.env = t.env.derive()
 		outnode = t.path.find_or_declare(outname)
 		solution.set_outputs(outnode)
-		t.bld.install_files(appname+'.'+toolName+'.xcodeproj/', outnode)
+		t.bld.install_files(projectName, outnode)
 		solution.name = appname
 		solution.version = xcodeprojects[toolName]
-		solution.install_path = t.path.srcpath()+'/'+appname+'.'+toolName+'.xcodeproj/'
+		solution.install_path = t.path.srcpath()+'/'
 		solution.projects = []
 		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
 		solution.env['XCODE_PROJECT_DEPENDS'] = []
@@ -549,12 +564,12 @@ def create_xcode_project(t):
 			i.depends.append(t)
 			t.depends.remove(i)
 	if t.usemaster:
-		filename = (hasObjectiveC(t.sourcetree) and "master-%s.mm" or "master-%s.cc") % t.name
+		filename = projectName + (hasObjectiveC(t.sourcetree) and "master-%s.mm" or "master-%s.cc") % t.name
 		node = t.path.find_or_declare(filename)
 		solution.set_outputs(node)
-		t.bld.install_files(appname+'.'+toolName+'.xcodeproj/', node)
+		t.bld.install_files(projectName, node)
 		project.masterfile = node
-		project.masterfilename = os.path.join(appname+'.'+toolName+'.xcodeproj/', filename)
+		project.masterfilename = filename
 	solution.projects.append(project)
 	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
 

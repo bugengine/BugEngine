@@ -326,6 +326,8 @@ class module:
 						result.addFile(sources.generatedcppsource(filename+'.cc', fileplatforms, filearchs, True, self.usepch))
 					else:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
+				elif ext == '.plist':
+					result.addFile(sources.deployedsource(file, '', 'runbin', fileplatforms, filearchs, doprocess))
 		return result
 
 	def addFile( self, filename ):

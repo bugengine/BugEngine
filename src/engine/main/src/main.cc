@@ -50,7 +50,8 @@ static int __main(int argc, const char *argv[])
     BugEngine::Environment::getEnvironment().init(argc, argv);
     try
     {
-        BugEngine::Logger::root()->addListener(new LogListener("log.txt"));
+        minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
+        BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);
     }
