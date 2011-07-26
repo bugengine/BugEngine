@@ -14,8 +14,9 @@ class Renderer;
 
 class Window : public IRenderTarget
 {
-private:
+public:
     class PlatformWindow;
+private:
     scoped<PlatformWindow>  m_window;
 protected:
     void* getWindowHandle() const;
