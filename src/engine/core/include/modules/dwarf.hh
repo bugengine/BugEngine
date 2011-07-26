@@ -27,7 +27,7 @@ private:
         u64                             m_current;
         Allocator::Block<char>          m_buffer;
     public:
-        StringBuffer(size_t size, ref<const StringBuffer> next = ref<const StringBuffer>());
+        StringBuffer(size_t size, ref<const StringBuffer> next);
         ~StringBuffer();
 
         const char* store(const char* string, size_t size);

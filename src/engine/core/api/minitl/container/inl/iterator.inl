@@ -70,7 +70,7 @@ static ITERATOR advance(const ITERATOR& it, typename iterator_traits<ITERATOR>::
 }
 
 template< typename T >
-static T* advance(T* input, difference_type offset)
+static T* advance_ptr(T* input, difference_type offset)
 {
     char *ptr = reinterpret_cast<char*>(input);
     ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;
@@ -78,7 +78,7 @@ static T* advance(T* input, difference_type offset)
 }
 
 template< typename T >
-static const T* advance(const T* input, difference_type offset)
+static const T* advance_ptr(const T* input, difference_type offset)
 {
     const char *ptr = reinterpret_cast<const char*>(input);
     ptr = ptr + be_align(sizeof(T),be_alignof(T))*offset;

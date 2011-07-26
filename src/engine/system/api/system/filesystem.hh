@@ -21,6 +21,7 @@ enum FileOpenMode
 
 class be_api(SYSTEM) FileSystem : public minitl::refcountable
 {
+    BE_NOCOPY(FileSystem);
 private:
     class FileSystemMountPoint : public pointer
     {
@@ -30,7 +31,8 @@ private:
         ref<const FileSystemComponent>  m_component;
         ChildrenMap                     m_children;
     public:
-        FileSystemMountPoint(ref<const FileSystemComponent> component = ref<const FileSystemComponent>());
+        FileSystemMountPoint();
+        FileSystemMountPoint(ref<const FileSystemComponent> component);
         ~FileSystemMountPoint();
 
         weak<FileSystemMountPoint> getOrCreate(const istring& child);

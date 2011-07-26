@@ -14,6 +14,7 @@ namespace BugEngine
 
 class be_api(MOBILE) WorldScene : public Graphics::IScene
 {
+    BE_NOCOPY(WorldScene);
 private:
     ref<World>      m_world;
 public:

@@ -15,6 +15,7 @@ class be_api(SYSTEM) IResourceLoader : public minitl::refcountable
 {
     friend struct ResourceLoaders;
     friend class Resource;
+    BE_NOCOPY(IResourceLoader);
 protected:
     const weak<minitl::pointer> m_loader;
 protected:
@@ -29,6 +30,7 @@ template< typename Owner, typename R >
 class ResourceLoader : public IResourceLoader
 {
     friend struct ResourceLoaders;
+    BE_NOCOPY(ResourceLoader);
 private:
     typedef ResourceHandle (Owner::*LoadMethod)(weak<const R> r);
     typedef void (Owner::*UnloadMethod)(const ResourceHandle& resource);

@@ -12,6 +12,7 @@ namespace BugEngine { namespace Input
 
 class Keyboard : public Controller
 {
+    BE_NOCOPY(Keyboard);
 public:
     Keyboard();
     ~Keyboard();

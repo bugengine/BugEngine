@@ -29,6 +29,9 @@ public:
 
     uint2           getScreenSize() override;
     void*           getPlatformData();
+private:
+    Renderer(const Renderer&);
+    Renderer& operator=(const Renderer&);
 };
 
 }}}

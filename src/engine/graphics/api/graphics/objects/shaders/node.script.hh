@@ -16,6 +16,7 @@ namespace BugEngine { namespace Graphics { namespace Shaders
 
 class be_api(GRAPHICS) Node : public minitl::refcountable
 {
+    BE_NOCOPY(Node);
 protected:
     Node();
     ~Node();

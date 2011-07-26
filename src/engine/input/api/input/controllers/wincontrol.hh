@@ -12,6 +12,7 @@ namespace BugEngine { namespace Input
 
 class Wincontrol : public Controller
 {
+    BE_NOCOPY(Wincontrol);
 public:
     Wincontrol();
     ~Wincontrol();

@@ -23,6 +23,7 @@ struct WindowCreationFlags
 
 class Renderer::PlatformRenderer : public minitl::refcountable
 {
+    BE_NOCOPY(PlatformRenderer);
 private:
     weak<Renderer>  m_renderer;
     istring         m_windowClassName;

@@ -12,6 +12,7 @@ namespace BugEngine { namespace Graphics
 
 class be_api(GRAPHICS) IShaderBuilder
 {
+    BE_NOCOPY(IShaderBuilder);
 private:
     MemoryStream    m_stream;
     i32             m_indent;

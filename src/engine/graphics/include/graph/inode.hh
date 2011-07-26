@@ -18,6 +18,7 @@ namespace BugEngine { namespace Graphics
 
 class INode : public minitl::refcountable
 {
+    BE_NOCOPY(INode);
 protected:
     INode();
 public:

@@ -360,7 +360,7 @@ const char * DwarfModule::storeString(const char *string)
     be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
     if (!m_strings)
     {
-        m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize);
+        m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize, ref<StringBuffer>());
     }
     result = m_strings->store(string, size);
     if (!result)

@@ -46,8 +46,8 @@ typedef u8                      byte;
 #pragma warning(disable:4251)
 #pragma warning(disable:4355)   // this used in base member initialization list
 #pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#pragma warning(disable:4481)   // use of "override" extension
 #pragma warning(disable:4127)
+#pragma warning(disable:4181)   // qualifier applied to reference type; ignored
 #pragma warning(disable:4709)   // comma operator used in []
 #pragma warning(disable:4505)   // unreferenced local function has been removed
 #define BE_THREAD_LOCAL        __declspec(thread)
@@ -70,11 +70,18 @@ typedef u8                      byte;
 
 #if _MSC_VER >= 1300
 # ifndef _XBOX
-#  include <intrin.h>
+#  include <xmmintrin.h>
 # endif
 # define be_break() __debugbreak()
 #else
 # define be_break() asm  { int 3; }
+#endif
+
+#if _MSC_VER >= 1400
+# pragma warning(disable:4481)   // use of "override" extension
+#else
+# define override
+# pragma warning(disable:4702)   // unreachable code
 #endif
 
 /*****************************************************************************/

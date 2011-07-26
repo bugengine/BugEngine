@@ -21,6 +21,9 @@ public:
     ~MetaClassInfo();
 
     virtual Value get(Value& from, istring name) const override;
+private:
+    MetaClassInfo(const MetaClassInfo&);
+    MetaClassInfo& operator=(const MetaClassInfo&);
 };
 
 class be_api(RTTI) ClassInfo::MetaClassInfo : public RTTI::Namespace::MetaClassInfo
@@ -31,6 +34,9 @@ public:
     ~MetaClassInfo();
 
     virtual Value get(Value& from, istring name) const override;
+private:
+    MetaClassInfo(const MetaClassInfo&);
+    MetaClassInfo& operator=(const MetaClassInfo&);
 };
 
 }}

@@ -11,6 +11,7 @@ namespace BugEngine { namespace Audio
 
 class be_api(AUDIO) ISource : public minitl::refcountable
 {
+    BE_NOCOPY(ISource);
 protected:
     ref<ISound> m_sound;
 public:

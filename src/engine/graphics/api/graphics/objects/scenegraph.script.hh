@@ -17,6 +17,7 @@ class SceneGraphLoader;
 
 class be_api(GRAPHICS) RenderNode : public Resource
 {
+    BE_NOCOPY(RenderNode);
 protected:
     RenderNode();
     ~RenderNode();
@@ -26,6 +27,7 @@ be_tag(ResourceLoaders())
 class be_api(GRAPHICS) RenderScene : public RenderNode
 {
     friend class SceneGraphLoader;
+    BE_NOCOPY(RenderScene);
 private:
     ref<IScene>         m_scene;
     ref<RenderTarget>   m_rendertarget;
@@ -38,6 +40,7 @@ be_tag(ResourceLoaders())
 class be_api(GRAPHICS) RenderSequence : public RenderNode
 {
     friend class SceneGraphLoader;
+    BE_NOCOPY(RenderSequence);
 private:
     minitl::vector< ref<const RenderNode> > m_nodes;
 published:
