@@ -14,7 +14,11 @@ __int64  __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest, __int64 E
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
-#pragma intrinsic(_InterlockedCompareExchange64)
+#if _MSC_VER > 1400
+# pragma intrinsic(_InterlockedCompareExchange64)
+#else
+# define _InterlockedCompareExchange64 InterlockedCompareExchange64
+#endif
 }
 
 #include    <core/debug/assert.hh>

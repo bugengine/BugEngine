@@ -82,6 +82,7 @@ typedef u8                      byte;
 #else
 # define override
 # pragma warning(disable:4702)   // unreachable code
+# pragma warning(disable:4714)   // function marked as __forceinline but not inlined
 #endif
 
 /*****************************************************************************/

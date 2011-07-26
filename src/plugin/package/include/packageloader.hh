@@ -12,6 +12,7 @@ namespace BugEngine { namespace Plugin { namespace PackageManager
 
 class PackageLoader : public minitl::refcountable
 {
+    BE_NOCOPY(PackageLoader);
 private:
     weak<const FileSystem> const    m_filesystem;
 public:

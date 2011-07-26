@@ -13,6 +13,7 @@ namespace BugEngine { namespace Graphics { namespace DirectX9
 
 class Dx9Window : public Windowing::Window
 {
+    BE_NOCOPY(Dx9Window);
 private:
     LPDIRECT3DSWAPCHAIN9 m_swapChain;
 private:

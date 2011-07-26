@@ -5,6 +5,7 @@
 #define BE_WINDOWING_RENDERER_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/irenderer.hh>
+#include    <windowing/window.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
@@ -15,6 +16,7 @@ struct WindowCreationFlags;
 class Renderer : public IRenderer
 {
     friend class Window;
+    friend class Window::PlatformWindow;
 private:
     class PlatformRenderer;
     friend class PlatformRenderer;
