@@ -11,6 +11,12 @@
 namespace BugEngine
 {
 
+FileSystem::FileSystemMountPoint::FileSystemMountPoint()
+:   m_component()
+,   m_children(gameArena())
+{
+}
+
 FileSystem::FileSystemMountPoint::FileSystemMountPoint(ref<const FileSystemComponent> component)
 :   m_component(component)
 ,   m_children(gameArena())
@@ -74,7 +80,7 @@ bool FileSystem::FileSystemMountPoint::empty() const
 //-----------------------------------------------------------------------------
 
 FileSystem::FileSystem(void)
-: m_root(scoped<FileSystemMountPoint>::create(gameArena()))
+: m_root(scoped<FileSystemMountPoint>::create(gameArena(), ref<const FileSystemComponent>()))
 {
 }
 

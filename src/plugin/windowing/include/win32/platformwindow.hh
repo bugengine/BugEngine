@@ -9,10 +9,12 @@
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
+class Window;
 
 class Window::PlatformWindow : public minitl::refcountable
 {
     friend class Window;
+    BE_NOCOPY(PlatformWindow);
 private:
     weak<const Renderer>    m_renderer;
     HWND                    m_window;

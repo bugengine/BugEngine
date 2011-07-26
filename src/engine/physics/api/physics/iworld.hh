@@ -11,6 +11,7 @@ namespace BugEngine { namespace Physics
 
 class be_api(PHYSICS) IWorld : public minitl::refcountable
 {
+    BE_NOCOPY(IWorld);
 public:
     IWorld();
     ~IWorld();

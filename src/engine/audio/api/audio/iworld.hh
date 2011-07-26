@@ -13,6 +13,7 @@ namespace BugEngine { namespace Audio
 
 class be_api(AUDIO) IWorld : public minitl::refcountable
 {
+    BE_NOCOPY(IWorld);
 public:
     IWorld();
     ~IWorld();

@@ -16,6 +16,7 @@ namespace BugEngine
 
 class Application::SceneResource : public minitl::refcountable
 {
+    BE_NOCOPY(SceneResource);
 private:
     ITask::CallbackConnection                       m_startSceneUpdate;
     ITask::CallbackConnection                       m_endSceneUpdate;

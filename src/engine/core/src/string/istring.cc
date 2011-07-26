@@ -345,11 +345,11 @@ istring igenericnamespace::pop_back()
 
 istring igenericnamespace::pop_front()
 {
-    istring i = m_namespace[0];
+    istring backup = m_namespace[0];
     for (size_t i = 1; i < m_size; ++i)
         m_namespace[i-1] = m_namespace[i];
     m_size--;
-    return i;
+    return backup;
 }
 
 bool igenericnamespace::operator==(const igenericnamespace& other) const

@@ -159,16 +159,17 @@ class VCproj:
 		self.output.write('</VisualStudioProject>\n')
 
 	def addCppFile(self, path, filename, source, tabs, usepch):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+						self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('>\n')
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCLCompilerTool"\n')
 				if self.pchname and source.usepch:
@@ -183,38 +184,74 @@ class VCproj:
 				self.output.write(tabs+'	</FileConfiguration>\n')
 		self.output.write(tabs+'</File>\n')
 
+	def addGeneratedCppFile(self, path, filename, source, tabs, usepch):
+		for thisplatform in self.platforms:
+			self.output.write(tabs+'<Filter Name="%s">\n' % thisplatform)
+			for thisconfig in self.configs:
+				self.output.write(tabs+'<Filter Name="%s">\n' % thisconfig)
+				self.output.write(tabs+'<File RelativePath="$(SolutionDir).build\\%s\\%s\\%s\\$(ProjectName)\\%s">\n' % (self.versionName, thisplatform, thisconfig, filename))
+				for platform in self.platforms:
+					for config in self.configs:
+						self.output.write(tabs+'	<FileConfiguration\n')
+						self.output.write(tabs+'		Name="%s|%s"' % (config,platform))
+						if platform != thisplatform or config != thisconfig:
+							self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
+						elif not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
+							self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
+						else:
+							if self.archs[platform] not in source.archs:
+								self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
+						self.output.write('>\n')
+						self.output.write(tabs+'	<Tool\n')
+						self.output.write(tabs+'		Name="VCCLCompilerTool"\n')
+						if self.pchname and source.usepch:
+							if os.path.join(path, source.filename) == self.pchname:
+								self.output.write(tabs+'		UsePrecompiledHeader="1"\n')
+							else:
+								self.output.write(tabs+'		UsePrecompiledHeader="2"\n')
+						else:
+							self.output.write(tabs+'		UsePrecompiledHeader="0"\n')
+						self.output.write(tabs+'		ObjectFile="$(IntDir)%s\\"\n' % path)
+						self.output.write(tabs+'	/>\n')
+						self.output.write(tabs+'	</FileConfiguration>\n')
+				self.output.write(tabs+'</File>\n')
+				self.output.write(tabs+'</Filter>\n')
+			self.output.write(tabs+'</Filter>\n')
+
 	def addRcFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s" />\n' % (config,platform))
+						self.output.write("\n"+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('/>\n')
 		self.output.write(tabs+'</File>\n')
 
 
 	def addHFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s" />\n'%filename)
 
 	def addBisonFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"\n' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+						self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('>\n')
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
 				self.output.write(tabs+'		Description="bison &quot;$(InputPath)&quot;"\n')
-				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; bison.exe -o&quot;%s&quot; -d --no-lines &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, "..\\..\\"+filename))
 				self.output.write(tabs+'		Outputs="&quot;%s&quot;;&quot;%s&quot;"\n' % ('$(IntDir)'+source.generatedcpp, '$(IntDir)'+source.generatedh))
 				self.output.write(tabs+'	/>\n')
 				self.output.write(tabs+'	</FileConfiguration>\n')
@@ -222,20 +259,21 @@ class VCproj:
 
 
 	def addDataFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"\n' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+						self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('>\n')
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
 				self.output.write(tabs+'		Description="datagen &quot;$(InputPath)&quot;"\n')
-				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -p &quot;%s&quot; -D $(SolutionDir)mak/macros_ignore -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], self.pchstop, os.path.split('$(IntDir)'+source.generatedcpp)[0], filename))
+				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; python.exe $(SolutionDir)mak/ddf.py -p &quot;%s&quot; -D $(SolutionDir)mak/macros_ignore -o &quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], self.pchstop, os.path.split('$(IntDir)'+source.generatedcpp)[0], "..\\..\\"+filename))
 				self.output.write(tabs+'		Outputs="&quot;%s&quot;"\n' % ('$(IntDir)'+source.generatedcpp))
 				self.output.write(tabs+'		AdditionalDependencies="&quot;$(SolutionDir)/mak/rtti.py;$(SolutionDir)/mak/ddf.py&quot;"\n')
 				self.output.write(tabs+'	/>\n')
@@ -244,20 +282,21 @@ class VCproj:
 
 
 	def addFlexFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+						self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('>\n')
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
 				self.output.write(tabs+'		Description="flex &quot;$(InputPath)&quot;"\n')
-				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; flex.exe -o&quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, filename))
+				self.output.write(tabs+'		CommandLine="set PATH=&quot;$(SolutionDir)mak/win32/bin&quot;;%%PATH%% &amp;&amp; (if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; flex.exe -o&quot;%s&quot; &quot;$(ProjectDir)%s&quot;"\n' % (os.path.split('$(IntDir)'+source.generatedcpp)[0], os.path.split('$(IntDir)'+source.generatedcpp)[0], '$(IntDir)'+source.generatedcpp, "..\\..\\"+filename))
 				self.output.write(tabs+'		Outputs="&quot;%s&quot;"\n' % ('$(IntDir)'+source.generatedcpp))
 				self.output.write(tabs+'	/>\n')
 				self.output.write(tabs+'	</FileConfiguration>\n')
@@ -265,28 +304,29 @@ class VCproj:
 
 
 	def addDeployedFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s">\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s">\n'%filename)
 		outputpath = os.path.join('$(OutDir)'+getFileDeployPath(source.type), source.outdir)
 		for platform in self.platforms:
 			for config in self.configs:
 				self.output.write(tabs+'	<FileConfiguration\n')
+				self.output.write(tabs+'		Name="%s|%s"' % (config,platform))
 				if not (set(mak.allplatforms[VCproj.vcplatforms[platform]]) & set(source.platforms)) or not source.process:
-					self.output.write(tabs+'		ExcludedFromBuild="true"\n')
+					self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
 				else:
 					if self.archs[platform] not in source.archs:
-						self.output.write(tabs+'		ExcludedFromBuild="true"\n')
-				self.output.write(tabs+'		Name="%s|%s">\n' % (config,platform))
+						self.output.write('\n'+tabs+'		ExcludedFromBuild="TRUE"')
+				self.output.write('>\n')
 				self.output.write(tabs+'	<Tool\n')
 				self.output.write(tabs+'		Name="VCCustomBuildTool"\n')
 				self.output.write(tabs+'		Description="Deploying &quot;$(InputPath)&quot; => &quot;%s\\$(InputFileName)&quot;..."\n' % outputpath)
-				self.output.write(tabs+'		CommandLine="(if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; copy &quot;%s&quot; &quot;%s&quot; /y"\n' % (outputpath, outputpath, filename, os.path.join(outputpath,source.filename)))
+				self.output.write(tabs+'		CommandLine="(if not exist &quot;%s&quot; mkdir &quot;%s&quot;) &amp;&amp; copy &quot;%s&quot; &quot;%s&quot; /y"\n' % (outputpath, outputpath, "..\\..\\"+filename, os.path.join(outputpath,source.filename)))
 				self.output.write(tabs+'		Outputs="&quot;%s&quot;"\n' % os.path.join(outputpath,source.filename))
 				self.output.write(tabs+'	/>\n')
 				self.output.write(tabs+'	</FileConfiguration>\n')
 		self.output.write(tabs+'</File>\n')
 
 	def addDummyFile(self, path, filename, source, tabs):
-		self.output.write(tabs+'<File RelativePath="%s" />\n' % filename)
+		self.output.write(tabs+'<File RelativePath="..\\..\\%s" />\n'%filename)
 
 	def addFiles(self, path, directory, tabs):
 		for subname,subdir in directory.directories.items():
@@ -294,13 +334,10 @@ class VCproj:
 			self.addFiles(os.path.join(path, subdir.prefix), subdir, tabs+'	')
 			self.output.write(tabs+'</Filter>\n')
 		for source in directory.files:
-			if not source.generated():
-				filename = os.path.join('..', '..', path, source.filename)
-			else:
-				filename = os.path.join('$(IntDir)', path, source.filename)
+			filename = os.path.join(path, source.filename)
 			if isinstance(source, mak.sources.hsource):
 				self.addHFile(path, filename, source, tabs)
-			elif isinstance(source, mak.sources.cppsource):
+			elif isinstance(source, mak.sources.cppsource) and not isinstance(source, mak.sources.generatedcppsource):
 				self.addCppFile(path, filename, source, tabs, source.usepch)
 			elif isinstance(source, mak.sources.rcsource):
 				self.addRcFile(path, filename, source, tabs)
@@ -315,7 +352,20 @@ class VCproj:
 			elif isinstance(source, mak.sources.dummysource):
 				self.addDummyFile(path, filename, source, tabs)
 
+	def addGeneratedFiles(self, path, directory, tabs):
+		for subname,subdir in directory.directories.items():
+			self.output.write(tabs+'<Filter Name="%s">\n' % subname)
+			self.addGeneratedFiles(os.path.join(path, subdir.prefix), subdir, tabs+'	')
+			self.output.write(tabs+'</Filter>\n')
+		for source in directory.files:
+			filename = os.path.join(path, source.filename)
+			if isinstance(source, mak.sources.generatedcppsource):
+				self.addGeneratedCppFile(path, filename, source, tabs, source.usepch)
+
 	def addDirectory(self, sources):
 		self.output.write('	<Files>\n')
+		self.output.write('		<Filter Name="generated">\n')
+		self.addGeneratedFiles(sources.prefix, sources, '			')
+		self.output.write('		</Filter>\n')
 		self.addFiles(sources.prefix, sources, '		')
 		self.output.write('	</Files>\n')

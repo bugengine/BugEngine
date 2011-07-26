@@ -18,7 +18,7 @@ private:
 private:
     void findToken() const;
 public:
-    inline format(const char *format);
+    inline format(const char *formatstr);
     inline ~format();
 
     inline operator const char* () const;
@@ -31,9 +31,9 @@ public:
 
 
 template< u16 size >
-format<size>::format(const char *format)
+format<size>::format(const char *formatstr)
 {
-    strncpy(m_buffer, format, size);
+    strncpy(m_buffer, formatstr, size);
     m_buffer[size-1] = 0;
     m_firstFormat = m_buffer;
     findToken();

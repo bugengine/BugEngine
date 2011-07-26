@@ -12,6 +12,7 @@ namespace BugEngine { namespace Input
 
 class Gamepad : public Controller
 {
+    BE_NOCOPY(Gamepad);
 public:
     Gamepad();
     ~Gamepad();

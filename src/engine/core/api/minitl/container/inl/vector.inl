@@ -22,7 +22,7 @@ public:
     typedef typename POLICY::reference                  reference;
     typedef typename POLICY::size_type                  size_type;
     typedef typename POLICY::difference_type            difference_type;
-private:
+public:
     const vector<T>*            m_owner;
     typename POLICY::pointer    m_iterator;
 private:
@@ -322,7 +322,7 @@ void                                                vector<T>::push_back(const_r
 {
     reserve(size() + 1);
     new((void*)m_end) T(r);
-    m_end = advance(m_end, 1);
+    m_end = advance_ptr(m_end, 1);
 }
 
 template< typename T >
@@ -334,7 +334,7 @@ void                                                vector<T>::push_back(ITERATO
     while (first != last)
     {
         new((void*)m_end) T(*first);
-        m_end = advance(m_end, 1);
+        m_end = advance_ptr(m_end, 1);
         ++first;
     }
 }
@@ -354,13 +354,13 @@ typename vector<T>::iterator                 vector<T>::erase(iterator first, it
     be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end, return first);
     be_assert_recover(first.m_iterator <= last.m_iterator,"first %p is not before last %p" | first.m_iterator | last.m_iterator, return first);
 
-    for (pointer t = first.m_iterator; t != last.m_iterator; t = advance(t, 1))
+    for (pointer i = first.m_iterator; i != last.m_iterator; i = advance_ptr(i, 1))
     {
-        t->~T();
+        i->~T();
     }
     pointer t = first.m_iterator;
     pointer t2 = last.m_iterator;
-    for ( ; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
+    for ( ; t2 != m_end; t = advance(t, 1), t2 = advance_ptr(t2, 1))
     {
         new((void*)t) T(*t2);
         t2->~T();
@@ -381,7 +381,7 @@ template< typename T >
 typename vector<T>::reference                vector<T>::back()
 {
     be_assert(!empty(), "getting back of empty vector");
-    return *advance(m_end, -1);
+    return *advance_ptr(m_end, -1);
 }
 
 template< typename T >
@@ -406,14 +406,14 @@ void                                                vector<T>::resize(size_type 
     if (size > s)
     {
         reserve(size);
-        pointer newend = advance(m_memory.data(), size);
+        pointer newend = advance_ptr(m_memory.data(), size);
         for (pointer t = m_end; t != newend; ++t)
             new((void*)t) T;
         m_end = newend;
     }
     else
     {
-        pointer newend = advance(m_memory.data(), size);
+        pointer newend = advance_ptr(m_memory.data(), size);
         for (pointer t = newend; t != m_end; ++t)
             t->~T();
         m_end = newend;
@@ -445,14 +445,14 @@ void                                                vector<T>::reserve(size_type
         size++;
         BugEngine::Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
-        for (pointer t2 = m_memory; t2 != m_end; t = advance(t, 1), t2 = advance(t2, 1))
+        for (pointer t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
             new((void*)t) T(*t2);
             t2->~T();
         }
         m_memory.swap(block);
         m_end = t;
-        m_capacity = advance(m_memory.data(), size);
+        m_capacity = advance_ptr(m_memory.data(), size);
     }
 }
 

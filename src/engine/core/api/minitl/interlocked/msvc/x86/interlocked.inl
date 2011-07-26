@@ -4,11 +4,18 @@
 #ifndef BE_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
 #define BE_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
 /*****************************************************************************/
-#include    <intrin.h>
+
+extern "C"
+{
+LONG  __cdecl _InterlockedCompareExchange(LONG volatile* Dest, LONG Exchange, LONG Comp);
+LONG  __cdecl _InterlockedExchange(LONG volatile* Target, LONG Value);
+LONG  __cdecl _InterlockedExchangeAdd(LONG volatile* Addend, LONG Value);
+__int64  __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest, __int64 Exchange, __int64 Comp);
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedCompareExchange64)
+}
 
 #include    <core/debug/assert.hh>
 
@@ -99,6 +106,28 @@ struct InterlockedType<4>
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong) == condition.asLongLong;
+    /*    bool result;
+        _asm
+        {
+            mov         edi,ebp
+            push        ebx
+            mov         ecx, condition
+            mov         eax, [ecx]
+            mov         edx, [ecx+4]
+            mov         esi, p
+            mov         ebx, eax
+            inc         ebx
+            mov         ecx, v
+            // lock        cmpxch8b esi;
+            _emit 0xF0
+            _emit 0x0F
+            _emit 0xC7
+            _emit 0x0E
+            setz        [result];
+            mov         ebp, edi
+            pop         ebx;
+        }
+        return result;*/
     }
 };
 template<>

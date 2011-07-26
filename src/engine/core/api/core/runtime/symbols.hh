@@ -61,10 +61,14 @@ public:
         SymbolInformations() : type(None), filename(""), offset(0), size(0) { }
     };
 
+    SymbolResolver();
     virtual ~SymbolResolver();
     bool resolve(Callstack::Address& address, Symbol& symbol) const;
 
     static ref<const SymbolResolver> loadSymbols(const SymbolInformations& infos, ref<const SymbolResolver> next);
+private:
+    SymbolResolver(const SymbolResolver&);
+    SymbolResolver& operator=(const SymbolResolver&);
 };
 
 }}

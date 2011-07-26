@@ -140,7 +140,11 @@ be_api(CORE) Allocator& inputArena();
 
 #ifdef _MSC_VER
 # define    malloca    _alloca
-# define    freea      _freea
+# if _MSC_VER >= 1400
+#  define    freea      _freea
+# else
+#  define    freea(p)
+# endif
 #else
 # if !defined(BE_PLATFORM_MACOS) && !defined(BE_PLATFORM_BSD)
 #  include <malloc.h>

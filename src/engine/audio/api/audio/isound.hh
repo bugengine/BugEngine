@@ -15,6 +15,7 @@ class IWorld;
 class be_api(AUDIO) ISound : public minitl::refcountable
 {
     friend class ISource;
+    BE_NOCOPY(ISound);
 private:
     weak<IWorld>        m_owner;
     ref<IMemoryStream>  m_soundFile;

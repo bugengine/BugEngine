@@ -15,6 +15,10 @@
 namespace BugEngine { namespace Runtime
 {
 
+SymbolResolver::SymbolResolver()
+{
+}
+
 SymbolResolver::~SymbolResolver()
 {
 }

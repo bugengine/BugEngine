@@ -16,6 +16,7 @@ class IMemoryStream;
 class be_api(SYSTEM) FileSystemComponent : public minitl::refcountable
 {
     friend class FileSystem;
+    BE_NOCOPY(FileSystemComponent);
 public:
     ~FileSystemComponent();
 protected:

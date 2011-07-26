@@ -4,9 +4,6 @@
 #include    <core/stdafx.h>
 
 #include    <core/runtime/callstack.hh>
-#ifdef BE_COMPILER_MSVC
-# include <intrin.h>
-#endif
 
 namespace BugEngine { namespace Runtime
 {

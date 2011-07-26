@@ -28,6 +28,7 @@
 #endif
 #define     BE_PROJECT          BE_STRINGIZE(BE_PROJECTCATEGORY) "." BE_STRINGIZE(BE_PROJECTNAME)
 #define     BE_HERE             BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
+#define     BE_NOCOPY(x)        private: x(const x&); x& operator=(const x&);
 
 #include    <core/compilers.hh>
 #include    <core/platforms.hh>

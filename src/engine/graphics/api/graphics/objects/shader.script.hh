@@ -23,6 +23,7 @@ class Param;
 
 class be_api(GRAPHICS) Shader : public Resource
 {
+    BE_NOCOPY(Shader);
 protected:
     Shader();
     ~Shader();
@@ -34,6 +35,7 @@ public:
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) VertexShader : public Shader
 {
+    BE_NOCOPY(VertexShader);
 published:
     const ref<const Shaders::Node>                      position;
     const ref<const Shaders::Node>                      diffuse;
@@ -54,6 +56,7 @@ public:
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) GeometryShader : public Shader
 {
+    BE_NOCOPY(GeometryShader);
 published:
     GeometryShader();
     ~GeometryShader();
@@ -64,6 +67,7 @@ public:
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) FragmentShader : public Shader
 {
+    BE_NOCOPY(FragmentShader);
 published:
     const ref<const Shaders::Node>  color;
     const ref<const Shaders::Node>  depth;
@@ -80,6 +84,7 @@ public:
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) ShaderProgram : public Resource
 {
+    BE_NOCOPY(ShaderProgram);
 published:
     const ref<const VertexShader>   vertex;
     const ref<const GeometryShader> geometry;

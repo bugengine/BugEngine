@@ -19,6 +19,7 @@ class be_api(SYSTEM) Resource : public minitl::refcountable
                               , public minitl::intrusive_list<Resource>::item
 {
     friend struct ResourceLoaders;
+    BE_NOCOPY(Resource);
 private:
     enum { MaxResourceCount = 4 };
     mutable minitl::pair<weak<pointer>, ResourceHandle> m_handles[MaxResourceCount];

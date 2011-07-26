@@ -27,6 +27,9 @@ public:
 
     virtual void load(weak<const Resource> resource) = 0;
     virtual void unload() = 0;
+private:
+    IGPUResource(const IGPUResource&);
+    IGPUResource& operator=(const IGPUResource&);
 };
 
 }}

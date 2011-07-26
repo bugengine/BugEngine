@@ -12,6 +12,7 @@ namespace BugEngine { namespace Graphics
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) RenderTarget : public Resource
 {
+    BE_NOCOPY(RenderTarget);
 published:
     const uint2 dimensions;
 published:
@@ -22,6 +23,7 @@ published:
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) RenderWindow : public RenderTarget
 {
+    BE_NOCOPY(RenderWindow);
 published:
     const istring title;
     const bool    fullscreen;

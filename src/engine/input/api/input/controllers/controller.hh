@@ -10,6 +10,7 @@ namespace BugEngine { namespace Input
 
 class be_api(INPUT) Controller : public minitl::refcountable
 {
+    BE_NOCOPY(Controller);
 protected:
     Controller();
     ~Controller();

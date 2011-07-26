@@ -39,6 +39,9 @@ published:
 private:
     enum CreationPolicy { DoNotCreate, Create };
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;
+
+    Namespace(const Namespace&);
+    Namespace& operator=(const Namespace&);
 };
 
 }}

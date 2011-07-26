@@ -12,6 +12,7 @@ namespace BugEngine { namespace Input
 
 class Mouse : public Controller
 {
+    BE_NOCOPY(Mouse);
 public:
     Mouse();
     ~Mouse();
