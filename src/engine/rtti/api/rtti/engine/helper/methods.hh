@@ -2,16 +2,13 @@
    see LICENSE for detail */
 
 #ifndef BE_METHOD_PARAMS
-# error don't include directly
+# error "don't include directly"
 #endif
 /*****************************************************************************/
 
 
 namespace BugEngine { namespace RTTI
 {
-
-#define BE_LPAREN   (
-#define BE_RPAREN   )
 
 template< typename T, typename R BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS, typename P) >
 struct functionhelper< T, R BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS, P) >
@@ -33,7 +30,7 @@ struct functionhelper< T, R BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS,
     {
         be_forceuse(params);
         be_forceuse(paramCount);
-        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | BE_METHOD_PARAMS+1 | paramCount, return Value());
+        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | (BE_METHOD_PARAMS+1) | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
         be_assert_recover((BE_LIST3_AND(BE_METHOD_PARAMS, be_typeid<P, >::type() <= params[BE_PP_NUM_,].type())), "invalid parameter", return Value());
         return Value((params[0].as<T&>().*method)(BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, ].as<P, >())));
@@ -44,7 +41,7 @@ struct functionhelper< T, R BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS,
     {
         be_forceuse(params);
         be_forceuse(paramCount);
-        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | BE_METHOD_PARAMS+1 | paramCount, return Value());
+        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | (BE_METHOD_PARAMS+1) | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<const T*>::type().name() | params[0].type().name(), return Value());
         be_assert_recover((BE_LIST3_AND(BE_METHOD_PARAMS, be_typeid<P, >::type() <= params[BE_PP_NUM_,].type())), "invalid parameter", return Value());
         return Value((params[0].as<const T&>().*method)(BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, ].as<P, >())));
@@ -73,7 +70,7 @@ struct procedurehelper< T BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS, P
     {
         be_forceuse(params);
         be_forceuse(paramCount);
-        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | BE_METHOD_PARAMS+1 | paramCount, return Value());
+        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | (BE_METHOD_PARAMS+1) | paramCount, return Value());
         be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T>::type().name() | params[0].type().name(), return Value());
         be_assert_recover((BE_LIST3_AND(BE_METHOD_PARAMS, be_typeid<P, >::type() <= params[BE_PP_NUM_,].type())), "invalid parameter", return Value());
         (params[0].as<T&>().*method)(BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, ].as<P, >()));
@@ -85,7 +82,7 @@ struct procedurehelper< T BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS, P
     {
         be_forceuse(params);
         be_forceuse(paramCount);
-        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | BE_METHOD_PARAMS+1 | paramCount, return Value());
+        be_assert_recover(paramCount == BE_METHOD_PARAMS+1, "expecting %d parameter; got %d" | (BE_METHOD_PARAMS+1) | paramCount, return Value());
         be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<const T*>::type().name() | params[0].type().name(), return Value());
         be_assert_recover((BE_LIST3_AND(BE_METHOD_PARAMS, be_typeid<P, >::type() <= params[BE_PP_NUM_,].type())), "invalid parameter", return Value());
         (params[0].as<const T&>().*method)(BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, ].as<P, >()));
