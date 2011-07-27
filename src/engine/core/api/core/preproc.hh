@@ -145,7 +145,7 @@
 #define BE_LIST3(count,x,y,z)     BE_CONCAT(BE_PP_LIST3_, count)(x,y,z)
 
 
-#define BE_PP_LIST3_AND_0(x,y,z)   
+#define BE_PP_LIST3_AND_0(x,y,z)      1
 #define BE_PP_LIST3_AND_1(x,y,z)      (x##1 y##1 z)
 #define BE_PP_LIST3_AND_2(x,y,z)      BE_PP_LIST3_1(x,y,z) && (x##2 y##2 z)
 #define BE_PP_LIST3_AND_3(x,y,z)      BE_PP_LIST3_2(x,y,z) && (x##3 y##3 z)
