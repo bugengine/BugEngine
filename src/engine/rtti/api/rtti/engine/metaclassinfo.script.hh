@@ -15,28 +15,24 @@ namespace RTTI
 
 class be_api(RTTI) Namespace::MetaClassInfo : public ClassInfo
 {
+    BE_NOCOPY(MetaClassInfo);
 public:
     MetaClassInfo(const inamespace& name, ref<const ClassInfo> parent);
     MetaClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 size, i32 offset);
     ~MetaClassInfo();
 
     virtual Value get(Value& from, istring name) const override;
-private:
-    MetaClassInfo(const MetaClassInfo&);
-    MetaClassInfo& operator=(const MetaClassInfo&);
 };
 
 class be_api(RTTI) ClassInfo::MetaClassInfo : public RTTI::Namespace::MetaClassInfo
 {
+    BE_NOCOPY(MetaClassInfo);
 public:
     MetaClassInfo(const inamespace& name, ref<const ClassInfo> parent);
     MetaClassInfo(const inamespace& name, ref<const ClassInfo> parent, u32 size, i32 offset);
     ~MetaClassInfo();
 
     virtual Value get(Value& from, istring name) const override;
-private:
-    MetaClassInfo(const MetaClassInfo&);
-    MetaClassInfo& operator=(const MetaClassInfo&);
 };
 
 }}

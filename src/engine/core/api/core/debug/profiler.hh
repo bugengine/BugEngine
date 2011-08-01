@@ -29,6 +29,7 @@ public:
 
 class ScopedProfiling
 {
+    BE_NOCOPY(ScopedProfiling);
 private:
     Profile&    m_profile;
 public:
@@ -41,9 +42,6 @@ public:
     {
         m_profile.stop();
     }
-private:
-    ScopedProfiling& operator=(const ScopedProfiling& other);
-    ScopedProfiling(const ScopedProfiling& other);
 };
 
 #define BE_SCOPE_PROFILE(name)      \

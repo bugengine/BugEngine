@@ -11,6 +11,7 @@ namespace BugEngine { namespace Runtime
 
 class PE : public Module
 {
+    BE_NOCOPY(PE);
 private:
     struct StringTable
     {
@@ -29,9 +30,6 @@ public:
 
     virtual Endianness endianness() const override { return Endianness_Little; }
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
-private:
-    PE(const PE&);
-    PE& operator=(const PE&);
 };
 
 }}

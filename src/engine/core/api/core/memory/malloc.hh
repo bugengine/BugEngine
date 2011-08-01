@@ -16,6 +16,7 @@ public:
     template< typename T >
     class Block
     {
+        BE_NOCOPY(Block);
     private:
         Allocator&  m_allocator;
         T*          m_data;
@@ -65,9 +66,6 @@ public:
             m_data = other.m_data;
             other.m_data = data;
         }
-    private:
-        Block(const Block& other);
-        Block& operator=(const Block& other);
     };
 protected:
     virtual void* internalAlloc(size_t size, size_t alignment) = 0;

@@ -7,21 +7,6 @@
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
-Param::Param(const istring& name, ref<const Node> value)
-    :   name(name)
-    ,   value(value)
-{
-}
-
-Param::~Param()
-{
-}
-
-
-void Param::buildSource(IShaderBuilder& /*stream*/) const
-{
-}
-
 Uniform::Uniform(const istring& name)
     :   name(name)
 {
@@ -31,7 +16,11 @@ Uniform::~Uniform()
 {
 }
 
-void Uniform::buildSource(IShaderBuilder& /*stream*/) const
+void Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+{
+}
+
+void Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
 {
 }
 

@@ -11,6 +11,7 @@ namespace BugEngine
 
 class be_api(CORE) IMemoryStream : public minitl::refcountable
 {
+    BE_NOCOPY(IMemoryStream);
 public:
     enum SeekMethod
     {
@@ -33,9 +34,6 @@ public:
     virtual void        write(const void *buffer, i64 size);
     virtual void        resize(i64 size) = 0;
     virtual bool        writable() const = 0;
-private:
-    IMemoryStream(const IMemoryStream&);
-    IMemoryStream& operator=(const IMemoryStream&);
 };
 
 class be_api(CORE) MemoryStream : public IMemoryStream

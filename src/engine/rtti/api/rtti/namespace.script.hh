@@ -19,6 +19,7 @@ be_meta(Namespace::MetaClassInfo)
 class be_api(RTTI) Namespace : public minitl::refcountable
 {
     friend class ::BugEngine::Value;
+    BE_NOCOPY(Namespace);
 published:
     class MetaClassInfo;
     mutable minitl::hashmap<istring, Value> decls;
@@ -39,9 +40,6 @@ published:
 private:
     enum CreationPolicy { DoNotCreate, Create };
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;
-
-    Namespace(const Namespace&);
-    Namespace& operator=(const Namespace&);
 };
 
 }}

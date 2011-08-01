@@ -27,6 +27,7 @@ enum ElfEndianness
 
 class Elf : public Module
 {
+    BE_NOCOPY(Elf);
 private:
     template< ElfClass klass, ElfEndianness endianness >
     void parse(FILE* file);
@@ -40,9 +41,6 @@ public:
     operator void*() const { return (void*)(m_endianness != msb_invalid); }
     bool operator !() const { return m_endianness == msb_invalid; }
 private:
-    Elf(const Elf& other);
-    Elf& operator=(const Elf& other);
-
     virtual Endianness endianness() const override { return m_endianness == msb_littleendian ? Endianness_Little : Endianness_Big; };
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
 };

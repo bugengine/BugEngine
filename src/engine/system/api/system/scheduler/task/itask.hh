@@ -12,6 +12,7 @@ namespace BugEngine
 
 class be_api(SYSTEM) ITask : public minitl::refcountable
 {
+    BE_NOCOPY(ITask);
 public:
     class CallbackConnection;
     friend class CallbackConnection;
@@ -19,6 +20,7 @@ public:
 public:
     class ICallback : public minitl::refcountable
     {
+        BE_NOCOPY(ICallback);
     protected:
         ICallback();
     public:
@@ -33,9 +35,6 @@ public:
         virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const = 0;
         virtual void onConnected(weak<ITask> to, CallbackStatus) = 0;
         virtual bool onDisconnected(weak<ITask> from) = 0;
-    private:
-        ICallback(const ICallback&);
-        ICallback& operator=(const ICallback&);
     };
 private:
     class ChainCallback : public ICallback
@@ -77,9 +76,6 @@ public:
 
 protected:
     ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity);
-private:
-    ITask& operator=(const ITask& other);
-    ITask(const ITask& other);
 };
 
 class be_api(SYSTEM) ITask::CallbackConnection

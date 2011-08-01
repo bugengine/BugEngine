@@ -9,18 +9,6 @@
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
-class be_api(GRAPHICS) Param : public Node
-{
-published:
-    const istring           name;
-    const ref<const Node>   value;
-published:
-    Param(const istring& name, ref<const Node> value);
-    ~Param();
-public:
-    virtual void buildSource(IShaderBuilder& stream) const override;
-};
-
 class be_api(GRAPHICS) Uniform : public Node
 {
 published:
@@ -29,7 +17,8 @@ published:
     Uniform(const istring& name);
     ~Uniform();
 public:
-    virtual void buildSource(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream) const override;
 };
 
 }}}

@@ -10,6 +10,7 @@ namespace BugEngine { namespace impl
 
 class be_api(SYSTEM) PluginList
 {
+    BE_NOCOPY(PluginList);
 private:
     static const size_t s_maxPlugins = 64;
     static size_t       s_currentPlugin;
@@ -25,9 +26,6 @@ public:
     PluginList(const char* name, Create c, Destroy d);
     ~PluginList();
     static PluginList* findPlugin(const char *name);
-private:
-    PluginList(const PluginList& other);
-    PluginList& operator=(const PluginList& other);
 };
 
 }}

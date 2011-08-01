@@ -16,6 +16,7 @@ class be_api(GRAPHICS) IGPUResource :   public minitl::refcountable
                                     ,   public minitl::intrusive_list<IGPUResource>::item
 {
     friend class IRenderer;
+    BE_NOCOPY(IGPUResource);
 protected:
     const weak<IRenderer>           m_renderer;
 private:
@@ -27,9 +28,6 @@ public:
 
     virtual void load(weak<const Resource> resource) = 0;
     virtual void unload() = 0;
-private:
-    IGPUResource(const IGPUResource&);
-    IGPUResource& operator=(const IGPUResource&);
 };
 
 }}

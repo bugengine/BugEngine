@@ -17,6 +17,7 @@ namespace BugEngine
 
 class Scheduler::Worker
 {
+    BE_NOCOPY(Worker);
 protected:
     static const int s_frameCount = 8;
 private:
@@ -33,9 +34,6 @@ public:
     void frameUpdate();
 
     static intptr_t work(intptr_t p1, intptr_t p2);
-private:
-    Worker& operator=(const Worker& other);
-    Worker(const Worker& other);
 };
 
 Scheduler::Worker::Worker(Scheduler* scheduler, size_t workerId)

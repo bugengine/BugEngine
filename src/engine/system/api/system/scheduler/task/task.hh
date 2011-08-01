@@ -15,6 +15,7 @@ class Task : public ITask
 {
     template< class B, class R >
     friend class ScheduledTasks::TaskItem;
+    BE_NOCOPY(Task);
 private:
     mutable Body    m_body;
     mutable i_u32   m_taskCount;
@@ -22,9 +23,6 @@ private:
 public:
     Task(istring name, color32 color, const Body& body, Scheduler::Priority priority = Scheduler::Default, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual void run(weak<Scheduler> sc) const override;
-private:
-    Task(const Task& other);
-    Task& operator=(const Task& other);
 };
 
 }
