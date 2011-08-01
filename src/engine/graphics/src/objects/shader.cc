@@ -32,8 +32,19 @@ VertexShader::~VertexShader()
 {
 }
 
-void VertexShader::buildSource(IShaderBuilder& /*builder*/) const
+void VertexShader::buildSource(Shaders::IShaderBuilder& builder) const
 {
+    if (position) position->buildDeclarations(builder);
+    if (diffuse) diffuse->buildDeclarations(builder);
+    if (specular) specular->buildDeclarations(builder);
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != varying.end(); ++it)
+        if (*it) (*it)->buildDeclarations(builder);
+
+    if (position) position->buildDefinitions(builder);
+    if (diffuse) diffuse->buildDefinitions(builder);
+    if (specular) specular->buildDefinitions(builder);
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != varying.end(); ++it)
+        if (*it) (*it)->buildDefinitions(builder);
 }
 
 
@@ -45,7 +56,7 @@ GeometryShader::~GeometryShader()
 {
 }
 
-void GeometryShader::buildSource(IShaderBuilder& /*stream*/) const
+void GeometryShader::buildSource(Shaders::IShaderBuilder& /*stream*/) const
 {
 }
 
@@ -60,7 +71,7 @@ FragmentShader::~FragmentShader()
 {
 }
 
-void FragmentShader::buildSource(IShaderBuilder& /*stream*/) const
+void FragmentShader::buildSource(Shaders::IShaderBuilder& /*stream*/) const
 {
 }
 

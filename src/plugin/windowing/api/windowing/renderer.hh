@@ -17,6 +17,7 @@ class Renderer : public IRenderer
 {
     friend class Window;
     friend class Window::PlatformWindow;
+    BE_NOCOPY(Renderer);
 private:
     class PlatformRenderer;
     friend class PlatformRenderer;
@@ -31,9 +32,6 @@ public:
 
     uint2           getScreenSize() override;
     void*           getPlatformData();
-private:
-    Renderer(const Renderer&);
-    Renderer& operator=(const Renderer&);
 };
 
 }}}

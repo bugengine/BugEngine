@@ -33,6 +33,7 @@ public:
 
 class SymbolResolver : public minitl::refcountable
 {
+    BE_NOCOPY(SymbolResolver);
 private:
     ref<const SymbolResolver> m_next;
 protected:
@@ -66,9 +67,6 @@ public:
     bool resolve(Callstack::Address& address, Symbol& symbol) const;
 
     static ref<const SymbolResolver> loadSymbols(const SymbolInformations& infos, ref<const SymbolResolver> next);
-private:
-    SymbolResolver(const SymbolResolver&);
-    SymbolResolver& operator=(const SymbolResolver&);
 };
 
 }}

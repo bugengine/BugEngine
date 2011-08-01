@@ -105,6 +105,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
+			print e
 			conf.variant = ''
 
 def parse_gcc_target(target):

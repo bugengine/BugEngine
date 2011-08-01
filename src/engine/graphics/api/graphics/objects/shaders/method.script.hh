@@ -10,18 +10,6 @@
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
-class Param;
-
-class be_api(GRAPHICS) Method : public Node
-{
-published:
-    const minitl::vector< ref<Param> > output;
-    Method(minitl::vector< ref<Param> > output);
-    ~Method();
-public:
-    virtual void buildSource(IShaderBuilder& stream) const override;
-};
-
 }}}
 
 /*****************************************************************************/

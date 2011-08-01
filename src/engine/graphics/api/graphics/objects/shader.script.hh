@@ -10,14 +10,13 @@
 namespace BugEngine { namespace Graphics
 {
 
-class IShaderBuilder;
-
 namespace Shaders
 {
 
 class Node;
 class Method;
 class Param;
+class IShaderBuilder;
 
 }
 
@@ -28,7 +27,7 @@ protected:
     Shader();
     ~Shader();
 public:
-    virtual void buildSource(IShaderBuilder& stream) const = 0;
+    virtual void buildSource(Shaders::IShaderBuilder& stream) const = 0;
 };
 
 
@@ -49,7 +48,7 @@ published:
     ~VertexShader();
 
 public:
-    void buildSource(IShaderBuilder& stream) const override;
+    void buildSource(Shaders::IShaderBuilder& stream) const override;
 };
 
 
@@ -61,7 +60,7 @@ published:
     GeometryShader();
     ~GeometryShader();
 public:
-    void buildSource(IShaderBuilder& stream) const override;
+    void buildSource(Shaders::IShaderBuilder& stream) const override;
 };
 
 be_tag(ResourceLoaders())
@@ -77,7 +76,7 @@ published:
     ~FragmentShader();
 
 public:
-    void buildSource(IShaderBuilder& stream) const override;
+    void buildSource(Shaders::IShaderBuilder& stream) const override;
 };
 
 

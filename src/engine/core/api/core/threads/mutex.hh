@@ -26,14 +26,12 @@ private:
 
 class ScopedMutexLock
 {
+    BE_NOCOPY(ScopedMutexLock);
 private:
     Mutex&  m_mutex;
 public:
     inline ScopedMutexLock(Mutex& m) : m_mutex(m)   { m_mutex.wait(); }
     inline ~ScopedMutexLock()                       { m_mutex.release(); }
-private:
-    ScopedMutexLock& operator=(const ScopedMutexLock& other);
-    ScopedMutexLock(const ScopedMutexLock& other);
 };
 
 }

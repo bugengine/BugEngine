@@ -25,6 +25,7 @@ class ITaskItem;
 
 class be_api(SYSTEM) Scheduler : public minitl::pointer
 {
+    BE_NOCOPY(Scheduler);
 private:
     class Worker;
     class HeadTask;
@@ -75,9 +76,6 @@ public:
 
     void frameUpdate();
     void mainThreadJoin();
-private:
-    Scheduler(const Scheduler& other);
-    Scheduler& operator=(const Scheduler& other);
 };
 
 template< typename T >

@@ -718,6 +718,12 @@ def p_enum_value(t):
 	"""
 	t.parser.namespace.addEnumValue(t[1])
 
+def p_enum_value_tag(t):
+	"""
+		enum_value : tags ID param_value_opt
+	"""
+	t.parser.namespace.addEnumValue(t[2])
+
 def p_enum_header(t):
 	"""
 		enum_header :	ENUM name_opt LBRACE

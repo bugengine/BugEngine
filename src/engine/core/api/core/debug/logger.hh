@@ -36,6 +36,7 @@ protected:
 class be_api(CORE) Logger : public minitl::refcountable
 {
     friend class minitl::ref<Logger>;
+    BE_NOCOPY(Logger);
 private:
     minitl::vector< ILogListener* >                 m_listeners;
     minitl::hashmap< istring, minitl::ref<Logger> > m_children;
@@ -55,9 +56,6 @@ public:
     bool log(LogLevel level, const char *filename, int line, const char *msg);
     template< size_t size >
     inline bool log(LogLevel level, const char *filename, int line, const minitl::format<size>& msg) { return log(level, filename, line, msg.c_str()); }
-private:
-    Logger(const Logger& other);
-    Logger& operator=(const Logger& other);
 };
 
 #ifdef _DEBUG

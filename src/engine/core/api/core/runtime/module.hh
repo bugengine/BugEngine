@@ -15,6 +15,7 @@ class SymbolResolver;
 
 class Module : public minitl::refcountable
 {
+    BE_NOCOPY(Module);
 public:
     class Section
     {
@@ -50,9 +51,6 @@ public:
 
     static ref<const Module> self();
     weak<const Module> next() const { return m_next; }
-private:
-    Module(const Module&);
-    Module& operator=(const Module&);
 };
 
 }}

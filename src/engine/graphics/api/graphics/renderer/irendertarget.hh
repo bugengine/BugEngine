@@ -15,6 +15,7 @@ class RenderTarget;
 
 class be_api(GRAPHICS) IRenderTarget : public IGPUResource
 {
+    BE_NOCOPY(IRenderTarget);
 public:
     enum ClearMode
     {
@@ -39,9 +40,6 @@ public:
 
     weak<ITask>     syncTask() const;
     void            drawBatches(const Batch* batches, size_t count) const;
-private:
-    IRenderTarget& operator=(const IRenderTarget& other);
-    IRenderTarget(const IRenderTarget& other);
 };
 
 }}

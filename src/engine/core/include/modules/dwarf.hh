@@ -18,9 +18,11 @@ namespace Dwarf
 
 class DwarfModule : public SymbolResolver
 {
+    BE_NOCOPY(DwarfModule);
 private:
     class StringBuffer : public refcountable
     {
+        BE_NOCOPY(StringBuffer);
     private:
         const ref<const StringBuffer>   m_next;
         u64 const                       m_size;
@@ -32,9 +34,6 @@ private:
 
         const char* store(const char* string, size_t size);
         char* data();
-    private:
-        StringBuffer(const StringBuffer&);
-        StringBuffer& operator=(const StringBuffer&);
     };
 private:
     struct AddressRange
@@ -83,9 +82,6 @@ public:
 
     const char *storeString(const char *string);
     const char *indexedString(u64 offset) const;
-private:
-    DwarfModule(const DwarfModule&);
-    DwarfModule& operator=(const DwarfModule&);
 };
 
 }}

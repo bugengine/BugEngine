@@ -11,6 +11,7 @@ namespace BugEngine
 template< typename Interface >
 class be_api(SYSTEM) Plugin
 {
+    BE_NOCOPY(Plugin);
 private:
     typedef void* Handle;
 private:
@@ -30,8 +31,6 @@ public:
     bool operator!() const              { return m_interface == 0; }
 private:
     Plugin();
-    Plugin(const Plugin& other);
-    Plugin& operator=(const Plugin& other);
 };
 
 }

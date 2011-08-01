@@ -5,30 +5,43 @@
 #define BE_GRAPHICS_MATERIAL_ISHADERBUILDER_HH_
 /*****************************************************************************/
 #include    <core/memory/streams.hh>
+#include    <graphics/objects/shaders/node.script.hh>
 
-
-namespace BugEngine { namespace Graphics
+namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
 class be_api(GRAPHICS) IShaderBuilder
 {
     BE_NOCOPY(IShaderBuilder);
 private:
-    MemoryStream    m_stream;
-    i32             m_indent;
+    struct Namespace
+    {
+        Namespace();
+        minitl::hashmap< weak<const Node>, istring >    names;
+    };
+    minitl::vector<Namespace>   m_namespaces;
+    MemoryStream                m_stream;
+    i32                         m_indent;
+    u32                         m_counter;
 public:
     IShaderBuilder();
-    ~IShaderBuilder();
 
     const char *text() const;
     i64         textSize() const;
+public:
+    virtual void addVariableDeclaration(weak<const Node> node, const istring& name, Scope scope, Type type, Semantic semantic);
+protected:
+    istring referenceNode(weak<const Node> node);
+    virtual void doAddVariableDeclaration(const istring& name, Scope scope, Type type, Semantic semantic) = 0;
+protected:
+    virtual ~IShaderBuilder();
 protected:
     void indent();
     void unindent();
     void write(const char *text);
 };
 
-}}
+}}}
 
 /*****************************************************************************/
 #endif

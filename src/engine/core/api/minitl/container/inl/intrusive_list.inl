@@ -49,6 +49,7 @@ intrusive_list<T, INDEX>::item::item(const item& /*other*/)
 template< typename T, int INDEX >
 typename intrusive_list<T, INDEX>::item& intrusive_list<T, INDEX>::item::operator=(const item& /*other*/)
 {
+    /* No unhook! */
     return *this;
 }
 

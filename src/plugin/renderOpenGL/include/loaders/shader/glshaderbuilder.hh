@@ -9,11 +9,14 @@
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-struct GLShaderBuilder : public IShaderBuilder
+struct GLShaderBuilder : public Shaders::IShaderBuilder
 {
 public:
     GLShaderBuilder();
     ~GLShaderBuilder();
+
+private:
+    virtual void doAddVariableDeclaration(const istring& name, Shaders::Scope scope, Shaders::Type type, Shaders::Semantic semantic) override;
 };
 
 }}}

@@ -17,6 +17,7 @@ class IScene;
 
 class Application : public minitl::refcountable
 {
+    BE_NOCOPY(Application);
 private:
     class SceneResource;
 private:
@@ -38,8 +39,6 @@ public:
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:
     Application(void);
-    Application(const Application&);
-    const Application& operator=(const Application&);
 };
 
 }
