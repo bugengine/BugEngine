@@ -26,7 +26,11 @@ def datagen(self, node):
 		tsk.pch = self.pchheader
 	except AttributeError:
 		tsk.pch = ''
-	tsk.dep_nodes = [self.path.find_or_declare('mak/ddf.py'), self.path.find_or_declare('mak/rtti.py')]
+	tsk.dep_nodes = [
+		self.path.find_or_declare('mak/cpp/lexer.py'),
+		self.path.find_or_declare('mak/cpp/parser.py'),
+		self.path.find_or_declare('mak/ddf.py'),
+		self.path.find_or_declare('mak/rtti.py'),]
 	#self.source.append(outs[0])
 
 def configure(conf):
