@@ -106,7 +106,7 @@ enum Type
     be_tag(Category("double")) Double4x3,
     be_tag(Category("double")) Double4x4,
 
-    be_tag(Category("bool")) Bool,
+    be_tag(Category("bool")) Boolean,
     be_tag(Category("bool")) Bool2,
     be_tag(Category("bool")) Bool3,
     be_tag(Category("bool")) Bool4,

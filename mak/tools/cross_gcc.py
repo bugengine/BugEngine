@@ -84,7 +84,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			worked = True
 		except Exception as e:
 			conf.variant = ''
-			print e
 	if not worked:
 		arch = originalarch
 		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
@@ -105,7 +104,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)
 		except Exception as e:
-			print e
 			conf.variant = ''
 
 def parse_gcc_target(target):
