@@ -28,11 +28,9 @@ public:
 
     const char *text() const;
     i64         textSize() const;
-public:
-    virtual void addVariableDeclaration(weak<const Node> node, const istring& name, Scope scope, Type type, Semantic semantic);
 protected:
     istring referenceNode(weak<const Node> node);
-    virtual void doAddVariableDeclaration(const istring& name, Scope scope, Type type, Semantic semantic) = 0;
+    virtual void doAddVariableDeclaration(const istring& name) = 0;
 protected:
     virtual ~IShaderBuilder();
 protected:

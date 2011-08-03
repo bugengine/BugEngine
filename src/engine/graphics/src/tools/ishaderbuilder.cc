@@ -61,15 +61,6 @@ i64 IShaderBuilder::textSize() const
     return m_stream.offset();
 }
 
-void IShaderBuilder::addVariableDeclaration(weak<const Node> node, const istring& name, Scope scope, Type type, Semantic semantic)
-{
-    Namespace& ns = (scope == uniform) ? m_namespaces.front() : m_namespaces.back();
-    if (ns.names.insert(std::make_pair(node, name)).second)
-    {
-        doAddVariableDeclaration(name, scope, type, semantic);
-    }
-}
-
 istring IShaderBuilder::referenceNode(weak<const Node> node)
 {
     for(minitl::vector< Namespace >::const_reverse_iterator it = m_namespaces.rbegin(); it != m_namespaces.rend(); ++it)

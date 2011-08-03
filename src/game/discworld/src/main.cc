@@ -43,7 +43,7 @@ int be_main(weak<BugEngine::Application> app)
 
 
     minitl::array< ref<const Shaders::Node>, 18 > outputs;
-    ref<Shaders::Uniform> color = ref<Shaders::Uniform>::create(gameArena(), "color");
+    ref<Shaders::Node> color = ref<Shaders::Node>();
     ref<VertexShader> vshader = ref<VertexShader>::create(gameArena(), ref<const Shaders::Node>(), color, ref<const Shaders::Node>(), outputs);
     ref<FragmentShader> fshader = ref<FragmentShader>::create(gameArena(), ref<const Shaders::Node>(), ref<const Shaders::Node>());
     ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), vshader, ref<GeometryShader>(), fshader);

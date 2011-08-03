@@ -17,7 +17,7 @@ GLShaderBuilder::~GLShaderBuilder()
 {
 }
 
-void GLShaderBuilder::doAddVariableDeclaration(const istring& /*name*/, Shaders::Scope /*scope*/, Shaders::Type /*type*/, Shaders::Semantic /*semantic*/)
+void GLShaderBuilder::doAddVariableDeclaration(const istring& /*name*/)
 {
 }
 
