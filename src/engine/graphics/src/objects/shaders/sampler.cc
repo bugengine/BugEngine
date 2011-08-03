@@ -2,3 +2,9 @@
    see LICENSE for detail */
 
 #include    <graphics/stdafx.h>
+#include    <graphics/objects/shaders/sampler.script.hh>
+
+namespace BugEngine { namespace Graphics { namespace Shaders
+{
+
+}}}

@@ -16,7 +16,7 @@ public:
     ~GLShaderBuilder();
 
 private:
-    virtual void doAddVariableDeclaration(const istring& name, Shaders::Scope scope, Shaders::Type type, Shaders::Semantic semantic) override;
+    virtual void doAddVariableDeclaration(const istring& name) override;
 };
 
 }}}
