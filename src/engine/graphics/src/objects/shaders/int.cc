@@ -4,6 +4,7 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/objects/shaders/int.script.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
@@ -25,8 +26,9 @@ IntUniform::~IntUniform()
 {
 }
 
-void IntUniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void IntUniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Int);
 }
 
 void IntUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -50,8 +52,9 @@ Int2Uniform::~Int2Uniform()
 {
 }
 
-void Int2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Int2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Int2);
 }
 
 void Int2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -75,8 +78,9 @@ Int3Uniform::~Int3Uniform()
 {
 }
 
-void Int3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Int3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Int3);
 }
 
 void Int3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -100,8 +104,9 @@ Int4Uniform::~Int4Uniform()
 {
 }
 
-void Int4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Int4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Int4);
 }
 
 void Int4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const

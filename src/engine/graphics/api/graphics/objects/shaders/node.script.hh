@@ -42,6 +42,7 @@ enum Type
     Type_Double4x2, Type_Double4x3, Type_Double4x4,
 
     Type_Int, Type_Int2, Type_Int3, Type_Int4,
+    Type_Uint, Type_Uint2, Type_Uint3, Type_Uint4,
 
     Type_Bool, Type_Bool2, Type_Bool3, Type_Bool4,
 

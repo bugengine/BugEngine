@@ -11,6 +11,7 @@ namespace minitl
 template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;
+class Arena;
 
 template< typename T >
 static void checked_destroy(const T*);

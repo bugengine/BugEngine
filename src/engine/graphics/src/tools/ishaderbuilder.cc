@@ -46,7 +46,7 @@ void IShaderBuilder::write(const char *text)
             m_stream.write("  ", 2);
         m_stream.write(text, strlen(text));
     }
-    m_stream.write("\n\n", 1);
+    m_stream.write("\n", 1);
     m_stream.write("\0", 1);
     m_stream.seek(MemoryStream::eSeekMove, -1);
 }

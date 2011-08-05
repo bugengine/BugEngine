@@ -53,7 +53,7 @@ void GLShaderProgram::load(weak<const Resource> resource)
 
 #ifdef BE_DEBUG
     GLint success, loglength;
-    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_OBJECT_COMPILE_STATUS_ARB, &success);
+    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &success);
     shaderext.glGetObjectParameteriv(m_shaderProgram, GL_OBJECT_INFO_LOG_LENGTH_ARB, &loglength);
     if (!success || loglength)
     {

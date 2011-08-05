@@ -4,6 +4,7 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/objects/shaders/double.script.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
@@ -25,8 +26,9 @@ DoubleUniform::~DoubleUniform()
 {
 }
 
-void DoubleUniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void DoubleUniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double);
 }
 
 void DoubleUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -50,8 +52,9 @@ Double2Uniform::~Double2Uniform()
 {
 }
 
-void Double2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double2);
 }
 
 void Double2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -75,8 +78,9 @@ Double3Uniform::~Double3Uniform()
 {
 }
 
-void Double3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double3);
 }
 
 void Double3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -100,8 +104,9 @@ Double4Uniform::~Double4Uniform()
 {
 }
 
-void Double4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double4);
 }
 
 void Double4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -125,8 +130,9 @@ Double2x2Uniform::~Double2x2Uniform()
 {
 }
 
-void Double2x2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double2x2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double2x2);
 }
 
 void Double2x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -150,8 +156,9 @@ Double3x2Uniform::~Double3x2Uniform()
 {
 }
 
-void Double3x2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double3x2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double3x2);
 }
 
 void Double3x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -175,8 +182,9 @@ Double4x2Uniform::~Double4x2Uniform()
 {
 }
 
-void Double4x2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double4x2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double4x2);
 }
 
 void Double4x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -200,8 +208,9 @@ Double2x3Uniform::~Double2x3Uniform()
 {
 }
 
-void Double2x3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double2x3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double2x3);
 }
 
 void Double2x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -225,8 +234,9 @@ Double3x3Uniform::~Double3x3Uniform()
 {
 }
 
-void Double3x3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double3x3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double3x3);
 }
 
 void Double3x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -250,8 +260,9 @@ Double4x3Uniform::~Double4x3Uniform()
 {
 }
 
-void Double4x3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double4x3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double4x3);
 }
 
 void Double4x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -275,8 +286,9 @@ Double2x4Uniform::~Double2x4Uniform()
 {
 }
 
-void Double2x4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double2x4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double2x4);
 }
 
 void Double2x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -300,8 +312,9 @@ Double3x4Uniform::~Double3x4Uniform()
 {
 }
 
-void Double3x4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double3x4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double3x4);
 }
 
 void Double3x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -325,8 +338,9 @@ Double4x4Uniform::~Double4x4Uniform()
 {
 }
 
-void Double4x4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Double4x4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Double4x4);
 }
 
 void Double4x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
