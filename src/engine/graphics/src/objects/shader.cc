@@ -20,11 +20,13 @@ Shader::~Shader()
 VertexShader::VertexShader( ref<const Shaders::Node> position,
                             ref<const Shaders::Node> diffuse,
                             ref<const Shaders::Node> specular,
-                            minitl::array< ref<const Shaders::Node>, 18 > varying)
+                            minitl::array< ref<const Shaders::Node>, 18 > input,
+                            minitl::array< ref<const Shaders::Node>, 18 > output)
     :   position(position)
     ,   diffuse(diffuse)
     ,   specular(specular)
-    ,   varying(varying)
+    ,   input(input)
+    ,   output(output)
 {
 }
 
@@ -37,13 +39,19 @@ void VertexShader::buildSource(Shaders::IShaderBuilder& builder) const
     if (position) position->buildDeclarations(builder);
     if (diffuse) diffuse->buildDeclarations(builder);
     if (specular) specular->buildDeclarations(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != varying.end(); ++it)
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != input.end(); ++it)
         if (*it) (*it)->buildDeclarations(builder);
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != output.end(); ++it)
+        if (*it) (*it)->buildDeclarations(builder);
+
+
 
     if (position) position->buildDefinitions(builder);
     if (diffuse) diffuse->buildDefinitions(builder);
     if (specular) specular->buildDefinitions(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != varying.end(); ++it)
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != input.end(); ++it)
+        if (*it) (*it)->buildDefinitions(builder);
+    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != output.end(); ++it)
         if (*it) (*it)->buildDefinitions(builder);
 }
 

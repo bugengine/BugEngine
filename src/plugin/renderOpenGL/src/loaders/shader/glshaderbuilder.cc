@@ -72,6 +72,14 @@ static const char *toString(Shaders::Type type)
         return "ivec3";
     case Shaders::Type_Int4:
         return "ivec4";
+    case Shaders::Type_Uint:
+        return "uint";
+    case Shaders::Type_Uint2:
+        return "uvec2";
+    case Shaders::Type_Uint3:
+        return "uvec3";
+    case Shaders::Type_Uint4:
+        return "uvec4";
     case Shaders::Type_Bool:
         return "bool";
     case Shaders::Type_Bool2:

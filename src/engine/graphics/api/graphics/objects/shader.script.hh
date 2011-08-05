@@ -30,7 +30,6 @@ public:
     virtual void buildSource(Shaders::IShaderBuilder& stream) const = 0;
 };
 
-
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) VertexShader : public Shader
 {
@@ -39,12 +38,14 @@ published:
     const ref<const Shaders::Node>                      position;
     const ref<const Shaders::Node>                      diffuse;
     const ref<const Shaders::Node>                      specular;
-    const minitl::array< ref<const Shaders::Node>, 18 > varying;
+    const minitl::array< ref<const Shaders::Node>, 18 > input;
+    const minitl::array< ref<const Shaders::Node>, 18 > output;
 published:
     VertexShader(                    ref<const Shaders::Node> position,
                   be_tag(Optional()) ref<const Shaders::Node> diffuse,
                   be_tag(Optional()) ref<const Shaders::Node> specular,
-                                     minitl::array< ref<const Shaders::Node>, 18 > varying);
+                                     minitl::array< ref<const Shaders::Node>, 18 > input,
+                                     minitl::array< ref<const Shaders::Node>, 18 > output);
     ~VertexShader();
 
 public:

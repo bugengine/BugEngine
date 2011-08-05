@@ -4,6 +4,7 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/objects/shaders/bool.script.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
@@ -25,8 +26,9 @@ BoolUniform::~BoolUniform()
 {
 }
 
-void BoolUniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void BoolUniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Bool);
 }
 
 void BoolUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -50,8 +52,9 @@ Bool2Uniform::~Bool2Uniform()
 {
 }
 
-void Bool2Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Bool2Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Bool2);
 }
 
 void Bool2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -75,8 +78,9 @@ Bool3Uniform::~Bool3Uniform()
 {
 }
 
-void Bool3Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Bool3Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Bool3);
 }
 
 void Bool3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
@@ -100,8 +104,9 @@ Bool4Uniform::~Bool4Uniform()
 {
 }
 
-void Bool4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Bool4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Bool4);
 }
 
 void Bool4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
