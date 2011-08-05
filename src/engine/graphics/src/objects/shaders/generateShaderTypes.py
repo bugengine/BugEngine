@@ -19,6 +19,7 @@ def header(f, cpp, n):
 	cpp.write("\n")
 	cpp.write("#include    <graphics/stdafx.h>\n")
 	cpp.write("#include    <graphics/objects/shaders/%s.script.hh>\n" % n)
+	cpp.write("#include    <graphics/tools/ishaderbuilder.hh>\n" % n)
 	cpp.write("\n")
 	cpp.write("namespace BugEngine { namespace Graphics { namespace Shaders\n")
 	cpp.write("{\n\n")
@@ -73,8 +74,9 @@ def fileType(h, cpp, basetype, col, row):
 	cpp.write("%sUniform::~%sUniform()\n" % (type, type))
 	cpp.write("{\n")
 	cpp.write("}\n\n")
-	cpp.write("void %sUniform::buildDeclarations(IShaderBuilder& /*stream*/) const\n" % type)
+	cpp.write("void %sUniform::buildDeclarations(IShaderBuilder& stream) const\n" % type)
 	cpp.write("{\n")
+	cpp.write("    stream.
 	cpp.write("}\n\n")
 	cpp.write("void %sUniform::buildDefinitions(IShaderBuilder& /*stream*/) const\n" % type)
 	cpp.write("{\n")

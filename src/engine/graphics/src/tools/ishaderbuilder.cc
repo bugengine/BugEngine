@@ -46,7 +46,7 @@ void IShaderBuilder::write(const char *text)
             m_stream.write("  ", 2);
         m_stream.write(text, strlen(text));
     }
-    m_stream.write("\n", 1);
+    m_stream.write("\n\n", 1);
     m_stream.write("\0", 1);
     m_stream.seek(MemoryStream::eSeekMove, -1);
 }
@@ -73,6 +73,15 @@ istring IShaderBuilder::referenceNode(weak<const Node> node)
     }
     be_error("Undeclared object");
     return istring("");
+}
+
+void IShaderBuilder::addUniform(weak<const Node> node, const istring& name, Type type)
+{
+    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
+    if (inserted)
+    {
+        doAddUniformDeclaration(name, type);
+    }
 }
 
 }}}

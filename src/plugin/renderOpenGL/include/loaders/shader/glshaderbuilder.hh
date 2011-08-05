@@ -16,7 +16,7 @@ public:
     ~GLShaderBuilder();
 
 private:
-    virtual void doAddVariableDeclaration(const istring& name) override;
+    virtual void doAddUniformDeclaration(const istring& name, Shaders::Type type) override;
 };
 
 }}}

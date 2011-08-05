@@ -4,6 +4,7 @@
 
 #include    <graphics/stdafx.h>
 #include    <graphics/objects/shaders/float.script.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
@@ -100,8 +101,9 @@ Float4Uniform::~Float4Uniform()
 {
 }
 
-void Float4Uniform::buildDeclarations(IShaderBuilder& /*stream*/) const
+void Float4Uniform::buildDeclarations(IShaderBuilder& stream) const
 {
+    stream.addUniform(this, name, Type_Float4);
 }
 
 void Float4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
