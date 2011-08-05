@@ -28,9 +28,11 @@ public:
 
     const char *text() const;
     i64         textSize() const;
+public:
+    void addUniform(weak<const Node> node, const istring& name, Type type);
 protected:
     istring referenceNode(weak<const Node> node);
-    virtual void doAddVariableDeclaration(const istring& name) = 0;
+    virtual void doAddUniformDeclaration(const istring& name, Type type) = 0;
 protected:
     virtual ~IShaderBuilder();
 protected:

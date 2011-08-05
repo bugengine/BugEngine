@@ -13,10 +13,12 @@ class IShaderBuilder;
 
 enum Semantic
 {
+    None,
     POSITION,
     COLOR0,
     COLOR1,
     DEPTH,
+    NORMAL,
     TEXCOORD0,
     TEXCOORD1,
     TEXCOORD2,
@@ -25,6 +27,25 @@ enum Semantic
     TEXCOORD5,
     TEXCOORD6,
     TEXCOORD7
+};
+
+enum Type
+{
+    Type_Float, Type_Float2, Type_Float3, Type_Float4,
+    Type_Float2x2, Type_Float2x3, Type_Float2x4,
+    Type_Float3x2, Type_Float3x3, Type_Float3x4,
+    Type_Float4x2, Type_Float4x3, Type_Float4x4,
+
+    Type_Double, Type_Double2, Type_Double3, Type_Double4,
+    Type_Double2x2, Type_Double2x3, Type_Double2x4,
+    Type_Double3x2, Type_Double3x3, Type_Double3x4,
+    Type_Double4x2, Type_Double4x3, Type_Double4x4,
+
+    Type_Int, Type_Int2, Type_Int3, Type_Int4,
+
+    Type_Bool, Type_Bool2, Type_Bool3, Type_Bool4,
+
+    Type_Sampler1D, Type_Sampler2D, Type_Sampler3D, Type_SamplerCube
 };
 
 class be_api(GRAPHICS) Node : public minitl::refcountable
