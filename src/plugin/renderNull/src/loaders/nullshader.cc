@@ -26,23 +26,5 @@ void NullShaderProgram::unload()
 {
 }
 
-
-NullShader::NullShader(weak<const Shader> resource, weak<NullRenderer> renderer)
-:   IGPUResource(resource, renderer)
-{
-}
-
-NullShader::~NullShader()
-{
-}
-
-void NullShader::load(weak<const Resource> /*resource*/)
-{
-}
-
-void NullShader::unload()
-{
-}
-
 }}}
 

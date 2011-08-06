@@ -27,8 +27,8 @@ published:
     BoolUniform(const istring& name);
     ~BoolUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Bool2 : public Node
@@ -48,8 +48,8 @@ published:
     Bool2Uniform(const istring& name);
     ~Bool2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Bool3 : public Node
@@ -69,8 +69,8 @@ published:
     Bool3Uniform(const istring& name);
     ~Bool3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Bool4 : public Node
@@ -90,8 +90,8 @@ published:
     Bool4Uniform(const istring& name);
     ~Bool4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 

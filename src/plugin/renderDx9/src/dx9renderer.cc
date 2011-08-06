@@ -136,19 +136,4 @@ ref<IGPUResource> Dx9Renderer::createShaderProgram(weak<const ShaderProgram> sha
     return ref<Dx9ShaderProgram>::create(m_allocator, shader, this);
 }
 
-ref<IGPUResource> Dx9Renderer::createVertexShader(weak<const VertexShader> shader)
-{
-    return ref<Dx9Shader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> Dx9Renderer::createGeometryShader(weak<const GeometryShader> shader)
-{
-    return ref<Dx9Shader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> Dx9Renderer::createFragmentShader(weak<const FragmentShader> shader)
-{
-    return ref<Dx9Shader>::create(m_allocator, shader, this);
-}
-
 }}}

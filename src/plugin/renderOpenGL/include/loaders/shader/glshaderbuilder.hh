@@ -5,18 +5,23 @@
 #define BE_OPENGL_LOADERS_GLSHADERBUILDER_HH_
 /*****************************************************************************/
 #include    <graphics/tools/ishaderbuilder.hh>
+#include    <graphics/objects/shaders/node.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
 struct GLShaderBuilder : public Shaders::IShaderBuilder
 {
+private:
+    GLenum  m_shaderType;
 public:
-    GLShaderBuilder();
+    GLShaderBuilder(GLenum shaderType);
     ~GLShaderBuilder();
 
+    istring attributes[64];
 private:
-    virtual void doAddUniformDeclaration(const istring& name, Shaders::Type type) override;
+    virtual void doAddUniformDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
+    virtual void doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
 };
 
 }}}

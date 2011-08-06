@@ -52,20 +52,5 @@ ref<IGPUResource> NullRenderer::createShaderProgram(weak<const ShaderProgram> sh
     return ref<NullShaderProgram>::create(m_allocator, shader, this);
 }
 
-ref<IGPUResource> NullRenderer::createVertexShader(weak<const VertexShader> shader)
-{
-    return ref<NullShader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> NullRenderer::createGeometryShader(weak<const GeometryShader> shader)
-{
-    return ref<NullShader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> NullRenderer::createFragmentShader(weak<const FragmentShader> shader)
-{
-    return ref<NullShader>::create(m_allocator, shader, this);
-}
-
 }}}
 

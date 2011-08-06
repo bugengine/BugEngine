@@ -5,6 +5,7 @@
 #define BE_OPENGL_LOADERS_SHADER_GLSHADER_HH_
 /*****************************************************************************/
 #include    <graphics/renderer/igpuresource.hh>
+#include    <graphics/objects/shaders/node.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
@@ -15,27 +16,15 @@ class GLShaderProgram : public IGPUResource
 {
 private:
     GLhandleARB m_shaderProgram;
+    GLhandleARB m_vertexShader;
+    GLhandleARB m_geometryShader;
+    GLhandleARB m_fragmentShader;
 private:
-    void attach(weak<const Shader> shader);
+    GLhandleARB build(weak<const ShaderProgram> program, Shaders::Stage stage) const;
+    void attach();
 public:
     GLShaderProgram(weak<const Resource> resource, weak<GLRenderer> renderer);
     ~GLShaderProgram();
-
-    virtual void load(weak<const Resource> resource) override;
-    virtual void unload() override;
-};
-
-class GLShader : public IGPUResource
-{
-    friend class GLShaderProgram;
-private:
-    GLenum      m_shaderType;
-    GLhandleARB m_shader;
-public:
-    GLShader(weak<const VertexShader> resource, weak<GLRenderer> renderer);
-    GLShader(weak<const GeometryShader> resource, weak<GLRenderer> renderer);
-    GLShader(weak<const FragmentShader> resource, weak<GLRenderer> renderer);
-    ~GLShader();
 
     virtual void load(weak<const Resource> resource) override;
     virtual void unload() override;

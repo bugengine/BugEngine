@@ -15,6 +15,8 @@ IShaderBuilder::Namespace::Namespace()
 IShaderBuilder::IShaderBuilder()
     :   m_stream(tempArena(), 10000)
     ,   m_namespaces(tempArena())
+    ,   m_input()
+    ,   m_output()
     ,   m_indent(0)
     ,   m_counter(0)
 {
@@ -75,12 +77,21 @@ istring IShaderBuilder::referenceNode(weak<const Node> node)
     return istring("");
 }
 
-void IShaderBuilder::addUniform(weak<const Node> node, const istring& name, Type type)
+void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istring& name, Type type)
 {
     bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
     if (inserted)
     {
-        doAddUniformDeclaration(name, type);
+        doAddUniformDeclaration(name, stage, type);
+    }
+}
+
+void IShaderBuilder::addVarying(weak<const Node> node, Stage stage, const istring& name, Type type)
+{
+    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
+    if (inserted)
+    {
+        doAddVaryingDeclaration(name, stage, type);
     }
 }
 

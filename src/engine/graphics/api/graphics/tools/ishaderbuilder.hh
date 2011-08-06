@@ -20,6 +20,8 @@ private:
         minitl::hashmap< weak<const Node>, istring >    names;
     };
     minitl::vector<Namespace>   m_namespaces;
+    Namespace                   m_input;
+    Namespace                   m_output;
     MemoryStream                m_stream;
     i32                         m_indent;
     u32                         m_counter;
@@ -29,10 +31,12 @@ public:
     const char *text() const;
     i64         textSize() const;
 public:
-    void addUniform(weak<const Node> node, const istring& name, Type type);
+    void addUniform(weak<const Node> node, Stage stage, const istring& name, Type type);
+    void addVarying(weak<const Node> node, Stage stage, const istring& name, Type type);
 protected:
     istring referenceNode(weak<const Node> node);
-    virtual void doAddUniformDeclaration(const istring& name, Type type) = 0;
+    virtual void doAddUniformDeclaration(const istring& name, Stage stage, Type type) = 0;
+    virtual void doAddVaryingDeclaration(const istring& name, Stage stage, Type type) = 0;
 protected:
     virtual ~IShaderBuilder();
 protected:

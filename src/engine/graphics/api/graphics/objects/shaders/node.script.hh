@@ -10,23 +10,11 @@ namespace BugEngine { namespace Graphics { namespace Shaders
 {
 
 class IShaderBuilder;
-
-enum Semantic
+enum Stage
 {
-    None,
-    POSITION,
-    COLOR0,
-    COLOR1,
-    DEPTH,
-    NORMAL,
-    TEXCOORD0,
-    TEXCOORD1,
-    TEXCOORD2,
-    TEXCOORD3,
-    TEXCOORD4,
-    TEXCOORD5,
-    TEXCOORD6,
-    TEXCOORD7
+    VertexStage,
+    GeometryStage,
+    FragmentStage
 };
 
 enum Type
@@ -58,8 +46,8 @@ protected:
     Node();
     ~Node();
 public:
-    virtual void buildDeclarations(IShaderBuilder& stream) const = 0;
-    virtual void buildDefinitions(IShaderBuilder& stream) const = 0;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const = 0;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const = 0;
 };
 
 }}}

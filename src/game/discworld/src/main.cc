@@ -42,11 +42,9 @@ int be_main(weak<BugEngine::Application> app)
     p->doFile("data/scripts/main.lua");
 
 
-    minitl::array< ref<const Shaders::Node>, 18 > outputs;
+    ref<Shaders::Node> vertexpos = ref<Shaders::Float4Uniform>::create(gameArena(), "vertexpos");
     ref<Shaders::Node> color = ref<Shaders::Float4Uniform>::create(gameArena(), "color");
-    ref<VertexShader> vshader = ref<VertexShader>::create(gameArena(), ref<const Shaders::Node>(), color, ref<const Shaders::Node>(), outputs);
-    ref<FragmentShader> fshader = ref<FragmentShader>::create(gameArena(), ref<const Shaders::Node>(), ref<const Shaders::Node>());
-    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), vshader, ref<GeometryShader>(), fshader);
+    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), vertexpos, color, ref<const Shaders::Node>());
 
     ref<RenderWindow> w1 = ref<RenderWindow>::create(gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
     ref<World> world = ref<World>::create(gameArena(), "physicsBullet", "audioOpenAL", float3(1000.0f, 1000.0f, 1000.0f));
@@ -56,8 +54,6 @@ int be_main(weak<BugEngine::Application> app)
     scenes.push_back(renderscene1);
     ref<RenderSequence> node = ref<RenderSequence>::create(gameArena(), scenes);
     
-    Resource::load(Value(vshader));
-    Resource::load(Value(fshader));
     Resource::load(Value(program));
     Resource::load(Value(w1));
     Resource::load(Value(scene));
@@ -70,8 +66,6 @@ int be_main(weak<BugEngine::Application> app)
     Resource::unload(Value(renderscene1));
     Resource::unload(Value(scene));
     Resource::unload(Value(w1));
-    Resource::unload(Value(fshader));
-    Resource::unload(Value(vshader));
     Resource::unload(Value(program));
 
     return 0;
