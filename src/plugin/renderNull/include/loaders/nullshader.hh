@@ -23,17 +23,6 @@ private:
     void unload() override;
 };
 
-class NullShader : public IGPUResource
-{
-public:
-    NullShader(weak<const Shader> resource, weak<NullRenderer> renderer);
-    ~NullShader();
-
-private:
-    void load(weak<const Resource> resource) override;
-    void unload() override;
-};
-
 }}}
 
 /*****************************************************************************/

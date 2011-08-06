@@ -8,108 +8,103 @@
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
-
+/* Type *************************************************************/
 Bool::Bool()
 {
 }
-
 Bool::~Bool()
 {
 }
 
+/* Uniform **********************************************************/
 BoolUniform::BoolUniform(const istring& name)
     :   name(name)
 {
 }
-
 BoolUniform::~BoolUniform()
 {
 }
-
-void BoolUniform::buildDeclarations(IShaderBuilder& stream) const
+void BoolUniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Bool);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Bool);
+}
+void BoolUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void BoolUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Bool2::Bool2()
 {
 }
-
 Bool2::~Bool2()
 {
 }
 
+/* Uniform **********************************************************/
 Bool2Uniform::Bool2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Bool2Uniform::~Bool2Uniform()
 {
 }
-
-void Bool2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Bool2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Bool2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Bool2);
+}
+void Bool2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Bool2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Bool3::Bool3()
 {
 }
-
 Bool3::~Bool3()
 {
 }
 
+/* Uniform **********************************************************/
 Bool3Uniform::Bool3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Bool3Uniform::~Bool3Uniform()
 {
 }
-
-void Bool3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Bool3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Bool3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Bool3);
+}
+void Bool3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Bool3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Bool4::Bool4()
 {
 }
-
 Bool4::~Bool4()
 {
 }
 
+/* Uniform **********************************************************/
 Bool4Uniform::Bool4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Bool4Uniform::~Bool4Uniform()
 {
 }
-
-void Bool4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Bool4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Bool4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Bool4);
 }
-
-void Bool4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
+void Bool4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 

@@ -24,18 +24,12 @@ IRenderer::IRenderer(Allocator& allocator, Scheduler::Affinity affinity)
     ResourceLoaders::attach<RenderWindow, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
     //ResourceLoaders::attach<Mesh, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
     //ResourceLoaders::attach<Texture, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    ResourceLoaders::attach<VertexShader, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    ResourceLoaders::attach<GeometryShader, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    ResourceLoaders::attach<FragmentShader, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
     ResourceLoaders::attach<ShaderProgram, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
 }
 
 IRenderer::~IRenderer()
 {
     ResourceLoaders::detach<ShaderProgram, IRenderer>(this);
-    ResourceLoaders::detach<FragmentShader, IRenderer>(this);
-    ResourceLoaders::detach<GeometryShader, IRenderer>(this);
-    ResourceLoaders::detach<VertexShader, IRenderer>(this);
     //ResourceLoaders::detach<Texture, IRenderer>(this);
     //ResourceLoaders::detach<Mesh, IRenderer>(this);
     ResourceLoaders::detach<RenderWindow, IRenderer>(this);
@@ -74,33 +68,6 @@ ResourceHandle IRenderer::load(weak<const ShaderProgram> shader)
 {
     ResourceHandle handle;
     ref<IGPUResource> resource = createShaderProgram(shader);
-    handle.handle = resource;
-    m_pendingShaders.push_back(*resource);
-    return handle;
-}
-
-ResourceHandle IRenderer::load(weak<const VertexShader> shader)
-{
-    ResourceHandle handle;
-    ref<IGPUResource> resource = createVertexShader(shader);
-    handle.handle = resource;
-    m_pendingShaders.push_back(*resource);
-    return handle;
-}
-
-ResourceHandle IRenderer::load(weak<const GeometryShader> shader)
-{
-    ResourceHandle handle;
-    ref<IGPUResource> resource = createGeometryShader(shader);
-    handle.handle = resource;
-    m_pendingShaders.push_back(*resource);
-    return handle;
-}
-
-ResourceHandle IRenderer::load(weak<const FragmentShader> shader)
-{
-    ResourceHandle handle;
-    ref<IGPUResource> resource = createFragmentShader(shader);
     handle.handle = resource;
     m_pendingShaders.push_back(*resource);
     return handle;

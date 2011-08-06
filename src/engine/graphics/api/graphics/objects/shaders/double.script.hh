@@ -27,8 +27,8 @@ published:
     DoubleUniform(const istring& name);
     ~DoubleUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double2 : public Node
@@ -48,8 +48,8 @@ published:
     Double2Uniform(const istring& name);
     ~Double2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double3 : public Node
@@ -69,8 +69,8 @@ published:
     Double3Uniform(const istring& name);
     ~Double3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double4 : public Node
@@ -90,8 +90,8 @@ published:
     Double4Uniform(const istring& name);
     ~Double4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double2x2 : public Node
@@ -111,8 +111,8 @@ published:
     Double2x2Uniform(const istring& name);
     ~Double2x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double3x2 : public Node
@@ -132,8 +132,8 @@ published:
     Double3x2Uniform(const istring& name);
     ~Double3x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double4x2 : public Node
@@ -153,8 +153,8 @@ published:
     Double4x2Uniform(const istring& name);
     ~Double4x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double2x3 : public Node
@@ -174,8 +174,8 @@ published:
     Double2x3Uniform(const istring& name);
     ~Double2x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double3x3 : public Node
@@ -195,8 +195,8 @@ published:
     Double3x3Uniform(const istring& name);
     ~Double3x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double4x3 : public Node
@@ -216,8 +216,8 @@ published:
     Double4x3Uniform(const istring& name);
     ~Double4x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double2x4 : public Node
@@ -237,8 +237,8 @@ published:
     Double2x4Uniform(const istring& name);
     ~Double2x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double3x4 : public Node
@@ -258,8 +258,8 @@ published:
     Double3x4Uniform(const istring& name);
     ~Double3x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Double4x4 : public Node
@@ -279,8 +279,8 @@ published:
     Double4x4Uniform(const istring& name);
     ~Double4x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 

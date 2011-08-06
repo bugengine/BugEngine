@@ -27,8 +27,8 @@ published:
     FloatUniform(const istring& name);
     ~FloatUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float2 : public Node
@@ -48,8 +48,8 @@ published:
     Float2Uniform(const istring& name);
     ~Float2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float3 : public Node
@@ -69,8 +69,8 @@ published:
     Float3Uniform(const istring& name);
     ~Float3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float4 : public Node
@@ -90,8 +90,8 @@ published:
     Float4Uniform(const istring& name);
     ~Float4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float2x2 : public Node
@@ -111,8 +111,8 @@ published:
     Float2x2Uniform(const istring& name);
     ~Float2x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float3x2 : public Node
@@ -132,8 +132,8 @@ published:
     Float3x2Uniform(const istring& name);
     ~Float3x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float4x2 : public Node
@@ -153,8 +153,8 @@ published:
     Float4x2Uniform(const istring& name);
     ~Float4x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float2x3 : public Node
@@ -174,8 +174,8 @@ published:
     Float2x3Uniform(const istring& name);
     ~Float2x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float3x3 : public Node
@@ -195,8 +195,8 @@ published:
     Float3x3Uniform(const istring& name);
     ~Float3x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float4x3 : public Node
@@ -216,8 +216,8 @@ published:
     Float4x3Uniform(const istring& name);
     ~Float4x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float2x4 : public Node
@@ -237,8 +237,8 @@ published:
     Float2x4Uniform(const istring& name);
     ~Float2x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float3x4 : public Node
@@ -258,8 +258,8 @@ published:
     Float3x4Uniform(const istring& name);
     ~Float3x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Float4x4 : public Node
@@ -279,8 +279,8 @@ published:
     Float4x4Uniform(const istring& name);
     ~Float4x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 

@@ -20,80 +20,22 @@ class IShaderBuilder;
 
 }
 
-class be_api(GRAPHICS) Shader : public Resource
-{
-    BE_NOCOPY(Shader);
-protected:
-    Shader();
-    ~Shader();
-public:
-    virtual void buildSource(Shaders::IShaderBuilder& stream) const = 0;
-};
-
-be_tag(ResourceLoaders())
-class be_api(GRAPHICS) VertexShader : public Shader
-{
-    BE_NOCOPY(VertexShader);
-published:
-    const ref<const Shaders::Node>                      position;
-    const ref<const Shaders::Node>                      diffuse;
-    const ref<const Shaders::Node>                      specular;
-    const minitl::array< ref<const Shaders::Node>, 18 > input;
-    const minitl::array< ref<const Shaders::Node>, 18 > output;
-published:
-    VertexShader(                    ref<const Shaders::Node> position,
-                  be_tag(Optional()) ref<const Shaders::Node> diffuse,
-                  be_tag(Optional()) ref<const Shaders::Node> specular,
-                                     minitl::array< ref<const Shaders::Node>, 18 > input,
-                                     minitl::array< ref<const Shaders::Node>, 18 > output);
-    ~VertexShader();
-
-public:
-    void buildSource(Shaders::IShaderBuilder& stream) const override;
-};
-
-
-be_tag(ResourceLoaders())
-class be_api(GRAPHICS) GeometryShader : public Shader
-{
-    BE_NOCOPY(GeometryShader);
-published:
-    GeometryShader();
-    ~GeometryShader();
-public:
-    void buildSource(Shaders::IShaderBuilder& stream) const override;
-};
-
-be_tag(ResourceLoaders())
-class be_api(GRAPHICS) FragmentShader : public Shader
-{
-    BE_NOCOPY(FragmentShader);
-published:
-    const ref<const Shaders::Node>  color;
-    const ref<const Shaders::Node>  depth;
-published:
-    FragmentShader(                    ref<const Shaders::Node> color,
-                    be_tag(Optional()) ref<const Shaders::Node> depth);
-    ~FragmentShader();
-
-public:
-    void buildSource(Shaders::IShaderBuilder& stream) const override;
-};
-
 
 be_tag(ResourceLoaders())
 class be_api(GRAPHICS) ShaderProgram : public Resource
 {
     BE_NOCOPY(ShaderProgram);
 published:
-    const ref<const VertexShader>   vertex;
-    const ref<const GeometryShader> geometry;
-    const ref<const FragmentShader> fragment;
+    const ref<const Shaders::Node>   position;
+    const ref<const Shaders::Node>   color;
+    const ref<const Shaders::Node>   depth;
 published:
-    ShaderProgram( be_tag(Optional()) ref<const VertexShader> vertex,
-                   be_tag(Optional()) ref<const GeometryShader> geometry,
-                   be_tag(Optional()) ref<const FragmentShader> fragment);
+    ShaderProgram(                    ref<const Shaders::Node> position,
+                                      ref<const Shaders::Node> color,
+                   be_tag(Optional()) ref<const Shaders::Node> depth);
     ~ShaderProgram();
+public:
+    void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const;
 };
 
 }}

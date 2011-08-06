@@ -42,19 +42,4 @@ ref<IGPUResource> GLRenderer::createShaderProgram(weak<const ShaderProgram> shad
     return ref<GLShaderProgram>::create(m_allocator, shader, this);
 }
 
-ref<IGPUResource> GLRenderer::createVertexShader(weak<const VertexShader> shader)
-{
-    return ref<GLShader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> GLRenderer::createGeometryShader(weak<const GeometryShader> shader)
-{
-    return ref<GLShader>::create(m_allocator, shader, this);
-}
-
-ref<IGPUResource> GLRenderer::createFragmentShader(weak<const FragmentShader> shader)
-{
-    return ref<GLShader>::create(m_allocator, shader, this);
-}
-
 }}}

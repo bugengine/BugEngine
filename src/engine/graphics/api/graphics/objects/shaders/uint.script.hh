@@ -27,8 +27,8 @@ published:
     UintUniform(const istring& name);
     ~UintUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Uint2 : public Node
@@ -48,8 +48,8 @@ published:
     Uint2Uniform(const istring& name);
     ~Uint2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Uint3 : public Node
@@ -69,8 +69,8 @@ published:
     Uint3Uniform(const istring& name);
     ~Uint3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 class Uint4 : public Node
@@ -90,8 +90,8 @@ published:
     Uint4Uniform(const istring& name);
     ~Uint4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream) const override;
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
 

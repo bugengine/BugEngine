@@ -8,342 +8,328 @@
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
-
+/* Type *************************************************************/
 Double::Double()
 {
 }
-
 Double::~Double()
 {
 }
 
+/* Uniform **********************************************************/
 DoubleUniform::DoubleUniform(const istring& name)
     :   name(name)
 {
 }
-
 DoubleUniform::~DoubleUniform()
 {
 }
-
-void DoubleUniform::buildDeclarations(IShaderBuilder& stream) const
+void DoubleUniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double);
+}
+void DoubleUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void DoubleUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double2::Double2()
 {
 }
-
 Double2::~Double2()
 {
 }
 
+/* Uniform **********************************************************/
 Double2Uniform::Double2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double2Uniform::~Double2Uniform()
 {
 }
-
-void Double2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double2);
+}
+void Double2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double3::Double3()
 {
 }
-
 Double3::~Double3()
 {
 }
 
+/* Uniform **********************************************************/
 Double3Uniform::Double3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double3Uniform::~Double3Uniform()
 {
 }
-
-void Double3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double3);
+}
+void Double3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double4::Double4()
 {
 }
-
 Double4::~Double4()
 {
 }
 
+/* Uniform **********************************************************/
 Double4Uniform::Double4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double4Uniform::~Double4Uniform()
 {
 }
-
-void Double4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double4);
+}
+void Double4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double2x2::Double2x2()
 {
 }
-
 Double2x2::~Double2x2()
 {
 }
 
+/* Uniform **********************************************************/
 Double2x2Uniform::Double2x2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double2x2Uniform::~Double2x2Uniform()
 {
 }
-
-void Double2x2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double2x2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double2x2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double2x2);
+}
+void Double2x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double2x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double3x2::Double3x2()
 {
 }
-
 Double3x2::~Double3x2()
 {
 }
 
+/* Uniform **********************************************************/
 Double3x2Uniform::Double3x2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double3x2Uniform::~Double3x2Uniform()
 {
 }
-
-void Double3x2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double3x2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double3x2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double3x2);
+}
+void Double3x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double3x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double4x2::Double4x2()
 {
 }
-
 Double4x2::~Double4x2()
 {
 }
 
+/* Uniform **********************************************************/
 Double4x2Uniform::Double4x2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double4x2Uniform::~Double4x2Uniform()
 {
 }
-
-void Double4x2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double4x2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double4x2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double4x2);
+}
+void Double4x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double4x2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double2x3::Double2x3()
 {
 }
-
 Double2x3::~Double2x3()
 {
 }
 
+/* Uniform **********************************************************/
 Double2x3Uniform::Double2x3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double2x3Uniform::~Double2x3Uniform()
 {
 }
-
-void Double2x3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double2x3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double2x3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double2x3);
+}
+void Double2x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double2x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double3x3::Double3x3()
 {
 }
-
 Double3x3::~Double3x3()
 {
 }
 
+/* Uniform **********************************************************/
 Double3x3Uniform::Double3x3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double3x3Uniform::~Double3x3Uniform()
 {
 }
-
-void Double3x3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double3x3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double3x3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double3x3);
+}
+void Double3x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double3x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double4x3::Double4x3()
 {
 }
-
 Double4x3::~Double4x3()
 {
 }
 
+/* Uniform **********************************************************/
 Double4x3Uniform::Double4x3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double4x3Uniform::~Double4x3Uniform()
 {
 }
-
-void Double4x3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double4x3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double4x3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double4x3);
+}
+void Double4x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double4x3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double2x4::Double2x4()
 {
 }
-
 Double2x4::~Double2x4()
 {
 }
 
+/* Uniform **********************************************************/
 Double2x4Uniform::Double2x4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double2x4Uniform::~Double2x4Uniform()
 {
 }
-
-void Double2x4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double2x4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double2x4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double2x4);
+}
+void Double2x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double2x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double3x4::Double3x4()
 {
 }
-
 Double3x4::~Double3x4()
 {
 }
 
+/* Uniform **********************************************************/
 Double3x4Uniform::Double3x4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double3x4Uniform::~Double3x4Uniform()
 {
 }
-
-void Double3x4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double3x4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double3x4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double3x4);
+}
+void Double3x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Double3x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Double4x4::Double4x4()
 {
 }
-
 Double4x4::~Double4x4()
 {
 }
 
+/* Uniform **********************************************************/
 Double4x4Uniform::Double4x4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Double4x4Uniform::~Double4x4Uniform()
 {
 }
-
-void Double4x4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Double4x4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Double4x4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Double4x4);
 }
-
-void Double4x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
+void Double4x4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 

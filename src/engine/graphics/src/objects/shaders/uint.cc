@@ -8,108 +8,103 @@
 
 namespace BugEngine { namespace Graphics { namespace Shaders
 {
-
+/* Type *************************************************************/
 Uint::Uint()
 {
 }
-
 Uint::~Uint()
 {
 }
 
+/* Uniform **********************************************************/
 UintUniform::UintUniform(const istring& name)
     :   name(name)
 {
 }
-
 UintUniform::~UintUniform()
 {
 }
-
-void UintUniform::buildDeclarations(IShaderBuilder& stream) const
+void UintUniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Uint);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Uint);
+}
+void UintUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void UintUniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Uint2::Uint2()
 {
 }
-
 Uint2::~Uint2()
 {
 }
 
+/* Uniform **********************************************************/
 Uint2Uniform::Uint2Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Uint2Uniform::~Uint2Uniform()
 {
 }
-
-void Uint2Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Uint2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Uint2);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Uint2);
+}
+void Uint2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Uint2Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Uint3::Uint3()
 {
 }
-
 Uint3::~Uint3()
 {
 }
 
+/* Uniform **********************************************************/
 Uint3Uniform::Uint3Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Uint3Uniform::~Uint3Uniform()
 {
 }
-
-void Uint3Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Uint3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Uint3);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Uint3);
+}
+void Uint3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
 }
 
-void Uint3Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
-{
-}
-
+/* Type *************************************************************/
 Uint4::Uint4()
 {
 }
-
 Uint4::~Uint4()
 {
 }
 
+/* Uniform **********************************************************/
 Uint4Uniform::Uint4Uniform(const istring& name)
     :   name(name)
 {
 }
-
 Uint4Uniform::~Uint4Uniform()
 {
 }
-
-void Uint4Uniform::buildDeclarations(IShaderBuilder& stream) const
+void Uint4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
 {
-    stream.addUniform(this, name, Type_Uint4);
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_Uint4);
 }
-
-void Uint4Uniform::buildDefinitions(IShaderBuilder& /*stream*/) const
+void Uint4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 

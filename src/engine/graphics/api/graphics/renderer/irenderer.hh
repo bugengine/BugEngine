@@ -45,9 +45,6 @@ private:
             ResourceHandle  load(weak<const RenderWindow> renderwindow);
     //        ResourceHandle  load(weak<const Mesh> mesh);
             ResourceHandle  load(weak<const ShaderProgram> program);
-            ResourceHandle  load(weak<const VertexShader> shader);
-            ResourceHandle  load(weak<const GeometryShader> shader);
-            ResourceHandle  load(weak<const FragmentShader> shader);
     //        ResourceHandle  load(weak<const Texture> texture);
 protected:
     virtual void                flush();
@@ -55,9 +52,6 @@ protected:
     virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) = 0;
     //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) = 0;
     virtual ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) = 0;
-    virtual ref<IGPUResource>   createVertexShader(weak<const VertexShader> shader) = 0;
-    virtual ref<IGPUResource>   createGeometryShader(weak<const GeometryShader> shader) = 0;
-    virtual ref<IGPUResource>   createFragmentShader(weak<const FragmentShader> shader) = 0;
     //virtual ref<IGPUResource>   createTexture(weak<const Texture> texture) = 0;
 public:
             weak<ITask>         syncTask() const;

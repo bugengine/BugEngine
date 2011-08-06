@@ -94,7 +94,8 @@ static const char *toString(Shaders::Type type)
     }
 }
 
-GLShaderBuilder::GLShaderBuilder()
+GLShaderBuilder::GLShaderBuilder(GLenum shaderType)
+    :   m_shaderType(shaderType)
 {
     write("#version 140");
 }
@@ -103,9 +104,21 @@ GLShaderBuilder::~GLShaderBuilder()
 {
 }
 
-void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Type type)
+void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Stage /*stage*/, Shaders::Type type)
 {
     write((minitl::format<>("uniform %s %s;") | toString(type) | name).c_str());
+}
+
+void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type)
+{
+    if (stage == Shaders::VertexStage)
+    {
+        write((minitl::format<>("out %s %s") | toString(type) | name).c_str());
+    }
+    else
+    {
+        write((minitl::format<>("in %s %s") | toString(type) | name).c_str());
+    }
 }
 
 }}}

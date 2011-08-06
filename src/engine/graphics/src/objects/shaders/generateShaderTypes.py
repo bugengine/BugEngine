@@ -1,36 +1,120 @@
 #!python
 
-def header(f, cpp, n):
-	f.write("/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>\n")
-	f.write("   see LICENSE for detail */\n")
-	f.write("/* GENERATED FILE! do not edit; see generateShaderTypes.py */\n")
-	f.write("\n")
-	f.write("#ifndef BE_GRAPHICS_OBJECTS_SHADERS_%s_SCRIPT_HH_\n" % n.upper())
-	f.write("#define BE_GRAPHICS_OBJECTS_SHADERS_%s_SCRIPT_HH_\n" % n.upper())
-	f.write("/*****************************************************************************/\n")
-	f.write("#include    <graphics/objects/shaders/node.script.hh>\n")
-	f.write("\n")
-	f.write("namespace BugEngine { namespace Graphics { namespace Shaders\n")
-	f.write("{\n\n")
 
-	cpp.write("/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>\n")
-	cpp.write("   see LICENSE for detail */\n")
-	cpp.write("/* GENERATED FILE! do not edit; see generateShaderTypes.py */\n")
-	cpp.write("\n")
-	cpp.write("#include    <graphics/stdafx.h>\n")
-	cpp.write("#include    <graphics/objects/shaders/%s.script.hh>\n" % n)
-	cpp.write("#include    <graphics/tools/ishaderbuilder.hh>\n")
-	cpp.write("\n")
-	cpp.write("namespace BugEngine { namespace Graphics { namespace Shaders\n")
-	cpp.write("{\n\n")
+hHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+   see LICENSE for detail */
+/* GENERATED FILE! do not edit; see generateShaderTypes.py */
 
-def footer(f, cpp):
-	f.write("\n")
-	f.write("}}}\n")
-	f.write("/*****************************************************************************/\n")
-	f.write("#endif\n")
+#ifndef BE_GRAPHICS_OBJECTS_SHADERS_%(TYPEUPPER)s_SCRIPT_HH_
+#define BE_GRAPHICS_OBJECTS_SHADERS_%(TYPEUPPER)s_SCRIPT_HH_
+/*****************************************************************************/
+#include    <graphics/objects/shaders/node.script.hh>
 
-	cpp.write("}}}\n")
+namespace BugEngine { namespace Graphics { namespace Shaders
+{
+
+"""
+
+hFooter = """
+}}}
+/*****************************************************************************/
+#endif
+"""
+
+cppHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+   see LICENSE for detail */
+/* GENERATED FILE! do not edit; see generateShaderTypes.py */
+
+#include    <graphics/stdafx.h>
+#include    <graphics/objects/shaders/%(TYPE)s.script.hh>
+#include    <graphics/tools/ishaderbuilder.hh>
+
+namespace BugEngine { namespace Graphics { namespace Shaders
+{
+"""
+
+
+cppFooter = """}}}
+"""
+
+
+
+
+exporttype = [
+"""class %(TYPE)s : public Node
+{
+    BE_NOCOPY(%(TYPE)s)
+protected:
+    inline %(TYPE)s();
+    inline ~%(TYPE)s();
+};
+
+""",
+"""/* Type *************************************************************/
+%(TYPE)s::%(TYPE)s()
+{
+}
+%(TYPE)s::~%(TYPE)s()
+{
+}
+
+"""
+]
+
+uniform = [
+"""class %(TYPE)sUniform : public %(TYPE)s
+{
+    BE_NOCOPY(%(TYPE)sUniform)
+published:
+    const istring name;
+published:
+    %(TYPE)sUniform(const istring& name);
+    ~%(TYPE)sUniform();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+""",
+"""/* Uniform **********************************************************/
+%(TYPE)sUniform::%(TYPE)sUniform(const istring& name)
+    :   name(name)
+{
+}
+%(TYPE)sUniform::~%(TYPE)sUniform()
+{
+}
+void %(TYPE)sUniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addUniform(this, currentStage, name, Type_%(TYPE)s);
+}
+void %(TYPE)sUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+"""
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+def header(h, cpp, n):
+	h.write(hHeader % {'TYPEUPPER': n.upper(), 'TYPE': n })
+	cpp.write(cppHeader % {'TYPE': n })
+
+def footer(h, cpp):
+	h.write(hFooter)
+	cpp.write(cppFooter)
 
 
 def fileType(h, cpp, basetype, col, row):
@@ -41,53 +125,21 @@ def fileType(h, cpp, basetype, col, row):
 	else:
 		type = "%s%dx%d" % (basetype, col, row)
 
-	h.write("class %s : public Node\n" % type)
-	h.write("{\n")
-	h.write("    BE_NOCOPY(%s)\n" % type)
-	h.write("protected:\n")
-	h.write("    inline %s();\n" % type)
-	h.write("    inline ~%s();\n" % type)
-	h.write("};\n\n")
-	h.write("class %sUniform : public %s\n" % (type,type))
-	h.write("{\n")
-	h.write("    BE_NOCOPY(%sUniform)\n" % type)
-	h.write("published:\n")
-	h.write("    const istring name;\n")
-	h.write("published:\n")
-	h.write("    %sUniform(const istring& name);\n" % type)
-	h.write("    ~%sUniform();\n" % type)
-	h.write("private:\n")
-	h.write("    virtual void buildDeclarations(IShaderBuilder& stream) const override;\n")
-	h.write("    virtual void buildDefinitions(IShaderBuilder& stream) const override;\n")
-	h.write("};\n\n")
-
-	cpp.write("%s::%s()\n" % (type, type))
-	cpp.write("{\n")
-	cpp.write("}\n\n")
-	cpp.write("%s::~%s()\n" % (type, type))
-	cpp.write("{\n")
-	cpp.write("}\n\n")
-	cpp.write("%sUniform::%sUniform(const istring& name)\n" % (type, type))
-	cpp.write("    :   name(name)\n")
-	cpp.write("{\n")
-	cpp.write("}\n\n")
-	cpp.write("%sUniform::~%sUniform()\n" % (type, type))
-	cpp.write("{\n")
-	cpp.write("}\n\n")
-	cpp.write("void %sUniform::buildDeclarations(IShaderBuilder& stream) const\n" % type)
-	cpp.write("{\n")
-	cpp.write("    stream.addUniform(this, name, Type_%s);\n" % type)
-	cpp.write("}\n\n")
-	cpp.write("void %sUniform::buildDefinitions(IShaderBuilder& /*stream*/) const\n" % type)
-	cpp.write("{\n")
-	cpp.write("}\n\n")
+	h.write(exporttype[0] % {'TYPE': type})
+	cpp.write(exporttype[1] % {'TYPE': type})
+	h.write(uniform[0] % {'TYPE': type})
+	cpp.write(uniform[1] % {'TYPE': type})
 
 
-types = [("float", "Float", True, True),
-("double", "Double", True, True),
-("int", "Int", True, False),
-("uint", "Uint", True, False),
-("bool", "Bool", True, False)]
+
+
+types = [
+	("float", "Float", True, True),
+	("double", "Double", True, True),
+	("int", "Int", True, False),
+	("uint", "Uint", True, False),
+	("bool", "Bool", True, False)
+]
 
 for rawtype, shadertype, doVector, doMatrix in types:
 	h = open("src/engine/graphics/api/graphics/objects/shaders/%s.script.hh" % rawtype, "w")

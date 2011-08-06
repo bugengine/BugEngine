@@ -26,23 +26,4 @@ void Dx9ShaderProgram::unload()
 {
 }
 
-
-
-Dx9Shader::Dx9Shader(weak<const Shader> resource, weak<Dx9Renderer> renderer)
-    :   IGPUResource(resource, renderer)
-{
-}
-
-Dx9Shader::~Dx9Shader()
-{
-}
-
-void Dx9Shader::load(weak<const Resource> resource)
-{
-}
-
-void Dx9Shader::unload()
-{
-}
-
 }}}

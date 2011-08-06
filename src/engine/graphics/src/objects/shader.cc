@@ -8,91 +8,26 @@
 namespace BugEngine { namespace Graphics
 {
 
-Shader::Shader()
-{
-}
-
-Shader::~Shader()
-{
-}
-
-
-VertexShader::VertexShader( ref<const Shaders::Node> position,
-                            ref<const Shaders::Node> diffuse,
-                            ref<const Shaders::Node> specular,
-                            minitl::array< ref<const Shaders::Node>, 18 > input,
-                            minitl::array< ref<const Shaders::Node>, 18 > output)
+ShaderProgram::ShaderProgram(ref<const Shaders::Node> position, ref<const Shaders::Node> color, ref<const Shaders::Node> depth)
     :   position(position)
-    ,   diffuse(diffuse)
-    ,   specular(specular)
-    ,   input(input)
-    ,   output(output)
-{
-}
-
-VertexShader::~VertexShader()
-{
-}
-
-void VertexShader::buildSource(Shaders::IShaderBuilder& builder) const
-{
-    if (position) position->buildDeclarations(builder);
-    if (diffuse) diffuse->buildDeclarations(builder);
-    if (specular) specular->buildDeclarations(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != input.end(); ++it)
-        if (*it) (*it)->buildDeclarations(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != output.end(); ++it)
-        if (*it) (*it)->buildDeclarations(builder);
-
-
-
-    if (position) position->buildDefinitions(builder);
-    if (diffuse) diffuse->buildDefinitions(builder);
-    if (specular) specular->buildDefinitions(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != input.end(); ++it)
-        if (*it) (*it)->buildDefinitions(builder);
-    for (minitl::array< ref<const Shaders::Node>, 18 >::const_iterator it = varying.begin(); it != output.end(); ++it)
-        if (*it) (*it)->buildDefinitions(builder);
-}
-
-
-GeometryShader::GeometryShader()
-{
-}
-
-GeometryShader::~GeometryShader()
-{
-}
-
-void GeometryShader::buildSource(Shaders::IShaderBuilder& /*stream*/) const
-{
-}
-
-
-FragmentShader::FragmentShader( ref<const Shaders::Node> color, ref<const Shaders::Node> depth)
-    :   color(color)
+    ,   color(color)
     ,   depth(depth)
-{
-}
-
-FragmentShader::~FragmentShader()
-{
-}
-
-void FragmentShader::buildSource(Shaders::IShaderBuilder& /*stream*/) const
-{
-}
-
-
-ShaderProgram::ShaderProgram(ref<const VertexShader> vertex, ref<const GeometryShader> geometry, ref<const FragmentShader> fragment)
-    :   vertex(vertex)
-    ,   geometry(geometry)
-    ,   fragment(fragment)
 {
 }
 
 ShaderProgram::~ShaderProgram()
 {
+}
+
+void ShaderProgram::buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const
+{
+    if (position) position->buildDeclarations(builder, Shaders::VertexStage, stage);
+    if (color) color->buildDeclarations(builder, Shaders::FragmentStage, stage);
+    if (depth) depth->buildDeclarations(builder, Shaders::FragmentStage, stage);
+
+    if (position) position->buildDefinitions(builder, Shaders::VertexStage, stage);
+    if (color) color->buildDefinitions(builder, Shaders::FragmentStage, stage);
+    if (depth) depth->buildDefinitions(builder, Shaders::FragmentStage, stage);
 }
 
 }}
