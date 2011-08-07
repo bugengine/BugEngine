@@ -7,6 +7,22 @@
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
+    
+static const char *toString(Shaders::Semantic semantic)
+{
+    switch(semantic)
+    {
+    case Shaders::Position:
+        return "gl_Position";
+    case Shaders::Color:
+        return "gl_FragColor";
+    case Shaders::Depth:
+        return "gl_FragDepth";
+    default:
+        be_error("semantic %d not recognized by the GLSL shader builder" | semantic);
+        return "gl_FragColor";
+    }
+}
 
 static const char *toString(Shaders::Type type)
 {
@@ -97,7 +113,7 @@ static const char *toString(Shaders::Type type)
 GLShaderBuilder::GLShaderBuilder(GLenum shaderType)
     :   m_shaderType(shaderType)
 {
-    write("#version 140");
+    writeln("#version 140");
 }
 
 GLShaderBuilder::~GLShaderBuilder()
@@ -106,19 +122,55 @@ GLShaderBuilder::~GLShaderBuilder()
 
 void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Stage /*stage*/, Shaders::Type type)
 {
-    write((minitl::format<>("uniform %s %s;") | toString(type) | name).c_str());
+    writeln((minitl::format<>("uniform %s %s;") | toString(type) | name).c_str());
 }
 
 void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type)
 {
     if (stage == Shaders::VertexStage)
     {
-        write((minitl::format<>("out %s %s") | toString(type) | name).c_str());
+        writeln((minitl::format<>("out %s %s;") | toString(type) | name).c_str());
     }
     else
     {
-        write((minitl::format<>("in %s %s") | toString(type) | name).c_str());
+        writeln((minitl::format<>("in %s %s;") | toString(type) | name).c_str());
     }
+}
+
+void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type)
+{
+    if (stage == Shaders::VertexStage)
+    {
+        writeln((minitl::format<>("in %s %s;") | toString(type) | name).c_str());
+    }
+    else if (stage ==Shaders::FragmentStage)
+    {
+        be_assert(false, "not yet");
+    }
+}
+
+void GLShaderBuilder::doAddMethod(const istring& name)
+{
+    writeln("");
+    writeln((minitl::format<>("void %s ()") | name).c_str());
+    writeln("{");
+    indent();
+}
+
+void GLShaderBuilder::doEndMethod()
+{
+    unindent();
+    writeln("}");
+}
+
+void GLShaderBuilder::doSaveTo(Shaders::Semantic semantic, const istring& value)
+{
+    writeln((minitl::format<>("%s = %s;") | toString(semantic) | value).c_str());
+}
+
+void GLShaderBuilder::doSaveTo(const istring& name, const istring& value)
+{
+    writeln((minitl::format<>("%s = %s;") | name | value).c_str());
 }
 
 }}}

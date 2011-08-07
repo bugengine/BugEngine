@@ -50,7 +50,7 @@ ref<T>::ref(const ref& other)
 template< typename T >
 template< typename U >
 ref<T>::ref(const ref<U> other)
-:   m_ptr(other.operator->())
+:   m_ptr(checkIsA<T>(other.operator->()))
 {
     addref(m_ptr);
 }
@@ -58,7 +58,7 @@ ref<T>::ref(const ref<U> other)
 template< typename T >
 template< typename U >
 ref<T>::ref(const scoped<U> other)
-:   m_ptr(other.operator->())
+:   m_ptr(checkIsA<T>(other.operator->()))
 {
     addref(m_ptr);
     other.m_ptr = 0;

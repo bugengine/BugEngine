@@ -33,6 +33,39 @@ void BoolUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentSt
 {
 }
 
+/* Attribute ********************************************************/
+BoolAttribute::BoolAttribute()
+{
+}
+BoolAttribute::~BoolAttribute()
+{
+}
+void BoolAttribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    stream.addAttribute(this, currentStage, targetStage, Type_Bool);
+}
+void BoolAttribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Varying **********************************************************/
+BoolVarying::BoolVarying(weak<const Bool> node)
+    :   node(node)
+{
+}
+BoolVarying::~BoolVarying()
+{
+}
+void BoolVarying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addVarying(this, currentStage, targetStage, Type_Bool);
+    node->buildDeclarations(stream, VertexStage, targetStage);
+}
+void BoolVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
 /* Type *************************************************************/
 Bool2::Bool2()
 {
@@ -55,6 +88,39 @@ void Bool2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage,
         stream.addUniform(this, currentStage, name, Type_Bool2);
 }
 void Bool2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Attribute ********************************************************/
+Bool2Attribute::Bool2Attribute()
+{
+}
+Bool2Attribute::~Bool2Attribute()
+{
+}
+void Bool2Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    stream.addAttribute(this, currentStage, targetStage, Type_Bool2);
+}
+void Bool2Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Varying **********************************************************/
+Bool2Varying::Bool2Varying(weak<const Bool2> node)
+    :   node(node)
+{
+}
+Bool2Varying::~Bool2Varying()
+{
+}
+void Bool2Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addVarying(this, currentStage, targetStage, Type_Bool2);
+    node->buildDeclarations(stream, VertexStage, targetStage);
+}
+void Bool2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 
@@ -83,6 +149,39 @@ void Bool3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentS
 {
 }
 
+/* Attribute ********************************************************/
+Bool3Attribute::Bool3Attribute()
+{
+}
+Bool3Attribute::~Bool3Attribute()
+{
+}
+void Bool3Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    stream.addAttribute(this, currentStage, targetStage, Type_Bool3);
+}
+void Bool3Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Varying **********************************************************/
+Bool3Varying::Bool3Varying(weak<const Bool3> node)
+    :   node(node)
+{
+}
+Bool3Varying::~Bool3Varying()
+{
+}
+void Bool3Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addVarying(this, currentStage, targetStage, Type_Bool3);
+    node->buildDeclarations(stream, VertexStage, targetStage);
+}
+void Bool3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
 /* Type *************************************************************/
 Bool4::Bool4()
 {
@@ -105,6 +204,39 @@ void Bool4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage,
         stream.addUniform(this, currentStage, name, Type_Bool4);
 }
 void Bool4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Attribute ********************************************************/
+Bool4Attribute::Bool4Attribute()
+{
+}
+Bool4Attribute::~Bool4Attribute()
+{
+}
+void Bool4Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    stream.addAttribute(this, currentStage, targetStage, Type_Bool4);
+}
+void Bool4Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+/* Varying **********************************************************/
+Bool4Varying::Bool4Varying(weak<const Bool4> node)
+    :   node(node)
+{
+}
+Bool4Varying::~Bool4Varying()
+{
+}
+void Bool4Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addVarying(this, currentStage, targetStage, Type_Bool4);
+    node->buildDeclarations(stream, VertexStage, targetStage);
+}
+void Bool4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 

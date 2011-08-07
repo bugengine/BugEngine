@@ -27,8 +27,8 @@ void GLShaderProgram::attach()
 
     if (m_vertexShader)
         be_checked_cast<const GLRenderer>(m_renderer)->shaderext().glAttachShader(m_shaderProgram, m_vertexShader);
-    if (m_geometryShader)
-        be_checked_cast<const GLRenderer>(m_renderer)->shaderext().glAttachShader(m_shaderProgram, m_geometryShader);
+    //if (m_geometryShader)
+    //    be_checked_cast<const GLRenderer>(m_renderer)->shaderext().glAttachShader(m_shaderProgram, m_geometryShader);
     if (m_fragmentShader)
         be_checked_cast<const GLRenderer>(m_renderer)->shaderext().glAttachShader(m_shaderProgram, m_fragmentShader);
 }

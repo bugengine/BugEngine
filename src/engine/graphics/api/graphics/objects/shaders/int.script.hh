@@ -31,6 +31,30 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+class IntAttribute : public Int
+{
+    BE_NOCOPY(IntAttribute)
+published:
+    IntAttribute();
+    ~IntAttribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class IntVarying : public Int
+{
+    BE_NOCOPY(IntVarying)
+published:
+    const weak<const Int> node;
+published:
+    IntVarying(weak<const Int> node);
+    ~IntVarying();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
 class Int2 : public Node
 {
     BE_NOCOPY(Int2)
@@ -47,6 +71,30 @@ published:
 published:
     Int2Uniform(const istring& name);
     ~Int2Uniform();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Int2Attribute : public Int2
+{
+    BE_NOCOPY(Int2Attribute)
+published:
+    Int2Attribute();
+    ~Int2Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Int2Varying : public Int2
+{
+    BE_NOCOPY(Int2Varying)
+published:
+    const weak<const Int2> node;
+published:
+    Int2Varying(weak<const Int2> node);
+    ~Int2Varying();
 private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
@@ -73,6 +121,30 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+class Int3Attribute : public Int3
+{
+    BE_NOCOPY(Int3Attribute)
+published:
+    Int3Attribute();
+    ~Int3Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Int3Varying : public Int3
+{
+    BE_NOCOPY(Int3Varying)
+published:
+    const weak<const Int3> node;
+published:
+    Int3Varying(weak<const Int3> node);
+    ~Int3Varying();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
 class Int4 : public Node
 {
     BE_NOCOPY(Int4)
@@ -89,6 +161,30 @@ published:
 published:
     Int4Uniform(const istring& name);
     ~Int4Uniform();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Int4Attribute : public Int4
+{
+    BE_NOCOPY(Int4Attribute)
+published:
+    Int4Attribute();
+    ~Int4Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Int4Varying : public Int4
+{
+    BE_NOCOPY(Int4Varying)
+published:
+    const weak<const Int4> node;
+published:
+    Int4Varying(weak<const Int4> node);
+    ~Int4Varying();
 private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;

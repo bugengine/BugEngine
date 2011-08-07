@@ -32,12 +32,12 @@ public:
     weak() : m_ptr(0) {}
     weak(T* ptr) : m_ptr(ptr) { minitl::addweak(m_ptr); }
     template< typename U >
-    weak(ref<U> other) : m_ptr(static_cast<T*>(other.operator->())) { minitl::addweak(m_ptr); }
+    weak(ref<U> other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
     template< typename U >
-    weak(const scoped<U>& other) : m_ptr(static_cast<T*>(other.operator->())) { minitl::addweak(m_ptr); }
+    weak(const scoped<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
     weak(const weak& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
     template< typename U >
-    weak(const weak<U>& other) : m_ptr(static_cast<T*>(other.operator->())) { minitl::addweak(m_ptr); }
+    weak(const weak<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
     ~weak() { minitl::decweak(m_ptr); }
 
     weak& operator=(const weak& other) { weak(other).swap(*this); return *this; }

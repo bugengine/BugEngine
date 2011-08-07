@@ -15,8 +15,10 @@ IShaderBuilder::Namespace::Namespace()
 IShaderBuilder::IShaderBuilder()
     :   m_stream(tempArena(), 10000)
     ,   m_namespaces(tempArena())
-    ,   m_input()
-    ,   m_output()
+    ,   m_currentAttribute(0)
+    ,   m_currentVarying(0)
+    ,   m_currentAttributeToVarying(0)
+    ,   m_attributeToVarying(tempArena())
     ,   m_indent(0)
     ,   m_counter(0)
 {
@@ -48,6 +50,13 @@ void IShaderBuilder::write(const char *text)
             m_stream.write("  ", 2);
         m_stream.write(text, strlen(text));
     }
+    m_stream.write("\0", 1);
+    m_stream.seek(MemoryStream::eSeekMove, -1);
+}
+
+void IShaderBuilder::writeln(const char *text)
+{
+    write(text);
     m_stream.write("\n", 1);
     m_stream.write("\0", 1);
     m_stream.seek(MemoryStream::eSeekMove, -1);
@@ -86,13 +95,78 @@ void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istrin
     }
 }
 
-void IShaderBuilder::addVarying(weak<const Node> node, Stage stage, const istring& name, Type type)
+void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage targetStage, Type type)
 {
-    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
-    if (inserted)
+    if (currentStage == targetStage)
     {
-        doAddVaryingDeclaration(name, stage, type);
+        istring name = minitl::format<>("b_varying%d") | m_currentVarying;
+        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
+        if (inserted)
+        {
+            m_currentVarying++;
+            doAddVaryingDeclaration(name, currentStage, type);
+        }
     }
+}
+
+void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Stage targetStage, Type type)
+{
+    if (VertexStage == targetStage)
+    {
+        istring nameAttribute = minitl::format<>("b_attribute%d") | m_currentAttribute;
+        istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
+        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, nameAttribute)).second;
+        if (inserted)
+        {
+            m_currentAttribute++;
+            if (currentStage == VertexStage)
+            {
+                doAddAttributeDeclaration(nameAttribute, targetStage, type);
+            }
+            else
+            {
+                m_currentAttributeToVarying++;
+                doAddAttributeDeclaration(nameAttribute, targetStage, type);
+                doAddVaryingDeclaration(nameVarying, targetStage, type);
+                m_attributeToVarying.push_back(minitl::make_pair(nameAttribute, nameVarying));
+            }
+        }
+    }
+    else if(currentStage == targetStage)
+    {
+        istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
+        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, nameVarying)).second;
+        if (inserted)
+        {
+            m_currentAttributeToVarying++;
+            doAddVaryingDeclaration(nameVarying, targetStage, type);
+        }
+    }
+}
+
+void IShaderBuilder::forwardAttributes()
+{
+    for (minitl::vector< minitl::pair<istring, istring> >::const_iterator it = m_attributeToVarying.begin(); it != m_attributeToVarying.end(); ++it)
+    {
+        doSaveTo(it->second, it->first);
+    }
+}
+
+void IShaderBuilder::beginMethodDefinition(const istring& name)
+{
+    m_namespaces.push_back(Namespace());
+    doAddMethod(name);
+}
+
+void IShaderBuilder::end()
+{
+    m_namespaces.erase(m_namespaces.end()-1);
+    doEndMethod();
+}
+
+void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
+{
+    doSaveTo(semantic, referenceNode(node));
 }
 
 }}}

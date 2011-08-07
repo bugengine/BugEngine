@@ -22,6 +22,11 @@ public:
 private:
     virtual void doAddUniformDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
     virtual void doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
+    virtual void doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
+    virtual void doAddMethod(const istring& name) override;
+    virtual void doEndMethod() override;
+    virtual void doSaveTo(Shaders::Semantic semantic, const istring& value) override;
+    virtual void doSaveTo(const istring& name, const istring& value) override;
 };
 
 }}}

@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 #include    <graphics/objects/shaders/node.script.hh>
+#include    <graphics/objects/shaders/float.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -26,13 +27,13 @@ class be_api(GRAPHICS) ShaderProgram : public Resource
 {
     BE_NOCOPY(ShaderProgram);
 published:
-    const ref<const Shaders::Node>   position;
-    const ref<const Shaders::Node>   color;
-    const ref<const Shaders::Node>   depth;
+    const ref<const Shaders::Float4> position;
+    const ref<const Shaders::Float4> color;
+    const ref<const Shaders::Float>  depth;
 published:
-    ShaderProgram(                    ref<const Shaders::Node> position,
-                                      ref<const Shaders::Node> color,
-                   be_tag(Optional()) ref<const Shaders::Node> depth);
+    ShaderProgram(                    ref<const Shaders::Float4> position,
+                                      ref<const Shaders::Float4> color,
+                   be_tag(Optional()) ref<const Shaders::Float>  depth);
     ~ShaderProgram();
 public:
     void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const;

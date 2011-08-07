@@ -97,6 +97,77 @@ void %(TYPE)sUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 ]
 
 
+attribute = [
+"""class %(TYPE)sAttribute : public %(TYPE)s
+{
+    BE_NOCOPY(%(TYPE)sAttribute)
+published:
+    %(TYPE)sAttribute();
+    ~%(TYPE)sAttribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+""",
+"""/* Attribute ********************************************************/
+%(TYPE)sAttribute::%(TYPE)sAttribute()
+{
+}
+%(TYPE)sAttribute::~%(TYPE)sAttribute()
+{
+}
+void %(TYPE)sAttribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    stream.addAttribute(this, currentStage, targetStage, Type_%(TYPE)s);
+}
+void %(TYPE)sAttribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+"""
+]
+
+
+
+varying = [
+"""class %(TYPE)sVarying : public %(TYPE)s
+{
+    BE_NOCOPY(%(TYPE)sVarying)
+published:
+    const weak<const %(TYPE)s> node;
+published:
+    %(TYPE)sVarying(weak<const %(TYPE)s> node);
+    ~%(TYPE)sVarying();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+""",
+"""/* Varying **********************************************************/
+%(TYPE)sVarying::%(TYPE)sVarying(weak<const %(TYPE)s> node)
+    :   node(node)
+{
+}
+%(TYPE)sVarying::~%(TYPE)sVarying()
+{
+}
+void %(TYPE)sVarying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+{
+    if (currentStage == targetStage)
+        stream.addVarying(this, currentStage, targetStage, Type_%(TYPE)s);
+    node->buildDeclarations(stream, VertexStage, targetStage);
+}
+void %(TYPE)sVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage */currentStage*/, Stage /*targetStage*/) const
+{
+}
+
+"""
+]
+
+
+
 
 
 
@@ -129,6 +200,10 @@ def fileType(h, cpp, basetype, col, row):
 	cpp.write(exporttype[1] % {'TYPE': type})
 	h.write(uniform[0] % {'TYPE': type})
 	cpp.write(uniform[1] % {'TYPE': type})
+	h.write(attribute[0] % {'TYPE': type})
+	cpp.write(attribute[1] % {'TYPE': type})
+	h.write(varying[0] % {'TYPE': type})
+	cpp.write(varying[1] % {'TYPE': type})
 
 
 

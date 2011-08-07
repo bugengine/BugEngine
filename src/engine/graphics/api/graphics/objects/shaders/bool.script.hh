@@ -31,6 +31,30 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+class BoolAttribute : public Bool
+{
+    BE_NOCOPY(BoolAttribute)
+published:
+    BoolAttribute();
+    ~BoolAttribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class BoolVarying : public Bool
+{
+    BE_NOCOPY(BoolVarying)
+published:
+    const weak<const Bool> node;
+published:
+    BoolVarying(weak<const Bool> node);
+    ~BoolVarying();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
 class Bool2 : public Node
 {
     BE_NOCOPY(Bool2)
@@ -47,6 +71,30 @@ published:
 published:
     Bool2Uniform(const istring& name);
     ~Bool2Uniform();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Bool2Attribute : public Bool2
+{
+    BE_NOCOPY(Bool2Attribute)
+published:
+    Bool2Attribute();
+    ~Bool2Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Bool2Varying : public Bool2
+{
+    BE_NOCOPY(Bool2Varying)
+published:
+    const weak<const Bool2> node;
+published:
+    Bool2Varying(weak<const Bool2> node);
+    ~Bool2Varying();
 private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
@@ -73,6 +121,30 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+class Bool3Attribute : public Bool3
+{
+    BE_NOCOPY(Bool3Attribute)
+published:
+    Bool3Attribute();
+    ~Bool3Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Bool3Varying : public Bool3
+{
+    BE_NOCOPY(Bool3Varying)
+published:
+    const weak<const Bool3> node;
+published:
+    Bool3Varying(weak<const Bool3> node);
+    ~Bool3Varying();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
 class Bool4 : public Node
 {
     BE_NOCOPY(Bool4)
@@ -89,6 +161,30 @@ published:
 published:
     Bool4Uniform(const istring& name);
     ~Bool4Uniform();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Bool4Attribute : public Bool4
+{
+    BE_NOCOPY(Bool4Attribute)
+published:
+    Bool4Attribute();
+    ~Bool4Attribute();
+private:
+    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+};
+
+class Bool4Varying : public Bool4
+{
+    BE_NOCOPY(Bool4Varying)
+published:
+    const weak<const Bool4> node;
+published:
+    Bool4Varying(weak<const Bool4> node);
+    ~Bool4Varying();
 private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;

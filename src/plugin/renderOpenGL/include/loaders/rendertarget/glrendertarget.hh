@@ -17,7 +17,7 @@ private:
     void setCurrent() const;
     void clearCurrent() const;
 public:
-    GLRenderTarget(weak<const Resource> resource, weak<GLRenderer> renderer);
+    GLRenderTarget(weak<const RenderTarget> resource, weak<GLRenderer> renderer);
     ~GLRenderTarget();
 
     virtual void load(weak<const Resource> resource) override;
