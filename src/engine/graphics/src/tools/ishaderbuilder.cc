@@ -18,6 +18,7 @@ IShaderBuilder::IShaderBuilder()
     ,   m_currentAttribute(0)
     ,   m_currentVarying(0)
     ,   m_currentAttributeToVarying(0)
+    ,   m_currentTemporary(0)
     ,   m_attributeToVarying(tempArena())
     ,   m_indent(0)
     ,   m_counter(0)
@@ -167,6 +168,19 @@ void IShaderBuilder::end()
 void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
 {
     doSaveTo(semantic, referenceNode(node));
+}
+
+void IShaderBuilder::addOperator(weak<const Node> node, Operator op, Type type, weak<const Node> node1, weak<const Node> node2)
+{
+    istring var = minitl::format<>("temp_%d") | m_currentTemporary;
+    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, var)).second;
+    if (inserted)
+    {
+        m_currentTemporary++;
+        const istring& op1 = referenceNode(node1);
+        const istring& op2 = referenceNode(node2);
+        doAddOperator(op, type, var, op1, op2);
+    }
 }
 
 }}}

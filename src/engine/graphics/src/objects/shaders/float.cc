@@ -66,6 +66,137 @@ void FloatVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentS
 {
 }
 
+class Floatmul : public Float
+{
+private:
+    weak<const Float> node1;
+    weak<const Float> node2;
+public:
+    Floatmul(weak<const Float> node1, weak<const Float> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float, node1, node2);
+        }
+    }
+};
+ref<Float> operator *(weak<const Float> node1, weak<const Float> node2)
+{
+    return ref<Floatmul>::create(gameArena(), node1, node2);
+}
+
+class Floatdiv : public Float
+{
+private:
+    weak<const Float> node1;
+    weak<const Float> node2;
+public:
+    Floatdiv(weak<const Float> node1, weak<const Float> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float, node1, node2);
+        }
+    }
+};
+ref<Float> operator /(weak<const Float> node1, weak<const Float> node2)
+{
+    return ref<Floatdiv>::create(gameArena(), node1, node2);
+}
+
+class Floatadd : public Float
+{
+private:
+    weak<const Float> node1;
+    weak<const Float> node2;
+public:
+    Floatadd(weak<const Float> node1, weak<const Float> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float, node1, node2);
+        }
+    }
+};
+ref<Float> operator +(weak<const Float> node1, weak<const Float> node2)
+{
+    return ref<Floatadd>::create(gameArena(), node1, node2);
+}
+
+class Floatsub : public Float
+{
+private:
+    weak<const Float> node1;
+    weak<const Float> node2;
+public:
+    Floatsub(weak<const Float> node1, weak<const Float> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float, node1, node2);
+        }
+    }
+};
+ref<Float> operator -(weak<const Float> node1, weak<const Float> node2)
+{
+    return ref<Floatsub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float2::Float2()
 {
@@ -123,6 +254,137 @@ void Float2Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage
 void Float2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float2mul : public Float2
+{
+private:
+    weak<const Float2> node1;
+    weak<const Float2> node2;
+public:
+    Float2mul(weak<const Float2> node1, weak<const Float2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float2, node1, node2);
+        }
+    }
+};
+ref<Float2> operator *(weak<const Float2> node1, weak<const Float2> node2)
+{
+    return ref<Float2mul>::create(gameArena(), node1, node2);
+}
+
+class Float2div : public Float2
+{
+private:
+    weak<const Float2> node1;
+    weak<const Float2> node2;
+public:
+    Float2div(weak<const Float2> node1, weak<const Float2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float2, node1, node2);
+        }
+    }
+};
+ref<Float2> operator /(weak<const Float2> node1, weak<const Float2> node2)
+{
+    return ref<Float2div>::create(gameArena(), node1, node2);
+}
+
+class Float2add : public Float2
+{
+private:
+    weak<const Float2> node1;
+    weak<const Float2> node2;
+public:
+    Float2add(weak<const Float2> node1, weak<const Float2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float2, node1, node2);
+        }
+    }
+};
+ref<Float2> operator +(weak<const Float2> node1, weak<const Float2> node2)
+{
+    return ref<Float2add>::create(gameArena(), node1, node2);
+}
+
+class Float2sub : public Float2
+{
+private:
+    weak<const Float2> node1;
+    weak<const Float2> node2;
+public:
+    Float2sub(weak<const Float2> node1, weak<const Float2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float2, node1, node2);
+        }
+    }
+};
+ref<Float2> operator -(weak<const Float2> node1, weak<const Float2> node2)
+{
+    return ref<Float2sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Float3::Float3()
@@ -182,6 +444,137 @@ void Float3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*current
 {
 }
 
+class Float3mul : public Float3
+{
+private:
+    weak<const Float3> node1;
+    weak<const Float3> node2;
+public:
+    Float3mul(weak<const Float3> node1, weak<const Float3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float3, node1, node2);
+        }
+    }
+};
+ref<Float3> operator *(weak<const Float3> node1, weak<const Float3> node2)
+{
+    return ref<Float3mul>::create(gameArena(), node1, node2);
+}
+
+class Float3div : public Float3
+{
+private:
+    weak<const Float3> node1;
+    weak<const Float3> node2;
+public:
+    Float3div(weak<const Float3> node1, weak<const Float3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float3, node1, node2);
+        }
+    }
+};
+ref<Float3> operator /(weak<const Float3> node1, weak<const Float3> node2)
+{
+    return ref<Float3div>::create(gameArena(), node1, node2);
+}
+
+class Float3add : public Float3
+{
+private:
+    weak<const Float3> node1;
+    weak<const Float3> node2;
+public:
+    Float3add(weak<const Float3> node1, weak<const Float3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float3, node1, node2);
+        }
+    }
+};
+ref<Float3> operator +(weak<const Float3> node1, weak<const Float3> node2)
+{
+    return ref<Float3add>::create(gameArena(), node1, node2);
+}
+
+class Float3sub : public Float3
+{
+private:
+    weak<const Float3> node1;
+    weak<const Float3> node2;
+public:
+    Float3sub(weak<const Float3> node1, weak<const Float3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float3, node1, node2);
+        }
+    }
+};
+ref<Float3> operator -(weak<const Float3> node1, weak<const Float3> node2)
+{
+    return ref<Float3sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float4::Float4()
 {
@@ -239,6 +632,137 @@ void Float4Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage
 void Float4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float4mul : public Float4
+{
+private:
+    weak<const Float4> node1;
+    weak<const Float4> node2;
+public:
+    Float4mul(weak<const Float4> node1, weak<const Float4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float4, node1, node2);
+        }
+    }
+};
+ref<Float4> operator *(weak<const Float4> node1, weak<const Float4> node2)
+{
+    return ref<Float4mul>::create(gameArena(), node1, node2);
+}
+
+class Float4div : public Float4
+{
+private:
+    weak<const Float4> node1;
+    weak<const Float4> node2;
+public:
+    Float4div(weak<const Float4> node1, weak<const Float4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float4, node1, node2);
+        }
+    }
+};
+ref<Float4> operator /(weak<const Float4> node1, weak<const Float4> node2)
+{
+    return ref<Float4div>::create(gameArena(), node1, node2);
+}
+
+class Float4add : public Float4
+{
+private:
+    weak<const Float4> node1;
+    weak<const Float4> node2;
+public:
+    Float4add(weak<const Float4> node1, weak<const Float4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float4, node1, node2);
+        }
+    }
+};
+ref<Float4> operator +(weak<const Float4> node1, weak<const Float4> node2)
+{
+    return ref<Float4add>::create(gameArena(), node1, node2);
+}
+
+class Float4sub : public Float4
+{
+private:
+    weak<const Float4> node1;
+    weak<const Float4> node2;
+public:
+    Float4sub(weak<const Float4> node1, weak<const Float4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float4, node1, node2);
+        }
+    }
+};
+ref<Float4> operator -(weak<const Float4> node1, weak<const Float4> node2)
+{
+    return ref<Float4sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Float2x2::Float2x2()
@@ -298,6 +822,137 @@ void Float2x2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 {
 }
 
+class Float2x2mul : public Float2x2
+{
+private:
+    weak<const Float2x2> node1;
+    weak<const Float2x2> node2;
+public:
+    Float2x2mul(weak<const Float2x2> node1, weak<const Float2x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float2x2, node1, node2);
+        }
+    }
+};
+ref<Float2x2> operator *(weak<const Float2x2> node1, weak<const Float2x2> node2)
+{
+    return ref<Float2x2mul>::create(gameArena(), node1, node2);
+}
+
+class Float2x2div : public Float2x2
+{
+private:
+    weak<const Float2x2> node1;
+    weak<const Float2x2> node2;
+public:
+    Float2x2div(weak<const Float2x2> node1, weak<const Float2x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float2x2, node1, node2);
+        }
+    }
+};
+ref<Float2x2> operator /(weak<const Float2x2> node1, weak<const Float2x2> node2)
+{
+    return ref<Float2x2div>::create(gameArena(), node1, node2);
+}
+
+class Float2x2add : public Float2x2
+{
+private:
+    weak<const Float2x2> node1;
+    weak<const Float2x2> node2;
+public:
+    Float2x2add(weak<const Float2x2> node1, weak<const Float2x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float2x2, node1, node2);
+        }
+    }
+};
+ref<Float2x2> operator +(weak<const Float2x2> node1, weak<const Float2x2> node2)
+{
+    return ref<Float2x2add>::create(gameArena(), node1, node2);
+}
+
+class Float2x2sub : public Float2x2
+{
+private:
+    weak<const Float2x2> node1;
+    weak<const Float2x2> node2;
+public:
+    Float2x2sub(weak<const Float2x2> node1, weak<const Float2x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float2x2, node1, node2);
+        }
+    }
+};
+ref<Float2x2> operator -(weak<const Float2x2> node1, weak<const Float2x2> node2)
+{
+    return ref<Float2x2sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float3x2::Float3x2()
 {
@@ -355,6 +1010,137 @@ void Float3x2Varying::buildDeclarations(IShaderBuilder& stream, Stage currentSta
 void Float3x2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float3x2mul : public Float3x2
+{
+private:
+    weak<const Float3x2> node1;
+    weak<const Float3x2> node2;
+public:
+    Float3x2mul(weak<const Float3x2> node1, weak<const Float3x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float3x2, node1, node2);
+        }
+    }
+};
+ref<Float3x2> operator *(weak<const Float3x2> node1, weak<const Float3x2> node2)
+{
+    return ref<Float3x2mul>::create(gameArena(), node1, node2);
+}
+
+class Float3x2div : public Float3x2
+{
+private:
+    weak<const Float3x2> node1;
+    weak<const Float3x2> node2;
+public:
+    Float3x2div(weak<const Float3x2> node1, weak<const Float3x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float3x2, node1, node2);
+        }
+    }
+};
+ref<Float3x2> operator /(weak<const Float3x2> node1, weak<const Float3x2> node2)
+{
+    return ref<Float3x2div>::create(gameArena(), node1, node2);
+}
+
+class Float3x2add : public Float3x2
+{
+private:
+    weak<const Float3x2> node1;
+    weak<const Float3x2> node2;
+public:
+    Float3x2add(weak<const Float3x2> node1, weak<const Float3x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float3x2, node1, node2);
+        }
+    }
+};
+ref<Float3x2> operator +(weak<const Float3x2> node1, weak<const Float3x2> node2)
+{
+    return ref<Float3x2add>::create(gameArena(), node1, node2);
+}
+
+class Float3x2sub : public Float3x2
+{
+private:
+    weak<const Float3x2> node1;
+    weak<const Float3x2> node2;
+public:
+    Float3x2sub(weak<const Float3x2> node1, weak<const Float3x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float3x2, node1, node2);
+        }
+    }
+};
+ref<Float3x2> operator -(weak<const Float3x2> node1, weak<const Float3x2> node2)
+{
+    return ref<Float3x2sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Float4x2::Float4x2()
@@ -414,6 +1200,137 @@ void Float4x2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 {
 }
 
+class Float4x2mul : public Float4x2
+{
+private:
+    weak<const Float4x2> node1;
+    weak<const Float4x2> node2;
+public:
+    Float4x2mul(weak<const Float4x2> node1, weak<const Float4x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float4x2, node1, node2);
+        }
+    }
+};
+ref<Float4x2> operator *(weak<const Float4x2> node1, weak<const Float4x2> node2)
+{
+    return ref<Float4x2mul>::create(gameArena(), node1, node2);
+}
+
+class Float4x2div : public Float4x2
+{
+private:
+    weak<const Float4x2> node1;
+    weak<const Float4x2> node2;
+public:
+    Float4x2div(weak<const Float4x2> node1, weak<const Float4x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float4x2, node1, node2);
+        }
+    }
+};
+ref<Float4x2> operator /(weak<const Float4x2> node1, weak<const Float4x2> node2)
+{
+    return ref<Float4x2div>::create(gameArena(), node1, node2);
+}
+
+class Float4x2add : public Float4x2
+{
+private:
+    weak<const Float4x2> node1;
+    weak<const Float4x2> node2;
+public:
+    Float4x2add(weak<const Float4x2> node1, weak<const Float4x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float4x2, node1, node2);
+        }
+    }
+};
+ref<Float4x2> operator +(weak<const Float4x2> node1, weak<const Float4x2> node2)
+{
+    return ref<Float4x2add>::create(gameArena(), node1, node2);
+}
+
+class Float4x2sub : public Float4x2
+{
+private:
+    weak<const Float4x2> node1;
+    weak<const Float4x2> node2;
+public:
+    Float4x2sub(weak<const Float4x2> node1, weak<const Float4x2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float4x2, node1, node2);
+        }
+    }
+};
+ref<Float4x2> operator -(weak<const Float4x2> node1, weak<const Float4x2> node2)
+{
+    return ref<Float4x2sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float2x3::Float2x3()
 {
@@ -471,6 +1388,137 @@ void Float2x3Varying::buildDeclarations(IShaderBuilder& stream, Stage currentSta
 void Float2x3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float2x3mul : public Float2x3
+{
+private:
+    weak<const Float2x3> node1;
+    weak<const Float2x3> node2;
+public:
+    Float2x3mul(weak<const Float2x3> node1, weak<const Float2x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float2x3, node1, node2);
+        }
+    }
+};
+ref<Float2x3> operator *(weak<const Float2x3> node1, weak<const Float2x3> node2)
+{
+    return ref<Float2x3mul>::create(gameArena(), node1, node2);
+}
+
+class Float2x3div : public Float2x3
+{
+private:
+    weak<const Float2x3> node1;
+    weak<const Float2x3> node2;
+public:
+    Float2x3div(weak<const Float2x3> node1, weak<const Float2x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float2x3, node1, node2);
+        }
+    }
+};
+ref<Float2x3> operator /(weak<const Float2x3> node1, weak<const Float2x3> node2)
+{
+    return ref<Float2x3div>::create(gameArena(), node1, node2);
+}
+
+class Float2x3add : public Float2x3
+{
+private:
+    weak<const Float2x3> node1;
+    weak<const Float2x3> node2;
+public:
+    Float2x3add(weak<const Float2x3> node1, weak<const Float2x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float2x3, node1, node2);
+        }
+    }
+};
+ref<Float2x3> operator +(weak<const Float2x3> node1, weak<const Float2x3> node2)
+{
+    return ref<Float2x3add>::create(gameArena(), node1, node2);
+}
+
+class Float2x3sub : public Float2x3
+{
+private:
+    weak<const Float2x3> node1;
+    weak<const Float2x3> node2;
+public:
+    Float2x3sub(weak<const Float2x3> node1, weak<const Float2x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float2x3, node1, node2);
+        }
+    }
+};
+ref<Float2x3> operator -(weak<const Float2x3> node1, weak<const Float2x3> node2)
+{
+    return ref<Float2x3sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Float3x3::Float3x3()
@@ -530,6 +1578,137 @@ void Float3x3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 {
 }
 
+class Float3x3mul : public Float3x3
+{
+private:
+    weak<const Float3x3> node1;
+    weak<const Float3x3> node2;
+public:
+    Float3x3mul(weak<const Float3x3> node1, weak<const Float3x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float3x3, node1, node2);
+        }
+    }
+};
+ref<Float3x3> operator *(weak<const Float3x3> node1, weak<const Float3x3> node2)
+{
+    return ref<Float3x3mul>::create(gameArena(), node1, node2);
+}
+
+class Float3x3div : public Float3x3
+{
+private:
+    weak<const Float3x3> node1;
+    weak<const Float3x3> node2;
+public:
+    Float3x3div(weak<const Float3x3> node1, weak<const Float3x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float3x3, node1, node2);
+        }
+    }
+};
+ref<Float3x3> operator /(weak<const Float3x3> node1, weak<const Float3x3> node2)
+{
+    return ref<Float3x3div>::create(gameArena(), node1, node2);
+}
+
+class Float3x3add : public Float3x3
+{
+private:
+    weak<const Float3x3> node1;
+    weak<const Float3x3> node2;
+public:
+    Float3x3add(weak<const Float3x3> node1, weak<const Float3x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float3x3, node1, node2);
+        }
+    }
+};
+ref<Float3x3> operator +(weak<const Float3x3> node1, weak<const Float3x3> node2)
+{
+    return ref<Float3x3add>::create(gameArena(), node1, node2);
+}
+
+class Float3x3sub : public Float3x3
+{
+private:
+    weak<const Float3x3> node1;
+    weak<const Float3x3> node2;
+public:
+    Float3x3sub(weak<const Float3x3> node1, weak<const Float3x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float3x3, node1, node2);
+        }
+    }
+};
+ref<Float3x3> operator -(weak<const Float3x3> node1, weak<const Float3x3> node2)
+{
+    return ref<Float3x3sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float4x3::Float4x3()
 {
@@ -587,6 +1766,137 @@ void Float4x3Varying::buildDeclarations(IShaderBuilder& stream, Stage currentSta
 void Float4x3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float4x3mul : public Float4x3
+{
+private:
+    weak<const Float4x3> node1;
+    weak<const Float4x3> node2;
+public:
+    Float4x3mul(weak<const Float4x3> node1, weak<const Float4x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float4x3, node1, node2);
+        }
+    }
+};
+ref<Float4x3> operator *(weak<const Float4x3> node1, weak<const Float4x3> node2)
+{
+    return ref<Float4x3mul>::create(gameArena(), node1, node2);
+}
+
+class Float4x3div : public Float4x3
+{
+private:
+    weak<const Float4x3> node1;
+    weak<const Float4x3> node2;
+public:
+    Float4x3div(weak<const Float4x3> node1, weak<const Float4x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float4x3, node1, node2);
+        }
+    }
+};
+ref<Float4x3> operator /(weak<const Float4x3> node1, weak<const Float4x3> node2)
+{
+    return ref<Float4x3div>::create(gameArena(), node1, node2);
+}
+
+class Float4x3add : public Float4x3
+{
+private:
+    weak<const Float4x3> node1;
+    weak<const Float4x3> node2;
+public:
+    Float4x3add(weak<const Float4x3> node1, weak<const Float4x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float4x3, node1, node2);
+        }
+    }
+};
+ref<Float4x3> operator +(weak<const Float4x3> node1, weak<const Float4x3> node2)
+{
+    return ref<Float4x3add>::create(gameArena(), node1, node2);
+}
+
+class Float4x3sub : public Float4x3
+{
+private:
+    weak<const Float4x3> node1;
+    weak<const Float4x3> node2;
+public:
+    Float4x3sub(weak<const Float4x3> node1, weak<const Float4x3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float4x3, node1, node2);
+        }
+    }
+};
+ref<Float4x3> operator -(weak<const Float4x3> node1, weak<const Float4x3> node2)
+{
+    return ref<Float4x3sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Float2x4::Float2x4()
@@ -646,6 +1956,137 @@ void Float2x4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 {
 }
 
+class Float2x4mul : public Float2x4
+{
+private:
+    weak<const Float2x4> node1;
+    weak<const Float2x4> node2;
+public:
+    Float2x4mul(weak<const Float2x4> node1, weak<const Float2x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float2x4, node1, node2);
+        }
+    }
+};
+ref<Float2x4> operator *(weak<const Float2x4> node1, weak<const Float2x4> node2)
+{
+    return ref<Float2x4mul>::create(gameArena(), node1, node2);
+}
+
+class Float2x4div : public Float2x4
+{
+private:
+    weak<const Float2x4> node1;
+    weak<const Float2x4> node2;
+public:
+    Float2x4div(weak<const Float2x4> node1, weak<const Float2x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float2x4, node1, node2);
+        }
+    }
+};
+ref<Float2x4> operator /(weak<const Float2x4> node1, weak<const Float2x4> node2)
+{
+    return ref<Float2x4div>::create(gameArena(), node1, node2);
+}
+
+class Float2x4add : public Float2x4
+{
+private:
+    weak<const Float2x4> node1;
+    weak<const Float2x4> node2;
+public:
+    Float2x4add(weak<const Float2x4> node1, weak<const Float2x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float2x4, node1, node2);
+        }
+    }
+};
+ref<Float2x4> operator +(weak<const Float2x4> node1, weak<const Float2x4> node2)
+{
+    return ref<Float2x4add>::create(gameArena(), node1, node2);
+}
+
+class Float2x4sub : public Float2x4
+{
+private:
+    weak<const Float2x4> node1;
+    weak<const Float2x4> node2;
+public:
+    Float2x4sub(weak<const Float2x4> node1, weak<const Float2x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float2x4, node1, node2);
+        }
+    }
+};
+ref<Float2x4> operator -(weak<const Float2x4> node1, weak<const Float2x4> node2)
+{
+    return ref<Float2x4sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float3x4::Float3x4()
 {
@@ -704,6 +2145,137 @@ void Float3x4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 {
 }
 
+class Float3x4mul : public Float3x4
+{
+private:
+    weak<const Float3x4> node1;
+    weak<const Float3x4> node2;
+public:
+    Float3x4mul(weak<const Float3x4> node1, weak<const Float3x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float3x4, node1, node2);
+        }
+    }
+};
+ref<Float3x4> operator *(weak<const Float3x4> node1, weak<const Float3x4> node2)
+{
+    return ref<Float3x4mul>::create(gameArena(), node1, node2);
+}
+
+class Float3x4div : public Float3x4
+{
+private:
+    weak<const Float3x4> node1;
+    weak<const Float3x4> node2;
+public:
+    Float3x4div(weak<const Float3x4> node1, weak<const Float3x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float3x4, node1, node2);
+        }
+    }
+};
+ref<Float3x4> operator /(weak<const Float3x4> node1, weak<const Float3x4> node2)
+{
+    return ref<Float3x4div>::create(gameArena(), node1, node2);
+}
+
+class Float3x4add : public Float3x4
+{
+private:
+    weak<const Float3x4> node1;
+    weak<const Float3x4> node2;
+public:
+    Float3x4add(weak<const Float3x4> node1, weak<const Float3x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float3x4, node1, node2);
+        }
+    }
+};
+ref<Float3x4> operator +(weak<const Float3x4> node1, weak<const Float3x4> node2)
+{
+    return ref<Float3x4add>::create(gameArena(), node1, node2);
+}
+
+class Float3x4sub : public Float3x4
+{
+private:
+    weak<const Float3x4> node1;
+    weak<const Float3x4> node2;
+public:
+    Float3x4sub(weak<const Float3x4> node1, weak<const Float3x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float3x4, node1, node2);
+        }
+    }
+};
+ref<Float3x4> operator -(weak<const Float3x4> node1, weak<const Float3x4> node2)
+{
+    return ref<Float3x4sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Float4x4::Float4x4()
 {
@@ -761,5 +2333,136 @@ void Float4x4Varying::buildDeclarations(IShaderBuilder& stream, Stage currentSta
 void Float4x4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Float4x4mul : public Float4x4
+{
+private:
+    weak<const Float4x4> node1;
+    weak<const Float4x4> node2;
+public:
+    Float4x4mul(weak<const Float4x4> node1, weak<const Float4x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Float4x4, node1, node2);
+        }
+    }
+};
+ref<Float4x4> operator *(weak<const Float4x4> node1, weak<const Float4x4> node2)
+{
+    return ref<Float4x4mul>::create(gameArena(), node1, node2);
+}
+
+class Float4x4div : public Float4x4
+{
+private:
+    weak<const Float4x4> node1;
+    weak<const Float4x4> node2;
+public:
+    Float4x4div(weak<const Float4x4> node1, weak<const Float4x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Float4x4, node1, node2);
+        }
+    }
+};
+ref<Float4x4> operator /(weak<const Float4x4> node1, weak<const Float4x4> node2)
+{
+    return ref<Float4x4div>::create(gameArena(), node1, node2);
+}
+
+class Float4x4add : public Float4x4
+{
+private:
+    weak<const Float4x4> node1;
+    weak<const Float4x4> node2;
+public:
+    Float4x4add(weak<const Float4x4> node1, weak<const Float4x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Float4x4, node1, node2);
+        }
+    }
+};
+ref<Float4x4> operator +(weak<const Float4x4> node1, weak<const Float4x4> node2)
+{
+    return ref<Float4x4add>::create(gameArena(), node1, node2);
+}
+
+class Float4x4sub : public Float4x4
+{
+private:
+    weak<const Float4x4> node1;
+    weak<const Float4x4> node2;
+public:
+    Float4x4sub(weak<const Float4x4> node1, weak<const Float4x4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Float4x4, node1, node2);
+        }
+    }
+};
+ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float4x4> node2)
+{
+    return ref<Float4x4sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 }}}

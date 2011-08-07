@@ -55,6 +55,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double> operator *(weak<const Double> node1, weak<const Double> node2);
+ref<Double> operator /(weak<const Double> node1, weak<const Double> node2);
+ref<Double> operator +(weak<const Double> node1, weak<const Double> node2);
+ref<Double> operator -(weak<const Double> node1, weak<const Double> node2);
+
+
+
 class Double2 : public Node
 {
     BE_NOCOPY(Double2)
@@ -99,6 +106,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double2> operator *(weak<const Double2> node1, weak<const Double2> node2);
+ref<Double2> operator /(weak<const Double2> node1, weak<const Double2> node2);
+ref<Double2> operator +(weak<const Double2> node1, weak<const Double2> node2);
+ref<Double2> operator -(weak<const Double2> node1, weak<const Double2> node2);
+
+
 
 class Double3 : public Node
 {
@@ -145,6 +159,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double3> operator *(weak<const Double3> node1, weak<const Double3> node2);
+ref<Double3> operator /(weak<const Double3> node1, weak<const Double3> node2);
+ref<Double3> operator +(weak<const Double3> node1, weak<const Double3> node2);
+ref<Double3> operator -(weak<const Double3> node1, weak<const Double3> node2);
+
+
+
 class Double4 : public Node
 {
     BE_NOCOPY(Double4)
@@ -189,6 +210,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double4> operator *(weak<const Double4> node1, weak<const Double4> node2);
+ref<Double4> operator /(weak<const Double4> node1, weak<const Double4> node2);
+ref<Double4> operator +(weak<const Double4> node1, weak<const Double4> node2);
+ref<Double4> operator -(weak<const Double4> node1, weak<const Double4> node2);
+
+
 
 class Double2x2 : public Node
 {
@@ -235,6 +263,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double2x2> operator *(weak<const Double2x2> node1, weak<const Double2x2> node2);
+ref<Double2x2> operator /(weak<const Double2x2> node1, weak<const Double2x2> node2);
+ref<Double2x2> operator +(weak<const Double2x2> node1, weak<const Double2x2> node2);
+ref<Double2x2> operator -(weak<const Double2x2> node1, weak<const Double2x2> node2);
+
+
+
 class Double3x2 : public Node
 {
     BE_NOCOPY(Double3x2)
@@ -279,6 +314,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double3x2> operator *(weak<const Double3x2> node1, weak<const Double3x2> node2);
+ref<Double3x2> operator /(weak<const Double3x2> node1, weak<const Double3x2> node2);
+ref<Double3x2> operator +(weak<const Double3x2> node1, weak<const Double3x2> node2);
+ref<Double3x2> operator -(weak<const Double3x2> node1, weak<const Double3x2> node2);
+
+
 
 class Double4x2 : public Node
 {
@@ -325,6 +367,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double4x2> operator *(weak<const Double4x2> node1, weak<const Double4x2> node2);
+ref<Double4x2> operator /(weak<const Double4x2> node1, weak<const Double4x2> node2);
+ref<Double4x2> operator +(weak<const Double4x2> node1, weak<const Double4x2> node2);
+ref<Double4x2> operator -(weak<const Double4x2> node1, weak<const Double4x2> node2);
+
+
+
 class Double2x3 : public Node
 {
     BE_NOCOPY(Double2x3)
@@ -369,6 +418,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double2x3> operator *(weak<const Double2x3> node1, weak<const Double2x3> node2);
+ref<Double2x3> operator /(weak<const Double2x3> node1, weak<const Double2x3> node2);
+ref<Double2x3> operator +(weak<const Double2x3> node1, weak<const Double2x3> node2);
+ref<Double2x3> operator -(weak<const Double2x3> node1, weak<const Double2x3> node2);
+
+
 
 class Double3x3 : public Node
 {
@@ -415,6 +471,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double3x3> operator *(weak<const Double3x3> node1, weak<const Double3x3> node2);
+ref<Double3x3> operator /(weak<const Double3x3> node1, weak<const Double3x3> node2);
+ref<Double3x3> operator +(weak<const Double3x3> node1, weak<const Double3x3> node2);
+ref<Double3x3> operator -(weak<const Double3x3> node1, weak<const Double3x3> node2);
+
+
+
 class Double4x3 : public Node
 {
     BE_NOCOPY(Double4x3)
@@ -459,6 +522,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double4x3> operator *(weak<const Double4x3> node1, weak<const Double4x3> node2);
+ref<Double4x3> operator /(weak<const Double4x3> node1, weak<const Double4x3> node2);
+ref<Double4x3> operator +(weak<const Double4x3> node1, weak<const Double4x3> node2);
+ref<Double4x3> operator -(weak<const Double4x3> node1, weak<const Double4x3> node2);
+
+
 
 class Double2x4 : public Node
 {
@@ -505,6 +575,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double2x4> operator *(weak<const Double2x4> node1, weak<const Double2x4> node2);
+ref<Double2x4> operator /(weak<const Double2x4> node1, weak<const Double2x4> node2);
+ref<Double2x4> operator +(weak<const Double2x4> node1, weak<const Double2x4> node2);
+ref<Double2x4> operator -(weak<const Double2x4> node1, weak<const Double2x4> node2);
+
+
+
 class Double3x4 : public Node
 {
     BE_NOCOPY(Double3x4)
@@ -550,6 +627,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Double3x4> operator *(weak<const Double3x4> node1, weak<const Double3x4> node2);
+ref<Double3x4> operator /(weak<const Double3x4> node1, weak<const Double3x4> node2);
+ref<Double3x4> operator +(weak<const Double3x4> node1, weak<const Double3x4> node2);
+ref<Double3x4> operator -(weak<const Double3x4> node1, weak<const Double3x4> node2);
+
+
+
 class Double4x4 : public Node
 {
     BE_NOCOPY(Double4x4)
@@ -594,6 +678,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Double4x4> operator *(weak<const Double4x4> node1, weak<const Double4x4> node2);
+ref<Double4x4> operator /(weak<const Double4x4> node1, weak<const Double4x4> node2);
+ref<Double4x4> operator +(weak<const Double4x4> node1, weak<const Double4x4> node2);
+ref<Double4x4> operator -(weak<const Double4x4> node1, weak<const Double4x4> node2);
+
+
 
 
 }}}

@@ -159,7 +159,7 @@ void %(TYPE)sVarying::buildDeclarations(IShaderBuilder& stream, Stage currentSta
         stream.addVarying(this, currentStage, targetStage, Type_%(TYPE)s);
     node->buildDeclarations(stream, VertexStage, targetStage);
 }
-void %(TYPE)sVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage */currentStage*/, Stage /*targetStage*/) const
+void %(TYPE)sVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
 
@@ -168,7 +168,43 @@ void %(TYPE)sVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage */curre
 
 
 
+operator = [
+"""ref<%(TYPE)s> operator %(OPERATOR)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2);
+""",
+"""class %(TYPE)s%(OPNAME)s : public %(TYPE)s
+{
+private:
+    weak<const %(TYPE)s> node1;
+    weak<const %(TYPE)s> node2;
+public:
+    %(TYPE)s%(OPNAME)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_%(OPNAME)s, Type_%(TYPE)s, node1, node2);
+        }
+    }
+};
+ref<%(TYPE)s> operator %(OPERATOR)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2)
+{
+    return ref<%(TYPE)s%(OPNAME)s>::create(gameArena(), node1, node2);
+}
 
+"""
+]
 
 
 
@@ -187,6 +223,12 @@ def footer(h, cpp):
 	h.write(hFooter)
 	cpp.write(cppFooter)
 
+operators = [
+ ('*', 'mul'),
+ ('/', 'div'),
+ ('+', 'add'),
+ ('-', 'sub')
+]
 
 def fileType(h, cpp, basetype, col, row):
 	if col == 1 and row == 1:
@@ -204,6 +246,11 @@ def fileType(h, cpp, basetype, col, row):
 	cpp.write(attribute[1] % {'TYPE': type})
 	h.write(varying[0] % {'TYPE': type})
 	cpp.write(varying[1] % {'TYPE': type})
+	for (op, opname) in operators:
+		h.write(operator[0] % {'TYPE':type, 'OPERATOR':op, 'OPNAME':opname})
+		cpp.write(operator[1] % {'TYPE':type, 'OPERATOR':op, 'OPNAME':opname})
+	h.write("\n\n\n")
+	cpp.write("\n\n\n")
 
 
 
