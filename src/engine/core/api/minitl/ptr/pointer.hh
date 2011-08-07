@@ -8,6 +8,10 @@
 namespace minitl
 {
 
+template< typename U, typename T >
+static inline U* checkIsA(T* t) { return t; }
+
+
 template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;

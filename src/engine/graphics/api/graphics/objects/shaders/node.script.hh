@@ -17,6 +17,13 @@ enum Stage
     FragmentStage
 };
 
+enum Semantic
+{
+    Position,
+    Color,
+    Depth
+};
+
 enum Type
 {
     Type_Float, Type_Float2, Type_Float3, Type_Float4,
