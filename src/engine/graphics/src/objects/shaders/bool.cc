@@ -66,6 +66,137 @@ void BoolVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentSt
 {
 }
 
+class Boolmul : public Bool
+{
+private:
+    weak<const Bool> node1;
+    weak<const Bool> node2;
+public:
+    Boolmul(weak<const Bool> node1, weak<const Bool> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Bool, node1, node2);
+        }
+    }
+};
+ref<Bool> operator *(weak<const Bool> node1, weak<const Bool> node2)
+{
+    return ref<Boolmul>::create(gameArena(), node1, node2);
+}
+
+class Booldiv : public Bool
+{
+private:
+    weak<const Bool> node1;
+    weak<const Bool> node2;
+public:
+    Booldiv(weak<const Bool> node1, weak<const Bool> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Bool, node1, node2);
+        }
+    }
+};
+ref<Bool> operator /(weak<const Bool> node1, weak<const Bool> node2)
+{
+    return ref<Booldiv>::create(gameArena(), node1, node2);
+}
+
+class Booladd : public Bool
+{
+private:
+    weak<const Bool> node1;
+    weak<const Bool> node2;
+public:
+    Booladd(weak<const Bool> node1, weak<const Bool> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Bool, node1, node2);
+        }
+    }
+};
+ref<Bool> operator +(weak<const Bool> node1, weak<const Bool> node2)
+{
+    return ref<Booladd>::create(gameArena(), node1, node2);
+}
+
+class Boolsub : public Bool
+{
+private:
+    weak<const Bool> node1;
+    weak<const Bool> node2;
+public:
+    Boolsub(weak<const Bool> node1, weak<const Bool> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Bool, node1, node2);
+        }
+    }
+};
+ref<Bool> operator -(weak<const Bool> node1, weak<const Bool> node2)
+{
+    return ref<Boolsub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Bool2::Bool2()
 {
@@ -123,6 +254,137 @@ void Bool2Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage,
 void Bool2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Bool2mul : public Bool2
+{
+private:
+    weak<const Bool2> node1;
+    weak<const Bool2> node2;
+public:
+    Bool2mul(weak<const Bool2> node1, weak<const Bool2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Bool2, node1, node2);
+        }
+    }
+};
+ref<Bool2> operator *(weak<const Bool2> node1, weak<const Bool2> node2)
+{
+    return ref<Bool2mul>::create(gameArena(), node1, node2);
+}
+
+class Bool2div : public Bool2
+{
+private:
+    weak<const Bool2> node1;
+    weak<const Bool2> node2;
+public:
+    Bool2div(weak<const Bool2> node1, weak<const Bool2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Bool2, node1, node2);
+        }
+    }
+};
+ref<Bool2> operator /(weak<const Bool2> node1, weak<const Bool2> node2)
+{
+    return ref<Bool2div>::create(gameArena(), node1, node2);
+}
+
+class Bool2add : public Bool2
+{
+private:
+    weak<const Bool2> node1;
+    weak<const Bool2> node2;
+public:
+    Bool2add(weak<const Bool2> node1, weak<const Bool2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Bool2, node1, node2);
+        }
+    }
+};
+ref<Bool2> operator +(weak<const Bool2> node1, weak<const Bool2> node2)
+{
+    return ref<Bool2add>::create(gameArena(), node1, node2);
+}
+
+class Bool2sub : public Bool2
+{
+private:
+    weak<const Bool2> node1;
+    weak<const Bool2> node2;
+public:
+    Bool2sub(weak<const Bool2> node1, weak<const Bool2> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Bool2, node1, node2);
+        }
+    }
+};
+ref<Bool2> operator -(weak<const Bool2> node1, weak<const Bool2> node2)
+{
+    return ref<Bool2sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 /* Type *************************************************************/
 Bool3::Bool3()
@@ -182,6 +444,137 @@ void Bool3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentS
 {
 }
 
+class Bool3mul : public Bool3
+{
+private:
+    weak<const Bool3> node1;
+    weak<const Bool3> node2;
+public:
+    Bool3mul(weak<const Bool3> node1, weak<const Bool3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Bool3, node1, node2);
+        }
+    }
+};
+ref<Bool3> operator *(weak<const Bool3> node1, weak<const Bool3> node2)
+{
+    return ref<Bool3mul>::create(gameArena(), node1, node2);
+}
+
+class Bool3div : public Bool3
+{
+private:
+    weak<const Bool3> node1;
+    weak<const Bool3> node2;
+public:
+    Bool3div(weak<const Bool3> node1, weak<const Bool3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Bool3, node1, node2);
+        }
+    }
+};
+ref<Bool3> operator /(weak<const Bool3> node1, weak<const Bool3> node2)
+{
+    return ref<Bool3div>::create(gameArena(), node1, node2);
+}
+
+class Bool3add : public Bool3
+{
+private:
+    weak<const Bool3> node1;
+    weak<const Bool3> node2;
+public:
+    Bool3add(weak<const Bool3> node1, weak<const Bool3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Bool3, node1, node2);
+        }
+    }
+};
+ref<Bool3> operator +(weak<const Bool3> node1, weak<const Bool3> node2)
+{
+    return ref<Bool3add>::create(gameArena(), node1, node2);
+}
+
+class Bool3sub : public Bool3
+{
+private:
+    weak<const Bool3> node1;
+    weak<const Bool3> node2;
+public:
+    Bool3sub(weak<const Bool3> node1, weak<const Bool3> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Bool3, node1, node2);
+        }
+    }
+};
+ref<Bool3> operator -(weak<const Bool3> node1, weak<const Bool3> node2)
+{
+    return ref<Bool3sub>::create(gameArena(), node1, node2);
+}
+
+
+
+
 /* Type *************************************************************/
 Bool4::Bool4()
 {
@@ -239,5 +632,136 @@ void Bool4Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage,
 void Bool4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
 {
 }
+
+class Bool4mul : public Bool4
+{
+private:
+    weak<const Bool4> node1;
+    weak<const Bool4> node2;
+public:
+    Bool4mul(weak<const Bool4> node1, weak<const Bool4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_mul, Type_Bool4, node1, node2);
+        }
+    }
+};
+ref<Bool4> operator *(weak<const Bool4> node1, weak<const Bool4> node2)
+{
+    return ref<Bool4mul>::create(gameArena(), node1, node2);
+}
+
+class Bool4div : public Bool4
+{
+private:
+    weak<const Bool4> node1;
+    weak<const Bool4> node2;
+public:
+    Bool4div(weak<const Bool4> node1, weak<const Bool4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_div, Type_Bool4, node1, node2);
+        }
+    }
+};
+ref<Bool4> operator /(weak<const Bool4> node1, weak<const Bool4> node2)
+{
+    return ref<Bool4div>::create(gameArena(), node1, node2);
+}
+
+class Bool4add : public Bool4
+{
+private:
+    weak<const Bool4> node1;
+    weak<const Bool4> node2;
+public:
+    Bool4add(weak<const Bool4> node1, weak<const Bool4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_add, Type_Bool4, node1, node2);
+        }
+    }
+};
+ref<Bool4> operator +(weak<const Bool4> node1, weak<const Bool4> node2)
+{
+    return ref<Bool4add>::create(gameArena(), node1, node2);
+}
+
+class Bool4sub : public Bool4
+{
+private:
+    weak<const Bool4> node1;
+    weak<const Bool4> node2;
+public:
+    Bool4sub(weak<const Bool4> node1, weak<const Bool4> node2)
+        :   node1(node1)
+        ,   node2(node2)
+    {
+    }
+private:
+    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDeclarations(stream, currentStage, targetStage);
+        node2->buildDeclarations(stream, currentStage, targetStage);
+    }
+    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    {
+        node1->buildDefinitions(stream, currentStage, targetStage);
+        node2->buildDefinitions(stream, currentStage, targetStage);
+        if (targetStage == currentStage)
+        {
+            stream.addOperator(this, Op_sub, Type_Bool4, node1, node2);
+        }
+    }
+};
+ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool4> node2)
+{
+    return ref<Bool4sub>::create(gameArena(), node1, node2);
+}
+
+
+
 
 }}}

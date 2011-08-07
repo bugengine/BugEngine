@@ -173,4 +173,9 @@ void GLShaderBuilder::doSaveTo(const istring& name, const istring& value)
     writeln((minitl::format<>("%s = %s;") | name | value).c_str());
 }
 
+void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::Type type, const istring& result, const istring& op1, const istring& op2)
+{
+    writeln((minitl::format<>("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op | op2).c_str());
+}
+
 }}}

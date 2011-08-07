@@ -43,8 +43,13 @@ int be_main(weak<BugEngine::Application> app)
 
 
     ref<Shaders::Float4> vertexpos = ref<Shaders::Float4Attribute>::create(gameArena());
-    ref<Shaders::Float> depth = ref<Shaders::FloatUniform>::create(gameArena(), "depth");
-    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), vertexpos, vertexpos, depth);
+    ref<Shaders::Float4> worldpos = ref<Shaders::Float4Uniform>::create(gameArena(), "worldpos");
+    ref<Shaders::Float4> camerapos = ref<Shaders::Float4Uniform>::create(gameArena(), "camerapos");
+    ref<Shaders::Float4> testadd = weak<const Shaders::Float4>(worldpos) + weak<const Shaders::Float4>(camerapos);
+    ref<Shaders::Float4> testmul = weak<const Shaders::Float4>(vertexpos) * weak<const Shaders::Float4>(testadd);
+    ref<Shaders::Float4> testmul2 = weak<const Shaders::Float4>(testmul) * weak<const Shaders::Float4>(testmul);
+    ref<Shaders::Float4> color = ref<Shaders::Float4Uniform>::create(gameArena(), "color");
+    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), testmul2, color, ref<Shaders::Float>());
 
     ref<RenderWindow> w1 = ref<RenderWindow>::create(gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
     ref<World> world = ref<World>::create(gameArena(), "physicsBullet", "audioOpenAL", float3(1000.0f, 1000.0f, 1000.0f));

@@ -55,6 +55,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Bool> operator *(weak<const Bool> node1, weak<const Bool> node2);
+ref<Bool> operator /(weak<const Bool> node1, weak<const Bool> node2);
+ref<Bool> operator +(weak<const Bool> node1, weak<const Bool> node2);
+ref<Bool> operator -(weak<const Bool> node1, weak<const Bool> node2);
+
+
+
 class Bool2 : public Node
 {
     BE_NOCOPY(Bool2)
@@ -99,6 +106,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Bool2> operator *(weak<const Bool2> node1, weak<const Bool2> node2);
+ref<Bool2> operator /(weak<const Bool2> node1, weak<const Bool2> node2);
+ref<Bool2> operator +(weak<const Bool2> node1, weak<const Bool2> node2);
+ref<Bool2> operator -(weak<const Bool2> node1, weak<const Bool2> node2);
+
+
 
 class Bool3 : public Node
 {
@@ -145,6 +159,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Bool3> operator *(weak<const Bool3> node1, weak<const Bool3> node2);
+ref<Bool3> operator /(weak<const Bool3> node1, weak<const Bool3> node2);
+ref<Bool3> operator +(weak<const Bool3> node1, weak<const Bool3> node2);
+ref<Bool3> operator -(weak<const Bool3> node1, weak<const Bool3> node2);
+
+
+
 class Bool4 : public Node
 {
     BE_NOCOPY(Bool4)
@@ -189,6 +210,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Bool4> operator *(weak<const Bool4> node1, weak<const Bool4> node2);
+ref<Bool4> operator /(weak<const Bool4> node1, weak<const Bool4> node2);
+ref<Bool4> operator +(weak<const Bool4> node1, weak<const Bool4> node2);
+ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool4> node2);
+
+
 
 
 }}}

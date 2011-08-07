@@ -55,6 +55,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Int> operator *(weak<const Int> node1, weak<const Int> node2);
+ref<Int> operator /(weak<const Int> node1, weak<const Int> node2);
+ref<Int> operator +(weak<const Int> node1, weak<const Int> node2);
+ref<Int> operator -(weak<const Int> node1, weak<const Int> node2);
+
+
+
 class Int2 : public Node
 {
     BE_NOCOPY(Int2)
@@ -99,6 +106,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Int2> operator *(weak<const Int2> node1, weak<const Int2> node2);
+ref<Int2> operator /(weak<const Int2> node1, weak<const Int2> node2);
+ref<Int2> operator +(weak<const Int2> node1, weak<const Int2> node2);
+ref<Int2> operator -(weak<const Int2> node1, weak<const Int2> node2);
+
+
 
 class Int3 : public Node
 {
@@ -145,6 +159,13 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
+ref<Int3> operator *(weak<const Int3> node1, weak<const Int3> node2);
+ref<Int3> operator /(weak<const Int3> node1, weak<const Int3> node2);
+ref<Int3> operator +(weak<const Int3> node1, weak<const Int3> node2);
+ref<Int3> operator -(weak<const Int3> node1, weak<const Int3> node2);
+
+
+
 class Int4 : public Node
 {
     BE_NOCOPY(Int4)
@@ -189,6 +210,13 @@ private:
     virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
+
+ref<Int4> operator *(weak<const Int4> node1, weak<const Int4> node2);
+ref<Int4> operator /(weak<const Int4> node1, weak<const Int4> node2);
+ref<Int4> operator +(weak<const Int4> node1, weak<const Int4> node2);
+ref<Int4> operator -(weak<const Int4> node1, weak<const Int4> node2);
+
+
 
 
 }}}
