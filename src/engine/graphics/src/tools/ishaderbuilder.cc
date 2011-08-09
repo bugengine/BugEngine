@@ -89,10 +89,14 @@ istring IShaderBuilder::referenceNode(weak<const Node> node)
 
 void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istring& name, Type type)
 {
-    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
-    if (inserted)
+    std::pair<Intermediate, bool> inserted = m_namespaces.front().names.insert(std::make_pair(node, minitl::make_pair(name, (size_t)1)));
+    if (inserted.second)
     {
         doAddUniformDeclaration(name, stage, type);
+    }
+    else
+    {
+        inserted.first.second.second ++;
     }
 }
 
@@ -101,11 +105,15 @@ void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage
     if (currentStage == targetStage)
     {
         istring name = minitl::format<>("b_varying%d") | m_currentVarying;
-        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, name)).second;
-        if (inserted)
+        std::pair<Intermediate, bool> inserted = m_namespaces.front().names.insert(std::make_pair(node, name));
+        if (inserted.second)
         {
             m_currentVarying++;
             doAddVaryingDeclaration(name, currentStage, type);
+        }
+        else
+        {
+            inserted.first.second.second ++;
         }
     }
 }
@@ -116,8 +124,8 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
     {
         istring nameAttribute = minitl::format<>("b_attribute%d") | m_currentAttribute;
         istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
-        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, nameAttribute)).second;
-        if (inserted)
+        std::pair<Intermediate, bool> inserted = m_namespaces.front().names.insert(std::make_pair(node, nameAttribute));
+        if (inserted.second)
         {
             m_currentAttribute++;
             if (currentStage == VertexStage)
@@ -132,15 +140,23 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
                 m_attributeToVarying.push_back(minitl::make_pair(nameAttribute, nameVarying));
             }
         }
+        else
+        {
+            inserted.first.second.second ++;
+        }
     }
     else if(currentStage == targetStage)
     {
         istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
-        bool inserted = m_namespaces.front().names.insert(std::make_pair(node, nameVarying)).second;
-        if (inserted)
+        std::pair<Intermediate, bool> inserted = m_namespaces.front().names.insert(std::make_pair(node, nameVarying));
+        if (inserted.second)
         {
             m_currentAttributeToVarying++;
             doAddVaryingDeclaration(nameVarying, targetStage, type);
+        }
+        else
+        {
+            inserted.first.second.second ++;
         }
     }
 }
@@ -173,13 +189,17 @@ void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
 void IShaderBuilder::addOperator(weak<const Node> node, Operator op, Type type, weak<const Node> node1, weak<const Node> node2)
 {
     istring var = minitl::format<>("temp_%d") | m_currentTemporary;
-    bool inserted = m_namespaces.front().names.insert(std::make_pair(node, var)).second;
-    if (inserted)
+    std::pair<Intermediate, bool> inserted = m_namespaces.front().names.insert(std::make_pair(node, var));
+    if (inserted.second)
     {
         m_currentTemporary++;
         const istring& op1 = referenceNode(node1);
         const istring& op2 = referenceNode(node2);
         doAddOperator(op, type, var, op1, op2);
+    }
+    else
+    {
+        inserted.first.second.second ++;
     }
 }
 

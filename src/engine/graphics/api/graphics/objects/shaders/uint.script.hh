@@ -55,13 +55,15 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
-ref<Uint> operator *(weak<const Uint> node1, weak<const Uint> node2);
 ref<Uint> operator /(weak<const Uint> node1, weak<const Uint> node2);
 ref<Uint> operator +(weak<const Uint> node1, weak<const Uint> node2);
 ref<Uint> operator -(weak<const Uint> node1, weak<const Uint> node2);
 
 
 
+class Uint2;
+class Uint3;
+class Uint4;
 class Uint2 : public Node
 {
     BE_NOCOPY(Uint2)
@@ -107,10 +109,17 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
-ref<Uint2> operator *(weak<const Uint2> node1, weak<const Uint2> node2);
 ref<Uint2> operator /(weak<const Uint2> node1, weak<const Uint2> node2);
 ref<Uint2> operator +(weak<const Uint2> node1, weak<const Uint2> node2);
 ref<Uint2> operator -(weak<const Uint2> node1, weak<const Uint2> node2);
+ref<Uint2> operator *(weak<const Uint> node1, weak<const Uint2> node2);
+ref<Uint2> operator *(weak<const Uint2> node1, weak<const Uint> node2);
+ref<Uint2> operator /(weak<const Uint> node1, weak<const Uint2> node2);
+ref<Uint2> operator /(weak<const Uint2> node1, weak<const Uint> node2);
+ref<Uint2> operator +(weak<const Uint> node1, weak<const Uint2> node2);
+ref<Uint2> operator +(weak<const Uint2> node1, weak<const Uint> node2);
+ref<Uint2> operator -(weak<const Uint> node1, weak<const Uint2> node2);
+ref<Uint2> operator -(weak<const Uint2> node1, weak<const Uint> node2);
 
 
 
@@ -159,10 +168,17 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
-ref<Uint3> operator *(weak<const Uint3> node1, weak<const Uint3> node2);
 ref<Uint3> operator /(weak<const Uint3> node1, weak<const Uint3> node2);
 ref<Uint3> operator +(weak<const Uint3> node1, weak<const Uint3> node2);
 ref<Uint3> operator -(weak<const Uint3> node1, weak<const Uint3> node2);
+ref<Uint3> operator *(weak<const Uint> node1, weak<const Uint3> node2);
+ref<Uint3> operator *(weak<const Uint3> node1, weak<const Uint> node2);
+ref<Uint3> operator /(weak<const Uint> node1, weak<const Uint3> node2);
+ref<Uint3> operator /(weak<const Uint3> node1, weak<const Uint> node2);
+ref<Uint3> operator +(weak<const Uint> node1, weak<const Uint3> node2);
+ref<Uint3> operator +(weak<const Uint3> node1, weak<const Uint> node2);
+ref<Uint3> operator -(weak<const Uint> node1, weak<const Uint3> node2);
+ref<Uint3> operator -(weak<const Uint3> node1, weak<const Uint> node2);
 
 
 
@@ -211,10 +227,17 @@ private:
     virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
 };
 
-ref<Uint4> operator *(weak<const Uint4> node1, weak<const Uint4> node2);
 ref<Uint4> operator /(weak<const Uint4> node1, weak<const Uint4> node2);
 ref<Uint4> operator +(weak<const Uint4> node1, weak<const Uint4> node2);
 ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint4> node2);
+ref<Uint4> operator *(weak<const Uint> node1, weak<const Uint4> node2);
+ref<Uint4> operator *(weak<const Uint4> node1, weak<const Uint> node2);
+ref<Uint4> operator /(weak<const Uint> node1, weak<const Uint4> node2);
+ref<Uint4> operator /(weak<const Uint4> node1, weak<const Uint> node2);
+ref<Uint4> operator +(weak<const Uint> node1, weak<const Uint4> node2);
+ref<Uint4> operator +(weak<const Uint4> node1, weak<const Uint> node2);
+ref<Uint4> operator -(weak<const Uint> node1, weak<const Uint4> node2);
+ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint> node2);
 
 
 

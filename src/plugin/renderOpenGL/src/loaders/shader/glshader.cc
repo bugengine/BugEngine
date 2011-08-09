@@ -93,7 +93,7 @@ void GLShaderProgram::load(weak<const Resource> resource)
 
     m_vertexShader = build (program, Shaders::VertexStage);
     m_geometryShader = build (program, Shaders::GeometryStage);
-    m_vertexShader = build (program, Shaders::FragmentStage);
+    m_fragmentShader = build (program, Shaders::FragmentStage);
     attach();
     shaderext.glLinkProgram(m_shaderProgram);
 
