@@ -169,15 +169,15 @@ void %(TYPE)sVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*curre
 
 
 operator = [
-"""ref<%(TYPE)s> operator %(OPERATOR)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2);
+"""ref<%(TYPE1)s> operator %(OPERATOR)s(weak<const %(TYPE2)s> node1, weak<const %(TYPE3)s> node2);
 """,
-"""class %(TYPE)s%(OPNAME)s : public %(TYPE)s
+"""class %(TYPE2)s%(OPNAME)s%(TYPE3)s : public %(TYPE1)s
 {
 private:
-    weak<const %(TYPE)s> node1;
-    weak<const %(TYPE)s> node2;
+    weak<const %(TYPE2)s> node1;
+    weak<const %(TYPE3)s> node2;
 public:
-    %(TYPE)s%(OPNAME)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2)
+    %(TYPE2)s%(OPNAME)s%(TYPE3)s(weak<const %(TYPE2)s> node1, weak<const %(TYPE3)s> node2)
         :   node1(node1)
         ,   node2(node2)
     {
@@ -194,13 +194,13 @@ private:
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_%(OPNAME)s, Type_%(TYPE)s, node1, node2);
+            stream.addOperator(this, Op_%(OPNAME)s, Type_%(TYPE1)s, node1, node2);
         }
     }
 };
-ref<%(TYPE)s> operator %(OPERATOR)s(weak<const %(TYPE)s> node1, weak<const %(TYPE)s> node2)
+ref<%(TYPE1)s> operator %(OPERATOR)s(weak<const %(TYPE2)s> node1, weak<const %(TYPE3)s> node2)
 {
-    return ref<%(TYPE)s%(OPNAME)s>::create(gameArena(), node1, node2);
+    return ref<%(TYPE2)s%(OPNAME)s%(TYPE3)s>::create(gameArena(), node1, node2);
 }
 
 """
@@ -224,13 +224,21 @@ def footer(h, cpp):
 	cpp.write(cppFooter)
 
 operators = [
- ('*', 'mul'),
  ('/', 'div'),
  ('+', 'add'),
  ('-', 'sub')
 ]
 
-def fileType(h, cpp, basetype, col, row):
+def predecl(h, basetype, col, row):
+	if col == 1 and row == 1:
+		type = "%s" % basetype
+	elif row == 1:
+		type = "%s%d" % (basetype, col)
+	else:
+		type = "%s%dx%d" % (basetype, col, row)
+	h.write("class %s;\n" % type)
+
+def fileType(h, cpp, basetype, col, row, doMatrix):
 	if col == 1 and row == 1:
 		type = "%s" % basetype
 	elif row == 1:
@@ -247,8 +255,34 @@ def fileType(h, cpp, basetype, col, row):
 	h.write(varying[0] % {'TYPE': type})
 	cpp.write(varying[1] % {'TYPE': type})
 	for (op, opname) in operators:
-		h.write(operator[0] % {'TYPE':type, 'OPERATOR':op, 'OPNAME':opname})
-		cpp.write(operator[1] % {'TYPE':type, 'OPERATOR':op, 'OPNAME':opname})
+		h.write(operator[0] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':type, 'OPERATOR':op, 'OPNAME':opname})
+		cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':type, 'OPERATOR':op, 'OPNAME':opname})
+	if col > 1 and row > 1:
+		for l in [2, 3, 4]:
+			type1 = "%s%dx%d" % (basetype, l, row)
+			type2 = "%s%dx%d" % (basetype, col, l)
+			h.write(operator[0] % {'TYPE1':type, 'TYPE2':type1, 'TYPE3':type2, 'OPERATOR':'*', 'OPNAME':'mul'})
+			cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type1, 'TYPE3':type2, 'OPERATOR':'*', 'OPNAME':'mul'})
+	elif col > 1 and doMatrix:
+		type2 = "%s%dx%d" % (basetype, col, col)
+		h.write(operator[0] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':type2, 'OPERATOR':'*', 'OPNAME':'mul'})
+		cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':type2, 'OPERATOR':'*', 'OPNAME':'mul'})
+		h.write(operator[0] % {'TYPE1':type, 'TYPE2':type2, 'TYPE3':type, 'OPERATOR':'*', 'OPNAME':'mul'})
+		cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type2, 'TYPE3':type, 'OPERATOR':'*', 'OPNAME':'mul'})
+	if col > 1:
+		h.write(operator[0] % {'TYPE1':type, 'TYPE2':basetype, 'TYPE3':type, 'OPERATOR':'*', 'OPNAME':'mul'})
+		cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':basetype, 'TYPE3':type, 'OPERATOR':'*', 'OPNAME':'mul'})
+		h.write(operator[0] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':basetype, 'OPERATOR':'*', 'OPNAME':'mul'})
+		cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':basetype, 'OPERATOR':'*', 'OPNAME':'mul'})
+	for (op, opname) in operators:
+		if col > 1:
+			h.write(operator[0] % {'TYPE1':type, 'TYPE2':basetype, 'TYPE3':type, 'OPERATOR':op, 'OPNAME':opname})
+			cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':basetype, 'TYPE3':type, 'OPERATOR':op, 'OPNAME':opname})
+			h.write(operator[0] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':basetype, 'OPERATOR':op, 'OPNAME':opname})
+			cpp.write(operator[1] % {'TYPE1':type, 'TYPE2':type, 'TYPE3':basetype, 'OPERATOR':op, 'OPNAME':opname})
+
+
+
 	h.write("\n\n\n")
 	cpp.write("\n\n\n")
 
@@ -267,20 +301,34 @@ for rawtype, shadertype, doVector, doMatrix in types:
 	h = open("src/engine/graphics/api/graphics/objects/shaders/%s.script.hh" % rawtype, "w")
 	cpp = open("src/engine/graphics/src/objects/shaders/%s.cc" % rawtype, "w")
 	header(h, cpp, rawtype)
-	fileType(h, cpp, shadertype, 1, 1)
+	fileType(h, cpp, shadertype, 1, 1, doMatrix)
 	if doVector:
-		fileType(h, cpp, shadertype, 2, 1)
-		fileType(h, cpp, shadertype, 3, 1)
-		fileType(h, cpp, shadertype, 4, 1)
+		predecl(h, shadertype, 2, 1)
+		predecl(h, shadertype, 3, 1)
+		predecl(h, shadertype, 4, 1)
 	if doMatrix:
-		fileType(h, cpp, shadertype, 2, 2)
-		fileType(h, cpp, shadertype, 3, 2)
-		fileType(h, cpp, shadertype, 4, 2)
-		fileType(h, cpp, shadertype, 2, 3)
-		fileType(h, cpp, shadertype, 3, 3)
-		fileType(h, cpp, shadertype, 4, 3)
-		fileType(h, cpp, shadertype, 2, 4)
-		fileType(h, cpp, shadertype, 3, 4)
-		fileType(h, cpp, shadertype, 4, 4)
+		predecl(h, shadertype, 2, 2)
+		predecl(h, shadertype, 3, 2)
+		predecl(h, shadertype, 4, 2)
+		predecl(h, shadertype, 2, 3)
+		predecl(h, shadertype, 3, 3)
+		predecl(h, shadertype, 4, 3)
+		predecl(h, shadertype, 2, 4)
+		predecl(h, shadertype, 3, 4)
+		predecl(h, shadertype, 4, 4)
+	if doVector:
+		fileType(h, cpp, shadertype, 2, 1, doMatrix)
+		fileType(h, cpp, shadertype, 3, 1, doMatrix)
+		fileType(h, cpp, shadertype, 4, 1, doMatrix)
+	if doMatrix:
+		fileType(h, cpp, shadertype, 2, 2, doMatrix)
+		fileType(h, cpp, shadertype, 3, 2, doMatrix)
+		fileType(h, cpp, shadertype, 4, 2, doMatrix)
+		fileType(h, cpp, shadertype, 2, 3, doMatrix)
+		fileType(h, cpp, shadertype, 3, 3, doMatrix)
+		fileType(h, cpp, shadertype, 4, 3, doMatrix)
+		fileType(h, cpp, shadertype, 2, 4, doMatrix)
+		fileType(h, cpp, shadertype, 3, 4, doMatrix)
+		fileType(h, cpp, shadertype, 4, 4, doMatrix)
 	footer(h, cpp)
 

@@ -37,7 +37,8 @@ namespace
                 OutputDebugString(s_logNames[level]);
                 OutputDebugString(") ");
                 OutputDebugString(msg);
-                OutputDebugString("\n");
+                if (msg[strlen(msg)-1] != '\n')
+                    OutputDebugString("\n");
             #endif
             return true;
         }

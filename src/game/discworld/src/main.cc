@@ -42,14 +42,11 @@ int be_main(weak<BugEngine::Application> app)
     p->doFile("data/scripts/main.lua");
 
 
-    ref<Shaders::Float4> vertexpos = ref<Shaders::Float4Attribute>::create(gameArena());
-    ref<Shaders::Float4> worldpos = ref<Shaders::Float4Uniform>::create(gameArena(), "worldpos");
-    ref<Shaders::Float4> camerapos = ref<Shaders::Float4Uniform>::create(gameArena(), "camerapos");
-    ref<Shaders::Float4> testadd = weak<const Shaders::Float4>(worldpos) + weak<const Shaders::Float4>(camerapos);
-    ref<Shaders::Float4> testmul = weak<const Shaders::Float4>(vertexpos) * weak<const Shaders::Float4>(testadd);
-    ref<Shaders::Float4> testmul2 = weak<const Shaders::Float4>(testmul) * weak<const Shaders::Float4>(testmul);
+    ref<Shaders::Float4> position = ref<Shaders::Float4Attribute>::create(gameArena());
+    ref<Shaders::Float4x4> worldtransform = ref<Shaders::Float4x4Uniform>::create(gameArena(), "ModelViewProj");
+    ref<Shaders::Float4> out_vertex = weak<const Shaders::Float4x4>(worldtransform) * weak<const Shaders::Float4>(position);
     ref<Shaders::Float4> color = ref<Shaders::Float4Uniform>::create(gameArena(), "color");
-    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), testmul2, color, ref<Shaders::Float>());
+    ref<ShaderProgram> program = ref<ShaderProgram>::create(gameArena(), out_vertex, color, ref<Shaders::Float>());
 
     ref<RenderWindow> w1 = ref<RenderWindow>::create(gameArena(), (u16)800, (u16)600, "discworld v0.1", false);
     ref<World> world = ref<World>::create(gameArena(), "physicsBullet", "audioOpenAL", float3(1000.0f, 1000.0f, 1000.0f));
