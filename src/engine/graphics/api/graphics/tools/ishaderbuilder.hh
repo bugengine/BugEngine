@@ -56,11 +56,9 @@ class be_api(GRAPHICS) IShaderBuilder
 private:
     struct Namespace
     {
-        typedef minitl::pair< istring, size_t > IntermediateData;
         Namespace();
-        minitl::hashmap< weak<const Node>, IntermediateData >   names;
+        minitl::hashmap< weak<const Node>, istring >   names;
     };
-    typedef minitl::hashmap< weak<const Node>, Namespace::IntermediateData > Intermediate;
     enum ShaderConstants { AttributeMax = 16, VaryingMax = 16 };
     minitl::vector<Namespace>                           m_namespaces;
     size_t                                              m_currentAttribute;
