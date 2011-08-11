@@ -108,8 +108,8 @@ static ::Window createDefaultWindow(::Display* display, ::XVisualInfo* visual)
 
 GLRenderer::Context::Context(PlatformData* data)
 :   m_display(data->display)
-,   m_glContext(createGLXContext(data->display, data->fbConfig))
 ,   m_defaultWindow(createDefaultWindow(m_display, data->visual))
+,   m_glContext(createGLXContext(data->display, data->fbConfig))
 ,   m_threadId(Thread::currentId())
 ,   shaderext()
 {
