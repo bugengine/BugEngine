@@ -21,6 +21,9 @@
 # define GL_EXT_geometry_shader4 1
 # include   <OpenGL/OpenGL.h>
 # include   <OpenGL/gl.h>
+# ifndef APIENTRY
+#  define APIENTRY
+# endif
 #else
 # include   <GL/gl.h>
 # include   <GL/glext.h>
