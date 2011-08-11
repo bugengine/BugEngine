@@ -7,7 +7,7 @@
 
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
-#include    <graphics/stdafx.h>
+#include    <3d/stdafx.h>
 
 #include    <windowing/win32/resource.h>
 

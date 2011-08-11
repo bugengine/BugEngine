@@ -457,11 +457,11 @@ class shared_library(module):
 	def _post(self, builder, blacklist=[]):
 		for d in self.depends:
 			if d not in blacklist:
-				d.post(builder, blacklist)
+				d._post(builder, blacklist)
 		options = coptions()
 		options.defines.add('BUILDING_DLL')
 		options.defines.add('_USRDLL')
-		task = self.gentask(builder, 'cshlib', options, blacklist=blacklist)
+		task = self.gentask(builder, 'cshlib', options, coptions(), blacklist=blacklist)
 
 """ static lib """
 class static_library(module):

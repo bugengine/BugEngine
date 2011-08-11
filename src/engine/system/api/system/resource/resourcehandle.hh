@@ -10,7 +10,7 @@ namespace BugEngine
 
 class IResourceLoader;
 
-struct ResourceHandle
+struct be_api(SYSTEM) ResourceHandle
 {
     union Id
     {

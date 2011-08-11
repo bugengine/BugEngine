@@ -8,10 +8,6 @@
 #include    <core/stdafx.h>
 #include    <system/stdafx.h>
 #include    <rtti/stdafx.h>
-#include    <graphics/stdafx.h>
-#include    <physics/stdafx.h>
-#include    <audio/stdafx.h>
-
 
 #if defined(building_mobile) || defined(MOBILE_EXPORTS)
 # define    MOBILEEXPORT        BE_EXPORT

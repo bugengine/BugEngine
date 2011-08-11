@@ -16,10 +16,8 @@ enum
     WorldUpdateTask_Count
 };
 
-World::World(istring physics, istring audio, float3 worldExtents)
-:   m_physicsSystem(physics, worldExtents)
-,   m_audioSystem(audio)
-,   m_tasks(taskArena())
+World::World(float3 /*worldExtents*/)
+:   m_tasks(taskArena())
 ,   m_callbacks(taskArena())
 {
     m_tasks.resize(WorldUpdateTask_Count);
@@ -34,7 +32,7 @@ World::~World()
 {
 }
 
-weak<ITask> World::updateWorldTask()
+weak<ITask> World::updateWorldTask() const
 {
     return m_tasks[WorldUpdateTask_CopyWorld];
 }

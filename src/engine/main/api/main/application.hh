@@ -10,16 +10,13 @@
 namespace BugEngine
 {
 
-namespace Graphics
-{
-class IScene;
-}
+class World;
 
 class Application : public minitl::refcountable
 {
     BE_NOCOPY(Application);
 private:
-    class SceneResource;
+    class WorldResource;
 private:
     scoped<Scheduler>                               m_scheduler;
     minitl::vector< ref<ITask> >                    m_tasks;
@@ -33,8 +30,8 @@ public:
 
     int run(void);
 
-    ResourceHandle addScene(weak<const Graphics::IScene> scene);
-    void removeScene(const ResourceHandle& handle);
+    ResourceHandle addWorld(weak<const World> scene);
+    void removeWorld(const ResourceHandle& handle);
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:

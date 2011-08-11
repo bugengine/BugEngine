@@ -5,7 +5,7 @@
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
 #include    <darwin/platformrenderer.hh>
-#include    <graphics/objects/rendertarget.script.hh>
+#include    <3d/rendertarget/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {
