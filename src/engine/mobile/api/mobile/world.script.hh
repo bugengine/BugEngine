@@ -5,28 +5,25 @@
 #define BE_MOBILE_WORLD_HH_
 /*****************************************************************************/
 #include    <system/plugin.hh>
-#include    <physics/iworld.hh>
-#include    <audio/iworld.hh>
 #include    <system/scheduler/task/itask.hh>
+#include    <system/resource/resource.script.hh>
 
 namespace BugEngine
 {
 
-class be_api(MOBILE) World : public minitl::refcountable
+class be_api(MOBILE) World : public Resource
 {
     friend class WorldScene;
 private:
-    Plugin<Physics::IWorld>                     m_physicsSystem;
-    Plugin<Audio::IWorld>                       m_audioSystem;
     minitl::vector< ref<ITask> >                m_tasks;
     minitl::vector<ITask::CallbackConnection>   m_callbacks;
 private:
     void copyWorld();
     void updateWorld();
-private: // friend class WorldScene
-    weak<ITask> updateWorldTask();
 public:
-    World(istring physics, istring audio, float3 worldExtents);
+    weak<ITask> updateWorldTask() const;
+published:
+    World(float3 worldExtents);
     ~World();
 };
 

@@ -6,7 +6,7 @@
 #include    <windowing/renderer.hh>
 #include    <win32/platformrenderer.hh>
 #include    <win32/platformwindow.hh>
-#include    <graphics/objects/rendertarget.script.hh>
+#include    <3d/rendertarget/rendertarget.script.hh>
 
 namespace BugEngine
 {

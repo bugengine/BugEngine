@@ -36,7 +36,7 @@ def build(bld):
 	openal			= module.external('OpenAL')
 	oggvorbis		= module.external('oggvorbis')
 
-	bullet			= module.external('bullet')
+	bulletengine	= module.external('bulletengine')
 
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
@@ -48,27 +48,33 @@ def build(bld):
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
 	input			= module.library('input',       [core, rtti] )
-	graphics		= module.library('graphics',    [core, rtti, system, input, freetype ] )
-	audio			= module.library('audio',       [core, rtti, system, oggvorbis] )
-	physics			= module.library('physics',     [core, rtti, system] )
-	mobile			= module.library('mobile',      [core, rtti, system, graphics, audio, physics, input] )
-	main			= module.library('main',        [core, rtti, system, input, graphics, audio, physics, mobile])
+	mobile			= module.library('mobile',      [core, rtti, system, input] )
+	main			= module.library('main',        [core, rtti, system, input, mobile])
 
-	discworld		= module.game('discworld',      [core, rtti, system, input, graphics, audio, physics, mobile, main])
+	discworld		= module.game('discworld',      [core, rtti, system, input, mobile, main])
 
 	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
+
 	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
-	physicsBullet	= module.plugin('physicsBullet',[discworld, bullet])
-	renderNull		= module.plugin('renderNull', 	[discworld])
-	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
-	renderOpenGL	= module.plugin('renderOpenGL', [discworld, windowing, opengl], platforms=['pc'])
-	renderDx9		= module.plugin('renderDx9',    [discworld, windowing, cgDx, directx9], platforms=['win32'])
-	#audioOpenAL		= module.plugin('audioOpenAL',  [discworld, openal], platforms=['pc'])
+	bullet			= module.plugin('bullet',		[discworld, bulletengine])
+
+	_3d				= module.plugin('3d', 			[discworld])
+	shadermodel1	= module.plugin('shadermodel1', [discworld, _3d])
+	shadermodel2	= module.plugin('shadermodel2', [discworld, _3d, shadermodel1])
+	shadermodel3	= module.plugin('shadermodel3', [discworld, _3d, shadermodel1, shadermodel2])
+	shadermodel4	= module.plugin('shadermodel4', [discworld, _3d, shadermodel1, shadermodel2, shadermodel3])
+
+	windowing		= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
+	gl				= module.plugin('GL', 			[discworld, windowing, opengl, _3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4], platforms=['pc'])
+	Dx9				= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d, shadermodel1, shadermodel2], platforms=['win32'])
+	#Dx10			= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, shadermodel4], platforms=['win32'])
+	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4])
+	#AL				= module.plugin('AL',  			[discworld, openal], platforms=['pc'])
 	package			= module.plugin('package',      [discworld])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[renderOpenGL, renderDx9, renderNull, physicsBullet, package, lua, squirrel]
+	discworld.plugins=[_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, gl, Dx9, nullrender, bullet, package, lua, squirrel]
 	discworld.post(bld)
 
 

@@ -4,7 +4,7 @@
 #ifndef BE_WINDOWING_RENDERER_HH_
 #define BE_WINDOWING_RENDERER_HH_
 /*****************************************************************************/
-#include    <graphics/renderer/irenderer.hh>
+#include    <3d/renderer/irenderer.hh>
 #include    <windowing/window.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing

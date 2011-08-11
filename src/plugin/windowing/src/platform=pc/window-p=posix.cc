@@ -8,7 +8,7 @@
 #include    <X11/X.h>
 #include    <X11/Xlib.h>
 #include    <X11/Xatom.h>
-#include    <graphics/objects/rendertarget.script.hh>
+#include    <3d/rendertarget/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {

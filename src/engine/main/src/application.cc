@@ -6,32 +6,32 @@
 
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
-#include    <graphics/scene/iscene.script.hh>
+#include    <system/resource/resourceloader.hh>
 
-#include    <mobile/worldscene.script.hh>
+#include    <mobile/world.script.hh>
 
 
 namespace BugEngine
 {
 
-class Application::SceneResource : public minitl::refcountable
+class Application::WorldResource : public minitl::refcountable
 {
-    BE_NOCOPY(SceneResource);
+    BE_NOCOPY(WorldResource);
 private:
     ITask::CallbackConnection                       m_startSceneUpdate;
     ITask::CallbackConnection                       m_endSceneUpdate;
 public:
-    SceneResource(weak<const Graphics::IScene> scene, weak<ITask> task);
-    ~SceneResource();
+    WorldResource(weak<const World> world, weak<ITask> task);
+    ~WorldResource();
 };
 
-Application::SceneResource::SceneResource(weak<const Graphics::IScene> scene, weak<ITask> task)
-    :   m_startSceneUpdate(task, scene->updateTask()->startCallback())
-    ,   m_endSceneUpdate(scene->updateTask(), task->startCallback())
+Application::WorldResource::WorldResource(weak<const World> world, weak<ITask> task)
+    :   m_startSceneUpdate(task, world->updateWorldTask()->startCallback())
+    ,   m_endSceneUpdate(world->updateWorldTask(), task->startCallback())
 {
 }
 
-Application::SceneResource::~SceneResource()
+Application::WorldResource::~WorldResource()
 {
 }
 
@@ -56,12 +56,12 @@ Application::Application(int argc, const char *argv[])
     m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[2]));
     //m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[3]));
 
-    ResourceLoaders::attach< Graphics::IScene, Application >(this, &Application::addScene, &Application::removeScene);
+    ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
 }
 
 Application::~Application(void)
 {
-    ResourceLoaders::detach< Graphics::IScene, Application >(this);
+    ResourceLoaders::detach< World, Application >(this);
 }
 
 void Application::frameUpdate()
@@ -75,14 +75,14 @@ int Application::run()
     return 0;
 }
 
-ResourceHandle Application::addScene(weak<const Graphics::IScene> scene)
+ResourceHandle Application::addWorld(weak<const World> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<SceneResource>::create(taskArena(), scene, m_tasks[0]);
+    handle.handle = ref<WorldResource>::create(taskArena(), world, m_tasks[0]);
     return handle;
 }
 
-void Application::removeScene(const ResourceHandle& /*handle*/)
+void Application::removeWorld(const ResourceHandle& /*handle*/)
 {
 }
 

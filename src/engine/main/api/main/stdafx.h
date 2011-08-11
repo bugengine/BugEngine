@@ -8,9 +8,6 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
-#include    <graphics/stdafx.h>
-#include    <physics/stdafx.h>
-#include    <audio/stdafx.h>
 #include    <mobile/stdafx.h>
 
 #if defined(building_main) || defined(MAIN_EXPORTS)
