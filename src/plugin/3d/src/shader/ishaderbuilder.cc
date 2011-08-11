@@ -13,13 +13,13 @@ IShaderBuilder::Namespace::Namespace()
 };
 
 IShaderBuilder::IShaderBuilder()
-    :   m_stream(tempArena(), 10000)
-    ,   m_namespaces(tempArena())
+    :   m_namespaces(tempArena())
     ,   m_currentAttribute(0)
     ,   m_currentVarying(0)
     ,   m_currentAttributeToVarying(0)
     ,   m_currentTemporary(0)
     ,   m_attributeToVarying(tempArena())
+    ,   m_stream(tempArena(), 10000)
     ,   m_indent(0)
     ,   m_counter(0)
 {
