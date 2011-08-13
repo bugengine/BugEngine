@@ -6,6 +6,7 @@ import os
 from waflib.Logs import pprint
 import mak.tools.cross_gcc
 
+os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
 
 def options(opt):
 	pass
@@ -14,7 +15,7 @@ def configure(conf):
 	conf.load("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'osx'
 	conf.env['BUILD_VARIANTS'] = []
-	
+
 	paths = ['/Developer/usr/bin', '/Developer-old/usr/bin']
 	for l in os.listdir('/Developer/Platforms/'):
 		paths.append('/Developer/Platforms/%s/Developer/usr/bin'%l)

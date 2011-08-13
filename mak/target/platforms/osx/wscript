@@ -26,12 +26,16 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_gcc_flags_to_env(conf):
-	conf.env.append_unique('CFLAGS', ['-fPIC'])
-	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', ['-lobjc'])
-	conf.env.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa', 'OpenGL'])
-	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	v = conf.env
+	v.append_unique('CFLAGS', ['-fPIC'])
+	v.append_unique('CXXFLAGS', ['-fPIC'])
+	v.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa', 'OpenGL'])
+	v.append_unique('CFLAGS', ['-fvisibility=hidden'])
+	v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	v['FRAMEWORKPATH_ST']    = '-F%s'
+	v['FRAMEWORK_ST']        = ['-framework']
+	v['SHLIB_MARKER']        = []
+	v['STLIB_MARKER']        = []
 
 def add_darwin_flags_to_env(conf, name, arch):
 	from waflib import Options
