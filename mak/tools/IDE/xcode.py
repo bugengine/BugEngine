@@ -436,7 +436,7 @@ class XCodeProject:
 						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % ("bugengine_"+d.projectName))
 					else:
 						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % d.projectName)
-					if d.plist.has_key(name):
+					if name in d.plist:
 						w("\t\t\tINFOPLIST_FILE = \"%s\";\n" % (d.plist[name]))
 					w("\t\t};\n")
 					w("\t\tname = \"%s\";\n" % name)
