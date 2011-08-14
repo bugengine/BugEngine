@@ -8,7 +8,7 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
-#include    <mobile/stdafx.h>
+#include    <world/stdafx.h>
 
 #if defined(building_main) || defined(MAIN_EXPORTS)
 # define     MAINEXPORT          BE_EXPORT

@@ -41,6 +41,7 @@ void Environment::init(int argc, const char *argv[])
     m_dataDirectory = ipath(argv[0], filename);
     m_dataDirectory += "share";
     m_dataDirectory += "bugengine";
+    m_homeDirectory.push_back(minitl::format<>(".%s") | m_game);
 }
 
 Environment::~Environment()

@@ -1,5 +1,8 @@
 import sys
-import mak.cpp.lexer as lexer
+try:
+	import mak.cpp.lexer as lexer
+except:
+	import lexer
 
 tokens = lexer.tokens
 

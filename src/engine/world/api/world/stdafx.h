@@ -1,20 +1,20 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MOBILE_STDAFX_H_
-#define BE_MOBILE_STDAFX_H_
+#ifndef BE_WORLD_STDAFX_H_
+#define BE_WORLD_STDAFX_H_
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
 #include    <system/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#if defined(building_mobile) || defined(MOBILE_EXPORTS)
-# define    MOBILEEXPORT        BE_EXPORT
-#elif defined(mobile_dll)
-# define    MOBILEEXPORT        BE_IMPORT
+#if defined(building_world) || defined(WORLD_EXPORTS)
+# define    WORLDEXPORT         BE_EXPORT
+#elif defined(world_dll)
+# define    WORLDEXPORT         BE_IMPORT
 #else
-# define    MOBILEEXPORT
+# define    WORLDEXPORT
 #endif
 
 /*****************************************************************************/

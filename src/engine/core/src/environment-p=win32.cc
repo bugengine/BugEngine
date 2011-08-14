@@ -23,11 +23,11 @@ Environment::Environment()
     size = sizeof(profile);
     GetUserProfileDirectory(token, profile, &size);
     m_homeDirectory = profile;
-    m_homeDirectory += "BugEngine";
 }
 
 Environment::~Environment()
 {
+    SetDllDirectoryA(NULL);
 }
 
 void Environment::init(int /*argc*/, const char *argv[])
@@ -47,6 +47,9 @@ void Environment::init(int /*argc*/, const char *argv[])
     m_dataDirectory = ipath(exe, exe+begin);
     m_dataDirectory.push_back(istring("data"));
     m_game = istring(exe+begin+1, exe+s);
+    m_homeDirectory.push_back(m_game);
+
+    SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().c_str());
 }
 
 Environment& Environment::getEnvironment()

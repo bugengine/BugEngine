@@ -159,4 +159,19 @@ u32 ClassInfo::distance(weak<const ClassInfo> other) const
     return TypeInfo::MaxTypeDistance;
 }
 
+void ClassInfo::clearTags()
+{
+    m_tags.clear();
+}
+
+void ClassInfo::clearProperties()
+{
+    properties.clear();
+}
+
+void ClassInfo::clearMethods()
+{
+    methods.clear();
+}
+
 }}
