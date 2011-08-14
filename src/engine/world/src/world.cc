@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <mobile/stdafx.h>
-#include    <mobile/world.script.hh>
+#include    <world/stdafx.h>
+#include    <world/world.script.hh>
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 

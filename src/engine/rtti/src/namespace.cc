@@ -108,4 +108,9 @@ weak<const Namespace> Namespace::rttiRoot()
     return s_root;
 }
 
+void Namespace::clearNamespace()
+{
+    decls.clear();
+}
+
 }}

@@ -37,6 +37,8 @@ published:
     static weak<const Namespace> rttiRoot();
 
     bool empty() const { return decls.empty(); }
+public:
+    void clearNamespace();
 private:
     enum CreationPolicy { DoNotCreate, Create };
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;

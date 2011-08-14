@@ -99,11 +99,15 @@ bool MemoryFileMap::writable() const
 
 //-----------------------------------------------------------------------------
 
-DiskFS::DiskFS(const ipath& prefix, bool readonly) :
-    FileSystemComponent(),
-    m_prefix(prefix),
-    m_readOnly(readonly)
+DiskFS::DiskFS(const ipath& prefix, bool readonly)
+    :   FileSystemComponent()
+    ,   m_prefix(prefix)
+    ,   m_readOnly(readonly)
 {
+    if (!m_readOnly)
+    {
+        CreateDirectoryA(prefix.str().c_str(), 0);
+    }
 }
 
 DiskFS::~DiskFS(void)

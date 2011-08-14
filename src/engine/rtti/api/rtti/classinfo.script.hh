@@ -67,7 +67,9 @@ published:
 
     Value operator()(Value* params, u32 nparams) const;
 public:
-    void clearTags()                                { m_tags.clear(); }
+    void clearTags();
+    void clearProperties();
+    void clearMethods();
     template< typename T > void addTag(const T& t)  { m_tags.push_back(Value(t)); }
     template< typename T > Value getTag() const     { return getTag(be_typeid<T>::type()); }
 public:

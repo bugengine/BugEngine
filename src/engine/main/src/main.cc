@@ -4,6 +4,7 @@
 #include    <main/stdafx.h>
 #include    <main/main.hh>
 #include    <core/environment.hh>
+#include    <system/diskfs.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
@@ -51,7 +52,8 @@ static int __main(int argc, const char *argv[])
     BugEngine::Environment::getEnvironment().init(argc, argv);
     try
     {
-        minitl::format<1024> logname = (/*BugEngine::Environment::getEnvironment().getHomeDirectory() +*/ BugEngine::ifilename("log.txt")).str();
+        ref<BugEngine::DiskFS> mountpoint = ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getHomeDirectory());
+        minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
         BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);

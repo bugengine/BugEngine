@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
-#define BE_GRAPHICS_RENDERER_IRENDERTARGET_HH_
+#ifndef BE_3D_RENDERER_IRENDERTARGET_HH_
+#define BE_3D_RENDERER_IRENDERTARGET_HH_
 /*****************************************************************************/
 #include    <system/scheduler/task/group.hh>
 #include    <3d/renderer/igpuresource.hh>

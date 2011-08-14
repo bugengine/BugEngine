@@ -48,10 +48,10 @@ def build(bld):
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
 	input			= module.library('input',       [core, rtti] )
-	mobile			= module.library('mobile',      [core, rtti, system, input] )
-	main			= module.library('main',        [core, rtti, system, input, mobile])
+	world			= module.library('world',      [core, rtti, system, input] )
+	main			= module.library('main',        [core, rtti, system, input, world])
 
-	discworld		= module.game('discworld',      [core, rtti, system, input, mobile, main])
+	discworld		= module.game('discworld',      [core, rtti, system, input, world, main])
 
 	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
 

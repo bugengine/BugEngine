@@ -8,7 +8,7 @@
 #include    <system/scheduler/task/method.hh>
 #include    <system/resource/resourceloader.hh>
 
-#include    <mobile/world.script.hh>
+#include    <world/world.script.hh>
 
 
 namespace BugEngine

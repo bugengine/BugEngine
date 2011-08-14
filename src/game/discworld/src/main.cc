@@ -4,9 +4,13 @@
 #include    <stdafx.h>
 
 #include    <main/main.hh>
+#include    <system/filesystem.hh>
+#include    <system/plugin.hh>
 
 int be_main(weak<BugEngine::Application> app)
 {
+    ref<BugEngine::FileSystem> fs = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
+    BugEngine::Plugin<minitl::pointer>("GL4", weak<const BugEngine::FileSystem>(fs));
     app->run();
     return 0;
 }

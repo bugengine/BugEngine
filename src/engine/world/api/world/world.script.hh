@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MOBILE_WORLD_HH_
-#define BE_MOBILE_WORLD_HH_
+#ifndef BE_WORLD_WORLD_HH_
+#define BE_WORLD_WORLD_HH_
 /*****************************************************************************/
 #include    <system/plugin.hh>
 #include    <system/scheduler/task/itask.hh>
@@ -11,7 +11,8 @@
 namespace BugEngine
 {
 
-class be_api(MOBILE) World : public Resource
+be_tag(ResourceLoaders())
+class be_api(WORLD) World : public Resource
 {
     friend class WorldScene;
 private:
