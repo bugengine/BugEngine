@@ -1,6 +1,0 @@
-opts = coptions(defines=['_REENTRANT'], libs=['pthread', 'rt'])
-exparchoptions = {}
-for p in ['linux', 'sunos', 'darwin', 'freebsd']:
-	exparchoptions[p] = opts
-m[name] = util( name, [], '3rdparty', globalarchoptions=exparchoptions, platforms=['posix'])
-

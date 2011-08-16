@@ -196,7 +196,7 @@ def find_cross_gcc(conf):
 	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:
 		v = conf.env
-		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
@@ -211,16 +211,16 @@ def find_cross_gcc(conf):
 			conf.fatal('could not run the compiler %r' % str(cmd))
 
 
-		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
 
-		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CPP']:
-			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, '']:
+			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)

@@ -20,13 +20,14 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_gcc_flags_to_env(conf):
+	conf.env.append_unique('DEFINES', ['_REENTRANT'])
 	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', ['-rdynamic', '-Wl,-E'])
+	conf.env.append_unique('LINKFLAGS', ['-lpthread', '-rdynamic', '-Wl,-E'])
 	#conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	#conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
-def add_freebsd_flags_to_env(conf, name):
+def add_freebsd_flags_to_env(conf, name, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['freebsd']
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
@@ -47,22 +48,7 @@ def configure(conf):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('freebsd') != -1:
-			name = 'gcc-freebsd-'+arch+'-'+version.replace('-','_')
-			conf.setenv(name, conf.env.derive())
-			try:
-				add_gcc_to_env(conf, version, toolchaindir, target)
-				add_gcc_flags_to_env(conf)
-				add_freebsd_flags_to_env(conf, name)
-				conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
-
-				pprint('GREEN', 'configure for tool %s' % name)
-
-				conf.variant = ''
-				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception as e:
-				warn('gcc not available: '+str(e))
-				conf.variant = ''
-
+			conf.create_gcc_env(version, toolchaindir, target, 'freebsd', arch, add_gcc_flags_to_env, add_freebsd_flags_to_env)
 
 def build(bld):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
