@@ -4,6 +4,7 @@
 #ifndef BE_SYSTEM_PLUGIN_HH_
 #define BE_SYSTEM_PLUGIN_HH_
 /*****************************************************************************/
+#include    <rtti/namespace.script.hh>
 
 namespace BugEngine
 {
@@ -18,17 +19,21 @@ private:
     Handle      m_handle;
     Interface*  m_interface;
 public:
+    enum PreloadType { Preload };
+    Plugin(const istring &pluginName, PreloadType preload);
     Plugin(const istring &pluginName);
     template< typename T1 >
     Plugin(const istring &pluginName, T1 param1);
     template< typename T1, typename T2 >
     Plugin(const istring &pluginName, T1 param1, T2 param2);
-    virtual ~Plugin(void);
+    ~Plugin(void);
 
     Interface* operator->()             { return m_interface; }
     const Interface* operator->() const { return m_interface; }
     operator const void*() const        { return m_interface; }
     bool operator!() const              { return m_interface == 0; }
+
+    weak<const RTTI::Namespace> pluginNamespace() const;
 private:
     Plugin();
 };

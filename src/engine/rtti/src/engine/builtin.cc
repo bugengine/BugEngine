@@ -35,7 +35,7 @@ template< > ref<RTTI::ClassInfo> be_typeid< type >::klassBuilder()              
                                                                      0);                        \
     klass->copyconstructor = &RTTI::nullconstructor<sizeof(type)>;                              \
     klass->destructor = &RTTI::nulldestructor;                                                  \
-    weak<const RTTI::Namespace> ns = RTTI::Namespace::rttiRoot();                                     \
+    weak<const RTTI::Namespace> ns = be_Namespace();                                            \
     ns->add(inamespace(#type), Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\
     return klass;                                                                               \
 }

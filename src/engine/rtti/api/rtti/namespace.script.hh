@@ -34,8 +34,6 @@ published:
     void remove(const istring& name) const;
     Value get(const istring& name) const;
 
-    static weak<const Namespace> rttiRoot();
-
     bool empty() const { return decls.empty(); }
 public:
     void clearNamespace();
@@ -44,7 +42,11 @@ private:
     weak<const Namespace> getNamespace(const inamespace& name, CreationPolicy policy) const;
 };
 
-}}
+}
+
+weak<const RTTI::Namespace> be_Namespace();
+
+}
 
 /*****************************************************************************/
 #endif

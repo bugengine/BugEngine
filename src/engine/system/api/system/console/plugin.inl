@@ -31,14 +31,21 @@ public:
 }}
 
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
-    static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
-    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }              \
+    static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }                 \
+    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }                        \
     static BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                         \
                                                          reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),        \
                                                          reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin));
 
 namespace BugEngine
 {
+
+template< typename Interface >
+Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
+:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
+,   m_interface(0)
+{
+}
 
 template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
@@ -83,6 +90,13 @@ Plugin<Interface>::~Plugin(void)
         (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
     }
 }
+
+template< typename Interface >
+weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
+{
+    return weak<const RTTI::Namespace>();
+}
+
 
 }
 

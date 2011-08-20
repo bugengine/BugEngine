@@ -220,7 +220,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
     return *this;
 }
 
-    template< Endianness endianness >
+template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u32& value)
 {
     Integer<u32,endianness> m;

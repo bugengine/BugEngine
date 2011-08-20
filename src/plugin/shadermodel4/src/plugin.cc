@@ -4,4 +4,4 @@
 #include    <shadermodel4/stdafx.h>
 #include    <system/plugin.hh>
 
-//BE_PLUGIN_REGISTER(shadermodel4, , ,);
+BE_PLUGIN_NAMESPACE_REGISTER("shadermodel4");
