@@ -30,6 +30,7 @@ public:
 
 }}
 
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
     static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }                 \
     static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }                        \
