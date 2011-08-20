@@ -8,12 +8,21 @@
 #include    <dlfcn.h>
 
 
-#define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
-    extern "C" BE_EXPORT const BugEngine::RTTI::Namespace* be_Namespace()                                                               \
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                   \
+    namespace BugEngine                                                                                                                 \
+    {                                                                                                                                   \
+    weak<const BugEngine::RTTI::Namespace> be_Namespace()                                                                               \
     {                                                                                                                                   \
         static ref<const ::BugEngine::RTTI::Namespace> ns = ref<const ::BugEngine::RTTI::Namespace>::create(::BugEngine::rttiArena());  \
-        return ns.operator();                                                                                                           \
+        return ns.operator->();                                                                                                         \
     }                                                                                                                                   \
+    }                                                                                                                                   \
+    extern "C" BE_EXPORT const BugEngine::RTTI::Namespace* be_pluginNamespace()                                                         \
+    {                                                                                                                                   \
+        return BugEngine::be_Namespace().operator->();                                                                                  \
+    }
+#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
     extern "C" BE_EXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 
@@ -91,7 +100,7 @@ weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
 {
     if (m_handle)
     {
-        const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_Namespace")));
+        const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_pluginNamespace")));
         if (be_pluginNamespace)
             return (*be_pluginNamespace)(); 
         return weak<const RTTI::Namespace>();
