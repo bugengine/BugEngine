@@ -9,6 +9,11 @@
 
 
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
+    extern "C" BE_EXPORT const BugEngine::RTTI::Namespace* be_Namespace()                                                               \
+    {                                                                                                                                   \
+        static ref<const ::BugEngine::RTTI::Namespace> ns = ref<const ::BugEngine::RTTI::Namespace>::create(::BugEngine::rttiArena());  \
+        return ns.operator();                                                                                                           \
+    }                                                                                                                                   \
     extern "C" BE_EXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 
@@ -24,6 +29,12 @@ static void* loadLibrary(const istring& pluginName)
         be_error(dlerror());
     }
     return handle;
+}
+
+template< typename Interface >
+Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
+:   m_handle(loadLibrary(pluginName))
+{
 }
 
 template< typename Interface >
@@ -71,9 +82,24 @@ Plugin<Interface>::~Plugin(void)
         void (*_fini)(Interface*) = reinterpret_cast<void (*)(Interface*)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_destroyPlugin")));
         if (_fini)
             _fini(m_interface); 
-        //dlclose(m_handle);
+        //dlclose(m_handle); crashes on systems with TLS
     }
 }
+
+template< typename Interface >
+weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
+{
+    if (m_handle)
+    {
+        const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_Namespace")));
+        if (be_pluginNamespace)
+            return (*be_pluginNamespace)(); 
+        return weak<const RTTI::Namespace>();
+    }
+}
+
+
+
 
 }
 

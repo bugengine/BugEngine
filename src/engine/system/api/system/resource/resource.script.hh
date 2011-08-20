@@ -16,7 +16,6 @@ struct ResourceLoaders;
 template< typename Owner, typename T > class ResourceLoader;
 
 class be_api(SYSTEM) Resource : public minitl::refcountable
-                              , public minitl::intrusive_list<Resource>::item
 {
     friend struct ResourceLoaders;
     BE_NOCOPY(Resource);

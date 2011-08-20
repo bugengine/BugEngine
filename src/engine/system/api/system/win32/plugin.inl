@@ -5,7 +5,21 @@
 
 #include    <winerror.h>
 
-#define BE_PLUGIN_REGISTER(name, klass, params, args)                               \
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                   \
+    namespace BugEngine                                                                                                                 \
+    {                                                                                                                                   \
+    weak<const BugEngine::RTTI::Namespace> be_Namespace()                                                                               \
+    {                                                                                                                                   \
+        static ref<const ::BugEngine::RTTI::Namespace> ns = ref<const ::BugEngine::RTTI::Namespace>::create(::BugEngine::rttiArena());  \
+        return ns.operator->();                                                                                                         \
+    }                                                                                                                                   \
+    }                                                                                                                                   \
+    extern "C" BE_EXPORT const BugEngine::RTTI::Namespace* be_pluginNamespace()                                                         \
+    {                                                                                                                                   \
+        return BugEngine::be_Namespace().operator->();                                                                                  \
+    }
+#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
     extern "C" BE_EXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 
@@ -36,6 +50,13 @@ static HANDLE loadPlugin(const istring &pluginName)
         ::LocalFree(errorMessage);
     }
     return h;
+}
+
+template< typename Interface >
+Plugin<Interface>::Plugin(const istring &pluginName, PreloadType /*preload*/)
+:   m_handle(loadPlugin(pluginName))
+,   m_interface(0)
+{
 }
 
 template< typename Interface >
@@ -127,7 +148,7 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if (m_handle)
+    if (m_handle && m_interface)
     {
         void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
         if (be_pluginDestroy)
@@ -135,6 +156,19 @@ Plugin<Interface>::~Plugin(void)
         FreeLibrary(static_cast<HMODULE>(m_handle));
     }
 }
+
+template< typename Interface >
+weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
+{
+    if (m_handle)
+    {
+        const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_pluginNamespace"));
+        if (be_pluginNamespace)
+            return (*be_pluginNamespace)(); 
+        return weak<const RTTI::Namespace>();
+    }
+}
+
 
 }
 

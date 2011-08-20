@@ -101,16 +101,19 @@ Value Namespace::get(const istring& name) const
         return Value();
 }
 
-weak<const Namespace> Namespace::rttiRoot()
-{
-    be_typeid<Namespace>::klass();
-    static ref<Namespace> s_root = ref<Namespace>::create(rttiArena());
-    return s_root;
-}
-
 void Namespace::clearNamespace()
 {
     decls.clear();
 }
 
-}}
+}
+
+
+weak<const RTTI::Namespace> be_Namespace()
+{
+    be_typeid<RTTI::Namespace>::klass();
+    static ref<RTTI::Namespace> s_root = ref<RTTI::Namespace>::create(rttiArena());
+    return s_root;
+}
+
+}

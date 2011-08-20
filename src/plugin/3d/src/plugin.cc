@@ -4,4 +4,4 @@
 #include    <3d/stdafx.h>
 #include    <system/plugin.hh>
 
-//BE_PLUGIN_REGISTER("3d", minitl::pointer, (),);
+BE_PLUGIN_NAMESPACE_REGISTER("3d");

@@ -47,11 +47,10 @@ def build(bld):
 	network			= module.library('network',     [core])
 	rtti			= module.library('rtti',        [core, network] )
 	system			= module.library('system',      [core, rtti] )
-	input			= module.library('input',       [core, rtti] )
-	world			= module.library('world',      [core, rtti, system, input] )
-	main			= module.library('main',        [core, rtti, system, input, world])
+	world			= module.library('world',       [core, rtti, system] )
+	main			= module.library('main',        [core, rtti, system, world])
 
-	discworld		= module.game('discworld',      [core, rtti, system, input, world, main])
+	discworld		= module.game('discworld',      [core, rtti, system, world, main])
 
 	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
 
@@ -69,12 +68,20 @@ def build(bld):
 	Dx9				= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d, shadermodel1, shadermodel2], platforms=['win32'])
 	#Dx10			= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, shadermodel4], platforms=['win32'])
 	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4])
+
 	#AL				= module.plugin('AL',  			[discworld, openal], platforms=['pc'])
+
 	package			= module.plugin('package',      [discworld])
 	lua				= module.plugin('lua',          [discworld, lualib])
 	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
 
-	discworld.plugins=[_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, gl, Dx9, nullrender, bullet, package, lua, squirrel]
+	input			= module.plugin('input', 		[discworld])
+
+	discworld.plugins=[
+		_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, gl, Dx9, nullrender,
+		bullet,
+		package, lua, squirrel,
+		input]
 	discworld.post(bld)
 
 

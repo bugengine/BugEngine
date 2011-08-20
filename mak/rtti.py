@@ -86,7 +86,7 @@ class Root(Container):
 			name = fullname[2:].replace('::', '.')
 			file.write("    template< > be_typeid< %s >::PropertyBuilder::~PropertyBuilder()\n" % (fullname))
 			file.write("    {\n")
-			file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::RTTI::Namespace::rttiRoot();\n")
+			file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::be_Namespace();\n")
 			file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
 			file.write("        ns->remove(name);\n")
 			file.write("        %sUnregisterProperties();\n" % classname)
@@ -137,7 +137,7 @@ class Enum(Container):
 		file.write("        klass = ref< ::BugEngine::RTTI::ClassInfo>::create(::BugEngine::rttiArena(), ::BugEngine::inamespace(\"%s\"), ::BugEngine::be_typeid< void >::klass(), be_checked_numcast<u32>(sizeof(%s)), 0);\n" % (self.fullname[2:].replace('::', '.'), self.fullname))
 		for tag in self.tags:
 			file.write("        klass->addTag(%s);\n" % tag)
-		file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::RTTI::Namespace::rttiRoot();\n")
+		file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::be_Namespace();\n")
 		file.write("        inamespace name = inamespace(\"%s\");\n" % (name))
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
 		file.write("        return klass;\n");
@@ -208,7 +208,7 @@ class Class(Container):
 			file.write("        klass->destructor = &::BugEngine::RTTI::wrapDestroy< %s >;\n" % (self.fullname))
 		for tag in self.tags:
 			file.write("        klass->addTag(%s);\n" % tag)
-		file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::RTTI::Namespace::rttiRoot();\n")
+		file.write("        weak<const ::BugEngine::RTTI::Namespace> ns = ::BugEngine::be_Namespace();\n")
 		file.write("        ns->add(name, Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\n")
 		file.write("        return klass;\n");
 		file.write("    }\n")
