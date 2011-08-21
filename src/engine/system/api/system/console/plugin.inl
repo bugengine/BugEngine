@@ -86,7 +86,7 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if (m_handle)
+    if (m_handle && m_interface)
     {
         (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
     }
