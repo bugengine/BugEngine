@@ -43,12 +43,14 @@ static void* loadLibrary(const istring& pluginName)
 template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
 :   m_handle(loadLibrary(pluginName))
+,   m_interface(0)
 {
 }
 
 template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
 :   m_handle(loadLibrary(pluginName))
+,   m_interface(0)
 {
     if  (m_handle)
     {
@@ -62,6 +64,7 @@ template< typename Interface >
 template< typename T1 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 :   m_handle(loadLibrary(pluginName))
+,   m_interface(0)
 {
     if (m_handle)
     {
@@ -75,6 +78,7 @@ template< typename Interface >
 template< typename T1, typename T2 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 :   m_handle(loadLibrary(pluginName))
+,   m_interface(0)
 {
     if (m_handle)
     {
@@ -86,11 +90,11 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if (m_handle)
+    if (m_handle && m_interface)
     {
         void (*_fini)(Interface*) = reinterpret_cast<void (*)(Interface*)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_destroyPlugin")));
         if (_fini)
-            _fini(m_interface); 
+            _fini(m_interface);
         //dlclose(m_handle); crashes on systems with TLS
     }
 }
@@ -102,7 +106,7 @@ weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
     {
         const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_pluginNamespace")));
         if (be_pluginNamespace)
-            return (*be_pluginNamespace)(); 
+            return (*be_pluginNamespace)();
         return weak<const RTTI::Namespace>();
     }
 }
