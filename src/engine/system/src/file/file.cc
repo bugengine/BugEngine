@@ -2,18 +2,18 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/fscomponent.hh>
+#include    <system/file/file.script.hh>
+#include    <system/file/filesystem.hh>
 
 
 namespace BugEngine
 {
 
-
-FileSystemComponent::FileSystemComponent(void)
+File::File()
 {
 }
 
-FileSystemComponent::~FileSystemComponent(void)
+File::~File()
 {
 }
 

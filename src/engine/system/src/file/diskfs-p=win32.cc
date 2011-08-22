@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/diskfs.hh>
+#include    <system/file/diskfs.hh>
 #include    <core/memory/streams.hh>
 
 
@@ -99,12 +99,12 @@ bool MemoryFileMap::writable() const
 
 //-----------------------------------------------------------------------------
 
-DiskFS::DiskFS(const ipath& prefix, bool readonly)
+DiskFS::DiskFS(const ipath& prefix, OpenMode mode)
     :   FileSystemComponent()
     ,   m_prefix(prefix)
-    ,   m_readOnly(readonly)
+    ,   m_readOnly(mode == ReadOnly)
 {
-    if (!m_readOnly)
+    if (mode == CreateRoot)
     {
         CreateDirectoryA(prefix.str().c_str(), 0);
     }

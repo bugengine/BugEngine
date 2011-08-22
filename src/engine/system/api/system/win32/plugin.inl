@@ -148,11 +148,14 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if (m_handle && m_interface)
+    if (m_handle)
     {
-        void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
-        if (be_pluginDestroy)
-            (*be_pluginDestroy)(m_interface); 
+        if (m_interface)
+        {
+            void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
+            if (be_pluginDestroy)
+                (*be_pluginDestroy)(m_interface);
+        }
         FreeLibrary(static_cast<HMODULE>(m_handle));
     }
 }
@@ -165,8 +168,8 @@ weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
         const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_pluginNamespace"));
         if (be_pluginNamespace)
             return (*be_pluginNamespace)(); 
-        return weak<const RTTI::Namespace>();
     }
+    return weak<const RTTI::Namespace>();
 }
 
 

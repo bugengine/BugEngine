@@ -5,7 +5,7 @@
 #define BE_RTTI_SCRIPTING_H_
 /*****************************************************************************/
 #include    <rtti/scripting.hh>
-#include    <system/filesystem.hh>
+#include    <core/memory/streams.hh>
 
 namespace BugEngine
 {

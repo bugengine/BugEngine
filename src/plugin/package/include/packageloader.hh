@@ -4,7 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGELOADER_HH_
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 #include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace Plugin { namespace PackageManager

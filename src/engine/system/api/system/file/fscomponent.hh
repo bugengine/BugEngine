@@ -1,11 +1,11 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SYSTEM_FILESYSTEM_COMPONENT_HH_
-#define BE_SYSTEM_FILESYSTEM_COMPONENT_HH_
+#ifndef BE_SYSTEM_FILE_FSCOMPONENT_HH_
+#define BE_SYSTEM_FILE_FSCOMPONENT_HH_
 /*****************************************************************************/
 #include    <minitl/ptr/refcountable.hh>
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 
 
 namespace BugEngine

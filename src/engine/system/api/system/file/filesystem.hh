@@ -61,7 +61,7 @@ public:
 };
 
 }
-#include    <system/fscomponent.hh>
+#include    <system/file/fscomponent.hh>
 
 
 

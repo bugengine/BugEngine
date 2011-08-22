@@ -4,7 +4,7 @@
 #include    <main/stdafx.h>
 #include    <main/main.hh>
 #include    <core/environment.hh>
-#include    <system/diskfs.hh>
+#include    <system/file/diskfs.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
