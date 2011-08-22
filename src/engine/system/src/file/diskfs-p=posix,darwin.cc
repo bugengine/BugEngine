@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/diskfs.hh>
+#include    <system/file/diskfs.hh>
 #include    <core/memory/streams.hh>
 
 #include    <unistd.h>
@@ -101,12 +101,15 @@ bool MemoryFileMap::writable() const
 
 //-----------------------------------------------------------------------------
 
-DiskFS::DiskFS(const ipath& prefix, bool readonly)
+DiskFS::DiskFS(const ipath& prefix, OpenMode mode)
     :   FileSystemComponent()
     ,   m_prefix(prefix)
-    ,   m_readOnly(readonly)
+    ,   m_readOnly(mode == ReadOnly)
 {
-    mkdir(prefix.str().c_str(), S_IRWXU|S_IRWXG);
+    if (mode == CreateRoot)
+    {
+        mkdir(prefix.str().c_str(), S_IRWXU|S_IRWXG);
+    }
 }
 
 DiskFS::~DiskFS(void)
