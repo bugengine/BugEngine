@@ -2,10 +2,10 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 
 #include    <core/memory/streams.hh>
-#include    <system/fscomponent.hh>
+#include    <system/file/fscomponent.hh>
 
 
 namespace BugEngine

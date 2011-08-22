@@ -4,7 +4,7 @@
 #ifndef BE_OPENGL_RENDERER_HH_
 #define BE_OPENGL_RENDERER_HH_
 /*****************************************************************************/
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 
 namespace BugEngine { namespace Graphics
 {

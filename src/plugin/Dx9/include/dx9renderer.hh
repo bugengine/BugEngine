@@ -5,7 +5,7 @@
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
 #include    <windowing/renderer.hh>
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 
 #include    <d3d9.h>
 

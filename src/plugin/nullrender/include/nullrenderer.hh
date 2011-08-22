@@ -5,7 +5,7 @@
 #define BE_RENDERNULL_RENDERER_HH_
 /*****************************************************************************/
 #include    <3d/renderer/irenderer.hh>
-#include    <system/filesystem.hh>
+#include    <system/file/filesystem.hh>
 
 namespace BugEngine { namespace Graphics { namespace Null
 {

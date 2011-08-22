@@ -1,10 +1,10 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SYSTEM_FILESYSTEM_DISK_HH_
-#define BE_SYSTEM_FILESYSTEM_DISK_HH_
+#ifndef BE_SYSTEM_FILE_DISKFS_HH_
+#define BE_SYSTEM_FILE_DISKFS_HH_
 /*****************************************************************************/
-#include    <system/fscomponent.hh>
+#include    <system/file/fscomponent.hh>
 #include    <core/string/istring.hh>
 
 
@@ -21,7 +21,8 @@ private:
     ipath       m_prefix;
     bool        m_readOnly;
 public:
-    DiskFS(const ipath& prefix, bool readonly = false);
+    enum OpenMode { Normal, CreateRoot, ReadOnly };
+    DiskFS(const ipath& prefix, OpenMode mode = Normal);
     ~DiskFS(void);
 
     virtual bool writable() const override;

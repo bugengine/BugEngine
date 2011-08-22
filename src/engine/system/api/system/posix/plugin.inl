@@ -107,8 +107,8 @@ weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
         const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_pluginNamespace")));
         if (be_pluginNamespace)
             return (*be_pluginNamespace)();
-        return weak<const RTTI::Namespace>();
     }
+    return weak<const RTTI::Namespace>();
 }
 
 
