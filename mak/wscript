@@ -13,7 +13,7 @@ from waflib.Tools import ccroot
 
 def options(opt):
 	opt.recurse(os.path.join('host', os.name))
-	opt.load('visualstudio netbeans xcode', tooldir='mak/tools/IDE')
+	opt.load('visualstudio netbeans xcode eclipse', tooldir='mak/tools/IDE')
 	#opt.load('parallel_debug', tooldir='mak/waflib/extras')
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
@@ -82,6 +82,7 @@ def configure(conf):
 
 	conf.variant = ''
 	conf.env['BUILD_VARIANTS'] = selectedvariants
+	conf.env['ALL_VARIANTS'] = selectedvariants
 
 	if Options.options.toolchains:
 		conf.env['SELECTED_TOOLCHAINS'] = Options.options.toolchains

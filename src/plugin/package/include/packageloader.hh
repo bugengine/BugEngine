@@ -7,7 +7,7 @@
 #include    <system/file/filesystem.hh>
 #include    <system/resource/resource.script.hh>
 
-namespace BugEngine { namespace Plugin { namespace PackageManager
+namespace BugEngine { namespace PackageManager
 {
 
 class PackageLoader : public minitl::refcountable
@@ -24,7 +24,7 @@ public:
     void  operator delete(void* memory)              { be_notreached(); return ::operator delete(memory); }
 };
 
-}}}
+}}
 
 /*****************************************************************************/
 #endif

@@ -95,6 +95,7 @@ try:
 			name = y.__name__.replace('Context','').lower()
 			class tmp(y):
 				cmd = name + '_' + toolchain
+				fun = name
 				variant = toolchain
 except:
 	pass
