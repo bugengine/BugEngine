@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <packageloader.hh>
 
-namespace BugEngine { namespace Plugin { namespace PackageManager
+namespace BugEngine { namespace PackageManager
 {
 
 PackageLoader::PackageLoader(weak<const FileSystem> filesystem)
@@ -16,4 +16,4 @@ PackageLoader::~PackageLoader()
 {
 }
 
-}}}
+}}

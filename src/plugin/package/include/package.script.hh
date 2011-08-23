@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 
-namespace BugEngine { namespace Plugin { namespace PackageManager
+namespace BugEngine { namespace PackageManager
 {
 
 be_tag(ResourceLoaders())
@@ -17,7 +17,7 @@ published:
     ~Package();
 };
 
-}}}
+}}
 
 /*****************************************************************************/
 #endif

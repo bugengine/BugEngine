@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <package.script.hh>
 
-namespace BugEngine { namespace Plugin { namespace PackageManager
+namespace BugEngine { namespace PackageManager
 {
 
 Package::Package(const ifilename& /*filename*/)
@@ -15,4 +15,4 @@ Package::~Package()
 {
 }
 
-}}}
+}}
