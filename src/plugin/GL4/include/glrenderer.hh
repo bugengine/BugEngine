@@ -28,8 +28,8 @@ class GLRenderer : public Windowing::Renderer
     friend class GLWindow;
 private:
     class Context;
-    mutable scoped<Context>         m_context;
     weak<const FileSystem>          m_filesystem;
+    mutable scoped<Context>         m_context;
 public:
     GLRenderer(weak<const FileSystem> filesystem);
     ~GLRenderer();

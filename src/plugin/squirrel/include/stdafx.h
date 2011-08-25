@@ -7,6 +7,7 @@
 
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
+#include    <system/stdafx.h>
 
 /*****************************************************************************/
 #endif

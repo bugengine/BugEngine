@@ -129,33 +129,36 @@ class eclipse(Build.BuildContext):
 
 	def impl_create_cproject(self, executable, waf, appname, workspace_includes, cpppath, source_dirs=[]):
 		doc = Document()
+		doc.encoding = "UTF-8"
 		doc.appendChild(doc.createProcessingInstruction('fileVersion', '4.0.0'))
 
 		cproject = doc.createElement('cproject')
 		count = 0
 		rootStorageModule = self.add(doc, cproject, 'storageModule',
 				{'moduleId': cdt_core + '.settings'})
+
 		for toolchainName in self.env['BUILD_VARIANTS']+[i for i in self.env['ALL_VARIANTS'] if i not in self.env['BUILD_VARIANTS']]:
-			print toolchainName
 			count = count+1
 			cconf_id = cdt_core + '.default.config.%d'%count
 			cconf = self.add(doc, rootStorageModule, 'cconfiguration', {'id':cconf_id})
 
+						
 			storageModule = self.add(doc, cconf, 'storageModule',
 					{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
 					'id': cconf_id,
 					'moduleId': cdt_core + '.settings',
 					'name': toolchainName})
-
 			self.add(doc, storageModule, 'externalSettings')
 
+					
 			extensions = self.add(doc, storageModule, 'extensions')
 			extension_list = """
 				VCErrorParser
-				MakeErrorParser
+				GmakeErrorParser
 				GCCErrorParser
 				GASErrorParser
 				GLDErrorParser
+				CWDLocator
 			""".split()
 			ext = self.add(doc, extensions, 'extension',
 						{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'})
@@ -163,56 +166,63 @@ class eclipse(Build.BuildContext):
 						{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'})
 			ext = self.add(doc, extensions, 'extension',
 						{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'})
-			ext = self.add(doc, extensions, 'extension',
-						{'id': cdt_core + '.GNU_ELF', 'point':cdt_core + '.BinaryParser'})
 			for e in extension_list:
 				ext = self.add(doc, extensions, 'extension',
 						{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'})
-			count = count+1
-			cconf_id = cdt_core + '.default.config.%d'%count
+
 			storageModule = self.add(doc, cconf, 'storageModule',
 					{'moduleId': 'cdtBuildSystem', 'version': '4.0.0'})
 			config = self.add(doc, storageModule, 'configuration',
 						{'artifactName': appname,
+						 'buildProperties': '',
+						 'description': '',
 						 'id': cconf_id,
 						 'name': toolchainName,
 						 'parent': cdt_bld + '.prefbase.cfg'})
 			folderInfo = self.add(doc, config, 'folderInfo',
 								{'id': cconf_id+'.', 'name': '/', 'resourcePath': ''})
-
+			count = count+1
 			toolChain = self.add(doc, folderInfo, 'toolChain',
-					{'id': cdt_bld + '.prefbase.toolchain.1',
+					{'id': cdt_bld + '.prefbase.toolchain.%d'%count,
 					 'name': 'No ToolChain',
 					 'resourceTypeBasedDiscovery': 'false',
 					 'superClass': cdt_bld + '.prefbase.toolchain'})
 
+			count = count+1
 			targetPlatform = self.add(doc, toolChain, 'targetPlatform',
-					{ 'binaryParser': 'org.eclipse.cdt.core.ELF',
-					  'id': cdt_bld + '.prefbase.toolchain.1', 'name': ''})
+					{ 'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
+					  'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''})
 
-			waf_build = '"%s" build_%s'%(waf,toolchainName)
+			waf_build = '"%s" install_%s'%(waf,toolchainName)
 			waf_clean = '"%s" clean'%(waf)
+			count = count+1
 			builder = self.add(doc, toolChain, 'builder',
 							{'autoBuildTarget': waf_build,
 							 'command': executable,
 							 'enableAutoBuild': 'false',
 							 'cleanBuildTarget': waf_clean,
-							 'enableIncrementalBuild': 'true',
-							 'id': cdt_bld + '.settings.default.builder.1',
+							 'id': cdt_bld + '.settings.default.builder.%d'%count,
 							 'incrementalBuildTarget': waf_build,
+							 'keepEnvironmentInBuildfile': 'false',
 							 'managedBuildOn': 'false',
 							 'name': 'Gnu Make Builder',
 							 'superClass': cdt_bld + '.settings.default.builder'})
 
 			for tool_name in ("Assembly", "GNU C++", "GNU C"):
+				count = count+1
 				tool = self.add(doc, toolChain, 'tool',
-						{'id': cdt_bld + '.settings.holder.1',
+						{'id': cdt_bld + '.settings.holder.%d'%count,
 						 'name': tool_name,
 						 'superClass': cdt_bld + '.settings.holder'})
+				count = count+1
+				input = self.add(doc, tool, 'inputType',
+						{'id': cdt_bld + '.settings.holder.inType.%d'%count,
+						 'superClass': cdt_bld + '.settings.holder.inType'})
 				if cpppath or workspace_includes:
 					incpaths = cdt_bld + '.settings.holder.incpaths'
+					count = count+1
 					option = self.add(doc, tool, 'option',
-							{'id': incpaths+'.1',
+							{'id': incpaths+'.%d'%count,
 							 'name': 'Include Paths',
 							 'superClass': incpaths,
 							 'valueType': 'includePath'})
@@ -224,6 +234,11 @@ class eclipse(Build.BuildContext):
 						self.add(doc, option, 'listOptionValue',
 									{'builtIn': 'false',
 									'value': '"%s"'%(i)})
+			count = count+1
+			tool = self.add(doc, toolChain, 'tool',
+							{'id': cdt_bld + '.settings.holder.libs.%d'%count,
+							 'name': "holder for library settings",
+							 'superClass': cdt_bld + '.settings.holder.libs'})
 			if source_dirs:
 				sourceEntries = self.add(doc, config, 'sourceEntries')
 				for i in source_dirs:
@@ -237,24 +252,27 @@ class eclipse(Build.BuildContext):
 								'flags': 'VALUE_WORKSPACE_PATH|RESOLVED',
 								'kind': 'sourcePath',
 								'name': i})
-
-		storageModule = self.add(doc, cconf, 'storageModule',
-							{'moduleId': cdt_mk + '.buildtargets'})
-		buildTargets = self.add(doc, storageModule, 'buildTargets')
-		def addTargetWrap(name, runAll):
-			return self.addTarget(doc, buildTargets, executable, name,
-								'"%s" %s'%(waf, name), runAll)
-		addTargetWrap('configure', True)
-		addTargetWrap('dist', False)
-		addTargetWrap('install', False)
-		addTargetWrap('check', False)
+			
+			storageModule = self.add(doc, cconf, 'storageModule',
+								{'moduleId': 'org.eclipse.cdt.core.externalSettings'})
 
 		storageModule = self.add(doc, cproject, 'storageModule',
 							{'moduleId': 'cdtBuildSystem',
 							 'version': '4.0.0'})
 
 		project = self.add(doc, storageModule, 'project',
-					{'id': '%s.null.1'%appname, 'name': appname})
+					{'id': '%s.null.0'%appname, 'name': appname})
+
+		storageModule = self.add(doc, cproject, 'storageModule',
+							{'moduleId': cdt_mk + '.buildtargets'})
+		buildTargets = self.add(doc, storageModule, 'buildTargets')
+		def addTargetWrap(name, runAll):
+			return self.addTarget(doc, buildTargets, executable, name,
+							'"%s" %s'%(waf, name), runAll)
+		addTargetWrap('configure', True)
+		addTargetWrap('dist', False)
+		addTargetWrap('install', False)
+		addTargetWrap('check', False)
 
 		doc.appendChild(cproject)
 		return doc
