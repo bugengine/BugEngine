@@ -16,8 +16,8 @@ def configure(conf):
 
 
 def build(bld):
+	bld.recurse('mak')
 	if not bld.variant:
-		bld.recurse('mak')
 		if not bld.env.PROJECTS:
 			Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
 			return
@@ -84,6 +84,8 @@ def build(bld):
 		input]
 	discworld.post(bld)
 
+def install(ctx):
+	print('bla')
 
 
 from waflib.Build import BuildContext, InstallContext, UninstallContext
@@ -95,8 +97,9 @@ try:
 			name = y.__name__.replace('Context','').lower()
 			class tmp(y):
 				cmd = name + '_' + toolchain
-				fun = name
-				variant = toolchain
+			while tmp != BuildContext:
+				tmp.variant = toolchain
+				tmp = tmp.__class__.__bases__[0]
 except:
 	pass
 
