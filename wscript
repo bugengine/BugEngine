@@ -19,7 +19,7 @@ def build(bld):
 	bld.recurse('mak')
 	if not bld.variant:
 		if not bld.env.PROJECTS:
-			Options.commands.extend(['build_' + i for i in bld.env.BUILD_VARIANTS])
+			Options.commands.extend([bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS])
 			return
 
 	dbghelp			= module.external('dbghelp')
@@ -83,23 +83,4 @@ def build(bld):
 		package, lua, squirrel,
 		input]
 	discworld.post(bld)
-
-def install(ctx):
-	print('bla')
-
-
-from waflib.Build import BuildContext, InstallContext, UninstallContext
-from waflib import ConfigSet
-try:
-	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
-	for toolchain in env.BUILD_VARIANTS:
-		for y in (BuildContext, InstallContext, UninstallContext):
-			name = y.__name__.replace('Context','').lower()
-			class tmp(y):
-				cmd = name + '_' + toolchain
-			while tmp != BuildContext:
-				tmp.variant = toolchain
-				tmp = tmp.__class__.__bases__[0]
-except:
-	pass
 
