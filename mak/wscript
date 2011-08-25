@@ -256,12 +256,12 @@ def make_masterfiles(self):
 def apply_implib_program(self):
 	ccroot.apply_implib(self)
 
-from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext
+from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, ListContext
 from waflib import ConfigSet
 try:
 	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
 	for toolchain in env.BUILD_VARIANTS:
-		for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
+		for y in (BuildContext, CleanContext, InstallContext, UninstallContext, ListContext):
 			name = y.__name__.replace('Context','').lower()
 			class tmp(y):
 				cmd = name + '_' + toolchain

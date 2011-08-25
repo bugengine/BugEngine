@@ -131,8 +131,8 @@ GLWindow::Context::~Context()
 
 GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
 :   Windowing::Renderer(gameArena())
-,   m_context(scoped<Context>::create(arena()))
 ,   m_filesystem(filesystem)
+,   m_context(scoped<Context>::create(arena()))
 {
 }
 
