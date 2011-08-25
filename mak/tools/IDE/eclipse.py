@@ -81,17 +81,18 @@ class eclipse(Build.BuildContext):
 					if is_cc and path not in source_dirs:
 						source_dirs.append(path)
 
-		project = self.impl_create_project(sys.executable, appname)
+		waf = sys.argv[0]
+
+		project = self.impl_create_project(sys.executable, waf, appname)
 		self.srcnode.make_node('.project').write(project.toxml())
 
-		waf = os.path.abspath(sys.argv[0])
 		project = self.impl_create_cproject(sys.executable, waf, appname, workspace_includes, cpppath, source_dirs)
 		self.srcnode.make_node('.cproject').write(project.toxml())
 
 		project = self.impl_create_pydevproject(appname, sys.path, pythonpath)
 		self.srcnode.make_node('.pydevproject').write(project.toxml())
 
-	def impl_create_project(self, executable, appname):
+	def impl_create_project(self, executable, waf, appname):
 		doc = Document()
 		projectDescription = doc.createElement('projectDescription')
 		self.add(doc, projectDescription, 'name', appname)
@@ -104,10 +105,16 @@ class eclipse(Build.BuildContext):
 		arguments = self.add(doc, buildCommand, 'arguments')
 		# the default make-style targets are overwritten by the .cproject values
 		dictionaries = {
+				cdt_mk + '.append_environment': 'true',
 				cdt_mk + '.contents': cdt_mk + '.activeConfigSettings',
 				cdt_mk + '.enableAutoBuild': 'false',
+				cdt_mk + '.autoBuildTarget': '"%s" install_%s' % (waf, self.env['BUILD_VARIANTS'][0]),
 				cdt_mk + '.enableCleanBuild': 'true',
+				cdt_mk + '.cleanBuildTarget': '"%s" clean_%s' % (waf, self.env['BUILD_VARIANTS'][0]),
 				cdt_mk + '.enableFullBuild': 'true',
+				cdt_mk + '.fullBuildTarget': '"%s" install_%s' % (waf, self.env['BUILD_VARIANTS'][0]),
+				cdt_mk + '.useDefaultBuildCmd': 'false',
+				cdt_mk + '.buildCommand': executable
 				}
 		for k, v in dictionaries.items():
 			self.addDictionary(doc, arguments, k, v)
@@ -142,7 +149,6 @@ class eclipse(Build.BuildContext):
 			cconf_id = cdt_core + '.default.config.%d'%count
 			cconf = self.add(doc, rootStorageModule, 'cconfiguration', {'id':cconf_id})
 
-						
 			storageModule = self.add(doc, cconf, 'storageModule',
 					{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
 					'id': cconf_id,
@@ -150,7 +156,6 @@ class eclipse(Build.BuildContext):
 					'name': toolchainName})
 			self.add(doc, storageModule, 'externalSettings')
 
-					
 			extensions = self.add(doc, storageModule, 'extensions')
 			extension_list = """
 				VCErrorParser
@@ -194,7 +199,7 @@ class eclipse(Build.BuildContext):
 					  'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''})
 
 			waf_build = '"%s" install_%s'%(waf,toolchainName)
-			waf_clean = '"%s" clean'%(waf)
+			waf_clean = '"%s" clean_%s'%(waf,toolchainName)
 			count = count+1
 			builder = self.add(doc, toolChain, 'builder',
 							{'autoBuildTarget': waf_build,
@@ -307,7 +312,7 @@ class eclipse(Build.BuildContext):
 	def addDictionary(self, doc, parent, k, v):
 		dictionary = self.add(doc, parent, 'dictionary')
 		self.add(doc, dictionary, 'key', k)
-		self.add(doc, dictionary, 'key', v)
+		self.add(doc, dictionary, 'value', v)
 		return dictionary
 
 	def addTarget(self, doc, buildTargets, executable, name, buildTarget, runAllBuilders=True):
