@@ -269,3 +269,9 @@ try:
 except:
 	pass
 
+class foo(BuildContext):
+	cmd = 'build'
+	fun = 'build'
+	def compile(self):
+		pass
+
