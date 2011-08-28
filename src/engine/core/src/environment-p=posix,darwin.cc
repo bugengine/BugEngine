@@ -17,7 +17,7 @@ Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
 ,   m_dataDirectory("../share/bugengine")
 ,   m_game("")
-,   m_user(getenv("USER"))
+,   m_user(getenv("HOME"))
 {
 }
 

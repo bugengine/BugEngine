@@ -5,4 +5,4 @@
 #include    <glrenderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(renderOpenGL, BugEngine::Graphics::OpenGL::GLRenderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));
+BE_PLUGIN_REGISTER(GL4, BugEngine::Graphics::OpenGL::GLRenderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));

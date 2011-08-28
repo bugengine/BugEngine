@@ -10,8 +10,7 @@
 int be_main(weak<BugEngine::Application> app)
 {
     ref<BugEngine::FileSystem> fs = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
-    BugEngine::Plugin<minitl::pointer> plugin("GL4", BugEngine::Plugin<minitl::pointer>::Preload);
-    plugin.pluginNamespace();
+    BugEngine::Plugin<minitl::pointer> plugin("GL4", weak<const BugEngine::FileSystem>(fs));
     app->run();
     return 0;
 }
