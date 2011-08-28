@@ -22,12 +22,12 @@ namespace
             GLX_DRAWABLE_TYPE,  GLX_WINDOW_BIT,
             GLX_RENDER_TYPE,    GLX_RGBA_BIT,
             GLX_X_VISUAL_TYPE,  GLX_TRUE_COLOR,
-            GLX_RED_SIZE, 8,
-            GLX_GREEN_SIZE, 8,
-            GLX_BLUE_SIZE, 8,
-            GLX_ALPHA_SIZE, 8,
-            GLX_DEPTH_SIZE, 24,
-            GLX_STENCIL_SIZE, 8,
+            //GLX_RED_SIZE, 8,
+            //GLX_GREEN_SIZE, 8,
+            //GLX_BLUE_SIZE, 8,
+            //GLX_ALPHA_SIZE, 8,
+            //GLX_DEPTH_SIZE, 24,
+            //GLX_STENCIL_SIZE, 8,
             GLX_DOUBLEBUFFER, True,
             None
         };
@@ -64,6 +64,7 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     }
 }
 
+#ifdef BE_ENABLE_ASSERTS
 static const char *s_messages[] =
 {
     "Success"
@@ -85,6 +86,7 @@ static const char *s_messages[] =
     "BadLength",
     "BadImplementation"
 };
+#endif
 
 int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 {
@@ -171,8 +173,7 @@ void Renderer::flush()
                 XGetWindowProperty(m_platformRenderer->m_platformData.display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
                                    False, AnyPropertyType, &type, &format, &nbItems, &leftBytes, &result);
                 be_assert(result, "could not retrieve engine window handle from X11 window");
-                Window *w = *(Window**)result;
-                be_info("%d items (%d): %p" | nbItems | leftBytes | w);
+                be_info("%d items (%d): %p" | nbItems | leftBytes | *(Window**)result);
                 XFree(result);
             }
             break;
