@@ -17,6 +17,7 @@ void GLRenderer::flush()
 {
     static int frames = 0;
     static float now = Timer::now();
+    be_forceuse(now);
     if (++frames%100 == 0)
     {
         float time = Timer::now();

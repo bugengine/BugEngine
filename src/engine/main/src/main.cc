@@ -50,7 +50,9 @@ namespace
 static int __main(int argc, const char *argv[])
 {
     BugEngine::Environment::getEnvironment().init(argc, argv);
+#ifdef BE_ENABLE_EXCEPTIONS
     try
+#endif
     {
         ref<BugEngine::DiskFS> mountpoint = ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getHomeDirectory(), BugEngine::DiskFS::CreateRoot);
         minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
@@ -58,10 +60,12 @@ static int __main(int argc, const char *argv[])
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);
     }
+#ifdef BE_ENABLE_EXCEPTIONS
     catch(...)
     {
         return EXIT_FAILURE;
     }
+#endif
 }
 /*****************************************************************************/
 #if defined(BE_PLATFORM_WIN32)

@@ -28,6 +28,7 @@
 # define BE_ENABLE_DEBUG_ITERATORS      1
 # define BE_ENABLE_LOGGING              1
 # define BE_ENABLE_MEMORY_TRACKING      1
+# define BE_ENABLE_EXCEPTIONS           1
 #endif
 
 /*****************************************************************************/
