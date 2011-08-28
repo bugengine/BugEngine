@@ -86,6 +86,12 @@ GLRenderer::Context::Context()
 {
     int sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
+	[m_context makeCurrentContext];
+	be_info("Created OpenGL context %s (%s) on %s"
+		| (const char*)glGetString(GL_VERSION)
+		| (const char *)glGetString(GL_VENDOR)
+		| (const char*)glGetString(GL_RENDERER));
+	[NSOpenGLContext clearCurrentContext];
 }
 
 GLRenderer::Context::~Context()
