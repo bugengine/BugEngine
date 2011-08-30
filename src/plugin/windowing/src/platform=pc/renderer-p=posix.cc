@@ -64,7 +64,7 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     }
 }
 
-#ifdef BE_ENABLE_ASSERTS
+#ifdef BE_ENABLE_ASSERT
 static const char *s_messages[] =
 {
     "Success"
