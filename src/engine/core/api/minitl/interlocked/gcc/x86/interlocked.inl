@@ -36,6 +36,7 @@ struct InterlockedType<4>
                       : "r" (v));
         return v;
     }
+    
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
