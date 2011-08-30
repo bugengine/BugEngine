@@ -10,41 +10,42 @@
 namespace BugEngine { namespace RTTI
 {
 
-struct be_api(RTTI) ParamInfo
-{
-published:
-    istring const   name;
-    TypeInfo const  type;
-public:
-    ParamInfo(const istring& name, const TypeInfo& type) : name(name), type(type) { }
-};
-
-struct be_api(RTTI) OverloadInfo
-{
-published:
-    TypeInfo const                  returnType;
-    minitl::vector<const ParamInfo> params;
-    bool                            vararg;
-public:
-    Value (*call)(Value* params, u32 nparams);
-
-    OverloadInfo(const TypeInfo& returnType, Value (*call)(Value* params, u32 nparams), bool vararg = false)
-        :   returnType(returnType)
-        ,   params(rttiArena())
-        ,   vararg(vararg)
-        ,   call(call)
-    { }
-    u32 distance(Value* p, u32 nparams) const;
-};
 
 struct be_api(RTTI) MethodInfo
 {
 published:
-    minitl::vector<OverloadInfo>  overloads;
+    struct be_api(RTTI) OverloadInfo
+    {
+    published:
+        struct be_api(RTTI) ParamInfo
+        {
+        published:
+            const ParamInfo*    next;
+            istring             name;
+            TypeInfo            type;
+        private:
+            ParamInfo& operator=(const ParamInfo&);
+        };
+    published:
+        const OverloadInfo* next;
+        TypeInfo            returnType;
+        const ParamInfo*    params;
+        bool                vararg;
+    public:
+        Value (*call)(Value* params, u32 nparams);
+        u32 distance(Value* p, u32 nparams) const;
+    private:
+        OverloadInfo& operator=(const OverloadInfo&);
+    };
+
+published:
+    const MethodInfo*   next;
+    istring             name;
+    const OverloadInfo* overloads;
 published:
     Value operator()(Value* params, u32 nparams) const;
-public:
-    MethodInfo();
+private:
+    MethodInfo& operator=(const MethodInfo&);
 };
 
 }}

@@ -4,14 +4,14 @@
 #ifndef BE_RTTI_VALUE_HH_
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.hh>
+#include   <rtti/typeinfo.script.hh>
 
 namespace BugEngine
 {
 
 namespace RTTI
 {
-class ClassInfo;
+struct ClassInfo;
 struct PropertyInfo;
 template< typename T,
           typename P1,
@@ -36,7 +36,7 @@ struct procedurehelper;
 
 class Value
 {
-    friend class RTTI::ClassInfo;
+    friend struct RTTI::ClassInfo;
     friend struct RTTI::PropertyInfo;
     template< typename T,
           typename P1,

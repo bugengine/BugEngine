@@ -87,7 +87,7 @@ inline Value::Value(ByRefType<Value> t)
 
 template<>
 inline Value::Value(ByRefType<const Value> t)
-:   m_type(t.value.m_type, TypeInfo::Constify)
+:   m_type(TypeInfo::makeType(t.value.m_type, TypeInfo::Constify))
 ,   m_reference(true)
 {
     m_ref.m_pointer = const_cast<void*>(t.value.memory());
@@ -143,7 +143,7 @@ TypeInfo Value::type()
 
 TypeInfo Value::type() const
 {
-    return TypeInfo(m_type, TypeInfo::Constify);
+    return TypeInfo::makeType(m_type, TypeInfo::Constify);
 }
 
 template< typename T >
@@ -248,12 +248,12 @@ bool Value::isConst() const
 
 Value::operator const void*() const
 {
-    return (const void*)(m_type.metaclass != be_typeid<void>::klass());
+    return (const void*)(m_type.metaclass != &be_typeid<void>::klass);
 }
 
 bool Value::operator!() const
 {
-    return m_type.metaclass == be_typeid<void>::klass();
+    return m_type.metaclass == &be_typeid<void>::klass;
 }
 
 void* Value::rawget() const

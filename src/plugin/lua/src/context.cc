@@ -6,7 +6,8 @@
 #include    <context.h>
 
 #include    <core/memory/streams.hh>
-#include    <rtti/namespace.script.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 
 
 namespace BugEngine { namespace Lua
@@ -125,7 +126,7 @@ void Context::doFile(weak<IMemoryStream> file, const char *filename)
 void Context::push(lua_State* state, const Value& v)
 {
     const TypeInfo& t = v.type();
-    if (t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
+    if (t.metaclass == &be_typeid<u8>::klass || t.metaclass == &be_typeid<u16>::klass)
     {
     }
 
@@ -217,18 +218,18 @@ int Context::valueToString(lua_State *state)
     Value* userdata = (Value*)lua_touserdata(state, -1);
     if (userdata->type().type == TypeInfo::Class)
     {
-        weak<const RTTI::ClassInfo> metaclass = userdata->type().metaclass;
-        if (metaclass == be_typeid< inamespace >::klass())
+        const RTTI::ClassInfo* metaclass = userdata->type().metaclass;
+        if (metaclass == &be_typeid< inamespace >::klass)
         {
             lua_pushfstring(state, "%s", userdata->as<const inamespace>().str().c_str());
             return 1;
         }
-        if (metaclass == be_typeid< istring >::klass())
+        if (metaclass == &be_typeid< istring >::klass)
         {
             lua_pushfstring(state, "%s", userdata->as<const istring>().c_str());
             return 1;
         }
-        if (metaclass == be_typeid< ifilename >::klass())
+        if (metaclass == &be_typeid< ifilename >::klass)
         {
             lua_pushfstring(state, "%s", userdata->as<const ifilename>().str().c_str());
             return 1;
@@ -267,7 +268,7 @@ int Context::valueCall(lua_State *state)
         new((void*)(&values[i-1])) Value(get(state, i));
     }
 
-    Value result = userdata->type().metaclass->call(values, top);
+    Value result = userdata->type().metaclass->call->operator ()(values, top);
 
     for (int i = top; i > 0; --i)
         values[i-1].~Value();

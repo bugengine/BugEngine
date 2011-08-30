@@ -12,7 +12,7 @@ class Value;
 
 namespace RTTI
 {
-class ClassInfo;
+struct ClassInfo;
 }
 
 struct be_api(RTTI) TypeInfo
@@ -42,13 +42,20 @@ struct be_api(RTTI) TypeInfo
         Constify
     };
 
-    ref<const RTTI::ClassInfo> const    metaclass;
-    Type const                          type;
-    Constness const                     constness;
+    const RTTI::ClassInfo*  metaclass;
+    Type                    type;
+    Constness               constness;
 
-    inline TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness);
-    inline TypeInfo(const TypeInfo& other, ConstifyType);
-    inline ~TypeInfo();
+    static inline TypeInfo makeType(const RTTI::ClassInfo* klass, Type type, Constness constness = Mutable)
+    {
+        TypeInfo info = { klass, type, constness };
+        return info;
+    }
+    static inline TypeInfo makeType(const TypeInfo& type, ConstifyType /*constify*/)
+    {
+        TypeInfo info = { type.metaclass, type.type, Const };
+        return info;
+    }
 
     u32                             size() const;
     minitl::format<>                name() const;
@@ -62,25 +69,6 @@ private:
     void                            create(void* obj) const;
     void                            destroy(void* obj) const;
 };
-
-
-TypeInfo::TypeInfo(ref<const RTTI::ClassInfo> metaclass, Type type, Constness constness)
-    :   metaclass(metaclass)
-    ,   type(type)
-    ,   constness(constness)
-{
-}
-
-TypeInfo::TypeInfo(const TypeInfo& other, ConstifyType)
-    :   metaclass(other.metaclass)
-    ,   type(other.type)
-    ,   constness(Const)
-{
-}
-
-TypeInfo::~TypeInfo()
-{
-}
 
 }
 

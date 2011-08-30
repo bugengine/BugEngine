@@ -18,15 +18,15 @@ struct be_api(RTTI) PropertyInfo
 {
     friend class BugEngine::Value;
 published:
-    const TypeInfo      owner;
-    const TypeInfo      type;
-    const u32           offset;
-published:
-    PropertyInfo(const TypeInfo& owner, const TypeInfo& type, u32 offset);
-    ~PropertyInfo();
+    const PropertyInfo* next;
+    TypeInfo            owner;
+    TypeInfo            type;
+    u32                 offset;
 
     Value get(Value& from) const;
     void  set(Value& from, const Value& value) const;
+private:
+    PropertyInfo& operator=(const PropertyInfo&);
 };
 
 }}

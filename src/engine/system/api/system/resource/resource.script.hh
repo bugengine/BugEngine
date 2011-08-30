@@ -44,7 +44,7 @@ public:
     template< typename T, typename Owner >
     static void attach(weak<Owner> owner, ResourceHandle(Owner::*load)(weak<const T> t), void (Owner::*unload)(const ResourceHandle& handle))
     {
-        Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
+        Value v = be_typeid<T>::klass.getTag(be_typeid<ResourceLoaders>::type());
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be attached" |  be_typeid<T>::type().name(), return);
         v.as<ResourceLoaders&>().add(ref< ResourceLoader<Owner, T> >::create(rttiArena(), owner, load, unload));
     }
@@ -52,7 +52,7 @@ public:
     template< typename T, typename Owner >
     static void detach(weak<Owner> owner)
     {
-        Value v = be_typeid<T>::klass()->template getTag<ResourceLoaders>();
+        Value v = be_typeid<T>::klass.getTag(be_typeid<ResourceLoaders>::type());
         be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be detached" |  be_typeid<T>::type().name(), return);
         v.as<ResourceLoaders&>().remove(owner);
     }
