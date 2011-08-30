@@ -77,7 +77,7 @@ def configure(conf):
 			name = optim+'-'+envname
 			conf.setenv(name, conf.all_envs[envname])
 			conf.env['OPTIMISATION'] = optim
-			conf.env['PREFIX'] = name
+			conf.env['PREFIX'] = os.path.join('build', name)
 			selectedvariants.append(name)
 
 	conf.variant = ''
@@ -118,6 +118,7 @@ def selectToolchains(ctx):
 	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
+	module.m = {}
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
