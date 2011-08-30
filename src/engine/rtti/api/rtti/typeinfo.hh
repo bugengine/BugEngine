@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_TYPEINFO_HH_
 #define BE_RTTI_TYPEINFO_HH_
 /*****************************************************************************/
+#include    <rtti/classinfo.script.hh>
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/type/typemanipulation.hh>
 
@@ -11,59 +12,47 @@ namespace BugEngine
 {
 
 template< typename T >
-struct BE_EXPORT be_typeid
+struct be_typeid
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
-    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
-private:
-    struct PropertyBuilder
-    {
-        PropertyBuilder();
-        ~PropertyBuilder();
-    };
-    static ref<RTTI::ClassInfo> klassBuilder();
-    static PropertyBuilder s_properties;
+    static BE_EXPORT const RTTI::ClassInfo klass;
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< T& > : public be_typeid<T>
+struct be_typeid< T& > : public be_typeid<T>
 {
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, TypeInfo::Class, TypeInfo::Mutable); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< const T > : public be_typeid< T >
+struct be_typeid< const T > : public be_typeid<T>
 {
-    static inline TypeInfo                      type()  { TypeInfo type = be_typeid<T>::type(); return TypeInfo(type.metaclass, type.type, TypeInfo::Const); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::type(), TypeInfo::Constify); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< const T& > : public be_typeid<const T>
+struct be_typeid< const T& > : public be_typeid<T>
 {
-    static inline TypeInfo                      type()  { TypeInfo type = be_typeid<T>::type(); return TypeInfo(type.metaclass, type.type, TypeInfo::Const); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::type(), TypeInfo::Constify); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< ref<T> >
+struct be_typeid< ref<T> > : public be_typeid<T>
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return be_typeid<T>::klass(); }
-    static inline TypeInfo                      type()  { return TypeInfo(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRefPtr : TypeInfo::RefPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstRefPtr : TypeInfo::RefPtr, TypeInfo::Mutable); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< weak<T> >
+struct be_typeid< weak<T> > : public be_typeid<T>
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return be_typeid<T>::klass(); }
-    static inline TypeInfo                      type()  { return TypeInfo(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstWeakPtr : TypeInfo::WeakPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstWeakPtr : TypeInfo::WeakPtr, TypeInfo::Mutable); }
 };
 
 template< typename T >
-struct be_api(RTTI) be_typeid< T* >
+struct be_typeid< T* > : public be_typeid<T>
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return be_typeid<T>::klass(); }
-    static inline TypeInfo                      type()  { return TypeInfo(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
 };
-
-template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder();
 
 }
 

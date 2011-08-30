@@ -72,7 +72,7 @@ const ResourceHandle& Resource::getResource(weak<const minitl::pointer> owner) c
 void Resource::load(const Value& v)
 {
     be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "value of type %s is not a Resource, skipping" | v.type().name(), return);
-    Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
+    Value resourceloaders = v.type().metaclass->getTag(be_typeid<ResourceLoaders>::type());
     be_assert_recover(resourceloaders, "no resource loader on type %s" | v.type().name(), return);
     resourceloaders.as<const ResourceLoaders&>().load(v);
 }
@@ -80,7 +80,7 @@ void Resource::load(const Value& v)
 void Resource::unload(const Value& v)
 {
     be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "value of type %s is not a Resource, skipping" | v.type().name(), return);
-    Value resourceloaders = v.type().metaclass->getTag<ResourceLoaders>();
+    Value resourceloaders = v.type().metaclass->getTag(be_typeid<ResourceLoaders>::type());
     be_assert_recover(resourceloaders, "no resource loader on type %s" | v.type().name(), return);
     resourceloaders.as<const ResourceLoaders&>().unload(v);
 }

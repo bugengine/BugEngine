@@ -4,10 +4,14 @@
 #ifndef BE_SYSTEM_PLUGIN_HH_
 #define BE_SYSTEM_PLUGIN_HH_
 /*****************************************************************************/
-#include    <rtti/namespace.script.hh>
 
 namespace BugEngine
 {
+
+    namespace RTTI
+    {
+        struct ClassInfo;
+    }
 
 template< typename Interface >
 class be_api(SYSTEM) Plugin
@@ -33,7 +37,7 @@ public:
     operator const void*() const        { return m_interface; }
     bool operator!() const              { return m_interface == 0; }
 
-    weak<const RTTI::Namespace> pluginNamespace() const;
+    const RTTI::ClassInfo* pluginNamespace() const;
 private:
     Plugin();
 };

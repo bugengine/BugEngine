@@ -4,7 +4,6 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/namespace.script.hh>
 #include    <rtti/engine/helper/get.hh>
 #include    <rtti/engine/helper/set.hh>
 #include    <rtti/engine/helper/method.hh>
@@ -12,33 +11,21 @@
 namespace BugEngine
 {
 
-template< > ref<RTTI::ClassInfo> be_typeid< void >::klassBuilder()
-{
-    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("void"), ref<RTTI::ClassInfo>(), 0, 0);
-    klass->copyconstructor = &RTTI::nullconstructor<0>;
-    klass->destructor = &RTTI::nulldestructor;
-    return klass;
-}
+template< >
+const RTTI::ClassInfo be_typeid< void >::klass = { "void", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-template< > ref<RTTI::ClassInfo> be_typeid< ::minitl::refcountable >::klassBuilder()
-{
-    return be_const_cast<RTTI::ClassInfo>(be_typeid< void >::klass());
-}
+template< >
+const RTTI::ClassInfo be_typeid< minitl::refcountable >::klass = { "minitl.refcountable", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+#define BE_MAKE_BUILTIN_NAME(type,name,parent)                                                  \
+    template< > const RTTI::ClassInfo be_typeid< type >::klass =                                \
+        {                                                                                       \
+            #name,                                                                              \
+            &be_typeid< parent >::klass,                                                        \
+            0, 0, 0, 0, 0, 0, 0, 0                                                              \
+        };
 #define BE_MAKE_BUILTIN(type,parent)                                                            \
-template< > ref<RTTI::ClassInfo> be_typeid< type >::klassBuilder()                              \
-{                                                                                               \
-    static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(),               \
-                                                                     inamespace(#type),         \
-                                                                     ref<RTTI::ClassInfo>(),    \
-                                                                     (u32)sizeof(type),         \
-                                                                     0);                        \
-    klass->copyconstructor = &RTTI::nullconstructor<sizeof(type)>;                              \
-    klass->destructor = &RTTI::nulldestructor;                                                  \
-    weak<const RTTI::Namespace> ns = be_Namespace();                                            \
-    ns->add(inamespace(#type), Value(minitl::ref< const ::BugEngine::RTTI::ClassInfo >(klass)));\
-    return klass;                                                                               \
-}
+    BE_MAKE_BUILTIN_NAME(type,type,parent)
 
 BE_MAKE_BUILTIN(bool, void);
 BE_MAKE_BUILTIN(u8, void);
@@ -49,7 +36,7 @@ BE_MAKE_BUILTIN(i8, void);
 BE_MAKE_BUILTIN(i16, void);
 BE_MAKE_BUILTIN(i32, void);
 BE_MAKE_BUILTIN(i64, void);
-    
+
 BE_MAKE_BUILTIN(byte2, void);
 BE_MAKE_BUILTIN(byte3, void);
 BE_MAKE_BUILTIN(byte4, void);
@@ -77,7 +64,7 @@ BE_MAKE_BUILTIN(float4, void);
 BE_MAKE_BUILTIN(istring, void);
 BE_MAKE_BUILTIN(inamespace, void);
 BE_MAKE_BUILTIN(ifilename, void);
-BE_MAKE_BUILTIN(minitl::format<>, void);
+BE_MAKE_BUILTIN_NAME(minitl::format<>, format, void);
 BE_MAKE_BUILTIN(Value, void);
 
 #undef BE_MAKE_BUILTIN

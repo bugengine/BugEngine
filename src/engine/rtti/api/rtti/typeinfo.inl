@@ -92,76 +92,41 @@ struct RefType< raw<const T> >
 }
 
 template< typename T >
-struct be_api(RTTI) be_typeid< minitl::vector<T> >
+struct be_typeid< minitl::vector<T> >
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
-    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
-private:
-    class PropertyBuilder
-    {
-        PropertyBuilder()
-        {
-        }
-        ~PropertyBuilder()
-        {
-        }
-    };
-    static ref<RTTI::ClassInfo> klassBuilder()
-    {
-        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("vector"), ref<RTTI::ClassInfo>(), 0, 0);
-        return klass;
-    }
-    static PropertyBuilder s_properties;
+    static const RTTI::ClassInfo klass;
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+};
+template< typename T >
+const RTTI::ClassInfo be_typeid< minitl::vector<T> >::klass =
+{
+    "vector", 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 template< typename T, size_t SIZE >
-struct be_api(RTTI) be_typeid< minitl::array<T,SIZE> >
+struct be_typeid< minitl::array<T,SIZE> >
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
-    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
-private:
-    class PropertyBuilder
-    {
-        PropertyBuilder()
-        {
-        }
-        ~PropertyBuilder()
-        {
-        }
-    };
-    static ref<RTTI::ClassInfo> klassBuilder()
-    {
-        static ref<RTTI::ClassInfo> klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("array"), ref<RTTI::ClassInfo>(), 0, 0);
-        return klass;
-    }
-    static PropertyBuilder s_properties;
+    static const RTTI::ClassInfo klass;
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+};
+template< typename T, size_t SIZE >
+const RTTI::ClassInfo be_typeid< minitl::array<T,SIZE> >::klass =
+{
+    "array", 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 template< typename T1, typename T2, typename T3 >
-struct be_api(RTTI) be_typeid< minitl::hashmap<T1, T2, T3> >
+struct be_typeid< minitl::hashmap<T1, T2, T3> >
 {
-    static inline ref<const RTTI::ClassInfo>    klass() { return klassBuilder(); }
-    static inline TypeInfo                      type()  { return TypeInfo(klass(), TypeInfo::Class, TypeInfo::Mutable); }
-private:
-    class PropertyBuilder
-    {
-        PropertyBuilder()
-        {
-        }
-        ~PropertyBuilder()
-        {
-        }
-    };
-    static ref<RTTI::ClassInfo> klassBuilder()
-    {
-        static ref<RTTI::ClassInfo> klass;
-        if (klass)
-            return klass;
-        klass = ref<RTTI::ClassInfo>::create(rttiArena(), inamespace("hashmap"), ref<RTTI::ClassInfo>(), 0, 0);
-        return klass;
-    }
-    static PropertyBuilder s_properties;
+    static const RTTI::ClassInfo klass;
+    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
 };
+template< typename T1, typename T2, typename T3 >
+const RTTI::ClassInfo be_typeid< minitl::hashmap<T1, T2, T3> >::klass =
+{
+    "hashmap", 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
 }
 
 /*****************************************************************************/

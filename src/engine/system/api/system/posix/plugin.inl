@@ -4,22 +4,23 @@
 #include    <system/stdafx.h>
 #include    <system/plugin.hh>
 #include    <core/environment.hh>
+#include    <rtti/classinfo.script.hh>
 
 #include    <dlfcn.h>
 
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                   \
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
     namespace BugEngine                                                                                                                 \
     {                                                                                                                                   \
-    weak<const BugEngine::RTTI::Namespace> be_Namespace()                                                                               \
-    {                                                                                                                                   \
-        static ref<const ::BugEngine::RTTI::Namespace> ns = ref<const ::BugEngine::RTTI::Namespace>::create(::BugEngine::rttiArena());  \
-        return ns.operator->();                                                                                                         \
+        BE_EXPORT RTTI::ClassInfo* be_Namespace()                                                                                       \
+        {                                                                                                                               \
+            static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0 };                                                              \
+            return &ci;                                                                                                                 \
+        }                                                                                                                               \
     }                                                                                                                                   \
-    }                                                                                                                                   \
-    extern "C" BE_EXPORT const BugEngine::RTTI::Namespace* be_pluginNamespace()                                                         \
+    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \
     {                                                                                                                                   \
-        return BugEngine::be_Namespace().operator->();                                                                                  \
+        return BugEngine::be_Namespace();                                                                                               \
     }
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
     BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
@@ -100,15 +101,15 @@ Plugin<Interface>::~Plugin(void)
 }
 
 template< typename Interface >
-weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
+const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
 {
     if (m_handle)
     {
-        const RTTI::Namespace* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Namespace* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_pluginNamespace")));
+        const RTTI::ClassInfo* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::ClassInfo* (*)()>(reinterpret_cast<size_t>(dlsym(m_handle, "be_pluginNamespace")));
         if (be_pluginNamespace)
             return (*be_pluginNamespace)();
     }
-    return weak<const RTTI::Namespace>();
+    return 0;
 }
 
 
