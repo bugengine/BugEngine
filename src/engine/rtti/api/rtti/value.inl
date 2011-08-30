@@ -248,12 +248,12 @@ bool Value::isConst() const
 
 Value::operator const void*() const
 {
-    return (const void*)(m_type.metaclass != &be_typeid<void>::klass);
+    return (const void*)(m_type.metaclass != be_typeid<void>::klass());
 }
 
 bool Value::operator!() const
 {
-    return m_type.metaclass == &be_typeid<void>::klass;
+    return m_type.metaclass == be_typeid<void>::klass();
 }
 
 void* Value::rawget() const

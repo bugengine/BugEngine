@@ -11,19 +11,22 @@
 namespace BugEngine
 {
 
+const RTTI::ClassInfo s_void = { "void", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 template< >
-const RTTI::ClassInfo be_typeid< void >::klass = { "void", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const RTTI::ClassInfo* be_typeid< void >::klass() { return &s_void; }
 
+const RTTI::ClassInfo s_refcountable = { "refcountable", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 template< >
-const RTTI::ClassInfo be_typeid< minitl::refcountable >::klass = { "minitl.refcountable", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass() { return &s_refcountable; }
 
 #define BE_MAKE_BUILTIN_NAME(type,name,parent)                                                  \
-    template< > const RTTI::ClassInfo be_typeid< type >::klass =                                \
+    const RTTI::ClassInfo s_##name =                                                            \
         {                                                                                       \
             #name,                                                                              \
-            &be_typeid< parent >::klass,                                                        \
+            be_typeid< parent >::klass(),                                                       \
             0, 0, 0, 0, 0, 0, 0, 0                                                              \
-        };
+        };                                                                                      \
+    template< > const RTTI::ClassInfo* be_typeid< type >::klass() { return &s_##name; }
 #define BE_MAKE_BUILTIN(type,parent)                                                            \
     BE_MAKE_BUILTIN_NAME(type,type,parent)
 

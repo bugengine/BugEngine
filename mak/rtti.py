@@ -95,10 +95,11 @@ class Enum(Container):
 
 	def dump(self, file, namespace, index, nested):
 		name = self.fullname[2:].replace('::', '.')
-		file.write("template< > const RTTI::ClassInfo be_typeid< %s >::klass =\n" % (self.fullname))
+		decl = "enum%s" % self.fullname.replace(':', '_')
+		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
-		file.write("        &be_typeid< void >::klass,\n")
+		file.write("        be_typeid< void >::klass(),\n")
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % self.fullname)
 		file.write("        0,\n")
 		file.write("        0,\n")
@@ -108,6 +109,7 @@ class Enum(Container):
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % self.fullname)
 		file.write("    };\n")
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &s_%s; }\n" % (self.fullname, decl))
 		return index
 
 class Class(Container):
@@ -130,10 +132,10 @@ class Class(Container):
 
 	def writeClass(self, file, decl, nested, properties, methods, constructor, call):
 		name = self.fullname[2:].replace('::', '.')
-		file.write("template< > const RTTI::ClassInfo be_typeid< %s >::klass =\n" % (self.fullname))
+		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
-		file.write("        &be_typeid< %s >::klass,\n" % (self.inherits))
+		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % self.fullname)
 		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, self.fullname))
 		file.write("        %s,\n" % (properties))
@@ -147,7 +149,7 @@ class Class(Container):
 			file.write("        0,\n")
 			file.write("        0\n")
 		file.write("    };\n")
-
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &s_%s; }\n" % (self.fullname, decl))
 
 	def buildProperties(self, file, decl):
 		prop = "0"
@@ -155,7 +157,7 @@ class Class(Container):
 			if visibility == 'published':
 				if showline:
 					file.write("#line %d\n" % (line))
-				file.write("static ::BugEngine::RTTI::PropertyInfo s_%s_%s =\n" % (decl, name))
+				file.write("static const ::BugEngine::RTTI::PropertyInfo s_%s_%s =\n" % (decl, name))
 				file.write("    {\n")
 				file.write("        %s,\n" % prop)
 				file.write("        BugEngine::be_typeid< %s >::type(),\n" % self.fullname)
@@ -184,7 +186,7 @@ class Class(Container):
 				param = "0"
 				if showline: file.write("#line %d\n" % (line))
 				for ptype, pname in params[::-1]:
-					file.write("static ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
+					file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
 					file.write("        %s,\n" % param)
 					file.write("        \"%s\",\n" % pname)
@@ -193,7 +195,7 @@ class Class(Container):
 					param = "&s_%s_%s_%d_p%d" % (decl, prettyname, overloadindex, paramindex)
 					paramindex = paramindex + 1
 				if 'static' not in attrs:
-					file.write("static ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
+					file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
 					file.write("        %s,\n" % param)
 					file.write("        \"this\",\n")
@@ -235,7 +237,7 @@ class Class(Container):
 					callptr = "&%s::call< %s >" % (helper, methodptr)
 
 
-				file.write("static ::BugEngine::RTTI::MethodInfo::OverloadInfo s_%s_%s_%d =\n" % (decl, prettyname, overloadindex))
+				file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo s_%s_%s_%d =\n" % (decl, prettyname, overloadindex))
 				file.write("    {\n")
 				file.write("        %s,\n" % overload)
 				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % rtype)
@@ -246,7 +248,7 @@ class Class(Container):
 				overload = "&s_%s_%s_%d" % (decl, prettyname, overloadindex)
 				overloadindex = overloadindex + 1
 
-			file.write("static ::BugEngine::RTTI::MethodInfo s_%s_%s =\n" % (decl, prettyname))
+			file.write("static const ::BugEngine::RTTI::MethodInfo s_%s_%s =\n" % (decl, prettyname))
 			file.write("    {\n")
 			file.write("        %s,\n" % method)
 			file.write("        \"%s\",\n" % name)
@@ -261,7 +263,7 @@ class Class(Container):
 
 		return method, constructor, call
 
-		"""	file.write("static ::BugEngine::RTTI::MethodInfo s_%s_%s =\n" % (decl, name))
+		"""	file.write("static const ::BugEngine::RTTI::MethodInfo s_%s_%s =\n" % (decl, name))
 				paramtypes = ', '.join(ptype for ptype, pname in params)
 
 				if name == '?ctor':
