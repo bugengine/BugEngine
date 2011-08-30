@@ -54,6 +54,8 @@ struct be_typeid< T* > : public be_typeid<T>
     static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
 };
 
+template< > const RTTI::ClassInfo* be_typeid< void >::klass();
+
 }
 
 /*****************************************************************************/
