@@ -136,7 +136,7 @@ class VCproj:
 
 				self.output.write('		<Configuration\n')
 				self.output.write('			Name="%s|%s"\n' % (config,platform))
-				self.output.write('			OutputDirectory="$(SolutionDir)deploy\\%s\\$(PlatformName)\\$(ConfigurationName)\\"\n' % self.versionName)
+				self.output.write('			OutputDirectory="$(SolutionDir)build\\%s\\$(PlatformName)\\$(ConfigurationName)\\"\n' % self.versionName)
 				self.output.write('			IntermediateDirectory="$(SolutionDir).build\\%s\\$(PlatformName)\\$(ConfigurationName)\\$(ProjectName)\\"\n' % self.versionName)
 				self.output.write('			ConfigurationType="%s"\n' % self.projectType)
 				self.output.write('			CharacterSet="2"\n')

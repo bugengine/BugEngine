@@ -53,7 +53,7 @@ def add_win32_flags_to_env(conf, name, arch):
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_win32', 'WIN32', '_WIN32', '_WIN32_', '__WIN32__', '_WIN32_WINNT=0x0502'])
 	if arch in ['amd64', 'x64', 'x86_64']:
 		conf.env.append_unique('DEFINES', ['_WIN64'])
-	conf.env['PREFIX']			= os.path.abspath(name)
+	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', name))
 	conf.env['DEPLOY']			= { 'prefix':	'',
 									'bin':		'',
 									'etc':		'conf',

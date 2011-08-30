@@ -19,7 +19,7 @@ def build(bld):
 	bld.recurse('mak')
 	if not bld.variant:
 		if not bld.env.PROJECTS:
-			Options.commands.extend([bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS])
+			Options.commands[:0] = [bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS]
 			return
 
 	dbghelp			= module.external('dbghelp')
