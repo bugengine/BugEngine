@@ -14,14 +14,14 @@ namespace BugEngine
 template< typename T >
 struct be_typeid
 {
-    static BE_EXPORT const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+    static BE_EXPORT const RTTI::ClassInfo* klass();
+    static inline TypeInfo  type()  { return TypeInfo::makeType(klass(), TypeInfo::Class, TypeInfo::Mutable); }
 };
 
 template< typename T >
 struct be_typeid< T& > : public be_typeid<T>
 {
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, TypeInfo::Class, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), TypeInfo::Class, TypeInfo::Mutable); }
 };
 
 template< typename T >
@@ -39,19 +39,19 @@ struct be_typeid< const T& > : public be_typeid<T>
 template< typename T >
 struct be_typeid< ref<T> > : public be_typeid<T>
 {
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstRefPtr : TypeInfo::RefPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRefPtr : TypeInfo::RefPtr, TypeInfo::Mutable); }
 };
 
 template< typename T >
 struct be_typeid< weak<T> > : public be_typeid<T>
 {
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstWeakPtr : TypeInfo::WeakPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstWeakPtr : TypeInfo::WeakPtr, TypeInfo::Mutable); }
 };
 
 template< typename T >
 struct be_typeid< T* > : public be_typeid<T>
 {
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&be_typeid<T>::klass, minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
 };
 
 }

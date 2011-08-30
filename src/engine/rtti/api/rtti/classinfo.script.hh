@@ -25,10 +25,10 @@ published:
     const ClassInfo*    parent;
     u32                 size;
     i32                 offset;
-    PropertyInfo*       properties;
-    MethodInfo*         methods;
-    MethodInfo*         constructor;
-    MethodInfo*         call;
+    const PropertyInfo* properties;
+    const MethodInfo*   methods;
+    const MethodInfo*   constructor;
+    const MethodInfo*   call;
 private:
     /* list of tags is const but each tag can be changed */
     //mutable minitl::vector<Value>                   m_tags;
