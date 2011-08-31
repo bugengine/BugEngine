@@ -629,9 +629,9 @@ def p_taglist_2(t):
 
 def p_tag(t):
 	"""
-		tag : BE_TAG LPAREN skiplist RPAREN
+		tag : BE_TAG LPAREN name LPAREN skiplist RPAREN RPAREN
 	"""
-	t[0] = t[3]
+	t[0] = (t[3],t[5])
 
 ###################################
 # class
