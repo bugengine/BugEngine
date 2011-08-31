@@ -56,6 +56,7 @@ class Root(Container):
 		file.write("#include    <rtti/classinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/methodinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/propertyinfo.script.hh>\n")
+		file.write("#include    <rtti/engine/taginfo.script.hh>\n")
 		file.write("#include    <rtti/engine/helper/get.hh>\n")
 		file.write("#include    <rtti/engine/helper/set.hh>\n")
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
@@ -96,12 +97,25 @@ class Enum(Container):
 	def dump(self, file, namespace, index, nested):
 		name = self.fullname[2:].replace('::', '.')
 		decl = "enum%s" % self.fullname.replace(':', '_')
+		tagname = "0"
+		tagindex = 0
+		for type,tag in self.tags:
+			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
+			file.write("static RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
+			file.write("    {\n")
+			file.write("        %s,\n" % tagname)
+			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
+			file.write("    };\n")
+			tagname = "&s_%s_tag_%d" % (decl, tagindex)
+			tagindex = tagindex + 1
+
 		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
 		file.write("        be_typeid< void >::klass(),\n")
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % self.fullname)
 		file.write("        0,\n")
+		file.write("        %s,\n" % (tagname))
 		file.write("        0,\n")
 		file.write("        0,\n")
 		file.write("        0,\n")
@@ -132,12 +146,25 @@ class Class(Container):
 
 	def writeClass(self, file, decl, nested, properties, methods, constructor, call):
 		name = self.fullname[2:].replace('::', '.')
+		tagname = "0"
+		tagindex = 0
+		for type,tag in self.tags:
+			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
+			file.write("static RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
+			file.write("    {\n")
+			file.write("        %s,\n" % tagname)
+			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
+			file.write("    };\n")
+			tagname = "&s_%s_tag_%d" % (decl, tagindex)
+			tagindex = tagindex + 1
+
 		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
 		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % self.fullname)
 		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, self.fullname))
+		file.write("        %s,\n" % (tagname))
 		file.write("        %s,\n" % (properties))
 		file.write("        %s,\n" % (methods))
 		file.write("        %s,\n" % (constructor))

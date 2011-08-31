@@ -87,7 +87,6 @@ private:
     enum ReserveType { Reserve };
 
     inline Value(TypeInfo type, ReserveType);
-    inline Value(TypeInfo typeinfo, void* location);
 public:
     enum ConstifyType { Constify };
 
@@ -96,6 +95,7 @@ public:
     template< typename T > explicit inline Value(T t, ConstifyType constify);
     inline Value(const Value& other);
     template< typename T > explicit inline Value(ByRefType<T> t);
+    inline Value(TypeInfo typeinfo, void* location);
     inline ~Value();
 
     template< typename T > inline Value& operator=(const T& t);

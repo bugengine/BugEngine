@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 
 struct PropertyInfo;
 struct MethodInfo;
-
+struct TagInfo;
 
 struct be_api(RTTI) ClassInfo
 {
@@ -25,13 +25,11 @@ published:
     const ClassInfo*    parent;
     u32                 size;
     i32                 offset;
+    TagInfo*            tags;
     const PropertyInfo* properties;
     const MethodInfo*   methods;
     const MethodInfo*   constructor;
     const MethodInfo*   call;
-private:
-    /* list of tags is const but each tag can be changed */
-    //mutable minitl::vector<Value>                   m_tags;
 public:
     void (*copyconstructor)(const void* src, void* dst);
     void (*destructor)(void* src);

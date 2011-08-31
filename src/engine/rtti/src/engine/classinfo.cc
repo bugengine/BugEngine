@@ -5,6 +5,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/taginfo.script.hh>
 #include    <rtti/value.inl>
 
 
@@ -45,8 +46,15 @@ Value ClassInfo::operator()(Value* params, u32 nparams) const
     return (*constructor)(params, nparams);
 }
 
-Value ClassInfo::getTag(const TypeInfo& /*type*/) const
+Value ClassInfo::getTag(const TypeInfo& type) const
 {
+    TagInfo* tag = tags;
+    while(tag)
+    {
+        if (type <= tag->tag.type())
+            return Value(Value::ByRef(tag->tag));
+        tag = tag->next;
+    }
     return Value();
 }
 
