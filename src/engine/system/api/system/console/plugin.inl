@@ -93,9 +93,9 @@ Plugin<Interface>::~Plugin(void)
 }
 
 template< typename Interface >
-weak<const RTTI::Namespace> Plugin<Interface>::pluginNamespace() const
+const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
 {
-    return weak<const RTTI::Namespace>();
+    return 0;
 }
 
 

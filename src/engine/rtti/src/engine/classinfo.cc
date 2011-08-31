@@ -81,7 +81,7 @@ u32 ClassInfo::distance(const ClassInfo* other) const
 
 RTTI::ClassInfo* be_Namespace()
 {
-    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     return &ci;
 }
 
