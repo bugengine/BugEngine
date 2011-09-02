@@ -1,106 +1,91 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Task
+from waflib import Task, Context
 import os
 import mak
+from xml.dom.minidom import Document
 
 allconfigs = ['debug','profile','final']
 
-def addFolder(file, tree, name, path, tabs):
-	file.write(tabs+'<logicalFolder name="%s" displayName="%s" projectFiles="true">\n' % (name, name))
-	for dname, d in tree.directories.items():
-		addFolder(file, d, dname, path + '/' + dname, tabs+'  ')
-	for f in tree.files:
-		file.write(tabs+'  <itemPath>%s</itemPath>\n' % (path + '/' + f.filename))
-	file.write(tabs+'</logicalFolder>\n')
+def setAttributes(node, attrs):
+	for k, v in attrs.items():
+		node.setAttribute(k, v)
+
+def add(doc, parent, tag, value = None):
+	el = doc.createElement(tag)
+	if (value):
+		if type(value) == type(str()):
+			el.appendChild(doc.createTextNode(value))
+		elif type(value) == type(dict()):
+			setAttributes(el, value)
+	parent.appendChild(el)
+	return el
+
+def generateProjectXml(appname, confs):
+	doc = Document()
+	doc.encoding = "UTF-8"
+	project = add(doc, doc, 'project', {'xmlns': "http://www.netbeans.org/ns/project/1"})
+	add(doc, project, 'type', "org.netbeans.modules.cnd.makeproject")
+	configuration = add(doc, project, 'configuration')
+	data = add(doc, configuration, 'data', {'xmlns': "http://www.netbeans.org/ns/make-project/1"})
+	add(doc, data, 'name', appname)
+	add(doc, data, 'c-extensions', 'c,m')
+	add(doc, data, 'cpp-extensions', 'cpp,cc,cxx,mm')
+	add(doc, data, 'header-extensions', 'h,hh,hxx,inl')
+	add(doc, data, 'sourceEncoding', 'UTF-8')
+	add(doc, data, 'make-dep-projects')
+	sourceRootList = add(doc, data, 'sourceRootList')
+	sourceRoot = add(doc, sourceRootList, 'sourceRootElem', '.')
+	confList = add(doc, data, 'confList')
+	for i in confs:
+		elem = add(doc, confList, 'confElem')
+		add(doc, elem, 'name', i)
+		add(doc, elem, 'type', '0')
+	return doc
+
+def addSourceTree(doc, xml, name, folder, path):
+	path = path + "/" + folder.prefix
+	f = add(doc, xml, "df", {'name': name, 'root': path})
+	for subname, subdir in folder.directories.items():
+		addSourceTree(doc, f, subname, subdir, path)
+	for source in folder.files:
+		add(doc, f, 'in', source.filename)
+
+def generateConfigurationsXml(sources):
+	doc = Document()
+	doc.encoding = "UTF-8"
+	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
+	lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
+	for project,source in sources:
+		addSourceTree(doc, lf, project, source, '.')
+	return doc
 
 def generateProject(task):
-	file = open(task.outputs[0].bldpath(), 'w')
-	file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-	file.write('<project xmlns="http://www.netbeans.org/ns/project/1">\n')
-	file.write('    <type>org.netbeans.modules.cnd.makeproject</type>\n')
-	file.write('    <configuration>\n')
-	file.write('        <data xmlns="http://www.netbeans.org/ns/make-project/1">\n')
-	file.write('            <name>%s</name>\n' % (task.projectCategory+'.'+task.projectName))
-	file.write('            <make-project-type>0</make-project-type>\n')
-	file.write('            <c-extensions>c</c-extensions>\n')
-	file.write('            <cpp-extensions>cpp,cc,cxx</cpp-extensions>\n')
-	file.write('            <header-extensions>h,hh</header-extensions>\n')
-	file.write('            <sourceEncoding>UTF-8</sourceEncoding>\n')
-	file.write('            <make-dep-projects></make-dep-projects>\n')
-	file.write('        </data>\n')
-	file.write('    </configuration>\n')
-	file.write('</project>\n')
+	project = generateProjectXml(task.appname, task.allplatforms)
+	task.outputs[0].write(project.toprettyxml())
+	configurations = generateConfigurationsXml(task.depends)
+	task.outputs[1].write(configurations.toprettyxml())
 
-	file = open(task.outputs[1].bldpath(), 'w')
-	file.write('<?xml version="1.0" encoding="UTF-8"?>')
-	file.write('<configurationDescriptor version="62">')
-	addFolder(file, task.sourceTree, 'root', '../../../src/%s/%s' %(task.projectCategory, task.projectName), '  ')
-	file.write('  <projectmakefile>Makefile</projectmakefile>')
-	file.write('  <confs>')
-	file.write('    <conf name="Debug" type="1">')
-	file.write('      <toolsSet>')
-	file.write('        <developmentServer>localhost</developmentServer>')
-	file.write('        <compilerSet>MinGW|MinGW</compilerSet>')
-	file.write('        <cRequired>true</cRequired>')
-	file.write('        <platform>3</platform>')
-	file.write('      </toolsSet>')
-	file.write('      <compileType>')
-	file.write('        <ccTool>')
-	file.write('          <stripSymbols>true</stripSymbols>')
-	file.write('          <warningLevel>3</warningLevel>')
-	file.write('        </ccTool>')
-	file.write('        <linkerTool>')
-	file.write('          <linkerLibItems>')
-	file.write('          </linkerLibItems>')
-	file.write('        </linkerTool>')
-	file.write('      </compileType>')
-	file.write('    </conf>')
-	file.write('    <conf name="Release" type="1">')
-	file.write('      <toolsSet>')
-	file.write('        <developmentServer>localhost</developmentServer>')
-	file.write('        <compilerSet>None|Unknown</compilerSet>')
-	file.write('        <platform>3</platform>')
-	file.write('      </toolsSet>')
-	file.write('      <compileType>')
-	file.write('        <cTool>')
-	file.write('          <developmentMode>5</developmentMode>')
-	file.write('        </cTool>')
-	file.write('        <ccTool>')
-	file.write('          <developmentMode>5</developmentMode>')
-	file.write('        </ccTool>')
-	file.write('        <fortranCompilerTool>')
-	file.write('          <developmentMode>5</developmentMode>')
-	file.write('        </fortranCompilerTool>')
-	file.write('        <linkerTool>')
-	file.write('          <linkerLibItems>')
-	file.write('          </linkerLibItems>')
-	file.write('        </linkerTool>')
-	file.write('      </compileType>')
-	file.write('    </conf>')
-	file.write('  </confs>')
-	file.write('</configurationDescriptor>')
+NetbeansGenerateProject = Task.task_factory('NetbeansGenerateProject', generateProject)
 
-
-	return
-
-GenerateProject = Task.task_factory('generateProject', generateProject)
-
+solutions={}
 @feature('netbeans')
 def create_netbeans_project(t):
 	toolName = t.features[0]
+	if not toolName in solutions:
+		outname = ['project.xml', 'configurations.xml']
+		solution = t.create_task("NetbeansGenerateProject")
+		solution.appname = getattr(Context.g_module, 'APPNAME', 'noname')
+		solution.env=t.env
+		solution.version = toolName
+		solution.allplatforms    = t.env['ALL_VARIANTS']
+		outnode = [t.path.find_or_declare(n) for n in outname]
+		solution.set_outputs(outnode)
+		t.bld.install_files(os.path.join(t.path.srcpath(), 'nbproject'), outnode)
+		solution.depends = []
+		solution.dep_vars = ['NB_PROJECT_DEPENDS']
+		solution.env['NB_PROJECT_DEPENDS'] = []
+		solutions[toolName] = solution
+	solution = solutions[toolName]
+	solution.depends.append((t.name, t.sourcetree))
 
-	project = GenerateProject(env=t.env)
-	project.type			= t.type
-	project.version 		= toolName
-	project.projectCategory = t.category
-	project.projectName 	= t.name
-	project.type 			= t.type
-	project.sourceTree 		= t.sourcetree
-	project.install_path	= os.path.join(t.path.srcpath(), '.build', toolName, t.category+'.'+t.name, 'nbproject')
-
-	project.set_outputs([t.path.find_or_declare(os.path.join('src', t.category, t.name, 'project.xml'))])
-	project.set_outputs([t.path.find_or_declare(os.path.join('src', t.category, t.name, 'configurations.xml'))])
-
-	project.env['NETBEANS_PROJECT_SOURCES'] = t.sourcetree
-	project.dep_vars = ['NETBEANS_PROJECT_SOURCES']
