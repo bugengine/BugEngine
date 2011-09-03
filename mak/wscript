@@ -273,6 +273,7 @@ except:
 class foo(BuildContext):
 	cmd = 'build'
 	fun = 'build'
+	returned_tasks = []
 	def compile(self):
 		pass
 
