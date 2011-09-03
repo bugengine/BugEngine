@@ -21,7 +21,7 @@ TaskGroup::~TaskGroup()
 
 void TaskGroup::run(weak<Scheduler> scheduler) const
 {
-    scheduler->m_runningTasks++;
+    Scheduler::WorkItem item(scheduler);
     if (!m_startTasks.empty())
     {
         for (minitl::vector< weak<ITask> >::const_iterator it = m_startTasks.begin(); it != m_startTasks.end(); ++it)
@@ -33,7 +33,6 @@ void TaskGroup::run(weak<Scheduler> scheduler) const
     {
         end(scheduler);
     }
-    scheduler->m_runningTasks--;
 }
 
 void TaskGroup::addStartTask(weak<ITask> task)

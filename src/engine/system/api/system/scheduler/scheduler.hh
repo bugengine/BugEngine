@@ -48,6 +48,14 @@ public:
         MainThread = 1
     };
 private:
+    struct WorkItem
+    {
+        weak<Scheduler> scheduler;
+        WorkItem(weak<Scheduler> scheduler_) : scheduler(scheduler_) { scheduler->m_runningTasks++; }
+        ~WorkItem() { if(0 == --scheduler->m_runningTasks) scheduler->notifyEnd(); }
+    };
+    friend struct WorkItem;
+private:
     minitl::vector<Worker*>                     m_workers;
     Semaphore                                   m_synchro;
     Semaphore                                   m_mainThreadSynchro;
@@ -62,6 +70,7 @@ private: //friend Worker
     i_u32                                       m_runningTasks;
     bool volatile                               m_running;
 private:
+    void notifyEnd();
     ScheduledTasks::ITaskItem* pop(Affinity affinity);
     void queue(ScheduledTasks::ITaskItem* task);
     void split(ScheduledTasks::ITaskItem* t, size_t count);

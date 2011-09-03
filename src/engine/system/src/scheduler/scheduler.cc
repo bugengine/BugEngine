@@ -79,8 +79,12 @@ intptr_t Scheduler::Worker::work(intptr_t p1, intptr_t p2)
     while (sc->m_running)
     {
         if (sc->m_synchro.wait() == Threads::Waitable::Finished)
+        {
             if (w->doWork(sc))
-                sc->m_mainThreadSynchro.release(1);
+            {
+                sc->notifyEnd();
+            }
+        }
     }
     return 0;
 }
@@ -127,6 +131,7 @@ Scheduler::~Scheduler()
 {
     m_running = false;
     m_synchro.release((int)m_workers.size());
+    m_mainThreadSynchro.release(1);
     for (size_t i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }
@@ -194,6 +199,12 @@ void Scheduler::mainThreadJoin()
             }
         }
     }
+}
+
+void Scheduler::notifyEnd()
+{
+    be_assert(m_runningTasks == 0, "should not notify end when tasks remain to be done");
+    m_mainThreadSynchro.release(1);
 }
 
 }
