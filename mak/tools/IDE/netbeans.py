@@ -43,28 +43,45 @@ def generateProjectXml(appname, confs):
 		add(doc, elem, 'type', '0')
 	return doc
 
-def addSourceTree(doc, xml, name, folder, path):
-	path = path + "/" + folder.prefix
-	f = add(doc, xml, "df", {'name': name, 'root': path})
+def addSourceTree(doc, xml, name, folder):
+	if folder.prefix != name:
+		f = add(doc, xml, "df", {'name': name, 'root': folder.prefix})
+	else:
+		f = add(doc, xml, "df", {'name': name})
 	for subname, subdir in folder.directories.items():
-		addSourceTree(doc, f, subname, subdir, path)
+		addSourceTree(doc, f, subname, subdir)
 	for source in folder.files:
 		add(doc, f, 'in', source.filename)
 
-def generateConfigurationsXml(sources):
+def generateConfigurationsXml(sources, configurations):
 	doc = Document()
 	doc.encoding = "UTF-8"
 	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
 	lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
-	for project,source in sources:
-		addSourceTree(doc, lf, project, source, '.')
+	for project,category,source in sources:
+		addSourceTree(doc, lf, category+'.'+project, source)
+	#add(doc, cd, 'sourceFolderFilter')
+	srl = add(doc, cd, 'sourceRootList')
+	add(doc, srl, 'Elem', '.')
+	add(doc, srl, 'Elem', './build/')
+	add(doc, cd, 'projectmakefile', 'wscript')
+	confs = add(doc, cd, 'confs')
+	for c in configurations:
+		conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
+		toolsSet = add(doc, conf, 'toolsSet')
+		add(doc, toolsSet, 'remote-source-mode', 'LOCAL_SOURCES')
+		mtype = add(doc, conf, 'makefileType')
+		mtool = add(doc, mtype, 'makeTool')
+		add(doc, mtool, 'buildCommandWorkingDir', '.')
+		add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
+		add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
 	return doc
 
 def generateProject(task):
 	project = generateProjectXml(task.appname, task.allplatforms)
-	task.outputs[0].write(project.toprettyxml())
-	configurations = generateConfigurationsXml(task.depends)
-	task.outputs[1].write(configurations.toprettyxml())
+	task.outputs[0].write(project.toxml())
+	configurations = generateConfigurationsXml(task.depends, task.allplatforms)
+	task.outputs[1].write(configurations.toxml())
 
 NetbeansGenerateProject = Task.task_factory('NetbeansGenerateProject', generateProject)
 
@@ -87,5 +104,5 @@ def create_netbeans_project(t):
 		solution.env['NB_PROJECT_DEPENDS'] = []
 		solutions[toolName] = solution
 	solution = solutions[toolName]
-	solution.depends.append((t.name, t.sourcetree))
+	solution.depends.append((t.name, t.category, t.sourcetree))
 
