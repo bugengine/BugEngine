@@ -34,7 +34,7 @@ template< typename T,
 struct procedurehelper;
 }
 
-class be_api(RTTI) Value
+class Value
 {
     friend struct RTTI::ClassInfo;
     friend struct RTTI::PropertyInfo;
@@ -71,8 +71,8 @@ private:
     };
     bool            m_reference;
 private:
-    void* memory();
-    const void* memory() const;
+    inline void* memory();
+    inline const void* memory() const;
     inline void* rawget() const;
 private:
     template< typename T >
@@ -90,22 +90,22 @@ private:
 public:
     enum ConstifyType { Constify };
 
-    Value();
-    Value(const Value& other);
-    template< typename T > explicit Value(T t);
-    template< typename T > explicit Value(T t, ConstifyType constify);
-    template< typename T > explicit Value(ByRefType<T> t);
-    Value(TypeInfo typeinfo, void* location);
-    ~Value();
+    inline Value();
+    template< typename T > explicit inline Value(T t);
+    template< typename T > explicit inline Value(T t, ConstifyType constify);
+    inline Value(const Value& other);
+    template< typename T > explicit inline Value(ByRefType<T> t);
+    inline Value(TypeInfo typeinfo, void* location);
+    inline ~Value();
 
-    template< typename T > Value& operator=(const T& t);
-    Value& operator=(const Value& other);
+    template< typename T > inline Value& operator=(const T& t);
+    inline Value& operator=(const Value& other);
     
     inline TypeInfo type();
     inline TypeInfo type() const;
 
-    template< typename T > const T as() const;
-    template< typename T > T as();
+    template< typename T > inline const T as() const;
+    template< typename T > inline T as();
 
     template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
     template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }
