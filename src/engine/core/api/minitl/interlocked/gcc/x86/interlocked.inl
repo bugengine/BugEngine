@@ -36,7 +36,7 @@ struct InterlockedType<4>
                       : "r" (v));
         return v;
     }
-    
+
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
@@ -97,12 +97,11 @@ struct InterlockedType<4>
     #ifdef __PIC__
         __asm__ __volatile__ (
                 "pushl %%ebx\n\t"
-                "movl  (%%ecx),%%ebx\n\t"
-                "movl  4(%%ecx),%%ecx\n\t"
+                "movl  %7,%%ebx\n\t"
                 "lock\n\t cmpxchg8b %2\n\t"
                 "popl  %%ebx"
                  : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*(i64 *)p)
-                 : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "c"(&dst)
+                 : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "m"(dst.taggedvalue.tag), "c"(v)
                  : "memory", "esp"
     #if defined(BE_COMPILER_INTEL)
                  ,"ebx"

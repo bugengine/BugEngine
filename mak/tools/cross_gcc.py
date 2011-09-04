@@ -278,7 +278,7 @@ def add_standard_gcc_flags(conf):
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['LINKFLAGS_final'] = ['-pipe', '-g', '-s']
+	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
 
 configure = '''
