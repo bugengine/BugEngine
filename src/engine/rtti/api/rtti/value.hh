@@ -71,8 +71,8 @@ private:
     };
     bool            m_reference;
 private:
-    inline void* memory();
-    inline const void* memory() const;
+    void* memory();
+    const void* memory() const;
     inline void* rawget() const;
 private:
     template< typename T >
