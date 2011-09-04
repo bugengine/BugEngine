@@ -63,7 +63,6 @@ private:
     minitl::pool<Buffer>                        m_taskPool;
     unsigned int                                m_frameCount;
     Timer                                       m_timer;
-    Event                                       m_end;
 private: //friend Worker
     minitl::istack<ScheduledTasks::ITaskItem>   m_tasks[PriorityCount];
     minitl::istack<ScheduledTasks::ITaskItem>   m_mainThreadTasks[PriorityCount];

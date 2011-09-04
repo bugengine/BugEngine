@@ -45,7 +45,7 @@ private:
 private:
     volatile value_t m_value;
 public:
-    interlocked()                                   { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
+    interlocked() : m_value(0)                      { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
     interlocked(T value) : m_value(value)           { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
     ~interlocked()                                  {}
 
@@ -75,7 +75,7 @@ private:
 private:
     value_t m_value;
 public:
-    iptr()                                          { be_assert(be_align(&m_value, sizeof(T*)) == &m_value, "value is incorrectly aligned"); }
+    iptr() : m_value(0)                             { be_assert(be_align(&m_value, sizeof(T*)) == &m_value, "value is incorrectly aligned"); }
     iptr(T* value) : m_value(value)                 { be_assert(be_align(&m_value, sizeof(T*)) == &m_value, "value is incorrectly aligned"); }
     ~iptr()                                         {}
 
