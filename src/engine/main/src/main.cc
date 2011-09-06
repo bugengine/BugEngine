@@ -4,7 +4,7 @@
 #include    <main/stdafx.h>
 #include    <main/main.hh>
 #include    <core/environment.hh>
-#include    <system/file/diskfs.hh>
+//#include    <system/file/diskfolder.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
@@ -54,7 +54,7 @@ static int __main(int argc, const char *argv[])
     try
 #endif
     {
-        ref<BugEngine::DiskFS> mountpoint = ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getHomeDirectory(), BugEngine::DiskFS::CreateRoot);
+        //ref<BugEngine::DiskFS> mountpoint = ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getHomeDirectory(), BugEngine::DiskFS::CreateRoot);
         minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
         BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);

@@ -7,7 +7,7 @@
 #include    <rtti/scripting.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
-#include    <system/file/filesystem.hh>
+#include    <system/file/folder.script.hh>
 
 namespace BugEngine { namespace Lua
 {
@@ -15,11 +15,11 @@ namespace BugEngine { namespace Lua
 class Context : public Scripting
 {
 private:
-    lua_State*              m_state;
-    weak<const FileSystem>  m_filesystem;
-    ref<Logger>             m_logger;
+    lua_State*          m_state;
+    weak<const Folder>  m_dataFolder;
+    ref<Logger>         m_logger;
 public:
-    Context(weak<const FileSystem> filesystem, Value root);
+    Context(weak<const Folder> dataFolder, Value root);
     ~Context();
 
     void doFile(const ifilename& file) override;

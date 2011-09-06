@@ -3,7 +3,6 @@
 
 #include    <system/stdafx.h>
 #include    <system/file/file.script.hh>
-#include    <system/file/filesystem.hh>
 
 
 namespace BugEngine

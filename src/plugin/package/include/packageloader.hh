@@ -4,7 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGELOADER_HH_
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
-#include    <system/file/filesystem.hh>
+#include    <system/file/folder.script.hh>
 #include    <system/resource/resource.script.hh>
 
 namespace BugEngine { namespace PackageManager
@@ -14,9 +14,9 @@ class PackageLoader : public minitl::refcountable
 {
     BE_NOCOPY(PackageLoader);
 private:
-    weak<const FileSystem> const    m_filesystem;
+    weak<const Folder> const    m_dataFolder;
 public:
-    PackageLoader(weak<const FileSystem> filesystem);
+    PackageLoader(weak<const Folder> dataFolder);
     ~PackageLoader();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

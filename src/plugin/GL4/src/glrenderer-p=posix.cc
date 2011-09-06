@@ -147,9 +147,9 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
+GLRenderer::GLRenderer(weak<const Folder> dataFolder)
 :   Windowing::Renderer(gameArena())
-,   m_filesystem(filesystem)
+,   m_dataFolder(dataFolder)
 ,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
 {
 }

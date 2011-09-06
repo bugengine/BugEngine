@@ -76,9 +76,9 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     }
 }
 
-Context::Context(weak<const FileSystem> filesystem, Value root)
+Context::Context(weak<const Folder> dataFolder, Value root)
 :   m_state(lua_newstate(&Context::luaAlloc, 0))
-,   m_filesystem(filesystem)
+,   m_dataFolder(dataFolder)
 {
     luaopen_base(m_state);
     luaopen_table(m_state);
@@ -101,7 +101,7 @@ Context::~Context()
 
 void Context::doFile(const ifilename& file)
 {
-    ref<IMemoryStream> stream = m_filesystem->open(file, eReadOnly);
+    ref<IMemoryStream> stream;// = m_dataFolder->open(file, eReadOnly);
     if (stream)
     {
         doFile(stream, file.str().c_str());
