@@ -28,9 +28,9 @@ void NullRenderer::flush()
     }
 }
 
-NullRenderer::NullRenderer(weak<const FileSystem> filesystem)
+NullRenderer::NullRenderer(weak<const Folder> dataFolder)
 :   IRenderer(gameArena())
-,   m_filesystem(filesystem)
+,   m_dataFolder(dataFolder)
 {
 }
 

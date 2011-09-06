@@ -41,14 +41,14 @@ static D3DPRESENT_PARAMETERS defaultParams(HWND hwnd)
     return params;
 }
 
-Dx9Renderer::Dx9Renderer(weak<const FileSystem> filesystem)
+Dx9Renderer::Dx9Renderer(weak<const Folder> dataFolder)
 :   Renderer(gameArena())
 ,   m_dummyWindow(CreateWindowEx(0, (minitl::format<>("__be__%p__") | (const void*)this).c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0))
 ,   m_dummyParams(defaultParams(m_dummyWindow))
 ,   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
 ,   m_context(cgCreateContext())
-,   m_filesystem(filesystem)
+,   m_dataFolder(dataFolder)
 ,   m_deviceState(DeviceLost)
 ,   m_threadId(Thread::currentId())
 {

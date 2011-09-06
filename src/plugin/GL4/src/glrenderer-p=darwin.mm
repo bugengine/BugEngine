@@ -86,12 +86,12 @@ GLRenderer::Context::Context()
 {
     int sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
-	[m_context makeCurrentContext];
-	be_info("Created OpenGL context %s (%s) on %s"
-		| (const char*)glGetString(GL_VERSION)
-		| (const char *)glGetString(GL_VENDOR)
-		| (const char*)glGetString(GL_RENDERER));
-	[NSOpenGLContext clearCurrentContext];
+    [m_context makeCurrentContext];
+    be_info("Created OpenGL context %s (%s) on %s"
+        | (const char*)glGetString(GL_VERSION)
+        | (const char *)glGetString(GL_VENDOR)
+        | (const char*)glGetString(GL_RENDERER));
+    [NSOpenGLContext clearCurrentContext];
 }
 
 GLRenderer::Context::~Context()
@@ -135,9 +135,9 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(weak<const FileSystem> filesystem)
+GLRenderer::GLRenderer(weak<const Folder> dataFolder)
 :   Windowing::Renderer(gameArena())
-,   m_filesystem(filesystem)
+,   m_dataFolder(dataFolder)
 ,   m_context(scoped<Context>::create(arena()))
 {
 }

@@ -4,7 +4,7 @@
 #ifndef BE_MAIN_IEDITOR_HH_
 #define BE_MAIN_IEDITOR_HH_
 /*****************************************************************************/
-#include    <system/file/filesystem.hh>
+#include    <system/file/folder.script.hh>
 #include    <main/ieditor.hh>
 
 namespace BugEngine { namespace Editor
@@ -13,7 +13,7 @@ namespace BugEngine { namespace Editor
 class be_api(MAIN) IEditor : public minitl::pointer
 {
 private:
-    ref<FileSystem> m_filesystem;
+    ref<Folder> m_folder;
 public:
     IEditor();
     ~IEditor();

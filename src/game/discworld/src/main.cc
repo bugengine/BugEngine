@@ -4,13 +4,14 @@
 #include    <stdafx.h>
 
 #include    <main/main.hh>
-#include    <system/file/filesystem.hh>
+#include    <system/file/folder.script.hh>
 #include    <system/plugin.hh>
 
 int be_main(weak<BugEngine::Application> app)
 {
-    ref<BugEngine::FileSystem> fs = ref<BugEngine::FileSystem>::create(BugEngine::gameArena());
-    BugEngine::Plugin<minitl::pointer> plugin("nullrender", weak<const BugEngine::FileSystem>(fs));
+    ref<BugEngine::Folder> dataFolder; // = ref<BugEngine::Folder>::create(BugEngine::gameArena());
+    BugEngine::Plugin<minitl::pointer> p1("nullrender", weak<const BugEngine::Folder>(dataFolder));
+    BugEngine::Plugin<minitl::pointer> p2("GL4", weak<const BugEngine::Folder>(dataFolder));
     app->run();
     return 0;
 }

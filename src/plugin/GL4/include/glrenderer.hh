@@ -4,7 +4,7 @@
 #ifndef BE_OPENGL_RENDERER_HH_
 #define BE_OPENGL_RENDERER_HH_
 /*****************************************************************************/
-#include    <system/file/filesystem.hh>
+#include    <system/file/folder.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -28,26 +28,26 @@ class GLRenderer : public Windowing::Renderer
     friend class GLWindow;
 private:
     class Context;
-    weak<const FileSystem>          m_filesystem;
-    mutable scoped<Context>         m_context;
+    weak<const Folder>      m_dataFolder;
+    mutable scoped<Context> m_context;
 public:
-    GLRenderer(weak<const FileSystem> filesystem);
+    GLRenderer(weak<const Folder> dataFolder);
     ~GLRenderer();
 
-    u32                             getMaxSimultaneousRenderTargets() const override { return 1; }
+    u32                     getMaxSimultaneousRenderTargets() const override { return 1; }
 
-    void                            flush() override;
+    void                    flush() override;
 
-    weak<const FileSystem>          filesystem() const  { return m_filesystem; }
+    weak<const Folder>      dataFolder() const  { return m_dataFolder; }
 
 public:
-    const ShaderExtensions&         shaderext() const;
+    const ShaderExtensions& shaderext() const;
 private:
-    void                            attachWindow(weak<GLWindow> w) const;
+    void                    attachWindow(weak<GLWindow> w) const;
 private:
-    ref<IGPUResource>               createRenderTarget(weak<const RenderTarget> rendertarget) override;
-    ref<IGPUResource>               createRenderWindow(weak<const RenderWindow> renderwindow) override;
-    ref<IGPUResource>               createShaderProgram(weak<const ShaderProgram> shader) override;
+    ref<IGPUResource>       createRenderTarget(weak<const RenderTarget> rendertarget) override;
+    ref<IGPUResource>       createRenderWindow(weak<const RenderWindow> renderwindow) override;
+    ref<IGPUResource>       createShaderProgram(weak<const ShaderProgram> shader) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }

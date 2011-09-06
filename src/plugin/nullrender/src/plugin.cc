@@ -5,4 +5,4 @@
 #include    <nullrenderer.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(nullrender, BugEngine::Graphics::Null::NullRenderer, (weak<const BugEngine::FileSystem> fileSystem), (fileSystem));
+BE_PLUGIN_REGISTER(nullrender, BugEngine::Graphics::Null::NullRenderer, (weak<const BugEngine::Folder> dataFolder), (dataFolder));

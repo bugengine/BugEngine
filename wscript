@@ -64,10 +64,10 @@ def build(bld):
 	shadermodel4	= module.plugin('shadermodel4', [discworld, _3d, shadermodel1, shadermodel2, shadermodel3])
 
 	windowing		= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
-	gl				= module.plugin('GL4', 			[discworld, windowing, opengl, _3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4], platforms=['pc'])
-	Dx9				= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d, shadermodel1, shadermodel2], platforms=['win32'])
-	#Dx10			= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, shadermodel4], platforms=['win32'])
-	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4])
+	gl				= module.plugin('GL4', 			[discworld, windowing, opengl, _3d], platforms=['pc'])
+	Dx9				= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
+	#Dx10			= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
+	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel4])
 
 	#AL				= module.plugin('AL',  			[discworld, openal], platforms=['pc'])
 

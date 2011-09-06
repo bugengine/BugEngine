@@ -7,8 +7,8 @@
 namespace BugEngine { namespace PackageManager
 {
 
-PackageLoader::PackageLoader(weak<const FileSystem> filesystem)
-    :   m_filesystem(filesystem)
+PackageLoader::PackageLoader(weak<const Folder> dataFolder)
+    :   m_dataFolder(dataFolder)
 {
 }
 
