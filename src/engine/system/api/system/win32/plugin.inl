@@ -46,7 +46,6 @@ static HANDLE loadPlugin(const istring &pluginName)
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        errorCode = ::GetLastError();
         be_error("%s : %s"|pluginName|errorMessage);
         ::LocalFree(errorMessage);
     }
