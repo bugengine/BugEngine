@@ -10,5 +10,11 @@
 #define BE_PLATFORM_POSIX       1
 #define BE_PLATFORM_PC          1
 
+#include    <stdlib.h>
+#include    <alloca.h>
+#include    <malloc.h>
+#define     malloca alloca
+#define     freea(p)
+
 /*****************************************************************************/
 #endif

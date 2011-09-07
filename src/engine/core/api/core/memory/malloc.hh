@@ -127,30 +127,6 @@ be_api(CORE) Allocator& inputArena();
 }
 
 
-#ifdef BE_PLATFORM_MACOS
-# include   <malloc/malloc.h>
-#else
-# include   <stdlib.h>
-#endif
-#ifdef BE_PLATFORM_SUN
-# include   <alloca.h>
-#endif
-
-#ifdef _MSC_VER
-# define    malloca    _alloca
-# if _MSC_VER >= 1400
-#  define    freea      _freea
-# else
-#  define    freea(p)
-# endif
-#else
-# if !defined(BE_PLATFORM_MACOS) && !defined(BE_PLATFORM_BSD)
-#  include <malloc.h>
-# endif
-# define    malloca     alloca
-# define    freea(p)
-#endif
-
 #include    <new>
 
 inline void* operator new(size_t size, BugEngine::Allocator& allocator)                     { return allocator.alloc(size); }

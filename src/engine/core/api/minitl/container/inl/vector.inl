@@ -439,9 +439,7 @@ void                                                vector<T>::reserve(size_type
         size = size >> 4  | size;
         size = size >> 8  | size;
         size = size >> 16 | size;
-    #ifdef BE_64
-        size = size >> 32 | size;
-    #endif
+        size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
         size++;
         BugEngine::Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;

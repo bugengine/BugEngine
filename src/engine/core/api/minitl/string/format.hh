@@ -5,6 +5,7 @@
 #define BE_MINITL_FORMAT_H_
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
+#include    <string.h>
 
 namespace minitl
 {

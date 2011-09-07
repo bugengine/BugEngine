@@ -35,5 +35,19 @@ static inline void displayError()
 #define BE_PLATFORM_WIN32      1
 #define BE_PLATFORM_PC         1
 
+#include    <stdlib.h>
+#ifdef _MSC_VER
+# define    malloca _alloca
+# if _MSC_VER >= 1400
+#  define   freea   _freea
+# else
+#  define   freea(p)
+# endif
+#else
+# include   <malloc.h>
+# define    malloca alloca
+# define    freea(p)
+#endif
+
 /*****************************************************************************/
 #endif
