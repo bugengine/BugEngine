@@ -102,7 +102,7 @@ private:
 public:
     typedef typename type_t::tag_t                          ticket_t;
 
-    itaggedptr() : m_value(0,0)                     { be_assert(be_align(&m_value, sizeof(value_t)) == &m_value, "value is incorrectly aligned"); }
+    itaggedptr() : m_value(0)                       { be_assert(be_align(&m_value, sizeof(value_t)) == &m_value, "value is incorrectly aligned"); }
     itaggedptr(T* value) : m_value((value_t)value)  { be_assert(be_align(&m_value, sizeof(value_t)) == &m_value, "value is incorrectly aligned"); }
     ~itaggedptr()                                   {}
 

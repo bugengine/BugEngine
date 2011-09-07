@@ -9,9 +9,14 @@
 #define BE_PLATFORM_LINUX       1
 #define BE_PLATFORM_POSIX       1
 #define BE_PLATFORM_PC          1
-#include   <strings.h>
-#define    stricmp strcasecmp
-#define    strnicmp strncasecmp
+
+#include    <strings.h>
+#include    <stdlib.h>
+#include    <malloc.h>
+#define     stricmp strcasecmp
+#define     strnicmp strncasecmp
+#define     malloca alloca
+#define     freea(p)
 
 /*****************************************************************************/
 #endif
