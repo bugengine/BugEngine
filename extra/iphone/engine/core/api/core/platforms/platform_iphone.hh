@@ -9,5 +9,9 @@
 #define BE_PLATFORM_IPHONE     1
 #define BE_PLATFORM_MACOS      1
 
+#include <malloc/malloc.h>
+#define malloca     alloca
+#define freea(p)
+
 /*****************************************************************************/
 #endif
