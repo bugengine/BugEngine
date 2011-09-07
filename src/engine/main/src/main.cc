@@ -4,7 +4,7 @@
 #include    <main/stdafx.h>
 #include    <main/main.hh>
 #include    <core/environment.hh>
-//#include    <system/file/diskfolder.hh>
+#include    <system/file/diskfolder.script.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
@@ -30,17 +30,38 @@ namespace
             fprintf(m_logFile, "%s:%d (%s)"
                                "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
             fflush(m_logFile);
-            #ifdef BE_PLATFORM_WIN32
-                OutputDebugString(filename);
-                OutputDebugString(minitl::format<>("(%d) :") | line);
-                OutputDebugString(logname.c_str());
-                OutputDebugString(")\t\t(");
-                OutputDebugString(s_logNames[level]);
-                OutputDebugString(") ");
-                OutputDebugString(msg);
-                if (msg[strlen(msg)-1] != '\n')
-                    OutputDebugString("\n");
-            #endif
+            return true;
+        }
+    };
+
+    class ConsoleLogListener : public BugEngine::ILogListener
+    {
+    public:
+        ConsoleLogListener()
+        {
+        }
+        ~ConsoleLogListener()
+        {
+        }
+    protected:
+        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
+        {
+#ifdef BE_PLATFORM_WIN32
+            OutputDebugString(filename);
+            OutputDebugString(minitl::format<>("(%d) :") | line);
+            OutputDebugString(logname.c_str());
+            OutputDebugString("\t\t(");
+            OutputDebugString(s_logNames[level]);
+            OutputDebugString(") ");
+            OutputDebugString(msg);
+            if (msg[strlen(msg)-1] != '\n')
+                OutputDebugString("\n");
+#else
+            fprintf(stderr, "%s(%d) :%s\t\t(%s) %s", filename, line, logname.c_str(), s_logNames[level], msg);
+            if (msg[strlen(msg)-1] != '\n')
+                fprintf(stderr, "\n");
+
+#endif
             return true;
         }
     };
@@ -54,7 +75,12 @@ static int __main(int argc, const char *argv[])
     try
 #endif
     {
-        //ref<BugEngine::DiskFS> mountpoint = ref<BugEngine::DiskFS>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getHomeDirectory(), BugEngine::DiskFS::CreateRoot);
+        BugEngine::Logger::root()->addListener(new ConsoleLogListener());
+        ref<BugEngine::DiskFolder> mountpoint = ref<BugEngine::DiskFolder>::create(
+                BugEngine::gameArena(),
+                BugEngine::Environment::getEnvironment().getHomeDirectory(),
+                BugEngine::DiskFolder::ScanRecursive,
+                BugEngine::DiskFolder::CreateOne);
         minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
         BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
