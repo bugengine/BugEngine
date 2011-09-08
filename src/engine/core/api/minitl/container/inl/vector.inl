@@ -340,6 +340,13 @@ void                                                vector<T>::push_back(ITERATO
 }
 
 template< typename T >
+void                                                vector<T>::pop_back()
+{
+    m_end = advance_ptr(m_end, -1);
+    m_end->~T();
+}
+
+template< typename T >
 typename vector<T>::iterator                 vector<T>::erase(iterator it)
 {
     return erase(it, it+1);

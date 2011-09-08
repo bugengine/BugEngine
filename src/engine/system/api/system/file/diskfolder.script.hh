@@ -17,22 +17,13 @@ private:
         void*   ptrHandle;
         u64     intHandle;
     };
+    ipath   m_path;
     Handle  m_handle;
 published:
-    enum DiskScanPolicy
-    {
-        ScanNone,
-        ScanRoot,
-        ScanRecursive
-    };
-    enum DiskCreatePolicy
-    {
-        CreateNone,
-        CreateOne,
-        CreateRecursive
-    };
-    DiskFolder(const ipath& diskpath, DiskScanPolicy scanPolicy = ScanRecursive, DiskCreatePolicy createPolicy = CreateOne);
+    DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive, Folder::CreatePolicy createPolicy = Folder::CreateOne);
     ~DiskFolder();
+
+    void refresh(Folder::ScanPolicy scanPolicy) override;
 };
 
 }

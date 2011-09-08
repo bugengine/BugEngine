@@ -1,5 +1,21 @@
 #include    <system/stdafx.h>
 
+
+namespace BugEngine
+{
+
+Allocator& fsArena()
+{
+    return gameArena();
+}
+
+Allocator& taskArena()
+{
+    return gameArena();
+}
+
+}
+
 #if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)
 
 namespace BugEngine

@@ -21,5 +21,11 @@
 # define    SYSTEMEXPORT
 #endif
 
+namespace BugEngine
+{
+    be_api(SYSTEM) Allocator& fsArena();
+    be_api(SYSTEM) Allocator& taskArena();
+}
+
 /*****************************************************************************/
 #endif

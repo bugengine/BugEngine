@@ -43,7 +43,7 @@ def run(self):
 		lock.acquire()
 		count -= 1
 		lock.release()
-		return ret
+	return ret
 cls.run = run
 
 @extension('.h', '.hh', '.hxx')
