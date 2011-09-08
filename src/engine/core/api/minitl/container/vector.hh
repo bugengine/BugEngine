@@ -63,6 +63,7 @@ public:
     void                    push_back(const_reference r);
     template< typename ITERATOR >
     void                    push_back(ITERATOR first, ITERATOR last);
+    void                    pop_back();
     iterator                erase(iterator it);
     iterator                erase(iterator begin, iterator end);
 

@@ -21,6 +21,7 @@ class Container:
 		self.line = line
 		self.scope = scope
 		self.visibility = 'published'
+		self.classes = []
 
 	def addObject(self, object):
 		self.objects.append(object)
@@ -35,11 +36,16 @@ class Container:
 			else:
 				self.methods[name] = [(rtype, params, attr, self.visibility, tags, line)]
 
-	def dump(self, file, namespace, index, nested):
+	def dump(self, file, namespace, nested):
+		classes = []
 		for o in self.objects:
 			if o.scope == 'published':
-				index = o.dump(file, namespace, index, nested)
-		return index
+				classes += o.dump(file, namespace, nested)
+		return classes
+
+	def predecl(self, file):
+		for o in self.objects:
+			o.predecl(file)
 
 class Root(Container):
 	def __init__(self, source):
@@ -61,14 +67,18 @@ class Root(Container):
 		file.write("#include    <rtti/engine/helper/set.hh>\n")
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
 		file.write("\n")
-		file.write("namespace BugEngine {\n\n")
 
 		if showline: file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))
-		
-		Container.dump(self, file, namespace, index, False)
 
-		file.write("}\n")
-		return index
+		file.write("namespace BugEngine\n{\n\n")
+		self.predecl(file)
+		file.write("\n}\n\n")
+
+		classes = Container.dump(self, file, namespace, False)
+		file.write("namespace BugEngine\n{\n\n")
+		for classname, objname in classes:
+			file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &%s; }\n" % (classname, objname))
+		file.write("\n}\n")
 
 class Typedef(Container):
 	def __init__(self, parent, name, line):
@@ -78,12 +88,19 @@ class Namespace(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line, 'published')
 
-	def dump(self, file, namespace, index, nested):
+	def dump(self, file, namespace, nested):
 		if showline: file.write("#line %d\n" % self.line)
+		file.write("namespace %s\n" % self.name)
+		file.write("{\n")
+		classes = Container.dump(self, file, namespace + '::' + self.name, False)
+		file.write("}\n")
+		return classes
+
+	def predecl(self, file):
 		if self.name != 'BugEngine':
-			file.write("using namespace %s;\n" % self.fullname)
-		index = Container.dump(self, file, namespace + '::' + self.name, index, False)
-		return index
+			file.write("using namespace %s;\n"%self.fullname)
+		Container.predecl(self, file)
+
 
 class Enum(Container):
 	def __init__(self, parent, name, line, scope):
@@ -94,14 +111,17 @@ class Enum(Container):
 	def addEnumValue(self, name):
 		self.values.append(name)
 
-	def dump(self, file, namespace, index, nested):
+	def predecl(self, file):
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass();\n" % (self.fullname))
+
+	def dump(self, file, namespace, nested):
 		name = self.fullname[2:].replace('::', '.')
 		decl = "enum%s" % self.fullname.replace(':', '_')
 		tagname = "0"
 		tagindex = 0
 		for type,tag in self.tags:
 			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
-			file.write("static RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
+			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
 			file.write("    {\n")
 			file.write("        %s,\n" % tagname)
 			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
@@ -109,7 +129,7 @@ class Enum(Container):
 			tagname = "&s_%s_tag_%d" % (decl, tagindex)
 			tagindex = tagindex + 1
 
-		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
+		file.write("static const ::BugEngine::RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
 		file.write("        be_typeid< void >::klass(),\n")
@@ -123,8 +143,7 @@ class Enum(Container):
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % self.fullname)
 		file.write("    };\n")
-		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &s_%s; }\n" % (self.fullname, decl))
-		return index
+		return [(self.fullname, "%s::s_%s" % (namespace, decl))]
 
 class Class(Container):
 	def __init__(self, parent, name, inherits, line, scope, value):
@@ -133,16 +152,22 @@ class Class(Container):
 		self.value = value
 		self.tags = []
 
-	def dump(self, file, namespace, index, nested):
+	def predecl(self, file):
+		Container.predecl(self, file)
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass();\n" % (self.fullname))
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass();\n" % (self.inherits))
+
+	def dump(self, file, namespace, nested):
 		file.write("//----------------------------------------------------------------------\n")
 		file.write("// %s\n" % self.fullname)
-		index = Container.dump(self, file, namespace, index+1, True)
+		classes = Container.dump(self, file, namespace, True)
 		decl = "class%s" % self.fullname.replace(':', '_')
 		properties = self.buildProperties(file, decl)
 		methods, constructor, call = self.buildMethods(file, decl);
 		self.writeClass(file, decl, nested, properties, methods, constructor, call)
 		file.write("//----------------------------------------------------------------------\n\n")
-		return index
+		classes.append((self.fullname, "%s::s_%s" % (namespace, decl)))
+		return classes
 
 	def writeClass(self, file, decl, nested, properties, methods, constructor, call):
 		name = self.fullname[2:].replace('::', '.')
@@ -150,7 +175,7 @@ class Class(Container):
 		tagindex = 0
 		for type,tag in self.tags:
 			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
-			file.write("static RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
+			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
 			file.write("    {\n")
 			file.write("        %s,\n" % tagname)
 			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
@@ -158,8 +183,7 @@ class Class(Container):
 			tagname = "&s_%s_tag_%d" % (decl, tagindex)
 			tagindex = tagindex + 1
 
-		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass();\n" % self.inherits)
-		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
+		file.write("static const ::BugEngine::RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
 		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
@@ -177,7 +201,6 @@ class Class(Container):
 			file.write("        0,\n")
 			file.write("        0\n")
 		file.write("    };\n")
-		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &s_%s; }\n" % (self.fullname, decl))
 
 	def buildProperties(self, file, decl):
 		prop = "0"
@@ -188,8 +211,8 @@ class Class(Container):
 				file.write("static const ::BugEngine::RTTI::PropertyInfo s_%s_%s =\n" % (decl, name))
 				file.write("    {\n")
 				file.write("        %s,\n" % prop)
-				file.write("        BugEngine::be_typeid< %s >::type(),\n" % self.fullname)
-				file.write("        BugEngine::be_typeid< %s >::type(),\n" % type)
+				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % self.fullname)
+				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % type)
 				file.write("        be_checked_numcast<u32>((char*)(&((%s*)0)->%s)-(char*)0)\n" % (self.fullname, name))
 				file.write("    };\n")
 				prop = "&s_%s_%s" % (decl, name)
@@ -291,43 +314,3 @@ class Class(Container):
 
 		return method, constructor, call
 
-		"""	file.write("static const ::BugEngine::RTTI::MethodInfo s_%s_%s =\n" % (decl, name))
-				paramtypes = ', '.join(ptype for ptype, pname in params)
-
-				if name == '?ctor':
-					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (self.fullname, paramtypes)
-				elif rtype != 'void':
-					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % (self.fullname, rtype, paramtypes)
-				else:
-					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (self.fullname, paramtypes)
-				if name == '?ctor':
-					if self.value:
-						call = "&%s::construct" % helper
-					else:
-						call = "&%s::constructPtr" % helper
-				elif 'const' in attrs:
-						call = "&%s::callConst< %s >" % (helper, method)
-				elif 'static' in attrs:
-						call = "&%s::callStatic< %s >" % (helper, method)
-				else:
-					call = "&%s::call< %s >" % (helper, method)
-
-				file.write("            if (%s::VarArg)\n" % (helper))
-				file.write("            {\n")
-				file.write("                mi.overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s, true));\n" % (rtype, call))
-				file.write("            }\n")
-				file.write("            else\n")
-				file.write("            {\n")
-				file.write("                mi.overloads.push_back(::BugEngine::RTTI::OverloadInfo(::BugEngine::be_typeid< %s >::type(), %s, false));\n" % (rtype, call))
-				if 'static' not in attrs:
-					if "const" in attrs:
-						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s const* >::type()));\n" % (self.fullname))
-					else:
-						file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"this\", ::BugEngine::be_typeid< %s* >::type()));\n" % (self.fullname))
-				for ptype, pname in params:
-					file.write("                mi.overloads.back().params.push_back(::BugEngine::RTTI::ParamInfo(\"%s\", ::BugEngine::be_typeid< %s >::type()));\n" % (pname, ptype))
-				file.write("            }\n")
-				methodindex = methodindex + 1
-			file.write("            klass->addMethod(\"%s\", mi);\n" % (name))
-			file.write("        }\n")
-		return method, constructor, call"""

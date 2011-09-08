@@ -34,11 +34,6 @@ Allocator& scriptArena()
     return gameArena();
 }
 
-Allocator& taskArena()
-{
-    return gameArena();
-}
-
 Allocator& inputArena()
 {
     return gameArena();

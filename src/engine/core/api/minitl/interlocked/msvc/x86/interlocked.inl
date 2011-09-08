@@ -75,10 +75,6 @@ struct InterlockedType<4>
             } taggedvalue;
             BE_SET_ALIGNMENT(8) volatile long long asLongLong;
         };
-        tagged_t(long long value)
-            :   asLongLong(value)
-        {
-        }
         tagged_t(incr_t value = 0)
         {
             taggedvalue.tag = 0;
