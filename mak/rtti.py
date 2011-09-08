@@ -158,6 +158,7 @@ class Class(Container):
 			tagname = "&s_%s_tag_%d" % (decl, tagindex)
 			tagindex = tagindex + 1
 
+		file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass();\n" % self.inherits)
 		file.write("static const RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))

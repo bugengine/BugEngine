@@ -11,7 +11,7 @@
 
 namespace
 {
-    class LogListener : public BugEngine::ILogListener
+    /*class LogListener : public BugEngine::ILogListener
     {
     private:
         FILE* m_logFile;
@@ -32,7 +32,7 @@ namespace
             fflush(m_logFile);
             return true;
         }
-    };
+    };*/
 
     class ConsoleLogListener : public BugEngine::ILogListener
     {
@@ -81,8 +81,8 @@ static int __main(int argc, const char *argv[])
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
-        minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
-        BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
+        //minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
+        //BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);
     }
