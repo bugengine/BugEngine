@@ -75,7 +75,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 				conf.load('winres')
 			add_gcc_flags_to_env(conf)
 			add_platform_flags_to_env(conf, name, arch)
-			conf.env['LINKFLAGS'].append(conf.env.RPATH_ST % os.path.join(conf.env.DEPLOY['prefix'], conf.env.DEPLOY['plugin']))
 
 			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
 
@@ -98,7 +97,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 				conf.load('winres')
 			add_gcc_flags_to_env(conf)
 			add_platform_flags_to_env(conf, name, arch)
-			conf.env['LINKFLAGS'].append(conf.env.RPATH_ST % os.path.join(conf.env.DEPLOY['prefix'], conf.env.DEPLOY['plugin']))
 
 			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
 
@@ -256,9 +254,9 @@ def add_standard_gcc_flags(conf):
 	v = conf.env
 	v.append_unique('ASFLAGS', '-c')
 	if v['GCC_FLAGS']:
-		v['CFLAGS'] = v['GCC_FLAGS']
-		v['CXXFLAGS'] = v['GCC_FLAGS']
-		v['LINKFLAGS'] = v['GCC_FLAGS']
+		v['CFLAGS'] = v['GCC_FLAGS'][:]
+		v['CXXFLAGS'] = v['GCC_FLAGS'][:]
+		v['LINKFLAGS'] = v['GCC_FLAGS'][:]
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
