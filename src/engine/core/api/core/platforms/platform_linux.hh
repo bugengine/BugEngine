@@ -17,6 +17,7 @@
 #define     strnicmp strncasecmp
 #define     malloca alloca
 #define     freea(p)
+#define     DIRENT_H    <dirent.h>
 
 /*****************************************************************************/
 #endif
