@@ -251,6 +251,39 @@ def make_masterfiles(self):
 			cppnumleft = cppnumleft - 1
 			mastertask.set_inputs(srcnode)
 
+objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
+objcpydbgcls = Task.task_factory('dbg', objcpydbg, 'YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
+objcpystrip = '${OBJCOPY} ${OBJCOPYFLAGS} --localize-hidden --strip-debug --strip-unneeded --keep-symbol .gnu_debuglink --add-gnu-debuglink ${SRC[0].change_ext(".dbg").path_from(tsk.inputs[0].parent)} ${SRC[0].abspath()} ${TGT[0].abspath()}'
+objcpystripcls = Task.task_factory('strip', objcpystrip, 'BLUE', ext_in='.all', shell=False)
+
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@after_method('apply_link')
+@after_method('apply_implib')
+@after_method('apply_implib_program')
+def extract_debug_info(self):
+	if self.env.CXX_NAME == 'gcc':
+		self.link_task_real = self.link_task
+		innode = self.link_task_real.outputs[0]
+		outnode = innode.change_ext('.all')
+		debugnode = innode.change_ext('.dbg')
+		self.link_task_real.outputs[0] = outnode
+
+		self.link_debug_task = self.create_task('dbg', outnode)
+		self.link_debug_task.set_outputs(debugnode)
+		self.link_debug_task.set_run_after(self.link_task_real)
+
+		try:
+			inst_to = self.install_path
+		except AttributeError:
+			inst_to = self.link_task.__class__.inst_to
+		self.bld.install_files(inst_to, self.link_debug_task.outputs[:], env=self.env)
+
+
+
+		self.link_task = self.create_task('strip', outnode)
+		self.link_task.set_outputs(innode)
+		self.link_task.set_run_after(self.link_debug_task)
+
 @feature('cprogram', 'cxxprogram')
 @after_method('apply_link')
 @before_method('apply_implib')

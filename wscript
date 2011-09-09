@@ -65,8 +65,8 @@ def build(bld):
 
 	windowing		= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
 	gl				= module.plugin('GL4', 			[discworld, windowing, opengl, _3d], platforms=['pc'])
-	Dx9				= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
-	#Dx10			= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
+	Dx9				= module.plugin('Dx9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
+	#Dx10			= module.plugin('Dx10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
 	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel4])
 
 	#AL				= module.plugin('AL',  			[discworld, openal], platforms=['pc'])
