@@ -224,6 +224,14 @@ def find_cross_gcc(conf):
 				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
+		
+		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
+			if conf.find_program(target+'-objcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+				break
+		if not v['OBJCOPY']:
+			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
+				if conf.find_program('objcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+					break
 
 		if not v['AS']: v['AS'] = v['CC']
 
@@ -248,6 +256,7 @@ def find_cross_gcc(conf):
 			if not conf.find_program('mingw32-windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				conf.find_program('windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True)
 	conf.load('gcc gxx gas')
+	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 
 @conf
 def add_standard_gcc_flags(conf):
