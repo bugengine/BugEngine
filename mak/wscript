@@ -261,7 +261,7 @@ objcpystripcls = Task.task_factory('strip', objcpystrip, 'BLUE', ext_in='.all', 
 @after_method('apply_implib')
 @after_method('apply_implib_program')
 def extract_debug_info(self):
-	if self.env.CXX_NAME == 'gcc':
+	if self.env.CXX_NAME == 'gcc' and self.env.OBJCOPY:
 		self.link_task_real = self.link_task
 		innode = self.link_task_real.outputs[0]
 		outnode = innode.change_ext('.all')
