@@ -224,13 +224,17 @@ def find_cross_gcc(conf):
 				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
-		
+
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-objcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+				break
+			if conf.find_program(target+'-gobjcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['OBJCOPY']:
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 				if conf.find_program('objcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+					break
+				if conf.find_program('gobjcopy'+name, var='OBJCOPY', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 
 		if not v['AS']: v['AS'] = v['CC']

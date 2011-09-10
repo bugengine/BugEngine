@@ -57,6 +57,7 @@ void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
 {
     if (m_handle.ptrHandle)
     {
+        minitl::format<1024u> pathname = m_path.str();
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
@@ -65,8 +66,14 @@ void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
             if (d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0)
                 continue;
             istring name = d->d_name;
-            if (d->d_type == DT_DIR)
+            minitl::format<1024u> filename = pathname;
+            filename.append("/");
+            filename.append(d->d_name);
+            struct stat s;
+            stat(filename.c_str(), &s);
+            if (s.st_mode & S_IFDIR)
             {
+                be_info("found dir: %s" | name);
                 for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                 {
                     if (it->first == name)
