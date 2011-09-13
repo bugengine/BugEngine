@@ -53,7 +53,7 @@ DiskFolder::~DiskFolder()
     closedir((DIR*)m_handle.ptrHandle);
 }
 
-void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
+void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     if (m_handle.ptrHandle)
     {
@@ -73,7 +73,7 @@ void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
             stat(filename.c_str(), &s);
             if (s.st_mode & S_IFDIR)
             {
-                be_info("found dir: %s" | name);
+                be_debug("found dir: %s" | name);
                 for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                 {
                     if (it->first == name)
@@ -85,7 +85,7 @@ void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
                         }
                     }
                 }
-                m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(fsArena(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
+                m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(fsArena(), m_path+ipath(name), scanPolicy == Folder::ScanRecursive?Folder::ScanRecursive : Folder::ScanNone, Folder::CreateNone)));
             }
             else
             {
