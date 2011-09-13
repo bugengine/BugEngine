@@ -26,14 +26,14 @@ global_macro_map = {
 	"PASCAL": False,
 }
 
-def doParse(source, output, temppath, macro = [], macrofile = [], pch=""):
+def doParse(source, output, temppath, macro = [], macrofile = [], pch="", useMethods=False):
 	import cpp.lexer, cpp.parser
 	lexer = ply.lex.lex(module=cpp.lexer)
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
 	yacc = ply.yacc.yacc(module=cpp.parser, method='LALR', debugfile='parser.out', picklefile=os.path.join(temppath, 'parsetab'), outputdir=temppath)
-	yacc.namespace = rtti.Root(source)
+	yacc.namespace = rtti.Root(source, useMethods)
 	yacc.rtti = rtti
 
 	lexer.macro_map = dict(global_macro_map)

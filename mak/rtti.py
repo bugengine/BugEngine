@@ -10,6 +10,7 @@ class Container:
 		self.name = name
 		if parent:
 			self.fullname = parent.fullname
+			self.useMethods = parent.useMethods
 			if name:
 				self.fullname += '::' + name
 			self.parent.addObject(self)
@@ -48,9 +49,10 @@ class Container:
 			o.predecl(file)
 
 class Root(Container):
-	def __init__(self, source):
+	def __init__(self, source, useMethods):
 		Container.__init__(self, None, '', 1, 'public')
 		self.source = source
+		self.useMethods = useMethods
 
 	def dump(self, file, namespace = '', index = 0, nested = False):
 		file.write("#include    <rtti/stdafx.h>\n")
@@ -117,6 +119,8 @@ class Enum(Container):
 	def dump(self, file, namespace, nested):
 		name = self.fullname[2:].replace('::', '.')
 		decl = "enum%s" % self.fullname.replace(':', '_')
+		if self.useMethods:
+			file.write("static const ::BugEngine::RTTI::ClassInfo& s_%sFun()\n{\n" % decl)
 		tagname = "0"
 		tagindex = 0
 		for type,tag in self.tags:
@@ -143,7 +147,11 @@ class Enum(Container):
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % self.fullname)
 		file.write("    };\n")
-		return [(self.fullname, "%s::s_%s" % (namespace, decl))]
+		if self.useMethods:
+			file.write("return s_%s;\n}\n" % decl)
+			return [(self.fullname, "%s::s_%sFun()" % (namespace, decl))]
+		else:
+			return [(self.fullname, "%s::s_%s" % (namespace, decl))]
 
 class Class(Container):
 	def __init__(self, parent, name, inherits, line, scope, value):
@@ -162,11 +170,17 @@ class Class(Container):
 		file.write("// %s\n" % self.fullname)
 		classes = Container.dump(self, file, namespace, True)
 		decl = "class%s" % self.fullname.replace(':', '_')
+		if self.useMethods:
+			file.write("static const ::BugEngine::RTTI::ClassInfo& s_%sFun()\n{\n" % decl)
 		properties = self.buildProperties(file, decl)
 		methods, constructor, call = self.buildMethods(file, decl);
 		self.writeClass(file, decl, nested, properties, methods, constructor, call)
+		if self.useMethods:
+			file.write("return s_%s;\n}\n" % decl)
+			classes.append((self.fullname, "%s::s_%sFun()" % (namespace, decl)))
+		else:
+			classes.append((self.fullname, "%s::s_%s" % (namespace, decl)))
 		file.write("//----------------------------------------------------------------------\n\n")
-		classes.append((self.fullname, "%s::s_%s" % (namespace, decl)))
 		return classes
 
 	def writeClass(self, file, decl, nested, properties, methods, constructor, call):

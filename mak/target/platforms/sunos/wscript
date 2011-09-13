@@ -37,6 +37,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 
 
 def add_gcc_flags_to_env(conf):
+	conf.env.BROKEN_INITIALIZER = True
 	conf.env.append_unique('CFLAGS', ['-fpic', '-fno-jump-tables'])
 	conf.env.append_unique('CXXFLAGS', ['-fpic', '-fno-jump-tables'])
 	conf.env.append_unique('LINKFLAGS', ['-static-libgcc', '-lposix4', '-lstdc++'])
