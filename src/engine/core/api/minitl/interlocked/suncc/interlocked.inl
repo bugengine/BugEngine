@@ -1,9 +1,19 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_INTERLOCKED_SUNCC_X86_INTERLOCKED_INL_
-#define BE_MINITL_INTERLOCKED_SUNCC_X86_INTERLOCKED_INL_
+#ifndef BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
+#define BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
 /*****************************************************************************/
+
+extern "C" i32 fetch_and_add_32(volatile i32* p, i32 add);
+extern "C" i32 fetch_and_set_32(volatile i32* p, i32 v);
+extern "C" i32 set_conditional_32(volatile i32* p, i32 v, i32 condition);
+extern "C" i64 fetch_and_add_64(volatile i64* p, i64 add);
+extern "C" i64 fetch_and_set_64(volatile i64* p, i64 v);
+extern "C" i64 set_conditional_64(volatile i64* p, i64 v, i64 condition);
+#ifdef _AMD64
+extern "C" char set_conditional_128(volatile i64* p, i64 nvalue, i64 oldvalue, i64 tag);
+#endif
 
 namespace minitl { namespace interlocked_impl
 {
@@ -18,35 +28,24 @@ struct InterlockedType<4>
     typedef i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
-        value_t old=0;
-        __asm__ __volatile__ ("lock; xadd %0,%1"
-                      : "=a" (old), "=m" (*p)
-                      : "a" (incr), "m" (*p)
-                      : "memory", "cc");
-        return old;
+        return fetch_and_add_32(p, incr);
     }
     static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
     {
-        return fetch_and_add(p, -incr);
+        return fetch_and_add_32(p, -incr);
     }
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
-        __asm__ __volatile__ ("lock; xchg %2, %1"
-                      : "=r" (v), "+m" (*p)
-                      : "r" (v));
-        return v;
+        return fetch_and_set_32(p, v);
     }
+
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
-        __asm__ __volatile__ ("lock; cmpxchg %1, %2"
-                      : "=r" (v)
-                      : "r" (v), "m" (*(p)), "0"(condition)
-                      : "memory", "cc");
-        return v;
+        return set_conditional_32(p, v, condition);
     }
     static inline value_t set_and_fetch(volatile value_t *p, value_t v)
     {
-        fetch_and_set(p, v);
+        fetch_and_set_32(p, v);
         return v;
     }
 
@@ -91,71 +90,48 @@ struct InterlockedType<4>
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        tagged_t result;
-        tagged_t dst(condition.taggedvalue.tag+1, v);
-        __asm__ __volatile__ (
-                "lock;  cmpxchg8b %2\n\t"
-                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
-                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
-                 : "memory", "cc");
-        return result.taggedvalue.tag == condition.taggedvalue.tag;
+        i64 old = *(i64*)&condition;
+        i64 value = *(i64*)&v;
+        volatile i64* dest = (volatile i64*)p;
+        return set_conditional_64(dest, value, old) == old;
     }
 };
 
+template<>
+struct InterlockedType<1> : public InterlockedType<4>
+{
+};
+
+template<>
+struct InterlockedType<2> : public InterlockedType<4>
+{
+};
+
+
+#ifdef _AMD64
 template<>
 struct InterlockedType<8>
 {
     typedef i64 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
-        value_t old = 0;
-        __asm__ __volatile__ ("lock; xaddq %0,%1"
-                      : "=a" (old), "=m" (*p)
-                      : "a" (incr), "m" (*p)
-                      : "memory", "cc");
-        return old;
+        return fetch_and_add_64(p, incr);
     }
     static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
     {
-        return fetch_and_add(p, -incr);
+        return fetch_and_add_64(p, -incr);
     }
     static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
-        __asm__ __volatile__ ("lock; xchgq %2, %1"
-                      : "=r" (v), "+m" (*p)
-                      : "r" (v));
-        return v;
+        return fetch_and_set_64(p, v);
     }
     static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
-    #ifdef __PIC__
-        __asm__ __volatile__("push %%rbx\n\t" : : : "esp");
-    #endif
-        value_t result = 0;
-        union split {
-            i64 asI64;
-            i32 asI32[2];
-        };
-        split dst;
-        dst.asI64 = v;
-        split src;
-        src.asI64 = condition;
-
-        __asm__ __volatile__ (
-                "lock;  cmpxchg8b %1\n\t"
-                 : "=A"(result), "=m"(*p)
-                 : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
-                 : "memory"
-
-        );
-    #ifdef __PIC__
-        __asm__ __volatile__("pop %%rbx\n\t" : : : "esp");
-    #endif
-        return result;
+        return set_conditional_64(p, v, condition);
     }
     static inline value_t set_and_fetch(volatile value_t *p, value_t v)
     {
-        fetch_and_set(p, v);
+        fetch_and_set_64(p, v);
         return v;
     }
 
@@ -201,28 +177,10 @@ struct InterlockedType<8>
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        unsigned char result = 0;
-        __asm__ __volatile__ (
-                "\tmov %2,%%r8\n"
-                "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
-                "\tsetz %0\n"
-                 : "=a"(result), "=m"(*p)
-                 : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory"
-        );
-        return result;
+        return set_conditional_128((volatile i64*)p, v, condition.taggedvalue.tag, condition.taggedvalue.value);
     }
 };
-
-template<>
-struct InterlockedType<1> : public InterlockedType<4>
-{
-};
-
-template<>
-struct InterlockedType<2> : public InterlockedType<4>
-{
-};
+#endif
 
 
 }}
