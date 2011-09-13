@@ -7,7 +7,7 @@
 
 #define be_alignof(t)           __alignof__(t)
 #if defined(_X86)||defined(_AMD64)
-# define be_break()             __asm("int3")
+# define be_break()             __asm__("int $3")
 #else
 # error Platform not supported
 #endif

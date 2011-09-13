@@ -78,7 +78,7 @@ DiskFolder::~DiskFolder()
     CloseHandle(m_handle.ptrHandle);
 }
 
-void DiskFolder::refresh(Folder::ScanPolicy scanPolicy)
+void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     if (m_handle.ptrHandle)
     {

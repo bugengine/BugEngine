@@ -19,11 +19,12 @@ private:
     };
     ipath   m_path;
     Handle  m_handle;
+private:
+    void doRefresh(Folder::ScanPolicy scanPolicy) override;
 published:
     DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive, Folder::CreatePolicy createPolicy = Folder::CreateOne);
     ~DiskFolder();
 
-    void refresh(Folder::ScanPolicy scanPolicy) override;
 };
 
 }

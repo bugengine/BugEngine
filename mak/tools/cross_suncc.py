@@ -52,4 +52,31 @@ def get_suncc_targets_64(conf, cc, cxx):
 
 def configure(conf):
 	conf.load('suncc suncxx')
+	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
+
+	v=conf.env
+
+	v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
+	v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
+	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,wunreachable,doubunder']
+	v['CXXFLAGS_warnnone'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,wunreachable,doubunder']
+
+	v['CFLAGS_debug'] = ['-g', '-D_DEBUG']
+	v['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
+	v['LINKFLAGS_debug'] = ['-g']
+	v['ASFLAGS_debug'] = ['-g', '-D_DEBUG']
+
+	v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
+	v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
+		'-features=no%except', '-features=mutable',
+		'-features=localfor', '-features=bool', '-features=no%split_init']
+	v['ASFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
+	v['LINKFLAGS_profile'] = ['-g']
+
+	v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
+	v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
+		'-features=no%except', '-features=mutable',
+		'-features=localfor', '-features=bool', '-features=no%split_init']
+	v['ASFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
+	v['LINKFLAGS_final'] = ['-g']
 

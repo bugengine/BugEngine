@@ -164,6 +164,15 @@ void Folder::umount(ipath name)
     }
 }
 
+void Folder::refresh(Folder::ScanPolicy scanPolicy)
+{
+    if (!m_upToDate)
+    {
+        doRefresh(scanPolicy);
+        m_upToDate = true;
+    }
+}
+
 
 
 }
