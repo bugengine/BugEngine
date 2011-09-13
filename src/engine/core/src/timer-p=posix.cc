@@ -10,7 +10,7 @@ namespace BugEngine
 
 u64 Timer::tick()
 {
-#if defined (BE_COMPILER_GCC) || defined(BE_COMPILER_SUNCC)
+#if defined (BE_COMPILER_GCC)
 # if defined(_X86)
     u64 x = 0;
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));

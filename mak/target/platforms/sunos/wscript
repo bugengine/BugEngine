@@ -14,11 +14,11 @@ def add_suncc_flags_to_env(conf, arch):
 	v = conf.env
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
 		conf.env.append_unique('CFLAGS', ['-m32'])
-		conf.env.append_unique('CXXFLAGS', ['-m32'])
+		conf.env.append_unique('CXXFLAGS', ['-m32', '../../../mak/suncc/interlocked-a=x86.il'])
 		conf.env.append_unique('LINKFLAGS', ['-m32'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
 		conf.env.append_unique('CFLAGS', ['-m64'])
-		conf.env.append_unique('CXXFLAGS', ['-m64'])
+		conf.env.append_unique('CXXFLAGS', ['-m64', '../../../mak/suncc/interlocked-a=amd64.il'])
 		conf.env.append_unique('LINKFLAGS', ['-m64'])
 	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
