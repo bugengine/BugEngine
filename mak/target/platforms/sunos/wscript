@@ -13,16 +13,16 @@ def options(opt):
 def add_suncc_flags_to_env(conf, arch):
 	v = conf.env
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
-		conf.env.append_unique('CFLAGS', ['-m32'])
-		conf.env.append_unique('CXXFLAGS', ['-m32', '../../../mak/suncc/interlocked-a=x86.il'])
-		conf.env.append_unique('LINKFLAGS', ['-m32'])
+		v.append_unique('CFLAGS', ['-m32'])
+		v.append_unique('CXXFLAGS', ['-m32', '../../../mak/suncc/interlocked-a=x86.il'])
+		v.append_unique('LINKFLAGS', ['-m32'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
-		conf.env.append_unique('CFLAGS', ['-m64'])
-		conf.env.append_unique('CXXFLAGS', ['-m64', '../../../mak/suncc/interlocked-a=amd64.il'])
-		conf.env.append_unique('LINKFLAGS', ['-m64'])
-	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-	conf.env.append_unique('LINKFLAGS', ['-lposix4', '-mt', '-znow', '-xldscope=hidden', '-Kpic', '-ldl', '-lm'])
+		v.append_unique('CFLAGS', ['-m64'])
+		v.append_unique('CXXFLAGS', ['-m64', '../../../mak/suncc/interlocked-a=amd64.il'])
+		v.append_unique('LINKFLAGS', ['-m64'])
+	v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+	v.append_unique('LINKFLAGS', ['-lposix4', '-mt', '-znow', '-xldscope=hidden', '-Kpic', '-ldl', '-lm'])
 
 
 
@@ -34,6 +34,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, gcc_target, 'bin'))]
 	conf.load('cross_gcc', tooldir='mak/tools')
+	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
+	if not conf.env['OBJCOPY']:
+		conf.find_program('gobjcopy', var='OBJCOPY', mandatory=False)
 
 
 def add_gcc_flags_to_env(conf):
