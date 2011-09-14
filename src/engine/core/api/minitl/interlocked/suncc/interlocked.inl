@@ -1,17 +1,17 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
-#define BE_MINITL_INTERLOCKED_GCC_X86_INTERLOCKED_INL_
+#ifndef BE_MINITL_INTERLOCKED_SUNCC_X86_INTERLOCKED_INL_
+#define BE_MINITL_INTERLOCKED_SUNCC_X86_INTERLOCKED_INL_
 /*****************************************************************************/
 
 extern "C" i32 fetch_and_add_32(volatile i32* p, i32 add);
 extern "C" i32 fetch_and_set_32(volatile i32* p, i32 v);
 extern "C" i32 set_conditional_32(volatile i32* p, i32 v, i32 condition);
-extern "C" i64 fetch_and_add_64(volatile i64* p, i64 add);
-extern "C" i64 fetch_and_set_64(volatile i64* p, i64 v);
 extern "C" i64 set_conditional_64(volatile i64* p, i64 v, i64 condition);
 #ifdef _AMD64
+extern "C" i64 fetch_and_add_64(volatile i64* p, i64 add);
+extern "C" i64 fetch_and_set_64(volatile i64* p, i64 v);
 extern "C" char set_conditional_128(volatile i64* p, i64 nvalue, i64 oldvalue, i64 tag);
 #endif
 
@@ -25,7 +25,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef i32 value_t;
+    typedef __attribute__ ((aligned(4))) i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         return fetch_and_add_32(p, incr);
@@ -51,10 +51,10 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef i32         value_t;
-        typedef i32         counter_t;
-        typedef tagged_t    tag_t;
-        struct
+        typedef __attribute__ ((aligned(4))) i32         value_t;
+        typedef __attribute__ ((aligned(4))) i32         counter_t;
+        typedef __attribute__ ((aligned(8))) tagged_t    tag_t;
+        struct __attribute__ ((aligned(8)))
         {
             volatile counter_t   tag;
             volatile value_t     value;
