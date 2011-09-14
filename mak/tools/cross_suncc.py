@@ -52,14 +52,13 @@ def get_suncc_targets_64(conf, cc, cxx):
 
 def configure(conf):
 	conf.load('suncc suncxx')
-	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 
 	v=conf.env
 
 	v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
 	v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
-	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,wunreachable,doubunder']
-	v['CXXFLAGS_warnnone'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,wunreachable,doubunder']
+	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,truncwarn,nonewline']
+	v['CXXFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,nonewline']
 
 	v['CFLAGS_debug'] = ['-g', '-D_DEBUG']
 	v['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
