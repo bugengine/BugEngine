@@ -34,6 +34,7 @@ typedef u8                      byte;
 #define BE_IMPORT
 
 #undef __REDIRECT
+#include <cerrno>
 
 /*****************************************************************************/
 #endif

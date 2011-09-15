@@ -33,7 +33,9 @@ int         g_settingsLine = 0;
 int         g_settingsColumnBefore = 0;
 int         g_settingsColumnAfter = 0;
 
-#define __attribute__(x)
+#ifndef __attribute__
+# define __attribute__(x)
+#endif
 %}
 
 
