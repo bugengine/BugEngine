@@ -17,9 +17,9 @@ def add_suncc_flags_to_env(conf, arch):
 		conf.env.append_unique('CXXFLAGS', ['-m32', '-I/usr/include/i386-linux-gnu', '../../../mak/suncc/interlocked-a=x86.il', '-xarch=sse2'])
 		conf.env.append_unique('LINKFLAGS', ['-m32', '-L/usr/lib/i386-linux-gnu', '-xarch=sse2'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
-		conf.env.append_unique('CFLAGS', ['-m64', '-I/usr/include/amd64-linux-gnu'])
-		conf.env.append_unique('CXXFLAGS', ['-m64', '-I/usr/include/amd64-linux-gnu', '../../../mak/suncc/interlocked-a=x86.il'])
-		conf.env.append_unique('LINKFLAGS', ['-m64', '-L/usr/lib/amd64-linux-gnu'])
+		conf.env.append_unique('CFLAGS', ['-m64', '-I/usr/include/x86_64-linux-gnu'])
+		conf.env.append_unique('CXXFLAGS', ['-m64', '-I/usr/include/x86_64-linux-gnu', '../../../mak/suncc/interlocked-a=amd64.il'])
+		conf.env.append_unique('LINKFLAGS', ['-m64', '-L/usr/lib/x86_64-linux-gnu'])
 	conf.env.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	conf.env.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4,Cstd'])
 	conf.env.append_unique('LINKFLAGS', ['-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4,Cstd', '-staticlib=%all'])
@@ -60,6 +60,7 @@ def configure(conf):
 			conf.env.CC = compilerc
 			conf.env.CXX = compilercxx
 			conf.load('cross_suncc', tooldir='mak/tools')
+			conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 			add_suncc_flags_to_env(conf, arch)
 			add_linux_flags_to_env(conf, name, arch)
 			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)

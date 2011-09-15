@@ -28,8 +28,8 @@
         movd        %edi,       %xmm1
         mov         16(%esp),   %edx
         mov         12(%esp),   %eax
-        mov         8(%esp),    %ecx
-        mov         4(%esp),    %ebx
+        mov         8(%esp),    %ebx
+        mov         4(%esp),    %ecx
         mov         (%esp),     %edi
  lock;  cmpxchg8b   (%edi)
         movd        %xmm1,      %edi

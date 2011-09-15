@@ -25,7 +25,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef __attribute__ ((aligned(4))) i32 value_t;
+    typedef i32 value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         return fetch_and_add_32(p, incr);
@@ -51,10 +51,10 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef __attribute__ ((aligned(4))) i32         value_t;
-        typedef __attribute__ ((aligned(4))) i32         counter_t;
-        typedef __attribute__ ((aligned(8))) tagged_t    tag_t;
-        struct __attribute__ ((aligned(8)))
+        typedef i32         value_t;
+        typedef i32         counter_t;
+        typedef tagged_t    tag_t;
+        struct
         {
             volatile counter_t   tag;
             volatile value_t     value;
@@ -84,6 +84,7 @@ struct InterlockedType<4>
         inline value_t value() { return taggedvalue.value; }
         inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
     };
+    #pragma struct_align 8 (tagged_t)
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p;
@@ -171,6 +172,7 @@ struct InterlockedType<8>
         inline value_t value() { return taggedvalue.value; }
         inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
     };
+    #pragma struct_align 16 (tagged_t)
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p;

@@ -6,7 +6,6 @@
 #include    <sys/types.h>
 #include    <sys/stat.h>
 #include    DIRENT_H
-#include    <errno.h>
 
 
 namespace BugEngine

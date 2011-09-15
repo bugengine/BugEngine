@@ -160,19 +160,22 @@ const format<size>& operator|(const format<size>& f, const BugEngine::istring& v
 template< u16 size >
 const format<size>& operator|(const format<size>& f, const BugEngine::inamespace& value)
 {
-    return f | value.str().c_str();
+    format<4096u> s = value.str();
+    return f | s.c_str();
 }
 
 template< u16 size >
 const format<size>& operator|(const format<size>& f, const BugEngine::ipath& value)
 {
-    return f | value.str().c_str();
+    format<1024u> s = value.str();
+    return f | s.c_str();
 }
 
 template< u16 size >
 const format<size>& operator|(const format<size>& f, const BugEngine::ifilename& value)
 {
-    return f | value.str().c_str();
+    format<1024u> s = value.str();
+    return f | s.c_str();
 }
 
 template<>
