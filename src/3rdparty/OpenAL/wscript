@@ -1,0 +1,21 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	expoptions = module.coptions(libs=['openal'])
+	exparchoptions = {
+		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.x86')]),
+		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.amd64')]),
+		}
+	bld.m['OpenAL'] = module.util( 'OpenAL', [], '3rdparty', module.coptions(), expoptions, {}, exparchoptions, platforms=['pc'])
+	bld.m['OpenAL'].deploy( 'bin.x86/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+	bld.m['OpenAL'].deploy( 'bin.x86/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+	bld.m['OpenAL'].deploy( 'bin.amd64/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
+	bld.m['OpenAL'].deploy( 'bin.amd64/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['amd64'])

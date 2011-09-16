@@ -1,0 +1,16 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+
+def build(bld):
+	if 'osx' in bld.env.PLATFORM:
+		bld.m['cocoa'] = module.util('cocoa', [])
+	else:
+		bld.m['cocoa'] = None
+

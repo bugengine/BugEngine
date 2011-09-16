@@ -1,0 +1,19 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	bld.recurse('../DirectX')
+	directx = module.external('DirectX')
+	includedir=[os.path.join('src', '3rdparty', 'DirectX10', 'api')]
+	exparchoptions = {
+		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX10', 'lib.x86')], libs=['d3d10', 'd3d10_1']),
+		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX10', 'lib.amd64')], libs=['d3d10', 'd3d10_1'])
+		}
+	bld.m['DirectX10'] = module.util( 'DirectX10', [directx], '3rdparty', module.coptions(), module.coptions(includedir=includedir), {}, exparchoptions, platforms=['win32'])

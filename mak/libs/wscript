@@ -1,0 +1,44 @@
+from waflib.Configure import conf
+from waflib.TaskGen import feature, before_method, after_method
+import os
+
+USE_LIBRARY_CODE="""
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+int main(int argc, char *argv[]) { return 0; }
+"""
+
+@feature("link_library")
+@before_method("process_source")
+def link_library_test(self):
+	def write_test_file(task):
+		task.outputs[0].write(task.generator.code)
+	bld = self.bld
+	bld(rule=write_test_file, target='main.cc', code=USE_LIBRARY_CODE)
+	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath)
+
+@conf
+def check_lib(self, libname, var='', libpath=[]):
+	if self.env[var]:
+		return
+	if not var: var = libname
+	try:
+		self.check(
+			compile_filename=[],
+			features='link_library',
+			msg='check for library %s' %libname,
+			libname=libname,
+			libpath=libpath)
+	except self.errors.ConfigurationError:
+		pass
+	else:
+		self.env[var] = libname
+
+def configure(conf):
+	for i in os.listdir(os.path.join('src', '3rdparty')):
+		if i in ['.svn', '.cvs']:
+			continue
+		if os.path.isdir(os.path.join('src', '3rdparty', i)):
+			conf.recurse(os.path.join('..', '..', 'src', '3rdparty', i), once=False)
+

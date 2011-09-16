@@ -77,6 +77,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			add_platform_flags_to_env(conf, name, arch)
 
 			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
+			conf.recurse(os.path.join(conf.mak, 'libs'), once=False)
 
 			pprint('GREEN', 'configure for tool %s' % name)
 			conf.variant = ''
@@ -99,6 +100,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			add_platform_flags_to_env(conf, name, arch)
 
 			conf.recurse(os.path.join(conf.mak, 'target', 'archs', arch), once=False)
+			conf.recurse(os.path.join(conf.mak, 'libs'), once=False)
 
 			pprint('GREEN', 'configure for tool %s' % name)
 			conf.variant = ''

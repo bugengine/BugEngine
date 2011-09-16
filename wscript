@@ -30,6 +30,8 @@ def build(bld):
 	cgGL			= module.external('CgGL')
 	X11				= module.external('X11')
 	win32			= module.external('win32')
+	cocoa			= module.external('cocoa')
+
 
 	freetype		= module.external('freetype')
 
@@ -78,9 +80,24 @@ def build(bld):
 	input			= module.plugin('input', 		[discworld])
 
 	discworld.plugins=[
-		_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, gl, Dx9, nullrender,
+		_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, nullrender,
 		bullet,
+		editor,
 		package, lua, squirrel,
 		input]
+
+
+	if win32 or X11 or cocoa:
+		windowing	= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
+		if opengl:
+			gl		= module.plugin('GL4', 			[discworld, windowing, opengl, _3d], platforms=['pc'])
+			discworld.plugins.append(gl)
+		if directx9:
+			Dx9		= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
+			discworld.plugins.append(Dx9)
+		#if diretx10:
+			#Dx10	= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
+			#discworld.plugins.append(Dx10)
+
 	discworld.post(bld)
 

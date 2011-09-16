@@ -1,3 +1,0 @@
-biopts = coptions(includedir = [os.path.join('src', '3rdparty', name, 'src')])
-m[name] = static_library( name, [], '3rdparty', coptions(), biopts)
-m[name].usemaster = False

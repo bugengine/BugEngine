@@ -1,0 +1,16 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	exparchoptions = {
+		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.x86')], libs=['bufferoverflowu', 'chkstk']),
+		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')], libs=[ 'bufferoverflowu', 'chkstk'])
+		}
+	bld.m['DirectX'] = module.util( 'DirectX', [], '3rdparty', module.coptions(), module.coptions(), {}, exparchoptions, platforms=['win32'])
