@@ -1,0 +1,12 @@
+import mak
+from mak import module
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	bld.m['squirrellib'] = module.static_library( 'squirrellib', [], '3rdparty')
+	bld.m['squirrellib'].usemaster = True

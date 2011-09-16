@@ -383,7 +383,8 @@ class module:
 	def post(self, builder):
 		self.makeproject(builder)
 		for d in self.plugins:
-			d.makeproject(builder)
+			if d:
+				d.makeproject(builder)
 		self._post(builder)
 		return self
 
@@ -581,12 +582,14 @@ class game(module):
 		options = coptions()
 		if builder.env['STATIC']:
 			for d in self.plugins:
-				d._post(builder,[self]+blacklist)
+				if d:
+					d._post(builder,[self]+blacklist)
 			task = self.gentask(builder, 'cprogram', options, extradepends=self.plugins, blacklist=[self]+blacklist)
 		elif not builder.variant in self.tasks:
 			task = self.gentask(builder, 'cprogram', options, blacklist=blacklist)
 			for d in self.plugins:
-				d._post(builder, blacklist)
+				if d:
+					d._post(builder, blacklist)
 
 
 """ tool """
@@ -692,14 +695,5 @@ class util(module):
 			d._post(builder,  blacklist)
 		task = self.gentask(builder, 'dummy')
 
-m={}
-def external( name,
-			  depends = [],
-			  localoptions = coptions(),
-			  globaloptions = coptions()):
-	if not name in m:
-		filename = os.path.join('src', '3rdparty', name, 'wscript_build')
-		file = open(filename, 'r')
-		exec(compile(file.read(), filename, 'exec'))
-		if file: file.close()
-	return m[name]
+def external(name):
+	return mak.builder.m[name]

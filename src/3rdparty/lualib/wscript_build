@@ -1,2 +1,0 @@
-m[name] = library( name, [], '3rdparty', coptions(defines=['__STRICT_ANSI__']))
-m[name].usemaster = False

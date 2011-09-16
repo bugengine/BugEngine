@@ -1,2 +1,0 @@
-m[name] = static_library( name, [], '3rdparty')
-m[name].usemaster = True

@@ -1,0 +1,16 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	exparchoptions = {
+		'win32-x86': module.coptions(libs=['psapi','dbghelp','version'], libdir=[os.path.join('src', '3rdparty', 'dbghelp', 'lib.x86')]),
+		'win32-amd64': module.coptions(libs=['psapi','dbghelp','version'], libdir=[os.path.join('src', '3rdparty', 'dbghelp', 'lib.amd64')]),
+		}
+	bld.m['dbghelp'] = module.util( 'dbghelp', [], '3rdparty', module.coptions(), module.coptions(), {}, exparchoptions)

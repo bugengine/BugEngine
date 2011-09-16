@@ -8,7 +8,6 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
-#include    <graphics/stdafx.h>
 #include    <main/stdafx.h>
 
 /*****************************************************************************/

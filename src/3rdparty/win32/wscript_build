@@ -1,7 +1,0 @@
-exparchoptions = {
-	'win32': coptions(libs= ['kernel32', 'user32', 'gdi32', 'winspool', 'comdlg32', 'advapi32',
-							'shell32', 'ole32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32', 'winmm',
-							'userenv', 'ws2_32'],
-					includedir=[os.path.join('src', '3rdparty', name, 'api-win32')])
-	}
-m[name] = util( name, [], '3rdparty', coptions(), coptions(), {}, exparchoptions)

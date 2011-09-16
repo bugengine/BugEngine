@@ -1,2 +1,0 @@
-expoptions = coptions(includedir=['/usr/X11R6/include'], libdir=['/usr/X11R6/lib'], libs=['X11'])
-m[name] = util( name, [], '3rdparty', coptions(), expoptions, platforms=['posix'])

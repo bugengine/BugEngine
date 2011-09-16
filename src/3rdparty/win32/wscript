@@ -1,0 +1,20 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+
+def build(bld):
+	if 'win32' in bld.env.PLATFORM:
+		winopts = module.coptions(libs= ['kernel32', 'user32', 'gdi32', 'winspool', 'comdlg32', 'advapi32',
+								'shell32', 'ole32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32', 'winmm',
+								'userenv', 'ws2_32'],
+								includedir=[os.path.join('src', '3rdparty', 'win32', 'api-win32')])
+		bld.m['win32'] = module.util( 'win32', [], '3rdparty', module.coptions(), winopts)
+	else:
+		bld.m['win32'] = None
+

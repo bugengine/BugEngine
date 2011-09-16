@@ -40,6 +40,11 @@ def options(opt):
 					default=True,
 					dest='master',
 					help='build with master files')
+	for i in os.listdir(os.path.join('src', '3rdparty')):
+		if i in ['.svn', '.cvs']:
+			continue
+		if os.path.isdir(os.path.join('src', '3rdparty', i)):
+			opt.recurse(os.path.join('..', 'src', '3rdparty', i))
 
 def configure(conf):
 	conf.mak = os.getcwd() + "/mak"
@@ -118,7 +123,6 @@ def selectToolchains(ctx):
 	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
-	module.m = {}
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
@@ -130,6 +134,11 @@ def build(bld):
 	selectToolchains(bld)
 	global builder
 	mak.builder = bld
+	bld.m = {}
+	for i in os.listdir(os.path.join('src', '3rdparty')):
+		if i not in ['.svn', '.cvs']:
+			if os.path.isdir(os.path.join('src', '3rdparty', i)):
+				bld.recurse(os.path.join('..', 'src', '3rdparty', i), once=False)
 
 def clean(ctx):
 	selectToolchains(ctx)

@@ -1,0 +1,14 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+	
+def build(bld):
+	biopts = module.coptions(includedir = [os.path.join('src', '3rdparty', 'bulletengine', 'src')])
+	bld.m['bulletengine'] = module.static_library( 'bulletengine', [], '3rdparty', module.coptions(), biopts)
+	bld.m['bulletengine'].usemaster = False
