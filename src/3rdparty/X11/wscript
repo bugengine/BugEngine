@@ -6,12 +6,12 @@ def options(opt):
 
 def configure(conf):
 	if 'posix' in conf.env.PLATFORM:
-		conf.check_lib('X11', libpath=['/usr/X11R6/lib'])
+		conf.check_lib('X11', libpath=['/usr/local/lib', '/usr/X11R6/lib'])
 
 
 def build(bld):
 	if bld.env.X11:
-		expoptions = module.coptions(includedir=['/usr/X11R6/include'], libdir=['/usr/X11R6/lib'], libs=[conf.env.X11])
+		expoptions = module.coptions(includedir=['/usr/X11R6/include'], libdir=['/usr/X11R6/lib'], libs=[bld.env.X11])
 		bld.m['X11'] = module.util( 'X11', [], '3rdparty', module.coptions(), expoptions, platforms=['posix'])
 	else:
 		bld.m['X11'] = None
