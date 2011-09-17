@@ -6,12 +6,37 @@ import re
 import os
 from mak.waflib.Errors import ConfigurationError
 
+def parse_gcc_target(target):
+	archs = [ ('i686-w64', 'amd64'),
+			  ('i386', 'x86'),
+			  ('i486', 'x86'),
+			  ('i586', 'x86'),
+			  ('i686', 'x86'),
+			  ('arm-eabi', 'arm'),
+			  ('arm', 'arm'),
+			  ('mipsel', 'mips'),
+			  ('mips', 'mips'),
+			  ('Gekko', 'mips'),
+			  ('x86_64', 'amd64'),
+			  ('x86', 'x86'),
+			  ('amd64', 'amd64'),
+			  ('powerpc', 'powerpc'),
+			  ('psp', 'mips'),
+			  ('mingw32', 'x86'),
+			  ('ppu', 'powerpc'),
+			  ('spu', 'spu'),
+			  ('ee', 'mipsel64'),
+			  ('iop', 'mipsel')]
+	for gccname,aname in archs:
+		if target.find(gccname) != -1:
+				return aname
+
 @conf
 def get_native_gcc_target(conf):
 	if not conf.env['GCC_NATIVE_TARGET']:
 		cmd = ['gcc', '-v']
 		try:
-			p = Utils.pproc.Popen(cmd, stdin=Utils.pproc.PIPE, stdout=Utils.pproc.PIPE, stderr=Utils.pproc.PIPE)
+			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 			out = p.communicate()[1]
 		except:
 			return
@@ -21,6 +46,9 @@ def get_native_gcc_target(conf):
 		for line in out:
 			if line.startswith('Target:'):
 				conf.env['GCC_NATIVE_TARGET'] = line.split()[1]
+				conf.env['GCC_NATIVE_ARCH'] = parse_gcc_target(conf.env['GCC_NATIVE_TARGET'])
+			if line.startswith('gcc version '):
+				conf.env['GCC_NATIVE_VERSION'] = line.split()[2]
 
 def allarchs(arch):
 	if arch == 'x86':
@@ -108,31 +136,6 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 		except Exception as e:
 			conf.variant = ''
 
-def parse_gcc_target(target):
-	archs = [ ('i686-w64', 'amd64'),
-			  ('i386', 'x86'),
-			  ('i486', 'x86'),
-			  ('i586', 'x86'),
-			  ('i686', 'x86'),
-			  ('arm-eabi', 'arm'),
-			  ('arm', 'arm'),
-			  ('mipsel', 'mips'),
-			  ('mips', 'mips'),
-			  ('Gekko', 'mips'),
-			  ('x86_64', 'amd64'),
-			  ('x86', 'x86'),
-			  ('amd64', 'amd64'),
-			  ('powerpc', 'powerpc'),
-			  ('psp', 'mips'),
-			  ('mingw32', 'x86'),
-			  ('ppu', 'powerpc'),
-			  ('spu', 'spu'),
-			  ('ee', 'mipsel64'),
-			  ('iop', 'mipsel')]
-	for gccname,aname in archs:
-		if target.find(gccname) != -1:
-				return aname
-
 def add_ld_so(conf, file, toolchaindirs):
 	f = open(file, 'r')
 	for line in f:
@@ -201,6 +204,10 @@ def find_cross_gcc(conf):
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
+		if not v['CC']:
+			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
+				if conf.find_program('gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+					break
 		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
 		cmd = [v['CC']] + conf.env['GCC_FLAGS'] + ['-dM', '-E', '-']
 		try:
@@ -209,6 +216,17 @@ def find_cross_gcc(conf):
 			out = p.communicate()[0]
 			if p.returncode != 0:
 				conf.fatal('could not run the compiler %r' % str(cmd))
+			out = str(out).split('\n')
+
+			for line in out:
+				if line.startswith('Target:'):
+					target = line.split()[1]
+					if thistarget != target:
+						conf.fatal('mismatch target: %s instead of %s' % (thistarget, target))
+				if line.startswith('gcc version '):
+					version = line.split()[2]
+					if thisversion != version:
+						conf.fatal('mismatch version: %s instead of %s' % (thisversion, version))
 		except:
 			conf.fatal('could not run the compiler %r' % str(cmd))
 
@@ -216,6 +234,10 @@ def find_cross_gcc(conf):
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
+		if not v['CXX']:
+			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
+				if conf.find_program('g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+					break
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
