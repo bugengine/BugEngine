@@ -262,7 +262,7 @@ def make_masterfiles(self):
 
 objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
 objcpydbgcls = Task.task_factory('dbg', objcpydbg, 'YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
-objcpystrip = '${OBJCOPY} ${OBJCOPYFLAGS} --localize-hidden --strip-debug --strip-unneeded --keep-symbol .gnu_debuglink --add-gnu-debuglink ${SRC[0].change_ext(".dbg").path_from(tsk.inputs[0].parent)} ${SRC[0].abspath()} ${TGT[0].abspath()}'
+objcpystrip = '${OBJCOPY} ${OBJCOPYFLAGS} --strip-debug --strip-unneeded --keep-symbol .gnu_debuglink --add-gnu-debuglink ${SRC[0].change_ext(".dbg").path_from(tsk.inputs[0].parent)} ${SRC[0].abspath()} ${TGT[0].abspath()}'
 objcpystripcls = Task.task_factory('strip', objcpystrip, 'BLUE', ext_in='.all', shell=False)
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
