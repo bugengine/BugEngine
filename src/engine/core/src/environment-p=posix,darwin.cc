@@ -6,9 +6,10 @@
 #include    <core/debug/logger.hh>
 #include    <unistd.h>
 #if !defined(BE_PLATFORM_LINUX) && !defined(BE_PLATFORM_SUN)
-# include    <sys/types.h>
-# include    <sys/sysctl.h>
+# include   <sys/types.h>
+# include   <sys/sysctl.h>
 #endif
+#include    <errno.h>
 
 namespace BugEngine
 {
@@ -80,12 +81,16 @@ size_t Environment::getProcessorCount() const
 #else
     int numCPU = 0;
     int mib[4];
-    size_t len;
+    size_t len = sizeof(numCPU);
 
     mib[0] = CTL_HW;
     mib[1] = HW_NCPU;
-    sysctl(mib, 2, &numCPU, &len, NULL, 0);
-
+    if (sysctl(mib, 2, &numCPU, &len, NULL, 0) == -1)
+    {
+        be_error("Could not retrieve number of processors: %s" | sys_errlist[errno]);
+        numCPU = 1;
+    }
+    be_assert_recover(numCPU >= 1, "Weird number of CPUs returned by sysctl: %d" | numCPU, numCPU=1);
     return numCPU;
 #endif
 }
