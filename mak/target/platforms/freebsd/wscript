@@ -23,7 +23,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('DEFINES', ['_REENTRANT'])
 	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', ['-lpthread', '-rdynamic', '-Wl,-E'])
+	conf.env.append_unique('LINKFLAGS', ['-lpthread', '-rdynamic', '-Wl,-E', '-L/usr/local/lib'])
 	#conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	#conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 

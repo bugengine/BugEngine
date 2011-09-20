@@ -113,7 +113,7 @@ u64 Thread::id() const
 
 u64 Thread::currentId()
 {
-    return (u64)pthread_self();
+    return u64(ptrdiff_t(pthread_self()));
 }
 
 istring Thread::name()

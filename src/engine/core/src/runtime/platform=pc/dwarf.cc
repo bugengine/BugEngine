@@ -159,7 +159,7 @@ DwarfModule::Buffer<endianness>::~Buffer()
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>::operator const void*() const
 {
-    return (const void*)(m_size-m_position);
+    return (const void*)(ptrdiff_t)(m_size-m_position);
 }
 
 template< Endianness endianness >

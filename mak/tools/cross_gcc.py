@@ -197,6 +197,7 @@ def get_available_gcc(conf, paths=[]):
 def find_cross_gcc(conf):
 	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
+	conf.env.BROKEN_INITIALIZER = version.split('.')[0] == '3'
 	versionsmall = '.'.join(version.split('.')[0:2])
 	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:

@@ -43,10 +43,10 @@ AssertionResult defaultAssertionCallback( const char *file,
         for (Runtime::Callstack::Address* a = address; a < address+result; ++a)
         {
             s_symbols->resolve(*a, s);
-            fprintf(stderr, "[%16p] %s - %s:%d - %s\n", (void*)s.address(), s.module(), s.filename(), s.line(), s.function());
+            be_info("[%d] %s - %s:%d - %s\n" | s.address() | s.module() | s.filename() | s.line() | s.function());
         }
     }
-    
+
     return Break;
 }
 
