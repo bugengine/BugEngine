@@ -13,13 +13,13 @@ def configure(conf):
 	conf.check_lib('libEGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 	if not conf.env.GLES2 or not conf.env.EGL:
 		warn('could not find OpenGLES 2; GLES2 renderer will not be built')
-	
+
 def build(bld):
 	exparchoptions = {
 		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.x86')]),
 		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.amd64')]),
 		}
-	if bld.env.GLES2:
+	if bld.env.GLES2 or bld.env.PROJECTS:
 		bld.m['OpenGLES2'] = module.util('OpenGLES2', [], '3rdparty', module.coptions(), module.coptions(libs=[bld.env.GLES2, bld.env.EGL]))
 	else:
 		bld.m['OpenGLES2'] = None

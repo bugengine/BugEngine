@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
 	pass
-	
+
 def build(bld):
 	exparchoptions = {
 		'win32-x86': module.coptions(libs=['psapi','dbghelp','version'], libdir=[os.path.join('src', '3rdparty', 'dbghelp', 'lib.x86')]),

@@ -208,7 +208,7 @@ def gather_wsdk_versions(conf, versions):
 			continue
 		if os.path.isfile(os.path.join(path, 'bin', 'SetEnv.cmd')):
 			targets = []
-			for target,arch in all_msvc_platforms:
+			for target,arch in all_msvc_platforms[::-1]:
 				try:
 					targets.append((target, (arch, conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
 				except conf.errors.ConfigurationError:

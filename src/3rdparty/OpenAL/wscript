@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
 	pass
-	
+
 def build(bld):
 	expoptions = module.coptions(libs=['openal'])
 	exparchoptions = {

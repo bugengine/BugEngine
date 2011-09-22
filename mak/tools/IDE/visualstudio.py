@@ -6,15 +6,13 @@ import mak
 from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
 
 projects = {
-	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10'), ['Win32']),
-	'vs2005':	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00'), ['Win32', 'x64', 'Xbox 360']),
-	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00'), ['Win32']),
-	'vs2008':	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00'), ['Win32', 'x64', 'Xbox 360']),
-	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00'), ['Win32']),
-	'vs2010':	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0'), ['Win32', 'x64', 'Xbox 360']),
+	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10')),
+	'vs2005':	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00')),
+	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00')),
+	'vs2008':	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00')),
+	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00')),
+	'vs2010':	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0')),
 }
-
-allconfigs = ['debug','profile','final']
 
 def generateSolution(task):
 	s = solution.Solution( task.name,
@@ -31,7 +29,7 @@ def generateSolution(task):
 	for d in task.depends:
 		if d.type != 'game':
 			s.addProject(d)
-	s.writeFooter(task.allplatforms, allconfigs)
+	s.writeFooter(task.env.BE_TOOLCHAINS)
 
 def generateProject(task):
 	project = task.projectClass( task.outputs[0].abspath(),
@@ -40,27 +38,13 @@ def generateProject(task):
 								 task.version,
 								 task.versionNumber,
 								 task.type,
-								 task.depends
 								)
-	project.writeHeader(allconfigs, task.allplatforms, task.platforms)
+	project.writeHeader(task.allplatforms)
 	project.addDirectory(task.sourceTree)
 	project.writeFooter()
 
 GenerateSolution = Task.task_factory('GenerateSolution', func=generateSolution)
 GenerateProject = Task.task_factory('GenerateProject', func=generateProject)
-
-def filterplatforms(type,platforms,depends):
-	supportedplatforms = {'win32-x86': 'Win32', 'win32-amd64': 'x64', 'xbox360-ppc':'Xbox 360'}
-	common_options = mak.module.coptions( defines = ['PREFIX=\\"\\"',
-										   'DATA_DIR=\\"data/\\"',
-										   'PLUGIN_DIR=\\"data/plugins\\"',
-										   'CONF_DIR=\\"conf/\\"'])
-	if type == 'plugin':
-		for d in depends:
-			if d.type == 'game':
-				common_options.libs.append(d.name)
-
-	return [(p,supportedplatforms[p], platforms[p].merge(common_options)) for p in platforms.keys() if p in supportedplatforms.keys()] or [('win32-x86', 'Win32', common_options),('win32-amd64', 'x64', common_options),('xbox360-ppc', 'Xbox 360', common_options)]
 
 solutions = {}
 def create_project(t):
@@ -72,7 +56,7 @@ def create_project(t):
 		solution.env=t.env
 		solution.version = toolName
 		solution.versionName, solution.versionNumber = projects[toolName][0]
-		solution.allplatforms    = projects[toolName][2]
+		solution.allplatforms    = t.env.ALL_VARIANTS
 		outnode = t.path.find_or_declare(outname)
 		solution.set_outputs(outnode)
 		t.bld.install_files(t.path.srcpath(), outnode)
@@ -86,8 +70,7 @@ def create_project(t):
 	project = t.create_task("GenerateProject")
 	project.env=t.env.derive()
 	project.type			= t.type
-	project.allplatforms    = projects[toolName][2]
-	project.platforms 		= filterplatforms(t.type, t.platforms, t.depends)
+	project.allplatforms    = t.env.ALL_VARIANTS
 	project.version 		= toolName
 	project.versionNumber 	= versionNumber
 	project.projectClass 	= projectClass
@@ -95,7 +78,6 @@ def create_project(t):
 	project.projectName 	= t.name
 	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	project.depends         = t.depends
 
 	install_path	= os.path.join(t.path.srcpath(), '.build', toolName)
 	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]

@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
 	pass
-	
+
 def build(bld):
 	bld.recurse('../DirectX')
 	directx = module.external('DirectX')
