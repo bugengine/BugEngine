@@ -6,7 +6,7 @@ def options(opt):
 
 def configure(conf):
 	pass
-	
+
 def build(bld):
 	opts = module.coptions(defines=['FT2_BUILD_LIBRARY', 'FT_OPTION_AUTOFIT2', 'DARWIN_NO_CARBON'])
 	sources = [	'psnames/psnames.c',

@@ -9,7 +9,7 @@ def configure(conf):
 	pass
 
 def build(bld):
-	if 'osx' in bld.env.PLATFORM:
+	if 'osx' in bld.env.PLATFORM or bld.env.PROJECTS:
 		bld.m['cocoa'] = module.util('cocoa', [])
 	else:
 		bld.m['cocoa'] = None

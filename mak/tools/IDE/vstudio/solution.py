@@ -81,42 +81,24 @@ class Solution:
 		for dep in project.depends:
 			self.addProject(dep)
 
-	def writeFooter(self,platforms,configs):
+	def writeFooter(self,platforms):
 		if float(self.versionnumber) >= 9.0:
-			self.file.write("""Global
-\tGlobalSection(SolutionConfigurationPlatforms) = preSolution
-""")
-			for conf in configs:
-				for platform in platforms:
-					self.file.write("""\t\t%s|%s = %s|%s
-""" % (conf,platform,conf,platform))
+			self.file.write("Global\r\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\r\n")
+			for platform in platforms:
+				self.file.write("\t\t%s|%s = %s|%s\r\n" % (conf,'Win32',conf,'Win32'))
 		else:
-			self.file.write("""Global
-\tGlobalSection(SolutionConfiguration) = preSolution
-""")
-			for conf in configs:
-				self.file.write("""\t\t%s = %s
-""" % (conf,conf))
+			self.file.write("Global\r\n\tGlobalSection(SolutionConfiguration) = preSolution\r\n")
+			for platform in platforms:
+				self.file.write("\t\t%s = %s\r\n" % (conf,conf))
 		if float(self.versionnumber) >= 9.0:
-			self.file.write("""\tEndGlobalSection
-\tGlobalSection(ProjectConfigurationPlatforms) = postSolution
-""")
+			self.file.write("""\tEndGlobalSection\r\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n""")
 		else:
-			self.file.write("""\tEndGlobalSection
-\tGlobalSection(ProjectConfiguration) = postSolution
-""")
+			self.file.write("""\tEndGlobalSection\r\n\tGlobalSection(ProjectConfiguration) = postSolution\r\n""")
 		for proj in self.projectlist:
-			for conf in configs:
-				for platform in platforms:
-					if float(self.versionnumber) >= 9.0:
-						self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s
-\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s
-""" % {'GUID':proj,'CONF':conf,'PLATFORM':platform})
-					else:
-						self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s
-\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s
-""" % {'GUID':proj,'CONF':conf,'PLATFORM':platform})
-		self.file.write("""\tEndGlobalSection
-EndGlobal
-""")
+			for conf in platforms:
+				if float(self.versionnumber) >= 9.0:
+					self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\r\n\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s\r\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+				else:
+					self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\r\n\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s\r\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'Win32'})
+		self.file.write("""\tEndGlobalSection\r\nEndGlobal\r\n""")
 

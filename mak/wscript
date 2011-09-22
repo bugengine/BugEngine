@@ -7,7 +7,7 @@ from waflib import Options,Task,Node,Errors
 import mak
 from mak import module
 from waflib.Logs import pprint
-from waflib.Tools import ccroot
+from waflib.Tools import ccroot,c,cxx
 
 
 
@@ -51,7 +51,7 @@ def configure(conf):
 	conf.env['ARCHITECTURES']	= mak.allarchs
 
 	#conf.load('parallel_debug', tooldir='mak/waflib/extras')
-	conf.load('visualstudio netbeans xcode', tooldir='mak/tools/IDE')
+	conf.load('visualstudio netbeans xcode eclipse', tooldir='mak/tools/IDE')
 	conf.recurse(os.path.join('host', os.name))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):
@@ -105,6 +105,7 @@ def configure(conf):
 		conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
 		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
 	conf.env.store('.build/be_toolchains.py')
+	conf.recurse('libs')
 
 def selectToolchains(ctx):
 	if not Options.options.toolchains:
@@ -194,6 +195,17 @@ def filter_sources(self):
 def private_headers(self):
 	self.env.append_value('DEFINES', getattr(self, 'private_defines', []))
 	self.env.append_value('INCLUDES', ['.']+getattr(self, 'private_includes', []))
+
+@feature('c', 'cxx')
+@after_method("process_source")
+def individual_pdb(self):
+	if self.env.CC_NAME == 'msvc':
+		for t in self.compiled_tasks:
+			if t.__class__ == cxx.cxx or t.__class__ == c.c:
+				pdb = t.outputs[0].change_ext('.pdb')
+				t.env.append_unique('CFLAGS', ['/Fd%s'%pdb.bldpath()])
+				t.env.append_unique('CXXFLAGS', ['/Fd%s' % pdb.bldpath()])
+
 
 @feature('cobjects')
 def dummy_cobjects(self):
