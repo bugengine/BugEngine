@@ -53,9 +53,8 @@ class Solution:
 		self.done = set([])
 
 	def writeHeader(self):
-		self.file.write("""Microsoft Visual Studio Solution File, Format Version %s
-# %s
-""" % (self.versionnumber, self.versionname))
+		self.file.write("""Microsoft Visual Studio Solution File, Format Version %s\n""" % (self.versionnumber))
+		self.file.write("""# %s\n""" % (self.versionname))
 
 	def addProject(self, project):
 		filename = project.outname
@@ -63,42 +62,34 @@ class Solution:
 		if project in self.done: return
 		self.done.add(project)
 		projectGUID = generateGUID(filename,name)
-		self.projectlist.append(projectGUID)
+		self.projectlist.append((projectGUID, project.type))
 		self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.guid, name, filename, projectGUID))
-		if project.depends:
-			self.file.write('\tProjectSection(ProjectDependencies) = postProject\n')
-			depends = project.depends[:]
-			seen = set()
-			while depends:
-				dep = depends.pop()
-				if dep not in seen:
-					seen.add(dep)
-					#depends += dep.depends
-					if 'win32-x86' in dep.platforms or 'win32-amd64' in dep.platforms:
-						self.file.write('\t\t%s = %s\n' % (generateGUID(dep.outname,dep.name),generateGUID(dep.outname,dep.name)))
-			self.file.write('\tEndProjectSection\n')
 		self.file.write('EndProject\n')
 		for dep in project.depends:
 			self.addProject(dep)
 
-	def writeFooter(self,platforms):
+	def writeFooter(self, configs):
 		if float(self.versionnumber) >= 9.0:
-			self.file.write("Global\r\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\r\n")
-			for platform in platforms:
-				self.file.write("\t\t%s|%s = %s|%s\r\n" % (conf,'Win32',conf,'Win32'))
+			self.file.write("Global\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n")
+			for conf in configs:
+				self.file.write("\t\t%s|%s = %s|%s\n" % (conf,'win32',conf,'win32'))
 		else:
-			self.file.write("Global\r\n\tGlobalSection(SolutionConfiguration) = preSolution\r\n")
-			for platform in platforms:
-				self.file.write("\t\t%s = %s\r\n" % (conf,conf))
+			self.file.write("Global\n\tGlobalSection(SolutionConfiguration) = preSolution\n")
+			for conf in configs:
+				self.file.write("\t\t%s = %s\n" % (conf,conf))
 		if float(self.versionnumber) >= 9.0:
-			self.file.write("""\tEndGlobalSection\r\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n""")
+			self.file.write("""\tEndGlobalSection\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n""")
 		else:
-			self.file.write("""\tEndGlobalSection\r\n\tGlobalSection(ProjectConfiguration) = postSolution\r\n""")
-		for proj in self.projectlist:
-			for conf in platforms:
+			self.file.write("""\tEndGlobalSection\n\tGlobalSection(ProjectConfiguration) = postSolution\n""")
+		for proj,type in self.projectlist:
+			for conf in configs:
 				if float(self.versionnumber) >= 9.0:
-					self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\r\n\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s\r\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+					self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+					if type == 'game':
+						self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
 				else:
-					self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\r\n\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s\r\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'Win32'})
-		self.file.write("""\tEndGlobalSection\r\nEndGlobal\r\n""")
+					self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+					if type == 'game':
+						self.file.write("""\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+		self.file.write("""\tEndGlobalSection\nEndGlobal\n""")
 
