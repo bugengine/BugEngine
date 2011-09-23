@@ -48,7 +48,8 @@ def configure(conf):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
 	conf.get_native_gcc_target()
 	if conf.env.GCC_NATIVE_TARGET and conf.env.GCC_NATIVE_VERSION:
-		conf.create_gcc_env(conf.env.GCC_NATIVE_VERSION, '/usr/lib', conf.env.GCC_NATIVE_TARGET, 'freebsd', conf.env.GCC_NATIVE_ARCH, add_gcc_flags_to_env, add_freebsd_flags_to_env)
+		if conf.env.HOST == 'freebsd':
+			conf.create_gcc_env(conf.env.GCC_NATIVE_VERSION, '/usr/lib', conf.env.GCC_NATIVE_TARGET, 'freebsd', conf.env.GCC_NATIVE_ARCH, add_gcc_flags_to_env, add_freebsd_flags_to_env)
 	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
 		if target.find('freebsd') != -1:
 			conf.create_gcc_env(version, toolchaindir, target, 'freebsd', arch, add_gcc_flags_to_env, add_freebsd_flags_to_env)

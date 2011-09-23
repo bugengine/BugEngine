@@ -52,7 +52,7 @@ def create_project(t):
 	toolName = t.features[0]
 	if not toolName in solutions:
 		appname = getattr(Context.g_module, 'APPNAME', 'noname')
-		outname = appname+'.'+toolName+'.sln'
+		outname = os.path.join('.build', appname+'.'+toolName+'.sln')
 		solution = t.create_task("GenerateSolution")
 		solution.env=t.env
 		solution.version = toolName

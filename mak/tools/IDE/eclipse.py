@@ -306,7 +306,7 @@ solutions={}
 def create_eclipse_project(t):
 	toolName = t.features[0]
 	if not toolName in solutions:
-		outname = ['.project', '.cproject', '.pydevproject']
+		outname = [os.path.join('.build', i) for i in ['.project', '.cproject', '.pydevproject']]
 		solution = t.create_task("EclipseGenerateProject")
 		solution.bld = t.bld
 		solution.appname = getattr(Context.g_module, 'APPNAME', 'noname')
