@@ -17,7 +17,7 @@ def getFileDeployPath(type):
 class VCxproj:
 	extensions = ['.vcxproj', '.vcxproj.filters']
 
-	def __init__(self, filename, name, category, versionName, versionNumber, type):
+	def __init__(self,  filename, name, category, versionName, versionNumber, type, envs):
 		self.versionName = versionName
 		self.versionNumber = versionNumber
 		self.name = name
@@ -26,10 +26,8 @@ class VCxproj:
 		self.filters = open(filename+'.filters', 'w')
 		self.targetName = os.path.join('.build', versionName, category+'.'+name+'.'+versionName+self.extensions[0])
 		self.type = type
-		if type == 'game':
-			self.projectType = 'Makefile'
-		else:
-			self.projectType = 'Utility'
+		self.envs = envs
+		self.projectType = 'Makefile'
 
 	def writeHeader(self, configs):
 		self.filters.write('<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
@@ -55,12 +53,19 @@ class VCxproj:
 		self.output.write('    <TargetName>%s</TargetName>\n' % self.name)
 		self.output.write('  </PropertyGroup>\n')
 		for config in configs:
+			env = self.envs[config]
 			self.output.write('  <PropertyGroup Condition="\'$(Configuration)\'==\'%s\'">\n' % (config))
-			self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % config)
-			self.output.write('    <NMakeOutput></NMakeOutput>\n')
-			self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s</NMakeCleanCommandLine>\n' % config)
-			self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
-			self.output.write('    <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>\n')
+			if self.type == 'game':
+				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % config)
+				self.output.write('    <NMakeOutput>$(SolutionDir)%s\\%s\\%s</NMakeOutput>\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%self.name))
+				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s</NMakeCleanCommandLine>\n' % config)
+				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
+			else:
+				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s --targets=%s</NMakeBuildCommandLine>\n' % (config, self.name))
+				self.output.write('    <NMakeOutput></NMakeOutput>\n')
+				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s --targets=%s</NMakeCleanCommandLine>\n' % (config, self.name))
+				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s --targets=%s</NMakeReBuildCommandLine>\n' % (config, config, self.name))
+			self.output.write('    <NMakePreprocessorDefinitions>%s</NMakePreprocessorDefinitions>\n' % ';'.join(env.DEFINES))
 			self.output.write('    <NMakeIncludeSearchPath></NMakeIncludeSearchPath>\n')
 			self.output.write('  </PropertyGroup>\n')
 

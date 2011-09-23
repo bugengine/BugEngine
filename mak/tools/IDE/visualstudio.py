@@ -29,7 +29,7 @@ def generateSolution(task):
 	for d in task.depends:
 		if d.type != 'game':
 			s.addProject(d)
-	s.writeFooter(task.env.BE_TOOLCHAINS)
+	s.writeFooter(task.env.ALL_VARIANTS)
 
 def generateProject(task):
 	project = task.projectClass( task.outputs[0].abspath(),
@@ -38,6 +38,7 @@ def generateProject(task):
 								 task.version,
 								 task.versionNumber,
 								 task.type,
+								 task.bld.all_envs
 								)
 	project.writeHeader(task.allplatforms)
 	project.addDirectory(task.sourceTree)
@@ -90,6 +91,7 @@ def create_project(t):
 	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree.hash()
 	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
 	project.dep_vars = ['MSVC_PROJECT_SOURCES', 'MSVC_PROJECT_FLAGS']
+	project.bld = t.bld
 
 	solution.depends.append(t)
 	solution.env['MSVC_PROJECT_DEPENDS'].append(outname)
