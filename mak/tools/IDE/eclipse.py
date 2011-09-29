@@ -71,12 +71,29 @@ def impl_create_project(self, executable, waf, appname):
 
 	self.add(doc, natures, 'nature', 'org.python.pydev.pythonNature')
 
+	resourceFilters = self.add(doc, projectDescription, 'filteredResources')
+	id = 1291476911
+	for name,recursively,type in [
+		('src', 'true', '9'),
+		('mak', 'true', '9'),
+		('waf', 'false', '5'),
+		('wscript', 'false', '5'),
+		('.svn', 'true', '26'),
+		('.cvs', 'true', '26'),
+		]:
+		filter = self.add(doc, resourceFilters, 'filter')
+		self.add(doc, filter, 'id', str(id))
+		self.add(doc, filter, 'name')
+		self.add(doc, filter, 'type', type)
+		matcher = self.add(doc, filter, 'matcher')
+		self.add(doc, matcher, 'id', 'org.eclipse.ui.ide.multiFilter')
+		self.add(doc, matcher, 'arguments', '1.0-name-matches-%s-false-%s' % (recursively, name))
+		id = id + 2
+
 	doc.appendChild(projectDescription)
 	return doc
 
 def impl_create_cproject(self, executable, waf, appname):
-	workspace_includes = []
-	cpppath = []
 	source_dirs = []
 	doc = Document()
 	doc.encoding = "UTF-8"
@@ -121,92 +138,108 @@ def impl_create_cproject(self, executable, waf, appname):
 		storageModule = self.add(doc, cconf, 'storageModule',
 				{'moduleId': 'cdtBuildSystem', 'version': '4.0.0'})
 		config = self.add(doc, storageModule, 'configuration',
-					{'artifactName': appname,
-					 'buildProperties': '',
-					 'description': '',
-					 'id': cconf_id,
-					 'name': toolchainName,
-					 'parent': cdt_bld + '.prefbase.cfg'})
-		folderInfo = self.add(doc, config, 'folderInfo',
-							{'id': cconf_id+'.', 'name': '/', 'resourcePath': ''})
-		count = count+1
-		toolChain = self.add(doc, folderInfo, 'toolChain',
-				{'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-				 'name': 'No ToolChain',
-				 'resourceTypeBasedDiscovery': 'false',
-				 'superClass': cdt_bld + '.prefbase.toolchain'})
-
-		count = count+1
-		targetPlatform = self.add(doc, toolChain, 'targetPlatform',
-				{ 'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
-				  'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''})
-
-		waf_build = '"%s" install_%s'%(waf,toolchainName)
-		waf_clean = '"%s" clean_%s'%(waf,toolchainName)
-		count = count+1
-		builder = self.add(doc, toolChain, 'builder',
-						{'autoBuildTarget': waf_build,
-						 'command': executable,
-						 'enableAutoBuild': 'false',
-						 'cleanBuildTarget': waf_clean,
-						 'id': cdt_bld + '.settings.default.builder.%d'%count,
-						 'incrementalBuildTarget': waf_build,
-						 'keepEnvironmentInBuildfile': 'false',
-						 'managedBuildOn': 'false',
-						 'name': 'Gnu Make Builder',
-						 'superClass': cdt_bld + '.settings.default.builder'})
-
-		for tool_name in ("Assembly", "GNU C++", "GNU C"):
+					{	'artifactName': appname,
+						'buildProperties': '',
+						'description': '',
+						'id': cconf_id,
+						'name': toolchainName,
+						'parent': cdt_bld + '.prefbase.cfg'})
+		for name, category, sourcetree, platforms in self.depends:
+			env = self.bld.all_envs[toolchainName]
+			try:
+				options = platforms['%s-%s' % (env['PLATFORM'][0], env['ARCHITECTURE'])]
+			except Exception as e:
+				options = None
 			count = count+1
-			tool = self.add(doc, toolChain, 'tool',
-					{'id': cdt_bld + '.settings.holder.%d'%count,
-					 'name': tool_name,
-					 'superClass': cdt_bld + '.settings.holder'})
+			folderInfo = self.add(doc, config, 'folderInfo',
+								{'id': cconf_id+'.%d'%count, 'resourcePath': '/'+sourcetree.prefix.replace('\\', '/'), 'name': ''})
 			count = count+1
-			input = self.add(doc, tool, 'inputType',
-					{'id': cdt_bld + '.settings.holder.inType.%d'%count,
-					 'superClass': cdt_bld + '.settings.holder.inType'})
-			if cpppath or workspace_includes:
-				incpaths = cdt_bld + '.settings.holder.incpaths'
+			toolChain = self.add(doc, folderInfo, 'toolChain',
+					{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+						'name': 'No ToolChain',
+						'resourceTypeBasedDiscovery': 'false',
+						'superClass': cdt_bld + '.prefbase.toolchain'})
+
+			count = count+1
+			targetPlatform = self.add(doc, toolChain, 'targetPlatform',
+					{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
+						'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''})
+
+			waf_build = '"%s" install_%s'%(waf,toolchainName)
+			waf_clean = '"%s" clean_%s'%(waf,toolchainName)
+			count = count+1
+			builder = self.add(doc, toolChain, 'builder',
+							{	'autoBuildTarget': waf_build,
+								'command': executable,
+								'enableAutoBuild': 'false',
+								'cleanBuildTarget': waf_clean,
+								'id': cdt_bld + '.settings.default.builder.%d'%count,
+								'incrementalBuildTarget': waf_build,
+								'keepEnvironmentInBuildfile': 'false',
+								'managedBuildOn': 'false',
+								'name': 'Gnu Make Builder',
+								'superClass': cdt_bld + '.settings.default.builder'})
+
+			for tool_name in ("Assembly", "GNU C++", "GNU C"):
 				count = count+1
-				option = self.add(doc, tool, 'option',
-						{'id': incpaths+'.%d'%count,
-						 'name': 'Include Paths',
-						 'superClass': incpaths,
-						 'valueType': 'includePath'})
-				for i in workspace_includes:
-					self.add(doc, option, 'listOptionValue',
-								{'builtIn': 'false',
-								'value': '"${workspace_loc:/%s/%s}"'%(appname, i)})
-				for i in cpppath:
-					self.add(doc, option, 'listOptionValue',
-								{'builtIn': 'false',
-								'value': '"%s"'%(i)})
+				tool = self.add(doc, toolChain, 'tool',
+						{	'id': cdt_bld + '.settings.holder.%d'%count,
+							'name': tool_name,
+							'superClass': cdt_bld + '.settings.holder'})
+				count = count+1
+				input = self.add(doc, tool, 'inputType',
+						{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+							'superClass': cdt_bld + '.settings.holder.inType'})
+				if options:
+					cpppath = options.includedir
+					incpaths = cdt_bld + '.settings.holder.incpaths'
+					count = count+1
+					option = self.add(doc, tool, 'option',
+							{	'id': incpaths+'.%d'%count,
+								'name': 'Include Paths',
+								'superClass': incpaths,
+								'valueType': 'includePath'})
+					for i in cpppath:
+						self.add(doc, option, 'listOptionValue',
+									{'builtIn': 'false',
+									'value': '"${ProjDirPath}/%s"'%(i)})
+					incpaths = cdt_bld + '.settings.holder.symbols'
+					count = count+1
+					option = self.add(doc, tool, 'option',
+							{	'id': incpaths+'.%d'%count,
+								'name': 'Include Paths',
+								'superClass': incpaths,
+								'valueType': 'definedSymbols'})
+					for d in options.defines|set(env['DEFINES']+['__ECLIPSE']):
+						self.add(doc, option, 'listOptionValue',
+									{'builtIn': 'false',
+									'value': '"%s"'%(d)})
+
 		count = count+1
 		tool = self.add(doc, toolChain, 'tool',
-						{'id': cdt_bld + '.settings.holder.libs.%d'%count,
-						 'name': "holder for library settings",
-						 'superClass': cdt_bld + '.settings.holder.libs'})
+						{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
+							'name': "holder for library settings",
+							'superClass': cdt_bld + '.settings.holder.libs'})
 		if source_dirs:
 			sourceEntries = self.add(doc, config, 'sourceEntries')
 			for i in source_dirs:
-				 self.add(doc, sourceEntries, 'entry',
+				self.add(doc, sourceEntries, 'entry',
 							{'excluding': i,
 							'flags': 'VALUE_WORKSPACE_PATH|RESOLVED',
 							'kind': 'sourcePath',
 							'name': ''})
-				 self.add(doc, sourceEntries, 'entry',
+				self.add(doc, sourceEntries, 'entry',
 							{
 							'flags': 'VALUE_WORKSPACE_PATH|RESOLVED',
 							'kind': 'sourcePath',
 							'name': i})
-		
+
 		storageModule = self.add(doc, cconf, 'storageModule',
 							{'moduleId': 'org.eclipse.cdt.core.externalSettings'})
 
 	storageModule = self.add(doc, cproject, 'storageModule',
-						{'moduleId': 'cdtBuildSystem',
-						 'version': '4.0.0'})
+						{	'moduleId': 'cdtBuildSystem',
+							'version': '4.0.0'})
 
 	project = self.add(doc, storageModule, 'project',
 				{'id': '%s.null.0'%appname, 'name': appname})
@@ -231,8 +264,8 @@ def impl_create_pydevproject(self, appname, system_path, user_path):
 	doc.appendChild(doc.createProcessingInstruction('eclipse-pydev', 'version="1.0"'))
 	pydevproject = doc.createElement('pydev_project')
 	prop = self.add(doc, pydevproject,
-				   'pydev_property',
-				   'python %d.%d'%(sys.version_info[0], sys.version_info[1]))
+					'pydev_property',
+					'python %d.%d'%(sys.version_info[0], sys.version_info[1]))
 	prop.setAttribute('name', 'org.python.pydev.PYTHON_PROJECT_VERSION')
 	prop = self.add(doc, pydevproject, 'pydev_property', 'Default')
 	prop.setAttribute('name', 'org.python.pydev.PYTHON_PROJECT_INTERPRETER')
@@ -260,9 +293,9 @@ def addDictionary(self, doc, parent, k, v):
 
 def addTarget(self, doc, buildTargets, executable, name, buildTarget, runAllBuilders=True):
 	target = self.add(doc, buildTargets, 'target',
-					{'name': name,
-					 'path': '',
-					 'targetID': oe_cdt + '.build.MakeTargetBuilder'})
+					{	'name': name,
+						'path': '',
+						'targetID': oe_cdt + '.build.MakeTargetBuilder'})
 	self.add(doc, target, 'buildCommand', executable)
 	self.add(doc, target, 'buildArguments', None)
 	self.add(doc, target, 'buildTarget', buildTarget)
@@ -306,7 +339,7 @@ solutions={}
 def create_eclipse_project(t):
 	toolName = t.features[0]
 	if not toolName in solutions:
-		outname = [os.path.join('.build', i) for i in ['.project', '.cproject', '.pydevproject']]
+		outname = ['.project', '.cproject', '.pydevproject']
 		solution = t.create_task("EclipseGenerateProject")
 		solution.bld = t.bld
 		solution.appname = getattr(Context.g_module, 'APPNAME', 'noname')
@@ -316,10 +349,13 @@ def create_eclipse_project(t):
 		outnode = [t.path.find_or_declare(n) for n in outname]
 		solution.set_outputs(outnode)
 		t.bld.install_files(t.path.srcpath(), outnode)
+		t.bld.install_files(os.path.join(t.path.srcpath(), '.settings'), t.path.find_or_declare('mak/eclipse/.settings/org.eclipse.cdt.codan.core.prefs'))
+		t.bld.install_files(os.path.join(t.path.srcpath(), '.settings'), t.path.find_or_declare('mak/eclipse/.settings/org.eclipse.cdt.core.prefs'))
+		t.bld.install_files(os.path.join(t.path.srcpath(), '.settings'), t.path.find_or_declare('mak/eclipse/.settings/org.eclipse.cdt.ui.prefs'))
 		solution.depends = []
 		solution.dep_vars = ['ECLIPSE_PROJECT_DEPENDS']
 		solution.env['ECLIPSE_PROJECT_DEPENDS'] = []
 		solutions[toolName] = solution
 	solution = solutions[toolName]
-	solution.depends.append((t.name, t.category, t.sourcetree))
+	solution.depends.append((t.name, t.category, t.sourcetree, t.platforms))
 

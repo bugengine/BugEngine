@@ -41,6 +41,7 @@ Threads::Waitable::WaitResult Event::wait()
         return Finished;
     case WAIT_FAILED:
         be_notreached();
+        return Abandoned;
     case WAIT_ABANDONED:
     default:
         return Abandoned;

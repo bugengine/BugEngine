@@ -8,11 +8,6 @@
 #include    <win32/platformwindow.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
 
 namespace BugEngine { namespace Graphics { namespace Windowing
 {

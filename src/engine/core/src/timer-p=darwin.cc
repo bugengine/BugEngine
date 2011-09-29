@@ -39,6 +39,7 @@ u64 Timer::tick()
     return 0;
 #else
 # error "Architecture not supported"
+    return 0;
 #endif
 }
 

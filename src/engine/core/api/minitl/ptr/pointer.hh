@@ -56,7 +56,7 @@ private: // entity behavior
     pointer& operator=(const pointer& other);
 protected:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
-    void  operator delete(void* memory, void* where) { return ::operator delete(memory, where); }
+    void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
 };
 
 

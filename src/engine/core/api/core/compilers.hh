@@ -21,6 +21,9 @@
 # define BE_COMPILER_SUNCC      1
 # define BE_COMPILER_NAME       "suncc"
 # include <core/compilers/suncc.hh>
+#elif defined(__ECLIPSE)
+# define BE_COMPILER_NAME       "Eclipse syntax analyzer"
+# include <core/compilers/syntax.hh>
 #else
 # error unsupported compiler
 #endif

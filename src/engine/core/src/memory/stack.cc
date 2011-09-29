@@ -42,9 +42,9 @@ void* StackAllocator::internalRealloc(void* ptr, size_t size, size_t alignment)
 void StackAllocator::internalFree(const void* pointer)
 {
 #ifdef _MSC_VER
-    return ::_aligned_free(const_cast<void*>(pointer));
+    ::_aligned_free(const_cast<void*>(pointer));
 #else
-    return ::free(const_cast<void*>(pointer));
+    ::free(const_cast<void*>(pointer));
 #endif
 }
 
