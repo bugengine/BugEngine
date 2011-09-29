@@ -12,7 +12,6 @@
 # include   <thread.h>
 #endif
 #include    <sched.h>
-int clock_nanosleep (const struct timespec *req, struct timespec *rem);
 
 namespace BugEngine
 {

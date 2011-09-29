@@ -5,7 +5,7 @@ from mak import module
 import os
 from waflib import Options, Logs
 
-top = '.'
+top = 'src'
 out = '.build/waf'
 
 def options(opt):
