@@ -5,7 +5,7 @@
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
-#include    <system/resource/resource.script.hh>
+#include    <package.script.hh>
 
 namespace BugEngine { namespace PackageManager
 {
@@ -16,8 +16,11 @@ class PackageLoader : public minitl::refcountable
 private:
     weak<const Folder> const    m_dataFolder;
 public:
-    PackageLoader(weak<const Folder> dataFolder);
+    PackageLoader();
     ~PackageLoader();
+
+    void loadPackage(weak<const Package> package);
+    void unloadPackage(const ResourceHandle& handle);
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

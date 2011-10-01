@@ -3,11 +3,51 @@
 
 #include    <system/stdafx.h>
 #include    <system/file/folder.script.hh>
+#include    <system/file/file.script.hh>
 
 #include    <minitl/container/algorithm.hh>
 
+#include    <core/threads/thread.hh>
+#include    <core/threads/semaphore.hh>
+
 namespace BugEngine
 {
+
+struct IOContext
+{
+    IOContext();
+    ~IOContext();
+    static intptr_t ioProcess(intptr_t p1, intptr_t p2);
+};
+
+
+static bool         s_ioDone;
+static Semaphore    s_ioSemaphore(0, 32768);
+static Thread       s_ioThread("IOThread", &IOContext::ioProcess, 0, 0, Thread::Highest);
+static IOContext    s_iocontext;
+
+IOContext::IOContext()
+{
+};
+
+IOContext::~IOContext()
+{
+    s_ioDone = true;
+    s_ioSemaphore.release(1);
+}
+
+intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
+{
+    while(s_ioSemaphore.wait())
+    {
+        if (s_ioDone)
+            break;
+        /* doWork*/
+    }
+    return 0;
+}
+
+
 
 Folder::Folder()
     :   m_files(fsArena())

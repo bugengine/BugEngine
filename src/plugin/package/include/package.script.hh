@@ -5,15 +5,21 @@
 #define BE_RTTI_PACKAGE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
+#include    <system/file/file.script.hh>
 
 namespace BugEngine { namespace PackageManager
 {
 
+class PackageLoader;
+
 be_tag(ResourceLoaders())
 class Package : public Resource
 {
+    friend class PackageLoader;
+private:
+    ref<const File> m_packageFile;
 published:
-    Package(const ifilename& filename);
+    Package(be_tag(EditHint::Extension(".pkg")) ref<const File> file);
     ~Package();
 };
 

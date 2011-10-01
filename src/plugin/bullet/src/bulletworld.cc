@@ -7,6 +7,8 @@
 namespace BugEngine
 {
 
+static Allocator& bulletArena() { return gameArena(); }
+
 }
 
 namespace BugEngine { namespace Physics { namespace Bullet
