@@ -7,7 +7,7 @@
 namespace BugEngine { namespace PackageManager
 {
 
-Package::Package(const ifilename& /*filename*/)
+Package::Package(ref<const File> file)
 {
 }
 
