@@ -51,6 +51,8 @@ class VCxproj:
 		self.output.write('  <PropertyGroup Label="Configuration">\n')
 		self.output.write('    <ConfigurationType>%s</ConfigurationType>\n' % self.projectType)
 		self.output.write('    <TargetName>%s</TargetName>\n' % self.name)
+		self.output.write('    <OutDir>$(SolutionDir)build\\$(Configuration)\\</OutDir>\n')
+		self.output.write('    <IntDir>$(SolutionDir)build\\$(Configuration)\\</IntDir>\n')
 		self.output.write('  </PropertyGroup>\n')
 		for config in configs:
 			env = self.envs[config]

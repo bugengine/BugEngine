@@ -78,6 +78,19 @@ inline void decweak(const pointer* ptr)
 #endif
 }
 
+template< typename T >
+struct RefWrapper
+{
+    T& m_t;
+    RefWrapper(T& t) : m_t(t) {}
+    operator T&() const { return m_t; }
+};
+template< typename T >
+inline RefWrapper<T> byref(T& t)
+{
+    return RefWrapper<T>(t);
+}
+
 }
 
 /*****************************************************************************/

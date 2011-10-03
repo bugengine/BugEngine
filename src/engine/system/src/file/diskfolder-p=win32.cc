@@ -3,6 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/file/diskfolder.script.hh>
+#include    <win32/file.hh>
 
 
 namespace BugEngine
@@ -41,13 +42,16 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 
 }
 
+static i_u32 s_diskIndex = 0;
+
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
+    ,   m_index(s_diskIndex++)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
     minitl::format<1024u> pathname = m_path.str();
     m_handle.ptrHandle = CreateFileA (pathname.c_str(),
-                                      FILE_ALL_ACCESS,
+                                      GENERIC_READ,
                                       FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
                                       0,
                                       OPEN_EXISTING,
@@ -64,7 +68,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        be_info("Directory %s could not be opened: error code %d (%s)" | diskpath | errorCode | errorMessage);
+        be_info("Directory %s could not be opened: (%d) %s" | diskpath | errorCode | errorMessage);
     }
 
     if (scanPolicy != Folder::ScanNone)
@@ -112,7 +116,10 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 }
                 else
                 {
-                    /*todo*/;
+                    u64 size = data.nFileSizeHigh;
+                    size <<= 32;
+                    size += data.nFileSizeLow;
+                    m_files.push_back(minitl::make_pair(name, ref<Win32File>::create(fsArena(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size)));
                 }
             } while (FindNextFile(h, &data));
             FindClose(h);

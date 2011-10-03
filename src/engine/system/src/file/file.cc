@@ -3,6 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/file/file.script.hh>
+#include    <ioprocess.hh>
 
 
 namespace BugEngine
@@ -13,7 +14,7 @@ static Allocator& ticketPool()
     return gameArena(); //TODO
 }
 
-File::Ticket::Ticket(Allocator& arena, weak<const File> file, size_t offset, size_t size)
+File::Ticket::Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 size)
     :   m_file(file)
     ,   buffer(arena, size, 16)
     ,   processed(0)
@@ -22,7 +23,7 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, size_t offset, siz
 {
 }
 
-File::File(Media media, size_t size)
+File::File(Media media, u64 size)
     :   m_media(media)
     ,   m_size(size)
 {
@@ -32,12 +33,13 @@ File::~File()
 {
 }
 
-ref<const File::Ticket> File::beginRead(size_t offset, size_t size, Allocator& arena) const
+ref<const File::Ticket> File::beginRead(u64 offset, u32 size, Allocator& arena) const
 {
-    size_t s = size ? size : m_size - offset;
-    be_assert(offset < m_size, "reading past end of file");
-    ref<Ticket> t = ref<Ticket>::create(ticketPool(), arena, this, offset, s);
-    Folder::pushTicket(t);
+    u32 s = size ? size : be_checked_numcast<u32>(m_size - offset);
+    be_assert(offset <= m_size, "reading past end of file");
+    be_assert(offset+size <= m_size, "reading past end of file");
+    ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(arena), this, offset, s);
+    IOContext::pushTicket(t);
     return t;
 }
 

@@ -19,6 +19,7 @@ private:
     };
     ipath   m_path;
     Handle  m_handle;
+    u32     m_index;
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
 published:

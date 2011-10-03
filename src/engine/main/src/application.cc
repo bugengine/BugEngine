@@ -37,6 +37,7 @@ Application::WorldResource::~WorldResource()
 
 Application::Application(int argc, const char *argv[])
 :   m_scheduler(scoped<Scheduler>::create(taskArena()))
+,   m_packageLoader("package")
 ,   m_tasks(taskArena())
 ,   m_startConnections(taskArena())
 ,   m_endConnections(taskArena())
@@ -48,7 +49,7 @@ Application::Application(int argc, const char *argv[])
 
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create(taskArena(), "memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
-    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create(taskArena(), "application", color32(255,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
+    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::updatePackage> > >::create(taskArena(), "package", color32(255,255,0), MethodCaller<Application, &Application::updatePackage>(this)));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[1]));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[2]));
     //m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[3]));
@@ -64,15 +65,29 @@ Application::~Application(void)
     ResourceLoaders::detach< World, Application >(this);
 }
 
-void Application::frameUpdate()
+void Application::updatePackage()
 {
+    if (m_packageLoader)
+    {
+        m_packageLoader->update();
+    }
 }
 
-int Application::run()
+int Application::run(weak<const File> package)
 {
-    m_tasks[0]->run(m_scheduler);
-    m_scheduler->mainThreadJoin();
-    return 0;
+    if (package)
+    {
+        m_packageLoader->loadFile(package);
+
+        m_tasks[0]->run(m_scheduler);
+        m_scheduler->mainThreadJoin();
+        return 0;
+    }
+    else
+    {
+        be_error("could not open main package file");
+        return 1;
+    }
 }
 
 ResourceHandle Application::addWorld(weak<const World> world)

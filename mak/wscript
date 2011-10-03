@@ -285,7 +285,7 @@ def extract_debug_info(self):
 	if self.env.CXX_NAME in ['gcc', 'sun'] and self.env.OBJCOPY:
 		self.link_task_real = self.link_task
 		innode = self.link_task_real.outputs[0]
-		outnode = innode.change_ext('.all')
+		outnode = innode.parent.find_or_declare('full').find_or_declare(innode.name)
 		debugnode = innode.change_ext('.dbg')
 		self.link_task_real.outputs[0] = outnode
 

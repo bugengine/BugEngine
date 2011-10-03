@@ -4,28 +4,26 @@
 #ifndef BE_LUA_CONTEXT_H_
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
-#include    <rtti/scripting.hh>
+#include    <main/scripting.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
-#include    <system/file/folder.script.hh>
+#include    <system/file/file.script.hh>
 
 namespace BugEngine { namespace Lua
 {
 
-class Context : public Scripting
+class Context : public IScriptEngine
 {
 private:
-    lua_State*          m_state;
-    weak<const Folder>  m_dataFolder;
-    ref<Logger>         m_logger;
+    lua_State*                                  m_state;
+    ref<Logger>                                 m_logger;
 public:
-    Context(weak<const Folder> dataFolder, Value root);
+    Context();
     ~Context();
-
-    void doFile(const ifilename& file) override;
-    void doFile(weak<IMemoryStream> stream, const char *filename) override;
-
 private:
+    void addNamespace(istring name, const RTTI::ClassInfo* ns) override;
+    void doBuffer(const Allocator::Block<u8>& buffer) override;
+
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 
 
