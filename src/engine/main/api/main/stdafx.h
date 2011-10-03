@@ -12,7 +12,7 @@
 
 #if defined(building_main) || defined(MAIN_EXPORTS)
 # define     MAINEXPORT          BE_EXPORT
-#elif defined(rtti_dll)
+#elif defined(main_dll)
 # define     MAINEXPORT          BE_IMPORT
 #else
 # define     MAINEXPORT

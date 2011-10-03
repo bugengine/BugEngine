@@ -6,6 +6,8 @@
 /*****************************************************************************/
 #include    <system/scheduler/task/group.hh>
 #include    <system/resource/resourcehandle.hh>
+#include    <main/scripting.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine
 {
@@ -19,16 +21,17 @@ private:
     class WorldResource;
 private:
     scoped<Scheduler>                               m_scheduler;
+    Plugin<IScriptEngine>                           m_packageLoader;
     minitl::vector< ref<ITask> >                    m_tasks;
     minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
     minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
 private:
-    void frameUpdate();
+    void updatePackage();
 public:
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
 
-    int run(void);
+    int run(weak<const File> package);
 
     ResourceHandle addWorld(weak<const World> scene);
     void removeWorld(const ResourceHandle& handle);

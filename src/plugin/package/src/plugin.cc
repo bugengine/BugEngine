@@ -2,7 +2,8 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
+#include    <packageloader.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_NAMESPACE_REGISTER("package");
+BE_PLUGIN_REGISTER(lua, BugEngine::PackageLoader, (), ());
 

@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <cstring>
 #include    <core/debug/assert.hh>
+#include    <minitl/container/algorithm.hh>
 
 namespace BugEngine
 {
@@ -18,53 +19,57 @@ public:
     {
         BE_NOCOPY(Block);
     private:
-        Allocator&  m_allocator;
+        /* doesn't handle destructors; make sure there is no complex data in here */
+        union PODCheck
+        {
+            T t;
+        };
+    private:
+        Allocator*  m_allocator;
+        size_t      m_count;
         T*          m_data;
     public:
         Block(Allocator& allocator, size_t count, size_t alignment = be_alignof(T))
-            :   m_allocator(allocator)
+            :   m_allocator(&allocator)
+            ,   m_count(count)
             ,   m_data((T*)allocator.alloc(be_align(sizeof(T), alignment)*count, alignment))
         {
         };
         ~Block()
         {
-            m_allocator.free(m_data);
+            m_allocator->free(m_data);
         }
-        inline Allocator& arena() const
-        {
-            return m_allocator;
-        }
-        T* data()
-        {
-            return m_data;
-        }
-        const T* data() const
-        {
-            return m_data;
-        }
-        operator T*()
-        {
-            return m_data;
-        }
-        operator const T*() const
-        {
-            return m_data;
-        }
+        inline Allocator& arena() const { return *m_allocator; }
+        T* data()                       { return m_data; }
+        const T* data() const           { return m_data; }
+        operator T*()                   { return m_data; }
+        operator const T*() const       { return m_data; }
+        size_t count() const            { return m_count; }
+
         bool resize(size_t count, size_t alignment = be_alignof(T))
         {
             size_t size = be_align(sizeof(T), alignment)*count;
-            return m_allocator.resize(m_data, size);
+            if (m_allocator->resize(m_data, size))
+            {
+                m_count = count;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         void realloc(size_t count, size_t alignment = be_alignof(T))
         {
             size_t size = be_align(sizeof(T), alignment)*count;
-            m_data = (T*)m_allocator.realloc(m_data, size, alignment);
+            m_count = count;
+            m_data = (T*)m_allocator->realloc(m_data, size, alignment);
         }
         void swap(Block<T>& other)
         {
-            T* data = m_data;
-            m_data = other.m_data;
-            other.m_data = data;
+            minitl::swap(m_allocator, other.m_allocator);
+            minitl::swap(m_count, other.m_count);
+            minitl::swap(m_data, other.m_data);
         }
     };
 protected:

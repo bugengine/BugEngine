@@ -1,20 +1,22 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_LUA_STDAFX_H_
-#define BE_LUA_STDAFX_H_
+#ifndef BE_SYSTEM_WIN32_FILE_HH_
+#define BE_SYSTEM_WIN32_FILE_HH_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
-#include    <main/stdafx.h>
-
-extern "C"
+namespace BugEngine
 {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+
+class Win32File : public File
+{
+private:
+    ifilename m_file;
+public:
+    Win32File(ifilename file, File::Media media, u64 size);
+    ~Win32File();
+};
+
 }
 
 /*****************************************************************************/

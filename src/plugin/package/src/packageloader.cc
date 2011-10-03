@@ -8,7 +8,13 @@
 namespace BugEngine { namespace PackageManager
 {
 
+Allocator& packageArena()
+{
+    return gameArena();
+}
+
 PackageLoader::PackageLoader()
+    :   IScriptEngine(packageArena())
 {
 }
 
@@ -18,19 +24,23 @@ PackageLoader::~PackageLoader()
 
 void PackageLoader::loadPackage(weak<const Package> package)
 {
-    struct PackageHeader
-    {
-        int version;
-    };
-    Allocator::Block<u8> buffer(tempArena(), sizeof(PackageHeader));
-    ref<const File::Ticket> ticket = package->m_packageFile->beginRead(0, sizeof(PackageHeader));
-    while(!ticket->done())
-        /* wait */
-        Thread::yield();
+    loadFile(package->m_packageFile);
 }
 
 void PackageLoader::unloadPackage(const ResourceHandle& /*handle*/)
 {
+}
+
+void PackageLoader::addNamespace(istring name, const RTTI::ClassInfo* classinfo)
+{
+}
+
+void PackageLoader::doBuffer(const Allocator::Block<u8>& buffer)
+{
+    struct PackageHeader
+    {
+        int version;
+    };
 }
 
 }}

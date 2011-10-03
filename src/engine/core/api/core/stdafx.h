@@ -92,6 +92,7 @@ using minitl::raw;
 using minitl::ref;
 using minitl::weak;
 using minitl::scoped;
+using minitl::byref;
 using minitl::be_checked_cast;
 using minitl::be_const_cast;
 using minitl::be_checked_numcast;

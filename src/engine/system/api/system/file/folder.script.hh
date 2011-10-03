@@ -12,7 +12,6 @@ namespace BugEngine
 
 class be_api(SYSTEM) Folder : public minitl::refcountable
 {
-    friend class File;
 protected:
     minitl::vector< minitl::pair<istring, ref<File> > >     m_files;
     minitl::vector< minitl::pair<istring, ref<Folder> > >   m_folders;
@@ -47,8 +46,6 @@ published:
     void            umount(ipath name);
 
     void            refresh(ScanPolicy scanPolicy);
-private:
-    static void     pushTicket(ref<const File::Ticket> ticket);
 };
 
 }

@@ -5,13 +5,17 @@
 
 #include    <context.h>
 
-#include    <core/memory/streams.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 
 
 namespace BugEngine { namespace Lua
 {
+
+static Allocator& luaArena()
+{
+    return rttiArena();
+}
 
 const luaL_Reg Context::s_valueMetaTable[] = {
     {"__gc",        Context::valueGC},
@@ -62,23 +66,23 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     {
         if (osize)
         {
-            return rttiArena().realloc(ptr, nsize, 16);
+            return luaArena().realloc(ptr, nsize, 16);
         }
         else
         {
-            return rttiArena().alloc(nsize, 16);
+            return luaArena().alloc(nsize, 16);
         }
     }
     else
     {
-        rttiArena().free(ptr);
+        luaArena().free(ptr);
         return 0;
     }
 }
 
-Context::Context(weak<const Folder> dataFolder, Value root)
-:   m_state(lua_newstate(&Context::luaAlloc, 0))
-,   m_dataFolder(dataFolder)
+Context::Context()
+:   IScriptEngine(luaArena())
+,   m_state(lua_newstate(&Context::luaAlloc, 0))
 {
     luaopen_base(m_state);
     luaopen_table(m_state);
@@ -88,10 +92,6 @@ Context::Context(weak<const Folder> dataFolder, Value root)
 
     luaL_register(m_state, "_G", base_funcs);
     luaL_register(m_state, "bugvalue", s_valueMetaTable);
-
-    push(m_state, root);
-    lua_setglobal(m_state, "game");
-    lua_pop(m_state, 1);
 }
 
 Context::~Context()
@@ -99,29 +99,24 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::doFile(const ifilename& file)
+void Context::addNamespace(istring name, const RTTI::ClassInfo* ns)
 {
-    ref<IMemoryStream> stream;// = m_dataFolder->open(file, eReadOnly);
-    if (stream)
-    {
-        doFile(stream, file.str().c_str());
-    }
-    else
-    {
-        be_error("Couldn't open file %s" | file);
-    }
+    push(m_state, Value(ns));
+    lua_setglobal(m_state, name.c_str());
+    lua_pop(m_state, 1);
 }
 
-void Context::doFile(weak<IMemoryStream> file, const char *filename)
+void Context::doBuffer(const Allocator::Block<u8>& block)
 {
     int result;
-    result = luaL_loadbuffer(m_state, (const char *)file->basememory(), (size_t)file->size(), filename);
+    result = luaL_loadbuffer(m_state, (const char *)block.data(), block.count(), 0);
     if (result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
     be_assert(result == 0, lua_tostring(m_state, -1));
 }
+
 
 void Context::push(lua_State* state, const Value& v)
 {

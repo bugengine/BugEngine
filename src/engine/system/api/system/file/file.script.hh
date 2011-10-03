@@ -9,6 +9,8 @@
 namespace BugEngine
 {
 
+struct IOContext;
+
 class be_api(SYSTEM) File : public minitl::refcountable
 {
 public:
@@ -24,36 +26,41 @@ public:
         };
         Type    type;
         u32     index;
-        u32     offset;
+        u64     offset;
+        Media(Type t, u32 i, u64 o)
+            :   type(t), index(i), offset(o)
+        {
+        }
     };
 private:
     const Media m_media;
-    size_t      m_size;
+    u64         m_size;
 protected:
-    File(Media media, size_t size);
+    File(Media media, u64 size);
 public:
     ~File();
 public:
-    class Ticket : public minitl::refcountable
+    class Ticket :  public minitl::refcountable
+                 ,  public minitl::intrusive_list<Ticket>::item
     {
-        friend class File;
+        friend struct IOContext;
     private:
         const weak<const File>      m_file;
     public:
         const Allocator::Block<u8>  buffer;
-        i_size_t                    processed;
-        const size_t                offset;
-        const size_t                total;
+        i_u32                       processed;
+        const u64                   offset;
+        const u32                   total;
 
         inline bool done() const    { return processed == total; }
 
+        Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 size);
     private:
-        Ticket(Allocator& arena, weak<const File> file, size_t offset, size_t size);
         Ticket(const Ticket&);
         Ticket& operator=(const Ticket&);
     };
 
-    ref<const Ticket> beginRead(size_t offset = 0, size_t size = 0, Allocator& arena = tempArena()) const;
+    ref<const Ticket> beginRead(u64 offset = 0, u32 size = 0, Allocator& arena = tempArena()) const;
     //const WriteTicket& beginWrite(Ticket& ticket, size_t offset = 0, size_t size = 0);
 };
 
