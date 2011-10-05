@@ -15,6 +15,8 @@ private:
 public:
     Win32File(ifilename file, File::Media media, u64 size);
     ~Win32File();
+private:
+    void doFillBuffer(weak<File::Ticket> ticket) const override;
 };
 
 }

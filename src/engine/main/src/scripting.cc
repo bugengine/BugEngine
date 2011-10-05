@@ -24,6 +24,7 @@ void IScriptEngine::update()
     {
         if ((*it)->done())
         {
+            runBuffer((*it)->buffer);
             it = m_tickets.erase(it);
         }
         else
@@ -35,6 +36,7 @@ void IScriptEngine::update()
 
 void IScriptEngine::loadFile(weak<const File> file)
 {
+    m_tickets.push_back(file->beginRead(0, 0, m_arena));
     m_tickets.push_back(file->beginRead(0, 0, m_arena));
 }
 

@@ -35,8 +35,9 @@ void PackageLoader::addNamespace(istring name, const RTTI::ClassInfo* classinfo)
 {
 }
 
-void PackageLoader::doBuffer(const Allocator::Block<u8>& buffer)
+void PackageLoader::runBuffer(const Allocator::Block<u8>& buffer)
 {
+    OutputDebugString("Executing buffer\n");
     struct PackageHeader
     {
         int version;

@@ -4,22 +4,15 @@
 #ifndef BE_SYSTEM_IOPROCESS_HH_
 #define BE_SYSTEM_IOPROCESS_HH_
 /*****************************************************************************/
-#include    <core/string/istring.hh>
 #include    <system/file/file.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace IOProcess
 {
 
-struct IOContext
-{
-    IOContext();
-    ~IOContext();
+struct IOContext;
+be_api(SYSTEM) void pushTicket(ref<File::Ticket> ticket);
 
-    static intptr_t ioProcess(intptr_t p1, intptr_t p2);
-    static void     pushTicket(ref<const File::Ticket> ticket);
-};
-
-}
+}}
 
 /*****************************************************************************/
 #endif
