@@ -33,7 +33,7 @@ class VCxproj:
 		self.filters.write('<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
 		self.output.write('<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
 		self.output.write('  <ItemGroup Label="ProjectConfigurations">\n')
-		for config in configs:
+		for (config, options) in configs:
 			self.output.write('    <ProjectConfiguration Include="%s|Win32">\n' % (config))
 			self.output.write('      <Configuration>%s</Configuration>\n' % config)
 			self.output.write('      <Platform>Win32</Platform>\n')
@@ -54,8 +54,15 @@ class VCxproj:
 		self.output.write('    <OutDir>$(SolutionDir)build\\$(Configuration)\\</OutDir>\n')
 		self.output.write('    <IntDir>$(SolutionDir)build\\$(Configuration)\\</IntDir>\n')
 		self.output.write('  </PropertyGroup>\n')
-		for config in configs:
+		for (config, options) in configs:
 			env = self.envs[config]
+			if options:
+				includes = options.includedir.union(env.INCPATHS)
+				defines = options.defines.union(env.DEFINES)
+			else:
+				includes = env.INCPATHS
+				defines = env.DEFINES
+			includes = [os.path.abspath(i) for i in includes]
 			self.output.write('  <PropertyGroup Condition="\'$(Configuration)\'==\'%s\'">\n' % (config))
 			if self.type == 'game':
 				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % config)
@@ -67,8 +74,8 @@ class VCxproj:
 				self.output.write('    <NMakeOutput></NMakeOutput>\n')
 				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s --targets=%s</NMakeCleanCommandLine>\n' % (config, self.name))
 				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s --targets=%s</NMakeReBuildCommandLine>\n' % (config, config, self.name))
-			self.output.write('    <NMakePreprocessorDefinitions>%s</NMakePreprocessorDefinitions>\n' % ';'.join(env.DEFINES))
-			self.output.write('    <NMakeIncludeSearchPath></NMakeIncludeSearchPath>\n')
+			self.output.write('    <NMakePreprocessorDefinitions>%s</NMakePreprocessorDefinitions>\n' % ';'.join(defines))
+			self.output.write('    <NMakeIncludeSearchPath>%s</NMakeIncludeSearchPath>\n' % ';'.join(includes))
 			self.output.write('  </PropertyGroup>\n')
 
 	def writeFooter(self):

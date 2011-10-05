@@ -71,7 +71,14 @@ def create_project(t):
 	project = t.create_task("GenerateProject")
 	project.env=t.env.derive()
 	project.type			= t.type
-	project.allplatforms    = t.env.ALL_VARIANTS
+	project.allplatforms    = []
+	for i in t.env.ALL_VARIANTS:
+		env = t.bld.all_envs[i]
+		try:
+			options = t.platforms['%s-%s' % (env['PLATFORM'][0], env['ARCHITECTURE'])]
+		except Exception as e:
+			options = None
+		project.allplatforms.append((i, options))
 	project.version 		= toolName
 	project.versionNumber 	= versionNumber
 	project.projectClass 	= projectClass
