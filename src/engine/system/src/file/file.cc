@@ -15,7 +15,7 @@ static Allocator& ticketPool()
 }
 
 File::Ticket::Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 size)
-    :   m_file(file)
+    :   file(file)
     ,   buffer(arena, size, 16)
     ,   processed(0)
     ,   offset(offset)
@@ -39,8 +39,14 @@ ref<const File::Ticket> File::beginRead(u64 offset, u32 size, Allocator& arena) 
     be_assert(offset <= m_size, "reading past end of file");
     be_assert(offset+size <= m_size, "reading past end of file");
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(arena), this, offset, s);
-    IOContext::pushTicket(t);
+    IOProcess::pushTicket(t);
     return t;
+}
+
+void File::fillBuffer(weak<Ticket> ticket) const
+{
+    be_assert(ticket->file == this, "trying to fill buffer of another file");
+    doFillBuffer(ticket);
 }
 
 }

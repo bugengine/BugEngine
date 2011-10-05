@@ -18,4 +18,8 @@ Win32File::~Win32File()
 {
 }
 
+void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
+{
+}
+
 }

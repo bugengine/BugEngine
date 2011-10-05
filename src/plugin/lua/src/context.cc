@@ -106,7 +106,7 @@ void Context::addNamespace(istring name, const RTTI::ClassInfo* ns)
     lua_pop(m_state, 1);
 }
 
-void Context::doBuffer(const Allocator::Block<u8>& block)
+void Context::runBuffer(const Allocator::Block<u8>& block)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *)block.data(), block.count(), 0);
