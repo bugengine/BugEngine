@@ -16,7 +16,9 @@ struct IOContext;
 
 class be_api(SYSTEM) File : public minitl::refcountable
 {
+    class Ticket;
     friend struct IOProcess::IOContext;
+    friend class Ticket;
 public:
     struct Media
     {
@@ -37,8 +39,9 @@ public:
         }
     };
 private:
-    const Media m_media;
-    u64         m_size;
+    const Media     m_media;
+    u64             m_size;
+    mutable i_u32   m_ticketCount;
 protected:
     File(Media media, u64 size);
 public:
@@ -50,15 +53,17 @@ public:
     {
         friend struct IOProcess::IOContext;
     public:
-        const weak<const File>      file;
-        const Allocator::Block<u8>  buffer;
+        weak<const File>            file;
+        Allocator::Block<u8>        buffer;
         i_u32                       processed;
         const u64                   offset;
         const u32                   total;
+        i_bool                      error;
 
-        inline bool done() const    { return processed == total; }
+        inline bool done() const    { return error || processed == total; }
 
         Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 size);
+        ~Ticket();
     private:
         Ticket(const Ticket&);
         Ticket& operator=(const Ticket&);
