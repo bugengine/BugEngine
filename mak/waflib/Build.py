@@ -905,8 +905,8 @@ class InstallContext(BuildContext):
 			else:
 				# same size and identical timestamps -> make no copy
 				if st1.st_mtime >= st2.st_mtime and st1.st_size == st2.st_size:
-					if not self.progress_bar:
-						Logs.info('- install %s (from %s)' % (tgt, srclbl))
+					#if not self.progress_bar:
+					#	Logs.info('- install %s (from %s)' % (tgt, srclbl))
 					return False
 
 		if not self.progress_bar:

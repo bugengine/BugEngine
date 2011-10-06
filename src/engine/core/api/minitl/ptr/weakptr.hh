@@ -30,15 +30,15 @@ private:
     }
 public:
     weak() : m_ptr(0) {}
-    weak(T* ptr) : m_ptr(ptr) { minitl::addweak(m_ptr); }
+    weak(T* ptr) : m_ptr(ptr) { if (m_ptr) m_ptr->addweak(); }
     template< typename U >
-    weak(ref<U> other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
+    weak(ref<U> other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
     template< typename U >
-    weak(const scoped<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
-    weak(const weak& other) : m_ptr(other.operator->()) { minitl::addweak(m_ptr); }
+    weak(const scoped<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
+    weak(const weak& other) : m_ptr(other.operator->()) { if (m_ptr) m_ptr->addweak(); }
     template< typename U >
-    weak(const weak<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { minitl::addweak(m_ptr); }
-    ~weak() { minitl::decweak(m_ptr); }
+    weak(const weak<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
+    ~weak() { if (m_ptr) m_ptr->decweak(); }
 
     weak& operator=(const weak& other) { weak(other).swap(*this); return *this; }
     template< typename U >
@@ -51,7 +51,7 @@ public:
     bool operator!() const { return m_ptr == 0; }
     T& operator*() { return *static_cast<T*>(const_cast<minitl::pointer*>(m_ptr)); }
 
-    void clear() { minitl::decweak(m_ptr); m_ptr = 0; }
+    void clear() { if (m_ptr) m_ptr->decweak(); m_ptr = 0; }
 };
 
 }

@@ -22,7 +22,7 @@ template< typename T >
 ref<T>::ref(T* value)
 :   m_ptr(value)
 {
-    minitl::addref(value);
+    if (m_ptr) m_ptr->addref();
 }
 
 template< typename T >
@@ -31,7 +31,7 @@ ref<T>::ref(T* value, BugEngine::Allocator& deleter)
 {
     be_assert(value->m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
     value->m_allocator = &deleter;
-    minitl::addref(value);
+    if (m_ptr) m_ptr->addref();
 }
 
 template< typename T >
@@ -44,7 +44,7 @@ template< typename T >
 ref<T>::ref(const ref& other)
 :   m_ptr(other.operator->())
 {
-    addref(m_ptr);
+    if (m_ptr) m_ptr->addref();
 }
 
 template< typename T >
@@ -52,7 +52,7 @@ template< typename U >
 ref<T>::ref(const ref<U> other)
 :   m_ptr(checkIsA<T>(other.operator->()))
 {
-    addref(m_ptr);
+    if (m_ptr) m_ptr->addref();
 }
 
 template< typename T >
@@ -60,7 +60,7 @@ template< typename U >
 ref<T>::ref(const scoped<U> other)
 :   m_ptr(checkIsA<T>(other.operator->()))
 {
-    addref(m_ptr);
+    if (m_ptr) m_ptr->addref();
     other.m_ptr = 0;
 }
 
@@ -80,7 +80,7 @@ ref<T>& ref<T>::operator=(const ref<U>& other)
 template< typename T >
 ref<T>::~ref()
 {
-    decref(m_ptr);
+    if (m_ptr) m_ptr->decref();
 }
 
 template< typename T >
