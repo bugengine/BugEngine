@@ -12,23 +12,27 @@ template< typename U, typename T >
 static inline U* checkIsA(T* t) { return t; }
 
 
+template< typename T >
+static inline void checked_destroy(const T* ptr)
+{
+    char typeMustBeComplete[sizeof(T)];
+    (void)typeMustBeComplete;
+    if (ptr)
+    {
+        ptr->~T();
+    }
+}
+
 template< typename T > class ref;
 template< typename T > class weak;
 template< typename T > class scoped;
 class Arena;
 
-template< typename T >
-static void checked_destroy(const T*);
-template< typename T >
-static void checked_delete(const T*);
-
 class pointer
 {
-                            friend inline void addweak(const pointer* ptr);
-                            friend inline void decweak(const pointer* ptr);
     template< typename T >  friend class ref;
+    template< typename T >  friend class weak;
     template< typename T >  friend class scoped;
-    template< typename T >  friend void checked_delete(const T*);
 private:
     mutable ::BugEngine::Allocator* m_allocator;
 #ifdef BE_ENABLE_WEAKCHECK
@@ -57,26 +61,27 @@ private: // entity behavior
 protected:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
+protected:
+    inline void checked_delete() const
+    {
+        BugEngine::Allocator* d = m_allocator;
+        checked_destroy(this);
+        d->free(this);
+    }
+    inline void addweak() const
+    {
+    #ifdef BE_ENABLE_WEAKCHECK
+        ++m_weakCount;
+    #endif
+    }
+    inline void decweak() const
+    {
+    #ifdef BE_ENABLE_WEAKCHECK
+        be_assert(m_weakCount, "object has no weak reference; cannot dereference it again");
+        --m_weakCount;
+    #endif
+    }
 };
-
-
-inline void addweak(const pointer* ptr)
-{
-#ifdef BE_ENABLE_WEAKCHECK
-    if (ptr)
-        ++ptr->m_weakCount;
-#endif
-}
-
-inline void decweak(const pointer* ptr)
-{
-#ifdef BE_ENABLE_WEAKCHECK
-    if (!ptr)
-        return;
-    be_assert(ptr->m_weakCount, "object has no weak reference; cannot dereference it again");
-    --ptr->m_weakCount;
-#endif
-}
 
 template< typename T >
 struct RefWrapper

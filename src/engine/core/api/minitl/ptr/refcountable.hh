@@ -11,32 +11,8 @@ namespace minitl
 
 class refcountable;
 
-template< typename T >
-static inline void checked_destroy(const T* ptr)
-{
-    char typeMustBeComplete[sizeof(T)];
-    (void)typeMustBeComplete;
-    if (ptr)
-    {
-        ptr->~T();
-    }
-}
-
-template< typename T >
-static inline void checked_delete(const T* ptr)
-{
-    if (ptr)
-    {
-        BugEngine::Allocator* d = ptr->m_allocator;
-        checked_destroy(ptr);
-        d->free(ptr);
-    }
-}
-
 class refcountable : public pointer
 {
-                            friend inline void addref(const refcountable* ptr);
-    template< typename T >  friend inline const T* decref(const T* ptr);
     template< typename T >  friend class ref;
     template< typename T >  friend class scoped;
 private: /* friend ref */
@@ -56,30 +32,20 @@ private:
 protected:
     void  operator delete(void* memory)              { return ::operator delete(memory); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
+public:
+    inline void addref() const
+    {
+        ++m_refCount;
+    }
+    inline void decref() const
+    {
+        be_assert(m_refCount > 0, "object has no reference; cannot dereference it again");
+        if (! --m_refCount)
+        {
+            checked_delete();
+        }
+    }
 };
-
-inline void addref(const refcountable* ptr)
-{
-    if (ptr)
-        ++ptr->m_refCount;
-}
-
-template< typename T >
-inline const T* decref(const T *ptr)
-{
-    if (!ptr)
-        return 0;
-    be_assert(ptr->m_refCount > 0, "object has no reference; cannot dereference it again");
-    if (! --ptr->m_refCount)
-    {
-        checked_delete<const T>(ptr);
-        return 0;
-    }
-    else
-    {
-        return ptr;
-    }
-}
 
 }
 

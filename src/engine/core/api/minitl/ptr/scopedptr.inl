@@ -26,7 +26,7 @@ scoped<T>::scoped()
 template< typename T >
 scoped<T>::~scoped()
 {
-    checked_delete<T>(m_ptr);
+    if (m_ptr) m_ptr->checked_delete();
 }
 
 template< typename T >
@@ -47,7 +47,7 @@ scoped<T>::scoped(const scoped<U>& other)
 template< typename T >
 scoped<T>& scoped<T>::operator=(const scoped& other)
 {
-    checked_delete<T>(m_ptr);
+    if (m_ptr) m_ptr->checked_delete();
     m_ptr = other.m_ptr;
     other.m_ptr = 0;
     return *this;

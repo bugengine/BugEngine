@@ -39,11 +39,11 @@ IOContext::~IOContext()
     {
         File::Ticket* t = it.operator->();
         it = s_iocontext.tickets.erase(it);
-        minitl::decref(t);
+        t->decref();
     }
     while(File::Ticket* t = requests.pop())
     {
-        minitl::decref(t);
+        t->decref();
     }
     be_assert(s_iocontext.tickets.empty(), "Tickets still in queue when exiting IO process");
 }
@@ -61,7 +61,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
         File::Ticket* t = s_iocontext.tickets.begin().operator->();
         s_iocontext.tickets.erase(s_iocontext.tickets.begin());
         t->file->fillBuffer(t);
-        minitl::decref(t);
+        t->decref();
     }
     return 0;
 }
@@ -70,7 +70,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
 void pushTicket(ref<File::Ticket> ticket)
 {
     File::Ticket* t = ticket.operator->();
-    minitl::addref(t);
+    t->addref();
     s_iocontext.requests.push(t);
     s_ioSemaphore.release(1);
 }
