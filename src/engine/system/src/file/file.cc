@@ -21,6 +21,14 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 si
     ,   offset(offset)
     ,   total(size)
 {
+    file->addref();
+}
+
+File::Ticket::~Ticket()
+{
+    const File* f = file.operator->();
+    file = weak<const File>();
+    f->decref();
 }
 
 File::File(Media media, u64 size)
