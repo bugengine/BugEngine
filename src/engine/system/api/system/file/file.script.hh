@@ -16,6 +16,7 @@ struct IOContext;
 
 class be_api(SYSTEM) File : public minitl::refcountable
 {
+public:
     class Ticket;
     friend struct IOProcess::IOContext;
     friend class Ticket;
