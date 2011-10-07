@@ -110,7 +110,7 @@ T& ref<T>::operator*()
 template< typename T >
 void ref<T>::clear()
 {
-    decref(m_ptr);
+    if (m_ptr) m_ptr->decref();
     m_ptr = 0;
 }
 
