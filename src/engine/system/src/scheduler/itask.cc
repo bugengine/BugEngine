@@ -7,7 +7,7 @@
 namespace BugEngine
 {
 
-    ITask::ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity)
+ITask::ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity)
 :   name(name)
 ,   color(color)
 ,   priority(priority)

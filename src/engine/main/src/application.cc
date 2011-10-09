@@ -37,25 +37,20 @@ Application::WorldResource::~WorldResource()
 
 Application::Application(int argc, const char *argv[])
 :   m_scheduler(scoped<Scheduler>::create(taskArena()))
-,   m_packageLoader("package")
+,   m_packageLoader("packagebuilder")
+,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
 ,   m_startConnections(taskArena())
-,   m_endConnections(taskArena())
+,   m_endConnections(taskArena()),   m_updateLoop(m_updateTask, m_updateTask->startCallback())
 {
     be_forceuse(argc); be_forceuse(argv);
 
-    ref< TaskGroup > updateTask = ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0));
-    m_tasks.push_back(updateTask);
-
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
-    //m_tasks.push_back(ref< Task< ProcedureCaller<&Malloc::frameUpdate> > >::create(taskArena(), "memory", color32(255,255,0), ProcedureCaller<&Malloc::frameUpdate>()));
     m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::updatePackage> > >::create(taskArena(), "package", color32(255,255,0), MethodCaller<Application, &Application::updatePackage>(this)));
-    m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[1]));
-    m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[2]));
-    //m_startConnections.push_back(TaskGroup::TaskStartConnection(updateTask, m_tasks[3]));
-    m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[1]));
-    m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[2]));
-    //m_endConnections.push_back(TaskGroup::TaskEndConnection(updateTask, m_tasks[3]));
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[0]));
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[1]));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[0]));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[1]));
 
     ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
 }
@@ -79,7 +74,7 @@ int Application::run(weak<const File> package)
     {
         m_packageLoader->loadFile(package);
 
-        m_tasks[0]->run(m_scheduler);
+        m_updateTask->run(m_scheduler);
         m_scheduler->mainThreadJoin();
         return 0;
     }
@@ -93,7 +88,7 @@ int Application::run(weak<const File> package)
 ResourceHandle Application::addWorld(weak<const World> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(taskArena(), world, m_tasks[0]);
+    handle.handle = ref<WorldResource>::create(taskArena(), world, m_updateTask);
     return handle;
 }
 
