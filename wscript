@@ -45,39 +45,40 @@ def build(bld):
 
 	mak				= module.external('mak')
 
-	core			= module.library('core',        [dbghelp, win32, mak])
-	network			= module.library('network',     [core])
-	rtti			= module.library('rtti',        [core, network] )
-	system			= module.library('system',      [core, rtti] )
-	world			= module.library('world',       [core, rtti, system] )
-	main			= module.library('main',        [core, rtti, system, world])
+	core			= module.library('core',        	[dbghelp, win32, mak])
+	network			= module.library('network',     	[core])
+	rtti			= module.library('rtti',        	[core, network] )
+	system			= module.library('system',      	[core, rtti] )
+	world			= module.library('world',       	[core, rtti, system] )
+	main			= module.library('main',        	[core, rtti, system, world])
 
-	discworld		= module.game('discworld',      [core, rtti, system, world, main])
+	discworld		= module.game('discworld',      	[core, rtti, system, world, main])
 
-	editor			= module.plugin('editor',       [discworld], platforms=['pc'])
+	packagebuilder	= module.plugin('packagebuilder',	[discworld], category='plugin')
+	editor			= module.plugin('editor',       	[discworld, packagebuilder], platforms=['pc'])
 
-	windowing		= module.library('windowing',   [discworld, X11, win32], category='plugin')
-	bullet			= module.plugin('bullet',		[discworld, bulletengine])
+	windowing		= module.library('windowing',   	[discworld, X11, win32], category='plugin')
+	bullet			= module.plugin('bullet',			[discworld, bulletengine])
 
-	_3d				= module.plugin('3d', 			[discworld])
-	shadermodel1	= module.plugin('shadermodel1', [discworld, _3d])
-	shadermodel2	= module.plugin('shadermodel2', [discworld, _3d, shadermodel1])
-	shadermodel3	= module.plugin('shadermodel3', [discworld, _3d, shadermodel1, shadermodel2])
-	shadermodel4	= module.plugin('shadermodel4', [discworld, _3d, shadermodel1, shadermodel2, shadermodel3])
+	_3d				= module.plugin('3d', 				[discworld])
+	shadermodel1	= module.plugin('shadermodel1', 	[discworld, _3d])
+	shadermodel2	= module.plugin('shadermodel2', 	[discworld, _3d, shadermodel1])
+	shadermodel3	= module.plugin('shadermodel3', 	[discworld, _3d, shadermodel1, shadermodel2])
+	shadermodel4	= module.plugin('shadermodel4', 	[discworld, _3d, shadermodel1, shadermodel2, shadermodel3])
 
-	windowing		= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
-	gl				= module.plugin('GL4', 			[discworld, windowing, opengl, _3d], platforms=['pc'])
-	Dx9				= module.plugin('Dx9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
-	#Dx10			= module.plugin('Dx10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
-	nullrender		= module.plugin('nullrender', 	[discworld, _3d, shadermodel4])
+	windowing		= module.library('windowing',   	[discworld, _3d, X11, win32], category='plugin')
+	gl				= module.plugin('GL4', 				[discworld, windowing, opengl, _3d], platforms=['pc'])
+	Dx9				= module.plugin('Dx9',          	[discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
+	#Dx10			= module.plugin('Dx10',         	[discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
+	nullrender		= module.plugin('nullrender', 		[discworld, _3d, shadermodel4])
 
-	#AL				= module.plugin('AL',  			[discworld, openal], platforms=['pc'])
+	#AL				= module.plugin('AL',  				[discworld, openal], platforms=['pc'])
 
-	package			= module.plugin('package',      [discworld])
-	lua				= module.plugin('lua',          [discworld, lualib])
-	squirrel		= module.plugin('squirrel',     [discworld, squirellib])
+	package			= module.plugin('package',      	[discworld])
+	lua				= module.plugin('lua',          	[discworld, lualib])
+	squirrel		= module.plugin('squirrel',     	[discworld, squirellib])
 
-	input			= module.plugin('input', 		[discworld])
+	input			= module.plugin('input', 			[discworld])
 
 	discworld.plugins=[
 		_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, nullrender,
