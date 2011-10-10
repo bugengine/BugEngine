@@ -72,7 +72,6 @@ class module:
 		self.archs = archs or mak.allarchs[:]
 		self.projects = {}
 		sourcelist = [os.path.normpath(i) for i in sourcelist]
-		self.plugins  = []
 
 		self.localoptions = coptions()
 		self.localoptions.merge(localoptions)
@@ -382,7 +381,7 @@ class module:
 
 	def post(self, builder):
 		self.makeproject(builder)
-		for d in self.plugins:
+		for name,d in self.plugins.iteritems():
 			if d:
 				d.makeproject(builder)
 		self._post(builder)
@@ -519,7 +518,7 @@ class plugin(module):
 		module.__init__(self,
 						name,
 						dstname or name,
-						depends,
+						[mak.builder.game]+depends,
 						category,
 						localoptions,
 						globaloptions,
@@ -528,6 +527,10 @@ class plugin(module):
 						platforms,
 						archs,
 						sources)
+		try:
+			mak.builder.game.plugins[name] = self
+		except:
+			mak.builder.game.plugins = { name:self }
 
 	def _post(self, builder, blacklist):
 		for d in self.depends:
@@ -557,10 +560,8 @@ class game(module):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
-				  plugins=[],
 				  dstname = None,
 				):
-		self.plugins = plugins
 		self.install_path = 'bin'
 		module.__init__(self,
 						name,
@@ -581,13 +582,13 @@ class game(module):
 				d._post(builder,blacklist)
 		options = coptions()
 		if builder.env['STATIC']:
-			for d in self.plugins:
+			for name,d in self.plugins.iteritems():
 				if d:
 					d._post(builder,[self]+blacklist)
-			task = self.gentask(builder, 'cprogram', options, extradepends=self.plugins, blacklist=[self]+blacklist)
+			task = self.gentask(builder, 'cprogram', options, extradepends=self.plugins.values(), blacklist=[self]+blacklist)
 		elif not builder.variant in self.tasks:
 			task = self.gentask(builder, 'cprogram', options, blacklist=blacklist)
-			for d in self.plugins:
+			for name,d in self.plugins.iteritems():
 				if d:
 					d._post(builder, blacklist)
 
@@ -605,7 +606,6 @@ class tool(game):
 				  platforms = [],
 				  archs = [],
 				  sources=[],
-				  plugins=[],
 				  dstname = None,
 				):
 		game.__init__(self,
@@ -619,7 +619,6 @@ class tool(game):
 						platforms,
 						archs,
 						sources,
-						plugins,
 						dstname)
 
 

@@ -11,7 +11,7 @@ def setup(conf):
 
 def build(bld):
 	if bld.env.GL:
-		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty', module.coptions(), module.coptions(libs=[bld.env.GL]))
+		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GL))
 	else:
 		bld.m['OpenGL'] = None
 

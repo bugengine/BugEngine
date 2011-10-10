@@ -18,6 +18,6 @@ def build(bld):
 		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.amd64')]),
 		}
 	if bld.env.GLES2 or bld.env.PROJECTS:
-		bld.m['OpenGLES2'] = module.util('OpenGLES2', [], '3rdparty', module.coptions(), module.coptions(libs=[bld.env.GLES2, bld.env.EGL]))
+		bld.m['OpenGLES2'] = module.util('OpenGLES2', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GLES2+ bld.env.EGL))
 	else:
 		bld.m['OpenGLES2'] = None
