@@ -5,7 +5,7 @@ from mak import module
 import os
 from waflib import Options, Logs
 
-top = 'src'
+top = '.'
 out = '.build/waf'
 
 def options(opt):
@@ -23,15 +23,34 @@ def build(bld):
 			return
 
 	dbghelp			= module.external('dbghelp')
+	win32			= module.external('win32')
+
+	mak				= module.external('mak')
+
+	core			= module.library('core',        [dbghelp, win32, mak])
+	network			= module.library('network',     [core])
+	rtti			= module.library('rtti',        [core, network] )
+	system			= module.library('system',      [core, rtti] )
+	world			= module.library('world',       [core, rtti, system] )
+	main			= module.library('main',        [core, rtti, system, world])
+
+	bld.game		= module.game('discworld',      [core, rtti, system, world, main])
+
+	bld.recurse('.', name='plugins', once=False)
+	bld.game.post(bld)
+
+
+def plugins(bld):
+	bld.game.plugins = []
+
 	directx9		= module.external('DirectX9')
 	directx10		= module.external('DirectX10')
 	opengl			= module.external('OpenGL')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
 	X11				= module.external('X11')
-	win32			= module.external('win32')
 	cocoa			= module.external('cocoa')
-
+	win32			= module.external('win32')
 
 	freetype		= module.external('freetype')
 
@@ -43,62 +62,49 @@ def build(bld):
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
-	mak				= module.external('mak')
 
-	core			= module.library('core',        	[dbghelp, win32, mak])
-	network			= module.library('network',     	[core])
-	rtti			= module.library('rtti',        	[core, network] )
-	system			= module.library('system',      	[core, rtti] )
-	world			= module.library('world',       	[core, rtti, system] )
-	main			= module.library('main',        	[core, rtti, system, world])
+	editor			= module.plugin('editor',   	    [bld.game], platforms=['pc'])
 
-	discworld		= module.game('discworld',      	[core, rtti, system, world, main])
+	bullet			= module.plugin('bullet',			[bld.game, bulletengine])
 
-	packagebuilder	= module.plugin('packagebuilder',	[discworld], category='plugin')
-	editor			= module.plugin('editor',       	[discworld, packagebuilder], platforms=['pc'])
+	_3d				= module.plugin('3d', 				[bld.game])
+	shadermodel1	= module.plugin('shadermodel1', 	[bld.game, _3d])
+	shadermodel2	= module.plugin('shadermodel2', 	[bld.game, _3d, shadermodel1])
+	shadermodel3	= module.plugin('shadermodel3', 	[bld.game, _3d, shadermodel1, shadermodel2])
+	shadermodel4	= module.plugin('shadermodel4', 	[bld.game, _3d, shadermodel1, shadermodel2, shadermodel3])
 
-	windowing		= module.library('windowing',   	[discworld, X11, win32], category='plugin')
-	bullet			= module.plugin('bullet',			[discworld, bulletengine])
+	windowing		= module.library('windowing',   	[bld.game, _3d, X11, win32], category='plugin')
+	gl				= module.plugin('GL4', 				[bld.game, windowing, opengl, _3d], platforms=['pc'])
+	Dx9				= module.plugin('Dx9',          	[bld.game, windowing, cgDx, directx9, _3d], platforms=['win32'])
+	#Dx10			= module.plugin('Dx10',         	[bld.game, windowing, cgDx, directx10, _3d], platforms=['win32'])
+	nullrender		= module.plugin('nullrender', 		[bld.game, _3d, shadermodel4])
 
-	_3d				= module.plugin('3d', 				[discworld])
-	shadermodel1	= module.plugin('shadermodel1', 	[discworld, _3d])
-	shadermodel2	= module.plugin('shadermodel2', 	[discworld, _3d, shadermodel1])
-	shadermodel3	= module.plugin('shadermodel3', 	[discworld, _3d, shadermodel1, shadermodel2])
-	shadermodel4	= module.plugin('shadermodel4', 	[discworld, _3d, shadermodel1, shadermodel2, shadermodel3])
+	#AL				= module.plugin('AL',  				[bld.game, openal], platforms=['pc'])
 
-	windowing		= module.library('windowing',   	[discworld, _3d, X11, win32], category='plugin')
-	gl				= module.plugin('GL4', 				[discworld, windowing, opengl, _3d], platforms=['pc'])
-	Dx9				= module.plugin('Dx9',          	[discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
-	#Dx10			= module.plugin('Dx10',         	[discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
-	nullrender		= module.plugin('nullrender', 		[discworld, _3d, shadermodel4])
+	package			= module.plugin('package',      	[bld.game])
+	packagebuilder	= module.plugin('packagebuilder',	[bld.game], category='plugin')
+	lua				= module.plugin('lua',          	[bld.game, lualib])
+	squirrel		= module.plugin('squirrel',     	[bld.game, squirellib])
+	input			= module.plugin('input', 			[bld.game])
 
-	#AL				= module.plugin('AL',  				[discworld, openal], platforms=['pc'])
-
-	package			= module.plugin('package',      	[discworld])
-	lua				= module.plugin('lua',          	[discworld, lualib])
-	squirrel		= module.plugin('squirrel',     	[discworld, squirellib])
-
-	input			= module.plugin('input', 			[discworld])
-
-	discworld.plugins=[
+	bld.game.plugins+=[
 		_3d, shadermodel1, shadermodel2, shadermodel3, shadermodel4, nullrender,
 		bullet,
 		editor,
-		package, lua, squirrel,
+		package, packagebuilder, lua, squirrel,
 		input]
 
 
 	if win32 or X11 or cocoa:
-		windowing	= module.library('windowing',   [discworld, _3d, X11, win32], category='plugin')
+		windowing	= module.library('windowing',   [bld.game, _3d, X11, win32], category='plugin')
 		if opengl:
-			gl		= module.plugin('GL4', 			[discworld, windowing, opengl, _3d], platforms=['pc'])
-			discworld.plugins.append(gl)
+			gl		= module.plugin('GL4', 			[bld.game, windowing, opengl, _3d], platforms=['pc'])
+			bld.game.plugins.append(gl)
 		if directx9:
-			Dx9		= module.plugin('DX9',          [discworld, windowing, cgDx, directx9, _3d], platforms=['win32'])
-			discworld.plugins.append(Dx9)
+			Dx9		= module.plugin('DX9',          [bld.game, windowing, cgDx, directx9, _3d], platforms=['win32'])
+			bld.game.plugins.append(Dx9)
 		#if diretx10:
-			#Dx10	= module.plugin('DX10',         [discworld, windowing, cgDx, directx10, _3d], platforms=['win32'])
-			#discworld.plugins.append(Dx10)
+			#Dx10	= module.plugin('DX10',         [bld.game, windowing, cgDx, directx10, _3d], platforms=['win32'])
+			#bld.game.plugins.append(Dx10)
 
-	discworld.post(bld)
-
+	bld.recurse('mak', name='plugins', once=False)

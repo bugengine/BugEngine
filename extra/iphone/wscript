@@ -88,6 +88,12 @@ def configure(conf):
 				else:
 					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, add_gcc_flags_to_env, add_darwin_simulator_flags_to_env)
 
+def setup(conf):
+	pass
+
 def build(bld):
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
+
+def plugins(bld):
+	pass
 
