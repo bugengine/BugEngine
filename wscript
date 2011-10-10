@@ -80,7 +80,7 @@ def plugins(bld):
 	#AL				= module.plugin('AL',  				[openal], platforms=['pc'])
 
 	package			= module.plugin('package',      	[])
-	#packagebuilder	= module.plugin('packagebuilder',	[], category='plugin')
+	packagebuilder	= module.plugin('packagebuilder',	[], category='plugin')
 	lua				= module.plugin('lua',          	[lualib])
 	squirrel		= module.plugin('squirrel',     	[squirellib])
 	input			= module.plugin('input', 			[])

@@ -1,0 +1,82 @@
+%{
+
+#define yyparse be_package_parse
+#define yylex   be_package_lex
+#define yyerror be_package_error
+#define yylval  be_package_lval
+#define yychar  be_package_char
+#define yydebug be_package_debug
+#define yynerrs be_package_nerrs
+
+
+#define YYPARSE_PARAM param
+#include    <stdafx.h>
+
+#ifdef _MSC_VER
+# include <malloc.h>
+# pragma warning(push)
+# pragma warning(disable:4065) // switch contains 'default' but no 'case' label
+# pragma warning(disable:4244) // conversion from 'type1' to 'type2' : possible loss of data
+# pragma warning(disable:4100) // param : unreferenced formal parameter
+# pragma warning(disable:4702) // unreachable code
+#endif
+
+#define YYSTACK_USE_ALLOCA 1
+
+extern int yylex();
+int         g_packageLine = 0;
+int         g_packageColumnBefore = 0;
+int         g_packageColumnAfter = 0;
+
+static int yyerror(const char *msg)
+{
+    be_error("Error parsing %d (%d:%d): %s" | g_packageLine | g_packageColumnBefore | g_packageColumnAfter | msg);
+    return 0;
+}
+
+#ifndef __attribute__
+# define __attribute__(x)
+#endif
+%}
+
+%token  TOK_ID
+%token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN
+
+%token  KW_import
+
+%type   <bValue>    VAL_BOOLEAN
+%type   <iValue>    VAL_INTEGER
+%type   <fValue>    VAL_FLOAT
+%type   <sValue>    VAL_STRING
+%type   <sValue>    TOK_ID
+
+%union
+{
+    bool    bValue;
+    i64     iValue;
+    double  fValue;
+    char*   sValue;
+}
+
+%start  file
+
+%%
+
+file:
+        file
+        decl
+    |
+        /* empty */
+    ;
+
+decl:
+        decl_import
+    ;
+
+decl_import:
+        KW_import ';'
+    ;
+
+%%
+
+
