@@ -4,7 +4,7 @@ from mak import module
 def options(opt):
 	pass
 
-def configure(conf):
+def setup(conf):
 	if 'posix' in conf.env.PLATFORM:
 		conf.check_lib('X11', libpath=['/usr/local/lib', '/usr/X11R6/lib'])
 
