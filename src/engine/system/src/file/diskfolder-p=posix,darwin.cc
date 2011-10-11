@@ -7,7 +7,7 @@
 #include    <sys/stat.h>
 #include    DIRENT_H
 #include    <errno.h>
-
+#include    <posix/file.hh>
 
 namespace BugEngine
 {
@@ -33,6 +33,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
+    ,   m_index(0)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
     minitl::format<1024u> pathname = m_path.str();
@@ -73,7 +74,6 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             stat(filename.c_str(), &s);
             if (s.st_mode & S_IFDIR)
             {
-                be_debug("found dir: %s" | name);
                 for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                 {
                     if (it->first == name)
@@ -89,8 +89,22 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             }
             else
             {
-                /*todo*/
-                be_info("found file: %s" | name);
+                struct stat s;
+                errno = 0;
+                if (stat(filename.c_str(), &s) == 0)
+                {
+                    m_files.push_back(minitl::make_pair(
+                        name,
+                        ref<PosixFile>::create(
+                                fsArena(),
+                                m_path+ifilename(name),
+                                File::Media(File::Media::Disk, minor(s.st_dev), s.st_ino),
+                                s.st_size)));
+                }
+                else
+                {
+                    be_error("could not stat file %s: %s(%d)" | filename.c_str() | sys_errlist[errno] | errno);
+                }
             }
         }
     }
