@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <packagebuilder.hh>
+#include    <packageloader.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(packagebuilder, BugEngine::PackageBuilder::PackageBuilder, (), ());
+BE_PLUGIN_REGISTER(packagebuilder, BugEngine::PackageBuilder::PackageLoader, (), ());
 

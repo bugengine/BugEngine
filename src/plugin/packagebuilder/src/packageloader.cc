@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <packagebuilder.hh>
+#include    <packageloader.hh>
 #include    <buildcontext.hh>
 
 
@@ -21,29 +21,29 @@ Allocator& packageArena()
     return gameArena();
 }
 
-PackageBuilder::PackageBuilder()
+PackageLoader::PackageLoader()
     :   IScriptEngine(packageArena())
 {
 }
 
-PackageBuilder::~PackageBuilder()
+PackageLoader::~PackageLoader()
 {
 }
 
-void PackageBuilder::loadPackage(weak<const Package> package)
+void PackageLoader::loadPackage(weak<const Package> package)
 {
     loadFile(package->m_packageFile, tempArena());
 }
 
-void PackageBuilder::unloadPackage(const ResourceHandle& /*handle*/)
+void PackageLoader::unloadPackage(const ResourceHandle& /*handle*/)
 {
 }
 
-void PackageBuilder::addNamespace(istring name, const RTTI::ClassInfo* classinfo)
+void PackageLoader::addNamespace(istring name, const RTTI::ClassInfo* classinfo)
 {
 }
 
-void PackageBuilder::runBuffer(const Allocator::Block<u8>& buffer)
+void PackageLoader::runBuffer(const Allocator::Block<u8>& buffer)
 {
     g_buffer = &buffer;
     g_bufferPosition = 0;

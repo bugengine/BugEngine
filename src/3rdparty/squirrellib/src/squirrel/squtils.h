@@ -8,6 +8,10 @@
 #define SQ_FREE(__ptr,__size) sq_vm_free((__ptr),(__size));
 #define SQ_REALLOC(__ptr,__oldsize,__size) sq_vm_realloc((__ptr),(__oldsize),(__size));
 
+void *sq_vm_malloc(SQUnsignedInteger size);
+void *sq_vm_realloc(void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size);
+void sq_vm_free(void *p, SQUnsignedInteger size);
+
 //sqvector mini vector class, supports objects by value
 template<typename T> class sqvector
 {

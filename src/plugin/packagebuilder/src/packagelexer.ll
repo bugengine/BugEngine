@@ -8,7 +8,7 @@
 
 #pragma warning(disable:4127 4244 4267 4996 4505)
 
-i64 strToInteger(const char *text)
+i64 strToInteger(const char *text, size_t l)
 {
     bool negate = false;
     i64 result = 0;
@@ -16,11 +16,11 @@ i64 strToInteger(const char *text)
     {
         negate = true;
         text++;
+        l--;
     }
-    while (isdigit(*text))
+    for (size_t i = 0; i < l; ++i)
     {
-        result = result * 10 + (*text-'0');
-        text++;
+        result = result * 10 + (text[i]-'0');
     }
     return negate?-result:result;
 }
@@ -58,23 +58,18 @@ extern "C" int be_package_wrap()
 %option prefix="be_package_"
 %option nounput
 
-alpha       [A-Za-z_]
-num         [0-9]
-alphanum    [A-Za-z_0-9]
-name        {alphanum}*{alpha}+{alphanum}*
-string      \"[^\r\n\"]*\"
 %%
 
-true                { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
-false               { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
-import              { update(be_package_leng); return KW_import; }
-plugin              { update(be_package_leng); return KW_plugin; }
-{name}              { update(be_package_leng); yylval.sValue = strdup(be_package_text); return TOK_ID; }
-{string}            { update(be_package_leng); yylval.sValue = strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
--?{num}+            { update(be_package_leng); yylval.iValue = strToInteger(be_package_text); return VAL_INTEGER; }
-"\n"                { newline(); }
-[ \r\t]+            { update(be_package_leng); }
-.                   { update(be_package_leng); return *be_package_text; }
+true                                    { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
+false                                   { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
+import                                  { update(be_package_leng); return KW_import; }
+plugin                                  { update(be_package_leng); return KW_plugin; }
+[0-9A-Za-z_]*[A-Za-z_]+[0-9A-Za-z_]*    { update(be_package_leng); yylval.sValue = strdup(be_package_text); return TOK_ID; }
+\"[^\r\n\"]*\"                          { update(be_package_leng); yylval.sValue = strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
+-?[0-9]+                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
+"\n"                                    { newline(); }
+[ \r\t]+                                { update(be_package_leng); }
+.                                       { update(be_package_leng); return *be_package_text; }
 
 %%
 
