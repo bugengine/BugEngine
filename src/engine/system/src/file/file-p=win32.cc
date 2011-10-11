@@ -42,6 +42,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
             NULL);
         be_info("File %s could not be opened: (%d) %s" | m_file | errorCode | errorMessage);
         ticket->error = true;
+        ::LocalFree(errorMessage);
     }
     else
     {
