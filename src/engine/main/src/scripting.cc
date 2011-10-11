@@ -9,8 +9,7 @@ namespace BugEngine
 {
 
 IScriptEngine::IScriptEngine(Allocator& arena)
-    :   m_arena(arena)
-    ,   m_tickets(arena)
+    :   m_tickets(arena)
 {
 }
 
@@ -34,9 +33,9 @@ void IScriptEngine::update()
     }
 }
 
-void IScriptEngine::loadFile(weak<const File> file)
+void IScriptEngine::loadFile(weak<const File> file, Allocator& arena)
 {
-    m_tickets.push_back(file->beginRead(0, 0, m_arena));
+    m_tickets.push_back(file->beginRead(0, 0, arena));
 }
 
 }

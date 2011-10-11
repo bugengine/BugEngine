@@ -56,6 +56,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName, PreloadType /*preload*/)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
+,   m_refCount(new (gameArena()) i_u32(1))
 {
 }
 
@@ -63,6 +64,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const istring &pluginName)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
+,   m_refCount(new (gameArena()) i_u32(1))
 {
     if (m_handle)
     {
@@ -92,6 +94,7 @@ template< typename T1 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
+,   m_refCount(new (gameArena()) i_u32(1))
 {
     if (m_handle)
     {
@@ -121,6 +124,7 @@ template< typename T1, typename T2 >
 Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
+,   m_refCount(new (gameArena()) i_u32(1))
 {
     if (m_handle)
     {
@@ -148,16 +152,55 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
-    if (m_handle)
+    if (! --*m_refCount)
     {
-        if (m_interface)
+        if (m_handle)
         {
-            void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
-            if (be_pluginDestroy)
-                (*be_pluginDestroy)(m_interface);
+            if (m_interface)
+            {
+                void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
+                if (be_pluginDestroy)
+                    (*be_pluginDestroy)(m_interface);
+            }
+            FreeLibrary(static_cast<HMODULE>(m_handle));
         }
-        FreeLibrary(static_cast<HMODULE>(m_handle));
+        minitl::checked_destroy(m_refCount);
+        gameArena().free(m_refCount);
     }
+}
+
+template< typename Interface >
+Plugin<Interface>::Plugin(const Plugin<Interface>& other)
+    :   m_handle(other.m_handle)
+    ,   m_interface(other.m_interface)
+    ,   m_refCount(other.m_refCount)
+{
+    (*m_refCount)++;
+}
+
+template< typename Interface >
+Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
+{
+    *(other->m_refCount)++;
+    if (! --*m_refCount)
+    {
+        if (m_handle)
+        {
+            if (m_interface)
+            {
+                void (*be_pluginDestroy)(Interface*) = reinterpret_cast<void (*)(Interface*)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_destroyPlugin"));
+                if (be_pluginDestroy)
+                    (*be_pluginDestroy)(m_interface);
+            }
+            FreeLibrary(static_cast<HMODULE>(m_handle));
+        }
+        minitl::checked_destroy(m_refCount);
+        gameArena().free(m_refCount);
+    }
+    m_refCount = other.m_refCount;
+    m_handle = other.m_handle;
+    m_interface = other.m_interface;
+    return *this;
 }
 
 template< typename Interface >

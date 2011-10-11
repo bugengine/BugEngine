@@ -41,7 +41,8 @@ Application::Application(int argc, const char *argv[])
 ,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
 ,   m_startConnections(taskArena())
-,   m_endConnections(taskArena()),   m_updateLoop(m_updateTask, m_updateTask->startCallback())
+,   m_endConnections(taskArena())
+,   m_updateLoop(m_updateTask, m_updateTask->startCallback())
 {
     be_forceuse(argc); be_forceuse(argv);
 
@@ -66,13 +67,18 @@ void Application::updatePackage()
     {
         m_packageLoader->update();
     }
+    static int x = 0;
+    if (x++ == 100)
+    {
+        m_updateLoop = ITask::CallbackConnection();
+    }
 }
 
 int Application::run(weak<const File> package)
 {
     if (package)
     {
-        m_packageLoader->loadFile(package);
+        m_packageLoader->loadFile(package, tempArena());
 
         m_updateTask->run(m_scheduler);
         m_scheduler->mainThreadJoin();

@@ -71,11 +71,6 @@ def plugins(bld):
 	shadermodel3	= module.plugin('shadermodel3', 	[_3d, shadermodel1, shadermodel2])
 	shadermodel4	= module.plugin('shadermodel4', 	[_3d, shadermodel1, shadermodel2, shadermodel3])
 
-	windowing		= module.library('windowing',   	[_3d, X11, win32], category='plugin')
-	gl				= module.plugin('GL4', 				[windowing, opengl, _3d], platforms=['pc'])
-	Dx9				= module.plugin('Dx9',          	[windowing, cgDx, directx9, _3d], platforms=['win32'])
-	#Dx10			= module.plugin('Dx10',         	[windowing, cgDx, directx10, _3d], platforms=['win32'])
-	nullrender		= module.plugin('nullrender', 		[_3d, shadermodel4])
 
 	#AL				= module.plugin('AL',  				[openal], platforms=['pc'])
 
@@ -85,7 +80,7 @@ def plugins(bld):
 	squirrel		= module.plugin('squirrel',     	[squirellib])
 	input			= module.plugin('input', 			[])
 
-
+	nullrender		= module.plugin('nullrender', 		[_3d, shadermodel4])
 	if win32 or X11 or cocoa:
 		windowing	= module.library('windowing',   [bld.game, _3d, X11, win32], category='plugin')
 		if opengl:

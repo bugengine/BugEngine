@@ -16,12 +16,12 @@ namespace BugEngine
 template< typename Interface >
 class be_api(SYSTEM) Plugin
 {
-    BE_NOCOPY(Plugin);
 private:
-    typedef void* Handle;
+    typedef void*   Handle;
 private:
-    Handle      m_handle;
-    Interface*  m_interface;
+    Handle          m_handle;
+    Interface*      m_interface;
+    i_u32*          m_refCount;
 public:
     enum PreloadType { Preload };
     Plugin(const istring &pluginName, PreloadType preload);
@@ -31,11 +31,13 @@ public:
     template< typename T1, typename T2 >
     Plugin(const istring &pluginName, T1 param1, T2 param2);
     ~Plugin(void);
+    Plugin(const Plugin& other);
+    Plugin& operator=(const Plugin& other);
 
     Interface* operator->()             { return m_interface; }
     const Interface* operator->() const { return m_interface; }
-    operator const void*() const        { return m_interface; }
-    bool operator!() const              { return m_interface == 0; }
+    operator const void*() const        { return m_handle; }
+    bool operator!() const              { return m_handle == 0; }
 
     const RTTI::ClassInfo* pluginNamespace() const;
 private:

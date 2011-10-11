@@ -24,7 +24,7 @@ PackageLoader::~PackageLoader()
 
 void PackageLoader::loadPackage(weak<const Package> package)
 {
-    loadFile(package->m_packageFile);
+    loadFile(package->m_packageFile, tempArena());
 }
 
 void PackageLoader::unloadPackage(const ResourceHandle& /*handle*/)

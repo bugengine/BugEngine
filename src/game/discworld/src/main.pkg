@@ -1,0 +1,9 @@
+plugin 3d;
+plugin editor;
+
+w = 3d.Graphics.RenderWindow (
+  width = 100;
+  height = 100;
+  title = "Discworld";
+  fullscreen = false;
+)

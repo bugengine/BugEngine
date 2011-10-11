@@ -1,6 +1,7 @@
 %{
-#include <stdafx.h>
-#include <ctype.h>
+#include    <stdafx.h>
+#include    <ctype.h>
+#include    <buildcontext.hh>
 
 #define yylval  be_package_lval
 #include "packageparser.hh"
@@ -19,13 +20,10 @@ i64 strToInteger(const char *text)
     while (isdigit(*text))
     {
         result = result * 10 + (*text-'0');
+        text++;
     }
     return negate?-result:result;
 }
-
-extern int g_packageLine;
-extern int g_packageColumnBefore;
-extern int g_packageColumnAfter;
 
 static void update (int num)
 {
@@ -44,15 +42,13 @@ extern "C" int be_package_wrap()
     return 1;
 }
 
-extern const BugEngine::Allocator::Block<u8>* g_buffer;
-extern int g_bufferPosition;
 #define YY_INPUT(buf,result,max_size)                               \
         {                                                           \
-            int size = max_size > g_buffer->count()-g_bufferPosition\
+            result = max_size > g_buffer->count()-g_bufferPosition  \
                 ? g_buffer->count()-g_bufferPosition                \
                 : max_size;                                         \
-            memcpy(buf, g_buffer->data()+g_bufferPosition, size);   \
-            result = size;                                          \
+            memcpy(buf, g_buffer->data()+g_bufferPosition, result); \
+            g_bufferPosition += result;                             \
         }
 
 
@@ -65,18 +61,20 @@ extern int g_bufferPosition;
 alpha       [A-Za-z_]
 num         [0-9]
 alphanum    [A-Za-z_0-9]
-name        {alpha}{alphanum}*
-
+name        {alphanum}*{alpha}+{alphanum}*
+string      \"[^\r\n\"]*\"
 %%
 
-'-'?{num}+          { size_t size = strlen(yytext); update(size); yylval.iValue = strToInteger(yytext); return VAL_INTEGER; }
-true                { update(4); yylval.bValue = true; return VAL_BOOLEAN; }
-false               { update(5); yylval.bValue = false; return VAL_BOOLEAN; }
-import              { update(6); return KW_import; }
-{name}              { update(strlen(yytext)); yylval.sValue = strdup(yytext); return TOK_ID; }
+true                { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
+false               { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
+import              { update(be_package_leng); return KW_import; }
+plugin              { update(be_package_leng); return KW_plugin; }
+{name}              { update(be_package_leng); yylval.sValue = strdup(be_package_text); return TOK_ID; }
+{string}            { update(be_package_leng); yylval.sValue = strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
+-?{num}+            { update(be_package_leng); yylval.iValue = strToInteger(be_package_text); return VAL_INTEGER; }
 "\n"                { newline(); }
-[ \r\t]+            { update(strlen(yytext)); }
-.                   { update(1); return *yytext; }
+[ \r\t]+            { update(be_package_leng); }
+.                   { update(be_package_leng); return *be_package_text; }
 
 %%
 

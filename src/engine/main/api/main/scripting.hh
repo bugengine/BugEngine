@@ -19,7 +19,6 @@ class File;
 class BE_EXPORT IScriptEngine : public minitl::pointer
 {
 private:
-    Allocator&                                  m_arena;
     minitl::vector< ref<const File::Ticket> >   m_tickets;
 protected:
     IScriptEngine(Allocator& arena);
@@ -27,7 +26,7 @@ public:
     virtual void addNamespace(istring name, const RTTI::ClassInfo* classinfo) = 0;
     virtual void runBuffer(const Allocator::Block<u8>& buffer) = 0;
 
-    void loadFile(weak<const File>);
+    void loadFile(weak<const File>, Allocator& arena);
     virtual void update();
 
     virtual ~IScriptEngine();
