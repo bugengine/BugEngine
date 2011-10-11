@@ -25,7 +25,7 @@ void PosixFile::doFillBuffer(weak<File::Ticket> ticket) const
     FILE* f = fopen(pathname.c_str(), "rb");
     if (!f)
     {
-        const char *errorMessage = sys_errlist[errno];
+        const char *errorMessage = strerror(errno);
         be_info("File %s could not be opened: (%d) %s" | m_file | errno | errorMessage);
         ticket->error = true;
     }

@@ -98,12 +98,12 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                         ref<PosixFile>::create(
                                 fsArena(),
                                 m_path+ifilename(name),
-                                File::Media(File::Media::Disk, minor(s.st_dev), s.st_ino),
+                                File::Media(File::Media::Disk, s.st_dev, s.st_ino),
                                 s.st_size)));
                 }
                 else
                 {
-                    be_error("could not stat file %s: %s(%d)" | filename.c_str() | sys_errlist[errno] | errno);
+                    be_error("could not stat file %s: %s(%d)" | filename.c_str() | strerror(errno) | errno);
                 }
             }
         }
