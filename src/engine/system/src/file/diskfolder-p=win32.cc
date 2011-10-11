@@ -69,6 +69,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
             0,
             NULL);
         be_info("Directory %s could not be opened: (%d) %s" | diskpath | errorCode | errorMessage);
+        ::LocalFree(errorMessage);
     }
 
     if (scanPolicy != Folder::ScanNone)
