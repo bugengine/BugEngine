@@ -10,12 +10,12 @@
 namespace BugEngine { namespace PackageBuilder
 {
 
-class PackageBuilder;
+class PackageLoader;
 
 be_tag(ResourceLoaders())
 class Package : public Resource
 {
-    friend class PackageBuilder;
+    friend class PackageLoader;
 private:
     ref<const File> m_packageFile;
 published:

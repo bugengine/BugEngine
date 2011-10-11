@@ -29,7 +29,7 @@ extern int yylex();
 
 static int yyerror(const char *msg)
 {
-    be_error("Error parsing %d (%d:%d): %s" | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1) | msg);
+    be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
     return 0;
 }
 
