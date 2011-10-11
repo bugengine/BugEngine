@@ -1,4 +1,6 @@
 %{
+#include    <stdafx.h>
+#include    <buildcontext.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -9,7 +11,7 @@
 #define yynerrs be_package_nerrs
 
 
-#define YYPARSE_PARAM param
+#define YYPARSE_PARAM   param
 #include    <stdafx.h>
 
 #ifdef _MSC_VER
@@ -24,13 +26,10 @@
 #define YYSTACK_USE_ALLOCA 1
 
 extern int yylex();
-int         g_packageLine = 0;
-int         g_packageColumnBefore = 0;
-int         g_packageColumnAfter = 0;
 
 static int yyerror(const char *msg)
 {
-    be_error("Error parsing %d (%d:%d): %s" | g_packageLine | g_packageColumnBefore | g_packageColumnAfter | msg);
+    be_error("Error parsing %d (%d:%d): %s" | g_packageLine+1 | g_packageColumnBefore+1 | g_packageColumnAfter+1 | msg);
     return 0;
 }
 
@@ -42,7 +41,7 @@ static int yyerror(const char *msg)
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN
 
-%token  KW_import
+%token  KW_import KW_plugin
 
 %type   <bValue>    VAL_BOOLEAN
 %type   <iValue>    VAL_INTEGER
@@ -71,10 +70,59 @@ file:
 
 decl:
         decl_import
+    |
+        decl_plugin
+    |
+        decl_object
     ;
 
 decl_import:
-        KW_import ';'
+        KW_import fullname';'
+    ;
+
+decl_plugin:
+        KW_plugin TOK_ID';'
+            {
+                BugEngine::istring i($2);
+                BugEngine::Plugin<minitl::pointer> plugin (i, BugEngine::Plugin<minitl::pointer>::Preload);
+                ((BugEngine::PackageBuilder::BuildContext*)param)->plugins.insert(std::make_pair(i, plugin));
+                free($2);
+            }
+    ;
+
+decl_object:
+        TOK_ID '=' fullname '('
+            params
+        ')'
+    ;
+
+params:
+        params
+        param
+    |
+        /* empty */
+    ;
+
+param:
+        TOK_ID '=' value ';'
+    ;
+
+value:
+        fullname
+    |
+        VAL_BOOLEAN
+    |
+        VAL_INTEGER
+    |
+        VAL_FLOAT
+    |
+        VAL_STRING
+    ;
+
+fullname:
+        TOK_ID
+    |
+        TOK_ID '.' fullname
     ;
 
 %%

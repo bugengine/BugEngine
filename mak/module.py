@@ -327,6 +327,8 @@ class module:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 				elif ext == '.plist':
 					result.addFile(sources.deployedsource(file, '', 'runbin', fileplatforms, filearchs, doprocess))
+				elif ext in ['.pkg']:
+					result.addFile(sources.deployedsource(file, '', 'data', fileplatforms, filearchs, doprocess))
 		return result
 
 	def addFile( self, filename ):
