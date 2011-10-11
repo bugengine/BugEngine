@@ -33,6 +33,7 @@ namespace BugEngine
 static void* loadLibrary(const istring& pluginName)
 {
     minitl::format<> f = (minitl::format<>("lib%s.so") | pluginName.c_str());
+    be_info("loading plugin %s" | f);
     void* handle = dlopen((Environment::getEnvironment().getDataDirectory() + ipath("plugins") + ifilename(f.c_str())).str().c_str(), RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
