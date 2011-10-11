@@ -135,8 +135,8 @@ be_api(CORE) Allocator& inputArena();
 
 inline void* operator new(size_t size, BugEngine::Allocator& allocator)                     { return allocator.alloc(size); }
 inline void* operator new(size_t size, BugEngine::Allocator& allocator, size_t align)       { return allocator.alloc(size, align); }
-inline void  operator delete(void* ptr, BugEngine::Allocator& allocator)                    { return allocator.free(ptr); }
-inline void  operator delete(void* ptr, BugEngine::Allocator& allocator, size_t /*align*/)  { return allocator.free(ptr); }
+inline void  operator delete(void* ptr, BugEngine::Allocator& allocator)                    { allocator.free(ptr); }
+inline void  operator delete(void* ptr, BugEngine::Allocator& allocator, size_t /*align*/)  { allocator.free(ptr); }
 
 /*****************************************************************************/
 #endif
