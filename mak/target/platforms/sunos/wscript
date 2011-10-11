@@ -62,7 +62,7 @@ def add_sunos_flags_to_env(conf, name, arch):
 									'runbin':	'lib',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		os.path.join('share', getattr(Context.g_module, 'APPNAME', 'noname')),
+									'data':		os.path.join('share', 'bugengine'),
 									'plugin':	os.path.join('share', 'bugengine', 'plugins')  }
 
 def configure(conf):
