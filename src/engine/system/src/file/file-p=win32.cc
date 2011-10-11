@@ -21,7 +21,7 @@ Win32File::~Win32File()
 void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    minitl::format<4096> pathname = m_file.str();
+    minitl::format<1024> pathname = m_file.str();
     HANDLE h = CreateFileA ( pathname.c_str(),
                              GENERIC_READ,
                              FILE_SHARE_READ,
@@ -45,6 +45,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
     }
     else
     {
+        static const int s_bufferSize = 1024;
         LARGE_INTEGER setOffset;
         LARGE_INTEGER offset;
         offset.QuadPart = ticket->offset;
@@ -53,10 +54,10 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
         for (ticket->processed = 0; !ticket->done(); )
         {
             DWORD read;
-            if (ticket->processed+1024 > ticket->total)
-                ReadFile (h, ticket->buffer.data(), be_checked_numcast<u32>(ticket->total - ticket->processed), &read, 0);
+            if (ticket->processed+s_bufferSize > ticket->total)
+                ReadFile (h, ticket->buffer.data()+ticket->processed, be_checked_numcast<u32>(ticket->total - ticket->processed), &read, 0);
             else
-                ReadFile (h, ticket->buffer.data(), 1024, &read, 0);
+                ReadFile (h, ticket->buffer.data()+ticket->processed, s_bufferSize, &read, 0);
             ticket->processed += read;
             if (read == 0)
             {
