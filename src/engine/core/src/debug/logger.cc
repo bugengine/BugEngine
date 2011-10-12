@@ -41,8 +41,6 @@ Logger::Logger(ref<Logger> parent, const istring& name)
 
 Logger::~Logger()
 {
-    for (size_t i = 0; i < m_listeners.size(); ++i)
-        delete m_listeners[i];
 }
 
 ref<Logger> Logger::instance(const inamespace& name)
@@ -75,7 +73,7 @@ bool Logger::log(const inamespace& name, LogLevel level, const char *filename, i
     return instance(name)->log(level, filename, line, msg);
 }
 
-void Logger::addListener(ILogListener* listener)
+void Logger::addListener(ref<ILogListener> listener)
 {
     m_listeners.push_back(listener);
 }
@@ -83,7 +81,7 @@ void Logger::addListener(ILogListener* listener)
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
 {
     bool result = false;
-    for (minitl::vector< ILogListener* >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for (minitl::vector< ref<ILogListener> >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }

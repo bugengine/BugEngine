@@ -24,7 +24,7 @@ enum LogLevel
 
 class Logger;
 
-class ILogListener
+class ILogListener : public minitl::refcountable
 {
     friend class Logger;
 protected:
@@ -38,7 +38,7 @@ class be_api(CORE) Logger : public minitl::refcountable
     friend class minitl::ref<Logger>;
     BE_NOCOPY(Logger);
 private:
-    minitl::vector< ILogListener* >                 m_listeners;
+    minitl::vector< minitl::ref<ILogListener> >     m_listeners;
     minitl::hashmap< istring, minitl::ref<Logger> > m_children;
     minitl::weak<Logger>                            m_parent;
     istring                                         m_name;
@@ -52,7 +52,7 @@ public:
     static bool                log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
     static minitl::ref<Logger> root();
 
-    void addListener(ILogListener* listener);
+    void addListener(minitl::ref<ILogListener> listener);
     bool log(LogLevel level, const char *filename, int line, const char *msg);
     template< size_t size >
     inline bool log(LogLevel level, const char *filename, int line, const minitl::format<size>& msg) { return log(level, filename, line, msg.c_str()); }

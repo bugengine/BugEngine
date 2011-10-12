@@ -56,7 +56,7 @@ def add_darwin_flags_to_env(conf, name, arch):
 									'runbin':	'',
 									'api':		'include',
 									'lib':		'lib',
-									'data':		'data',
+									'data':		os.path.join('share', 'bugengine'),
 									'plugin':	os.path.join('data', 'plugins') }
 
 def configure(conf):
