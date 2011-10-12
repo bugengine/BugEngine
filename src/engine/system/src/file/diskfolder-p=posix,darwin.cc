@@ -40,7 +40,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     m_handle.ptrHandle = opendir(pathname.c_str());
     if (!m_handle.ptrHandle)
     {
-        perror("");
+        be_error("Could not open directory %s: %s" | diskpath | strerror(errno));
     }
 
     if (scanPolicy != Folder::ScanNone)
@@ -51,7 +51,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
 
 DiskFolder::~DiskFolder()
 {
-    closedir((DIR*)m_handle.ptrHandle);
+    if (m_handle.ptrHandle)
+        closedir((DIR*)m_handle.ptrHandle);
 }
 
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)

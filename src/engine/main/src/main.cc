@@ -75,14 +75,14 @@ static int __main(int argc, const char *argv[])
     try
 #endif
     {
-        BugEngine::Logger::root()->addListener(new ConsoleLogListener());
-        ref<BugEngine::DiskFolder> mountpoint = ref<BugEngine::DiskFolder>::create(
+        BugEngine::Logger::root()->addListener(ref<ConsoleLogListener>::create(BugEngine::debugArena()));
+        ref<BugEngine::DiskFolder> home = ref<BugEngine::DiskFolder>::create(
                 BugEngine::gameArena(),
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
-        //minitl::format<1024> logname = (BugEngine::Environment::getEnvironment().getHomeDirectory() + BugEngine::ifilename("log.txt")).str();
-        //BugEngine::Logger::root()->addListener(new LogListener(logname.c_str()));
+        //ref<File> f = home->createFile("log")
+        //BugEngine::Logger::root()->addListener(new LogListener(home));
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);
     }
