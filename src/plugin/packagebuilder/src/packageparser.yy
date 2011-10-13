@@ -81,13 +81,17 @@ decl_import:
     ;
 
 decl_plugin:
-        KW_plugin TOK_ID';'
+        KW_plugin TOK_ID
             {
                 BugEngine::istring i($2);
                 BugEngine::Plugin<minitl::pointer> plugin (i, BugEngine::Plugin<minitl::pointer>::Preload);
-                ((BugEngine::PackageBuilder::BuildContext*)param)->plugins.insert(std::make_pair(i, plugin));
+                if (!plugin)
+                    yyerror((minitl::format<>("Unable to find plugin %s") | i).c_str());
+                else
+                    ((BugEngine::PackageBuilder::BuildContext*)param)->plugins.insert(std::make_pair(i, plugin));
                 free($2);
             }
+        ';'
     ;
 
 decl_object:

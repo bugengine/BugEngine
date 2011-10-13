@@ -132,7 +132,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 template< typename Interface >
 const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
 {
-    return 0;
+    return be_Namespace();
 }
 
 
