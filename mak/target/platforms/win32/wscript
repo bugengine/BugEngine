@@ -37,6 +37,7 @@ def add_win32_gcc_flags_to_env(conf):
 
 def add_win32_flags_to_env(conf, name, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['win32']
+	conf.env['ABI'] = 'pe'
 	conf.env['library_PATTERN'] = '%s.lib'
 	conf.env['shlib_PATTERN']	= '%s.dll'
 	conf.env['program_PATTERN'] = '%s.exe'

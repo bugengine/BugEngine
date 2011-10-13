@@ -100,9 +100,9 @@ def setup_msvc(conf, versions):
 			targets = dict(versiondict [version])
 			for target in platforms:
 				try:
-					arch,(p1,p2,p3) = targets[target]
+					arch,(p1,p2,p3,p4,p5) = targets[target]
 					compiler,revision = version.split()
-					return compiler,revision,p1,p2,p3
+					return compiler,revision,p1,p2,p3,p4,p5
 				except KeyError: continue
 		except KeyError: continue
 	conf.fatal('msvc: Impossible to find a valid architecture for building (in setup_msvc)')
@@ -174,7 +174,7 @@ echo LIB=%%LIB%%
 	finally:
 		conf.env[compiler_name] = ''
 
-	return (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR)
+	return (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR, vcvars, target)
 
 @conf
 def gather_wsdk_versions(conf, versions):
@@ -585,11 +585,12 @@ def autodetect(conf):
 	v = conf.env
 	if v.NO_MSVC_DETECT:
 		return
-	compiler, version, path, includes, libdirs = conf.detect_msvc()
+	compiler, version, path, includes, libdirs, cmd, flag = conf.detect_msvc()
 	v['PATH'] = path
 	v['INCLUDES'] = includes
 	v['LIBPATH'] = libdirs
 	v['MSVC_COMPILER'] = compiler
+	v['MSVC_ENVIRONMENT'] = [cmd, flag]
 	try:
 		v['MSVC_VERSION'] = float(version)
 	except:

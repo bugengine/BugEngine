@@ -50,6 +50,7 @@ def add_gcc_flags_to_env(conf):
 
 def add_sunos_flags_to_env(conf, name, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['sunos']
+	conf.env['ABI'] = 'elf'
 	conf.env['library_PATTERN'] = 'lib%s.a'
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
