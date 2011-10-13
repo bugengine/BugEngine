@@ -7,6 +7,7 @@ def options(opt):
 
 def configure(conf):
 	conf.env['ARCHITECTURE'] = 'mips'
+	conf.env['LP64'] = 1
 	conf.env.append_unique('DEFINES', ['_MIPS', '_MIPS64'])
 
 def build(bld):

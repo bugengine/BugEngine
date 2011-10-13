@@ -13,7 +13,7 @@ from waflib.Tools import ccroot,c,cxx
 
 def options(opt):
 	opt.recurse(os.path.join('host', os.name))
-	opt.load('visualstudio netbeans xcode eclipse', tooldir='mak/tools/IDE')
+	opt.load('visualstudio netbeans xcode eclipse qtcreator', tooldir='mak/tools/IDE')
 	#opt.load('parallel_debug', tooldir='mak/waflib/extras')
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):

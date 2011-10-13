@@ -190,7 +190,7 @@ def impl_create_cproject(self, executable, waf, appname):
 				input = self.add(doc, tool, 'inputType',
 						{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
 							'superClass': cdt_bld + '.settings.holder.inType'})
-				if options:
+				if options and None:
 					cpppath = options.includedir
 					incpaths = cdt_bld + '.settings.holder.incpaths'
 					count = count+1
