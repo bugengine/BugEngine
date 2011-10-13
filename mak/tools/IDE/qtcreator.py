@@ -45,20 +45,20 @@ def create_creator_user(self, appname):
 	self.add(doc, data, 'variable', 'ProjectExplorer.Project.EditorSetting')
 	map = self.add(doc, data, 'valuemap', '', {'type':'QVariantMap'})
 
+	data = self.add(doc, qtproject, 'data')
+	self.add(doc, data, 'variable', 'ProjectExplorer.Project.Target.0')
+	target = self.add(doc, data, 'valuemap', '', {'type':'QVariantMap'})
+	self.add(doc, target, 'value', '%s'%appname, { 'key':'ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'type':'QString' })
+	self.add(doc, target, 'value', '', { 'key':'ProjectExplorer.ProjectConfiguration.DisplayName', 'type':'QString' })
+	self.add(doc, target, 'value', 'GenericProjectManager.GenericTarget', { 'key':'ProjectExplorer.ProjectConfiguration.Id', 'type':'QString' })
+	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveBuildConfiguration', 'type':'int' })
+	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveDeployConfiguration', 'type':'int' })
+	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveRunConfiguration', 'type':'int' })
+
 	targetcount = 0
 	for toolchainName in self.env['BUILD_VARIANTS']+[i for i in self.env['ALL_VARIANTS'] if i not in self.env['BUILD_VARIANTS']]:
 		env = self.bld.all_envs[toolchainName]
-		data = self.add(doc, qtproject, 'data')
-		self.add(doc, data, 'variable', 'ProjectExplorer.Project.Target.%d' % targetcount)
-		target = self.add(doc, data, 'valuemap', '', {'type':'QVariantMap'})
-		self.add(doc, target, 'value', '%s'%toolchainName, { 'key':'ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'type':'QString' })
-		self.add(doc, target, 'value', '', { 'key':'ProjectExplorer.ProjectConfiguration.DisplayName', 'type':'QString' })
-		self.add(doc, target, 'value', 'GenericProjectManager.GenericTarget', { 'key':'ProjectExplorer.ProjectConfiguration.Id', 'type':'QString' })
-		self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveBuildConfiguration', 'type':'int' })
-		self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveDeployConfiguration', 'type':'int' })
-		self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.ActiveRunConfiguration', 'type':'int' })
-
-		map = self.add(doc, target, 'valuemap', '', {'type':'QVariantMap', 'key':'ProjectExplorer.Target.BuildConfiguration.0' })
+		map = self.add(doc, target, 'valuemap', '', {'type':'QVariantMap', 'key':'ProjectExplorer.Target.BuildConfiguration.%d' % targetcount })
 		self.add(doc, map, 'value', env['PREFIX'], {'type':'QString', 'key':"GenericProjectManager.GenericBuildConfiguration.BuildDirectory"})
 		if env.CC_NAME == 'msvc':
 			self.add(doc, map, 'value', 'ProjectExplorer.ToolChain.Msvc:%s:%s:%s' % (env.MSVC_ENVIRONMENT[0],env.MSVC_ENVIRONMENT[1], cdb), {'type':'QString', 'key':'ProjectExplorer.BuildConfiguration.ToolChain'})
@@ -109,14 +109,14 @@ def create_creator_user(self, appname):
 		self.add(doc, map, 'value', '', { 'key':'ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'type':'QString' })
 		self.add(doc, map, 'value', toolchainName, { 'key':'ProjectExplorer.ProjectConfiguration.DisplayName', 'type':'QString' })
 		self.add(doc, map, 'value', 'GenericProjectManager.GenericBuildConfiguration', { 'key':'ProjectExplorer.ProjectConfiguration.Id', 'type':'QString' })
-
-		self.add(doc, target, 'value', '1', { 'key':'ProjectExplorer.Target.BuildConfigurationCount', 'type':'int' })
-		self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.DeployConfigurationCount', 'type':'int' })
-		self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.RunConfigurationCount', 'type':'int' })
 		targetcount = targetcount + 1
 
+	self.add(doc, target, 'value', '%d'%targetcount, { 'key':'ProjectExplorer.Target.BuildConfigurationCount', 'type':'int' })
+	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.DeployConfigurationCount', 'type':'int' })
+	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.RunConfigurationCount', 'type':'int' })
+
 	self.add(doc, data, 'variable', 'ProjectExplorer.Project.TargetCount')
-	self.add(doc, data, 'value', '%d'%targetcount, { 'type':'int' })
+	self.add(doc, data, 'value', '1', { 'type':'int' })
 	self.add(doc, data, 'variable', 'ProjectExplorer.Project.Updater.EnvironmentId')
 	self.add(doc, data, 'value', '{81f17ba5-6dc5-418d-8074-a27a07355d8a}', { 'type':'QString' })
 	self.add(doc, data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion')
@@ -201,7 +201,7 @@ def create_qtcreator_project(t):
 	toolName = t.features[0]
 	if not toolName in solutions:
 		appname = getattr(Context.g_module, 'APPNAME', 'noname')
-		outname = [appname+i for i in ['.creator', '.creator.user', '.files', '.includes', '.config']]
+		outname = ["projects/"+appname+i for i in ['.creator', '.creator.user', '.files', '.includes', '.config']]
 		solution = t.create_task("QtCreatorGenerateProject")
 		solution.appname = appname
 		solution.bld = t.bld

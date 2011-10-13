@@ -1,5 +1,6 @@
 plugin 3d;
 plugin editor;
+plugin blabla;
 
 w = 3d.Graphics.RenderWindow (
   width = 100;
