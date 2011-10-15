@@ -1,0 +1,7 @@
+.build/*
+build/*
+nbproject/*
+*.pyc
+.lock-*
+parser.out
+
