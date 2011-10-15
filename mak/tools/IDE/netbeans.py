@@ -53,7 +53,7 @@ def addSourceTree(doc, xml, name, folder):
 	for source in folder.files:
 		add(doc, f, 'in', source.filename)
 
-def generateConfigurationsXml(sources, configurations):
+def generateConfigurationsXml(sources, configurations, bld, out):
 	doc = Document()
 	doc.encoding = "UTF-8"
 	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
@@ -67,6 +67,7 @@ def generateConfigurationsXml(sources, configurations):
 	add(doc, cd, 'projectmakefile', 'wscript')
 	confs = add(doc, cd, 'confs')
 	for c in configurations:
+		env = bld.all_envs[c]
 		conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
 		toolsSet = add(doc, conf, 'toolsSet')
 		add(doc, toolsSet, 'remote-source-mode', 'LOCAL_SOURCES')
@@ -75,12 +76,16 @@ def generateConfigurationsXml(sources, configurations):
 		add(doc, mtool, 'buildCommandWorkingDir', '.')
 		add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
 		add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
+		if env.ABI == 'mach-o' and False:
+			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+		else:
+			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
 	return doc
 
 def generateProject(task):
 	project = generateProjectXml(task.appname, task.allplatforms)
 	task.outputs[0].write(project.toxml())
-	configurations = generateConfigurationsXml(task.depends, task.allplatforms)
+	configurations = generateConfigurationsXml(task.depends, task.allplatforms, task.bld, task.out)
 	task.outputs[1].write(configurations.toxml())
 
 NetbeansGenerateProject = Task.task_factory('NetbeansGenerateProject', generateProject)
@@ -90,8 +95,9 @@ solutions={}
 def create_netbeans_project(t):
 	toolName = t.features[0]
 	if not toolName in solutions:
-		outname = ['project.xml', 'configurations.xml']
+		outname = ['projects/project.xml', 'projects/configurations.xml']
 		solution = t.create_task("NetbeansGenerateProject")
+		solution.bld = t.bld
 		solution.appname = getattr(Context.g_module, 'APPNAME', 'noname')
 		solution.env=t.env
 		solution.version = toolName
@@ -105,4 +111,6 @@ def create_netbeans_project(t):
 		solutions[toolName] = solution
 	solution = solutions[toolName]
 	solution.depends.append((t.name, t.category, t.sourcetree))
+	if t.type == 'game':
+		solution.out = t.name
 
