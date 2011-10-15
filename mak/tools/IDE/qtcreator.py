@@ -10,10 +10,10 @@ import xml
 from xml.dom.minidom import Document
 
 
-def create_project(self, appname):
+def create_project(self, appname, out):
 	project = self.create_creator(appname)
 	self.outputs[0].write(project)
-	project = self.create_creator_user(appname)
+	project = self.create_creator_user(appname, out)
 	self.outputs[1].write(project.toxml())
 	project = self.create_files(appname)
 	self.outputs[2].write(project)
@@ -31,7 +31,7 @@ try:
 except KeyError:
 	cdb = "mak/win32/bin/cdb.exe"
 
-def create_creator_user(self, appname):
+def create_creator_user(self, appname, out):
 	imp= xml.dom.minidom.getDOMImplementation('')
 	dt= imp.createDocumentType('QtCreatorProject', '', '')
 	doc = imp.createDocument('qtcreator', 'qtcreator', dt)
@@ -59,7 +59,7 @@ def create_creator_user(self, appname):
 	for toolchainName in self.env['BUILD_VARIANTS']+[i for i in self.env['ALL_VARIANTS'] if i not in self.env['BUILD_VARIANTS']]:
 		env = self.bld.all_envs[toolchainName]
 		map = self.add(doc, target, 'valuemap', '', {'type':'QVariantMap', 'key':'ProjectExplorer.Target.BuildConfiguration.%d' % targetcount })
-		self.add(doc, map, 'value', env['PREFIX'], {'type':'QString', 'key':"GenericProjectManager.GenericBuildConfiguration.BuildDirectory"})
+		self.add(doc, map, 'value', os.path.abspath(env['PREFIX']), {'type':'QString', 'key':"GenericProjectManager.GenericBuildConfiguration.BuildDirectory"})
 		if env.CC_NAME == 'msvc':
 			self.add(doc, map, 'value', 'ProjectExplorer.ToolChain.Msvc:%s:%s:%s' % (env.MSVC_ENVIRONMENT[0],env.MSVC_ENVIRONMENT[1], cdb), {'type':'QString', 'key':'ProjectExplorer.BuildConfiguration.ToolChain'})
 		else:
@@ -105,7 +105,12 @@ def create_creator_user(self, appname):
 
 		self.add(doc, map, 'value', '2', { 'key':'ProjectExplorer.BuildConfiguration.BuildStepListCount', 'type':'int' })
 		self.add(doc, map, 'value', 'false', { 'key':'ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', 'type':'bool' })
-		self.add(doc, map, 'valuelist', '', { 'key':'ProjectExplorer.BuildConfiguration.UserEnvironmentChanges', 'type':'QVariantList' })
+		environments=self.add(doc, map, 'valuelist', '', { 'key':'ProjectExplorer.BuildConfiguration.UserEnvironmentChanges', 'type':'QVariantList' })
+		if env.ABI == 'mach_o':
+			self.add(doc, environments, 'value', 'Executable=%s.app' % appname, {'type':'QString'})
+		else:
+			self.add(doc, environments, 'value', 'Executable=%s' % os.path.join(env.DEPLOY['bin'], out), {'type':'QString'})
+		self.add(doc, environments, 'value', 'Output=%s' % os.path.abspath(env.PREFIX), {'type':'QString'})
 		self.add(doc, map, 'value', '', { 'key':'ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'type':'QString' })
 		self.add(doc, map, 'value', toolchainName, { 'key':'ProjectExplorer.ProjectConfiguration.DisplayName', 'type':'QString' })
 		self.add(doc, map, 'value', 'GenericProjectManager.GenericBuildConfiguration', { 'key':'ProjectExplorer.ProjectConfiguration.Id', 'type':'QString' })
@@ -113,7 +118,23 @@ def create_creator_user(self, appname):
 
 	self.add(doc, target, 'value', '%d'%targetcount, { 'key':'ProjectExplorer.Target.BuildConfigurationCount', 'type':'int' })
 	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.DeployConfigurationCount', 'type':'int' })
-	self.add(doc, target, 'value', '0', { 'key':'ProjectExplorer.Target.RunConfigurationCount', 'type':'int' })
+
+	runconf = self.add(doc, target, 'valuemap', '', { 'key':'ProjectExplorer.Target.RunConfiguration.0', 'type':'QVariantMap' })
+	self.add(doc, runconf, 'value', 'true', { 'key':'Analyzer.Project.UseGlobal', 'type':'bool' })
+	self.add(doc, runconf, 'value', '', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.Arguments', 'type':'QString' })
+	self.add(doc, runconf, 'value', '2', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.BaseEnvironmentBase', 'type':'int' })
+	self.add(doc, runconf, 'value', '${Output}/${Executable}', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.Executable', 'type':'QString' })
+	self.add(doc, runconf, 'value', 'false', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', 'type':'bool' })
+	self.add(doc, runconf, 'valuelist', '', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.UserEnvironmentChanges', 'type':'QVariantList' })
+	self.add(doc, runconf, 'value', '${Output}', { 'key':'ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', 'type':'QString' })
+	self.add(doc, runconf, 'value', 'Running ${Output}/${Executable}', { 'key':'ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'type':'QString' })
+	self.add(doc, runconf, 'value', '', { 'key':'ProjectExplorer.ProjectConfiguration.DisplayName', 'type':'QString' })
+	self.add(doc, runconf, 'value', 'ProjectExplorer.CustomExecutableRunConfiguration', { 'key':'ProjectExplorer.ProjectConfiguration.Id', 'type':'QString' })
+	self.add(doc, runconf, 'value', '3768', { 'key':'RunConfiguration.QmlDebugServerPort', 'type':'int' })
+	self.add(doc, runconf, 'value', 'true', { 'key':'RunConfiguration.UseCppDebugger', 'type':'bool' })
+	self.add(doc, runconf, 'value', 'false', { 'key':'RunConfiguration.UseQmlDebugger', 'type':'bool' })
+	self.add(doc, runconf, 'value', 'false', { 'key':'RunConfiguration.UseQmlDebuggerAuto', 'type':'bool' })
+	self.add(doc, target, 'value', '1', { 'key':'ProjectExplorer.Target.RunConfigurationCount', 'type':'int' })
 
 	self.add(doc, data, 'variable', 'ProjectExplorer.Project.TargetCount')
 	self.add(doc, data, 'value', '1', { 'type':'int' })
@@ -181,7 +202,7 @@ def setAttributes(self, node, attrs):
 
 
 def generateProject(task):
-	task.create_project(task.appname)
+	task.create_project(task.appname, task.out)
 
 QtCreatorGenerateProject = Task.task_factory('QtCreatorGenerateProject', generateProject)
 QtCreatorGenerateProject.append_directory = append_directory
@@ -217,4 +238,6 @@ def create_qtcreator_project(t):
 		solutions[toolName] = solution
 	solution = solutions[toolName]
 	solution.depends.append((t.name, t.category, t.sourcetree, t.platforms))
+	if t.type == 'game':
+		solution.out = t.name
 
