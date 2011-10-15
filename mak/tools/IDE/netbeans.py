@@ -76,7 +76,7 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 		add(doc, mtool, 'buildCommandWorkingDir', '.')
 		add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
 		add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
-		if env.ABI == 'mach-o' and False:
+		if env.ABI == 'mach_o' and False:
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 		else:
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
