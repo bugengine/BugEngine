@@ -4,4 +4,5 @@ nbproject/*
 *.pyc
 .lock-*
 parser.out
+BugEngine.*
 
