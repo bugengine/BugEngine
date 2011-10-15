@@ -35,7 +35,7 @@ def add_gcc_flags_to_env(conf):
 def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
-	conf.env['ABI'] = 'mach-o'
+	conf.env['ABI'] = 'mach_o'
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
