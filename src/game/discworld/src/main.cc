@@ -12,6 +12,8 @@ int be_main(weak<BugEngine::Application> app)
     ref<BugEngine::Folder> dataFolder = ref<BugEngine::DiskFolder>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory());
     BugEngine::Plugin<minitl::pointer> p1("nullrender", weak<const BugEngine::Folder>(dataFolder));
     //BugEngine::Plugin<minitl::pointer> p2("GL4", weak<const BugEngine::Folder>(dataFolder));
+
+    const BugEngine::RTTI::ClassInfo* ci = BugEngine::be_typeid<BugEngine::RTTI::ClassInfo>::klass();
     app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
     return 0;
 }

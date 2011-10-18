@@ -93,25 +93,31 @@ def p_param(t):
 	"""
 		param : type param_name_opt array_opt param_value_opt
 	"""
-	t[0] = (t[1][1]+t[3], t[2])
+	t[0] = (t[1][1]+t[3], t[2], [])
 
 def p_param_tag(t):
 	"""
 		param : tags type param_name_opt array_opt param_value_opt
 	"""
-	t[0] = (t[2][1]+t[4], t[3])
+	t[0] = (t[2][1]+t[4], t[3], t[1])
 
 def p_function_param(t):
 	"""
 		param : function_pointer_with_name param_value_opt
 	"""
-	t[0] = t[1]
+	t[0] = (t[1][0], t[1][1], [])
+
+def p_function_param_tag(t):
+	"""
+		param : tags function_pointer_with_name param_value_opt
+	"""
+	t[0] = (t[2][0], t[2][1], t[1])
 
 def p_param_ellipsis(t):
 	"""
 		param : ELLIPSIS
 	"""
-	t[0] = ('...','')
+	t[0] = ('...','', [])
 
 def p_template_param(t):
 	"""
@@ -269,7 +275,7 @@ def typeList(params):
 		else:
 			return params[0][0]
 	result = params[0][0]
-	for type,name in params[1:]:
+	for type,name,tags in params[1:]:
 		result = result + ', ' + type
 		return result
 
