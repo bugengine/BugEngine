@@ -160,7 +160,7 @@ class Enum(Container):
 		file.write("        0,\n")
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >,\n" % self.fullname)
-		file.write("        { 0x%s, 0x%s, 0x%s, 0x%s }\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
+		file.write("        {{ 0x%s, 0x%s, 0x%s, 0x%s }}\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
 		if self.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
@@ -220,7 +220,7 @@ class Class(Container):
 		else:
 			file.write("        0,\n")
 			file.write("        0,\n")
-		file.write("        { 0x%s, 0x%s, 0x%s, 0x%s }\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
+		file.write("        {{ 0x%s, 0x%s, 0x%s, 0x%s }}\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
 
 	def buildProperties(self, file, decl):
