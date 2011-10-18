@@ -12,6 +12,24 @@ namespace BugEngine { namespace RTTI
 static const u32 s_overloadMaxDistance = 1000000;
 static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
+
+Value MethodInfo::OverloadInfo::ParamInfo::getTag(const TypeInfo& type) const
+{
+    TagInfo* tag = tags;
+    while(tag)
+    {
+        if (type <= tag->tag.type())
+            return Value(Value::ByRef(tag->tag));
+        tag = tag->next;
+    }
+    return Value();
+}
+
+Value MethodInfo::OverloadInfo::ParamInfo::getTag(const ClassInfo* type) const
+{
+    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+}
+
 u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
 {
     if (vararg)
@@ -34,6 +52,23 @@ u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
         else
             return distance;
     }
+}
+
+Value MethodInfo::OverloadInfo::getTag(const TypeInfo& type) const
+{
+    TagInfo* tag = tags;
+    while(tag)
+    {
+        if (type <= tag->tag.type())
+            return Value(Value::ByRef(tag->tag));
+        tag = tag->next;
+    }
+    return Value();
+}
+
+Value MethodInfo::OverloadInfo::getTag(const ClassInfo* type) const
+{
+    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
 }
 
 Value MethodInfo::operator()(Value* params, u32 nparams) const

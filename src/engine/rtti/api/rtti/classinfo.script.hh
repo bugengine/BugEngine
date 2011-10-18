@@ -5,6 +5,7 @@
 #define BE_RTTI_CLASSINFO_HH_
 /*****************************************************************************/
 #include    <rtti/value.hh>
+#include    <core/runtime/md5.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -21,23 +22,26 @@ published:
     class MetaClassInfo;
     friend class MetaClassInfo;
 published:
-    inamespace          name;
+    inamespace const    name;
     const ClassInfo*    parent;
-    u32                 size;
-    i32                 offset;
-    TagInfo*            tags;
+    u32 const           size;
+    i32 const           offset;
+    TagInfo* const      tags;
     const PropertyInfo* properties;
     const MethodInfo*   methods;
     const MethodInfo*   constructor;
     const MethodInfo*   call;
 public:
-    void (*copyconstructor)(const void* src, void* dst);
-    void (*destructor)(void* src);
+    typedef void (*CopyConstructor)(const void *, void *);
+    typedef void (*Destructor)(void *);
+    const CopyConstructor   copyconstructor;
+    const Destructor        destructor;
+    const MD5               hash;
 published:
-    Value get(Value& from, istring name) const;
-
     Value getTag(const TypeInfo& type) const;
     Value getTag(const ClassInfo* type) const;
+
+    Value get(Value& from, istring name) const;
 
     bool isA(const ClassInfo* klass) const;
 

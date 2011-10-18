@@ -29,4 +29,21 @@ void PropertyInfo::set(Value& from, const Value& value) const
     get(from) = value;
 }
 
+Value PropertyInfo::getTag(const TypeInfo& type) const
+{
+    TagInfo* tag = tags;
+    while(tag)
+    {
+        if (type <= tag->tag.type())
+            return Value(Value::ByRef(tag->tag));
+        tag = tag->next;
+    }
+    return Value();
+}
+
+Value PropertyInfo::getTag(const ClassInfo* type) const
+{
+    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+}
+
 }}

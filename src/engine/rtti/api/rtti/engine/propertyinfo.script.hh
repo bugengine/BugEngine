@@ -18,6 +18,7 @@ struct be_api(RTTI) PropertyInfo
 {
     friend class BugEngine::Value;
 published:
+    TagInfo* const      tags;
     const PropertyInfo* next;
     TypeInfo            owner;
     TypeInfo            type;
@@ -25,6 +26,9 @@ published:
 
     Value get(Value& from) const;
     void  set(Value& from, const Value& value) const;
+
+    Value getTag(const TypeInfo& type) const;
+    Value getTag(const ClassInfo* type) const;
 private:
     PropertyInfo& operator=(const PropertyInfo&);
 };

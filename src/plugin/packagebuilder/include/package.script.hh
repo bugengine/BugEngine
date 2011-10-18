@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 #include    <system/file/file.script.hh>
+#include    <rtti/tags/editor.script.hh>
 
 namespace BugEngine { namespace PackageBuilder
 {

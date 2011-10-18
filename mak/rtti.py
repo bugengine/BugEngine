@@ -1,6 +1,12 @@
 import os
 
 
+try:
+	import hashlib
+	make_md5 = hashlib.md5
+except:
+	import md5
+	make_md5 = md5.new
 
 showline = 0
 
@@ -23,6 +29,7 @@ class Container:
 		self.scope = scope
 		self.visibility = 'published'
 		self.classes = []
+		self.hash = make_md5()
 
 	def addObject(self, object):
 		self.objects.append(object)
@@ -47,6 +54,21 @@ class Container:
 	def predecl(self, file):
 		for o in self.objects:
 			o.predecl(file)
+
+	def writeTags(self, file, prefix, tags):
+		tagname = "0"
+		tagindex = 0
+		for type,tag in tags:
+			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, prefix, tagindex, type, tag))
+			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (prefix, tagindex))
+			file.write("    {\n")
+			file.write("        %s,\n" % tagname)
+			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tagindex))
+			file.write("    };\n")
+			tagname = "&s_%s_tag_%d" % (prefix, tagindex)
+			tagindex = tagindex + 1
+		return tagname
+
 
 class Root(Container):
 	def __init__(self, source, useMethods):
@@ -82,6 +104,7 @@ class Root(Container):
 			file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &%s; }\n" % (classname, objname))
 		file.write("\n}\n")
 
+
 class Typedef(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line, 'public')
@@ -104,6 +127,7 @@ class Namespace(Container):
 		Container.predecl(self, file)
 
 
+
 class Enum(Container):
 	def __init__(self, parent, name, line, scope):
 		Container.__init__(self, parent, name, line, scope)
@@ -119,20 +143,10 @@ class Enum(Container):
 	def dump(self, file, namespace, nested):
 		name = self.fullname[2:].replace('::', '.')
 		decl = "enum%s" % self.fullname.replace(':', '_')
+		tagname = self.writeTags(file, decl, self.tags)
 		if self.useMethods:
 			file.write("static const ::BugEngine::RTTI::ClassInfo& s_%sFun()\n{\n" % decl)
-		tagname = "0"
-		tagindex = 0
-		for type,tag in self.tags:
-			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
-			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
-			file.write("    {\n")
-			file.write("        %s,\n" % tagname)
-			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
-			file.write("    };\n")
-			tagname = "&s_%s_tag_%d" % (decl, tagindex)
-			tagindex = tagindex + 1
-
+		hash = self.hash.hexdigest()
 		file.write("static const ::BugEngine::RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
@@ -145,7 +159,8 @@ class Enum(Container):
 		file.write("        0,\n")
 		file.write("        0,\n")
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
-		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % self.fullname)
+		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >,\n" % self.fullname)
+		file.write("        { 0x%s, 0x%s, 0x%s, 0x%s }\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
 		if self.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
@@ -168,6 +183,7 @@ class Class(Container):
 	def dump(self, file, namespace, nested):
 		file.write("//----------------------------------------------------------------------\n")
 		file.write("// %s\n" % self.fullname)
+		self.hash.update(self.fullname)
 		classes = Container.dump(self, file, namespace, True)
 		decl = "class%s" % self.fullname.replace(':', '_')
 		if self.useMethods:
@@ -185,18 +201,8 @@ class Class(Container):
 
 	def writeClass(self, file, decl, nested, properties, methods, constructor, call):
 		name = self.fullname[2:].replace('::', '.')
-		tagname = "0"
-		tagindex = 0
-		for type,tag in self.tags:
-			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, decl, tagindex, type, tag))
-			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (decl, tagindex))
-			file.write("    {\n")
-			file.write("        %s,\n" % tagname)
-			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, decl, tagindex))
-			file.write("    };\n")
-			tagname = "&s_%s_tag_%d" % (decl, tagindex)
-			tagindex = tagindex + 1
-
+		tagname = self.writeTags(file, decl, self.tags)
+		hash = self.hash.hexdigest()
 		file.write("static const ::BugEngine::RTTI::ClassInfo s_%s =\n" % (decl))
 		file.write("    {\n")
 		file.write("        inamespace(\"%s\"),\n" % (name))
@@ -210,10 +216,11 @@ class Class(Container):
 		file.write("        %s,\n" % (call))
 		if self.value:
 			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
-			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % self.fullname)
+			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >,\n" % self.fullname)
 		else:
 			file.write("        0,\n")
-			file.write("        0\n")
+			file.write("        0,\n")
+		file.write("        { 0x%s, 0x%s, 0x%s, 0x%s }\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
 
 	def buildProperties(self, file, decl):
@@ -222,8 +229,13 @@ class Class(Container):
 			if visibility == 'published':
 				if showline:
 					file.write("#line %d\n" % (line))
+				self.hash.update("property")
+				self.hash.update(type)
+				self.hash.update(name)
+				tagname = self.writeTags(file, decl+"_"+name, tags)
 				file.write("static const ::BugEngine::RTTI::PropertyInfo s_%s_%s =\n" % (decl, name))
 				file.write("    {\n")
+				file.write("        %s,\n" % tagname)
 				file.write("        %s,\n" % prop)
 				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % self.fullname)
 				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % type)
@@ -245,14 +257,27 @@ class Class(Container):
 				continue
 			if showline:
 				file.write("        #line %d\n" % (line))
+			self.hash.update("method")
+			self.hash.update(name)
 
 			for rtype, params, attrs, visibility, tags, line in overloads:
+				self.hash.update("overload")
+				if "const" in attrs:
+					self.hash.update("const")
+				if "static" in attrs:
+					self.hash.update("static")
 				paramindex = 0
 				param = "0"
 				if showline: file.write("#line %d\n" % (line))
-				for ptype, pname in params[::-1]:
+				method_tagname = self.writeTags(file, decl+"_"+prettyname, tags)
+				for ptype, pname, tags in params[::-1]:
+					self.hash.update("param")
+					self.hash.update("ptype")
+					self.hash.update("pname")
+					param_tagname = self.writeTags(file, decl+"_"+prettyname+"_"+pname, tags)
 					file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
+					file.write("        %s,\n" % param_tagname)
 					file.write("        %s,\n" % param)
 					file.write("        \"%s\",\n" % pname)
 					file.write("        ::BugEngine::be_typeid< %s >::type()\n" % ptype)
@@ -262,6 +287,7 @@ class Class(Container):
 				if 'static' not in attrs:
 					file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
+					file.write("        0,\n")
 					file.write("        %s,\n" % param)
 					file.write("        \"this\",\n")
 					if "const" in attrs:
@@ -271,7 +297,7 @@ class Class(Container):
 					file.write("    };\n")
 					param = "&s_%s_%s_%d_p%d" % (decl, prettyname, overloadindex, paramindex)
 
-				paramtypes = ', '.join(ptype for ptype, pname in params)
+				paramtypes = ', '.join(ptype for ptype, pname, tags in params)
 				if 'static' in attrs:
 					ptr = "%s (*) (%s)" % (rtype, paramtypes)
 				elif 'const' in attrs:
@@ -304,6 +330,7 @@ class Class(Container):
 
 				file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo s_%s_%s_%d =\n" % (decl, prettyname, overloadindex))
 				file.write("    {\n")
+				file.write("        %s,\n" % method_tagname)
 				file.write("        %s,\n" % overload)
 				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % rtype)
 				file.write("        %s,\n" % param)
