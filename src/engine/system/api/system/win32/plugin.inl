@@ -34,6 +34,7 @@ static HANDLE loadPlugin(const istring &pluginName)
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     static const ipath pluginSubdir = ipath("plugins");
     minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
+    be_info("loading plugin %s (%s)" | pluginName | pluginPath);
     HANDLE h = LoadLibrary(pluginPath.c_str());
     if (!h)
     {

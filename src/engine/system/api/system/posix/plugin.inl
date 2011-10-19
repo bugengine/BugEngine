@@ -32,9 +32,12 @@ namespace BugEngine
 
 static void* loadLibrary(const istring& pluginName)
 {
-    minitl::format<> f = (minitl::format<>("lib%s.so") | pluginName.c_str());
-    be_info("loading plugin %s" | f);
-    void* handle = dlopen((Environment::getEnvironment().getDataDirectory() + ipath("plugins") + ifilename(f.c_str())).str().c_str(), RTLD_NOW|RTLD_LOCAL);
+    minitl::format<> plugingFile = minitl::format<>("lib%s.so") | pluginName;
+    const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
+    static const ipath pluginSubdir = ipath("plugins");
+    minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
+    be_info("loading plugin %s (%s)" | pluginName | pluginPath);
+    void* handle = dlopen(pluginPath.c_str(), RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
         be_error(dlerror());
