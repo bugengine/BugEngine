@@ -38,6 +38,7 @@ PluginList::~PluginList()
 
 PluginList* PluginList::findPlugin(const char *name)
 {
+    be_info("loading plugin %s (built-in)" | name);
     for (size_t i = 0; i < s_currentPlugin; ++i)
     {
         if (strcmp(name, s_plugins[i]->name) ==0)
