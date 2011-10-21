@@ -10,27 +10,26 @@ def newid():
 	return "%04X%04X%04X%012d" % (random.randint(0, 32767), random.randint(0, 32767), random.randint(0, 32767), int(time.time()))
 
 class XCodeProject:
-	def __init__(self, name, path, version, projects):
+	def __init__(self, name, path, version, projects, out, bld):
 		self.file = open(path, 'w')
 		self.version = version
 		self.projects = projects
 		self.projectID = newid()
-		self.buildSettingsId = (newid(),
-					[('osx-debug', newid(), newid(), newid()),
-					 ('osx-final', newid(), newid(), newid()),
-					 ('osx-profile', newid(), newid(), newid()),
-					 ('iphone-debug', newid(), newid(), newid()),
-					 ('iphone-profile', newid(), newid(), newid()),
-					 ('iphone-final', newid(), newid(), newid())])
 		self.mainGroup = newid()
-		for p in self.projects:
-			p.plist = {}
+		self.bld = bld
+		self.targetId = {}
+		self.productId = {}
+		self.projectConfIdDebug = newid()
+		self.projectConfIdProfile = newid()
+		self.projectConfIdFinal = newid()
+		self.projectConfListId = newid()
+		self.out = out
 
-	def getProject(self, d):
-		for p in self.projects:
-			if p.projectName == d.name and p.projectCategory == d.category:
-				return p
-		return None
+		for toolchain in self.bld.env.ALL_VARIANTS:
+			if toolchain[0:5] == 'debug':
+				toolchain = toolchain[6:]
+				self.targetId[toolchain] = newid()
+				self.productId[toolchain] = newid()
 
 	def writeHeader(self):
 		w = self.file.write
@@ -42,40 +41,22 @@ class XCodeProject:
 		w("	objectVersion = %d;\n" % self.version[1])
 		w("	objects = {\n\n")
 
-	def pbxBuildTree(self, tree, processcpp):
-		w = self.file.write
-		tree.id = newid()
-		for name,dir in tree.directories.items():
-			self.pbxBuildTree(dir, processcpp)
-		for file in tree.files:
-			file.id = newid()
-			file.buildid = newid()
-			if file.process:
-				if isinstance(file, mak.sources.cppsource) and not isinstance(file, mak.sources.generatedcppsource):
-					if processcpp:
-						w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
-				elif isinstance(file, mak.sources.datasource):
-					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
-				elif isinstance(file, mak.sources.lexsource):
-					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
-				elif isinstance(file, mak.sources.yaccsource):
-					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (file.buildid, file.id))
-
-	def pbxDirTree(self, tree, name, children = []):
+	def pbxDirTree(self, tree, name):
 		w = self.file.write
 		w("\t%s = {\n" % tree.id)
 		w("\t\tisa = PBXGroup;\n")
 		w("\t\tchildren = (\n")
 		subdirs = []
 		for n,d in tree.directories.items():
+			d.id = newid()
 			subdirs.append((n, d))
 		subdirs.sort(key = lambda i: i[0])
 		for n,d in subdirs:
 			w("\t\t\t%s,\n"%d.id)
 		for file in tree.files:
+			if isinstance(file, mak.sources.generatedcppsource) or isinstance(file, mak.sources.generatedhsource):
+				continue
 			w("\t\t\t%s,\n"%file.id)
-		for id in children:
-			w("\t\t\t%s,\n"%id)
 		w("\t\t);\n")
 		w("\t\tname = \"%s\";\n" % name)
 		w("\t\tsourceTree = \"<group>\";\n")
@@ -90,6 +71,7 @@ class XCodeProject:
 		for file in tree.files:
 			filename = os.path.join(path, tree.prefix, file.filename)
 			sourceroot = "SOURCE_ROOT"
+			file.id = newid()
 			if isinstance(file, mak.sources.generatedcppsource) or isinstance(file, mak.sources.generatedhsource):
 				continue
 			if isinstance(file, mak.sources.hsource):
@@ -115,215 +97,226 @@ class XCodeProject:
 			elif isinstance(file, mak.sources.deployedsource):
 				if file.filename.endswith('.plist'):
 					filetype = "text.plist.xml"
-					for name, _1, _2, _3 in self.buildSettingsId[1]:
-						platform, variant = name.split('-')
-						if platform in file.platforms:
-							p.plist[name] = filename
 				else:
 					filetype = "text"
 			else:
 				filetype = "text"
 			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = %s;\n\t};\n" % (file.id, filetype, os.path.split(filename)[1], filename, sourceroot))
 
-	def writePBXBuildFile(self):
-		w = self.file.write
-		w("/* Begin PBXBuildFile section */\n")
-		for d in self.projects:
-			if d.usemaster:
-				d.masterid = newid()
-				d.masterbuildid = newid()
-				w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (d.masterbuildid, d.masterid))
-			self.pbxBuildTree(d.sourceTree, not d.usemaster)
-		w("/* End PBXBuildFile section */\n\n")
-
 	def writePBXFileReference(self):
 		w = self.file.write
 		w("/* Begin PBXFileReference section */\n")
-		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
-			w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = text.xcconfig;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (fileref, name+'.xcconfig', os.path.join('mak', 'xcode', name+'.xcconfig')))
-			#w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tlastKnownFileType = wrapper.framework;\n\t\tname = \"%s\";\n\t\tpath = \"/System/Library/Framework/%s.framework\";\n\t\tsourceTree = \"<absolute>\";\n\t};\n" % (fileref, name, name)))
 		for d in self.projects:
-			d.targetId = newid()
-			d.phaseId = [newid()]
-			d.applicationId = newid()
-			if d.usemaster:
-				if d.masterfilename[-2:] == '.c':
-					filetype = "sourcecode.c.c"
-				elif d.masterfilename[-2:] == '.m':
-					filetype = "sourcecode.c.objc"
-				elif d.masterfilename[-3:] == '.mm':
-					filetype = "sourcecode.cpp.objcpp"
-				else:
-					filetype = "sourcecode.cpp.cpp"
-				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\tfileEncoding = 4;\n\t\tlastKnownFileType = %s;\n\t\tname = \"%s\";\n\t\tpath = \"%s\";\n\t\tsourceTree = \"SOURCE_ROOT\";\n\t};\n" % (d.masterid, filetype, os.path.split(d.masterfilename)[1], d.masterfilename))
 			self.pbxFileRefTree(d, d.sourceTree)
-			if d.type in ['game', 'tool']:
-				d.phaseId.append(newid())
-				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = wrapper.application;\n\t\tincludeInIndex = 0;\n\t\tpath = \"%s.app\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
-			elif d.type in ['library', 'static_library', 'plugin']:
-				w("\t%s = {\n\t\tisa = PBXFileReference;\n\t\texplicitFileType = archive.ar;\n\t\tincludeInIndex = 0;\n\t\tpath = \"lib%s.a\";\n\t\tsourceTree = BUILT_PRODUCTS_DIR;\n\t};\n" % (d.applicationId, d.projectName))
-			d.buildSettingsId = (newid(),
-						[('osx-debug', newid()), ('osx-profile', newid()), ('osx-final', newid()),
-						 ('iphone-debug', newid()), ('iphone-profile', newid()), ('iphone-final', newid())])
 		w("/* End PBXFileReference section */\n\n")
 
 	def writePBXGroup(self):
 		w = self.file.write
+
+		products = newid()
 		w("/* Begin PBXGroup section */\n")
-		makid = newid()
-		w("\t%s = {\n" % makid)
+		w("\t%s = {\n" % products)
 		w("\t\tisa = PBXGroup;\n")
 		w("\t\tchildren = (\n")
-		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
-			w("\t\t\t%s,\n" % fileref)
+		for toolchain in self.bld.env.ALL_VARIANTS:
+			env = self.bld.all_envs[toolchain]
+			if toolchain[0:5] == 'debug':
+				toolchain = toolchain[6:]
+				if env.ABI == 'mach_o':
+					w("\t\t\t%s,\n" % self.productId[toolchain])
 		w("\t\t);\n")
-		w("\t\tname = config;\n")
+		w("\t\tname = out;\n")
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
 
 		w("\t%s = {\n" % self.mainGroup)
 		w("\t\tisa = PBXGroup;\n")
 		w("\t\tchildren = (\n")
-		w("\t\t\t%s,\n" % makid)
 		projects = []
 		for d in self.projects:
+			d.sourceTree.id = newid()
 			projects.append((d.projectCategory+'.'+d.projectName, d))
 		projects.sort(key = lambda i: i[0])
 		for name, d in projects:
 			w("\t\t\t%s,\n"%d.sourceTree.id)
+		w("\t\t\t%s\n" % products)
 		w("\t\t);\n")
 		w("\t\tname = BugEngine;\n")
 		w("\t\tsourceTree = \"<group>\";\n")
 		w("\t};\n")
 		for name, d in projects:
-			children = []
-			if d.usemaster:
-				children.append(d.masterid)
-			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
-				children.append(d.applicationId)
-			self.pbxDirTree(d.sourceTree, name, children)
+			self.pbxDirTree(d.sourceTree, name)
 		w("/* End PBXGroup section */\n\n")
 
-	def writeTarget(self, d):
+	def writeTarget(self, toolchain):
 		w = self.file.write
+		env = self.bld.all_envs['debug-'+toolchain]
 
-		dataid = newid()
-		w("\t%s = {\n" % dataid)
-		w("\t\tisa = PBXBuildRule;\n")
-		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
-		w("\t\tfilePatterns = \"*.script.hh\";\n")
-		w("\t\tfileType = pattern.proxy;\n")
-		w("\t\tisEditable = 1;\n")
-		w("\t\toutputFiles = (\n")
-		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
-		w("\t\t);\n")
-		w("\t\tscript = \"python mak/ddf.py --pch \\\"%s\\\" -o\\\"$DERIVED_FILES_DIR\\\" -D mak/macros_ignore \\\"$INPUT_FILE_PATH\\\"\";\n" % d.pchstop)
+		appname = getattr(Context.g_module, 'APPNAME', 'noname')
+
+		def macarch(arch):
+			if arch == 'amd64':
+				return 'x86_64'
+			elif arch == 'arm':
+				return 'armv6'
+			elif arch == 'x86':
+				return 'i386'
+			elif arch == 'ppc':
+				return 'powerpc'
+			elif arch == 'ppc64':
+				return 'powerpc64'
+			else:
+				return arch
+
+
+		conflist = newid()
+		confDebug = newid()
+		confProfile = newid()
+		confFinal = newid()
+		if env.ABI == 'mach_o':
+			productname = "%s/%s" % (env.PREFIX, appname)
+		else:
+			productname = "%s/%s/%s" % (env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN % self.out)
+
+		w("\t%s = {\n" % confDebug)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tPRODUCT_NAME = \"%s\";\n" % appname)
+		if env.ABI == 'mach_o':
+			w("\t\t\tARCHS = \"%s\";\n" % macarch(env.ARCHITECTURE))
+			w("\t\t\tSDKROOT = \"%s\";\n" % env.SDKROOT)
+			w("\t\t\tTOOLCHAIN = \"%s\";\n" % toolchain)
+			w("\t\t\tEFFECTIVE_PLATFORM_NAME = \"-%s\";\n" % toolchain)
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "debug")
 		w("\t};\n")
 
-		flexid = newid()
-		w("\t%s = {\n" % flexid)
-		w("\t\tisa = PBXBuildRule;\n")
-		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
-		w("\t\tfilePatterns = \"*.ll\";\n")
-		w("\t\tfileType = pattern.proxy;\n")
-		w("\t\tisEditable = 1;\n")
-		w("\t\toutputFiles = (\n")
-		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
-		w("\t\t);\n")
-		w("\t\tscript = \"/Developer/usr/bin/flex -o \\\"$DERIVED_FILES_DIR/$INPUT_FILE_BASE.cc\\\" \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t%s = {\n" % confProfile)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tPRODUCT_NAME = \"%s\";\n" % appname)
+		if env.ABI == 'mach_o':
+			w("\t\t\tARCHS = \"%s\";\n" % macarch(env.ARCHITECTURE))
+			w("\t\t\tSDKROOT = \"%s\";\n" % env.SDKROOT)
+			w("\t\t\tCONFIGURATION_BUILD_DIR = \"$CONFIG-$TOOLCHAIN\";\n")
+			w("\t\t\tTOOLCHAIN = \"%s\";\n" % toolchain)
+			w("\t\t\tEFFECTIVE_PLATFORM_NAME = \"-%s\";\n" % toolchain)
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "profile")
 		w("\t};\n")
 
-		bisonid = newid()
-		w("\t%s = {\n" % bisonid)
-		w("\t\tisa = PBXBuildRule;\n")
-		w("\t\tcompilerSpec = com.apple.compilers.proxy.script;\n")
-		w("\t\tfilePatterns = \"*.yy\";\n")
-		w("\t\tfileType = pattern.proxy;\n")
-		w("\t\tisEditable = 1;\n")
-		w("\t\toutputFiles = (\n")
-		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).cc\",\n")
-		w("\t\t\t\"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).hh\",\n")
-		w("\t\t);\n")
-		w("\t\tscript = \"/Developer/usr/bin/bison -d -o\\\"$DERIVED_FILES_DIR/$INPUT_FILE_BASE.cc\\\" \\\"$INPUT_FILE_PATH\\\"\";\n")
+		w("\t%s = {\n" % confFinal)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tPRODUCT_NAME = \"%s\";\n" % appname)
+		if env.ABI == 'mach_o':
+			w("\t\t\tARCHS = \"%s\";\n" % macarch(env.ARCHITECTURE))
+			w("\t\t\tSDKROOT = \"%s\";\n" % env.SDKROOT)
+			w("\t\t\tCONFIGURATION_BUILD_DIR = \"$CONFIG-$TOOLCHAIN\";\n")
+			w("\t\t\tTOOLCHAIN = \"%s\";\n" % toolchain)
+			w("\t\t\tEFFECTIVE_PLATFORM_NAME = \"-%s\";\n" % toolchain)
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "final")
 		w("\t};\n")
 
-		dependencies = []
-		for p in d.depends:
-			project = self.getProject(p)
-			if project.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
-				dependency = newid()
-				dependencies.append(dependency)
-				proxyId = getattr(project, 'proxyId', '')
-				if not proxyId:
-					project.proxyId = newid()
-					w("\t%s = {\n" % project.proxyId)
-					w("\t\tisa = PBXContainerItemProxy;\n")
-					w("\t\tcontainerPortal = %s;\n" % self.projectID)
-					w("\t\tproxyType = 1;\n")
-					w("\t\tremoteGlobalIdString = %s;\n" % project.targetId)
-					w("\t\tremoteInfo = \"%s\";\n" % project.projectName)
-					w("\t};\n")
-				w("\t%s = {\n" % dependency)
-				w("\t\tisa = PBXTargetDependency;\n")
-				w("\t\ttarget = %s;\n" % project.targetId)
-				w("\t\ttargetProxy = %s;\n" % project.proxyId)
-				w("\t};\n")
+		w("\t%s = {\n" % conflist)
+		w("\t\tisa = XCConfigurationList;\n")
+		w("\t\tbuildConfigurations = (\n")
+		w("\t\t\t%s,\n" % confDebug)
+		w("\t\t\t%s,\n" % confProfile)
+		w("\t\t\t%s,\n" % confFinal)
+		w("\t\t);\n")
+		w("\t\tdefaultConfigurationIsVisible = 0;\n")
+		w("\t\tdefaultConfigurationName = \"%s\";\n" % "debug")
+		w("\t};\n")
+
+		if env.ABI != 'mach_o':
+			w("\t%s = {\n" % self.targetId[toolchain])
+			w("\t\tisa = PBXLegacyTarget;\n")
+			w("\t\tbuildArgumentsString = \"waf install_$CONFIG-$TOOLCHAIN\";\n")
+			w("\t\tbuildConfigurationList = %s;\n" % conflist)
+			w("\t\tbuildPhases = (\n")
+			w("\t\t);\n")
+			w("\t\tbuildToolPath = %s;\n" % "python")
+			w("\t\tbuildWorkingDirectory = \"\";\n")
+			w("\t\tdependencies = (\n")
+			w("\t\t);\n")
+			w("\t\tname = \"%s\";\n" % toolchain)
+			w("\t\tproductName = \"%s\";\n" % toolchain)
+			w("\t\tpassBuildSettingsInEnvironment = 0;\n")
+			w("\t};\n")
 
 
-		w("\t%s = {\n" % d.targetId)
-		w("\t\tisa = PBXNativeTarget;\n")
-		w("\t\tbuildConfigurationList = %s;\n" % d.buildSettingsId[0])
-		w("\t\tbuildPhases = (\n")
-		for phase in d.phaseId:
-			w("\t\t\t%s,\n" % phase)
-		w("\t\t);\n")
-		w("\t\tbuildRules = (\n")
-		w("\t\t\t%s,\n" % dataid)
-		w("\t\t\t%s,\n" % flexid)
-		w("\t\t\t%s,\n" % bisonid)
-		w("\t\t);\n")
-		w("\t\tdependencies = (\n")
-		for i in dependencies:
-			w("\t\t\t%s,\n" % i)
-		w("\t\t);\n")
-		w("\t\tname = \"%s\";\n" % (d.projectName))
-		w("\t\tproductName = %s;\n" % d.projectName)
-		w("\t\tproductReference = %s;\n" % d.applicationId)
-		if d.type in ['game', 'tool']:
+		else:
+			shellscript = newid()
+			w("\t%s = {\n" % self.productId[toolchain])
+			w("\t\tisa = PBXFileReference;\n")
+			w("\t\texplicitFileType = wrapper.application;\n")
+			w("\t\tincludeInIndex = 0;\n")
+			w("\t\tpath = \"%s.app\";\n" % appname)
+			w("\t\tsourceTree = BUILT_PRODUCTS_DIR;\n")
+			w("\t};\n")
+
+			w("\t%s = {\n" % shellscript)
+			w("\t\tisa = PBXShellScriptBuildPhase;\n")
+			w("\t\tbuildActionMask = 2147483647;\n")
+			w("\t\tfiles = (\n")
+			w("\t\t);\n")
+			w("\t\tinputPaths = (\n")
+			w("\t\t);\n")
+			w("\t\toutputPaths = (\n")
+			w("\t\t);\n")
+			w("\t\trunOnlyForDeploymentPostProcessing = 0;\n")
+			w("\t\tshellPath = /bin/sh;\n")
+			w("\t\tshellScript = \"python waf install_$CONFIG-$TOOLCHAIN\";\n")
+			w("\t};\n")
+
+
+			w("\t%s = {\n" % self.targetId[toolchain])
+			w("\t\tisa = PBXNativeTarget;\n")
+			w("\t\tbuildConfigurationList = %s;\n" % conflist)
+			w("\t\tbuildPhases = (\n")
+			w("\t\t\t%s,\n" % shellscript)
+			w("\t\t);\n")
+			w("\t\tbuildRules = (\n")
+			w("\t\t);\n")
+			w("\t\tdependencies = (\n")
+			w("\t\t);\n")
+			w("\t\tname = \"%s\";\n" % toolchain)
+			w("\t\tproductName = \"%s\";\n" % toolchain)
+			w("\t\tproductReference = %s;\n" % self.productId[toolchain])
 			w("\t\tproductType = \"com.apple.product-type.application\";\n")
-		elif d.type in ['library', 'static_library', 'plugin']:
-			w("\t\tproductType = \"com.apple.product-type.library.static\";\n")
-		w("\t};\n")
+			w("\t};\n")
 
-	def writePBXNativeTarget(self):
+
+	def writePBXLegacyTarget(self):
 		w = self.file.write
-		w("/* Begin PBXNativeTarget section */\n")
-		for d in self.projects:
-			if d.type in ['game', 'tool']:
-				self.writeTarget(d)
-		for d in self.projects:
-			if d.type in ['library', 'static_library', 'plugin']:
-				self.writeTarget(d)
-		w("/* End PBXNativeTarget section */\n\n")
+		w("/* Begin PBXLegacyTarget section */\n")
+		for toolchain in self.bld.env.ALL_VARIANTS:
+			if toolchain[0:5] == 'debug':
+				toolchain = toolchain[6:]
+				self.writeTarget(toolchain)
+		w("/* End PBXLegacyTarget section */\n\n")
 
 	def writePBXProject(self):
 		w = self.file.write
 		w("/* Begin PBXProject section */\n")
 		w("\t%s /* Project object */ = {\n" % self.projectID)
 		w("\t\tisa = PBXProject;\n")
-		w("\t\tbuildConfigurationList = %s;\n" % self.buildSettingsId[0])
+		w("\t\tbuildConfigurationList = %s;\n" % self.projectConfListId)
 		w("\t\tcompatibilityVersion = \"%s\";\n" % self.version[0])
 		w("\t\thasScannedForEncodings = 1;\n")
 		w("\t\tmainGroup = %s;\n" % self.mainGroup)
 		w("\t\tprojectDirPath=\"\";\n")
 		w("\t\tprojectRoot=\"\";\n")
 		w("\t\ttargets = (\n")
-		for d in self.projects:
-			if d.type in ['game', 'tool']:
-				w("\t\t\t%s,\n" % d.targetId)
-		for d in self.projects:
-			if d.type in ['library', 'static_library', 'plugin']:
-				w("\t\t\t%s,\n" % d.targetId)
+		for toolchain in self.bld.env.ALL_VARIANTS:
+			if toolchain[0:5] == 'debug':
+				toolchain = toolchain[6:]
+				w("\t\t\t%s,\n" % self.targetId[toolchain])
 		w("\t\t);\n")
 		w("\t};\n")
 		w("/* End PBXProject section */\n\n")
@@ -341,132 +334,54 @@ class XCodeProject:
 				else:
 					w("\t\t\t%s,\n" % file.buildid)
 
-	def writePBXSourcesBuildPhase(self):
-		w = self.file.write
-		w("/* Begin PBXSourcesBuildPhase section */\n")
-		for d in self.projects:
-			w("\t%s = {\n" % d.phaseId[0])
-			w("\t\tisa = PBXSourcesBuildPhase;\n")
-			w("\t\tbuildActionMask = 2147483647;\n")
-			w("\t\tfiles = (\n")
-			if d.usemaster:
-				w("\t\t\t%s,\n" % d.masterbuildid)
-				self.writeSources(d.sourceTree, False)
-			else:
-				self.writeSources(d.sourceTree, True)
-			w("\t\t);\n")
-			w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
-			w("\t};\n")
-			if d.type in ['game', 'tool']:
-				w("\t%s = {\n" % d.phaseId[1])
-				w("\t\tisa = PBXFrameworksBuildPhase;\n")
-				w("\t\tbuildActionMask = 2147483647;\n")
-				w("\t\tfiles = (\n")
-				buildLibs = []
-				seen = set([d])
-				projects = d.depends[:]
-				while projects:
-					p = projects.pop(0)
-					project = self.getProject(p)
-					if project in seen:
-						continue
-					seen.add(project)
-					projects += p.depends
-					if project.type in ['game', 'tool', 'static_library', 'library', 'plugin']:
-						buildId = newid()
-						buildLibs.append((project.applicationId, buildId))
-						w("\t\t\t%s,\n" % buildId)
-				w("\t\t);\n")
-				w("\t\trunOnlyForDeploymentPostprocessing = 0;\n")
-				w("\t};\n")
-				for fileId, buildId in buildLibs:
-					w("\t%s = { isa = PBXBuildFile; fileRef = %s; };\n" % (buildId, fileId))
-
-
-		w("/* End PBXSourcesBuildPhase section */\n\n")
-
 
 	def writeXCBuildConfiguration(self):
-		def toXCodeArch(arch):
-			if arch == 'x86':
-				return 'i386'
-			elif arch == 'amd64':
-				return 'x86_64'
-			elif arch == 'arm':
-				return 'arm*'
-			elif arch == 'ppc':
-				return 'ppc'
-			elif arch == 'ppc64':
-				return 'ppc64'
-			else:
-				return ''
-		def toSDK(platform):
-			if platform == 'osx':
-				return 'osx', 'macosx*'
-			elif platform == 'iphone':
-				return 'iphone', 'iphoneos*'
-			else:
-				return '', ''
-
 		w = self.file.write
 		w("/* Begin XCBuildConfiguration section */\n")
-		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
-			w("\t%s = {\n" % setting)
-			w("\t\tisa = XCBuildConfiguration;\n")
-			w("\t\tbaseConfigurationReference = %s;\n" % fileref)
-			w("\t\tbuildSettings = {\n")
-			w("\t\t};\n")
-			w("\t\tname = %s;\n" % name)
-			w("\t};\n")
-		for d in self.projects:
-			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
-				for name, setting in d.buildSettingsId[1]:
-					w("\t%s = {\n" % setting)
-					w("\t\tisa = XCBuildConfiguration;\n")
-					w("\t\tbuildSettings = {\n")
-					for platform, options in d.platforms.items():
-						p, arch = platform.split('-')
-						p, sdk = toSDK(p)
-						arch = toXCodeArch(arch)
-						if p and arch and name.startswith(p):
-							w("\t\t\t\"GCC_PREPROCESSOR_DEFINITIONS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i.replace('"', '\\"') for i in ["$(GCC_PREPROCESSOR_DEFINITIONS_PLATFORM)"]+[o for o in options.defines])))
-							if options.includedir:
-								w("\t\t\t\"HEADER_SEARCH_PATHS[arch=%s]\" = (\n\t\t\t%s);\n" % (arch, "".join("\t\"%s\",\n\t\t\t" % i for i in options.includedir)))
-					if d.type not in ['game', 'tool']:
-						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % ("bugengine_"+d.projectName))
-					else:
-						w("\t\t\tPRODUCT_NAME = \"%s\";\n" % d.projectName)
-					if name in d.plist:
-						w("\t\t\tINFOPLIST_FILE = \"%s\";\n" % (d.plist[name]))
-					w("\t\t};\n")
-					w("\t\tname = \"%s\";\n" % name)
-					w("\t};\n")
+		w("\t%s = {\n" % self.projectConfIdDebug)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tCONFIG=debug;\n")
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "debug")
+		w("\t};\n")
+
+		w("/* Begin XCBuildConfiguration section */\n")
+		w("\t%s = {\n" % self.projectConfIdProfile)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tCONFIG=profile;\n")
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "profile")
+		w("\t};\n")
+
+		w("/* Begin XCBuildConfiguration section */\n")
+		w("\t%s = {\n" % self.projectConfIdFinal)
+		w("\t\tisa = XCBuildConfiguration;\n")
+		w("\t\tbaseConfigurationReference = \"\";\n")
+		w("\t\tbuildSettings = {\n")
+		w("\t\t\tCONFIG=final;\n")
+		w("\t\t};\n")
+		w("\t\tname = %s;\n" % "final")
+		w("\t};\n")
 		w("/* End XCBuildConfiguration section */\n\n")
 
 	def writeXCConfigurationList(self):
 		self.writeXCBuildConfiguration()
 		w = self.file.write
 		w("/* Begin XCConfigurationList section */\n")
-		w("\t%s = {\n" % self.buildSettingsId[0])
+		w("\t%s = {\n" % self.projectConfListId)
 		w("\t\tisa = XCConfigurationList;\n")
 		w("\t\tbuildConfigurations = (\n")
-		for name, setting, buildfile, fileref in self.buildSettingsId[1]:
-			w("\t\t\t%s,\n" % setting)
+		w("\t\t\t%s,\n" % self.projectConfIdDebug)
+		w("\t\t\t%s,\n" % self.projectConfIdProfile)
+		w("\t\t\t%s,\n" % self.projectConfIdFinal)
 		w("\t\t);\n")
 		w("\t\tdefaultConfigurationIsVisible = 0;\n")
-		w("\t\tdefaultConfigurationName = \"%s\";\n" % self.buildSettingsId[1][0][0])
+		w("\t\tdefaultConfigurationName = \"%s\";\n" % "debug")
 		w("\t};\n")
-		for d in self.projects:
-			if d.type in ['game', 'tool', 'library', 'static_library', 'plugin']:
-				w("\t%s = {\n" % d.buildSettingsId[0])
-				w("\t\tisa = XCConfigurationList;\n")
-				w("\t\tbuildConfigurations = (\n")
-				for name, setting in d.buildSettingsId[1]:
-					w("\t\t\t%s,\n" % setting)
-				w("\t\t);\n")
-				w("\t\tdefaultConfigurationIsVisible = 0;\n")
-				w("\t\tdefaultConfigurationName = %s;\n" % d.buildSettingsId[1][0][0])
-				w("\t};\n")
 		w("/* End XCConfigurationList section */\n\n")
 
 	def writeFooter(self):
@@ -483,45 +398,21 @@ xcodeprojects = {
 	'xcode4': ('Xcode 4.X', 46),
 }
 
-def hasObjectiveC(sourcetree):
-	for source in sourcetree.files:
-		if isinstance(source, mak.sources.cppsource):
-			if source.filename.endswith('.m') or source.filename.endswith('.mm'):
-				return True
-	for name,directory in sourcetree.directories.items():
-		if hasObjectiveC(directory):
-			return True
-	return False
-	
-def writemaster(sourcetree, f, path = ''):
-	for source in sourcetree.files:
-		if isinstance(source, mak.sources.cppsource) and not isinstance(source, mak.sources.generatedcppsource):
-			if source.archs and source.platforms:
-				f.write("#if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.archs]))
-				f.write("# if %s\n" % " || ".join(["defined(_%s)" % i.upper() for i in source.platforms]))
-				f.write("#  include \"../%s\"\n" % os.path.join(path, sourcetree.prefix, source.filename))
-				f.write("# endif\n")
-				f.write("#endif\n")
-	for name,directory in sourcetree.directories.items():
-		writemaster(directory, f, os.path.join(path, sourcetree.prefix))
-
 def generateProject(task):
 	solution = XCodeProject( task.name,
 							 task.outputs[0].abspath(),
 							 task.version,
-							 task.projects)
+							 task.projects,
+							 task.out,
+							 task.bld)
 	solution.writeHeader()
-	solution.writePBXBuildFile()
+	#solution.writePBXBuildFile()
 	solution.writePBXFileReference()
 	solution.writePBXGroup()
-	solution.writePBXSourcesBuildPhase()
-	solution.writePBXNativeTarget()
+	solution.writePBXLegacyTarget()
 	solution.writePBXProject()
 	solution.writeXCConfigurationList()
 	solution.writeFooter()
-	for p in task.projects:
-		if p.usemaster:
-			writemaster(p.sourceTree, open(p.masterfile.abspath(), 'w'))
 
 GenerateProject = Task.task_factory('generateProject', generateProject)
 
@@ -534,10 +425,11 @@ def create_xcode_project(t):
 		outname = projectName+'project.pbxproj'
 		solution = t.create_task('generateProject')
 		solution.env = t.env.derive()
-		outnode = t.path.find_or_declare(outname)
+		outnode = t.path.find_or_declare("projects/"+outname)
 		solution.set_outputs(outnode)
 		t.bld.install_files(projectName, outnode)
 		solution.name = appname
+		solution.bld = t.bld
 		solution.version = xcodeprojects[toolName]
 		solution.install_path = t.path.srcpath()+'/'
 		solution.projects = []
@@ -549,27 +441,13 @@ def create_xcode_project(t):
 
 	project = Project()
 	project.type			= t.type
-	#project.allplatforms    = projects[toolName][2]
 	project.platforms 		= t.platforms
 	project.version 		= toolName
 	project.projectCategory = t.category
 	project.projectName 	= t.name
-	project.type 			= t.type
 	project.sourceTree 		= t.sourcetree
-	project.usemaster		= t.usemaster
-	project.depends			= t.depends
-	project.pchstop			= t.pchstop
-	for i in t.depends:
-		if i.type in ['game', 'tool']:
-			i.depends.append(t)
-			t.depends.remove(i)
-	if t.usemaster:
-		filename = projectName + (hasObjectiveC(t.sourcetree) and "master-%s.mm" or "master-%s.cc") % t.name
-		node = t.path.find_or_declare(filename)
-		solution.set_outputs(node)
-		t.bld.install_files(projectName, node)
-		project.masterfile = node
-		project.masterfilename = filename
+	if project.type == 'game':
+		solution.out = project.projectName
 	solution.projects.append(project)
 	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
 

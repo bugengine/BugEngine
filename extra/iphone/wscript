@@ -36,6 +36,7 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['ABI'] = 'mach_o'
+	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
@@ -58,7 +59,9 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 def add_darwin_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
+	conf.env['ABI'] = 'mach_o'
 	conf.env['STATIC'] = 1
+	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env.append_unique('CFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
