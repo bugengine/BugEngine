@@ -30,6 +30,12 @@ Environment::~Environment()
     SetDllDirectoryA(NULL);
 }
 
+Environment& Environment::getEnvironment()
+{
+    static Environment s_environment;
+    return s_environment;
+}
+
 void Environment::init(int /*argc*/, const char *argv[])
 {
     const char *exe = argv[0];
@@ -52,32 +58,7 @@ void Environment::init(int /*argc*/, const char *argv[])
     SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().c_str());
 }
 
-Environment& Environment::getEnvironment()
-{
-    static Environment s_environment;
-    return s_environment;
-}
-
-const ipath& Environment::getDataDirectory() const
-{
-    return m_dataDirectory;
-}
-
-const ipath& Environment::getHomeDirectory() const
-{
-    return m_homeDirectory;
-}
-
-const istring& Environment::getGame() const
-{
-    return m_game;
-}
-
-const istring& Environment::getUser() const
-{
-    return m_user;
-}
-size_t Environment::getProcessorCount() const
+    size_t Environment::getProcessorCount() const
 {
     SYSTEM_INFO i;
     GetSystemInfo(&i);

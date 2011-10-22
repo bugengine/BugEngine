@@ -18,7 +18,7 @@ Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
 ,   m_dataDirectory("../share/bugengine")
 ,   m_game("")
-,   m_user(getenv("HOME"))
+,   m_user(getenv("USER"))
 {
 }
 
@@ -55,25 +55,6 @@ Environment& Environment::getEnvironment()
     return s_environment;
 }
 
-const ipath& Environment::getDataDirectory() const
-{
-    return m_dataDirectory;
-}
-
-const ipath& Environment::getHomeDirectory() const
-{
-    return m_homeDirectory;
-}
-
-const istring& Environment::getGame() const
-{
-    return m_game;
-}
-
-const istring& Environment::getUser() const
-{
-    return m_user;
-}
 size_t Environment::getProcessorCount() const
 {
 #if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_MACOS)
