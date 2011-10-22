@@ -12,7 +12,7 @@
 #include <malloc/malloc.h>
 #define malloca     alloca
 #define freea(p)
-#define DIRENT_H    <sys/dir.h>
+#define DIRENT_H    <dirent.h>
 
 /*****************************************************************************/
 #endif
