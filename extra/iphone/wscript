@@ -38,9 +38,9 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['ABI'] = 'mach_o'
 	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['STATIC'] = 1
-	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
-	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
-	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
+	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -62,9 +62,9 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['ABI'] = 'mach_o'
 	conf.env['STATIC'] = 1
 	conf.env['SDKROOT'] = 'iphoneos'
-	conf.env.append_unique('CFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
-	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
-	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
+	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=4.0', '-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
+	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=4.0', '-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
+	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
