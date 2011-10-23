@@ -6,11 +6,15 @@ def options(opt):
 	pass
 
 def setup(conf):
-	conf.check_lib('GL', var='GL')
-	conf.check_lib('OpenGL32', var='GL')
+	if 'osx' in conf.env.PLATFORM:
+		return
+	elif 'win32' in conf.env.PLATFORM:
+		conf.check_lib('OpenGL32', var='GL')
+	else:
+		conf.check_lib('GL', var='GL')
 
 def build(bld):
-	if bld.env.GL:
+	if bld.env.GL or 'osx' in bld.env.PLATFORM or bld.env.PROJECTS:
 		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GL))
 	else:
 		bld.m['OpenGL'] = None
