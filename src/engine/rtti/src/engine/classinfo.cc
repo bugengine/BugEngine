@@ -24,9 +24,35 @@ void ClassInfo::destroy(void* src) const
     (*destructor)(src);
 }
 
-Value ClassInfo::get(Value& /*from*/, istring /*propname*/) const
+Value ClassInfo::get(Value& from, istring propname) const
 {
-    return Value();
+    static const ClassInfo* const s_metaClassInfo = be_typeid<ClassInfo>::klass();
+    if (from.type().metaclass == s_metaClassInfo)
+    {
+        const ObjectInfo* o = from.as<const ClassInfo*>()->objects;
+        while(o)
+        {
+            if (o->name == propname)
+            {
+                return o->value;
+            }
+            o = o->next;
+        }
+        return Value();
+    }
+    else
+    {
+        const PropertyInfo* p = properties;
+        while(p)
+        {
+            if (p->name == propname)
+            {
+                return p->get(from);
+            }
+            p = p->next;
+        }
+        return Value();
+    }
 }
 
 bool ClassInfo::isA(const ClassInfo* klass) const

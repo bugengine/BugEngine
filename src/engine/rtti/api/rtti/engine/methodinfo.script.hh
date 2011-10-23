@@ -47,7 +47,6 @@ published:
     };
 
 published:
-    const MethodInfo*   next;
     istring             name;
     const OverloadInfo* overloads;
 published:

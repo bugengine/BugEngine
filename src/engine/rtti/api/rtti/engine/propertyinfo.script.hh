@@ -20,6 +20,7 @@ struct be_api(RTTI) PropertyInfo
 published:
     TagInfo* const      tags;
     const PropertyInfo* next;
+    const istring       name;
     TypeInfo            owner;
     TypeInfo            type;
     u32                 offset;
