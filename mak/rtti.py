@@ -100,7 +100,7 @@ class Root(Container):
 
 		classes = Container.dump(self, file, namespace, False)
 		file.write("namespace BugEngine\n{\n\n")
-		for classname, objname in classes:
+		for classname, objname, nested in classes:
 			file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &%s; }\n" % (classname, objname))
 		file.write("\n}\n")
 
@@ -164,9 +164,9 @@ class Enum(Container):
 		file.write("    };\n")
 		if self.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
-			return [(self.fullname, "%s::s_%sFun()" % (namespace, decl))]
+			return [(self.fullname, "%s::s_%sFun()" % (namespace, decl), nested)]
 		else:
-			return [(self.fullname, "%s::s_%s" % (namespace, decl))]
+			return [(self.fullname, "%s::s_%s" % (namespace, decl), nested)]
 
 class Class(Container):
 	def __init__(self, parent, name, inherits, line, scope, value):
@@ -194,9 +194,9 @@ class Class(Container):
 		self.writeClass(file, decl, nested, properties, methods, constructor, call)
 		if self.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
-			classes.append((self.fullname, "%s::s_%sFun()" % (namespace, decl)))
+			classes.append((self.fullname, "%s::s_%sFun()" % (namespace, decl), nested))
 		else:
-			classes.append((self.fullname, "%s::s_%s" % (namespace, decl)))
+			classes.append((self.fullname, "%s::s_%s" % (namespace, decl), nested))
 		file.write("//----------------------------------------------------------------------\n\n")
 		return classes
 
@@ -247,7 +247,7 @@ class Class(Container):
 		return prop
 
 	def buildStatics(self, file, decl):
-		return "0"
+		return "be_typeid< %s >::klass()->objects"%self.inherits
 
 	def buildMethods(self, file, decl, statics):
 		method = statics
