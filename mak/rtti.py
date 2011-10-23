@@ -364,4 +364,3 @@ class Class(Container):
 			method = "&s_%s_%s" % (decl, prettyname)
 
 		return method, constructor, call
-
