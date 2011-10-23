@@ -38,7 +38,6 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             o = o->next;
         }
-        return Value();
     }
     else
     {
@@ -51,8 +50,11 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             p = p->next;
         }
-        return Value();
     }
+    if (parent)
+        return parent->get(from, propname);
+    else
+        return Value();
 }
 
 bool ClassInfo::isA(const ClassInfo* klass) const
