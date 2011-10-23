@@ -19,18 +19,22 @@ struct be_api(RTTI) ClassInfo
     friend struct BugEngine::TypeInfo;
     friend class BugEngine::Value;
 published:
-    class MetaClassInfo;
-    friend class MetaClassInfo;
+    struct ObjectInfo
+    {
+        const ObjectInfo* const next;
+        istring const           name;
+        Value                   value;
+    };
 published:
-    inamespace const    name;
-    const ClassInfo*    parent;
-    u32 const           size;
-    i32 const           offset;
-    TagInfo* const      tags;
-    const PropertyInfo* properties;
-    const MethodInfo*   methods;
-    const MethodInfo*   constructor;
-    const MethodInfo*   call;
+    inamespace const                        name;
+    const ClassInfo* const                  parent;
+    u32 const                               size;
+    i32 const                               offset;
+    TagInfo* const                          tags;
+    const PropertyInfo* const               properties;
+    const MethodInfo* const                 constructor;
+    const MethodInfo* const                 call;
+    const ObjectInfo* const                 objects;
 public:
     typedef void (*CopyConstructor)(const void *, void *);
     typedef void (*Destructor)(void *);
