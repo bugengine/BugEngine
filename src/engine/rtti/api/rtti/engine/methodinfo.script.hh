@@ -48,6 +48,7 @@ published:
 
 published:
     istring             name;
+    const MethodInfo*   next;
     const OverloadInfo* overloads;
 published:
     Value operator()(Value* params, u32 nparams) const;

@@ -32,9 +32,10 @@ published:
     i32 const                               offset;
     TagInfo* const                          tags;
     const PropertyInfo* const               properties;
+    const MethodInfo* const                 methods;
+    const ObjectInfo* const                 objects;
     const MethodInfo* const                 constructor;
     const MethodInfo* const                 call;
-    const ObjectInfo* const                 objects;
 public:
     typedef void (*CopyConstructor)(const void *, void *);
     typedef void (*Destructor)(void *);
@@ -50,6 +51,7 @@ published:
     bool isA(const ClassInfo* klass) const;
 
     Value operator()(Value* params, u32 nparams) const;
+    int test() const;
 public:
     u32 distance(const ClassInfo* other) const;
 private: // friend Value

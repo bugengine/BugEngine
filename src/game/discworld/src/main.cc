@@ -7,11 +7,17 @@
 #include    <system/file/diskfolder.script.hh>
 #include    <system/plugin.hh>
 
-int be_main(weak<BugEngine::Application> app)
+using namespace BugEngine;
+
+int be_main(weak<Application> app)
 {
-    ref<BugEngine::Folder> dataFolder = ref<BugEngine::DiskFolder>::create(BugEngine::gameArena(), BugEngine::Environment::getEnvironment().getDataDirectory());
-    BugEngine::Plugin<minitl::pointer> p1("nullrender", weak<const BugEngine::Folder>(dataFolder));
-    //BugEngine::Plugin<minitl::pointer> p2("GL4", weak<const BugEngine::Folder>(dataFolder));
+    ref<Folder> dataFolder = ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory());
+    Plugin<minitl::pointer> p1("nullrender", weak<const Folder>(dataFolder));
+    //Plugin<minitl::pointer> p2("GL4", weak<const Folder>(dataFolder));
+
+    const RTTI::ClassInfo* ci = be_typeid<RTTI::ClassInfo>::klass();
+    Value v(ci);
+    Value t = v["test"](&v, 1);
 
     app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
     return 0;

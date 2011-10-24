@@ -11,11 +11,11 @@
 namespace BugEngine
 {
 
-	static const RTTI::ClassInfo s_void = { "void", 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
+	static const RTTI::ClassInfo s_void = { "void", 0, 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
 template< >
 const RTTI::ClassInfo* be_typeid< void >::klass() { return &s_void; }
 
-static const RTTI::ClassInfo s_refcountable = { "refcountable", 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
+static const RTTI::ClassInfo s_refcountable = { "refcountable", 0, 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
 template< >
 const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass() { return &s_refcountable; }
 
@@ -26,7 +26,7 @@ const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass() { return &s_re
             be_typeid< parent >::klass(),                           \
             sizeof(#type),                                          \
             0,                                                      \
-            0, 0, 0, 0, 0,                                          \
+            0, 0, 0, 0, 0, 0,                                       \
             &RTTI::nullconstructor<sizeof(#type)>,                  \
             &RTTI::nulldestructor,                                  \
             {{ 0, 0, 0, 0 }}                                        \
