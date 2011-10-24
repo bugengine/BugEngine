@@ -39,7 +39,19 @@ Value ClassInfo::get(Value& from, istring propname) const
             o = o->next;
         }
     }
-    else
+
+    {
+        const MethodInfo* m = methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                return Value(m);
+            }
+            m = m->next;
+        }
+    }
+
     {
         const PropertyInfo* p = properties;
         while(p)
@@ -51,6 +63,7 @@ Value ClassInfo::get(Value& from, istring propname) const
             p = p->next;
         }
     }
+
     return Value();
 }
 
@@ -102,11 +115,17 @@ u32 ClassInfo::distance(const ClassInfo* other) const
     return TypeInfo::MaxTypeDistance;
 }
 
+int ClassInfo::test() const
+{
+    //be_info("Done some testing");
+    return 1;
+}
+
 }
 
 RTTI::ClassInfo* be_Namespace()
 {
-    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
+    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
     return &ci;
 }
 
