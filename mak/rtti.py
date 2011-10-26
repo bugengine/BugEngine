@@ -63,7 +63,7 @@ class Container:
 			file.write("static ::BugEngine::RTTI::TagInfo s_%s_tag_%d =\n" % (prefix, tagindex))
 			file.write("    {\n")
 			file.write("        %s,\n" % tagname)
-			file.write("        Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tagindex))
+			file.write("        ::BugEngine::Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tagindex))
 			file.write("    };\n")
 			tagname = "&s_%s_tag_%d" % (prefix, tagindex)
 			tagindex = tagindex + 1
@@ -98,6 +98,7 @@ class Root(Container):
 		self.predecl(file)
 		file.write("\n}\n\n")
 
+		prettysource = self.source.replace('/', '_').replace('\\', '_').replace('.', '_').replace(':', '_')
 		classes = Container.dump(self, file, namespace, False)
 		file.write("namespace BugEngine\n{\n\n")
 		for classname, objname, nested in classes:
@@ -124,6 +125,7 @@ class Namespace(Container):
 	def predecl(self, file):
 		if self.name != 'BugEngine':
 			file.write("using namespace %s;\n"%self.fullname)
+		file.write("::BugEngine::RTTI::ClassInfo* be_Namespace%s();\n"%"_".join(self.fullname.split('::')))
 		Container.predecl(self, file)
 
 
@@ -225,6 +227,13 @@ class Class(Container):
 			file.write("        0,\n")
 		file.write("        {{ 0x%s, 0x%s, 0x%s, 0x%s }}\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
+		if not nested:
+			classname = self.parent.fullname.split('::')[1:]
+			owner = "be_Namespace"
+			for ns in classname:
+				owner += "_%s" % ns
+			file.write("static ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_obj = { %s()->objects, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, owner, self.name, decl))
+			file.write("static const ::BugEngine::RTTI::ClassInfo::ObjectInfo* s_%s_obj_ptr = ( %s()->objects = &s_%s_obj );\n" % (decl, owner, decl))
 
 	def buildProperties(self, file, decl):
 		prop = "0"
@@ -254,7 +263,7 @@ class Class(Container):
 		file.write("    {\n")
 		file.write("        %s,\n" % method)
 		file.write("        \"%s\",\n" % name)
-		file.write("        Value(&s_method_%s_%s)\n" % (decl, prettyname))
+		file.write("        ::BugEngine::Value(&s_method_%s_%s)\n" % (decl, prettyname))
 		file.write("    };\n")
 
 

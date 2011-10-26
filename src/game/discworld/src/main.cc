@@ -14,10 +14,12 @@ int be_main(weak<Application> app)
     ref<Folder> dataFolder = ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory());
     Plugin<minitl::pointer> p1("nullrender", weak<const Folder>(dataFolder));
     //Plugin<minitl::pointer> p2("GL4", weak<const Folder>(dataFolder));
-
-    const RTTI::ClassInfo* ci = be_typeid<RTTI::ClassInfo>::klass();
-    Value v(ci);
-    Value t = v["test"](&v, 1);
+    Value root = Value(be_Namespace());
+    Value bugengine = root["BugEngine"];
+    Value rtti = bugengine["RTTI"];
+    Value classinfo = rtti["ClassInfo"];
+    Value name = classinfo["name"];
+    be_info("%s"|name.as<const inamespace>());
 
     app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
     return 0;
