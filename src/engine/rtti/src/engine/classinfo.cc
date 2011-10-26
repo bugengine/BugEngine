@@ -8,7 +8,6 @@
 #include    <rtti/engine/taginfo.script.hh>
 #include    <rtti/value.inl>
 
-
 namespace BugEngine { namespace RTTI
 {
 
@@ -115,18 +114,19 @@ u32 ClassInfo::distance(const ClassInfo* other) const
     return TypeInfo::MaxTypeDistance;
 }
 
-int ClassInfo::test() const
-{
-    //be_info("Done some testing");
-    return 1;
-}
-
 }
 
 RTTI::ClassInfo* be_Namespace()
 {
-    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
+    static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };
+    static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
+    static const RTTI::ClassInfo::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);
     return &ci;
+}
+
+RTTI::ClassInfo* be_Namespace_BugEngine()
+{
+    return be_Namespace();
 }
 
 }

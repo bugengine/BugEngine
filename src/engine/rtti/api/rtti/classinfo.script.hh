@@ -30,10 +30,10 @@ published:
     const ClassInfo* const                  parent;
     u32 const                               size;
     i32 const                               offset;
-    TagInfo* const                          tags;
+    TagInfo*                                tags;
     const PropertyInfo* const               properties;
     const MethodInfo* const                 methods;
-    const ObjectInfo* const                 objects;
+    const ObjectInfo*                       objects;
     const MethodInfo* const                 constructor;
     const MethodInfo* const                 call;
 public:
@@ -51,9 +51,9 @@ published:
     bool isA(const ClassInfo* klass) const;
 
     Value operator()(Value* params, u32 nparams) const;
-    int test() const;
 public:
     u32 distance(const ClassInfo* other) const;
+    const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;
@@ -62,6 +62,64 @@ private: // friend Value
 }
 
 BE_EXPORT RTTI::ClassInfo* be_Namespace();
+#define BE_REGISTER_NAMESPACE_1(name)                                                                                                           \
+namespace BugEngine                                                                                                                             \
+{                                                                                                                                               \
+    BugEngine::RTTI::ClassInfo* be_Namespace_##name()                                                                                           \
+    {                                                                                                                                           \
+        static RTTI::ClassInfo ci = { #name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                               \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace()->objects, #name, Value(&ci) };                                                 \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace()->objects = &ob);                                                     \
+        return &ci;                                                                                                                             \
+    }                                                                                                                                           \
+}
+
+#define BE_REGISTER_NAMESPACE_2(name1, name2)                                                                                                   \
+namespace BugEngine                                                                                                                             \
+{                                                                                                                                               \
+    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2()                                                                                \
+    {                                                                                                                                           \
+        static RTTI::ClassInfo ci = { #name1 "." #name2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                   \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1()->objects, #name2, Value(&ci) };                                        \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1()->objects = &ob);                                             \
+        return &ci;                                                                                                                             \
+    }                                                                                                                                           \
+}
+
+#define BE_REGISTER_NAMESPACE_3(name1, name2, name3)                                                                                            \
+namespace BugEngine                                                                                                                             \
+{                                                                                                                                               \
+    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3()                                                                      \
+    {                                                                                                                                           \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                        \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2()->objects, #name3, Value(&ci) };                              \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2()->objects = &ob);                                   \
+        return &ci;                                                                                                                             \
+    }                                                                                                                                           \
+}
+#define BE_REGISTER_NAMESPACE_4(name1, name2, name3, name4)                                                                                     \
+namespace BugEngine                                                                                                                             \
+{                                                                                                                                               \
+    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3##_##name4()                                                            \
+    {                                                                                                                                           \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };             \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2##_##name3()->objects, #name4, Value(&ci) };                    \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2##_##name3()->objects = &ob);                         \
+        return &ci;                                                                                                                             \
+    }                                                                                                                                           \
+}
+
+#define BE_REGISTER_NAMESPACE_5(name1, name2, name3, name4, name5)                                                                              \
+namespace BugEngine                                                                                                                             \
+{                                                                                                                                               \
+    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3##_##name4##_##name5()                                                  \
+    {                                                                                                                                           \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4 "." #name5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };  \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2##_##name3##_##name4()->objects, #name5, Value(&ci) };          \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2##_##name3##_##name4()->objects = &ob);               \
+        return &ci;                                                                                                                             \
+    }                                                                                                                                           \
+}
 
 }
 
