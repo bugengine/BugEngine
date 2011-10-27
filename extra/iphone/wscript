@@ -37,6 +37,7 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['ABI'] = 'mach_o'
 	conf.env['SDKROOT'] = 'iphoneos'
+	conf.env['SUPPORTEDPLATFORMS'] = 'iphonesimulator'
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneSimulator.platform', 'Developer', 'SDKs', Options.options.iphonesimulator_sdk)])
@@ -62,6 +63,7 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['ABI'] = 'mach_o'
 	conf.env['STATIC'] = 1
 	conf.env['SDKROOT'] = 'iphoneos'
+	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=4.0', '-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=4.0', '-mthumb', '-mcpu=cortex-a8', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
 	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=4.0', '-isysroot', os.path.join('/Developer', 'Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs', Options.options.iphone_sdk)])
