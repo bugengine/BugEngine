@@ -42,6 +42,7 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['osx']
 	conf.env['ABI'] = 'mach_o'
 	conf.env['SDKROOT'] = 'macosx10.6'
+	conf.env['SUPPORTEDPLATFORMS'] = 'macosx'
 	conf.env['STATIC'] = 1
 	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
 	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
