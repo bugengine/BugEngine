@@ -121,6 +121,7 @@ RTTI::ClassInfo* be_Namespace()
     static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };
     static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
     static const RTTI::ClassInfo::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);
+    be_forceuse(obptr);
     return &ci;
 }
 

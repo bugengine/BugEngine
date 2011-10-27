@@ -102,7 +102,11 @@ class Root(Container):
 		classes = Container.dump(self, file, namespace, False)
 		file.write("namespace BugEngine\n{\n\n")
 		for classname, objname, nested in classes:
-			file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { return &%s; }\n" % (classname, objname))
+			if not nested:
+				use = "be_forceuse(%s_obj_ptr); "%objname
+			else:
+				use = ""
+			file.write("template< > const RTTI::ClassInfo* be_typeid< %s >::klass() { %sreturn &%s; }\n" % (classname, use, objname))
 		file.write("\n}\n")
 
 
@@ -165,6 +169,13 @@ class Enum(Container):
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >,\n" % self.fullname)
 		file.write("        {{ 0x%s, 0x%s, 0x%s, 0x%s }}\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
+		if not nested:
+			classname = self.parent.fullname.split('::')[1:]
+			owner = "be_Namespace"
+			for ns in classname:
+				owner += "_%s" % ns
+			file.write("static ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_obj = { %s()->objects, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, owner, self.name, decl))
+			file.write("static const ::BugEngine::RTTI::ClassInfo::ObjectInfo* s_%s_obj_ptr = ( %s()->objects = &s_%s_obj );\n" % (decl, owner, decl))
 		if self.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
 			return [(self.fullname, "%s::s_%sFun()" % (namespace, decl), nested)]
