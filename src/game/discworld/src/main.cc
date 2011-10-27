@@ -19,7 +19,9 @@ int be_main(weak<Application> app)
     Value rtti = bugengine["RTTI"];
     Value classinfo = rtti["ClassInfo"];
     Value name = classinfo["name"];
+    Value size = classinfo["size"];
     be_info("%s"|name.as<const inamespace>());
+    be_info("%d"|size.as<const u32>());
 
     app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
     return 0;
