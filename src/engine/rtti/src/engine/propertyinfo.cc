@@ -12,7 +12,7 @@ namespace BugEngine { namespace RTTI
 
 Value PropertyInfo::get(Value& from) const
 {
-    be_assert(from.type() <= owner, "getting property on object of type %s, while expecting type %s" | from.type().name() | owner.name());
+    be_assert(owner <= from.type(), "getting property on object of type %s, while expecting type %s" | from.type().name() | owner.name());
     i32 propoffset = offset + (from.type().metaclass->offset - owner.metaclass->offset);
     if (from.isConst())
     {
