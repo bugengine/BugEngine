@@ -6,4 +6,4 @@
 #include    <system/plugin.hh>
 
 BE_PLUGIN_REGISTER(packagebuilder, BugEngine::PackageBuilder::PackageLoader, (), ());
-
+BE_REGISTER_NAMESPACE_2(BugEngine, PackageBuilder);

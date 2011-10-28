@@ -8,16 +8,27 @@
 #include    <rtti/engine/helper/set.hh>
 #include    <rtti/engine/helper/method.hh>
 
+
+BE_REGISTER_NAMESPACE_2(BugEngine, RTTI);
+BE_REGISTER_NAMESPACE_2(BugEngine, EditHint);
+BE_REGISTER_NAMESPACE_2(BugEngine, Documentation);
+
 namespace BugEngine
 {
 
-	static const RTTI::ClassInfo s_void = { "void", 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
 template< >
-const RTTI::ClassInfo* be_typeid< void >::klass() { return &s_void; }
+const RTTI::ClassInfo* be_typeid< void >::klass()
+{
+    static const RTTI::ClassInfo s_void = { "void", 0, 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
+    return &s_void;
+}
 
-static const RTTI::ClassInfo s_refcountable = { "refcountable", 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
 template< >
-const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass() { return &s_refcountable; }
+const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass()
+{
+    static const RTTI::ClassInfo s_refcountable = { "refcountable", 0, 0, 0, 0, 0, 0, 0, 0, 0, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
+    return &s_refcountable;
+}
 
 #define BE_MAKE_BUILTIN_NAME(type,name,parent)                      \
     static const RTTI::ClassInfo s_##name =                         \
@@ -26,7 +37,7 @@ const RTTI::ClassInfo* be_typeid< minitl::refcountable >::klass() { return &s_re
             be_typeid< parent >::klass(),                           \
             sizeof(#type),                                          \
             0,                                                      \
-            0, 0, 0, 0, 0,                                          \
+            0, 0, 0, 0, 0, 0,                                       \
             &RTTI::nullconstructor<sizeof(#type)>,                  \
             &RTTI::nulldestructor,                                  \
             {{ 0, 0, 0, 0 }}                                        \

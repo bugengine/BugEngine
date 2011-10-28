@@ -115,6 +115,7 @@ public:
     inline bool operator!() const;
 
     inline Value operator[](const istring& name);
+    inline Value operator()(Value params[], u32 paramCount);
 };
 
 }
