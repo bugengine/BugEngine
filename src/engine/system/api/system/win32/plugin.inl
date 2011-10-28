@@ -6,26 +6,12 @@
 
 #include    <winerror.h>
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
-    namespace BugEngine                                                                                                                 \
-    {                                                                                                                                   \
-        BE_EXPORT RTTI::ClassInfo* be_Namespace()                                                                                       \
-        {                                                                                                                               \
-            static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };                                                        \
-            static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                           \
-            return &ci;                                                                                                                 \
-        }                                                                                                                               \
-        RTTI::ClassInfo* be_Namespace_BugEngine()                                                                                       \
-        {                                                                                                                               \
-            return be_Namespace();                                                                                                      \
-        }                                                                                                                               \
-    }                                                                                                                                   \
-    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \
-    {                                                                                                                                   \
-        return BugEngine::be_Namespace();                                                                                               \
-    }
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
     BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
+    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \
+    {                                                                                                                                   \
+        return BugEngine::be_##name##_Namespace();                                                                                      \
+    }                                                                                                                                   \
     extern "C" BE_EXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 

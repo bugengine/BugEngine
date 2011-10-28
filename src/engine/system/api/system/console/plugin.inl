@@ -18,25 +18,28 @@ private:
 public:
     typedef void*(*Create)();
     typedef void(*Destroy)(void*);
+    typedef RTTI::ClassInfo* (*Namespace)();
 public:
     const char* const   name;
     Create const        create;
     Destroy const       destroy;
+    Namespace const     ns;
 public:
-    PluginList(const char* name, Create c, Destroy d);
+    PluginList(const char* name, Create c, Destroy d, Namespace n);
     ~PluginList();
     static PluginList* findPlugin(const char *name);
 };
 
 }}
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+    BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                                  \
     static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }                 \
     static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }                        \
     static BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                         \
                                                          reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),        \
-                                                         reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin));
+                                                         reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin),      \
+                                                         BugEngine::be_##name##_Namespace);
 
 namespace BugEngine
 {
@@ -132,7 +135,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 template< typename Interface >
 const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
 {
-    return be_Namespace();
+    return (*(m_interface->ns))();
 }
 
 

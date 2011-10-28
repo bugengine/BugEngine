@@ -4,5 +4,5 @@
 #include    <stdafx.h>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_NAMESPACE_REGISTER("squirrel");
+BE_PLUGIN_NAMESPACE_REGISTER(squirrel);
 

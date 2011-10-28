@@ -23,6 +23,21 @@ void ClassInfo::destroy(void* src) const
     (*destructor)(src);
 }
 
+void ClassInfo::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
+{
+    static const ClassInfo* const s_metaClassInfo = be_typeid<ClassInfo>::klass();
+    const ObjectInfo* o = objects;
+    while(o)
+    {
+        (*callback)(o->value);
+        if (recursion == EnumerateRecursive && (o->value.type().metaclass == s_metaClassInfo))
+        {
+            o->value.as<const ClassInfo*>()->enumerateObjects(recursion, callback);
+        }
+        o = o->next;
+    }
+}
+
 Value ClassInfo::get(Value& from, istring propname) const
 {
     static const ClassInfo* const s_metaClassInfo = be_typeid<ClassInfo>::klass();
@@ -116,7 +131,7 @@ u32 ClassInfo::distance(const ClassInfo* other) const
 
 }
 
-RTTI::ClassInfo* be_Namespace()
+RTTI::ClassInfo* be_game_Namespace()
 {
     static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };
     static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
@@ -125,9 +140,9 @@ RTTI::ClassInfo* be_Namespace()
     return &ci;
 }
 
-RTTI::ClassInfo* be_Namespace_BugEngine()
+RTTI::ClassInfo* be_game_Namespace_BugEngine()
 {
-    return be_Namespace();
+    return be_game_Namespace();
 }
 
 }

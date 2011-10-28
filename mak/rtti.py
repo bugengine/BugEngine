@@ -17,6 +17,7 @@ class Container:
 		if parent:
 			self.fullname = parent.fullname
 			self.useMethods = parent.useMethods
+			self.plugin = parent.plugin
 			if name:
 				self.fullname += '::' + name
 			self.parent.addObject(self)
@@ -71,10 +72,11 @@ class Container:
 
 
 class Root(Container):
-	def __init__(self, source, useMethods):
+	def __init__(self, source, useMethods, plugin):
 		Container.__init__(self, None, '', 1, 'public')
 		self.source = source
 		self.useMethods = useMethods
+		self.plugin = plugin
 
 	def dump(self, file, namespace = '', index = 0, nested = False):
 		file.write("#include    <rtti/stdafx.h>\n")
@@ -114,6 +116,7 @@ class Typedef(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line, 'public')
 
+
 class Namespace(Container):
 	def __init__(self, parent, name, line):
 		Container.__init__(self, parent, name, line, 'published')
@@ -129,7 +132,7 @@ class Namespace(Container):
 	def predecl(self, file):
 		if self.name != 'BugEngine':
 			file.write("using namespace %s;\n"%self.fullname)
-		file.write("::BugEngine::RTTI::ClassInfo* be_Namespace%s();\n"%"_".join(self.fullname.split('::')))
+		file.write("::BugEngine::RTTI::ClassInfo* be_%s_Namespace%s();\n"%(self.plugin, "_".join(self.fullname.split('::'))))
 		Container.predecl(self, file)
 
 
@@ -171,7 +174,7 @@ class Enum(Container):
 		file.write("    };\n")
 		if not nested:
 			classname = self.parent.fullname.split('::')[1:]
-			owner = "be_Namespace"
+			owner = "be_%s_Namespace"%self.plugin
 			for ns in classname:
 				owner += "_%s" % ns
 			file.write("static ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_obj = { %s()->objects, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, owner, self.name, decl))
@@ -240,7 +243,7 @@ class Class(Container):
 		file.write("    };\n")
 		if not nested:
 			classname = self.parent.fullname.split('::')[1:]
-			owner = "be_Namespace"
+			owner = "be_%s_Namespace"%self.plugin
 			for ns in classname:
 				owner += "_%s" % ns
 			file.write("static ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_obj = { %s()->objects, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, owner, self.name, decl))

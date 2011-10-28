@@ -197,6 +197,7 @@ class module:
 			else:
 				optim,compiler,platform,architecture,version = variant.split('-')[0:5]
 				task					= bld()
+				task.category			= self.category
 				task.target				= self.dstname
 				task.env				= env.derive()
 				task.env.detach()

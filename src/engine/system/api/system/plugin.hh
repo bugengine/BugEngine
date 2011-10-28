@@ -57,5 +57,20 @@ private:
 # error Plugin subsystem not implemented...
 #endif
 
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
+    namespace BugEngine                                                                                                                 \
+    {                                                                                                                                   \
+        BE_EXPORT RTTI::ClassInfo* be_##name##_Namespace()                                                                              \
+        {                                                                                                                               \
+            static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };                                                        \
+            static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                           \
+            return &ci;                                                                                                                 \
+        }                                                                                                                               \
+        RTTI::ClassInfo* be_##name##_Namespace_BugEngine()                                                                              \
+        {                                                                                                                               \
+            return be_##name##_Namespace();                                                                                             \
+        }                                                                                                                               \
+    }
+
 /*****************************************************************************/
 #endif
