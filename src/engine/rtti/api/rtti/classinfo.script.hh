@@ -52,6 +52,13 @@ published:
 
     Value operator()(Value* params, u32 nparams) const;
 public:
+    typedef void(*EnumerateCallback)(const Value& v);
+    enum EnumerateRecursion
+    {
+        EnumerateOwn,
+        EnumerateRecursive
+    };
+    void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
     u32 distance(const ClassInfo* other) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
 private: // friend Value
@@ -61,70 +68,71 @@ private: // friend Value
 
 }
 
-BE_EXPORT RTTI::ClassInfo* be_Namespace();
-RTTI::ClassInfo* be_Namespace_BugEngine();
-#define BE_REGISTER_NAMESPACE_1(name)                                                                                                           \
-namespace BugEngine                                                                                                                             \
-{                                                                                                                                               \
-    BugEngine::RTTI::ClassInfo* be_Namespace_##name()                                                                                           \
-    {                                                                                                                                           \
-        static RTTI::ClassInfo ci = { #name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                               \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace()->objects, #name, Value(&ci) };                                                 \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace()->objects = &ob);                                                     \
-        be_forceuse(result);                                                                                                                    \
-        return &ci;                                                                                                                             \
-    }                                                                                                                                           \
+be_api(RTTI) RTTI::ClassInfo* be_game_Namespace();
+RTTI::ClassInfo* be_game_Namespace_BugEngine();
+
+#define BE_REGISTER_NAMESPACE_1(plugin, name)                                                                                                       \
+namespace BugEngine                                                                                                                                 \
+{                                                                                                                                                   \
+    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name()                                                                                    \
+    {                                                                                                                                               \
+        static RTTI::ClassInfo ci = { #name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                                   \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace()->objects, #name, Value(&ci) };                                          \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace()->objects = &ob);                                              \
+        be_forceuse(result);                                                                                                                        \
+        return &ci;                                                                                                                                 \
+    }                                                                                                                                               \
 }
 
-#define BE_REGISTER_NAMESPACE_2(name1, name2)                                                                                                   \
-namespace BugEngine                                                                                                                             \
-{                                                                                                                                               \
-    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2()                                                                                \
-    {                                                                                                                                           \
-        static RTTI::ClassInfo ci = { #name1 "." #name2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                   \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1()->objects, #name2, Value(&ci) };                                        \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1()->objects = &ob);                                             \
-        be_forceuse(result);                                                                                                                    \
-        return &ci;                                                                                                                             \
-    }                                                                                                                                           \
+#define BE_REGISTER_NAMESPACE_2(plugin, name1, name2)                                                                                               \
+namespace BugEngine                                                                                                                                 \
+{                                                                                                                                                   \
+    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2()                                                                         \
+    {                                                                                                                                               \
+        static RTTI::ClassInfo ci = { #name1 "." #name2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                       \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1()->objects, #name2, Value(&ci) };                                 \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1()->objects = &ob);                                      \
+        be_forceuse(result);                                                                                                                        \
+        return &ci;                                                                                                                                 \
+    }                                                                                                                                               \
 }
 
-#define BE_REGISTER_NAMESPACE_3(name1, name2, name3)                                                                                            \
-namespace BugEngine                                                                                                                             \
-{                                                                                                                                               \
-    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3()                                                                      \
-    {                                                                                                                                           \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                        \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2()->objects, #name3, Value(&ci) };                              \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2()->objects = &ob);                                   \
-        be_forceuse(result);                                                                                                                    \
-        return &ci;                                                                                                                             \
-    }                                                                                                                                           \
+#define BE_REGISTER_NAMESPACE_3(plugin, name1, name2, name3)                                                                                        \
+namespace BugEngine                                                                                                                                 \
+{                                                                                                                                                   \
+    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3()                                                               \
+    {                                                                                                                                               \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                            \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2()->objects, #name3, Value(&ci) };                       \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2()->objects = &ob);                            \
+        be_forceuse(result);                                                                                                                        \
+        return &ci;                                                                                                                                 \
+    }                                                                                                                                               \
 }
-#define BE_REGISTER_NAMESPACE_4(name1, name2, name3, name4)                                                                                     \
-namespace BugEngine                                                                                                                             \
-{                                                                                                                                               \
-    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3##_##name4()                                                            \
-    {                                                                                                                                           \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };             \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2##_##name3()->objects, #name4, Value(&ci) };                    \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2##_##name3()->objects = &ob);                         \
-        be_forceuse(result);                                                                                                                    \
-        return &ci;                                                                                                                             \
-    }                                                                                                                                           \
+#define BE_REGISTER_NAMESPACE_4(plugin, name1, name2, name3, name4)                                                                                 \
+namespace BugEngine                                                                                                                                 \
+{                                                                                                                                                   \
+    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()                                                     \
+    {                                                                                                                                               \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                 \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2##_##name3()->objects, #name4, Value(&ci) };             \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2##_##name3()->objects = &ob);                  \
+        be_forceuse(result);                                                                                                                        \
+        return &ci;                                                                                                                                 \
+    }                                                                                                                                               \
 }
 
-#define BE_REGISTER_NAMESPACE_5(name1, name2, name3, name4, name5)                                                                              \
-namespace BugEngine                                                                                                                             \
-{                                                                                                                                               \
-    BugEngine::RTTI::ClassInfo* be_Namespace_##name1##_##name2##_##name3##_##name4##_##name5()                                                  \
-    {                                                                                                                                           \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4 "." #name5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };  \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_Namespace_##name1##_##name2##_##name3##_##name4()->objects, #name5, Value(&ci) };          \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_Namespace_##name1##_##name2##_##name3##_##name4()->objects = &ob);               \
-        be_forceuse(result);                                                                                                                    \
-        return &ci;                                                                                                                             \
-    }                                                                                                                                           \
+#define BE_REGISTER_NAMESPACE_5(plugin,name1, name2, name3, name4, name5)                                                                           \
+namespace BugEngine                                                                                                                                 \
+{                                                                                                                                                   \
+    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4##_##name5()                                           \
+    {                                                                                                                                               \
+        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4 "." #name5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };      \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()->objects, #name5, Value(&ci) };   \
+        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()->objects = &ob);        \
+        be_forceuse(result);                                                                                                                        \
+        return &ci;                                                                                                                                 \
+    }                                                                                                                                               \
 }
 
 }

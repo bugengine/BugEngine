@@ -14,7 +14,7 @@ int be_main(weak<Application> app)
     ref<Folder> dataFolder = ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory());
     Plugin<minitl::pointer> p1("nullrender", weak<const Folder>(dataFolder));
     //Plugin<minitl::pointer> p2("GL4", weak<const Folder>(dataFolder));
-    Value root = Value(be_Namespace());
+    Value root = Value(be_game_Namespace());
     Value bugengine = root["BugEngine"];
     Value rtti = bugengine["RTTI"];
     Value classinfo = rtti["ClassInfo"];

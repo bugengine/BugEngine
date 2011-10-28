@@ -14,10 +14,11 @@ size_t       PluginList::s_currentPlugin;
 
 PluginList*  PluginList::s_plugins[s_maxPlugins];
 
-PluginList::PluginList(const char* name, Create c, Destroy d)
+PluginList::PluginList(const char* name, Create c, Destroy d, Namespace n)
     :   name(name)
     ,   create(c)
     ,   destroy(d)
+    ,   ns(n)
 {
     be_assert(s_currentPlugin < s_maxPlugins, "too many plugins registered; increase the value of PluginList::s_maxPlugins to more than %d" | s_maxPlugins);
     s_plugins[s_currentPlugin++] = this;

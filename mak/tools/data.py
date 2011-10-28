@@ -17,7 +17,7 @@ def scan(self):
 	return ([], [])
 
 def doParseData(task):
-	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.env.BROKEN_INITIALIZER)
+	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.plugin, task.env.BROKEN_INITIALIZER)
 
 cls = Task.task_factory('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
@@ -52,6 +52,10 @@ def datagen(self, node):
 	outs.append(node.change_ext('.cc'))
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
+	if self.category == 'plugin':
+		tsk.plugin = self.name
+	else:
+		tsk.plugin = 'game'
 	try:
 		tsk.pch = self.pchheader
 	except AttributeError:
