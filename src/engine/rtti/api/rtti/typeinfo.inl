@@ -100,7 +100,7 @@ struct be_typeid< minitl::vector<T> >
 template< typename T >
 const RTTI::ClassInfo be_typeid< minitl::vector<T> >::klass =
 {
-    "vector", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+    "vector", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 template< typename T, size_t SIZE >
@@ -112,7 +112,7 @@ struct be_typeid< minitl::array<T,SIZE> >
 template< typename T, size_t SIZE >
 const RTTI::ClassInfo be_typeid< minitl::array<T,SIZE> >::klass =
 {
-    "array", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+    "array", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 template< typename T1, typename T2, typename T3 >
@@ -124,7 +124,7 @@ struct be_typeid< minitl::hashmap<T1, T2, T3> >
 template< typename T1, typename T2, typename T3 >
 const RTTI::ClassInfo be_typeid< minitl::hashmap<T1, T2, T3> >::klass =
 {
-	"hashmap", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+	"hashmap", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 }

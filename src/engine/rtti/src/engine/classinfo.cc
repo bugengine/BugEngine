@@ -8,7 +8,6 @@
 #include    <rtti/engine/taginfo.script.hh>
 #include    <rtti/value.inl>
 
-
 namespace BugEngine { namespace RTTI
 {
 
@@ -38,9 +37,20 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             o = o->next;
         }
-        return Value();
     }
-    else
+
+    {
+        const MethodInfo* m = methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                return Value(m);
+            }
+            m = m->next;
+        }
+    }
+
     {
         const PropertyInfo* p = properties;
         while(p)
@@ -51,8 +61,9 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             p = p->next;
         }
-        return Value();
     }
+
+    return Value();
 }
 
 bool ClassInfo::isA(const ClassInfo* klass) const
@@ -107,8 +118,16 @@ u32 ClassInfo::distance(const ClassInfo* other) const
 
 RTTI::ClassInfo* be_Namespace()
 {
-    static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
+    static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };
+    static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };
+    static const RTTI::ClassInfo::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);
+    be_forceuse(obptr);
     return &ci;
+}
+
+RTTI::ClassInfo* be_Namespace_BugEngine()
+{
+    return be_Namespace();
 }
 
 }

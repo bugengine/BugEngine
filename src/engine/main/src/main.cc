@@ -108,13 +108,7 @@ int WINAPI WinMain( HINSTANCE hInstance,
                     int /*nCmdShow*/ )
 {
     BugEngine::hDllInstance = hInstance;
-    freopen("be_out.txt", "w+", stdout);
-    freopen("be_err.txt", "w+", stderr);
-
     int result = __main(__argc, (const char **)__argv);
-    fflush(stdout);
-    fflush(stderr);
-
     return result;
 }
 #else

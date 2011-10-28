@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <minitl/type/typemanipulation.hh>
 #include    <rtti/typeinfo.inl>
@@ -264,6 +265,25 @@ void* Value::rawget() const
 Value Value::operator[](const istring& name)
 {
     return m_type.metaclass->get(*this, name);
+}
+
+Value Value::operator()(Value params[], u32 paramCount)
+{
+    be_assert_recover(m_type.metaclass->call, "Not a callable object: %s" | m_type.name(), return Value());
+    Value* v = (Value*)malloca(sizeof(Value)*(paramCount+1));
+    new(v) Value(Value::ByRef(*this));
+    for (u32 i = 0; i < paramCount; ++i)
+    {
+        new (v+i+1) Value(Value::ByRef(params[i]));
+    }
+    Value r = (*m_type.metaclass->call)(v, paramCount+1);
+    for (u32 i = paramCount; i > 0; --i)
+    {
+        v[i].~Value();
+    }
+    v[0].~Value();
+    freea(v);
+    return r;
 }
 
 }

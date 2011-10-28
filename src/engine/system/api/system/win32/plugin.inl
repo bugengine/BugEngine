@@ -11,8 +11,13 @@
     {                                                                                                                                   \
         BE_EXPORT RTTI::ClassInfo* be_Namespace()                                                                                       \
         {                                                                                                                               \
-            static RTTI::ClassInfo ci = { "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { { 0, 0, 0, 0 } } };                                       \
+            static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };                                                        \
+            static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                           \
             return &ci;                                                                                                                 \
+        }                                                                                                                               \
+        RTTI::ClassInfo* be_Namespace_BugEngine()                                                                                       \
+        {                                                                                                                               \
+            return be_Namespace();                                                                                                      \
         }                                                                                                                               \
     }                                                                                                                                   \
     extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \

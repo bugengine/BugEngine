@@ -95,9 +95,21 @@ decl_plugin:
     ;
 
 decl_object:
+        editor_attributes
         TOK_ID '=' fullname '('
             params
         ')'
+    ;
+
+editor_attributes:
+        editor_attributes
+        '[' attribute ']'
+    |
+        /* empty */
+    ;
+
+attribute:
+        TOK_ID '=' value
     ;
 
 params:
