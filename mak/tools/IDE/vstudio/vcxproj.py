@@ -4,16 +4,6 @@ import mak
 from mak import sources
 
 
-def getFileDeployPath(type):
-	if type == 'data':
-		return 'data'
-	elif type == 'etc':
-		return 'conf'
-	elif type == 'plugin':
-		return os.path.join('data','plugins')
-	else:
-		return ''
-
 class VCxproj:
 	extensions = ['.vcxproj', '.vcxproj.filters']
 
