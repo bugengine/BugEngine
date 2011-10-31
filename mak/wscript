@@ -9,7 +9,7 @@ from mak import module
 from waflib.Logs import pprint
 from waflib.Tools import ccroot,c,cxx
 
-projects = ['vs2003', 'vs2005', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e',
+projects = ['vs2003', 'vs2005', 'vs2005e', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e',
 			'xcode3', 'xcode4', 'eclipse', 'netbeans', 'qtcreator']
 
 def options(opt):

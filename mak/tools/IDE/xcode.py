@@ -47,7 +47,7 @@ class XCodeNode:
 				self.write_recursive(i, file)
 		elif isinstance(value, XCodeNode):
 			value.write(file)
-		
+
 	def write(self, file):
 		for attribute,value in self.__dict__.iteritems():
 			if attribute[0] != '_':
@@ -262,8 +262,7 @@ class PBXProject(XCodeNode):
 						self.targets.append(target)
 						self._output.children.append(target.productReference)
 					else:
-						self.targets.append(PBXLegacyTarget('install_', tg.name))
-		
+						self.targets.append(PBXLegacyTarget('install_', p.name))
 
 
 class xcode3(Build.BuildContext):
