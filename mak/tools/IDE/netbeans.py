@@ -1,6 +1,6 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Task, Context
+from waflib import TaskGen, Context, Build
 import os
 import mak
 from xml.dom.minidom import Document
@@ -82,35 +82,38 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
 	return doc
 
-def generateProject(task):
-	project = generateProjectXml(task.appname, task.allplatforms)
-	task.outputs[0].write(project.toxml())
-	configurations = generateConfigurationsXml(task.depends, task.allplatforms, task.bld, task.out)
-	task.outputs[1].write(configurations.toxml())
+class netbeans(Build.BuildContext):
+	cmd = 'netbeans'
+	fun = 'build'
 
-NetbeansGenerateProject = Task.task_factory('NetbeansGenerateProject', generateProject)
+	def execute(self):
+		"""
+		Entry point
+		"""
+		self.restore()
+		if not self.all_envs:
+			self.load_envs()
+		self.env.PROJECTS=[self.__class__.cmd]
+		self.recurse([self.run_dir])
 
-solutions={}
-@feature('netbeans')
-def create_netbeans_project(t):
-	toolName = t.features[0]
-	if not toolName in solutions:
-		outname = ['projects/project.xml', 'projects/configurations.xml']
-		solution = t.create_task("NetbeansGenerateProject")
-		solution.bld = t.bld
-		solution.appname = getattr(Context.g_module, 'APPNAME', 'noname')
-		solution.env=t.env
-		solution.version = toolName
-		solution.allplatforms    = t.env['ALL_VARIANTS']
-		outnode = [t.path.find_or_declare(n) for n in outname]
-		solution.set_outputs(outnode)
-		t.bld.install_files(os.path.join(t.path.srcpath(), 'nbproject'), outnode)
-		solution.depends = []
-		solution.dep_vars = ['NB_PROJECT_DEPENDS']
-		solution.env['NB_PROJECT_DEPENDS'] = []
-		solutions[toolName] = solution
-	solution = solutions[toolName]
-	solution.depends.append((t.name, t.category, t.sourcetree))
-	if t.type == 'game':
-		solution.out = t.name
+
+		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+		path = self.srcnode.make_node('nbproject')
+		path.mkdir()
+		project = path.make_node('project.xml')
+		confs = path.make_node('configurations.xml')
+		deps = []
+
+		for g in self.groups:
+			for tg in g:
+				if not isinstance(tg, TaskGen.task_gen):
+					continue
+				tg.post()
+				deps.append((tg.name, tg.category, tg.sourcetree))
+
+		p = generateProjectXml(appname, self.env['ALL_VARIANTS'])
+		project.write(p.toxml())
+		c = generateConfigurationsXml(deps, self.env['ALL_VARIANTS'], self, self.game.name)
+		confs.write(c.toxml())
+
 
