@@ -384,7 +384,7 @@ class module:
 
 	def post(self, builder):
 		self.makeproject(builder)
-		for name,d in self.plugins.iteritems():
+		for name,d in self.plugins.items():
 			if d:
 				d.makeproject(builder)
 		self._post(builder)
@@ -585,13 +585,13 @@ class game(module):
 				d._post(builder,blacklist)
 		options = coptions()
 		if builder.env['STATIC']:
-			for name,d in self.plugins.iteritems():
+			for name,d in self.plugins.items():
 				if d:
 					d._post(builder,[self]+blacklist)
-			task = self.gentask(builder, 'cprogram', options, extradepends=self.plugins.values(), blacklist=[self]+blacklist)
+			task = self.gentask(builder, 'cprogram', options, extradepends=list(self.plugins.values()), blacklist=[self]+blacklist)
 		elif not builder.variant in self.tasks:
 			task = self.gentask(builder, 'cprogram', options, blacklist=blacklist)
-			for name,d in self.plugins.iteritems():
+			for name,d in self.plugins.items():
 				if d:
 					d._post(builder, blacklist)
 
