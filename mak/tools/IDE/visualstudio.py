@@ -1,111 +1,94 @@
-from waflib.TaskGen import feature
-from waflib.Configure import conf
-from waflib import Context, Task
+from waflib import Context, Build, TaskGen
 import os
 import mak
 from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
 
-projects = {
-	'vs2003':	(('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10')),
-	'vs2005':	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00')),
-	'vs2005e':	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00')),
-	'vs2008':	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00')),
-	'vs2008e':	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00')),
-	'vs2010':	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0')),
-}
+class vs2003(Build.BuildContext):
+	cmd = 'vs2003'
+	fun = 'build'
+	version = (('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10'))
 
-def generateSolution(task):
-	s = solution.Solution( task.name,
-						   task.outputs[0].abspath(),
-						   task.version,
-						   task.versionNumber,
-						   task.versionName,
-						)
-	s.writeHeader()
-	# adds games and exes first
-	for d in task.depends:
-		if d.type == 'game':
-			s.addProject(d)
-	for d in task.depends:
-		if d.type != 'game':
-			s.addProject(d)
-	s.writeFooter(task.env.ALL_VARIANTS)
+	def execute(self):
+		"""
+		Entry point
+		"""
+		self.restore()
+		if not self.all_envs:
+			self.load_envs()
+		self.env.PROJECTS=[self.__class__.cmd]
+		self.recurse([self.run_dir])
 
-def generateProject(task):
-	project = task.projectClass( task.outputs[0].abspath(),
-								 task.projectName,
-								 task.projectCategory,
-								 task.version,
-								 task.versionNumber,
-								 task.type,
-								 task.bld.all_envs
-								)
-	project.writeHeader(task.allplatforms)
-	project.addDirectory(task.sourceTree)
-	project.writeFooter()
+		version = self.__class__.cmd
+		version_name, version_number = self.__class__.version[0]
+		klass, version_project = self.__class__.version[1]
+		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 
-GenerateSolution = Task.task_factory('GenerateSolution', func=generateSolution)
-GenerateProject = Task.task_factory('GenerateProject', func=generateProject)
+		node = self.srcnode.make_node(appname+'.'+self.__class__.cmd+'.sln')
+		projects = self.srcnode.make_node('.build').make_node(version)
+		projects.mkdir()
 
-solutions = {}
-def create_project(t):
-	toolName = t.features[0]
-	if not toolName in solutions:
-		appname = getattr(Context.g_module, 'APPNAME', 'noname')
-		outname = os.path.join('.build', appname+'.'+toolName+'.sln')
-		solution = t.create_task("GenerateSolution")
-		solution.env=t.env
-		solution.version = toolName
-		solution.versionName, solution.versionNumber = projects[toolName][0]
-		solution.allplatforms    = t.env.ALL_VARIANTS
-		outnode = t.path.find_or_declare(outname)
-		solution.set_outputs(outnode)
-		t.bld.install_files(t.path.srcpath(), outnode)
-		solution.depends = []
-		solution.dep_vars = ['MSVC_PROJECT_DEPENDS']
-		solution.env['MSVC_PROJECT_DEPENDS'] = []
-		solutions[toolName] = solution
-	solution = solutions[toolName]
-	projectClass,versionNumber = projects[toolName][1]
 
-	project = t.create_task("GenerateProject")
-	project.env=t.env.derive()
-	project.type			= t.type
-	project.allplatforms    = []
-	for i in t.env.ALL_VARIANTS:
-		env = t.bld.all_envs[i]
-		try:
-			options = t.platforms['%s-%s' % (env['PLATFORM'][0], env['ARCHITECTURE'])]
-		except Exception as e:
-			options = None
-		project.allplatforms.append((i, options))
-	project.version 		= toolName
-	project.versionNumber 	= versionNumber
-	project.projectClass 	= projectClass
-	project.projectCategory = t.category
-	project.projectName 	= t.name
-	project.type 			= t.type
-	project.sourceTree 		= t.sourcetree
+		s = solution.Solution(appname, node.abspath(), version, version_number, version_name)
+		s.writeHeader()
 
-	install_path	= os.path.join(t.path.srcpath(), '.build', toolName)
-	outname = t.category+'.'+t.name+'.'+toolName+projectClass.extensions[0]
-	t.outname = os.path.join('.build', toolName, outname)
-	for extension in projectClass.extensions:
-		outname = t.category+'.'+t.name+'.'+toolName+extension
-		outnode = t.path.find_or_declare(outname)
-		project.set_outputs(outnode)
-		t.bld.install_files(install_path, outnode)
-	project.env['MSVC_PROJECT_SOURCES'] = t.sourcetree.hash()
-	project.env['MSVC_PROJECT_FLAGS'] = t.platforms
-	project.dep_vars = ['MSVC_PROJECT_SOURCES', 'MSVC_PROJECT_FLAGS']
-	project.bld = t.bld
+		project_list = []
+		for g in self.groups:
+			for tg in g:
+				if not isinstance(tg, TaskGen.task_gen):
+					continue
+				tg.post()
 
-	solution.depends.append(t)
-	solution.env['MSVC_PROJECT_DEPENDS'].append(outname)
+				allplatforms = []
+				for i in self.env.ALL_VARIANTS:
+					env = self.all_envs[i]
+					try:
+						options = tg.platforms['%s-%s' % (env['PLATFORM'][0], env['ARCHITECTURE'])]
+					except Exception as e:
+						options = None
+					allplatforms.append((i, options))
 
-for pname in projects.keys():
-	feature(pname)(create_project)
+				node = projects.make_node("%s.%s.%s.%s" % (tg.category, tg.name, version, klass.extensions[0]))
+				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.category, self.all_envs)
+				project.writeHeader(allplatforms)
+				project.addDirectory(tg.sourcetree)
+				project.writeFooter()
+				project_list.append((project, node))
+		for project, node in project_list:
+			if project.category == 'game':
+				s.addProject(project, node.path_from(self.srcnode))
+		for project, node in project_list:
+			if project.category != 'game':
+				s.addProject(project, node.path_from(self.srcnode))
+		s.writeFooter(self.env.ALL_VARIANTS)
 
-def configure(ctx):
-	pass
+class vs2005(vs2003):
+	cmd = 'vs2005'
+	fun = 'build'
+	version =	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00'))
+
+class vs2005e(vs2003):
+	cmd = 'vs2005e'
+	fun = 'build'
+	version =	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00'))
+
+
+class vs2008(vs2003):
+	cmd = 'vs2008'
+	fun = 'build'
+	version =	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00'))
+
+class vs2008e(vs2003):
+	cmd = 'vs2008e'
+	fun = 'build'
+	version =	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00'))
+
+class vs2010(vs2003):
+	cmd = 'vs2010'
+	fun = 'build'
+	version =	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0'))
+
+class vs2010e(vs2003):
+	cmd = 'vs2010e'
+	fun = 'build'
+	version =	(('Visual C++ Express 2010', '11.00'),(vcxproj.VCxproj, '4.0'))
 
