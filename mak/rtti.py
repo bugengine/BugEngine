@@ -200,7 +200,7 @@ class Class(Container):
 	def dump(self, file, namespace, nested):
 		file.write("//----------------------------------------------------------------------\n")
 		file.write("// %s\n" % self.fullname)
-		self.hash.update(self.fullname)
+		self.hash.update(self.fullname.encode())
 		classes = Container.dump(self, file, namespace, True)
 		decl = "class%s" % self.fullname.replace(':', '_')
 		if self.useMethods:
@@ -255,9 +255,9 @@ class Class(Container):
 			if visibility == 'published':
 				if showline:
 					file.write("#line %d\n" % (line))
-				self.hash.update("property")
-				self.hash.update(type)
-				self.hash.update(name)
+				self.hash.update("property".encode())
+				self.hash.update(type.encode())
+				self.hash.update(name.encode())
 				tagname = self.writeTags(file, decl+"_"+name, tags)
 				file.write("static const ::BugEngine::RTTI::PropertyInfo s_%s_%s =\n" % (decl, name))
 				file.write("    {\n")
@@ -294,23 +294,23 @@ class Class(Container):
 				continue
 			if showline:
 				file.write("        #line %d\n" % (line))
-			self.hash.update("method")
-			self.hash.update(name)
+			self.hash.update("method".encode())
+			self.hash.update(name.encode())
 
 			for rtype, params, attrs, visibility, tags, line in overloads:
-				self.hash.update("overload")
+				self.hash.update("overload".encode())
 				if "const" in attrs:
-					self.hash.update("const")
+					self.hash.update("const".encode())
 				if "static" in attrs:
-					self.hash.update("static")
+					self.hash.update("static".encode())
 				paramindex = 0
 				param = "0"
 				if showline: file.write("#line %d\n" % (line))
 				method_tagname = self.writeTags(file, decl+"_"+prettyname, tags)
 				for ptype, pname, tags in params[::-1]:
-					self.hash.update("param")
-					self.hash.update("ptype")
-					self.hash.update("pname")
+					self.hash.update("param".encode())
+					self.hash.update(ptype.encode())
+					self.hash.update(pname.encode())
 					param_tagname = self.writeTags(file, decl+"_"+prettyname+"_"+pname, tags)
 					file.write("static const ::BugEngine::RTTI::MethodInfo::OverloadInfo::ParamInfo s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
