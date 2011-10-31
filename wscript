@@ -17,10 +17,9 @@ def configure(conf):
 
 def build(bld):
 	bld.recurse('mak')
-	if not bld.variant:
-		if not bld.env.PROJECTS:
-			Options.commands[:0] = [bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS]
-			return
+	if not bld.variant and not bld.env.PROJECTS:
+		Options.commands[:0] = [bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS]
+		return
 
 	dbghelp			= module.external('dbghelp')
 	win32			= module.external('win32')
