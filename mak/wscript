@@ -9,7 +9,8 @@ from mak import module
 from waflib.Logs import pprint
 from waflib.Tools import ccroot,c,cxx
 
-
+projects = ['vs2003', 'vs2005', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e',
+			'xcode3', 'xcode4', 'eclipse', 'netbeans', 'qtcreator']
 
 def options(opt):
 	opt.recurse(os.path.join('host', os.name))
@@ -112,18 +113,17 @@ def selectToolchains(ctx):
 		Options.options.toolchains = ctx.env['SELECTED_TOOLCHAINS']
 	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
 	selectedvariants = []
-	if Options.options.projects:
-		ctx.env['PROJECTS'] = Options.options.projects.split(',')
-	else:
-		allvariants = ctx.env['BUILD_VARIANTS']
-		for v in allvariants:
-			for e in selectedtoolchains:
-				if e.match(v):
-					selectedvariants.append(v)
-					pprint('GREEN', 'selected variant %s for build' % v)
+	allvariants = ctx.env['BUILD_VARIANTS']
+	for v in allvariants:
+		for e in selectedtoolchains:
+			if e.match(v):
+				selectedvariants.append(v)
+				pprint('GREEN', 'selected variant %s for build' % v)
 	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
+	if bld.__class__.__name__ in projects:
+		bld.env.PROJECTS = [bld.__class__.__name__]
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:
