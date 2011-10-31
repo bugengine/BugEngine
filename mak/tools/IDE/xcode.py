@@ -80,6 +80,7 @@ class XCConfigurationList(XCodeNode):
 
 # Group/Files
 class PBXFileReference(XCodeNode):
+	sort_prefix = 'b'
 	def __init__(self, name, path, filetype = '', sourcetree = "SOURCE_ROOT"):
 		XCodeNode.__init__(self)
 		self.fileEncoding = 4
@@ -115,6 +116,7 @@ class PBXFileReference(XCodeNode):
 		self.sourceTree = sourcetree
 
 class PBXGroup(XCodeNode):
+	sort_prefix = 'a'
 	def __init__(self, name, sourcetree = "<group>"):
 		XCodeNode.__init__(self)
 		self.children = []
@@ -128,6 +130,11 @@ class PBXGroup(XCodeNode):
 			group.add(dir, os.path.join(path, dir.prefix))
 		for file in sourcetree.files:
 			ref = PBXFileReference(file.filename, os.path.join(path, file.filename))
+			self.children.append(ref)
+		self.sort()
+
+	def sort(self):
+		self.children.sort(key = lambda x: x.__class__.sort_prefix+x.name)
 
 
 # Targets
@@ -212,8 +219,13 @@ class PBXProject(XCodeNode):
 		self.projectDirPath = ""
 		self.targets = []
 		self._objectVersion = version[1]
-		self._output = PBXGroup('out')
+		self._output = PBXGroup('Products')
 		self.mainGroup.children.append(self._output)
+		self._groups = {}
+		for i in ['3rdparty', 'engine', 'game', 'plugin']:
+			g = PBXGroup(i)
+			self._groups[i] = g
+			self.mainGroup.children.append(g)
 
 	def write(self, file):
 		w = file.write
@@ -233,8 +245,10 @@ class PBXProject(XCodeNode):
 
 	def add(self, bld, p):
 		group = PBXGroup(p.name)
-		group.add(p.sourcetree, '')
-		self.mainGroup.children.append(group)
+		group.add(p.sourcetree, p.sourcetree.prefix)
+		g = self._groups[p.category]
+		g.children.append(group)
+		g.sort()
 		if p.category == 'game':
 			appname = getattr(Context.g_module, 'APPNAME', 'noname')
 			for toolchain in bld.env.ALL_VARIANTS:
