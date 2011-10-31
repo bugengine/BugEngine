@@ -21,7 +21,7 @@ class XCodeNode:
 	def tostring(self, value):
 		if isinstance(value, dict):
 			result = "{\n"
-			for k,v in value.iteritems():
+			for k,v in value.items():
 				result = result + "\t\t\t%s = %s;\n" % (k, self.tostring(v))
 			result = result + "\t\t}"
 			return result
@@ -40,7 +40,7 @@ class XCodeNode:
 
 	def write_recursive(self, value, file):
 		if isinstance(value, dict):
-			for k,v in value.iteritems():
+			for k,v in value.items():
 				self.write_recursive(v, file)
 		elif isinstance(value, list):
 			for i in value:
@@ -49,14 +49,14 @@ class XCodeNode:
 			value.write(file)
 
 	def write(self, file):
-		for attribute,value in self.__dict__.iteritems():
+		for attribute,value in self.__dict__.items():
 			if attribute[0] != '_':
 				self.write_recursive(value, file)
 
 		w = file.write
 		w("\t%s = {\n" % self._id)
 		w("\t\tisa = %s;\n" % self.__class__.__name__)
-		for attribute,value in self.__dict__.iteritems():
+		for attribute,value in self.__dict__.items():
 			if attribute[0] != '_':
 				w("\t\t%s = %s;\n" % (attribute, self.tostring(value)))
 		w("\t};\n\n")
@@ -124,7 +124,7 @@ class PBXGroup(XCodeNode):
 		self.sourceTree = sourcetree
 
 	def add(self, sourcetree, path):
-		for name,dir in sourcetree.directories.iteritems():
+		for name,dir in sourcetree.directories.items():
 			group = PBXGroup(name)
 			self.children.append(group)
 			group.add(dir, os.path.join(path, dir.prefix))
@@ -189,7 +189,7 @@ class PBXNativeTarget(XCodeNode):
 
 # Root project object
 
-def macarch(arch):
+def macarch(arch, is64):
 	if arch == 'amd64':
 		return 'x86_64'
 	elif arch == 'arm':
@@ -197,9 +197,10 @@ def macarch(arch):
 	elif arch == 'x86':
 		return 'i386'
 	elif arch == 'ppc':
-		return 'powerpc'
-	elif arch == 'ppc64':
-		return 'powerpc64'
+		if is64:
+			return 'ppc64'
+		else:
+			return 'ppc'
 	else:
 		return arch
 
@@ -258,7 +259,7 @@ class PBXProject(XCodeNode):
 					if env.ABI == 'mach_o':
 						target = PBXNativeTarget('install_', toolchain, appname,
 								env.PREFIX.replace('debug-'+toolchain, '%s-'+toolchain),
-								macarch(env.ARCHITECTURE), env.SDKROOT, env.SUPPORTEDPLATFORMS)
+								macarch(env.ARCHITECTURE, env.LP64), env.SDKROOT, env.SUPPORTEDPLATFORMS)
 						self.targets.append(target)
 						self._output.children.append(target.productReference)
 					else:
@@ -268,7 +269,7 @@ class PBXProject(XCodeNode):
 class xcode3(Build.BuildContext):
 	cmd = 'xcode3'
 	fun = 'build'
-	version = ('Xcode 3.2', 46)
+	version = ('Xcode 3.2', 45)
 
 	def execute(self):
 		"""
