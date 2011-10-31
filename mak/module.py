@@ -190,7 +190,20 @@ class module:
 		env = bld.env
 		variant = bld.variant
 		if not variant in self.tasks:
-			if type=='dummy' or not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
+			if type=='dummy':
+				task = None
+				# will deploy files that were scheduled to be deployed
+				self.sourcetree.make_sources(bld, env, self.root)
+			elif env.PROJECTS:
+				task					= bld()
+				task.category			= self.category
+				task.target				= self.dstname
+				task.env				= env.derive()
+				task.env.detach()
+				task.type				= type
+				task.features			= ['c', 'cxx', type]
+				task.sourcetree			= self.sourcetree
+			elif not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
 				self.sourcetree.make_sources(bld, env, self.root)
@@ -357,36 +370,7 @@ class module:
 			else:
 				self.deploy(os.path.join(dirname,file),outputdir,deploytype,platforms, archs)
 
-	def makeproject(self, bld):
-		for d in self.depends:
-			d.makeproject(bld)
-		for p in bld.env['PROJECTS']:
-			if not p in self.projects:
-				task = bld()
-				task.features		= [p]
-				task.depends		= [d.projects[p] for d in self.depends]
-				task.target			= self.dstname+'.'+p
-				task.name			= self.dstname
-				task.env			= bld.env
-				task.sourcetree		= self.sourcetree
-				task.type			= self.__class__.__name__
-				task.category		= self.category
-				task.usemaster		= self.usemaster
-				task.pchstop		= self.localoptions.pchstop
-				platforms = {}
-				for platform,aliases in mak.allplatforms.items():
-					if set(aliases) & self.platforms:
-						for arch in self.archs:
-							options = self.getoptions(aliases, arch)
-							platforms[platform+'-'+arch] = options
-				task.platforms		= platforms
-				self.projects[p] = task
-
 	def post(self, builder):
-		self.makeproject(builder)
-		for name,d in self.plugins.iteritems():
-			if d:
-				d.makeproject(builder)
 		self._post(builder)
 		return self
 
@@ -547,7 +531,7 @@ class plugin(module):
 			options.defines.add('BUILDING_DLL')
 			options.defines.add('_USRDLL')
 			task = self.gentask(builder, 'cshlib', options, coptions(), blacklist = blacklist)
-			if task:
+			if task and not builder.env.PROJECTS:
 				task.install_bindir = os.path.join(builder.env['DEPLOY']['plugin'])
 
 """ game """

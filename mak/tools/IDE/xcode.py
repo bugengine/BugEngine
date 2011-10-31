@@ -1,13 +1,17 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
-from waflib import Context, Task
+from waflib import Context, TaskGen, Build
 import os, sys
 import mak
 import random
 import time
 
+x = 2000
+y = 10500999
 def newid():
-	return "%04X%04X%04X%012d" % (random.randint(0, 32767), random.randint(0, 32767), random.randint(0, 32767), int(time.time()))
+	global x, y
+	y = y + 1
+	return "%04X%04X%04X%012d" % (0, x, 0, y)
 
 
 class XCodeNode:
@@ -228,10 +232,10 @@ class PBXProject(XCodeNode):
 		w("}\n")
 
 	def add(self, bld, p):
-		group = PBXGroup(p.projectName)
-		group.add(p.sourceTree, '')
+		group = PBXGroup(p.name)
+		group.add(p.sourcetree, '')
 		self.mainGroup.children.append(group)
-		if p.type == 'game':
+		if p.category == 'game':
 			appname = getattr(Context.g_module, 'APPNAME', 'noname')
 			for toolchain in bld.env.ALL_VARIANTS:
 				if toolchain.startswith('debug-'):
@@ -248,58 +252,35 @@ class PBXProject(XCodeNode):
 		
 
 
+class xcode3(Build.BuildContext):
+	cmd = 'xcode3'
+	fun = 'build'
+	version = ('Xcode 3.2', 46)
 
-class Project:
-	pass
-
-xcodeprojects = {
-	'xcode3': ('Xcode 3.X', 45),
-	'xcode4': ('Xcode 4.X', 46),
-}
-
-def generateProject(task):
-	project = PBXProject(task.name, task.version)
-	for p in task.projects:
-		project.add(task.bld, p)
-	project.write(open(task.outputs[0].abspath(), 'w'))
-
-GenerateProject = Task.task_factory('generateProject', generateProject)
-
-solutions = {}
-def create_xcode_project(t):
-	toolName = t.features[0]
-	appname = getattr(Context.g_module, 'APPNAME', 'noname')
-	projectName = appname+'.'+toolName+'.xcodeproj/'
-	if not toolName in solutions:
-		outname = projectName+'project.pbxproj'
-		solution = t.create_task('generateProject')
-		solution.env = t.env.derive()
-		outnode = t.path.find_or_declare("projects/"+outname)
-		solution.set_outputs(outnode)
-		t.bld.install_files(projectName, outnode)
-		solution.name = appname
-		solution.bld = t.bld
-		solution.version = xcodeprojects[toolName]
-		solution.install_path = t.path.srcpath()+'/'
-		solution.projects = []
-		solution.dep_vars = ['XCODE_PROJECT_DEPENDS']
-		solution.env['XCODE_PROJECT_DEPENDS'] = []
-		solutions[toolName] = solution
-	solution = solutions[toolName]
+	def execute(self):
+		"""
+		Entry point
+		"""
+		self.restore()
+		if not self.all_envs:
+			self.load_envs()
+		self.env.PROJECTS=[self.__class__.cmd]
+		self.recurse([self.run_dir])
 
 
-	project = Project()
-	project.type			= t.type
-	project.platforms 		= t.platforms
-	project.version 		= toolName
-	project.projectCategory = t.category
-	project.projectName 	= t.name
-	project.sourceTree 		= t.sourcetree
-	if project.type == 'game':
-		solution.out = project.projectName
-	solution.projects.append(project)
-	solution.env['XCODE_PROJECT_DEPENDS'].append(t.sourcetree)
+		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+		p = PBXProject(appname, self.__class__.version)
 
-for pname in xcodeprojects.keys():
-	feature(pname)(create_xcode_project)
+		for g in self.groups:
+			for tg in g:
+				if not isinstance(tg, TaskGen.task_gen):
+					continue
+				tg.post()
+				p.add(self, tg)
+
+		node = self.srcnode.make_node('%s.%s.xcodeproj' % (appname, self.__class__.cmd))
+		node.mkdir()
+		node = node.make_node('project.pbxproj')
+		p.write(open(node.abspath(), 'w'))
+
 
