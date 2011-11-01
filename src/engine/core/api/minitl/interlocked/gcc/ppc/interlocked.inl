@@ -14,7 +14,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef long value_t;
+    typedef int value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old = 0;
@@ -136,7 +136,7 @@ struct InterlockedType<2> : public InterlockedType<4>
 template<>
 struct InterlockedType<8>
 {
-    typedef long value_t;
+    typedef long long int value_t;
     static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         value_t old = 0;
