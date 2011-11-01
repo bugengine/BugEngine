@@ -21,6 +21,7 @@ PluginList::PluginList(const char* name, Create c, Destroy d, Namespace n)
     ,   ns(n)
 {
     be_assert(s_currentPlugin < s_maxPlugins, "too many plugins registered; increase the value of PluginList::s_maxPlugins to more than %d" | s_maxPlugins);
+	be_info("Registering built-in plugin %s" | name);
     s_plugins[s_currentPlugin++] = this;
 }
 
