@@ -22,7 +22,7 @@ struct Guid
 
     struct GuidString
     {
-        char str[40];
+        char str[33];
         operator char*()                { return str; }
         operator const char*() const    { return str; }
     };
