@@ -14,14 +14,6 @@ int be_main(weak<Application> app)
     ref<Folder> dataFolder = ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory());
     Plugin<minitl::pointer> p1("nullrender", weak<const Folder>(dataFolder));
     //Plugin<minitl::pointer> p2("GL4", weak<const Folder>(dataFolder));
-    Value root = Value(be_game_Namespace());
-    Value bugengine = root["BugEngine"];
-    Value rtti = bugengine["RTTI"];
-    Value classinfo = rtti["ClassInfo"];
-    Value name = classinfo["name"];
-    Value size = classinfo["size"];
-    be_info("%s"|name.as<const inamespace>());
-    be_info("%d"|size.as<const u32>());
 
     app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
     return 0;

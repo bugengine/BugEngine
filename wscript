@@ -26,14 +26,14 @@ def build(bld):
 
 	mak				= module.external('mak')
 
-	core			= module.library('core',        [dbghelp, win32, mak])
-	network			= module.library('network',     [core])
-	rtti			= module.library('rtti',        [core, network] )
-	system			= module.library('system',      [core, rtti] )
-	world			= module.library('world',       [core, rtti, system] )
-	main			= module.library('main',        [core, rtti, system, world])
+	core			= module.library('core',		[dbghelp, win32, mak])
+	network			= module.library('network',		[core])
+	rtti			= module.library('rtti',		[core, network] )
+	system			= module.library('system',		[core, rtti] )
+	world			= module.library('world',		[core, rtti, system] )
+	main			= module.library('main',		[core, rtti, system, world])
 
-	bld.game		= module.game('discworld',      [core, rtti, system, world, main])
+	bld.game		= module.game('discworld',		[core, rtti, system, world, main])
 
 	bld.recurse('.', name='plugins', once=False)
 	bld.game.post(bld)
@@ -60,34 +60,34 @@ def plugins(bld):
 	squirellib		= module.external('squirrellib')
 
 
-	editor			= module.plugin('editor',   	    [], platforms=['pc'])
+	package			= module.plugin('package',			[])
+	packagebuilder	= module.plugin('packagebuilder',	[], category='plugin')
+	editor			= module.plugin('editor',			[packagebuilder], platforms=['pc'])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
-	_3d				= module.plugin('3d', 				[])
-	shadermodel1	= module.plugin('shadermodel1', 	[_3d])
-	shadermodel2	= module.plugin('shadermodel2', 	[_3d, shadermodel1])
-	shadermodel3	= module.plugin('shadermodel3', 	[_3d, shadermodel1, shadermodel2])
-	shadermodel4	= module.plugin('shadermodel4', 	[_3d, shadermodel1, shadermodel2, shadermodel3])
+	_3d				= module.plugin('3d',					[])
+	shadermodel1	= module.plugin('shadermodel1',		[_3d])
+	shadermodel2	= module.plugin('shadermodel2',		[_3d, shadermodel1])
+	shadermodel3	= module.plugin('shadermodel3',		[_3d, shadermodel1, shadermodel2])
+	shadermodel4	= module.plugin('shadermodel4',		[_3d, shadermodel1, shadermodel2, shadermodel3])
 
 
-	#AL				= module.plugin('AL',  				[openal], platforms=['pc'])
+	#AL				= module.plugin('AL',				[openal], platforms=['pc'])
 
-	package			= module.plugin('package',      	[])
-	packagebuilder	= module.plugin('packagebuilder',	[], category='plugin')
-	lua				= module.plugin('lua',          	[lualib])
-	squirrel		= module.plugin('squirrel',     	[squirellib])
-	input			= module.plugin('input', 			[])
+	lua				= module.plugin('lua',				[lualib])
+	squirrel		= module.plugin('squirrel',			[squirellib])
+	input			= module.plugin('input',			[])
 
-	nullrender		= module.plugin('nullrender', 		[_3d, shadermodel4])
+	nullrender		= module.plugin('nullrender',		[_3d, shadermodel4])
 	if win32 or X11 or cocoa:
-		windowing	= module.library('windowing',   [bld.game, _3d, X11, win32], category='plugin')
+		windowing	= module.library('windowing',		[bld.game, _3d, X11, win32], category='plugin')
 		if opengl:
-			gl		= module.plugin('GL4', 			[bld.game, windowing, opengl, _3d], platforms=['pc'])
+			gl		= module.plugin('GL4',				[bld.game, windowing, opengl, _3d], platforms=['pc'])
 		if directx9:
-			Dx9		= module.plugin('DX9',          [bld.game, windowing, cgDx, directx9, _3d], platforms=['win32'])
+			Dx9		= module.plugin('DX9',				[bld.game, windowing, cgDx, directx9, _3d], platforms=['win32'])
 		#if diretx10:
-			#Dx10	= module.plugin('DX10',         [bld.game, windowing, cgDx, directx10, _3d], platforms=['win32'])
+			#Dx10	= module.plugin('DX10',				[bld.game, windowing, cgDx, directx10, _3d], platforms=['win32'])
 
 	bld.recurse('mak', name='plugins', once=False)
 

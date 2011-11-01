@@ -8,6 +8,31 @@
 
 #pragma warning(disable:4127 4244 4267 4996 4505)
 
+#ifdef malloc
+# undef malloc
+#endif
+#ifdef realloc
+# undef realloc
+#endif
+#ifdef free
+# undef free
+#endif
+#define malloc(x)    BugEngine::tempArena().alloc(x, 4)
+#define relloc(x,s)  BugEngine::tempArena().realloc(x, s, 4)
+#define free(x)      BugEngine::tempArena().free(x)
+#ifdef strdup
+# undef strdup
+#endif
+#define strdup(x)    be_strdup(x)
+static char *be_strdup(const char *src)
+{
+    size_t x = strlen(src);
+    char* result = (char*)malloc(x+1);
+    strncpy(result, src, x);
+    result[x] = 0;
+    return result;
+}
+
 i64 strToInteger(const char *text, size_t l)
 {
     bool negate = false;
@@ -64,25 +89,11 @@ true                                    { update(be_package_leng); yylval.bValue
 false                                   { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
 import                                  { update(be_package_leng); return KW_import; }
 plugin                                  { update(be_package_leng); return KW_plugin; }
-[0-9A-Za-z_]*[A-Za-z_]+[0-9A-Za-z_]*    { update(be_package_leng); yylval.sValue = strdup(be_package_text); return TOK_ID; }
-\"[^\r\n\"]*\"                          { update(be_package_leng); yylval.sValue = strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
+[0-9A-Za-z_]*[A-Za-z_]+[0-9A-Za-z_]*    { update(be_package_leng); yylval.sValue = be_strdup(be_package_text); return TOK_ID; }
+\"[^\r\n\"]*\"                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
 -?[0-9]+                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
 "\n"                                    { newline(); }
 [ \r\t]+                                { update(be_package_leng); }
 .                                       { update(be_package_leng); return *be_package_text; }
 
 %%
-
-static struct Cleanup
-{
-    Cleanup()
-    {
-    }
-    ~Cleanup()
-    {
-        if (YY_CURRENT_BUFFER)
-        {
-            yy_delete_buffer(YY_CURRENT_BUFFER);
-        }
-    }
-} cleanup;
