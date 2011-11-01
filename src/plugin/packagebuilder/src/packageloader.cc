@@ -7,6 +7,7 @@
 
 
 int be_package_parse(void* param);
+int be_package_lex_destroy();
 const BugEngine::Allocator::Block<u8>* g_buffer = 0;
 int g_bufferPosition = 0;
 int g_packageLine = 0;
@@ -51,6 +52,7 @@ void PackageLoader::runBuffer(const Allocator::Block<u8>& buffer)
     g_packageColumnBefore = g_packageColumnAfter = 0;
     BuildContext context;
     be_package_parse(&context);
+    be_package_lex_destroy();
     g_buffer = 0;
     g_bufferPosition = 0;
 }

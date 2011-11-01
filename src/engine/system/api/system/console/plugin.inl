@@ -35,8 +35,8 @@ public:
 #define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
     BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                 \
     BE_EXPORT BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                      \
-                                                            0,     																		\
-                                                            0,   																		\
+                                                            0,                                                                          \
+                                                            0,                                                                          \
                                                             BugEngine::be_##name##_Namespace);
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
     BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                 \

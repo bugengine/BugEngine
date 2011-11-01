@@ -5,6 +5,7 @@
 #define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 /*****************************************************************************/
 #include    <system/plugin.hh>
+#include    <packagebuilder/nodes/package.hh>
 
 namespace BugEngine { namespace PackageBuilder
 {
@@ -12,13 +13,15 @@ namespace BugEngine { namespace PackageBuilder
 struct BuildContext
 {
     minitl::hashmap< istring, Plugin<minitl::pointer> > plugins;
-    minitl::vector< const RTTI::ClassInfo* >            imports;
+    minitl::hashmap< istring, const RTTI::ClassInfo* >  imports;
     minitl::vector< Value >                             objects;
+    ref<Nodes::Package>                                 result;
 
     BuildContext()
         :   plugins(tempArena())
         ,   imports(tempArena())
         ,   objects(tempArena())
+        ,   result()
     {
     }
 };

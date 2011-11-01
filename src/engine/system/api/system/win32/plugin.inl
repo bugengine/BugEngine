@@ -7,13 +7,13 @@
 #include    <winerror.h>
 
 #define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
-    BE_PLUGIN_NAMESPACE_REGISTER_(name)
-#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
-    BE_PLUGIN_NAMESPACE_REGISTER_(name);                                                                                                \
+    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                 \
     extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \
     {                                                                                                                                   \
         return BugEngine::be_##name##_Namespace();                                                                                      \
-    }                                                                                                                                   \
+    }
+#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
     extern "C" BE_EXPORT klass* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
 
