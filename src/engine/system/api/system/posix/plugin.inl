@@ -9,8 +9,10 @@
 #include    <dlfcn.h>
 
 
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
+    BE_PLUGIN_NAMESPACE_REGISTER_(name)
 #define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
-    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                 \
+    BE_PLUGIN_NAMESPACE_REGISTER_(name);                                                                                                \
     extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                         \
     {                                                                                                                                   \
         return BugEngine::be_##name##_Namespace();                                                                                      \

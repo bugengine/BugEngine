@@ -57,7 +57,7 @@ private:
 # error Plugin subsystem not implemented...
 #endif
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                              \
+#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                             \
     namespace BugEngine                                                                                                                 \
     {                                                                                                                                   \
         BE_EXPORT RTTI::ClassInfo* be_##name##_Namespace()                                                                              \
