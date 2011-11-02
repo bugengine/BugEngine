@@ -12,16 +12,10 @@ namespace BugEngine { namespace PackageBuilder
 
 struct BuildContext
 {
-    minitl::hashmap< istring, Plugin<minitl::pointer> > plugins;
-    minitl::hashmap< istring, const RTTI::ClassInfo* >  imports;
-    minitl::vector< Value >                             objects;
     ref<Nodes::Package>                                 result;
 
     BuildContext()
-        :   plugins(tempArena())
-        ,   imports(tempArena())
-        ,   objects(tempArena())
-        ,   result()
+        :   result(ref<Nodes::Package>::create(packageBuilderArena()))
     {
     }
 };

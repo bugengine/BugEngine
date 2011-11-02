@@ -5,6 +5,16 @@
 #include    <packageloader.hh>
 #include    <core/threads/thread.hh>
 
+namespace BugEngine
+{
+
+Allocator& packageArena()
+{
+    return gameArena();
+}
+
+}
+
 namespace BugEngine { namespace PackageManager
 {
 
