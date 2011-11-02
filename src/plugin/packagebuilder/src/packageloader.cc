@@ -14,6 +14,16 @@ int g_packageLine = 0;
 int g_packageColumnBefore = 0;
 int g_packageColumnAfter = 0;
 
+namespace BugEngine
+{
+
+Allocator& packageBuilderArena()
+{
+    return gameArena();
+}
+
+}
+
 namespace BugEngine { namespace PackageBuilder
 {
 

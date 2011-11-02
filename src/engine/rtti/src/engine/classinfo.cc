@@ -43,7 +43,7 @@ Value ClassInfo::get(Value& from, istring propname) const
     static const ClassInfo* const s_metaClassInfo = be_typeid<ClassInfo>::klass();
     if (from.type().metaclass == s_metaClassInfo)
     {
-        const ObjectInfo* o = from.as<const ClassInfo*>()->objects;
+        const ObjectInfo* o = from.as<const ClassInfo* const>()->objects;
         while(o)
         {
             if (o->name == propname)

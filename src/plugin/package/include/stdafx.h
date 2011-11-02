@@ -10,6 +10,7 @@
 #include    <system/stdafx.h>
 #include    <main/stdafx.h>
 
+namespace BugEngine { Allocator& packageArena(); }
 
 /*****************************************************************************/
 #endif

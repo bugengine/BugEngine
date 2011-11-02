@@ -1,6 +1,9 @@
 %{
 #include    <stdafx.h>
 #include    <buildcontext.hh>
+#include    <packagebuilder/nodes/package.hh>
+#include    <packagebuilder/nodes/object.hh>
+#include    <packagebuilder/nodes/reference.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -24,13 +27,6 @@
 
 #define YYSTACK_USE_ALLOCA 1
 
-struct Parameter
-{
-    Parameter*          next;
-    BugEngine::istring  name;
-    BugEngine::Value    value;
-};
-
 extern int yylex();
 
 static int yyerror(const char *msg)
@@ -52,9 +48,11 @@ static int yyerror(const char *msg)
 #ifdef free
 # undef free
 #endif
-#define malloc(x)    BugEngine::tempArena().alloc(x, 4)
-#define relloc(x,s)  BugEngine::tempArena().realloc(x, s, 4)
-#define free(x)      BugEngine::tempArena().free(x)
+#define malloc(x)    tempArena().alloc(x, 4)
+#define relloc(x,s)  tempArena().realloc(x, s, 4)
+#define free(x)      tempArena().free(x)
+
+using namespace BugEngine;
 
 %}
 
@@ -85,17 +83,29 @@ static int yyerror(const char *msg)
 %%
 
 file:
-        file
-        decl
+        imports
+        decls
+    ;
+
+imports:
+        imports import
+    |
+        /* empty */
+    ;
+
+import:
+        decl_import
+    |
+        decl_plugin
+    ;
+
+decls:
+        decls decl
     |
         /* empty */
     ;
 
 decl:
-        decl_import
-    |
-        decl_plugin
-    |
         decl_object
     ;
 
@@ -109,17 +119,7 @@ decl_import:
 decl_plugin:
         KW_plugin TOK_ID
             {
-                BugEngine::istring i($2);
-                BugEngine::Plugin<minitl::pointer> plugin (i, BugEngine::Plugin<minitl::pointer>::Preload);
-                if (!plugin)
-                {
-                    yyerror((minitl::format<>("Unable to find plugin %s") | i).c_str());
-                }
-                else
-                {
-                    ((BugEngine::PackageBuilder::BuildContext*)param)->plugins.insert(std::make_pair(i, plugin));
-                    ((BugEngine::PackageBuilder::BuildContext*)param)->imports.insert(std::make_pair(i, plugin.pluginNamespace()));
-                }
+                ((PackageBuilder::BuildContext*)param)->result->loadPlugin($2);
                 free($2);
             }
         ';'
@@ -127,39 +127,18 @@ decl_plugin:
 
 decl_object:
         editor_attributes
-        TOK_ID '=' fullname '('
+        TOK_ID '=' fullname
+        {
+            ref<PackageBuilder::Nodes::Object> object = ref<PackageBuilder::Nodes::Object>::create(packageBuilderArena(), ((PackageBuilder::BuildContext*)param)->result);
+            ref<PackageBuilder::Nodes::Reference> reference = ref<PackageBuilder::Nodes::Reference>::create(packageBuilderArena(), ((PackageBuilder::BuildContext*)param)->result);
+            reference->setName(inamespace($4));
+            object->setMethod(reference);
+            object->setName($2);
+        }
+        '('
             params
         ')'
         {
-            BugEngine::inamespace n($4);
-            minitl::hashmap<BugEngine::istring, const BugEngine::RTTI::ClassInfo*>::const_iterator it = ((BugEngine::PackageBuilder::BuildContext*)param)->imports.find(n[0]);
-            if (it == ((BugEngine::PackageBuilder::BuildContext*)param)->imports.end())
-            {
-                yyerror((minitl::format<>("Could not find type %s") | n).c_str());
-            }
-            else if (!it->second)
-            {
-                yyerror((minitl::format<>("Plugin %s is empty") | n).c_str());
-            }
-            else
-            {
-                const BugEngine::RTTI::ClassInfo* ci = it->second;
-                BugEngine::Value v(ci);
-                for (size_t i = 1; i < n.size(); ++i)
-                {
-                    v = v[n[i]];
-                    if (!v)
-                    {
-                        yyerror((minitl::format<>("Could not find object %s") | n).c_str());
-                        break;
-                    }
-                }
-                const BugEngine::RTTI::MethodInfo* mi = v.type().metaclass->call;
-                if (!mi)
-                {
-                    yyerror((minitl::format<>("%s is not a type or callable object") | n).c_str());
-                }
-            }
             free($2);
             free($4);
         }
