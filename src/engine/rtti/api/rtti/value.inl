@@ -152,7 +152,10 @@ const T Value::as() const
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
     TypeInfo ti = be_typeid<const T>::type();
-    be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(ti.metaclass->isA(m_type.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.type&TypeInfo::TypeMask) <= (m_type.type&TypeInfo::TypeMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.type&TypeInfo::MutableBit) <= (m_type.type&TypeInfo::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     const void* mem = memory();
     ref<const minitl::refcountable>   rptr;
     weak<const minitl::refcountable>  wptr;
@@ -187,7 +190,10 @@ T Value::as()
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
     TypeInfo ti = be_typeid<T>::type();
-    be_assert(ti <= m_type, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(ti.metaclass->isA(m_type.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.type&TypeInfo::TypeMask) <= (m_type.type&TypeInfo::TypeMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.type&TypeInfo::MutableBit) <= (m_type.type&TypeInfo::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     void* mem = memory();
     ref<minitl::refcountable>   rptr;
     weak<minitl::refcountable>  wptr;

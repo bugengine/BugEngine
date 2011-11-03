@@ -34,6 +34,14 @@ void Object::setName(istring name)
 void Object::setMethod(ref<Reference> reference)
 {
     m_methodReference = reference;
+    Value v(Value::ByRef(m_methodReference->value()));
+    if (v)
+    {
+        if (v.type().metaclass->call)
+        {
+            m_method = v.type().metaclass->call;
+        }
+    }
 }
 
 }}}

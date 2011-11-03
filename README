@@ -7,19 +7,21 @@ Supported platforms
 ----------------------
 
 The following platforms are currently tested and known to build & work :
-- win32 with GCC 4.3/4.4/4.5
+- win32 with GCC 4.3/4.4/4.5/4.6/4.7
 - win32 with visual studio 2005/2008/2010/express editions
 - win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2010
 
-- linux amd64 with GCC 4.1 to 4.6
-- linux powerpc (G5) with GCC 4.1 to 4.6
+- linux x86/amd64 with GCC 4.1 to 4.7 (older versions probably work as well)
+- linux powerpc (G5) with GCC 4.1 to 4.7 (older versions probably work as well)
 - linux x86/amd64 with sunCC
 
-- MacOS X 10.4 to 10.6 (ppc and x86) with GCC 4.0 or 4.2
+- MacOS X 10.4 to 10.6 (ppc/ppc64 and x86/amd64) with GCC 4.0 or 4.2
 
 - OpenSolaris/Solaris 10 with GCC
 - OpenSolaris/Solaris 10 with SunCC
-- FreeBSD with GCC
+- FreeBSD with GCC (all versions from 3.4 to 4.7)
+
+- iPhone (iOS 4) with gcc 4.2
 
 
 
@@ -32,7 +34,8 @@ You need python installed (tested with python 2.4, 2.5, 2.6 and 3.1)
 You need Flex and Bison (for windows they are included)
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC 2003, 2005, 2008, 2010 including express versions, and XCode
+waf can also be used to generate projects for MSVC 2003, 2005, 2008, 2010
+including express versions, XCode, Eclipse, NetBeans and QtCreator
 
 
 Configuring
@@ -86,14 +89,16 @@ the supported IDEs at the moment are Visual Studio 2005, 2008 and 2010, in their
 express editions.
 To generate the project files, configure the project (which toolchain is selected doesn't
 actually matter) and run
-> python waf install --projects=[ide list]
+> python waf [ide-list]
 where [ide-list] is the list of projects you'd like to generate in
 vs2005, vs2008, vs2010, vs2005e or vs2008e, or xcode3, xcode4
-> python waf install --projects=vs2005e,vs2010
+> python waf vs2005e vs2010
 will create a set of projects and a solution for Visual Studio 2005 express, and another set of
 projects and solutions for Visual Studio 2010.
 You don't need to have these installed to generate the projects, you just need them to actually
 open the projects.
+> python waf --help
+will show all targets available.
 
 
 
