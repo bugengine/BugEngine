@@ -217,6 +217,8 @@ class module:
 				task.type				= type
 				task.features			= ['c', 'cxx', type]
 				task.usemaster			= self.usemaster
+				task.rpath = [os.path.abspath(os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['plugin'])),
+					os.path.abspath(os.path.join(env.DEPLOY['prefix'], env.DEPLOY['plugin']))]
 
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
