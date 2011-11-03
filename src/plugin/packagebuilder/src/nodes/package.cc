@@ -92,7 +92,7 @@ void Package::resolveReference(weak<Reference> reference)
         }
         else
         {
-            Value v(Value::ByRef(it->second));
+            Value v(it->second);
             for (size_t i = 1; i < name.size(); ++i)
             {
                 v = v[name[i]];

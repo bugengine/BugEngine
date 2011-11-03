@@ -22,6 +22,7 @@ public:
     ~Reference();
 
     void setName(const inamespace& name);
+    Value value() const { return m_value; }
 };
 
 }}}
