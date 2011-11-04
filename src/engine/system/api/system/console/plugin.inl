@@ -141,7 +141,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 template< typename Interface >
 const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
 {
-    return (*(m_interface->ns))();
+    return (*static_cast<const impl::PluginList*>(m_handle)->ns)();
 }
 
 

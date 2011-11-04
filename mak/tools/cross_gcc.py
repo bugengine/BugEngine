@@ -155,6 +155,12 @@ def get_available_gcc(conf, paths=[]):
 	conf.env['GCC_TARGETS'] = []
 	for dir in paths+[i for i in os.environ['PATH'].split(':') if i not in paths]:
 		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', 'lib')))
+		try:
+			for f in os.listdir(os.path.join(dir, '..')):
+				if f.find('gcc') != -1:
+					toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', f, 'lib')))
+		except:
+			pass
 	if os.path.isfile('/etc/ld.so.conf'):
 		add_ld_so(conf, '/etc/ld.so.conf', toolchaindirs)
 	if os.path.isdir('/etc/ld.so.conf.d'):
@@ -170,7 +176,7 @@ def get_available_gcc(conf, paths=[]):
 				continue
 			if not os.path.isdir(libdir):
 				continue
-			for subdir in ['', 'gcc']:
+			for subdir in ['', 'lib/gcc', 'gcc']:
 				libdir = os.path.join(libdir, subdir)
 				if not os.path.isdir(libdir):
 					continue
@@ -189,6 +195,8 @@ def get_available_gcc(conf, paths=[]):
 						if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
 							continue
 						arch = parse_gcc_target(target) or 'unknown'
+						if libdir.find('llvm') != -1:
+							target = target + '-llvm'
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
