@@ -232,7 +232,7 @@ class Class(Container):
 		file.write("        %s,\n" % (methods))
 		file.write("        %s,\n" % (objects))
 		file.write("        %s,\n" % (constructor))
-		file.write("        %s,\n" % (call))
+		file.write("        %s,\n" % (constructor))
 		if self.value:
 			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % self.fullname)
 			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >,\n" % self.fullname)
@@ -380,6 +380,7 @@ class Class(Container):
 			file.write("static const ::BugEngine::RTTI::MethodInfo s_method_%s_%s =\n" % (decl, prettyname))
 			file.write("    {\n")
 			file.write("        \"%s\",\n" % name)
+			file.write("        &s_method_%s_%s,\n" % (decl, prettyname))
 			file.write("        %s,\n" % method)
 			file.write("        %s\n" % overload)
 			file.write("    };\n")

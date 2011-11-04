@@ -71,7 +71,7 @@ Value MethodInfo::OverloadInfo::getTag(const ClassInfo* type) const
     return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
 }
 
-Value MethodInfo::operator()(Value* params, u32 nparams) const
+Value MethodInfo::doCall(Value* params, u32 nparams) const
 {
     u32 bestDistance = s_overloadMaxDistance;
     const OverloadInfo* overload = 0;
