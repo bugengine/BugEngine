@@ -55,18 +55,6 @@ Value ClassInfo::get(Value& from, istring propname) const
     }
 
     {
-        const MethodInfo* m = methods;
-        while(m)
-        {
-            if (m->name == propname)
-            {
-                return Value(m);
-            }
-            m = m->next;
-        }
-    }
-
-    {
         const PropertyInfo* p = properties;
         while(p)
         {
@@ -75,6 +63,18 @@ Value ClassInfo::get(Value& from, istring propname) const
                 return p->get(from);
             }
             p = p->next;
+        }
+    }
+
+    {
+        const MethodInfo* m = methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                return Value(m);
+            }
+            m = m->next;
         }
     }
 
@@ -93,9 +93,9 @@ bool ClassInfo::isA(const ClassInfo* klass) const
     return false;
 }
 
-Value ClassInfo::operator()(Value* params, u32 nparams) const
+Value ClassInfo::create(Value* params, u32 nparams) const
 {
-    return (*constructor)(params, nparams);
+    return constructor->doCall(params, nparams);
 }
 
 Value ClassInfo::getTag(const TypeInfo& type) const

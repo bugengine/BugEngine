@@ -255,17 +255,17 @@ int Context::valueCall(lua_State *state)
 
     void* v = 0;
     Value* values = 0;
-    v = malloca(be_align(sizeof(Value), be_alignof(Value))*(top));
+    v = malloca(be_align(sizeof(Value), be_alignof(Value))*(top-1));
     values = (Value*)v;
 
-    for (int i = 1; i <= top; i++)
+    for (int i = 1; i < top; i++)
     {
-        new((void*)(&values[i-1])) Value(get(state, i));
+        new((void*)(&values[i])) Value(get(state, i));
     }
 
-    Value result = userdata->type().metaclass->call->operator ()(values, top);
+    Value result = (*userdata)(values, top-1);
 
-    for (int i = top; i > 0; --i)
+    for (int i = top-1; i > 0; --i)
         values[i-1].~Value();
     freea(v);
 

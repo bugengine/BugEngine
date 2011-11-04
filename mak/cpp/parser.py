@@ -833,7 +833,7 @@ def p_operator_function_3(t):
 	"""
 		method : type operator_name LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = ('?call', t[8], t[1][1], t[6], t.lineno(5))
+	t[0] = ('call', t[8], t[1][1], t[6], t.lineno(5))
 
 def p_operator_function_cast(t):
 	"""

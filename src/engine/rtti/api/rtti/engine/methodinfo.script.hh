@@ -48,10 +48,11 @@ published:
 
 published:
     istring             name;
+    const MethodInfo*   call;
     const MethodInfo*   next;
     const OverloadInfo* overloads;
 published:
-    Value operator()(Value* params, u32 nparams) const;
+    Value doCall(Value* params, u32 nparams) const;
 private:
     MethodInfo& operator=(const MethodInfo&);
 };

@@ -275,21 +275,11 @@ Value Value::operator[](const istring& name)
 
 Value Value::operator()(Value params[], u32 paramCount)
 {
-    be_assert_recover(m_type.metaclass->call, "Not a callable object: %s" | m_type.name(), return Value());
-    Value* v = (Value*)malloca(sizeof(Value)*(paramCount+1));
-    new(v) Value(Value::ByRef(*this));
-    for (u32 i = 0; i < paramCount; ++i)
-    {
-        new (v+i+1) Value(Value::ByRef(params[i]));
-    }
-    Value r = (*m_type.metaclass->call)(v, paramCount+1);
-    for (u32 i = paramCount; i > 0; --i)
-    {
-        v[i].~Value();
-    }
-    v[0].~Value();
-    freea(v);
-    return r;
+    static const istring callName("call");
+    Value call = (*this)[callName];
+    be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
+    be_assert_recover(be_typeid<const RTTI::MethodInfo*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
+    return call.as<const RTTI::MethodInfo*>()->doCall(params, paramCount);
 }
 
 }
