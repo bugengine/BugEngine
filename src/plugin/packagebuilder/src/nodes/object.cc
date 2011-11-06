@@ -5,9 +5,51 @@
 #include    <packagebuilder/nodes/object.hh>
 #include    <packagebuilder/nodes/package.hh>
 #include    <packagebuilder/nodes/reference.hh>
+#include    <packagebuilder/nodes/parameter.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
+
+struct ParameterMatch
+{
+    typedef RTTI::MethodInfo::OverloadInfo::ParamInfo ParamInfo;
+    minitl::vector< ref<Parameter> >                                    unused;
+    minitl::vector< const ParamInfo* >                                  missing;
+    minitl::vector< minitl::pair< ref<Parameter>, const ParamInfo*> >   matches;
+    u32                                                                 match;
+    ParameterMatch(const RTTI::MethodInfo::OverloadInfo* overload, const minitl::vector< ref<Parameter> >& parameters)
+        :   unused(tempArena())
+        ,   missing(tempArena())
+        ,   matches(tempArena())
+        ,   match(0)
+    {
+        minitl::vector< ref<Parameter> > params(tempArena(), parameters.begin(), parameters.end());
+        for (const ParamInfo* param = overload->params; param; param = param->next)
+        {
+            bool matched = false;
+            for (minitl::vector< ref<Parameter> >::iterator value = params.begin(); value != params.end(); ++value)
+            {
+                if (param->name == (*value)->name())
+                {
+                    matches.push_back(minitl::make_pair(*value, param));
+                    matched = true;
+                    params.erase(value);
+                    break;
+                }
+            }
+            if (!matched)
+            {
+                missing.push_back(param);
+            }
+        }
+    }
+
+    bool operator<(const ParameterMatch& other)
+    {
+        return match < other.match;
+    }
+};
+
 
 Object::Object(weak<Package> owner)
     :   m_owner(owner)
@@ -42,8 +84,41 @@ void Object::setMethod(ref<Reference> reference)
         if (call && be_typeid<const RTTI::MethodInfo* const>::type() <= call.type())
         {
             m_method = call.as<const RTTI::MethodInfo* const>();
+            resolveOverload();
         }
     }
+}
+
+u32 Object::overloadDistance(const RTTI::MethodInfo::OverloadInfo* overload) const
+{
+    return 0;
+}
+
+void Object::resolveOverload()
+{
+    m_overload = 0;
+    if (m_method)
+    {
+        const RTTI::MethodInfo::OverloadInfo* overload = m_method->overloads;
+        u32 bestDistance = (u32)-1;
+        while (overload)
+        {
+            u32 distance = overloadDistance(overload);
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                m_overload = overload;
+            }
+            overload = overload->next;
+        }
+    }
+}
+
+void Object::doCall()
+{
+    be_assert(m_method, "no method");
+    be_assert(m_overload, "no proper overload");
+    m_overload->call(0, 0);
 }
 
 }}}
