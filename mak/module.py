@@ -203,6 +203,10 @@ class module:
 				task.type				= type
 				task.features			= ['c', 'cxx', type]
 				task.sourcetree			= self.sourcetree
+				task.options = {}
+				for envname in bld.env.ALL_VARIANTS:
+					env = bld.all_envs[envname]
+					task.options[envname]	= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
 			elif not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
