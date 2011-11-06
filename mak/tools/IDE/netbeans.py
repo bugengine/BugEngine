@@ -5,8 +5,6 @@ import os
 import mak
 from xml.dom.minidom import Document
 
-allconfigs = ['debug','profile','final']
-
 def setAttributes(node, attrs):
 	for k, v in attrs.items():
 		node.setAttribute(k, v)
@@ -58,7 +56,7 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 	doc.encoding = "UTF-8"
 	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
 	lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
-	for project,category,source in sources:
+	for project, category, source, options in sources:
 		addSourceTree(doc, lf, category+'.'+project, source)
 	#add(doc, cd, 'sourceFolderFilter')
 	srl = add(doc, cd, 'sourceRootList')
@@ -80,6 +78,29 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 		else:
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
+		for project, category, source, options in sources:
+			options = options[c]
+			name = category+'.'+project
+			f = add(doc, conf, 'folder', {'path': name})
+			ctool = add(doc, f, 'cTool')
+			incdir = add(doc, ctool, 'incDir')
+			for i in options.includedir:
+				add(doc, incdir, 'pElem', i)
+			defines = add(doc, ctool, 'preprocessorList')
+			for d in ['be_api(x)=', 'BE_EXPORT=']:
+				add(doc, defines, 'Elem', d)
+			for d in options.defines:
+				add(doc, defines, 'Elem', d)
+			ctool = add(doc, f, 'ccTool')
+			incdir = add(doc, ctool, 'incDir')
+			for i in options.includedir:
+				add(doc, incdir, 'pElem', i)
+			defines = add(doc, ctool, 'preprocessorList')
+			for d in ['be_api(x)=', 'BE_EXPORT=']:
+				add(doc, defines, 'Elem', d)
+			for d in options.defines:
+				add(doc, defines, 'Elem', d)
+
 	return doc
 
 class netbeans(Build.BuildContext):
@@ -109,7 +130,7 @@ class netbeans(Build.BuildContext):
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
-				deps.append((tg.name, tg.category, tg.sourcetree))
+				deps.append((tg.name, tg.category, tg.sourcetree, tg.options))
 
 		p = generateProjectXml(appname, self.env['ALL_VARIANTS'])
 		project.write(p.toxml())
