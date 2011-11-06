@@ -21,6 +21,9 @@ private:
     const RTTI::MethodInfo*                 m_method;
     const RTTI::MethodInfo::OverloadInfo*   m_overload;
     minitl::vector< ref<Parameter> >        m_parameters;
+private:
+    void resolveOverload();
+    u32 overloadDistance(const RTTI::MethodInfo::OverloadInfo* overload) const;
 public:
     Object(weak<Package> owner);
     ~Object();
@@ -33,6 +36,8 @@ public:
     void setName(istring name);
     void setMethod(ref<Reference> reference);
     void addParam(ref<Parameter> param);
+
+    void doCall();
 };
 
 }}}
