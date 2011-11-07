@@ -41,23 +41,23 @@ def generateProjectXml(appname, confs):
 		add(doc, elem, 'type', '0')
 	return doc
 
-def addSourceTree(doc, xml, name, folder):
-	if folder.prefix != name:
-		f = add(doc, xml, "df", {'name': name, 'root': folder.prefix})
-	else:
-		f = add(doc, xml, "df", {'name': name})
+def addSourceTree(doc, xml, name, folder, prefix):
+	f = add(doc, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
 	for subname, subdir in folder.directories.items():
-		addSourceTree(doc, f, subname, subdir)
+		addSourceTree(doc, f, subname, subdir, os.path.join(prefix, subdir.prefix))
 	for source in folder.files:
-		add(doc, f, 'in', source.filename)
+		add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
 
 def generateConfigurationsXml(sources, configurations, bld, out):
 	doc = Document()
 	doc.encoding = "UTF-8"
 	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
 	lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
+	categories = {}
+	for i in ['3rdparty', 'engine', 'game', 'plugin']:
+		categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
 	for project, category, source, options in sources:
-		addSourceTree(doc, lf, category+'.'+project, source)
+		addSourceTree(doc, categories[category], project, source, source.prefix)
 	#add(doc, cd, 'sourceFolderFilter')
 	srl = add(doc, cd, 'sourceRootList')
 	add(doc, srl, 'Elem', '.')
@@ -80,7 +80,7 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
 		for project, category, source, options in sources:
 			options = options[c]
-			name = category+'.'+project
+			name = category+'/'+project
 			f = add(doc, conf, 'folder', {'path': name})
 			ctool = add(doc, f, 'cTool')
 			incdir = add(doc, ctool, 'incDir')
@@ -88,6 +88,8 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 				add(doc, incdir, 'pElem', i)
 			defines = add(doc, ctool, 'preprocessorList')
 			for d in ['be_api(x)=', 'BE_EXPORT=']:
+				add(doc, defines, 'Elem', d)
+			for d in env.DEFINES:
 				add(doc, defines, 'Elem', d)
 			for d in options.defines:
 				add(doc, defines, 'Elem', d)
@@ -97,6 +99,8 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 				add(doc, incdir, 'pElem', i)
 			defines = add(doc, ctool, 'preprocessorList')
 			for d in ['be_api(x)=', 'BE_EXPORT=']:
+				add(doc, defines, 'Elem', d)
+			for d in env.DEFINES:
 				add(doc, defines, 'Elem', d)
 			for d in options.defines:
 				add(doc, defines, 'Elem', d)

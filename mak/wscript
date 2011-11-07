@@ -214,6 +214,9 @@ def individual_pdb(self):
 				t.env.append_unique('CXXFLAGS', ['/Fd%s' % pdb.bldpath()])
 
 
+@feature('dummy')
+def dummy_dummy(self):
+	pass
 @feature('cobjects')
 def dummy_cobjects(self):
 	pass
