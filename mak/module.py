@@ -190,11 +190,7 @@ class module:
 		env = bld.env
 		variant = bld.variant
 		if not variant in self.tasks:
-			if type=='dummy':
-				task = None
-				# will deploy files that were scheduled to be deployed
-				self.sourcetree.make_sources(bld, env, self.root)
-			elif env.PROJECTS:
+			if env.PROJECTS:
 				task					= bld()
 				task.category			= self.category
 				task.target				= self.dstname
@@ -207,6 +203,10 @@ class module:
 				for envname in bld.env.ALL_VARIANTS:
 					env = bld.all_envs[envname]
 					task.options[envname]	= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
+			elif type=='dummy':
+				task = None
+				# will deploy files that were scheduled to be deployed
+				self.sourcetree.make_sources(bld, env, self.root)
 			elif not set(env['PLATFORM']) & self.platforms or not env['ARCHITECTURE'] in self.archs:
 				task = None
 				# will deploy files that were scheduled to be deployed
