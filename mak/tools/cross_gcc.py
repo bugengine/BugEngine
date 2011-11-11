@@ -315,14 +315,14 @@ def add_standard_gcc_flags(conf):
 	v['LINKFLAGS_debug'] = ['-pipe', '-g']
 	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 
-	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
 
-	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
 
