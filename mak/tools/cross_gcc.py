@@ -91,8 +91,9 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 @conf
 def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, add_gcc_flags_to_env, add_platform_flags_to_env):
 	worked = False
+	tool = (toolchaindir.find('llvm') != -1) and 'llvm' or 'gcc'
 	for opt,arch in allarchs(originalarch):
-		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			continue
 		conf.setenv(name, conf.env.derive())
@@ -115,7 +116,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 	if not worked:
 		arch = originalarch
-		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			return
 		conf.setenv(name, conf.env.derive())
