@@ -34,7 +34,7 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	except:
 		root = "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs"
 		sdks = sorted(os.listdir(root))
-	sdk = Options.options.macosx_sdk
+	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'iPhoneSimulator%s.sdk'%sdk)
 		version = sdk
@@ -79,7 +79,7 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	except:
 		root = "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs"
 		sdks = sorted(os.listdir(root))
-	sdk = Options.options.macosx_sdk
+	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'iPhoneOS%s.sdk'%sdk)
 		version = sdk
@@ -87,7 +87,7 @@ def add_darwin_flags_to_env(conf, variant, arch):
 		if sdk:
 			warn("preferred SDK iPhoneOS%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
 		full_sdk = os.path.join(root, sdks[0])
-		version = sdks[0][15:18]
+		version = sdks[0][8:11]
 	conf.msg('Checking for iPhoneOS SDK', full_sdk)
 
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-mthumb', '-mcpu=cortex-a8', '-isysroot', full_sdk])
