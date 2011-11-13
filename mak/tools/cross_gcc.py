@@ -316,15 +316,15 @@ def add_standard_gcc_flags(conf):
 	v['ASFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
 	v['LINKFLAGS_debug'] = ['-pipe', '-gdwarf-2']
 
-	v['CFLAGS_profile'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_profile'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3']
-	v['LINKFLAGS_profile'] = ['-pipe', '-gdwarf-2']
+	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
 
-	v['CFLAGS_final'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_final'] = ['-pipe', '-gdwarf-2', '-DNDEBUG', '-O3']
-	v['LINKFLAGS_final'] = ['-pipe', '-gdwarf-2']
+	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
 
 configure = '''
