@@ -51,15 +51,17 @@ def add_darwin_flags_to_env(conf, name, arch):
 	sdk = Options.options.macosx_sdk
 	if sdk and 'MacOSX%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'MacOSX%s.sdk'%sdk)
+		version = sdk
 	else:
 		if sdk:
 			warn("preferred SDK MacOSX%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
 		full_sdk = os.path.join(root, sdks[0])
+		version = sdks[0][6:10]
 	conf.msg('Checking for MacOSX SDK', full_sdk)
 
-	conf.env.append_unique('CFLAGS', ['-isysroot', full_sdk])
-	conf.env.append_unique('CXXFLAGS', ['-isysroot', full_sdk])
-	conf.env.append_unique('LINKFLAGS', ['-isysroot', full_sdk])
+	conf.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
