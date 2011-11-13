@@ -26,21 +26,16 @@ def options(opt):
 				continue
 			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
 				opt.recurse(os.path.join('..', 'extra', f))
-	opt.add_option( '--projects',
-					action='store',
-					default='',
-					dest='projects',
-					help='build projects for the selected IDEs')
 	opt.add_option( '--toolchains',
 					action='store',
 					default='',
 					dest='toolchains',
 					help='build for the selected toolchains')
-	opt.add_option( '--master',
+	opt.add_option( '--nomaster',
 					action='store_true',
-					default=True,
-					dest='master',
-					help='build with master files')
+					default=False,
+					dest='nomaster',
+					help='build without master files')
 	for i in os.listdir(os.path.join('src', '3rdparty')):
 		if i in ['.svn', '.cvs']:
 			continue
@@ -238,7 +233,7 @@ MasterTask = Task.task_factory("MkMaster", createmasterfile)
 @after_method('filter_sources')
 @before('c', 'cxx')
 def make_masterfiles(self):
-	if not Options.options.master:
+	if Options.options.nomaster:
 		return
 	self.originalsources = self.source[:]
 	self.originalsources.sort()

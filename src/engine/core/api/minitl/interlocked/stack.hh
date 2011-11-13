@@ -10,7 +10,7 @@ namespace minitl
 
 struct inode
 {
-    volatile inode* next;
+    inode* next;
 };
 
 template< typename T >
