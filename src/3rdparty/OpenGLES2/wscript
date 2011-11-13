@@ -7,10 +7,11 @@ def options(opt):
 	pass
 
 def setup(conf):
-	conf.check_lib('GLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
-	conf.check_lib('libGLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
-	conf.check_lib('EGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
-	conf.check_lib('libEGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
+	if 'darwin' not in conf.env.PLATFORM:
+		conf.check_lib('GLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
+		conf.check_lib('libGLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
+		conf.check_lib('EGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
+		conf.check_lib('libEGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 
 def build(bld):
 	exparchoptions = {
