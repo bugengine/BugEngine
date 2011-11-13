@@ -54,6 +54,7 @@ Application::Application(int argc, const char *argv[])
     m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[1]));
 
     ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
+    m_updateLoop = ITask::CallbackConnection();
 }
 
 Application::~Application(void)
@@ -66,11 +67,6 @@ void Application::updatePackage()
     if (m_packageLoader)
     {
         m_packageLoader->update();
-    }
-    static int x = 0;
-    if (x++ == 100)
-    {
-        m_updateLoop = ITask::CallbackConnection();
     }
 }
 

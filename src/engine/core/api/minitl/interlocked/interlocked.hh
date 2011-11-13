@@ -41,9 +41,9 @@ class interlocked
 {
 private:
     typedef interlocked_impl::InterlockedType< sizeof(T) >  impl;
-    typedef typename impl::value_t                          value_t; 
+    typedef typename impl::value_t                          value_t;
 private:
-    volatile value_t m_value;
+    value_t m_value;
 public:
     interlocked() : m_value(0)                      { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }
     interlocked(T value) : m_value(value)           { be_assert(be_align(&m_value, sizeof(m_value)) == &m_value, "value is incorrectly aligned"); }

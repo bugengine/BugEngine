@@ -4,6 +4,7 @@
 #ifndef BE_SYSTEM_POSIX_FILE_HH_
 #define BE_SYSTEM_POSIX_FILE_HH_
 /*****************************************************************************/
+#include <system/file/file.script.hh>
 
 namespace BugEngine
 {
