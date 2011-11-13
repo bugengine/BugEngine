@@ -85,3 +85,12 @@ def configure(conf):
 
 def build(bld):
 	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']
+	from waflib import Options
+	for p in Options.options.xcode_sdks.split(',')[::-1]:
+		try:
+			for platform in os.listdir(os.path.join(p, 'Platforms')):
+				os.environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+os.environ['PATH']
+
+		except:
+			pass
+		os.environ['PATH'] = ('%s/usr/bin:'%p)+os.environ['PATH']
