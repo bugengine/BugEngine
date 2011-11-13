@@ -249,7 +249,7 @@ def find_cross_gcc(conf):
 				if conf.find_program('g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
-		conf.find_program(target+'-gdb', var='GDB', path_list=v['GCC_PATH'], mandatory=False)
+		conf.find_program(target+'-gdb', var='GDB', path_list=v['GCC_PATH'], mandatory=False, silent=True)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
