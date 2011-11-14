@@ -87,9 +87,9 @@ def configure(conf):
 		except Exception as e:
 			warn('suncc not available: '+str(e))
 			conf.variant = ''
-	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
 		if target.find('solaris') != -1:
-			conf.create_gcc_env(version, toolchaindir, target, 'sunos', arch, add_gcc_flags_to_env, add_sunos_flags_to_env)
+			conf.create_gcc_env(version, toolchaindir, target, 'sunos', arch, gcc, gxx, add_gcc_flags_to_env, add_sunos_flags_to_env)
 
 
 def build(bld):
