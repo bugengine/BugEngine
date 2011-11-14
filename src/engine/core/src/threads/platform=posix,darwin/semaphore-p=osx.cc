@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/threads/semaphore.hh>
 #include    <core/timer.hh>
+#include    <cerrno>
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
 # include   <dispatch/dispatch.h>
 #else

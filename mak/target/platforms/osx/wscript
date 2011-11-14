@@ -6,15 +6,11 @@ from waflib import Context
 from waflib.Logs import info,warn,pprint
 
 def options(opt):
-	try:
-		sdks = os.listdir(os.path.join('/Developer', 'SDKs'))
-		opt.add_option( '--darwin-sdk',
-						action='store',
-						default=sdks[-1],
-						dest='darwin_sdk',
-						help='Use MacOS sdk')
-	except OSError:
-		pass
+	opt.add_option( '--macosx-sdk',
+					action='store',
+					default='',
+					dest='macosx_sdk',
+					help='Version of the MacOS X SDK to target')
 
 def add_gcc_to_env(conf, version, toolchaindir, gcc_target):
 	newenv = conf.env
@@ -44,9 +40,28 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env['SDKROOT'] = 'macosx'
 	conf.env['SUPPORTEDPLATFORMS'] = 'macosx'
 	conf.env['STATIC'] = 1
-	conf.env.append_unique('CFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
-	conf.env.append_unique('CXXFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
-	conf.env.append_unique('LINKFLAGS', ['-isysroot', os.path.join('/Developer', 'SDKs', Options.options.darwin_sdk)])
+
+	try:
+		root = "/"+conf.env.CXX[0].split('/')[1]+"/SDKs"
+		sdks = sorted(os.listdir(root))
+	except:
+		root = "/Developer/SDKs"
+		sdks = sorted(os.listdir(root))
+	from waflib import Options
+	sdk = Options.options.macosx_sdk
+	if sdk and 'MacOSX%s.sdk'%sdk in sdks:
+		full_sdk = os.path.join(root, 'MacOSX%s.sdk'%sdk)
+		version = sdk
+	else:
+		if sdk:
+			warn("preferred SDK MacOSX%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
+		full_sdk = os.path.join(root, sdks[0])
+		version = sdks[0][6:10]
+	conf.msg('Checking for MacOSX SDK', full_sdk)
+
+	conf.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -64,9 +79,19 @@ def add_darwin_flags_to_env(conf, name, arch):
 
 def configure(conf):
 	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']
-	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
 		if target.find('darwin') != -1 and target.find('arm') == -1:
-			conf.create_gcc_env(version, toolchaindir, target, 'darwin', arch, add_gcc_flags_to_env, add_darwin_flags_to_env)
+			conf.create_gcc_env(version, toolchaindir, target, 'darwin', arch, gcc, gxx, add_gcc_flags_to_env, add_darwin_flags_to_env)
 
 def build(bld):
 	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']
+	from waflib import Options
+	xcode_paths = getattr(Options.options, 'xcode_sdks', [])
+	for p in xcode_paths[::-1]:
+		try:
+			for platform in os.listdir(os.path.join(p, 'Platforms')):
+				os.environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+os.environ['PATH']
+
+		except:
+			pass
+		os.environ['PATH'] = ('%s/usr/bin:'%p)+os.environ['PATH']
