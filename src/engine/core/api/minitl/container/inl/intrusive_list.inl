@@ -318,13 +318,13 @@ void                                                        intrusive_list<T, IN
 template< typename T, int INDEX >
 void                                                        intrusive_list<T, INDEX>::push_back(const_reference r)
 {
-    r.item::insert(m_root.m_previous);
+    r.intrusive_list<T, INDEX>::item::insert(m_root.m_previous);
 }
 
 template< typename T, int INDEX >
 typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, INDEX>::insert(typename intrusive_list<T, INDEX>::iterator after, const_reference r)
 {
-    r.item::insert(after.m_iterator);
+    r.intrusive_list<T, INDEX>::item::insert(after.m_iterator);
     return ++after;
 }
 
