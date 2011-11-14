@@ -8,8 +8,6 @@
 #define be_alignof(t)           __alignof__(t)
 #define be_break()
 
-#include <stdint.h>
-#include <stdlib.h>
 typedef signed char         i8;
 typedef signed short        i16;
 typedef signed int          i32;

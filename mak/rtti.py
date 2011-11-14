@@ -33,7 +33,8 @@ class Container:
 		self.hash = make_md5()
 
 	def addObject(self, object):
-		self.objects.append(object)
+		if self.visibility == 'published':
+			self.objects.append(object)
 
 	def addMember(self, type, attr, name, tags, line):
 		self.members.append((type, name, attr, self.visibility, tags, line))
@@ -104,7 +105,7 @@ class Root(Container):
 		classes = Container.dump(self, file, namespace, False)
 		file.write("namespace BugEngine\n{\n\n")
 		for classname, objname, nested in classes:
-			if not nested:
+			if not self.useMethods and not nested:
 				use = "be_forceuse(%s_obj_ptr); "%objname
 			else:
 				use = ""
@@ -180,6 +181,8 @@ class Enum(Container):
 			file.write("static ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_obj = { %s()->objects, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, owner, self.name, decl))
 			file.write("static const ::BugEngine::RTTI::ClassInfo::ObjectInfo* s_%s_obj_ptr = ( %s()->objects = &s_%s_obj );\n" % (decl, owner, decl))
 		if self.useMethods:
+			if not nested:
+				file.write("be_forceuse(s_%s_obj_ptr); " % decl)
 			file.write("return s_%s;\n}\n" % decl)
 			return [(self.fullname, "%s::s_%sFun()" % (namespace, decl), nested)]
 		else:
@@ -210,6 +213,8 @@ class Class(Container):
 		methods, constructor, call = self.buildMethods(file, decl);
 		self.writeClass(file, decl, nested, properties, methods, statics, constructor, call)
 		if self.useMethods:
+			if not nested:
+				file.write("be_forceuse(s_%s_obj_ptr); " % decl)
 			file.write("return s_%s;\n}\n" % decl)
 			classes.append((self.fullname, "%s::s_%sFun()" % (namespace, decl), nested))
 		else:
