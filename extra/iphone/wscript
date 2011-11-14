@@ -111,13 +111,13 @@ def add_darwin_flags_to_env(conf, variant, arch):
 def configure(conf):
 	from waflib import Options
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
-	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
 		if target.find('darwin') != -1:
 			if (target.find('arm') != -1 or target.find('i686') != -1):
 				if target.find('arm') != -1:
-					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, add_gcc_flags_to_env, add_darwin_flags_to_env)
+					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, gcc, gxx, add_gcc_flags_to_env, add_darwin_flags_to_env)
 				else:
-					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, add_gcc_flags_to_env, add_darwin_simulator_flags_to_env)
+					conf.create_gcc_env(version, toolchaindir, target, 'iphone', arch, gcc, gxx, add_gcc_flags_to_env, add_darwin_simulator_flags_to_env)
 
 def setup(conf):
 	pass
