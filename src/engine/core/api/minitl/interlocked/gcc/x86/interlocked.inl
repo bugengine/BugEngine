@@ -16,7 +16,7 @@ template<>
 struct InterlockedType<4>
 {
     typedef BE_SET_ALIGNMENT(4) i32 value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         value_t old;
         __asm__ __volatile__ ("lock; xadd %0,%1"
@@ -25,11 +25,11 @@ struct InterlockedType<4>
                       : "memory", "cc");
         return old;
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(value_t *p, value_t incr)
     {
         return fetch_and_add(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         __asm__ __volatile__ ("lock; xchg %2, %1"
                       : "=r" (v), "+m" (*p)
@@ -37,7 +37,7 @@ struct InterlockedType<4>
         return v;
     }
 
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
                       : "=r" (v)
@@ -45,7 +45,7 @@ struct InterlockedType<4>
                       : "memory", "cc");
         return v;
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(value_t *p, value_t v)
     {
         fetch_and_set(p, v);
         return v;
@@ -58,8 +58,8 @@ struct InterlockedType<4>
         typedef tagged_t    tag_t;
         BE_SET_ALIGNMENT(8) struct
         {
-            volatile counter_t   tag;
-            volatile value_t     value;
+            counter_t   tag;
+            value_t     value;
         } taggedvalue;
 
         tagged_t(value_t value = 0)
@@ -90,7 +90,7 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         tagged_t result;
         tagged_t dst(condition.taggedvalue.tag+1, v);
@@ -135,7 +135,7 @@ template<>
 struct InterlockedType<8>
 {
     typedef BE_SET_ALIGNMENT(8) i64 value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         value_t old;
         __asm__ __volatile__ ("lock; xaddq %0,%1"
@@ -144,18 +144,18 @@ struct InterlockedType<8>
                       : "memory", "cc");
         return old;
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(value_t *p, value_t incr)
     {
         return fetch_and_add(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         __asm__ __volatile__ ("lock; xchgq %2, %1"
                       : "=r" (v), "+m" (*p)
                       : "r" (v));
         return v;
     }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
     #ifdef __PIC__
         __asm__ __volatile__("push %%rbx\n\t" : : : "esp");
@@ -182,7 +182,7 @@ struct InterlockedType<8>
     #endif
         return result;
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(value_t *p, value_t v)
     {
         fetch_and_set(p, v);
         return v;
@@ -196,8 +196,8 @@ struct InterlockedType<8>
         typedef tagged_t    tag_t;
         BE_SET_ALIGNMENT(16) struct
         {
-            volatile counter_t   tag;
-            volatile value_t     value;
+            counter_t   tag;
+            value_t     value;
         } taggedvalue;
 
         tagged_t(value_t value = 0)
@@ -228,7 +228,7 @@ struct InterlockedType<8>
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         unsigned char result;
         __asm__ __volatile__ (

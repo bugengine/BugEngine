@@ -66,9 +66,9 @@ def options(opt):
 
 def configure(conf):
 	mak.allplatforms['win32'] = ['win32', 'pc']
-	for (version, toolchaindir, target, arch) in conf.env['GCC_TARGETS']:
+	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
 		if target.find('mingw') != -1:
-			conf.create_gcc_env(version, toolchaindir, target, 'win32', arch, add_win32_gcc_flags_to_env, add_win32_flags_to_env)
+			conf.create_gcc_env(version, toolchaindir, target, 'win32', arch, gcc, gxx, add_win32_gcc_flags_to_env, add_win32_flags_to_env)
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
 			name = '%s-%s-%s-%s' %(compiler, platform, target, version)

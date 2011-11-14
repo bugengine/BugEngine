@@ -65,7 +65,9 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/parser.py'),
 		self.path.find_or_declare('mak/ddf.py'),
 		self.path.find_or_declare('mak/rtti.py'),]
-	#self.source.append(outs[0])
+	from waflib import Options
+	if Options.options.nomaster:
+		self.source.append(outs[0])
 
 def configure(conf):
 	pass

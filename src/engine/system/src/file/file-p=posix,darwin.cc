@@ -3,7 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <posix/file.hh>
-
+#include    <cerrno>
 
 namespace BugEngine
 {
