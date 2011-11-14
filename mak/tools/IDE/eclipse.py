@@ -139,7 +139,7 @@ class eclipse(Build.BuildContext):
 			link = self.add(doc, resources, 'link')
 			self.add(doc, link, 'name', folder+"/"+file.filename)
 			self.add(doc, link, 'type', '1')
-			self.add(doc, link, 'locationURI', os.path.join(path, file.filename))
+			self.add(doc, link, 'locationURI', os.path.join(path, file.filename).replace('\\', '/'))
 
 
 
@@ -302,9 +302,7 @@ class eclipse(Build.BuildContext):
 			return self.addTarget(doc, buildTargets, executable, name,
 							'"%s" %s'%(waf, name), runAll)
 		addTargetWrap('configure', True)
-		addTargetWrap('dist', False)
-		addTargetWrap('install', False)
-		addTargetWrap('check', False)
+		addTargetWrap('eclipse', False)
 
 		doc.appendChild(cproject)
 		return doc
