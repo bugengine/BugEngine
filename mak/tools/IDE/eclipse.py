@@ -97,27 +97,52 @@ class eclipse(Build.BuildContext):
 
 		self.add(doc, natures, 'nature', 'org.python.pydev.pythonNature')
 
-		resourceFilters = self.add(doc, projectDescription, 'filteredResources')
-		id = 1291476911
-		for name,recursively,type in [
-			('src', 'true', '9'),
-			('mak', 'true', '9'),
-			('waf', 'false', '5'),
-			('wscript', 'false', '5'),
-			('.svn', 'true', '26'),
-			('.cvs', 'true', '26'),
-			]:
-			filter = self.add(doc, resourceFilters, 'filter')
-			self.add(doc, filter, 'id', str(id))
-			self.add(doc, filter, 'name')
-			self.add(doc, filter, 'type', type)
-			matcher = self.add(doc, filter, 'matcher')
-			self.add(doc, matcher, 'id', 'org.eclipse.ui.ide.multiFilter')
-			self.add(doc, matcher, 'arguments', '1.0-name-matches-%s-false-%s' % (recursively, name))
-			id = id + 2
+		resources = self.add(doc, projectDescription, 'linkedResources')
+		for category in ['3rdparty', 'engine', 'game', 'plugin']:
+			link = self.add(doc, resources, 'link')
+			self.add(doc, link, 'name', category)
+			self.add(doc, link, 'type', '2')
+			self.add(doc, link, 'locationURI', 'virtual:/virtual')
+		for g in self.groups:
+			for tg in g:
+				if not isinstance(tg, TaskGen.task_gen):
+					continue
+				tg.post()
+
+				name = tg.name
+				category = tg.category
+				sourcetree = tg.sourcetree
+				self.addSourceTree(doc, resources, sourcetree, category+'/'+name, os.path.join('PROJECT_LOC', sourcetree.prefix))
+
+		filters = self.add(doc, projectDescription, 'filteredResources')
+		filter = self.add(doc, filters, 'filter')
+		self.add(doc, filter, 'id', '1321206201691')
+		self.add(doc, filter, 'name')
+		self.add(doc, filter, 'type', '30')
+		matcher = self.add(doc, filter, 'matcher')
+		self.add(doc, matcher, 'id', 'org.eclipse.ui.ide.multiFilter')
+		self.add(doc, matcher, 'arguments', '1.0-name-matches-false-false-*')
 
 		doc.appendChild(projectDescription)
 		return doc
+
+	def addSourceTree(self, doc, resources, sourcetree, folder, path):
+		link = self.add(doc, resources, 'link')
+		self.add(doc, link, 'name', folder)
+		self.add(doc, link, 'type', '2')
+		self.add(doc, link, 'locationURI', 'virtual:/virtual')
+		for name, tree in sourcetree.directories.items():
+			self.addSourceTree(doc, resources, tree, folder+"/"+name, os.path.join(path, tree.prefix))
+		for file in sourcetree.files:
+			if file.generated():
+				continue
+			link = self.add(doc, resources, 'link')
+			self.add(doc, link, 'name', folder+"/"+file.filename)
+			self.add(doc, link, 'type', '1')
+			self.add(doc, link, 'locationURI', os.path.join(path, file.filename).replace('\\', '/'))
+
+
+
 
 	def impl_create_cproject(self, executable, waf, appname):
 		source_dirs = []
@@ -172,21 +197,7 @@ class eclipse(Build.BuildContext):
 							'parent': cdt_bld + '.prefbase.cfg'})
 			count = count+1
 			folderInfo = self.add(doc, config, 'folderInfo',
-								{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''})
-			#for g in self.groups:
-			#	for tg in g:
-			#		if not isinstance(tg, TaskGen.task_gen):
-			#			continue
-			#		tg.post()
-
-			#		name = tg.name
-			#		category = tg.category
-			#		sourcetree = tg.sourcetree
-
-			#		env = self.all_envs[toolchainName]
-			#		count = count+1
-			#		folderInfo = self.add(doc, config, 'folderInfo',
-			#							{'id': cconf_id+'.%d'%count, 'resourcePath': '/'+sourcetree.prefix.replace('\\', '/'), 'name': ''})
+								{'id': cconf_id+'.%d'%count, 'resourcePath': '', 'name': ''})
 			count = count+1
 			toolChain = self.add(doc, folderInfo, 'toolChain',
 					{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
@@ -213,37 +224,67 @@ class eclipse(Build.BuildContext):
 								'managedBuildOn': 'false',
 								'name': 'Gnu Make Builder',
 								'superClass': cdt_bld + '.settings.default.builder'})
-
-			for tool_name in ("Assembly", "GNU C++", "GNU C"):
-				count = count+1
-				tool = self.add(doc, toolChain, 'tool',
-						{	'id': cdt_bld + '.settings.holder.%d'%count,
-							'name': tool_name,
-							'superClass': cdt_bld + '.settings.holder'})
-				count = count+1
-				input = self.add(doc, tool, 'inputType',
-						{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-							'superClass': cdt_bld + '.settings.holder.inType'})
-
 			count = count+1
 			tool = self.add(doc, toolChain, 'tool',
 							{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
 								'name': "holder for library settings",
 								'superClass': cdt_bld + '.settings.holder.libs'})
-			if source_dirs:
-				sourceEntries = self.add(doc, config, 'sourceEntries')
-				for i in source_dirs:
-					self.add(doc, sourceEntries, 'entry',
-								{'excluding': i,
-								'flags': 'VALUE_WORKSPACE_PATH|RESOLVED',
-								'kind': 'sourcePath',
-								'name': ''})
-					self.add(doc, sourceEntries, 'entry',
-								{
-								'flags': 'VALUE_WORKSPACE_PATH|RESOLVED',
-								'kind': 'sourcePath',
-								'name': i})
 
+
+			for g in self.groups:
+				for tg in g:
+					if not isinstance(tg, TaskGen.task_gen):
+						continue
+					tg.post()
+
+					name = tg.name
+					category = tg.category
+					sourcetree = tg.sourcetree
+
+					env = self.all_envs[toolchainName]
+					option = tg.options[toolchainName]
+					count = count+1
+					folderInfo = self.add(doc, config, 'folderInfo',
+										{'id': cconf_id+'.%d'%count, 'resourcePath': '/'+category+'/'+name, 'name': ''})
+					count = count+1
+					toolChain = self.add(doc, folderInfo, 'toolChain',
+							{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+								'name': 'No ToolChain',
+								'unusedChidlren': '',
+								'superClass': cdt_bld + '.prefbase.toolchain'})
+					count = count+1
+					tool = self.add(doc, toolChain, 'tool',
+									{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
+										'name': "holder for library settings",
+										'superClass': cdt_bld + '.settings.holder.libs'})
+					for tool_name in ("Assembly", "GNU C++", "GNU C"):
+						count = count+1
+						tool = self.add(doc, toolChain, 'tool',
+								{	'id': cdt_bld + '.settings.holder.%d'%count,
+									'name': tool_name,
+									'superClass': cdt_bld + '.settings.holder'})
+						count = count+1
+						includes = self.add(doc, tool, 'option',
+								{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
+									'superClass': cdt_bld + '.settings.holder.incpaths',
+									'valueType': 'includePath'})
+						for i in option.includedir:
+							self.add(doc, includes, 'listOptionValue', {'builtin': 'false', 'value': '${ProjDirPath}/'+i})
+						count = count+1
+						defines = self.add(doc, tool, 'option',
+								{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
+									'superClass': cdt_bld + '.settings.holder.symbols',
+									'valueType': 'definedSymbols'})
+						for i in option.defines.union(env.DEFINES+['__ECLIPSE']):
+							self.add(doc, defines, 'listOptionValue', {'builtin': 'false', 'value': i})
+						count = count+1
+						defines = self.add(doc, tool, 'option',
+								{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+									'superClass': cdt_bld + '.settings.holder.inType'})
+
+						input = self.add(doc, tool, 'inputType',
+								{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+									'superClass': cdt_bld + '.settings.holder.inType'})
 			storageModule = self.add(doc, cconf, 'storageModule',
 								{'moduleId': 'org.eclipse.cdt.core.externalSettings'})
 
@@ -261,9 +302,7 @@ class eclipse(Build.BuildContext):
 			return self.addTarget(doc, buildTargets, executable, name,
 							'"%s" %s'%(waf, name), runAll)
 		addTargetWrap('configure', True)
-		addTargetWrap('dist', False)
-		addTargetWrap('install', False)
-		addTargetWrap('check', False)
+		addTargetWrap('eclipse', False)
 
 		doc.appendChild(cproject)
 		return doc

@@ -6,7 +6,7 @@ def options(opt):
 	pass
 
 def setup(conf):
-	if 'osx' in conf.env.PLATFORM:
+	if 'darwin' in conf.env.PLATFORM:
 		return
 	elif 'win32' in conf.env.PLATFORM:
 		conf.check_lib('OpenGL32', var='GL')

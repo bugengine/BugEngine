@@ -3,6 +3,7 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/taginfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/value.inl>

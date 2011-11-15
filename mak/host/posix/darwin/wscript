@@ -7,18 +7,25 @@ from waflib.Logs import pprint
 import mak.tools.cross_gcc
 
 
-os.environ['PATH'] = '/Developer/usr/bin:'+os.environ['PATH']
-try:
-	for i in os.listdir('/Developer/Platforms/'):
-		os.environ['PATH'] = '/Developer/Platforms/'+i+'/Developer/usr/bin:'+os.environ['PATH']
-except:
-	pass
 
 
 def options(opt):
-	pass
+	opt.add_option( '--xcode-sdks',
+					action='store',
+					default='/Developer',
+					dest='xcode_sdks',
+					help='Paths of the different XCode SDKs')
 
 def configure(conf):
+	from waflib import Options
+	for p in Options.options.xcode_sdks.split(',')[::-1]:
+		try:
+			for platform in os.listdir(os.path.join(p, 'Platforms')):
+				os.environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+os.environ['PATH']
+
+		except:
+			pass
+		os.environ['PATH'] = ('%s/usr/bin:'%p)+os.environ['PATH']
 	conf.load("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'osx'
 	conf.env['BUILD_VARIANTS'] = []
