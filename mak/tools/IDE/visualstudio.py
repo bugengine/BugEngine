@@ -41,13 +41,10 @@ class vs2003(Build.BuildContext):
 				allplatforms = []
 				for i in self.env.ALL_VARIANTS:
 					env = self.all_envs[i]
-					try:
-						options = tg.platforms['%s-%s' % (env['PLATFORM'][0], env['ARCHITECTURE'])]
-					except Exception as e:
-						options = None
+					options = tg.options[i]
 					allplatforms.append((i, options))
 
-				node = projects.make_node("%s.%s.%s.%s" % (tg.category, tg.name, version, klass.extensions[0]))
+				node = projects.make_node("%s.%s.%s%s" % (tg.category, tg.name, version, klass.extensions[0]))
 				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.category, self.all_envs)
 				project.writeHeader(allplatforms)
 				project.addDirectory(tg.sourcetree)
