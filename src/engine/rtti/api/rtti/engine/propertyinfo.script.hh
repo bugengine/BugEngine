@@ -14,6 +14,8 @@ class Value;
 namespace BugEngine { namespace RTTI
 {
 
+struct TagInfo;
+
 struct be_api(RTTI) PropertyInfo
 {
     friend class BugEngine::Value;

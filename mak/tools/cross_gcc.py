@@ -32,6 +32,30 @@ def parse_gcc_target(target):
 				return aname
 
 @conf
+def get_native_clang_target(conf, clang):
+	cmd = [clang, '-v']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	out = str(out).split('\n')
+	target = None
+	version = None
+
+	for line in out:
+		if line.startswith('Target:'):
+			target = line.split()[1]
+		if line.find('clang version ') != -1:
+			line = line.split()
+			while line[0] != 'clang' and line[1] != 'version':
+				line = line[1:]
+			version = line[2].split('-')[0]
+	return (target, version)
+
+
+@conf
 def get_native_gcc_target(conf):
 	if not conf.env['GCC_NATIVE_TARGET']:
 		cmd = ['gcc', '-v']
@@ -77,8 +101,10 @@ def allarchs(arch):
 
 
 @conf
-def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
+def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag, gcc, gxx):
 	newenv = conf.env
+	newenv['GCC_NAME'] = gcc
+	newenv['GXX_NAME'] = gxx
 	newenv['GCC_VERSION']	= version
 	newenv['GCC_TARGET']	= gcc_target
 	newenv['GCC_FLAGS']		= flag and [flag] or []
@@ -89,15 +115,16 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag):
 
 
 @conf
-def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, add_gcc_flags_to_env, add_platform_flags_to_env):
+def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, gcc, gxx, add_gcc_flags_to_env, add_platform_flags_to_env):
 	worked = False
+	tool = gcc.replace('-', '')
 	for opt,arch in allarchs(originalarch):
-		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			continue
 		conf.setenv(name, conf.env.derive())
 		try:
-			add_gcc_to_env(conf, version, toolchaindir, target, opt)
+			add_gcc_to_env(conf, version, toolchaindir, target, opt, gcc, gxx)
 			if platform == 'win32':
 				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')
 				conf.load('winres')
@@ -115,12 +142,12 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 	if not worked:
 		arch = originalarch
-		name = 'gcc-%s-%s-%s' %(platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			return
 		conf.setenv(name, conf.env.derive())
 		try:
-			add_gcc_to_env(conf, version, toolchaindir, target, '')
+			add_gcc_to_env(conf, version, toolchaindir, target, '', gcc, gxx)
 			if platform == 'win32':
 				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')
 				conf.load('winres')
@@ -195,14 +222,20 @@ def get_available_gcc(conf, paths=[]):
 						if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
 							continue
 						arch = parse_gcc_target(target) or 'unknown'
-						if libdir.find('llvm') != -1:
-							target = target + '-llvm'
-						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch))
+						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'gcc', 'g++'))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
+
+	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
+		toolchaindir = os.path.split(conf.env.CLANG)[0]
+		target, version = conf.get_native_clang_target(conf.env.CLANG)
+		arch = parse_gcc_target(target) or 'unknown'
+		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'clang', 'clang++'))
 
 
 @conf
 def find_cross_gcc(conf):
+	gcc = conf.env['GCC_NAME'] or 'gcc'
+	gxx = conf.env['GXX_NAME'] or 'g++'
 	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
 	conf.env.BROKEN_INITIALIZER = version.split('.')[0] == '3'
@@ -211,13 +244,13 @@ def find_cross_gcc(conf):
 	if target:
 		v = conf.env
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
-			if conf.find_program(target+'-gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+			if conf.find_program(target+'-'+gcc+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CC']:
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
-				if conf.find_program('gcc'+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+				if conf.find_program(gcc+name, var='CC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
-		if not v['CC']: conf.fatal('unable to find gcc for target %s' % target)
+		if not v['CC']: conf.fatal('unable to find %s for target %s' % (gcc, target))
 		cmd = [v['CC']] + conf.env['GCC_FLAGS'] + ['-dM', '-E', '-']
 		try:
 			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
@@ -232,8 +265,11 @@ def find_cross_gcc(conf):
 					target = line.split()[1]
 					if thistarget != target:
 						conf.fatal('mismatch target: %s instead of %s' % (thistarget, target))
-				if line.startswith('gcc version '):
-					version = line.split()[2]
+				if line.find(' version ') != -1:
+					versions = line.split()
+					while versions[0] != 'version':
+						versions = versions[1:]
+					version = versions[1]
 					if thisversion != version:
 						conf.fatal('mismatch version: %s instead of %s' % (thisversion, version))
 		except:
@@ -241,14 +277,14 @@ def find_cross_gcc(conf):
 
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
-			if conf.find_program(target+'-g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+			if conf.find_program(target+'-'+gxx+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 				break
 		if not v['CXX']:
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
-				if conf.find_program('g++'+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+				if conf.find_program(gxx+name, var='CXX', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
-		if not v['CXX']: conf.fatal('unable to find g++ for target %s' % target)
-		conf.find_program(target+'-gdb', var='GDB', path_list=v['GCC_PATH'], mandatory=False)
+		if not v['CXX']: conf.fatal('unable to find %s for target %s' % (gxx, target))
+		conf.find_program(target+'-gdb', var='GDB', path_list=v['GCC_PATH'], mandatory=False, silent=True)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 			if conf.find_program(target+'-cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
@@ -307,22 +343,22 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-unneeded-internal-declaration']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wno-unneeded-internal-declaration']
 
-	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
-	v['LINKFLAGS_debug'] = ['-pipe', '-g']
-	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	v['CFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
+	v['CXXFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG', '-Wno-invalid-offsetof']
+	v['ASFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
+	v['LINKFLAGS_debug'] = ['-pipe', '-gdwarf-2']
 
-	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
+	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
 
-	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
-	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-Os']
+	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
 

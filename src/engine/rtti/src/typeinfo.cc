@@ -54,6 +54,7 @@ minitl::format<> TypeInfo::name() const
         break;
     default:
         be_notreached();
+        break;
     }
 
     switch(constness)
