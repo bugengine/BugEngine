@@ -238,7 +238,7 @@ def find_cross_gcc(conf):
 	gxx = conf.env['GXX_NAME'] or 'g++'
 	target = conf.env['GCC_TARGET']
 	version = conf.env['GCC_VERSION']
-	conf.env.BROKEN_INITIALIZER = version.split('.')[0] == '3'
+	conf.env.BROKEN_INITIALIZER = gcc == 'gcc' and version.split('.')[0] == '3'
 	versionsmall = '.'.join(version.split('.')[0:2])
 	versionverysmall = ''.join(version.split('.')[0:2])
 	if target:
@@ -347,17 +347,17 @@ def add_standard_gcc_flags(conf):
 	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wno-unneeded-internal-declaration']
 
 	v['CFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
 	v['ASFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
 	v['LINKFLAGS_debug'] = ['-pipe', '-gdwarf-2']
 
 	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
 	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
 
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
