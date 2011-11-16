@@ -117,7 +117,7 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag, gcc, gxx):
 @conf
 def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, gcc, gxx, add_gcc_flags_to_env, add_platform_flags_to_env):
 	worked = False
-	tool = gcc.replace('-', '')
+	tool = gcc.split('-')[0]
 	for opt,arch in allarchs(originalarch):
 		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
@@ -222,7 +222,11 @@ def get_available_gcc(conf, paths=[]):
 						if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
 							continue
 						arch = parse_gcc_target(target) or 'unknown'
-						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'gcc', 'g++'))
+						if libdir.find('llvm') != -1:
+							gcc, gxx = 'llvm-gcc', 'llvm-g++'
+						else:
+							gcc, gxx = 'gcc', 'g++'
+						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, gcc, gxx))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
 	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
@@ -343,8 +347,12 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-unneeded-internal-declaration']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wno-unneeded-internal-declaration']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
+
+	if conf.env.GCC_NAME == 'clang':
+		v['CFLAGS_warnall'] += ['-Wno-unneeded-internal-declaration']
+		v['CXXFLAGS_warnall'] += ['-Wno-unneeded-internal-declaration']
 
 	v['CFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
 	v['CXXFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
