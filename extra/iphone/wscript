@@ -28,12 +28,20 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['STATIC'] = 1
 
 
-	try:
-		root = "/"+conf.env.CXX[0].split('/')[1]+"/Platforms/iPhoneSimulator.platform/Developer/SDKs"
-		sdks = sorted(os.listdir(root))
-	except:
+	path,f = os.path.split(conf.env.CXX[0])
+	while path and f:
+		root = os.path.join(path, "Platforms", "iPhoneSimulator.platform", "Developer", "SDKs")
+		path,f = os.path.split(path)
+		sdks = None
+		try:
+			sdks = sorted(os.listdir(root))
+			break
+		except OSError:
+			continue
+	if not sdks:
 		root = "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs"
 		sdks = sorted(os.listdir(root))
+
 	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'iPhoneSimulator%s.sdk'%sdk)
@@ -73,12 +81,20 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 
 
-	try:
-		root = "/"+conf.env.CXX[0].split('/')[1]+"/Platforms/iPhoneOS.platform/Developer/SDKs"
-		sdks = sorted(os.listdir(root))
-	except:
+	path,f = os.path.split(conf.env.CXX[0])
+	while path and f:
+		root = os.path.join(path, "Platforms", "iPhoneOS.platform", "Developer", "SDKs")
+		path,f = os.path.split(path)
+		sdks = None
+		try:
+			sdks = sorted(os.listdir(root))
+			break
+		except OSError:
+			continue
+	if not sdks:
 		root = "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs"
 		sdks = sorted(os.listdir(root))
+
 	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'iPhoneOS%s.sdk'%sdk)

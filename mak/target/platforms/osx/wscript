@@ -41,13 +41,23 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env['SUPPORTEDPLATFORMS'] = 'macosx'
 	conf.env['STATIC'] = 1
 
-	try:
-		root = "/"+conf.env.CXX[0].split('/')[1]+"/SDKs"
-		sdks = sorted(os.listdir(root))
-	except:
+	path,f = os.path.split(conf.env.CXX[0])
+	while path and f:
+		root = os.path.join(path, "SDKs")
+		path,f = os.path.split(path)
+		sdks = None
+		try:
+			sdks = sorted(os.listdir(root))
+			for i in sdks:
+				if i.startswith('MacOSX'):
+					path=''
+					break
+		except OSError:
+			continue
+	if not sdks:
 		root = "/Developer/SDKs"
 		sdks = sorted(os.listdir(root))
-	from waflib import Options
+
 	sdk = Options.options.macosx_sdk
 	if sdk and 'MacOSX%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'MacOSX%s.sdk'%sdk)
