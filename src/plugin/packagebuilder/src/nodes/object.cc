@@ -86,12 +86,15 @@ void Object::setMethod(ref<Reference> reference)
             m_method = call.as<const RTTI::MethodInfo* const>();
             resolveOverload();
         }
+        else if (call)
+        {
+            // error
+        }
+        else
+        {
+            // error
+        }
     }
-}
-
-u32 Object::overloadDistance(const RTTI::MethodInfo::OverloadInfo* overload) const
-{
-    return 0;
 }
 
 void Object::resolveOverload()
@@ -99,18 +102,6 @@ void Object::resolveOverload()
     m_overload = 0;
     if (m_method)
     {
-        const RTTI::MethodInfo::OverloadInfo* overload = m_method->overloads;
-        u32 bestDistance = (u32)-1;
-        while (overload)
-        {
-            u32 distance = overloadDistance(overload);
-            if (distance < bestDistance)
-            {
-                bestDistance = distance;
-                m_overload = overload;
-            }
-            overload = overload->next;
-        }
     }
 }
 
