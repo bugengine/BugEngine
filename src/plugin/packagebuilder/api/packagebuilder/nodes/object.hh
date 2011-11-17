@@ -23,7 +23,6 @@ private:
     minitl::vector< ref<Parameter> >        m_parameters;
 private:
     void resolveOverload();
-    u32 overloadDistance(const RTTI::MethodInfo::OverloadInfo* overload) const;
 public:
     Object(weak<Package> owner);
     ~Object();
