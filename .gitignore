@@ -7,3 +7,5 @@ parser.out
 BugEngine.*
 be_out.txt
 be_err.txt
+.*project
+.settings
