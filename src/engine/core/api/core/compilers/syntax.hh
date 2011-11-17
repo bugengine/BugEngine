@@ -17,7 +17,10 @@ typedef unsigned short      u16;
 typedef unsigned int        u32;
 typedef unsigned long int   u64;
 typedef u8                  byte;
+
 typedef unsigned long int	size_t;
+typedef unsigned long int   ptrdiff_t;
+typedef unsigned long int   intptr_t;
 
 #define override
 #define BE_THREAD_LOCAL
