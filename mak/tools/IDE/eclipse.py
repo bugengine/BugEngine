@@ -55,7 +55,7 @@ class eclipse(Build.BuildContext):
 		project = self.impl_create_cproject(sys.executable, sys.argv[0], appname)
 		self.srcnode.make_node('.cproject').write(project.toxml())
 
-		project = self.impl_create_pydevproject(appname, sys.path, sys.executable)
+		project = self.impl_create_pydevproject(appname, sys.path, [])
 		self.srcnode.make_node('.pydevproject').write(project.toxml())
 
 	def impl_create_project(self, executable, waf, appname):
@@ -275,7 +275,7 @@ class eclipse(Build.BuildContext):
 								{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
 									'superClass': cdt_bld + '.settings.holder.symbols',
 									'valueType': 'definedSymbols'})
-						for i in option.defines.union(env.DEFINES+['__ECLIPSE']):
+						for i in option.defines.union(env.DEFINES):
 							self.add(doc, defines, 'listOptionValue', {'builtin': 'false', 'value': i})
 						count = count+1
 						defines = self.add(doc, tool, 'option',
