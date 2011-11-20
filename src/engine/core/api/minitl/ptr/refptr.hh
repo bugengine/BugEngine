@@ -40,15 +40,74 @@ public:
 
     inline void clear();
 
-#define be_pointer_ ref
-#include "factory0.inl"
-#include "factory1.inl"
-#include "factory2.inl"
-#include "factory3.inl"
-#include "factory4.inl"
-#include "factory5.inl"
-#include "factory6.inl"
-#undef be_pointer_
+    static inline ref<T> create(::BugEngine::Allocator& allocator)
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(), allocator);
+    }
+
+    template< class A1 >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1 )
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1), allocator);
+    }
+
+    template< class A1, class A2 >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1,
+                                 const A2& a2 )
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1, a2), allocator);
+    }
+
+    template< class A1, class A2, class A3  >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1,
+                                 const A2& a2,
+                                 const A3& a3 )
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1, a2, a3), allocator);
+    }
+
+    template< class A1, class A2, class A3, class A4 >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1,
+                                 const A2& a2,
+                                 const A3& a3,
+                                 const A4& a4 )
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1, a2, a3, a4), allocator);
+    }
+
+    template< class A1, class A2, class A3, class A4, class A5 >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1,
+                                 const A2& a2,
+                                 const A3& a3,
+                                 const A4& a4,
+                                 const A5& a5 )
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1, a2, a3, a4, a5), allocator);
+    }
+
+    template< class A1, class A2, class A3, class A4, class A5, class A6 >
+    static inline ref<T> create( ::BugEngine::Allocator& allocator,
+                                 const A1& a1,
+                                 const A2& a2,
+                                 const A3& a3,
+                                 const A4& a4,
+                                 const A5& a5,
+                                 const A6& a6)
+    {
+        void* mem = allocator.alloc(sizeof(T), be_alignof(T));
+        return ref<T>(new(mem) T(a1, a2, a3, a4, a5, a6), allocator);
+    }
 };
 
 }
