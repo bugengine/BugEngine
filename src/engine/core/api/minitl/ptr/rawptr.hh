@@ -23,6 +23,10 @@ public:
     inline operator const void*() const;
     inline bool operator!() const;
     inline T& operator*();
+
+    template< typename U >
+    operator raw<U>() const { raw<U> result = {m_ptr}; return result; }
+    T* set(T* value) { return m_ptr = value; }
 };
 
 }

@@ -32,7 +32,7 @@ void PropertyInfo::set(Value& from, const Value& value) const
 
 Value PropertyInfo::getTag(const TypeInfo& type) const
 {
-    TagInfo* tag = tags;
+    raw<TagInfo> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -42,7 +42,7 @@ Value PropertyInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value PropertyInfo::getTag(const ClassInfo* type) const
+Value PropertyInfo::getTag(raw<const ClassInfo> type) const
 {
     return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
 }

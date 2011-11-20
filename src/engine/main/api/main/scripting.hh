@@ -23,7 +23,7 @@ private:
 protected:
     IScriptEngine(Allocator& arena);
 public:
-    virtual void addNamespace(istring name, const RTTI::ClassInfo* classinfo) = 0;
+    virtual void addNamespace(istring name, raw<const RTTI::ClassInfo> classinfo) = 0;
     virtual void runBuffer(const Allocator::Block<u8>& buffer) = 0;
 
     void loadFile(weak<const File>, Allocator& arena);

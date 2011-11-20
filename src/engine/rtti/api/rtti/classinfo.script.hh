@@ -21,21 +21,21 @@ struct be_api(RTTI) ClassInfo
 published:
     struct ObjectInfo
     {
-        const ObjectInfo* const next;
-        istring const           name;
-        Value                   value;
+        raw<const ObjectInfo> const     next;
+        istring const                   name;
+        Value                           value;
     };
 published:
-    inamespace const                        name;
-    const ClassInfo* const                  parent;
-    u32 const                               size;
-    i32 const                               offset;
-    TagInfo*                                tags;
-    const PropertyInfo* const               properties;
-    const MethodInfo* const                 methods;
-    const ObjectInfo*                       objects;
-    const MethodInfo* const                 constructor;
-    const MethodInfo* const                 call;
+    inamespace const                    name;
+    raw<const ClassInfo> const          parent;
+    u32 const                           size;
+    i32 const                           offset;
+    raw<TagInfo>                        tags;
+    raw<const PropertyInfo> const       properties;
+    raw<const MethodInfo> const         methods;
+    raw<const ObjectInfo>               objects;
+    raw<const MethodInfo> const         constructor;
+    raw<const MethodInfo> const         call;
 public:
     typedef void (*CopyConstructor)(const void *, void *);
     typedef void (*Destructor)(void *);
@@ -44,11 +44,11 @@ public:
     const MD5               hash;
 published:
     Value getTag(const TypeInfo& type) const;
-    Value getTag(const ClassInfo* type) const;
+    Value getTag(raw<const ClassInfo> type) const;
 
     Value get(Value& from, istring name) const;
 
-    bool isA(const ClassInfo* klass) const;
+    bool isA(raw<const ClassInfo> klass) const;
 
     Value create(Value* params, u32 nparams) const;
 public:
@@ -59,7 +59,7 @@ public:
         EnumerateRecursive
     };
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
-    u32 distance(const ClassInfo* other) const;
+    u32 distance(raw<const ClassInfo> other) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
 private: // friend Value
     void copy(const void* src, void* dst) const;
@@ -68,71 +68,82 @@ private: // friend Value
 
 }
 
-be_api(RTTI) RTTI::ClassInfo* be_game_Namespace();
-RTTI::ClassInfo* be_game_Namespace_BugEngine();
+be_api(RTTI) raw<RTTI::ClassInfo> be_game_Namespace();
+raw<RTTI::ClassInfo> be_game_Namespace_BugEngine();
 
-#define BE_REGISTER_NAMESPACE_1(plugin, name)                                                                                                       \
+#define BE_REGISTER_NAMESPACE_1(plugin, n)                                                                                                          \
 namespace BugEngine                                                                                                                                 \
 {                                                                                                                                                   \
-    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name()                                                                                    \
+    raw<BugEngine::RTTI::ClassInfo> be_##plugin##_Namespace_##n()                                                                                   \
     {                                                                                                                                               \
-        static RTTI::ClassInfo ci = { #name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                                   \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace()->objects, #name, Value(&ci) };                                          \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace()->objects = &ob);                                              \
+        static RTTI::ClassInfo ci = { #n, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };                                        \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace()->objects, #n, Value(&ci) };                                             \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = {be_##plugin##_Namespace()->objects.set(&ob)};                                       \
         be_forceuse(result);                                                                                                                        \
-        return &ci;                                                                                                                                 \
+        raw<BugEngine::RTTI::ClassInfo> ptr = {&ci};                                                                                                \
+        return ptr;                                                                                                                                 \
     }                                                                                                                                               \
+    static raw<BugEngine::RTTI::ClassInfo> s_##plugin##_##n = be_##plugin##_Namespace_##n();                                                        \
 }
 
-#define BE_REGISTER_NAMESPACE_2(plugin, name1, name2)                                                                                               \
+#define BE_REGISTER_NAMESPACE_2(plugin, n1, n2)                                                                                                     \
 namespace BugEngine                                                                                                                                 \
 {                                                                                                                                                   \
-    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2()                                                                         \
+    raw<BugEngine::RTTI::ClassInfo> be_##plugin##_Namespace_##n1##_##n2()                                                                           \
     {                                                                                                                                               \
-        static RTTI::ClassInfo ci = { #name1 "." #name2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                                       \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1()->objects, #name2, Value(&ci) };                                 \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1()->objects = &ob);                                      \
+        static RTTI::ClassInfo ci = { #n1"."#n2, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };                                 \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##n1()->objects, #n2, Value(&ci) };                                       \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = {be_##plugin##_Namespace_##n1()->objects.set(&ob)};                           \
         be_forceuse(result);                                                                                                                        \
-        return &ci;                                                                                                                                 \
+        raw<BugEngine::RTTI::ClassInfo> ptr = {&ci};                                                                                                \
+        return ptr;                                                                                                                                 \
     }                                                                                                                                               \
+    static raw<BugEngine::RTTI::ClassInfo> s_##plugin##_##n1##_##n2=be_##plugin##_Namespace_##n1##_##n2();                                          \
 }
 
-#define BE_REGISTER_NAMESPACE_3(plugin, name1, name2, name3)                                                                                        \
+#define BE_REGISTER_NAMESPACE_3(plugin, n1, n2, n3)                                                                                                 \
 namespace BugEngine                                                                                                                                 \
 {                                                                                                                                                   \
-    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3()                                                               \
+    raw<BugEngine::RTTI::ClassInfo> be_##plugin##_Namespace_##n1##_##n2##_##n3()                                                                    \
     {                                                                                                                                               \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                            \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2()->objects, #name3, Value(&ci) };                       \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2()->objects = &ob);                            \
+        static RTTI::ClassInfo ci = { #n1"."#n2"."#n3, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };                           \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2()->objects, #n3, Value(&ci) };                                \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2()->objects.set(&ob)};                           \
         be_forceuse(result);                                                                                                                        \
-        return &ci;                                                                                                                                 \
+        raw<BugEngine::RTTI::ClassInfo> ptr = {&ci};                                                                                                \
+        return ptr;                                                                                                                                 \
     }                                                                                                                                               \
+    static raw<BugEngine::RTTI::ClassInfo> s_##plugin##_##n1##_##n2##_##n3=be_##plugin##_Namespace_##n1##_##n2##_##n3();                            \
 }
-#define BE_REGISTER_NAMESPACE_4(plugin, name1, name2, name3, name4)                                                                                 \
+#define BE_REGISTER_NAMESPACE_4(plugin, n1, n2, n3, n4)                                                                                             \
 namespace BugEngine                                                                                                                                 \
 {                                                                                                                                                   \
-    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()                                                     \
+    raw<BugEngine::RTTI::ClassInfo> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                                                             \
     {                                                                                                                                               \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                 \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2##_##name3()->objects, #name4, Value(&ci) };             \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2##_##name3()->objects = &ob);                  \
+        static RTTI::ClassInfo ci = { #n1"."#n2"."#n3"."#n4, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };                     \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects, #n4, Value(&ci) };                         \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.set(&ob)};                    \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects = {&ob};                       \
         be_forceuse(result);                                                                                                                        \
-        return &ci;                                                                                                                                 \
+        raw<BugEngine::RTTI::ClassInfo> ptr = {&ci};                                                                                                \
+        return ptr;                                                                                                                                 \
     }                                                                                                                                               \
+    static raw<BugEngine::RTTI::ClassInfo> s_##plugin##_##n1##_##n2##_##n3##_##n4=be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4();              \
 }
 
-#define BE_REGISTER_NAMESPACE_5(plugin,name1, name2, name3, name4, name5)                                                                           \
+#define BE_REGISTER_NAMESPACE_5(plugin,n1, n2, n3, n4, n5)                                                                                          \
 namespace BugEngine                                                                                                                                 \
 {                                                                                                                                                   \
-    BugEngine::RTTI::ClassInfo* be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4##_##name5()                                           \
+    raw<BugEngine::RTTI::ClassInfo> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()                                                      \
     {                                                                                                                                               \
-        static RTTI::ClassInfo ci = { #name1 "." #name2 "." #name3 "." #name4 "." #name5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };      \
-        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()->objects, #name5, Value(&ci) };   \
-        static const RTTI::ClassInfo::ObjectInfo* result = (be_##plugin##_Namespace_##name1##_##name2##_##name3##_##name4()->objects = &ob);        \
+        static RTTI::ClassInfo ci = { #n1"."#n2"."#n3"."#n4"."#n5, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };               \
+        static RTTI::ClassInfo::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects, #n5, Value(&ci) };                  \
+        static raw<const RTTI::ClassInfo::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.set(&ob)};             \
         be_forceuse(result);                                                                                                                        \
-        return &ci;                                                                                                                                 \
+        raw<BugEngine::RTTI::ClassInfo> ptr = {&ci};                                                                                                \
+        return ptr;                                                                                                                                 \
     }                                                                                                                                               \
+    static raw<BugEngine::RTTI::ClassInfo> s_##plugin##_##n1##_##n2##_##n3##_##n4##_##n5=be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5();\
 }
 
 }

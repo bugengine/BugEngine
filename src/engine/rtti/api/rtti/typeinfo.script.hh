@@ -42,11 +42,11 @@ struct be_api(RTTI) TypeInfo
         Constify
     };
 
-    const RTTI::ClassInfo*  metaclass;
-    Type                    type;
-    Constness               constness;
+    raw<const RTTI::ClassInfo>  metaclass;
+    Type                        type;
+    Constness                   constness;
 
-    static inline TypeInfo makeType(const RTTI::ClassInfo* klass, Type type, Constness constness = Mutable)
+    static inline TypeInfo makeType(raw<const RTTI::ClassInfo> klass, Type type, Constness constness = Mutable)
     {
         TypeInfo info = { klass, type, constness };
         return info;

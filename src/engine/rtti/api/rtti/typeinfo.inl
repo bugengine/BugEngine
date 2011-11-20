@@ -95,36 +95,36 @@ template< typename T >
 struct be_typeid< minitl::vector<T> >
 {
     static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
 };
 template< typename T >
 const RTTI::ClassInfo be_typeid< minitl::vector<T> >::klass =
 {
-    "vector", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+    "vector", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 template< typename T, size_t SIZE >
 struct be_typeid< minitl::array<T,SIZE> >
 {
     static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
 };
 template< typename T, size_t SIZE >
 const RTTI::ClassInfo be_typeid< minitl::array<T,SIZE> >::klass =
 {
-    "array", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+    "array", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 template< typename T1, typename T2, typename T3 >
 struct be_typeid< minitl::hashmap<T1, T2, T3> >
 {
     static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { return TypeInfo::makeType(&klass, TypeInfo::Class, TypeInfo::Mutable); }
+    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
 };
 template< typename T1, typename T2, typename T3 >
 const RTTI::ClassInfo be_typeid< minitl::hashmap<T1, T2, T3> >::klass =
 {
-	"hashmap", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ 0, 0, 0, 0 }}
+    "hashmap", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };
 
 }

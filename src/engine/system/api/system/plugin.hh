@@ -40,7 +40,7 @@ public:
     operator const void*() const        { return m_handle; }
     bool operator!() const              { return m_handle == 0; }
 
-    const RTTI::ClassInfo* pluginNamespace() const;
+    raw<const RTTI::ClassInfo> pluginNamespace() const;
 private:
     Plugin();
 };
@@ -60,15 +60,16 @@ private:
 #define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                             \
     namespace BugEngine                                                                                                                 \
     {                                                                                                                                   \
-        BE_EXPORT RTTI::ClassInfo* be_##name##_Namespace()                                                                              \
+        BE_EXPORT raw<RTTI::ClassInfo> be_##name##_Namespace()                                                                          \
         {                                                                                                                               \
-            static RTTI::ClassInfo::ObjectInfo ob = { 0, "BugEngine", Value() };                                                        \
-            static RTTI::ClassInfo ci = { "BugEngine", 0, 0, 0, 0, 0, 0, &ob, 0, 0, 0, 0, {{ 0, 0, 0, 0 }} };                           \
-            static const RTTI::ClassInfo::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);                                           \
+            static RTTI::ClassInfo::ObjectInfo ob = { {0}, "BugEngine", Value() };                                                      \
+            static RTTI::ClassInfo ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };             \
+            static raw<const RTTI::ClassInfo::ObjectInfo> obptr = {((ob.value = Value(&ci)), &ob)};                                     \
             be_forceuse(obptr);                                                                                                         \
-            return &ci;                                                                                                                 \
+            raw<RTTI::ClassInfo> ptr = {&ci};                                                                                           \
+            return ptr;                                                                                                                 \
         }                                                                                                                               \
-        RTTI::ClassInfo* be_##name##_Namespace_BugEngine()                                                                              \
+        raw<RTTI::ClassInfo> be_##name##_Namespace_BugEngine()                                                                          \
         {                                                                                                                               \
             return be_##name##_Namespace();                                                                                             \
         }                                                                                                                               \

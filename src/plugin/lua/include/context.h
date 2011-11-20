@@ -21,7 +21,7 @@ public:
     Context();
     ~Context();
 private:
-    void addNamespace(istring name, const RTTI::ClassInfo* ns) override;
+    void addNamespace(istring name, raw<const RTTI::ClassInfo> ns) override;
     void runBuffer(const Allocator::Block<u8>& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);

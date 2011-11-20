@@ -99,7 +99,7 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::addNamespace(istring name, const RTTI::ClassInfo* ns)
+void Context::addNamespace(istring name, raw<const RTTI::ClassInfo> ns)
 {
     push(m_state, Value(ns));
     lua_setglobal(m_state, name.c_str());
@@ -213,7 +213,7 @@ int Context::valueToString(lua_State *state)
     Value* userdata = (Value*)lua_touserdata(state, -1);
     if (userdata->type().type == TypeInfo::Class)
     {
-        const RTTI::ClassInfo* metaclass = userdata->type().metaclass;
+        raw<const RTTI::ClassInfo> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
         {
             lua_pushfstring(state, "%s", userdata->as<const inamespace>().str().c_str());

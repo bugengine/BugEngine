@@ -198,13 +198,16 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 }
 
 template< typename Interface >
-const RTTI::ClassInfo* Plugin<Interface>::pluginNamespace() const
+raw<const RTTI::ClassInfo> Plugin<Interface>::pluginNamespace() const
 {
     if (m_handle)
     {
         const RTTI::ClassInfo* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::ClassInfo* (*)()>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_pluginNamespace"));
         if (be_pluginNamespace)
-            return (*be_pluginNamespace)(); 
+        {
+            raw<const RTTI::ClassInfo> ci = {(*be_pluginNamespace)()};
+            return ci;
+        }
     }
     return 0;
 }

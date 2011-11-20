@@ -16,7 +16,7 @@ static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
 Value MethodInfo::OverloadInfo::ParamInfo::getTag(const TypeInfo& type) const
 {
-    TagInfo* tag = tags;
+    raw<TagInfo> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -26,7 +26,7 @@ Value MethodInfo::OverloadInfo::ParamInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value MethodInfo::OverloadInfo::ParamInfo::getTag(const ClassInfo* type) const
+Value MethodInfo::OverloadInfo::ParamInfo::getTag(raw<const ClassInfo> type) const
 {
     return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
 }
@@ -40,7 +40,7 @@ u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
     else
     {
         u32 distance = 0;
-        const ParamInfo* selfp = params;
+        raw<const ParamInfo> selfp = params;
         while(nparams && selfp)
         {
             distance += p->type().distance(selfp->type);
@@ -57,7 +57,7 @@ u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
 
 Value MethodInfo::OverloadInfo::getTag(const TypeInfo& type) const
 {
-    TagInfo* tag = tags;
+    raw<TagInfo> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -67,7 +67,7 @@ Value MethodInfo::OverloadInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value MethodInfo::OverloadInfo::getTag(const ClassInfo* type) const
+Value MethodInfo::OverloadInfo::getTag(raw<const ClassInfo> type) const
 {
     return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
 }
@@ -75,14 +75,14 @@ Value MethodInfo::OverloadInfo::getTag(const ClassInfo* type) const
 Value MethodInfo::doCall(Value* params, u32 nparams) const
 {
     u32 bestDistance = s_overloadMaxDistance;
-    const OverloadInfo* overload = 0;
-    for (const OverloadInfo* it = overloads; it; it = it->next)
+    raw<const OverloadInfo> overload = {0};
+    for (raw<const OverloadInfo> it = overloads; it; it = it->next)
     {
         u32 distance = it->distance(params, nparams);
         if (distance < bestDistance)
         {
             bestDistance = distance;
-            overload = &(*it);
+            overload = it;
         }
     }
     if (overload)
