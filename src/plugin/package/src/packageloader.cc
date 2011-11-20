@@ -41,7 +41,7 @@ void PackageLoader::unloadPackage(const ResourceHandle& /*handle*/)
 {
 }
 
-void PackageLoader::addNamespace(istring name, const RTTI::ClassInfo* classinfo)
+void PackageLoader::addNamespace(istring name, raw<const RTTI::ClassInfo> classinfo)
 {
 }
 

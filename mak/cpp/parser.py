@@ -958,8 +958,7 @@ def p_skiplist_base_2(t):
 		skiplist_base : skiplist_base operator
 		skiplist_base : skiplist_base keyword
 		skiplist_base : skiplist_base constant
-		skiplist_base : skiplist_base ID
-		skiplist_base : skiplist_base SCOPE
+		skiplist_base : skiplist_base name
 	"""
 	t[0] = " ".join(t[1:])
 

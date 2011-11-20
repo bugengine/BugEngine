@@ -20,25 +20,25 @@ published:
         struct be_api(RTTI) ParamInfo
         {
         published:
-            TagInfo* const          tags;
-            const ParamInfo* const  next;
-            istring                 name;
-            TypeInfo                type;
+            raw<TagInfo> const          tags;
+            raw<const ParamInfo> const  next;
+            istring                     name;
+            TypeInfo                    type;
         published:
             Value getTag(const TypeInfo& type) const;
-            Value getTag(const ClassInfo* type) const;
+            Value getTag(raw<const ClassInfo> type) const;
         private:
             ParamInfo& operator=(const ParamInfo&);
         };
     published:
-        TagInfo* const      tags;
-        const OverloadInfo* next;
-        TypeInfo            returnType;
-        const ParamInfo*    params;
-        bool                vararg;
+        raw<TagInfo> const      tags;
+        raw<const OverloadInfo> next;
+        TypeInfo                returnType;
+        raw<const ParamInfo>    params;
+        bool                    vararg;
     published:
         Value getTag(const TypeInfo& type) const;
-        Value getTag(const ClassInfo* type) const;
+        Value getTag(raw<const ClassInfo> type) const;
     public:
         Value (*call)(Value* params, u32 nparams);
         u32 distance(Value* p, u32 nparams) const;
@@ -47,10 +47,10 @@ published:
     };
 
 published:
-    istring             name;
-    const MethodInfo*   call;
-    const MethodInfo*   next;
-    const OverloadInfo* overloads;
+    istring                 name;
+    raw<const MethodInfo>   call;
+    raw<const MethodInfo>   next;
+    raw<const OverloadInfo> overloads;
 published:
     Value doCall(Value* params, u32 nparams) const;
 private:

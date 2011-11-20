@@ -12,7 +12,7 @@ namespace BugEngine { namespace RTTI
 
 struct be_api(RTTI) TagInfo
 {
-    TagInfo* next;
+    raw<TagInfo> next;
     Value tag;
 };
 

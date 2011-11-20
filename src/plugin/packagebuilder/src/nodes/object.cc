@@ -13,10 +13,10 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 struct ParameterMatch
 {
     typedef RTTI::MethodInfo::OverloadInfo::ParamInfo ParamInfo;
-    minitl::vector< ref<Parameter> >                                    unused;
-    minitl::vector< const ParamInfo* >                                  missing;
-    minitl::vector< minitl::pair< ref<Parameter>, const ParamInfo*> >   matches;
-    u32                                                                 match;
+    minitl::vector< ref<Parameter> >                                        unused;
+    minitl::vector< raw<const ParamInfo> >                                  missing;
+    minitl::vector< minitl::pair< ref<Parameter>,raw< const ParamInfo> > >  matches;
+    u32                                                                     match;
     ParameterMatch(const RTTI::MethodInfo::OverloadInfo* overload, const minitl::vector< ref<Parameter> >& parameters)
         :   unused(tempArena())
         ,   missing(tempArena())
@@ -24,7 +24,7 @@ struct ParameterMatch
         ,   match(0)
     {
         minitl::vector< ref<Parameter> > params(tempArena(), parameters.begin(), parameters.end());
-        for (const ParamInfo* param = overload->params; param; param = param->next)
+        for (raw<const ParamInfo> param = overload->params; param; param = param->next)
         {
             bool matched = false;
             for (minitl::vector< ref<Parameter> >::iterator value = params.begin(); value != params.end(); ++value)

@@ -20,7 +20,7 @@ public:
     void loadPackage(weak<const Package> package);
     void unloadPackage(const ResourceHandle& handle);
 private:
-    virtual void addNamespace(istring name, const RTTI::ClassInfo* classinfo) override;
+    virtual void addNamespace(istring name, raw<const RTTI::ClassInfo> classinfo) override;
     virtual void runBuffer(const Allocator::Block<u8>& buffer) override;
 };
 

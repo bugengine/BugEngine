@@ -14,7 +14,7 @@ namespace BugEngine
 template< typename T >
 struct be_typeid
 {
-    static BE_EXPORT const RTTI::ClassInfo* klass();
+    static BE_EXPORT raw<const RTTI::ClassInfo> klass();
     static inline TypeInfo  type()  { return TypeInfo::makeType(klass(), TypeInfo::Class, TypeInfo::Mutable); }
 };
 
@@ -49,12 +49,18 @@ struct be_typeid< weak<T> > : public be_typeid<T>
 };
 
 template< typename T >
+struct be_typeid< raw<T> > : public be_typeid<T>
+{
+    static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
+};
+
+template< typename T >
 struct be_typeid< T* > : public be_typeid<T>
 {
     static inline TypeInfo  type()  { return TypeInfo::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? TypeInfo::ConstRawPtr : TypeInfo::RawPtr, TypeInfo::Mutable); }
 };
 
-template< > const RTTI::ClassInfo* be_typeid< void >::klass();
+template< > raw<const RTTI::ClassInfo> be_typeid< void >::klass();
 
 }
 
