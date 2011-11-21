@@ -348,21 +348,21 @@ def add_standard_gcc_flags(conf):
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
 	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wnon-virtual-dtor', '-Woverloaded-virtual']
 
 	if conf.env.GCC_NAME == 'clang':
-		v['CFLAGS_warnall'] += ['-Wno-unneeded-internal-declaration']
-		v['CXXFLAGS_warnall'] += ['-Wno-unneeded-internal-declaration']
+		v['CFLAGS_warnall'] += ['-Wno-unused-function']
+		v['CXXFLAGS_warnall'] += ['-Wno-unused-function']
 
-	v['CFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
-	v['ASFLAGS_debug'] = ['-pipe', '-gdwarf-2', '-D_DEBUG']
-	v['LINKFLAGS_debug'] = ['-pipe', '-gdwarf-2']
+	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
+	v['LINKFLAGS_debug'] = ['-pipe', '-g']
 
 	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
 	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['LINKFLAGS_profile'] = ['-pipe', '-g', '-s']
+	v['LINKFLAGS_profile'] = ['-pipe', '-g']
 
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']

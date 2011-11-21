@@ -149,7 +149,8 @@ raw<const RTTI::ClassInfo> Plugin<Interface>::pluginNamespace() const
             return ci;
         }
     }
-    return 0;
+    raw<const RTTI::ClassInfo> ci = {0};
+    return ci;
 }
 
 
