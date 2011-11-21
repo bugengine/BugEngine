@@ -348,7 +348,7 @@ def add_standard_gcc_flags(conf):
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
 	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual']
 
 	if conf.env.GCC_NAME == 'clang':
 		v['CFLAGS_warnall'] += ['-Wno-unneeded-internal-declaration']
