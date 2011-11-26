@@ -60,7 +60,7 @@ class Solution:
 		name = project.category+'.'+project.name
 		if project in self.done: return
 		self.done.add(project)
-		projectGUID = generateGUID(filename,name)
+		projectGUID = generateGUID(project.targetName, project.name)
 		self.projectlist.append((projectGUID, project.category))
 		self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.guid, name, filename, projectGUID))
 		self.file.write('EndProject\n')

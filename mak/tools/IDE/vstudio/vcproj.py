@@ -20,7 +20,7 @@ class VCproj:
 		self.name = name
 		self.category = category
 		self.output = open(filename, 'w')
-		self.targetName = os.path.join('.build', versionName, category+'.'+name+'.'+versionName+self.extensions[0])
+		self.targetName = filename
 		self.envs = envs
 
 	def writeHeader(self, configs):
