@@ -6,11 +6,31 @@ def options(opt):
 	pass
 
 def setup(conf):
-	pass
+	if 'win32' in conf.env.PLATFORM:
+		conf.check_lib('d3d9 d3dx9', var='dx9', libpath=[
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
+		conf.check_lib('d3d10 d3dx10', var='dx10', libpath=[
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
+		conf.check_lib('d3d11 d3dx11', var='dx11', libpath=[
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
+			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
 
 def build(bld):
 	exparchoptions = {
-		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.x86')], libs=['bufferoverflowu', 'chkstk']),
-		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')], libs=[ 'bufferoverflowu', 'chkstk'])
+		'win32-x86': module.coptions(
+			libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.x86')],
+			#libs=['bufferoverflowu', 'chkstk'],
+			includedir=[os.path.join('src', '3rdparty', 'DirectX', 'api')]),
+		'win32-amd64': module.coptions(
+			libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')],
+			#libs=[ 'bufferoverflowu', 'chkstk'],
+			includedir=[os.path.join('src', '3rdparty', 'DirectX', 'api')]),
 		}
-	bld.m['DirectX'] = module.util( 'DirectX', [], '3rdparty', module.coptions(), module.coptions(), {}, exparchoptions, platforms=['win32'])
+	if conf.env.dx9 or conf.env.PROJECT:
+		bld.m['DirectX9'] = module.util( 'DirectX9', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx9), {}, exparchoptions)
+	if conf.env.dx10 or conf.env.PROJECT:
+		bld.m['DirectX10'] = module.util( 'DirectX10', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx10), {}, exparchoptions)
+	if conf.env.dx9 or conf.env.PROJECT:
+		bld.m['DirectX11'] = module.util( 'DirectX11', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx11), {}, exparchoptions)

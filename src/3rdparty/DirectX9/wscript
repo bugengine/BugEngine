@@ -3,18 +3,10 @@ from mak import module
 import os
 
 def options(opt):
-	pass
+	opt.recurse('../DirectX')
 
 def setup(conf):
-	pass
+	conf.recurse('../DirectX')
 
 def build(bld):
 	bld.recurse('../DirectX')
-	directx = module.external('DirectX')
-	if directx:
-		includedir=[os.path.join('src', '3rdparty', 'DirectX9', 'api')]
-		exparchoptions = {
-			'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX9', 'lib.x86')], libs=['d3d9', 'd3dx9']),
-			'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'DirectX9', 'lib.amd64')], libs=['d3d9', 'd3dx9'])
-			}
-		bld.m['DirectX9'] = module.util( 'DirectX9', [directx], '3rdparty', module.coptions(), module.coptions(includedir=includedir), {}, exparchoptions, platforms=['win32'])
