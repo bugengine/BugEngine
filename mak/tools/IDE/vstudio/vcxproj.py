@@ -14,7 +14,7 @@ class VCxproj:
 		self.category = category
 		self.output = open(filename, 'w')
 		self.filters = open(filename+'.filters', 'w')
-		self.targetName = os.path.join('.build', versionName, category+'.'+name+'.'+versionName+self.extensions[0])
+		self.targetName = filename
 		self.type = type
 		self.envs = envs
 		self.projectType = 'Makefile'
