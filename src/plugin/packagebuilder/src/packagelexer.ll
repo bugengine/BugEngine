@@ -67,9 +67,9 @@ extern "C" int be_package_wrap()
     return 1;
 }
 
+#define YY_NO_INPUT
 #define YY_INPUT(buf,result,max_size)                               \
         {                                                           \
-            be_forceuse(yyinput);                                   \
             result = max_size > g_buffer->count()-g_bufferPosition  \
                 ? g_buffer->count()-g_bufferPosition                \
                 : max_size;                                         \
