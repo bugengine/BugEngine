@@ -22,4 +22,5 @@ def build(bld):
 			elif entries == 'wscript' or entries == 'wscript_build' or entries.endswith('.py'):
 				p.addFile(entry)
 	addEntries(bld.m['mak'], 'mak', addEntries)
+	bld.m['mak'].addFile('wscript')
 
