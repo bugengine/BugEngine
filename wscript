@@ -61,19 +61,20 @@ def plugins(bld):
 
 
 	package			= module.plugin('package',			[])
-	packagebuilder	= module.plugin('packagebuilder',	[], category='plugin')
+	packagebuilder	= module.plugin('packagebuilder',	[])
 	editor			= module.plugin('editor',			[packagebuilder], platforms=['pc'])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
-	_3d				= module.plugin('3d',					[])
+	_3d				= module.plugin('3d',				[])
 	shadermodel1	= module.plugin('shadermodel1',		[_3d])
 	shadermodel2	= module.plugin('shadermodel2',		[_3d, shadermodel1])
 	shadermodel3	= module.plugin('shadermodel3',		[_3d, shadermodel1, shadermodel2])
 	shadermodel4	= module.plugin('shadermodel4',		[_3d, shadermodel1, shadermodel2, shadermodel3])
 
 
-	#AL				= module.plugin('AL',				[openal], platforms=['pc'])
+
+	#AL				= module.plugin('AL',				[openal])
 
 	lua				= module.plugin('lua',				[lualib])
 	squirrel		= module.plugin('squirrel',			[squirellib])
@@ -83,11 +84,11 @@ def plugins(bld):
 	if win32 or X11 or cocoa:
 		windowing	= module.library('windowing',		[bld.game, _3d, X11, win32], category='plugin')
 		if opengl:
-			gl		= module.plugin('GL4',				[bld.game, windowing, opengl, _3d], platforms=['pc'])
+			gl		= module.plugin('GL4',				[bld.game, windowing, opengl, _3d])
 		if directx9:
-			Dx9		= module.plugin('DX9',				[bld.game, windowing, cgDx, directx9, _3d], platforms=['win32'])
+			Dx9		= module.plugin('DX9',				[bld.game, windowing, cgDx, directx9, _3d])
 		#if diretx10:
-			#Dx10	= module.plugin('DX10',				[bld.game, windowing, cgDx, directx10, _3d], platforms=['win32'])
+			#Dx10	= module.plugin('DX10',				[bld.game, windowing, cgDx, directx10, _3d])
 
 	bld.recurse('mak', name='plugins', once=False)
 
