@@ -4,6 +4,7 @@
 #include    <packagebuilder/nodes/package.hh>
 #include    <packagebuilder/nodes/object.hh>
 #include    <packagebuilder/nodes/reference.hh>
+#include    <packagebuilder/nodes/parameter.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -49,10 +50,15 @@ static int yyerror(const char *msg)
 # undef free
 #endif
 #define malloc(x)    tempArena().alloc(x, 4)
-#define relloc(x,s)  tempArena().realloc(x, s, 4)
+#define realloc(x,s) tempArena().realloc(x, s, 4)
 #define free(x)      tempArena().free(x)
 
 using namespace BugEngine;
+using namespace BugEngine::PackageBuilder;
+using namespace BugEngine::PackageBuilder::Nodes;
+
+
+ref<PackageBuilder::Nodes::Object> s_currentObject;
 
 %}
 
@@ -67,7 +73,6 @@ using namespace BugEngine;
 %type   <sValue>    VAL_STRING
 %type   <sValue>    TOK_ID
 %type   <sValue>    fullname
-%type   <value>     value
 
 %union
 {
@@ -75,7 +80,6 @@ using namespace BugEngine;
     i64                 iValue;
     double              fValue;
     char*               sValue;
-    BugEngine::Value*   value;
 }
 
 %start  file
@@ -119,28 +123,32 @@ decl_import:
 decl_plugin:
         KW_plugin TOK_ID
             {
-                ((PackageBuilder::BuildContext*)param)->result->loadPlugin($2);
+                ((BuildContext*)param)->result->loadPlugin($2);
                 free($2);
             }
         ';'
     ;
 
 decl_object:
+        {
+            s_currentObject = ref<Object>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            ((BuildContext*)param)->result->insertNode(s_currentObject);
+        }
         editor_attributes
         TOK_ID '=' fullname
         {
-            ref<PackageBuilder::Nodes::Object> object = ref<PackageBuilder::Nodes::Object>::create(packageBuilderArena(), ((PackageBuilder::BuildContext*)param)->result);
-            ref<PackageBuilder::Nodes::Reference> reference = ref<PackageBuilder::Nodes::Reference>::create(packageBuilderArena(), ((PackageBuilder::BuildContext*)param)->result);
-            reference->setName(inamespace($4));
-            object->setMethod(reference);
-            object->setName($2);
+            ref<Nodes::Reference> reference = ref<Reference>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            reference->setName(inamespace($5));
+            s_currentObject->setMethod(reference);
+            s_currentObject->setName($3);
         }
         '('
             params
         ')'
         {
-            free($2);
-            free($4);
+            s_currentObject.clear();
+            free($3);
+            free($5);
         }
     ;
 
@@ -168,6 +176,8 @@ params:
 param:
         TOK_ID '=' value ';'
         {
+            ref<Parameter> param = ref<Parameter>::create(packageBuilderArena(), istring($1));
+            s_currentObject->addParameter(param);
             free($1);
         }
     ;
@@ -175,36 +185,45 @@ param:
 value:
         fullname
         {
-            $$ = 0;
             free($1);
         }
     |
         VAL_BOOLEAN
         {
-            $$ = 0;
         }
     |
         VAL_INTEGER
         {
-            $$ = 0;
         }
     |
         VAL_FLOAT
         {
-            $$ = 0;
         }
     |
         VAL_STRING
         {
-            $$ = 0;
             free($1);
         }
     ;
 
 fullname:
-        TOK_ID { $$ = $1; }
+        TOK_ID
+        {
+            $$ = $1;
+        }
     |
-        TOK_ID '.' fullname { size_t s = strlen($1); s += strlen($3); s++; $$ = (char*)malloc(s+1); strcpy($$, $1); strcat($$, "."); strcat($$, $3); free($1); free($3); }
+        TOK_ID '.' fullname
+        {
+            size_t s = strlen($1);
+            s += strlen($3);
+            s++;
+            $$ = (char*)malloc(s+1);
+            strcpy($$, $1);
+            strcat($$, ".");
+            strcat($$, $3);
+            free($1);
+            free($3);
+        }
     ;
 
 %%

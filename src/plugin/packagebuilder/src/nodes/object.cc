@@ -10,53 +10,12 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-struct ParameterMatch
-{
-    typedef RTTI::MethodInfo::OverloadInfo::ParamInfo ParamInfo;
-    minitl::vector< ref<Parameter> >                                        unused;
-    minitl::vector< raw<const ParamInfo> >                                  missing;
-    minitl::vector< minitl::pair< ref<Parameter>,raw< const ParamInfo> > >  matches;
-    u32                                                                     match;
-    ParameterMatch(const RTTI::MethodInfo::OverloadInfo* overload, const minitl::vector< ref<Parameter> >& parameters)
-        :   unused(tempArena())
-        ,   missing(tempArena())
-        ,   matches(tempArena())
-        ,   match(0)
-    {
-        minitl::vector< ref<Parameter> > params(tempArena(), parameters.begin(), parameters.end());
-        for (raw<const ParamInfo> param = overload->params; param; param = param->next)
-        {
-            bool matched = false;
-            for (minitl::vector< ref<Parameter> >::iterator value = params.begin(); value != params.end(); ++value)
-            {
-                if (param->name == (*value)->name())
-                {
-                    matches.push_back(minitl::make_pair(*value, param));
-                    matched = true;
-                    params.erase(value);
-                    break;
-                }
-            }
-            if (!matched)
-            {
-                missing.push_back(param);
-            }
-        }
-    }
-
-    bool operator<(const ParameterMatch& other)
-    {
-        return match < other.match;
-    }
-};
-
-
 Object::Object(weak<Package> owner)
     :   m_owner(owner)
     ,   m_name("")
     ,   m_method(0)
-    ,   m_overload(0)
     ,   m_parameters(packageBuilderArena())
+    ,   m_overloads(packageBuilderArena())
 {
 }
 
@@ -69,6 +28,7 @@ void Object::setName(istring name)
     if (m_owner->findByName(name))
     {
         // error
+        be_unimplemented();
     }
     m_name = name;
 }
@@ -84,32 +44,39 @@ void Object::setMethod(ref<Reference> reference)
         if (call && be_typeid<const RTTI::MethodInfo* const>::type() <= call.type())
         {
             m_method = call.as<const RTTI::MethodInfo* const>();
-            resolveOverload();
+            m_overloads.clear();
+            for (raw<const RTTI::MethodInfo::OverloadInfo> overload = m_method->overloads; overload; overload = overload->next)
+            {
+                m_overloads.push_back(OverloadMatch(overload));
+                OverloadMatch& match = m_overloads.back();
+                for(minitl::vector< ref<Parameter> >::const_iterator it = m_parameters.begin(); it != m_parameters.end(); ++it)
+                {
+                    match.addParameter(*it);
+                }
+            }
+            minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
         }
         else if (call)
         {
             // error
+            be_unimplemented();
         }
         else
         {
             // error
+            be_unimplemented();
         }
     }
 }
 
-void Object::resolveOverload()
+void Object::addParameter(ref<Parameter> param)
 {
-    m_overload = 0;
-    if (m_method)
+    m_parameters.push_back(param);
+    for (minitl::vector< OverloadMatch >::iterator it = m_overloads.begin(); it != m_overloads.end(); ++it)
     {
+        it->addParameter(param);
     }
-}
-
-void Object::doCall()
-{
-    be_assert(m_method, "no method");
-    be_assert(m_overload, "no proper overload");
-    m_overload->call(0, 0);
+    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
 }}}
