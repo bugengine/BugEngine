@@ -28,9 +28,15 @@ def build(bld):
 			#libs=[ 'bufferoverflowu', 'chkstk'],
 			includedir=[os.path.join('src', '3rdparty', 'DirectX', 'api')]),
 		}
-	if conf.env.dx9 or conf.env.PROJECT:
+	if bld.env.dx9 or bld.env.PROJECT:
 		bld.m['DirectX9'] = module.util( 'DirectX9', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx9), {}, exparchoptions)
-	if conf.env.dx10 or conf.env.PROJECT:
+	else:
+		bld.m['DirectX9'] = None
+	if bld.env.dx10 or bld.env.PROJECT:
 		bld.m['DirectX10'] = module.util( 'DirectX10', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx10), {}, exparchoptions)
-	if conf.env.dx9 or conf.env.PROJECT:
+	else:
+		bld.m['DirectX10'] = None
+	if bld.env.dx9 or bld.env.PROJECT:
 		bld.m['DirectX11'] = module.util( 'DirectX11', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx11), {}, exparchoptions)
+	else:
+		bld.m['DirectX11'] = None
