@@ -46,7 +46,8 @@ def addSourceTree(doc, xml, name, folder, prefix):
 	for subname, subdir in folder.directories.items():
 		addSourceTree(doc, f, subname, subdir, os.path.join(prefix, subdir.prefix))
 	for source in folder.files:
-		add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
+		if not source.generated():
+			add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
 
 def generateConfigurationsXml(sources, configurations, bld, out):
 	doc = Document()
