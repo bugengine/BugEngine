@@ -54,7 +54,7 @@ Application::Application(int argc, const char *argv[])
     m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[1]));
 
     ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
-    m_updateLoop = ITask::CallbackConnection();
+    //m_updateLoop = ITask::CallbackConnection();
 }
 
 Application::~Application(void)

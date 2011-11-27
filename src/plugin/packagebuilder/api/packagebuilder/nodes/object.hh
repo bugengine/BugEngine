@@ -4,6 +4,8 @@
 #ifndef BE_PACKAGEBUILDER_NODES_OBJECT_HH_
 #define BE_PACKAGEBUILDER_NODES_OBJECT_HH_
 /*****************************************************************************/
+#include    <packagebuilder/nodes/overloadmatch.hh>
+
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -19,24 +21,21 @@ private:
     istring                                 m_name;
     ref<Reference>                          m_methodReference;
     const RTTI::MethodInfo*                 m_method;
-    const RTTI::MethodInfo::OverloadInfo*   m_overload;
     minitl::vector< ref<Parameter> >        m_parameters;
+    minitl::vector< OverloadMatch >         m_overloads;
 private:
     void resolveOverload();
 public:
     Object(weak<Package> owner);
     ~Object();
 
-    istring name() const                                    { return m_name; }
-    const RTTI::MethodInfo* method() const                  { return m_method; }
-    const RTTI::MethodInfo::OverloadInfo* overload() const  { return m_overload; }
-    const minitl::vector< ref<Parameter> >& params() const  { return m_parameters; }
+    istring name() const                                        { return m_name; }
+    const RTTI::MethodInfo* method() const                      { return m_method; }
+    const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
 
     void setName(istring name);
     void setMethod(ref<Reference> reference);
-    void addParam(ref<Parameter> param);
-
-    void doCall();
+    void addParameter(ref<Parameter> param);
 };
 
 }}}

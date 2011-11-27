@@ -56,6 +56,7 @@ ref<Object> Package::findByName(istring name) const
         {
             return *it;
         }
+        ++it;
     }
     return ref<Object>();
 }
