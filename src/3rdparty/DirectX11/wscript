@@ -1,0 +1,12 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	opt.recurse('../DirectX')
+
+def setup(conf):
+	conf.recurse('../DirectX')
+
+def build(bld):
+	bld.recurse('../DirectX')

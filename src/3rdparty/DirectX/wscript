@@ -3,40 +3,71 @@ from mak import module
 import os
 
 def options(opt):
-	pass
+	dx_sdks = []
+	try:
+		try:
+			import _winreg as winreg
+		except:
+			import winreg
+		try:
+			sdks = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\DirectX\\')
+		except WindowsError:
+			sdks = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\DirectX\\')
+		index = 0
+		while 1:
+			try:
+				version = winreg.EnumKey(sdks, index)
+			except WindowsError:
+				break
+			index = index+1
+			try:
+				sdk_version = winreg.OpenKey(sdks, version)
+				version,type = winreg.QueryValueEx(sdk_version,'InstalledVersion')
+				path,type = winreg.QueryValueEx(sdk_version,'InstallPath')
+				dx_sdks.append((version, str(path)))
+			except:
+				pass
+	except:
+		pass
+	dx_sdks.sort(key=lambda x: x[0])
+	opt.add_option( '--directx-sdk',
+				action='store',
+				default=dx_sdks and dx_sdks[-1][1] or '',
+				dest='dx_sdk',
+				help='Location of the DirectX SDK')
 
 def setup(conf):
 	if 'win32' in conf.env.PLATFORM:
-		conf.check_lib('d3d9 d3dx9', var='dx9', libpath=[
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
-		conf.check_lib('d3d10 d3dx10', var='dx10', libpath=[
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
-		conf.check_lib('d3d11 d3dx11', var='dx11', libpath=[
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.x86'),
-			os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')])
+		from waflib import Options
+		includes=[os.path.join(Options.options.dx_sdk, 'Include')]
+		libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
+		conf.check_lib('d3d9 d3dx9', var='dx9', libpath=libdirs)
+		conf.check_lib('d3d10 d3dx10', var='dx10', libpath=libdirs)
+		conf.check_lib('d3d11 d3dx11', var='dx11', libpath=libdirs)
 
 def build(bld):
+	from waflib import Options
+	includes=[os.path.join(Options.options.dx_sdk, 'Include')]
+	libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
 	exparchoptions = {
 		'win32-x86': module.coptions(
-			libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.x86')],
+			libdir=libdirs,
 			#libs=['bufferoverflowu', 'chkstk'],
-			includedir=[os.path.join('src', '3rdparty', 'DirectX', 'api')]),
+			includedir=includes),
 		'win32-amd64': module.coptions(
-			libdir=[os.path.join('src', '3rdparty', 'DirectX', 'lib.amd64')],
+			libdir=libdirs,
 			#libs=[ 'bufferoverflowu', 'chkstk'],
-			includedir=[os.path.join('src', '3rdparty', 'DirectX', 'api')]),
+			includedir=includes)
 		}
 	if bld.env.dx9 or bld.env.PROJECT:
-		bld.m['DirectX9'] = module.util( 'DirectX9', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx9), {}, exparchoptions)
+		bld.m['DirectX9'] = module.util( 'DirectX9', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.dx9), {}, exparchoptions)
 	else:
 		bld.m['DirectX9'] = None
 	if bld.env.dx10 or bld.env.PROJECT:
-		bld.m['DirectX10'] = module.util( 'DirectX10', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx10), {}, exparchoptions)
+		bld.m['DirectX10'] = module.util( 'DirectX10', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.dx10), {}, exparchoptions)
 	else:
 		bld.m['DirectX10'] = None
 	if bld.env.dx9 or bld.env.PROJECT:
-		bld.m['DirectX11'] = module.util( 'DirectX11', [], '3rdparty', module.coptions(), module.coptions(libs=conf.env.dx11), {}, exparchoptions)
+		bld.m['DirectX11'] = module.util( 'DirectX11', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.dx11), {}, exparchoptions)
 	else:
 		bld.m['DirectX11'] = None
