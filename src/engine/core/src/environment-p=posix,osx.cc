@@ -24,6 +24,7 @@ Environment::Environment()
 
 void Environment::init(int argc, const char *argv[])
 {
+    m_game = istring("bugeditor");
     const char* filename = argv[0];
     while (*filename != 0)
     {
@@ -33,13 +34,20 @@ void Environment::init(int argc, const char *argv[])
     {
         filename--;
     }
-    m_game = filename+1;
     filename--;
     while (*filename != '/' && filename != argv[0])
     {
         filename--;
     }
     m_dataDirectory = ipath(argv[0], filename);
+    for( int arg = 1; arg < argc; arg++ )
+    {
+        if (argv[arg][0] == '-')
+        {
+            continue; // TODO
+        }
+        m_game = argv[arg];
+    }
     m_dataDirectory += "share";
     m_dataDirectory += "bugengine";
     m_homeDirectory.push_back(minitl::format<>(".%s") | m_game);

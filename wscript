@@ -63,7 +63,7 @@ def plugins(bld):
 
 	package			= module.plugin('package',			[])
 	packagebuilder	= module.plugin('packagebuilder',	[])
-	editor			= module.plugin('editor',			[packagebuilder], platforms=['pc'])
+	bugeditor		= module.plugin('bugeditor',			[packagebuilder], platforms=['pc'])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
