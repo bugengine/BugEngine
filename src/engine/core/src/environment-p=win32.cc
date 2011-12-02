@@ -40,6 +40,9 @@ void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
+    m_dataDirectory = ipath(exe, exe+begin);
+    m_dataDirectory.push_back(istring("data"));
+    m_game = istring("bugeditor");
     do
     {
         if (exe[s] == '\\' || exe[s] == '/')
@@ -56,10 +59,8 @@ void Environment::init(int argc, const char *argv[])
         {
             continue; // TODO
         }
+        m_game = argv[arg];
     }
-    m_dataDirectory = ipath(exe, exe+begin);
-    m_dataDirectory.push_back(istring("data"));
-    m_game = istring(exe+begin+1, exe+s);
     m_homeDirectory.push_back(m_game);
 
     SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().c_str());

@@ -18,16 +18,6 @@ static Allocator& luaArena()
 }
 
 
-LuaScript::LuaScript(ref<const File> file)
-    :   Script(file)
-{
-}
-
-LuaScript::~LuaScript()
-{
-}
-
-
 const luaL_Reg Context::s_valueMetaTable[] = {
     {"__gc",        Context::valueGC},
     {"__tostring",  Context::valueToString},
