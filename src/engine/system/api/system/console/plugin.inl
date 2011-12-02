@@ -38,9 +38,9 @@ public:
                                                             0,                                                                          \
                                                             0,                                                                          \
                                                             BugEngine::be_##name##_Namespace);
-#define BE_PLUGIN_REGISTER(name, klass, params, args)                                                                                   \
+#define BE_PLUGIN_REGISTER(name, interface, klass, params, args)                                                                        \
     BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                 \
-    static klass* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }                 \
+    static interface* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }             \
     static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }                        \
     BE_EXPORT BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                      \
                                                             reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),     \

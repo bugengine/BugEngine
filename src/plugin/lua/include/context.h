@@ -4,7 +4,7 @@
 #ifndef BE_LUA_CONTEXT_H_
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
-#include    <main/scripting.hh>
+#include    <main/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
 #include    <system/file/file.script.hh>
@@ -12,7 +12,17 @@
 namespace BugEngine { namespace Lua
 {
 
-class Context : public IScriptEngine
+be_tag(ResourceLoaders())
+class LuaScript : public Script
+{
+    friend class PackageLoader;
+published:
+    LuaScript(be_tag(EditHint::Extension(".lua")) ref<const File> file);
+    ~LuaScript();
+};
+
+
+class Context : public ScriptEngine<LuaScript>
 {
 private:
     lua_State*                                  m_state;
@@ -21,8 +31,7 @@ public:
     Context();
     ~Context();
 private:
-    void addNamespace(istring name, raw<const RTTI::ClassInfo> ns) override;
-    void runBuffer(const Allocator::Block<u8>& buffer) override;
+    void runBuffer(weak<const LuaScript> resource, const Allocator::Block<u8>& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 

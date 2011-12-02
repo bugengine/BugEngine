@@ -4,8 +4,7 @@
 #ifndef BE_RTTI_PACKAGE_SCRIPT_HH_
 #define BE_RTTI_PACKAGE_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.script.hh>
-#include    <system/file/file.script.hh>
+#include    <main/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 
 namespace BugEngine { namespace PackageManager
@@ -14,13 +13,11 @@ namespace BugEngine { namespace PackageManager
 class PackageLoader;
 
 be_tag(ResourceLoaders())
-class Package : public Resource
+class Package : public Script
 {
     friend class PackageLoader;
-private:
-    ref<const File> m_packageFile;
 published:
-    Package(be_tag(EditHint::Extension(".pkg")) ref<const File> file);
+    Package(be_tag(EditHint::Extension(".bpkg")) ref<const File> file);
     ~Package();
 };
 

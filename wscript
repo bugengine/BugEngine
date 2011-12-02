@@ -33,7 +33,7 @@ def build(bld):
 	world			= module.library('world',		[core, rtti, system] )
 	main			= module.library('main',		[core, rtti, system, world])
 
-	bld.game		= module.game('discworld',		[core, rtti, system, world, main])
+	bld.game		= module.game('bugengine',		[core, rtti, system, world, main])
 
 	bld.recurse('.', name='plugins', once=False)
 	bld.game.post(bld)

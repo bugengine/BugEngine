@@ -8,6 +8,7 @@ namespace BugEngine { namespace PackageManager
 {
 
 Package::Package(ref<const File> file)
+    :   Script(file)
 {
 }
 

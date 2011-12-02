@@ -37,6 +37,7 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
             }
             it->parameter = param;
             m_score -= s_parameterMissing;
+            return;
         }
     }
     ParameterMatch unusedParam;

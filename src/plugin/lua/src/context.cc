@@ -17,6 +17,17 @@ static Allocator& luaArena()
     return rttiArena();
 }
 
+
+LuaScript::LuaScript(ref<const File> file)
+    :   Script(file)
+{
+}
+
+LuaScript::~LuaScript()
+{
+}
+
+
 const luaL_Reg Context::s_valueMetaTable[] = {
     {"__gc",        Context::valueGC},
     {"__tostring",  Context::valueToString},
@@ -81,7 +92,7 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 }
 
 Context::Context()
-:   IScriptEngine(luaArena())
+:   ScriptEngine(luaArena())
 ,   m_state(lua_newstate(&Context::luaAlloc, 0))
 {
     luaopen_base(m_state);
@@ -99,14 +110,7 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::addNamespace(istring name, raw<const RTTI::ClassInfo> ns)
-{
-    push(m_state, Value(ns));
-    lua_setglobal(m_state, name.c_str());
-    lua_pop(m_state, 1);
-}
-
-void Context::runBuffer(const Allocator::Block<u8>& block)
+void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block<u8>& block)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *)block.data(), block.count(), 0);

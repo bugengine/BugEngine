@@ -5,23 +5,19 @@
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
 #include    <package.script.hh>
-#include    <main/scripting.hh>
+#include    <main/scriptengine.hh>
 
 namespace BugEngine { namespace PackageManager
 {
 
-class PackageLoader : public IScriptEngine
+class PackageLoader : public ScriptEngine<Package>
 {
     BE_NOCOPY(PackageLoader);
 public:
     PackageLoader();
     ~PackageLoader();
-
-    void loadPackage(weak<const Package> package);
-    void unloadPackage(const ResourceHandle& handle);
 private:
-    virtual void addNamespace(istring name, raw<const RTTI::ClassInfo> classinfo) override;
-    virtual void runBuffer(const Allocator::Block<u8>& buffer) override;
+    virtual void runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer) override;
 };
 
 }}

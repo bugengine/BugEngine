@@ -11,7 +11,7 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 class Parameter : public minitl::refcountable
 {
 private:
-    istring m_name;
+    istring     m_name;
 public:
     Parameter(istring name);
     ~Parameter();

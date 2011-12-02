@@ -33,7 +33,7 @@ Allocator& packageArena()
 }
 
 PackageLoader::PackageLoader()
-    :   IScriptEngine(packageArena())
+    :   ScriptEngine(packageArena())
 {
 }
 
@@ -41,20 +41,7 @@ PackageLoader::~PackageLoader()
 {
 }
 
-void PackageLoader::loadPackage(weak<const Package> package)
-{
-    loadFile(package->m_packageFile, tempArena());
-}
-
-void PackageLoader::unloadPackage(const ResourceHandle& /*handle*/)
-{
-}
-
-void PackageLoader::addNamespace(istring name, raw<const RTTI::ClassInfo> classinfo)
-{
-}
-
-void PackageLoader::runBuffer(const Allocator::Block<u8>& buffer)
+void PackageLoader::runBuffer(weak<const Package> resource, const Allocator::Block<u8>& buffer)
 {
     g_buffer = &buffer;
     g_bufferPosition = 0;

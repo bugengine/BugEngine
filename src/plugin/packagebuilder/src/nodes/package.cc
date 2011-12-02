@@ -28,6 +28,7 @@ void Package::insertNode(ref<Object> object)
         if (*it == object)
         {
             be_error("Object added twice");
+            return;
         }
     }
     m_nodes.push_back(object);
@@ -106,6 +107,16 @@ void Package::resolveReference(weak<Reference> reference)
             reference->m_value = v;
         }
     }
+}
+
+void Package::binarySave() const
+{
+    
+}
+
+void Package::textSave() const
+{
+    
 }
 
 }}}
