@@ -55,7 +55,7 @@ void Environment::init(int argc, const char *argv[])
         s++;
     for( int arg = 1; arg < argc; arg++ )
     {
-        if (argv[i][0] == '-')
+        if (argv[arg][0] == '-')
         {
             continue; // TODO
         }

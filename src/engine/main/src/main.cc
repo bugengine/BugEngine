@@ -83,6 +83,7 @@ static int __main(int argc, const char *argv[])
                 BugEngine::DiskFolder::CreateOne);
         //ref<File> f = home->createFile("log")
         //BugEngine::Logger::root()->addListener(new LogListener(home));
+        be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
         return be_main(locApplication);
     }
