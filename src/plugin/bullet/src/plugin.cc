@@ -5,5 +5,5 @@
 #include    <bulletworld.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(bullet, BugEngine::Physics::Bullet::BulletWorld, (BugEngine::float3 worldExtents), (worldExtents));
+BE_PLUGIN_REGISTER(bullet, BugEngine::Physics::Bullet::BulletWorld, BugEngine::Physics::Bullet::BulletWorld, (BugEngine::float3 worldExtents), (worldExtents));
 

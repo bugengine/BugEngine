@@ -70,21 +70,11 @@ void Application::updatePackage()
     }
 }
 
-int Application::run(weak<const File> package)
+int Application::run()
 {
-    if (package)
-    {
-        m_packageLoader->loadFile(package, tempArena());
-
-        m_updateTask->run(m_scheduler);
-        m_scheduler->mainThreadJoin();
-        return 0;
-    }
-    else
-    {
-        be_error("could not open main package file");
-        return 1;
-    }
+    m_updateTask->run(m_scheduler);
+    m_scheduler->mainThreadJoin();
+    return 0;
 }
 
 ResourceHandle Application::addWorld(weak<const World> world)

@@ -36,7 +36,7 @@ Environment& Environment::getEnvironment()
     return s_environment;
 }
 
-void Environment::init(int /*argc*/, const char *argv[])
+void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
@@ -50,6 +50,13 @@ void Environment::init(int /*argc*/, const char *argv[])
     size_t begin = s;
     while (exe[s] && exe[s] != '.')
         s++;
+    for( int arg = 1; arg < argc; arg++ )
+    {
+        if (argv[i][0] == '-')
+        {
+            continue; // TODO
+        }
+    }
     m_dataDirectory = ipath(exe, exe+begin);
     m_dataDirectory.push_back(istring("data"));
     m_game = istring(exe+begin+1, exe+s);

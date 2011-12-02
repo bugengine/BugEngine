@@ -5,4 +5,4 @@
 #include    <editor.hh>
 #include    <system/plugin.hh>
 
-BE_PLUGIN_REGISTER(editor, BugEngine::Editor::Editor, (), ());
+BE_PLUGIN_REGISTER(editor, BugEngine::Editor::IEditor, BugEngine::Editor::Editor, (), ());

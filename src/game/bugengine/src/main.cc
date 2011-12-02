@@ -15,7 +15,7 @@ int be_main(weak<Application> app)
     Plugin<minitl::pointer> p1("nullrender", weak<const Folder>(dataFolder));
     //Plugin<minitl::pointer> p2("GL4", weak<const Folder>(dataFolder));
 
-    app->run(dataFolder->openFile(BugEngine::istring("main.pkg")));
+    app->run();
     return 0;
 }
 

@@ -8,7 +8,7 @@
 
 namespace BugEngine
 {
-    
+
 class be_api(NETWORK) Socket
 {
 public:

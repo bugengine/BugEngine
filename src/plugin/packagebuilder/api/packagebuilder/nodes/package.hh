@@ -32,6 +32,9 @@ public:
     ref<Object> findByName(istring name) const;
 
     void loadPlugin(istring);
+
+    void binarySave() const;
+    void textSave() const;
 };
 
 }}}
