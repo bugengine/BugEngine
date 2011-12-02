@@ -16,10 +16,10 @@ class Package : public minitl::refcountable
 {
     friend class Reference;
 private:
-    minitl::vector< Plugin<minitl::pointer> >   m_plugins;
-    minitl::hashmap< istring, Value >           m_imports;
-    minitl::vector< ref<Object> >               m_nodes;
-    minitl::intrusive_list<Reference>           m_references;
+    minitl::vector< Plugin<void*> >     m_plugins;
+    minitl::hashmap< istring, Value >   m_imports;
+    minitl::vector< ref<Object> >       m_nodes;
+    minitl::intrusive_list<Reference>   m_references;
 private:
     void addReference(weak<Reference> reference);
     void resolveReference(weak<Reference> reference);

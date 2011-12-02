@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class IScriptEngine
+class IScriptEngine : public minitl::pointer
 {
 public:
     virtual ~IScriptEngine() {}
@@ -18,7 +18,7 @@ public:
 };
 
 template< typename T >
-class ScriptEngine : public ResourceLoader<ScriptEngine<T>, T>, public IScriptEngine
+class ScriptEngine : public IScriptEngine
 {
 private:
     Allocator&                                                                      m_scriptArena;

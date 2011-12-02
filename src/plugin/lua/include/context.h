@@ -12,16 +12,6 @@
 namespace BugEngine { namespace Lua
 {
 
-be_tag(ResourceLoaders())
-class LuaScript : public Script
-{
-    friend class PackageLoader;
-published:
-    LuaScript(be_tag(EditHint::Extension(".lua")) ref<const File> file);
-    ~LuaScript();
-};
-
-
 class Context : public ScriptEngine<LuaScript>
 {
 private:

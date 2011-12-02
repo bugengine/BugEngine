@@ -64,7 +64,7 @@ ref<Object> Package::findByName(istring name) const
 
 void Package::loadPlugin(istring plugin)
 {
-    Plugin<minitl::pointer> p(plugin, Plugin<minitl::pointer>::Preload);
+    Plugin<void*> p(plugin, Plugin<void*>::Preload);
     if (!p)
     {
     }

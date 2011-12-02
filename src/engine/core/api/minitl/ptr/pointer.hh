@@ -41,9 +41,6 @@ private:
 public:
     pointer()
     :   m_allocator(0)
-#ifdef BE_ENABLE_WEAKCHECK
-    ,   m_weakCount(0)
-#endif
     {}
     inline virtual ~pointer()
     {

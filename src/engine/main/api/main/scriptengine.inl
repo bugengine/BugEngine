@@ -13,15 +13,17 @@ namespace BugEngine
 
 template< typename T >
 ScriptEngine<T>::ScriptEngine(Allocator& arena)
-    :   ResourceLoader<ScriptEngine<T>, T>(this, &ScriptEngine::loadScript, &ScriptEngine::unloadScript)
+    :   IScriptEngine()
     ,   m_scriptArena(arena)
     ,   m_tickets(arena)
 {
+    ResourceLoaders::attach<T, ScriptEngine<T> >(this, &ScriptEngine::loadScript, &ScriptEngine::unloadScript);
 }
 
 template< typename T >
 ScriptEngine<T>::~ScriptEngine()
 {
+    ResourceLoaders::detach<T, ScriptEngine<T> >(this);
 }
 
 template< typename T >
