@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Editor
 {
 
-class be_api(MAIN) IEditor : public minitl::pointer
+class be_api(BUGENGINE) IEditor : public minitl::pointer
 {
 private:
     ref<Folder> m_folder;
