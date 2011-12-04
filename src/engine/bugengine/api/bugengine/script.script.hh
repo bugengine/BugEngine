@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MAIN_SCRIPT_SCRIPT_HH_
-#define BE_MAIN_SCRIPT_SCRIPT_HH_
+#ifndef BE_BUGENGINE_SCRIPT_SCRIPT_HH_
+#define BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/file/file.script.hh>
 #include    <system/resource/resource.script.hh>

@@ -5,7 +5,7 @@
 #define BE_EDITOR_EDITOR_HH_
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
-#include    <main/ieditor.hh>
+#include    <bugengine/ieditor.hh>
 
 namespace BugEngine { namespace Editor
 {

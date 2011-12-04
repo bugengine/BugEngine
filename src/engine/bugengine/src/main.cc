@@ -1,8 +1,7 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <main/stdafx.h>
-#include    <main/main.hh>
+#include    <bugengine/stdafx.h>
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
 
@@ -85,7 +84,8 @@ static int __main(int argc, const char *argv[])
         //BugEngine::Logger::root()->addListener(new LogListener(home));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
-        return be_main(locApplication);
+        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), locApplication);
+        return locApplication->run();
     }
 #ifdef BE_ENABLE_EXCEPTIONS
     catch(...)

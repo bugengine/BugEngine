@@ -8,7 +8,7 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
-#include    <main/stdafx.h>
+#include    <bugengine/stdafx.h>
 
 extern "C"
 {

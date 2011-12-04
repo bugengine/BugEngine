@@ -5,7 +5,7 @@
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
 #include    <package.script.hh>
-#include    <main/scriptengine.hh>
+#include    <bugengine/scriptengine.hh>
 
 namespace BugEngine { namespace PackageManager
 {
