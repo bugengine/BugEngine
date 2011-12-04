@@ -541,12 +541,42 @@ class plugin(module):
 			if task and not builder.env.PROJECTS:
 				task.install_bindir = os.path.join(builder.env['DEPLOY']['plugin'])
 
+
 """ game """
-class game(module):
+class game(plugin):
 	def __init__( self,
 				  name,
 				  depends = [],
 				  category = 'game',
+				  localoptions = coptions(),
+				  globaloptions = coptions(),
+				  localarchoptions = {},
+				  globalarchoptions = {},
+				  platforms = [],
+				  archs = [],
+				  sources=[],
+				  dstname = None,
+				):
+		plugin.__init__(self,
+						name,
+						depends,
+						category,
+						localoptions,
+						globaloptions,
+						localarchoptions,
+						globalarchoptions,
+						platforms,
+						archs,
+						sources,
+						dstname)
+
+
+""" executable """
+class engine(module):
+	def __init__( self,
+				  name,
+				  depends = [],
+				  category = 'engine',
 				  localoptions = coptions(),
 				  globaloptions = coptions(),
 				  localarchoptions = {},
@@ -585,74 +615,6 @@ class game(module):
 			for name,d in self.plugins.items():
 				if d:
 					d._post(builder, blacklist)
-
-
-""" tool """
-class tool(game):
-	def __init__( self,
-				  name,
-				  depends = [],
-				  category = 'tool',
-				  localoptions = coptions(),
-				  globaloptions = coptions(),
-				  localarchoptions = {},
-				  globalarchoptions = {},
-				  platforms = [],
-				  archs = [],
-				  sources=[],
-				  dstname = None,
-				):
-		game.__init__(self,
-						name,
-						depends,
-						category,
-						localoptions,
-						globaloptions,
-						localarchoptions,
-						globalarchoptions,
-						platforms,
-						archs,
-						sources,
-						dstname)
-
-
-""" unit test """
-class test(module):
-	def __init__( self,
-				  name,
-				  depends = [],
-				  category = 'test',
-				  localoptions = coptions(),
-				  globaloptions = coptions(),
-				  localarchoptions = {},
-				  globalarchoptions = {},
-				  platforms = [],
-				  archs = [],
-				  sources=[],
-				  dstname = None,
-				):
-		module.__init__(self,
-						name,
-						dstname or name,
-						depends,
-						category,
-						localoptions,
-						globaloptions,
-						localarchoptions,
-						globalarchoptions,
-						platforms,
-						archs,
-						sources)
-
-	def _post(self, builder, blacklist):
-		for d in self.depends:
-			if d not in blacklist:
-				d._post(builder, blacklist)
-		options = coptions()
-		task = self.gentask(builder, 'cprogram', options, coptions(), blacklist = blacklist)
-		task.subsystem = 'console'
-		task.do_install = 0
-		task.features.append("unittest")
 
 """ barely a C option holder """
 class util(module):

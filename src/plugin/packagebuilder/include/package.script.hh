@@ -4,7 +4,7 @@
 #ifndef BE_PACKAHEBUILDER_PACKAGE_SCRIPT_HH_
 #define BE_PACKAHEBUILDER_PACKAGE_SCRIPT_HH_
 /*****************************************************************************/
-#include    <main/script.script.hh>
+#include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 
 namespace BugEngine { namespace PackageBuilder

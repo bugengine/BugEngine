@@ -1,11 +1,11 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MAIN_SCRIPTENGINE_INL_
-#define BE_MAIN_SCRIPTENGINE_INL_
+#ifndef BE_BUGENGINE_SCRIPTENGINE_INL_
+#define BE_BUGENGINE_SCRIPTENGINE_INL_
 /*****************************************************************************/
-#include    <main/stdafx.h>
-#include    <main/scriptengine.hh>
+#include    <bugengine/stdafx.h>
+#include    <bugengine/scriptengine.hh>
 
 
 namespace BugEngine

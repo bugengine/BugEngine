@@ -1,11 +1,10 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MAIN_IEDITOR_HH_
-#define BE_MAIN_IEDITOR_HH_
+#ifndef BE_BUGENGINE_IEDITOR_HH_
+#define BE_BUGENGINE_IEDITOR_HH_
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
-#include    <main/ieditor.hh>
 
 namespace BugEngine { namespace Editor
 {

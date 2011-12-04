@@ -4,7 +4,7 @@
 #ifndef BE_LUA_CONTEXT_H_
 #define BE_LUA_CONTEXT_H_
 /*****************************************************************************/
-#include    <main/scriptengine.hh>
+#include    <bugengine/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
 #include    <system/file/file.script.hh>

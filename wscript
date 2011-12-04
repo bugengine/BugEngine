@@ -31,10 +31,8 @@ def build(bld):
 	rtti			= module.library('rtti',		[core, network] )
 	system			= module.library('system',		[core, rtti] )
 	world			= module.library('world',		[core, rtti, system] )
-	main			= module.library('main',		[core, rtti, system, world])
 
-	bld.game		= module.game('bugengine',		[core, rtti, system, world, main])
-
+	bld.game		= module.engine('bugengine',	[core, rtti, system, world])
 	bld.recurse('.', name='plugins', once=False)
 	bld.game.post(bld)
 
@@ -63,7 +61,6 @@ def plugins(bld):
 
 	package			= module.plugin('package',			[])
 	packagebuilder	= module.plugin('packagebuilder',	[])
-	bugeditor		= module.plugin('bugeditor',			[packagebuilder], platforms=['pc'])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
@@ -72,8 +69,6 @@ def plugins(bld):
 	shadermodel2	= module.plugin('shadermodel2',		[_3d, shadermodel1])
 	shadermodel3	= module.plugin('shadermodel3',		[_3d, shadermodel1, shadermodel2])
 	shadermodel4	= module.plugin('shadermodel4',		[_3d, shadermodel1, shadermodel2, shadermodel3])
-
-
 
 	#AL				= module.plugin('AL',				[openal])
 
@@ -92,6 +87,9 @@ def plugins(bld):
 			#Dx10	= module.plugin('DX10',				[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
 			#Dx11	= module.plugin('DX11',				[bld.game, windowing, cgDx, directx11, _3d])
+
+
+	bugeditor		= module.game('bugeditor',			[packagebuilder], platforms=['pc'])
 
 	bld.recurse('mak', name='plugins', once=False)
 
