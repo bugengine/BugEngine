@@ -21,14 +21,11 @@ private:
     class WorldResource;
 private:
     scoped<Scheduler>                               m_scheduler;
-    Plugin< IScriptEngine >                         m_packageLoader;
     ref<TaskGroup>                                  m_updateTask;
     minitl::vector< ref<ITask> >                    m_tasks;
     minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
     minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
     ITask::CallbackConnection                       m_updateLoop;
-private:
-    void updatePackage();
 public:
     Application(int argc, const char *argv[]);
     virtual ~Application(void);
