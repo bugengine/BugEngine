@@ -6,14 +6,17 @@
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
 #include    <bugengine/ieditor.hh>
+#include    <bugengine/application.hh>
 
 namespace BugEngine { namespace Editor
 {
 
 class Editor : public IEditor
 {
+private:
+    weak<Application> const m_application;
 public:
-    Editor();
+    Editor(weak<Application> application);
     ~Editor();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

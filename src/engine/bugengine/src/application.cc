@@ -37,7 +37,6 @@ Application::WorldResource::~WorldResource()
 
 Application::Application(int argc, const char *argv[])
 :   m_scheduler(scoped<Scheduler>::create(taskArena()))
-,   m_packageLoader("packagebuilder")
 ,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
 ,   m_startConnections(taskArena())
@@ -47,11 +46,8 @@ Application::Application(int argc, const char *argv[])
     be_forceuse(argc); be_forceuse(argv);
 
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
-    m_tasks.push_back(ref< Task< MethodCaller<Application, &Application::updatePackage> > >::create(taskArena(), "package", color32(255,255,0), MethodCaller<Application, &Application::updatePackage>(this)));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[0]));
-    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[1]));
     m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[0]));
-    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[1]));
 
     ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
     //m_updateLoop = ITask::CallbackConnection();
@@ -60,14 +56,6 @@ Application::Application(int argc, const char *argv[])
 Application::~Application(void)
 {
     ResourceLoaders::detach< World, Application >(this);
-}
-
-void Application::updatePackage()
-{
-    if (m_packageLoader)
-    {
-        m_packageLoader->update();
-    }
 }
 
 int Application::run()

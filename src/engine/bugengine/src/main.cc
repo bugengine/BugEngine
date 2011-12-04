@@ -84,7 +84,7 @@ static int __main(int argc, const char *argv[])
         //BugEngine::Logger::root()->addListener(new LogListener(home));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
-        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), locApplication);
+        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), weak<BugEngine::Application>(locApplication));
         return locApplication->run();
     }
 #ifdef BE_ENABLE_EXCEPTIONS

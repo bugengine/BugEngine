@@ -7,7 +7,8 @@
 namespace BugEngine { namespace Editor
 {
 
-Editor::Editor()
+Editor::Editor(weak<Application> application)
+    :   m_application(application)
 {
 }
 
