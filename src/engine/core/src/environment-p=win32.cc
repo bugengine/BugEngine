@@ -41,8 +41,6 @@ void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
-    m_dataDirectory = ipath(exe, exe+begin);
-    m_dataDirectory.push_back(istring("data"));
     m_game = istring("bugeditor");
     do
     {
@@ -54,6 +52,8 @@ void Environment::init(int argc, const char *argv[])
     size_t begin = s;
     while (exe[s] && exe[s] != '.')
         s++;
+    m_dataDirectory = ipath(exe, exe+begin);
+    m_dataDirectory.push_back(istring("data"));
     for( int arg = 1; arg < argc; arg++ )
     {
         if (argv[arg][0] == '-')
