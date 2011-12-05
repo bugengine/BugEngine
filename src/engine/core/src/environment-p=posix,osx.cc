@@ -20,6 +20,7 @@ Environment::Environment()
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
+    m_homeDirectory.push_back(minitl::format<>(".bugengine"));
 }
 
 void Environment::init(int argc, const char *argv[])
@@ -50,7 +51,6 @@ void Environment::init(int argc, const char *argv[])
     }
     m_dataDirectory += "share";
     m_dataDirectory += "bugengine";
-    m_homeDirectory.push_back(minitl::format<>(".%s") | m_game);
 }
 
 Environment::~Environment()
