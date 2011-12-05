@@ -23,6 +23,7 @@ Environment::Environment()
     size = sizeof(profile);
     GetUserProfileDirectory(token, profile, &size);
     m_homeDirectory = profile;
+    m_homeDirectory.push_back("bugengine");
 }
 
 Environment::~Environment()
@@ -61,7 +62,6 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
-    m_homeDirectory.push_back(m_game);
 
     SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().c_str());
 }

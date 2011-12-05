@@ -23,10 +23,11 @@ public:
 
     void init(int argc, const char *argv[]);
 
-    const ipath&    getHomeDirectory() const    { return m_homeDirectory; }
-    const ipath&    getDataDirectory() const    { return m_dataDirectory; }
-    const istring&  getGame() const             { return m_game; }
-    const istring&  getUser() const             { return m_user; }
+    const ipath&    getHomeDirectory() const        { return m_homeDirectory; }
+    const ipath     getGameHomeDirectory() const    { return m_homeDirectory+ipath(m_game); }
+    const ipath&    getDataDirectory() const        { return m_dataDirectory; }
+    const istring&  getGame() const                 { return m_game; }
+    const istring&  getUser() const                 { return m_user; }
     size_t          getProcessorCount() const;
 };
 
