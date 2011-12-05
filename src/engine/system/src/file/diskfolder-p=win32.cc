@@ -85,6 +85,7 @@ DiskFolder::~DiskFolder()
 
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
+    Folder::doRefresh(scanPolicy);
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
@@ -106,11 +107,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     {
                         if (it->first == name)
                         {
-                            if (scanPolicy == Folder::ScanRecursive)
-                            {
-                                it->second->refresh(scanPolicy);
-                                continue;
-                            }
+                            continue;
                         }
                     }
                     m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(fsArena(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
