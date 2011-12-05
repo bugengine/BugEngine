@@ -75,6 +75,11 @@ static int __main(int argc, const char *argv[])
 #endif
     {
         BugEngine::Logger::root()->addListener(ref<ConsoleLogListener>::create(BugEngine::debugArena()));
+        ref<BugEngine::DiskFolder>::create(
+                BugEngine::gameArena(),
+                BugEngine::Environment::getEnvironment().getHomeDirectory(),
+                BugEngine::DiskFolder::ScanRecursive,
+                BugEngine::DiskFolder::CreateOne);
         ref<BugEngine::DiskFolder> home = ref<BugEngine::DiskFolder>::create(
                 BugEngine::gameArena(),
                 BugEngine::Environment::getEnvironment().getGameHomeDirectory(),

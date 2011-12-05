@@ -179,6 +179,18 @@ void Folder::refresh(Folder::ScanPolicy scanPolicy)
     }
 }
 
+void Folder::doRefresh(ScanPolicy scanPolicy)
+{
+    if (scanPolicy == Folder::ScanRecursive)
+    {
+        for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+        {
+            it->second->refresh(scanPolicy);
+        }
+    }
+
+}
+
 
 
 }
