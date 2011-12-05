@@ -34,7 +34,8 @@ published:
         ScanRecursive
     };
 protected:
-    virtual void doRefresh(ScanPolicy scanPolicy) = 0;
+    virtual void    doRefresh(ScanPolicy scanPolicy) = 0;
+    void            refresh(ScanPolicy scanPolicy);
 published:
     weak<File>      openFile(istring name);
     weak<File>      openFile(ifilename name);
@@ -44,8 +45,6 @@ published:
     void            mount(ipath name, ref<Folder> folder);
     void            umount(istring name);
     void            umount(ipath name);
-
-    void            refresh(ScanPolicy scanPolicy);
 };
 
 }
