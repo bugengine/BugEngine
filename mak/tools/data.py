@@ -19,7 +19,7 @@ def scan(self):
 def doParseData(task):
 	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.plugin, task.env.BROKEN_INITIALIZER)
 
-cls = Task.task_factory('datagen', doParseData, [], 'GREEN', ext_in='.h .hh .hxx', ext_out='.cc')
+cls = Task.task_factory('datagen', doParseData, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 old_runnable_status = cls.runnable_status
 def runnable_status(self):
