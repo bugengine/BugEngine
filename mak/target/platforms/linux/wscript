@@ -65,6 +65,7 @@ def configure(conf):
 			add_suncc_flags_to_env(conf, arch)
 			add_linux_flags_to_env(conf, name, arch)
 			conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', arch), once=False)
+			conf.recurse(os.path.join('..', '..', '..', 'libs'), once=False)
 			pprint('GREEN', 'configure for tool %s' % name)
 			conf.variant = ''
 			conf.env['BUILD_VARIANTS'].append(name)

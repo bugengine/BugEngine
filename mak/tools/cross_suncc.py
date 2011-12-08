@@ -55,6 +55,8 @@ def configure(conf):
 
 	v=conf.env
 
+	v['RPATH_ST'] = '-R%s'
+
 	v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
 	v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
 	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,truncwarn,nonewline']
