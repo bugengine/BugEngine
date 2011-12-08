@@ -225,7 +225,7 @@ def createmasterfile(task):
 		f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
 	f.close()
 
-MasterTask = Task.task_factory("MkMaster", createmasterfile)
+MasterTask = Task.task_factory("master", createmasterfile, color='CYAN')
 
 @taskgen_method
 @feature('master')
@@ -260,7 +260,7 @@ def make_masterfiles(self):
 				cindex = cindex + 1
 				self.source.append(masterfile)
 				node = self.path.find_or_declare(masterfile)
-				mastertask = self.create_task("MkMaster", [], node)
+				mastertask = self.create_task("master", [], node)
 				self.mastertasks.append(mastertask)
 			cnumleft = cnumleft - 1
 			mastertask.set_inputs(srcnode)
@@ -271,7 +271,7 @@ def make_masterfiles(self):
 				cppindex = cppindex + 1
 				self.source.append(masterfile)
 				node = self.path.find_or_declare(masterfile)
-				mastertask = self.create_task("MkMaster", [], node)
+				mastertask = self.create_task("master", [], node)
 				mastertask.set_outputs(node)
 				self.mastertasks.append(mastertask)
 			cppnumleft = cppnumleft - 1
