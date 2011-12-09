@@ -49,12 +49,10 @@ private:
 
 #ifdef BE_STATIC
 # include "console/plugin.inl"
-#elif defined(BE_PLATFORM_WIN32)
-# include "win32/plugin.inl"
-#elif defined(BE_PLATFORM_POSIX) || defined(BE_PLATFORM_MACOS)
-# include "posix/plugin.inl"
+#elif defined(PLUGIN_H)
+# include PLUGIN_H
 #else
-# error Plugin subsystem not implemented...
+# error Plugin subsystem not implemented... define PLUGIN_H in platform_xxx.hh
 #endif
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                             \

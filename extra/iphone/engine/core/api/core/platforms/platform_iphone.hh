@@ -13,6 +13,8 @@
 #define malloca     alloca
 #define freea(p)
 #define DIRENT_H    <dirent.h>
+#define PLUGIN_EXT  ".dylib"
+#define PLUGIN_H    <system/posix/plugin.inl>
 
 /*****************************************************************************/
 #endif

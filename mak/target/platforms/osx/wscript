@@ -26,8 +26,9 @@ def add_gcc_flags_to_env(conf):
 	v.append_unique('CFLAGS', ['-fPIC'])
 	v.append_unique('CXXFLAGS', ['-fPIC'])
 	v.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa', 'OpenGL'])
-	v.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	if conf.env.GCC_NAME == 'gcc':
+		v.append_unique('CFLAGS', ['-fvisibility=hidden'])
+		v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 	v['FRAMEWORKPATH_ST']    = '-F%s'
 	v['FRAMEWORK_ST']        = ['-framework']
 	v['SHLIB_MARKER']        = []
@@ -39,7 +40,6 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env['ABI'] = 'mach_o'
 	conf.env['SDKROOT'] = 'macosx'
 	conf.env['SUPPORTEDPLATFORMS'] = 'macosx'
-	conf.env['STATIC'] = 1
 
 	path,f = os.path.split(conf.env.CXX[0])
 	while path and f:
@@ -72,8 +72,9 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_darwin', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
@@ -85,7 +86,7 @@ def add_darwin_flags_to_env(conf, name, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('data', 'plugins') }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def configure(conf):
 	mak.allplatforms['osx'] = ['osx', 'darwin', 'pc']

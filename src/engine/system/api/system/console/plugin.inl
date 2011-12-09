@@ -68,6 +68,10 @@ Plugin<Interface>::Plugin(const istring &pluginName)
     {
         m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const impl::PluginList*>(m_handle)->create))();
     }
+    else
+    {
+        be_error("Could not load plugin %s" | pluginName);
+    }
 }
 
 template< typename Interface >
@@ -77,9 +81,13 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
 ,   m_interface(0)
 ,   m_refCount(new (gameArena()) i_u32(1))
 {
-    if  (m_handle)
+    if (m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1);
+    }
+    else
+    {
+        be_error("Could not load plugin %s" | pluginName);
     }
 }
 
@@ -93,6 +101,10 @@ Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
     if (m_handle)
     {
         m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1, param2);
+    }
+    else
+    {
+        be_error("Could not load plugin %s" | pluginName);
     }
 }
 

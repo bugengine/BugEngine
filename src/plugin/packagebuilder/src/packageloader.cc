@@ -33,7 +33,7 @@ Allocator& packageArena()
 }
 
 PackageLoader::PackageLoader()
-    :   ScriptEngine(packageArena())
+    :   ScriptEngine<Package>(packageArena())
 {
 }
 

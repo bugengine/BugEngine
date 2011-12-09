@@ -8,6 +8,12 @@
 
 #include    <dlfcn.h>
 
+#ifndef     PLUGIN_PREFIX
+# define    PLUGIN_PREFIX "lib"
+#endif
+#ifndef     PLUGIN_EXT
+# define    PLUGIN_EXT ".so"
+#endif
 
 #define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                                  \
     BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                     \
@@ -25,7 +31,7 @@ namespace BugEngine
 
 static void* loadLibrary(const istring& pluginName)
 {
-    minitl::format<> plugingFile = minitl::format<>("lib%s.so") | pluginName;
+    minitl::format<> plugingFile = minitl::format<>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     static const ipath pluginSubdir = ipath("plugins");
     minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();

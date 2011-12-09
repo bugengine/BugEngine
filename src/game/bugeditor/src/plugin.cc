@@ -6,4 +6,4 @@
 #include    <system/plugin.hh>
 #include    <bugengine/application.hh>
 
-BE_PLUGIN_REGISTER(editor, BugEngine::Editor::IEditor, BugEngine::Editor::Editor, (weak<BugEngine::Application> application), (application));
+BE_PLUGIN_REGISTER(bugeditor, minitl::refcountable, BugEngine::Editor::Editor, (weak<BugEngine::Application> application), (application));
