@@ -1,7 +1,7 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
 from waflib import TaskGen, Context, Build
-import os
+import os, sys
 import mak
 from xml.dom.minidom import Document
 
@@ -59,17 +59,20 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 		categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
 	for project, category, source, options in sources:
 		addSourceTree(doc, categories[category], project, source, source.prefix)
+	impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'Makefile', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
+	add(doc, impfiles, 'itemPath', sys.argv[0])
 	#add(doc, cd, 'sourceFolderFilter')
 	srl = add(doc, cd, 'sourceRootList')
 	add(doc, srl, 'Elem', '.')
 	add(doc, srl, 'Elem', './build/')
-	add(doc, cd, 'projectmakefile', 'wscript')
+	add(doc, cd, 'projectmakefile', sys.argv[0])
 	confs = add(doc, cd, 'confs')
 	for c in configurations:
 		env = bld.all_envs[c]
 		conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
 		toolsSet = add(doc, conf, 'toolsSet')
-		add(doc, toolsSet, 'remote-source-mode', 'LOCAL_SOURCES')
+		add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
+		add(doc, toolsSet, 'compilerSet', 'default')
 		mtype = add(doc, conf, 'makefileType')
 		mtool = add(doc, mtype, 'makeTool')
 		add(doc, mtool, 'buildCommandWorkingDir', '.')
