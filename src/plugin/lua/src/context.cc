@@ -82,7 +82,7 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 }
 
 Context::Context()
-:   ScriptEngine(luaArena())
+:   ScriptEngine<LuaScript>(luaArena())
 ,   m_state(lua_newstate(&Context::luaAlloc, 0))
 {
     luaopen_base(m_state);

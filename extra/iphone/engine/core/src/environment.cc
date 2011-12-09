@@ -15,9 +15,10 @@ namespace BugEngine
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
 ,   m_dataDirectory("share/bugengine")
-,   m_game("")
+,   m_game("bugeditor")
 ,   m_user(getenv("USER"))
 {
+    m_homeDirectory.push_back(minitl::format<>(".bugengine"));
 }
 
 void Environment::init(int argc, const char *argv[])
@@ -31,12 +32,19 @@ void Environment::init(int argc, const char *argv[])
     {
         filename--;
     }
-    m_game = filename+1;
     filename--;
+    for( int arg = 1; arg < argc; arg++ )
+    {
+        printf("%s\n", argv[arg]);
+        if (argv[arg][0] == '-')
+        {
+            continue; // TODO
+        }
+        m_game = argv[arg];
+    }
     m_dataDirectory = ipath(argv[0], filename);
     m_dataDirectory += "share";
     m_dataDirectory += "bugengine";
-    m_homeDirectory.push_back(minitl::format<>(".%s") | m_game);
 }
 
 Environment::~Environment()

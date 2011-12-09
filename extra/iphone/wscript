@@ -25,7 +25,6 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['ABI'] = 'mach_o'
 	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphonesimulator'
-	conf.env['STATIC'] = 1
 
 
 	path,f = os.path.split(conf.env.CXX[0])
@@ -57,8 +56,9 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
@@ -70,13 +70,12 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('data', 'plugins') }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def add_darwin_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
 	conf.env['ABI'] = 'mach_o'
-	conf.env['STATIC'] = 1
 	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 
@@ -109,6 +108,8 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-mthumb', '-mcpu=cortex-a8', '-isysroot', full_sdk])
 	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%version, '-mthumb', '-mcpu=cortex-a8', '-isysroot', full_sdk])
 	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
 	conf.env['program_PATTERN'] = '%s'
@@ -122,7 +123,7 @@ def add_darwin_flags_to_env(conf, variant, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('data', 'plugins') }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
 
 def configure(conf):
 	from waflib import Options

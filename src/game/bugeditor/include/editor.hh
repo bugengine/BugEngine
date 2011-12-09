@@ -5,13 +5,12 @@
 #define BE_EDITOR_EDITOR_HH_
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
-#include    <bugengine/ieditor.hh>
 #include    <bugengine/application.hh>
 
 namespace BugEngine { namespace Editor
 {
 
-class Editor : public IEditor
+class Editor : public minitl::refcountable
 {
 private:
     weak<Application> const m_application;
