@@ -113,7 +113,6 @@ def selectToolchains(ctx):
 		for e in selectedtoolchains:
 			if e.match(v):
 				selectedvariants.append(v)
-				pprint('GREEN', 'selected variant %s for build' % v)
 	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
