@@ -7,6 +7,7 @@
 #include <core/string/istring.hh>
 #include <minitl/string/format.hh>
 #include <minitl/ptr/refptr.hh>
+#include <minitl/ptr/scopedptr.hh>
 #include <minitl/ptr/weakptr.hh>
 
 namespace BugEngine
@@ -30,15 +31,16 @@ class ILogListener : public minitl::refcountable
 protected:
     static be_api(CORE) const char* s_logNames[];
     virtual ~ILogListener() {}
-    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) = 0;
+    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) const = 0;
 };
 
 class be_api(CORE) Logger : public minitl::refcountable
 {
     friend class minitl::ref<Logger>;
+    friend struct ScopedLogListener;
     BE_NOCOPY(Logger);
 private:
-    minitl::vector< minitl::ref<ILogListener> >     m_listeners;
+    minitl::vector< minitl::weak<ILogListener> >    m_listeners;
     minitl::hashmap< istring, minitl::ref<Logger> > m_children;
     minitl::weak<Logger>                            m_parent;
     istring                                         m_name;
@@ -52,10 +54,28 @@ public:
     static bool                log(const inamespace& name, LogLevel level, const char *filename, int line, const char *msg);
     static minitl::ref<Logger> root();
 
-    void addListener(minitl::ref<ILogListener> listener);
-    bool log(LogLevel level, const char *filename, int line, const char *msg);
+    bool log(LogLevel level, const char *filename, int line, const char *msg) const;
     template< size_t size >
-    inline bool log(LogLevel level, const char *filename, int line, const minitl::format<size>& msg) { return log(level, filename, line, msg.c_str()); }
+    inline bool log(LogLevel level, const char *filename, int line, const minitl::format<size>& msg) const { return log(level, filename, line, msg.c_str()); }
+private:
+    void addListener(minitl::weak<ILogListener> listener);
+    void removeListener(minitl::weak<ILogListener> listener);
+};
+
+struct ScopedLogListener
+{
+private:
+    minitl::scoped<ILogListener> const m_listener;
+public:
+    ScopedLogListener(minitl::scoped<ILogListener> listener)
+        :   m_listener(listener)
+    {
+        Logger::root()->addListener(m_listener);
+    }
+    ~ScopedLogListener()
+    {
+        Logger::root()->removeListener(m_listener);
+    }
 };
 
 #ifdef _DEBUG

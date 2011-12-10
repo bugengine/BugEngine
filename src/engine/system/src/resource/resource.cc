@@ -69,6 +69,18 @@ const ResourceHandle& Resource::getResource(weak<const minitl::pointer> owner) c
     return ResourceHandle::null();
 }
 
+ResourceHandle& Resource::getResourceForWriting(weak<const minitl::pointer> owner) const
+{
+    for(int i = 0; i < MaxResourceCount; ++i)
+    {
+        if (m_handles[i].first == owner)
+        {
+            return m_handles[i].second;
+        }
+    }
+    return ResourceHandle::null();
+}
+
 void Resource::load(const Value& v)
 {
     be_assert_recover(be_typeid<const Resource>::type() <= v.type(), "value of type %s is not a Resource, skipping" | v.type().name(), return);

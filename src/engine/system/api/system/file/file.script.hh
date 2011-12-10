@@ -53,28 +53,37 @@ public:
                  ,  public minitl::intrusive_list<Ticket>::item
     {
         friend struct IOProcess::IOContext;
+        friend class File;
     public:
+        enum Action
+        {
+            Read,
+            Write
+        };
+        Action const                action;
         weak<const File>            file;
         Allocator::Block<u8>        buffer;
         i_u32                       processed;
-        const u64                   offset;
+        const i64                   offset;
         const u32                   total;
         i_bool                      error;
 
         inline bool done() const    { return error || processed == total; }
 
-        Ticket(Allocator& arena, weak<const File> file, u64 offset, u32 size);
+        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, Action action);
         ~Ticket();
     private:
         Ticket(const Ticket&);
         Ticket& operator=(const Ticket&);
     };
 
-    ref<const Ticket> beginRead(u64 offset = 0, u32 size = 0, Allocator& arena = tempArena()) const;
-    void beginWrite(Ticket& ticket, size_t offset = 0, size_t size = 0);
+    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, Allocator& arena = tempArena()) const;
+    ref<const Ticket> beginWrite(const void* data, u32 size, i64 offset = 0);
 private:
     void fillBuffer(weak<Ticket> ticket) const;
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
+    void writeBuffer(weak<Ticket> ticket) const;
+    virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;
 };
 
 }

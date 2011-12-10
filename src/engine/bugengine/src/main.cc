@@ -10,28 +10,26 @@
 
 namespace
 {
-    /*class LogListener : public BugEngine::ILogListener
+    class FileLogListener : public BugEngine::ILogListener
     {
     private:
-        FILE* m_logFile;
+        weak<BugEngine::File> m_logFile;
     public:
-        LogListener(const char *logname)
-            :   m_logFile(fopen(logname, "w"))
+        FileLogListener(weak<BugEngine::File> file)
+            :   m_logFile(file)
         {
         }
-        ~LogListener()
+        ~FileLogListener()
         {
-            fclose(m_logFile);
         }
     protected:
-        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
+        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
         {
-            fprintf(m_logFile, "%s:%d (%s)"
-                               "\t(%s) %s\n", filename, line, logname.c_str(), s_logNames[level], msg);
-            fflush(m_logFile);
+            minitl::format<4096> message = minitl::format<4096>("%s:%d (%s)\t(%s) %s\n") | filename | line | logname.c_str() | s_logNames[level] | msg;
+            m_logFile->beginWrite(message.c_str(), strlen(message.c_str()), -1);
             return true;
         }
-    };*/
+    };
 
     class ConsoleLogListener : public BugEngine::ILogListener
     {
@@ -43,7 +41,7 @@ namespace
         {
         }
     protected:
-        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) throw()
+        virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
         {
 #ifdef BE_PLATFORM_WIN32
             OutputDebugString(filename);
@@ -74,7 +72,7 @@ static int __main(int argc, const char *argv[])
     try
 #endif
     {
-        BugEngine::Logger::root()->addListener(ref<ConsoleLogListener>::create(BugEngine::debugArena()));
+        BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::debugArena()));
         ref<BugEngine::DiskFolder>::create(
                 BugEngine::gameArena(),
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
@@ -85,10 +83,9 @@ static int __main(int argc, const char *argv[])
                 BugEngine::Environment::getEnvironment().getGameHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
-        //ref<File> f = home->createFile("log")
-        //BugEngine::Logger::root()->addListener(new LogListener(home));
+        BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::debugArena(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
-        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena(), argc, argv);
+        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena());
         BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), weak<BugEngine::Application>(locApplication));
         return locApplication->run();
     }

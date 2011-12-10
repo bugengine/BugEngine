@@ -32,6 +32,7 @@ public:
     static void load(const Value& value);
     static void unload(const Value& value);
     const ResourceHandle& getResource(weak<const minitl::pointer> owner) const;
+    ResourceHandle& getResourceForWriting(weak<const minitl::pointer> owner) const;
 };
 
 struct be_api(SYSTEM) ResourceLoaders

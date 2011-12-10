@@ -27,7 +27,7 @@ private:
     minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
     ITask::CallbackConnection                       m_updateLoop;
 public:
-    Application(int argc, const char *argv[]);
+    Application();
     virtual ~Application(void);
 
     int run();

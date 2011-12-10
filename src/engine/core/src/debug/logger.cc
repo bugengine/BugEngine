@@ -73,15 +73,28 @@ bool Logger::log(const inamespace& name, LogLevel level, const char *filename, i
     return instance(name)->log(level, filename, line, msg);
 }
 
-void Logger::addListener(ref<ILogListener> listener)
+void Logger::addListener(weak<ILogListener> listener)
 {
     m_listeners.push_back(listener);
 }
 
-bool Logger::log(LogLevel level, const char *filename, int line, const char *msg)
+void Logger::removeListener(weak<ILogListener> listener)
+{
+    for(minitl::vector< weak<ILogListener> >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    {
+        if (*it == listener)
+        {
+            m_listeners.erase(it);
+            return;
+        }
+    }
+    be_warning("unable to remove listener");
+}
+
+bool Logger::log(LogLevel level, const char *filename, int line, const char *msg) const
 {
     bool result = false;
-    for (minitl::vector< ref<ILogListener> >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for (minitl::vector< weak<ILogListener> >::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(m_name, level, filename, line, msg);
     }
@@ -92,7 +105,6 @@ bool Logger::log(LogLevel level, const char *filename, int line, const char *msg
     }
 
     return result;
-
 }
 
 }

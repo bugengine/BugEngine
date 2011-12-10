@@ -23,7 +23,7 @@ struct be_api(SYSTEM) ResourceHandle
     ResourceHandle();
     ~ResourceHandle();
 
-    static const ResourceHandle& null();
+    static ResourceHandle& null();
 
     inline operator const void*() const { return (const void*)(this - &null()); }
     bool operator!() const              { return this->operator const void*() == 0; }

@@ -35,7 +35,7 @@ Application::WorldResource::~WorldResource()
 {
 }
 
-Application::Application(int argc, const char *argv[])
+Application::Application()
 :   m_scheduler(scoped<Scheduler>::create(taskArena()))
 ,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
@@ -43,8 +43,6 @@ Application::Application(int argc, const char *argv[])
 ,   m_endConnections(taskArena())
 ,   m_updateLoop(m_updateTask, m_updateTask->startCallback())
 {
-    be_forceuse(argc); be_forceuse(argv);
-
     m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[0]));
     m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[0]));

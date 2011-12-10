@@ -20,7 +20,7 @@ ResourceHandle::~ResourceHandle()
     be_assert(cache.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
 }
 
-const ResourceHandle& ResourceHandle::null()
+ResourceHandle& ResourceHandle::null()
 {
     static ResourceHandle s_nullHandle;
     return s_nullHandle;

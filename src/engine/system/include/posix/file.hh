@@ -17,7 +17,8 @@ public:
     PosixFile(ifilename file, File::Media media, u64 size);
     ~PosixFile();
 private:
-    void doFillBuffer(weak<File::Ticket> ticket) const override;
+    virtual void doFillBuffer(weak<File::Ticket> ticket) const override;
+    virtual void doWriteBuffer(weak<Ticket> ticket) const;
 };
 
 }
