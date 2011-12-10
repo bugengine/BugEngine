@@ -26,7 +26,7 @@ namespace
         virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
         {
             minitl::format<4096> message = minitl::format<4096>("%s:%d (%s)\t(%s) %s\n") | filename | line | logname.c_str() | s_logNames[level] | msg;
-            m_logFile->beginWrite(message.c_str(), strlen(message.c_str()), -1);
+            m_logFile->beginWrite(message.c_str(), strlen(message.c_str()));
             return true;
         }
     };
