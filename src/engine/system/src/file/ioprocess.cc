@@ -35,16 +35,6 @@ IOContext::~IOContext()
     s_ioDone = true;
     s_ioSemaphore.release(1);
     s_ioThread.wait();
-    for( minitl::intrusive_list<File::Ticket>::iterator it = s_iocontext.tickets.begin(); it != s_iocontext.tickets.end(); )
-    {
-        File::Ticket* t = it.operator->();
-        it = s_iocontext.tickets.erase(it);
-        t->decref();
-    }
-    while(File::Ticket* t = requests.pop())
-    {
-        t->decref();
-    }
     be_assert(s_iocontext.tickets.empty(), "Tickets still in queue when exiting IO process");
 }
 
@@ -53,14 +43,26 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
     while(1)
     {
         s_ioSemaphore.wait();
-        if (s_ioDone)
-            break;
         File::Ticket* request = s_iocontext.requests.pop();
+        if (!request)
+        {
+            be_assert(s_ioDone, "IO context exited but was not yet finished");
+            break;
+        }
         s_iocontext.tickets.push_back(*request);
         //s_iocontext.sort();
         File::Ticket* t = s_iocontext.tickets.begin().operator->();
         s_iocontext.tickets.erase(s_iocontext.tickets.begin());
-        t->file->fillBuffer(t);
+        switch(t->action)
+        {
+        case File::Ticket::Read:
+            if (!s_ioDone)
+                t->file->fillBuffer(t);
+            break;
+        case File::Ticket::Write:
+            t->file->writeBuffer(t);
+            break;
+        }
         t->decref();
     }
     return 0;

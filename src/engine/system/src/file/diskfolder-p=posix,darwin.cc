@@ -108,4 +108,38 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     }
 }
 
+weak<File> DiskFolder::createFile(const istring& name)
+{
+    const minitl::format<1024u> path = (m_path+ifilename(name)).str();
+    struct stat s;
+    errno = 0;
+    FILE* f = fopen(path.c_str(), "w");
+    if (f == 0)
+    {
+        be_error("could not create file %s: %s(%d)" | path.c_str() | strerror(errno) | errno);
+        return ref<File>();
+    }
+    if (stat(path.c_str(), &s) != 0)
+    {
+        be_error("could not create file %s: %s(%d)" | path.c_str() | strerror(errno) | errno);
+        return ref<File>();
+    }
+
+    ref<File> result = ref<PosixFile>::create(
+                fsArena(),
+                m_path+ifilename(name),
+                File::Media(File::Media::Disk, s.st_dev, s.st_ino),
+                s.st_size);
+    for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+    {
+        if (it->first == name)
+        {
+            it->second = result;
+            return result;
+        }
+    }
+    m_files.push_back(minitl::make_pair(name, result));
+    return result;
+}
+
 }

@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAHEBUILDER_PACKAGE_SCRIPT_HH_
-#define BE_PACKAHEBUILDER_PACKAGE_SCRIPT_HH_
+#ifndef BE_PACKAGEBUILDER_PACKAGE_SCRIPT_HH_
+#define BE_PACKAGEBUILDER_PACKAGE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>

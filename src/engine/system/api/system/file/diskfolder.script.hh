@@ -26,6 +26,7 @@ published:
     DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive, Folder::CreatePolicy createPolicy = Folder::CreateOne);
     ~DiskFolder();
 
+    weak<File> createFile(const istring& name);
 };
 
 }

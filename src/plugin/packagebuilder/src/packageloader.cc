@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <packageloader.hh>
 #include    <buildcontext.hh>
-
+#include    <package/package.hh>
 
 int be_package_parse(void* param);
 int be_package_lex_destroy();
@@ -52,6 +52,9 @@ void PackageLoader::runBuffer(weak<const Package> resource, const Allocator::Blo
     be_package_lex_destroy();
     g_buffer = 0;
     g_bufferPosition = 0;
+
+    ResourceHandle& handle = resource->getResourceForWriting(this);
+    handle.handle = context.result;
 }
 
 }}

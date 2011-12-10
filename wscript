@@ -60,7 +60,7 @@ def plugins(bld):
 
 
 	package			= module.plugin('package',			[])
-	packagebuilder	= module.plugin('packagebuilder',	[])
+	packagebuilder	= module.plugin('packagebuilder',	[package])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
