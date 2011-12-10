@@ -59,7 +59,7 @@ def generateConfigurationsXml(sources, configurations, bld, out):
 		categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
 	for project, category, source, options in sources:
 		addSourceTree(doc, categories[category], project, source, source.prefix)
-	impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'Makefile', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
+	impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
 	add(doc, impfiles, 'itemPath', sys.argv[0])
 	#add(doc, cd, 'sourceFolderFilter')
 	srl = add(doc, cd, 'sourceRootList')
