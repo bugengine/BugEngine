@@ -29,8 +29,8 @@ public:
     virtual ~ScriptEngine();
     virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;
 private:
-    ResourceHandle loadScript(weak<const T> script);
-    void unloadScript(const ResourceHandle& handle);
+    ResourceHandle load(weak<const Resource> script);
+    void unload(const ResourceHandle& handle);
 public:
     virtual void update() override;
 public:

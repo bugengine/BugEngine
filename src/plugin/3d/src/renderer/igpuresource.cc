@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-IGPUResource::IGPUResource(weak<const Resource> owner, weak<IRenderer> renderer)
+IGPUResource::IGPUResource(weak<const Resource> owner, weak<const IRenderer> renderer)
     :   m_renderer(renderer)
     ,   m_resource(owner)
     ,   m_index(-1)

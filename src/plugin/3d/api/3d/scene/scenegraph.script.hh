@@ -21,7 +21,6 @@ protected:
     ~RenderNode();
 };
 
-be_tag(ResourceLoaders())
 class be_api(_3D) RenderScene : public RenderNode
 {
     friend class SceneGraphLoader;
@@ -33,7 +32,6 @@ published:
     ~RenderScene();
 };
 
-be_tag(ResourceLoaders())
 class be_api(_3D) RenderSequence : public RenderNode
 {
     friend class SceneGraphLoader;

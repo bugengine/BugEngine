@@ -1,7 +1,7 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <stdafx.h>
+#include    <packagebuilder/stdafx.h>
 #include    <packagebuilder/nodes/object.hh>
 #include    <packagebuilder/nodes/package.hh>
 #include    <packagebuilder/nodes/reference.hh>

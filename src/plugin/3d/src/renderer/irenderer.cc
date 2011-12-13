@@ -14,26 +14,17 @@
 namespace BugEngine { namespace Graphics
 {
 
-IRenderer::IRenderer(Allocator& allocator, Scheduler::Affinity affinity)
+IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
+    ,   m_resourceManager(manager)
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena(), this))
     ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
     ,   m_deletedObjects(allocator)
 {
-    ResourceLoaders::attach<RenderTarget, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    ResourceLoaders::attach<RenderWindow, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    //ResourceLoaders::attach<Mesh, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    //ResourceLoaders::attach<Texture, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
-    ResourceLoaders::attach<ShaderProgram, IRenderer>(this, &IRenderer::load, &IRenderer::destroy);
 }
 
 IRenderer::~IRenderer()
 {
-    ResourceLoaders::detach<ShaderProgram, IRenderer>(this);
-    //ResourceLoaders::detach<Texture, IRenderer>(this);
-    //ResourceLoaders::detach<Mesh, IRenderer>(this);
-    ResourceLoaders::detach<RenderWindow, IRenderer>(this);
-    ResourceLoaders::detach<RenderTarget, IRenderer>(this);
 }
 
 weak<ITask> IRenderer::syncTask() const

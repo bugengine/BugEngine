@@ -9,7 +9,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_tag(ResourceLoaders())
 class be_api(_3D) Mesh : public Resource
 {
 public:

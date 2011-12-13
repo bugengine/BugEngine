@@ -18,7 +18,7 @@ void NullWindow::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullWindow::NullWindow(weak<const RenderWindow> resource, weak<NullRenderer> renderer)
+NullWindow::NullWindow(weak<const RenderWindow> resource, weak<const NullRenderer> renderer)
 :   IRenderTarget(resource, renderer)
 {
 }

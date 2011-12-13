@@ -9,6 +9,7 @@ namespace BugEngine { namespace Editor
 
 Editor::Editor(weak<Application> application)
     :   m_application(application)
+    ,   m_packageBuilder("packagebuilder")
 {
 }
 

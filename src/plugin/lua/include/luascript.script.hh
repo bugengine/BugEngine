@@ -10,7 +10,6 @@
 namespace BugEngine { namespace Lua
 {
 
-be_tag(ResourceLoaders())
 class LuaScript : public Script
 {
     friend class PackageLoader;

@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace Null
 {
 
-NullShaderProgram::NullShaderProgram(weak<const ShaderProgram> resource, weak<NullRenderer> renderer)
+NullShaderProgram::NullShaderProgram(weak<const ShaderProgram> resource, weak<const NullRenderer> renderer)
 :   IGPUResource(resource, renderer)
 {
 }

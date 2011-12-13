@@ -1,5 +1,5 @@
 %{
-#include    <stdafx.h>
+#include    <packagebuilder/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
 

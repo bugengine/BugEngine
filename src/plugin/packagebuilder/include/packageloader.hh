@@ -4,7 +4,7 @@
 #ifndef BE_PACKAGEBUILDER_PACKAGELOADER_HH_
 #define BE_PACKAGEBUILDER_PACKAGELOADER_HH_
 /*****************************************************************************/
-#include    <package.script.hh>
+#include    <packagebuilder/package.script.hh>
 #include    <bugengine/scriptengine.hh>
 
 namespace BugEngine { namespace PackageBuilder

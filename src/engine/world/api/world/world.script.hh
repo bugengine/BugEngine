@@ -11,7 +11,6 @@
 namespace BugEngine
 {
 
-be_tag(ResourceLoaders())
 class be_api(WORLD) World : public Resource
 {
     friend class WorldScene;

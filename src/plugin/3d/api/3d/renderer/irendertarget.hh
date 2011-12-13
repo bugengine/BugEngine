@@ -34,7 +34,7 @@ private:
     virtual void    begin(ClearMode clear) const = 0;
     virtual void    end(PresentMode present) const = 0;
 protected:
-    IRenderTarget(weak<const RenderTarget> rendertarget, weak<IRenderer> renderer);
+    IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer);
 public:
     virtual ~IRenderTarget();
 

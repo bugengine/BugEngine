@@ -18,12 +18,12 @@ class be_api(_3D) IGPUResource :   public minitl::refcountable
     friend class IRenderer;
     BE_NOCOPY(IGPUResource);
 protected:
-    const weak<IRenderer>           m_renderer;
+    const weak<const IRenderer>     m_renderer;
 private:
     mutable weak<const Resource>    m_resource;
     mutable i32                     m_index;
 public:
-    IGPUResource(weak<const Resource> resource, weak<IRenderer> renderer);
+    IGPUResource(weak<const Resource> resource, weak<const IRenderer> renderer);
     virtual ~IGPUResource();
 
     virtual void load(weak<const Resource> resource) = 0;

@@ -14,7 +14,7 @@ namespace BugEngine
 
 class World;
 
-class Application : public minitl::refcountable
+class Application : public IResourceLoader
 {
     BE_NOCOPY(Application);
 private:
@@ -34,8 +34,8 @@ public:
 
     weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:
-    ResourceHandle addWorld(weak<const World> scene);
-    void removeWorld(const ResourceHandle& handle);
+    ResourceHandle load(weak<const Resource> scene) override;
+    void unload(const ResourceHandle& handle) override;
 };
 
 }

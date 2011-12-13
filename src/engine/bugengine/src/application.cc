@@ -36,7 +36,8 @@ Application::WorldResource::~WorldResource()
 }
 
 Application::Application()
-:   m_scheduler(scoped<Scheduler>::create(taskArena()))
+:   IResourceLoader()
+,   m_scheduler(scoped<Scheduler>::create(taskArena()))
 ,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
 ,   m_startConnections(taskArena())
@@ -47,13 +48,11 @@ Application::Application()
     m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[0]));
     m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[0]));
 
-    ResourceLoaders::attach< World, Application >(this, &Application::addWorld, &Application::removeWorld);
     m_updateLoop = ITask::CallbackConnection();
 }
 
 Application::~Application(void)
 {
-    ResourceLoaders::detach< World, Application >(this);
 }
 
 int Application::run()
@@ -63,14 +62,14 @@ int Application::run()
     return 0;
 }
 
-ResourceHandle Application::addWorld(weak<const World> world)
+ResourceHandle Application::load(weak<const Resource> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(taskArena(), world, m_updateTask);
+    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World>(world), m_updateTask);
     return handle;
 }
 
-void Application::removeWorld(const ResourceHandle& /*handle*/)
+void Application::unload(const ResourceHandle& /*handle*/)
 {
 }
 

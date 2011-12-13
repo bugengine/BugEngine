@@ -1,4 +1,4 @@
-#include    <stdafx.h>
+#include    <packagebuilder/stdafx.h>
 
 #if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)
 
