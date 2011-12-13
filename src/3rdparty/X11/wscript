@@ -6,7 +6,7 @@ def options(opt):
 
 def setup(conf):
 	if 'posix' in conf.env.PLATFORM:
-		conf.check_lib(['X11', 'GLX'], libpath=['/usr/local/lib', '/usr/X11R6/lib'])
+		conf.check_lib(['X11'], libpath=['/usr/local/lib', '/usr/X11R6/lib'])
 
 
 def build(bld):
