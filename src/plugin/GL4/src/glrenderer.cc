@@ -28,17 +28,17 @@ void GLRenderer::flush()
     Windowing::Renderer::flush();
 }
 
-ref<IGPUResource> GLRenderer::createRenderTarget(weak<const RenderTarget> rendertarget)
+ref<IGPUResource> GLRenderer::createRenderTarget(weak<const RenderTarget> rendertarget) const
 {
     return ref<GLRenderTarget>();
 }
 
-ref<IGPUResource> GLRenderer::createRenderWindow(weak<const RenderWindow> renderwindow)
+ref<IGPUResource> GLRenderer::createRenderWindow(weak<const RenderWindow> renderwindow) const
 {
     return ref<GLWindow>::create(m_allocator, renderwindow, this);
 }
 
-ref<IGPUResource> GLRenderer::createShaderProgram(weak<const ShaderProgram> shader)
+ref<IGPUResource> GLRenderer::createShaderProgram(weak<const ShaderProgram> shader) const
 {
     return ref<GLShaderProgram>::create(m_allocator, shader, this);
 }

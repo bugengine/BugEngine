@@ -28,9 +28,8 @@ void NullRenderer::flush()
     }
 }
 
-NullRenderer::NullRenderer(weak<const Folder> dataFolder)
-:   IRenderer(gameArena())
-,   m_dataFolder(dataFolder)
+NullRenderer::NullRenderer(weak<ResourceManager> manager)
+:   IRenderer(gameArena(), manager)
 {
 }
 
@@ -38,17 +37,17 @@ NullRenderer::~NullRenderer()
 {
 }
 
-ref<IGPUResource> NullRenderer::createRenderTarget(weak<const RenderTarget> rendertarget)
+ref<IGPUResource> NullRenderer::createRenderTarget(weak<const RenderTarget> rendertarget) const
 {
     return ref<NullRenderTarget>::create(m_allocator, rendertarget, this);
 }
 
-ref<IGPUResource> NullRenderer::createRenderWindow(weak<const RenderWindow> renderwindow)
+ref<IGPUResource> NullRenderer::createRenderWindow(weak<const RenderWindow> renderwindow) const
 {
     return ref<NullWindow>::create(m_allocator, renderwindow, this);
 }
 
-ref<IGPUResource> NullRenderer::createShaderProgram(weak<const ShaderProgram> shader)
+ref<IGPUResource> NullRenderer::createShaderProgram(weak<const ShaderProgram> shader) const
 {
     return ref<NullShaderProgram>::create(m_allocator, shader, this);
 }

@@ -25,7 +25,6 @@ enum Stage
 
 }
 
-be_tag(ResourceLoaders())
 class be_api(_3D) ShaderProgram : public Resource
 {
     BE_NOCOPY(ShaderProgram);

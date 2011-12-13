@@ -17,13 +17,11 @@ ScriptEngine<T>::ScriptEngine(Allocator& arena)
     ,   m_scriptArena(arena)
     ,   m_tickets(arena)
 {
-    ResourceLoaders::attach<T, ScriptEngine<T> >(this, &ScriptEngine::loadScript, &ScriptEngine::unloadScript);
 }
 
 template< typename T >
 ScriptEngine<T>::~ScriptEngine()
 {
-    ResourceLoaders::detach<T, ScriptEngine<T> >(this);
 }
 
 template< typename T >
@@ -44,14 +42,14 @@ void ScriptEngine<T>::update()
 }
 
 template< typename T >
-ResourceHandle ScriptEngine<T>::loadScript(weak<const T> resource)
+ResourceHandle ScriptEngine<T>::load(weak<const Resource> resource)
 {
-    m_tickets.push_back(minitl::make_pair(resource->m_file->beginRead(0, 0, tempArena()), resource));
+    m_tickets.push_back(minitl::make_pair(be_checked_cast<const T>(resource)->m_file->beginRead(0, 0, tempArena()), be_checked_cast<const T>(resource)));
     return ResourceHandle();
 }
 
 template< typename T >
-void ScriptEngine<T>::unloadScript(const ResourceHandle& handle)
+void ScriptEngine<T>::unload(const ResourceHandle& handle)
 {
 }
 

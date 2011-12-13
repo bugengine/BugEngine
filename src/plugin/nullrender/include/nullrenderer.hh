@@ -13,22 +13,18 @@ namespace BugEngine { namespace Graphics { namespace Null
 class NullRenderer : public IRenderer
 {
     BE_NOCOPY(NullRenderer);
-private:
-    weak<const Folder>  m_dataFolder;
 public:
-    NullRenderer(weak<const Folder> dataFolder);
+    NullRenderer(weak<ResourceManager> manager);
     ~NullRenderer();
 
     u32                 getMaxSimultaneousRenderTargets() const override { return 1; }
 
     void                flush() override;
     uint2               getScreenSize() override { return uint2(1920,1080); }
-
-    weak<const Folder>  dataFolder() const  { return m_dataFolder; }
 private:
-    ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) override;
-    ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) override;
-    ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) override;
+    ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) const override;
+    ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) const override;
+    ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

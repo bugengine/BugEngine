@@ -9,7 +9,6 @@
 namespace BugEngine { namespace Graphics
 {
 
-be_tag(ResourceLoaders())
 class be_api(_3D) RenderTarget : public Resource
 {
     BE_NOCOPY(RenderTarget);
@@ -20,7 +19,6 @@ published:
     ~RenderTarget();
 };
 
-be_tag(ResourceLoaders())
 class be_api(_3D) RenderWindow : public RenderTarget
 {
     BE_NOCOPY(RenderWindow);

@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-IRenderTarget::IRenderTarget(weak<const RenderTarget> rendertarget, weak<IRenderer> renderer)
+IRenderTarget::IRenderTarget(weak<const RenderTarget> rendertarget, weak<const IRenderer> renderer)
 :   IGPUResource(rendertarget, renderer)
 {
 }

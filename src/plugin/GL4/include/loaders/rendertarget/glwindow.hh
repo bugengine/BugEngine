@@ -30,7 +30,7 @@ public:
     virtual void    begin(ClearMode clear) const override;
     virtual void    end(PresentMode present) const override;
 public:
-    GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer);
+    GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer> renderer);
     ~GLWindow();
 };
 

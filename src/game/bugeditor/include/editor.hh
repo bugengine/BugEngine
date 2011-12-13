@@ -13,7 +13,8 @@ namespace BugEngine { namespace Editor
 class Editor : public minitl::refcountable
 {
 private:
-    weak<Application> const m_application;
+    weak<Application> const     m_application;
+    Plugin<IScriptEngine> const m_packageBuilder;
 public:
     Editor(weak<Application> application);
     ~Editor();

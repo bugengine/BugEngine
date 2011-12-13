@@ -4,7 +4,7 @@
 #ifndef BE_3D_RENDERER_IRENDERER_HH_
 #define BE_3D_RENDERER_IRENDERER_HH_
 /*****************************************************************************/
-#include    <system/resource/resourcehandle.hh>
+#include    <system/resource/resourcemanager.hh>
 #include    <3d/renderer/igpuresource.hh>
 #include    <system/scheduler/scheduler.hh>
 
@@ -23,32 +23,30 @@ class Mesh;
 class ShaderProgram;
 class Texture;
 class IGPUResource;
+template< typename R >
+class GPUResourceLoader;
 
 class be_api(_3D) IRenderer : public minitl::pointer
 {
+    template< typename R >
+    friend class GPUResourceLoader;
 protected:
     Allocator&                                  m_allocator;
+    weak<ResourceManager>                       m_resourceManager;
     scoped<SceneGraphLoader>                    m_sceneLoader;
     ref<ITask>                                  m_syncTask;
-    minitl::vector< ref<minitl::refcountable> > m_deletedObjects;
-    minitl::intrusive_list<IGPUResource>        m_pendingRenderTargets;
-    minitl::intrusive_list<IGPUResource>        m_pendingShaders;
+    scoped< GPUResourceLoader<RenderTarget> >   m_renderTargetLoader;
+    scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
+    scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
 protected:
-    IRenderer(Allocator& allocator, Scheduler::Affinity affinity = Scheduler::DontCare);
+    IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
-private:
-            void            destroy(const ResourceHandle& r);
-            ResourceHandle  load(weak<const RenderTarget> rendertarget);
-            ResourceHandle  load(weak<const RenderWindow> renderwindow);
-    //        ResourceHandle  load(weak<const Mesh> mesh);
-            ResourceHandle  load(weak<const ShaderProgram> program);
-    //        ResourceHandle  load(weak<const Texture> texture);
 protected:
     virtual void                flush();
-    virtual ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) = 0;
-    virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) = 0;
-    //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) = 0;
-    virtual ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) = 0;
+    virtual ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) const = 0;
+    virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) const = 0;
+    //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) const = 0;
+    virtual ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) const = 0;
     //virtual ref<IGPUResource>   createTexture(weak<const Texture> texture) = 0;
 public:
             weak<ITask>         syncTask() const;

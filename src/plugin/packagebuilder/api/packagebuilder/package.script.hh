@@ -10,7 +10,8 @@
 namespace BugEngine { namespace PackageBuilder
 {
 
-be_tag(ResourceLoaders())
+class PackageLoader;
+
 class Package : public Script
 {
     friend class PackageLoader;

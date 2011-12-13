@@ -18,7 +18,7 @@ void NullRenderTarget::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullRenderTarget::NullRenderTarget(weak<const RenderTarget> resource, weak<NullRenderer> renderer)
+NullRenderTarget::NullRenderTarget(weak<const RenderTarget> resource, weak<const NullRenderer> renderer)
 :   IRenderTarget(resource, renderer)
 {
 }

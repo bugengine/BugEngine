@@ -16,7 +16,7 @@ class NullRenderer;
 class NullRenderTarget : public IRenderTarget
 {
 public:
-    NullRenderTarget(weak<const RenderTarget> resource, weak<NullRenderer> renderer);
+    NullRenderTarget(weak<const RenderTarget> resource, weak<const NullRenderer> renderer);
     ~NullRenderTarget();
 
 private:

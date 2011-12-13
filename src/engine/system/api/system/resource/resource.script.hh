@@ -11,59 +11,27 @@ namespace BugEngine
 {
 
 class IResourceLoader;
-struct ResourceLoaders;
-
-template< typename Owner, typename T > class ResourceLoader;
+class ResourceManager;
 
 class be_api(SYSTEM) Resource : public minitl::refcountable
 {
-    friend struct ResourceLoaders;
+    friend class ResourceManager;
     BE_NOCOPY(Resource);
 private:
-    enum { MaxResourceCount = 4 };
-    mutable minitl::pair<weak<pointer>, ResourceHandle> m_handles[MaxResourceCount];
+    enum
+    {
+        MaxResourceCount = 4
+    };
+    mutable minitl::pair<weak<IResourceLoader>, ResourceHandle> m_handles[MaxResourceCount];
+private:
+    void load(weak<IResourceLoader> loader);
+    void unload(weak<IResourceLoader> loader);
 protected:
     Resource();
     ~Resource();
-private:
-    void load(weak<const IResourceLoader> loader) const;
-    void unload(weak<const IResourceLoader> loader) const;
 public:
-    static void load(const Value& value);
-    static void unload(const Value& value);
-    const ResourceHandle& getResource(weak<const minitl::pointer> owner) const;
+    const ResourceHandle& getResource(weak<IResourceLoader> owner) const;
     ResourceHandle& getResourceForWriting(weak<const minitl::pointer> owner) const;
-};
-
-struct be_api(SYSTEM) ResourceLoaders
-{
-    friend class Resource;
-public:
-    ResourceLoaders();
-    ~ResourceLoaders();
-
-    template< typename T, typename Owner >
-    static void attach(weak<Owner> owner, ResourceHandle(Owner::*load)(weak<const T> t), void (Owner::*unload)(const ResourceHandle& handle))
-    {
-        Value v = be_typeid<T>::klass()->getTag(be_typeid<ResourceLoaders>::type());
-        be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be attached" |  be_typeid<T>::type().name(), return);
-        v.as<ResourceLoaders&>().add(ref< ResourceLoader<Owner, T> >::create(rttiArena(), owner, load, unload));
-    }
-
-    template< typename T, typename Owner >
-    static void detach(weak<Owner> owner)
-    {
-        Value v = be_typeid<T>::klass()->getTag(be_typeid<ResourceLoaders>::type());
-        be_assert_recover(v, "type %s has no ResourceLoaders tag; no loader can be detached" |  be_typeid<T>::type().name(), return);
-        v.as<ResourceLoaders&>().remove(owner);
-    }
-private:
-    minitl::vector< ref<const IResourceLoader> > m_loaders;
-
-    void add(ref<const IResourceLoader> loader);
-    void remove(weak<const minitl::pointer> loader);
-    inline void load(const Value& resource) const;
-    inline void unload(const Value& resource) const;
 };
 
 }

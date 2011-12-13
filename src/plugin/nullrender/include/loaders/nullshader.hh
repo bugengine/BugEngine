@@ -15,7 +15,7 @@ class NullRenderer;
 class NullShaderProgram : public IGPUResource
 {
 public:
-    NullShaderProgram(weak<const ShaderProgram> resource, weak<NullRenderer> renderer);
+    NullShaderProgram(weak<const ShaderProgram> resource, weak<const NullRenderer> renderer);
     ~NullShaderProgram();
 
 private:

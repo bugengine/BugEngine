@@ -1,5 +1,5 @@
 %{
-#include    <stdafx.h>
+#include    <packagebuilder/stdafx.h>
 #include    <buildcontext.hh>
 #include    <packagebuilder/nodes/package.hh>
 #include    <packagebuilder/nodes/object.hh>
