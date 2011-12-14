@@ -147,9 +147,8 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(weak<const Folder> dataFolder)
-:   Windowing::Renderer(gameArena())
-,   m_dataFolder(dataFolder)
+GLRenderer::GLRenderer(weak<ResourceManager> manager)
+:   Windowing::Renderer(gameArena(), manager)
 ,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
 {
 }
@@ -172,7 +171,7 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer)
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer> renderer)
 :   Windowing::Window(renderwindow, renderer)
 ,   m_context(scoped<Context>())
 {

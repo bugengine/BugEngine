@@ -9,8 +9,10 @@ namespace BugEngine { namespace Editor
 
 Editor::Editor(weak<Application> application)
     :   m_application(application)
-    ,   m_packageBuilder("packagebuilder")
+    ,   m_resourceManager(scoped<ResourceManager>::create(gameArena()))
+    ,   m_packageBuilder("packagebuilder", weak<ResourceManager>(m_resourceManager))
 {
+    Plugin<void> p("shadermodel4", Plugin<void>::Preload);
 }
 
 Editor::~Editor()

@@ -12,35 +12,42 @@ namespace BugEngine { namespace Graphics
 
 class RenderTarget;
 class SceneGraphLoader;
+class INode;
+class IRenderer;
 
 class be_api(_3D) RenderNode : public Resource
 {
+    friend class SceneGraphLoader;
     BE_NOCOPY(RenderNode);
 protected:
     RenderNode();
     ~RenderNode();
+protected:
+    virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const = 0;
 };
 
 class be_api(_3D) RenderScene : public RenderNode
 {
-    friend class SceneGraphLoader;
     BE_NOCOPY(RenderScene);
 private:
-    ref<RenderTarget>   m_rendertarget;
+    ref<RenderTarget>   m_renderTarget;
 published:
     RenderScene(ref<RenderTarget> rendertarget);
     ~RenderScene();
+private:
+    virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const override;
 };
 
 class be_api(_3D) RenderSequence : public RenderNode
 {
-    friend class SceneGraphLoader;
     BE_NOCOPY(RenderSequence);
 private:
     minitl::vector< ref<const RenderNode> > m_nodes;
 published:
     RenderSequence(const minitl::vector< ref<const RenderNode> >& nodes);
     ~RenderSequence();
+private:
+    virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const override;
 };
 
 }}

@@ -8,8 +8,7 @@
 namespace BugEngine
 {
 
-IResourceLoader::IResourceLoader(weak<pointer> loader)
-    :   m_loader(loader)
+IResourceLoader::IResourceLoader()
 {
 }
 

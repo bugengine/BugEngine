@@ -1,0 +1,10 @@
+plugin 3d;
+
+w = 3d.Graphics.Window
+(
+    width = 800;
+    height = 600;
+    title = "BugEngine editor v0.1";
+    fullscreen = false;
+)
+

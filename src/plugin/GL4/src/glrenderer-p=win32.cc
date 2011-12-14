@@ -215,9 +215,8 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(weak<const Folder> dataFolder)
-    :   Windowing::Renderer(gameArena())
-    ,   m_dataFolder(dataFolder)
+GLRenderer::GLRenderer(weak<ResourceManager> manager)
+    :   Windowing::Renderer(gameArena(), manager)
     ,   m_context(scoped<Context>::create(gameArena(), this))
 {
 }

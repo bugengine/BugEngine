@@ -37,17 +37,17 @@ NullRenderer::~NullRenderer()
 {
 }
 
-ref<IGPUResource> NullRenderer::createRenderTarget(weak<const RenderTarget> rendertarget) const
+ref<IGPUResource> NullRenderer::create(weak<const RenderTarget> rendertarget) const
 {
     return ref<NullRenderTarget>::create(m_allocator, rendertarget, this);
 }
 
-ref<IGPUResource> NullRenderer::createRenderWindow(weak<const RenderWindow> renderwindow) const
+ref<IGPUResource> NullRenderer::create(weak<const RenderWindow> renderwindow) const
 {
     return ref<NullWindow>::create(m_allocator, renderwindow, this);
 }
 
-ref<IGPUResource> NullRenderer::createShaderProgram(weak<const ShaderProgram> shader) const
+ref<IGPUResource> NullRenderer::create(weak<const ShaderProgram> shader) const
 {
     return ref<NullShaderProgram>::create(m_allocator, shader, this);
 }

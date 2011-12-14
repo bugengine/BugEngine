@@ -48,8 +48,8 @@ void Renderer::PlatformRenderer::flush()
     }
 }
 
-Renderer::Renderer(Allocator& arena)
-    :   IRenderer(arena, Scheduler::MainThread)
+Renderer::Renderer(Allocator& arena, weak<ResourceManager> manager)
+    :   IRenderer(arena, manager, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {
 }

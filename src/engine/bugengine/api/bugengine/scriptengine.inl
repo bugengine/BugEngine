@@ -13,7 +13,7 @@ namespace BugEngine
 
 template< typename T >
 ScriptEngine<T>::ScriptEngine(Allocator& arena)
-    :   IScriptEngine()
+    :   IResourceLoader()
     ,   m_scriptArena(arena)
     ,   m_tickets(arena)
 {
@@ -23,7 +23,7 @@ template< typename T >
 ScriptEngine<T>::~ScriptEngine()
 {
 }
-
+#ifdef NOT_IMPLEMENTED
 template< typename T >
 void ScriptEngine<T>::update()
 {
@@ -40,6 +40,7 @@ void ScriptEngine<T>::update()
         }
     }
 }
+#endif
 
 template< typename T >
 ResourceHandle ScriptEngine<T>::load(weak<const Resource> resource)

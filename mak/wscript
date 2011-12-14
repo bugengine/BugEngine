@@ -396,4 +396,3 @@ class foo(BuildContext):
 	returned_tasks = []
 	def compile(self):
 		pass
-

@@ -37,7 +37,7 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
+Window::Window(weak<const RenderWindow> resource, weak<const Renderer> renderer)
 :   IRenderTarget(resource, renderer)
 ,   m_window()
 {
@@ -50,12 +50,12 @@ Window::~Window()
 void Window::load(weak<const Resource> resource)
 {
     m_window = scoped<PlatformWindow>::create(m_renderer->arena(),
-                                              be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
-                                              be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->createWindow(0, 0, 800, 600));
+                                              be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
+                                              be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->createWindow(0, 0, 800, 600));
     Window* w = this;
-    XChangeProperty(be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
+    XChangeProperty(be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
                     m_window->m_window,
-                    be_checked_cast<Renderer>(m_renderer)->m_platformRenderer->m_windowProperty,
+                    be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_windowProperty,
                     XA_INTEGER, 8, PropModeReplace, (unsigned char *)&w, sizeof(w));
 }
 
