@@ -4,6 +4,7 @@
 #include    <bugengine/stdafx.h>
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
+#include    <system/resource/resourcemanager.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
@@ -86,7 +87,7 @@ static int __main(int argc, const char *argv[])
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::debugArena(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena());
-        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), weak<BugEngine::Application>(locApplication));
+        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), BugEngine::PluginContext(weak<BugEngine::ResourceManager>()));
         return locApplication->run();
     }
 #ifdef BE_ENABLE_EXCEPTIONS

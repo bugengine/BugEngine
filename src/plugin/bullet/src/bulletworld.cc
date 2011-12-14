@@ -29,25 +29,11 @@ static BE_NOINLINE void free(void* block)
     return bulletArena().free(block);
 }
 
-BulletWorld::WorldSetup::WorldSetup()
+
+BulletWorld::BulletWorld(const PluginContext& context)
 {
     btAlignedAllocSetCustom(allocate, free);
     btAlignedAllocSetCustomAligned(allocate, free);
-}
-
-BulletWorld::WorldSetup::~WorldSetup()
-{
-}
-
-
-BulletWorld::BulletWorld(float3 worldExtents)
-:   m_setup()
-,   m_configuration()
-,   m_dispatcher(&m_configuration)
-,   m_solver()
-,   m_broadphase(btVector3(-worldExtents.x(),-worldExtents.y(),-worldExtents.z()),btVector3(worldExtents.x(),worldExtents.y(),worldExtents.z()))
-,   m_world(&m_dispatcher, &m_broadphase, &m_solver, &m_configuration)
-{
 }
 
 BulletWorld::~BulletWorld()
@@ -56,7 +42,6 @@ BulletWorld::~BulletWorld()
 
 void BulletWorld::step()
 {
-    m_world.stepSimulation(0.033f);
 }
 
 }}}

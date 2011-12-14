@@ -28,8 +28,8 @@ void NullRenderer::flush()
     }
 }
 
-NullRenderer::NullRenderer(weak<ResourceManager> manager)
-:   IRenderer(gameArena(), manager)
+NullRenderer::NullRenderer(const PluginContext& context)
+:   IRenderer(gameArena(), context.resourceManager)
 {
 }
 

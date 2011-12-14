@@ -7,6 +7,7 @@
 #include    <system/file/folder.script.hh>
 #include    <bugengine/application.hh>
 #include    <system/resource/resourcemanager.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine { namespace Editor
 {
@@ -14,11 +15,11 @@ namespace BugEngine { namespace Editor
 class Editor : public minitl::refcountable
 {
 private:
-    weak<Application> const         m_application;
     scoped<ResourceManager> const   m_resourceManager;
+    PluginContext           const   m_pluginContext;
     Plugin<IResourceLoader> const   m_packageBuilder;
 public:
-    Editor(weak<Application> application);
+    Editor(const PluginContext& context);
     ~Editor();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

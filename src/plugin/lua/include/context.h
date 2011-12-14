@@ -8,6 +8,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
 #include    <system/file/file.script.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine { namespace Lua
 {
@@ -15,10 +16,10 @@ namespace BugEngine { namespace Lua
 class Context : public ScriptEngine<LuaScript>
 {
 private:
-    lua_State*                                  m_state;
-    ref<Logger>                                 m_logger;
+    lua_State*  m_state;
+    ref<Logger> m_logger;
 public:
-    Context();
+    Context(const PluginContext& context);
     ~Context();
 private:
     void runBuffer(weak<const LuaScript> resource, const Allocator::Block<u8>& buffer) override;

@@ -32,8 +32,8 @@ Allocator& packageArena()
     return gameArena();
 }
 
-PackageLoader::PackageLoader()
-    :   ScriptEngine<Package>(packageArena())
+PackageLoader::PackageLoader(const PluginContext& context)
+    :   ScriptEngine<Package>(packageArena(), context.resourceManager)
 {
 }
 

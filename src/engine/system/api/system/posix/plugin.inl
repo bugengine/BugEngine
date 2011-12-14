@@ -15,16 +15,24 @@
 # define    PLUGIN_EXT ".so"
 #endif
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                                                                  \
-    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                     \
-    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                                                             \
-    {                                                                                                                                       \
-        return BugEngine::be_##name##_Namespace().operator->();                                                                             \
+#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                      \
+    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                         \
+    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                 \
+    {                                                                                           \
+        return BugEngine::be_##name##_Namespace().operator->();                                 \
     }
-#define BE_PLUGIN_REGISTER(name, interface, klass, params, args)                                                                            \
-    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                                                                     \
-    extern "C" BE_EXPORT interface* be_createPlugin params { void* m = ::BugEngine::gameArena().alloc<klass>(); return new(m) klass args; } \
-    extern "C" BE_EXPORT void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); ::BugEngine::gameArena().free(cls); }
+#define BE_PLUGIN_REGISTER(name, interface, klass)                                              \
+    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                         \
+    extern "C" BE_EXPORT interface* be_createPlugin (const ::BugEngine::PluginContext& context) \
+    {                                                                                           \
+        void* m = ::BugEngine::gameArena().alloc<klass>();                                      \
+        return new(m) klass(context);                                                           \
+    }                                                                                           \
+    extern "C" BE_EXPORT void be_destroyPlugin(klass* cls)                                      \
+    {                                                                                           \
+        minitl::checked_destroy(cls);                                                           \
+        ::BugEngine::gameArena().free(cls);                                                     \
+    }
 
 namespace BugEngine
 {
@@ -53,48 +61,19 @@ Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
 }
 
 template< typename Interface >
-Plugin<Interface>::Plugin(const istring &pluginName)
+Plugin<Interface>::Plugin(const istring &pluginName, const PluginContext& context)
 :   m_handle(loadLibrary(pluginName))
 ,   m_interface(0)
 ,   m_refCount(new (gameArena()) i_u32(1))
 {
     if  (m_handle)
     {
-        Interface* (*_init)(void) = reinterpret_cast<Interface* (*)(void)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
+        Interface* (*_init)(const PluginContext&) = reinterpret_cast<Interface* (*)(const PluginContext&)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
         be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
-        m_interface = (*_init)();
+        m_interface = (*_init)(context);
     }
 }
 
-template< typename Interface >
-template< typename T1 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
-:   m_handle(loadLibrary(pluginName))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        Interface* (*_init)(T1) = reinterpret_cast<Interface* (*)(T1)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
-        be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
-        m_interface = (*_init)(param1);
-    }
-}
-
-template< typename Interface >
-template< typename T1, typename T2 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
-:   m_handle(loadLibrary(pluginName))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        Interface* (*_init)(T1, T2) = reinterpret_cast<Interface* (*)(T1, T2)>(reinterpret_cast<size_t>(dlsym(m_handle, "be_createPlugin")));
-        be_assert(_init, "could not find method _init in plugin %s" | pluginName.c_str());
-        m_interface = (*_init)(param1, param2);
-    }
-}
 template< typename Interface >
 Plugin<Interface>::~Plugin(void)
 {
