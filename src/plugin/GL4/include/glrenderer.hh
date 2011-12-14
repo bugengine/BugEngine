@@ -4,7 +4,7 @@
 #ifndef BE_OPENGL_RENDERER_HH_
 #define BE_OPENGL_RENDERER_HH_
 /*****************************************************************************/
-#include    <system/file/folder.script.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -28,18 +28,14 @@ class GLRenderer : public Windowing::Renderer
     friend class GLWindow;
 private:
     class Context;
-    weak<const Folder>      m_dataFolder;
     mutable scoped<Context> m_context;
 public:
-    GLRenderer(weak<ResourceManager> manager);
+    GLRenderer(const PluginContext& context);
     ~GLRenderer();
 
     u32                     getMaxSimultaneousRenderTargets() const override { return 1; }
 
     void                    flush() override;
-
-    weak<const Folder>      dataFolder() const  { return m_dataFolder; }
-
 public:
     const ShaderExtensions& shaderext() const;
 private:

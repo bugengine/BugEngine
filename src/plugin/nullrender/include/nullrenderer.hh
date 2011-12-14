@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <3d/renderer/irenderer.hh>
 #include    <system/file/folder.script.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine { namespace Graphics { namespace Null
 {
@@ -14,7 +15,7 @@ class NullRenderer : public IRenderer
 {
     BE_NOCOPY(NullRenderer);
 public:
-    NullRenderer(weak<ResourceManager> manager);
+    NullRenderer(const PluginContext& context);
     ~NullRenderer();
 
     u32                 getMaxSimultaneousRenderTargets() const override { return 1; }

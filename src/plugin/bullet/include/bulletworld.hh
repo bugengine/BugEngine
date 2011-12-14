@@ -4,6 +4,7 @@
 #ifndef BE_PHYSICSBULLET_BULLETWORLD_H_
 #define BE_PHYSICSBULLET_BULLETWORLD_H_
 /*****************************************************************************/
+#include    <system/plugin.hh>
 
 #ifdef BE_COMPILER_MSVC
 #pragma warning(push,1)
@@ -19,22 +20,8 @@ namespace BugEngine { namespace Physics { namespace Bullet
 
 class BulletWorld : public minitl::pointer
 {
-private:
-    class WorldSetup
-    {
-    public:
-        WorldSetup();
-        ~WorldSetup();
-    };
 public:
-    WorldSetup                          m_setup;
-    btDefaultCollisionConfiguration     m_configuration;
-    btCollisionDispatcher               m_dispatcher;
-    btSequentialImpulseConstraintSolver m_solver;
-    btAxisSweep3                        m_broadphase;
-    btDiscreteDynamicsWorld             m_world;
-public:
-    BulletWorld(float3 worldExtents);
+    BulletWorld(const PluginContext& context);
     ~BulletWorld();
 
     void step();

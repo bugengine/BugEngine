@@ -6,22 +6,25 @@
 /*****************************************************************************/
 #include    <bugengine/stdafx.h>
 #include    <bugengine/scriptengine.hh>
-
+#include    <system/resource/resourcemanager.hh>
 
 namespace BugEngine
 {
 
 template< typename T >
-ScriptEngine<T>::ScriptEngine(Allocator& arena)
+ScriptEngine<T>::ScriptEngine(Allocator& arena, weak<ResourceManager> manager)
     :   IResourceLoader()
     ,   m_scriptArena(arena)
+    ,   m_manager(manager)
     ,   m_tickets(arena)
 {
+    m_manager->attach<T>(this);
 }
 
 template< typename T >
 ScriptEngine<T>::~ScriptEngine()
 {
+    m_manager->detach<T>(this);
 }
 #ifdef NOT_IMPLEMENTED
 template< typename T >

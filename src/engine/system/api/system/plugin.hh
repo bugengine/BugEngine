@@ -9,10 +9,17 @@
 namespace BugEngine
 {
 
-    namespace RTTI
-    {
-        struct ClassInfo;
-    }
+namespace RTTI
+{
+    struct ClassInfo;
+}
+
+class ResourceManager;
+struct PluginContext
+{
+    weak<ResourceManager>   resourceManager;
+    PluginContext(weak<ResourceManager> manager);
+};
 
 template< typename Interface >
 class be_api(SYSTEM) Plugin
@@ -26,11 +33,7 @@ private:
 public:
     enum PreloadType { Preload };
     Plugin(const istring &pluginName, PreloadType preload);
-    Plugin(const istring &pluginName);
-    template< typename T1 >
-    Plugin(const istring &pluginName, T1 param1);
-    template< typename T1, typename T2 >
-    Plugin(const istring &pluginName, T1 param1, T2 param2);
+    Plugin(const istring &pluginName, const PluginContext& context);
     ~Plugin(void);
     Plugin(const Plugin& other);
     Plugin& operator=(const Plugin& other);

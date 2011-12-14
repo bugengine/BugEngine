@@ -15,9 +15,10 @@ class ScriptEngine : public IResourceLoader
 {
 private:
     Allocator&                                                                      m_scriptArena;
+    weak<ResourceManager>                                                           m_manager;
     minitl::vector< minitl::pair< ref<const File::Ticket>, weak<const Script> > >   m_tickets;
 protected:
-    ScriptEngine(Allocator& arena);
+    ScriptEngine(Allocator& arena, weak<ResourceManager> manager);
 public:
     virtual ~ScriptEngine();
     virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;

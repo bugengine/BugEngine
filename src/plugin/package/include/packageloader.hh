@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <package.script.hh>
 #include    <bugengine/scriptengine.hh>
+#include    <system/plugin.hh>
 
 namespace BugEngine { namespace PackageManager
 {
@@ -14,7 +15,7 @@ class PackageLoader : public ScriptEngine<Package>
 {
     BE_NOCOPY(PackageLoader);
 public:
-    PackageLoader();
+    PackageLoader(const PluginContext& context);
     ~PackageLoader();
 private:
     virtual void runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer) override;

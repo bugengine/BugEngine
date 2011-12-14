@@ -147,9 +147,9 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(weak<ResourceManager> manager)
-:   Windowing::Renderer(gameArena(), manager)
-,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
+GLRenderer::GLRenderer(const PluginContext& context)
+    :   Windowing::Renderer(gameArena(), context.resourceManager)
+    ,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
 {
 }
 

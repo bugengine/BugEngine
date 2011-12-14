@@ -5,7 +5,16 @@
 #include    <system/plugin.hh>
 #include    <cstring>
 
-namespace BugEngine { namespace impl
+namespace BugEngine
+{
+
+PluginContext::PluginContext(weak<ResourceManager> manager)
+    :   resourceManager(manager)
+{
+}
+
+
+namespace impl
 {
 
 #ifdef BE_STATIC
