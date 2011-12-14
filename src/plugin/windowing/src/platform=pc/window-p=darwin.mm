@@ -34,7 +34,7 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
+Window::Window(weak<const RenderWindow> resource, weak<const Renderer> renderer)
 :   IRenderTarget(resource, renderer)
 ,   m_window()
 {

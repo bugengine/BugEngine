@@ -11,17 +11,16 @@ namespace BugEngine { namespace Graphics
 
 class IRenderer;
 
-class SceneGraphLoader : public minitl::pointer
+class SceneGraphLoader : public IResourceLoader
 {
 private:
-    weak<const IRenderer> m_renderer;
+    weak<const IRenderer>   m_renderer;
 public:
     SceneGraphLoader(weak<const IRenderer> renderer);
     ~SceneGraphLoader();
 private:
-    ResourceHandle load(weak<const RenderScene> source);
-    ResourceHandle load(weak<const RenderSequence> source);
-    void  unload(const ResourceHandle& resource);
+    virtual ResourceHandle load(weak<const Resource> resource) override;
+    virtual void  unload(const ResourceHandle& resource) override;
 };
 
 }}

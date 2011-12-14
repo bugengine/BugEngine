@@ -4,6 +4,7 @@ import os
 import mak
 from waflib import Context
 from waflib.Logs import info,warn,pprint
+from waflib.TaskGen import feature, before_method, after_method
 
 def options(opt):
 	opt.add_option( '--iphone-sdk',
@@ -116,9 +117,9 @@ def add_darwin_flags_to_env(conf, variant, arch):
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
 	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', variant))
-	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname')+'.app/Contents/',
-									'bin':		'MacOS',
-									'etc':		'etc',
+	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname')+'.app/',
+									'bin':		'',
+									'etc':		'',
 									'runbin':	'',
 									'api':		'include',
 									'lib':		'lib',
@@ -145,3 +146,8 @@ def build(bld):
 def plugins(bld):
 	pass
 
+@feature('cshlib', 'cxxshlib')
+@after_method('apply_link')
+def set_iphone_shlib_name(self):
+	if 'iphone' in self.env.PLATFORM:
+		self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', self.env.DEPLOY['plugin'], self.link_task.outputs[0].name)])

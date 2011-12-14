@@ -33,8 +33,8 @@ class be_api(_3D) IRenderer : public minitl::pointer
 protected:
     Allocator&                                  m_allocator;
     weak<ResourceManager>                       m_resourceManager;
-    scoped<SceneGraphLoader>                    m_sceneLoader;
     ref<ITask>                                  m_syncTask;
+    scoped<SceneGraphLoader>                    m_sceneLoader;
     scoped< GPUResourceLoader<RenderTarget> >   m_renderTargetLoader;
     scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
     scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
@@ -43,19 +43,22 @@ protected:
     virtual ~IRenderer();
 protected:
     virtual void                flush();
-    virtual ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) const = 0;
-    virtual ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) const = 0;
-    //virtual ref<IGPUResource>   createMesh(weak<const Mesh> mesh) const = 0;
-    virtual ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) const = 0;
-    //virtual ref<IGPUResource>   createTexture(weak<const Texture> texture) = 0;
+
+    virtual ref<IGPUResource>   create(weak<const RenderTarget> rendertarget) const = 0;
+    virtual ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const = 0;
+    //virtual ref<IGPUResource>   create(weak<const Mesh> mesh) const = 0;
+    virtual ref<IGPUResource>   create(weak<const ShaderProgram> shader) const = 0;
+    //virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
+            weak<IGPUResource>  getRenderTarget(weak<const Resource> resource) const;
+            weak<IGPUResource>  getRenderWindow(weak<const Resource> resource) const;
+            weak<IGPUResource>  getShaderProgram(weak<const Resource> resource) const;
+
+            Allocator&          arena() const;
             weak<ITask>         syncTask() const;
 
     virtual uint2               getScreenSize() = 0;
-
     virtual u32                 getMaxSimultaneousRenderTargets() const = 0;
-
-            Allocator&          arena() const;
 };
 
 }}

@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <system/file/folder.script.hh>
 #include    <bugengine/application.hh>
+#include    <system/resource/resourcemanager.hh>
 
 namespace BugEngine { namespace Editor
 {
@@ -13,8 +14,9 @@ namespace BugEngine { namespace Editor
 class Editor : public minitl::refcountable
 {
 private:
-    weak<Application> const     m_application;
-    Plugin<IScriptEngine> const m_packageBuilder;
+    weak<Application> const         m_application;
+    scoped<ResourceManager> const   m_resourceManager;
+    Plugin<IResourceLoader> const   m_packageBuilder;
 public:
     Editor(weak<Application> application);
     ~Editor();

@@ -24,14 +24,14 @@ private:
     };
     mutable minitl::pair<weak<IResourceLoader>, ResourceHandle> m_handles[MaxResourceCount];
 private:
-    void load(weak<IResourceLoader> loader);
-    void unload(weak<IResourceLoader> loader);
+    void load(weak<IResourceLoader> loader) const;
+    void unload(weak<const IResourceLoader> loader) const;
 protected:
     Resource();
     ~Resource();
 public:
-    const ResourceHandle& getResource(weak<IResourceLoader> owner) const;
-    ResourceHandle& getResourceForWriting(weak<const minitl::pointer> owner) const;
+    const ResourceHandle& getResourceHandle(weak<const IResourceLoader> owner) const;
+    ResourceHandle& getResourceHandleForWriting(weak<const IResourceLoader> owner) const;
 };
 
 }

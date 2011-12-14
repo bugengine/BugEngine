@@ -31,7 +31,7 @@ private:
     weak<const Folder>      m_dataFolder;
     mutable scoped<Context> m_context;
 public:
-    GLRenderer(weak<const Folder> dataFolder);
+    GLRenderer(weak<ResourceManager> manager);
     ~GLRenderer();
 
     u32                     getMaxSimultaneousRenderTargets() const override { return 1; }
@@ -45,9 +45,9 @@ public:
 private:
     void                    attachWindow(weak<GLWindow> w) const;
 private:
-    ref<IGPUResource>       createRenderTarget(weak<const RenderTarget> rendertarget) const override;
-    ref<IGPUResource>       createRenderWindow(weak<const RenderWindow> renderwindow) const override;
-    ref<IGPUResource>       createShaderProgram(weak<const ShaderProgram> shader) const override;
+    ref<IGPUResource>       create(weak<const RenderTarget> rendertarget) const override;
+    ref<IGPUResource>       create(weak<const RenderWindow> renderwindow) const override;
+    ref<IGPUResource>       create(weak<const ShaderProgram> shader) const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

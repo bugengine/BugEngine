@@ -16,7 +16,7 @@ Resource::~Resource()
 {
 }
 
-const ResourceHandle& Resource::getResource(weak<const minitl::pointer> owner) const
+const ResourceHandle& Resource::getResourceHandle(weak<const IResourceLoader> owner) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
@@ -39,37 +39,25 @@ void Resource::load(weak<IResourceLoader> loader) const
             return;
         }
     }
-    be_notreached("no free slot for loading resource");
+    be_notreached();
 }
 
-void Resource::unload(weak<IResourceLoader> loader) const
+void Resource::unload(weak<const IResourceLoader> loader) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {
         if (m_handles[i].first == loader)
         {
+            m_handles[i].first->unload(m_handles[i].second);
             m_handles[i].first = weak<IResourceLoader>();
-            loader->unload(m_handles[i].second);
             m_handles[i].second = ResourceHandle();
             return;
         }
     }
-    be_notreached("no free slot for loading resource");
+    be_notreached();
 }
 
-ResourceHandle& Resource::getResourceForWriting(weak<const minitl::pointer> owner) const
-{
-    for(int i = 0; i < MaxResourceCount; ++i)
-    {
-        if (m_handles[i].first == owner)
-        {
-            return m_handles[i].second;
-        }
-    }
-    return ResourceHandle::null();
-}
-
-ResourceHandle& Resource::getResourceForWriting(weak<const minitl::pointer> owner) const
+ResourceHandle& Resource::getResourceHandleForWriting(weak<const IResourceLoader> owner) const
 {
     for(int i = 0; i < MaxResourceCount; ++i)
     {

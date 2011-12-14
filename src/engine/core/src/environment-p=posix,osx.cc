@@ -16,7 +16,7 @@ namespace BugEngine
 
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory("../share/bugengine")
+,   m_dataDirectory("share/bugengine")
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
@@ -40,7 +40,8 @@ void Environment::init(int argc, const char *argv[])
     {
         filename--;
     }
-    m_dataDirectory = ipath(argv[0], filename);
+    ipath rootdir = ipath(argv[0], filename);
+    chdir(rootdir.str().c_str());
     for( int arg = 1; arg < argc; arg++ )
     {
         if (argv[arg][0] == '-')
@@ -49,8 +50,6 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
-    m_dataDirectory += "share";
-    m_dataDirectory += "bugengine";
 }
 
 Environment::~Environment()

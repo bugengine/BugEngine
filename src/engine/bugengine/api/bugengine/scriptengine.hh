@@ -10,15 +10,8 @@
 namespace BugEngine
 {
 
-class IScriptEngine : public minitl::pointer
-{
-public:
-    virtual ~IScriptEngine() {}
-    virtual void update() = 0;
-};
-
 template< typename T >
-class ScriptEngine : public IScriptEngine
+class ScriptEngine : public IResourceLoader
 {
 private:
     Allocator&                                                                      m_scriptArena;
@@ -29,10 +22,8 @@ public:
     virtual ~ScriptEngine();
     virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;
 private:
-    ResourceHandle load(weak<const Resource> script);
-    void unload(const ResourceHandle& handle);
-public:
-    virtual void update() override;
+    virtual ResourceHandle load(weak<const Resource> script) override;
+    virtual void unload(const ResourceHandle& handle) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

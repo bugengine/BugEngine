@@ -53,7 +53,7 @@ void PackageLoader::runBuffer(weak<const Package> resource, const Allocator::Blo
     g_buffer = 0;
     g_bufferPosition = 0;
 
-    ResourceHandle& handle = resource->getResourceForWriting(this);
+    ResourceHandle& handle = resource->getResourceHandleForWriting(this);
     handle.handle = context.result;
 }
 

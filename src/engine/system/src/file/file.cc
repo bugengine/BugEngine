@@ -53,9 +53,9 @@ ref<const File::Ticket> File::beginRead(u32 size, i64 offset, Allocator& arena) 
     }
     else
     {
-        be_assert(m_size+offset >= 0, "reading past end of file");
-        be_assert(m_size+offset+size <= m_size, "reading past end of file");
-        s = size ? size : be_checked_numcast<u32>(m_size + offset);
+        be_assert(offset+(i64)m_size+1 >= 0, "reading past end of file");
+        be_assert(m_size+offset+size+1 <= m_size, "reading past end of file");
+        s = size ? size : be_checked_numcast<u32>((i64)m_size + offset + 1);
     }
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(arena), this, offset, s, Ticket::Read);
     IOProcess::pushTicket(t);
@@ -67,7 +67,7 @@ ref<const File::Ticket> File::beginWrite(const void* data, u32 size, i64 offset)
     if (offset > 0)
         be_assert(offset <= m_size, "writing past end of file");
     else if (offset < 0)
-        be_assert(m_size+offset >= 0, "writing past end of file");
+        be_assert(offset+(i64)m_size+1 >= 0, "writing past end of file");
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(tempArena()), this, offset, size, Ticket::Write);
     memcpy(t->buffer.data(), data, size);
     IOProcess::pushTicket(t);

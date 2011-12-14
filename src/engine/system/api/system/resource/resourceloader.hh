@@ -14,6 +14,7 @@ class ResourceManager;
 class be_api(SYSTEM) IResourceLoader : public minitl::refcountable
 {
     friend class ResourceManager;
+    friend class Resource;
     BE_NOCOPY(IResourceLoader);
 protected:
     IResourceLoader();

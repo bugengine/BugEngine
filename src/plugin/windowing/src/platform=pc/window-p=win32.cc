@@ -44,7 +44,7 @@ Window::PlatformWindow::~PlatformWindow()
         m_renderer->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
-Window::Window(weak<const RenderWindow> resource, weak<Renderer> renderer)
+Window::Window(weak<const RenderWindow> resource, weak<const Renderer> renderer)
 :   IRenderTarget(resource, renderer)
 ,   m_window(scoped<PlatformWindow>())
 {
@@ -56,7 +56,7 @@ Window::~Window()
 
 void Window::load(weak<const Resource> resource)
 {
-    m_window = scoped<PlatformWindow>::create(m_renderer->arena(), be_checked_cast<Renderer>(m_renderer), this);
+    m_window = scoped<PlatformWindow>::create(m_renderer->arena(), be_checked_cast<const Renderer>(m_renderer), this);
 }
 
 void Window::unload()
