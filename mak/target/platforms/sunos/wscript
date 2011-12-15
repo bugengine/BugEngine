@@ -55,6 +55,7 @@ def add_sunos_flags_to_env(conf, name, arch):
 	conf.env['shlib_PATTERN']	= 'lib%s.so'
 	conf.env['program_PATTERN'] = '%s'
 
+	conf.env.RPATH = '$ORIGIN/../share/bugengine/plugins'
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_sunos', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
 	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', name))
 	conf.env['DEPLOY']			= { 'prefix':	'',
