@@ -9,6 +9,8 @@
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
 
+#include "system/plugin.hh"
+
 
 
 namespace BugEngine
@@ -41,14 +43,13 @@ static D3DPRESENT_PARAMETERS defaultParams(HWND hwnd)
     return params;
 }
 
-Dx9Renderer::Dx9Renderer(weak<const Folder> dataFolder)
-:   Renderer(gameArena())
+Dx9Renderer::Dx9Renderer(const PluginContext& context)
+:   Renderer(gameArena(), context.resourceManager)
 ,   m_dummyWindow(CreateWindowEx(0, (minitl::format<>("__be__%p__") | (const void*)this).c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0))
 ,   m_dummyParams(defaultParams(m_dummyWindow))
 ,   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
 ,   m_context(cgCreateContext())
-,   m_dataFolder(dataFolder)
 ,   m_deviceState(DeviceLost)
 ,   m_threadId(Thread::currentId())
 {
@@ -121,17 +122,17 @@ void Dx9Renderer::flush()
     }
 }
 
-ref<IGPUResource> Dx9Renderer::createRenderTarget(weak<const RenderTarget> rendertarget)
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderTarget> rendertarget)
 {
     return ref<IGPUResource>();
 }
 
-ref<IGPUResource> Dx9Renderer::createRenderWindow(weak<const RenderWindow> renderwindow)
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderWindow> renderwindow)
 {
     return ref<Dx9Window>::create(m_allocator, renderwindow, this);
 }
 
-ref<IGPUResource> Dx9Renderer::createShaderProgram(weak<const ShaderProgram> shader)
+ref<IGPUResource> Dx9Renderer::create(weak<const ShaderProgram> shader)
 {
     return ref<Dx9ShaderProgram>::create(m_allocator, shader, this);
 }
