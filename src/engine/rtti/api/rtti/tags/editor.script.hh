@@ -8,7 +8,7 @@
 namespace BugEngine { namespace EditHint
 {
 
-struct Extension
+struct be_api(RTTI) Extension
 {
     const istring ext;
     Extension(const istring& ext) : ext(ext) { }
