@@ -5,8 +5,7 @@
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
 #include    <windowing/renderer.hh>
-#include    <system/file/folder.script.hh>
-
+#include    <system/plugin.hh>
 #include    <d3d9.h>
 
 namespace BugEngine { namespace Graphics
@@ -56,18 +55,16 @@ private:
     DeviceState             m_deviceState;
     u64                     m_threadId;
 public:
-    Dx9Renderer(weak<const Folder> dataFolder);
+    Dx9Renderer(const PluginContext& context);
     ~Dx9Renderer();
 
     u32                 getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }
-
-    weak<const Folder>  dataFolder() const { return m_dataFolder; }
 private:
     void                flush() override;
 
-    ref<IGPUResource>   createRenderTarget(weak<const RenderTarget> rendertarget) override;
-    ref<IGPUResource>   createRenderWindow(weak<const RenderWindow> renderwindow) override;
-    ref<IGPUResource>   createShaderProgram(weak<const ShaderProgram> shader) override;
+    ref<IGPUResource>   create(weak<const RenderTarget> rendertarget) const override;
+    ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;
+    ref<IGPUResource>   create(weak<const ShaderProgram> shader) const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
