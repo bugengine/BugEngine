@@ -122,8 +122,8 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 
 
 
-Renderer::Renderer(Allocator& arena)
-    :   IRenderer(arena)
+Renderer::Renderer(Allocator& arena, weak<ResourceManager> manager)
+    :   IRenderer(arena, manager)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {
 }

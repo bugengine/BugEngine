@@ -200,7 +200,7 @@ void GLWindow::setCurrent() const
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
-        weak<GLRenderer::Context> c = be_checked_cast<GLRenderer>(m_renderer)->m_context;
+        weak<GLRenderer::Context> c = be_checked_cast<const GLRenderer>(m_renderer)->m_context;
         if(!glXMakeCurrent(c->m_display, *w, c->m_glContext))
             be_error("Unable to set current context");
     }
@@ -211,7 +211,7 @@ void GLWindow::clearCurrent() const
     if (m_context)
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
-        weak<GLRenderer::Context> c = be_checked_cast<GLRenderer>(m_renderer)->m_context;
+        weak<GLRenderer::Context> c = be_checked_cast<const GLRenderer>(m_renderer)->m_context;
         if(!glXMakeCurrent(c->m_display, c->m_defaultWindow, c->m_glContext))
             be_error("Unable to clear current context");
     }
@@ -223,7 +223,7 @@ void GLWindow::present() const
     {
         be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
-        glXSwapBuffers(be_checked_cast<GLRenderer>(m_renderer)->m_context->m_display, *w);
+        glXSwapBuffers(be_checked_cast<const GLRenderer>(m_renderer)->m_context->m_display, *w);
     }
 }
 

@@ -18,21 +18,15 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourceLoader> loader)
 {
-    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); )
+    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
-        if (it->loader == loader)
-        {
-            it = m_loaders.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
+        be_assert_recover(it->loader != loader, "registering twice the same loader for class %s" | classinfo->name, return);
     }
     LoaderInfo loaderInfo;
     loaderInfo.classinfo = classinfo;
     loaderInfo.loader = loader;
     m_loaders.push_back(loaderInfo);
+    printf("attached\n");
 }
 
 void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IResourceLoader> loader)
@@ -42,6 +36,7 @@ void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IR
         if (it->classinfo == classinfo)
         {
             it = m_loaders.erase(it);
+            return;
         }
         else
         {
