@@ -50,8 +50,8 @@ Dx9Renderer::Dx9Renderer(const PluginContext& context)
 ,   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
 ,   m_context(cgCreateContext())
-,   m_deviceState(DeviceLost)
 ,   m_threadId(Thread::currentId())
+,   m_deviceState(DeviceLost)
 {
     m_directx->GetDeviceCaps(0, D3DDEVTYPE_HAL, &m_caps);
 
@@ -122,17 +122,17 @@ void Dx9Renderer::flush()
     }
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const RenderTarget> rendertarget)
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderTarget> rendertarget) const
 {
     return ref<IGPUResource>();
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const RenderWindow> renderwindow)
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderWindow> renderwindow) const
 {
     return ref<Dx9Window>::create(m_allocator, renderwindow, this);
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const ShaderProgram> shader)
+ref<IGPUResource> Dx9Renderer::create(weak<const ShaderProgram> shader) const
 {
     return ref<Dx9ShaderProgram>::create(m_allocator, shader, this);
 }

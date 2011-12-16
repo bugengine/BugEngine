@@ -17,6 +17,7 @@ public:
     ~Win32File();
 private:
     void doFillBuffer(weak<File::Ticket> ticket) const override;
+    virtual void doWriteBuffer(weak<Ticket> ticket) const override;
 };
 
 }

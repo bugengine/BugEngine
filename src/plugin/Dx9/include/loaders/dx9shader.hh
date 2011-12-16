@@ -17,19 +17,8 @@ private:
     void load(weak<const Resource> resource) override;
     void unload() override;
 public:
-    Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<Dx9Renderer> renderer);
+    Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<const Dx9Renderer> renderer);
     ~Dx9ShaderProgram();
-};
-
-
-class Dx9Shader : public IGPUResource
-{
-private:
-    void load(weak<const Resource> resource) override;
-    void unload() override;
-public:
-    Dx9Shader(weak<const Shader> resource, weak<Dx9Renderer> renderer);
-    ~Dx9Shader();
 };
 
 }}}

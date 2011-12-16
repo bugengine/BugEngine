@@ -51,9 +51,8 @@ private:
     LPDIRECT3DDEVICE9       m_device;
     D3DCAPS9                m_caps;
     CGcontext               m_context;
-    weak<const Folder>      m_dataFolder;
-    DeviceState             m_deviceState;
     u64                     m_threadId;
+    mutable DeviceState     m_deviceState;
 public:
     Dx9Renderer(const PluginContext& context);
     ~Dx9Renderer();
