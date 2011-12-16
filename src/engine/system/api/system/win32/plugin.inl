@@ -62,14 +62,14 @@ Plugin<Interface>::Plugin(const istring &pluginName, PreloadType /*preload*/)
 }
 
 template< typename Interface >
-Plugin<Interface>::Plugin(const istring &pluginName)
+Plugin<Interface>::Plugin(const istring &pluginName, const PluginContext& context)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
 ,   m_refCount(new (gameArena()) i_u32(1))
 {
     if (m_handle)
     {
-        Interface* (*be_pluginCreate)(void) = reinterpret_cast<Interface* (*)(void)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
+        Interface* (*be_pluginCreate)(const PluginContext&) = reinterpret_cast<Interface* (*)(const PluginContext&)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
         if (!be_pluginCreate)
         {
             char *errorMessage;
@@ -85,67 +85,7 @@ Plugin<Interface>::Plugin(const istring &pluginName)
         }
         else
         {
-            m_interface = (*be_pluginCreate)();
-        }
-    }
-}
-
-template< typename Interface >
-template< typename T1 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
-:   m_handle(loadPlugin(pluginName))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        Interface* (*be_pluginCreate)(T1) = reinterpret_cast<Interface* (*)(T1)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
-        if (!be_pluginCreate)
-        {
-            char *errorMessage;
-            ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                ::GetLastError(),
-                0,
-                reinterpret_cast<LPTSTR>(&errorMessage),
-                0,
-                NULL);
-            be_error(errorMessage);
-            ::LocalFree(errorMessage);
-        }
-        else
-        {
-            m_interface = (*be_pluginCreate)(param1);
-        }
-    }
-}
-
-template< typename Interface >
-template< typename T1, typename T2 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
-:   m_handle(loadPlugin(pluginName))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        Interface* (*be_pluginCreate)(T1, T2) = reinterpret_cast<Interface* (*)(T1, T2)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
-        if (!be_pluginCreate)
-        {
-            char *errorMessage;
-            ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                ::GetLastError(),
-                0,
-                reinterpret_cast<LPTSTR>(&errorMessage),
-                0,
-                NULL);
-            be_error(errorMessage);
-            ::LocalFree(errorMessage);
-        }
-        else
-        {
-            m_interface = (*be_pluginCreate)(param1, param2);
+            m_interface = (*be_pluginCreate)(context);
         }
     }
 }

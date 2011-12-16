@@ -125,4 +125,69 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     }
 }
 
+weak<File> DiskFolder::createFile(const istring& name)
+{
+    const minitl::format<1024u> path = (m_path+ifilename(name)).str();
+    HANDLE h = CreateFileA ( path.c_str(),
+                             GENERIC_WRITE,
+                             0,
+                             0,
+                             CREATE_ALWAYS,
+                             0,
+                             0);
+    if (h == INVALID_HANDLE_VALUE)
+    {
+        char *errorMessage = 0;
+        int errorCode = ::GetLastError();
+        FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            errorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            reinterpret_cast<LPSTR>(&errorMessage),
+            0,
+            NULL);
+        be_error("File %s could not be created: CreateFile returned an error (%d) %s" | path | errorCode | errorMessage);
+        ::LocalFree(errorMessage);
+        return weak<File>();
+    }
+    else
+    {
+        CloseHandle(h);
+        WIN32_FIND_DATA data;
+        HANDLE h = FindFirstFile(path.c_str(), &data);
+        if (h == INVALID_HANDLE_VALUE)
+        {
+            char *errorMessage = 0;
+            int errorCode = ::GetLastError();
+            FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL,
+                errorCode,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                reinterpret_cast<LPSTR>(&errorMessage),
+                0,
+                NULL);
+            be_error("File %s could not be created: FindFirstFile returned an error (%d) %s" | path | errorCode | errorMessage);
+            ::LocalFree(errorMessage);
+            return weak<File>();
+        }
+        FindClose(h);
+        ref<File> result = ref<Win32File>::create(
+                    fsArena(),
+                    m_path+ifilename(name),
+                    File::Media(File::Media::Disk, m_index, 0),
+                    0);
+        for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+        {
+            if (it->first == name)
+            {
+                it->second = result;
+                return result;
+            }
+        }
+        m_files.push_back(minitl::make_pair(name, result));
+        return result;
+    }
+}
+
+
 }

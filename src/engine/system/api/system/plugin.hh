@@ -15,7 +15,7 @@ namespace RTTI
 }
 
 class ResourceManager;
-struct PluginContext
+struct be_api(SYSTEM) PluginContext
 {
     weak<ResourceManager>   resourceManager;
     PluginContext(weak<ResourceManager> manager);
