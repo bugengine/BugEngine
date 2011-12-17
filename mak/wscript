@@ -224,7 +224,7 @@ def createmasterfile(task):
 		f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
 	f.close()
 
-MasterTask = Task.task_factory("master", createmasterfile, color='CYAN')
+MasterTask = Task.task_factory("master", createmasterfile, color='CYAN', before='c cxx')
 
 @taskgen_method
 @feature('master')
@@ -340,7 +340,6 @@ from waflib import Task
 old_sort_tasks = Task.set_file_constraints
 def task_priority(t1):
 	if t1.__class__.__name__ in ['flex', 'bison', 'datagen']:
-		print t1.run_after
 		return 'b:'
 	elif t1.__class__.__name__ in ['master']:
 		return 'a:'
@@ -358,6 +357,5 @@ def task_priority(t1):
 def sort_tasks(tasks):
 	old_sort_tasks(tasks)
 	tasks.sort(key = task_priority)
-	print tasks
 
 Task.set_file_constraints = sort_tasks
