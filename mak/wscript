@@ -308,67 +308,6 @@ def extract_debug_info(self):
 		self.link_task = self.create_task('strip', outnode)
 		self.link_task.set_outputs(innode)
 		self.link_task.set_run_after(self.link_debug_task)
-"""
-@feature('cshlib', 'cxxshlib')
-@after_method('process_use')
-def add_bundle_executable(self):
-	if not 'osx' in self.env.PLATFORM:
-		return
-
-	use_not = self.tmp_use_not = set([])
-	use_seen = self.tmp_use_seen = [] # we would like an ordered set
-	use_prec = self.tmp_use_prec = {}
-	self.uselib = self.to_list(getattr(self, 'uselib', []))
-	self.includes = self.to_list(getattr(self, 'includes', []))
-	names = self.to_list(getattr(self, 'use', []))
-
-	for x in names:
-		self.use_rec(x)
-
-	for x in use_not:
-		if x in use_prec:
-			del use_prec[x]
-
-	# topological sort
-	out = []
-	tmp = []
-	for x in self.tmp_use_seen:
-		for k in use_prec.values():
-			if x in k:
-				break
-		else:
-			tmp.append(x)
-
-	while tmp:
-		e = tmp.pop()
-		out.append(e)
-		try:
-			nlst = use_prec[e]
-		except KeyError:
-			pass
-		else:
-			del use_prec[e]
-			for x in nlst:
-				for y in use_prec:
-					if x in use_prec[y]:
-						break
-				else:
-					tmp.append(x)
-	if use_prec:
-		raise Errors.WafError('Cycle detected in the use processing %r' % use_prec)
-	out.reverse()
-
-	link_task = getattr(self, 'link_task', None)
-	for x in out:
-		y = self.bld.get_tgen_by_name(x)
-		if 'cprogram' in y.features or 'cxxprogram' in y.features:
-			self.env.append_value('LINKFLAGS', '-bundle')
-			self.env.append_value('LINKFLAGS', '-bundle_loader')
-			self.env.append_value('LINKFLAGS', [y.target[y.target.rfind(os.sep) + 1:]])
-			if link_task:
-				self.link_task.dep_nodes.extend(y.link_task.outputs)
-			tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
-"""
 
 
 @feature('cprogram', 'cxxprogram')
@@ -396,3 +335,29 @@ class foo(BuildContext):
 	returned_tasks = []
 	def compile(self):
 		pass
+
+from waflib import Task
+old_sort_tasks = Task.set_file_constraints
+def task_priority(t1):
+	if t1.__class__.__name__ in ['flex', 'bison', 'datagen']:
+		print t1.run_after
+		return 'b:'
+	elif t1.__class__.__name__ in ['master']:
+		return 'a:'
+	elif t1.__class__.__name__ == 'cxx':
+		f = t1.outputs[0].abspath()
+		if f.find('master') != -1:
+			return 'f:'+t1.outputs[0].abspath()
+		else:
+			return 'g:'+t1.outputs[0].abspath()
+	elif t1.__class__.__name__ == 'c':
+		return 'h:'
+	else:
+		return 'z:'
+
+def sort_tasks(tasks):
+	old_sort_tasks(tasks)
+	tasks.sort(key = task_priority)
+	print tasks
+
+Task.set_file_constraints = sort_tasks
