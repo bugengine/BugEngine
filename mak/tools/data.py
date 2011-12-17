@@ -3,7 +3,6 @@
 
 from waflib import Task
 from waflib.TaskGen import extension
-import mak.ddf
 import os
 import sys
 from waflib.Utils import threading
@@ -19,9 +18,10 @@ def scan(self):
 def doParseData(task):
 	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.plugin, task.env.BROKEN_INITIALIZER)
 
-cls = Task.task_factory('datagen', doParseData, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
+ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/macros_ignore --pch ${PCH} --namespace ${PLUGIN} -b ${str(env.BROKEN_INITIALIZER)} ${SRC[0].abspath()}' % sys.executable
+cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc', before='cxx')
 cls.scan = scan
-old_runnable_status = cls.runnable_status
+"""old_runnable_status = cls.runnable_status
 def runnable_status(self):
 	global count, lock, MAX
 	ret = Task.ASK_LATER
@@ -44,7 +44,7 @@ def run(self):
 		count -= 1
 		lock.release()
 	return ret
-cls.run = run
+cls.run = run"""
 
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
@@ -52,14 +52,15 @@ def datagen(self, node):
 	outs.append(node.change_ext('.cc'))
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
+	tsk.env.detach()
 	if self.category == 'plugin':
-		tsk.plugin = self.name
+		tsk.env.PLUGIN = self.name
 	else:
-		tsk.plugin = 'game'
+		tsk.env.PLUGIN = 'game'
 	try:
-		tsk.pch = self.pchheader
+		tsk.env.PCH = self.pchheader
 	except AttributeError:
-		tsk.pch = ''
+		pass
 	tsk.dep_nodes = [
 		self.path.find_or_declare('mak/cpp/lexer.py'),
 		self.path.find_or_declare('mak/cpp/parser.py'),

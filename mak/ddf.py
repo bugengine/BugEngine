@@ -13,6 +13,8 @@ options.add_option("--cpp", dest="cpp", help="extension used for source implemen
 options.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
 options.add_option("-D", dest="macrofile", action="append", help="add the content of <macrofile> to the macros, one macro per line")
 options.add_option("-p", "--pch", dest="pch", help="insert an include for precompiled header at the start of the file")
+options.add_option("-n", "--namespace", dest="namespace", help="namespace root")
+options.add_option("-b", "--brokengcc", dest="brokengcc", help="generate code for an older/broken version of GCC")
 
 
 global_macro_map = {
@@ -97,7 +99,7 @@ if __name__ == '__main__':
 			raise Exception("source file and target file are the same: %s" % outputname)
 
 		path = os.path.abspath(os.path.split(sys.argv[0])[0])
-		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch) > 0:
+		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch, options.namespace, options.brokengcc == "True") > 0:
 			exit(1)
 	exit(0)
 
