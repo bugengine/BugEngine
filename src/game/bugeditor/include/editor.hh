@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Editor
 {
 
-class Editor : public minitl::refcountable
+class Editor : public Application
 {
 private:
     scoped<ResourceManager> const   m_resourceManager;

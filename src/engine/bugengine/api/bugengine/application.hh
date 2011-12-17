@@ -26,16 +26,16 @@ private:
     minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
     minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
     ITask::CallbackConnection                       m_updateLoop;
-public:
+protected:
+    void addTask(ref<ITask> task);
     Application();
+public:
     virtual ~Application(void);
 
     int run();
-
-    weak<const Scheduler> scheduler() const  { return m_scheduler; }
 private:
-    ResourceHandle load(weak<const Resource> scene) override;
-    void unload(const ResourceHandle& handle) override;
+    virtual ResourceHandle load(weak<const Resource> scene) override;
+    virtual void unload(const ResourceHandle& handle) override;
 };
 
 }

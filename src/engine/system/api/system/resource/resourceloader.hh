@@ -21,6 +21,7 @@ protected:
     ~IResourceLoader();
 
     virtual ResourceHandle load(weak<const Resource> resource) = 0;
+    virtual void onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer) { be_notreached(); }
     virtual void unload(const ResourceHandle& resource) = 0;
 };
 

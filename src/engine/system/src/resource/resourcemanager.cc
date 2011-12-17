@@ -9,6 +9,7 @@ namespace BugEngine
 
 ResourceManager::ResourceManager()
     :   m_loaders(gameArena())
+    ,   m_tickets(gameArena())
 {
 }
 
@@ -26,7 +27,6 @@ void ResourceManager::attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourc
     loaderInfo.classinfo = classinfo;
     loaderInfo.loader = loader;
     m_loaders.push_back(loaderInfo);
-    printf("attached\n");
 }
 
 void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IResourceLoader> loader)
@@ -64,6 +64,31 @@ void ResourceManager::unload(raw<const RTTI::ClassInfo> classinfo, weak<const Re
         if (it->classinfo == classinfo)
         {
             resource->unload(it->loader);
+        }
+    }
+}
+
+void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file)
+{
+    Ticket ticket;
+    ticket.loader = loader;
+    ticket.resource = resource;
+    ticket.ticket = file->beginRead(0, 0, tempArena());
+    m_tickets.push_back(ticket);
+}
+
+void ResourceManager::updateTickets()
+{
+    for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
+    {
+        if (it->ticket->done())
+        {
+            it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
+            it = m_tickets.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }
