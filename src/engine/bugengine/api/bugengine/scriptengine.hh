@@ -16,15 +16,16 @@ class ScriptEngine : public IResourceLoader
 private:
     Allocator&                                                                      m_scriptArena;
     weak<ResourceManager>                                                           m_manager;
-    minitl::vector< minitl::pair< ref<const File::Ticket>, weak<const Script> > >   m_tickets;
-protected:
-    ScriptEngine(Allocator& arena, weak<ResourceManager> manager);
 public:
     virtual ~ScriptEngine();
+protected:
+    ScriptEngine(Allocator& arena, weak<ResourceManager> manager);
     virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;
+
 private:
     virtual ResourceHandle load(weak<const Resource> script) override;
     virtual void unload(const ResourceHandle& handle) override;
+    virtual void onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

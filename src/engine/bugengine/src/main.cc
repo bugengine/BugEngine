@@ -86,9 +86,8 @@ static int __main(int argc, const char *argv[])
                 BugEngine::DiskFolder::CreateOne);
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::debugArena(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
-        ref<BugEngine::Application> locApplication = ref<BugEngine::Application>::create(BugEngine::taskArena());
-        BugEngine::Plugin<void*> plugin(BugEngine::Environment::getEnvironment().getGame(), BugEngine::PluginContext(weak<BugEngine::ResourceManager>()));
-        return locApplication->run();
+        BugEngine::Plugin<BugEngine::Application> app(BugEngine::Environment::getEnvironment().getGame(), BugEngine::PluginContext(weak<BugEngine::ResourceManager>()));
+        return app->run();
     }
 #ifdef BE_ENABLE_EXCEPTIONS
     catch(...)

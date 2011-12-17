@@ -55,6 +55,13 @@ Application::~Application(void)
 {
 }
 
+void Application::addTask(ref<ITask> task)
+{
+    m_tasks.push_back(task);
+    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, task));
+    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, task));
+}
+
 int Application::run()
 {
     m_updateTask->run(m_scheduler);
