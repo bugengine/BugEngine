@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Graphics { namespace DirectX9
 {
 
-Dx9ShaderProgram::Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<Dx9Renderer> renderer)
+Dx9ShaderProgram::Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<const Dx9Renderer> renderer)
     :   IGPUResource(resource, renderer)
 {
 }

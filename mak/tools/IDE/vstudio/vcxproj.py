@@ -19,7 +19,7 @@ class VCxproj:
 		self.envs = envs
 		self.projectType = 'Makefile'
 
-	def writeHeader(self, configs):
+	def writeHeader(self, configs, engine):
 		self.filters.write('<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
 		self.output.write('<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
 		self.output.write('  <ItemGroup Label="ProjectConfigurations">\n')
@@ -56,9 +56,12 @@ class VCxproj:
 			self.output.write('  <PropertyGroup Condition="\'$(Configuration)\'==\'%s\'">\n' % (config))
 			if self.type == 'game':
 				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % config)
-				self.output.write('    <NMakeOutput>$(SolutionDir)%s\\%s\\%s</NMakeOutput>\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%self.name))
+				self.output.write('    <NMakeOutput>$(SolutionDir)%s\\%s\\%s</NMakeOutput>\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%engine))
 				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s</NMakeCleanCommandLine>\n' % config)
 				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
+				self.output.write('    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>')
+				self.output.write('    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>')
+				self.output.write('    <LocalDebuggerCommandArguments>%s</LocalDebuggerCommandArguments>' % self.name)
 			else:
 				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s --targets=%s</NMakeBuildCommandLine>\n' % (config, self.name))
 				self.output.write('    <NMakeOutput></NMakeOutput>\n')
