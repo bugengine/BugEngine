@@ -46,7 +46,7 @@ class vs2003(Build.BuildContext):
 
 				node = projects.make_node("%s.%s%s" % (tg.category, tg.name, klass.extensions[0]))
 				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.category, self.all_envs)
-				project.writeHeader(allplatforms)
+				project.writeHeader(allplatforms, self.game.name)
 				project.addDirectory(tg.sourcetree)
 				project.writeFooter()
 				project_list.append((project, node))

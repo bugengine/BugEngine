@@ -244,7 +244,7 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<GLRenderer> renderer)
+GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer> renderer)
 :   Windowing::Window(renderwindow, renderer)
 ,   m_context(scoped<Context>())
 {
