@@ -245,7 +245,6 @@ def find_cross_gcc(conf):
 	conf.env.BROKEN_INITIALIZER = gcc == 'gcc' and version.split('.')[0] == '3'
 	versionsmall = '.'.join(version.split('.')[0:2])
 	versionverysmall = ''.join(version.split('.')[0:2])
-	print(target)
 	if target:
 		v = conf.env
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
