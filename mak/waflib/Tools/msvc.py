@@ -132,15 +132,7 @@ echo LIB=%%LIB%%
 	sout = conf.cmd_and_log(['cmd', '/E:on', '/V:on', '/C', batfile.abspath()])
 	lines = sout.splitlines()
 
-	if not lines[0]: lines=lines[1:]
-	for x in ('Setting environment', 'Setting SDK environment', 'Intel(R) C++ Compiler', 'Intel Parallel Studio'):
-		if lines[0].find(x) != -1:
-			break
-	else:
-		debug('msvc: get_msvc_version: %r %r %r -> not found', compiler, version, target)
-		conf.fatal('msvc: Impossible to find a valid architecture for building (in get_msvc_version)')
-
-	for line in lines[1:]:
+	for line in lines:
 		if line.startswith('PATH='):
 			path = line[5:]
 			MSVC_PATH = path.split(';')
@@ -303,7 +295,7 @@ def gather_msvc_targets(conf, versions, version, vc_path):
 		for target,realtarget in all_msvc_platforms[::-1]:
 			try:
 				targets.append((target, (realtarget, conf.get_msvc_version('msvc', version, target, os.path.join(vc_path, 'vcvarsall.bat')))))
-			except conf.errors.ConfigurationError:
+			except conf.errors.ConfigurationError as e:
 				pass
 	elif os.path.isfile(os.path.join(vc_path, 'Common7', 'Tools', 'vsvars32.bat')):
 		try:
