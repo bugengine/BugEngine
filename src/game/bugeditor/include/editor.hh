@@ -9,6 +9,12 @@
 #include    <system/resource/resourcemanager.hh>
 #include    <system/plugin.hh>
 
+namespace BugEngine
+{
+class Folder;
+class Package;
+}
+
 namespace BugEngine { namespace Editor
 {
 
@@ -18,6 +24,8 @@ private:
     scoped<ResourceManager> const   m_resourceManager;
     PluginContext           const   m_pluginContext;
     Plugin<IResourceLoader> const   m_packageBuilder;
+    ref<Folder>             const   m_dataFolder;
+    ref<const Package>      const   m_mainPackage;
 public:
     Editor(const PluginContext& context);
     ~Editor();

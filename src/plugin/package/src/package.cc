@@ -4,10 +4,10 @@
 #include    <package/stdafx.h>
 #include    <package/package.script.hh>
 
-namespace BugEngine { namespace PackageManager
+namespace BugEngine
 {
 
-Package::Package(ref<const File> file)
+Package::Package(weak<const File> file)
     :   Script(file)
 {
 }
@@ -16,4 +16,4 @@ Package::~Package()
 {
 }
 
-}}
+}

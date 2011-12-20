@@ -17,9 +17,9 @@ class BE_EXPORT Script : public Resource
     template< typename T >
     friend class ScriptEngine;
 private:
-    ref<const File>   m_file;
+    weak<const File>  m_file;
 protected:
-    Script(ref<const File> file);
+    Script(weak<const File> file);
     ~Script();
 };
 

@@ -7,7 +7,7 @@
 namespace BugEngine
 {
 
-Script::Script(ref<const File> file)
+Script::Script(weak<const File> file)
     :   m_file(file)
 {
 }
