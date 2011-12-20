@@ -60,7 +60,6 @@ def plugins(bld):
 
 
 	package			= module.plugin('package',			[])
-	packagebuilder	= module.plugin('packagebuilder',	[package])
 
 	bullet			= module.plugin('bullet',			[bulletengine])
 
@@ -89,7 +88,7 @@ def plugins(bld):
 			#Dx11	= module.plugin('DX11',				[bld.game, windowing, cgDx, directx11, _3d])
 
 
-	bugeditor		= module.game('bugeditor',			[packagebuilder], platforms=['pc'])
+	bugeditor		= module.game('bugeditor',			[package], platforms=['pc'])
 
 	bld.recurse('mak', name='plugins', once=False)
 

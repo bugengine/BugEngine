@@ -60,6 +60,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
                 t->file->fillBuffer(t);
             break;
         case File::Ticket::Write:
+            t->buffer.realloc(t->total);
             t->file->writeBuffer(t);
             break;
         }

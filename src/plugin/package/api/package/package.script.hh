@@ -16,7 +16,7 @@ class Package : public Script
 {
     friend class PackageLoader;
 published:
-    Package(be_tag(EditHint::Extension(".bpkg")) ref<const File> file);
+    Package(ref<const File> file);
     ~Package();
 };
 

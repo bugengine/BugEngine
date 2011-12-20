@@ -1,10 +1,10 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGEBUILDER_NODES_OBJECT_HH_
-#define BE_PACKAGEBUILDER_NODES_OBJECT_HH_
+#ifndef BE_PACKAGE_NODES_OBJECT_HH_
+#define BE_PACKAGE_NODES_OBJECT_HH_
 /*****************************************************************************/
-#include    <packagebuilder/nodes/overloadmatch.hh>
+#include    <package/nodes/overloadmatch.hh>
 
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes

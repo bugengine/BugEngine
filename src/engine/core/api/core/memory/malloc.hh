@@ -29,10 +29,10 @@ public:
         size_t      m_count;
         T*          m_data;
     public:
-        Block(Allocator& allocator, size_t count, size_t alignment = be_alignof(T))
+        Block(Allocator& allocator, size_t count, size_t alignment = be_min<size_t>(16, be_alignof(T)))
             :   m_allocator(&allocator)
             ,   m_count(count)
-            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), alignment)*count, alignment))
+            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), be_alignof(T))*count, alignment))
         {
         };
         ~Block()
@@ -45,10 +45,11 @@ public:
         operator T*()                   { return m_data; }
         operator const T*() const       { return m_data; }
         size_t count() const            { return m_count; }
+        size_t byteCount() const        { return be_align(sizeof(T), be_alignof(T))*count; }
 
-        bool resize(size_t count, size_t alignment = be_alignof(T))
+        bool resize(size_t count)
         {
-            size_t size = be_align(sizeof(T), alignment)*count;
+            size_t size = be_align(sizeof(T), be_alignof(T))*count;
             if (m_allocator->resize(m_data, size))
             {
                 m_count = count;
@@ -59,9 +60,9 @@ public:
                 return false;
             }
         }
-        void realloc(size_t count, size_t alignment = be_alignof(T))
+        void realloc(size_t count, size_t alignment = be_min<size_t>(16, be_alignof(T)))
         {
-            size_t size = be_align(sizeof(T), alignment)*count;
+            size_t size = be_align(sizeof(T), be_alignof(T))*count;
             m_count = count;
             m_data = (T*)m_allocator->realloc(m_data, size, alignment);
         }

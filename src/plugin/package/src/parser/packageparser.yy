@@ -1,10 +1,10 @@
 %{
-#include    <packagebuilder/stdafx.h>
+#include    <package/stdafx.h>
 #include    <buildcontext.hh>
-#include    <packagebuilder/nodes/package.hh>
-#include    <packagebuilder/nodes/object.hh>
-#include    <packagebuilder/nodes/reference.hh>
-#include    <packagebuilder/nodes/parameter.hh>
+#include    <package/nodes/package.hh>
+#include    <package/nodes/object.hh>
+#include    <package/nodes/reference.hh>
+#include    <package/nodes/parameter.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex

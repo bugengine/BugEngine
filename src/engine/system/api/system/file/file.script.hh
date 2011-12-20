@@ -70,7 +70,8 @@ public:
 
         inline bool done() const    { return error || processed == total; }
 
-        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, Action action);
+        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size);
+        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data);
         ~Ticket();
     private:
         Ticket(const Ticket&);

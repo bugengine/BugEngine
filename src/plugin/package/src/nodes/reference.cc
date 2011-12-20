@@ -1,9 +1,9 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <packagebuilder/stdafx.h>
-#include    <packagebuilder/nodes/reference.hh>
-#include    <packagebuilder/nodes/package.hh>
+#include    <package/stdafx.h>
+#include    <package/nodes/reference.hh>
+#include    <package/nodes/package.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

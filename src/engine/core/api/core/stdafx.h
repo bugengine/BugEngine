@@ -51,10 +51,22 @@ struct StaticAssert_<true>
 #define StaticAssert(expr) StaticAssert_<expr>::Defined ;
 
 template< typename T >
-T be_align(T value, size_t alignment)
+inline T be_align(T value, size_t alignment)
 {
     size_t v = (size_t)(value);
     return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
+}
+
+template< typename T >
+inline T be_min(T t1, T t2)
+{
+    return t1 < t2 ? t1 : t2;
+}
+
+template< typename T >
+inline T be_max(T t1, T t2)
+{
+    return t1 > t2 ? t1 : t2;
 }
 
 #include    <core/memory/malloc.hh>
