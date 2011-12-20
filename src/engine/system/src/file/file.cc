@@ -15,7 +15,7 @@ static Allocator& ticketPool()
 }
 
 File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size)
-    :   action(Write)
+    :   action(Read)
     ,   file(file)
     ,   buffer(arena, 0)
     ,   processed(0)
@@ -26,7 +26,7 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 si
 }
 
 File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data)
-    :   action(Read)
+    :   action(Write)
     ,   file(file)
     ,   buffer(arena, size)
     ,   processed(0)
