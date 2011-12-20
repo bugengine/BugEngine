@@ -5,7 +5,7 @@
 #define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 /*****************************************************************************/
 #include    <system/plugin.hh>
-#include    <packagebuilder/nodes/package.hh>
+#include    <package/nodes/package.hh>
 
 namespace BugEngine { namespace PackageBuilder
 {

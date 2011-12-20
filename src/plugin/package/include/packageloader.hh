@@ -4,7 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGELOADER_HH_
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /*****************************************************************************/
-#include    <package.script.hh>
+#include    <package/package.script.hh>
 #include    <bugengine/scriptengine.hh>
 #include    <system/plugin.hh>
 

@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGEBUILDER_STDAFX_H_
-#define BE_PACKAGEBUILDER_STDAFX_H_
+#ifndef BE_PACKAGE_STDAFX_H_
+#define BE_PACKAGE_STDAFX_H_
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
@@ -10,7 +10,13 @@
 #include    <system/stdafx.h>
 #include    <bugengine/stdafx.h>
 
-namespace BugEngine { Allocator& packageBuilderArena(); }
+namespace BugEngine
+{
+
+Allocator& packageArena();
+Allocator& packageBuilderArena();
+
+}
 
 /*****************************************************************************/
 #endif

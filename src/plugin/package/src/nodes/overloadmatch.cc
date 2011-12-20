@@ -1,9 +1,9 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <packagebuilder/stdafx.h>
-#include    <packagebuilder/nodes/overloadmatch.hh>
-#include    <packagebuilder/nodes/parameter.hh>
+#include    <package/stdafx.h>
+#include    <package/nodes/overloadmatch.hh>
+#include    <package/nodes/parameter.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
