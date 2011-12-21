@@ -57,7 +57,7 @@ File::~File()
 ref<const File::Ticket> File::beginRead(u32 size, i64 offset, Allocator& arena) const
 {
     u32 s;
-    if (offset > 0)
+    if (offset >= 0)
     {
         be_assert(offset <= m_size, "reading past end of file");
         be_assert(offset+size <= m_size, "reading past end of file");

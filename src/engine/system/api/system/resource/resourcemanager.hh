@@ -40,8 +40,10 @@ public:
 
     template< typename T > void attach(weak<IResourceLoader> loader)        { attach(be_typeid<T>::klass(), loader); }
     template< typename T > void detach(weak<const IResourceLoader> loader)  { detach(be_typeid<T>::klass(), loader); }
-    template< typename T > void load(weak<const T> resource) const          { load(be_typeid<T>::klass(), resource); }
-    template< typename T > void unload(weak<const T> resource) const        { unload(be_typeid<T>::klass(), resource); }
+    template< typename T > void load(weak<T> resource) const                { load(be_typeid<T>::klass(), resource); }
+    template< typename T > void load(ref<T> resource) const                 { load(be_typeid<T>::klass(), resource); }
+    template< typename T > void unload(weak<T> resource) const              { unload(be_typeid<T>::klass(), resource); }
+    template< typename T > void unload(ref<T> resource) const               { unload(be_typeid<T>::klass(), resource); }
 
     void addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file);
     void updateTickets();

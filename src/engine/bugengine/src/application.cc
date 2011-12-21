@@ -44,11 +44,8 @@ Application::Application()
 ,   m_endConnections(taskArena())
 ,   m_updateLoop(m_updateTask, m_updateTask->startCallback())
 {
-    m_tasks.push_back(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
-    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, m_tasks[0]));
-    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, m_tasks[0]));
-
-    m_updateLoop = ITask::CallbackConnection();
+    addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
+    //m_updateLoop = ITask::CallbackConnection();
 }
 
 Application::~Application(void)
