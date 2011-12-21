@@ -12,7 +12,7 @@ namespace BugEngine
 
 class PackageLoader;
 
-class Package : public Script
+class be_api(PACKAGE) Package : public Script
 {
     friend class PackageLoader;
 published:
