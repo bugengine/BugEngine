@@ -57,10 +57,12 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
         {
         case File::Ticket::Read:
             if (!s_ioDone)
+            {
+                t->buffer.realloc(t->total);
                 t->file->fillBuffer(t);
+            }
             break;
         case File::Ticket::Write:
-            t->buffer.realloc(t->total);
             t->file->writeBuffer(t);
             break;
         }

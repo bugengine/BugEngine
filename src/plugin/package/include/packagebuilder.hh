@@ -16,7 +16,7 @@ public:
     PackageBuilder();
     ~PackageBuilder();
 private:
-    virtual ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer) override;
+    virtual ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer);
 };
 
 }}

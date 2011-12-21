@@ -10,5 +10,7 @@
 #include    <system/stdafx.h>
 #include    <bugengine/stdafx.h>
 
+#include    <package/stdafx.h>
+
 /*****************************************************************************/
 #endif

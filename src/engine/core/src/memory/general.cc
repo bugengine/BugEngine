@@ -28,9 +28,9 @@ GeneralAllocator::~GeneralAllocator()
 void* GeneralAllocator::internalAlloc(size_t size, size_t alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
+    return size > 0 ? ::_aligned_malloc(size, alignment) : 0;
 #else
-    return ::malloc(size);
+    return size > 0 ? ::malloc(size) : 0;
 #endif
 }
 

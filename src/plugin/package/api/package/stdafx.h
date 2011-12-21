@@ -10,6 +10,14 @@
 #include    <system/stdafx.h>
 #include    <bugengine/stdafx.h>
 
+#if defined(building_package)
+# define    PACKAGEEXPORT      BE_EXPORT
+#elif defined(package_dll)
+# define    PACKAGEEXPORT      BE_IMPORT
+#else
+# define    PACKAGEEXPORT
+#endif
+
 namespace BugEngine
 {
 
