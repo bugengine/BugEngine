@@ -89,13 +89,13 @@ class vs2010e(vs2003):
 	fun = 'build'
 	version =	(('Visual C++ Express 2010', '11.00'),(vcxproj.VCxproj, '4.0'))
 
-class vs2012(vs2003):
-	cmd = 'vs2012'
+class vs11(vs2003):
+	cmd = 'vs11'
 	fun = 'build'
 	version =	(('Visual Studio 11', '12.00'),(vcxproj.VCxproj, '4.0'))
 
-class vs2010e(vs2003):
-	cmd = 'vs2010e'
+class vs11e(vs2003):
+	cmd = 'vs11e'
 	fun = 'build'
 	version =	(('Visual C++ Express 11', '12.00'),(vcxproj.VCxproj, '4.0'))
 
