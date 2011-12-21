@@ -15,8 +15,8 @@ class PackageBuilder : public minitl::pointer
 public:
     PackageBuilder();
     ~PackageBuilder();
-private:
-    virtual ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer);
+public:
+    ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer);
 };
 
 }}
