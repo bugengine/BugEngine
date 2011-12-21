@@ -8,12 +8,19 @@
 #include    <bugengine/scriptengine.hh>
 #include    <system/plugin.hh>
 
+namespace BugEngine { namespace PackageBuilder
+{
+class PackageBuilder;
+}}
+
 namespace BugEngine { namespace PackageManager
 {
 
 class PackageLoader : public ScriptEngine<Package>
 {
     BE_NOCOPY(PackageLoader);
+private:
+    scoped<PackageBuilder::PackageBuilder>   m_packageBuilder;
 public:
     PackageLoader(const PluginContext& context);
     ~PackageLoader();

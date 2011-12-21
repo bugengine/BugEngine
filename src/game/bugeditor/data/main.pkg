@@ -1,6 +1,6 @@
 plugin 3d;
 
-w = 3d.Graphics.Window
+w = 3d.Graphics.RenderWindow
 (
     width = 800;
     height = 600;

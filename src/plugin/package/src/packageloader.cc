@@ -4,6 +4,7 @@
 #include    <package/stdafx.h>
 #include    <packageloader.hh>
 #include    <core/threads/thread.hh>
+#include    <packagebuilder.hh>
 
 namespace BugEngine
 {
@@ -25,6 +26,7 @@ Allocator& packageArena()
 
 PackageLoader::PackageLoader(const PluginContext& context)
     :   ScriptEngine<Package>(packageArena(), context.resourceManager)
+    ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(packageArena()))
 {
 }
 
@@ -34,10 +36,7 @@ PackageLoader::~PackageLoader()
 
 void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer)
 {
-    struct PackageHeader
-    {
-        int version;
-    };
+    script->getResourceHandleForWriting(this).handle = m_packageBuilder->createPackage(buffer);
 }
 
 }}
