@@ -14,7 +14,7 @@ namespace BugEngine
 
 class World;
 
-class Application : public IResourceLoader
+class be_api(BUGENGINE) Application : public IResourceLoader
 {
     BE_NOCOPY(Application);
 private:
