@@ -19,101 +19,110 @@ def add(doc, parent, tag, value = None):
 	parent.appendChild(el)
 	return el
 
-def generateProjectXml(appname, confs):
-	doc = Document()
-	doc.encoding = "UTF-8"
-	project = add(doc, doc, 'project', {'xmlns': "http://www.netbeans.org/ns/project/1"})
-	add(doc, project, 'type', "org.netbeans.modules.cnd.makeproject")
-	configuration = add(doc, project, 'configuration')
-	data = add(doc, configuration, 'data', {'xmlns': "http://www.netbeans.org/ns/make-project/1"})
-	add(doc, data, 'name', appname)
-	add(doc, data, 'c-extensions', 'c,m')
-	add(doc, data, 'cpp-extensions', 'cpp,cc,cxx,mm')
-	add(doc, data, 'header-extensions', 'h,hh,hxx,inl')
-	add(doc, data, 'sourceEncoding', 'UTF-8')
-	add(doc, data, 'make-dep-projects')
-	sourceRootList = add(doc, data, 'sourceRootList')
-	sourceRoot = add(doc, sourceRootList, 'sourceRootElem', '.')
-	confList = add(doc, data, 'confList')
-	for i in confs:
-		elem = add(doc, confList, 'confElem')
-		add(doc, elem, 'name', i)
-		add(doc, elem, 'type', '0')
-	return doc
-
-def addSourceTree(doc, xml, name, folder, prefix):
-	f = add(doc, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
-	for subname, subdir in folder.directories.items():
-		addSourceTree(doc, f, subname, subdir, os.path.join(prefix, subdir.prefix))
-	for source in folder.files:
-		if not source.generated():
-			add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
-
-def generateConfigurationsXml(sources, configurations, bld, out):
-	doc = Document()
-	doc.encoding = "UTF-8"
-	cd = add(doc, doc, 'configurationDescriptor', {'version':'79'})
-	lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
-	categories = {}
-	for i in ['3rdparty', 'engine', 'game', 'plugin']:
-		categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
-	for project, category, source, options in sources:
-		addSourceTree(doc, categories[category], project, source, source.prefix)
-	impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
-	add(doc, impfiles, 'itemPath', sys.argv[0])
-	#add(doc, cd, 'sourceFolderFilter')
-	srl = add(doc, cd, 'sourceRootList')
-	add(doc, srl, 'Elem', '.')
-	add(doc, srl, 'Elem', './build/')
-	add(doc, cd, 'projectmakefile', sys.argv[0])
-	confs = add(doc, cd, 'confs')
-	for c in configurations:
-		env = bld.all_envs[c]
-		conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
-		toolsSet = add(doc, conf, 'toolsSet')
-		add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
-		add(doc, toolsSet, 'compilerSet', 'default')
-		mtype = add(doc, conf, 'makefileType')
-		mtool = add(doc, mtype, 'makeTool')
-		add(doc, mtool, 'buildCommandWorkingDir', '.')
-		add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
-		add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
-		if env.ABI == 'mach_o' and False:
-			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
-		else:
-			add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
-		for project, category, source, options in sources:
-			options = options[c]
-			name = category+'/'+project
-			f = add(doc, conf, 'folder', {'path': name})
-			ctool = add(doc, f, 'cTool')
-			incdir = add(doc, ctool, 'incDir')
-			for i in options.includedir:
-				add(doc, incdir, 'pElem', i)
-			defines = add(doc, ctool, 'preprocessorList')
-			for d in ['be_api(x)=', 'BE_EXPORT=']:
-				add(doc, defines, 'Elem', d)
-			for d in env.DEFINES:
-				add(doc, defines, 'Elem', d)
-			for d in options.defines:
-				add(doc, defines, 'Elem', d)
-			ctool = add(doc, f, 'ccTool')
-			incdir = add(doc, ctool, 'incDir')
-			for i in options.includedir:
-				add(doc, incdir, 'pElem', i)
-			defines = add(doc, ctool, 'preprocessorList')
-			for d in ['be_api(x)=', 'BE_EXPORT=']:
-				add(doc, defines, 'Elem', d)
-			for d in env.DEFINES:
-				add(doc, defines, 'Elem', d)
-			for d in options.defines:
-				add(doc, defines, 'Elem', d)
-
-	return doc
-
 class netbeans(Build.BuildContext):
-	cmd = 'netbeans'
-	fun = 'build'
+	cmd		= 'netbeans'
+	fun		= 'build'
+	version	= 79
+
+	def generateProjectXml(self, appname, confs):
+		doc = Document()
+		doc.encoding = "UTF-8"
+		project = add(doc, doc, 'project', {'xmlns': "http://www.netbeans.org/ns/project/1"})
+		add(doc, project, 'type', "org.netbeans.modules.cnd.makeproject")
+		configuration = add(doc, project, 'configuration')
+		data = add(doc, configuration, 'data', {'xmlns': "http://www.netbeans.org/ns/make-project/1"})
+		add(doc, data, 'name', appname)
+		add(doc, data, 'make-project-type', '1')
+		add(doc, data, 'c-extensions', 'c,m')
+		add(doc, data, 'cpp-extensions', 'cpp,cc,cxx,mm')
+		add(doc, data, 'header-extensions', 'h,hh,hxx,inl')
+		add(doc, data, 'sourceEncoding', 'UTF-8')
+		add(doc, data, 'make-dep-projects')
+		if self.__class__.version >= 70:
+			sourceRootList = add(doc, data, 'sourceRootList')
+			sourceRoot = add(doc, sourceRootList, 'sourceRootElem', '.')
+			confList = add(doc, data, 'confList')
+			for i in confs:
+				elem = add(doc, confList, 'confElem')
+				add(doc, elem, 'name', i)
+				add(doc, elem, 'type', '0')
+		return doc
+
+	def addSourceTree(self, doc, xml, name, folder, prefix):
+		f = add(doc, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
+		for subname, subdir in folder.directories.items():
+			self.addSourceTree(doc, f, subname, subdir, os.path.join(prefix, subdir.prefix))
+		for source in folder.files:
+			if not source.generated():
+				add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
+
+	def generateConfigurationsXml(self, sources, configurations, bld, out):
+		doc = Document()
+		doc.encoding = "UTF-8"
+		cd = add(doc, doc, 'configurationDescriptor', {'version':'%i'%self.__class__.version})
+		lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
+		categories = {}
+		for i in ['3rdparty', 'engine', 'game', 'plugin']:
+			categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
+		for project, category, source, options in sources:
+			self.addSourceTree(doc, categories[category], project, source, source.prefix)
+		impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
+		add(doc, impfiles, 'itemPath', sys.argv[0])
+		#add(doc, cd, 'sourceFolderFilter')
+		srl = add(doc, cd, 'sourceRootList')
+		add(doc, srl, 'Elem', '.')
+		add(doc, srl, 'Elem', './build/')
+		add(doc, cd, 'projectmakefile', sys.argv[0])
+		confs = add(doc, cd, 'confs')
+		for c in configurations:
+			env = bld.all_envs[c]
+			conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
+			toolsSet = add(doc, conf, 'toolsSet')
+			add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
+			add(doc, toolsSet, 'compilerSet', 'default')
+			mtype = add(doc, conf, 'makefileType')
+			mtool = add(doc, mtype, 'makeTool')
+			add(doc, mtool, 'buildCommandWorkingDir', '.')
+			add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
+			add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
+			if env.ABI == 'mach_o' and False:
+				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+			else:
+				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
+			for project, category, source, options in sources:
+				options = options[c]
+				name = category+'/'+project
+				f = add(doc, conf, 'folder', {'path': name})
+				if self.__class__.version >= 70:
+					ctool = add(doc, f, 'cTool')
+				else:
+					ctool = add(doc, f, 'cCompilerTool')
+				incdir = add(doc, ctool, 'incDir')
+				for i in options.includedir:
+					add(doc, incdir, 'pElem', i)
+				defines = add(doc, ctool, 'preprocessorList')
+				for d in ['be_api(x)=', 'BE_EXPORT=']:
+					add(doc, defines, 'Elem', d)
+				for d in env.DEFINES:
+					add(doc, defines, 'Elem', d)
+				for d in options.defines:
+					add(doc, defines, 'Elem', d)
+				if self.__class__.version >= 70:
+					ctool = add(doc, f, 'ccTool')
+				else:
+					ctool = add(doc, f, 'ccCompilerTool')
+				incdir = add(doc, ctool, 'incDir')
+				for i in options.includedir:
+					add(doc, incdir, 'pElem', i)
+				defines = add(doc, ctool, 'preprocessorList')
+				for d in ['be_api(x)=', 'BE_EXPORT=']:
+					add(doc, defines, 'Elem', d)
+				for d in env.DEFINES:
+					add(doc, defines, 'Elem', d)
+				for d in options.defines:
+					add(doc, defines, 'Elem', d)
+
+		return doc
 
 	def execute(self):
 		"""
@@ -140,9 +149,21 @@ class netbeans(Build.BuildContext):
 				tg.post()
 				deps.append((tg.name, tg.category, tg.sourcetree, tg.options))
 
-		p = generateProjectXml(appname, self.env['ALL_VARIANTS'])
+		p = self.generateProjectXml(appname, self.env['ALL_VARIANTS'])
 		project.write(p.toxml())
-		c = generateConfigurationsXml(deps, self.env['ALL_VARIANTS'], self, self.game.name)
+		c = self.generateConfigurationsXml(deps, self.env['ALL_VARIANTS'], self, self.game.name)
 		confs.write(c.toxml())
 
 
+class netbeans7(netbeans):
+	cmd = 'netbeans7'
+	fun = 'build'
+
+class netbeans6(netbeans):
+	cmd		= 'netbeans6'
+	fun		= 'build'
+	version	= 51
+
+class sunstudio(netbeans6):
+	cmd = 'sunstudio'
+	fun = 'build'
