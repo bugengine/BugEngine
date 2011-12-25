@@ -14,10 +14,8 @@ struct BuildContext
 {
     ref<Nodes::Package>                                 result;
 
-    BuildContext()
-        :   result(ref<Nodes::Package>::create(packageBuilderArena()))
-    {
-    }
+    BuildContext(const Allocator::Block<u8>& buffer);
+    ~BuildContext();
 };
 
 }}

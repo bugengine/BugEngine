@@ -23,9 +23,8 @@ IShaderBuilder::IShaderBuilder()
     ,   m_indent(0)
     ,   m_counter(0)
 {
-    m_stream.write("\0", 1);
-    m_stream.seek(MemoryStream::eSeekMove, -1);
     m_namespaces.push_back(Namespace());
+    m_stream.write("\0", 1);
 }
 
 IShaderBuilder::~IShaderBuilder()
@@ -44,6 +43,7 @@ void IShaderBuilder::unindent()
 
 void IShaderBuilder::write(const char *text)
 {
+    m_stream.erase(1);
     size_t size = text ? strlen(text) : 0;
     if (size)
     {
@@ -52,25 +52,22 @@ void IShaderBuilder::write(const char *text)
         m_stream.write(text, strlen(text));
     }
     m_stream.write("\0", 1);
-    m_stream.seek(MemoryStream::eSeekMove, -1);
 }
 
 void IShaderBuilder::writeln(const char *text)
 {
     write(text);
-    m_stream.write("\n", 1);
-    m_stream.write("\0", 1);
-    m_stream.seek(MemoryStream::eSeekMove, -1);
+    m_stream.write("\n\0", 2);
 }
 
 const char *IShaderBuilder::text() const
 {
-    return reinterpret_cast<const char *>(m_stream.basememory());
+    return reinterpret_cast<const char *>(m_stream.memory());
 }
 
 i64 IShaderBuilder::textSize() const
 {
-    return m_stream.offset();
+    return m_stream.size();
 }
 
 istring IShaderBuilder::referenceNode(weak<const Node> node)

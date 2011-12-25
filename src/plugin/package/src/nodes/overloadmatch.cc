@@ -13,10 +13,11 @@ static const u32 s_parameterBadType = 10000;
 static const u32 s_parameterMissing = 100;
 
 OverloadMatch::OverloadMatch(raw<const RTTI::MethodInfo::OverloadInfo> overload)
-    :   m_params(packageBuilderArena())
+    :   m_overload(overload)
+    ,   m_params(packageBuilderArena())
     ,   m_score(0)
 {
-    for (raw<const ParamInfo> param = overload->params; param; param = param->next)
+    for (raw<const ParamInfo> param = m_overload->params; param; param = param->next)
     {
         ParameterMatch match;
         match.match = param;

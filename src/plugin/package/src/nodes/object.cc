@@ -79,4 +79,9 @@ void Object::addParameter(ref<Parameter> param)
     minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
+TypeInfo Object::getType() const
+{
+    return m_overloads.empty() ? be_typeid<void>::type() : m_overloads[0].m_overload->returnType;
+}
+
 }}}

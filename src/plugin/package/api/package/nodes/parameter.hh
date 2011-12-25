@@ -12,6 +12,7 @@ class Parameter : public minitl::refcountable
 {
 private:
     istring     m_name;
+    TypeInfo    m_type;
 public:
     Parameter(istring name);
     ~Parameter();
