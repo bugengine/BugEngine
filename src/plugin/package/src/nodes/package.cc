@@ -71,7 +71,7 @@ void Package::loadPlugin(istring plugin)
     else
     {
         m_plugins.push_back(p);
-        m_imports.insert(std::make_pair(plugin, Value(p.pluginNamespace())));
+        m_imports.insert(std::make_pair(plugin, BugEngine::Value(p.pluginNamespace())));
     }
 }
 
@@ -86,7 +86,7 @@ void Package::resolveReference(weak<Reference> reference)
     inamespace name = reference->m_name;
     if (name.size())
     {
-        minitl::hashmap<istring, Value>::const_iterator it = m_imports.find(name[0]);
+        minitl::hashmap<istring, BugEngine::Value>::const_iterator it = m_imports.find(name[0]);
         if (it == m_imports.end())
         {
         }
@@ -95,7 +95,7 @@ void Package::resolveReference(weak<Reference> reference)
         }
         else
         {
-            Value v(it->second);
+            BugEngine::Value v(it->second);
             for (size_t i = 1; i < name.size(); ++i)
             {
                 v = v[name[i]];

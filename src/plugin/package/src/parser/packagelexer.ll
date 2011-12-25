@@ -2,6 +2,9 @@
 #include    <package/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
+#include    <package/nodes/value.hh>
+
+using namespace BugEngine::PackageBuilder::Nodes;
 
 #define yylval  be_package_lval
 #include "packageparser.hh"
