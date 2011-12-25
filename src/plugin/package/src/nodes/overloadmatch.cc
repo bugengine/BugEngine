@@ -36,8 +36,15 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
             {
                 be_unimplemented();
             }
-            it->parameter = param;
-            m_score -= s_parameterMissing;
+            else
+            {
+                it->parameter = param;
+                m_score -= s_parameterMissing;
+                if (! param->isCompatible(it->match->type))
+                {
+                    m_score += s_parameterBadType;
+                }
+            }
             return;
         }
     }
