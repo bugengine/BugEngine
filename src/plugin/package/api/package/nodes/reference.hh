@@ -16,13 +16,15 @@ class Reference : public minitl::refcountable, public minitl::intrusive_list<Ref
 private:
     weak< Package > const   m_owner;
     inamespace              m_name;
-    Value                   m_value;
+    BugEngine::Value        m_value;
 public:
     Reference(weak<Package> owner);
     ~Reference();
 
     void setName(const inamespace& name);
-    Value value() const { return m_value; }
+
+    const BugEngine::Value& value() const   { return m_value; }
+    TypeInfo getType() const                { return m_value.type(); }
 };
 
 }}}

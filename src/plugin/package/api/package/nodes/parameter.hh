@@ -8,16 +8,18 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
+class Value;
 class Parameter : public minitl::refcountable
 {
 private:
     istring     m_name;
-    TypeInfo    m_type;
+    ref<Value>  m_value;
 public:
-    Parameter(istring name);
+    Parameter(istring name, ref<Value> value);
     ~Parameter();
 
-    istring name() const    { return m_name; }
+    istring name() const                    { return m_name; }
+    TypeInfo getType() const;
 };
 
 }}}

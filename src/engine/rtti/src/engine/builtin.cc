@@ -61,11 +61,13 @@ BE_MAKE_BUILTIN(i8, void);
 BE_MAKE_BUILTIN(i16, void);
 BE_MAKE_BUILTIN(i32, void);
 BE_MAKE_BUILTIN(i64, void);
+BE_MAKE_BUILTIN(float, void);
+BE_MAKE_BUILTIN(double, void);
 
 BE_MAKE_BUILTIN(byte2, void);
 BE_MAKE_BUILTIN(byte3, void);
 BE_MAKE_BUILTIN(byte4, void);
-    
+
 BE_MAKE_BUILTIN(short2, void);
 BE_MAKE_BUILTIN(short3, void);
 BE_MAKE_BUILTIN(short4, void);

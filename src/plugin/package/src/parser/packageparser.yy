@@ -5,6 +5,7 @@
 #include    <package/nodes/object.hh>
 #include    <package/nodes/reference.hh>
 #include    <package/nodes/parameter.hh>
+#include    <package/nodes/value.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -49,16 +50,15 @@ static int yyerror(const char *msg)
 #ifdef free
 # undef free
 #endif
-#define malloc(x)    tempArena().alloc(x, 4)
-#define realloc(x,s) tempArena().realloc(x, s, 4)
-#define free(x)      tempArena().free(x)
+#define malloc(x)    BugEngine::tempArena().alloc(x, 4)
+#define realloc(x,s) BugEngine::tempArena().realloc(x, s, 4)
+#define free(x)      BugEngine::tempArena().free(x)
 
-using namespace BugEngine;
 using namespace BugEngine::PackageBuilder;
 using namespace BugEngine::PackageBuilder::Nodes;
 
 
-ref<PackageBuilder::Nodes::Object> s_currentObject;
+ref<Object> s_currentObject;
 
 %}
 
@@ -73,13 +73,15 @@ ref<PackageBuilder::Nodes::Object> s_currentObject;
 %type   <sValue>    VAL_STRING
 %type   <sValue>    TOK_ID
 %type   <sValue>    fullname
+%type   <value>     value
 
 %union
 {
-    bool                bValue;
-    i64                 iValue;
-    double              fValue;
-    char*               sValue;
+    bool        bValue;
+    i64         iValue;
+    double      fValue;
+    char*       sValue;
+    ref<Value>* value;
 }
 
 %start  file
@@ -138,7 +140,7 @@ decl_object:
         TOK_ID '=' fullname
         {
             ref<Nodes::Reference> reference = ref<Reference>::create(packageBuilderArena(), ((BuildContext*)param)->result);
-            reference->setName(inamespace($5));
+            reference->setName(BugEngine::inamespace($5));
             s_currentObject->setMethod(reference);
             s_currentObject->setName($3);
         }
@@ -176,32 +178,46 @@ params:
 param:
         TOK_ID '=' value ';'
         {
-            ref<Parameter> param = ref<Parameter>::create(packageBuilderArena(), istring($1));
+            ref<Parameter> param = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
             s_currentObject->addParameter(param);
+            $3->~ref();
             free($1);
+            free($3);
         }
     ;
 
 value:
         fullname
         {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            ref<Reference> reference = ref<Reference>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            reference->setName(BugEngine::inamespace($1));
+            new ($$) ref<Value>(ref<ReferenceValue>::create(packageBuilderArena(), reference));
             free($1);
         }
     |
         VAL_BOOLEAN
         {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<BoolValue>::create(packageBuilderArena(), $1));
         }
     |
         VAL_INTEGER
         {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<IntValue>::create(packageBuilderArena(), $1));
         }
     |
         VAL_FLOAT
         {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<FloatValue>::create(packageBuilderArena(), $1));
         }
     |
         VAL_STRING
         {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<StringValue>::create(packageBuilderArena(), $1));
             free($1);
         }
     ;

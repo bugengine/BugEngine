@@ -36,14 +36,14 @@ void Object::setName(istring name)
 void Object::setMethod(ref<Reference> reference)
 {
     m_methodReference = reference;
-    Value v(Value::ByRef(m_methodReference->value()));
+    BugEngine::Value v(BugEngine::Value::ByRef(m_methodReference->value()));
     if (v)
     {
         static const istring callName("call");
-        Value call = v[callName];
+        BugEngine::Value call = v[callName];
         if (call && be_typeid<const RTTI::MethodInfo* const>::type() <= call.type())
         {
-            m_method = call.as<const RTTI::MethodInfo* const>();
+            m_method = call.as<const RTTI::MethodInfo*>();
             m_overloads.clear();
             for (raw<const RTTI::MethodInfo::OverloadInfo> overload = m_method->overloads; overload; overload = overload->next)
             {
