@@ -84,6 +84,7 @@ public:
     inline bool  resize(void* ptr, size_t size);
     inline void* realloc(void* ptr, size_t size, size_t alignment);
     inline void  free(const void* pointer);
+    inline const char* strdup(const char *src);
     template< typename T >
     inline T* alloc();
 };
@@ -114,6 +115,16 @@ void  Allocator::free(const void* pointer)
 #ifdef BE_MEMORY_TRACKING
 #endif
     internalFree(pointer);
+}
+
+const char*  Allocator::strdup(const char* src)
+{
+#ifdef BE_MEMORY_TRACKING
+#endif
+    size_t s = strlen(src);
+    char *result = static_cast<char*>(internalAlloc(s+1, 1));
+    strcpy(result, src);
+    return result;
 }
 
 template< typename T >

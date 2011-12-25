@@ -18,8 +18,8 @@ public:
     Parameter(istring name, ref<Value> value);
     ~Parameter();
 
-    istring name() const                    { return m_name; }
-    TypeInfo getType() const;
+    istring name() const;
+    bool isCompatible(const TypeInfo& type) const;
 };
 
 }}}

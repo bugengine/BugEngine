@@ -15,7 +15,7 @@ protected:
 public:
     ~Value();
 
-    virtual TypeInfo getType() const = 0;
+    virtual bool isCompatible(const TypeInfo& type) const = 0;
 };
 
 
@@ -29,7 +29,7 @@ public:
     ReferenceValue(ref<const Reference> value);
     ~ReferenceValue();
 
-    virtual TypeInfo getType() const override;
+    virtual bool isCompatible(const TypeInfo& type) const override;
 };
 
 class BoolValue : public Value
@@ -40,7 +40,7 @@ public:
     BoolValue(bool value);
     ~BoolValue();
 
-    virtual TypeInfo getType() const override;
+    virtual bool isCompatible(const TypeInfo& type) const override;
 };
 
 
@@ -52,7 +52,7 @@ public:
     IntValue(i64 param);
     ~IntValue();
 
-    virtual TypeInfo getType() const override;
+    virtual bool isCompatible(const TypeInfo& type) const override;
 };
 
 
@@ -64,19 +64,19 @@ public:
     FloatValue(double value);
     ~FloatValue();
 
-    virtual TypeInfo getType() const override;
+    virtual bool isCompatible(const TypeInfo& type) const override;
 };
 
 
 class StringValue : public Value
 {
 private:
-    istring m_value;
+    const char* m_value;
 public:
-    StringValue(const istring& value);
+    StringValue(const char* value);
     ~StringValue();
 
-    virtual TypeInfo getType() const override;
+    virtual bool isCompatible(const TypeInfo& type) const override;
 };
 
 }}}

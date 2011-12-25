@@ -26,9 +26,9 @@ BoolValue::~BoolValue()
 {
 }
 
-TypeInfo BoolValue::getType() const
+bool BoolValue::isCompatible(const TypeInfo& type) const
 {
-    return be_typeid<bool>::type();
+    return type <= be_typeid<bool>::type();
 }
 
 
@@ -42,9 +42,16 @@ IntValue::~IntValue()
 {
 }
 
-TypeInfo IntValue::getType() const
+bool IntValue::isCompatible(const TypeInfo& type) const
 {
-    return be_typeid<i64>::type();
+    return type <= be_typeid<i8>::type()
+        || type <= be_typeid<i16>::type()
+        || type <= be_typeid<i32>::type()
+        || type <= be_typeid<i64>::type()
+        || type <= be_typeid<u8>::type()
+        || type <= be_typeid<u16>::type()
+        || type <= be_typeid<u32>::type()
+        || type <= be_typeid<u64>::type();
 }
 
 
@@ -58,25 +65,29 @@ FloatValue::~FloatValue()
 {
 }
 
-TypeInfo FloatValue::getType() const
+bool FloatValue::isCompatible(const TypeInfo& type) const
 {
-    return be_typeid<double>::type();
+    return type <= be_typeid<float>::type()
+        || type <= be_typeid<double>::type();
 }
 
 
 
-StringValue::StringValue(const istring& value)
-    :   m_value(value)
+StringValue::StringValue(const char* value)
+    :   m_value(packageBuilderArena().strdup(value))
 {
 }
 
 StringValue::~StringValue()
 {
+    packageBuilderArena().free(m_value);
 }
 
-TypeInfo StringValue::getType() const
+bool StringValue::isCompatible(const TypeInfo& type) const
 {
-    return be_typeid<istring>::type();
+    return type <= be_typeid<istring>::type()
+        || type <= be_typeid<inamespace>::type()
+        || type <= be_typeid< minitl::format<> >::type();
 }
 
 
@@ -90,9 +101,9 @@ ReferenceValue::~ReferenceValue()
 {
 }
 
-TypeInfo ReferenceValue::getType() const
+bool ReferenceValue::isCompatible(const TypeInfo& type) const
 {
-    return m_value->getType();
+    return type <= m_value->getType();
 }
 
 }}}

@@ -18,9 +18,14 @@ Parameter::~Parameter()
 {
 }
 
-TypeInfo Parameter::getType() const
+istring Parameter::name() const
 {
-    return m_value->getType();
+    return m_name;
+}
+
+bool Parameter::isCompatible(const TypeInfo& type) const
+{
+    return m_value->isCompatible(type);
 }
 
 }}}
