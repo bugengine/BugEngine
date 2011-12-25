@@ -184,8 +184,7 @@ def get_available_gcc(conf, paths=[]):
 		toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', 'lib')))
 		try:
 			for f in os.listdir(os.path.join(dir, '..')):
-				if f.find('gcc') != -1:
-					toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', f, 'lib')))
+				toolchaindirs.add(os.path.normpath(os.path.join(dir, '..', f, 'lib')))
 		except:
 			pass
 	if os.path.isfile('/etc/ld.so.conf'):
@@ -331,8 +330,9 @@ def find_cross_gcc(conf):
 					break
 		if not v['RANLIB']: conf.fatal('unable to find ranlib for target %s' % target)
 		if not v['WINRC']:
-			if not conf.find_program('mingw32-windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
-				conf.find_program('windres', var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True)
+			for windres in [target+'-windres', 'mingw32-windres', 'windres']:
+				if conf.find_program(windres, var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
+					break
 	conf.load('gcc gxx gas')
 	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 
