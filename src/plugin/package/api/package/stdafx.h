@@ -22,7 +22,11 @@ namespace BugEngine
 {
 
 Allocator& packageArena();
+
+namespace PackageBuilder
+{
 Allocator& packageBuilderArena();
+}
 
 }
 

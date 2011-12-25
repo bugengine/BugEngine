@@ -9,9 +9,11 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
 class Parameter;
+class Object;
 
 struct OverloadMatch
 {
+    friend class Object;
 public:
     typedef RTTI::MethodInfo::OverloadInfo::ParamInfo ParamInfo;
     struct ParameterMatch
@@ -20,8 +22,9 @@ public:
         raw<const ParamInfo>    match;
     };
 private:
-    minitl::vector<ParameterMatch>  m_params;
-    u32                             m_score;
+    raw<const RTTI::MethodInfo::OverloadInfo>   m_overload;
+    minitl::vector<ParameterMatch>              m_params;
+    u32                                         m_score;
 public:
     OverloadMatch(raw<const RTTI::MethodInfo::OverloadInfo> overload);
     void addParameter(weak<const Parameter> param);

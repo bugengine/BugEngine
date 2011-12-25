@@ -9,50 +9,23 @@
 namespace BugEngine
 {
 
-class be_api(CORE) IMemoryStream : public minitl::refcountable
-{
-    BE_NOCOPY(IMemoryStream);
-public:
-    enum SeekMethod
-    {
-        eSeekFromStart = SEEK_SET,
-        eSeekMove      = SEEK_CUR,
-        eSeekFromEnd   = SEEK_END
-    };
-public:
-    IMemoryStream();
-    virtual ~IMemoryStream();
-
-    virtual void*       basememory() = 0;
-    virtual void*       memory();
-    virtual const void* basememory() const = 0;
-    virtual const void* memory() const;
-    virtual i64         offset() const = 0;
-    virtual i64         size() const = 0;
-    virtual void        seek(SeekMethod method, i64 offset) = 0;
-    virtual i64         read(void* buffer, i64 size);
-    virtual void        write(const void *buffer, i64 size);
-    virtual void        resize(i64 size) = 0;
-    virtual bool        writable() const = 0;
-};
-
-class be_api(CORE) MemoryStream : public IMemoryStream
+class be_api(CORE) MemoryStream
 {
 private:
     Allocator::Block<u8>    m_memory;
-    i64                     m_size;
-    i64                     m_offset;
+    u64                     m_size;
+    u64                     m_capacity;
 public:
-    MemoryStream(Allocator& allocator, i64 size = 0);
-    virtual ~MemoryStream();
+    MemoryStream(Allocator& allocator, u64 size = 0);
+    ~MemoryStream();
 
-    virtual void*       basememory() override;
-    virtual const void* basememory() const override;
-    virtual i64         size() const override;
-    virtual i64         offset() const override;
-    virtual void        seek(SeekMethod method, i64 offset) override;
-    virtual void        resize(i64 size) override;
-    virtual bool        writable() const override;
+    void*       memory()                                { return m_memory; }
+    const void* memory() const                          { return m_memory; }
+    u64         size() const                            { return m_size; }
+    u64         capacity() const                        { return m_capacity; }
+    void        resize(u64 size);
+    void        write(const void *buffer, u64 size);
+    void        erase(u64 count);
 };
 
 }

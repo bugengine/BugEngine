@@ -74,6 +74,7 @@ void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resourc
     ticket.loader = loader;
     ticket.resource = resource;
     ticket.ticket = file->beginRead(0, 0, tempArena());
+    ticket.progress = 0;
     m_tickets.push_back(ticket);
 }
 
@@ -81,10 +82,19 @@ void ResourceManager::updateTickets()
 {
     for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
     {
-        if (it->ticket->done())
+        if (it->ticket->processed != it->progress)
         {
-            it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
-            it = m_tickets.erase(it);
+            if (it->ticket->done())
+            {
+                it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
+                it = m_tickets.erase(it);
+            }
+            else
+            {
+                it->progress = it->ticket->processed;
+                it->loader->onTicketUpdated(it->resource, it->ticket->buffer, it->progress);
+                ++it;
+            }
         }
         else
         {

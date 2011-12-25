@@ -25,6 +25,7 @@ private:
         weak<IResourceLoader>   loader;
         weak<const Resource>    resource;
         ref<const File::Ticket> ticket;
+        u32                     progress;
     };
 private:
     minitl::vector<LoaderInfo>  m_loaders;

@@ -19,6 +19,7 @@ class Object : public minitl::refcountable
 private:
     weak< Package > const                   m_owner;
     istring                                 m_name;
+    TypeInfo                                m_objectType;
     ref<Reference>                          m_methodReference;
     const RTTI::MethodInfo*                 m_method;
     minitl::vector< ref<Parameter> >        m_parameters;
@@ -32,6 +33,7 @@ public:
     istring name() const                                        { return m_name; }
     const RTTI::MethodInfo* method() const                      { return m_method; }
     const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
+    TypeInfo getType() const;
 
     void setName(istring name);
     void setMethod(ref<Reference> reference);
