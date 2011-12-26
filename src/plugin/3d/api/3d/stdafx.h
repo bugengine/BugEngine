@@ -8,6 +8,7 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
+#include    <world/stdafx.h>
 
 
 #if defined(building_3d)

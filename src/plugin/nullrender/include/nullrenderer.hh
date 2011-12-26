@@ -23,7 +23,7 @@ public:
     void                flush() override;
     uint2               getScreenSize() override { return uint2(1920,1080); }
 private:
-    ref<IGPUResource>   create(weak<const RenderTarget> rendertarget) const override;
+    ref<IGPUResource>   create(weak<const RenderSurface> rendersurface) const override;
     ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;
     ref<IGPUResource>   create(weak<const ShaderProgram> shader) const override;
 public:

@@ -2,10 +2,7 @@ plugin 3d;
 
 window = 3d.Graphics.RenderWindow
 (
-    width = 800;
-    height = 600;
     title = "BugEngine editor v0.1";
-    fullscreen = false;
 )
 
 world = game.World
@@ -15,4 +12,5 @@ world = game.World
 node = 3d.Graphics.RenderScene
 (
     rendertarget = window;
+    world = world;
 )

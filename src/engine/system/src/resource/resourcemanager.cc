@@ -50,7 +50,7 @@ void ResourceManager::load(raw<const RTTI::ClassInfo> classinfo, weak<const Reso
 {
     for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
-        if (it->classinfo == classinfo)
+        if (classinfo->isA(it->classinfo))
         {
             resource->load(it->loader);
         }
@@ -61,7 +61,7 @@ void ResourceManager::unload(raw<const RTTI::ClassInfo> classinfo, weak<const Re
 {
     for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
-        if (it->classinfo == classinfo)
+        if (classinfo->isA(it->classinfo))
         {
             resource->unload(it->loader);
         }

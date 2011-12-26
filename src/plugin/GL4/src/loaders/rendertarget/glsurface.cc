@@ -4,30 +4,30 @@
 #include    <stdafx.h>
 #include    <glrenderer.hh>
 #include    <extensions.hh>
-#include    <loaders/rendertarget/glrendertarget.hh>
+#include    <loaders/rendertarget/glsurface.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 
 namespace BugEngine { namespace Graphics { namespace OpenGL
 {
 
-GLRenderTarget::GLRenderTarget(weak<const RenderTarget> resource, weak<GLRenderer> renderer)
+GLSurface::GLSurface(weak<const RenderSurface> resource, weak<GLRenderer> renderer)
     :   IRenderTarget(resource, renderer)
 {
 }
 
-GLRenderTarget::~GLRenderTarget()
+GLSurface::~GLSurface()
 {
 }
 
-void GLRenderTarget::load(weak<const Resource> resource)
+void GLSurface::load(weak<const Resource> resource)
 {
 }
 
-void GLRenderTarget::unload()
+void GLSurface::unload()
 {
 }
 
-void GLRenderTarget::begin(ClearMode clear) const
+void GLSurface::begin(ClearMode clear) const
 {
     setCurrent();
     if (clear == IRenderTarget::Clear)
@@ -37,7 +37,7 @@ void GLRenderTarget::begin(ClearMode clear) const
     }
 }
 
-void GLRenderTarget::end(PresentMode presentMode) const
+void GLSurface::end(PresentMode presentMode) const
 {
     glFlush();
     if (presentMode == Present)
@@ -48,15 +48,15 @@ void GLRenderTarget::end(PresentMode presentMode) const
 }
 
 
-void GLRenderTarget::setCurrent() const
+void GLSurface::setCurrent() const
 {
 }
 
-void GLRenderTarget::clearCurrent() const
+void GLSurface::clearCurrent() const
 {
 }
 
-void GLRenderTarget::present() const
+void GLSurface::present() const
 {
 }
 

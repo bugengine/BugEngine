@@ -13,11 +13,13 @@ namespace BugEngine
 class ITask;
 }
 
-namespace BugEngine { namespace Graphics
+namespace BugEngine
+{
+namespace Graphics
 {
 
 class SceneGraphLoader;
-class RenderTarget;
+class RenderSurface;
 class RenderWindow;
 class Mesh;
 class ShaderProgram;
@@ -31,37 +33,38 @@ class be_api(_3D) IRenderer : public minitl::pointer
     template< typename R >
     friend class GPUResourceLoader;
 protected:
-    Allocator&                                  m_allocator;
-    weak<ResourceManager>                       m_resourceManager;
-    ref<ITask>                                  m_syncTask;
-    scoped<SceneGraphLoader>                    m_sceneLoader;
-    scoped< GPUResourceLoader<RenderTarget> >   m_renderTargetLoader;
-    scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
-    scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
+    Allocator& m_allocator;
+    weak<ResourceManager> m_resourceManager;
+    ref<ITask> m_syncTask;
+    scoped<SceneGraphLoader> m_sceneLoader;
+    scoped< GPUResourceLoader<RenderSurface> > m_renderSurfaceLoader;
+    scoped< GPUResourceLoader<RenderWindow> > m_renderWindowLoader;
+    scoped< GPUResourceLoader<ShaderProgram> > m_shaderProgramLoader;
 protected:
     IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
 protected:
-    virtual void                flush();
+    virtual void flush();
 
-    virtual ref<IGPUResource>   create(weak<const RenderTarget> rendertarget) const = 0;
-    virtual ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const = 0;
+    virtual ref<IGPUResource> create(weak<const RenderSurface> rendertarget) const = 0;
+    virtual ref<IGPUResource> create(weak<const RenderWindow> renderwindow) const = 0;
     //virtual ref<IGPUResource>   create(weak<const Mesh> mesh) const = 0;
-    virtual ref<IGPUResource>   create(weak<const ShaderProgram> shader) const = 0;
+    virtual ref<IGPUResource> create(weak<const ShaderProgram> shader) const = 0;
     //virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
-            weak<IGPUResource>  getRenderTarget(weak<const Resource> resource) const;
-            weak<IGPUResource>  getRenderWindow(weak<const Resource> resource) const;
-            weak<IGPUResource>  getShaderProgram(weak<const Resource> resource) const;
+    weak<IGPUResource> getRenderSurface(weak<const Resource> resource) const;
+    weak<IGPUResource> getRenderWindow(weak<const Resource> resource) const;
+    weak<IGPUResource> getShaderProgram(weak<const Resource> resource) const;
 
-            Allocator&          arena() const;
-            weak<ITask>         syncTask() const;
+    Allocator& arena() const;
+    weak<ITask> syncTask() const;
 
-    virtual uint2               getScreenSize() = 0;
-    virtual u32                 getMaxSimultaneousRenderTargets() const = 0;
+    virtual uint2 getScreenSize() = 0;
+    virtual u32 getMaxSimultaneousRenderTargets() const = 0;
 };
 
-}}
+}
+}
 
 /*****************************************************************************/
 #endif

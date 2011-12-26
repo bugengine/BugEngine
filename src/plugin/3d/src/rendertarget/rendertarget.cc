@@ -7,8 +7,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-RenderTarget::RenderTarget(u16 width, u16 height)
-    :   dimensions(width, height)
+RenderTarget::RenderTarget()
 {
 }
 
@@ -16,10 +15,17 @@ RenderTarget::~RenderTarget()
 {
 }
 
-RenderWindow::RenderWindow(u16 width, u16 height, istring title, bool fullscreen)
-    :   RenderTarget(width, height)
-    ,   title(title)
-    ,   fullscreen(fullscreen)
+RenderSurface::RenderSurface(u16 width, u16 height)
+    :   dimensions(width, height)
+{
+}
+
+RenderSurface::~RenderSurface()
+{
+}
+
+RenderWindow::RenderWindow(istring title)
+    :   title(title)
 {
 }
 
