@@ -28,4 +28,9 @@ bool Parameter::isCompatible(const TypeInfo& type) const
     return m_value->isCompatible(type);
 }
 
+BugEngine::Value Parameter::as(const TypeInfo& type) const
+{
+    return m_value->as(type);
+}
+
 }}}

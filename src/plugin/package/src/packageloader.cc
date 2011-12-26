@@ -5,6 +5,7 @@
 #include    <packageloader.hh>
 #include    <core/threads/thread.hh>
 #include    <packagebuilder.hh>
+#include    <package/nodes/package.hh>
 
 namespace BugEngine
 {
@@ -36,7 +37,9 @@ PackageLoader::~PackageLoader()
 
 void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer)
 {
-    script->getResourceHandleForWriting(this).handle = m_packageBuilder->createPackage(buffer);
+    ref<PackageBuilder::Nodes::Package> package = m_packageBuilder->createPackage(buffer);
+    script->getResourceHandleForWriting(this).handle = package;
+    package->createObjects();
 }
 
 }}

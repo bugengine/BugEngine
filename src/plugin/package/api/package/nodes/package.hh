@@ -20,6 +20,7 @@ private:
     minitl::hashmap< istring, Value >   m_imports;
     minitl::vector< ref<Object> >       m_nodes;
     minitl::intrusive_list<Reference>   m_references;
+    minitl::vector<Value>               m_values;
 private:
     void addReference(weak<Reference> reference);
     void resolveReference(weak<Reference> reference);
@@ -35,6 +36,8 @@ public:
 
     void binarySave() const;
     void textSave() const;
+
+    void createObjects();
 };
 
 }}}

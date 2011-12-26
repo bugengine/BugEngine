@@ -84,4 +84,9 @@ TypeInfo Object::getType() const
     return m_overloads.empty() ? be_typeid<void>::type() : m_overloads[0].m_overload->returnType;
 }
 
+BugEngine::Value Object::create() const
+{
+    return m_overloads.empty() ? BugEngine::Value() : m_overloads[0].create();
+}
+
 }}}
