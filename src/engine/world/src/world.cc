@@ -39,6 +39,7 @@ weak<ITask> World::updateWorldTask() const
 
 void World::copyWorld()
 {
+    be_info("copy");
 }
 
 void World::updateWorld()
