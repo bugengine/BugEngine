@@ -13,6 +13,7 @@ Package::Package()
     :   m_plugins(packageBuilderArena())
     ,   m_imports(packageBuilderArena())
     ,   m_nodes(packageBuilderArena())
+    ,   m_values(packageBuilderArena())
 {
 }
 
@@ -111,12 +112,19 @@ void Package::resolveReference(weak<Reference> reference)
 
 void Package::binarySave() const
 {
-    
 }
 
 void Package::textSave() const
 {
-    
+}
+
+void Package::createObjects()
+{
+    m_values.resize(m_nodes.size());
+    for(size_t i = 0; i < m_nodes.size(); ++i)
+    {
+        m_values[i] = m_nodes[i]->create();
+    }
 }
 
 }}}

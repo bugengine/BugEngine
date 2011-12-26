@@ -38,6 +38,8 @@ public:
     void setName(istring name);
     void setMethod(ref<Reference> reference);
     void addParameter(ref<Parameter> param);
+
+    BugEngine::Value create() const;
 };
 
 }}}

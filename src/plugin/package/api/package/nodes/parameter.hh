@@ -20,6 +20,7 @@ public:
 
     istring name() const;
     bool isCompatible(const TypeInfo& type) const;
+    BugEngine::Value as(const TypeInfo& type) const;
 };
 
 }}}

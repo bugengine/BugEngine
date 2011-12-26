@@ -15,7 +15,8 @@ protected:
 public:
     ~Value();
 
-    virtual bool isCompatible(const TypeInfo& type) const = 0;
+    virtual bool                isCompatible(const TypeInfo& type) const = 0;
+    virtual BugEngine::Value    as(const TypeInfo& type) const = 0;
 };
 
 
@@ -29,7 +30,8 @@ public:
     ReferenceValue(ref<const Reference> value);
     ~ReferenceValue();
 
-    virtual bool isCompatible(const TypeInfo& type) const override;
+    virtual bool                isCompatible(const TypeInfo& type) const override;
+    virtual BugEngine::Value    as(const TypeInfo& type) const override;
 };
 
 class BoolValue : public Value
@@ -40,7 +42,8 @@ public:
     BoolValue(bool value);
     ~BoolValue();
 
-    virtual bool isCompatible(const TypeInfo& type) const override;
+    virtual bool                isCompatible(const TypeInfo& type) const override;
+    virtual BugEngine::Value    as(const TypeInfo& type) const override;
 };
 
 
@@ -52,7 +55,8 @@ public:
     IntValue(i64 param);
     ~IntValue();
 
-    virtual bool isCompatible(const TypeInfo& type) const override;
+    virtual bool                isCompatible(const TypeInfo& type) const override;
+    virtual BugEngine::Value    as(const TypeInfo& type) const override;
 };
 
 
@@ -64,7 +68,8 @@ public:
     FloatValue(double value);
     ~FloatValue();
 
-    virtual bool isCompatible(const TypeInfo& type) const override;
+    virtual bool                isCompatible(const TypeInfo& type) const override;
+    virtual BugEngine::Value    as(const TypeInfo& type) const override;
 };
 
 
@@ -76,7 +81,8 @@ public:
     StringValue(const char* value);
     ~StringValue();
 
-    virtual bool isCompatible(const TypeInfo& type) const override;
+    virtual bool                isCompatible(const TypeInfo& type) const override;
+    virtual BugEngine::Value    as(const TypeInfo& type) const override;
 };
 
 }}}
