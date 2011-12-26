@@ -5,6 +5,8 @@
 #include    <package/nodes/package.hh>
 #include    <package/nodes/reference.hh>
 #include    <package/nodes/object.hh>
+#include    <system/resource/resourcemanager.hh>
+
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -15,6 +17,7 @@ Package::Package()
     ,   m_nodes(packageBuilderArena())
     ,   m_values(packageBuilderArena())
 {
+    m_imports.insert(std::make_pair("game", BugEngine::Value(be_game_Namespace())));
 }
 
 Package::~Package()
@@ -23,8 +26,7 @@ Package::~Package()
 
 void Package::insertNode(ref<Object> object)
 {
-    minitl::vector< ref<Object> >::iterator it = m_nodes.begin();
-    while (it != m_nodes.end())
+    for (minitl::vector< ref<Object> >::iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
     {
         if (*it == object)
         {
@@ -45,6 +47,7 @@ void Package::removeNode(ref<Object> object)
             m_nodes.erase(it);
             return;
         }
+        ++it;
     }
     be_error("Object does not exist");
 }
@@ -61,6 +64,21 @@ ref<Object> Package::findByName(istring name) const
         ++it;
     }
     return ref<Object>();
+}
+
+const BugEngine::Value& Package::getValue(weak<const Object> object) const
+{
+    size_t index = 0;
+    for (minitl::vector< ref<Object> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it, ++index)
+    {
+        if ((*it) == object)
+        {
+            be_assert_recover(index < m_values.size(), "access to a value not yet created", return m_empty);
+            be_assert(m_values[index], "access to a value not yet created");
+            return m_values[index];
+        }
+    }
+    return m_empty;
 }
 
 void Package::loadPlugin(istring plugin)
@@ -90,9 +108,14 @@ void Package::resolveReference(weak<Reference> reference)
         minitl::hashmap<istring, BugEngine::Value>::const_iterator it = m_imports.find(name[0]);
         if (it == m_imports.end())
         {
+            if (name.size() == 1) //TODO: namespaces
+            {
+                reference->m_object = findByName(name[0]);
+            }
         }
         else if (!it->second)
         {
+            be_notreached();
         }
         else
         {
@@ -102,6 +125,7 @@ void Package::resolveReference(weak<Reference> reference)
                 v = v[name[i]];
                 if (!v)
                 {
+                    be_notreached();
                     return;
                 }
             }
@@ -118,12 +142,16 @@ void Package::textSave() const
 {
 }
 
-void Package::createObjects()
+void Package::createObjects(weak<const ResourceManager> manager)
 {
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
         m_values[i] = m_nodes[i]->create();
+        if (be_typeid<const Resource>::type() <= m_values[i].type())
+        {
+            manager->load(m_values[i].type().metaclass, m_values[i].as< weak<const Resource> >());
+        }
     }
 }
 

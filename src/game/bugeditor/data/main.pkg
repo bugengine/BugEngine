@@ -1,6 +1,6 @@
 plugin 3d;
 
-w = 3d.Graphics.RenderWindow
+window = 3d.Graphics.RenderWindow
 (
     width = 800;
     height = 600;
@@ -8,3 +8,11 @@ w = 3d.Graphics.RenderWindow
     fullscreen = false;
 )
 
+world = game.World
+(
+)
+
+node = 3d.Graphics.RenderScene
+(
+    rendertarget = window;
+)

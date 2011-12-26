@@ -16,7 +16,7 @@ enum
     WorldUpdateTask_Count
 };
 
-World::World(float3 /*worldExtents*/)
+World::World()
 :   m_tasks(taskArena())
 ,   m_callbacks(taskArena())
 {

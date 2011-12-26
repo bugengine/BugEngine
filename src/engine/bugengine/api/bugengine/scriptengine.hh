@@ -13,7 +13,7 @@ namespace BugEngine
 template< typename T >
 class ScriptEngine : public IResourceLoader
 {
-private:
+protected:
     Allocator&                                                                      m_scriptArena;
     weak<ResourceManager>                                                           m_manager;
 public:

@@ -9,6 +9,7 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
 class Package;
+class Object;
 
 class Reference : public minitl::refcountable, public minitl::intrusive_list<Reference>::item
 {
@@ -17,14 +18,15 @@ private:
     weak< Package > const   m_owner;
     inamespace              m_name;
     BugEngine::Value        m_value;
+    weak<const Object>      m_object;
 public:
     Reference(weak<Package> owner);
     ~Reference();
 
     void setName(const inamespace& name);
 
-    const BugEngine::Value& value() const   { return m_value; }
-    TypeInfo getType() const                { return m_value.type(); }
+    const BugEngine::Value& getValue() const;
+    TypeInfo getType() const;
 };
 
 }}}
