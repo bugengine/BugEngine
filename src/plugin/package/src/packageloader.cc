@@ -39,7 +39,7 @@ void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block
 {
     ref<PackageBuilder::Nodes::Package> package = m_packageBuilder->createPackage(buffer);
     script->getResourceHandleForWriting(this).handle = package;
-    package->createObjects();
+    package->createObjects(m_manager);
 }
 
 }}

@@ -27,4 +27,38 @@ void Reference::setName(const inamespace& name)
     m_owner->resolveReference(this);
 }
 
+const BugEngine::Value& Reference::getValue() const
+{
+    if (m_value)
+    {
+        return m_value;
+    }
+    else if (m_object)
+    {
+        return m_owner->getValue(m_object);
+    }
+    else
+    {
+        be_notreached();
+        return m_value;
+    }
+}
+
+TypeInfo Reference::getType() const
+{
+    if (m_value)
+    {
+        return m_value.type();
+    }
+    else if (m_object)
+    {
+        return m_object->getType();
+    }
+    else
+    {
+        be_notreached();
+        return be_typeid<void>::type();
+    }
+}
+
 }}}

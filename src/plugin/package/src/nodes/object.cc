@@ -36,7 +36,7 @@ void Object::setName(istring name)
 void Object::setMethod(ref<Reference> reference)
 {
     m_methodReference = reference;
-    BugEngine::Value v(BugEngine::Value::ByRef(m_methodReference->value()));
+    BugEngine::Value v(BugEngine::Value::ByRef(m_methodReference->getValue()));
     if (v)
     {
         static const istring callName("call");
@@ -81,7 +81,15 @@ void Object::addParameter(ref<Parameter> param)
 
 TypeInfo Object::getType() const
 {
-    return m_overloads.empty() ? be_typeid<void>::type() : m_overloads[0].m_overload->returnType;
+    if (m_overloads.empty())
+    {
+        be_notreached();
+        return be_typeid<void>::type();
+    }
+    else
+    {
+        return m_overloads[0].m_overload->returnType;
+    }
 }
 
 BugEngine::Value Object::create() const

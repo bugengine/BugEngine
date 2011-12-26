@@ -50,14 +50,6 @@ private:
 
 }
 
-#ifdef BE_STATIC
-# include "console/plugin.inl"
-#elif defined(PLUGIN_H)
-# include PLUGIN_H
-#else
-# error Plugin subsystem not implemented... define PLUGIN_H in platform_xxx.hh
-#endif
-
 #define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                             \
     namespace BugEngine                                                                                                                 \
     {                                                                                                                                   \
@@ -75,6 +67,14 @@ private:
             return be_##name##_Namespace();                                                                                             \
         }                                                                                                                               \
     }
+#ifdef BE_STATIC
+# include "console/plugin.inl"
+#elif defined(PLUGIN_H)
+# include PLUGIN_H
+#else
+# error Plugin subsystem not implemented... define PLUGIN_H in platform_xxx.hh
+#endif
+
 
 /*****************************************************************************/
 #endif

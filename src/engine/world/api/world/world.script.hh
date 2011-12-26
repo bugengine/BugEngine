@@ -13,7 +13,6 @@ namespace BugEngine
 
 class be_api(WORLD) World : public Resource
 {
-    friend class WorldScene;
 private:
     minitl::vector< ref<ITask> >                m_tasks;
     minitl::vector<ITask::CallbackConnection>   m_callbacks;
@@ -23,7 +22,7 @@ private:
 public:
     weak<ITask> updateWorldTask() const;
 published:
-    World(float3 worldExtents);
+    World();
     ~World();
 };
 

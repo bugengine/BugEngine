@@ -21,6 +21,7 @@ private:
     minitl::vector< ref<Object> >       m_nodes;
     minitl::intrusive_list<Reference>   m_references;
     minitl::vector<Value>               m_values;
+    Value                               m_empty;
 private:
     void addReference(weak<Reference> reference);
     void resolveReference(weak<Reference> reference);
@@ -31,13 +32,14 @@ public:
     void insertNode(ref<Object> object);
     void removeNode(ref<Object> object);
     ref<Object> findByName(istring name) const;
+    const BugEngine::Value& getValue(weak<const Object> object) const;
 
     void loadPlugin(istring);
 
     void binarySave() const;
     void textSave() const;
 
-    void createObjects();
+    void createObjects(weak<const ResourceManager> manager);
 };
 
 }}}

@@ -164,7 +164,7 @@ bool ReferenceValue::isCompatible(const TypeInfo& type) const
 BugEngine::Value ReferenceValue::as(const TypeInfo& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType().name() | type.name());
-    return m_value->value();
+    return m_value->getValue();
 }
 
 }}}

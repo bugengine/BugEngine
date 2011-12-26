@@ -94,7 +94,7 @@ public:
     template< typename T > explicit inline Value(T t);
     template< typename T > explicit inline Value(T t, ConstifyType constify);
     inline Value(const Value& other);
-    template< typename T > explicit inline Value(ByRefType<T> t);
+    template< typename T > inline Value(ByRefType<T> t);
     inline Value(TypeInfo typeinfo, void* location);
     inline ~Value();
 

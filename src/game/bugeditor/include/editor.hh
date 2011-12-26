@@ -23,6 +23,7 @@ class Editor : public Application
 private:
     scoped<ResourceManager> const   m_resourceManager;
     PluginContext           const   m_pluginContext;
+    Plugin<void>            const   m_renderer;
     Plugin<IResourceLoader> const   m_packageManager;
     ref<Folder>             const   m_dataFolder;
     ref<const Package>      const   m_mainPackage;
