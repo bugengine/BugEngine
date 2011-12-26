@@ -236,9 +236,9 @@ vector<T>& vector<T>::operator=(const vector<T>& other)
 template< typename T >
 vector<T>::~vector()
 {
-    for (const_pointer t = m_memory; t != m_end; t = advance(t, 1))
+    for (const_pointer t = m_end; t > m_memory; t = advance(t, -1))
     {
-        t->~T();
+        advance(t, -1)->~T();
     }
 }
 

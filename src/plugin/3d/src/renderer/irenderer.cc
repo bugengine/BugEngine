@@ -20,14 +20,22 @@ IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Schedu
     ,   m_resourceManager(manager)
     ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena(), this))
-    ,   m_renderTargetLoader(scoped< GPUResourceLoader<RenderTarget> >::create(gameArena(), this))
+    ,   m_renderSurfaceLoader(scoped< GPUResourceLoader<RenderSurface> >::create(gameArena(), this))
     ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindow> >::create(gameArena(), this))
     ,   m_shaderProgramLoader(scoped< GPUResourceLoader<ShaderProgram> >::create(gameArena(), this))
 {
+    m_resourceManager->attach<RenderNode>(m_sceneLoader);
+    m_resourceManager->attach<RenderSurface>(m_renderSurfaceLoader);
+    m_resourceManager->attach<RenderWindow>(m_renderWindowLoader);
+    m_resourceManager->attach<ShaderProgram>(m_shaderProgramLoader);
 }
 
 IRenderer::~IRenderer()
 {
+    m_resourceManager->detach<ShaderProgram>(m_shaderProgramLoader);
+    m_resourceManager->detach<RenderWindow>(m_renderWindowLoader);
+    m_resourceManager->detach<RenderTarget>(m_renderSurfaceLoader);
+    m_resourceManager->detach<RenderNode>(m_sceneLoader);
 }
 
 weak<ITask> IRenderer::syncTask() const
@@ -42,14 +50,14 @@ Allocator& IRenderer::arena() const
 
 void IRenderer::flush()
 {
-    m_renderTargetLoader->flush();
+    m_renderSurfaceLoader->flush();
     m_renderWindowLoader->flush();
     m_shaderProgramLoader->flush();
 }
 
-weak<IGPUResource> IRenderer::getRenderTarget(weak<const Resource> resource) const
+weak<IGPUResource> IRenderer::getRenderSurface(weak<const Resource> resource) const
 {
-    return be_checked_cast<IGPUResource>(resource->getResourceHandle(m_renderTargetLoader).handle);
+    return be_checked_cast<IGPUResource>(resource->getResourceHandle(m_renderSurfaceLoader).handle);
 }
 
 weak<IGPUResource> IRenderer::getRenderWindow(weak<const Resource> resource) const

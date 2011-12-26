@@ -6,7 +6,7 @@
 
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
-#include    <loaders/nullrendertarget.hh>
+#include    <loaders/nullsurface.hh>
 #include    <loaders/nullwindow.hh>
 #include    <loaders/nullshader.hh>
 
@@ -37,9 +37,9 @@ NullRenderer::~NullRenderer()
 {
 }
 
-ref<IGPUResource> NullRenderer::create(weak<const RenderTarget> rendertarget) const
+ref<IGPUResource> NullRenderer::create(weak<const RenderSurface> rendersurface) const
 {
-    return ref<NullRenderTarget>::create(m_allocator, rendertarget, this);
+    return ref<NullSurface>::create(m_allocator, rendersurface, this);
 }
 
 ref<IGPUResource> NullRenderer::create(weak<const RenderWindow> renderwindow) const

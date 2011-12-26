@@ -9,6 +9,7 @@
 #include    <graph/loader.hh>
 #include    <graph/scenenode.hh>
 #include    <graph/multinode.hh>
+#include    <world/world.script.hh>
 
 namespace BugEngine { namespace Graphics
 {
@@ -21,9 +22,10 @@ RenderNode::~RenderNode()
 {
 }
 
-RenderScene::RenderScene(ref<RenderTarget> rendertarget)
+RenderScene::RenderScene(ref<RenderTarget> rendertarget, ref<const World> world)
     :   RenderNode()
     ,   m_renderTarget(rendertarget)
+    ,   m_world(world)
 {
 }
 
@@ -33,9 +35,13 @@ RenderScene::~RenderScene()
 
 ref<INode> RenderScene::createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const
 {
-    weak<IGPUResource> renderTarget = renderer->getRenderTarget(m_renderTarget);
+    weak<IGPUResource> renderTarget = renderer->getRenderSurface(m_renderTarget);
+    if (!renderTarget)
+    {
+        renderTarget = renderer->getRenderWindow(m_renderTarget);
+    }
     be_assert_recover(renderTarget, "can't create scene node: render target has not been created yet", return ref<INode>());
-    return ref<SceneNode>::create(gameArena(), be_checked_cast<IRenderTarget>(renderTarget));
+    return ref<SceneNode>::create(gameArena(), be_checked_cast<IRenderTarget>(renderTarget), m_world);
 }
 
 RenderSequence::RenderSequence(const minitl::vector< ref<const RenderNode> >& nodes)

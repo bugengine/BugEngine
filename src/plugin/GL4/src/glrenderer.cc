@@ -5,7 +5,7 @@
 #include    <glrenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
-#include    <loaders/rendertarget/glrendertarget.hh>
+#include    <loaders/rendertarget/glsurface.hh>
 #include    <loaders/rendertarget/glwindow.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <core/timer.hh>
@@ -28,9 +28,9 @@ void GLRenderer::flush()
     Windowing::Renderer::flush();
 }
 
-ref<IGPUResource> GLRenderer::create(weak<const RenderTarget> rendertarget) const
+ref<IGPUResource> GLRenderer::create(weak<const RenderSurface> rendersurface) const
 {
-    return ref<GLRenderTarget>();
+    return ref<GLSurface>();
 }
 
 ref<IGPUResource> GLRenderer::create(weak<const RenderWindow> renderwindow) const
