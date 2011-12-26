@@ -37,10 +37,10 @@ raw<const RTTI::ClassInfo> be_typeid< minitl::refcountable >::klass()
         {                                                               \
             #name,                                                      \
             be_typeid< parent >::klass(),                               \
-            sizeof(#type),                                              \
+            sizeof(type),                                               \
             0,                                                          \
             {0}, {0}, {0}, {0}, {0}, {0},                               \
-            &RTTI::nullconstructor<sizeof(#type)>,                      \
+            &RTTI::nullconstructor<sizeof(type)>,                       \
             &RTTI::nulldestructor,                                      \
             {{ 0, 0, 0, 0 }}                                            \
         };                                                              \
