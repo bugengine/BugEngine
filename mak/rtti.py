@@ -360,8 +360,10 @@ class Class(Container):
 				if name == '?ctor':
 					if self.value:
 						callptr = "&%s::construct" % helper
+						rtype = self.fullname
 					else:
 						callptr = "&%s::constructPtr" % helper
+						rtype = "ref< %s >" % self.fullname
 				elif 'const' in attrs:
 						callptr = "&%s::callConst< %s >" % (helper, methodptr)
 				elif 'static' in attrs:
