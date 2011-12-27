@@ -52,34 +52,75 @@ public:
 static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
 {
     GLXContext context = 0;
+    GLXContext ctx_old = glXCreateContext(display, glXGetVisualFromFBConfig(display, fbConfig), 0, GL_TRUE);
+    be_assert(ctx_old, "could not create legacy OpenGL context");
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress((const GLubyte *)"glXCreateContextAttribsARB");
     if (glXCreateContextAttribsARB)
     {
-        int attribs[] =
+        int attribs[][10] =
             {
-                GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
-                GLX_CONTEXT_MINOR_VERSION_ARB, 1,
-                //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-                None
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 1,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 1,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 2,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 1,
+                    None
+                }
             };
-        context = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
-        if (!context)
+        XSync(display, False);
+        for (int i = 0; i < sizeof(attribs)/sizeof(attribs[0]); ++i)
         {
-            attribs[1] = 2;
-            attribs[3] = 0;
-            context = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
-        }
-        if (!context)
-        {
-            attribs[1] = 1;
-            attribs[3] = 0;
-            context = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs);
+            context = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs[i]);
+            if (context)
+                break;
         }
     }
     else
     {
         context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE, 0, True);
     }
+    glXMakeCurrent(display, 0, 0);
+    glXDestroyContext(display, ctx_old);
     return context;
 }
 

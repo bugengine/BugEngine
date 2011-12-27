@@ -31,12 +31,10 @@ SceneNode::~SceneNode()
 
 void SceneNode::render()
 {
-    be_info("render");
 }
 
 void SceneNode::dispatch()
 {
-    be_info("dispatch");
     m_renderTarget->drawBatches(0, 0);
 }
 

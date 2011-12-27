@@ -23,6 +23,7 @@ void ResourceManager::attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourc
     {
         be_assert_recover(it->loader != loader, "registering twice the same loader for class %s" | classinfo->name, return);
     }
+    be_info("registering loader for type %s"|classinfo->name);
     LoaderInfo loaderInfo;
     loaderInfo.classinfo = classinfo;
     loaderInfo.loader = loader;
@@ -35,6 +36,7 @@ void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IR
     {
         if (it->classinfo == classinfo)
         {
+            be_info("unregistering loader for type %s"|classinfo->name);
             it = m_loaders.erase(it);
             return;
         }

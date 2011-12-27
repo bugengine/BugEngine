@@ -50,6 +50,7 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
     }
     ParameterMatch unusedParam;
     unusedParam.parameter = param;
+    unusedParam.match = raw<const ParamInfo>::null();
     m_params.push_back(unusedParam);
 }
 

@@ -27,6 +27,7 @@ public:
     template< typename U >
     operator raw<U>() const { raw<U> result = {m_ptr}; return result; }
     T* set(T* value) { return m_ptr = value; }
+    static inline raw<T> null();
 };
 
 }

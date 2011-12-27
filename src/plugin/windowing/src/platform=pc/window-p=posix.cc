@@ -51,7 +51,7 @@ void Window::load(weak<const Resource> resource)
 {
     m_window = scoped<PlatformWindow>::create(m_renderer->arena(),
                                               be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
-                                              be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->createWindow(0, 0, 800, 600));
+                                              be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->createWindow(0, 0, 200, 200));
     Window* w = this;
     XChangeProperty(be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,
                     m_window->m_window,
