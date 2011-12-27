@@ -237,7 +237,7 @@ struct InterlockedType<8>
                 "\tsetz %0\n"
                  : "=a"(result), "=m"(*p)
                  : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory"
+                 : "memory", "r8"
         );
         return result;
     }
