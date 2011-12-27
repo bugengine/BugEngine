@@ -34,7 +34,7 @@ IRenderer::~IRenderer()
 {
     m_resourceManager->detach<ShaderProgram>(m_shaderProgramLoader);
     m_resourceManager->detach<RenderWindow>(m_renderWindowLoader);
-    m_resourceManager->detach<RenderTarget>(m_renderSurfaceLoader);
+    m_resourceManager->detach<RenderSurface>(m_renderSurfaceLoader);
     m_resourceManager->detach<RenderNode>(m_sceneLoader);
 }
 
