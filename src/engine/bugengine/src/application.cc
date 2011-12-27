@@ -18,16 +18,16 @@ class Application::WorldResource : public minitl::refcountable
 {
     BE_NOCOPY(WorldResource);
 private:
-    ITask::CallbackConnection                       m_startSceneUpdate;
-    ITask::CallbackConnection                       m_endSceneUpdate;
+    TaskGroup::TaskStartConnection  m_startSceneUpdate;
+    TaskGroup::TaskEndConnection    m_endSceneUpdate;
 public:
-    WorldResource(weak<const World> world, weak<ITask> task);
+    WorldResource(weak<const World> world, weak<TaskGroup> task);
     ~WorldResource();
 };
 
-Application::WorldResource::WorldResource(weak<const World> world, weak<ITask> task)
-    :   m_startSceneUpdate(task, world->updateWorldTask()->startCallback())
-    ,   m_endSceneUpdate(world->updateWorldTask(), task->startCallback())
+Application::WorldResource::WorldResource(weak<const World> world, weak<TaskGroup> task)
+    :   m_startSceneUpdate(task, world->updateWorldTask())
+    ,   m_endSceneUpdate(task, world->updateWorldTask())
 {
 }
 

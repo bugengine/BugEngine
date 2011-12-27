@@ -21,7 +21,6 @@ TaskGroup::~TaskGroup()
 
 void TaskGroup::run(weak<Scheduler> scheduler) const
 {
-    be_info("start group %s"|name);
     Scheduler::WorkItem item(scheduler);
     if (!m_startTasks.empty())
     {
