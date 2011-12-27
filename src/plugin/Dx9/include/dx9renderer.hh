@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Graphics
 {
 
-class RenderTarget;
+class RenderSurface;
 class RenderWindow;
 class Mesh;
 class Texture;
@@ -61,7 +61,7 @@ public:
 private:
     void                flush() override;
 
-    ref<IGPUResource>   create(weak<const RenderTarget> rendertarget) const override;
+    ref<IGPUResource>   create(weak<const RenderSurface> rendersurface) const override;
     ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;
     ref<IGPUResource>   create(weak<const ShaderProgram> shader) const override;
 public:

@@ -122,7 +122,7 @@ void Dx9Renderer::flush()
     }
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const RenderTarget> rendertarget) const
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderSurface> rendersurface) const
 {
     return ref<IGPUResource>();
 }
