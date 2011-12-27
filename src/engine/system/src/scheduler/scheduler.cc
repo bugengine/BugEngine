@@ -61,6 +61,7 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
     }
     else
     {
+        be_info("running %s" | target->m_owner->name);
         target->run(sc);
     }
     be_assert(sc->m_runningTasks > 0, "running task count should be more than 1");
@@ -203,6 +204,7 @@ void Scheduler::mainThreadJoin()
 void Scheduler::notifyEnd()
 {
     be_assert(m_runningTasks == 0, "should not notify end when tasks remain to be done");
+    be_info("no more tasks to run; exiting");
     m_mainThreadSynchro.release(1);
 }
 

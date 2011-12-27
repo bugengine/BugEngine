@@ -27,6 +27,7 @@ private:
     Plugin<IResourceLoader> const   m_packageManager;
     ref<Folder>             const   m_dataFolder;
     ref<const Package>      const   m_mainPackage;
+    ref<ITask>              const   m_resourceTask;
 public:
     Editor(const PluginContext& context);
     ~Editor();

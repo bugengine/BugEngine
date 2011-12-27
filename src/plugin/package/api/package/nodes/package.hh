@@ -40,6 +40,7 @@ public:
     void textSave() const;
 
     void createObjects(weak<const ResourceManager> manager);
+    void deleteObjects(weak<const ResourceManager> manager);
 };
 
 }}}

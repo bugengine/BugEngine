@@ -29,6 +29,7 @@ protected:
 private:
     void insert(const T* after) const;
 protected:
+    bool hooked() const;
     void unhook() const;
 };
 
@@ -69,6 +70,12 @@ void intrusive_list<T, INDEX>::item::insert(const T* after) const
     m_previous = const_cast<T*>(after);
     after->m_next =  static_cast<T*>(const_cast<item*>(this));
     m_next->m_previous =  static_cast<T*>(const_cast<item*>(this));
+}
+
+template< typename T, int INDEX >
+bool intrusive_list<T, INDEX>::item::hooked() const
+{
+    return m_next != this;
 }
 
 template< typename T, int INDEX >

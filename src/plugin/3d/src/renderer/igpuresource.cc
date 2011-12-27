@@ -18,6 +18,7 @@ IGPUResource::IGPUResource(weak<const Resource> owner, weak<const IRenderer> ren
 
 IGPUResource::~IGPUResource()
 {
+    if (hooked()) unhook();
 }
 
 }}
