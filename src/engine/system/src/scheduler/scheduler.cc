@@ -61,7 +61,6 @@ bool Scheduler::Worker::doWork(Scheduler* sc)
     }
     else
     {
-        be_info("running %s" | target->m_owner->name);
         target->run(sc);
     }
     be_assert(sc->m_runningTasks > 0, "running task count should be more than 1");
