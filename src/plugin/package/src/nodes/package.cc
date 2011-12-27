@@ -157,7 +157,6 @@ void Package::createObjects(weak<const ResourceManager> manager)
 
 void Package::deleteObjects(weak<const ResourceManager> manager)
 {
-    be_error("%d"|m_values.size());
     for(size_t i = m_values.size(); i > 0; --i)
     {
         if (be_typeid<const Resource>::type() <= m_values[i-1].type())
