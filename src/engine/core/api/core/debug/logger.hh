@@ -78,7 +78,8 @@ public:
     }
 };
 
-#ifdef _DEBUG
+#define ALLDEBUG
+#if defined(_DEBUG) or defined(ALLDEBUG)
 # define  be_spam(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logSpam, __FILE__, __LINE__, (minitl::format<2048>)msg)
 # define  be_debug(msg)       ::BugEngine::Logger::root()->log(::BugEngine::logDebug, __FILE__, __LINE__, (minitl::format<2048>)msg)
 #else
@@ -86,7 +87,7 @@ public:
 # define  be_debug(msg)
 #endif
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) or defined(ALLDEBUG)
 # define  be_info(msg)        ::BugEngine::Logger::root()->log(::BugEngine::logInfo, __FILE__, __LINE__, (minitl::format<2048>)msg)
 #else
 # define  be_info(msg)

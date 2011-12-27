@@ -21,7 +21,7 @@ namespace
             GLX_X_RENDERABLE,   True,
             GLX_DRAWABLE_TYPE,  GLX_WINDOW_BIT,
             GLX_RENDER_TYPE,    GLX_RGBA_BIT,
-            GLX_X_VISUAL_TYPE,  GLX_TRUE_COLOR,
+            //GLX_X_VISUAL_TYPE,  GLX_TRUE_COLOR,
             //GLX_RED_SIZE, 8,
             //GLX_GREEN_SIZE, 8,
             //GLX_BLUE_SIZE, 8,
@@ -34,6 +34,7 @@ namespace
 
         int configCount;
         GLXFBConfig *configs = glXChooseFBConfig(display, screen, s_glxAttributes, &configCount);
+        be_info("found %d configs" | configCount);
         GLXFBConfig fbConfig = configs[0];
         XFree(configs);
         return fbConfig;
@@ -64,10 +65,10 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     }
 }
 
-#ifdef BE_ENABLE_ASSERT
+
 static const char *s_messages[] =
 {
-    "Success"
+    "Success",
     "BadRequest",
     "BadValue",
     "BadWindow",
@@ -86,11 +87,10 @@ static const char *s_messages[] =
     "BadLength",
     "BadImplementation"
 };
-#endif
 
 int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 {
-    be_assert(false, "X11 error: %s"|s_messages[event->error_code]);
+    be_error("X11 error: %d (%s)"|event->error_code|s_messages[event->error_code]);
     return 0;
 }
 
@@ -123,7 +123,7 @@ int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
 
 
 Renderer::Renderer(Allocator& arena, weak<ResourceManager> manager)
-    :   IRenderer(arena, manager)
+    :   IRenderer(arena, manager, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {
 }

@@ -32,6 +32,13 @@ T& raw<T>::operator*()
     return *m_ptr;
 }
 
+template< typename T >
+raw<T> raw<T>::null()
+{
+    raw<T> result = { 0 };
+    return result;
+}
+
 }
 
 /*****************************************************************************/

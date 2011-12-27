@@ -10,12 +10,15 @@ namespace BugEngine { class Resource; }
 namespace BugEngine { namespace Graphics
 {
 
+template< typename R >
+class GPUResourceLoader;
 class IRenderer;
 
 class be_api(_3D) IGPUResource :   public minitl::refcountable
                                ,   public minitl::intrusive_list<IGPUResource>::item
 {
-    friend class IRenderer;
+    template< typename T >
+    friend class GPUResourceLoader;
     BE_NOCOPY(IGPUResource);
 protected:
     const weak<const IRenderer>     m_renderer;

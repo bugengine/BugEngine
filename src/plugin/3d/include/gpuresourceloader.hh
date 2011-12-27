@@ -18,8 +18,9 @@ class GPUResourceLoader : public IResourceLoader
     BE_NOCOPY(GPUResourceLoader);
 private:
     weak<const IRenderer>                   m_renderer;
+    minitl::intrusive_list<IGPUResource>    m_pending;
     minitl::intrusive_list<IGPUResource>    m_resources;
-    minitl::vector< ref<IGPUResource> >     m_deletedResources;
+    minitl::vector< ref<IGPUResource> >     m_deleted;
 public:
     GPUResourceLoader(weak<const IRenderer> renderer);
     ~GPUResourceLoader();
