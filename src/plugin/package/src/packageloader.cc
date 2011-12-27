@@ -42,7 +42,7 @@ void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block
     package->createObjects(m_manager);
 }
 
-void PackageLoader::unload(const ResourceHandle& handle)
+void PackageLoader::unloadScript(const ResourceHandle& handle)
 {
     ref<PackageBuilder::Nodes::Package> package = be_checked_cast<PackageBuilder::Nodes::Package>(handle.handle);
     package->deleteObjects(m_manager);
