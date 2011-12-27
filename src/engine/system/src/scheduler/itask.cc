@@ -30,6 +30,7 @@ ITask::~ITask()
 
 void ITask::end(weak<Scheduler> sc) const
 {
+    be_info("done task %s"|name);
     ScopedCriticalSection scope(m_cs);
     for (minitl::list< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {

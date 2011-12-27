@@ -18,7 +18,6 @@ Reference::Reference(weak<Package> owner)
 
 Reference::~Reference()
 {
-    unhook();
 }
 
 void Reference::setName(const inamespace& name)

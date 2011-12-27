@@ -26,6 +26,7 @@ public:
     ~PackageLoader();
 private:
     virtual void runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer) override;
+    virtual void unload(const ResourceHandle& handle) override;
 };
 
 }}

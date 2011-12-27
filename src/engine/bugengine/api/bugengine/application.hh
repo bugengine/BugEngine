@@ -19,15 +19,22 @@ class be_api(BUGENGINE) Application : public IResourceLoader
     BE_NOCOPY(Application);
 private:
     class WorldResource;
+    struct UpdateTask
+    {
+        ref<ITask>                      task;
+        TaskGroup::TaskStartConnection  start;
+        TaskGroup::TaskEndConnection    end;
+    };
 private:
     scoped<Scheduler>                               m_scheduler;
     ref<TaskGroup>                                  m_updateTask;
-    minitl::vector< ref<ITask> >                    m_tasks;
-    minitl::vector<TaskGroup::TaskStartConnection>  m_startConnections;
-    minitl::vector<TaskGroup::TaskEndConnection>    m_endConnections;
+    ref<TaskGroup>                                  m_worldTask;
+    minitl::vector< UpdateTask >                    m_tasks;
     ITask::CallbackConnection                       m_updateLoop;
+    ITask::CallbackConnection                       m_worldLoop;
 protected:
     void addTask(ref<ITask> task);
+    void removeTask(ref<ITask> task);
     Application();
 public:
     virtual ~Application(void);

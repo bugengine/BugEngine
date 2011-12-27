@@ -39,10 +39,10 @@ Application::Application()
 :   IResourceLoader()
 ,   m_scheduler(scoped<Scheduler>::create(taskArena()))
 ,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
+,   m_worldTask(ref< TaskGroup >::create(taskArena(), "worldUpdate", color32(255,255,0)))
 ,   m_tasks(taskArena())
-,   m_startConnections(taskArena())
-,   m_endConnections(taskArena())
-,   m_updateLoop(m_updateTask, m_updateTask->startCallback())
+,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
+,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
 {
     addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     //m_updateLoop = ITask::CallbackConnection();
@@ -54,9 +54,23 @@ Application::~Application(void)
 
 void Application::addTask(ref<ITask> task)
 {
-    m_tasks.push_back(task);
-    m_startConnections.push_back(TaskGroup::TaskStartConnection(m_updateTask, task));
-    m_endConnections.push_back(TaskGroup::TaskEndConnection(m_updateTask, task));
+    UpdateTask t;
+    t.task = task;
+    t.start = TaskGroup::TaskStartConnection(m_updateTask, task);
+    t.end = TaskGroup::TaskEndConnection(m_updateTask, task);
+    m_tasks.push_back(t);
+}
+
+void Application::removeTask(ref<ITask> task)
+{
+    for (size_t i = 0; i < m_tasks.size(); ++i)
+    {
+        if (m_tasks[i].task == task)
+        {
+            minitl::swap(m_tasks[i], m_tasks.back());
+            m_tasks.pop_back();
+        }
+    }
 }
 
 int Application::run()
@@ -69,7 +83,7 @@ int Application::run()
 ResourceHandle Application::load(weak<const Resource> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World>(world), m_updateTask);
+    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World>(world), m_worldTask);
     return handle;
 }
 
