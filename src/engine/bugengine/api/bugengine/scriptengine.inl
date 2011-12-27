@@ -36,6 +36,15 @@ ResourceHandle ScriptEngine<T>::load(weak<const Resource> resource)
 template< typename T >
 void ScriptEngine<T>::unload(const ResourceHandle& handle)
 {
+    if (handle.handle)
+    {
+        unloadScript(handle);
+    }
+}
+
+template< typename T >
+void ScriptEngine<T>::unloadScript(const ResourceHandle& handle)
+{
 }
 
 template< typename T >

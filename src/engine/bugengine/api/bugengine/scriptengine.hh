@@ -21,6 +21,7 @@ public:
 protected:
     ScriptEngine(Allocator& arena, weak<ResourceManager> manager);
     virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;
+    virtual void unloadScript(const ResourceHandle& handle);
 
 private:
     virtual ResourceHandle load(weak<const Resource> script) override;
