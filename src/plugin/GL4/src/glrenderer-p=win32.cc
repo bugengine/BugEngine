@@ -9,7 +9,7 @@
 #include    <3d/mesh/mesh.script.hh>
 #include    <3d/texture/texture.script.hh>
 #include    <3d/shader/shader.script.hh>
-#include    <loaders/rendertarget/glrendertarget.hh>
+#include    <loaders/rendertarget/glsurface.hh>
 #include    <loaders/rendertarget/glwindow.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
