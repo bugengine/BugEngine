@@ -22,7 +22,7 @@ struct InterlockedType<4>
         __asm__ __volatile__ ("lock; xadd %0,%1"
                       : "=a" (old), "=m" (*p)
                       : "a" (incr), "m" (*p)
-                      : "memory", "cc", "eax");
+                      : "memory");
         return old;
     }
     static inline value_t fetch_and_sub(value_t *p, value_t incr)
@@ -31,10 +31,10 @@ struct InterlockedType<4>
     }
     static inline value_t fetch_and_set(value_t *p, value_t v)
     {
-        __asm__ __volatile__ ("lock; xchg %2, %1"
+        __asm__ __volatile__ ("lock; xchg %0, %1"
                       : "=a" (v), "+m" (*p)
                       : "a" (v)
-                      : "memory", "eax");
+                      : "memory");
         return v;
     }
 
@@ -43,7 +43,7 @@ struct InterlockedType<4>
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
                       : "=a" (v)
                       : "a" (v), "m" (*(p)), "0"(condition)
-                      : "memory", "cc", "eax");
+                      : "memory", "cc");
         return v;
     }
     static inline value_t set_and_fetch(value_t *p, value_t v)
@@ -103,7 +103,7 @@ struct InterlockedType<4>
                 "popl  %%ebx"
                  : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*(i64 *)p)
                  : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "m"(dst.taggedvalue.tag), "c"(v)
-                 : "memory", "cc", "esp", "eax", "ecx", "edx", "ebx"
+                 : "memory", "cc", "esp", "ecx", "ebx"
     #if defined(BE_COMPILER_INTEL)
                  ,"ebx"
     #endif
@@ -113,7 +113,7 @@ struct InterlockedType<4>
                 "lock;  cmpxchg8b %2\n\t"
                  : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
                  : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
-                 : "memory", "cc", "eax", "ebx", "ecx", "edx"
+                 : "memory", "cc", "ebx", "ecx"
         );
     #endif
         return result.taggedvalue.tag == condition.taggedvalue.tag;
@@ -142,7 +142,7 @@ struct InterlockedType<8>
         __asm__ __volatile__ ("lock; xaddq %0,%1"
                       : "=a" (old), "=m" (*p)
                       : "a" (incr), "m" (*p)
-                      : "memory", "cc", "rax");
+                      : "memory");
         return old;
     }
     static inline value_t fetch_and_sub(value_t *p, value_t incr)
@@ -154,7 +154,7 @@ struct InterlockedType<8>
         __asm__ __volatile__ ("lock; xchgq %2, %1"
                       : "=a" (v), "+m" (*p)
                       : "a" (v)
-                      : "memory", "rax");
+                      : "memory");
         return v;
     }
     static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
@@ -176,7 +176,7 @@ struct InterlockedType<8>
                 "lock;  cmpxchg8b %1\n\t"
                  : "=A"(result), "=m"(*p)
                  : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
-                 : "memory", "cc", "rax", "rbx", "rcx", "rdx"
+                 : "memory", "cc", "rbx", "rcx"
 
         );
     #ifdef __PIC__
@@ -239,7 +239,7 @@ struct InterlockedType<8>
                 "\tsetz %0\n"
                  : "=a"(result), "=m"(*p)
                  : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory", "cc", "r8", "rax", "rbx", "rcx", "rdx"
+                 : "memory", "cc", "r8"
         );
         return result;
     }
