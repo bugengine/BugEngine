@@ -21,7 +21,7 @@ void GLRenderer::flush()
     if (++frames%100 == 0)
     {
         float time = Timer::now();
-        be_error("FPS: %d" | (int)(1000.0f*100.0f / (time - now)));
+        be_info("FPS: %d" | (int)(1000.0f*100.0f / (time - now)));
         now = time;
     }
 
