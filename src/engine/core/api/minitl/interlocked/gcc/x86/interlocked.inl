@@ -93,30 +93,21 @@ struct InterlockedType<4>
     }
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        tagged_t result;
-        tagged_t dst(condition.taggedvalue.tag+1, v);
     #ifdef __PIC__
-        __asm__ __volatile__ (
-                "pushl %%ebx\n\t"
-                "movl  %7,%%ebx\n\t"
-                "lock\n\t cmpxchg8b %2\n\t"
-                "popl  %%ebx"
-                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*(i64 *)p)
-                 : "m"(*(i64 *)p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "m"(dst.taggedvalue.tag), "c"(v)
-                 : "memory", "cc", "esp", "ecx", "ebx"
-    #if defined(BE_COMPILER_INTEL)
-                 ,"ebx"
+        __asm__ __volatile__("push %%ebx\n\t" : : : "esp");
     #endif
-        );
-    #else
+        unsigned char result;
         __asm__ __volatile__ (
-                "lock;  cmpxchg8b %2\n\t"
-                 : "=a"(result.taggedvalue.tag), "=d"(result.taggedvalue.value), "=m"(*p)
-                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(dst.taggedvalue.tag), "c"(v)
-                 : "memory", "cc", "ebx", "ecx"
+                "lock;  cmpxchg8b %1\n\t"
+                "       setz %0\n"
+                 : "=r"(result), "+m"(*p)
+                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(condition.taggedvalue.tag+1), "c"(v)
+                 : "memory", "cc", "eax", "edx"
         );
+    #ifdef __PIC__
+        __asm__ __volatile__("pop %%ebx\n\t" : : : "esp");
     #endif
-        return result.taggedvalue.tag == condition.taggedvalue.tag;
+        return result;
     }
 };
 
