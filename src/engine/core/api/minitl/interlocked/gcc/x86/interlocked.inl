@@ -20,8 +20,8 @@ struct InterlockedType<4>
     {
         value_t old;
         __asm__ __volatile__ ("lock; xadd %0,%1"
-                      : "=a" (old), "=m" (*p)
-                      : "a" (incr), "m" (*p)
+                      : "=r" (old), "=m" (*p)
+                      : "0" (incr), "m" (*p)
                       : "memory");
         return old;
     }
@@ -32,8 +32,8 @@ struct InterlockedType<4>
     static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         __asm__ __volatile__ ("lock; xchg %0, %1"
-                      : "=a" (v), "+m" (*p)
-                      : "a" (v)
+                      : "=r" (v), "+m" (*p)
+                      : "0" (v)
                       : "memory");
         return v;
     }
@@ -41,8 +41,8 @@ struct InterlockedType<4>
     static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
         __asm__ __volatile__ ("lock; cmpxchg %1, %2"
-                      : "=a" (v)
-                      : "a" (v), "m" (*(p)), "0"(condition)
+                      : "=r" (v)
+                      : "0" (v), "m" (*(p)), "0"(condition)
                       : "memory", "cc");
         return v;
     }
@@ -93,20 +93,19 @@ struct InterlockedType<4>
     }
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-    #ifdef __PIC__
-        __asm__ __volatile__("push %%ebx\n\t" : : : "esp");
-    #endif
         unsigned char result;
+        tagged_t::value_t unused;
         __asm__ __volatile__ (
-                "lock;  cmpxchg8b %1\n\t"
-                "       setz %0\n"
-                 : "=r"(result), "+m"(*p)
-                 : "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "b"(condition.taggedvalue.tag+1), "c"(v)
-                 : "memory", "cc", "eax", "edx"
+                "       push %%ebx\n\t"
+                "       mov %%eax,%%ebx\n\t"
+                "       inc %%ebx\n\t"
+                "lock;  cmpxchg8b (%3)\n\t"
+                "       setz %1\n\t"
+                "       pop %%ebx\n\t"
+                 : "=m"(*p), "=a"(result), "=d"(unused)
+                 : "S"(p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "c"(v)
+                 : "memory", "cc"
         );
-    #ifdef __PIC__
-        __asm__ __volatile__("pop %%ebx\n\t" : : : "esp");
-    #endif
         return result;
     }
 };
@@ -131,8 +130,8 @@ struct InterlockedType<8>
     {
         value_t old;
         __asm__ __volatile__ ("lock; xaddq %0,%1"
-                      : "=a" (old), "=m" (*p)
-                      : "a" (incr), "m" (*p)
+                      : "=r" (old), "=m" (*p)
+                      : "0" (incr), "m" (*p)
                       : "memory");
         return old;
     }
@@ -143,8 +142,8 @@ struct InterlockedType<8>
     static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         __asm__ __volatile__ ("lock; xchgq %2, %1"
-                      : "=a" (v), "+m" (*p)
-                      : "a" (v)
+                      : "=r" (v), "+m" (*p)
+                      : "0" (v)
                       : "memory");
         return v;
     }
@@ -228,9 +227,9 @@ struct InterlockedType<8>
                 "\tmov %2,%%r8\n"
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
-                 : "=a"(result), "=m"(*p)
+                 : "=r"(result), "=m"(*p)
                  : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory", "cc", "r8"
+                 : "memory", "cc", "r8", "rax", "rdx"
         );
         return result;
     }
