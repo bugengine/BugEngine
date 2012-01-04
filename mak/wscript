@@ -56,7 +56,7 @@ def configure(conf):
 			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
 				pprint('BLUE', '_'*40)
 				pprint('BLUE', '| '+('configure for extra package '+f).ljust(36)+ ' |')
-				conf.recurse(os.path.join('..', 'extra', f))
+				conf.recurse(os.path.join('..', 'extra', f), once=False)
 	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
 		if platform == conf.env.HOST: continue
 		if platform not in ['.svn', '.cvs']:

@@ -16,7 +16,7 @@ private:
     static size_t       s_currentPlugin;
     static PluginList*  s_plugins[s_maxPlugins];
 public:
-    typedef void*(*Create)();
+    typedef void*(*Create)(const PluginContext& context);
     typedef void(*Destroy)(void*);
     typedef raw<RTTI::ClassInfo> (*Namespace)();
 public:
@@ -38,10 +38,18 @@ public:
                                                             0,                                                                          \
                                                             0,                                                                          \
                                                             BugEngine::be_##name##_Namespace);
-#define BE_PLUGIN_REGISTER(name, interface, klass, params, args)                                                                        \
-    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                                 \
-    static interface* be_createPlugin params { void* m = BugEngine::gameArena().alloc<klass>(); return new(m) klass args; }             \
-    static void be_destroyPlugin(klass* cls) { minitl::checked_destroy(cls); BugEngine::gameArena().free(cls); }                        \
+#define BE_PLUGIN_REGISTER(name, interface, klass)                                              \
+    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                         \
+    static interface* be_createPlugin (const ::BugEngine::PluginContext& context)               \
+    {                                                                                           \
+        void* m = ::BugEngine::gameArena().alloc<klass>();                                      \
+        return new(m) klass(context);                                                           \
+    }                                                                                           \
+    static void be_destroyPlugin(klass* cls)                                                    \
+    {                                                                                           \
+        minitl::checked_destroy(cls);                                                           \
+        ::BugEngine::gameArena().free(cls);                                                     \
+    }                                                                                           \
     BE_EXPORT BugEngine::impl::PluginList s_##name##Plugin( #name,                                                                      \
                                                             reinterpret_cast<BugEngine::impl::PluginList::Create>(be_createPlugin),     \
                                                             reinterpret_cast<BugEngine::impl::PluginList::Destroy>(be_destroyPlugin),   \
@@ -59,48 +67,14 @@ Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
 }
 
 template< typename Interface >
-Plugin<Interface>::Plugin(const istring &pluginName)
+Plugin<Interface>::Plugin(const istring &pluginName, const PluginContext& context)
 :   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
 ,   m_interface(0)
 ,   m_refCount(new (gameArena()) i_u32(1))
 {
     if (m_handle)
     {
-        m_interface = (reinterpret_cast<Interface*(*)()>(static_cast<const impl::PluginList*>(m_handle)->create))();
-    }
-    else
-    {
-        be_error("Could not load plugin %s" | pluginName);
-    }
-}
-
-template< typename Interface >
-template< typename T1 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1)
-:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        m_interface = (reinterpret_cast<Interface*(*)(T1)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1);
-    }
-    else
-    {
-        be_error("Could not load plugin %s" | pluginName);
-    }
-}
-
-template< typename Interface >
-template< typename T1, typename T2 >
-Plugin<Interface>::Plugin(const istring &pluginName, T1 param1, T2 param2)
-:   m_handle(impl::PluginList::findPlugin(pluginName.c_str()))
-,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
-{
-    if (m_handle)
-    {
-        m_interface = (reinterpret_cast<Interface*(*)(T1, T2)>(static_cast<const impl::PluginList*>(m_handle)->create))(param1, param2);
+        m_interface = (reinterpret_cast<Interface*(*)(const PluginContext&)>(static_cast<const impl::PluginList*>(m_handle)->create))(context);
     }
     else
     {
