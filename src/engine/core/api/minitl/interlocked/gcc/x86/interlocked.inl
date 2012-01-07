@@ -228,7 +228,7 @@ struct InterlockedType<8>
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
                  : "=r"(result), "=m"(*p), "=d"(condition.taggedvalue.value), "=a"(condition.taggedvalue.tag)
-                 : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1)
+                 : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
                  : "memory", "cc", "r8"
         );
         return result;

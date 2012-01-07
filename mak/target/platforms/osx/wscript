@@ -72,7 +72,7 @@ def add_darwin_flags_to_env(conf, name, arch):
 
 	conf.env.append_value('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
 	conf.env.append_value('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
-	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
+	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/', '-L', '%s/usr/lib'%full_sdk])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'
