@@ -20,6 +20,7 @@ void* StackAllocator::internalAlloc(size_t size, size_t alignment)
 #ifdef _MSC_VER
     return ::_aligned_malloc(size, alignment);
 #else
+    be_forceuse(alignment);
     return ::malloc(size);
 #endif
 }

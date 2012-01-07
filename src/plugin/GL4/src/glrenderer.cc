@@ -28,7 +28,7 @@ void GLRenderer::flush()
     Windowing::Renderer::flush();
 }
 
-ref<IGPUResource> GLRenderer::create(weak<const RenderSurface> rendersurface) const
+ref<IGPUResource> GLRenderer::create(weak<const RenderSurface> /*rendersurface*/) const
 {
     return ref<GLSurface>();
 }

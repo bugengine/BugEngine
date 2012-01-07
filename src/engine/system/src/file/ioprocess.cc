@@ -38,7 +38,7 @@ IOContext::~IOContext()
     be_assert(s_iocontext.tickets.empty(), "Tickets still in queue when exiting IO process");
 }
 
-intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
+intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
 {
     while(1)
     {

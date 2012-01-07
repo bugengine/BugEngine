@@ -32,7 +32,7 @@ void MemoryStream::write(const void* buffer, u64 size_)
 {
     if (size_ + m_size > m_capacity)
         resize(m_size+size_);
-    memcpy(m_memory+m_size, m_memory, be_checked_numcast<size_t>(size_));
+    memcpy(m_memory+m_size, buffer, be_checked_numcast<size_t>(size_));
     m_size = m_size + size_;
 }
 

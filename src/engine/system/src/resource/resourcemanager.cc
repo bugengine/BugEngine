@@ -34,7 +34,7 @@ void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IR
 {
     for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); )
     {
-        if (it->classinfo == classinfo)
+        if (it->classinfo == classinfo && it->loader == loader)
         {
             be_info("unregistering loader for type %s"|classinfo->name);
             it = m_loaders.erase(it);

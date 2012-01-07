@@ -82,7 +82,7 @@ ref<Object> s_currentObject;
     double      fValue;
     char*       sValue;
     ref<Value>* value;
-}
+};
 
 %start  file
 
@@ -178,8 +178,8 @@ params:
 param:
         TOK_ID '=' value ';'
         {
-            ref<Parameter> param = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
-            s_currentObject->addParameter(param);
+            ref<Parameter> parameter = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
+            s_currentObject->addParameter(parameter);
             $3->~ref();
             free($1);
             free($3);
