@@ -75,15 +75,6 @@ ref<Object> s_currentObject;
 %type   <sValue>    fullname
 %type   <value>     value
 
-%union
-{
-    bool        bValue;
-    i64         iValue;
-    double      fValue;
-    char*       sValue;
-    ref<Value>* value;
-};
-
 %start  file
 
 %%

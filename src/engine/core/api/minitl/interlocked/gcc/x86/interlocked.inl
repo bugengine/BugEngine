@@ -224,7 +224,7 @@ struct InterlockedType<8>
     {
         unsigned char result;
         __asm__ __volatile__ (
-                "\tmov %2,%%r8\n"
+                "\tmov %4,%%r8\n"
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
                  : "=r"(result), "=m"(*p), "=d"(condition.taggedvalue.value), "=a"(condition.taggedvalue.tag)
