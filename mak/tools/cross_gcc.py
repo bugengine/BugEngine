@@ -383,21 +383,21 @@ def add_standard_gcc_flags(conf):
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
 	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
 
 	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	v['LINKFLAGS_debug'] = ['-pipe', '-g']
 
 	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g']
 
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
@@ -405,16 +405,16 @@ def add_standard_gcc_flags(conf):
 		v['CFLAGS_warnall'] += ['-Wextra']
 		v['CXXFLAGS_warnall'] += ['-Wextra', '-Wno-sign-compare']
 		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
-		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics']
-		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics']
+		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics', '-Wno-unused-parameter']
+		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics', '-Wno-unused-parameter']
 
 	if conf.env.GCC_NAME == 'clang':
 		v.append_unique('CFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
 		v.append_unique('CXXFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
-		v.append_unique('CFLAGS_profile', ['-Wno-unused-function', '-Wno-unused-parameter'])
-		v.append_unique('CXXFLAGS_profile', ['-Wno-unused-function', '-Wno-unused-parameter'])
-		v.append_unique('CFLAGS_final', ['-Wno-unused-function', '-Wno-unused-parameter'])
-		v.append_unique('CXXFLAGS_final', ['-Wno-unused-function', '-Wno-unused-parameter'])
+		v.append_unique('CFLAGS_profile', ['-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_profile', ['-Wno-unused-function'])
+		v.append_unique('CFLAGS_final', ['-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_final', ['-Wno-unused-function'])
 
 
 configure = '''
