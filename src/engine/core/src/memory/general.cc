@@ -30,6 +30,7 @@ void* GeneralAllocator::internalAlloc(size_t size, size_t alignment)
 #ifdef _MSC_VER
     return size > 0 ? ::_aligned_malloc(size, alignment) : 0;
 #else
+    be_forceuse(alignment);
     return size > 0 ? ::malloc(size) : 0;
 #endif
 }
@@ -44,6 +45,7 @@ void* GeneralAllocator::internalRealloc(void* ptr, size_t size, size_t alignment
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, size, alignment);
 #else
+    be_forceuse(alignment);
     return ::realloc(ptr, size);
 #endif
 }

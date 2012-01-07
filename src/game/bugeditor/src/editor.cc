@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Editor
 {
 
-Editor::Editor(const PluginContext& context)
+Editor::Editor(const PluginContext& /*context*/)
     :   m_resourceManager(scoped<ResourceManager>::create(gameArena()))
     ,   m_pluginContext(m_resourceManager)
     ,   m_renderer("GL4", m_pluginContext)

@@ -16,7 +16,7 @@ namespace
     private:
         weak<BugEngine::File> m_logFile;
     public:
-        FileLogListener(weak<BugEngine::File> file)
+        explicit FileLogListener(weak<BugEngine::File> file)
             :   m_logFile(file)
         {
         }

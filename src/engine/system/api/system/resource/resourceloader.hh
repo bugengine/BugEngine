@@ -23,8 +23,8 @@ protected:
     virtual ResourceHandle load(weak<const Resource> resource) = 0;
     virtual void unload(const ResourceHandle& resource) = 0;
 
-    virtual void onTicketUpdated(weak<const Resource> resource, const Allocator::Block<u8>& buffer, u32 progress) { }
-    virtual void onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer) { be_notreached(); }
+    virtual void onTicketUpdated(weak<const Resource> /*resource*/, const Allocator::Block<u8>& /*buffer*/, u32 /*progress*/) { }
+    virtual void onTicketLoaded(weak<const Resource> /*resource*/, const Allocator::Block<u8>& /*buffer*/) { be_notreached(); }
 };
 
 }

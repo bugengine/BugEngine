@@ -96,7 +96,7 @@ ITask::ChainCallback::~ChainCallback()
     }
 }
 
-void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const
+void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> /*task*/) const
 {
     if (++m_completed == m_startedBy.size())
     {

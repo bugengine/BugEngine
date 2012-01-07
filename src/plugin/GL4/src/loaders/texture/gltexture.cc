@@ -19,7 +19,7 @@ GLTexture::~GLTexture()
 {
 }
 
-void GLTexture::load(weak<const Resource> resource)
+void GLTexture::load(weak<const Resource> /*resource*/)
 {
 }
 

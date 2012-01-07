@@ -54,7 +54,7 @@ void* Thread::ThreadParams::threadWrapper(void* params)
 
 
 
-Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p, bool isSuspended)
+Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
 :   m_params(new ThreadParams(name, f, p1, p2))
 ,   m_data(new pthread_t)
 {

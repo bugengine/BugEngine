@@ -79,7 +79,7 @@ public:
     Integer(T value = 0) : m_value(ByteSwap<T, Endianness_Self, e>::byteswap(value)) { }
     ~Integer()                                                       { }
     operator T() const                                               { return ByteSwap<T, e, Endianness_Self>::byteswap(m_value); }
-    Integer& operator=(T value)                                      { m_value = ByteSwap<T, Endianness_Self, e>::byteswap(m_value); return *this; }
+    Integer& operator=(T value)                                      { m_value = ByteSwap<T, Endianness_Self, e>::byteswap(value); return *this; }
 };
 
 typedef Integer<u8, Endianness_Little>  u8_l;

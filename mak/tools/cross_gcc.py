@@ -32,6 +32,32 @@ def parse_gcc_target(target):
 				return aname
 
 @conf
+def get_native_icc_target(conf, icc):
+	cmd = [icc, '-V']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	out = str(out).split('\n')
+	target = os.uname()[0].lower()
+	arch = 'x86'
+	version = None
+	for line in out:
+		words = line.split()
+		while len(words):
+			if words[0] == 'Intel(R)' and words[1] == '64':
+				arch = 'amd64'
+			if words[0] == 'ID:':
+				if words[1].startswith('m_cproc_'):
+					version = words[1][10:]
+			words = words[1:]
+	return (target+'-'+arch, version)
+
+
+
+@conf
 def get_native_clang_target(conf, clang):
 	cmd = [clang, '-v']
 	try:
@@ -228,6 +254,12 @@ def get_available_gcc(conf, paths=[]):
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, gcc, gxx))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
+	if conf.find_program('icc', var='ICC', mandatory=False, silent = True):
+		toolchaindir = os.path.split(conf.env.ICC)[0]
+		target, version = conf.get_native_icc_target(conf.env.ICC)
+		arch = parse_gcc_target(target) or 'unknown'
+		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
+
 	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
 		toolchaindir = os.path.split(conf.env.CLANG)[0]
 		target, version = conf.get_native_clang_target(conf.env.CLANG)
@@ -275,7 +307,7 @@ def find_cross_gcc(conf):
 					version = versions[1]
 					if thisversion != version:
 						conf.fatal('mismatch version: %s instead of %s' % (thisversion, version))
-		except:
+		except Exception as e:
 			conf.fatal('could not run the compiler %r' % str(cmd))
 
 
@@ -333,7 +365,10 @@ def find_cross_gcc(conf):
 			for windres in [target+'-windres', 'mingw32-windres', 'windres']:
 				if conf.find_program(windres, var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
-	conf.load('gcc gxx gas')
+	if gcc != 'icc':
+		conf.load('gcc gxx')
+	else:
+		conf.load('icc icpc')
 	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 
 @conf
@@ -347,27 +382,39 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wnon-virtual-dtor', '-Woverloaded-virtual']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Werror']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual']
 
-	if conf.env.GCC_NAME == 'clang':
-		v['CFLAGS_warnall'] += ['-Wno-unused-function']
-		v['CXXFLAGS_warnall'] += ['-Wno-unused-function']
 
 	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof']
 	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	v['LINKFLAGS_debug'] = ['-pipe', '-g']
 
 	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g']
 
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
+
+	if conf.env.GCC_NAME != 'icc':
+		v['CFLAGS_warnall'] += ['-Wextra']
+		v['CXXFLAGS_warnall'] += ['-Wextra', '-Wno-sign-compare']
+		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
+		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics']
+		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics']
+
+	if conf.env.GCC_NAME == 'clang':
+		v.append_unique('CFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
+		v.append_unique('CXXFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
+		v.append_unique('CFLAGS_profile', ['-Wno-unused-function', '-Wno-unused-parameter'])
+		v.append_unique('CXXFLAGS_profile', ['-Wno-unused-function', '-Wno-unused-parameter'])
+		v.append_unique('CFLAGS_final', ['-Wno-unused-function', '-Wno-unused-parameter'])
+		v.append_unique('CXXFLAGS_final', ['-Wno-unused-function', '-Wno-unused-parameter'])
 
 
 configure = '''

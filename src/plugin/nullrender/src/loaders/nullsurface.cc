@@ -31,7 +31,7 @@ void NullSurface::present() const
 {
 }
 
-void NullSurface::load(weak<const Resource> resource)
+void NullSurface::load(weak<const Resource> /*resource*/)
 {
 }
 

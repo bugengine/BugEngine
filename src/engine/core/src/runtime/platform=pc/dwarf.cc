@@ -177,9 +177,9 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
     m_position += 4;
     if (value.value == 0xffffffff)
     {
-        Integer<u64,endianness> m;
-        memcpy(&m, m_buffer+m_position, 8);
-        value.value = m;
+        Integer<u64,endianness> m2;
+        memcpy(&m2, m_buffer+m_position, 8);
+        value.value = m2;
         m_position += 8;
         m_64 = true;
     }

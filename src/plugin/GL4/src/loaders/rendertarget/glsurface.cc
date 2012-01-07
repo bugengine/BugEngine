@@ -19,7 +19,7 @@ GLSurface::~GLSurface()
 {
 }
 
-void GLSurface::load(weak<const Resource> resource)
+void GLSurface::load(weak<const Resource> /*resource*/)
 {
 }
 
