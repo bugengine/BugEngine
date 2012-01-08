@@ -65,7 +65,7 @@ ref<Object> s_currentObject;
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN
 
-%token  KW_import KW_plugin
+%token  KW_import KW_plugin KW_namespace
 
 %type   <bValue>    VAL_BOOLEAN
 %type   <iValue>    VAL_INTEGER
