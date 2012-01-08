@@ -51,7 +51,7 @@ def get_native_icc_target(conf, icc):
 				arch = 'amd64'
 			if words[0] == 'ID:':
 				if words[1].startswith('m_cproc_'):
-					version = words[1][10:]
+					version = words[1][10:].split('.')[0]
 			words = words[1:]
 	return (target+'-'+arch, version)
 
