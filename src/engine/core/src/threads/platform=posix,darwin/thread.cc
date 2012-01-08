@@ -48,7 +48,9 @@ Thread::ThreadParams::~ThreadParams()
 void* Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = reinterpret_cast<ThreadParams*>(params);
+    be_info("started thread %s" | p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
+    be_info("stopped thread %s" | p->m_name);
     return 0;
 }
 
