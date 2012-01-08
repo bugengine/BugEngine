@@ -28,6 +28,10 @@ typedef u8                      byte;
 #pragma warning disable 1418    // external function definition with no prior declaration
 #pragma warning disable 2259
 
+#ifdef NDEBUG
+# pragma warning disable 869
+#endif
+
 #ifndef _WIN32
 
 # define override
