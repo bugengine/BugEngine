@@ -223,11 +223,12 @@ struct InterlockedType<8>
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         unsigned char result;
+        tagged_t::tag_t dummy;
         __asm__ __volatile__ (
                 "\tmov %4,%%r8\n"
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
-                 : "=r"(result), "=m"(*p), "=d"(condition.taggedvalue.value), "=a"(condition.taggedvalue.tag)
+                 : "=r"(result), "=m"(*p), "=d"(dummy.taggedvalue.value), "=a"(dummy.taggedvalue.tag)
                  : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
                  : "memory", "cc", "r8"
         );
