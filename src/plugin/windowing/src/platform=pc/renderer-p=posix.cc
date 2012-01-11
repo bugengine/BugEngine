@@ -88,7 +88,7 @@ static const char *s_messages[] =
     "BadImplementation"
 };
 
-int Renderer::PlatformRenderer::xError(::Display* display, XErrorEvent* event)
+int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* event)
 {
     be_error("X11 error: %d (%s)"|event->error_code|s_messages[event->error_code]);
     return 0;

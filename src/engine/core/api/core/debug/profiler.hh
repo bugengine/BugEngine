@@ -14,8 +14,7 @@ private:
     const char *m_name;
     Profile*    m_parent;
 public:
-    template< size_t size >
-    Profile(const char name[size])
+    Profile(const char* name)
         :   m_name(name)
     {
     }

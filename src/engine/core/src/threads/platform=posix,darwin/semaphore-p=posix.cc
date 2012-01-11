@@ -6,12 +6,12 @@
 #include    <semaphore.h>
 #include    <cerrno>
 #include    <core/timer.hh>
-#include 	<stdio.h>
+#include    <stdio.h>
 
 namespace BugEngine
 {
 
-Semaphore::Semaphore(int initialCount, int maxCount)
+Semaphore::Semaphore(int initialCount)
 :   m_data(new sem_t)
 {
     if (sem_init(reinterpret_cast<sem_t*>(m_data), 0, initialCount) != 0)
