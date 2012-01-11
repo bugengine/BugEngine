@@ -8,8 +8,8 @@
 namespace BugEngine
 {
 
-Semaphore::Semaphore(int initialCount, int maxCount)
-:   m_data(CreateSemaphore(NULL, initialCount, maxCount, NULL))
+Semaphore::Semaphore(int initialCount)
+:   m_data(CreateSemaphore(NULL, initialCount, 65535, NULL))
 {
 }
 

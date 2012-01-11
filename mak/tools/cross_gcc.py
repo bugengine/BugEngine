@@ -52,6 +52,8 @@ def get_native_icc_target(conf, icc):
 			if words[0] == 'ID:':
 				if words[1].startswith('m_cproc_'):
 					version = words[1][10:].split('.')[0]
+			if words[0] == 'Version':
+				version = words[1].split('.')[0]
 			words = words[1:]
 	return (target+'-'+arch, version)
 
@@ -136,7 +138,8 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag, gcc, gxx):
 	newenv['GCC_FLAGS']		= flag and [flag] or []
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, '..', 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, '..', '..', 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin'))]
+							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin')),
+							   toolchaindir]
 	conf.load('cross_gcc', tooldir='mak/tools')
 
 
@@ -254,11 +257,13 @@ def get_available_gcc(conf, paths=[]):
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, gcc, gxx))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
-	if conf.find_program('icc', var='ICC', mandatory=False, silent = True):
-		toolchaindir = os.path.split(conf.env.ICC)[0]
-		target, version = conf.get_native_icc_target(conf.env.ICC)
-		arch = parse_gcc_target(target) or 'unknown'
-		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
+	for dir in paths+[i for i in os.environ['PATH'].split(':') if i not in paths]:
+		if conf.find_program('icc', var='ICC', path_list=[dir], mandatory=False, silent = True):
+			toolchaindir = os.path.split(conf.env.ICC)[0]
+			target, version = conf.get_native_icc_target(conf.env.ICC)
+			arch = parse_gcc_target(target) or 'unknown'
+			conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
+			del conf.env['ICC']
 
 	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
 		toolchaindir = os.path.split(conf.env.CLANG)[0]
@@ -328,6 +333,8 @@ def find_cross_gcc(conf):
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
+		if not v['CPP']:
+			conf.find_program('cpp', var='CPP', mandatory=False, silent=True)
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
@@ -382,7 +389,7 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Werror']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Winline', '-Wno-unknown-pragmas', '-Werror']
 	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
 
@@ -402,15 +409,15 @@ def add_standard_gcc_flags(conf):
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
 
 	if conf.env.GCC_NAME != 'icc':
-		v['CFLAGS_warnall'] += ['-Wextra']
+		v['CFLAGS_warnall'] += ['-Wextra', '-pedantic']
 		v['CXXFLAGS_warnall'] += ['-Wextra', '-Wno-sign-compare']
 		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
 		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics', '-Wno-unused-parameter']
 		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics', '-Wno-unused-parameter']
 
 	if conf.env.GCC_NAME == 'clang':
-		v.append_unique('CFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
-		v.append_unique('CXXFLAGS_warnall', ['-Wno-unneeded-internal-declaration'])
+		v.append_unique('CFLAGS_warnall', ['-Wno-unknown-warning-option', '-Wno-unneeded-internal-declaration', '-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-warning-option', '-Wno-unneeded-internal-declaration', '-Wno-unused-function'])
 		v.append_unique('CFLAGS_profile', ['-Wno-unused-function'])
 		v.append_unique('CXXFLAGS_profile', ['-Wno-unused-function'])
 		v.append_unique('CFLAGS_final', ['-Wno-unused-function'])

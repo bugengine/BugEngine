@@ -27,6 +27,9 @@ typedef u8                      byte;
 #pragma warning disable 981
 #pragma warning disable 1418    // external function definition with no prior declaration
 #pragma warning disable 2259
+#pragma warning disable 411     // class X defines no constructor to initialize...
+#pragma warning disable 2304    // explicit constructors
+#pragma warning disable 2289    // signature for copy is Type(const Type&)
 
 #ifdef NDEBUG
 # pragma warning disable 869
@@ -34,6 +37,7 @@ typedef u8                      byte;
 
 #ifndef _WIN32
 
+#include <stdint.h>
 # define override
 # define BE_THREAD_LOCAL         __thread
 # define BE_NOINLINE             __attribute__((noinline))

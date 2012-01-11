@@ -22,7 +22,7 @@ struct IOContext
 
 
 static bool         s_ioDone;
-static Semaphore    s_ioSemaphore(0, 32768);
+static Semaphore    s_ioSemaphore(0);
 static Thread       s_ioThread("IOThread", &IOContext::ioProcess, 0, 0, Thread::Highest);
 static IOContext    s_iocontext;
 
