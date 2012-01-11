@@ -166,7 +166,7 @@ struct InterlockedType<8>
                 "lock;  cmpxchg8b %1\n\t"
                  : "=A"(result), "=m"(*p)
                  : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
-                 : "memory", "cc", "rbx", "rcx"
+                 : "memory", "cc"
 
         );
     #ifdef __PIC__
