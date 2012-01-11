@@ -414,6 +414,10 @@ def add_standard_gcc_flags(conf):
 		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
 		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics', '-Wno-unused-parameter']
 		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics', '-Wno-unused-parameter']
+	else:
+		v.append_unique('CFLAGS', ['-static-intel'])
+		v.append_unique('CXXFLAGS', ['-static-intel'])
+		v.append_unique('LINKFLAGS', ['-static-intel'])
 
 	if conf.env.GCC_NAME == 'clang':
 		v.append_unique('CFLAGS_warnall', ['-Wno-unknown-warning-option', '-Wno-unneeded-internal-declaration', '-Wno-unused-function'])
