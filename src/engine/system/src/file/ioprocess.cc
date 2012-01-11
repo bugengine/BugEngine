@@ -51,6 +51,7 @@ intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
         }
         s_iocontext.tickets.push_front(*request);
         File::Ticket* t = s_iocontext.tickets.begin().operator->();
+        s_iocontext.tickets.erase(s_iocontext.tickets.begin());
         switch(t->action)
         {
         case File::Ticket::Read:
@@ -67,7 +68,6 @@ intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
             be_error("unknown IO request: %d" | t->action);
             break;
         }
-        s_iocontext.tickets.erase(s_iocontext.tickets.begin());
         t->decref();
     }
     return 0;
