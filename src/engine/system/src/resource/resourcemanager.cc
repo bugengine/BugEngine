@@ -50,13 +50,16 @@ void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IR
 
 void ResourceManager::load(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const
 {
+    int loadedCount = 0;
     for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
         if (classinfo->isA(it->classinfo))
         {
             resource->load(it->loader);
+            loadedCount++;
         }
     }
+    be_assert(loadedCount, "resource of type %s has no loader registered" | classinfo->name);
 }
 
 void ResourceManager::unload(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const

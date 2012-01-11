@@ -319,7 +319,7 @@ bool                                                        intrusive_list<T, IN
 template< typename T, int INDEX >
 void                                                        intrusive_list<T, INDEX>::push_front(const_reference r)
 {
-    r.item::insert(&m_root);
+    r.intrusive_list<T, INDEX>::item::insert(m_root.m_previous->m_next);
 }
 
 template< typename T, int INDEX >
