@@ -100,7 +100,6 @@ bool FloatValue::isCompatible(const TypeInfo& type) const
 {
     return type <= be_typeid<float>::type()
         || type <= be_typeid<double>::type();
-    return BugEngine::Value(m_value);
 }
 
 BugEngine::Value FloatValue::as(const TypeInfo& type) const

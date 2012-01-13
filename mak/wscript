@@ -238,7 +238,8 @@ def make_masterfiles(self):
 	self.originalsources.sort()
 	self.mastertasks = []
 	self.source = []
-	mastertask = None
+	cmastertask = None
+	cppmastertask = None
 	cindex	 = 0
 	cppindex = 0
 	cnumleft = 0
@@ -259,10 +260,10 @@ def make_masterfiles(self):
 				cindex = cindex + 1
 				self.source.append(masterfile)
 				node = self.path.find_or_declare(masterfile)
-				mastertask = self.create_task("master", [], node)
-				self.mastertasks.append(mastertask)
+				cmastertask = self.create_task("master", [], node)
+				self.mastertasks.append(cmastertask)
 			cnumleft = cnumleft - 1
-			mastertask.set_inputs(srcnode)
+			cmastertask.set_inputs(srcnode)
 		else:
 			if cppnumleft == 0:
 				cppnumleft = 30
@@ -270,11 +271,11 @@ def make_masterfiles(self):
 				cppindex = cppindex + 1
 				self.source.append(masterfile)
 				node = self.path.find_or_declare(masterfile)
-				mastertask = self.create_task("master", [], node)
-				mastertask.set_outputs(node)
-				self.mastertasks.append(mastertask)
+				cppmastertask = self.create_task("master", [], node)
+				cppmastertask.set_outputs(node)
+				self.mastertasks.append(cppmastertask)
 			cppnumleft = cppnumleft - 1
-			mastertask.set_inputs(srcnode)
+			cppmastertask.set_inputs(srcnode)
 
 objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
 objcpydbgcls = Task.task_factory('dbg', objcpydbg, 'YELLOW', ext_in='.all', ext_out='.dbg', shell=False)

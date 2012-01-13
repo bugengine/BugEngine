@@ -53,7 +53,7 @@ static void* loadLibrary(const istring& pluginName)
 }
 
 template< typename Interface >
-Plugin<Interface>::Plugin(const istring &pluginName, PreloadType preload)
+Plugin<Interface>::Plugin(const istring &pluginName, PreloadType /*preload*/)
 :   m_handle(loadLibrary(pluginName))
 ,   m_interface(0)
 ,   m_refCount(new (gameArena()) i_u32(1))

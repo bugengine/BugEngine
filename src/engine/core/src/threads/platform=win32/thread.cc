@@ -58,6 +58,7 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = static_cast<ThreadParams*>(params);
     st_name = &(p->m_name);
+    be_info("started thread %s" | p->m_name);
 #ifdef _MSC_VER
     THREADNAME_INFO info;
     info.dwType = 0x1000;
@@ -73,15 +74,16 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
     }
 #endif
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
+    be_info("stopped thread %s" | p->m_name);
 
     return 0;
 }
 
 
 
-Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p, bool isSuspended)
+Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
 :   m_params(new ThreadParams(name, f, p1, p2))
-,   m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, isSuspended?CREATE_SUSPENDED:0, &m_id))
+,   m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, 0, &m_id))
 {
     setPriority(p);
 }

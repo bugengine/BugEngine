@@ -21,8 +21,8 @@ struct IOContext
 };
 
 
-static bool         s_ioDone;
-static Semaphore    s_ioSemaphore(0, 32768);
+static i_u8         s_ioDone(0);
+static Semaphore    s_ioSemaphore(0);
 static Thread       s_ioThread("IOThread", &IOContext::ioProcess, 0, 0, Thread::Highest);
 static IOContext    s_iocontext;
 
@@ -32,13 +32,13 @@ IOContext::IOContext()
 
 IOContext::~IOContext()
 {
-    s_ioDone = true;
+    s_ioDone++;
     s_ioSemaphore.release(1);
     s_ioThread.wait();
     be_assert(s_iocontext.tickets.empty(), "Tickets still in queue when exiting IO process");
 }
 
-intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
+intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
 {
     while(1)
     {
@@ -49,8 +49,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
             be_assert(s_ioDone, "IO context exited but was not yet finished");
             break;
         }
-        s_iocontext.tickets.push_back(*request);
-        //s_iocontext.sort();
+        s_iocontext.tickets.push_front(*request);
         File::Ticket* t = s_iocontext.tickets.begin().operator->();
         s_iocontext.tickets.erase(s_iocontext.tickets.begin());
         switch(t->action)
@@ -64,6 +63,9 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t p2)
             break;
         case File::Ticket::Write:
             t->file->writeBuffer(t);
+            break;
+        default:
+            be_error("unknown IO request: %d" | t->action);
             break;
         }
         t->decref();

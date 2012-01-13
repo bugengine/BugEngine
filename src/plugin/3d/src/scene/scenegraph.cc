@@ -33,7 +33,7 @@ RenderScene::~RenderScene()
 {
 }
 
-ref<INode> RenderScene::createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const
+ref<INode> RenderScene::createNode(weak<const SceneGraphLoader> /*loader*/, weak<const IRenderer> renderer) const
 {
     weak<IGPUResource> renderTarget = renderer->getRenderSurface(m_renderTarget);
     if (!renderTarget)
@@ -54,7 +54,7 @@ RenderSequence::~RenderSequence()
 {
 }
 
-ref<INode> RenderSequence::createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const
+ref<INode> RenderSequence::createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> /*renderer*/) const
 {
     minitl::vector< weak<INode> > nodes(tempArena());
     for (minitl::vector< ref<const RenderNode> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
