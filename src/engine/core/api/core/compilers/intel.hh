@@ -19,6 +19,7 @@ typedef unsigned __int64        u64;
 typedef u8                      byte;
 
 
+#pragma warning disable 161     // unknown pragma
 #pragma warning disable 279     // controlling expression is constant
 #pragma warning disable 383     // reference to copy
 #pragma warning disable 424     // extra ;
