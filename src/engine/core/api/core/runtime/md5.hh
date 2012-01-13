@@ -22,7 +22,7 @@ static inline bool operator==(const MD5& hash1, const MD5& hash2)
         && hash1.hash[3] == hash2.hash[3];
 }
 
-MD5 digest(const void* data, size_t size);
+be_api(CORE) MD5 digest(const void* data, size_t size);
 
 template< typename T >
 static inline MD5 digest(const Allocator::Block<T>& block)
@@ -37,7 +37,6 @@ namespace minitl
 
 static char hex(unsigned char value)
 {
-    value = value & 0xf;
     return value >= 10 ? value-10+'a' : value + '0';
 }
 
@@ -47,14 +46,14 @@ const format<size>& operator|(const format<size>& f, const BugEngine::MD5& value
     char str[33];
     for(int i = 0; i < 4; ++i)
     {
-        str[i*8+0] = hex(value.hash[i] >> 4);
-        str[i*8+1] = hex(value.hash[i] >> 0);
-        str[i*8+2] = hex(value.hash[i] >> 12);
-        str[i*8+3] = hex(value.hash[i] >> 8);
-        str[i*8+4] = hex(value.hash[i] >> 20);
-        str[i*8+5] = hex(value.hash[i] >> 16);
-        str[i*8+6] = hex(value.hash[i] >> 28);
-        str[i*8+7] = hex(value.hash[i] >> 24);
+        str[i*8+0] = hex(0xf & (value.hash[i] >> 4));
+        str[i*8+1] = hex(0xf & (value.hash[i] >> 0));
+        str[i*8+2] = hex(0xf & (value.hash[i] >> 12));
+        str[i*8+3] = hex(0xf & (value.hash[i] >> 8));
+        str[i*8+4] = hex(0xf & (value.hash[i] >> 20));
+        str[i*8+5] = hex(0xf & (value.hash[i] >> 16));
+        str[i*8+6] = hex(0xf & (value.hash[i] >> 28));
+        str[i*8+7] = hex(0xf & (value.hash[i] >> 24));
     }
     str[32] = 0;
     return f | str;
