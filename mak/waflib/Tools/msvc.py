@@ -356,6 +356,56 @@ def gather_msvc_versions(conf, versions):
 			conf.gather_wince_targets(versions, version, vc_path, vsvars, wince_supported_platforms)
 
 @conf
+def gather_icl_suite_versions(conf, versions):
+	"""
+	Checks ICL compiler suites
+
+	:param versions: list to modify
+	:type versions: list
+	"""
+	version_pattern = re.compile('^...?.?\..?')
+	try:
+		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Suites')
+	except WindowsError:
+		try:
+			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Suites')
+		except WindowsError:
+			return
+	index = 0
+	while 1:
+		try:
+			version_key = _winreg.EnumKey(all_versions, index)
+			version = _winreg.OpenKey(all_versions, version_key)
+		except WindowsError:
+			break
+		index = index + 1
+		if not version_pattern.match(version_key):
+			continue
+		indexsub = 0
+		while 1:
+			try:
+				subversion_key = _winreg.EnumKey(version, indexsub)
+			except WindowsError:
+				break
+			indexsub = indexsub + 1
+
+			targets = []
+			try:
+				icl_version = _winreg.OpenKey(all_versions, os.path.join(version_key, subversion_key, 'C++'))
+				path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
+				if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
+					for target,arch in all_icl_platforms:
+						try:
+							targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
+						except conf.errors.ConfigurationError:
+							pass
+			except WindowsError:
+				continue
+		major = version_key[0:2]
+		versions.append(('intel ' + major, targets))
+
+
+@conf
 def gather_icl_versions(conf, versions):
 	"""
 	Checks ICL compilers
@@ -388,6 +438,7 @@ def gather_icl_versions(conf, versions):
 				_winreg.OpenKey(all_versions,version+'\\'+targetDir)
 				icl_version=_winreg.OpenKey(all_versions,version)
 				path,type=_winreg.QueryValueEx(icl_version,'ProductDir')
+				print path
 				if os.path.isfile(os.path.join(path,'bin','iclvars.bat')):
 					try:
 						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,os.path.join(path,'bin','iclvars.bat')))))
@@ -418,6 +469,7 @@ def get_msvc_versions(conf):
 	if not conf.env['MSVC_INSTALLED_VERSIONS']:
 		lst = []
 		conf.gather_icl_versions(lst)
+		conf.gather_icl_suite_versions(lst)
 		conf.gather_wsdk_versions(lst)
 		conf.gather_msvc_versions(lst)
 		conf.env['MSVC_INSTALLED_VERSIONS'] = lst
