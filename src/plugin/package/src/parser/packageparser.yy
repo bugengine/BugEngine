@@ -65,7 +65,7 @@ ref<Object> s_currentObject;
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN
 
-%token  KW_import KW_plugin
+%token  KW_import KW_plugin KW_namespace
 
 %type   <bValue>    VAL_BOOLEAN
 %type   <iValue>    VAL_INTEGER
@@ -74,15 +74,6 @@ ref<Object> s_currentObject;
 %type   <sValue>    TOK_ID
 %type   <sValue>    fullname
 %type   <value>     value
-
-%union
-{
-    bool        bValue;
-    i64         iValue;
-    double      fValue;
-    char*       sValue;
-    ref<Value>* value;
-}
 
 %start  file
 
@@ -178,8 +169,8 @@ params:
 param:
         TOK_ID '=' value ';'
         {
-            ref<Parameter> param = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
-            s_currentObject->addParameter(param);
+            ref<Parameter> parameter = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
+            s_currentObject->addParameter(parameter);
             $3->~ref();
             free($1);
             free($3);

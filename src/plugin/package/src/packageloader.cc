@@ -6,6 +6,8 @@
 #include    <core/threads/thread.hh>
 #include    <packagebuilder.hh>
 #include    <package/nodes/package.hh>
+#include    <core/runtime/md5.hh>
+
 
 namespace BugEngine
 {
@@ -37,6 +39,8 @@ PackageLoader::~PackageLoader()
 
 void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer)
 {
+    MD5 md5 = digest(buffer);
+    be_info("md5 sum of package: %s" | md5);
     ref<PackageBuilder::Nodes::Package> package = m_packageBuilder->createPackage(buffer);
     script->getResourceHandleForWriting(this).handle = package;
     package->createObjects(m_manager);

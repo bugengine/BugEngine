@@ -6,6 +6,20 @@
 /*****************************************************************************/
 #include    <system/plugin.hh>
 #include    <package/nodes/package.hh>
+#include    <package/nodes/value.hh>
+
+
+union YYSTYPE
+{
+    bool                                            bValue;
+    i64                                             iValue;
+    double                                          fValue;
+    char*                                           sValue;
+    ref<BugEngine::PackageBuilder::Nodes::Value>*   value;
+};
+#define YYSTYPE_IS_DECLARED 1
+#define YYSTYPE_IS_TRIVIAL 1
+
 
 namespace BugEngine { namespace PackageBuilder
 {

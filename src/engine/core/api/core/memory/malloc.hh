@@ -45,7 +45,7 @@ public:
         operator T*()                   { return m_data; }
         operator const T*() const       { return m_data; }
         size_t count() const            { return m_count; }
-        size_t byteCount() const        { return be_align(sizeof(T), be_alignof(T))*count; }
+        size_t byteCount() const        { return be_align(sizeof(T), be_alignof(T))*m_count; }
 
         bool resize(size_t count)
         {

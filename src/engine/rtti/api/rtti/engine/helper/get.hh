@@ -10,7 +10,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename T, typename Owner, T (Owner::*Field) >
-static inline Value get(weak<const PropertyInfo> _this, void* from, bool isConst)
+static inline Value get(weak<const PropertyInfo> /*_this*/, void* from, bool isConst)
 {
     if (isConst)
     {
@@ -23,13 +23,13 @@ static inline Value get(weak<const PropertyInfo> _this, void* from, bool isConst
 }
 
 template< typename T, T v >
-static inline Value staticgetvalue(weak<const PropertyInfo> _this, void* from, bool isConst)
+static inline Value staticgetvalue(weak<const PropertyInfo> /*_this*/, void* /*from*/, bool /*isConst*/)
 {
     return Value(v);
 }
 
 template< typename T, T* object >
-static inline Value staticgetobject(weak<const PropertyInfo> _this, void* from, bool isConst)
+static inline Value staticgetobject(weak<const PropertyInfo> /*_this*/, void* /*from*/, bool /*isConst*/)
 {
     return Value(*object);
 }

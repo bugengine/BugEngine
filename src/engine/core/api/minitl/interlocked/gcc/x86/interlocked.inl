@@ -166,7 +166,7 @@ struct InterlockedType<8>
                 "lock;  cmpxchg8b %1\n\t"
                  : "=A"(result), "=m"(*p)
                  : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
-                 : "memory", "cc", "rbx", "rcx"
+                 : "memory", "cc"
 
         );
     #ifdef __PIC__
@@ -223,13 +223,14 @@ struct InterlockedType<8>
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         unsigned char result;
+        tagged_t::tag_t dummy;
         __asm__ __volatile__ (
-                "\tmov %2,%%r8\n"
+                "\tmov %4,%%r8\n"
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
-                 : "=r"(result), "=m"(*p)
-                 : "r"(p), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag), "c"(v), "b"(condition.taggedvalue.tag+1)
-                 : "memory", "cc", "r8", "rax", "rdx"
+                 : "=r"(result), "=m"(*p), "=d"(dummy.taggedvalue.value), "=a"(dummy.taggedvalue.tag)
+                 : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
+                 : "memory", "cc", "r8"
         );
         return result;
     }

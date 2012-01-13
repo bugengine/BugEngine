@@ -32,6 +32,34 @@ def parse_gcc_target(target):
 				return aname
 
 @conf
+def get_native_icc_target(conf, icc):
+	cmd = [icc, '-V']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	out = str(out).split('\n')
+	target = os.uname()[0].lower()
+	arch = 'x86'
+	version = None
+	for line in out:
+		words = line.split()
+		while len(words):
+			if words[0] == 'Intel(R)' and words[1] == '64':
+				arch = 'amd64'
+			if words[0] == 'ID:':
+				if words[1].startswith('m_cproc_'):
+					version = words[1][10:].split('.')[0]
+			if words[0] == 'Version':
+				version = words[1].split('.')[0]
+			words = words[1:]
+	return (target+'-'+arch, version)
+
+
+
+@conf
 def get_native_clang_target(conf, clang):
 	cmd = [clang, '-v']
 	try:
@@ -110,7 +138,8 @@ def add_gcc_to_env(conf, version, toolchaindir, gcc_target, flag, gcc, gxx):
 	newenv['GCC_FLAGS']		= flag and [flag] or []
 	newenv['GCC_PATH']		= [os.path.abspath(os.path.join(toolchaindir, '..', 'bin')),
 							   os.path.abspath(os.path.join(toolchaindir, '..', '..', 'bin')),
-							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin'))]
+							   os.path.abspath(os.path.join(toolchaindir, '..', gcc_target, 'bin')),
+							   toolchaindir]
 	conf.load('cross_gcc', tooldir='mak/tools')
 
 
@@ -228,6 +257,14 @@ def get_available_gcc(conf, paths=[]):
 						conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, gcc, gxx))
 	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
 
+	for dir in paths+[i for i in os.environ['PATH'].split(':') if i not in paths]:
+		if conf.find_program('icc', var='ICC', path_list=[dir], mandatory=False, silent = True):
+			toolchaindir = os.path.split(conf.env.ICC)[0]
+			target, version = conf.get_native_icc_target(conf.env.ICC)
+			arch = parse_gcc_target(target) or 'unknown'
+			conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
+			del conf.env['ICC']
+
 	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
 		toolchaindir = os.path.split(conf.env.CLANG)[0]
 		target, version = conf.get_native_clang_target(conf.env.CLANG)
@@ -275,7 +312,7 @@ def find_cross_gcc(conf):
 					version = versions[1]
 					if thisversion != version:
 						conf.fatal('mismatch version: %s instead of %s' % (thisversion, version))
-		except:
+		except Exception as e:
 			conf.fatal('could not run the compiler %r' % str(cmd))
 
 
@@ -296,6 +333,8 @@ def find_cross_gcc(conf):
 			for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
 				if conf.find_program('cpp'+name, var='CPP', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
+		if not v['CPP']:
+			conf.find_program('cpp', var='CPP', mandatory=False, silent=True)
 		if not v['CPP']: conf.fatal('unable to find cpp for target %s' % target)
 
 		for name in ['-'+version, '-'+versionsmall, '-'+versionverysmall, versionverysmall, '']:
@@ -333,7 +372,10 @@ def find_cross_gcc(conf):
 			for windres in [target+'-windres', 'mingw32-windres', 'windres']:
 				if conf.find_program(windres, var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
-	conf.load('gcc gxx gas')
+	if gcc != 'icc':
+		conf.load('gcc gxx')
+	else:
+		conf.load('icc icpc')
 	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
 
 @conf
@@ -347,27 +389,43 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wextra', '-Wno-unknown-pragmas', '-Wno-unused-parameter', '-Werror', '-Wno-sign-compare', '-Wnon-virtual-dtor', '-Woverloaded-virtual']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Winline', '-Wno-unknown-pragmas', '-Werror']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
-	if conf.env.GCC_NAME == 'clang':
-		v['CFLAGS_warnall'] += ['-Wno-unused-function']
-		v['CXXFLAGS_warnall'] += ['-Wno-unused-function']
 
 	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
-	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	v['ASFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
 	v['LINKFLAGS_debug'] = ['-pipe', '-g']
 
 	v['CFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v['ASFLAGS_profile'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_profile'] = ['-pipe', '-g']
 
 	v['CFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions', '-Wno-invalid-offsetof', '-fno-threadsafe-statics']
+	v['CXXFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v['ASFLAGS_final'] = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v['LINKFLAGS_final'] = ['-pipe', '-g']
+
+	if conf.env.GCC_NAME != 'icc':
+		v['CFLAGS_warnall'] += ['-Wextra', '-pedantic']
+		v['CXXFLAGS_warnall'] += ['-Wextra', '-Wno-sign-compare']
+		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
+		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics', '-Wno-unused-parameter']
+		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics', '-Wno-unused-parameter']
+	else:
+		v.append_unique('CFLAGS', ['-static-intel'])
+		v.append_unique('CXXFLAGS', ['-static-intel'])
+		v.append_unique('LINKFLAGS', ['-static-intel'])
+
+	if conf.env.GCC_NAME == 'clang':
+		v.append_unique('CFLAGS_warnall', ['-Wno-unknown-warning-option', '-Wno-unneeded-internal-declaration', '-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-warning-option', '-Wno-unneeded-internal-declaration', '-Wno-unused-function'])
+		v.append_unique('CFLAGS_profile', ['-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_profile', ['-Wno-unused-function'])
+		v.append_unique('CFLAGS_final', ['-Wno-unused-function'])
+		v.append_unique('CXXFLAGS_final', ['-Wno-unused-function'])
 
 
 configure = '''
