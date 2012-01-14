@@ -41,31 +41,65 @@ def generateGUID(slnfile, name):
 
 
 class Solution:
-	def __init__(self, name, filename, version, versionnumber, versionname):
+	def __init__(self, name, filename, version, versionnumber, versionname, folders):
 		self.name = name
 		self.filename = filename
 		self.guid = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}" #vcproj/vcxproj
+		self.folderGUID = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}" #folder
 		self.file = open(self.filename,'w')
 		self.projectlist = []
 		self.version = version
 		self.versionnumber = versionnumber
 		self.versionname = versionname
 		self.done = set([])
+		self.folders = folders
+		self.layout = {}
 
 	def writeHeader(self):
 		self.file.write("""Microsoft Visual Studio Solution File, Format Version %s\n""" % (self.versionnumber))
 		self.file.write("""# %s\n""" % (self.versionname))
 
 	def addProject(self, project, filename):
-		name = project.category+'.'+project.name
-		if project in self.done: return
+		if project in self.done:
+			return
 		self.done.add(project)
+
+		name = project.category+'.'+project.name
 		projectGUID = generateGUID(project.targetName, project.name)
+		if self.folders:
+			lst = name.split('.')
+			l = self.layout
+			for i in lst[:-1]:
+				try:
+					l = l[i][1]
+				except KeyError:
+					l[i] = (generateGUID(i, i), {})
+					l = l[i][1]
+			l[lst[-1]] = (projectGUID, {})
+
+
 		self.projectlist.append((projectGUID, project.category))
 		self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.guid, name, filename, projectGUID))
 		self.file.write('EndProject\n')
 
+	def writeLayout(self, folder):
+		for name, value in folder.items():
+			guid, children = value
+			if children:
+				self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.folderGUID, name, name, guid))
+				self.file.write('EndProject\n')
+				self.writeLayout(children)
+
+	def writeProjectFolders(self, parent, folder):
+		for name, value in folder.items():
+			guid, children = value
+			if parent:
+				self.file.write("%s = %s\n" % (guid, parent))
+			self.writeProjectFolders(guid, children)
+
 	def writeFooter(self, configs):
+		if self.folders:
+			self.writeLayout(self.layout)
 		if float(self.versionnumber) >= 9.0:
 			self.file.write("Global\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n")
 			for conf in configs:
@@ -88,5 +122,8 @@ class Solution:
 					self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
 					if type == 'game':
 						self.file.write("""\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+		if self.folders:
+			self.file.write("""\tEndGlobalSection\n\tGlobalSection(NestedProjects) = preSolution\n""")
+			self.writeProjectFolders("", self.layout)
 		self.file.write("""\tEndGlobalSection\nEndGlobal\n""")
 
