@@ -1,6 +1,6 @@
-plugin 3d;
+plugin graphics.3d;
 
-window = 3d.Graphics.RenderWindow
+window = graphics.3d.RenderWindow
 (
     title = "BugEngine editor v0.1";
 )
@@ -9,7 +9,7 @@ world = game.World
 (
 )
 
-node = 3d.Graphics.RenderScene
+node = graphics.3d.RenderScene
 (
     rendertarget = window;
     world = world;

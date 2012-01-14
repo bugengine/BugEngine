@@ -15,14 +15,19 @@
 # define    PLUGIN_EXT ".so"
 #endif
 
-#define BE_PLUGIN_NAMESPACE_REGISTER(name)                                                      \
-    BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                         \
+#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                \
+    BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
     extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                 \
     {                                                                                           \
         return BugEngine::be_##name##_Namespace().operator->();                                 \
     }
-#define BE_PLUGIN_REGISTER(name, interface, klass)                                              \
-    BE_PLUGIN_NAMESPACE_REGISTER(name);                                                         \
+#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                     \
+    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)
+#define BE_PLUGIN_NAMESPACE_REGISTER()                                                          \
+    BE_PLUGIN_NAMESPACE_REGISTER_(BE_PROJECTSHORTNAME)
+
+#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                        \
+    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name);                                                   \
     extern "C" BE_EXPORT interface* be_createPlugin (const ::BugEngine::PluginContext& context) \
     {                                                                                           \
         void* m = ::BugEngine::gameArena().alloc<klass>();                                      \
@@ -33,6 +38,11 @@
         minitl::checked_destroy(cls);                                                           \
         ::BugEngine::gameArena().free(cls);                                                     \
     }
+#define BE_PLUGIN_REGISTER_NAMED_(name, interface, klass)                                       \
+    BE_PLUGIN_REGISTER_NAMED(name, interface, klass)
+#define BE_PLUGIN_REGISTER(interface, klass)                                                    \
+    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTSHORTNAME, interface, klass)
+
 
 namespace BugEngine
 {
