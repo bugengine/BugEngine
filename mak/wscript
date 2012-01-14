@@ -26,16 +26,22 @@ def options(opt):
 				continue
 			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
 				opt.recurse(os.path.join('..', 'extra', f))
-	opt.add_option( '--toolchains',
+	gr = opt.get_option_group('build and install options')
+	gr.add_option( '--toolchains',
 					action='store',
 					default='',
 					dest='toolchains',
 					help='build for the selected toolchains')
-	opt.add_option( '--nomaster',
+	gr.add_option( '--nomaster',
 					action='store_true',
 					default=False,
 					dest='nomaster',
 					help='build without master files')
+	gr.add_option( '--static',
+					action='store_true',
+					default=False,
+					dest='static',
+					help='build a static executable (all plugins built into the engine)')
 	for i in os.listdir(os.path.join('src', '3rdparty')):
 		if i in ['.svn', '.cvs']:
 			continue
@@ -98,7 +104,7 @@ def configure(conf):
 		if not selectedvariants:
 			conf.fatal('No toolchain matches the pattern %s, available : %s' % (Options.options.toolchains,str(allvariants)))
 	else:
-		conf.env['SELECTED_TOOLCHAINS'] = 'debug-'+conf.env['DEFAULT_BUILD_TOOL']
+		conf.env['SELECTED_TOOLCHAINS'] = '^debug-'+conf.env['DEFAULT_BUILD_TOOL']+"$"
 		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
 	conf.env.store('.build/be_toolchains.py')
 	conf.recurse('libs')
@@ -116,6 +122,7 @@ def selectToolchains(ctx):
 	ctx.env['BUILD_VARIANTS'] = selectedvariants
 
 def build(bld):
+	from waflib import Options
 	if bld.__class__.__name__ in projects:
 		bld.env.PROJECTS = [bld.__class__.__name__]
 	for l in 'platforms','archs':
@@ -129,6 +136,7 @@ def build(bld):
 	selectToolchains(bld)
 	global builder
 	mak.builder = bld
+	mak.builder.static = Options.options.static
 	bld.m = {}
 	for i in os.listdir(os.path.join('src', '3rdparty')):
 		if i not in ['.svn', '.cvs']:

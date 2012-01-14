@@ -6,4 +6,4 @@
 #include    <system/plugin.hh>
 #include    <bugengine/application.hh>
 
-BE_PLUGIN_REGISTER(bugeditor, BugEngine::Application, BugEngine::Editor::Editor);
+BE_PLUGIN_REGISTER(BugEngine::Application, BugEngine::Editor::Editor);

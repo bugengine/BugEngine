@@ -32,8 +32,8 @@ private:
     i_u32*          m_refCount;
 public:
     enum PreloadType { Preload };
-    Plugin(const istring &pluginName, PreloadType preload);
-    Plugin(const istring &pluginName, const PluginContext& context);
+    Plugin(const inamespace &pluginName, PreloadType preload);
+    Plugin(const inamespace &pluginName, const PluginContext& context);
     ~Plugin(void);
     Plugin(const Plugin& other);
     Plugin& operator=(const Plugin& other);
@@ -50,7 +50,7 @@ private:
 
 }
 
-#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                                                             \
+#define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                                               \
     namespace BugEngine                                                                                                                 \
     {                                                                                                                                   \
         BE_EXPORT raw<RTTI::ClassInfo> be_##name##_Namespace()                                                                          \
@@ -68,7 +68,7 @@ private:
         }                                                                                                                               \
     }
 #ifdef BE_STATIC
-# include "console/plugin.inl"
+# include "static/plugin.inl"
 #elif defined(PLUGIN_H)
 # include PLUGIN_H
 #else
