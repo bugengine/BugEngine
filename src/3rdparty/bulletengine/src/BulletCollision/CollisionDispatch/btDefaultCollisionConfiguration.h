@@ -27,7 +27,9 @@ struct	btDefaultCollisionConstructionInfo
 	btPoolAllocator*	m_collisionAlgorithmPool;
 	int					m_defaultMaxPersistentManifoldPoolSize;
 	int					m_defaultMaxCollisionAlgorithmPoolSize;
+	int					m_customCollisionAlgorithmMaxElementSize;
 	int					m_defaultStackAllocatorSize;
+	int					m_useEpaPenetrationAlgorithm;
 
 	btDefaultCollisionConstructionInfo()
 		:m_stackAlloc(0),
@@ -35,7 +37,9 @@ struct	btDefaultCollisionConstructionInfo
 		m_collisionAlgorithmPool(0),
 		m_defaultMaxPersistentManifoldPoolSize(4096),
 		m_defaultMaxCollisionAlgorithmPoolSize(4096),
-		m_defaultStackAllocatorSize(0)
+		m_customCollisionAlgorithmMaxElementSize(0),
+		m_defaultStackAllocatorSize(0),
+		m_useEpaPenetrationAlgorithm(true)
 	{
 	}
 };
@@ -108,6 +112,11 @@ public:
 		return m_stackAlloc;
 	}
 
+	virtual	btVoronoiSimplexSolver*	getSimplexSolver()
+	{
+		return m_simplexSolver;
+	}
+
 
 	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0,int proxyType1);
 
@@ -119,6 +128,8 @@ public:
 	///See Bullet/Demos/CollisionDemo for an example how this feature gathers multiple points.
 	///@todo we could add a per-object setting of those parameters, for level-of-detail collision detection.
 	void	setConvexConvexMultipointIterations(int numPerturbationIterations=3, int minimumPointsPerturbationThreshold = 3);
+
+	void	setPlaneConvexMultipointIterations(int numPerturbationIterations=3, int minimumPointsPerturbationThreshold = 3);
 
 };
 

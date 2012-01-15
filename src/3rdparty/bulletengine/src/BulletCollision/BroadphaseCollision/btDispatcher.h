@@ -13,9 +13,8 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _DISPATCHER_H
-#define _DISPATCHER_H
-
+#ifndef BT_DISPATCHER_H
+#define BT_DISPATCHER_H
 #include "LinearMath/btScalar.h"
 
 class btCollisionAlgorithm;
@@ -27,6 +26,7 @@ class btOverlappingPairCache;
 
 class btPersistentManifold;
 class btStackAlloc;
+class btPoolAllocator;
 
 struct btDispatcherInfo
 {
@@ -40,13 +40,13 @@ struct btDispatcherInfo
 		m_stepCount(0),
 		m_dispatchFunc(DISPATCH_DISCRETE),
 		m_timeOfImpact(btScalar(1.)),
-		m_useContinuous(false),
+		m_useContinuous(true),
 		m_debugDraw(0),
 		m_enableSatConvex(false),
 		m_enableSPU(true),
 		m_useEpa(true),
 		m_allowedCcdPenetration(btScalar(0.04)),
-		m_useConvexConservativeDistanceUtil(true),
+		m_useConvexConservativeDistanceUtil(false),
 		m_convexConservativeDistanceThreshold(0.0f),
 		m_stackAllocator(0)
 	{
@@ -96,6 +96,10 @@ public:
 
 	virtual	btPersistentManifold**	getInternalManifoldPointer() = 0;
 
+	virtual	btPoolAllocator*	getInternalManifoldPool() = 0;
+
+	virtual	const btPoolAllocator*	getInternalManifoldPool() const = 0;
+
 	virtual	void* allocateCollisionAlgorithm(int size)  = 0;
 
 	virtual	void freeCollisionAlgorithm(void* ptr) = 0;
@@ -103,4 +107,4 @@ public:
 };
 
 
-#endif //_DISPATCHER_H
+#endif //BT_DISPATCHER_H
