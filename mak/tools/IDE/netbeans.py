@@ -63,9 +63,18 @@ class netbeans(Build.BuildContext):
 		lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
 		categories = {}
 		for i in ['3rdparty', 'engine', 'game', 'plugin']:
-			categories[i] = add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'})
+			categories[i] = (add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'}), {})
 		for project, category, source, options in sources:
-			self.addSourceTree(doc, categories[category], project, source, source.prefix)
+			f, subs = categories[category]
+			project = project.split('.')
+			for subname in project[:-1]:
+				try:
+					f, subs = subs[subname]
+				except KeyError:
+					f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
+					subs[subname] = (f, {})
+					f, subs = subs[subname]
+			self.addSourceTree(doc, f, project[-1], source, source.prefix)
 		impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
 		add(doc, impfiles, 'itemPath', sys.argv[0])
 		#add(doc, cd, 'sourceFolderFilter')
