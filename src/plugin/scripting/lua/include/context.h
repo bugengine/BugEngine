@@ -9,6 +9,7 @@
 #include    <rtti/value.inl>
 #include    <system/file/file.script.hh>
 #include    <system/plugin.hh>
+#include    <luascript.script.hh>
 
 namespace BugEngine { namespace Lua
 {

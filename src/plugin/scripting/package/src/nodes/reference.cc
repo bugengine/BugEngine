@@ -3,7 +3,9 @@
 
 #include    <package/stdafx.h>
 #include    <package/nodes/reference.hh>
+#include    <package/nodes/object.hh>
 #include    <package/nodes/package.hh>
+
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
