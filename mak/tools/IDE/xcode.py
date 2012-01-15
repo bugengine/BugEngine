@@ -136,6 +136,12 @@ class PBXGroup(XCodeNode):
 	def sort(self):
 		self.children.sort(key = lambda x: x.__class__.sort_prefix+x.name)
 
+	def __getitem__(self, name):
+		for g in self.children:
+			if g.name == name:
+				return g
+		raise KeyError()
+
 
 # Targets
 class PBXLegacyTarget(XCodeNode):
@@ -245,9 +251,18 @@ class PBXProject(XCodeNode):
 		w("}\n")
 
 	def add(self, bld, p):
-		group = PBXGroup(p.name)
+		names = p.name.split('.')
+		group = PBXGroup(names[-1])
 		group.add(p.sourcetree, p.sourcetree.prefix)
 		g = self._groups[p.category]
+		for subname in names[:-1]:
+			try:
+				g = g[subname]
+			except KeyError:
+				newgroup = PBXGroup(subname)
+				g.children.append(newgroup)
+				g.sort()
+				g = newgroup
 		g.children.append(group)
 		g.sort()
 		if p.category == 'game':
