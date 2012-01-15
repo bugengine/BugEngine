@@ -6,7 +6,7 @@ from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
 class vs2003(Build.BuildContext):
 	cmd = 'vs2003'
 	fun = 'build'
-	version = (('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10'))
+	version = (('Visual Studio .NET 2003', '8.00', False), (vcproj.VCproj, '7.10'))
 
 	def execute(self):
 		"""
