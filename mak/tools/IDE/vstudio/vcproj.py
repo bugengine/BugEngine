@@ -10,9 +10,13 @@ def xmlify(s):
 	s = s.replace('"', "&quot;")
 	return s
 
+import socket
+host = socket.gethostname()
+import getpass
+user = getpass.getuser()
 
 class VCproj:
-	extensions = ['.vcproj']
+	extensions = ['.vcproj', '.vcproj.%s.%s.user'%(host,user)]
 
 	def __init__(self, filename, name, category, versionName, versionNumber, type, envs):
 		self.versionName = versionName
@@ -20,10 +24,11 @@ class VCproj:
 		self.name = name
 		self.category = category
 		self.output = open(filename, 'w')
+		self.userconfig = open(filename+'.%s.%s.user'%(host,user), 'w')
 		self.targetName = filename
 		self.envs = envs
 
-	def writeHeader(self, configs):
+	def writeHeader(self, configs, engine):
 		self.output.write('<VisualStudioProject\n	ProjectType="Visual C++"\n	Version="%s"\n	Name="%s"\n	ProjectGUID="%s"\n	RootNamespace="%s"\n	Keyword="Win32Proj">\n' % (self.versionNumber, self.category+'.'+self.name, solution.generateGUID(self.targetName, self.name), self.name))
 		self.output.write('	<Platforms>\n')
 		self.output.write('		<Platform\n			Name="Win32"/>\n')
@@ -54,7 +59,7 @@ class VCproj:
 			self.output.write('				BuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s %s"\n' % (config, target))
 			self.output.write('				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s %s"\n' %(config, config, target))
 			self.output.write('				CleanCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s %s"\n' %(config, target))
-			self.output.write('				Output="$(SolutionDir)%s\\%s\\%s"\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%self.name))
+			self.output.write('				Output="$(SolutionDir)%s\\%s\\%s"\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%engine))
 			if float(self.versionNumber) >= 8:
 				self.output.write('				PreprocessorDefinitions="%s"\n' % xmlify(";".join(defines)))
 				self.output.write('				IncludeSearchPath="%s"\n' % xmlify(";".join(includes)))
@@ -67,6 +72,50 @@ class VCproj:
 		self.output.write('	</Configurations>\n')
 		self.output.write('	<References>\n')
 		self.output.write('	</References>\n')
+
+		self.userconfig.write('<?xml version="1.0" encoding="Windows-1252"?>\n')
+		self.userconfig.write('<VisualStudioUserFile\n')
+		self.userconfig.write('	ProjectType="Visual C++"\n')
+		self.userconfig.write('	Version="%s"\n' % self.versionNumber)
+		self.userconfig.write('	ShowAllFiles="false"\n')
+		self.userconfig.write('	>\n')
+		self.userconfig.write('	<Configurations>\n')
+		for (config, options) in configs:
+			self.userconfig.write('		<Configuration\n')
+			self.userconfig.write('			Name="%s|Win32"\n' % config)
+			self.userconfig.write('			>\n')
+			self.userconfig.write('			<DebugSettings\n')
+			self.userconfig.write('				Command="$(TargetPath)"\n')
+			self.userconfig.write('				WorkingDirectory=""\n')
+			if self.category == 'game':
+				self.userconfig.write('				CommandArguments="%s"\n' % self.name)
+			else:
+				self.userconfig.write('				CommandArguments=""\n')
+			self.userconfig.write('				Attach="false"\n')
+			self.userconfig.write('				DebuggerType="3"\n')
+			self.userconfig.write('				Remote="1"\n')
+			self.userconfig.write('				RemoteMachine="%s"\n' % host)
+			self.userconfig.write('				RemoteCommand=""\n')
+			self.userconfig.write('				HttpUrl=""\n')
+			self.userconfig.write('				PDBPath=""\n')
+			self.userconfig.write('				SQLDebugging=""\n')
+			self.userconfig.write('				Environment=""\n')
+			self.userconfig.write('				EnvironmentMerge="true"\n')
+			self.userconfig.write('				DebuggerFlavor=""\n')
+			self.userconfig.write('				MPIRunCommand=""\n')
+			self.userconfig.write('				MPIRunArguments=""\n')
+			self.userconfig.write('				MPIRunWorkingDirectory=""\n')
+			self.userconfig.write('				ApplicationCommand=""\n')
+			self.userconfig.write('				ApplicationArguments=""\n')
+			self.userconfig.write('				ShimCommand=""\n')
+			self.userconfig.write('				MPIAcceptMode=""\n')
+			self.userconfig.write('				MPIAcceptFilter=""\n')
+			self.userconfig.write('			/>\n')
+			self.userconfig.write('		</Configuration>\n')
+		self.userconfig.write('	</Configurations>\n')
+		self.userconfig.write('</VisualStudioUserFile>\n')
+
+
 
 	def writeFooter(self):
 		self.output.write('	<Globals>\n')
