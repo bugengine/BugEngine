@@ -13,8 +13,8 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef CONVEX_CONVEX_ALGORITHM_H
-#define CONVEX_CONVEX_ALGORITHM_H
+#ifndef BT_CONVEX_CONVEX_ALGORITHM_H
+#define BT_CONVEX_CONVEX_ALGORITHM_H
 
 #include "btActivatingCollisionAlgorithm.h"
 #include "BulletCollision/NarrowPhaseCollision/btGjkPairDetector.h"
@@ -31,7 +31,8 @@ class btConvexPenetrationDepthSolver;
 ///so the distance is not conservative. In that case, enabling this USE_SEPDISTANCE_UTIL2 would result in failing/missing collisions.
 ///Either improve GJK for large size ratios (testing a 100 units versus a 0.1 unit object) or only enable the util
 ///for certain pairs that have a small size ratio
-///#define USE_SEPDISTANCE_UTIL2 1
+
+//#define USE_SEPDISTANCE_UTIL2 1
 
 ///The convexConvexAlgorithm collision algorithm implements time of impact, convex closest points and penetration depth calculations between two convex objects.
 ///Multiple contact points are calculated by perturbing the orientation of the smallest object orthogonal to the separating normal.
@@ -105,4 +106,4 @@ public:
 
 };
 
-#endif //CONVEX_CONVEX_ALGORITHM_H
+#endif //BT_CONVEX_CONVEX_ALGORITHM_H

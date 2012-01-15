@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -13,8 +13,8 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef TRIANGLE_MESH_SHAPE_H
-#define TRIANGLE_MESH_SHAPE_H
+#ifndef BT_TRIANGLE_MESH_SHAPE_H
+#define BT_TRIANGLE_MESH_SHAPE_H
 
 #include "btConcaveShape.h"
 #include "btStridingMeshInterface.h"
@@ -79,7 +79,11 @@ public:
 	//debugging
 	virtual const char*	getName()const {return "TRIANGLEMESH";}
 
+	
 
 };
 
-#endif //TRIANGLE_MESH_SHAPE_H
+
+
+
+#endif //BT_TRIANGLE_MESH_SHAPE_H

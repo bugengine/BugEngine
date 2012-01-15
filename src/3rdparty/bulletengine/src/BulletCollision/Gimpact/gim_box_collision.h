@@ -2,7 +2,7 @@
 #define GIM_BOX_COLLISION_H_INCLUDED
 
 /*! \file gim_box_collision.h
-\author Francisco Len Nßjera
+\author Francisco Leon Najera
 */
 /*
 -----------------------------------------------------------------------------
@@ -585,6 +585,11 @@ SIMD_FORCE_INLINE bool btCompareTransformsEqual(const btTransform & t1,const btT
 	return true;
 }
 
+
+#undef TEST_CROSS_EDGE_BOX_X_AXIS_MCR
+#undef TEST_CROSS_EDGE_BOX_Y_AXIS_MCR
+#undef TEST_CROSS_EDGE_BOX_Z_AXIS_MCR
+#undef TEST_CROSS_EDGE_BOX_MCR
 
 
 #endif // GIM_BOX_COLLISION_H_INCLUDED

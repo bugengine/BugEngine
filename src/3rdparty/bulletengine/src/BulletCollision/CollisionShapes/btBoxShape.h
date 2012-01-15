@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -13,8 +13,8 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef OBB_BOX_MINKOWSKI_H
-#define OBB_BOX_MINKOWSKI_H
+#ifndef BT_OBB_BOX_MINKOWSKI_H
+#define BT_OBB_BOX_MINKOWSKI_H
 
 #include "btPolyhedralConvexShape.h"
 #include "btCollisionMargin.h"
@@ -41,7 +41,7 @@ public:
 	
 	const btVector3& getHalfExtentsWithoutMargin() const
 	{
-		return m_implicitShapeDimensions;//changed in Bullet 2.63: assume the scaling and margin are included
+		return m_implicitShapeDimensions;//scaling is included, margin is not
 	}
 	
 
@@ -80,13 +80,7 @@ public:
 	}
 
 
-	btBoxShape( const btVector3& boxHalfExtents) 
-		: btPolyhedralConvexShape()
-	{
-		m_shapeType = BOX_SHAPE_PROXYTYPE;
-		btVector3 margin(getMargin(),getMargin(),getMargin());
-		m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
-	};
+	btBoxShape( const btVector3& boxHalfExtents);
 
 	virtual void setMargin(btScalar collisionMargin)
 	{
@@ -145,7 +139,7 @@ public:
 
 	virtual void getVertex(int i,btVector3& vtx) const
 	{
-		btVector3 halfExtents = getHalfExtentsWithoutMargin();
+		btVector3 halfExtents = getHalfExtentsWithMargin();
 
 		vtx = btVector3(
 				halfExtents.x() * (1-(i&1)) - halfExtents.x() * (i&1),
@@ -312,6 +306,7 @@ public:
 
 };
 
-#endif //OBB_BOX_MINKOWSKI_H
+
+#endif //BT_OBB_BOX_MINKOWSKI_H
 
 
