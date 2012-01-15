@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
+#include    <world/world.script.hh>
 
 namespace BugEngine
 {

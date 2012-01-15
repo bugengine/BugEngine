@@ -3,6 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/plugin.hh>
+#include    <system/resource/resourcemanager.hh>
 #include    <cstring>
 
 namespace BugEngine

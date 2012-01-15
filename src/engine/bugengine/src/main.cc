@@ -2,8 +2,11 @@
    see LICENSE for detail */
 
 #include    <bugengine/stdafx.h>
+#include    <bugengine/application.hh>
+
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
+#include    <system/plugin.hh>
 #include    <system/resource/resourcemanager.hh>
 
 #include    <cstdio>

@@ -4,7 +4,6 @@
 #ifndef BE_WORLD_WORLD_HH_
 #define BE_WORLD_WORLD_HH_
 /*****************************************************************************/
-#include    <system/plugin.hh>
 #include    <system/scheduler/task/itask.hh>
 #include    <system/resource/resource.script.hh>
 

@@ -4,6 +4,7 @@
 #include    <3d/stdafx.h>
 #include    <3d/scene/scenegraph.script.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
+#include    <3d/renderer/irenderer.hh>
 #include    <3d/renderer/irendertarget.hh>
 #include    <graph/inode.hh>
 #include    <graph/loader.hh>
