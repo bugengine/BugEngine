@@ -1,6 +1,6 @@
 import sys
 try:
-	import mak.cpp.lexer as lexer
+	import cpp.lexer as lexer
 except:
 	import lexer
 
