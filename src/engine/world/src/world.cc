@@ -6,26 +6,14 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
-namespace BugEngine
-{
+BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 
-enum
+namespace BugEngine { namespace World
 {
-    WorldUpdateTask_CopyWorld   = 0,
-    WorldUpdateTask_UpdateWorld = 1,
-    WorldUpdateTask_Count
-};
 
 World::World()
-:   m_tasks(taskArena())
-,   m_callbacks(taskArena())
+:   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 {
-    m_tasks.resize(WorldUpdateTask_Count);
-
-    m_tasks[WorldUpdateTask_CopyWorld] = ref< Task< MethodCaller<World, &World::copyWorld> > >::create(taskArena(), "copyWorld", color32(255,0,255),  MethodCaller<World, &World::copyWorld>(this), Scheduler::High);
-    m_tasks[WorldUpdateTask_UpdateWorld] = ref< Task< MethodCaller<World, &World::updateWorld> > >::create(taskArena(), "updateWorld", color32(255,0,255),  MethodCaller<World, &World::updateWorld>(this));
-    m_callbacks.push_back(ITask::CallbackConnection(m_tasks[WorldUpdateTask_CopyWorld], m_tasks[WorldUpdateTask_UpdateWorld]->startCallback()));
-    m_callbacks.push_back(ITask::CallbackConnection(m_tasks[WorldUpdateTask_UpdateWorld], m_tasks[WorldUpdateTask_CopyWorld]->startCallback(), ITask::ICallback::Completed));
 }
 
 World::~World()
@@ -34,15 +22,8 @@ World::~World()
 
 weak<ITask> World::updateWorldTask() const
 {
-    return m_tasks[WorldUpdateTask_CopyWorld];
+    return m_task;
 }
 
-void World::copyWorld()
-{
-}
+}}
 
-void World::updateWorld()
-{
-}
-
-}

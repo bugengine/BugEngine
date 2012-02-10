@@ -2,10 +2,18 @@
    see LICENSE for detail */
 
 #include    <world/stdafx.h>
-#include    <world/entity.script.hh>
+#include    <world/rule.script.hh>
 
 namespace BugEngine { namespace World
 {
+
+Rule::Rule()
+{
+}
+
+Rule::~Rule()
+{
+}
 
 }}
 

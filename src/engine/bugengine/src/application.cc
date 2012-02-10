@@ -21,11 +21,11 @@ private:
     TaskGroup::TaskStartConnection  m_startSceneUpdate;
     TaskGroup::TaskEndConnection    m_endSceneUpdate;
 public:
-    WorldResource(weak<const World> world, weak<TaskGroup> task);
+    WorldResource(weak<const World::World> world, weak<TaskGroup> task);
     ~WorldResource();
 };
 
-Application::WorldResource::WorldResource(weak<const World> world, weak<TaskGroup> task)
+Application::WorldResource::WorldResource(weak<const World::World> world, weak<TaskGroup> task)
     :   m_startSceneUpdate(task, world->updateWorldTask())
     ,   m_endSceneUpdate(task, world->updateWorldTask())
 {
@@ -83,7 +83,7 @@ int Application::run()
 ResourceHandle Application::load(weak<const Resource> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World>(world), m_worldTask);
+    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World::World>(world), m_worldTask);
     return handle;
 }
 

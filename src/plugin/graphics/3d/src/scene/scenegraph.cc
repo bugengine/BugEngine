@@ -23,7 +23,7 @@ RenderNode::~RenderNode()
 {
 }
 
-RenderScene::RenderScene(ref<RenderTarget> rendertarget, ref<const World> world)
+RenderScene::RenderScene(ref<RenderTarget> rendertarget, ref<const BugEngine::World::World> world)
     :   RenderNode()
     ,   m_renderTarget(rendertarget)
     ,   m_world(world)

@@ -1,19 +1,19 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WORLD_ENTITY_SCRIPT_HH_
-#define BE_WORLD_ENTITY_SCRIPT_HH_
+#ifndef BE_WORLD_RULE_SCRIPT_HH_
+#define BE_WORLD_RULE_SCRIPT_HH_
 /*****************************************************************************/
+#include    <world/entity.script.hh>
 
 namespace BugEngine { namespace World
 {
 
-struct be_api(WORLD) Entity
+class be_api(WORLD) Rule : public minitl::refcountable
 {
-private:
-    u32     id;
-    u16     storage;
-    u16     index;
+protected:
+    Rule();
+    ~Rule();
 };
 
 }}
