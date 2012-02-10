@@ -16,20 +16,20 @@ class IRenderTarget;
 class SceneNode : public INode
 {
 private:
-    weak<const World>           m_world;
-    ref<ITask>                  m_renderTask;
-    ref<ITask>                  m_dispatchTask;
-    weak<IRenderTarget>         m_renderTarget;
-    ITask::CallbackConnection   m_startRender;
-    ITask::CallbackConnection   m_startDispatch;
-    ITask::CallbackConnection   m_startFlush;
-    ITask::CallbackConnection   m_waitOnRender;
-    ITask::CallbackConnection   m_waitOnFlush;
+    weak<const BugEngine::World::World> m_world;
+    ref<ITask>                          m_renderTask;
+    ref<ITask>                          m_dispatchTask;
+    weak<IRenderTarget>                 m_renderTarget;
+    ITask::CallbackConnection           m_startRender;
+    ITask::CallbackConnection           m_startDispatch;
+    ITask::CallbackConnection           m_startFlush;
+    ITask::CallbackConnection           m_waitOnRender;
+    ITask::CallbackConnection           m_waitOnFlush;
 private:
     void render();
     void dispatch();
 public:
-    SceneNode(weak<IRenderTarget> renderTarget, weak<const World> world);
+    SceneNode(weak<IRenderTarget> renderTarget, weak<const BugEngine::World::World> world);
     ~SceneNode();
 
     virtual weak<ITask> updateTask() override;
