@@ -14,6 +14,8 @@ class be_api(WORLD) Rule : public minitl::refcountable
 protected:
     Rule();
     ~Rule();
+public:
+    weak<ITask> updateTask() const = 0;
 };
 
 }}
