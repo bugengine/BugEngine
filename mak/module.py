@@ -59,11 +59,12 @@ class module:
 		while None in depends:
 			depends.remove(None)
 		self.name	  = name
+		self.sname = self.name.split('.')[-1]
 		self.dstname = dstname
 		self.category = category
 		self.depends  = depends
 		self.tasks = {}
-		self.root = os.path.join('src', category, name)
+		self.root = os.path.join('src', category, name.replace('.', '/'))
 		self.platforms = set([])
 		for p in platforms or mak.allplatforms.keys():
 			for pname, pgroup in mak.allplatforms.items():
@@ -75,10 +76,9 @@ class module:
 
 		self.localoptions = coptions()
 		self.localoptions.merge(localoptions)
-		self.localoptions.defines |= set([ 'building_'+name,
-										   'BE_PROJECTCATEGORY="'+category+'"',
-										   'BE_PROJECTNAME="'+name+'"',
-										   'BE_SOURCEDIR="'+os.path.abspath('src').replace('\\','\\\\')+'"'])
+		self.localoptions.defines |= set([ 'building_'+self.sname,
+										   'BE_PROJECTSHORTNAME='+self.sname,
+										   'BE_PROJECTNAME='+self.name])
 		self.globaloptions = coptions()
 		self.globaloptions.merge(globaloptions)
 		self.localarchoptions = localarchoptions
@@ -92,65 +92,66 @@ class module:
 
 
 		self.usepch = 0
-		if os.path.isfile(os.path.join('src', category, self.name, 'src', 'stdafx.cpp')):
-			self.pchsource = os.path.join('src', category, self.name, 'src', 'stdafx.cpp')
-			if os.path.isfile(os.path.join('src', category, self.name, 'api', name, 'stdafx.h')):
-				self.pchheader = os.path.join(self.name, 'stdafx.h')
-				self.pchfullheader = os.path.join('src', category, self.name, 'api', name, 'stdafx.h')
-			elif os.path.isfile(os.path.join('src', category, self.name, 'include', 'stdafx.h')):
+		if os.path.isfile(os.path.join(self.root, 'src', 'stdafx.cpp')):
+			self.pchsource = os.path.join(self.root, 'src', 'stdafx.cpp')
+			if os.path.isfile(os.path.join(self.root, 'api', self.sname, 'stdafx.h')):
+				self.pchheader = os.path.join(self.sname, 'stdafx.h')
+				self.pchfullheader = os.path.join(self.root, 'api', self.sname, 'stdafx.h')
+			elif os.path.isfile(os.path.join(self.root, 'include', 'stdafx.h')):
 				self.pchheader = 'stdafx.h'
-				self.pchfullheader = os.path.join('src', category, self.name, 'include', 'stdafx.h')
+				self.pchfullheader = os.path.join(self.root, 'include', 'stdafx.h')
 			self.localoptions.pchname = self.pchsource
 			self.localoptions.pchstop = self.pchheader
 			self.usepch = 1
 
-		if os.path.isdir(os.path.join('src', category, name, 'include')):
-			self.localoptions.includedir.add(os.path.join('src', category, name, 'include'))
-		if os.path.isdir(os.path.join('src', category, name, 'api')):
-			self.globaloptions.includedir.add(os.path.join('src', category, name, 'api'))
+		if os.path.isdir(os.path.join(self.root, 'include')):
+			self.localoptions.includedir.add(os.path.join(self.root, 'include'))
+		if os.path.isdir(os.path.join(self.root, 'api')):
+			self.globaloptions.includedir.add(os.path.join(self.root, 'api'))
 
 		self.sourcetree		   = sources.directory()
-		self.sourcetree.prefix = os.path.join('src', category, name)
-		if os.path.isdir(os.path.join('src', category, name, 'include')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'include'), '', 0, self.platforms, self.archs), 'include')
-		if os.path.isdir(os.path.join('src', category, name, 'api')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'api'), '', 0, self.platforms, self.archs), 'api')
-		if os.path.isdir(os.path.join('src', category, name, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'data'), '', 1, self.platforms, self.archs, sourcelist), 'data')
-		if os.path.isdir(os.path.join('src', category, name, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'src'), '', 1, self.platforms, self.archs, sourcelist), 'src')
+		self.sourcetree.prefix = self.root
+		if os.path.isdir(os.path.join(self.root, 'include')):
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'include'), '', 0, self.platforms, self.archs), 'include')
+		if os.path.isdir(os.path.join(self.root, 'api')):
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'api'), '', 0, self.platforms, self.archs), 'api')
+		if os.path.isdir(os.path.join(self.root, 'data')):
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', 1, self.platforms, self.archs, sourcelist), 'data')
+		if os.path.isdir(os.path.join(self.root, 'src')):
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'src'), '', 1, self.platforms, self.archs, sourcelist), 'src')
 
 		platformsdirectory = sources.directory()
 		if os.path.isdir('extra'):
 			for platform in os.listdir(os.path.join('extra')):
+				extraroot = os.path.join('extra', platform, category, name.replace('.', '/'))
 				pdir = sources.directory()
-				if os.path.isdir(os.path.join('extra', platform, category, name, 'api')):
-					pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'api'), '', 0, [platform], self.archs), 'api')
+				if os.path.isdir(os.path.join(extraroot, 'api')):
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'api'), '', 0, [platform], self.archs), 'api')
 					try:
-						self.globalarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'api'))
+						self.globalarchoptions[platform].includedir.add(os.path.join(extraroot, 'api'))
 					except KeyError:
-						self.globalarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'api')])
-				if os.path.isdir(os.path.join('extra', platform, category, name, 'include')):
-					pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'include'), '', 0, [platform], self.archs), 'include')
+						self.globalarchoptions[platform] = coptions([os.path.join(extraroot, 'api')])
+				if os.path.isdir(os.path.join(extraroot, 'include')):
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'include'), '', 0, [platform], self.archs), 'include')
 					try:
-						self.localarchoptions[platform].includedir.add(os.path.join('extra', platform, category, name, 'include'))
+						self.localarchoptions[platform].includedir.add(os.path.join(extraroot, 'include'))
 					except KeyError:
-						self.localarchoptions[platform] = coptions([os.path.join('extra', platform, category, name, 'include')])
-				if os.path.isdir(os.path.join('extra', platform, category, name, 'src')):
-					pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'src'), '', 1, [platform], self.archs, sourcelist), 'src')
-				if os.path.isdir(os.path.join('extra', platform, category, name, 'data')):
-					pdir.addDirectory(self.scandir(os.path.join('extra', platform, category, name, 'data'), '', 1, [platform], self.archs, sourcelist), 'src')
+						self.localarchoptions[platform] = coptions([os.path.join(extraroot, 'include')])
+				if os.path.isdir(os.path.join(extraroot, 'src')):
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'src'), '', 1, [platform], self.archs, sourcelist), 'src')
+				if os.path.isdir(os.path.join(extraroot, 'data')):
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', 1, [platform], self.archs, sourcelist), 'src')
 				if pdir.directories or pdir.files:
 					platformsdirectory.addDirectory(pdir, platform)
-					pdir.prefix = os.path.join(platform, category, name)
+					pdir.prefix = os.path.join(platform, category, name.replace('.', '/'))
 					self.sourcetree.addDirectory(platformsdirectory, 'platforms')
 			platformsdirectory.prefix = os.path.join('..', '..', '..', 'extra')
 
 		for arch in mak.allarchs:
-			if os.path.isdir(os.path.join('src', category, name, 'lib.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'lib.'+arch), '', 0, self.platforms, [arch]), 'lib.'+arch)
-			if os.path.isdir(os.path.join('src', category, name, 'bin.'+arch)):
-				self.sourcetree.addDirectory(self.scandir(os.path.join('src', category, name, 'bin.'+arch), '', 0, self.platforms, [arch]), 'bin.'+arch)
+			if os.path.isdir(os.path.join(self.root, 'lib.'+arch)):
+				self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'lib.'+arch), '', 0, self.platforms, [arch]), 'lib.'+arch)
+			if os.path.isdir(os.path.join(self.root, 'bin.'+arch)):
+				self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'bin.'+arch), '', 0, self.platforms, [arch]), 'bin.'+arch)
 
 	def getoptions(self, platforms, arch):
 		options = coptions()
@@ -194,6 +195,7 @@ class module:
 		if not variant in self.tasks:
 			if env.PROJECTS:
 				task					= bld()
+				task.sname				= self.sname
 				task.category			= self.category
 				task.target				= self.dstname
 				task.env				= env.derive()
@@ -216,6 +218,7 @@ class module:
 			else:
 				optim,compiler,platform,architecture,version = variant.split('-')[0:5]
 				task					= bld()
+				task.sname				= self.sname
 				task.category			= self.category
 				task.target				= self.dstname
 				task.env				= env.derive()
@@ -226,11 +229,12 @@ class module:
 
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
-				task.uselib = [optim]
+				task.uselib = []
 				if self.category != '3rdparty':
 					task.uselib.append('warnall')
 				else:
 					task.uselib.append('warnnone')
+				task.uselib.append(optim)
 				task.use = []
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
 				dps = self.depends + extradepends
@@ -247,7 +251,7 @@ class module:
 							task.inheritedoptions.merge(t.inheritedoptions)
 						dps += [dep for dep in d.depends if dep not in seen]
 				task.options			= self.getoptions(env['PLATFORM'], env['ARCHITECTURE'])
-				if env['STATIC']:
+				if env['STATIC'] or bld.static:
 					task.options.defines.add('BE_STATIC')
 				for d in extradepends:
 					task.options.merge(d.getglobaloptions(env['PLATFORM'], env['ARCHITECTURE']))
@@ -529,7 +533,7 @@ class plugin(module):
 		for d in self.depends:
 			if d not in blacklist:
 				d._post(builder, blacklist)
-		if builder.env['STATIC']:
+		if builder.env['STATIC'] or builder.static:
 			options = coptions()
 			task = self.gentask(builder, 'cobjects', options, coptions(), blacklist=blacklist)
 		else:
@@ -604,7 +608,7 @@ class engine(module):
 			if d not in blacklist:
 				d._post(builder,blacklist)
 		options = coptions()
-		if builder.env['STATIC']:
+		if builder.env['STATIC'] or builder.static:
 			for name,d in self.plugins.items():
 				if d:
 					d._post(builder,[self]+blacklist)

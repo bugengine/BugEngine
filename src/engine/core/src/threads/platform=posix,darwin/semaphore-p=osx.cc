@@ -14,7 +14,7 @@
 namespace BugEngine
 {
 
-Semaphore::Semaphore(int initialCount, int maxCount)
+Semaphore::Semaphore(int initialCount)
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
 :   m_data(dispatch_semaphore_create(initialCount))
 #else

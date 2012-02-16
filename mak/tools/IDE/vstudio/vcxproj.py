@@ -97,9 +97,7 @@ class VCxproj:
 		for source in directory.files:
 			if not source.generated():
 				filename = os.path.join('..', '..', path, source.filename)
-			else:
-				filename = os.path.join('$(IntDir)', path, source.filename)
-			self.addFile(path, filter, filename, source)
+				self.addFile(path, filter, filename, source)
 
 	def addDirectory(self, sourceDir):
 		self.output.write('  <ItemGroup>\n')

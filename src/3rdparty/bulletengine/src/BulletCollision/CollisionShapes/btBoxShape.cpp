@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,11 +12,20 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-
 #include "btBoxShape.h"
 
+btBoxShape::btBoxShape( const btVector3& boxHalfExtents) 
+: btPolyhedralConvexShape()
+{
+	m_shapeType = BOX_SHAPE_PROXYTYPE;
 
-//{ 
+	setSafeMargin(boxHalfExtents);
+
+	btVector3 margin(getMargin(),getMargin(),getMargin());
+	m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
+};
+
+
 
 
 void btBoxShape::getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const

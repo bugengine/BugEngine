@@ -21,6 +21,7 @@ void* PoolAllocator::internalAlloc(size_t size, size_t alignment)
 #ifdef _MSC_VER
     return ::_aligned_malloc(size, alignment);
 #else
+    be_forceuse(alignment);
     return ::malloc(size);
 #endif
 }
@@ -35,6 +36,7 @@ void* PoolAllocator::internalRealloc(void* ptr, size_t size, size_t alignment)
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, size, alignment);
 #else
+    be_forceuse(alignment);
     return ::realloc(ptr, size);
 #endif
 }

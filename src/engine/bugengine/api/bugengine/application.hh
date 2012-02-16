@@ -12,7 +12,10 @@
 namespace BugEngine
 {
 
+namespace World
+{
 class World;
+}
 
 class be_api(BUGENGINE) Application : public IResourceLoader
 {

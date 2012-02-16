@@ -2,8 +2,11 @@
    see LICENSE for detail */
 
 #include    <bugengine/stdafx.h>
+#include    <bugengine/application.hh>
+
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
+#include    <system/plugin.hh>
 #include    <system/resource/resourcemanager.hh>
 
 #include    <cstdio>
@@ -16,7 +19,7 @@ namespace
     private:
         weak<BugEngine::File> m_logFile;
     public:
-        FileLogListener(weak<BugEngine::File> file)
+        explicit FileLogListener(weak<BugEngine::File> file)
             :   m_logFile(file)
         {
         }
@@ -86,7 +89,7 @@ static int __main(int argc, const char *argv[])
                 BugEngine::DiskFolder::CreateOne);
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::debugArena(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
-        BugEngine::Plugin<BugEngine::Application> app(BugEngine::Environment::getEnvironment().getGame(), BugEngine::PluginContext(weak<BugEngine::ResourceManager>()));
+        BugEngine::Plugin<BugEngine::Application> app(BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()), BugEngine::PluginContext(weak<BugEngine::ResourceManager>()));
         return app->run();
     }
 #ifdef BE_ENABLE_EXCEPTIONS

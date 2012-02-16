@@ -9,7 +9,7 @@ def setup(conf):
 	pass
 
 def build(bld):
-	if 'osx' in bld.env.PLATFORM or bld.env.PROJECTS:
+	if ('osx' in bld.env.PLATFORM and bld.env.GCC_NAME != 'icc') or bld.env.PROJECTS:
 		bld.m['cocoa'] = module.util('cocoa', [])
 	else:
 		bld.m['cocoa'] = None

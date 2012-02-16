@@ -43,7 +43,7 @@ void ScriptEngine<T>::unload(const ResourceHandle& handle)
 }
 
 template< typename T >
-void ScriptEngine<T>::unloadScript(const ResourceHandle& handle)
+void ScriptEngine<T>::unloadScript(const ResourceHandle& /*handle*/)
 {
 }
 

@@ -32,7 +32,7 @@ Value::Value(T t)
 }
 
 template< typename T >
-Value::Value(T t, ConstifyType constify)
+Value::Value(T t, ConstifyType /*constify*/)
 :   m_type(be_typeid<T>::type(), TypeInfo::Constify)
 ,   m_reference(false)
 {

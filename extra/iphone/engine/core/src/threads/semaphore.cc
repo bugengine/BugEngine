@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-Semaphore::Semaphore(int initialCount, int maxCount)
+Semaphore::Semaphore(int initialCount)
 :   m_data(dispatch_semaphore_create(initialCount))
 {
     if (!m_data)

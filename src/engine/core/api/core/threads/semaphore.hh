@@ -14,7 +14,7 @@ class be_api(CORE) Semaphore : public Threads::Waitable
 private:
     void*           m_data;
 public:
-    Semaphore(int initialCount, int maxCount);
+    Semaphore(int initialCount);
     ~Semaphore();
 
     void release(int count);

@@ -1,5 +1,7 @@
-#ifndef DEFAULT_MOTION_STATE_H
-#define DEFAULT_MOTION_STATE_H
+#ifndef BT_DEFAULT_MOTION_STATE_H
+#define BT_DEFAULT_MOTION_STATE_H
+
+#include "btMotionState.h"
 
 ///The btDefaultMotionState provides a common implementation to synchronize world transforms with offsets.
 struct	btDefaultMotionState : public btMotionState
@@ -35,4 +37,4 @@ struct	btDefaultMotionState : public btMotionState
 
 };
 
-#endif //DEFAULT_MOTION_STATE_H
+#endif //BT_DEFAULT_MOTION_STATE_H

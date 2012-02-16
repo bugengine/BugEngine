@@ -3,3 +3,9 @@
 
 #include    <world/stdafx.h>
 #include    <world/entity.script.hh>
+
+namespace BugEngine { namespace World
+{
+
+}}
+
