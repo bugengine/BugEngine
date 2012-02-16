@@ -74,7 +74,11 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             filename.append(d->d_name);
             struct stat s;
             stat(filename.c_str(), &s);
-            if (s.st_mode & S_IFDIR)
+            if (errno == 0)
+            {
+                be_error("could not stat file %s: %s(%d)" | filename.c_str() | strerror(errno) | errno);
+            }
+            else if (s.st_mode & S_IFDIR)
             {
                 for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                 {
@@ -87,22 +91,13 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             }
             else
             {
-                struct stat s;
-                errno = 0;
-                if (stat(filename.c_str(), &s) == 0)
-                {
-                    m_files.push_back(minitl::make_pair(
-                        name,
-                        ref<PosixFile>::create(
-                                fsArena(),
-                                m_path+ifilename(name),
-                                File::Media(File::Media::Disk, s.st_dev, s.st_ino),
-                                s.st_size)));
-                }
-                else
-                {
-                    be_error("could not stat file %s: %s(%d)" | filename.c_str() | strerror(errno) | errno);
-                }
+                m_files.push_back(minitl::make_pair(
+                    name,
+                    ref<PosixFile>::create(
+                            fsArena(),
+                            m_path+ifilename(name),
+                            File::Media(File::Media::Disk, s.st_dev, s.st_ino),
+                            s.st_size)));
             }
         }
     }

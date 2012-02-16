@@ -20,7 +20,6 @@ subject to the following restrictions:
 #include "btBulletCollisionCommon.h"
 
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
-#include "BulletDynamics/Dynamics/btContinuousDynamicsWorld.h"
 
 #include "BulletDynamics/Dynamics/btSimpleDynamicsWorld.h"
 #include "BulletDynamics/Dynamics/btRigidBody.h"
@@ -30,6 +29,9 @@ subject to the following restrictions:
 #include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btSliderConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btUniversalConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btHinge2Constraint.h"
 
 #include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h"
 

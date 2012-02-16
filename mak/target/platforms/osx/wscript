@@ -70,15 +70,15 @@ def add_darwin_flags_to_env(conf, name, arch):
 		version = sdks[0][6:10]
 	conf.msg('Checking for MacOSX SDK', full_sdk)
 
-	conf.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
-	conf.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
-	conf.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_value('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
+	conf.env.append_value('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
+	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/', '-L', '%s/usr/lib'%full_sdk])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['program_PATTERN'] = '%s'
 
-	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_darwin', 'POSIX', '_POSIX', '_POSIX_', '__POSIX__'])
+	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_darwin', '__POSIX__'])
 	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', name))
 	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname')+'.app/Contents/',
 									'bin':		'MacOS',

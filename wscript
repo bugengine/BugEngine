@@ -60,36 +60,36 @@ def plugins(bld):
 	squirellib		= module.external('squirrellib')
 
 
-	package			= module.plugin('package',			[])
+	package			= module.plugin('scripting.package',		[])
 
-	bullet			= module.plugin('bullet',			[bulletengine])
+	bullet			= module.plugin('physics.bullet',			[bulletengine])
 
-	_3d				= module.plugin('3d',				[])
-	shadermodel1	= module.plugin('shadermodel1',		[_3d])
-	shadermodel2	= module.plugin('shadermodel2',		[_3d, shadermodel1])
-	shadermodel3	= module.plugin('shadermodel3',		[_3d, shadermodel1, shadermodel2])
-	shadermodel4	= module.plugin('shadermodel4',		[_3d, shadermodel1, shadermodel2, shadermodel3])
+	_3d				= module.plugin('graphics.3d',				[])
+	shadermodel1	= module.plugin('graphics.shadermodel1',	[_3d])
+	shadermodel2	= module.plugin('graphics.shadermodel2',	[_3d, shadermodel1])
+	shadermodel3	= module.plugin('graphics.shadermodel3',	[_3d, shadermodel1, shadermodel2])
+	shadermodel4	= module.plugin('graphics.shadermodel4',	[_3d, shadermodel1, shadermodel2, shadermodel3])
 
-	#AL				= module.plugin('AL',				[openal])
+	#AL				= module.plugin('audio.AL',					[openal])
 
-	lua				= module.plugin('lua',				[lualib])
-	squirrel		= module.plugin('squirrel',			[squirellib])
-	input			= module.plugin('input',			[])
+	lua				= module.plugin('scripting.lua',			[lualib])
+	squirrel		= module.plugin('scripting.squirrel',		[squirellib])
+	input			= module.plugin('input.input',				[])
 
-	nullrender		= module.plugin('nullrender',		[_3d, shadermodel4])
+	nullrender		= module.plugin('graphics.nullrender',		[_3d, shadermodel4])
 	if win32 or X11 or cocoa:
-		windowing	= module.library('windowing',		[bld.game, _3d, X11, win32], category='plugin')
+		windowing	= module.library('graphics.windowing',		[bld.game, _3d, X11, win32], category='plugin')
 		if opengl:
-			gl		= module.plugin('GL4',				[bld.game, windowing, opengl, _3d])
+			gl		= module.plugin('graphics.GL4',				[bld.game, windowing, opengl, _3d])
 		if directx9:
-			Dx9		= module.plugin('DX9',				[bld.game, windowing, cgDx, directx9, _3d])
+			Dx9		= module.plugin('graphics.DX9',				[bld.game, windowing, cgDx, directx9, _3d])
 		#if diretx10:
-			#Dx10	= module.plugin('DX10',				[bld.game, windowing, cgDx, directx10, _3d])
+			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
-			#Dx11	= module.plugin('DX11',				[bld.game, windowing, cgDx, directx11, _3d])
+			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
 
 
-	bugeditor		= module.game('bugeditor',			[package, scintilla], platforms=['pc'])
+	bugeditor		= module.game('bugeditor',					[package, scintilla], platforms=['pc'])
 
 	bld.recurse('mak', name='plugins', once=False)
 

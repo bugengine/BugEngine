@@ -91,26 +91,17 @@ void btConvexTriangleCallback::processTriangle(btVector3* triangle,int partId, i
 	btCollisionObject* ob = static_cast<btCollisionObject*>(m_triBody);
 
 
-	
+#if 0	
 	///debug drawing of the overlapping triangles
 	if (m_dispatchInfoPtr && m_dispatchInfoPtr->m_debugDraw && (m_dispatchInfoPtr->m_debugDraw->getDebugMode() &btIDebugDraw::DBG_DrawWireframe ))
 	{
-		btVector3 color(255,255,0);
+		btVector3 color(1,1,0);
 		btTransform& tr = ob->getWorldTransform();
 		m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[0]),tr(triangle[1]),color);
 		m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[1]),tr(triangle[2]),color);
 		m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[2]),tr(triangle[0]),color);
-
-		//btVector3 center = triangle[0] + triangle[1]+triangle[2];
-		//center *= btScalar(0.333333);
-		//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[0]),tr(center),color);
-		//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[1]),tr(center),color);
-		//m_dispatchInfoPtr->m_debugDraw->drawLine(tr(triangle[2]),tr(center),color);
-
 	}
-
-
-	//btCollisionObject* colObj = static_cast<btCollisionObject*>(m_convexProxy->m_clientObject);
+#endif
 	
 	if (m_convexBody->getCollisionShape()->isConvex())
 	{
@@ -119,14 +110,18 @@ void btConvexTriangleCallback::processTriangle(btVector3* triangle,int partId, i
 		
 		btCollisionShape* tmpShape = ob->getCollisionShape();
 		ob->internalSetTemporaryCollisionShape( &tm );
-		
-		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(m_convexBody,m_triBody,m_manifoldPtr);
-		///this should use the btDispatcher, so the actual registered algorithm is used
-		//		btConvexConvexAlgorithm cvxcvxalgo(m_manifoldPtr,ci,m_convexBody,m_triBody);
 
-		m_resultOut->setShapeIdentifiers(-1,-1,partId,triangleIndex);
-	//	cvxcvxalgo.setShapeIdentifiers(-1,-1,partId,triangleIndex);
-//		cvxcvxalgo.processCollision(m_convexBody,m_triBody,*m_dispatchInfoPtr,m_resultOut);
+		btCollisionAlgorithm* colAlgo = ci.m_dispatcher1->findAlgorithm(m_convexBody,m_triBody,m_manifoldPtr);
+
+		if (m_resultOut->getBody0Internal() == m_triBody)
+		{
+			m_resultOut->setShapeIdentifiersA(partId,triangleIndex);
+		}
+		else
+		{
+			m_resultOut->setShapeIdentifiersB(partId,triangleIndex);
+		}
+	
 		colAlgo->processCollision(m_convexBody,m_triBody,*m_dispatchInfoPtr,m_resultOut);
 		colAlgo->~btCollisionAlgorithm();
 		ci.m_dispatcher1->freeCollisionAlgorithm(colAlgo);

@@ -503,10 +503,10 @@ PE::PE(const char *filename, u64 baseAddress)
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if (debug_link)
         {
-            Allocator::Block<char> filename(tempArena(), be_checked_numcast<size_t>(debug_link.fileSize));
-            readSection(debug_link, filename);
+            Allocator::Block<char> f(tempArena(), be_checked_numcast<size_t>(debug_link.fileSize));
+            readSection(debug_link, f);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
-            m_symbolInformations.filename = ifilename(filename);
+            m_symbolInformations.filename = ifilename(f);
             m_symbolInformations.offset = m_baseAddress + code.offset;
             m_symbolInformations.size = code.size;
         }

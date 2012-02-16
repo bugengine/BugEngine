@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -13,8 +13,10 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef OPTIMIZED_BVH_H
-#define OPTIMIZED_BVH_H
+///Contains contributions from Disney Studio's
+
+#ifndef BT_OPTIMIZED_BVH_H
+#define BT_OPTIMIZED_BVH_H
 
 #include "BulletCollision/BroadphaseCollision/btQuantizedBvh.h"
 
@@ -45,7 +47,7 @@ public:
 	void	updateBvhNodes(btStridingMeshInterface* meshInterface,int firstNode,int endNode,int index);
 
 	/// Data buffer MUST be 16 byte aligned
-	virtual bool serialize(void *o_alignedDataBuffer, unsigned i_dataBufferSize, bool i_swapEndian)
+	virtual bool serializeInPlace(void *o_alignedDataBuffer, unsigned i_dataBufferSize, bool i_swapEndian) const
 	{
 		return btQuantizedBvh::serialize(o_alignedDataBuffer,i_dataBufferSize,i_swapEndian);
 
@@ -58,6 +60,6 @@ public:
 };
 
 
-#endif //OPTIMIZED_BVH_H
+#endif //BT_OPTIMIZED_BVH_H
 
 

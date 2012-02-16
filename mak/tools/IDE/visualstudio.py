@@ -6,7 +6,7 @@ from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
 class vs2003(Build.BuildContext):
 	cmd = 'vs2003'
 	fun = 'build'
-	version = (('Visual Studio .NET 2003', '8.00'),(vcproj.VCproj, '7.10'))
+	version = (('Visual Studio .NET 2003', '8.00', False), (vcproj.VCproj, '7.10'))
 
 	def execute(self):
 		"""
@@ -19,7 +19,7 @@ class vs2003(Build.BuildContext):
 		self.recurse([self.run_dir])
 
 		version = self.__class__.cmd
-		version_name, version_number = self.__class__.version[0]
+		version_name, version_number, folders = self.__class__.version[0]
 		klass, version_project = self.__class__.version[1]
 		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 
@@ -28,7 +28,7 @@ class vs2003(Build.BuildContext):
 		projects.mkdir()
 
 
-		s = solution.Solution(appname, node.abspath(), version, version_number, version_name)
+		s = solution.Solution(appname, node.abspath(), version, version_number, version_name, folders)
 		s.writeHeader()
 
 		project_list = []
@@ -61,41 +61,41 @@ class vs2003(Build.BuildContext):
 class vs2005(vs2003):
 	cmd = 'vs2005'
 	fun = 'build'
-	version =	(('Visual Studio 2005', '9.00'),(vcproj.VCproj, '8.00'))
+	version =	(('Visual Studio 2005', '9.00', True),(vcproj.VCproj, '8.00'))
 
 class vs2005e(vs2003):
 	cmd = 'vs2005e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2005', '9.00'),(vcproj.VCproj, '8.00'))
+	version =	(('Visual C++ Express 2005', '9.00', False),(vcproj.VCproj, '8.00'))
 
 
 class vs2008(vs2003):
 	cmd = 'vs2008'
 	fun = 'build'
-	version =	(('Visual Studio 2008', '10.00'),(vcproj.VCproj, '9.00'))
+	version =	(('Visual Studio 2008', '10.00', True),(vcproj.VCproj, '9.00'))
 
 class vs2008e(vs2003):
 	cmd = 'vs2008e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2008', '10.00'),(vcproj.VCproj, '9.00'))
+	version =	(('Visual C++ Express 2008', '10.00', False),(vcproj.VCproj, '9.00'))
 
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
-	version =	(('Visual Studio 2010', '11.00'),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual Studio 2010', '11.00', True),(vcxproj.VCxproj, '4.0'))
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2010', '11.00'),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual C++ Express 2010', '11.00', False),(vcxproj.VCxproj, '4.0'))
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	version =	(('Visual Studio 11', '12.00'),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual Studio 11', '12.00', True),(vcxproj.VCxproj, '4.0'))
 
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
-	version =	(('Visual C++ Express 11', '12.00'),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual C++ Express 11', '12.00', False),(vcxproj.VCxproj, '4.0'))
 

@@ -34,9 +34,7 @@ int gNumManifold = 0;
 
 
 btCollisionDispatcher::btCollisionDispatcher (btCollisionConfiguration* collisionConfiguration): 
-	m_count(0),
-	m_useIslands(true),
-	m_staticWarningReported(false),
+m_dispatcherFlags(btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD),
 	m_collisionConfiguration(collisionConfiguration)
 {
 	int i;
@@ -79,9 +77,11 @@ btPersistentManifold*	btCollisionDispatcher::getNewManifold(void* b0,void* b1)
 	btCollisionObject* body0 = (btCollisionObject*)b0;
 	btCollisionObject* body1 = (btCollisionObject*)b1;
 
-	//test for Bullet 2.74: use a relative contact breaking threshold without clamping against 'gContactBreakingThreshold'
-	//btScalar contactBreakingThreshold = btMin(gContactBreakingThreshold,btMin(body0->getCollisionShape()->getContactBreakingThreshold(),body1->getCollisionShape()->getContactBreakingThreshold()));
-	btScalar contactBreakingThreshold = btMin(body0->getCollisionShape()->getContactBreakingThreshold(),body1->getCollisionShape()->getContactBreakingThreshold());
+	//optional relative contact breaking threshold, turned on by default (use setDispatcherFlags to switch off feature for improved performance)
+	
+	btScalar contactBreakingThreshold =  (m_dispatcherFlags & btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD) ? 
+		btMin(body0->getCollisionShape()->getContactBreakingThreshold(gContactBreakingThreshold) , body1->getCollisionShape()->getContactBreakingThreshold(gContactBreakingThreshold))
+		: gContactBreakingThreshold ;
 
 	btScalar contactProcessingThreshold = btMin(body0->getContactProcessingThreshold(),body1->getContactProcessingThreshold());
 		
@@ -92,8 +92,16 @@ btPersistentManifold*	btCollisionDispatcher::getNewManifold(void* b0,void* b1)
 		mem = m_persistentManifoldPoolAllocator->allocate(sizeof(btPersistentManifold));
 	} else
 	{
-		mem = btAlignedAlloc(sizeof(btPersistentManifold),16);
-
+		//we got a pool memory overflow, by default we fallback to dynamically allocate memory. If we require a contiguous contact pool then assert.
+		if ((m_dispatcherFlags&CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION)==0)
+		{
+			mem = btAlignedAlloc(sizeof(btPersistentManifold),16);
+		} else
+		{
+			btAssert(0);
+			//make sure to increase the m_defaultMaxPersistentManifoldPoolSize in the btDefaultCollisionConstructionInfo/btDefaultCollisionConfiguration
+			return 0;
+		}
 	}
 	btPersistentManifold* manifold = new(mem) btPersistentManifold (body0,body1,0,contactBreakingThreshold,contactProcessingThreshold);
 	manifold->m_index1a = m_manifoldsPtr.size();
@@ -169,13 +177,12 @@ bool	btCollisionDispatcher::needsCollision(btCollisionObject* body0,btCollisionO
 	bool needsCollision = true;
 
 #ifdef BT_DEBUG
-	if (!m_staticWarningReported)
+	if (!(m_dispatcherFlags & btCollisionDispatcher::CD_STATIC_STATIC_REPORTED))
 	{
 		//broadphase filtering already deals with this
-		if ((body0->isStaticObject() || body0->isKinematicObject()) &&
-			(body1->isStaticObject() || body1->isKinematicObject()))
+		if (body0->isStaticOrKinematicObject() && body1->isStaticOrKinematicObject())
 		{
-			m_staticWarningReported = true;
+			m_dispatcherFlags |= btCollisionDispatcher::CD_STATIC_STATIC_REPORTED;
 			printf("warning btCollisionDispatcher::needsCollision: static-static collision!\n");
 		}
 	}
