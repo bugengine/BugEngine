@@ -47,6 +47,7 @@ def plugins(bld):
 	X11				= module.external('X11')
 	cocoa			= module.external('cocoa')
 	win32			= module.external('win32')
+	scintilla		= module.external('scintilla')
 
 	freetype		= module.external('freetype')
 
@@ -88,7 +89,7 @@ def plugins(bld):
 			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
 
 
-	bugeditor		= module.game('bugeditor',					[package], platforms=['pc'])
+	bugeditor		= module.game('bugeditor',					[package, scintilla], platforms=['pc'])
 
 	bld.recurse('mak', name='plugins', once=False)
 
