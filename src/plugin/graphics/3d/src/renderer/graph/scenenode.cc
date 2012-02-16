@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-SceneNode::SceneNode(weak<IRenderTarget> renderTarget, weak<const World> world)
+SceneNode::SceneNode(weak<IRenderTarget> renderTarget, weak<const BugEngine::World::World> world)
 :   INode()
 ,   m_world(world)
 ,   m_renderTask(ref< Task< MethodCaller<SceneNode, &SceneNode::render> > >::create(taskArena(), "renderScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::render>(this), Scheduler::High))

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <world/stdafx.h>
-#include    <world/entity.script.hh>
+#include    <world/component.script.hh>
 
 namespace BugEngine { namespace World
 {

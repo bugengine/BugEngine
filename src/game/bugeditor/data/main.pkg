@@ -5,7 +5,7 @@ window = graphics.3d.RenderWindow
     title = "BugEngine editor v0.1";
 )
 
-world = game.World
+world = game.World.World
 (
 )
 
