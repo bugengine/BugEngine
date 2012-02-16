@@ -11,7 +11,11 @@
 namespace BugEngine
 {
 
+namespace World
+{
 class World;
+}
+
 class RenderTarget;
 class SceneGraphLoader;
 class INode;
@@ -32,10 +36,10 @@ class be_api(_3D) RenderScene : public RenderNode
 {
     BE_NOCOPY(RenderScene);
 private:
-    ref<RenderTarget>   m_renderTarget;
-    ref<const World>    m_world;
+    ref<RenderTarget>       m_renderTarget;
+    ref<const World::World> m_world;
 published:
-    RenderScene(ref<RenderTarget> rendertarget, ref<const World> world);
+    RenderScene(ref<RenderTarget> rendertarget, ref<const World::World> world);
     ~RenderScene();
 private:
     virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const override;
