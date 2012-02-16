@@ -1,14 +1,35 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_INTERLOCKED_GCC_PPC_INTERLOCKED_INL_
-#define BE_MINITL_INTERLOCKED_GCC_PPC_INTERLOCKED_INL_
+#ifndef BE_MINITL_INTERLOCKED_GCC_ARM_INTERLOCKED_INL_
+#define BE_MINITL_INTERLOCKED_GCC_ARM_INTERLOCKED_INL_
 /*****************************************************************************/
 
 /*
  * most implementations here from Hans Boehm's atomic ops
  * http://www.hpl.hp.com/research/linux/atomic_ops/
  */
+#if defined(__thumb__) && !defined(__thumb2__)
+  /* Thumb One mode does not have ARM "mcr", "swp" and some load/store  */
+  /* instructions, so we temporarily switch to ARM mode and go back     */
+  /* afterwards (clobbering "r3" register).                             */
+# define AO_THUMB_GO_ARM \
+           "       adr     r3, 4f\n" \
+           "       bx      r3\n" \
+           "      .align\n" \
+           "      .arm\n" \
+           "4:\n"
+# define AO_THUMB_RESTORE_MODE \
+           "       adr     r3, 5f + 1\n" \
+           "       bx      r3\n" \
+           "       .thumb\n" \
+           "5:\n"
+# define AO_THUMB_SWITCH_CLOBBERS "r3",
+#else
+# define AO_THUMB_GO_ARM /* empty */
+# define AO_THUMB_RESTORE_MODE /* empty */
+# define AO_THUMB_SWITCH_CLOBBERS /* empty */
+#endif /* !__thumb__ */
 
 namespace minitl { namespace interlocked_impl
 {
@@ -20,55 +41,61 @@ template<>
 struct InterlockedType<4>
 {
     typedef long value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         value_t old = 0;
         value_t temp, flag;
         __asm__ __volatile__(
+                AO_THUMB_GO_ARM
                 "1:     ldrex   %0, [%5]\n"
                 "       add     %2, %0, %4\n"
                 "       strex   %1, %2, [%5]\n"
                 "       teq             %1, #0\n"
                 "       bne             1b\n"
+                AO_THUMB_RESTORE_MODE
             : "=&r"(old),"=&r"(flag),"=&r"(temp),"+m"(*p)
             : "r"(incr), "r"(p)
-            : "cc");
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
         return old;
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(value_t *p, value_t incr)
     {
         return fetch_and_add(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         value_t prev, flag;
         __asm__ __volatile__(
+                AO_THUMB_GO_ARM
                 "1:     ldrex   %0, [%3]\n"
                 "       strex   %1, %4, [%3]\n"
                 "       teq             %1, #0\n"
                 "       bne             1b\n"
+                AO_THUMB_RESTORE_MODE
             : "=&r"(prev),"=&r"(flag), "+m"(*p)
             : "r"(p), "r"(v)
-            : "cc");
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
         return prev;
     }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
         value_t result, old;
         __asm__ __volatile__ (
-                "1:     mov             %0, #2\n"                       /* store a flag */
-                "       ldrex   %1, [%3]\n"                     /* get original */
-                "       teq             %1, %4\n"                       /* see if match */
+                AO_THUMB_GO_ARM
+                "1:     mov             %0, #2\n"       /* store a flag */
+                "       ldrex   %1, [%3]\n"             /* get original */
+                "       teq             %1, %4\n"       /* see if match */
                 "       strexeq %0, %5, [%3]\n"         /* store new one if matched */
                 "       teq             %0, #1\n"
-                "       beq             1b\n"                           /* if update failed, repeat */
+                "       beq             1b\n"           /* if update failed, repeat */
+                AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v)
-            : "cc");
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return old;
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(value_t *p, value_t v)
     {
         fetch_and_set(p, v);
         return v;
@@ -79,7 +106,7 @@ struct InterlockedType<4>
         typedef long        value_t;
         typedef value_t     tag_t;
         
-        BE_SET_ALIGNMENT(4) volatile value_t     m_value;
+        BE_SET_ALIGNMENT(4) value_t     m_value;
 
         tagged_t(long value = 0)
             :   m_value(value)
@@ -101,21 +128,25 @@ struct InterlockedType<4>
     {
         value_t result;
         __asm__ __volatile__ (
+                AO_THUMB_GO_ARM
                 "       ldrex   %0, [%1]\n"
+                AO_THUMB_RESTORE_MODE
             : "=r"(result)
             : "r"(&p.m_value)
-            : "cc");
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
-    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
          long result;
 
         __asm__ __volatile__(
+                AO_THUMB_GO_ARM
                 "       strex %0, %2, [%3]\n"
+                AO_THUMB_RESTORE_MODE
             : "=&r"(result), "+m"(*p)
             : "r"(v), "r"(p)
-            : "cc");
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return !(result&2);  
     }
