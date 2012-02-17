@@ -5,6 +5,7 @@
 #define BE_WORLD_RULE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <world/entity.script.hh>
+#include    <system/scheduler/task/itask.hh>
 
 namespace BugEngine { namespace World
 {
@@ -15,7 +16,7 @@ protected:
     Rule();
     ~Rule();
 public:
-    weak<ITask> updateTask() const = 0;
+    virtual weak<ITask> updateTask() const = 0;
 };
 
 }}
