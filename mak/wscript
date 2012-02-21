@@ -235,8 +235,8 @@ def createmasterfile(task):
 MasterTask = Task.task_factory("master", createmasterfile, color='CYAN', before='c cxx')
 def master_sig_deps(task):
 	for f in task.inputs:
-		task.m.update(f.srcpath())
-		task.m.update(';')
+		task.m.update(f.srcpath().encode('utf8'))
+		task.m.update(b';')
 MasterTask.sig_explicit_deps = master_sig_deps
 
 @taskgen_method

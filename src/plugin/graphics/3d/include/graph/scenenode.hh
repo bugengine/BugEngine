@@ -10,7 +10,10 @@
 namespace BugEngine
 {
 
+namespace World
+{
 class World;
+}
 class IRenderTarget;
 
 class SceneNode : public INode
