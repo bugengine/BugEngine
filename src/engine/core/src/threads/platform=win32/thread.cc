@@ -69,6 +69,8 @@ static void setThreadName(const istring& name)
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
     }
+#else
+    be_forceuse(name);
 #endif
 }
 

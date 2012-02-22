@@ -30,7 +30,7 @@ static BE_NOINLINE void free(void* block)
 }
 
 
-BulletWorld::BulletWorld(const PluginContext& context)
+BulletWorld::BulletWorld(const PluginContext& /*context*/)
 {
     btAlignedAllocSetCustom(allocate, free);
     btAlignedAllocSetCustomAligned(allocate, free);

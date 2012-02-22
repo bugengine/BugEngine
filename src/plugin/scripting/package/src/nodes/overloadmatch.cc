@@ -68,7 +68,7 @@ BugEngine::Value OverloadMatch::create() const
     {
         v[i] = m_params[i].parameter->as(m_params[i].match->type);
     }
-    return (*(m_overload->call))(v, m_params.size());
+    return (*(m_overload->call))(v, be_checked_numcast<u32>(m_params.size()));
 }
 
 }}}

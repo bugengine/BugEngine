@@ -17,16 +17,6 @@ typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
 
-#ifdef  _CRT_SECURE_NO_WARNINGS
-# undef _CRT_SECURE_NO_WARNINGS
-#endif
-#define _CRT_SECURE_NO_WARNINGS 1
-
-#ifndef _CRT_SECURE_NO_DEPRECATE
-# undef _CRT_SECURE_NO_DEPRECATE
-#endif
-#define _CRT_SECURE_NO_DEPRECATE 1
-
 #pragma warning(default:4263)   // member function does not override any base class virtual member function
 #pragma warning(default:4264)   // no override available for virtual member function from base 'class'; function is hidden
 #pragma warning(default:4265)   // class has virtual functions, but destructor is not virtual
@@ -36,20 +26,20 @@ typedef u8                      byte;
 
 #pragma warning(error:4715)     // not all control paths return a value
 
-#pragma warning(disable:4275)
+#pragma warning(disable:4275)   // non dll-interface class 'X' used as base for dll-interface class 'Y'
 #ifdef NDEBUG
 # pragma warning(error:4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'
 # pragma warning(disable:4530)  // C++ exception handler used, but unwind semantics are not enabled
 # pragma warning(disable:4100)  // unreferenced formal parameter
 #endif
-#pragma warning(disable:4201)   // nonstandard extension used : nameless struct/union
-#pragma warning(disable:4251)
 #pragma warning(disable:4355)   // this used in base member initialization list
-#pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#pragma warning(disable:4127)
-#pragma warning(disable:4181)   // qualifier applied to reference type; ignored
-#pragma warning(disable:4709)   // comma operator used in []
+#pragma warning(disable:4127)   // conditional expression is constant
+//#pragma warning(disable:4181)   // qualifier applied to reference type; ignored
 #pragma warning(disable:4505)   // unreferenced local function has been removed
+#pragma warning(disable:4510)   // default constructor could not be generated
+#pragma warning(disable:4512)   // assignment operator could not be generated
+#pragma warning(disable:4610)   // struct X can never be instantiated - user defined constructor required
+#pragma warning(disable:4800)   // forcing value to bool 'true' or 'false' (performance warning)
 #define BE_THREAD_LOCAL        __declspec(thread)
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline
