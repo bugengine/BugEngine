@@ -12,6 +12,22 @@ from waflib.Tools import ccroot,c,cxx
 projects = ['vs2003', 'vs2005', 'vs2005e', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e',
 			'xcode3', 'xcode4', 'eclipse', 'netbeans', 'qtcreator']
 
+from waflib.Tools.ccroot import USELIB_VARS
+USELIB_VARS['debug'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+USELIB_VARS['profile'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+USELIB_VARS['final'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+USELIB_VARS['warnall'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+USELIB_VARS['warnnone'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+
+@feature('debug', 'profile', 'final', 'warnall', 'warnnone')
+def dummy(c):
+	pass
+
+def print_msg(task):
+	tgt_str = task.outputs[0].nice_path(task.env)
+	return '[{0:^11}] {1}\n'.format(task.__class__.__name__.replace('_task', ''), tgt_str)
+Task.Task.__str__ = print_msg
+
 def options(opt):
 	opt.recurse(os.path.join('host', os.name))
 	opt.load('visualstudio netbeans xcode eclipse qtcreator', tooldir='mak/tools/IDE')
@@ -234,8 +250,8 @@ def createmasterfile(task):
 
 MasterTask = Task.task_factory("master", createmasterfile, color='CYAN', before='c cxx')
 def master_sig_deps(task):
-	for f in task.inputs:
-		task.m.update(f.srcpath().encode('utf8'))
+	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
+		task.m.update(f)
 		task.m.update(b';')
 MasterTask.sig_explicit_deps = master_sig_deps
 

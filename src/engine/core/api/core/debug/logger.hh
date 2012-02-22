@@ -76,6 +76,9 @@ public:
     {
         Logger::root()->removeListener(m_listener);
     }
+private:
+    ScopedLogListener(const ScopedLogListener&);
+    ScopedLogListener& operator=(const ScopedLogListener&);
 };
 
 #define ALLDEBUG

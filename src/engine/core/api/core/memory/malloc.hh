@@ -4,6 +4,7 @@
 #ifndef BE_CORE_MEMORY_MALLOC_HH_
 #define BE_CORE_MEMORY_MALLOC_HH_
 /*****************************************************************************/
+#include    <core/stdafx.h>
 #include    <cstring>
 #include    <core/debug/assert.hh>
 #include    <minitl/container/algorithm.hh>

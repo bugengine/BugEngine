@@ -229,13 +229,12 @@ class module:
 
 				task.inheritedoptions	= coptions()
 				task.inheritedoptions.merge(inheritedoptions)
-				task.uselib = []
-				if self.category != '3rdparty':
-					task.uselib.append('warnall')
-				else:
-					task.uselib.append('warnnone')
-				task.uselib.append(optim)
 				task.use = []
+				if self.category != '3rdparty':
+					task.features.append('warnall')
+				else:
+					task.features.append('warnnone')
+				task.features.append(optim)
 				task.install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY'][self.install_path]))
 				dps = self.depends + extradepends
 				seen = set()
