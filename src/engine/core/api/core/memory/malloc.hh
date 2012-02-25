@@ -27,13 +27,13 @@ public:
         };
     private:
         Allocator*  m_allocator;
-        size_t      m_count;
+        u64         m_count;
         T*          m_data;
     public:
-        Block(Allocator& allocator, size_t count, size_t alignment = be_min<size_t>(16, be_alignof(T)))
+        Block(Allocator& allocator, u64 count, u64 alignment = be_alignof(T))
             :   m_allocator(&allocator)
             ,   m_count(count)
-            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), be_alignof(T))*count, alignment))
+            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), be_alignof(T))*count, be_min<u64>(16, alignment)))
         {
         };
         ~Block()
@@ -45,12 +45,12 @@ public:
         const T* data() const           { return m_data; }
         operator T*()                   { return m_data; }
         operator const T*() const       { return m_data; }
-        size_t count() const            { return m_count; }
-        size_t byteCount() const        { return be_align(sizeof(T), be_alignof(T))*m_count; }
+        u64 count() const               { return m_count; }
+        u64 byteCount() const           { return be_align(sizeof(T), be_alignof(T))*m_count; }
 
-        bool resize(size_t count)
+        bool resize(u64 count)
         {
-            size_t size = be_align(sizeof(T), be_alignof(T))*count;
+            u64 size = be_align(sizeof(T), be_alignof(T))*count;
             if (m_allocator->resize(m_data, size))
             {
                 m_count = count;
@@ -61,9 +61,9 @@ public:
                 return false;
             }
         }
-        void realloc(size_t count, size_t alignment = be_min<size_t>(16, be_alignof(T)))
+        void realloc(u64 count, u64 alignment = be_min<u64>(16, be_alignof(T)))
         {
-            size_t size = be_align(sizeof(T), be_alignof(T))*count;
+            u64 size = be_align(sizeof(T), be_alignof(T))*count;
             m_count = count;
             m_data = (T*)m_allocator->realloc(m_data, size, alignment);
         }
@@ -75,36 +75,36 @@ public:
         }
     };
 protected:
-    virtual void* internalAlloc(size_t size, size_t alignment) = 0;
-    virtual bool  internalResize(void* ptr, size_t size) = 0;
-    virtual void* internalRealloc(void* ptr, size_t size, size_t alignment) = 0;
+    virtual void* internalAlloc(u64 size, u64 alignment) = 0;
+    virtual bool  internalResize(void* ptr, u64 size) = 0;
+    virtual void* internalRealloc(void* ptr, u64 size, u64 alignment) = 0;
     virtual void  internalFree(const void* pointer) = 0;
     virtual ~Allocator() { }
 public:
-    inline void* alloc(size_t size, size_t alignment = 16);
-    inline bool  resize(void* ptr, size_t size);
-    inline void* realloc(void* ptr, size_t size, size_t alignment);
+    inline void* alloc(u64 size, u64 alignment = 16);
+    inline bool  resize(void* ptr, u64 size);
+    inline void* realloc(void* ptr, u64 size, u64 alignment);
     inline void  free(const void* pointer);
     inline const char* strdup(const char *src);
     template< typename T >
     inline T* alloc();
 };
 
-void* Allocator::alloc(size_t size, size_t alignment)
+void* Allocator::alloc(u64 size, u64 alignment)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
     return internalAlloc(size, alignment);
 }
 
-bool  Allocator::resize(void* ptr, size_t size)
+bool  Allocator::resize(void* ptr, u64 size)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif
     return internalResize(ptr, size);
 }
 
-void* Allocator::realloc(void* ptr, size_t size, size_t alignment)
+void* Allocator::realloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef BE_MEMORY_TRACKING
 #endif

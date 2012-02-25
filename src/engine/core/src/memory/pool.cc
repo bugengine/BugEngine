@@ -16,25 +16,25 @@ PoolAllocator::~PoolAllocator()
 {
 }
 
-void* PoolAllocator::internalAlloc(size_t size, size_t alignment)
+void* PoolAllocator::internalAlloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_malloc(size, alignment);
+    return ::_aligned_malloc(be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment));
 #else
     be_forceuse(alignment);
     return ::malloc(size);
 #endif
 }
 
-bool PoolAllocator::internalResize(void* /*ptr*/, size_t /*size*/)
+bool PoolAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
 {
     return false;
 }
 
-void* PoolAllocator::internalRealloc(void* ptr, size_t size, size_t alignment)
+void* PoolAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
+    return ::_aligned_realloc(ptr, be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment));
 #else
     be_forceuse(alignment);
     return ::realloc(ptr, size);
