@@ -37,6 +37,7 @@ typedef u8                      byte;
 //#pragma warning(disable:4181)   // qualifier applied to reference type; ignored
 #pragma warning(disable:4505)   // unreferenced local function has been removed
 #pragma warning(disable:4510)   // default constructor could not be generated
+#pragma warning(disable:4511)   // copy constructor could not be generated
 #pragma warning(disable:4512)   // assignment operator could not be generated
 #pragma warning(disable:4610)   // struct X can never be instantiated - user defined constructor required
 #pragma warning(disable:4800)   // forcing value to bool 'true' or 'false' (performance warning)

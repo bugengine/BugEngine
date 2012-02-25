@@ -25,25 +25,25 @@ GeneralAllocator::~GeneralAllocator()
 {
 }
 
-void* GeneralAllocator::internalAlloc(size_t size, size_t alignment)
+void* GeneralAllocator::internalAlloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return size > 0 ? ::_aligned_malloc(size, alignment) : 0;
+    return size > 0 ? ::_aligned_malloc(be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment)) : 0;
 #else
     be_forceuse(alignment);
     return size > 0 ? ::malloc(size) : 0;
 #endif
 }
 
-bool GeneralAllocator::internalResize(void* /*ptr*/, size_t /*size*/)
+bool GeneralAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
 {
     return false;
 }
 
-void* GeneralAllocator::internalRealloc(void* ptr, size_t size, size_t alignment)
+void* GeneralAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, size, alignment);
+    return ::_aligned_realloc(ptr, be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment));
 #else
     be_forceuse(alignment);
     return ::realloc(ptr, size);

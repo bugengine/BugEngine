@@ -15,9 +15,9 @@ public:
     GeneralAllocator();
     ~GeneralAllocator();
 protected:
-    virtual void* internalAlloc(size_t size, size_t alignment) override;
-    virtual bool  internalResize(void* ptr, size_t size) override;
-    virtual void* internalRealloc(void* ptr, size_t size, size_t alignment) override;
+    virtual void* internalAlloc(u64 size, u64 alignment) override;
+    virtual bool  internalResize(void* ptr, u64 size) override;
+    virtual void* internalRealloc(void* ptr, u64 size, u64 alignment) override;
     virtual void  internalFree(const void* pointer) override;
 };
 

@@ -103,7 +103,7 @@ Context::~Context()
 void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block<u8>& block)
 {
     int result;
-    result = luaL_loadbuffer(m_state, (const char *)block.data(), block.count(), 0);
+    result = luaL_loadbuffer(m_state, (const char *)block.data(), be_checked_numcast<size_t>(block.count()), 0);
     if (result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
