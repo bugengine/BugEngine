@@ -55,7 +55,7 @@ private:
     {                                                                                                                                   \
         BE_EXPORT raw<RTTI::ClassInfo> be_##name##_Namespace()                                                                          \
         {                                                                                                                               \
-            static RTTI::ClassInfo::ObjectInfo ob = { {0}, "BugEngine", Value() };                                                      \
+            static RTTI::ClassInfo::ObjectInfo ob = { {0}, {0}, "BugEngine", Value() };                                                      \
             static RTTI::ClassInfo ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };             \
             static raw<const RTTI::ClassInfo::ObjectInfo> obptr = {((ob.value = Value(&ci)), &ob)};                                     \
             be_forceuse(obptr);                                                                                                         \
