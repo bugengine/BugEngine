@@ -9,6 +9,8 @@
 namespace BugEngine { namespace World
 {
 
+static const u32 s_maxComponentCount = 128;
+
 struct be_api(WORLD) Component
 {
 };

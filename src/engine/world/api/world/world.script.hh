@@ -10,10 +10,13 @@
 namespace BugEngine { namespace World
 {
 
+class State;
+
 class be_api(WORLD) World : public Resource
 {
 private:
-    ref<ITask>  m_task;
+    ref<ITask>      m_task;
+    scoped<State>   m_emptyEntityState;
 public:
     weak<ITask> updateWorldTask() const;
 published:

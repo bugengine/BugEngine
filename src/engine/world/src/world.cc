@@ -6,6 +6,8 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
+#include    <state.hh>
+
 BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 
 namespace BugEngine { namespace World
@@ -13,6 +15,7 @@ namespace BugEngine { namespace World
 
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
+,   m_emptyEntityState(scoped<State>::create(gameArena()))
 {
 }
 
