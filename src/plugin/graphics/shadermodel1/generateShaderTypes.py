@@ -10,13 +10,13 @@ hHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.co
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders { namespace %(TYPECAML)s
 {
 
 """
 
 hFooter = """
-}}
+}}}
 /*****************************************************************************/
 #endif
 """
@@ -29,12 +29,12 @@ cppHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.
 #include    <%(PROJECT)s/shaders/%(TYPE)s.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders {namespace %(TYPECAML)s
 {
 """
 
 
-cppFooter = """}}
+cppFooter = """}}}
 """
 
 
@@ -216,8 +216,8 @@ ref<%(TYPE1)s> operator %(OPERATOR)s(weak<const %(TYPE2)s> node1, weak<const %(T
 
 
 def header(h, cpp, n, project):
-	h.write(hHeader % {'TYPEUPPER': n.upper(), 'TYPE': n, 'PROJECT':project })
-	cpp.write(cppHeader % {'TYPE': n, 'PROJECT':project })
+	h.write(hHeader % {'TYPEUPPER': n.upper(), 'TYPE': n.lower(), 'TYPECAML':n, 'PROJECT':project })
+	cpp.write(cppHeader % {'TYPE': n.lower(), 'TYPECAML': n, 'PROJECT':project })
 
 def footer(h, cpp):
 	h.write(hFooter)
@@ -300,7 +300,7 @@ types = [
 for rawtype, shadertype, doVector, doMatrix, shadermodel in types:
 	h = open("src/plugin/graphics/%s/api/%s/shaders/%s.script.hh" % (shadermodel, shadermodel, rawtype), "w")
 	cpp = open("src/plugin/graphics/%s/src/shaders/%s.cc" % (shadermodel, rawtype), "w")
-	header(h, cpp, rawtype, shadermodel)
+	header(h, cpp, shadertype, shadermodel)
 	fileType(h, cpp, shadertype, 1, 1, doMatrix)
 	if doVector:
 		predecl(h, shadertype, 2, 1)

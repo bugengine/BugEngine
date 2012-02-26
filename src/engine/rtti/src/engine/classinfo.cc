@@ -52,6 +52,15 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             o = o->next;
         }
+        raw<const MethodInfo> m = from.as< raw<const ClassInfo> >()->methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                return Value(m);
+            }
+            m = m->next;
+        }
     }
 
     {

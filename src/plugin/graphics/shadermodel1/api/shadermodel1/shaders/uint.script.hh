@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders { namespace Uint
 {
 
 class Uint : public Node
@@ -242,6 +242,6 @@ ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint> node2);
 
 
 
-}}
+}}}
 /*****************************************************************************/
 #endif

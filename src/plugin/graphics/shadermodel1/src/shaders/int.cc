@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/int.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders {namespace Int
 {
 /* Type *************************************************************/
 Int::Int()
@@ -1404,4 +1404,4 @@ ref<Int4> operator -(weak<const Int4> node1, weak<const Int> node2)
 
 
 
-}}
+}}}

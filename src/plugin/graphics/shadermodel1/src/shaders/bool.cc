@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/bool.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders {namespace Bool
 {
 /* Type *************************************************************/
 Bool::Bool()
@@ -1404,4 +1404,4 @@ ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool> node2)
 
 
 
-}}
+}}}

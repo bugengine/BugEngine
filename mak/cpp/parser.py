@@ -362,16 +362,13 @@ def p_variable_decl(t):
 	"""
 		decl : type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0], t[2], [], t.lineno(6))
+	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0].split(), t[2], [], t.lineno(6))
 
 def p_variable_decl_2(t):
 	"""
 		decl : modifier_list type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	if 'static' in t[1]:
-		t.parser.namespace.meta.addMember(t[1]+t[3], t[2])
-	else:
-		t.parser.namespace.addMember(t[2][1]+t[4], t[1][0], t[3], [], t.lineno(7))
+	t.parser.namespace.addMember(t[2][1]+t[4], t[2][0].split()+[i for i in t[1]], t[3], [], t.lineno(7))
 
 ###################################
 # Value
@@ -821,19 +818,19 @@ def p_operator_function(t):
 		method : type operator_name LT LPAREN params_list RPAREN method_modifier_right
 		method : type operator_name GT LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = (t[3], t[7], t[1][1], t[5], t.lineno(4))
+	t[0] = ("operator%s"%t[3], t[7], t[1][1], t[5], t.lineno(4))
 
 def p_operator_function_2(t):
 	"""
 		method : type operator_name LBRACKET RBRACKET LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = ('?index', t[8], t[1][1], t[6], t.lineno(5))
+	t[0] = ('operator[]', t[8], t[1][1], t[6], t.lineno(5))
 
 def p_operator_function_3(t):
 	"""
 		method : type operator_name LPAREN RPAREN LPAREN params_list RPAREN method_modifier_right
 	"""
-	t[0] = ('call', t[8], t[1][1], t[6], t.lineno(5))
+	t[0] = ('operator()', t[8], t[1][1], t[6], t.lineno(5))
 
 def p_operator_function_cast(t):
 	"""

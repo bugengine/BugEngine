@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders { namespace Float
 {
 
 class Float : public Node
@@ -815,6 +815,6 @@ ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float> node2);
 
 
 
-}}
+}}}
 /*****************************************************************************/
 #endif
