@@ -6,7 +6,7 @@
 #include    <shadermodel4/shaders/double.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders {namespace Double
 {
 /* Type *************************************************************/
 Double::Double()
@@ -6177,4 +6177,4 @@ ref<Double4x4> operator -(weak<const Double4x4> node1, weak<const Double> node2)
 
 
 
-}}
+}}}

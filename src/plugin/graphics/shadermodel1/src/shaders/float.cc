@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/float.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders
+namespace BugEngine { namespace Shaders {namespace Float
 {
 /* Type *************************************************************/
 Float::Float()
@@ -6177,4 +6177,4 @@ ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float> node2)
 
 
 
-}}
+}}}

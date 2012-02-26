@@ -33,7 +33,7 @@ published:
     i32 const                           offset;
     raw<TagInfo>                        tags;
     raw<const PropertyInfo> const       properties;
-    raw<const MethodInfo> const         methods;
+    raw<const MethodInfo>               methods;
     raw<const ObjectInfo>               objects;
     raw<const MethodInfo> const         constructor;
     raw<const MethodInfo> const         call;
