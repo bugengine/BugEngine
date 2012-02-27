@@ -14,7 +14,6 @@ showline = 0
 def toOperator(name):
 	if name.startswith("operator"):
 		name = name[8:]
-		print name
 		if name == '+':
 			return "?add"
 		if name == '-':
@@ -204,7 +203,7 @@ class Namespace(Container):
 				tagname = self.writeTags(file, decl+"_"+name, tags)
 				file.write("static const ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_%s =\n" % (decl, name))
 				file.write("    {\n")
-				file.write("        %s,\n" % statics)
+				file.write("        {%s},\n" % statics)
 				file.write("        {%s},\n" % tagname)
 				file.write("        \"%s\",\n" % name)
 				file.write("        ::BugEngine::Value(::BugEngine::Value::ByRef(%s::%s))\n" % (self.fullname, name))
@@ -407,7 +406,7 @@ class Class(Container):
 				if 'static' in attr:
 					file.write("static const ::BugEngine::RTTI::ClassInfo::ObjectInfo s_%s_%s =\n" % (decl, name))
 					file.write("    {\n")
-					file.write("        %s,\n" % statics)
+					file.write("        {%s},\n" % statics)
 					file.write("        {%s},\n" % tagname)
 					file.write("        \"%s\",\n" % name)
 					file.write("        ::BugEngine::Value(::BugEngine::Value::ByRef(%s::%s))\n" % (self.fullname, name))
