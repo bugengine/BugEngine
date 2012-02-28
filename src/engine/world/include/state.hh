@@ -4,7 +4,7 @@
 #ifndef BE_WORLD_STATE_HH_
 #define BE_WORLD_STATE_HH_
 /*****************************************************************************/
-#include    <world/entity.script.hh>
+#include    <world/component.script.hh>
 
 namespace BugEngine { namespace World
 {

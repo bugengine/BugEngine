@@ -23,7 +23,7 @@ Environment::Environment()
     size = sizeof(profile);
     GetUserProfileDirectory(token, profile, &size);
     m_homeDirectory = profile;
-    m_homeDirectory.push_back("bugengine");
+    m_homeDirectory.push_back(istring("bugengine"));
 }
 
 Environment::~Environment()

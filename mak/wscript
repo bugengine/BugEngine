@@ -242,69 +242,57 @@ def dummy_cobjects(self):
 
 
 
-def createmasterfile(task):
-	f = open(task.outputs[0].abspath(), 'w')
-	for src in task.inputs:
-		f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
-	f.close()
 
-MasterTask = Task.task_factory("master", createmasterfile, color='CYAN', before='c cxx')
-def master_sig_deps(task):
-	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
-		task.m.update(f)
-		task.m.update(b';')
-MasterTask.sig_explicit_deps = master_sig_deps
-
-@taskgen_method
-@feature('master')
-@before_method('process_source')
-@after_method('filter_sources')
-@before('c', 'cxx')
-def make_masterfiles(self):
-	if Options.options.nomaster:
-		return
-	self.originalsources = self.source[:]
-	self.originalsources.sort()
-	self.mastertasks = []
-	self.source = []
-	cmastertask = None
-	cppmastertask = None
-	cindex	 = 0
-	cppindex = 0
-	cnumleft = 0
-	cppnumleft = 0
-	for f in self.originalsources:
-		if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx', '.hh']:
-			self.source.append(f)
-			continue
-		if os.path.splitext(f)[1] == '.hh':
-			self.source.append(f)
-			srcnode = self.path.find_resource(f).change_ext('.cc')
-		else:
-			srcnode = self.path.find_resource(f)
-		if os.path.splitext(f)[1] == '.c':
-			if cnumleft == 0:
-				cnumleft = 30
-				masterfile = self.target+'-c-master%d.c' % cindex
-				cindex = cindex + 1
-				self.source.append(masterfile)
-				node = self.path.find_or_declare(masterfile)
-				cmastertask = self.create_task("master", [], node)
-				self.mastertasks.append(cmastertask)
-			cnumleft = cnumleft - 1
-			cmastertask.set_inputs(srcnode)
-		else:
-			if cppnumleft == 0:
-				cppnumleft = 30
-				masterfile = self.target+'-cpp-master%d.cpp' % cppindex
-				cppindex = cppindex + 1
-				self.source.append(masterfile)
-				node = self.path.find_or_declare(masterfile)
-				cppmastertask = self.create_task("master", [], node)
-				cppmastertask.set_outputs(node)
-				self.mastertasks.append(cppmastertask)
-			cppnumleft = cppnumleft - 1
-			cppmastertask.set_inputs(srcnode)
+#@taskgen_method
+#@feature('master')
+#@before_method('process_source')
+#@after_method('filter_sources')
+#@before('c', 'cxx')
+#def make_masterfiles(self):
+#	if Options.options.nomaster:
+#		return
+#	self.originalsources = self.source[:]
+#	self.originalsources.sort()
+#	self.mastertasks = []
+#	self.source = []
+#	cmastertask = None
+#	cppmastertask = None
+#	cindex	 = 0
+#	cppindex = 0
+#	cnumleft = 0
+#	cppnumleft = 0
+#	for f in self.originalsources:
+#		if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx', '.hh']:
+#			self.source.append(f)
+#			continue
+#		if os.path.splitext(f)[1] == '.hh':
+#			self.source.append(f)
+#			srcnode = self.path.find_resource(f).change_ext('.cc')
+#		else:
+#			srcnode = self.path.find_resource(f)
+#		if os.path.splitext(f)[1] == '.c':
+#			if cnumleft == 0:
+#				cnumleft = 30
+#				masterfile = self.target+'-c-master%d.c' % cindex
+#				cindex = cindex + 1
+#				self.source.append(masterfile)
+#				node = self.path.find_or_declare(masterfile)
+#				cmastertask = self.create_task("master", [], node)
+#				self.mastertasks.append(cmastertask)
+#			cnumleft = cnumleft - 1
+#			cmastertask.set_inputs(srcnode)
+#		else:
+#			if cppnumleft == 0:
+#				cppnumleft = 30
+#				masterfile = self.target+'-cpp-master%d.cpp' % cppindex
+#				cppindex = cppindex + 1
+#				self.source.append(masterfile)
+#				node = self.path.find_or_declare(masterfile)
+#				cppmastertask = self.create_task("master", [], node)
+#				cppmastertask.set_outputs(node)
+#				self.mastertasks.append(cppmastertask)
+#			cppnumleft = cppnumleft - 1
+#			cppmastertask.set_inputs(srcnode)
 
 objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
 objcpydbgcls = Task.task_factory('dbg', objcpydbg, 'YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
@@ -366,26 +354,43 @@ class foo(BuildContext):
 	def compile(self):
 		pass
 
-from waflib import Task
-old_sort_tasks = Task.set_file_constraints
-def task_priority(t1):
-	if t1.__class__.__name__ in ['flex', 'bison', 'datagen']:
-		return 'b:'
-	elif t1.__class__.__name__ in ['master']:
-		return 'a:'
-	elif t1.__class__.__name__ == 'cxx':
-		f = t1.outputs[0].abspath()
-		if f.find('master') != -1:
-			return 'f:'+t1.outputs[0].abspath()
-		else:
-			return 'g:'+t1.outputs[0].abspath()
-	elif t1.__class__.__name__ == 'c':
-		return 'h:'
-	else:
-		return 'z:'
+import re
+r = re.compile("istring\w*\(\w*\".*\"\w*\)")
 
-def sort_tasks(tasks):
-	old_sort_tasks(tasks)
-	tasks.sort(key = task_priority)
+def create_message_file(task):
+	with open(task.outputs[0].abspath(), 'w') as string:
+		with open(task.outputs[1].abspath(), 'w') as messages:
+			for src,out in zip(task.inputs,task.outputs[2:]):
+				with open(src.abspath(), 'r') as input:
+					with open(out.abspath(), 'w') as output:
+						content = input.read()
+						for m in r.finditer(content):
+							print m.group()
+						output.write(content)
+MessageTask = Task.task_factory("message", create_message_file, color='CYAN')
 
-Task.set_file_constraints = sort_tasks
+def create_master_file(task):
+	with open(task.outputs[0].abspath(), 'w') as f:
+		for src in task.inputs:
+			f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
+def master_sig_deps(task):
+	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
+		task.m.update(f)
+		task.m.update(b';')
+MasterTask = Task.task_factory("master", create_master_file, color='CYAN', before='c cxx')
+MasterTask.sig_explicit_deps = master_sig_deps
+
+
+@extension('.cc', '.cxx', '.cpp')
+def cc_hook(self, node):
+	if 'message' in self.features:
+		output = node.change_ext('.processed.cc')
+		try:
+			self.messagetask.set_inputs(node)
+			self.messagetask.set_outputs(output)
+		except:
+			strings = '%s.strings'%self.name
+			messages = '%s.messages'%self.name
+			self.messagetask = self.create_task("message", [node], [self.path.find_or_declare(strings), self.path.find_or_declare(messages), output])
+		node = output
+	self.create_compiled_task('cxx', node)
