@@ -360,13 +360,12 @@ r = re.compile("istring\w*\(\w*\".*\"\w*\)")
 def create_message_file(task):
 	with open(task.outputs[0].abspath(), 'w') as string:
 		with open(task.outputs[1].abspath(), 'w') as messages:
-			for src,out in zip(task.inputs,task.outputs[2:]):
-				with open(src.abspath(), 'r') as input:
-					with open(out.abspath(), 'w') as output:
-						content = input.read()
-						for m in r.finditer(content):
-							print m.group()
-						output.write(content)
+			with open(task.inputs[0].abspath(), 'r') as input:
+				with open(task.outputs[2].abspath(), 'w') as output:
+					content = input.read()
+					for m in r.finditer(content):
+						print m.group()
+					output.write(content)
 MessageTask = Task.task_factory("message", create_message_file, color='CYAN')
 
 def create_master_file(task):
@@ -385,12 +384,8 @@ MasterTask.sig_explicit_deps = master_sig_deps
 def cc_hook(self, node):
 	if 'message' in self.features:
 		output = node.change_ext('.processed.cc')
-		try:
-			self.messagetask.set_inputs(node)
-			self.messagetask.set_outputs(output)
-		except:
-			strings = '%s.strings'%self.name
-			messages = '%s.messages'%self.name
-			self.messagetask = self.create_task("message", [node], [self.path.find_or_declare(strings), self.path.find_or_declare(messages), output])
+		strings = node.change_ext('.strings')
+		messages = node.change_ext('.messages')
+		self.create_task("message", [node], [strings, messages, output])
 		node = output
 	self.create_compiled_task('cxx', node)
