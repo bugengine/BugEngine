@@ -354,7 +354,7 @@ class foo(BuildContext):
 	def compile(self):
 		pass
 
-import re
+import re,sys
 r = re.compile("istring\w*\(\w*\".*\"\w*\)")
 
 def create_message_file(task):
@@ -363,10 +363,10 @@ def create_message_file(task):
 			with open(task.inputs[0].abspath(), 'r') as input:
 				with open(task.outputs[2].abspath(), 'w') as output:
 					content = input.read()
-					for m in r.finditer(content):
-						print m.group()
+					#for m in r.finditer(content):
+					#	print m.group()
 					output.write(content)
-MessageTask = Task.task_factory("message", create_message_file, color='CYAN')
+MessageTask = Task.task_factory("message", create_message_file, color='PINK')
 
 def create_master_file(task):
 	with open(task.outputs[0].abspath(), 'w') as f:
@@ -377,8 +377,28 @@ def master_sig_deps(task):
 		task.m.update(f)
 		task.m.update(b';')
 MasterTask = Task.task_factory("master", create_master_file, color='CYAN', before='c cxx')
-MasterTask.sig_explicit_deps = master_sig_deps
+#MasterTask.sig_explicit_deps = master_sig_deps
 
+
+@extension('.c')
+def c_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		try:
+			mastertask_c = self.mastertasks_c[-1]
+			if len(mastertask_c.inputs) <= 10:
+				mastertask_c.set_inputs([node])
+			else:
+				output = self.path.find_or_declare(self.target+'-c-%d-master.c' % len(self.mastertasks_c))
+				mastertask_c = self.create_task('master', [node], [output])
+				self.mastertasks_c.append(mastertask_c)
+				self.create_compiled_task('c', output)
+		except:
+			output = self.path.find_or_declare(self.target+'-c-0-master.c')
+			mastertask_c = self.create_task('master', [node], [output])
+			self.mastertasks_c = [mastertask_c]
+			self.create_compiled_task('c', output)
+	else:
+		self.create_compiled_task('c', node)
 
 @extension('.cc', '.cxx', '.cpp')
 def cc_hook(self, node):
@@ -388,4 +408,20 @@ def cc_hook(self, node):
 		messages = node.change_ext('.messages')
 		self.create_task("message", [node], [strings, messages, output])
 		node = output
-	self.create_compiled_task('cxx', node)
+	if 'master' in self.features and not Options.options.nomaster:
+		try:
+			mastertask_cxx = self.mastertasks_cxx[-1]
+			if len(mastertask_cxx.inputs) <= 10:
+				mastertask_cxx.set_inputs([node])
+			else:
+				output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
+				mastertask_cxx = self.create_task('master', [node], [output])
+				self.mastertasks_cxx.append(mastertask_cxx)
+				self.create_compiled_task('cxx', output)
+		except:
+			output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
+			mastertask_cxx = self.create_task('master', [node], [output])
+			self.mastertasks_cxx = [mastertask_cxx]
+			self.create_compiled_task('cxx', output)
+	else:
+		self.create_compiled_task('cxx', node)
