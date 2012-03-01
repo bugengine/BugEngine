@@ -231,7 +231,7 @@ class module:
 				task.inheritedoptions.merge(inheritedoptions)
 				task.use = []
 				if self.category != '3rdparty':
-					task.features += ['warnall', 'message']
+					task.features.append('warnall')
 				else:
 					task.features.append('warnnone')
 				task.features.append(optim)
