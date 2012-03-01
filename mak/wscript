@@ -354,20 +354,6 @@ class foo(BuildContext):
 	def compile(self):
 		pass
 
-import re,sys
-r = re.compile("istring\w*\(\w*\".*\"\w*\)")
-
-def create_message_file(task):
-	with open(task.outputs[0].abspath(), 'w') as string:
-		with open(task.outputs[1].abspath(), 'w') as messages:
-			with open(task.inputs[0].abspath(), 'r') as input:
-				with open(task.outputs[2].abspath(), 'w') as output:
-					content = input.read()
-					#for m in r.finditer(content):
-					#	print m.group()
-					output.write(content)
-MessageTask = Task.task_factory("message", create_message_file, color='PINK')
-
 def create_master_file(task):
 	with open(task.outputs[0].abspath(), 'w') as f:
 		for src in task.inputs:
@@ -377,7 +363,7 @@ def master_sig_deps(task):
 		task.m.update(f)
 		task.m.update(b';')
 MasterTask = Task.task_factory("master", create_master_file, color='CYAN', before='c cxx')
-#MasterTask.sig_explicit_deps = master_sig_deps
+MasterTask.sig_explicit_deps = master_sig_deps
 
 
 @extension('.c')
@@ -402,12 +388,6 @@ def c_hook(self, node):
 
 @extension('.cc', '.cxx', '.cpp')
 def cc_hook(self, node):
-	if 'message' in self.features:
-		output = node.change_ext('.processed.cc')
-		strings = node.change_ext('.strings')
-		messages = node.change_ext('.messages')
-		self.create_task("message", [node], [strings, messages, output])
-		node = output
 	if 'master' in self.features and not Options.options.nomaster:
 		try:
 			mastertask_cxx = self.mastertasks_cxx[-1]
