@@ -24,18 +24,18 @@ IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Schedu
     ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindow> >::create(gameArena(), this))
     ,   m_shaderProgramLoader(scoped< GPUResourceLoader<ShaderProgram> >::create(gameArena(), this))
 {
-    m_resourceManager->attach<RenderNode>(m_sceneLoader);
-    m_resourceManager->attach<RenderSurface>(m_renderSurfaceLoader);
-    m_resourceManager->attach<RenderWindow>(m_renderWindowLoader);
-    m_resourceManager->attach<ShaderProgram>(m_shaderProgramLoader);
+    m_resourceManager->attach(be_typeid<RenderNode>::klass(), m_sceneLoader);
+    m_resourceManager->attach(be_typeid<RenderSurface>::klass(), m_renderSurfaceLoader);
+    m_resourceManager->attach(be_typeid<RenderWindow>::klass(), m_renderWindowLoader);
+    m_resourceManager->attach(be_typeid<ShaderProgram>::klass(), m_shaderProgramLoader);
 }
 
 IRenderer::~IRenderer()
 {
-    m_resourceManager->detach<ShaderProgram>(m_shaderProgramLoader);
-    m_resourceManager->detach<RenderWindow>(m_renderWindowLoader);
-    m_resourceManager->detach<RenderSurface>(m_renderSurfaceLoader);
-    m_resourceManager->detach<RenderNode>(m_sceneLoader);
+    m_resourceManager->detach(be_typeid<ShaderProgram>::klass(), m_shaderProgramLoader);
+    m_resourceManager->detach(be_typeid<RenderWindow>::klass(), m_renderWindowLoader);
+    m_resourceManager->detach(be_typeid<RenderSurface>::klass(), m_renderSurfaceLoader);
+    m_resourceManager->detach(be_typeid<RenderNode>::klass(), m_sceneLoader);
 }
 
 weak<ITask> IRenderer::syncTask() const
