@@ -84,7 +84,7 @@ istring IShaderBuilder::referenceNode(weak<const Node> node)
     return istring("");
 }
 
-void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istring& name, Type type)
+void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istring& name, ValueType type)
 {
     if (m_namespaces.front().names.insert(std::make_pair(node, name)).second)
     {
@@ -92,7 +92,7 @@ void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istrin
     }
 }
 
-void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage targetStage, Type type)
+void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage targetStage, ValueType type)
 {
     if (currentStage == targetStage)
     {
@@ -105,7 +105,7 @@ void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage
     }
 }
 
-void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Stage targetStage, Type type)
+void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Stage targetStage, ValueType type)
 {
     if (VertexStage == targetStage)
     {
@@ -163,7 +163,7 @@ void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
     doSaveTo(semantic, referenceNode(node));
 }
 
-void IShaderBuilder::addOperator(weak<const Node> node, Operator op, Type type, weak<const Node> node1, weak<const Node> node2)
+void IShaderBuilder::addOperator(weak<const Node> node, Operator op, ValueType type, weak<const Node> node1, weak<const Node> node2)
 {
     istring var = minitl::format<>("temp_%d") | m_currentTemporary;
     if (m_namespaces.front().names.insert(std::make_pair(node, var)).second)

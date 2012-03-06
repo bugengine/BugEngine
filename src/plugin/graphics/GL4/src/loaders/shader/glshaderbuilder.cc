@@ -24,7 +24,7 @@ static const char *toString(Shaders::Semantic semantic)
     }
 }
 
-static const char *toString(Shaders::Type type)
+static const char *toString(Shaders::ValueType type)
 {
     switch(type)
     {
@@ -120,12 +120,12 @@ GLShaderBuilder::~GLShaderBuilder()
 {
 }
 
-void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Stage /*stage*/, Shaders::Type type)
+void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Stage /*stage*/, Shaders::ValueType type)
 {
     writeln((minitl::format<>("uniform %s %s;") | toString(type) | name).c_str());
 }
 
-void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type)
+void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type)
 {
     if (stage == Shaders::VertexStage)
     {
@@ -137,7 +137,7 @@ void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stag
     }
 }
 
-void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type)
+void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type)
 {
     if (stage == Shaders::VertexStage)
     {
@@ -173,7 +173,7 @@ void GLShaderBuilder::doSaveTo(const istring& name, const istring& value)
     writeln((minitl::format<>("%s = %s;") | name | value).c_str());
 }
 
-void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::Type type, const istring& result, const istring& op1, const istring& op2)
+void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::ValueType type, const istring& result, const istring& op1, const istring& op2)
 {
     writeln((minitl::format<>("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op | op2).c_str());
 }
