@@ -31,7 +31,7 @@ static int luaPrint (lua_State *L)
     int n = lua_gettop(L);  /* number of arguments */
     int i;
     lua_getglobal(L, "tostring");
-    for (i=1; i<=n; i++) 
+    for (i=1; i<=n; i++)
     {
         const char *s;
         lua_pushvalue(L, -1);  /* function to be called */

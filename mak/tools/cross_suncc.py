@@ -59,7 +59,7 @@ def configure(conf):
 
 	v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
 	v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
-	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,truncwarn,nonewline']
+	v['CFLAGS_warnall'] = ['+w2', '-errtags=yes']
 	v['CXXFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,nonewline']
 
 	v['CFLAGS_debug'] = ['-g', '-D_DEBUG']
