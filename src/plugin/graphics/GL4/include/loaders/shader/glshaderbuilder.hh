@@ -20,10 +20,10 @@ public:
 
     istring attributes[64];
 private:
-    virtual void doAddUniformDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
-    virtual void doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
-    virtual void doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::Type type) override;
-    virtual void doAddOperator(Shaders::Operator op, Shaders::Type type, const istring& result, const istring& op1, const istring& op2) override;
+    virtual void doAddUniformDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type) override;
+    virtual void doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type) override;
+    virtual void doAddAttributeDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type) override;
+    virtual void doAddOperator(Shaders::Operator op, Shaders::ValueType type, const istring& result, const istring& op1, const istring& op2) override;
     virtual void doAddMethod(const istring& name) override;
     virtual void doEndMethod() override;
     virtual void doSaveTo(Shaders::Semantic semantic, const istring& value) override;

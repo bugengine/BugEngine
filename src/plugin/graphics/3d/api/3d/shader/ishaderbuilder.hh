@@ -18,7 +18,7 @@ enum Semantic
     Depth
 };
 
-enum Type
+enum ValueType
 {
     Type_Float, Type_Float2, Type_Float3, Type_Float4,
     Type_Float2x2, Type_Float2x3, Type_Float2x4,
@@ -76,27 +76,27 @@ public:
     const char *text() const;
     i64         textSize() const;
 public:
-    void addUniform(weak<const Node> node, Stage stage, const istring& name, Type type);
-    void addVarying(weak<const Node> node, Stage currentStage, Stage targetStage, Type type);
-    void addAttribute(weak<const Node> node, Stage currentStage, Stage targetStage, Type type);
+    void addUniform(weak<const Node> node, Stage stage, const istring& name, ValueType type);
+    void addVarying(weak<const Node> node, Stage currentStage, Stage targetStage, ValueType type);
+    void addAttribute(weak<const Node> node, Stage currentStage, Stage targetStage, ValueType type);
     void forwardAttributes();
     void beginMethodDefinition(const istring& name);
     void end();
     void saveTo(Semantic semantic, weak<const Node> node);
-    void addOperator(weak<const Node> node, Operator op, Type type, weak<const Node> node1, weak<const Node> node2);
+    void addOperator(weak<const Node> node, Operator op, ValueType type, weak<const Node> node1, weak<const Node> node2);
 protected:
     istring referenceNode(weak<const Node> node);
 
-    virtual void doAddUniformDeclaration(const istring& name, Stage stage, Type type) = 0;
-    virtual void doAddVaryingDeclaration(const istring& name, Stage stage, Type type) = 0;
-    virtual void doAddAttributeDeclaration(const istring& name, Stage stage, Type type) = 0;
+    virtual void doAddUniformDeclaration(const istring& name, Stage stage, ValueType type) = 0;
+    virtual void doAddVaryingDeclaration(const istring& name, Stage stage, ValueType type) = 0;
+    virtual void doAddAttributeDeclaration(const istring& name, Stage stage, ValueType type) = 0;
     virtual void doAddMethod(const istring& name) = 0;
     virtual void doEndMethod() = 0;
 
     virtual void doSaveTo(Semantic semantic, const istring& expr) = 0;
     virtual void doSaveTo(const istring& target, const istring& expr) = 0;
 
-    virtual void doAddOperator(Operator op, Type type, const istring& result, const istring& op1, const istring& op2) = 0;
+    virtual void doAddOperator(Operator op, ValueType type, const istring& result, const istring& op1, const istring& op2) = 0;
 protected:
     virtual ~IShaderBuilder();
 protected:
