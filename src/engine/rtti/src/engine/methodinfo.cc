@@ -14,9 +14,9 @@ static const u32 s_overloadMaxDistance = 1000000;
 static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
 
-Value MethodInfo::OverloadInfo::ParamInfo::getTag(const TypeInfo& type) const
+Value Method::Overload::Parameter::getTag(const Type& type) const
 {
-    raw<TagInfo> tag = tags;
+    raw<Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -26,12 +26,12 @@ Value MethodInfo::OverloadInfo::ParamInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value MethodInfo::OverloadInfo::ParamInfo::getTag(raw<const ClassInfo> type) const
+Value Method::Overload::Parameter::getTag(raw<const Class> type) const
 {
-    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+    return getTag(Type::makeType(type, Type::Class, Type::Mutable));
 }
 
-u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
+u32 Method::Overload::distance(Value* p, u32 nparams) const
 {
     if (vararg)
     {
@@ -40,7 +40,7 @@ u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
     else
     {
         u32 distance = 0;
-        raw<const ParamInfo> selfp = params;
+        raw<const Parameter> selfp = params;
         while(nparams && selfp)
         {
             distance += p->type().distance(selfp->type);
@@ -55,9 +55,9 @@ u32 MethodInfo::OverloadInfo::distance(Value* p, u32 nparams) const
     }
 }
 
-Value MethodInfo::OverloadInfo::getTag(const TypeInfo& type) const
+Value Method::Overload::getTag(const Type& type) const
 {
-    raw<TagInfo> tag = tags;
+    raw<Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -67,16 +67,16 @@ Value MethodInfo::OverloadInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value MethodInfo::OverloadInfo::getTag(raw<const ClassInfo> type) const
+Value Method::Overload::getTag(raw<const Class> type) const
 {
-    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+    return getTag(Type::makeType(type, Type::Class, Type::Mutable));
 }
 
-Value MethodInfo::doCall(Value* params, u32 nparams) const
+Value Method::doCall(Value* params, u32 nparams) const
 {
     u32 bestDistance = s_overloadMaxDistance;
-    raw<const OverloadInfo> overload = {0};
-    for (raw<const OverloadInfo> it = overloads; it; it = it->next)
+    raw<const Overload> overload = {0};
+    for (raw<const Overload> it = overloads; it; it = it->next)
     {
         u32 distance = it->distance(params, nparams);
         if (distance < bestDistance)

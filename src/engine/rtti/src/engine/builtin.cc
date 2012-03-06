@@ -17,23 +17,23 @@ namespace BugEngine
 {
 
 template< >
-raw<const RTTI::ClassInfo> be_typeid< void >::klass()
+raw<const RTTI::Class> be_typeid< void >::klass()
 {
-    static const RTTI::ClassInfo s_void = { "void", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
-    raw<const RTTI::ClassInfo> ci = {&s_void};
+    static const RTTI::Class s_void = { "void", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
+    raw<const RTTI::Class> ci = {&s_void};
     return ci;
 }
 
 template< >
-raw<const RTTI::ClassInfo> be_typeid< minitl::refcountable >::klass()
+raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
 {
-    static const RTTI::ClassInfo s_refcountable = { "refcountable", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
-    raw<const RTTI::ClassInfo> ci = {&s_refcountable};
+    static const RTTI::Class s_refcountable = { "refcountable", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
+    raw<const RTTI::Class> ci = {&s_refcountable};
     return ci;
 }
 
 #define BE_MAKE_BUILTIN_NAME(type,name,parent)                          \
-    static const RTTI::ClassInfo s_##name =                             \
+    static const RTTI::Class s_##name =                             \
         {                                                               \
             #name,                                                      \
             be_typeid< parent >::klass(),                               \
@@ -44,9 +44,9 @@ raw<const RTTI::ClassInfo> be_typeid< minitl::refcountable >::klass()
             &RTTI::nulldestructor,                                      \
             {{ 0, 0, 0, 0 }}                                            \
         };                                                              \
-    template< > raw<const RTTI::ClassInfo> be_typeid< type >::klass()   \
+    template< > raw<const RTTI::Class> be_typeid< type >::klass()   \
     {                                                                   \
-        raw<const RTTI::ClassInfo> ci = {&s_##name};                    \
+        raw<const RTTI::Class> ci = {&s_##name};                    \
         return ci;                                                      \
     }
 #define BE_MAKE_BUILTIN(type,parent)                                    \

@@ -84,7 +84,7 @@ for r in reserved:
 
 states = (
 	('MACRO', 'exclusive'),
-	('DOXYGEN', 'exclusive')
+#	('DOXYGEN', 'exclusive')
 )
 
 
@@ -120,27 +120,27 @@ def t_MACRO_NEWLINE(t):
 	t.lexer.lineno += t.value.count("\n")
 
 # Comments
-def t_doxygen_line(t):
-	r'//[/\!]'
-	t.lexer.begin('DOXYGEN')
-	t.lexer.doxyline=1
+#def t_doxygen_line(t):
+#	r'//[/\!]'
+#	t.lexer.begin('DOXYGEN')
+#	t.lexer.doxyline=1
 	
-def t_doxygen_long(t):
-	r'/\*\!'
-	t.lexer.begin('DOXYGEN')
-	t.lexer.doxyline=0
+#def t_doxygen_long(t):
+#	r'/\*\!'
+#	t.lexer.begin('DOXYGEN')
+#	t.lexer.doxyline=0
 
-def t_doxygen_long_2(t):
-	r'/\*\*[^\*]'
-	t.lexer.begin('DOXYGEN')
-	t.lexer.doxyline=0
-
-
-def t_DOXYGEN_newline(t):
-	r'\n+'
-	t.lexer.lineno += t.value.count("\n")
-	if t.lexer.doxyline:
-		t.lexer.begin('INITIAL')
+#def t_doxygen_long_2(t):
+#	r'/\*\*[^\*]'
+#	t.lexer.begin('DOXYGEN')
+#	t.lexer.doxyline=0
+#
+#
+#def t_DOXYGEN_newline(t):
+#	r'\n+'
+#	t.lexer.lineno += t.value.count("\n")
+#	if t.lexer.doxyline:
+#		t.lexer.begin('INITIAL')
 
 
 def t_comment(t):

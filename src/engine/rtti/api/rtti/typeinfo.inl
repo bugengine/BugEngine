@@ -11,14 +11,14 @@
 namespace BugEngine
 {
 
-static inline bool operator==(TypeInfo t1, TypeInfo t2)
+static inline bool operator==(Type t1, Type t2)
 {
-    return t1.metaclass == t2.metaclass && t1.type == t2.type && t1.constness == t2.constness;
+    return t1.metaclass == t2.metaclass && t1.indirection == t2.indirection && t1.constness == t2.constness;
 }
-static inline bool operator<=(TypeInfo t1, TypeInfo t2)
+static inline bool operator<=(Type t1, Type t2)
 {
-    return     (t1.type & TypeInfo::TypeMask) <= (t2.type & TypeInfo::TypeMask)
-            && t1.type <= t2.type
+    return     (t1.indirection & Type::IndirectionMask) <= (t2.indirection & Type::IndirectionMask)
+            && t1.indirection <= t2.indirection
             && t2.metaclass->isA(t1.metaclass)
             && t1.constness <= t2.constness;
 }
@@ -30,14 +30,14 @@ template< typename T >
 struct RefType
 {
     typedef T Type;
-    enum { Reference = TypeInfo::Class, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::Class, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType<const T>
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = RefType<T>::Reference, Constness = TypeInfo::Const };
+    enum { Reference = RefType<T>::Reference, Constness = Type::Const };
 };
 
 template< typename T >
@@ -51,42 +51,42 @@ template< typename T >
 struct RefType< ref<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::RefPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::RefPtr, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType< ref<const T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::ConstRefPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::ConstRefPtr, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType< weak<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::WeakPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::WeakPtr, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType< weak<const T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::ConstWeakPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::ConstWeakPtr, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType< raw<T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::RawPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::RawPtr, Constness = Type::Mutable };
 };
 
 template< typename T >
 struct RefType< raw<const T> >
 {
     typedef typename RefType<T>::Type Type;
-    enum { Reference = TypeInfo::ConstRawPtr, Constness = TypeInfo::Mutable };
+    enum { Reference = Type::ConstRawPtr, Constness = Type::Mutable };
 };
 
 }
@@ -94,11 +94,11 @@ struct RefType< raw<const T> >
 template< typename T >
 struct be_typeid< minitl::vector<T> >
 {
-    static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
+    static const RTTI::Class klass;
+    static inline Type  type()  { raw<const RTTI::Class> ci = {&klass};  return Type::makeType(ci, Type::Class, Type::Mutable); }
 };
 template< typename T >
-const RTTI::ClassInfo be_typeid< minitl::vector<T> >::klass =
+const RTTI::Class be_typeid< minitl::vector<T> >::klass =
 {
     "vector", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };
@@ -106,11 +106,11 @@ const RTTI::ClassInfo be_typeid< minitl::vector<T> >::klass =
 template< typename T, size_t SIZE >
 struct be_typeid< minitl::array<T,SIZE> >
 {
-    static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
+    static const RTTI::Class klass;
+    static inline Type  type()  { raw<const RTTI::Class> ci = {&klass};  return Type::makeType(ci, Type::Class, Type::Mutable); }
 };
 template< typename T, size_t SIZE >
-const RTTI::ClassInfo be_typeid< minitl::array<T,SIZE> >::klass =
+const RTTI::Class be_typeid< minitl::array<T,SIZE> >::klass =
 {
     "array", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };
@@ -118,11 +118,11 @@ const RTTI::ClassInfo be_typeid< minitl::array<T,SIZE> >::klass =
 template< typename T1, typename T2, typename T3 >
 struct be_typeid< minitl::hashmap<T1, T2, T3> >
 {
-    static const RTTI::ClassInfo klass;
-    static inline TypeInfo  type()  { raw<const RTTI::ClassInfo> ci = {&klass};  return TypeInfo::makeType(ci, TypeInfo::Class, TypeInfo::Mutable); }
+    static const RTTI::Class klass;
+    static inline Type  type()  { raw<const RTTI::Class> ci = {&klass};  return Type::makeType(ci, Type::Class, Type::Mutable); }
 };
 template< typename T1, typename T2, typename T3 >
-const RTTI::ClassInfo be_typeid< minitl::hashmap<T1, T2, T3> >::klass =
+const RTTI::Class be_typeid< minitl::hashmap<T1, T2, T3> >::klass =
 {
     "hashmap", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }}
 };

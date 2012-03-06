@@ -12,12 +12,12 @@ static const u32 s_parameterTooMany = 1000000;
 static const u32 s_parameterBadType = 10000;
 static const u32 s_parameterMissing = 100;
 
-OverloadMatch::OverloadMatch(raw<const RTTI::MethodInfo::OverloadInfo> overload)
+OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
     :   m_overload(overload)
     ,   m_params(packageBuilderArena())
     ,   m_score(0)
 {
-    for (raw<const ParamInfo> param = m_overload->params; param; param = param->next)
+    for (raw<const RTTIParameter> param = m_overload->params; param; param = param->next)
     {
         ParameterMatch match;
         match.match = param;
@@ -50,7 +50,7 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
     }
     ParameterMatch unusedParam;
     unusedParam.parameter = param;
-    unusedParam.match = raw<const ParamInfo>::null();
+    unusedParam.match = raw<const RTTIParameter>::null();
     m_params.push_back(unusedParam);
 }
 

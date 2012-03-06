@@ -32,8 +32,8 @@ Value::Value(T t)
 }
 
 template< typename T >
-Value::Value(T t, ConstifyType /*constify*/)
-:   m_type(be_typeid<T>::type(), TypeInfo::Constify)
+Value::Value(T t, MakeConstType /*constify*/)
+:   m_type(be_typeid<T>::type(), Type::MakeConst)
 ,   m_reference(false)
 {
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
@@ -52,7 +52,7 @@ Value::Value(const Value& other)
         m_type.copy(other.memory(), memory());
 }
 
-Value::Value(TypeInfo type, void* location)
+Value::Value(Type type, void* location)
 :   m_type(type)
 ,   m_reference(true)
 {
@@ -60,7 +60,7 @@ Value::Value(TypeInfo type, void* location)
     m_ref.m_deallocate = false;
 }
 
-Value::Value(TypeInfo type, ReserveType)
+Value::Value(Type type, ReserveType)
 :   m_type(type)
 ,   m_reference(false)
 {
@@ -88,7 +88,7 @@ inline Value::Value(ByRefType<Value> t)
 
 template<>
 inline Value::Value(ByRefType<const Value> t)
-:   m_type(TypeInfo::makeType(t.value.m_type, TypeInfo::Constify))
+:   m_type(Type::makeType(t.value.m_type, Type::MakeConst))
 ,   m_reference(true)
 {
     m_ref.m_pointer = const_cast<void*>(t.value.memory());
@@ -112,7 +112,7 @@ Value& Value::operator=(const Value& v)
     if (m_reference)
     {
         be_assert_recover(v.m_type.metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
-        be_assert_recover(m_type.constness != TypeInfo::Const, "Value is const", return *this);
+        be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(v.memory(), mem);
@@ -130,53 +130,53 @@ template< typename T >
 Value& Value::operator=(const T& t)
 {
     be_assert_recover(be_typeid<T>::type().metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
-    be_assert_recover(m_type.constness != TypeInfo::Const, "Value is const", return *this);
+    be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
     void* mem = memory();
     m_type.destroy(mem);
     m_type.copy(&t, mem);
     return *this;
 }
 
-TypeInfo Value::type()
+Type Value::type()
 {
     return m_type;
 }
 
-TypeInfo Value::type() const
+Type Value::type() const
 {
-    return TypeInfo::makeType(m_type, TypeInfo::Constify);
+    return Type::makeType(m_type, Type::MakeConst);
 }
 
 template< typename T >
 const T Value::as() const
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
-    TypeInfo ti = be_typeid<const T>::type();
+    Type ti = be_typeid<const T>::type();
     be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.type&TypeInfo::TypeMask) <= (m_type.type&TypeInfo::TypeMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.type&TypeInfo::MutableBit) <= (m_type.type&TypeInfo::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.indirection&Type::IndirectionMask) <= (m_type.indirection&Type::IndirectionMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.indirection&Type::MutableBit) <= (m_type.indirection&Type::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     const void* mem = memory();
     ref<const minitl::refcountable>   rptr;
     weak<const minitl::refcountable>  wptr;
     const minitl::refcountable*       obj;
-    int targetType = ti.type & TypeInfo::TypeMask;
-    switch(m_type.type & TypeInfo::TypeMask)
+    int targetType = ti.indirection & Type::IndirectionMask;
+    switch(m_type.indirection & Type::IndirectionMask)
     {
-    case TypeInfo::ConstRefPtr:
-        if (targetType == TypeInfo::ConstRefPtr)
+    case Type::ConstRefPtr:
+        if (targetType == Type::ConstRefPtr)
             break;
         rptr = *(ref<const minitl::refcountable>*)mem;
         wptr = rptr;
         mem = (const void*)&wptr;
-    case TypeInfo::ConstWeakPtr:
-        if (targetType == TypeInfo::ConstWeakPtr)
+    case Type::ConstWeakPtr:
+        if (targetType == Type::ConstWeakPtr)
             break;
         wptr = *(weak<const minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (const void*)&obj;
-    case TypeInfo::ConstRawPtr:
-        if (targetType == TypeInfo::ConstRawPtr)
+    case Type::ConstRawPtr:
+        if (targetType == Type::ConstRawPtr)
             break;
         mem = *(const void**)mem;
     default:
@@ -189,33 +189,33 @@ template< typename T >
 T Value::as()
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
-    TypeInfo ti = be_typeid<T>::type();
+    Type ti = be_typeid<T>::type();
     be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.type&TypeInfo::TypeMask) <= (m_type.type&TypeInfo::TypeMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.type&TypeInfo::MutableBit) <= (m_type.type&TypeInfo::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.indirection&Type::IndirectionMask) <= (m_type.indirection&Type::IndirectionMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert((ti.indirection&Type::MutableBit) <= (m_type.indirection&Type::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     void* mem = memory();
     ref<minitl::refcountable>   rptr;
     weak<minitl::refcountable>  wptr;
     minitl::refcountable*       obj;
-    int targetType = ti.type & TypeInfo::TypeMask;
-    switch(m_type.type & TypeInfo::TypeMask)
+    int targetType = ti.indirection & Type::IndirectionMask;
+    switch(m_type.indirection & Type::IndirectionMask)
     {
-    case TypeInfo::ConstRefPtr:
-        if (targetType == TypeInfo::ConstRefPtr)
+    case Type::ConstRefPtr:
+        if (targetType == Type::ConstRefPtr)
             break;
         rptr = *(ref<minitl::refcountable>*)mem;
         wptr = rptr;
         mem = (void*)&wptr;
-    case TypeInfo::ConstWeakPtr:
-        if (targetType == TypeInfo::ConstWeakPtr)
+    case Type::ConstWeakPtr:
+        if (targetType == Type::ConstWeakPtr)
             break;
         // TODO: multiple inheritance will crash
         wptr = *(weak<minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (void*)&obj;
-    case TypeInfo::ConstRawPtr:
-        if (targetType == TypeInfo::ConstRawPtr)
+    case Type::ConstRawPtr:
+        if (targetType == Type::ConstRawPtr)
             break;
         mem = *(void**)mem;
     default:
@@ -250,7 +250,7 @@ const void* Value::memory() const
 
 bool Value::isConst() const
 {
-    return m_type.constness == TypeInfo::Const;
+    return m_type.constness == Type::Const;
 }
 
 Value::operator const void*() const
@@ -278,8 +278,8 @@ Value Value::operator()(Value params[], u32 paramCount)
     static const istring callName("call");
     Value call = (*this)[callName];
     be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
-    be_assert_recover(be_typeid<const RTTI::MethodInfo*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
-    return call.as<const RTTI::MethodInfo*>()->doCall(params, paramCount);
+    be_assert_recover(be_typeid<const RTTI::Method*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
+    return call.as<const RTTI::Method*>()->doCall(params, paramCount);
 }
 
 }

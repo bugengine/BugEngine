@@ -23,12 +23,12 @@ istring Parameter::name() const
     return m_name;
 }
 
-bool Parameter::isCompatible(const TypeInfo& type) const
+bool Parameter::isCompatible(const Type& type) const
 {
     return m_value->isCompatible(type);
 }
 
-BugEngine::Value Parameter::as(const TypeInfo& type) const
+BugEngine::Value Parameter::as(const Type& type) const
 {
     return m_value->as(type);
 }

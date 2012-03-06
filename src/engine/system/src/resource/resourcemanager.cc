@@ -17,7 +17,7 @@ ResourceManager::~ResourceManager()
 {
 }
 
-void ResourceManager::attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourceLoader> loader)
+void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<IResourceLoader> loader)
 {
     for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
@@ -30,7 +30,7 @@ void ResourceManager::attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourc
     m_loaders.push_back(loaderInfo);
 }
 
-void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IResourceLoader> loader)
+void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader)
 {
     for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); )
     {
@@ -48,7 +48,7 @@ void ResourceManager::detach(raw<const RTTI::ClassInfo> classinfo, weak<const IR
     be_error("loader was not in the list of loaders for type %s" | classinfo->name);
 }
 
-void ResourceManager::load(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const
+void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const
 {
     int loadedCount = 0;
     for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
@@ -62,7 +62,7 @@ void ResourceManager::load(raw<const RTTI::ClassInfo> classinfo, weak<const Reso
     be_assert(loadedCount, "resource of type %s has no loader registered" | classinfo->name);
 }
 
-void ResourceManager::unload(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const
+void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const
 {
     for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {

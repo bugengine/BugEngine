@@ -10,9 +10,9 @@
 namespace BugEngine
 {
 
-u32 TypeInfo::size() const
+u32 Type::size() const
 {
-    switch(type)
+    switch(indirection)
     {
     case Class:
         return metaclass->size;
@@ -31,15 +31,15 @@ u32 TypeInfo::size() const
     }
 }
 
-minitl::format<> TypeInfo::name() const
+minitl::format<> Type::name() const
 {
     minitl::format<> n("");
-    if (type && (type & MutableBit))
+    if (indirection && (indirection & MutableBit))
         n = minitl::format<>("%s") | metaclass->name;
     else
         n = minitl::format<>("const %s") | metaclass->name;
 
-    switch(type & TypeMask)
+    switch(indirection & IndirectionMask)
     {
     case Class:
         break;
@@ -69,9 +69,9 @@ minitl::format<> TypeInfo::name() const
     }
 }
 
-void* TypeInfo::rawget(const void* data) const
+void* Type::rawget(const void* data) const
 {
-    switch(type)
+    switch(indirection)
     {
     case Class:
         return (void*)data;
@@ -90,9 +90,9 @@ void* TypeInfo::rawget(const void* data) const
     }
 }
 
-void TypeInfo::copy(const void* source, void* dest) const
+void Type::copy(const void* source, void* dest) const
 {
-    switch(type)
+    switch(indirection)
     {
     case Class:
         return metaclass->copy(source, dest);
@@ -114,9 +114,9 @@ void TypeInfo::copy(const void* source, void* dest) const
     }
 }
 
-void TypeInfo::destroy(void* ptr) const
+void Type::destroy(void* ptr) const
 {
-    switch(type)
+    switch(indirection)
     {
     case Class:
         return metaclass->destroy(ptr);
@@ -137,21 +137,21 @@ void TypeInfo::destroy(void* ptr) const
     }
 }
 
-u32 TypeInfo::distance(const TypeInfo& other) const
+u32 Type::distance(const Type& other) const
 {
     u32 result = 0;
     if (constness < other.constness)
         return 1000000;
     else
         result += constness - other.constness;
-    if ((type & TypeMask) < (other.type & TypeMask))
+    if ((indirection & IndirectionMask) < (other.indirection & IndirectionMask))
         return 1000000;
     else
-        result += (type & TypeMask) - (other.type & TypeMask);
-    if ((type & MutableBit) < (other.type & MutableBit))
+        result += (indirection & IndirectionMask) - (other.indirection & IndirectionMask);
+    if ((indirection & MutableBit) < (other.indirection & MutableBit))
         return 1000000;
     else
-        result += (type & MutableBit) - (other.type & MutableBit);
+        result += (indirection & MutableBit) - (other.indirection & MutableBit);
     return result + metaclass->distance(other.metaclass);
 }
 

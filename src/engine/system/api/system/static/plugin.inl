@@ -18,7 +18,7 @@ private:
 public:
     typedef void*(*Create)(const PluginContext& context);
     typedef void(*Destroy)(void*);
-    typedef raw<RTTI::ClassInfo> (*Namespace)();
+    typedef raw<RTTI::Class> (*Namespace)();
 public:
     const char* const   name;
     Create const        create;
@@ -138,7 +138,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 }
 
 template< typename Interface >
-raw<const RTTI::ClassInfo> Plugin<Interface>::pluginNamespace() const
+raw<const RTTI::Class> Plugin<Interface>::pluginNamespace() const
 {
     return (*static_cast<const impl::PluginList*>(m_handle)->ns)();
 }

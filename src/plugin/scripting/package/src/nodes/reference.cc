@@ -45,7 +45,7 @@ const BugEngine::Value& Reference::getValue() const
     }
 }
 
-TypeInfo Reference::getType() const
+Type Reference::getType() const
 {
     if (m_value)
     {

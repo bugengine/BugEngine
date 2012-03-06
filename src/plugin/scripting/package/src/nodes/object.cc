@@ -41,11 +41,11 @@ void Object::setMethod(ref<Reference> reference)
     {
         static const istring callName("call");
         BugEngine::Value call = v[callName];
-        if (call && be_typeid<const RTTI::MethodInfo* const>::type() <= call.type())
+        if (call && be_typeid<const RTTI::Method* const>::type() <= call.type())
         {
-            m_method = call.as<const RTTI::MethodInfo*>();
+            m_method = call.as<const RTTI::Method*>();
             m_overloads.clear();
-            for (raw<const RTTI::MethodInfo::OverloadInfo> overload = m_method->overloads; overload; overload = overload->next)
+            for (raw<const RTTI::Method::Overload> overload = m_method->overloads; overload; overload = overload->next)
             {
                 m_overloads.push_back(OverloadMatch(overload));
                 OverloadMatch& match = m_overloads.back();
@@ -79,7 +79,7 @@ void Object::addParameter(ref<Parameter> param)
     minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
-TypeInfo Object::getType() const
+Type Object::getType() const
 {
     if (m_overloads.empty())
     {

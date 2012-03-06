@@ -11,51 +11,52 @@ namespace BugEngine { namespace RTTI
 {
 
 
-struct be_api(RTTI) MethodInfo
+struct be_api(RTTI) Method
 {
 published:
-    struct be_api(RTTI) OverloadInfo
+    struct be_api(RTTI) Overload
     {
     published:
-        struct be_api(RTTI) ParamInfo
+        struct be_api(RTTI) Parameter
         {
         published:
-            raw<TagInfo> const          tags;
-            raw<const ParamInfo> const  next;
+            raw<Tag> const              tags;
+            raw<const Parameter> const  next;
             istring                     name;
-            TypeInfo                    type;
+            Type                        type;
         published:
-            Value getTag(const TypeInfo& type) const;
-            Value getTag(raw<const ClassInfo> type) const;
+            Value getTag(const Type& type) const;
+            Value getTag(raw<const Class> type) const;
         private:
-            ParamInfo& operator=(const ParamInfo&);
+            Parameter& operator=(const Parameter&);
         };
     published:
-        raw<TagInfo> const      tags;
-        raw<const OverloadInfo> next;
-        TypeInfo                returnType;
-        raw<const ParamInfo>    params;
+        raw<Tag> const          tags;
+        raw<const Overload>     next;
+        Type                    returnType;
+        raw<const Parameter>    params;
         bool                    vararg;
     published:
-        Value getTag(const TypeInfo& type) const;
-        Value getTag(raw<const ClassInfo> type) const;
+        Value getTag(const Type& type) const;
+        Value getTag(raw<const Class> type) const;
     public:
         Value (*call)(Value* params, u32 nparams);
         u32 distance(Value* p, u32 nparams) const;
     private:
-        OverloadInfo& operator=(const OverloadInfo&);
+        Overload& operator=(const Overload&);
     };
 
 published:
-    istring                 name;
-    raw<const MethodInfo>   call;
-    raw<const MethodInfo>   next;
-    raw<const OverloadInfo> overloads;
+    istring             name;
+    raw<const Method>   call;
+    raw<const Method>   next;
+    raw<const Overload> overloads;
 published:
     Value doCall(Value* params, u32 nparams) const;
 private:
-    MethodInfo& operator=(const MethodInfo&);
+    Method& operator=(const Method&);
 };
+
 
 }}
 

@@ -11,13 +11,13 @@
 namespace BugEngine { namespace RTTI
 {
 
-Value PropertyInfo::get(Value& from) const
+Value Property::get(Value& from) const
 {
     be_assert(from.type().metaclass->isA(owner.metaclass), "getting property on object of type %s, while expecting type %s" | from.type().name() | owner.name());
     i32 propoffset = offset + (from.type().metaclass->offset - owner.metaclass->offset);
     if (from.isConst())
     {
-        return Value(TypeInfo::makeType(type, TypeInfo::Constify), (void*)((char*)from.rawget() + propoffset));
+        return Value(Type::makeType(type, Type::MakeConst), (void*)((char*)from.rawget() + propoffset));
     }
     else
     {
@@ -25,14 +25,14 @@ Value PropertyInfo::get(Value& from) const
     }
 }
 
-void PropertyInfo::set(Value& from, const Value& value) const
+void Property::set(Value& from, const Value& value) const
 {
     get(from) = value;
 }
 
-Value PropertyInfo::getTag(const TypeInfo& type) const
+Value Property::getTag(const Type& type) const
 {
-    raw<TagInfo> tag = tags;
+    raw<Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -42,9 +42,9 @@ Value PropertyInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value PropertyInfo::getTag(raw<const ClassInfo> type) const
+Value Property::getTag(raw<const Class> type) const
 {
-    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+    return getTag(Type::makeType(type, Type::Class, Type::Mutable));
 }
 
 }}
