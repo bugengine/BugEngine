@@ -10,9 +10,9 @@
 namespace BugEngine { namespace RTTI
 {
 
-struct be_api(RTTI) TagInfo
+struct be_api(RTTI) Tag
 {
-    raw<TagInfo> next;
+    raw<Tag> const next;
     Value tag;
 };
 

@@ -26,7 +26,7 @@ public:
     void setName(const inamespace& name);
 
     const BugEngine::Value& getValue() const;
-    TypeInfo getType() const;
+    Type getType() const;
 };
 
 }}}

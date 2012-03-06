@@ -114,7 +114,7 @@ void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block
 
 void Context::push(lua_State* state, const Value& v)
 {
-    const TypeInfo& t = v.type();
+    const Type& t = v.type();
     if (t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
     {
     }
@@ -205,9 +205,9 @@ int Context::valueGC(lua_State *state)
 int Context::valueToString(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -1);
-    if (userdata->type().type == TypeInfo::Class)
+    if (userdata->type().indirection == Type::Class)
     {
-        raw<const RTTI::ClassInfo> metaclass = userdata->type().metaclass;
+        raw<const RTTI::Class> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
         {
             lua_pushfstring(state, "%s", userdata->as<const inamespace>().str().c_str());

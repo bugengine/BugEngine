@@ -28,12 +28,12 @@ BoolValue::~BoolValue()
 {
 }
 
-bool BoolValue::isCompatible(const TypeInfo& type) const
+bool BoolValue::isCompatible(const Type& type) const
 {
     return type <= be_typeid<bool>::type();
 }
 
-BugEngine::Value BoolValue::as(const TypeInfo& type) const
+BugEngine::Value BoolValue::as(const Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from bool to %s" | type.name());
     return BugEngine::Value(m_value);
@@ -51,7 +51,7 @@ IntValue::~IntValue()
 {
 }
 
-bool IntValue::isCompatible(const TypeInfo& type) const
+bool IntValue::isCompatible(const Type& type) const
 {
     return type <= be_typeid<i8>::type()
         || type <= be_typeid<i16>::type()
@@ -63,7 +63,7 @@ bool IntValue::isCompatible(const TypeInfo& type) const
         || type <= be_typeid<u64>::type();
 }
 
-BugEngine::Value IntValue::as(const TypeInfo& type) const
+BugEngine::Value IntValue::as(const Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type.name());
     if (type <= be_typeid<i8>::type())
@@ -96,13 +96,13 @@ FloatValue::~FloatValue()
 {
 }
 
-bool FloatValue::isCompatible(const TypeInfo& type) const
+bool FloatValue::isCompatible(const Type& type) const
 {
     return type <= be_typeid<float>::type()
         || type <= be_typeid<double>::type();
 }
 
-BugEngine::Value FloatValue::as(const TypeInfo& type) const
+BugEngine::Value FloatValue::as(const Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from float to %s" | type.name());
     if (type <= be_typeid<float>::type())
@@ -124,14 +124,14 @@ StringValue::~StringValue()
     packageBuilderArena().free(m_value);
 }
 
-bool StringValue::isCompatible(const TypeInfo& type) const
+bool StringValue::isCompatible(const Type& type) const
 {
     return type <= be_typeid<istring>::type()
         || type <= be_typeid<inamespace>::type()
         || type <= be_typeid< minitl::format<> >::type();
 }
 
-BugEngine::Value StringValue::as(const TypeInfo& type) const
+BugEngine::Value StringValue::as(const Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from string to %s" | type.name());
     if (type <= be_typeid< istring >::type())
@@ -155,12 +155,12 @@ ReferenceValue::~ReferenceValue()
 {
 }
 
-bool ReferenceValue::isCompatible(const TypeInfo& type) const
+bool ReferenceValue::isCompatible(const Type& type) const
 {
     return type <= m_value->getType();
 }
 
-BugEngine::Value ReferenceValue::as(const TypeInfo& type) const
+BugEngine::Value ReferenceValue::as(const Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType().name() | type.name());
     return m_value->getValue();

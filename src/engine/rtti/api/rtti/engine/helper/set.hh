@@ -10,7 +10,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename T, typename Owner, T (Owner::*Field) >
-static inline void set(weak<const PropertyInfo> /*_this*/, void* from, Value& value, bool isConst)
+static inline void set(weak<const Property> /*_this*/, void* from, Value& value, bool isConst)
 {
     be_assert_recover(!isConst, "Setting property on const object", return);
     (Owner*)from->*Field = value.as<T>();

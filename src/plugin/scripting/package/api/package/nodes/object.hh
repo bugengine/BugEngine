@@ -17,13 +17,13 @@ class Reference;
 class Object : public minitl::refcountable
 {
 private:
-    weak< Package > const                   m_owner;
-    istring                                 m_name;
-    TypeInfo                                m_objectType;
-    ref<Reference>                          m_methodReference;
-    const RTTI::MethodInfo*                 m_method;
-    minitl::vector< ref<Parameter> >        m_parameters;
-    minitl::vector< OverloadMatch >         m_overloads;
+    weak< Package > const               m_owner;
+    istring                             m_name;
+    Type                                m_objectType;
+    ref<Reference>                      m_methodReference;
+    const RTTI::Method*                 m_method;
+    minitl::vector< ref<Parameter> >    m_parameters;
+    minitl::vector< OverloadMatch >     m_overloads;
 private:
     void resolveOverload();
 public:
@@ -31,9 +31,9 @@ public:
     ~Object();
 
     istring name() const                                        { return m_name; }
-    const RTTI::MethodInfo* method() const                      { return m_method; }
+    const RTTI::Method* method() const                          { return m_method; }
     const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
-    TypeInfo getType() const;
+    Type getType() const;
 
     void setName(istring name);
     void setMethod(ref<Reference> reference);

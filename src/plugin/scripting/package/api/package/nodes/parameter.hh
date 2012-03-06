@@ -19,8 +19,8 @@ public:
     ~Parameter();
 
     istring name() const;
-    bool isCompatible(const TypeInfo& type) const;
-    BugEngine::Value as(const TypeInfo& type) const;
+    bool isCompatible(const Type& type) const;
+    BugEngine::Value as(const Type& type) const;
 };
 
 }}}

@@ -11,39 +11,39 @@
 namespace BugEngine { namespace RTTI
 {
 
-void ClassInfo::copy(const void* src, void* dst) const
+void Class::copy(const void* src, void* dst) const
 {
     be_assert_recover(copyconstructor, "no copy for type %s" | name, return);
     (*copyconstructor)(src, dst);
 }
 
-void ClassInfo::destroy(void* src) const
+void Class::destroy(void* src) const
 {
     be_assert_recover(destructor, "no destructor for type %s" | name, return);
     (*destructor)(src);
 }
 
-void ClassInfo::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
+void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
 {
-    static raw<const ClassInfo> const s_metaClassInfo = be_typeid<ClassInfo>::klass();
+    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
     raw<const ObjectInfo> o = objects;
     while(o)
     {
         (*callback)(o->value);
-        if (recursion == EnumerateRecursive && (o->value.type().metaclass == s_metaClassInfo))
+        if (recursion == EnumerateRecursive && (o->value.type().metaclass == s_metaClass))
         {
-            o->value.as< raw<const ClassInfo> >()->enumerateObjects(recursion, callback);
+            o->value.as< raw<const Class> >()->enumerateObjects(recursion, callback);
         }
         o = o->next;
     }
 }
 
-Value ClassInfo::get(Value& from, istring propname) const
+Value Class::get(Value& from, istring propname) const
 {
-    static raw<const ClassInfo> const s_metaClassInfo = be_typeid<ClassInfo>::klass();
-    if (from.type().metaclass == s_metaClassInfo)
+    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
+    if (from.type().metaclass == s_metaClass)
     {
-        raw<const ObjectInfo> o = from.as< raw<const ClassInfo> >()->objects;
+        raw<const ObjectInfo> o = from.as< raw<const Class> >()->objects;
         while(o)
         {
             if (o->name == propname)
@@ -52,7 +52,7 @@ Value ClassInfo::get(Value& from, istring propname) const
             }
             o = o->next;
         }
-        raw<const MethodInfo> m = from.as< raw<const ClassInfo> >()->methods;
+        raw<const Method> m = from.as< raw<const Class> >()->methods;
         while(m)
         {
             if (m->name == propname)
@@ -64,7 +64,7 @@ Value ClassInfo::get(Value& from, istring propname) const
     }
 
     {
-        raw<const PropertyInfo> p = properties;
+        raw<const Property> p = properties;
         while(p)
         {
             if (p->name == propname)
@@ -76,7 +76,7 @@ Value ClassInfo::get(Value& from, istring propname) const
     }
 
     {
-        raw<const MethodInfo> m = methods;
+        raw<const Method> m = methods;
         while(m)
         {
             if (m->name == propname)
@@ -90,9 +90,9 @@ Value ClassInfo::get(Value& from, istring propname) const
     return Value();
 }
 
-bool ClassInfo::isA(raw<const ClassInfo> klass) const
+bool Class::isA(raw<const Class> klass) const
 {
-    raw<const ClassInfo> ci = {this};
+    raw<const Class> ci = {this};
     while (ci)
     {
         if (ci == klass)
@@ -102,14 +102,14 @@ bool ClassInfo::isA(raw<const ClassInfo> klass) const
     return false;
 }
 
-Value ClassInfo::create(Value* params, u32 nparams) const
+Value Class::create(Value* params, u32 nparams) const
 {
     return constructor->doCall(params, nparams);
 }
 
-Value ClassInfo::getTag(const TypeInfo& type) const
+Value Class::getTag(const Type& type) const
 {
-    raw<TagInfo> tag = tags;
+    raw<Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -119,14 +119,14 @@ Value ClassInfo::getTag(const TypeInfo& type) const
     return Value();
 }
 
-Value ClassInfo::getTag(raw<const ClassInfo> type) const
+Value Class::getTag(raw<const Class> type) const
 {
-    return getTag(TypeInfo::makeType(type, TypeInfo::Class, TypeInfo::Mutable));
+    return getTag(Type::makeType(type, Type::Class, Type::Mutable));
 }
 
-u32 ClassInfo::distance(raw<const ClassInfo> other) const
+u32 Class::distance(raw<const Class> other) const
 {
-    raw<const ClassInfo> ci = {this};
+    raw<const Class> ci = {this};
     u32 result = 0;
     while (ci)
     {
@@ -135,22 +135,22 @@ u32 ClassInfo::distance(raw<const ClassInfo> other) const
         ci = ci->parent;
         result++;
     }
-    return TypeInfo::MaxTypeDistance;
+    return Type::MaxTypeDistance;
 }
 
 }
 
-raw<RTTI::ClassInfo> be_game_Namespace()
+raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::ClassInfo::ObjectInfo ob = { {0}, {0}, "BugEngine", Value() };
-    static RTTI::ClassInfo ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };
-    static const RTTI::ClassInfo::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);
+    static RTTI::Class::ObjectInfo ob = { {0}, {0}, "BugEngine", Value() };
+    static RTTI::Class ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };
+    static const RTTI::Class::ObjectInfo* obptr = ((ob.value = Value(&ci)), &ob);
     be_forceuse(obptr);
-    raw<RTTI::ClassInfo> result = {&ci};
+    raw<RTTI::Class> result = {&ci};
     return result;
 }
 
-raw<RTTI::ClassInfo> be_game_Namespace_BugEngine()
+raw<RTTI::Class> be_game_Namespace_BugEngine()
 {
     return be_game_Namespace();
 }

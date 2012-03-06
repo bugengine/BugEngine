@@ -15,18 +15,18 @@ struct OverloadMatch
 {
     friend class Object;
 public:
-    typedef RTTI::MethodInfo::OverloadInfo::ParamInfo ParamInfo;
+    typedef BugEngine::RTTI::Method::Overload::Parameter RTTIParameter;
     struct ParameterMatch
     {
-        weak<const Parameter>   parameter;
-        raw<const ParamInfo>    match;
+        weak<const Parameter>       parameter;
+        raw<const RTTIParameter>    match;
     };
 private:
-    raw<const RTTI::MethodInfo::OverloadInfo>   m_overload;
-    minitl::vector<ParameterMatch>              m_params;
-    u32                                         m_score;
+    raw<const RTTI::Method::Overload>   m_overload;
+    minitl::vector<ParameterMatch>      m_params;
+    u32                                 m_score;
 public:
-    OverloadMatch(raw<const RTTI::MethodInfo::OverloadInfo> overload);
+    OverloadMatch(raw<const RTTI::Method::Overload> overload);
     void addParameter(weak<const Parameter> param);
     bool operator<(const OverloadMatch& other) const;
     BugEngine::Value create() const;

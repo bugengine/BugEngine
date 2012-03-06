@@ -17,8 +17,8 @@ class be_api(SYSTEM) ResourceManager : public minitl::pointer
 private:
     struct LoaderInfo
     {
-        raw<const RTTI::ClassInfo>  classinfo;
-        weak<IResourceLoader>       loader;
+        raw<const RTTI::Class>  classinfo;
+        weak<IResourceLoader>   loader;
     };
     struct Ticket
     {
@@ -34,10 +34,10 @@ public:
     ResourceManager();
     ~ResourceManager();
 
-    void attach(raw<const RTTI::ClassInfo> classinfo, weak<IResourceLoader> loader);
-    void detach(raw<const RTTI::ClassInfo> classinfo, weak<const IResourceLoader> loader);
-    void load(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const;
-    void unload(raw<const RTTI::ClassInfo> classinfo, weak<const Resource> resource) const;
+    void attach(raw<const RTTI::Class> classinfo, weak<IResourceLoader> loader);
+    void detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader);
+    void load(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const;
+    void unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const;
 
     template< typename T > void attach(weak<IResourceLoader> loader)        { attach(be_typeid<T>::klass(), loader); }
     template< typename T > void detach(weak<const IResourceLoader> loader)  { detach(be_typeid<T>::klass(), loader); }

@@ -11,8 +11,8 @@ namespace BugEngine
 
 namespace RTTI
 {
-struct ClassInfo;
-struct PropertyInfo;
+struct Class;
+struct Property;
 template< typename T,
           typename P1,
           typename P2,
@@ -36,8 +36,8 @@ struct procedurehelper;
 
 class Value
 {
-    friend struct RTTI::ClassInfo;
-    friend struct RTTI::PropertyInfo;
+    friend struct RTTI::Class;
+    friend struct RTTI::Property;
     template< typename T,
           typename P1,
           typename P2,
@@ -58,7 +58,7 @@ class Value
           typename Dummy>
     friend struct RTTI::procedurehelper;
 private:
-    TypeInfo        m_type;
+    Type                m_type;
     struct Reference
     {
         void*           m_pointer;
@@ -69,7 +69,7 @@ private:
         Reference       m_ref;
         char            m_buffer[47];
     };
-    bool            m_reference;
+    bool                 m_reference;
 private:
     inline void* memory();
     inline const void* memory() const;
@@ -86,23 +86,23 @@ private:
 private:
     enum ReserveType { Reserve };
 
-    inline Value(TypeInfo type, ReserveType);
+    inline Value(Type type, ReserveType);
 public:
-    enum ConstifyType { Constify };
+    enum MakeConstType { MakeConst };
 
     inline Value();
     template< typename T > explicit inline Value(T t);
-    template< typename T > explicit inline Value(T t, ConstifyType constify);
+    template< typename T > explicit inline Value(T t, MakeConstType constify);
     inline Value(const Value& other);
     template< typename T > inline Value(ByRefType<T> t);
-    inline Value(TypeInfo typeinfo, void* location);
+    inline Value(Type typeinfo, void* location);
     inline ~Value();
 
     template< typename T > inline Value& operator=(const T& t);
     inline Value& operator=(const Value& other);
     
-    inline TypeInfo type();
-    inline TypeInfo type() const;
+    inline Type type();
+    inline Type type() const;
 
     template< typename T > inline const T as() const;
     template< typename T > inline T as();

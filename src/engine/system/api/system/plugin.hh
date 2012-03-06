@@ -11,7 +11,7 @@ namespace BugEngine
 
 namespace RTTI
 {
-    struct ClassInfo;
+    struct Class;
 }
 
 class ResourceManager;
@@ -43,29 +43,29 @@ public:
     operator const void*() const        { return m_handle; }
     bool operator!() const              { return m_handle == 0; }
 
-    raw<const RTTI::ClassInfo> pluginNamespace() const;
+    raw<const RTTI::Class> pluginNamespace() const;
 private:
     Plugin();
 };
 
 }
 
-#define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                                               \
-    namespace BugEngine                                                                                                                 \
-    {                                                                                                                                   \
-        BE_EXPORT raw<RTTI::ClassInfo> be_##name##_Namespace()                                                                          \
-        {                                                                                                                               \
-            static RTTI::ClassInfo::ObjectInfo ob = { {0}, {0}, "BugEngine", Value() };                                                      \
-            static RTTI::ClassInfo ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} };             \
-            static raw<const RTTI::ClassInfo::ObjectInfo> obptr = {((ob.value = Value(&ci)), &ob)};                                     \
-            be_forceuse(obptr);                                                                                                         \
-            raw<RTTI::ClassInfo> ptr = {&ci};                                                                                           \
-            return ptr;                                                                                                                 \
-        }                                                                                                                               \
-        raw<RTTI::ClassInfo> be_##name##_Namespace_BugEngine()                                                                          \
-        {                                                                                                                               \
-            return be_##name##_Namespace();                                                                                             \
-        }                                                                                                                               \
+#define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                               \
+    namespace BugEngine                                                                                                 \
+    {                                                                                                                   \
+        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                                              \
+        {                                                                                                               \
+            static RTTI::Class::ObjectInfo ob = { {0}, {0}, "BugEngine", Value() };                                     \
+            static RTTI::Class ci = { "BugEngine", {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0, {{ 0, 0, 0, 0 }} }; \
+            static raw<const RTTI::Class::ObjectInfo> obptr = {((ob.value = Value(&ci)), &ob)};                         \
+            be_forceuse(obptr);                                                                                         \
+            raw<RTTI::Class> ptr = {&ci};                                                                               \
+            return ptr;                                                                                                 \
+        }                                                                                                               \
+        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                                              \
+        {                                                                                                               \
+            return be_##name##_Namespace();                                                                             \
+        }                                                                                                               \
     }
 #ifdef BE_STATIC
 # include "static/plugin.inl"

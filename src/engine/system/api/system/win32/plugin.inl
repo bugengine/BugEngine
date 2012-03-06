@@ -8,7 +8,7 @@
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                \
     BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
-    extern "C" BE_EXPORT const BugEngine::RTTI::ClassInfo* be_pluginNamespace()                 \
+    extern "C" BE_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                     \
     {                                                                                           \
         return BugEngine::be_##name##_Namespace().operator->();                                 \
     }
@@ -155,18 +155,18 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
 }
 
 template< typename Interface >
-raw<const RTTI::ClassInfo> Plugin<Interface>::pluginNamespace() const
+raw<const RTTI::Class> Plugin<Interface>::pluginNamespace() const
 {
     if (m_handle)
     {
-        const RTTI::ClassInfo* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::ClassInfo* (*)()>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_pluginNamespace"));
+        const RTTI::Class* (*be_pluginNamespace)() = reinterpret_cast<const RTTI::Class* (*)()>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_pluginNamespace"));
         if (be_pluginNamespace)
         {
-            raw<const RTTI::ClassInfo> ci = {(*be_pluginNamespace)()};
+            raw<const RTTI::Class> ci = {(*be_pluginNamespace)()};
             return ci;
         }
     }
-    raw<const RTTI::ClassInfo> ci = {0};
+    raw<const RTTI::Class> ci = {0};
     return ci;
 }
 
