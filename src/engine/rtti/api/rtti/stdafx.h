@@ -21,7 +21,6 @@
 
 #define     published           public
 #define     be_tag(v)
-#define     be_meta(metatype)
 
 /*****************************************************************************/
 #endif

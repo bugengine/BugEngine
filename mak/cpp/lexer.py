@@ -8,7 +8,7 @@ reserved = (
 		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
 		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
 		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW',
-		'BE_TAG', 'BE_META'
+		'BE_TAG'
 	)
 
 tokens = reserved + (
@@ -43,6 +43,14 @@ tokens = reserved + (
 
 	# Ellipsis (...)
 	'ELLIPSIS',
+
+	# Doxygen comments
+	'DOXY_BLOCK',
+	'DOXY_BLOCK_LEFT',
+	'DOXY_LINE',
+	'DOXY_LINE_LEFT',
+	'DOXY_END',
+	'DOXY_NEWLINE',
 )
 
 # Completely ignored characters
@@ -84,7 +92,7 @@ for r in reserved:
 
 states = (
 	('MACRO', 'exclusive'),
-#	('DOXYGEN', 'exclusive')
+	('DOXYGEN', 'exclusive')
 )
 
 
@@ -120,27 +128,67 @@ def t_MACRO_NEWLINE(t):
 	t.lexer.lineno += t.value.count("\n")
 
 # Comments
-#def t_doxygen_line(t):
-#	r'//[/\!]'
-#	t.lexer.begin('DOXYGEN')
-#	t.lexer.doxyline=1
-	
-#def t_doxygen_long(t):
-#	r'/\*\!'
-#	t.lexer.begin('DOXYGEN')
-#	t.lexer.doxyline=0
+def t_doxygen_line_left(t):
+	r'//[/!]<'
+	t.lexer.begin('DOXYGEN')
+	t.lexer.doxyline=1
+	t.type = "DOXY_LINE_LEFT"
+	return t
 
-#def t_doxygen_long_2(t):
-#	r'/\*\*[^\*]'
-#	t.lexer.begin('DOXYGEN')
-#	t.lexer.doxyline=0
-#
-#
-#def t_DOXYGEN_newline(t):
-#	r'\n+'
-#	t.lexer.lineno += t.value.count("\n")
-#	if t.lexer.doxyline:
-#		t.lexer.begin('INITIAL')
+def t_doxygen_line(t):
+	r'//[/!]'
+	t.lexer.begin('DOXYGEN')
+	t.lexer.doxyline=1
+	t.type = "DOXY_LINE"
+	return t
+
+def t_doxygen_block_left(t):
+	r'/\*[\*!]<'
+	t.lexer.begin('DOXYGEN')
+	t.lexer.doxyline=0
+	t.type = "DOXY_BLOCK_LEFT"
+	return t
+
+def t_doxygen_long(t):
+	r'/\*!'
+	t.lexer.begin('DOXYGEN')
+	t.lexer.doxyline=0
+	t.type = "DOXY_BLOCK"
+	return t
+
+def t_doxygen_long_2(t):
+	r'/\*\*[^\*]'
+	t.lexer.begin('DOXYGEN')
+	t.lexer.doxyline=0
+	t.type = "DOXY_BLOCK"
+	return t
+
+t_DOXYGEN_ignore = ' \t\x0c\r'
+
+def t_DOXYGEN_newline(t):
+	r'\n+'
+	t.lexer.lineno += t.value.count("\n")
+	if t.lexer.doxyline:
+		t.lexer.begin('INITIAL')
+		t.type = "DOXY_END"
+		return t
+	#else:
+	#	t.type = "DOXY_NEWLINE"
+	#	return t
+
+def t_DOXYGEN_end(t):
+	r'\*+/'
+	if not t.lexer.doxyline:
+		t.lexer.begin('INITIAL')
+		t.type = "DOXY_END"
+		return t
+
+def t_DOXYGEN_word(t):
+	r'([^ \t\x0c\r\n])+'
+	pass
+
+
+
 
 
 def t_comment(t):
