@@ -149,18 +149,52 @@ def p_template_params_list(t):
 	"""
 	pass
 
+def p_cs_params_list_c1(t):
+	"""
+		cs_params_list : doxycomment param
+	"""
+	t[2][3] = t[1]+t[2][3]
+	t[0] = [t[2]]
+
+def p_cs_params_list_c2(t):
+	"""
+		cs_params_list : param doxycomment_left
+	"""
+	t[1][3] = t[2]+t[1][3]
+	t[0] = [t[1]]
+	
 def p_cs_params_list(t):
 	"""
 		cs_params_list : param
 	"""
 	t[0] = [t[1]]
 
+def p_cs_params_list_extend_c1(t):
+	"""
+		cs_params_list : param doxycomment_left COMMA cs_params_list
+	"""
+	t[1][3] = t[2]+t[1][3]
+	t[0] = [t[1]]+t[4]
+
+def p_cs_params_list_extend_c2(t):
+	"""
+		cs_params_list : doxycomment param COMMA cs_params_list
+	"""
+	t[2][3] = t[1]+t[2][3]
+	t[0] = [t[2]]+t[4]
+
+def p_cs_params_list_extend_c3(t):
+	"""
+		cs_params_list : param COMMA doxycomment_left cs_params_list
+	"""
+	t[1][3] = t[3]+t[1][3]
+	t[0] = [t[1]]+t[4]
+
 def p_cs_params_list_extend(t):
 	"""
-		cs_params_list : cs_params_list COMMA param
+		cs_params_list : param COMMA cs_params_list
 	"""
-	t[0] = t[1]
-	t[0].append(t[3])
+	t[0] = [t[1]]+t[3]
 
 
 def p_cs_template_params_list(t):
@@ -358,17 +392,30 @@ def p_decl(t):
 		decl : function_pointer_with_name SEMI
 		decl : modifier_list function_pointer_with_name SEMI
 	"""
-def p_variable_decl(t):
+
+def p_variable_decl_c1(t):
 	"""
-		decl : type name array_opt param_value_opt field_length_opt SEMI
+		decl : doxycomment type name array_opt param_value_opt field_length_opt SEMI
+	"""
+	t.parser.namespace.addMember(t[2][1]+t[4], t[2][0].split(), t[3], [], t.lineno(7))
+
+def p_variable_decl_c2(t):
+	"""
+		decl : type name array_opt param_value_opt field_length_opt SEMI doxycomment_left_opt
 	"""
 	t.parser.namespace.addMember(t[1][1]+t[3], t[1][0].split(), t[2], [], t.lineno(6))
 
-def p_variable_decl_2(t):
+def p_variable_decl_2_c1(t):
 	"""
-		decl : modifier_list type name array_opt param_value_opt field_length_opt SEMI
+		decl : doxycomment modifier_list type name array_opt param_value_opt field_length_opt SEMI
 	"""
-	t.parser.namespace.addMember(t[2][1]+t[4], t[2][0].split()+[i for i in t[1]], t[3], [], t.lineno(7))
+	t.parser.namespace.addMember(t[3][1]+t[4], t[3][0].split()+[i for i in t[2]], t[4], [], t.lineno(8))
+
+def p_variable_decl_2_c2(t):
+	"""
+		decl : modifier_list type name array_opt param_value_opt field_length_opt SEMI doxycomment_left_opt
+	"""
+	t.parser.namespace.addMember(t[2][1]+t[3], t[2][0].split()+[i for i in t[1]], t[3], [], t.lineno(7))
 
 ###################################
 # Value
@@ -680,10 +727,9 @@ def p_class_2(t):
 
 def p_class_3(t):
 	"""
-		decl : BE_META LPAREN name RPAREN class_def
+		decl : doxycomment class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
-	t.parser.namespace.metaclass = t[3]
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_4(t):
@@ -696,11 +742,10 @@ def p_class_4(t):
 
 def p_class_5(t):
 	"""
-		decl : tags BE_META LPAREN name RPAREN class_def
+		decl : doxycomment tags class_def
 	"""
 	t[0] = ('', t.parser.namespace.fullname)
-	t.parser.namespace.tags = t[1]
-	t.parser.namespace.metaclass = t[4]
+	t.parser.namespace.tags = t[2]
 	t.parser.namespace = t.parser.namespace.parent
 
 def p_class_decl(t):
@@ -713,8 +758,11 @@ def p_class_decl(t):
 def p_enum_values(t):
 	"""
 		enum_values :
-		enum_values : enum_value
-		enum_values : enum_value COMMA enum_values
+		enum_values : enum_value doxycomment_left_opt
+		enum_values : doxycomment enum_value
+		enum_values : doxycomment enum_value COMMA enum_values
+		enum_values : enum_value doxycomment_left COMMA enum_values
+		enum_values : enum_value COMMA doxycomment_left_opt enum_values
 	"""
 	pass
 
@@ -732,16 +780,31 @@ def p_enum_value_tag(t):
 
 def p_enum_header(t):
 	"""
-		enum_header :	ENUM name_opt LBRACE
+		enum_header :	ENUM name_opt doxycomment_left_opt LBRACE
 	"""
-	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[2], t.lineno(3), t.parser.namespace.visibility)
+	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[2], t.lineno(4), t.parser.namespace.visibility)
+	t.parser.namespace.tags = t[3]
 
 def p_enum_header_2(t):
 	"""
-		enum_header :	tags ENUM name_opt LBRACE
+		enum_header :	tags ENUM name_opt doxycomment_left_opt LBRACE
 	"""
-	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[3], t.lineno(4), t.parser.namespace.visibility)
+	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[3], t.lineno(5), t.parser.namespace.visibility)
+	t.parser.namespace.tags = t[4]+t[1]
+
+def p_enum_header_comment(t):
+	"""
+		enum_header :	doxycomment ENUM name_opt LBRACE
+	"""
+	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[3], t.lineno(3), t.parser.namespace.visibility)
 	t.parser.namespace.tags = t[1]
+
+def p_enum_header_2_comment(t):
+	"""
+		enum_header :	doxycomment tags ENUM name_opt LBRACE
+	"""
+	t.parser.namespace = t.parser.rtti.Enum(t.parser.namespace, t[4], t.lineno(4), t.parser.namespace.visibility)
+	t.parser.namespace.tags = t[1]+t[2]
 
 def p_enum(t):
 	"""
@@ -860,41 +923,171 @@ def p_initializer(t):
 
 def p_method_decl_or_impl(t):
 	"""
-		decl : method SEMI
-		decl : method initializers LBRACE skiplist_all RBRACE
+		decl : method doxycomment_left SEMI
+		decl : method doxycomment_left_opt initializers LBRACE skiplist_all RBRACE
 	"""
-	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], [], t[1][4])
+	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], t[2], t[1][4])
+	
+def p_method_decl_or_impl_1(t):
+	"""
+		decl : method SEMI doxycomment_left_opt
+	"""
+	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], t[3], t[1][4])
 
-def p_method_decl_or_impl_2(t):
+def p_method_decl_or_impl_comment(t):
 	"""
-		decl : tags method SEMI
-		decl : tags method initializers LBRACE skiplist_all RBRACE
+		decl : doxycomment method SEMI
+		decl : doxycomment method initializers LBRACE skiplist_all RBRACE
 	"""
 	t.parser.namespace.addMethod(t[2][0], t[2][1], t[2][2], t[2][3], t[1], t[2][4])
 
+
+def p_method_decl_or_impl_2(t):
+	"""
+		decl : tags method SEMI doxycomment_left_opt
+	"""
+	t.parser.namespace.addMethod(t[2][0], t[2][1], t[2][2], t[2][3], t[4]+t[1], t[2][4])
+
+def p_method_decl_or_impl_2_2(t):
+	"""
+		decl : tags method doxycomment_left SEMI
+		decl : tags method doxycomment_left_opt initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[2][0], t[2][1], t[2][2], t[2][3], t[3]+t[1], t[2][4])
+
+def p_method_decl_or_impl_2_comment(t):
+	"""
+		decl : doxycomment tags method SEMI
+		decl : doxycomment tags method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1], t[3][2], t[3][3], t[1]+t[2], t[3][4])
+
 def p_method_decl_or_impl_3(t):
 	"""
-		decl : modifier_list method SEMI
+		decl : modifier_list method doxycomment_left SEMI
 	"""
-	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[3], t[2][4])
 
+def p_method_decl_or_impl_3_2(t):
+	"""
+		decl : modifier_list method SEMI doxycomment_left_opt
+	"""
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[4], t[2][4])
+
+def p_method_decl_or_impl_3_comment(t):
+	"""
+		decl : doxycomment modifier_list method SEMI
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[1], t[3][4])
+	
 def p_method_decl_or_impl_4(t):
 	"""
-		decl : tags modifier_list method SEMI
+		decl : tags modifier_list method doxycomment_left SEMI
 	"""
-	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[1], t[3][2], t[3][3], t[1], t[3][4])
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[4]+t[1], t[3][4])
+
+def p_method_decl_or_impl_4_2(t):
+	"""
+		decl : tags modifier_list method SEMI doxycomment_left_opt
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[5]+t[1], t[3][4])
+
+def p_method_decl_or_impl_4_comment(t):
+	"""
+		decl : doxycomment tags modifier_list method SEMI
+	"""
+	t.parser.namespace.addMethod(t[4][0], t[4][1]|t[3], t[4][2], t[4][3], t[1]+t[2], t[4][4])
 
 def p_method_decl_or_impl_5(t):
 	"""
-		decl : modifier_list method initializers LBRACE skiplist_all RBRACE
+		decl : modifier_list method doxycomment_left_opt initializers LBRACE skiplist_all RBRACE
 	"""
-	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], [], t[2][4])
+	t.parser.namespace.addMethod(t[2][0], t[2][1]|t[1], t[2][2], t[2][3], t[3], t[2][4])
+
+def p_method_decl_or_impl_5_comment(t):
+	"""
+		decl : doxycomment modifier_list method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[1], t[3][4])
 
 def p_method_decl_or_impl_6(t):
 	"""
-		decl : tags modifier_list method initializers LBRACE skiplist_all RBRACE
+		decl : tags modifier_list method doxycomment_left_opt initializers LBRACE skiplist_all RBRACE
 	"""
-	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[1], t[3][2], t[3][3], t[1], t[3][4])
+	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[4]+t[1], t[3][4])
+
+def p_method_decl_or_impl_6_comment(t):
+	"""
+		decl : doxycomment tags modifier_list method initializers LBRACE skiplist_all RBRACE
+	"""
+	t.parser.namespace.addMethod(t[4][0], t[4][1]|t[3], t[4][2], t[4][3], t[1]+t[2], t[4][4])
+
+###################################
+# doxygen
+def p_doxycomment(t):
+	"""
+		doxycomment : doxyline
+		doxycomment : doxylines
+		doxycomment : doxyblock
+		doxycomment : doxyline doxyblock
+	"""
+	t[0] = []
+
+def p_doxycomment_left(t):
+	"""
+		doxycomment_left : doxyline_left
+		doxycomment_left : doxylines_left
+		doxycomment_left : doxyblock_left
+		doxycomment_left : doxyline_left doxyblock_left
+	"""
+	t[0] = []
+
+def p_doxycomment_left_optional(t):
+	"""
+		doxycomment_left_opt : 
+		doxycomment_left_opt : doxycomment_left
+	"""
+	t[0] = []
+
+def p_doxyline(t):
+	"""
+		doxyline : DOXY_LINE DOXY_END
+	"""
+	pass
+	
+def p_doxylines(t):
+	"""
+		doxylines : doxyline doxyline
+		doxylines : doxyline doxylines
+	"""
+	pass
+
+def p_doxyblock(t):
+	"""
+		doxyblock : DOXY_BLOCK DOXY_END
+		
+	"""
+	pass
+	
+def p_doxyline_left(t):
+	"""
+		doxyline_left : DOXY_LINE_LEFT DOXY_END
+	"""
+	pass
+	
+def p_doxylines_left(t):
+	"""
+		doxylines_left : doxyline_left doxyline_left
+		doxylines_left : doxyline_left doxylines_left
+	"""
+	pass
+
+def p_doxyblock_left(t):
+	"""
+		doxyblock_left : DOXY_BLOCK_LEFT DOXY_END
+		
+	"""
+	pass
 
 ###################################
 # skiplist
@@ -932,7 +1125,6 @@ def p_keyword(t):
 				| TYPEDEF
 				| THROW
 				| BE_TAG
-				| BE_META
 	"""
 	t[0] = t[1]
 
