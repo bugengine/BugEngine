@@ -15,49 +15,49 @@ template< typename T >
 struct be_typeid
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static inline Type  type()  { return Type::makeType(klass(), Type::Class, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(klass(), Type::Value, Type::Mutable, , Type::Mutable); }
 };
 
 template< typename T >
-struct be_typeid< T& > : public be_typeid<T>
+struct be_typeid<const T>
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::Class, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::Value, Type::Const, Type::Const); }
 };
 
 template< typename T >
-struct be_typeid< const T > : public be_typeid<T>
+struct be_typeid< T& >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::type(), Type::MakeConst); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::Value, Type::Mutable, Type::Mutable); }
 };
 
 template< typename T >
-struct be_typeid< const T& > : public be_typeid<T>
+struct be_typeid< const T& >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::type(), Type::MakeConst); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::Value, Type::Const, Type::Const; }
 };
 
 template< typename T >
-struct be_typeid< ref<T> > : public be_typeid<T>
+struct be_typeid< ref<T> >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? Type::ConstRefPtr : Type::RefPtr, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::RefPtr, minitl::is_const<T>::Value ? Type::Const : Type::Mutable); }
 };
 
 template< typename T >
-struct be_typeid< weak<T> > : public be_typeid<T>
+struct be_typeid< weak<T> >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? Type::ConstWeakPtr : Type::WeakPtr, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::WeakPtr, minitl::is_const<T>::Value ? Type::Const : Type::Mutable); }
 };
 
 template< typename T >
-struct be_typeid< raw<T> > : public be_typeid<T>
+struct be_typeid< raw<T> >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? Type::ConstRawPtr : Type::RawPtr, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::RawPtr, minitl::is_const<T>::Value ? Type::Const : Type::Mutable); }
 };
 
 template< typename T >
-struct be_typeid< T* > : public be_typeid<T>
+struct be_typeid< T* >
 {
-    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), minitl::is_const<T>::Value ? Type::ConstRawPtr : Type::RawPtr, Type::Mutable); }
+    static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::RawPtr, minitl::is_const<T>::Value ? Type::Const : Type::Mutable); }
 };
 
 template< > raw<const RTTI::Class> be_typeid< void >::klass();

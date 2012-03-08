@@ -15,17 +15,25 @@ namespace RTTI
 struct Class;
 }
 
-/// Represents the type of an object
+/// Represents the type of an object packed in an \ref RTTI::Value
 /*!
- * The Type struct stores information about the type of an object; it holds
- * information about the class of an object, its indirection, its constness,
- * and the constness of the indirection itself.
+ * The Type struct stores meta-information about the type of an object; it holds
+ * information about the class of an object stored in the \ref RTTI::Value,
+ * its indirection (and thus how to access it), and the constness of the object
+ *
+ * All objects passed to script are packed in an opaque structure; the type
+ * allows to modify the value that is packed or the members of this value.
+ *
+ * \par Constness
  * Just as in \e C++, the constness can be applied to different parts of a type;
  * a pointer to a \e const value is different from a \e const pointer to a value,
  * which is itself different from a \e const pointer to a \e const value.
  * The constness of the object is then split in two parts; a bit in \e indirection
  * indicates the constness of the object pointed at. the \e const field indicates
  * the constness of the indirection.
+ *
+ * \sa
+ * BugEngine::RTTI::Value
  */
 struct be_api(RTTI) Type
 {
@@ -38,31 +46,20 @@ struct be_api(RTTI) Type
      */
     enum Indirection
     {
-        IndirectionMask = 0x0f,                     ///< Mask that covers all the bits used for the indirection without the \e MutableBit
-        MutableBit      = 0x10,                     ///< Constness bit; when this bit is set in the indirection flag,
-                                                    ///< the object pointed to is \e mutable; otherwise it is \e const
-
-        Class           = 0,                        ///< The type represents an immediate value without indirection
-        ConstRawPtr     = 1,                        ///< The type represents a raw pointer to a \e const object
-        ConstWeakPtr    = 2,                        ///< The type represents a weak pointer to a \e const object
-        ConstRefPtr     = 3,                        ///< The type represents a refcounted pointer to a \e const object
- 
-        RawPtr          = ConstRawPtr | MutableBit, ///< The type represents a raw pointer to a \e mutable object
-        WeakPtr         = ConstWeakPtr | MutableBit,///< The type represents a weak pointer to a \e mutable object
-        RefPtr          = ConstRefPtr | MutableBit  ///< The type represents a refcounted pointer to a \e mutable object
+        Value   = 0,    ///< The type represents an immediate value without indirection
+        RawPtr  = 1,    ///< The type represents a raw pointer to an object
+        WeakPtr = 2,    ///< The type represents a weak pointer to an object
+        RefPtr  = 3     ///< The type represents a refcounted pointer to an object
     };
-    /// Constness of the object
-    /*!
-     * Unlike the constness bit in the \e Indirection, the Constness enumeration
-     * represents the constness of the 
-     */
+    /// Constness of the value
     enum Constness
     {
-        Const = 0,      ///< The type represents a const object; 
-        Mutable = 1     ///< The type represents a const object; 
+        Mutable = 0,    ///< The type represents a mutable object
+        Const = 1       ///< The type represents a const object
     };
-    /// 
+    /// Helper enumeration.
     /*!
+     * This enumeration is used in \ref makeType to create a copy of a type but change its constness.
      */
     enum MakeConstType
     {
@@ -70,17 +67,18 @@ struct be_api(RTTI) Type
     };
 
     raw<const RTTI::Class>  metaclass;
-    Indirection             indirection;
-    Constness               constness;
+    u16                     indirection;
+    u8                      access;
+    u8                      constness;
 
-    static inline Type makeType(raw<const RTTI::Class> klass, Indirection indirection, Constness constness = Mutable)
+    static inline Type makeType(raw<const RTTI::Class> klass, Indirection indirection, Constness access, Constness constness)
     {
-        Type info = { klass, indirection, constness };
+        Type info = { klass, (u16)indirection, (u8)access, (u8)constness };
         return info;
     }
     static inline Type makeType(const Type& type, MakeConstType /*constify*/)
     {
-        Type info = { type.metaclass, type.indirection, Const };
+        Type info = { type.metaclass, type.indirection, type.access, Const };
         return info;
     }
 

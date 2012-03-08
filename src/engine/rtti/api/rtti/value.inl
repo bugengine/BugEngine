@@ -150,39 +150,7 @@ Type Value::type() const
 template< typename T >
 const T Value::as() const
 {
-    typedef typename minitl::remove_reference<T>::type REALTYPE;
-    Type ti = be_typeid<const T>::type();
-    be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.indirection&Type::IndirectionMask) <= (m_type.indirection&Type::IndirectionMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.indirection&Type::MutableBit) <= (m_type.indirection&Type::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    const void* mem = memory();
-    ref<const minitl::refcountable>   rptr;
-    weak<const minitl::refcountable>  wptr;
-    const minitl::refcountable*       obj;
-    int targetType = ti.indirection & Type::IndirectionMask;
-    switch(m_type.indirection & Type::IndirectionMask)
-    {
-    case Type::ConstRefPtr:
-        if (targetType == Type::ConstRefPtr)
-            break;
-        rptr = *(ref<const minitl::refcountable>*)mem;
-        wptr = rptr;
-        mem = (const void*)&wptr;
-    case Type::ConstWeakPtr:
-        if (targetType == Type::ConstWeakPtr)
-            break;
-        wptr = *(weak<const minitl::refcountable>*)mem;
-        obj = wptr.operator->();
-        mem = (const void*)&obj;
-    case Type::ConstRawPtr:
-        if (targetType == Type::ConstRawPtr)
-            break;
-        mem = *(const void**)mem;
-    default:
-        break;
-    }
-    return *(const REALTYPE*)mem;
+    return const_cast<Value*>(this)->as<const T>();
 }
 
 template< typename T >
@@ -191,31 +159,28 @@ T Value::as()
     typedef typename minitl::remove_reference<T>::type REALTYPE;
     Type ti = be_typeid<T>::type();
     be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.indirection&Type::IndirectionMask) <= (m_type.indirection&Type::IndirectionMask), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert((ti.indirection&Type::MutableBit) <= (m_type.indirection&Type::MutableBit), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert(!minitl::is_reference<T>::Value || ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(ti.indirection <= m_type.indirection, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(ti.constness <= m_type.constness, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
     void* mem = memory();
     ref<minitl::refcountable>   rptr;
     weak<minitl::refcountable>  wptr;
     minitl::refcountable*       obj;
-    int targetType = ti.indirection & Type::IndirectionMask;
-    switch(m_type.indirection & Type::IndirectionMask)
+    switch(m_type.indirection)
     {
-    case Type::ConstRefPtr:
-        if (targetType == Type::ConstRefPtr)
+    case Type::RefPtr:
+        if (ti.indirection == Type::RefPtr)
             break;
         rptr = *(ref<minitl::refcountable>*)mem;
         wptr = rptr;
         mem = (void*)&wptr;
-    case Type::ConstWeakPtr:
-        if (targetType == Type::ConstWeakPtr)
+    case Type::WeakPtr:
+        if (ti.indirection == Type::WeakPtr)
             break;
-        // TODO: multiple inheritance will crash
         wptr = *(weak<minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (void*)&obj;
-    case Type::ConstRawPtr:
-        if (targetType == Type::ConstRawPtr)
+    case Type::RawPtr:
+        if (ti.indirection == Type::RawPtr)
             break;
         mem = *(void**)mem;
     default:
