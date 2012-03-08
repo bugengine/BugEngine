@@ -17,79 +17,11 @@ static inline bool operator==(Type t1, Type t2)
 }
 static inline bool operator<=(Type t1, Type t2)
 {
-    return     (t1.indirection & Type::IndirectionMask) <= (t2.indirection & Type::IndirectionMask)
-            && t1.indirection <= t2.indirection
-            && t2.metaclass->isA(t1.metaclass)
-            && t1.constness <= t2.constness;
+    return     (t1.indirection <= t2.indirection)
+            && t1.constness <= t2.constness
+            && t2.metaclass->isA(t1.metaclass);
 }
 
-namespace RTTI
-{
-
-template< typename T >
-struct RefType
-{
-    typedef T Type;
-    enum { Reference = Type::Class, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType<const T>
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = RefType<T>::Reference, Constness = Type::Const };
-};
-
-template< typename T >
-struct RefType< T& >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = RefType<T>::Reference, Constness = RefType<T>::Constness };
-};
-
-template< typename T >
-struct RefType< ref<T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::RefPtr, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType< ref<const T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::ConstRefPtr, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType< weak<T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::WeakPtr, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType< weak<const T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::ConstWeakPtr, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType< raw<T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::RawPtr, Constness = Type::Mutable };
-};
-
-template< typename T >
-struct RefType< raw<const T> >
-{
-    typedef typename RefType<T>::Type Type;
-    enum { Reference = Type::ConstRawPtr, Constness = Type::Mutable };
-};
-
-}
 
 template< typename T >
 struct be_typeid< minitl::vector<T> >

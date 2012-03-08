@@ -14,16 +14,13 @@ u32 Type::size() const
 {
     switch(indirection)
     {
-    case Class:
+    case Value:
         return metaclass->size;
     case RawPtr:
-    case ConstRawPtr:
         return sizeof(raw<char>);
     case RefPtr:
-    case ConstRefPtr:
         return sizeof(ref<minitl::refcountable>);
     case WeakPtr:
-    case ConstWeakPtr:
         return sizeof(weak<minitl::refcountable>);
     default:
         be_notreached();
@@ -34,55 +31,42 @@ u32 Type::size() const
 minitl::format<> Type::name() const
 {
     minitl::format<> n("");
-    if (indirection && (indirection & MutableBit))
+    if (constness)
         n = minitl::format<>("%s") | metaclass->name;
     else
         n = minitl::format<>("const %s") | metaclass->name;
 
-    switch(indirection & IndirectionMask)
+    switch(indirection)
     {
-    case Class:
+    case Value:
         break;
-    case ConstRawPtr:
+    case RawPtr:
         n = minitl::format<>("raw<%s>") | n;
         break;
-    case ConstWeakPtr:
+    case WeakPtr:
         n = minitl::format<>("weak<%s>") | n;
         break;
-    case ConstRefPtr:
+    case RefPtr:
         n = minitl::format<>("ref<%s>") | n;
         break;
     default:
         be_notreached();
         break;
     }
-
-    switch(constness)
-    {
-    case Const:
-        return minitl::format<>("const %s") | n;
-    case Mutable:
-        return n;
-    default:
-        be_notreached();
-        return n;
-    }
+    return n;
 }
 
 void* Type::rawget(const void* data) const
 {
     switch(indirection)
     {
-    case Class:
+    case Value:
         return (void*)data;
     case RawPtr:
-    case ConstRawPtr:
         return *(void**)data;
     case RefPtr:
-    case ConstRefPtr:
         return ((ref<minitl::refcountable>*)data)->operator->();
     case WeakPtr:
-    case ConstWeakPtr:
         return ((weak<minitl::refcountable>*)data)->operator->();
     default:
         be_notreached();
@@ -94,18 +78,15 @@ void Type::copy(const void* source, void* dest) const
 {
     switch(indirection)
     {
-    case Class:
+    case Value:
         return metaclass->copy(source, dest);
     case RawPtr:
-    case ConstRawPtr:
         memcpy(dest, source, sizeof(void*));
         return;
     case RefPtr:
-    case ConstRefPtr:
         new (dest) const ref<const minitl::refcountable>(*(const ref<const minitl::refcountable>*)source);
         return;
     case WeakPtr:
-    case ConstWeakPtr:
         new (dest) const weak<const minitl::refcountable>(*(const weak<const minitl::refcountable>*)source);
         return;
     default:
@@ -118,17 +99,14 @@ void Type::destroy(void* ptr) const
 {
     switch(indirection)
     {
-    case Class:
+    case Value:
         return metaclass->destroy(ptr);
     case RawPtr:
-    case ConstRawPtr:
         return;
     case RefPtr:
-    case ConstRefPtr:
         ((ref<const minitl::refcountable>*)ptr)->~ref();
         return;
     case WeakPtr:
-    case ConstWeakPtr:
         ((weak<const minitl::refcountable>*)ptr)->~weak();
         return;
     default:
@@ -144,14 +122,10 @@ u32 Type::distance(const Type& other) const
         return 1000000;
     else
         result += constness - other.constness;
-    if ((indirection & IndirectionMask) < (other.indirection & IndirectionMask))
+    if (indirection < other.indirection)
         return 1000000;
     else
-        result += (indirection & IndirectionMask) - (other.indirection & IndirectionMask);
-    if ((indirection & MutableBit) < (other.indirection & MutableBit))
-        return 1000000;
-    else
-        result += (indirection & MutableBit) - (other.indirection & MutableBit);
+        result += indirection - other.indirection;
     return result + metaclass->distance(other.metaclass);
 }
 

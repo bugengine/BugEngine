@@ -205,7 +205,7 @@ int Context::valueGC(lua_State *state)
 int Context::valueToString(lua_State *state)
 {
     Value* userdata = (Value*)lua_touserdata(state, -1);
-    if (userdata->type().indirection == Type::Class)
+    if (userdata->type().indirection == Type::Value)
     {
         raw<const RTTI::Class> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
