@@ -25,13 +25,14 @@ published:
     const istring       name;
     Type                owner;
     Type                type;
-    u32                 offset;
 
     Value get(Value& from) const;
     void  set(Value& from, const Value& value) const;
 
     Value getTag(const Type& type) const;
     Value getTag(raw<const Class> type) const;
+public:
+    Value (*getter)(void* data, const Type& type);
 private:
     Property& operator=(const Property&);
 };

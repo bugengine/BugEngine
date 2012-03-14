@@ -9,30 +9,32 @@
 namespace BugEngine { namespace RTTI
 {
 
-template< typename T, typename Owner, T (Owner::*Field) >
-static inline Value get(weak<const Property> /*_this*/, void* from, bool isConst)
-{
-    if (isConst)
-    {
-        return Value(Value::ByRef((const Owner*)from->*Field));
-    }
-    else
-    {
-        return Value(Value::ByRef((Owner*)from->*Field));
-    }
-}
 
-template< typename T, T v >
-static inline Value staticgetvalue(weak<const Property> /*_this*/, void* /*from*/, bool /*isConst*/)
+template< typename T, ptrdiff_t offset >
+struct PropertyHelper
 {
-    return Value(v);
-}
+    static Value get(void* from, const Type& type)
+    {
+        void* t = reinterpret_cast<void*>(reinterpret_cast<char*>(from)+offset);
+        return Value(type, t);
+    }
+};
 
-template< typename T, T* object >
-static inline Value staticgetobject(weak<const Property> /*_this*/, void* /*from*/, bool /*isConst*/)
+template< ptrdiff_t offset >
+struct PropertyHelper<Value, offset>
 {
-    return Value(*object);
-}
+    static Value get(void* from, const Type& type)
+    {
+        if (type.constness == Type::Const)
+        {
+            return Value::ByRef(*reinterpret_cast<const Value*>(reinterpret_cast<char*>(from)+offset));
+        }
+        else
+        {
+            return Value::ByRef(*reinterpret_cast<Value*>(reinterpret_cast<char*>(from)+offset));
+        }
+    }
+};
 
 }}
 
