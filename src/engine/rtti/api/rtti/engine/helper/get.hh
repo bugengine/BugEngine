@@ -9,29 +9,18 @@
 namespace BugEngine { namespace RTTI
 {
 
-
-template< typename T, ptrdiff_t offset >
+template< typename T, typename Owner, T (Owner::*Member) >
 struct PropertyHelper
 {
-    static Value get(void* from, const Type& type)
+    static Value get(void* from, bool isConst)
     {
-        void* t = reinterpret_cast<void*>(reinterpret_cast<char*>(from)+offset);
-        return Value(type, t);
-    }
-};
-
-template< ptrdiff_t offset >
-struct PropertyHelper<Value, offset>
-{
-    static Value get(void* from, const Type& type)
-    {
-        if (type.constness == Type::Const)
+        if (isConst)
         {
-            return Value::ByRef(*reinterpret_cast<const Value*>(reinterpret_cast<char*>(from)+offset));
+            return Value::ByRef(reinterpret_cast<const Owner*>(from)->*Member);
         }
         else
         {
-            return Value::ByRef(*reinterpret_cast<Value*>(reinterpret_cast<char*>(from)+offset));
+            return Value::ByRef(reinterpret_cast<Owner*>(from)->*Member);
         }
     }
 };

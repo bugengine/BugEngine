@@ -420,7 +420,7 @@ class Class(Container):
 					file.write("        \"%s\",\n" % name)
 					file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % self.fullname)
 					file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % type)
-					file.write("        &::BugEngine::RTTI::PropertyHelper<%s, (char*)(&((%s*)0)->%s)-(char*)0>::get\n" % (type, self.fullname, name))
+					file.write("        &::BugEngine::RTTI::PropertyHelper<%s, %s, &%s::%s>::get\n" % (type, self.fullname, self.fullname, name))
 					file.write("    };\n")
 					prop = "&s_%s_%s" % (decl, name)
 		return prop, statics
