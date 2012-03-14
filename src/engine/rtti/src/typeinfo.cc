@@ -30,11 +30,17 @@ u32 Type::size() const
 
 minitl::format<> Type::name() const
 {
-    minitl::format<> n("");
-    if (access == Const)
-        n = minitl::format<>("%s") | metaclass->name;
-    else
-        n = minitl::format<>("const %s") | metaclass->name;
+    minitl::format<> n(metaclass->name.str());
+    switch(access)
+    {
+    case Const:
+        n.append(" const");
+        break;
+    case Mutable:
+        break;
+    default:
+        be_notreached();
+    }
 
     switch(indirection)
     {
@@ -53,8 +59,17 @@ minitl::format<> Type::name() const
         be_notreached();
         break;
     }
-    if (constness == Const)
+
+    switch(constness)
+    {
+    case Const:
         n.append(" const");
+        break;
+    case Mutable:
+        break;
+    default:
+        be_notreached();
+    }
     return n;
 }
 

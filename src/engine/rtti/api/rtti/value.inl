@@ -111,8 +111,8 @@ Value& Value::operator=(const Value& v)
 {
     if (m_reference)
     {
-        be_assert_recover(v.m_type.metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
-        be_assert_recover(m_type.access != Type::Const, "Value is const", return *this);
+        be_assert_recover(v.m_type <= m_type, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
+        be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(v.memory(), mem);
@@ -129,12 +129,21 @@ Value& Value::operator=(const Value& v)
 template< typename T >
 Value& Value::operator=(const T& t)
 {
-    be_assert_recover(be_typeid<T>::type().metaclass == m_type.metaclass, "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
-    be_assert_recover(m_type.access != Type::Const, "Value is const", return *this);
-    void* mem = memory();
-    m_type.destroy(mem);
-    m_type.copy(&t, mem);
-    return *this;
+    if (m_reference)
+    {
+        be_assert_recover(be_typeid<T>::type() <= m_type, "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
+        be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
+        void* mem = memory();
+        m_type.destroy(mem);
+        m_type.copy(&t, mem);
+        return *this;
+    }
+    else
+    {
+        this->~Value();
+        new ((void*)this) Value(t);
+        return *this;
+    }
 }
 
 Type Value::type()

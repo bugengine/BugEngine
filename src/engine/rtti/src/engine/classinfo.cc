@@ -87,6 +87,7 @@ Value Class::get(Value& from, istring propname) const
         }
     }
 
+    be_error("unable to access member %s in class %s" | name | from.type().metaclass->name);
     return Value();
 }
 

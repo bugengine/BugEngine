@@ -7,14 +7,14 @@
 #include    <system/file/diskfolder.script.hh>
 #include    <system/scheduler/task/method.hh>
 #include    <world/world.script.hh>
-
+#include <rtti/engine/taginfo.script.hh>
 namespace BugEngine { namespace Editor
 {
 
 Editor::Editor(const PluginContext& /*context*/)
     :   m_resourceManager(scoped<ResourceManager>::create(gameArena()))
     ,   m_pluginContext(m_resourceManager)
-    ,   m_renderer("graphics.DX9", m_pluginContext)
+    ,   m_renderer("graphics.GL4", m_pluginContext)
     ,   m_packageManager("scripting.package", m_pluginContext)
     ,   m_dataFolder(ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory()))
     ,   m_mainPackage(ref<Package>::create(gameArena(), m_dataFolder->openFile(istring("main.pkg"))))

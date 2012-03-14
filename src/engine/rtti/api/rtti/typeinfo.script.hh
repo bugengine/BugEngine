@@ -37,7 +37,7 @@ struct Class;
  */
 struct be_api(RTTI) Type
 {
-    friend class Value;
+    //friend class Value;
 
     /// Indirection to the object
     /*!
@@ -89,6 +89,7 @@ public:
     enum { MaxTypeDistance = 1000000 };
 private:
     Type& operator=(const Type&);
+public:
     void*               rawget(const void*) const;
     void                copy(const void* source, void* dest) const;
     void                create(void* obj) const;
