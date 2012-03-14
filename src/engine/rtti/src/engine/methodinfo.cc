@@ -28,7 +28,7 @@ Value Method::Overload::Parameter::getTag(const Type& type) const
 
 Value Method::Overload::Parameter::getTag(raw<const Class> type) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const));
+    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
 u32 Method::Overload::distance(Value* p, u32 nparams) const
@@ -69,7 +69,7 @@ Value Method::Overload::getTag(const Type& type) const
 
 Value Method::Overload::getTag(raw<const Class> type) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const));
+    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
 Value Method::doCall(Value* params, u32 nparams) const
