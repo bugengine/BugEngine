@@ -31,7 +31,7 @@ u32 Type::size() const
 minitl::format<> Type::name() const
 {
     minitl::format<> n("");
-    if (constness)
+    if (access == Const)
         n = minitl::format<>("%s") | metaclass->name;
     else
         n = minitl::format<>("const %s") | metaclass->name;
@@ -53,6 +53,8 @@ minitl::format<> Type::name() const
         be_notreached();
         break;
     }
+    if (constness == Const)
+        n.append(" const");
     return n;
 }
 
@@ -118,10 +120,10 @@ void Type::destroy(void* ptr) const
 u32 Type::distance(const Type& other) const
 {
     u32 result = 0;
-    if (constness < other.constness)
+    if (access < other.access)
         return 1000000;
     else
-        result += constness - other.constness;
+        result += access - other.access;
     if (indirection < other.indirection)
         return 1000000;
     else

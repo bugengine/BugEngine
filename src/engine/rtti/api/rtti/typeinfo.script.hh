@@ -17,7 +17,7 @@ struct Class;
 
 /// Represents the type of an object packed in an \ref RTTI::Value
 /*!
- * The Type struct stores meta-information about the type of an object; it holds
+ * The Type struct stores meta-information about an object; it holds
  * information about the class of an object stored in the \ref RTTI::Value,
  * its indirection (and thus how to access it), and the constness of the object
  *
@@ -28,9 +28,9 @@ struct Class;
  * Just as in \e C++, the constness can be applied to different parts of a type;
  * a pointer to a \e const value is different from a \e const pointer to a value,
  * which is itself different from a \e const pointer to a \e const value.
- * The constness of the object is then split in two parts; a bit in \e indirection
- * indicates the constness of the object pointed at. the \e const field indicates
- * the constness of the indirection.
+ * The constness of the object is then split in two parts; the \e access
+ * indicates the constness of the object pointed at. the \e constness indicates
+ * the constness of the variable.
  *
  * \sa
  * BugEngine::RTTI::Value
@@ -54,8 +54,8 @@ struct be_api(RTTI) Type
     /// Constness of the value
     enum Constness
     {
-        Mutable = 0,    ///< The type represents a mutable object
-        Const = 1       ///< The type represents a const object
+        Const = 0,      ///< The type represents a const object
+        Mutable = 1     ///< The type represents a mutable object
     };
     /// Helper enumeration.
     /*!

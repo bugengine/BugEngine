@@ -44,7 +44,7 @@ Value Property::getTag(const Type& type) const
 
 Value Property::getTag(raw<const Class> type) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const));
+    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
 }}
