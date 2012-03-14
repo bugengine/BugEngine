@@ -32,7 +32,7 @@ published:
     Value getTag(const Type& type) const;
     Value getTag(raw<const Class> type) const;
 public:
-    Value (*getter)(void* data, const Type& type);
+    Value (*getter)(void* data, bool isConst);
 private:
     Property& operator=(const Property&);
 };
