@@ -90,7 +90,7 @@ struct be_api(RTTI) Type
      * object pointed at. If the access is \ref Mutable, it is possible to modify
      * the properties of the object and to call methods that are not marked
      * \e const. If the access is \ref Const then the properties are read-only
-     * and only \e const methods can be called. 
+     * and only \e const methods can be called.
      */
     u8                      access;
     /// Access right to the indirection
@@ -120,30 +120,35 @@ struct be_api(RTTI) Type
         Type info = { klass, (u16)indirection, (u8)access, (u8)constness };
         return info;
     }
-    
+
     /// Creates a copy of a type
     /*!
      * Creates a copy of the type description but alters the constness of the indirection
      * \returns A modify copy of the type
      */
     static inline Type makeType(
-            const Type& type,               ///! type to copy
-            MakeConstType /*constify*/      ///! make const
+            const Type& type,               ///< type to copy
+            MakeConstType constify          ///< make const
         )
     {
+        be_forceuse(constify);
         Type info = { type.metaclass, type.indirection, type.access, Const };
         return info;
     }
 
-    /// Returns the size of the value.
+    /// Calculates the size of a value of this type.
     /*!
-     * It is either the size of a pointer or the size of the object itself
+     * \returns
+     *  Either the size of a pointer or the size of the object itself
      *  depending on the indirection to the object.
      */
     u32                 size() const;
+
     /// Returns the name of this type
     /*!
      * Builds the type name depending on the access and indirection.
+     * \returns
+     *   A formatted string including the indirection, access right and constness of this type.
      */
     minitl::format<>    name() const;
     /// Calculate the distance to another type
@@ -151,7 +156,7 @@ struct be_api(RTTI) Type
      * Two types can be compatible but not necessarily equivalent. In order to
      * find the best version of an overloaded method, it is necessary to calculate
      * how close the type of the real parameter is from the type expected by a method.
-     * This method returns 0 in case the two types are equal; it returns a value different than 0
+     * This method returns 0 in case the two types are equal; it returns a value above 0
      * if they don't exactly match but are compatible.
      * It returns a very large value for types that are not compatible.
      * A type is compatible with another one if:

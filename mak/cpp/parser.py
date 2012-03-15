@@ -153,16 +153,16 @@ def p_cs_params_list_c1(t):
 	"""
 		cs_params_list : doxycomment param
 	"""
-	t[2][3] = t[1]+t[2][3]
+	t[2][2][0:0] = t[1]
 	t[0] = [t[2]]
 
 def p_cs_params_list_c2(t):
 	"""
 		cs_params_list : param doxycomment_left
 	"""
-	t[1][3] = t[2]+t[1][3]
+	t[1][2][0:0] = t[2]
 	t[0] = [t[1]]
-	
+
 def p_cs_params_list(t):
 	"""
 		cs_params_list : param
@@ -173,21 +173,21 @@ def p_cs_params_list_extend_c1(t):
 	"""
 		cs_params_list : param doxycomment_left COMMA cs_params_list
 	"""
-	t[1][3] = t[2]+t[1][3]
+	t[1][2][0:0] = t[2]
 	t[0] = [t[1]]+t[4]
 
 def p_cs_params_list_extend_c2(t):
 	"""
 		cs_params_list : doxycomment param COMMA cs_params_list
 	"""
-	t[2][3] = t[1]+t[2][3]
+	t[2][2][0:0] = t[1]
 	t[0] = [t[2]]+t[4]
 
 def p_cs_params_list_extend_c3(t):
 	"""
 		cs_params_list : param COMMA doxycomment_left cs_params_list
 	"""
-	t[1][3] = t[3]+t[1][3]
+	t[1][2][0:0] = t[3]
 	t[0] = [t[1]]+t[4]
 
 def p_cs_params_list_extend(t):
@@ -927,7 +927,7 @@ def p_method_decl_or_impl(t):
 		decl : method doxycomment_left_opt initializers LBRACE skiplist_all RBRACE
 	"""
 	t.parser.namespace.addMethod(t[1][0], t[1][1], t[1][2], t[1][3], t[2], t[1][4])
-	
+
 def p_method_decl_or_impl_1(t):
 	"""
 		decl : method SEMI doxycomment_left_opt
@@ -979,7 +979,7 @@ def p_method_decl_or_impl_3_comment(t):
 		decl : doxycomment modifier_list method SEMI
 	"""
 	t.parser.namespace.addMethod(t[3][0], t[3][1]|t[2], t[3][2], t[3][3], t[1], t[3][4])
-	
+
 def p_method_decl_or_impl_4(t):
 	"""
 		decl : tags modifier_list method doxycomment_left SEMI
@@ -1054,7 +1054,7 @@ def p_doxyline(t):
 		doxyline : DOXY_LINE DOXY_END
 	"""
 	pass
-	
+
 def p_doxylines(t):
 	"""
 		doxylines : doxyline doxyline
@@ -1065,16 +1065,15 @@ def p_doxylines(t):
 def p_doxyblock(t):
 	"""
 		doxyblock : DOXY_BLOCK DOXY_END
-		
 	"""
 	pass
-	
+
 def p_doxyline_left(t):
 	"""
 		doxyline_left : DOXY_LINE_LEFT DOXY_END
 	"""
 	pass
-	
+
 def p_doxylines_left(t):
 	"""
 		doxylines_left : doxyline_left doxyline_left
@@ -1085,7 +1084,6 @@ def p_doxylines_left(t):
 def p_doxyblock_left(t):
 	"""
 		doxyblock_left : DOXY_BLOCK_LEFT DOXY_END
-		
 	"""
 	pass
 
