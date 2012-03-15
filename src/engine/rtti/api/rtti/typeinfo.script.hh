@@ -28,8 +28,8 @@ struct Class;
  * Just as in \e C++, the constness can be applied to different parts of a type;
  * a pointer to a \e const value is different from a \e const pointer to a value,
  * which is itself different from a \e const pointer to a \e const value.
- * The constness of the object is then split in two parts; the \e access
- * indicates the constness of the object pointed at. the \e constness indicates
+ * The constness of the object is then split in two parts; the \ref access
+ * indicates the constness of the object pointed at. the \ref constness indicates
  * the constness of the variable.
  *
  * \sa
@@ -163,16 +163,22 @@ struct be_api(RTTI) Type
      *  - the metaclass inherits from the compatible type
      *  - the access is less permissive than the compatible type
      *  - the indirection type is compatible
+     *
+     * \param other Type to which to try compatibility
      * \returns
      *  The distance between type other and this, or MaxTypeDistance if this
      *  is not compatible with type
      */
-    u32                 distance(
-            const Type& other ///< type to which to try compatibility
-        ) const;
+    u32                 distance(const Type& other) const;
+
+    /// Max distance constant
+    /*!
+     * The maximum distance between two types, when they are not compatible
+     * \deprecated
+     */
     enum MaxTypeDistanceType
     {
-        MaxTypeDistance = 1000000 /*!< */
+        MaxTypeDistance = 1000000 ///< The maximum distance to indicate two types are not compatible
     };
 private:
     Type& operator=(const Type&);
