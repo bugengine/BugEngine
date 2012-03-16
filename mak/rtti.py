@@ -139,6 +139,7 @@ class Root(Container):
 		file.write("#include    <rtti/engine/helper/get.hh>\n")
 		file.write("#include    <rtti/engine/helper/set.hh>\n")
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
+		file.write("#include    <rtti/tags/documentation.script.hh>\n")
 		file.write("\n")
 
 		if showline: file.write("#line %d \"%s\"\n" % (self.line, self.source.replace("\\", "\\\\")))

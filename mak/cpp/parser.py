@@ -1026,20 +1026,17 @@ def p_method_decl_or_impl_6_comment(t):
 # doxygen
 def p_doxycomment(t):
 	"""
-		doxycomment : doxyline
-		doxycomment : doxylines
-		doxycomment : doxyblock
-		doxycomment : doxyline doxyblock
+		doxycomment : DOXY_BEGIN doxy_words DOXY_END
+		doxycomment_left : DOXY_BEGIN_LEFT doxy_words DOXY_END
 	"""
 	t[0] = []
 
-def p_doxycomment_left(t):
+def p_doxycomment_brief(t):
 	"""
-		doxycomment_left : doxyline_left
-		doxycomment_left : doxylines_left
-		doxycomment_left : doxyblock_left
-		doxycomment_left : doxyline_left doxyblock_left
+		doxycomment : DOXY_BEGIN doxy_words DOXY_END DOXY_BEGIN doxy_words DOXY_END
+		doxycomment_left : DOXY_BEGIN_LEFT doxy_words DOXY_END DOXY_BEGIN_LEFT doxy_words DOXY_END
 	"""
+	#t[0] = [(t[2][0] or 'brief', t[2][1])] + t[5]
 	t[0] = []
 
 def p_doxycomment_left_optional(t):
@@ -1047,45 +1044,37 @@ def p_doxycomment_left_optional(t):
 		doxycomment_left_opt : 
 		doxycomment_left_opt : doxycomment_left
 	"""
-	t[0] = []
+	if len(t) > 1:
+		t[0] = t[1]
+	else:
+		t[0] = []
 
-def p_doxyline(t):
+def p_doxy_words(t):
 	"""
-		doxyline : DOXY_LINE DOXY_END
+		doxy_words :
 	"""
-	pass
+	t[0] = [('', [])]
 
-def p_doxylines(t):
+def p_doxy_text(t):
 	"""
-		doxylines : doxyline doxyline
-		doxylines : doxyline doxylines
+		doxy_words : DOXY_WORD doxy_words
+		doxy_words : DOXY_LIST doxy_words
 	"""
-	pass
+	t[2][0][1][0:0] = [t[1]]
+	t[0] = t[2]
 
-def p_doxyblock(t):
+def p_doxy_newpar(t):
 	"""
-		doxyblock : DOXY_BLOCK DOXY_END
+		doxy_words : DOXY_NEWLINE DOXY_NEWLINE doxy_words
 	"""
-	pass
+	t[0] = [('',[])] + t[3]
 
-def p_doxyline_left(t):
+def p_doxy_newline(t):
 	"""
-		doxyline_left : DOXY_LINE_LEFT DOXY_END
+		doxy_words : DOXY_NEWLINE doxy_words
 	"""
-	pass
+	t[0] = t[2]
 
-def p_doxylines_left(t):
-	"""
-		doxylines_left : doxyline_left doxyline_left
-		doxylines_left : doxyline_left doxylines_left
-	"""
-	pass
-
-def p_doxyblock_left(t):
-	"""
-		doxyblock_left : DOXY_BLOCK_LEFT DOXY_END
-	"""
-	pass
 
 ###################################
 # skiplist
