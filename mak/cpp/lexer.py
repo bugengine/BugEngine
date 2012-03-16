@@ -45,12 +45,12 @@ tokens = reserved + (
 	'ELLIPSIS',
 
 	# Doxygen comments
-	'DOXY_BLOCK',
-	'DOXY_BLOCK_LEFT',
-	'DOXY_LINE',
-	'DOXY_LINE_LEFT',
+	'DOXY_BEGIN',
+	'DOXY_BEGIN_LEFT',
 	'DOXY_END',
 	'DOXY_NEWLINE',
+	'DOXY_WORD',
+	'DOXY_LIST'
 )
 
 # Completely ignored characters
@@ -132,28 +132,32 @@ def t_doxygen_line_left(t):
 	r'//[/!]<'
 	t.lexer.begin('DOXYGEN')
 	t.lexer.doxyline=1
-	t.type = "DOXY_LINE_LEFT"
+	t.lexer.doxyleft = 1
+	t.type = "DOXY_BEGIN_LEFT"
 	return t
 
 def t_doxygen_line(t):
 	r'//[/!]'
 	t.lexer.begin('DOXYGEN')
 	t.lexer.doxyline=1
-	t.type = "DOXY_LINE"
+	t.lexer.doxyleft = 0
+	t.type = "DOXY_BEGIN"
 	return t
 
 def t_doxygen_block_left(t):
 	r'/\*[\*!]<'
 	t.lexer.begin('DOXYGEN')
 	t.lexer.doxyline=0
-	t.type = "DOXY_BLOCK_LEFT"
+	t.lexer.doxyleft = 1
+	t.type = "DOXY_BEGIN_LEFT"
 	return t
 
 def t_doxygen_long(t):
 	r'/\*!'
 	t.lexer.begin('DOXYGEN')
 	t.lexer.doxyline=0
-	t.type = "DOXY_BLOCK"
+	t.lexer.doxyleft = 0
+	t.type = "DOXY_BEGIN"
 	return t
 
 def t_doxygen_long_2(t):
@@ -165,16 +169,25 @@ def t_doxygen_long_2(t):
 
 t_DOXYGEN_ignore = ' \t\x0c\r'
 
+def t_DOXYGEN_list(t):
+	r'^\w*\*\w*-\#?'
+	t.type = "DOXY_LIST"
+
+def t_DOXYGEN_newline_extend(t):
+	r'\n\w*//[/!]<?'
+	t.type = "DOXY_NEWLINE"
+	return t
+
 def t_DOXYGEN_newline(t):
-	r'\n+'
+	r'\n\w*\*?'
 	t.lexer.lineno += t.value.count("\n")
 	if t.lexer.doxyline:
 		t.lexer.begin('INITIAL')
 		t.type = "DOXY_END"
 		return t
-	#else:
-	#	t.type = "DOXY_NEWLINE"
-	#	return t
+	else:
+		t.type = "DOXY_NEWLINE"
+		return t
 
 def t_DOXYGEN_end(t):
 	r'\*+/'
@@ -185,7 +198,8 @@ def t_DOXYGEN_end(t):
 
 def t_DOXYGEN_word(t):
 	r'([^ \t\x0c\r\n])+'
-	pass
+	t.type = "DOXY_WORD"
+	return t
 
 
 
