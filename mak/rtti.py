@@ -452,12 +452,12 @@ class Class(Container):
 				paramindex = 0
 				param = "0"
 				if showline: file.write("#line %d\n" % (line))
-				method_tagname = self.writeTags(file, decl+"_"+prettyname, tags)
+				method_tagname = self.writeTags(file, decl+"_"+prettyname+"_%d"%overloadindex, tags)
 				for ptype, pname, tags in params[::-1]:
 					self.hash.update("param".encode())
 					self.hash.update(ptype.encode())
 					self.hash.update(pname.encode())
-					param_tagname = self.writeTags(file, decl+"_"+prettyname+"_"+pname, tags)
+					param_tagname = self.writeTags(file, decl+"_"+prettyname+("_%d_"%overloadindex)+pname, tags)
 					file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter s_%s_%s_%d_p%d =\n" % (decl, prettyname, overloadindex, paramindex))
 					file.write("    {\n")
 					file.write("        {%s},\n" % param_tagname)

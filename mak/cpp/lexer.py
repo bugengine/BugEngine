@@ -170,17 +170,20 @@ def t_doxygen_long_2(t):
 t_DOXYGEN_ignore = ' \t\x0c\r'
 
 def t_DOXYGEN_list(t):
-	r'^\w*\*\w*-\#?'
+	r'\n[ \t]*(\*[ \t]*)?-\#?'
 	t.type = "DOXY_LIST"
+	t.value = t.value[t.value.find('*')+1:]
+	return t
 
 def t_DOXYGEN_newline_extend(t):
-	r'\n\w*//[/!]<?'
+	r'\n[ \t]*//[/!]<?'
+	t.lexer.lineno += 1
 	t.type = "DOXY_NEWLINE"
 	return t
 
 def t_DOXYGEN_newline(t):
-	r'\n\w*\*?'
-	t.lexer.lineno += t.value.count("\n")
+	r'\n'
+	t.lexer.lineno += 1
 	if t.lexer.doxyline:
 		t.lexer.begin('INITIAL')
 		t.type = "DOXY_END"
