@@ -1024,20 +1024,39 @@ def p_method_decl_or_impl_6_comment(t):
 
 ###################################
 # doxygen
+import zlib
+def toDoxyHelp(sections):
+	text = ""
+	if sections:
+		if sections[0][0] == '':
+			sections[0] = ('synopsis', sections[0][1])
+		if len(sections) > 1 and sections[1][0] == '':
+			sections[1] = ('description', sections[1][1])
+	for sectiontitle,sectiontext in sections:
+		if sectiontitle:
+			text = text + "= %s =\n" % sectiontitle.title()
+		text = text + ' '.join(sectiontext)
+		text = text + '\n\n'
+	size = len(text)
+	text = zlib.compress(text)
+	string=""
+	for c in text:
+		string += "\\%s"%hex(ord(c))[1:]
+	return [('::BugEngine::RTTI::Documentation', '%d, (const u8*)"%s"'% (size, string))]
+
 def p_doxycomment(t):
 	"""
 		doxycomment : DOXY_BEGIN doxy_words DOXY_END
 		doxycomment_left : DOXY_BEGIN_LEFT doxy_words DOXY_END
 	"""
-	t[0] = []
+	t[0] = toDoxyHelp(t[2])
 
 def p_doxycomment_brief(t):
 	"""
 		doxycomment : DOXY_BEGIN doxy_words DOXY_END DOXY_BEGIN doxy_words DOXY_END
 		doxycomment_left : DOXY_BEGIN_LEFT doxy_words DOXY_END DOXY_BEGIN_LEFT doxy_words DOXY_END
 	"""
-	#t[0] = [(t[2][0] or 'brief', t[2][1])] + t[5]
-	t[0] = []
+	t[0] = toDoxyHelp(t[2] + t[5])
 
 def p_doxycomment_left_optional(t):
 	"""
@@ -1058,9 +1077,15 @@ def p_doxy_words(t):
 def p_doxy_text(t):
 	"""
 		doxy_words : DOXY_WORD doxy_words
-		doxy_words : DOXY_LIST doxy_words
 	"""
 	t[2][0][1][0:0] = [t[1]]
+	t[0] = t[2]
+
+def p_doxy_listitem(t):
+	"""
+		doxy_words : DOXY_LIST doxy_words
+	"""
+	t[2][0][1][0:0] = ['\n'+t[1]]
 	t[0] = t[2]
 
 def p_doxy_newpar(t):
@@ -1073,7 +1098,10 @@ def p_doxy_newline(t):
 	"""
 		doxy_words : DOXY_NEWLINE doxy_words
 	"""
+	#print t[1]
 	t[0] = t[2]
+	if t[0] and t[0][0] and t[0][0][1] and t[0][0][1][0] == '*':
+		t[0][0] = (t[0][0][0], t[0][0][1][1:])
 
 
 ###################################

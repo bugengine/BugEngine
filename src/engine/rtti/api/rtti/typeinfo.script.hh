@@ -19,7 +19,7 @@ struct Class;
 /*!
  * The Type struct stores meta-information about an object; it holds
  * information about the class of an object stored in the \ref RTTI::Value,
- * its indirection (and thus how to access it), and the constness of the object
+ * its indirection (and thus how to access it), and the constness of the object.
  *
  * All objects passed to script are packed in an opaque structure; the type
  * allows to modify the value that is packed and the members of this value.
