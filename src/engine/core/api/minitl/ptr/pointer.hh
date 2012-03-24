@@ -65,19 +65,17 @@ protected:
         checked_destroy(this);
         d->free(this);
     }
+    #ifdef BE_ENABLE_WEAKCHECK
     inline void addweak() const
     {
-    #ifdef BE_ENABLE_WEAKCHECK
         ++m_weakCount;
-    #endif
     }
     inline void decweak() const
     {
-    #ifdef BE_ENABLE_WEAKCHECK
         be_assert(m_weakCount, "object has no weak reference; cannot dereference it again");
         --m_weakCount;
-    #endif
     }
+    #endif
 };
 
 template< typename T >

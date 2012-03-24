@@ -30,15 +30,50 @@ private:
     }
 public:
     weak() : m_ptr(0) {}
-    weak(T* ptr) : m_ptr(ptr) { if (m_ptr) m_ptr->addweak(); }
+    weak(T* ptr)
+        : m_ptr(ptr)
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->addweak();
+        #endif
+    }
     template< typename U >
-    weak(ref<U> other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
+    weak(ref<U> other)
+        : m_ptr(checkIsA<T>(other.operator->()))
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->addweak();
+        #endif
+    }
     template< typename U >
-    weak(const scoped<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
-    weak(const weak& other) : m_ptr(other.operator->()) { if (m_ptr) m_ptr->addweak(); }
+    weak(const scoped<U>& other)
+        : m_ptr(checkIsA<T>(other.operator->()))
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->addweak();
+        #endif
+    }
+    weak(const weak& other)
+        : m_ptr(other.operator->())
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->addweak();
+        #endif
+    }
     template< typename U >
-    weak(const weak<U>& other) : m_ptr(checkIsA<T>(other.operator->())) { if (m_ptr) m_ptr->addweak(); }
-    ~weak() { if (m_ptr) m_ptr->decweak(); }
+    weak(const weak<U>& other)
+        : m_ptr(checkIsA<T>(other.operator->()))
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->addweak();
+        #endif
+    }
+    ~weak()
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->decweak();
+        #endif
+    }
 
     weak& operator=(const weak& other) { weak(other).swap(*this); return *this; }
     template< typename U >
@@ -51,7 +86,12 @@ public:
     bool operator!() const { return m_ptr == 0; }
     T& operator*() { return *static_cast<T*>(const_cast<minitl::pointer*>(m_ptr)); }
 
-    void clear() { if (m_ptr) m_ptr->decweak(); m_ptr = 0; }
+    void clear()
+    {
+        #ifdef BE_ENABLE_WEAKCHECK
+            if (m_ptr) m_ptr->decweak(); m_ptr = 0;
+        #endif
+    }
 };
 
 }
