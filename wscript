@@ -23,12 +23,13 @@ def build(bld):
 
 	dbghelp			= module.external('dbghelp')
 	win32			= module.external('win32')
+	zlib			= module.external('zlib')
 
 	mak				= module.external('mak')
 
 	core			= module.library('core',		[dbghelp, win32, mak])
 	network			= module.library('network',		[core])
-	rtti			= module.library('rtti',		[core, network] )
+	rtti			= module.library('rtti',		[core, network, zlib] )
 	system			= module.library('system',		[core, rtti] )
 	world			= module.library('world',		[core, rtti, system] )
 
