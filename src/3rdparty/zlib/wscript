@@ -1,0 +1,14 @@
+import mak
+from mak import module
+import os
+
+def options(opt):
+	pass
+
+def setup(conf):
+	pass
+
+def build(bld):
+	bld.m['zlib'] = module.static_library( 'zlib', [], '3rdparty')
+	bld.m['zlib'].usemaster = False
+

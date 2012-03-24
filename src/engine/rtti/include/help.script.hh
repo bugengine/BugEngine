@@ -1,0 +1,24 @@
+/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+   see LICENSE for detail */
+
+#ifndef BE_RTTI_HELP_SCRIPT_HH_
+#define BE_RTTI_HELP_SCRIPT_HH_
+/*****************************************************************************/
+#include <rtti/engine/methodinfo.script.hh>
+#include <rtti/engine/propertyinfo.script.hh>
+#include <rtti/classinfo.script.hh>
+
+namespace BugEngine
+{
+
+void help(const RTTI::Class& klass);
+void help(const RTTI::Property& klass);
+void help(const RTTI::Method& klass);
+void help(const RTTI::Method::Overload& klass);
+void help(const RTTI::Method::Overload::Parameter& klass);
+void help(const Value& v);
+
+}
+
+/*****************************************************************************/
+#endif

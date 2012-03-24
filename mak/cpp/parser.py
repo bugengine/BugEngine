@@ -1038,10 +1038,13 @@ def toDoxyHelp(sections):
 		text = text + ' '.join(sectiontext)
 		text = text + '\n\n'
 	size = len(text)
-	text = zlib.compress(text)
+	text = zlib.compress(text.encode())
 	string=""
 	for c in text:
-		string += "\\%s"%hex(ord(c))[1:]
+		try:
+			string += "\\%s"%hex(ord(c))[1:]
+		except TypeError:
+			string += "\\%s"%hex(c)[1:]
 	return [('::BugEngine::RTTI::Documentation', '%d, (const u8*)"%s"'% (size, string))]
 
 def p_doxycomment(t):

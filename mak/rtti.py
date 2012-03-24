@@ -1,6 +1,5 @@
 import os
 
-
 try:
 	import hashlib
 	make_md5 = hashlib.md5
@@ -61,6 +60,7 @@ class Container:
 		self.parent = parent
 		self.name = name
 		if parent:
+			self.source = parent.source
 			self.fullname = parent.fullname
 			self.useMethods = parent.useMethods
 			self.plugin = parent.plugin
@@ -211,7 +211,7 @@ class Namespace(Container):
 				file.write("    };\n")
 				statics = "&s_%s_%s" % (decl, name)
 		if self.members:
-			file.write("static const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(%s) );\n" % (decl, parent, statics))
+			file.write("static const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_%s_obj_ptr = ( %s->objects.set(%s) );\n" % (decl, self.hash.hexdigest(), parent, statics))
 
 	def buildMethods(self, file, decl, parent):
 		method = "%s->methods.m_ptr" % parent
@@ -281,7 +281,7 @@ class Namespace(Container):
 			file.write("    };\n")
 			method = "&s_method_%s_%s" % (decl, prettyname)
 		if self.methods:
-			file.write("static const ::BugEngine::RTTI::Method* s_%s_method_ptr = { %s->methods.set(%s) };\n" % (decl, parent, method))
+			file.write("static const ::BugEngine::RTTI::Method* s_%s_%s_method_ptr = { %s->methods.set(%s) };\n" % (decl, self.hash.hexdigest(), parent, method))
 
 
 class Enum(Container):
