@@ -16,8 +16,7 @@ BE_REGISTER_NAMESPACE_2_(game, BugEngine, Documentation);
 namespace BugEngine
 {
 
-template< >
-raw<const RTTI::Class> be_typeid< void >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
 {
     static const RTTI::Class s_void = { "void", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
     raw<const RTTI::Class> ci = {&s_void};

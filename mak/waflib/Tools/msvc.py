@@ -438,7 +438,6 @@ def gather_icl_versions(conf, versions):
 				_winreg.OpenKey(all_versions,version+'\\'+targetDir)
 				icl_version=_winreg.OpenKey(all_versions,version)
 				path,type=_winreg.QueryValueEx(icl_version,'ProductDir')
-				print path
 				if os.path.isfile(os.path.join(path,'bin','iclvars.bat')):
 					try:
 						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,os.path.join(path,'bin','iclvars.bat')))))

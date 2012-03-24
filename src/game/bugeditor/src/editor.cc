@@ -7,7 +7,7 @@
 #include    <system/file/diskfolder.script.hh>
 #include    <system/scheduler/task/method.hh>
 #include    <world/world.script.hh>
-#include <rtti/engine/taginfo.script.hh>
+
 namespace BugEngine { namespace Editor
 {
 

@@ -85,7 +85,7 @@ struct be_typeid< T* const >
     static inline Type  type()  { return Type::makeType(be_typeid<T>::klass(), Type::RawPtr, minitl::is_const<T>::Value ? Type::Const : Type::Mutable, Type::Const); }
 };
 
-template< > raw<const RTTI::Class> be_typeid< void >::klass();
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
 
 }
 

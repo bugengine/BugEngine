@@ -82,20 +82,20 @@ class vs2008e(vs2003):
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
-	version =	(('Visual Studio 2010', '11.00', True),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual Studio 2010', '11.00', True),(vcxproj.VCxproj, ('4.0','10.0')))
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2010', '11.00', False),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual C++ Express 2010', '11.00', False),(vcxproj.VCxproj, ('4.0','10.0')))
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	version =	(('Visual Studio 11', '12.00', True),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual Studio 11', '12.00', True),(vcxproj.VCxproj, ('4.5','11.0')))
 
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
-	version =	(('Visual C++ Express 11', '12.00', False),(vcxproj.VCxproj, '4.0'))
+	version =	(('Visual C++ Express 11', '12.00', False),(vcxproj.VCxproj, ('4.5','11.0')))
 

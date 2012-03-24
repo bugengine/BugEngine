@@ -31,7 +31,7 @@ class VCxproj:
 		self.output.write('  </ItemGroup>\n')
 		self.output.write('  <PropertyGroup Label="Globals">\n')
 		self.output.write('    <ProjectGUID>%s</ProjectGUID>\n' % solution.generateGUID(self.targetName, self.name))
-		self.output.write('    <TargetFrameworkVersion>v%s</TargetFrameworkVersion>\n' % self.versionNumber)
+		self.output.write('    <TargetFrameworkVersion>v%s</TargetFrameworkVersion>\n' % self.versionNumber[0])
 		self.output.write('    <RootNamespace>%s</RootNamespace>\n' % self.name)
 		self.output.write('  </PropertyGroup>\n')
 		self.output.write('  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />\n')
@@ -43,6 +43,7 @@ class VCxproj:
 		self.output.write('    <TargetName>%s</TargetName>\n' % self.name)
 		self.output.write('    <OutDir>$(SolutionDir)build\\$(Configuration)\\</OutDir>\n')
 		self.output.write('    <IntDir>$(SolutionDir)build\\$(Configuration)\\</IntDir>\n')
+		self.output.write('    <PlatformToolset>v%d</PlatformToolset>\n' % float(self.versionNumber[1])*10)
 		self.output.write('  </PropertyGroup>\n')
 		for (config, options) in configs:
 			env = self.envs[config]
