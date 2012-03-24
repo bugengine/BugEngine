@@ -342,7 +342,8 @@ class Class(Container):
 	def predecl(self, file):
 		Container.predecl(self, file)
 		file.write("template< > raw<const RTTI::Class> be_typeid< %s >::klass();\n" % (self.fullname))
-		file.write("template< > raw<const RTTI::Class> be_typeid< %s >::klass();\n" % (self.inherits))
+		if self.inherits != 'void':
+			file.write("template< > raw<const RTTI::Class> be_typeid< %s >::klass();\n" % (self.inherits))
 
 	def dump(self, file, namespace, parent):
 		file.write("//----------------------------------------------------------------------\n")
