@@ -11,7 +11,7 @@
 #include    <minitl/type/typemanipulation.hh>
 #include    <rtti/typeinfo.inl>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 Value::Value()
@@ -252,11 +252,11 @@ Value Value::operator()(Value params[], u32 paramCount)
     static const istring callName("call");
     Value call = (*this)[callName];
     be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
-    be_assert_recover(be_typeid<const RTTI::Method*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
-    return call.as<const RTTI::Method*>()->doCall(params, paramCount);
+    be_assert_recover(be_typeid<const Method*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
+    return call.as<const Method*>()->doCall(params, paramCount);
 }
 
-}
+}}
 
 #include    <rtti/typeinfo.inl>
 

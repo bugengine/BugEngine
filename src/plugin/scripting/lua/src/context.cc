@@ -112,20 +112,20 @@ void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block
 }
 
 
-void Context::push(lua_State* state, const Value& v)
+void Context::push(lua_State* state, const RTTI::Value& v)
 {
-    const Type& t = v.type();
+    const RTTI::Type& t = v.type();
     if (t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
     {
     }
 
-    void* userdata = lua_newuserdata(state, sizeof(Value));
-    new(userdata) Value(v);
+    void* userdata = lua_newuserdata(state, sizeof(RTTI::Value));
+    new(userdata) RTTI::Value(v);
     lua_getglobal(state, "bugvalue");
     lua_setmetatable(state, -2);
 }
 /*
-void Context::push(lua_State* state, const Value& v)
+void Context::push(lua_State* state, const RTTI::Value& v)
 {
     switch(v.type())
     {
@@ -157,22 +157,22 @@ void Context::push(lua_State* state, const Value& v)
     }
 }*/
 
-Value Context::get(lua_State *state, int index)
+RTTI::Value Context::get(lua_State *state, int index)
 {
     int t = lua_type(state, index);
     switch (t)
     {
     case LUA_TSTRING:
         {
-            return Value(); //std::string(lua_tostring(state, index))
+            return RTTI::Value(); //std::string(lua_tostring(state, index))
         }
     case LUA_TBOOLEAN:
         {
-            return Value(); //lua_toboolean(state, index)?true:false);
+            return RTTI::Value(); //lua_toboolean(state, index)?true:false);
         }
     case LUA_TNUMBER:
         {
-            return Value(); //double(lua_tonumber(state, index)));
+            return RTTI::Value(); //double(lua_tonumber(state, index)));
         }
     case LUA_TUSERDATA:
         {
@@ -181,31 +181,31 @@ Value Context::get(lua_State *state, int index)
             if (lua_rawequal(state, -1, -2))
             {
                 lua_pop(state, 2);
-                return *(Value*)lua_touserdata(state, index);
+                return *(RTTI::Value*)lua_touserdata(state, index);
             }
             else
             {
                 lua_pop(state, 2);
                 be_notreached();
-                return Value();
+                return RTTI::Value();
             }
         }
     default:
-        return Value();
+        return RTTI::Value();
     }
 }
 
 int Context::valueGC(lua_State *state)
 {
-    Value* userdata = (Value*)lua_touserdata(state, -1);
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -1);
     userdata->~Value();
     return 0;
 }
 
 int Context::valueToString(lua_State *state)
 {
-    Value* userdata = (Value*)lua_touserdata(state, -1);
-    if (userdata->type().indirection == Type::Value)
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -1);
+    if (userdata->type().indirection == RTTI::Type::Value)
     {
         raw<const RTTI::Class> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
@@ -230,9 +230,9 @@ int Context::valueToString(lua_State *state)
 
 int Context::valueGet(lua_State *state)
 {
-    Value* userdata = (Value*)lua_touserdata(state, -2);
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
     const char *name = lua_tostring(state, -1);
-    Value v = (*userdata)[name];
+    RTTI::Value v = (*userdata)[name];
     if (!v)
     {
         lua_pushnil(state);
@@ -245,19 +245,19 @@ int Context::valueGet(lua_State *state)
 int Context::valueCall(lua_State *state)
 {
     int top = lua_gettop(state);
-    Value* userdata = (Value*)lua_touserdata(state, 1);
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, 1);
 
     void* v = 0;
-    Value* values = 0;
-    v = malloca(be_align(sizeof(Value), be_alignof(Value))*(top-1));
-    values = (Value*)v;
+    RTTI::Value* values = 0;
+    v = malloca(be_align(sizeof(RTTI::Value), be_alignof(RTTI::Value))*(top-1));
+    values = (RTTI::Value*)v;
 
     for (int i = 1; i < top; i++)
     {
-        new((void*)(&values[i])) Value(get(state, i));
+        new((void*)(&values[i])) RTTI::Value(get(state, i));
     }
 
-    Value result = (*userdata)(values, top-1);
+    RTTI::Value result = (*userdata)(values, top-1);
 
     for (int i = top-1; i > 0; --i)
         values[i-1].~Value();
@@ -298,7 +298,7 @@ void Context::printStack(lua_State* l)
             break;
         case LUA_TUSERDATA:
             {
-                Value* userdata = (Value*)lua_touserdata(l, -i);
+                RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(l, -i);
                 be_forceuse(userdata);
                 be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
             }

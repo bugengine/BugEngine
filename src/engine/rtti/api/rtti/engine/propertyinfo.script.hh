@@ -6,19 +6,15 @@
 /*****************************************************************************/
 #include   <rtti/typeinfo.script.hh>
 
-namespace BugEngine
-{
-class Value;
-}
-
 namespace BugEngine { namespace RTTI
 {
 
 struct Tag;
+class Value;
 
 struct be_api(RTTI) Property
 {
-    friend class BugEngine::Value;
+    friend class Value;
 published:
     raw<Tag> const      tags;
     raw<const Property> next;

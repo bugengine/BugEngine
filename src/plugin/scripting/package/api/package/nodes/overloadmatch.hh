@@ -29,7 +29,7 @@ public:
     OverloadMatch(raw<const RTTI::Method::Overload> overload);
     void addParameter(weak<const Parameter> param);
     bool operator<(const OverloadMatch& other) const;
-    BugEngine::Value create() const;
+    RTTI::Value create() const;
 };
 
 }}}
