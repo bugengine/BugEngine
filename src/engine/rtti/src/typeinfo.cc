@@ -7,7 +7,7 @@
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 u32 Type::size() const
@@ -146,4 +146,4 @@ u32 Type::distance(const Type& other) const
     return result + metaclass->distance(other.metaclass);
 }
 
-}
+}}

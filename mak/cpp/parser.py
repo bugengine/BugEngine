@@ -122,7 +122,7 @@ def p_param_ellipsis(t):
 def p_template_param(t):
 	"""
 		template_param : type param_name_opt array_opt template_param_value_opt
-		template_param : template class param_name_opt array_opt template_param_value_opt
+		template_param : template CLASS param_name_opt array_opt template_param_value_opt
 		template_param : function_pointer_with_name template_param_value_opt
 		template_param : TYPENAME
 		template_param : ELLIPSIS
@@ -351,6 +351,13 @@ def p_typedef2(t):
 	"""
 	t.parser.rtti.Typedef(t.parser.namespace, t[2][1], t.lineno(1))
 
+def p_friend(t):
+	"""
+		decl : FRIEND CLASS name SEMI
+		decl : FRIEND STRUCT name SEMI
+		decl : FRIEND method SEMI
+	"""
+	pass
 
 def p_modifier_left(t):
 	"""
@@ -359,7 +366,6 @@ def p_modifier_left(t):
 		modifier_left : INLINE
 		modifier_left : VIRTUAL
 		modifier_left : OVERRIDE
-		modifier_left : FRIEND
 		modifier_left : EXTERN
 		modifier_left : EXTERN STRING
 	"""
@@ -685,18 +691,6 @@ def p_tag(t):
 
 ###################################
 # class
-def p_struct_kw(t):
-	"""
-		struct : STRUCT
-		struct : UNION
-	"""
-	pass
-
-def p_class_kw(t):
-	"""
-		class : CLASS
-	"""
-	pass
 
 def p_struct_header(t):
 	"""
@@ -714,8 +708,9 @@ def p_class_header(t):
 
 def p_class(t):
 	"""
-		class_def : class class_header decls RBRACE
-		class_def : struct struct_header decls RBRACE
+		class_def : CLASS class_header decls RBRACE
+		class_def : STRUCT struct_header decls RBRACE
+		class_def : UNION struct_header decls RBRACE
 	"""
 
 def p_class_2(t):
@@ -750,8 +745,9 @@ def p_class_5(t):
 
 def p_class_decl(t):
 	"""
-		simple_type : class name
-		simple_type : struct name
+		simple_type : CLASS name
+		simple_type : STRUCT name
+		simple_type : UNION name
 	"""
 	t[0] = ('', t.parser.rtti.Typedef(t.parser.namespace, t[2], t.lineno(2)).fullname)
 

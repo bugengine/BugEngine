@@ -5,17 +5,13 @@
 #define BE_RTTI_TYPEINFO_SCRIPT_HH_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 class Value;
-
-namespace RTTI
-{
 struct Class;
-}
 
-/// Represents the type of an object packed in an \ref RTTI::Value
+/// Represents the type of an object packed in a \ref BugEngine::RTTI::Value
 /*!
  * The Type struct stores meta-information about an object; it holds
  * information about the class of an object stored in the \ref RTTI::Value,
@@ -78,12 +74,12 @@ struct be_api(RTTI) Type
      * \sa
      *  BugEngine::RTTI::Class
      */
-    raw<const RTTI::Class>  metaclass;
+    raw<const Class>    metaclass;
     /// Indirection of the object
     /*!
      * Indicates how to access the object. The value is one of \ref Indirection.
      */
-    u16                     indirection;
+    u16                 indirection;
     /// Access right to the object
     /*!
      * access will be either Const or Mutable. It indicates the constness of the
@@ -92,7 +88,7 @@ struct be_api(RTTI) Type
      * \e const. If the access is \ref Const then the properties are read-only
      * and only \e const methods can be called.
      */
-    u8                      access;
+    u8                  access;
     /// Access right to the indirection
     /*!
      * indirection will be either Const or Mutable. It indicates the constness of the
@@ -100,7 +96,7 @@ struct be_api(RTTI) Type
      * make the value point to another object. If the indirection is \ref Const
      * then it is not possible to change the value to point to another object.
      */
-    u8                      constness;
+    u8                  constness;
 
     /// Creates a type
     /*!
@@ -115,7 +111,7 @@ struct be_api(RTTI) Type
      * \param constness
      *  The access rights to the indirection itself
      */
-    static inline Type makeType(raw<const RTTI::Class> klass, Indirection indirection, Constness access, Constness constness)
+    static inline Type makeType(raw<const Class> klass, Indirection indirection, Constness access, Constness constness)
     {
         Type info = { klass, (u16)indirection, (u8)access, (u8)constness };
         return info;
@@ -188,7 +184,7 @@ private:
     void                destroy(void* obj) const;
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

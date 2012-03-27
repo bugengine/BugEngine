@@ -17,7 +17,7 @@ class Reference : public minitl::refcountable, public minitl::intrusive_list<Ref
 private:
     weak< Package > const   m_owner;
     inamespace              m_name;
-    BugEngine::Value        m_value;
+    RTTI::Value        m_value;
     weak<const Object>      m_object;
 public:
     Reference(weak<Package> owner);
@@ -25,8 +25,8 @@ public:
 
     void setName(const inamespace& name);
 
-    const BugEngine::Value& getValue() const;
-    Type getType() const;
+    const RTTI::Value& getValue() const;
+    RTTI::Type getType() const;
 };
 
 }}}

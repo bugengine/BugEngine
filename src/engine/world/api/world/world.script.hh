@@ -6,6 +6,8 @@
 /*****************************************************************************/
 #include    <system/scheduler/task/itask.hh>
 #include    <system/resource/resource.script.hh>
+#include    <world/entity.script.hh>
+
 
 namespace BugEngine { namespace World
 {
@@ -17,8 +19,11 @@ class be_api(WORLD) World : public Resource
 private:
     ref<ITask>      m_task;
     scoped<State>   m_emptyEntityState;
+    i_u32           m_entityId;
 public:
     weak<ITask> updateWorldTask() const;
+published:
+    Entity spawn();
 published:
     World();
     ~World();

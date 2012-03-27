@@ -6,11 +6,9 @@
 /*****************************************************************************/
 #include   <rtti/typeinfo.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-namespace RTTI
-{
 struct Class;
 struct Property;
 template< typename T,
@@ -32,12 +30,12 @@ template< typename T,
           typename P16,
           typename Dummy>
 struct procedurehelper;
-}
+
 
 class Value
 {
-    friend struct RTTI::Class;
-    friend struct RTTI::Property;
+    friend struct Class;
+    friend struct Property;
     template< typename T,
           typename P1,
           typename P2,
@@ -56,7 +54,7 @@ class Value
           typename P15,
           typename P16,
           typename Dummy>
-    friend struct RTTI::procedurehelper;
+    friend struct procedurehelper;
 private:
     Type                m_type;
     struct Reference
@@ -118,7 +116,7 @@ public:
     inline Value operator()(Value params[], u32 paramCount);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif
