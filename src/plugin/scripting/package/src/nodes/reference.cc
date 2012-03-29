@@ -28,7 +28,7 @@ void Reference::setName(const inamespace& name)
     m_owner->resolveReference(this);
 }
 
-const BugEngine::Value& Reference::getValue() const
+const RTTI::Value& Reference::getValue() const
 {
     if (m_value)
     {
@@ -45,7 +45,7 @@ const BugEngine::Value& Reference::getValue() const
     }
 }
 
-Type Reference::getType() const
+RTTI::Type Reference::getType() const
 {
     if (m_value)
     {

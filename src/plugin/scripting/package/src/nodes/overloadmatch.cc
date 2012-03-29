@@ -59,11 +59,11 @@ bool OverloadMatch::operator<(const OverloadMatch& other) const
     return m_score < other.m_score;
 }
 
-BugEngine::Value OverloadMatch::create() const
+RTTI::Value OverloadMatch::create() const
 {
     be_assert(m_score == 0, "cannot create object when no perfect match was found");
     be_assert(m_params.size() <= 16, "parameter count larger than buffer; grow buffer");
-    BugEngine::Value v[16];
+    RTTI::Value v[16];
     for(size_t i = 0; i < m_params.size(); ++i)
     {
         v[i] = m_params[i].parameter->as(m_params[i].match->type);

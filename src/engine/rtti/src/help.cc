@@ -11,6 +11,11 @@
 namespace BugEngine
 {
 
+void help(const RTTI::Type& type)
+{
+    be_forceuse(type);
+}
+
 void help(const RTTI::Class& klass)
 {
     be_forceuse(klass);
@@ -37,7 +42,7 @@ void help(const RTTI::Method::Overload::Parameter& parameter)
 }
 
 
-void help(const Value& v)
+void help(const RTTI::Value& v)
 {
     be_forceuse(v);
 }

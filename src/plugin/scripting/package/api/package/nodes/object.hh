@@ -19,7 +19,7 @@ class Object : public minitl::refcountable
 private:
     weak< Package > const               m_owner;
     istring                             m_name;
-    Type                                m_objectType;
+    RTTI::Type                          m_objectType;
     ref<Reference>                      m_methodReference;
     const RTTI::Method*                 m_method;
     minitl::vector< ref<Parameter> >    m_parameters;
@@ -33,13 +33,13 @@ public:
     istring name() const                                        { return m_name; }
     const RTTI::Method* method() const                          { return m_method; }
     const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
-    Type getType() const;
+    RTTI::Type getType() const;
 
     void setName(istring name);
     void setMethod(ref<Reference> reference);
     void addParameter(ref<Parameter> param);
 
-    BugEngine::Value create() const;
+    RTTI::Value create() const;
 };
 
 }}}

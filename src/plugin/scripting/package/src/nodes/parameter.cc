@@ -23,12 +23,12 @@ istring Parameter::name() const
     return m_name;
 }
 
-bool Parameter::isCompatible(const Type& type) const
+bool Parameter::isCompatible(const RTTI::Type& type) const
 {
     return m_value->isCompatible(type);
 }
 
-BugEngine::Value Parameter::as(const Type& type) const
+RTTI::Value Parameter::as(const RTTI::Type& type) const
 {
     return m_value->as(type);
 }

@@ -21,9 +21,9 @@ Package::Namespace::~Namespace()
 {
 }
 
-BugEngine::Value Package::Namespace::get(const inamespace& name) const
+RTTI::Value Package::Namespace::get(const inamespace& name) const
 {
-    minitl::hashmap<istring, BugEngine::Value>::const_iterator it = m_values.find(name[0]);
+    minitl::hashmap<istring, RTTI::Value>::const_iterator it = m_values.find(name[0]);
     if (it == m_values.end())
     {
         minitl::hashmap< istring, ref<Namespace> >::const_iterator it = m_children.find(name[0]);
@@ -35,16 +35,16 @@ BugEngine::Value Package::Namespace::get(const inamespace& name) const
         }
         else
         {
-            return BugEngine::Value();
+            return RTTI::Value();
         }
     }
     else if (!it->second)
     {
-        return BugEngine::Value();
+        return RTTI::Value();
     }
     else
     {
-        BugEngine::Value v(it->second);
+        RTTI::Value v(it->second);
         for (size_t i = 1; i < name.size(); ++i)
         {
             v = v[name[i]];
@@ -57,7 +57,7 @@ BugEngine::Value Package::Namespace::get(const inamespace& name) const
     }
 }
 
-void Package::Namespace::add(const inamespace& name, const BugEngine::Value& value)
+void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
 {
     if (name.size() == 1)
     {
@@ -69,7 +69,7 @@ void Package::Namespace::add(const inamespace& name, const BugEngine::Value& val
     }
     else
     {
-        minitl::hashmap< istring, BugEngine::Value >::const_iterator it = m_values.find(name[0]);
+        minitl::hashmap< istring, RTTI::Value >::const_iterator it = m_values.find(name[0]);
         if (it != m_values.end())
         {
             be_notreached();
@@ -92,7 +92,7 @@ Package::Package()
     ,   m_nodes(packageBuilderArena())
     ,   m_values(packageBuilderArena())
 {
-    m_rootNamespace->add(inamespace("game"), BugEngine::Value(be_game_Namespace()));
+    m_rootNamespace->add(inamespace("game"), RTTI::Value(be_game_Namespace()));
 }
 
 Package::~Package()
@@ -141,7 +141,7 @@ ref<Object> Package::findByName(istring name) const
     return ref<Object>();
 }
 
-const BugEngine::Value& Package::getValue(weak<const Object> object) const
+const RTTI::Value& Package::getValue(weak<const Object> object) const
 {
     size_t index = 0;
     for (minitl::vector< ref<Object> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it, ++index)
@@ -166,7 +166,7 @@ void Package::loadPlugin(inamespace plugin)
     else
     {
         m_plugins.push_back(p);
-        m_rootNamespace->add(plugin, BugEngine::Value(p.pluginNamespace()));
+        m_rootNamespace->add(plugin, RTTI::Value(p.pluginNamespace()));
     }
 }
 
