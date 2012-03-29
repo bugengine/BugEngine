@@ -30,7 +30,7 @@ AssertionResult defaultAssertionCallback( const char *file,
     Runtime::Symbol s;
     static ref<const Runtime::Module> executable = Runtime::Module::self();
     static weak<const Runtime::Module> last = executable;
-    static ref<const Runtime::SymbolResolver> s_symbols = executable ? Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols) : ref<const Runtime::SymbolResolver>();
+    static ref<const Runtime::SymbolResolver> s_symbols = executable ? Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), ref<const Runtime::SymbolResolver>()) : ref<const Runtime::SymbolResolver>();
     while (last && last->next())
     {
         last = last->next();
