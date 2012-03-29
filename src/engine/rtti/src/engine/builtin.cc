@@ -93,7 +93,7 @@ BE_MAKE_BUILTIN(ipath, void);
 BE_MAKE_BUILTIN(ifilename, void);
 BE_MAKE_BUILTIN_NAME(minitl::format<>, format, void);
 
-BE_MAKE_BUILTIN(Value, void);
+BE_MAKE_BUILTIN_NAME(RTTI::Value, Value, void);
 
 #undef BE_MAKE_BUILTIN
 

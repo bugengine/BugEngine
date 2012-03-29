@@ -10,10 +10,10 @@ namespace BugEngine { namespace World
 
 struct be_api(WORLD) Entity
 {
-private:
-    u32     id;
-    u16     storage;
-    u16     index;
+published:
+    u32 const    id;
+    u16 const    storage;
+    u16 const    index;
 };
 
 }}
@@ -21,4 +21,3 @@ private:
 
 /*****************************************************************************/
 #endif
-

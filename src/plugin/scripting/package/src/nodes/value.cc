@@ -28,15 +28,15 @@ BoolValue::~BoolValue()
 {
 }
 
-bool BoolValue::isCompatible(const Type& type) const
+bool BoolValue::isCompatible(const RTTI::Type& type) const
 {
     return type <= be_typeid<bool>::type();
 }
 
-BugEngine::Value BoolValue::as(const Type& type) const
+RTTI::Value BoolValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from bool to %s" | type.name());
-    return BugEngine::Value(m_value);
+    return RTTI::Value(m_value);
 }
 
 
@@ -51,7 +51,7 @@ IntValue::~IntValue()
 {
 }
 
-bool IntValue::isCompatible(const Type& type) const
+bool IntValue::isCompatible(const RTTI::Type& type) const
 {
     return type <= be_typeid<i8>::type()
         || type <= be_typeid<i16>::type()
@@ -63,26 +63,26 @@ bool IntValue::isCompatible(const Type& type) const
         || type <= be_typeid<u64>::type();
 }
 
-BugEngine::Value IntValue::as(const Type& type) const
+RTTI::Value IntValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type.name());
     if (type <= be_typeid<i8>::type())
-        return BugEngine::Value(be_checked_numcast<i8>(m_value));
+        return RTTI::Value(be_checked_numcast<i8>(m_value));
     if (type <= be_typeid<i16>::type())
-        return BugEngine::Value(be_checked_numcast<i16>(m_value));
+        return RTTI::Value(be_checked_numcast<i16>(m_value));
     if (type <= be_typeid<i32>::type())
-        return BugEngine::Value(be_checked_numcast<i32>(m_value));
+        return RTTI::Value(be_checked_numcast<i32>(m_value));
     if (type <= be_typeid<i64>::type())
-        return BugEngine::Value(be_checked_numcast<i64>(m_value));
+        return RTTI::Value(be_checked_numcast<i64>(m_value));
     if (type <= be_typeid<u8>::type())
-        return BugEngine::Value(be_checked_numcast<u8>(m_value));
+        return RTTI::Value(be_checked_numcast<u8>(m_value));
     if (type <= be_typeid<u16>::type())
-        return BugEngine::Value(be_checked_numcast<u16>(m_value));
+        return RTTI::Value(be_checked_numcast<u16>(m_value));
     if (type <= be_typeid<u32>::type())
-        return BugEngine::Value(be_checked_numcast<u32>(m_value));
+        return RTTI::Value(be_checked_numcast<u32>(m_value));
     if (type <= be_typeid<u64>::type())
-        return BugEngine::Value(be_checked_numcast<u64>(m_value));
-    return BugEngine::Value();
+        return RTTI::Value(be_checked_numcast<u64>(m_value));
+    return RTTI::Value();
 }
 
 
@@ -96,19 +96,19 @@ FloatValue::~FloatValue()
 {
 }
 
-bool FloatValue::isCompatible(const Type& type) const
+bool FloatValue::isCompatible(const RTTI::Type& type) const
 {
     return type <= be_typeid<float>::type()
         || type <= be_typeid<double>::type();
 }
 
-BugEngine::Value FloatValue::as(const Type& type) const
+RTTI::Value FloatValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from float to %s" | type.name());
     if (type <= be_typeid<float>::type())
-        return BugEngine::Value((float)m_value);
+        return RTTI::Value((float)m_value);
     else
-        return BugEngine::Value((double)m_value);
+        return RTTI::Value((double)m_value);
 }
 
 
@@ -124,23 +124,23 @@ StringValue::~StringValue()
     packageBuilderArena().free(m_value);
 }
 
-bool StringValue::isCompatible(const Type& type) const
+bool StringValue::isCompatible(const RTTI::Type& type) const
 {
     return type <= be_typeid<istring>::type()
         || type <= be_typeid<inamespace>::type()
         || type <= be_typeid< minitl::format<> >::type();
 }
 
-BugEngine::Value StringValue::as(const Type& type) const
+RTTI::Value StringValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from string to %s" | type.name());
     if (type <= be_typeid< istring >::type())
-        return BugEngine::Value(istring(m_value));
+        return RTTI::Value(istring(m_value));
     if (type <= be_typeid< inamespace >::type())
-        return BugEngine::Value(inamespace(m_value));
+        return RTTI::Value(inamespace(m_value));
     if (type <= be_typeid< minitl::format<> >::type())
-        return BugEngine::Value(minitl::format<>(m_value));
-    return BugEngine::Value();
+        return RTTI::Value(minitl::format<>(m_value));
+    return RTTI::Value();
 }
 
 
@@ -155,12 +155,12 @@ ReferenceValue::~ReferenceValue()
 {
 }
 
-bool ReferenceValue::isCompatible(const Type& type) const
+bool ReferenceValue::isCompatible(const RTTI::Type& type) const
 {
     return type <= m_value->getType();
 }
 
-BugEngine::Value ReferenceValue::as(const Type& type) const
+RTTI::Value ReferenceValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType().name() | type.name());
     return m_value->getValue();

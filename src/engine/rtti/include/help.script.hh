@@ -11,12 +11,13 @@
 namespace BugEngine
 {
 
+void help(const RTTI::Type& type);
 void help(const RTTI::Class& klass);
 void help(const RTTI::Property& klass);
 void help(const RTTI::Method& klass);
 void help(const RTTI::Method::Overload& klass);
 void help(const RTTI::Method::Overload::Parameter& klass);
-void help(const Value& v);
+void help(const RTTI::Value& v);
 
 }
 

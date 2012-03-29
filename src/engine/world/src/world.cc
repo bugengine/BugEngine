@@ -16,6 +16,7 @@ namespace BugEngine { namespace World
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
+,   m_entityId(0)
 {
 }
 
@@ -26,6 +27,12 @@ World::~World()
 weak<ITask> World::updateWorldTask() const
 {
     return m_task;
+}
+
+Entity World::spawn()
+{
+    Entity e = { m_entityId++, 0, 0 };
+    return e;
 }
 
 }}

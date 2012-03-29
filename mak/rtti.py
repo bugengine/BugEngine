@@ -111,7 +111,7 @@ class Container:
 			file.write("static ::BugEngine::RTTI::Tag s_%s_tag_%d =\n" % (prefix, tagindex))
 			file.write("    {\n")
 			file.write("        {%s},\n" % tagname)
-			file.write("        ::BugEngine::Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tagindex))
+			file.write("        ::BugEngine::RTTI::Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tagindex))
 			file.write("    };\n")
 			tagname = "&s_%s_tag_%d" % (prefix, tagindex)
 			tagindex = tagindex + 1
@@ -207,7 +207,7 @@ class Namespace(Container):
 				file.write("        {%s},\n" % statics)
 				file.write("        {%s},\n" % tagname)
 				file.write("        \"%s\",\n" % name)
-				file.write("        ::BugEngine::Value(::BugEngine::Value::ByRef(%s::%s))\n" % (self.fullname, name))
+				file.write("        ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n" % (self.fullname, name))
 				file.write("    };\n")
 				statics = "&s_%s_%s" % (decl, name)
 		if self.members:
@@ -323,7 +323,7 @@ class Enum(Container):
 		if self.useMethods:
 			file.write("be_forceuse(s_%s_obj_ptr); " % decl)
 			file.write("return s_%s;\n}\n" % decl)
-		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
+		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
 		file.write("static const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, parent, decl))
 
 		if self.useMethods:
@@ -391,7 +391,7 @@ class Class(Container):
 			file.write("        0,\n")
 		file.write("        {{ 0x%s, 0x%s, 0x%s, 0x%s }}\n" % (hash[0:8], hash[8:16], hash[16:24], hash[24:32]))
 		file.write("    };\n")
-		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
+		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
 		file.write("static const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, parent, decl))
 
 	def buildProperties(self, file, decl):
@@ -411,7 +411,7 @@ class Class(Container):
 					file.write("        {%s},\n" % statics)
 					file.write("        {%s},\n" % tagname)
 					file.write("        \"%s\",\n" % name)
-					file.write("        ::BugEngine::Value(::BugEngine::Value::ByRef(%s::%s))\n" % (self.fullname, name))
+					file.write("        ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n" % (self.fullname, name))
 					file.write("    };\n")
 					statics = "&s_%s_%s" % (decl, name)
 				else:
