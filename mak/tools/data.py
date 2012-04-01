@@ -50,6 +50,7 @@ cls.run = run"""
 def datagen(self, node):
 	outs = []
 	outs.append(node.change_ext('.cc'))
+	outs.append(node.change_ext('-instances.cc'))
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
 	tsk.env.detach()
@@ -66,9 +67,8 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/parser.py'),
 		self.path.find_or_declare('mak/ddf.py'),
 		self.path.find_or_declare('mak/rtti.py'),]
-	from waflib import Options
-	#if Options.options.nomaster:
 	self.source.append(outs[0])
+	self.source.append(outs[1])
 
 def configure(conf):
 	pass
