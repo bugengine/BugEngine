@@ -76,7 +76,14 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		raise Exception("cannot open output file %s : %s" % (output, str(e)))
 	if pch:
 		implementation.write("#include <%s>\n" % pch)
-	yacc.namespace.dump(implementation)
+	file, ext = os.path.splitext(output)
+	try:
+		instances = open(file+'-instances'+ext, 'w')
+	except IOError as e:
+		raise Exception("cannot open output file %s : %s" % (file+'-instances'+ext, str(e)))
+	if pch:
+		instances.write("#include <%s>\n" % pch)
+	yacc.namespace.dump(implementation, instances)
 
 	return 0
 

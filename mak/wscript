@@ -242,62 +242,10 @@ def dummy_cobjects(self):
 
 
 
-
-#@taskgen_method
-#@feature('master')
-#@before_method('process_source')
-#@after_method('filter_sources')
-#@before('c', 'cxx')
-#def make_masterfiles(self):
-#	if Options.options.nomaster:
-#		return
-#	self.originalsources = self.source[:]
-#	self.originalsources.sort()
-#	self.mastertasks = []
-#	self.source = []
-#	cmastertask = None
-#	cppmastertask = None
-#	cindex	 = 0
-#	cppindex = 0
-#	cnumleft = 0
-#	cppnumleft = 0
-#	for f in self.originalsources:
-#		if os.path.splitext(f)[1] not in ['.c', '.C', '.cc', '.cpp', '.cxx', '.hh']:
-#			self.source.append(f)
-#			continue
-#		if os.path.splitext(f)[1] == '.hh':
-#			self.source.append(f)
-#			srcnode = self.path.find_resource(f).change_ext('.cc')
-#		else:
-#			srcnode = self.path.find_resource(f)
-#		if os.path.splitext(f)[1] == '.c':
-#			if cnumleft == 0:
-#				cnumleft = 30
-#				masterfile = self.target+'-c-master%d.c' % cindex
-#				cindex = cindex + 1
-#				self.source.append(masterfile)
-#				node = self.path.find_or_declare(masterfile)
-#				cmastertask = self.create_task("master", [], node)
-#				self.mastertasks.append(cmastertask)
-#			cnumleft = cnumleft - 1
-#			cmastertask.set_inputs(srcnode)
-#		else:
-#			if cppnumleft == 0:
-#				cppnumleft = 30
-#				masterfile = self.target+'-cpp-master%d.cpp' % cppindex
-#				cppindex = cppindex + 1
-#				self.source.append(masterfile)
-#				node = self.path.find_or_declare(masterfile)
-#				cppmastertask = self.create_task("master", [], node)
-#				cppmastertask.set_outputs(node)
-#				self.mastertasks.append(cppmastertask)
-#			cppnumleft = cppnumleft - 1
-#			cppmastertask.set_inputs(srcnode)
-
 objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
-objcpydbgcls = Task.task_factory('dbg', objcpydbg, 'YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
+objcpydbgcls = Task.task_factory('dbg', objcpydbg, color='YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
 objcpystrip = '${OBJCOPY} ${OBJCOPYFLAGS} --strip-debug --strip-unneeded --keep-symbol .gnu_debuglink --add-gnu-debuglink ${SRC[0].change_ext(".dbg").path_from(tsk.inputs[0].parent)} ${SRC[0].abspath()} ${TGT[0].abspath()}'
-objcpystripcls = Task.task_factory('strip', objcpystrip, 'BLUE', ext_in='.all', shell=False)
+objcpystripcls = Task.task_factory('strip', objcpystrip, color='YELLOW', ext_in='.all', shell=False)
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
 @after_method('apply_link')
@@ -389,19 +337,27 @@ def c_hook(self, node):
 @extension('.cc', '.cxx', '.cpp')
 def cc_hook(self, node):
 	if 'master' in self.features and not Options.options.nomaster:
-		try:
-			mastertask_cxx = self.mastertasks_cxx[-1]
-			if len(mastertask_cxx.inputs) <= 10:
-				mastertask_cxx.set_inputs([node])
-			else:
-				output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
-				mastertask_cxx = self.create_task('master', [node], [output])
-				self.mastertasks_cxx.append(mastertask_cxx)
+		if node.name.endswith('-instances.cc'):
+			try:
+				self.instancetask_cxx.set_inputs([node])
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-instances-master.cc')
+				self.instancetask_cxx = self.create_task('master', [node], [output])
 				self.create_compiled_task('cxx', output)
-		except:
-			output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
-			mastertask_cxx = self.create_task('master', [node], [output])
-			self.mastertasks_cxx = [mastertask_cxx]
-			self.create_compiled_task('cxx', output)
+		else:
+			try:
+				mastertask_cxx = self.mastertasks_cxx[-1]
+				if len(mastertask_cxx.inputs) <= 10:
+					mastertask_cxx.set_inputs([node])
+				else:
+					output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
+					mastertask_cxx = self.create_task('master', [node], [output])
+					self.mastertasks_cxx.append(mastertask_cxx)
+					self.create_compiled_task('cxx', output)
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
+				mastertask_cxx = self.create_task('master', [node], [output])
+				self.mastertasks_cxx = [mastertask_cxx]
+				self.create_compiled_task('cxx', output)
 	else:
 		self.create_compiled_task('cxx', node)
