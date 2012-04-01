@@ -4,6 +4,7 @@ from waflib.Logs import warn,pprint
 from waflib import Options, Utils
 import re
 import os
+import sys
 from mak.waflib.Errors import ConfigurationError
 
 def parse_gcc_target(target):
@@ -40,7 +41,9 @@ def get_native_icc_target(conf, icc):
 	except:
 		return (None, None)
 
-	out = str(out).split('\n')
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')
 	target = os.uname()[0].lower()
 	arch = 'x86'
 	version = None
@@ -68,7 +71,9 @@ def get_native_clang_target(conf, clang):
 	except:
 		return (None, None)
 
-	out = str(out).split('\n')
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')
 	target = None
 	version = None
 
@@ -80,6 +85,7 @@ def get_native_clang_target(conf, clang):
 			while line[0] != 'clang' and line[1] != 'version':
 				line = line[1:]
 			version = line[2].split('-')[0]
+	print (out)
 	return (target, version)
 
 
