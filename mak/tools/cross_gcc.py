@@ -85,7 +85,6 @@ def get_native_clang_target(conf, clang):
 			while line[0] != 'clang' and line[1] != 'version':
 				line = line[1:]
 			version = line[2].split('-')[0]
-	print (out)
 	return (target, version)
 
 

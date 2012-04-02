@@ -49,7 +49,7 @@ def configure(conf):
 		if i in ['.svn', '.cvs']:
 			continue
 		if os.path.isdir(os.path.join('src', '3rdparty', i)):
-			conf.recurse(os.path.join('..', '..', 'src', '3rdparty', i), once=False, name='setup')
+			conf.recurse(os.path.join('..', '..', 'src', '3rdparty', i), name='setup', once=False)
 	for i in os.listdir(os.path.join('extra')):
 		if i in ['.svn', '.cvs']:
 			continue

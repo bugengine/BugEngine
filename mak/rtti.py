@@ -159,7 +159,7 @@ class Root(Container):
 		file.write("namespace BugEngine\n{\n\n")
 		instances.write("namespace BugEngine\n{\n\n")
 		for classname, objname in classes:
-			instances.write("template< > raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (classname, objname))
+			instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (classname, objname))
 		file.write("\n}\n")
 		instances.write("\n}\n\n")
 
