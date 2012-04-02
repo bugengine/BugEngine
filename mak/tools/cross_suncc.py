@@ -34,7 +34,9 @@ def get_suncc_targets(conf, cc, cxx, flag):
 		return None
 	if p.returncode:
 		return None
-	out = str(out).split('\n')
+	if not isinstance(out, str):
+		out = out.decode()
+	out = out.split('\n')
 	line = out[0]
 	return format.match(line)
 

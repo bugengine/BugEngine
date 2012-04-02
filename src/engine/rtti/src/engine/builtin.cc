@@ -24,7 +24,7 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
 }
 
 template< >
-raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
+BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
 {
     static const RTTI::Class s_refcountable = { "refcountable", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
     raw<const RTTI::Class> ci = {&s_refcountable};
@@ -43,7 +43,7 @@ raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
             &RTTI::nulldestructor,                                      \
             {{ 0, 0, 0, 0 }}                                            \
         };                                                              \
-    template< > raw<const RTTI::Class> be_typeid< type >::klass()   \
+    template< > BE_EXPORT raw<const RTTI::Class> be_typeid< type >::klass()   \
     {                                                                   \
         raw<const RTTI::Class> ci = {&s_##name};                    \
         return ci;                                                      \

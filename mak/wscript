@@ -25,7 +25,12 @@ def dummy(c):
 
 def print_msg(task):
 	tgt_str = task.outputs[0].nice_path(task.env)
-	return '[{0:^11}] {1}\n'.format(task.__class__.__name__.replace('_task', ''), tgt_str)
+	tgt = []
+	while tgt_str:
+		tgt_str,tail = os.path.split(tgt_str)
+		tgt = [tail]+tgt
+	tgt = tgt[3:]
+	return '[{0:^11}] {1}\n'.format(task.__class__.__name__.replace('_task', ''), '/'.join(tgt))
 Task.Task.__str__ = print_msg
 
 def options(opt):
