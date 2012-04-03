@@ -14,3 +14,11 @@ node = graphics.3d.RenderScene
     rendertarget = window;
     world = world;
 )
+
+type = game.RTTI.Type
+{
+    metaclass = game.RTTI.Type;
+    indirection = 0;
+    constness = 0;
+    access = 0;
+}

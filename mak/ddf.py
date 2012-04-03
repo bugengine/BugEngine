@@ -34,7 +34,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
-	yacc = ply.yacc.yacc(module=cpp.parser, method='LALR', debugfile='parser.out', picklefile=os.path.join(temppath, 'parsetab'), outputdir=temppath)
+	yacc = cpp.parser.Parser()
 	yacc.namespace = rtti.Root(source, useMethods, name)
 	yacc.rtti = rtti
 
@@ -64,7 +64,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 
 
-	yacc.parse(input.read(), lexer=lexer, debug=0)
+	yacc.parse(input.read(), lexer=lexer)
 	input.close()
 
 	if lexer.error != 0:
