@@ -38,7 +38,7 @@ typedef u8                      byte;
 
 #ifndef _WIN32
 
-#include <stdint.h>
+# include <unistd.h>
 # define override
 # define BE_THREAD_LOCAL         __thread
 # define BE_NOINLINE             __attribute__((noinline))
