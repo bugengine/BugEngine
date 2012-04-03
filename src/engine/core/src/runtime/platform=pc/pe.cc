@@ -10,7 +10,7 @@ namespace BugEngine { namespace Runtime
 
 static inline char be_hex2char(u8 value)
 {
-    return (value&0xf) > 9 ? (value-10+'A') : (value+'0');
+    return (value&(char)0xf) > 9 ? (char)(value-10+'A') : (char)(value+'0');
 }
 
 struct Guid
