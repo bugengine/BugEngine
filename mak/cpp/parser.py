@@ -20,7 +20,6 @@ class Expr(yacc.Nonterm):
 	"%nonterm"
 	def expr_namespace(self, namespace_begin, exprs, rbrace):
 		"%reduce NamespaceBegin Exprs RBRACE"
-		
 
 class Exprs(yacc.Nonterm):
 	"%nonterm"
@@ -39,7 +38,6 @@ class Header(yacc.Nonterm):
 
 spec = yacc.Spec(sys.modules[__name__],
 				pickleFile="cpp.pickle",
-				skinny=False,
 				logFile="cpp.log",
 				graphFile="cpp.dot",
 				verbose=True)
