@@ -4,7 +4,7 @@ import ply.yacc as yacc
 tokens = []
 reserved_map = { }
 
-for name,r in cpp.tokens.__dict__.iteritems():
+for name,r in cpp.tokens.__dict__.items():
 	if type(r) == type(cpp.tokens.keyword):
 		if cpp.tokens.keyword in r.__bases__:
 			tokens.append(r.__name__)
