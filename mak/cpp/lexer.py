@@ -62,7 +62,6 @@ def t_ID(t):
 	except KeyError:
 		k = reserved_map.get(t.value, cpp.tokens.ID)
 		t.type = k.__name__
-		t.token = k
 		return t
 
 def t_MACRO_open(t):
@@ -177,7 +176,6 @@ def t_comment_2(t):
 def t_preprocessor(t):
 	r'\#([^\\\n]|(\\.)|(\\\n))*'
 	t.lexer.lineno += t.value.count('\n')
-	pass
 
 # Operators
 t_PLUS              = r'\+'
