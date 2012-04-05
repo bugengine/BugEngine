@@ -1,50 +1,17 @@
-import sys
-try:
-	import cpp.lexer as lexer
-	import ply.yacc as yacc
-	import cpp.tokens
-	from cpp.tokens import *
-except:
-	import lexer
-	import yacc
-
-class NamespaceBegin(yacc.Nonterm):
-	"%nonterm"
-	def namespace_named(self, namespace, name, LBRACE):
-		"%reduce NAMESPACE ID LBRACE"
-		print(name.value)
-	def namespace_unnamed(self, namespace, LBRACE):
-		"%reduce NAMESPACE LBRACE"
-
-class Expr(yacc.Nonterm):
-	"%nonterm"
-	def expr_namespace(self, namespace_begin, exprs, rbrace):
-		"%reduce NamespaceBegin Exprs RBRACE"
-
-class Exprs(yacc.Nonterm):
-	"%nonterm"
-	def expr_list(self, exprs, expr):
-		"%reduce Expr Exprs"
-	def empty(self):
-		"%reduce"
-
-class Header(yacc.Nonterm):
-	"%start"
-
-	def exprs(self, exprs):
-		"%reduce Exprs"
+import cpp.yacc
+import cpp.tokens
+import cpp.grammar.unit
 
 
-
-spec = yacc.Spec(sys.modules[__name__],
+spec = cpp.yacc.Spec([cpp.tokens, cpp.grammar.unit],
 				pickleFile="cpp.pickle",
 				logFile="cpp.log",
 				graphFile="cpp.dot",
 				verbose=True)
 
-class Parser(yacc.Lr):
+class Parser(cpp.yacc.Lr):
 	def __init__(self):
-		yacc.Lr.__init__(self, spec)
+		cpp.yacc.Lr.__init__(self, spec)
 
 	def parse(self, input, lexer):
 		lexer.input(input)

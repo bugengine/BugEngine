@@ -1,6 +1,6 @@
 import sys
-import ply.yacc
-import ply.lex
+import cpp.yacc
+import cpp.lex
 import os
 import rtti
 
@@ -30,7 +30,7 @@ global_macro_map = {
 
 def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="", useMethods=False):
 	import cpp.lexer, cpp.parser
-	lexer = ply.lex.lex(module=cpp.lexer)
+	lexer = cpp.lex.lex(module=cpp.lexer)
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0

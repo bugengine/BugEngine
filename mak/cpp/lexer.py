@@ -1,5 +1,5 @@
 import cpp.tokens
-import ply.yacc as yacc
+import cpp.yacc
 
 tokens = []
 reserved_map = { }
@@ -9,7 +9,7 @@ for name,r in cpp.tokens.__dict__.items():
 		if cpp.tokens.keyword in r.__bases__:
 			tokens.append(r.__name__)
 			reserved_map[r.__name__.lower()] = r
-		elif yacc.Token in r.__bases__:
+		elif cpp.yacc.Token in r.__bases__:
 			tokens.append(r.__name__)
 
 
