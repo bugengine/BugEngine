@@ -1,7 +1,4 @@
-try:
-	import ply.yacc as yacc
-except:
-	import yacc
+import cpp.yacc as yacc
 
 
 class keyword(yacc.Token):			pass
