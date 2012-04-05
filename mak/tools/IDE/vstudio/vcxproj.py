@@ -43,7 +43,7 @@ class VCxproj:
 		self.output.write('    <TargetName>%s</TargetName>\n' % self.name)
 		self.output.write('    <OutDir>$(SolutionDir)build\\$(Configuration)\\</OutDir>\n')
 		self.output.write('    <IntDir>$(SolutionDir)build\\$(Configuration)\\</IntDir>\n')
-		self.output.write('    <PlatformToolset>v%d</PlatformToolset>\n' % float(self.versionNumber[1])*10)
+		self.output.write('    <PlatformToolset>v%d</PlatformToolset>\n' % (float(self.versionNumber[1])*10))
 		self.output.write('  </PropertyGroup>\n')
 		for (config, options) in configs:
 			env = self.envs[config]
