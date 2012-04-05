@@ -1,57 +1,17 @@
+import cpp.tokens
+import ply.yacc as yacc
 
-# Reserved words
-reserved = (
-		'PUBLISHED',
-		'STRUCT', 'CLASS', 'ENUM', 'NAMESPACE', 'UNION',
-		'USING', 'NEW', 'DELETE',
-		'PUBLIC', 'PROTECTED', 'PRIVATE', 'FRIEND',
-		'SIGNED', 'UNSIGNED', 'SHORT', 'CHAR', 'LONG', 'INT', 'FLOAT', 'DOUBLE',
-		'EXPLICIT', 'INLINE', 'EXTERN', 'STATIC', 'CONST', 'VOLATILE', 'VIRTUAL', 'OVERRIDE', 'MUTABLE',
-		'TEMPLATE', 'TYPENAME', 'OPERATOR', 'TYPEDEF', 'THROW',
-		'BE_TAG'
-	)
+tokens = []
+reserved_map = { }
 
-tokens = reserved + (
-	'ID', 'CHARCONST', 'WCHAR', 'STRING', 'WSTRING', 'FLOATING', 'DECIMAL', 'OCTAL', 'HEX',
-	# Operators
-	'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MOD',
-	'OR', 'AND', 'NOT', 'XOR', 'LSHIFT', 'RSHIFT',
-	'LOR', 'LAND', 'LNOT',
-	'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'SCOPE',
+for name,r in cpp.tokens.__dict__.items():
+	if type(r) == type(cpp.tokens.keyword):
+		if cpp.tokens.keyword in r.__bases__:
+			tokens.append(r.__name__)
+			reserved_map[r.__name__.lower()] = r
+		elif yacc.Token in r.__bases__:
+			tokens.append(r.__name__)
 
-	# Assignment
-	'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL',
-	'PLUSEQUAL', 'MINUSEQUAL',
-	'LSHIFTEQUAL','RSHIFTEQUAL', 'ANDEQUAL', 'XOREQUAL',
-	'OREQUAL',
-
-	# Increment/decrement
-	'PLUSPLUS', 'MINUSMINUS',
-
-	# Structure dereference (->)
-	'ARROW',
-
-	# Conditional operator (?)
-	'CONDOP',
-
-	# Delimeters
-	'LPAREN', 'RPAREN',         # ( )
-	'LBRACKET', 'RBRACKET',     # [ ]
-	'LBRACE', 'RBRACE',         # { }
-	'COMMA', 'PERIOD',          # . ,
-	'SEMI', 'COLON',            # ; :
-
-	# Ellipsis (...)
-	'ELLIPSIS',
-
-	# Doxygen comments
-	'DOXY_BEGIN',
-	'DOXY_BEGIN_LEFT',
-	'DOXY_END',
-	'DOXY_NEWLINE',
-	'DOXY_WORD',
-	'DOXY_LIST'
-)
 
 # Completely ignored characters
 t_ANY_ignore           = ' \t\x0c\r'
@@ -86,10 +46,6 @@ fractional_constant = r"""([0-9]*\.[0-9]+)|([0-9]+\.)"""
 t_FLOATING = '(((('+fractional_constant+')'+exponent_part+'?)|([0-9]+'+exponent_part+'))[FfLl]?)'
 
 
-reserved_map = { }
-for r in reserved:
-	reserved_map[r.lower()] = r
-
 states = (
 	('MACRO', 'exclusive'),
 	('DOXYGEN', 'exclusive')
@@ -104,7 +60,8 @@ def t_ID(t):
 		if remove_paren and t.lexer.lexdata[t.lexer.lexpos] == '(':
 			t.lexer.begin('MACRO')
 	except KeyError:
-		t.type = reserved_map.get(t.value, "ID")
+		k = reserved_map.get(t.value, cpp.tokens.ID)
+		t.type = k.__name__
 		return t
 
 def t_MACRO_open(t):
@@ -219,7 +176,6 @@ def t_comment_2(t):
 def t_preprocessor(t):
 	r'\#([^\\\n]|(\\.)|(\\\n))*'
 	t.lexer.lineno += t.value.count('\n')
-	pass
 
 # Operators
 t_PLUS              = r'\+'
