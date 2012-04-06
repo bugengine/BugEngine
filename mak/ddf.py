@@ -35,8 +35,6 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 	lexer.sourcename = source
 	lexer.error = 0
 	yacc = cpp.parser.Parser()
-	yacc.namespace = rtti.Root(source, useMethods, name)
-	yacc.rtti = rtti
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
@@ -83,7 +81,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		raise Exception("cannot open output file %s : %s" % (file+'-instances'+ext, str(e)))
 	if pch:
 		instances.write("#include <%s>\n" % pch)
-	yacc.namespace.dump(implementation, instances)
+	yacc.dump(implementation, instances, useMethods, name, source)
 
 	return 0
 
