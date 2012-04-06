@@ -66,7 +66,21 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/lexer.py'),
 		self.path.find_or_declare('mak/cpp/parser.py'),
 		self.path.find_or_declare('mak/ddf.py'),
-		self.path.find_or_declare('mak/rtti.py'),]
+		self.path.find_or_declare('mak/rtti.py'),
+		self.path.find_or_declare('mak/cpp/grammar/unit.py'),
+		self.path.find_or_declare('mak/cpp/grammar/namespace.py'),
+		self.path.find_or_declare('mak/cpp/grammar/name.py'),
+		self.path.find_or_declare('mak/cpp/grammar/using.py'),
+		self.path.find_or_declare('mak/cpp/grammar/tag.py'),
+		self.path.find_or_declare('mak/cpp/grammar/struct.py'),
+		self.path.find_or_declare('mak/cpp/grammar/method.py'),
+		self.path.find_or_declare('mak/cpp/grammar/variable.py'),
+		self.path.find_or_declare('mak/cpp/grammar/type.py'),
+		self.path.find_or_declare('mak/cpp/grammar/template.py'),
+		self.path.find_or_declare('mak/cpp/grammar/keywords.py'),
+		self.path.find_or_declare('mak/cpp/grammar/value.py'),
+		self.path.find_or_declare('mak/cpp/grammar/skip.py'),
+		]
 	self.source.append(outs[0])
 	self.source.append(outs[1])
 

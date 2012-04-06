@@ -768,7 +768,7 @@ class ItemSet(dict):
 			dotPos = item.dotPos
 			if dotPos < len(rhs) \
 			  and isinstance(rhs[dotPos], NontermSpec):
-				for lookahead in item.lookahead.keys():
+				for lookahead in list(item.lookahead.keys()):
 					string = StringSpec( \
 					  String(rhs[dotPos+1:] + [lookahead]))
 					lhs = rhs[dotPos]

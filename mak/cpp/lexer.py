@@ -201,7 +201,7 @@ t_NE                = r'!='
 t_SCOPE             = r'::'
 
 # Assignment operators
-t_EQUALS            = r'='
+t_EQUAL             = r'='
 t_TIMESEQUAL        = r'\*='
 t_DIVEQUAL          = r'/='
 t_MODEQUAL          = r'%='
