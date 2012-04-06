@@ -3,6 +3,14 @@ from mak.tools.IDE.vstudio import solution
 import mak
 from mak import sources
 
+try:
+	import cStringIO as StringIO
+except ImportError:
+	try:
+		import StringIO
+	except ImportError:
+		import io as StringIO
+
 
 class VCxproj:
 	extensions = ['.vcxproj', '.vcxproj.filters']
@@ -12,8 +20,8 @@ class VCxproj:
 		self.versionNumber = versionNumber
 		self.name = name
 		self.category = category
-		self.output = open(filename, 'w')
-		self.filters = open(filename+'.filters', 'w')
+		self.output = StringIO.StringIO()
+		self.filters = StringIO.StringIO()
 		self.targetName = filename
 		self.type = type
 		self.envs = envs
@@ -78,6 +86,20 @@ class VCxproj:
 		self.output.write('  </ImportGroup>\n')
 		self.output.write('</Project>\n')
 		self.filters.write('</Project>\n')
+
+		with open(self.targetName,'r') as original:
+			content = self.output.getvalue()
+			if original.read() != content:
+				print('writing %s...' % self.targetName)
+				with open(self.targetName, 'w') as f:
+					f.write(content)
+		with open(self.targetName+'.filters','r') as original:
+			content = self.filters.getvalue()
+			if original.read() != content:
+				print('writing %s...' % (self.targetName+'.filters'))
+				with open(self.targetName+'.filters', 'w') as f:
+					f.write(content)
+
 
 	def addFilter(self, name, directory):
 		self.filters.write('    <Filter Include="%s">\n' % name)

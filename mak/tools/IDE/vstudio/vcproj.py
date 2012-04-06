@@ -4,6 +4,15 @@ import mak.sources
 import string
 from xml.dom import minidom
 
+try:
+	import cStringIO as StringIO
+except ImportError:
+	try:
+		import StringIO
+	except ImportError:
+		import io as StringIO
+
+
 def xmlify(s):
 	s = s.replace("&", "&amp;") # do this first
 	s = s.replace("'", "&apos;")
@@ -23,9 +32,10 @@ class VCproj:
 		self.versionNumber = versionNumber
 		self.name = name
 		self.category = category
-		self.output = open(filename, 'w')
-		self.userconfig = open(filename+'.%s.%s.user'%(host,user), 'w')
+		self.output = StringIO.StringIO()
+		self.userconfig = StringIO.StringIO()
 		self.targetName = filename
+		self.userconfigName = filename+'.%s.%s.user'%(host,user)
 		self.envs = envs
 
 	def writeHeader(self, configs, engine):
@@ -121,6 +131,19 @@ class VCproj:
 		self.output.write('	<Globals>\n')
 		self.output.write('	</Globals>\n')
 		self.output.write('</VisualStudioProject>\n')
+
+		with open(self.targetName,'r') as original:
+			content = self.output.getvalue()
+			if original.read() != content:
+				print('writing %s...' % self.targetName)
+				with open(self.targetName, 'w') as f:
+					f.write(content)
+		with open(self.userconfigName,'r') as original:
+			content = self.userconfig.getvalue()
+			if original.read() != content:
+				print('writing %s...' % (self.userconfigName))
+				with open(self.userconfigName, 'w') as f:
+					f.write(content)
 
 	def addFile(self, path, filename, source, tabs):
 		self.output.write(tabs+'<File RelativePath="..\\..\\%s" />\n'%filename)

@@ -1,5 +1,13 @@
 import string
 try:
+	import cStringIO as StringIO
+except ImportError:
+	try:
+		import StringIO
+	except ImportError:
+		import io as StringIO
+
+try:
 	import hashlib
 	createMd5=hashlib.md5
 except:
@@ -46,7 +54,7 @@ class Solution:
 		self.filename = filename
 		self.guid = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}" #vcproj/vcxproj
 		self.folderGUID = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}" #folder
-		self.file = open(self.filename,'w')
+		self.file = StringIO.StringIO()
 		self.projectlist = []
 		self.version = version
 		self.versionnumber = versionnumber
@@ -126,4 +134,12 @@ class Solution:
 			self.file.write("""\tEndGlobalSection\n\tGlobalSection(NestedProjects) = preSolution\n""")
 			self.writeProjectFolders("", self.layout)
 		self.file.write("""\tEndGlobalSection\nEndGlobal\n""")
+
+
+		with open(self.filename,'r') as original:
+			content = self.file.getvalue()
+			if original.read() != content:
+				print('writing %s...' % self.filename)
+				with open(self.filename, 'w') as f:
+					f.write(content)
 
