@@ -11,13 +11,16 @@ class SkipItem(yacc.Nonterm):
 		self.value = op.value
 	def skiplist_value(self, value):
 		"%reduce Value"
-		self.value = name.value
+		self.value = value.value
 	def skiplist_scope(self, scope):
 		"%reduce SCOPE"
 		self.value = scope.value
-	def skiplist_scope(self, id):
+	def skiplist_id(self, id):
 		"%reduce ID"
 		self.value = id.value
+	def skiplist_semi(self, semi):
+		"%reduce SEMI"
+		self.value = semi.value
 
 class SkipAllItem(yacc.Nonterm):
 	"%nonterm"

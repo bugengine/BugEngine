@@ -6,7 +6,9 @@ import cpp.grammar.namespace
 import cpp.grammar.name
 import cpp.grammar.using
 import cpp.grammar.tag
+import cpp.grammar.comment
 import cpp.grammar.struct
+import cpp.grammar.enum
 import cpp.grammar.method
 import cpp.grammar.variable
 import cpp.grammar.type
@@ -24,7 +26,9 @@ spec = cpp.yacc.Spec(
 					cpp.grammar.name,
 					cpp.grammar.using,
 					cpp.grammar.tag,
+					cpp.grammar.comment,
 					cpp.grammar.struct,
+					cpp.grammar.enum,
 					cpp.grammar.method,
 					cpp.grammar.variable,
 					cpp.grammar.type,
@@ -33,10 +37,10 @@ spec = cpp.yacc.Spec(
 					cpp.grammar.value,
 					cpp.grammar.skip,
 				],
-				pickleFile="cpp.pickle",
-				logFile="cpp.log",
-				graphFile="cpp.dot",
-				verbose=True)
+				pickleFile="../../cpp.pickle",
+				logFile="../../cpp.log",
+				graphFile="../../cpp.dot",
+				verbose=False)
 
 class Parser(cpp.yacc.Lr):
 	def __init__(self):

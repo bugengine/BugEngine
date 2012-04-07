@@ -5,12 +5,15 @@ class NameItem(yacc.Nonterm):
 	def name_id(self, id):
 		"%reduce ID"
 		self.value = id.value
-	def name_template(self, template, id):
-		"%reduce TEMPLATE ID"
-		self.value = template.value + " " + id.value
+	#def name_template_class(self, template, id):
+	#	"%reduce TEMPLATE ID"
+	#	self.value = template.value + " " + id.value
 	def name_typename(self, typename, id):
 		"%reduce TYPENAME ID"
 		self.value = typename.value + " " + id.value
+	def name_template(self, id, lt, skip, gt):
+		"%reduce ID LT SkipListTemplate GT"
+		self.value = id.value + " < " + skip.value + " >"
 
 class Namelist(yacc.Nonterm):
 	"%nonterm"

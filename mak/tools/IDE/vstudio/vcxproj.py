@@ -87,18 +87,28 @@ class VCxproj:
 		self.output.write('</Project>\n')
 		self.filters.write('</Project>\n')
 
-		with open(self.targetName,'r') as original:
+		try:
+			with open(self.targetName,'r') as original:
+				content = self.output.getvalue()
+				if original.read() != content:
+					print('writing %s...' % self.targetName)
+					with open(self.targetName, 'w') as f:
+						f.write(content)
+		except IOError:
 			content = self.output.getvalue()
-			if original.read() != content:
-				print('writing %s...' % self.targetName)
-				with open(self.targetName, 'w') as f:
-					f.write(content)
-		with open(self.targetName+'.filters','r') as original:
+			with open(self.targetName, 'w') as f:
+				f.write(content)
+		try:
+			with open(self.targetName+'.filters','r') as original:
+				content = self.filters.getvalue()
+				if original.read() != content:
+					print('writing %s...' % (self.targetName+'.filters'))
+					with open(self.targetName+'.filters', 'w') as f:
+						f.write(content)
+		except IOError:
 			content = self.filters.getvalue()
-			if original.read() != content:
-				print('writing %s...' % (self.targetName+'.filters'))
-				with open(self.targetName+'.filters', 'w') as f:
-					f.write(content)
+			with open(self.targetName+'.filters', 'w') as f:
+				f.write(content)
 
 
 	def addFilter(self, name, directory):
