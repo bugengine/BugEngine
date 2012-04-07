@@ -132,18 +132,28 @@ class VCproj:
 		self.output.write('	</Globals>\n')
 		self.output.write('</VisualStudioProject>\n')
 
-		with open(self.targetName,'r') as original:
+		try:
+			with open(self.targetName,'r') as original:
+				content = self.output.getvalue()
+				if original.read() != content:
+					print('writing %s...' % self.targetName)
+					with open(self.targetName, 'w') as f:
+						f.write(content)
+		except IOError:
 			content = self.output.getvalue()
-			if original.read() != content:
-				print('writing %s...' % self.targetName)
-				with open(self.targetName, 'w') as f:
-					f.write(content)
-		with open(self.userconfigName,'r') as original:
+			with open(self.targetName, 'w') as f:
+				f.write(content)
+		try:
+			with open(self.userconfigName,'r') as original:
+				content = self.userconfig.getvalue()
+				if original.read() != content:
+					print('writing %s...' % (self.userconfigName))
+					with open(self.userconfigName, 'w') as f:
+						f.write(content)
+		except IOError:
 			content = self.userconfig.getvalue()
-			if original.read() != content:
-				print('writing %s...' % (self.userconfigName))
-				with open(self.userconfigName, 'w') as f:
-					f.write(content)
+			with open(self.userconfigName, 'w') as f:
+				f.write(content)
 
 	def addFile(self, path, filename, source, tabs):
 		self.output.write(tabs+'<File RelativePath="..\\..\\%s" />\n'%filename)

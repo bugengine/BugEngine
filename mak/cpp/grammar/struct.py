@@ -63,24 +63,22 @@ class Parent(yacc.Nonterm):
 class ClassDef(yacc.Nonterm):
 	"%nonterm"
 
-	def class_definition(self, cls, name, parent, lbrace, members, rbrace, semi):
-		"%reduce CLASS Name Parent LBRACE Members RBRACE SEMI"
+	def class_definition(self, cls, name, parent, lbrace, members, rbrace):
+		"%reduce CLASS Name Parent LBRACE Members RBRACE"
 		if parent.inherits[0] >= 5:
 			inherits = parent.inherits[1]
 		else:
 			inherits = ""
-		print(inherits)
 		self.value = rtti.Class(name.value, inherits, cls.lineno, False)
 
-	def struct_definition(self, cls, name, parent, lbrace, members, rbrace, semi):
-		"%reduce STRUCT Name Parent LBRACE Members RBRACE SEMI"
+	def struct_definition(self, cls, name, parent, lbrace, members, rbrace):
+		"%reduce STRUCT Name Parent LBRACE Members RBRACE"
 		if parent.inherits[0] >= 4:
 			inherits = parent.inherits[1]
 		else:
 			inherits = ""
-		print(inherits)
 		self.value = rtti.Class(name.value, inherits, cls.lineno, True)
 
-	def union_definition(self, union, name, lbrace, members, rbrace, semi):
-		"%reduce UNION Name LBRACE Members RBRACE SEMI"
+	def union_definition(self, union, name, lbrace, members, rbrace):
+		"%reduce UNION Name LBRACE Members RBRACE"
 		self.value = rtti.Class(name.value, "", union.lineno, True)

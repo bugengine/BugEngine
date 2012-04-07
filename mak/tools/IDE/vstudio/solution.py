@@ -136,10 +136,15 @@ class Solution:
 		self.file.write("""\tEndGlobalSection\nEndGlobal\n""")
 
 
-		with open(self.filename,'r') as original:
+		try:
+			with open(self.filename,'r') as original:
+				content = self.file.getvalue()
+				if original.read() != content:
+					print('writing %s...' % self.filename)
+					with open(self.filename, 'w') as f:
+						f.write(content)
+		except IOError:
 			content = self.file.getvalue()
-			if original.read() != content:
-				print('writing %s...' % self.filename)
-				with open(self.filename, 'w') as f:
-					f.write(content)
+			with open(self.filename, 'w') as f:
+				f.write(content)
 
