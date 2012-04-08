@@ -1510,12 +1510,16 @@ the Parser class for parsing.
 			del self._startState
 
 		if file != None and "w" in mode:
-			if self._verbose:
-				print( "Parsing.Spec: Creating %s Spec pickle in %s..." % \
-				  (("fat", "skinny")[self._skinny], file))
-			f = open(file, "wb")
-			cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
-			f.close()
+			import os
+			try:
+				f = os.fdopen(os.open(file, os.O_CREAT|os.O_EXCL|os.O_TRUNC|os.O_RDWR), "wb")
+				if self._verbose:
+					print( "Parsing.Spec: Creating %s Spec pickle in %s..." % \
+					  (("fat", "skinny")[self._skinny], file))
+				cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+				f.close()
+			except OSError:
+				pass
 
 	# Restore state from a pickle file, if a compatible one is provided.  This
 	# method uses the same set of return values as does _compatible().
