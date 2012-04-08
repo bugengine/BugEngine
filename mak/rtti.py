@@ -127,7 +127,7 @@ class Root(Container):
 		file.write("#include    <rtti/tags/documentation.script.hh>\n")
 		file.write("\n")
 
-		if showline: file.write("#line %d \"%s\"\n" % (self.line, source.replace("\\", "\\\\")))
+		file.write("#line %d \"%s\"\n" % (self.line, source.replace("\\", "\\\\")))
 
 		file.write("namespace BugEngine\n{\n\n")
 		instances.write("namespace BugEngine\n{\n\n")

@@ -3,9 +3,11 @@ import rtti
 
 class Members(yacc.Nonterm):
 	"%nonterm"
-	def members(self, skip_list):
-		"%reduce SkipList"
 
+	def empty(self, skip_list):
+		"%reduce SkipList"
+		self.members = []
+		self.methods = []
 
 
 
@@ -65,20 +67,79 @@ class ClassDef(yacc.Nonterm):
 
 	def class_definition(self, cls, name, parent, lbrace, members, rbrace):
 		"%reduce CLASS Name Parent LBRACE Members RBRACE"
+		self.name = name.value
+		self.value = False
 		if parent.inherits[0] >= 5:
-			inherits = parent.inherits[1]
+			self.inherits = parent.inherits[1]
 		else:
-			inherits = ""
-		self.value = rtti.Class(name.value, inherits, cls.lineno, False)
+			self.inherits = "void"
 
 	def struct_definition(self, cls, name, parent, lbrace, members, rbrace):
 		"%reduce STRUCT Name Parent LBRACE Members RBRACE"
+		self.name = name.value
+		self.value = True
 		if parent.inherits[0] >= 4:
-			inherits = parent.inherits[1]
+			self.inherits = parent.inherits[1]
 		else:
-			inherits = ""
-		self.value = rtti.Class(name.value, inherits, cls.lineno, True)
+			self.inherits = "void"
 
 	def union_definition(self, union, name, lbrace, members, rbrace):
 		"%reduce UNION Name LBRACE Members RBRACE"
-		self.value = rtti.Class(name.value, "", union.lineno, True)
+		self.name = name.value
+		self.inherits = 'void'
+		self.value = True
+
+	def predecl(self, file, instances, name, parent, member):
+		#TODO: using sub objects
+		name = name+[self.name]
+		fullname = '::'+'::'.join(name)
+		decl = "class%s" % fullname.replace(':', '_')
+		if self.parser.useMethods:
+			instances.write("extern const ::BugEngine::RTTI::Class& s_%sFun();\n" % decl)
+		else:
+			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
+
+
+	def dump(self, file, instances, name, parent, member):
+		namespace = '::'+'::'.join(name)
+		name = name+[self.name]
+		fullname = '::'+'::'.join(name)
+		prettyname = '.'.join(name)
+
+		tagname = "0"
+		properties = "0"
+		objects = "0"
+		methods = constructor = destructor = call = "0"
+
+		decl = "class%s" % fullname.replace(':', '_')
+		if self.parser.useMethods:
+			varname = "%s::s_%sFun()" % (namespace, decl)
+			file.write("static const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
+		else:
+			varname = "%s::s_%s" % (namespace, decl)
+
+		file.write("::BugEngine::RTTI::Class s_%s =\n" % (decl))
+		file.write("    {\n")
+		file.write("        inamespace(\"%s\"),\n" % (prettyname))
+		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
+		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % fullname)
+		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, fullname))
+		file.write("        {%s},\n" % (tagname))
+		file.write("        {%s},\n" % (properties))
+		file.write("        {%s},\n" % (methods))
+		file.write("        {%s},\n" % (objects))
+		file.write("        {%s},\n" % (constructor))
+		file.write("        {%s},\n" % (destructor))
+		if self.value:
+			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % fullname)
+			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % fullname)
+		else:
+			file.write("        0,\n")
+			file.write("        0\n")
+		file.write("    };\n")
+		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
+		file.write("const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, parent, decl))
+		if self.parser.useMethods:
+			file.write("return s_%s;\n}\n" % decl)
+
+		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))

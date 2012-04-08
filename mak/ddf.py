@@ -34,7 +34,8 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
-	yacc = cpp.parser.Parser()
+	file, ext = os.path.splitext(output)
+	yacc = cpp.parser.Parser(output, file+'-instances'+ext, useMethods, name, source, pch)
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
@@ -68,20 +69,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 	if lexer.error != 0:
 		return lexer.error
 
-	try:
-		implementation = open(output, 'w')
-	except IOError as e:
-		raise Exception("cannot open output file %s : %s" % (output, str(e)))
-	if pch:
-		implementation.write("#include <%s>\n" % pch)
-	file, ext = os.path.splitext(output)
-	try:
-		instances = open(file+'-instances'+ext, 'w')
-	except IOError as e:
-		raise Exception("cannot open output file %s : %s" % (file+'-instances'+ext, str(e)))
-	if pch:
-		instances.write("#include <%s>\n" % pch)
-	yacc.dump(implementation, instances, useMethods, name, source)
+	yacc.dump()
 
 	return 0
 

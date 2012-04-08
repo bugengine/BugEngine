@@ -6,11 +6,11 @@ class TypeDef(yacc.Nonterm):
 
 	def type_class(self, cls):
 		"%reduce ClassDef"
-		self.value = cls.value
+		self.value = cls
 
 	def type_enum(self, cls):
 		"%reduce EnumDef"
-		self.value = cls.value
+		self.value = cls
 
 
 
