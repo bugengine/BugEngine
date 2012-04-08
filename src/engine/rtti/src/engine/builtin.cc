@@ -18,7 +18,7 @@ namespace BugEngine
 
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
 {
-    static const RTTI::Class s_void = { "void", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor,  {{ 0, 0, 0, 0 }} };
+    static const RTTI::Class s_void = { "void", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<const RTTI::Class> ci = {&s_void};
     return ci;
 }
@@ -26,7 +26,7 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
 template< >
 BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
 {
-    static const RTTI::Class s_refcountable = { "refcountable", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor, {{ 0, 0, 0, 0 }} };
+    static const RTTI::Class s_refcountable = { "refcountable", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<const RTTI::Class> ci = {&s_refcountable};
     return ci;
 }
@@ -40,8 +40,7 @@ BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
             0,                                                          \
             {0}, {0}, {0}, {0}, {0}, {0},                               \
             &RTTI::nullconstructor<sizeof(type)>,                       \
-            &RTTI::nulldestructor,                                      \
-            {{ 0, 0, 0, 0 }}                                            \
+            &RTTI::nulldestructor                                       \
         };                                                              \
     template< > BE_EXPORT raw<const RTTI::Class> be_typeid< type >::klass()   \
     {                                                                   \

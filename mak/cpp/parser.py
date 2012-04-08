@@ -40,12 +40,18 @@ spec = cpp.yacc.Spec(
 				pickleFile="../../cpp.pickle",
 				logFile="../../cpp.log",
 				graphFile="../../cpp.dot",
-				verbose=False)
+				verbose=True)
 
 class Parser(cpp.yacc.Lr):
-	def __init__(self):
+	def __init__(self, filename, instancesname, useMethods, plugin, source, pch):
 		cpp.yacc.Lr.__init__(self, spec)
-		self.root = rtti.Root()
+		self.filename = filename
+		self.instancesname = instancesname
+		self.useMethods = useMethods
+		self.plugin = plugin
+		self.source = source
+		self.pch = pch
+
 
 	def parse(self, input, lexer):
 		lexer.input(input)
@@ -58,6 +64,14 @@ class Parser(cpp.yacc.Lr):
 			t=lexer.token()
 		self.eoi()
 
-	def dump(self, implementation, instances, useMethods, name, source):
-		self.root.dump(implementation, instances, useMethods, name, source)
-		pass
+	def dump(self):
+		try:
+			with open(self.filename, 'w') as implementation:
+				with open(self.instancesname, 'w') as instances:
+					if self.pch:
+						implementation.write("#include <%s>\n" % self.pch)
+						instances.write("#include <%s>\n" % self.pch)
+					self.root.dump(implementation, instances)
+		except IOError as e:
+			raise Exception("cannot open output file : %s" % str(e))
+
