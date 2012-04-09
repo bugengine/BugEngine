@@ -40,7 +40,7 @@ spec = cpp.yacc.Spec(
 				pickleFile="../../cpp.pickle",
 				logFile="../../cpp.log",
 				graphFile="../../cpp.dot",
-				verbose=True)
+				verbose=False)
 
 class Parser(cpp.yacc.Lr):
 	def __init__(self, filename, instancesname, useMethods, plugin, source, pch):

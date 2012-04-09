@@ -1156,12 +1156,20 @@ the Parser class for parsing.
 			try:
 				self._validate(logFile)
 			finally:
+				try:
+					os.remove(pickleFIle)
+				except:
+					pass
 				# Pickle the spec, if method parameters so dictate, even if
 				# there were validation errors, so that the pickle might be
 				# used in part during later runs.
 				self._pickle(pickleFile, pickleMode)
 		elif compat == "repickle":
 			# Pickle the spec, if method parameters so dictate.
+			try:
+				os.remove(pickleFIle)
+			except:
+				pass
 			self._pickle(pickleFile, pickleMode)
 
 		if self._skinny:
