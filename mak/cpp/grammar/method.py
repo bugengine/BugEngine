@@ -6,6 +6,9 @@ import cpp.yacc as yacc
 class Arg(yacc.Nonterm):
 	"%nonterm"
 
+	def arg_value(self, tags_left, type, id, equal, value, tags_right):
+		"%reduce TagsLeft Type ID EQUAL Value TagsRight"
+
 	def arg_full(self, tags_left, type, id, tags_right):
 		"%reduce TagsLeft Type ID TagsRight"
 
@@ -68,10 +71,10 @@ class MethodPrototype(yacc.Nonterm):
 		self.args = args
 		self.attributes = set(['static'])
 
-	def method_destructor(self, type, lparen, args, rparen):
+	def method_destructor(self, n, type, lparen, args, rparen):
 		"%reduce NOT Type LPAREN ArgList RPAREN"
 		self.name = '?del'
-		self.line = name.lineno
+		self.line = type.lineno
 		self.args = args
 		self.attributes = set(['static'])
 
@@ -87,17 +90,17 @@ class MethodAttributes(yacc.Nonterm):
 
 	def method_static(self, static, method):
 		"%reduce STATIC MethodAttributes"
-		self.value = method
+		self.value = method.value
 		self.value.attributes.add('static')
 
 	def method_virtual(self, virtual, method):
 		"%reduce VIRTUAL MethodAttributes"
-		self.value = method
+		self.value = method.value
 		self.value.attributes.add('virtual')
 
 	def method_inline(self, inline, method):
 		"%reduce INLINE MethodAttributes"
-		self.value = method
+		self.value = method.value
 		self.value.attributes.add('inline')
 
 

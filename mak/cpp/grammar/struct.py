@@ -4,10 +4,27 @@ import rtti
 class Members(yacc.Nonterm):
 	"%nonterm"
 
-	def empty(self, skip_list):
-		"%reduce SkipList"
-		self.members = []
-		self.methods = []
+	def empty(self):
+		"%reduce"
+		self.members = [None, None, None, None, None]
+
+	def exprs(self, exprs):
+		"%reduce Exprs"
+		self.members = [None, None, None, exprs, None]
+
+	def exprs(self, members, visibility, colon, exprs):
+		"%reduce Members Visibility COLON Exprs"
+		self.members = members.members
+		if self.members[visibility.visibility]:
+			self.members[visibility.visibility].members += exprs.members
+			self.members[visibility.visibility].objects += exprs.objects
+			for m, methods in exprs.methods.items():
+				try:
+					self.members[visibility.visibility].methods[m] += methods
+				except KeyError:
+					self.members[visibility.visibility].methods[m] = methods
+		else:
+			self.members[visibility.visibility] = exprs
 
 
 
