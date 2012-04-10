@@ -1131,6 +1131,10 @@ the Parser class for parsing.
 		# Check for a compatible pickle.
 		compat = self._unpickle(pickleFile, pickleMode)
 
+		if compat != "compatible":
+			import os
+			os.remove(pickleFile)
+
 		if compat == "incompatible":
 			# Create the collection of sets of LR(1) items.
 			self._firstSets()
@@ -1156,20 +1160,12 @@ the Parser class for parsing.
 			try:
 				self._validate(logFile)
 			finally:
-				try:
-					os.remove(pickleFile)
-				except:
-					pass
 				# Pickle the spec, if method parameters so dictate, even if
 				# there were validation errors, so that the pickle might be
 				# used in part during later runs.
 				self._pickle(pickleFile, pickleMode)
 		elif compat == "repickle":
 			# Pickle the spec, if method parameters so dictate.
-			try:
-				os.remove(pickleFile)
-			except:
-				pass
 			self._pickle(pickleFile, pickleMode)
 
 		if self._skinny:
@@ -1527,7 +1523,7 @@ the Parser class for parsing.
 					  (("fat", "skinny")[self._skinny], file))
 				cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
 				f.close()
-			except OSError:
+			except OSError as e:
 				pass
 
 	# Restore state from a pickle file, if a compatible one is provided.  This
@@ -1556,7 +1552,9 @@ the Parser class for parsing.
 					error = sys.exc_info()
 					print( "Parsing.Spec: Pickle load failed: Exception %s: %s" \
 					  % (error[0], error[1]))
+				f.close()
 				return "incompatible"
+			f.close()
 
 			compat = self._compatible(spec)
 			if compat == "incompatible":
