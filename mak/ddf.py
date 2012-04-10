@@ -1,6 +1,5 @@
 import sys
-import cpp.yacc
-import cpp.lex
+import cpp
 import os
 import rtti
 
@@ -29,7 +28,6 @@ global_macro_map = {
 }
 
 def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="", useMethods=False):
-	import cpp.lexer, cpp.parser
 	lexer = cpp.lex.lex(module=cpp.lexer)
 	lexer.inside = 0
 	lexer.sourcename = source
@@ -63,13 +61,16 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 
 
-	yacc.parse(input.read(), lexer=lexer)
-	input.close()
+	try:
+		yacc.parse(input.read(), lexer=lexer)
+		input.close()
 
-	if lexer.error != 0:
-		return lexer.error
-
-	yacc.dump()
+		if lexer.error != 0:
+			return lexer.error
+	except:
+		return 1
+	else:
+		yacc.dump()
 
 	return 0
 

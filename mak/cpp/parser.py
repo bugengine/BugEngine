@@ -1,21 +1,4 @@
-import cpp.yacc
-import rtti
-import cpp.tokens
-import cpp.grammar.unit
-import cpp.grammar.namespace
-import cpp.grammar.name
-import cpp.grammar.using
-import cpp.grammar.tag
-import cpp.grammar.comment
-import cpp.grammar.struct
-import cpp.grammar.enum
-import cpp.grammar.method
-import cpp.grammar.variable
-import cpp.grammar.type
-import cpp.grammar.template
-import cpp.grammar.keywords
-import cpp.grammar.value
-import cpp.grammar.skip
+import cpp
 
 
 spec = cpp.yacc.Spec(
@@ -56,13 +39,17 @@ class Parser(cpp.yacc.Lr):
 	def parse(self, input, lexer):
 		lexer.input(input)
 		t=lexer.token()
-		while t:
-			tok = cpp.tokens.__dict__[t.type](self)
-			tok.value = t.value
-			tok.lineno = t.lineno
-			self.token(tok)
-			t=lexer.token()
-		self.eoi()
+		try:
+			while t:
+				tok = cpp.tokens.__dict__[t.type](self)
+				tok.value = t.value
+				tok.lineno = t.lineno
+				self.token(tok)
+				t=lexer.token()
+			self.eoi()
+		except SyntaxError as e:
+			print("%s:%d %s" % (self.source, t.lineno, str(e)))
+			raise
 
 	def dump(self):
 		try:

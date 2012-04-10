@@ -1,9 +1,9 @@
-import cpp.yacc as yacc
+import cpp
 
 
 
 
-class Arg(yacc.Nonterm):
+class Arg(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def arg_value(self, tags_left, type, id, equal, value, tags_right):
@@ -21,7 +21,7 @@ class Arg(yacc.Nonterm):
 
 
 
-class ArgSequence(yacc.Nonterm):
+class ArgSequence(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def argseq(self, argseq, comma, arg):
@@ -33,7 +33,7 @@ class ArgSequence(yacc.Nonterm):
 
 
 
-class ArgList(yacc.Nonterm):
+class ArgList(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def no_args(self):
@@ -47,7 +47,7 @@ class ArgList(yacc.Nonterm):
 
 
 
-class MethodPrototype(yacc.Nonterm):
+class MethodPrototype(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def method_simple(self, type, name, lparen, args, rparen):
@@ -81,7 +81,7 @@ class MethodPrototype(yacc.Nonterm):
 
 
 
-class MethodAttributes(yacc.Nonterm):
+class MethodAttributes(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def method(self, method):
@@ -106,7 +106,7 @@ class MethodAttributes(yacc.Nonterm):
 
 
 
-class Method(yacc.Nonterm):
+class Method(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def method(self, method):

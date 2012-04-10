@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class NameItem(yacc.Nonterm):
+class NameItem(cpp.yacc.Nonterm):
 	"%nonterm"
 	def name_id(self, id):
 		"%reduce ID"
@@ -19,7 +19,7 @@ class NameItem(yacc.Nonterm):
 		self.value = id.value + " < " + skip.value + " >"
 		self.lineno = id.lineno
 
-class Namelist(yacc.Nonterm):
+class Namelist(cpp.yacc.Nonterm):
 	"%nonterm"
 	def nameitem(self, name_item):
 		"%reduce NameItem"
@@ -30,7 +30,7 @@ class Namelist(yacc.Nonterm):
 		self.value = name_list.value + '::' + name_item.value
 		self.lineno = name_list.lineno
 
-class Name(yacc.Nonterm):
+class Name(cpp.yacc.Nonterm):
 	"%nonterm"
 	def name_absolute(self, scope, name_list):
 		"%reduce SCOPE Namelist"

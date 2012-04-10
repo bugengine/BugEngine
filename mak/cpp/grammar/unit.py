@@ -1,8 +1,7 @@
-import cpp.yacc as yacc
-import rtti
+import cpp
 
 
-class ExprMethod(yacc.Nonterm):
+class ExprMethod(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_method(self, tags_left, method, tags_right, semi):
@@ -18,7 +17,7 @@ class ExprMethod(yacc.Nonterm):
 
 
 
-class ExprNamespace(yacc.Nonterm):
+class ExprNamespace(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_namespace(self, namespace):
@@ -28,7 +27,7 @@ class ExprNamespace(yacc.Nonterm):
 
 
 
-class ExprType(yacc.Nonterm):
+class ExprType(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_type(self, tags_left, type, tags_right, semi):
@@ -44,7 +43,7 @@ class ExprType(yacc.Nonterm):
 
 
 
-class ExprVariable(yacc.Nonterm):
+class ExprVariable(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_variable(self, tags_left, variable, tags_right, semi):
@@ -54,7 +53,7 @@ class ExprVariable(yacc.Nonterm):
 
 
 
-class ExprFriend(yacc.Nonterm):
+class ExprFriend(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_friend(self, friend, type):
@@ -65,7 +64,7 @@ class ExprFriend(yacc.Nonterm):
 
 
 
-class ExprTemplate(yacc.Nonterm):
+class ExprTemplate(cpp.yacc.Nonterm):
 	"%nonterm"
 	def template_method(self, tpl, method):
 		"%reduce Template ExprMethod"
@@ -82,7 +81,7 @@ class ExprTemplate(yacc.Nonterm):
 
 
 
-class ExprIgnore(yacc.Nonterm):
+class ExprIgnore(cpp.yacc.Nonterm):
 	"%nonterm"
 	def expr_using(self, using):
 		"%reduce Using"
@@ -92,7 +91,7 @@ class ExprIgnore(yacc.Nonterm):
 
 
 
-class Exprs(yacc.Nonterm):
+class Exprs(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def expr_method(self, m, exprs):
@@ -163,11 +162,11 @@ class Exprs(yacc.Nonterm):
 
 
 
-class Unit(yacc.Nonterm):
+class Unit(cpp.yacc.Nonterm):
 	"%start"
 
 	def __init__(self, parser):
-		yacc.Nonterm.__init__(self, parser)
+		cpp.yacc.Nonterm.__init__(self, parser)
 		parser.root = self
 
 	def exprs(self, exprs):

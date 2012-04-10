@@ -1157,7 +1157,7 @@ the Parser class for parsing.
 				self._validate(logFile)
 			finally:
 				try:
-					os.remove(pickleFIle)
+					os.remove(pickleFile)
 				except:
 					pass
 				# Pickle the spec, if method parameters so dictate, even if
@@ -1167,7 +1167,7 @@ the Parser class for parsing.
 		elif compat == "repickle":
 			# Pickle the spec, if method parameters so dictate.
 			try:
-				os.remove(pickleFIle)
+				os.remove(pickleFile)
 			except:
 				pass
 			self._pickle(pickleFile, pickleMode)
@@ -1520,7 +1520,8 @@ the Parser class for parsing.
 		if file != None and "w" in mode:
 			import os
 			try:
-				f = os.fdopen(os.open(file, os.O_CREAT|os.O_EXCL|os.O_TRUNC|os.O_RDWR), "wb")
+				os.close(os.open(file, os.O_CREAT|os.O_EXCL|os.O_TRUNC|os.O_RDWR))
+				f = open(file, "wb")
 				if self._verbose:
 					print( "Parsing.Spec: Creating %s Spec pickle in %s..." % \
 					  (("fat", "skinny")[self._skinny], file))

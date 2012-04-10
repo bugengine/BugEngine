@@ -1,7 +1,7 @@
-import cpp.yacc as yacc
+import cpp
 
 
-class Operator(yacc.Nonterm):
+class Operator(cpp.yacc.Nonterm):
 	"%nonterm"
 	def op_new(self, op):
 		"%reduce NEW"
@@ -194,7 +194,7 @@ class Operator(yacc.Nonterm):
 
 
 
-class Keyword(yacc.Nonterm):
+class Keyword(cpp.yacc.Nonterm):
 	"%nonterm"
 	def kw_struct(self, kw):
 		"%reduce STRUCT"
