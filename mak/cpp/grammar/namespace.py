@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class Namespace(yacc.Nonterm):
+class Namespace(cpp.yacc.Nonterm):
 	"%nonterm"
 	def namespace_named(self, namespace, name, LBRACE, exprs, RBRACE):
 		"%reduce NAMESPACE ID LBRACE Exprs RBRACE"

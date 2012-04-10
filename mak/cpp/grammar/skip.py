@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class SkipItem(yacc.Nonterm):
+class SkipItem(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skip_keyword(self, kw):
@@ -22,7 +22,7 @@ class SkipItem(yacc.Nonterm):
 		"%reduce SEMI"
 		self.value = semi.value
 
-class SkipAllItem(yacc.Nonterm):
+class SkipAllItem(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skip_item(self, si):
@@ -40,7 +40,7 @@ class SkipAllItem(yacc.Nonterm):
 
 
 
-class SkipListBase(yacc.Nonterm):
+class SkipListBase(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_empty(self):
@@ -50,7 +50,7 @@ class SkipListBase(yacc.Nonterm):
 		"%reduce SkipListBase SkipItem"
 		self.value = skiplist.value + " " + item.value
 
-class SkipListAllBase(yacc.Nonterm):
+class SkipListAllBase(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_empty(self):
@@ -63,7 +63,7 @@ class SkipListAllBase(yacc.Nonterm):
 
 
 
-class SkipList(yacc.Nonterm):
+class SkipList(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_base(self, skiplist):
@@ -84,7 +84,7 @@ class SkipList(yacc.Nonterm):
 
 
 
-class SkipListTemplate(yacc.Nonterm):
+class SkipListTemplate(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_base(self, skiplist):

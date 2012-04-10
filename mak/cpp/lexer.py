@@ -1,5 +1,4 @@
-import cpp.tokens
-import cpp.yacc
+import cpp
 
 tokens = []
 reserved_map = { }

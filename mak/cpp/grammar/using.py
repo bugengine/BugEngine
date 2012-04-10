@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class Using(yacc.Nonterm):
+class Using(cpp.yacc.Nonterm):
 	"%nonterm"
 	def using_name(self, using, name, semi):
 		"%reduce USING Name SEMI"

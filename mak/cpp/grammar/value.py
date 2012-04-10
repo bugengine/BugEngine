@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class Value(yacc.Nonterm):
+class Value(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def constant_string(self, constant):
@@ -28,25 +28,3 @@ class Value(yacc.Nonterm):
 		"%reduce FLOATING"
 		self.value = constant.value
 
-
-class VariableItem(yacc.Nonterm):
-	"%nonterm"
-
-	def variable(self, type, name):
-		"%reduce Type ID"
-
-class VariableAttributes(yacc.Nonterm):
-	"%nonterm"
-
-	def variable(self, variable):
-		"%reduce VariableItem"
-	def static_variable(self, static, variable):
-		"%reduce STATIC VariableAttributes"
-
-class Variable(yacc.Nonterm):
-	"%nonterm"
-
-	def variable(self, variable):
-		"%reduce VariableAttributes"
-	def variable_value(self, variable, eq, value):
-		"%reduce VariableAttributes EQUAL Value"

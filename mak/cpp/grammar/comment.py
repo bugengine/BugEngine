@@ -1,6 +1,6 @@
-import cpp.yacc as yacc
+import cpp
 
-class DoxyWords(yacc.Nonterm):
+class DoxyWords(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def words(self):
@@ -18,7 +18,7 @@ class DoxyWords(yacc.Nonterm):
 
 
 
-class DoxyCommentRight(yacc.Nonterm):
+class DoxyCommentRight(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def doxy(self):
@@ -35,7 +35,7 @@ class DoxyCommentRight(yacc.Nonterm):
 
 
 
-class DoxyComment(yacc.Nonterm):
+class DoxyComment(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def doxy(self):

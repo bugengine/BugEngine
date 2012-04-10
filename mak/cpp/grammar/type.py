@@ -1,7 +1,7 @@
-import cpp.yacc as yacc
+import cpp
 
 
-class TypeDef(yacc.Nonterm):
+class TypeDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def type_class(self, cls):
@@ -14,7 +14,7 @@ class TypeDef(yacc.Nonterm):
 
 
 
-class TypeDecl(yacc.Nonterm):
+class TypeDecl(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def class_declaration(self, type, name):
@@ -40,7 +40,7 @@ class TypeDecl(yacc.Nonterm):
 
 
 
-class TypePart(yacc.Nonterm):
+class TypePart(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def type_declaration(self, type):
@@ -71,7 +71,7 @@ class TypePart(yacc.Nonterm):
 
 
 
-class Type(yacc.Nonterm):
+class Type(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def type(self, part):

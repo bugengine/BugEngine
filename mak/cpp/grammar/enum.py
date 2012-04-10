@@ -1,8 +1,7 @@
-import cpp.yacc as yacc
-import rtti
+import cpp
 
 
-class EnumDef(yacc.Nonterm):
+class EnumDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def enum(self, enum, name, lbrace, skip, rbrace):

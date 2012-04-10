@@ -1,7 +1,7 @@
-import cpp.yacc as yacc
+import cpp
 
 
-class Template(yacc.Nonterm):
+class Template(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def template(self, template, lt, SkipListTemplate, gt):

@@ -1,7 +1,7 @@
-import cpp.yacc as yacc
+import cpp
 
 
-class Tag(yacc.Nonterm):
+class Tag(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def tag(self, tag, lparen, name, lparen2, skiplist, rparen2, rparen):
@@ -9,7 +9,7 @@ class Tag(yacc.Nonterm):
 		tag = (name.value, skiplist.value)
 
 
-class TagList(yacc.Nonterm):
+class TagList(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def taglist_empty(self):
@@ -21,14 +21,14 @@ class TagList(yacc.Nonterm):
 		self.tags = taglist.tags
 		self.tags.append(tag.tag)
 
-class TagsLeft(yacc.Nonterm):
+class TagsLeft(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def taglistcomment(self, comment, taglist):
 		"%reduce DoxyComment TagList"
 		self.tags = taglist.tags
 
-class TagsRight(yacc.Nonterm):
+class TagsRight(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def taglistcomment(self, comment):

@@ -1,7 +1,6 @@
-import cpp.yacc as yacc
-import rtti
+import cpp
 
-class Members(yacc.Nonterm):
+class Members(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def empty(self):
@@ -28,29 +27,29 @@ class Members(yacc.Nonterm):
 
 
 
-class Visibility(yacc.Nonterm):
+class Visibility(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def private(self, private):
 		"%reduce PRIVATE"
-		self.visibility = 1
+		self.visibility = 0
 	def protected(self, protected):
 		"%reduce PROTECTED"
-		self.visibility = 2
+		self.visibility = 1
 	def public(self, public):
 		"%reduce PUBLIC"
-		self.visibility = 3
+		self.visibility = 2
 	def none(self):
 		"%reduce"
-		self.visibility = 4
+		self.visibility = 3
 	def published(self, published):
 		"%reduce PUBLISHED"
-		self.visibility = 5
+		self.visibility = 4
 
 
 
 
-class ParentList(yacc.Nonterm):
+class ParentList(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def parent_item(self, visibility, name):
@@ -66,7 +65,7 @@ class ParentList(yacc.Nonterm):
 
 
 
-class Parent(yacc.Nonterm):
+class Parent(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def parent_none(self):
@@ -79,14 +78,14 @@ class Parent(yacc.Nonterm):
 
 
 
-class ClassDef(yacc.Nonterm):
+class ClassDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def class_definition(self, cls, name, parent, lbrace, members, rbrace):
 		"%reduce CLASS Name Parent LBRACE Members RBRACE"
 		self.name = name.value
 		self.value = False
-		if parent.inherits[0] >= 5:
+		if parent.inherits[0] >= 4:
 			self.inherits = parent.inherits[1]
 		else:
 			self.inherits = "void"
@@ -95,7 +94,7 @@ class ClassDef(yacc.Nonterm):
 		"%reduce STRUCT Name Parent LBRACE Members RBRACE"
 		self.name = name.value
 		self.value = True
-		if parent.inherits[0] >= 4:
+		if parent.inherits[0] >= 3:
 			self.inherits = parent.inherits[1]
 		else:
 			self.inherits = "void"
