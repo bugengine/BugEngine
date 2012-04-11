@@ -9,29 +9,8 @@ class SkipItem(cpp.yacc.Nonterm):
 	def skip_operator(self, op):
 		"%reduce Operator"
 		self.value = op.value
-	def skip_string(self, constant):
-		"%reduce STRING"
-		self.value = constant.value
-	def skip_wstring(self, constant):
-		"%reduce WSTRING"
-		self.value = constant.value
-	def skip_charconst(self, constant):
-		"%reduce CHARCONST"
-		self.value = constant.value
-	def skip_wchar(self, constant):
-		"%reduce WCHAR"
-		self.value = constant.value
-	def skip_decimal(self, constant):
-		"%reduce DECIMAL"
-		self.value = constant.value
-	def skip_octal(self, constant):
-		"%reduce OCTAL"
-		self.value = constant.value
-	def skip_hex(self, constant):
-		"%reduce HEX"
-		self.value = constant.value
-	def skip_floating(self, constant):
-		"%reduce FLOATING"
+	def skip_constant(self, constant):
+		"%reduce Constant"
 		self.value = constant.value
 	def skip_id(self, value):
 		"%reduce ID"
@@ -39,11 +18,8 @@ class SkipItem(cpp.yacc.Nonterm):
 	def skip_scope(self, value):
 		"%reduce SCOPE"
 		self.value = value.value
-	def skiplist_semi(self, semi):
-		"%reduce SEMI"
-		self.value = semi.value
 
-class SkipAllItem(cpp.yacc.Nonterm):
+class SkipMoreItem(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skip_item(self, si):
@@ -56,51 +32,94 @@ class SkipAllItem(cpp.yacc.Nonterm):
 		"%reduce GT"
 		self.value = op.value
 
+class SkipAllItem(cpp.yacc.Nonterm):
+	"%nonterm"
+	def skip_item(self, si):
+		"%reduce SkipMoreItem"
+		self.value = si.value
+	def skip_semi(self, kw):
+		"%reduce SEMI"
+		self.value = kw.value
+	def skip_comma(self, kw):
+		"%reduce COMMA"
+		self.value = kw.value
+	def skip_doxy_begin(self, kw):
+		"%reduce DOXY_BEGIN"
+		self.value = kw.value
+	def kw_doxy_begin_left(self, kw):
+		"%reduce DOXY_BEGIN_LEFT"
+		self.value = kw.value
+	def skip_doxy_end(self, kw):
+		"%reduce DOXY_END"
+		self.value = kw.value
+	def skip_doxy_word(self, kw):
+		"%reduce DOXY_WORD"
+		self.value = kw.value
+	def skip_doxy_newline(self, kw):
+		"%reduce DOXY_NEWLINE"
+		self.value = kw.value
+	def skip_doxy_list(self, kw):
+		"%reduce DOXY_LIST"
+		self.value = kw.value
 
 
 
 
+
+class SkipListTemplateBase(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def skiplist_empty(self):
+		"%reduce"
+		self.value = ""
+	def skiplist_list(self, skiplist, item):
+		"%reduce SkipListTemplateBase SkipItem"
+		self.value = skiplist.value + " " + item.value
+	def skiplist_comma(self, skiplist, comma):
+		"%reduce SkipListTemplateBase COMMA"
+		self.value = skiplist.value + " " + comma.value
+
+
+class SkipListMoreBase(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def skiplist_empty(self):
+		"%reduce"
+		self.value = ""
+	def skiplist_list(self, skiplist, item):
+		"%reduce SkipListMoreBase SkipMoreItem"
+		self.value = skiplist.value + " " + item.value
 
 class SkipListBase(cpp.yacc.Nonterm):
 	"%nonterm"
 
-	def skiplist_empty(self):
+	def skiplist(self):
 		"%reduce"
 		self.value = ""
-	def skiplist_list(self, skiplist, item):
-		"%reduce SkipListBase SkipItem"
-		self.value = skiplist.value + " " + item.value
 
-class SkipListAllBase(cpp.yacc.Nonterm):
-	"%nonterm"
-
-	def skiplist_empty(self):
-		"%reduce"
-		self.value = ""
-	def skiplist_list(self, skiplist, item):
-		"%reduce SkipListAllBase SkipAllItem"
-		self.value = skiplist.value + " " + item.value
+	def skiplist_comma(self, skiplistbase, item):
+		"%reduce SkipListBase SkipAllItem"
+		self.value = skiplistbase.value + item.value
 
 
 
-
-class SkipList(cpp.yacc.Nonterm):
+class SkipListNoComma(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_base(self, skiplist):
-		"%reduce SkipListAllBase"
+		"%reduce SkipListMoreBase"
 		self.value = skiplist.value
 
 	def skiplist_paren(self, skiplist1, lparen, skiplist2, rparen, skiplist3):
-		"%reduce SkipList LPAREN SkipList RPAREN SkipListAllBase"
+		"%reduce SkipListNoComma LPAREN SkipList RPAREN SkipListMoreBase"
 		self.value = skiplist1.value + " ( " + skiplist2.value + " ) " + skiplist3.value
 
 	def skiplist_brace(self, skiplist1, lbrace, skiplist2, rbrace, skiplist3):
-		"%reduce SkipList LBRACE SkipList RBRACE SkipListAllBase"
+		"%reduce SkipListNoComma LBRACE SkipList RBRACE SkipListMoreBase"
 		self.value = skiplist1.value + " { " + skiplist2.value + " } " + skiplist3.value
 
 	def skiplist_brackets(self, skiplist1, lbracket, skiplist2, rbracket, skiplist3):
-		"%reduce SkipList LBRACKET SkipList RBRACKET SkipListAllBase"
+		"%reduce SkipListNoComma LBRACKET SkipList RBRACKET SkipListMoreBase"
 		self.value = skiplist1.value + " [ " + skiplist2.value + " ] " + skiplist3.value
 
 
@@ -109,21 +128,38 @@ class SkipListTemplate(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def skiplist_base(self, skiplist):
-		"%reduce SkipListBase"
+		"%reduce SkipListTemplateBase"
 		self.value = skiplist.value
 
 	def skiplist_paren(self, skiplist1, lparen, skiplist2, rparen, skiplist3):
-		"%reduce SkipListTemplate LPAREN SkipList RPAREN SkipListBase"
+		"%reduce SkipListTemplate LPAREN SkipList RPAREN SkipListTemplateBase"
 		self.value = skiplist1.value + " ( " + skiplist2.value + " ) " + skiplist3.value
 
-	def skiplist_brace(self, skiplist1, lbrace, skiplist2, rbrace, skiplist3):
-		"%reduce SkipListTemplate LBRACE SkipList RBRACE SkipListBase"
-		self.value = skiplist1.value + " { " + skiplist2.value + " } " + skiplist3.value
-
 	def skiplist_brackets(self, skiplist1, lbracket, skiplist2, rbracket, skiplist3):
-		"%reduce SkipListTemplate LBRACKET SkipList RBRACKET SkipListBase"
+		"%reduce SkipListTemplate LBRACKET SkipList RBRACKET SkipListTemplateBase"
 		self.value = skiplist1.value + " [ " + skiplist2.value + " ] " + skiplist3.value
 
 	def skiplist_template(self, skiplist1, lt, skiplist2, gt, skiplist3):
-		"%reduce SkipListTemplate LT SkipListTemplate GT SkipListBase"
+		"%reduce SkipListTemplate LT SkipListTemplate GT SkipListTemplateBase"
 		self.value = skiplist1.value + " < " + skiplist2.value + " > " + skiplist3.value
+
+class SkipList(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def skiplist(self, skiplistbase):
+		"%reduce SkipListBase"
+		self.value = skiplistbase.value
+
+	def skiplist_paren(self, skiplist1, lparen, skiplist2, rparen, skiplist3):
+		"%reduce SkipList LPAREN SkipList RPAREN SkipListBase"
+		self.value = skiplist1.value + " ( " + skiplist2.value + " ) " + skiplist3.value
+
+	def skiplist_brace(self, skiplist1, lbrace, skiplist2, rbrace, skiplist3):
+		"%reduce SkipList LBRACE SkipList RBRACE SkipListBase"
+		self.value = skiplist1.value + " { " + skiplist2.value + " } " + skiplist3.value
+
+	def skiplist_brackets(self, skiplist1, lbracket, skiplist2, rbracket, skiplist3):
+		"%reduce SkipList LBRACKET SkipList RBRACKET SkipListBase"
+		self.value = skiplist1.value + " [ " + skiplist2.value + " ] " + skiplist3.value
+
+

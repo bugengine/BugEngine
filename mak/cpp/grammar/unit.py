@@ -40,6 +40,14 @@ class ExprType(cpp.yacc.Nonterm):
 		self.value = None
 		#self.value.tags = tags_left.tags + tags_right.tags
 
+	def expr_typedef(self, tags_left, typedef, typedecl, id, tags_right, semi):
+		"%reduce TagsLeft TYPEDEF TypeDecl ID TagsRight SEMI"
+		self.value = None
+
+	def expr_typedef_method(self, tags_left, typedef, methodptr, tags_right, semi):
+		"%reduce TagsLeft TYPEDEF MethodPointer TagsRight SEMI"
+		self.value = None
+
 
 
 
@@ -50,7 +58,6 @@ class ExprVariable(cpp.yacc.Nonterm):
 		"%reduce TagsLeft Variable TagsRight SEMI"
 		self.value = None
 		#self.value.tags = tags_left.tags + tags_right.tags
-
 
 
 class ExprFriend(cpp.yacc.Nonterm):

@@ -1133,7 +1133,10 @@ the Parser class for parsing.
 
 		if compat != "compatible":
 			import os
-			os.remove(pickleFile)
+			try:
+				os.remove(pickleFile)
+			except:
+				pass
 
 		if compat == "incompatible":
 			# Create the collection of sets of LR(1) items.

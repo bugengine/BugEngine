@@ -1,6 +1,6 @@
 import cpp
 
-class Value(cpp.yacc.Nonterm):
+class Constant(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def constant_string(self, constant):
@@ -27,7 +27,10 @@ class Value(cpp.yacc.Nonterm):
 	def constant_floating(self, constant):
 		"%reduce FLOATING"
 		self.value = constant.value
-	def value_name(self, name):
-		"%reduce Name"
-		self.value = name.value
+
+class Value(cpp.yacc.Nonterm):
+	"%nonterm"
+	def value(self, skip):
+		"%reduce SkipListNoComma"
+		self.value = skip.value
 

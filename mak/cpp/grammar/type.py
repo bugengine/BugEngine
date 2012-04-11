@@ -38,8 +38,6 @@ class TypeDecl(cpp.yacc.Nonterm):
 		self.value = None
 
 
-
-
 class TypePart(cpp.yacc.Nonterm):
 	"%nonterm"
 
