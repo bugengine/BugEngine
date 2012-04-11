@@ -14,12 +14,16 @@ class VariableAttributes(cpp.yacc.Nonterm):
 		"%reduce VariableItem"
 	def static_variable(self, static, variable):
 		"%reduce STATIC VariableAttributes"
+	def mutable_variable(self, static, variable):
+		"%reduce MUTABLE VariableAttributes"
 
 class Variable(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def variable(self, variable):
 		"%reduce VariableAttributes"
+	def variable_array(self, variable, lbracket, value, rbracket):
+		"%reduce VariableAttributes LBRACKET Value RBRACKET"
 	def variable_value(self, variable, eq, value):
 		"%reduce VariableAttributes EQUAL Value"
 

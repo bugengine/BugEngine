@@ -1,19 +1,16 @@
 import cpp
 
-class Members(cpp.yacc.Nonterm):
+
+class MemberList(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def empty(self):
 		"%reduce"
 		self.members = [None, None, None, None, None]
 
-	def exprs(self, exprs):
-		"%reduce Exprs"
-		self.members = [None, None, None, exprs, None]
-
-	def exprs(self, members, visibility, colon, exprs):
-		"%reduce Members Visibility COLON Exprs"
-		self.members = members.members
+	def block(self, visibility, colon, exprs, memberlist):
+		"%reduce Visibility COLON Exprs MemberList"
+		self.members = memberlist.members
 		if self.members[visibility.visibility]:
 			self.members[visibility.visibility].members += exprs.members
 			self.members[visibility.visibility].objects += exprs.objects
@@ -26,6 +23,13 @@ class Members(cpp.yacc.Nonterm):
 			self.members[visibility.visibility] = exprs
 
 
+class Members(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def list(self, exprs, members):
+		"%reduce Exprs MemberList"
+		self.members = members.members
+		self.members[3] = exprs
 
 class Visibility(cpp.yacc.Nonterm):
 	"%nonterm"
@@ -82,8 +86,9 @@ class ClassDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def class_definition(self, cls, name, parent, lbrace, members, rbrace):
-		"%reduce CLASS Name Parent LBRACE Members RBRACE"
+		"%reduce CLASS NameOpt Parent LBRACE Members RBRACE"
 		self.name = name.value
+		self.lineno = cls.lineno
 		self.value = False
 		if parent.inherits[0] >= 4:
 			self.inherits = parent.inherits[1]
@@ -91,8 +96,9 @@ class ClassDef(cpp.yacc.Nonterm):
 			self.inherits = "void"
 
 	def struct_definition(self, cls, name, parent, lbrace, members, rbrace):
-		"%reduce STRUCT Name Parent LBRACE Members RBRACE"
+		"%reduce STRUCT NameOpt Parent LBRACE Members RBRACE"
 		self.name = name.value
+		self.lineno = cls.lineno
 		self.value = True
 		if parent.inherits[0] >= 3:
 			self.inherits = parent.inherits[1]
@@ -100,8 +106,9 @@ class ClassDef(cpp.yacc.Nonterm):
 			self.inherits = "void"
 
 	def union_definition(self, union, name, lbrace, members, rbrace):
-		"%reduce UNION Name LBRACE Members RBRACE"
+		"%reduce UNION NameOpt LBRACE Members RBRACE"
 		self.name = name.value
+		self.lineno = union.lineno
 		self.inherits = 'void'
 		self.value = True
 

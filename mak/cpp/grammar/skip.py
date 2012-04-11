@@ -9,15 +9,36 @@ class SkipItem(cpp.yacc.Nonterm):
 	def skip_operator(self, op):
 		"%reduce Operator"
 		self.value = op.value
-	def skiplist_value(self, value):
-		"%reduce Value"
-		self.value = value.value
-	def skiplist_scope(self, scope):
-		"%reduce SCOPE"
-		self.value = scope.value
-	def skiplist_id(self, id):
+	def skip_string(self, constant):
+		"%reduce STRING"
+		self.value = constant.value
+	def skip_wstring(self, constant):
+		"%reduce WSTRING"
+		self.value = constant.value
+	def skip_charconst(self, constant):
+		"%reduce CHARCONST"
+		self.value = constant.value
+	def skip_wchar(self, constant):
+		"%reduce WCHAR"
+		self.value = constant.value
+	def skip_decimal(self, constant):
+		"%reduce DECIMAL"
+		self.value = constant.value
+	def skip_octal(self, constant):
+		"%reduce OCTAL"
+		self.value = constant.value
+	def skip_hex(self, constant):
+		"%reduce HEX"
+		self.value = constant.value
+	def skip_floating(self, constant):
+		"%reduce FLOATING"
+		self.value = constant.value
+	def skip_id(self, value):
 		"%reduce ID"
-		self.value = id.value
+		self.value = value.value
+	def skip_scope(self, value):
+		"%reduce SCOPE"
+		self.value = value.value
 	def skiplist_semi(self, semi):
 		"%reduce SEMI"
 		self.value = semi.value

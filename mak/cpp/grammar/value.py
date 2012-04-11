@@ -27,4 +27,7 @@ class Value(cpp.yacc.Nonterm):
 	def constant_floating(self, constant):
 		"%reduce FLOATING"
 		self.value = constant.value
+	def value_name(self, name):
+		"%reduce Name"
+		self.value = name.value
 

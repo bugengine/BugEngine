@@ -1,5 +1,6 @@
 import cpp
 
+
 class NameItem(cpp.yacc.Nonterm):
 	"%nonterm"
 	def name_id(self, id):
@@ -30,15 +31,27 @@ class Namelist(cpp.yacc.Nonterm):
 		self.value = name_list.value + '::' + name_item.value
 		self.lineno = name_list.lineno
 
+class NamePrecedence(cpp.yacc.Precedence):
+	"%right <ScopePrecedence"
 class Name(cpp.yacc.Nonterm):
 	"%nonterm"
 	def name_absolute(self, scope, name_list):
-		"%reduce SCOPE Namelist"
+		"%reduce SCOPE Namelist [NamePrecedence]"
 		self.value = '::'+name_list.value
 		self.lineno = scope.lineno
 	def name(self, name_list):
-		"%reduce Namelist"
+		"%reduce Namelist [NamePrecedence]"
 		self.value = name_list.value
 		self.lineno = name_list.lineno
 
+class NameOpt(cpp.yacc.Nonterm):
+	"%nonterm"
+	def name(self, name):
+		"%reduce Name"
+		self.value = name.value
+		self.lineno = name.lineno
 
+	def empty(self):
+		"%reduce"
+		self.value = ""
+		self.lineno = 0

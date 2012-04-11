@@ -24,8 +24,8 @@ class Arg(cpp.yacc.Nonterm):
 class ArgSequence(cpp.yacc.Nonterm):
 	"%nonterm"
 
-	def argseq(self, argseq, comma, arg):
-		"%reduce ArgSequence COMMA Arg"
+	def argseq(self, argseq, comma, tags, arg):
+		"%reduce ArgSequence COMMA TagsRight Arg"
 
 	def argseq_1arg(self, arg):
 		"%reduce Arg"
@@ -51,7 +51,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def method_simple(self, type, name, lparen, args, rparen):
-		"%reduce Type ID LPAREN ArgList RPAREN"
+		"%reduce Type Name LPAREN ArgList RPAREN"
 		self.name = name.value
 		self.line = name.lineno
 		self.args = args
@@ -105,6 +105,13 @@ class MethodAttributes(cpp.yacc.Nonterm):
 
 
 
+class Initializers(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def initializers(self, name, lparen, value, rparen):
+		"%reduce ID LPAREN Value RPAREN"
+	def initializer_list(self, name, lparen, value, rparen, comma, initlist):
+		"%reduce ID LPAREN Value RPAREN COMMA Initializers"
 
 class Method(cpp.yacc.Nonterm):
 	"%nonterm"
@@ -125,6 +132,11 @@ class Method(cpp.yacc.Nonterm):
 
 	def method_abstract(self, method, equals, value):
 		"%reduce Method EQUAL Value"
+		self.value = method.value
+		self.value.attributes.add('abstract')
+
+	def method_initlist(self, method, colon, initializers):
+		"%reduce Method COLON Initializers"
 		self.value = method.value
 		self.value.attributes.add('abstract')
 
