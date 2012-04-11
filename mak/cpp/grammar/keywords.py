@@ -187,10 +187,6 @@ class Operator(cpp.yacc.Nonterm):
 		"%reduce ELLIPSIS"
 		self.value = op.value
 		self.lineno = op.lineno
-	def op_comma(self, op):
-		"%reduce COMMA"
-		self.value = op.value
-		self.lineno = op.lineno
 
 
 
@@ -295,21 +291,4 @@ class Keyword(cpp.yacc.Nonterm):
 	def kw_be_tag(self, kw):
 		"%reduce BE_TAG"
 		self.value = kw.value
-	def kw_doxy_begin(self, kw):
-		"%reduce DOXY_BEGIN"
-		self.value = kw.value
-	def kw_doxy_begin_left(self, kw):
-		"%reduce DOXY_BEGIN_LEFT"
-		self.value = kw.value
-	def kw_doxy_end(self, kw):
-		"%reduce DOXY_END"
-		self.value = kw.value
-	def kw_doxy_word(self, kw):
-		"%reduce DOXY_WORD"
-		self.value = kw.value
-	def kw_doxy_newline(self, kw):
-		"%reduce DOXY_NEWLINE"
-		self.value = kw.value
-	def kw_doxy_list(self, kw):
-		"%reduce DOXY_LIST"
-		self.value = kw.value
+

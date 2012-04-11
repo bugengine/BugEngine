@@ -131,7 +131,7 @@ class Method(cpp.yacc.Nonterm):
 		self.value.attributes.add('override')
 
 	def method_abstract(self, method, equals, value):
-		"%reduce Method EQUAL Value"
+		"%reduce Method EQUAL Constant"
 		self.value = method.value
 		self.value.attributes.add('abstract')
 
@@ -139,4 +139,12 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 		self.value.attributes.add('abstract')
+
+class MethodPointer(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def method_ptr(self, type, lparen, times, rparen, lparen2, args, rparen2):
+		"%reduce Type LPAREN TIMES RPAREN LPAREN ArgList RPAREN"
+	def method_ptr(self, type, lparen, times, id, rparen, lparen2, args, rparen2):
+		"%reduce Type LPAREN TIMES ID RPAREN LPAREN ArgList RPAREN"
 

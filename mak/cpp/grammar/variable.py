@@ -6,6 +6,8 @@ class VariableItem(cpp.yacc.Nonterm):
 
 	def variable(self, type, name):
 		"%reduce Type ID"
+	def method_ptr(self, method_ptr):
+		"%reduce MethodPointer"
 
 class VariableAttributes(cpp.yacc.Nonterm):
 	"%nonterm"
