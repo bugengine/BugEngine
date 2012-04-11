@@ -5,7 +5,7 @@ class EnumDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def enum(self, enum, name, lbrace, skip, rbrace):
-		"%reduce ENUM Name LBRACE SkipList RBRACE"
+		"%reduce ENUM NameOpt LBRACE SkipList RBRACE"
 		self.name = name.value
 		self.value = None
 		self.lineno = name.lineno

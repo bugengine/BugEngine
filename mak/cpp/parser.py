@@ -50,6 +50,9 @@ class Parser(cpp.yacc.Lr):
 		except SyntaxError as e:
 			print("%s:%d %s" % (self.source, t.lineno, str(e)))
 			raise
+		except Exception as e:
+			print("%s:%d %s" % (self.source, t.lineno, str(e)))
+			raise
 
 	def dump(self):
 		try:

@@ -11,7 +11,7 @@ class ExprMethod(cpp.yacc.Nonterm):
 
 	def expr_method_definition(self, tags_left, method, tags_right, lbrace, skip_list, rbrace):
 		"%reduce TagsLeft Method TagsRight LBRACE SkipList RBRACE"
-		self.value = method
+		self.value = method.value
 		self.value.tags = tags_left.tags + tags_right.tags
 
 
@@ -56,10 +56,10 @@ class ExprVariable(cpp.yacc.Nonterm):
 class ExprFriend(cpp.yacc.Nonterm):
 	"%nonterm"
 
-	def expr_friend(self, friend, type):
+	def expr_friend_type(self, friend, type, semi):
 		"%reduce FRIEND Type SEMI"
 
-	def expr_friend(self, friend, method):
+	def expr_friend_method(self, friend, method, semi):
 		"%reduce FRIEND Method SEMI"
 
 

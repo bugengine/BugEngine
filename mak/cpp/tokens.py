@@ -1,5 +1,6 @@
 import cpp
 
+class ScopePrecedence(cpp.yacc.Precedence): "%left"
 
 class keyword(cpp.yacc.Token):			pass
 class PUBLISHED(keyword):				"%token"
@@ -27,6 +28,7 @@ class EXPLICIT(keyword):				"%token"
 class INLINE(keyword):					"%token"
 class EXTERN(keyword):					"%token"
 class STATIC(keyword):					"%token"
+class MUTABLE(keyword):					"%token"
 class CONST(keyword):					"%token"
 class VOLATILE(keyword):				"%token"
 class VIRTUAL(keyword):					"%token"
@@ -67,7 +69,7 @@ class GT(cpp.yacc.Token):				"%token"
 class GE(cpp.yacc.Token):				"%token"
 class EQ(cpp.yacc.Token):				"%token"
 class NE(cpp.yacc.Token):				"%token"
-class SCOPE(cpp.yacc.Token):			"%token"
+class SCOPE(cpp.yacc.Token):			"%token [ScopePrecedence]"
 class EQUAL(cpp.yacc.Token):			"%token"
 class TIMESEQUAL(cpp.yacc.Token):		"%token"
 class DIVEQUAL(cpp.yacc.Token):			"%token"
