@@ -324,7 +324,7 @@ def c_hook(self, node):
 	if 'master' in self.features and not Options.options.nomaster:
 		try:
 			mastertask_c = self.mastertasks_c[-1]
-			if len(mastertask_c.inputs) <= 10:
+			if len(mastertask_c.inputs) <= 20:
 				mastertask_c.set_inputs([node])
 			else:
 				output = self.path.find_or_declare(self.target+'-c-%d-master.c' % len(self.mastertasks_c))
@@ -352,7 +352,7 @@ def cc_hook(self, node):
 		else:
 			try:
 				mastertask_cxx = self.mastertasks_cxx[-1]
-				if len(mastertask_cxx.inputs) <= 10:
+				if len(mastertask_cxx.inputs) <= 20:
 					mastertask_cxx.set_inputs([node])
 				else:
 					output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))

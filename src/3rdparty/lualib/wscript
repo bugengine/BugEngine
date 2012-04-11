@@ -9,4 +9,4 @@ def setup(conf):
 
 def build(bld):
 	bld.m['lualib'] = module.library( 'lualib', [], '3rdparty', module.coptions(defines=['__STRICT_ANSI__']))
-	bld.m['lualib'].usemaster = False
+	#bld.m['lualib'].usemaster = False
