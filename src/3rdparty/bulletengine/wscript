@@ -11,4 +11,4 @@ def setup(conf):
 def build(bld):
 	biopts = module.coptions(includedir = [os.path.join('src', '3rdparty', 'bulletengine', 'src')])
 	bld.m['bulletengine'] = module.static_library( 'bulletengine', [], '3rdparty', module.coptions(), biopts)
-	bld.m['bulletengine'].usemaster = False
+	#bld.m['bulletengine'].usemaster = False
