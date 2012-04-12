@@ -14,6 +14,7 @@
 
 #include "lua.h"
 
+#include "luaconf.h"
 #include "ldebug.h"
 #include "ldo.h"
 #include "lfunc.h"
