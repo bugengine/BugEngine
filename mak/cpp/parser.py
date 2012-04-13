@@ -5,6 +5,7 @@ spec = cpp.yacc.Spec(
 				[
 					cpp.tokens,
 					cpp.grammar.unit,
+					cpp.grammar.exprs,
 					cpp.grammar.namespace,
 					cpp.grammar.name,
 					cpp.grammar.using,

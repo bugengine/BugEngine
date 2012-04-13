@@ -12,7 +12,7 @@ class Namespace(cpp.yacc.Nonterm):
 		#unnamed namespaces are not exported
 		self.name = ''
 
-	def predecl(self, file, instances, name, parent, member):
+	def predecl(self, file, instances, name, owner, member):
 		name = name+[self.name]
 		instances.write("namespace %s\n" % self.name)
 		instances.write("{\n")
@@ -24,7 +24,7 @@ class Namespace(cpp.yacc.Nonterm):
 		self.exprs.predecl(file, instances, name, owner, member)
 		instances.write("\n}\n")
 
-	def dump(self, file, instances, name, parent, member):
+	def dump(self, file, instances, name, owner, member):
 		name = name+[self.name]
 		owner = "be_%s_Namespace"%self.parser.plugin
 		file.write("namespace %s\n" % self.name)
@@ -33,7 +33,7 @@ class Namespace(cpp.yacc.Nonterm):
 		for ns in name:
 			owner += "_%s" % ns
 		owner += "()"
-		self.exprs.dump(file, instances, name, owner, member)
+		self.exprs.dump(file, instances, name, owner, "")
 
 		file.write("\n}\n")
 
