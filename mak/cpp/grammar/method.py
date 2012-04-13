@@ -138,7 +138,46 @@ class Method(cpp.yacc.Nonterm):
 	def method_initlist(self, method, colon, initializers):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
-		self.value.attributes.add('abstract')
+
+	def dump(self, file, instances, name, owner, member, overload_ptr, overload_index):
+		tags = "0"
+
+		prettyname = self.value.name.replace("?", "_")
+		#args = self.value.args.dump(file, instances, name, owner, member, not 'static' in self.value.attributes)
+		args = "0"
+			
+
+			paramtypes = ', '.join(ptype for ptype, pname, tags in params)
+			ptr = "%s (*) (%s)" % (rtype, paramtypes)
+			methodptr = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, fullname, name)
+			if paramtypes: paramtypes = ', '+paramtypes
+			if rtype != 'void':
+				helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % ("::BugEngine::RTTI::Class", rtype, paramtypes)
+			else:
+				helper = "BugEngine::RTTI::procedurehelper< %s%s >" % ("::BugEngine::RTTI::Class", paramtypes)
+			callptr = "&%s::callStatic< %s >" % (helper, methodptr)
+
+			file.write("static const ::BugEngine::RTTI::Method::Overload s_%s_%s_%d =\n" % (decl, prettyname, overloadindex))
+			file.write("    {\n")
+			file.write("        {%s},\n" % method_tagname)
+			file.write("        {%s},\n" % overload)
+			file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % rtype)
+			file.write("        {%s},\n" % param)
+			file.write("        %s::VarArg,\n" % helper)
+			file.write("        %s\n" % callptr)
+			file.write("    };\n")
+			overload = "&s_%s_%s_%d" % (decl, prettyname, overloadindex)
+			overloadindex = overloadindex + 1
+
+		file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (decl, prettyname))
+		file.write("    {\n")
+		file.write("        \"%s\",\n" % name)
+		file.write("        {&s_method_%s_%s},\n" % (decl, prettyname))
+		file.write("        {%s},\n" % method)
+		file.write("        {%s}\n" % overload)
+		file.write("    };\n")
+		method = "&s_method_%s_%s" % (decl, prettyname)
+
 
 class MethodPointer(cpp.yacc.Nonterm):
 	"%nonterm"

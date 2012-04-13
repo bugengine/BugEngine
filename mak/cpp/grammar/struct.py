@@ -112,7 +112,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.inherits = 'void'
 		self.value = True
 
-	def predecl(self, file, instances, name, parent, member):
+	def predecl(self, file, instances, name, owner, member):
 		#TODO: using sub objects
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
@@ -123,7 +123,7 @@ class ClassDef(cpp.yacc.Nonterm):
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
 
 
-	def dump(self, file, instances, name, parent, member):
+	def dump(self, file, instances, name, owner, member):
 		namespace = '::'+'::'.join(name)
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
@@ -160,8 +160,8 @@ class ClassDef(cpp.yacc.Nonterm):
 			file.write("        0,\n")
 			file.write("        0\n")
 		file.write("    };\n")
-		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, parent, tagname, self.name, decl))
-		file.write("const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, parent, decl))
+		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, owner, tagname, self.name, decl))
+		file.write("const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, owner, decl))
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
 

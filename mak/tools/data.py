@@ -68,6 +68,7 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/ddf.py'),
 		self.path.find_or_declare('mak/rtti.py'),
 		self.path.find_or_declare('mak/cpp/grammar/unit.py'),
+		self.path.find_or_declare('mak/cpp/grammar/exprs.py'),
 		self.path.find_or_declare('mak/cpp/grammar/namespace.py'),
 		self.path.find_or_declare('mak/cpp/grammar/name.py'),
 		self.path.find_or_declare('mak/cpp/grammar/using.py'),
