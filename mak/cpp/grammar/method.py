@@ -8,12 +8,18 @@ class Arg(cpp.yacc.Nonterm):
 
 	def arg_value(self, tags_left, type, id, equal, value, tags_right):
 		"%reduce TagsLeft Type ID EQUAL Value TagsRight"
+		self.type = type.value
+		self.name = id.value
 
 	def arg_full(self, tags_left, type, id, tags_right):
 		"%reduce TagsLeft Type ID TagsRight"
+		self.type = type.value
+		self.name = id.value
 
 	def arg_unnamed(self, tags_left, type, tags_right):
 		"%reduce TagsLeft Type TagsRight"
+		self.type = type.value
+		self.name = ""
 
 	def arg_ellipsis(self, ellipsis):
 		"%reduce ELLIPSIS"
@@ -26,9 +32,12 @@ class ArgSequence(cpp.yacc.Nonterm):
 
 	def argseq(self, argseq, comma, tags, arg):
 		"%reduce ArgSequence COMMA TagsRight Arg"
+		self.args = argseq.args
+		self.args.append(arg)
 
 	def argseq_1arg(self, arg):
 		"%reduce Arg"
+		self.args = [arg]
 
 
 
@@ -38,11 +47,27 @@ class ArgList(cpp.yacc.Nonterm):
 
 	def no_args(self):
 		"%reduce"
-		self.args = None
+		self.args = []
 
-	def arglist(self, argsequence):
+	def arglist(self, arg_sequence):
 		"%reduce ArgSequence"
-		self.args = None
+		self.args = arg_sequence.args
+
+	def dump(self, file, instances, name, owner, parent_name, decl):
+		arg_pointer = "0"
+		arg_index = 0
+		for arg in self.args[::-1]:
+			arg_tag = "0"
+			file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter s_%s_p%d =\n" % (decl, arg_index))
+			file.write("    {\n")
+			file.write("        {%s},\n" % arg_tag)
+			file.write("        {%s},\n" % arg_pointer)
+			file.write("        \"%s\",\n" % arg.name)
+			file.write("        ::BugEngine::be_typeid< %s >::type()\n" % arg.type)
+			file.write("    };\n")
+			arg_pointer = "&s_%s_p%d" % (decl, arg_index)
+			arg_index = arg_index + 1
+
 
 
 
@@ -52,28 +77,36 @@ class MethodPrototype(cpp.yacc.Nonterm):
 
 	def method_simple(self, type, name, lparen, args, rparen):
 		"%reduce Type Name LPAREN ArgList RPAREN"
+		self.id = name.value
 		self.name = name.value
+		self.return_type = type.value
 		self.line = name.lineno
 		self.args = args
 		self.attributes = set()
 
 	def method_operator(self, type, keyword, operator, lparen, args, rparen):
 		"%reduce Type OPERATOR Operator LPAREN ArgList RPAREN"
+		self.id = 'operator%s'%operator.value
 		self.name = operator.rtti_name
+		self.return_type = type.value
 		self.line = operator.lineno
 		self.args = args
 		self.attributes = set()
 
 	def method_constructor(self, type, lparen, args, rparen):
 		"%reduce Type LPAREN ArgList RPAREN"
+		self.id = '?new'
 		self.name = '?new'
+		self.return_type = type.value
 		self.line = type.lineno
 		self.args = args
 		self.attributes = set(['static'])
 
 	def method_destructor(self, n, type, lparen, args, rparen):
 		"%reduce NOT Type LPAREN ArgList RPAREN"
+		self.id = '?del'
 		self.name = '?del'
+		self.return_type = type.value
 		self.line = type.lineno
 		self.args = args
 		self.attributes = set(['static'])
@@ -105,6 +138,7 @@ class MethodAttributes(cpp.yacc.Nonterm):
 
 
 
+
 class Initializers(cpp.yacc.Nonterm):
 	"%nonterm"
 
@@ -112,6 +146,9 @@ class Initializers(cpp.yacc.Nonterm):
 		"%reduce ID LPAREN Value RPAREN"
 	def initializer_list(self, name, lparen, value, rparen, comma, initlist):
 		"%reduce ID LPAREN Value RPAREN COMMA Initializers"
+
+
+
 
 class Method(cpp.yacc.Nonterm):
 	"%nonterm"
@@ -139,44 +176,57 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump(self, file, instances, name, owner, member, overload_ptr, overload_index):
+	def dump(self, file, instances, name, owner, parent_name, parent_value, overload_ptr, overload_index):
 		tags = "0"
 
+		fullname = '::'+'::'.join(name)
+		decl = fullname.replace(':', '_')
 		prettyname = self.value.name.replace("?", "_")
-		#args = self.value.args.dump(file, instances, name, owner, member, not 'static' in self.value.attributes)
+		new_overload = "&s_%s_%s_%d" % (decl, prettyname, overload_index)
+		#args,param_types,return_type = self.value.args.dump(file, instances, name, owner, member, not 'static' in self.value.attributes)
 		args = "0"
-			
+		param_types = ""
+		return_type = ""
+		method_tags = "0"
 
-			paramtypes = ', '.join(ptype for ptype, pname, tags in params)
-			ptr = "%s (*) (%s)" % (rtype, paramtypes)
-			methodptr = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, fullname, name)
-			if paramtypes: paramtypes = ', '+paramtypes
-			if rtype != 'void':
-				helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % ("::BugEngine::RTTI::Class", rtype, paramtypes)
+		if self.value.id == '?del':
+			return overload_index
+		else:
+			if self.value.id == '?new':
+				if param_types: param_types = ', '+param_types
+				helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (parent_name, param_types)
+				if parent_value:
+					call_ptr = "&%s::construct" % helper
+					return_type = parent_name
+				else:
+					call_ptr = "&%s::constructPtr" % helper
+					return_type = "ref< %s >" % parent_name
 			else:
-				helper = "BugEngine::RTTI::procedurehelper< %s%s >" % ("::BugEngine::RTTI::Class", paramtypes)
-			callptr = "&%s::callStatic< %s >" % (helper, methodptr)
+				ptr = "%s (*) (%s)" % (return_type, param_types)
+				if 'const' in self.value.attributes:
+					ptr += ' const'
+				methodptr = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, name, self.value.name)
+				if param_types: param_types = ', '+param_types
+				if return_type != 'void':
+					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % ("::BugEngine::RTTI::Class", return_type, param_types)
+				else:
+					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % ("::BugEngine::RTTI::Class", param_types)
+				if 'static' in self.value.attributes or not parent_name:
+					call_ptr = "&%s::callStatic< %s >" % (helper, methodptr)
+				else:
+					call_ptr = "&%s::call< %s >" % (helper, methodptr)
 
-			file.write("static const ::BugEngine::RTTI::Method::Overload s_%s_%s_%d =\n" % (decl, prettyname, overloadindex))
+			file.write("static const ::BugEngine::RTTI::Method::Overload %s =\n" % (new_overload))
 			file.write("    {\n")
-			file.write("        {%s},\n" % method_tagname)
-			file.write("        {%s},\n" % overload)
-			file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % rtype)
-			file.write("        {%s},\n" % param)
+			file.write("        {%s},\n" % method_tags)
+			file.write("        {%s},\n" % overload_ptr)
+			file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % return_type)
+			file.write("        {%s},\n" % args)
 			file.write("        %s::VarArg,\n" % helper)
-			file.write("        %s\n" % callptr)
+			file.write("        %s\n" % call_ptr)
 			file.write("    };\n")
-			overload = "&s_%s_%s_%d" % (decl, prettyname, overloadindex)
-			overloadindex = overloadindex + 1
+			return new_overload
 
-		file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (decl, prettyname))
-		file.write("    {\n")
-		file.write("        \"%s\",\n" % name)
-		file.write("        {&s_method_%s_%s},\n" % (decl, prettyname))
-		file.write("        {%s},\n" % method)
-		file.write("        {%s}\n" % overload)
-		file.write("    };\n")
-		method = "&s_method_%s_%s" % (decl, prettyname)
 
 
 class MethodPointer(cpp.yacc.Nonterm):

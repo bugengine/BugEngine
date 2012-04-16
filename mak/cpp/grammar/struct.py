@@ -90,6 +90,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.name = name.value
 		self.lineno = cls.lineno
 		self.value = False
+		self.members = members.members[4]
 		if parent.inherits[0] >= 4:
 			self.inherits = parent.inherits[1]
 		else:
@@ -100,6 +101,17 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.name = name.value
 		self.lineno = cls.lineno
 		self.value = True
+		self.members = members.members[3]
+		if self.members and members.members[4]:
+			self.members.members += members.members[4].members
+			self.members.objects += members.members[4].objects
+			for m, methods in members.members[4].methods.items():
+				try:
+					self.members.methods[m] += methods
+				except KeyError:
+					self.members.methods[m] = methods
+		else:
+			self.members = members.members[4]
 		if parent.inherits[0] >= 3:
 			self.inherits = parent.inherits[1]
 		else:
@@ -111,6 +123,8 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.lineno = union.lineno
 		self.inherits = 'void'
 		self.value = True
+		self.members = members.members
+		self.visibility = 3
 
 	def predecl(self, file, instances, name, owner, member):
 		#TODO: using sub objects
@@ -121,6 +135,8 @@ class ClassDef(cpp.yacc.Nonterm):
 			instances.write("extern const ::BugEngine::RTTI::Class& s_%sFun();\n" % decl)
 		else:
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
+		if self.members:
+			self.members.predecl(file, instances, name, 'be_typeid< %s >::klass()'%fullname, self.value)
 
 
 	def dump(self, file, instances, name, owner, member):
@@ -133,6 +149,8 @@ class ClassDef(cpp.yacc.Nonterm):
 		properties = "0"
 		objects = "0"
 		methods = constructor = destructor = call = "0"
+		if self.members:
+			self.members.dump(file, instances, name, 'be_typeid< %s >::klass()'%fullname, fullname, self.value)
 
 		decl = "class%s" % fullname.replace(':', '_')
 		if self.parser.useMethods:
