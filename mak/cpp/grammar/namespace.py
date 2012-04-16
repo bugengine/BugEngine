@@ -33,7 +33,7 @@ class Namespace(cpp.yacc.Nonterm):
 		for ns in name:
 			owner += "_%s" % ns
 		owner += "()"
-		self.exprs.dump(file, instances, name, owner, "")
+		self.exprs.dump(file, instances, name, owner, "", True)
 
 		file.write("\n}\n")
 

@@ -61,16 +61,16 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		raise Exception("cannot open input file %s : %s" % (source, str(e)))
 
 
-	try:
-		yacc.parse(input.read(), lexer=lexer)
-		input.close()
+	#try:
+	yacc.parse(input.read(), lexer=lexer)
+	input.close()
 
-		if lexer.error != 0:
-			return lexer.error
-	except:
-		return 1
-	else:
-		yacc.dump()
+	if lexer.error != 0:
+		return lexer.error
+	#except:
+	#	return 1
+	#else:
+	yacc.dump()
 
 	return 0
 
