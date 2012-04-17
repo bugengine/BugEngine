@@ -126,8 +126,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.members = members.members
 		self.visibility = 3
 
-	def predecl(self, file, instances, name, owner, member):
-		#TODO: using sub objects
+	def predecl(self, file, instances, name, member):
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
 		decl = "class%s" % fullname.replace(':', '_')
@@ -136,28 +135,29 @@ class ClassDef(cpp.yacc.Nonterm):
 		else:
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
 		if self.members:
-			self.members.predecl(file, instances, name, 'be_typeid< %s >::klass()'%fullname, self.value)
+			self.members.predecl(file, instances, name, self.value)
 
 
-	def dump(self, file, instances, name, owner, member):
-		namespace = '::'+'::'.join(name)
+	def dump(self, file, instances, namespace, name, member, object_ptr):
+		ns = '::'+'::'.join(namespace)
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
 		prettyname = '.'.join(name)
 
-		tagname = "0"
-		properties = "0"
-		objects = "0"
-		methods = constructor = destructor = call = "0"
+		tagname = "{0}"
+		properties = "{0}"
+		objects = "{0}"
+		methods = constructor = call = "{0}"
 		if self.members:
-			self.members.dump(file, instances, name, 'be_typeid< %s >::klass()'%fullname, fullname, self.value)
+			#owner = 'be_typeid< %s >::klass()'%fullname
+			objects,methods,constructor,call = self.members.dump(file, instances, namespace, name, fullname, self.value)
 
 		decl = "class%s" % fullname.replace(':', '_')
 		if self.parser.useMethods:
-			varname = "%s::s_%sFun()" % (namespace, decl)
-			file.write("static const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
+			varname = "%s::s_%sFun()" % (ns, decl)
+			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
 		else:
-			varname = "%s::s_%s" % (namespace, decl)
+			varname = "%s::s_%s" % (ns, decl)
 
 		file.write("::BugEngine::RTTI::Class s_%s =\n" % (decl))
 		file.write("    {\n")
@@ -165,12 +165,12 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % fullname)
 		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, fullname))
-		file.write("        {%s},\n" % (tagname))
-		file.write("        {%s},\n" % (properties))
-		file.write("        {%s},\n" % (methods))
-		file.write("        {%s},\n" % (objects))
-		file.write("        {%s},\n" % (constructor))
-		file.write("        {%s},\n" % (destructor))
+		file.write("        %s,\n" % (tagname))
+		file.write("        %s,\n" % (properties))
+		file.write("        %s,\n" % (methods))
+		file.write("        %s,\n" % (objects))
+		file.write("        %s,\n" % (constructor))
+		file.write("        %s,\n" % (call))
 		if self.value:
 			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % fullname)
 			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % fullname)
@@ -178,9 +178,10 @@ class ClassDef(cpp.yacc.Nonterm):
 			file.write("        0,\n")
 			file.write("        0\n")
 		file.write("    };\n")
-		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s->objects, {%s}, \"%s\", ::BugEngine::RTTI::Value(&s_%s) };\n" % (decl, owner, tagname, self.name, decl))
-		file.write("const ::BugEngine::RTTI::Class::ObjectInfo* s_%s_obj_ptr = ( %s->objects.set(&s_%s_obj) );\n" % (decl, owner, decl))
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
+		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, object_ptr, tagname, self.name, varname))
 
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
+
+		return "{&s_%s_obj}"%decl

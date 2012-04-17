@@ -15,10 +15,3 @@ node = graphics.3d.RenderScene
     world = world;
 )
 
-type = game.RTTI.Type
-{
-    metaclass = game.RTTI.Type;
-    indirection = 0;
-    constness = 0;
-    access = 0;
-}

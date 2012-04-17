@@ -158,26 +158,47 @@ class Exprs(cpp.yacc.Nonterm):
 		self.members = []
 		self.objects = []
 
-	def predecl(self, file, instances, name, owner, parent_name):
+	def predecl(self, file, instances, name, parent_name):
 		for o in self.objects:
-			o.predecl(file, instances, name, owner, parent_name)
+			o.predecl(file, instances, name, parent_name)
 
-	def dump(self, file, instances, name, owner, parent_name, parent_value):
+	def dump(self, file, instances, namespace, name, parent_name, parent_value):
 		if parent_name:
-			method_ptr = "%s->methods"
-			property_ptr = "%s->properties"
-			object_ptr = "%s->objects"
+			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
+			property_ptr = "be_typeid< %s >::klass()->properties"%parent_name
+			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
 		else:
-			method_ptr = "0"
-			property_ptr = "0"
-			object_ptr = "0"
+			method_ptr = "{0}"
+			property_ptr = "{0}"
+			object_ptr = "{0}"
+		constructor_ptr = "{0}"
+		call_ptr = "{0}"
+
 		for o in self.objects:
-			o.dump(file, instances, name, owner, parent_name)
+			object_ptr = o.dump(file, instances, namespace, name, parent_name, object_ptr)
+
 		for m, overloads in self.methods.items():
 			overload_ptr = "0"
 			overload_index = 0
 			for overload in overloads:
-				overload_ptr = overload.dump(file, instances, name, owner, parent_name, parent_value, overload_ptr, overload_index)
+				overload_ptr = overload.dump(file, instances, namespace, name, parent_name, parent_value, overload_ptr, overload_index)
 				overload_index += 1
+
+			decl = '_'.join(name)
+			prettyname = m.replace("?", "_")
+
+			file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (decl, prettyname))
+			file.write("    {\n")
+			file.write("        \"%s\",\n" % m)
+			file.write("        {&s_method_%s_%s},\n" % (decl, prettyname))
+			file.write("        %s,\n" % method_ptr)
+			file.write("        {%s}\n" % overload_ptr)
+			file.write("    };\n")
+			if m == "?ctor":
+				constructor_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+			elif m == "?call":
+				call_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+			method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+		return object_ptr, method_ptr, constructor_ptr, call_ptr
 
 
