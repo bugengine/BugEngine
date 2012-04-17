@@ -50,7 +50,7 @@ published:
 
     bool isA(raw<const Class> klass) const;
 
-    Value create(Value* params, u32 nparams) const;
+    Value operator()(Value* params, u32 nparams) const;
 public:
     typedef void(*EnumerateCallback)(const Value& v);
     enum EnumerateRecursion

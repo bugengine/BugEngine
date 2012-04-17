@@ -12,7 +12,7 @@ class Namespace(cpp.yacc.Nonterm):
 		#unnamed namespaces are not exported
 		self.name = ''
 
-	def predecl(self, file, instances, name, owner, member):
+	def predecl(self, file, instances, name, member):
 		name = name+[self.name]
 		instances.write("namespace %s\n" % self.name)
 		instances.write("{\n")
@@ -21,10 +21,11 @@ class Namespace(cpp.yacc.Nonterm):
 			owner += "_%s" % ns
 		owner += "()"
 		file.write("raw< ::BugEngine::RTTI::Class > be_%s_Namespace_%s();\n"%(self.parser.plugin, "_".join(name)))
-		self.exprs.predecl(file, instances, name, owner, member)
+		self.exprs.predecl(file, instances, name, member)
 		instances.write("\n}\n")
 
-	def dump(self, file, instances, name, owner, member):
+	def dump(self, file, instances, namespace, name, member, object_ptr):
+		namespace = name+[self.name]
 		name = name+[self.name]
 		owner = "be_%s_Namespace"%self.parser.plugin
 		file.write("namespace %s\n" % self.name)
@@ -33,8 +34,10 @@ class Namespace(cpp.yacc.Nonterm):
 		for ns in name:
 			owner += "_%s" % ns
 		owner += "()"
-		self.exprs.dump(file, instances, name, owner, "", True)
-
+		my_object_ptr, method_ptr, constructor, call = self.exprs.dump(file, instances, namespace, name, "", True)
+		if my_object_ptr != '{0}':
+			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_ptr = ( %s->objects.set(%s) );\n" % (my_object_ptr[2:-1], owner, my_object_ptr[1:-1]))
 		file.write("\n}\n")
+		return object_ptr
 
 

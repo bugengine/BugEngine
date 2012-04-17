@@ -55,16 +55,7 @@ class ArgList(cpp.yacc.Nonterm):
 	def dump(self, file, instances, decl, parent_name, is_static, is_const):
 		arg_pointer = "0"
 		arg_index = 0
-		args = self.args
-		if parent_name and not is_static:
-			class BuiltinArg:
-				def __init__(self, **kw):
-					self.__dict__.update(kw)
-			this = BuiltinArg(type=parent_name+'*', name='this')
-			if is_const:
-				this.type = 'const '+this.type
-			args = [this]+args
-		for arg in args[::-1]:
+		for arg in self.args[::-1]:
 			arg_tag = "0"
 			file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_p%d =\n" % (decl, arg_index))
 			file.write("    {\n")
@@ -75,7 +66,20 @@ class ArgList(cpp.yacc.Nonterm):
 			file.write("    };\n")
 			arg_pointer = "&%s_p%d" % (decl, arg_index)
 			arg_index = arg_index + 1
-		return (arg_pointer, ",".join([arg.type for arg in args]))
+		if parent_name and not is_static:
+			arg_tag = "0"
+			file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_p%d =\n" % (decl, arg_index))
+			file.write("    {\n")
+			file.write("        {%s},\n" % arg_tag)
+			file.write("        {%s},\n" % arg_pointer)
+			file.write("        \"%s\",\n" % "this")
+			if is_const:
+				file.write("        ::BugEngine::be_typeid< const %s* >::type()\n" % parent_name)
+			else:
+				file.write("        ::BugEngine::be_typeid< %s* >::type()\n" % parent_name)
+			file.write("    };\n")
+			arg_pointer = "&%s_p%d" % (decl, arg_index)
+		return (arg_pointer, ",".join([arg.type for arg in self.args]))
 
 
 
@@ -99,6 +103,24 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		self.name = operator.rtti_name
 		self.return_type = type.value
 		self.line = operator.lineno
+		self.args = args
+		self.attributes = set()
+
+	def method_operator_call(self, type, keyword, lparen_op, rparen_op, lparen, args, rparen):
+		"%reduce Type OPERATOR LPAREN RPAREN LPAREN ArgList RPAREN"
+		self.id = 'operator()'
+		self.name = '?call'
+		self.return_type = type.value
+		self.line = lparen_op.lineno
+		self.args = args
+		self.attributes = set()
+
+	def method_operator_index(self, type, keyword, lbracket, rbracket, lparen, args, rparen):
+		"%reduce Type OPERATOR LBRACKET RBRACKET LPAREN ArgList RPAREN"
+		self.id = 'operator[]'
+		self.name = '?index'
+		self.return_type = type.value
+		self.line = lbracket.lineno
 		self.args = args
 		self.attributes = set()
 
@@ -185,13 +207,17 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump(self, file, instances, name, owner, parent_name, parent_value, overload_ptr, overload_index):
+	def dump(self, file, instances, namespace, name, parent_name, parent_value, overload_ptr, overload_index):
 		if self.value.id == '?del':
 			return overload_index
 		else:
 			tags = "0"
 
 			fullname = '::'+'::'.join(name)
+			if parent_name:
+				owner = fullname
+			else:
+				owner = '::BugEngine::RTTI::Class'
 			decl = fullname.replace(':', '_')
 			prettyname = self.value.name.replace("?", "_")
 			new_overload = "s_%s_%s_%d" % (decl, prettyname, overload_index)
@@ -215,17 +241,22 @@ class Method(cpp.yacc.Nonterm):
 					call_ptr = "&%s::constructPtr" % helper
 					return_type = "ref< %s >" % parent_name
 			else:
-				ptr = "%s (*) (%s)" % (return_type, param_types)
-				if 'const' in self.value.attributes:
-					ptr += ' const'
+				if 'static' in self.value.attributes or not parent_name:
+					ptr = "%s (*) (%s)" % (return_type, param_types)
+				else:
+					ptr = "%s (%s::*) (%s)" % (return_type, fullname, param_types)
+					if 'const' in self.value.attributes:
+						ptr += ' const'
 				methodptr = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, fullname, self.value.id)
 				if param_types: param_types = ', '+param_types
 				if return_type != 'void':
-					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % ("::BugEngine::RTTI::Class", return_type, param_types)
+					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % (owner, return_type, param_types)
 				else:
-					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % ("::BugEngine::RTTI::Class", param_types)
+					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (owner, param_types)
 				if 'static' in self.value.attributes or not parent_name:
 					call_ptr = "&%s::callStatic< %s >" % (helper, methodptr)
+				elif 'const' in self.value.attributes:
+					call_ptr = "&%s::callConst< %s >" % (helper, methodptr)
 				else:
 					call_ptr = "&%s::call< %s >" % (helper, methodptr)
 
