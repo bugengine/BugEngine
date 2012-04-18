@@ -48,8 +48,8 @@ published:
 
 published:
     istring             name;
-    raw<const Method>   call;
     raw<const Method>   next;
+    raw<const Method>   call;
     raw<const Overload> overloads;
 published:
     Value doCall(Value* params, u32 nparams) const;

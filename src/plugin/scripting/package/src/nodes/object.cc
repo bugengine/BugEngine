@@ -39,7 +39,7 @@ void Object::setMethod(ref<Reference> reference)
     RTTI::Value v(RTTI::Value::ByRef(m_methodReference->getValue()));
     if (v)
     {
-        static const istring callName("call");
+        static const istring callName("?call");
         RTTI::Value call = v[callName];
         if (call && be_typeid<const RTTI::Method* const>::type() <= call.type())
         {
