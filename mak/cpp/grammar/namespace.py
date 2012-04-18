@@ -27,15 +27,12 @@ class Namespace(cpp.yacc.Nonterm):
 	def dump(self, file, instances, namespace, name, member, object_ptr):
 		namespace = name+[self.name]
 		name = name+[self.name]
-		owner = "be_%s_Namespace"%self.parser.plugin
 		file.write("namespace %s\n" % self.name)
 		file.write("{\n")
 
-		for ns in name:
-			owner += "_%s" % ns
-		owner += "()"
+		owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
 		my_object_ptr, method_ptr, constructor, call = self.exprs.dump(file, instances, namespace, name, "", True)
-		if my_object_ptr != '{0}':
+		if my_object_ptr != '%s->objects'%owner:
 			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_ptr = ( %s->objects.set(%s) );\n" % (my_object_ptr[2:-1], owner, my_object_ptr[1:-1]))
 		file.write("\n}\n")
 		return object_ptr

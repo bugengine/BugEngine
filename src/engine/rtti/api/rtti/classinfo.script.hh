@@ -49,8 +49,6 @@ published:
     Value get(Value& from, istring name) const;
 
     bool isA(raw<const Class> klass) const;
-
-    Value operator()(Value* params, u32 nparams) const;
 public:
     typedef void(*EnumerateCallback)(const Value& v);
     enum EnumerateRecursion

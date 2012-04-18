@@ -168,9 +168,10 @@ class Exprs(cpp.yacc.Nonterm):
 			property_ptr = "be_typeid< %s >::klass()->properties"%parent_name
 			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
 		else:
-			method_ptr = "{0}"
+			owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
+			method_ptr = "%s->methods"%owner
 			property_ptr = "{0}"
-			object_ptr = "{0}"
+			object_ptr = "%s->objects"%owner
 		constructor_ptr = "{0}"
 		call_ptr = "{0}"
 

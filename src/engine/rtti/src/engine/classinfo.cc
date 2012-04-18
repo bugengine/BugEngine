@@ -103,11 +103,6 @@ bool Class::isA(raw<const Class> klass) const
     return false;
 }
 
-Value Class::operator()(Value* params, u32 nparams) const
-{
-    return constructor->doCall(params, nparams);
-}
-
 Value Class::getTag(const Type& type) const
 {
     raw<Tag> tag = tags;
