@@ -63,10 +63,9 @@ def datagen(self, node):
 	except AttributeError:
 		pass
 	tsk.dep_nodes = [
+		self.path.find_or_declare('mak/ddf.py'),
 		self.path.find_or_declare('mak/cpp/lexer.py'),
 		self.path.find_or_declare('mak/cpp/parser.py'),
-		self.path.find_or_declare('mak/ddf.py'),
-		self.path.find_or_declare('mak/rtti.py'),
 		self.path.find_or_declare('mak/cpp/grammar/unit.py'),
 		self.path.find_or_declare('mak/cpp/grammar/exprs.py'),
 		self.path.find_or_declare('mak/cpp/grammar/namespace.py'),

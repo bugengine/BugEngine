@@ -47,7 +47,6 @@ class EnumDef(cpp.yacc.Nonterm):
 		file.write("        {%s},\n" % (methods))
 		file.write("        %s,\n" % (objects))
 		file.write("        {0},\n")
-		file.write("        {0},\n")
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % fullname)
 		file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % fullname)
 		file.write("    };\n")

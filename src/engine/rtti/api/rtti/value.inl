@@ -250,13 +250,10 @@ Value Value::operator[](const istring& name)
 Value Value::operator()(Value params[], u32 paramCount)
 {
     static const istring callName("?call");
-    static const istring extraCallName("call");
     Value call = (*this)[callName];
-    if (!call)
-        Value call = (*this)[extraCallName];
     be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
-    be_assert_recover(be_typeid<const Method*>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
-    return call.as<const Method*>()->doCall(params, paramCount);
+    be_assert_recover(be_typeid<const Method* const>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
+    return call.as<const Method* const>()->doCall(params, paramCount);
 }
 
 }}
