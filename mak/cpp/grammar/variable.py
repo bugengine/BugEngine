@@ -8,11 +8,13 @@ class VariableItem(cpp.yacc.Nonterm):
 		"%reduce Type ID"
 		self.type = type.value
 		self.name = name.value
+		self.lineno = name.lineno
 
 	def method_ptr(self, method_ptr):
 		"%reduce MethodPointer"
 		self.type = method_ptr.type
 		self.name = method_ptr.name
+		self.lineno = method_ptr.lineno
 
 class VariableAttributes(cpp.yacc.Nonterm):
 	"%nonterm"
@@ -22,6 +24,7 @@ class VariableAttributes(cpp.yacc.Nonterm):
 		self.type = variable.type
 		self.name = variable.name
 		self.attributes = set([])
+		self.lineno = variable.lineno
 
 	def static_variable(self, static, variable):
 		"%reduce STATIC VariableAttributes"
@@ -29,6 +32,7 @@ class VariableAttributes(cpp.yacc.Nonterm):
 		self.name = variable.name
 		self.attributes = variable.attributes
 		self.attributes.add('static')
+		self.lineno = variable.lineno
 
 	def mutable_variable(self, static, variable):
 		"%reduce MUTABLE VariableAttributes"
@@ -36,6 +40,7 @@ class VariableAttributes(cpp.yacc.Nonterm):
 		self.name = variable.name
 		self.attributes = variable.attributes
 		self.attributes.add('mutable')
+		self.lineno = variable.lineno
 
 class Variable(cpp.yacc.Nonterm):
 	"%nonterm"
@@ -45,18 +50,21 @@ class Variable(cpp.yacc.Nonterm):
 		self.type = variable.type
 		self.name = variable.name
 		self.attributes = variable.attributes
+		self.lineno = variable.lineno
 
 	def variable_array(self, variable, lbracket, value, rbracket):
 		"%reduce VariableAttributes LBRACKET Value RBRACKET"
 		self.type = variable.type + '['+value.value+']'
 		self.name = variable.name
 		self.attributes = variable.attributes
+		self.lineno = variable.lineno
 
 	def variable_value(self, variable, eq, value):
 		"%reduce VariableAttributes EQUAL Value"
 		self.type = variable.type
 		self.name = variable.name
 		self.attributes = variable.attributes
+		self.lineno = variable.lineno
 
 	def dump(self, file, instances, namespace, name, parent_name, property_ptr, object_ptr):
 		if name:
@@ -67,26 +75,27 @@ class Variable(cpp.yacc.Nonterm):
 		tag_ptr = self.tags.dump(file, instances, decl)
 		index = 0
 		for name in [self.name]+self.aliases:
+			file.write("#line %d\n" % self.lineno)
 			if not parent_name or 'static' in self.attributes:
-				file.write("static const ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_%d =\n" % (decl, self.name, index))
-				file.write("    {\n")
-				file.write("        %s,\n" % object_ptr)
-				file.write("        %s,\n" % tag_ptr)
-				file.write("        \"%s\",\n" % name)
-				file.write("        ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n" % (fullname, self.name))
-				file.write("    };\n")
+				file.write("static const ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_%d =\\\n" % (decl, self.name, index))
+				file.write("    {\\\n")
+				file.write("        %s,\\\n" % object_ptr)
+				file.write("        %s,\\\n" % tag_ptr)
+				file.write("        \"%s\",\\\n" % name)
+				file.write("        ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\\\n" % (fullname, self.name))
+				file.write("    };\n\n")
 				object_ptr = "{&s_%s_%s_%d}" % (decl, self.name, index)
 				index = index + 1
 			else:
-				file.write("static const ::BugEngine::RTTI::Property s_%s_%s_%d =\n" % (decl, self.name, index))
-				file.write("    {\n")
-				file.write("        %s,\n" % tag_ptr)
-				file.write("        %s,\n" % property_ptr)
-				file.write("        \"%s\",\n" % name)
-				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % fullname)
-				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % self.type)
-				file.write("        &::BugEngine::RTTI::PropertyHelper<%s, %s, &%s::%s>::get\n" % (self.type, fullname, fullname, self.name))
-				file.write("    };\n")
+				file.write("static const ::BugEngine::RTTI::Property s_%s_%s_%d =\\\n" % (decl, self.name, index))
+				file.write("    {\\\n")
+				file.write("        %s,\\\n" % tag_ptr)
+				file.write("        %s,\\\n" % property_ptr)
+				file.write("        \"%s\",\\\n" % name)
+				file.write("        ::BugEngine::be_typeid< %s >::type(),\\\n" % fullname)
+				file.write("        ::BugEngine::be_typeid< %s >::type(),\\\n" % self.type)
+				file.write("        &::BugEngine::RTTI::PropertyHelper<%s, %s, &%s::%s>::get\\\n" % (self.type, fullname, fullname, self.name))
+				file.write("    };\n\n")
 				property_ptr = "{&s_%s_%s_%d}" % (decl, self.name, index)
 				index = index + 1
 		return property_ptr, object_ptr
