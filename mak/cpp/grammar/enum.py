@@ -45,14 +45,15 @@ class EnumValueList(cpp.yacc.Nonterm):
 		"%reduce EnumSequence"
 		self.enums = enums_sequence.enums
 
-	def dump(self, file, instances, decl, owner):
+	def dump(self, file, instances, decl, owner, type):
 		enums_pointer = "{0}"
 		for enum in self.enums[::-1]:
 			enum_tag = enum.tags.dump(file, instances, decl+"_enum_%s"%enum.name)
 			file.write("#line %d\n"%enum.lineno)
+			file.write("static const %s::%s s_%s_%s_value(%s::%s);\\\n" % (owner, type, decl, enum.name, owner, enum.name))
 			alias_index = 0
 			for name in [enum.name]+enum.tags.aliases:
-				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_enum_%s_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(%s::%s, ::BugEngine::RTTI::Value::MakeConst) };\n" % (decl, enum.name, alias_index, enums_pointer, enum_tag, name, owner, enum.name))
+				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_enum_%s_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(s_%s_%s_value)) };\n" % (decl, enum.name, alias_index, enums_pointer, enum_tag, name, decl, enum.name))
 				enums_pointer = "{&s_%s_enum_%s_%d}" % (decl, enum.name, alias_index)
 				alias_index += 1
 		return enums_pointer
@@ -88,8 +89,8 @@ class EnumDef(cpp.yacc.Nonterm):
 
 		tag_ptr = self.tags.dump(file, instances, decl)
 		properties = "{0}"
-		objects = self.value.dump(file, instances, decl, owner)
-		methods = constructor = destructor = call = "0"
+		objects = self.value.dump(file, instances, decl, owner, self.name)
+		methods = "{0}"
 		if self.parser.useMethods:
 			varname = "%s::s_%sFun()" % (ns, decl)
 			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
@@ -105,7 +106,7 @@ class EnumDef(cpp.yacc.Nonterm):
 		file.write("        0,\\\n")
 		file.write("        %s,\\\n" % (tag_ptr))
 		file.write("        %s,\\\n" % (properties))
-		file.write("        {%s},\\\n" % (methods))
+		file.write("        %s,\\\n" % (methods))
 		file.write("        %s,\\\n" % (objects))
 		file.write("        {0},\\\n")
 		file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\\\n" % fullname)
