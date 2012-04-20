@@ -17,6 +17,7 @@ class Unit(cpp.yacc.Nonterm):
 		instances.write("#include    <%s>\n" % self.parser.source)
 		instances.write("#include    <rtti/typeinfo.hh>\n")
 		instances.write("#include    <rtti/classinfo.script.hh>\n")
+		instances.write("#line 1 \"%s\"\n" % (self.parser.source.replace("\\", "\\\\")))
 
 		file.write("#include    <rtti/stdafx.h>\n")
 		file.write("#include    <%s>\n" % self.parser.source)
@@ -33,6 +34,8 @@ class Unit(cpp.yacc.Nonterm):
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
 		file.write("#include    <rtti/tags/documentation.script.hh>\n")
 		file.write("\n")
+		file.write("\n")
+		file.write("#line 1 \"%s\"\n" % (self.parser.source.replace("\\", "\\\\")))
 
 		owner = "be_%s_Namespace()"%self.parser.plugin
 

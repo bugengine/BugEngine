@@ -6,7 +6,7 @@ class Tag(cpp.yacc.Nonterm):
 
 	def tag(self, tag, lparen, name, lparen2, skiplist, rparen2, rparen):
 		"%reduce BE_TAG LPAREN Name LPAREN SkipList RPAREN RPAREN"
-		self.value = (name.value, skiplist.value)
+		self.value = (name.value, skiplist.value, name.lineno)
 
 
 class TagList(cpp.yacc.Nonterm):
@@ -40,12 +40,13 @@ class TagsLeft(cpp.yacc.Nonterm):
 	def dump(self, file, instances, prefix):
 		tag_ptr = "{0}"
 		tag_index = 0
-		for type,tag in self.tags:
-			file.write("static %s s_%s_tag_value_%d = %s(%s);\n" % (type, prefix, tag_index, type, tag))
-			file.write("static ::BugEngine::RTTI::Tag s_%s_tag_%d =\n" % (prefix, tag_index))
-			file.write("    {\n")
-			file.write("        %s,\n" % tag_ptr)
-			file.write("        ::BugEngine::RTTI::Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\n" % (type, prefix, tag_index))
+		for type,tag,lineno in self.tags:
+			file.write("#line %d\n"%lineno)
+			file.write("static %s s_%s_tag_value_%d = %s(%s);\\\n" % (type, prefix, tag_index, type, tag))
+			file.write("static ::BugEngine::RTTI::Tag s_%s_tag_%d =\\\n" % (prefix, tag_index))
+			file.write("    {\\\n")
+			file.write("        %s,\\\n" % tag_ptr)
+			file.write("        ::BugEngine::RTTI::Value(be_typeid< %s >::type(), (void*)&s_%s_tag_value_%d)\\\n" % (type, prefix, tag_index))
 			file.write("    };\n")
 			tag_ptr = "{&s_%s_tag_%d}" % (prefix, tag_index)
 			tag_index += 1
