@@ -40,11 +40,11 @@ class Visibility(cpp.yacc.Nonterm):
 	def protected(self, protected):
 		"%reduce PROTECTED"
 		self.visibility = 1
-	def public(self, public):
-		"%reduce PUBLIC"
-		self.visibility = 2
 	def none(self):
 		"%reduce"
+		self.visibility = 2
+	def public(self, public):
+		"%reduce PUBLIC"
 		self.visibility = 3
 	def published(self, published):
 		"%reduce PUBLISHED"
@@ -91,7 +91,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.lineno = cls.lineno
 		self.value = False
 		self.members = members.members[4]
-		if parent.inherits[0] >= 4:
+		if parent.inherits[0] >= 3:
 			self.inherits = parent.inherits[1]
 		else:
 			self.inherits = "void"
@@ -112,7 +112,7 @@ class ClassDef(cpp.yacc.Nonterm):
 					self.members.methods[m] = methods
 		else:
 			self.members = members.members[4]
-		if parent.inherits[0] >= 3:
+		if parent.inherits[0] >= 2:
 			self.inherits = parent.inherits[1]
 		else:
 			self.inherits = "void"
@@ -124,7 +124,6 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.inherits = 'void'
 		self.value = True
 		self.members = members.members
-		self.visibility = 3
 
 	def predecl(self, file, instances, name, member):
 		name = name+[self.name]
@@ -143,16 +142,16 @@ class ClassDef(cpp.yacc.Nonterm):
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
 		prettyname = '.'.join(name)
-
-		tagname = "{0}"
-		properties = "{0}"
-		objects = "{0}"
-		methods = constructor = call = "{0}"
-		if self.members:
-			#owner = 'be_typeid< %s >::klass()'%fullname
-			objects,methods,constructor,call = self.members.dump(file, instances, namespace, name, fullname, self.value)
-
 		decl = "class%s" % fullname.replace(':', '_')
+
+		if member:
+			file.write("typedef %s %s;\n" % ('::'.join(name), self.name))
+		tag_ptr = self.tags.dump(file, instances, decl)
+		if self.members:
+			objects,methods,constructor,properties = self.members.dump(file, instances, namespace, name, fullname, self.value)
+		else:
+			objects = methods = constructor = properties = "{0}"
+
 		if self.parser.useMethods:
 			varname = "%s::s_%sFun()" % (ns, decl)
 			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
@@ -165,12 +164,11 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("        be_typeid< %s >::klass(),\n" % (self.inherits))
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\n" % fullname)
 		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, fullname))
-		file.write("        %s,\n" % (tagname))
+		file.write("        %s,\n" % (tag_ptr))
 		file.write("        %s,\n" % (properties))
 		file.write("        %s,\n" % (methods))
 		file.write("        %s,\n" % (objects))
 		file.write("        %s,\n" % (constructor))
-		file.write("        %s,\n" % (call))
 		if self.value:
 			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % fullname)
 			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % fullname)
@@ -180,8 +178,12 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("    };\n")
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
-		file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, object_ptr, tagname, self.name, varname))
+		alias_index = 0
+		for name in self.aliases+[self.name]:
+			alias_index += 1
+			file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, tag_ptr, name, varname))
+			object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
 
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
 
-		return "{&s_%s_obj}"%decl
+		return object_ptr
