@@ -33,7 +33,7 @@ Value::Value(T t)
 
 template< typename T >
 Value::Value(T t, MakeConstType /*constify*/)
-:   m_type(be_typeid<T>::type(), Type::MakeConst)
+:   m_type(Type::makeType(be_typeid<T>::type(), Type::MakeConst))
 ,   m_reference(false)
 {
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;

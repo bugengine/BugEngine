@@ -1,13 +1,72 @@
 import cpp
 
+class Enum(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def enum_value(self, tags_left, id, equal, value, tags_right):
+		"%reduce TagsLeft ID EQUAL Value TagsRight"
+		self.name = id.value
+		self.lineno = id.lineno
+		self.tags = tags_left
+		self.tags.tags += tags_right.tags
+
+	def enum(self, tags_left, id, tags_right):
+		"%reduce TagsLeft ID TagsRight"
+		self.name = id.value
+		self.lineno = id.lineno
+		self.tags = tags_left
+		self.tags.tags += tags_right.tags
+
+
+
+class EnumSequence(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def enumseq(self, enumseq, comma, tags, enum):
+		"%reduce EnumSequence COMMA TagsRight Enum"
+		self.enums = enumseq.enums
+		self.enums.append(enum)
+		enum.tags.tags += tags.tags
+
+	def enumseq_1(self, enum):
+		"%reduce Enum"
+		self.enums = [enum]
+
+
+
+class EnumValueList(cpp.yacc.Nonterm):
+	"%nonterm"
+
+	def empty(self):
+		"%reduce"
+		self.enums = []
+
+	def enum_list(self, enums_sequence):
+		"%reduce EnumSequence"
+		self.enums = enums_sequence.enums
+
+	def dump(self, file, instances, decl, owner):
+		enums_pointer = "{0}"
+		for enum in self.enums[::-1]:
+			enum_tag = enum.tags.dump(file, instances, decl+"_enum_%s"%enum.name)
+			file.write("#line %d\n"%enum.lineno)
+			alias_index = 0
+			for name in [enum.name]+enum.tags.aliases:
+				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_enum_%s_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(%s::%s, ::BugEngine::RTTI::Value::MakeConst) };\n" % (decl, enum.name, alias_index, enums_pointer, enum_tag, name, owner, enum.name))
+				enums_pointer = "{&s_%s_enum_%s_%d}" % (decl, enum.name, alias_index)
+				alias_index += 1
+		return enums_pointer
+
+
+
 
 class EnumDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
-	def enum(self, enum, name, lbrace, skip, rbrace):
-		"%reduce ENUM NameOpt LBRACE SkipList RBRACE"
+	def enum(self, enum, name, lbrace, enums, rbrace):
+		"%reduce ENUM NameOpt LBRACE EnumValueList RBRACE"
 		self.name = name.value
-		self.value = None
+		self.value = enums
 		self.lineno = enum.lineno
 
 	def predecl(self, file, instances, name, member):
@@ -21,6 +80,7 @@ class EnumDef(cpp.yacc.Nonterm):
 
 	def dump(self, file, instances, namespace, name, member, object_ptr):
 		ns = '::'+'::'.join(namespace)
+		owner = '::'+'::'.join(name)
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
 		prettyname = '.'.join(name)
@@ -28,7 +88,7 @@ class EnumDef(cpp.yacc.Nonterm):
 
 		tag_ptr = self.tags.dump(file, instances, decl)
 		properties = "{0}"
-		objects = "{0}"
+		objects = self.value.dump(file, instances, decl, owner)
 		methods = constructor = destructor = call = "0"
 		if self.parser.useMethods:
 			varname = "%s::s_%sFun()" % (ns, decl)
