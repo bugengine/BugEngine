@@ -242,7 +242,7 @@ class Method(cpp.yacc.Nonterm):
 					'const' in self.value.attributes,
 					self.value.line)
 			return_type = self.value.return_type
-			method_tags = "0"
+			method_tags = "{0}"
 
 			if self.value.id == '?new':
 				if param_types: param_types = ', '+param_types
