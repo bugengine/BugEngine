@@ -528,12 +528,12 @@ template <typename T>T* btAlignPointer(T* unalignedPtr, size_t alignment)
         {
                 T* ptr;
                 size_t integer;
-        };
+        } alignHelper;
         const size_t bit_mask = ~(alignment - 1);
-        ptr = unalignedPtr;
-		integer += alignment-1;
-        integer &= bit_mask;
-        return ptr;
+        alignHelper.ptr = unalignedPtr;
+        alignHelper.integer += alignment-1;
+        alignHelper.integer &= bit_mask;
+        return alignHelper.ptr;
 }
 
 #endif //BT_SCALAR_H
