@@ -87,17 +87,20 @@ class EnumDef(cpp.yacc.Nonterm):
 		prettyname = '.'.join(name)
 		decl = "enum%s" % fullname.replace(':', '_')
 
-		tag_ptr = self.tags.dump(file, instances, decl)
-		properties = "{0}"
-		objects = self.value.dump(file, instances, decl, owner, self.name)
-		methods = "{0}"
 		if self.parser.useMethods:
 			varname = "%s::s_%sFun()" % (ns, decl)
 			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % decl)
 		else:
 			varname = "%s::s_%s" % (ns, decl)
 
+		tag_ptr = self.tags.dump(file, instances, decl)
+		properties = "{0}"
+		objects = self.value.dump(file, instances, decl, owner, self.name)
+		methods = "{0}"
+
 		file.write("#line %d\n"%self.lineno)
+		if self.parser.useMethods:
+			file.write("static ")
 		file.write("::BugEngine::RTTI::Class s_%s =\\\n" % (decl))
 		file.write("    {\\\n")
 		file.write("        inamespace(\"%s\"),\\\n" % (prettyname))

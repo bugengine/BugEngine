@@ -147,19 +147,23 @@ class ClassDef(cpp.yacc.Nonterm):
 		if member:
 			file.write("#line %d\n"%self.lineno)
 			file.write("typedef %s %s;\n" % ('::'.join(name), self.name))
+
+		if self.parser.useMethods:
+			varname = "%s::s_%sFun()" % (ns, decl)
+			file.write("#line %d\n"%self.lineno)
+			file.write("const ::BugEngine::RTTI::Class& s_%sFun ()\n{\n" % decl)
+		else:
+			varname = "%s::s_%s" % (ns, decl)
+
 		tag_ptr = self.tags.dump(file, instances, decl)
 		if self.members:
 			objects,methods,constructor,properties = self.members.dump(file, instances, namespace, name, fullname, self.value)
 		else:
 			objects = methods = constructor = properties = "{0}"
 
-		if self.parser.useMethods:
-			varname = "%s::s_%sFun()" % (ns, decl)
-			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\\\n{\\\n" % decl)
-		else:
-			varname = "%s::s_%s" % (ns, decl)
-
 		file.write("#line %d\n"%self.lineno)
+		if self.parser.useMethods:
+			file.write("static ")
 		file.write("::BugEngine::RTTI::Class s_%s =\\\n" % (decl))
 		file.write("    {\\\n")
 		file.write("        inamespace(\"%s\"),\\\n" % (prettyname))
@@ -178,14 +182,14 @@ class ClassDef(cpp.yacc.Nonterm):
 			file.write("        0,\\\n")
 			file.write("        0\\\n")
 		file.write("    };\n")
-		if self.parser.useMethods:
-			file.write("return s_%s;\n}\n" % decl)
 		alias_index = 0
 		for name in self.aliases+[self.name]:
 			alias_index += 1
 			file.write("#line %d\n"%self.lineno)
 			file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, tag_ptr, name, varname))
 			object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
+		if self.parser.useMethods:
+			file.write("return s_%s;\n}\n" % decl)
 
 		instances.write("#line %d\n"%self.lineno)
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
