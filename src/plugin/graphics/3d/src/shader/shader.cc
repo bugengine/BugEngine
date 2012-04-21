@@ -16,8 +16,9 @@ ShaderProgram::~ShaderProgram()
 {
 }
 
-/*void ShaderProgram::buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const
+void ShaderProgram::buildSource(Shaders::IShaderBuilder& /*builder*/, Shaders::Stage /*stage*/) const
 {
+/*
     if (color) color->buildDeclarations(builder, Shaders::FragmentStage, stage);
     if (depth) depth->buildDeclarations(builder, Shaders::FragmentStage, stage);
     if (position) position->buildDeclarations(builder, Shaders::VertexStage, stage);
@@ -43,6 +44,7 @@ ShaderProgram::~ShaderProgram()
     }
     builder.forwardAttributes();
     builder.end();
-}*/
+*/
+}
 
 }

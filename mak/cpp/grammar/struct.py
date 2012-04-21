@@ -160,7 +160,7 @@ class ClassDef(cpp.yacc.Nonterm):
 
 		tag_ptr = self.tags.dump(file, instances, decl)
 		if self.members:
-			objects,methods,constructor,properties = self.members.dump(file, instances, namespace, name, fullname, self.value)
+			objects,methods,constructor,properties = self.members.dump(file, instances, namespace, name, fullname, self.inherits, self.value)
 		else:
 			objects = methods = constructor = properties = "{0}"
 

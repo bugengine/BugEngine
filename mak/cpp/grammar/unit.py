@@ -46,7 +46,7 @@ class Unit(cpp.yacc.Nonterm):
 
 		instances.write("namespace BugEngine\n{\n\n")
 		self.members.dumpObjects(file, instances, [], [], "")
-		self.members.dump(file, instances, [], [], "", False)
+		self.members.dump(file, instances, [], [], "", "", False)
 		instances.write("\n}\n\n")
 
 

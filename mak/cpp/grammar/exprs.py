@@ -187,35 +187,36 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects:
 			o.varname, o.tag_ptr = o.dump(file, instances, namespace, name, parent_name)
 
-	def dump(self, file, instances, namespace, name, parent_name, parent_value):
+	def dump(self, file, instances, namespace, name, owner, parent_name, parent_value):
 		if parent_name:
 			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
 			property_ptr = "be_typeid< %s >::klass()->properties"%parent_name
 			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
 		else:
-			owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
-			method_ptr = "%s->methods"%owner
+			o = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
+			method_ptr = "%s->methods"%o
 			property_ptr = "{0}"
-			object_ptr = "%s->objects"%owner
+			object_ptr = "%s->objects"%o
 		constructor_ptr = "{0}"
 
 		decl = "objects%s" % '_'.join(name)
 		alias_index = 0
 		for o in self.objects:
-			for n in o.aliases+[o.name]:
-				alias_index += 1
-				file.write("#line %d\n"%o.lineno)
-				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, o.tag_ptr, n, o.varname))
-				object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
+			if o.varname != '':
+				for n in o.aliases+[o.name]:
+					alias_index += 1
+					file.write("#line %d\n"%o.lineno)
+					file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, o.name, alias_index, object_ptr, o.tag_ptr, n, o.varname))
+					object_ptr = "{&s_%s_%s_obj_%d}"%(decl, o.name, alias_index)
 
 		for v in self.members:
-			property_ptr,object_ptr = v.dump(file, instances, namespace, name, parent_name, property_ptr, object_ptr)
+			property_ptr,object_ptr = v.dump(file, instances, namespace, name, owner, property_ptr, object_ptr)
 
 		for m, overloads in self.methods.items():
 			overload_ptr = "0"
 			overload_index = 0
 			for overload in overloads:
-				overload_ptr = overload.dump(file, instances, namespace, name, parent_name, parent_value, overload_ptr, overload_index)
+				overload_ptr = overload.dump(file, instances, namespace, name, owner, parent_value, overload_ptr, overload_index)
 				overload_index += 1
 
 			decl = '_'.join(name)
