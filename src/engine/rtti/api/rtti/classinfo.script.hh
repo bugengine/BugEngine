@@ -47,6 +47,7 @@ published:
     be_tag(Alias("?call"))
     raw<const Method> const             constructor;
 public:
+
     typedef void (*CopyConstructor)(const void *, void *);
     typedef void (*Destructor)(void *);
     const CopyConstructor   copyconstructor;
