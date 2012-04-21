@@ -33,7 +33,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 	lexer.sourcename = source
 	lexer.error = 0
 	file, ext = os.path.splitext(output)
-	yacc = cpp.parser.Parser(output, file+'-instances'+ext, useMethods, name, source, pch)
+	yacc = cpp.parser.Parser(output, file+'-instances'+ext, True, name, source, pch)
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
