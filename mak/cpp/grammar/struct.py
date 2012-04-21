@@ -137,12 +137,15 @@ class ClassDef(cpp.yacc.Nonterm):
 			self.members.predecl(file, instances, name, self.value)
 
 
-	def dump(self, file, instances, namespace, name, member, object_ptr):
+	def dump(self, file, instances, namespace, name, member):
 		ns = '::'+'::'.join(namespace)
 		name = name+[self.name]
 		fullname = '::'+'::'.join(name)
 		prettyname = '.'.join(name)
 		decl = "class%s" % fullname.replace(':', '_')
+
+		if self.members:
+			self.members.dumpObjects(file, instances, namespace, name, fullname)
 
 		if member:
 			file.write("#line %d\n"%self.lineno)
@@ -183,15 +186,10 @@ class ClassDef(cpp.yacc.Nonterm):
 			file.write("        0\\\n")
 		file.write("    };\n")
 		alias_index = 0
-		for name in self.aliases+[self.name]:
-			alias_index += 1
-			file.write("#line %d\n"%self.lineno)
-			file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, tag_ptr, name, varname))
-			object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
 
 		instances.write("#line %d\n"%self.lineno)
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
 
-		return object_ptr
+		return varname, tag_ptr
