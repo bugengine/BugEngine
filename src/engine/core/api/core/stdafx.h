@@ -5,13 +5,6 @@
 #define BE_CORE_STDAFX_H_
 /*****************************************************************************/
 
-#ifndef BE_FILEID
-# ifdef     _WIN32
-#  define   BE_COUNTER          __COUNTER__
-# else
-#  define   BE_COUNTER          0
-# endif
-#endif
 #define     BE_FILE             __FILE__
 #define     BE_LINE             __LINE__
 #ifdef _MSC_VER

@@ -65,7 +65,7 @@ def plugins(bld):
 
 	bullet			= module.plugin('physics.bullet',			[bulletengine])
 
-	_3d				= module.plugin('graphics.3d',				[])
+	_3d				= module.plugin('graphics.3d',				[freetype])
 	shadermodel1	= module.plugin('graphics.shadermodel1',	[_3d])
 	shadermodel2	= module.plugin('graphics.shadermodel2',	[_3d, shadermodel1])
 	shadermodel3	= module.plugin('graphics.shadermodel3',	[_3d, shadermodel1, shadermodel2])
