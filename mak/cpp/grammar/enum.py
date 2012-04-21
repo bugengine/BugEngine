@@ -79,7 +79,7 @@ class EnumDef(cpp.yacc.Nonterm):
 		else:
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
 
-	def dump(self, file, instances, namespace, name, member, object_ptr):
+	def dump(self, file, instances, namespace, name, member):
 		ns = '::'+'::'.join(namespace)
 		owner = '::'+'::'.join(name)
 		name = name+[self.name]
@@ -118,15 +118,7 @@ class EnumDef(cpp.yacc.Nonterm):
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % decl)
 
-		alias_index = 0
-		for name in self.aliases+[self.name]:
-			alias_index += 1
-			file.write("#line %d\n"%self.lineno)
-			file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, tag_ptr, name, varname))
-			object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
-
-
 		instances.write("#line %d\n"%self.lineno)
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
 
-		return object_ptr
+		return varname, tag_ptr

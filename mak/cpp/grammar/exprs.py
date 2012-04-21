@@ -183,6 +183,10 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects:
 			o.predecl(file, instances, name, parent_name)
 
+	def dumpObjects(self, file, instances, namespace, name, parent_name):
+		for o in self.objects:
+			o.varname, o.tag_ptr = o.dump(file, instances, namespace, name, parent_name)
+
 	def dump(self, file, instances, namespace, name, parent_name, parent_value):
 		if parent_name:
 			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
@@ -195,8 +199,14 @@ class Exprs(cpp.yacc.Nonterm):
 			object_ptr = "%s->objects"%owner
 		constructor_ptr = "{0}"
 
+		decl = "objects%s" % '_'.join(name)
+		alias_index = 0
 		for o in self.objects:
-			object_ptr = o.dump(file, instances, namespace, name, parent_name, object_ptr)
+			for n in o.aliases+[o.name]:
+				alias_index += 1
+				file.write("#line %d\n"%o.lineno)
+				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, alias_index, object_ptr, o.tag_ptr, n, o.varname))
+				object_ptr = "{&s_%s_obj_%d}"%(decl,alias_index)
 
 		for v in self.members:
 			property_ptr,object_ptr = v.dump(file, instances, namespace, name, parent_name, property_ptr, object_ptr)

@@ -29,7 +29,7 @@ protected:
     ShaderProgram();
     ~ShaderProgram();
 public:
-    virtual void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const = 0;
+    virtual void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const;
 };
 
 }

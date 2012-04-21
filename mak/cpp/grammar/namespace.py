@@ -6,11 +6,15 @@ class Namespace(cpp.yacc.Nonterm):
 		"%reduce NAMESPACE ID LBRACE Exprs RBRACE"
 		self.name = name.value
 		self.exprs = exprs
+		self.aliases = []
+		self.lineno = name.lineno
 
 	def namespace_unnamed(self, namespace, LBRACE, exprs, RBRACE):
 		"%reduce NAMESPACE LBRACE RBRACE"
 		#unnamed namespaces are not exported
 		self.name = ''
+		self.aliases = []
+		self.lineno = namespace.lineno
 
 	def predecl(self, file, instances, name, member):
 		name = name+[self.name]
@@ -24,17 +28,18 @@ class Namespace(cpp.yacc.Nonterm):
 		self.exprs.predecl(file, instances, name, member)
 		instances.write("\n}\n")
 
-	def dump(self, file, instances, namespace, name, member, object_ptr):
+	def dump(self, file, instances, namespace, name, member):
 		namespace = name+[self.name]
 		name = name+[self.name]
 		file.write("namespace %s\n" % self.name)
 		file.write("{\n")
 
 		owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
-		my_object_ptr, method_ptr, constructor, variables = self.exprs.dump(file, instances, namespace, name, "", True)
-		if my_object_ptr != '%s->objects'%owner:
-			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_ptr = ( %s->objects.set(%s) );\n" % (my_object_ptr[2:-1], owner, my_object_ptr[1:-1]))
+		self.exprs.dumpObjects(file, instances, namespace, name, "")
+		object_ptr, method_ptr, constructor, variables = self.exprs.dump(file, instances, namespace, name, "", True)
+		if object_ptr != '%s->objects'%owner:
+			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_ptr = ( %s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
 		file.write("\n}\n")
-		return object_ptr
+		return owner, "{0}"
 
 
