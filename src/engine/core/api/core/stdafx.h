@@ -69,8 +69,8 @@ inline T be_max(T t1, T t2)
 #include    <minitl/container/pair.hh>
 #include    <minitl/container/array.hh>
 #include    <minitl/container/vector.hh>
-#include    <minitl/container/list.hh>
 #include    <minitl/container/hash_map.hh>
+#include    <minitl/container/intrusive_list.hh>
 #include    <minitl/interlocked/interlocked.hh>
 #include    <minitl/string/format.hh>
 
