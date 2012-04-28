@@ -2,7 +2,7 @@
 #include <new>
 #include <squirrel.h>
 #include <sqstdio.h>
-#include <string.h>
+#include <cstring>
 #include <sqstdblob.h>
 #include "sqstdstream.h"
 #include "sqstdblobimpl.h"

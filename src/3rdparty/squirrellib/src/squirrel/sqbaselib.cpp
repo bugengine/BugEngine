@@ -9,8 +9,8 @@
 #include "sqfuncproto.h"
 #include "sqclosure.h"
 #include "sqclass.h"
-#include <stdlib.h>
-#include <stdarg.h>
+#include <cstdlib>
+#include <cstdarg>
 #include <ctype.h>
 
 bool str2num(const SQChar *s,SQObjectPtr &res)
