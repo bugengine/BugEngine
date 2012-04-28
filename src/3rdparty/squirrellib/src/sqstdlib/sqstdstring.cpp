@@ -1,11 +1,11 @@
 /* see copyright notice in squirrel.h */
 #include <squirrel.h>
 #include <sqstdstring.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <ctype.h>
-#include <assert.h>
+#include <cassert>
 
 #ifdef SQUNICODE
 #define scstrchr wcschr

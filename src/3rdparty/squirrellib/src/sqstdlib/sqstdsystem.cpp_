@@ -1,8 +1,8 @@
 /* see copyright notice in squirrel.h */
 #include <squirrel.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdlib>
+#include <cstdio>
 #include <sqstdsystem.h>
 
 #ifdef SQUNICODE
