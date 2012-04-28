@@ -87,8 +87,13 @@ class netbeans(Build.BuildContext):
 			env = bld.all_envs[c]
 			conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
 			toolsSet = add(doc, conf, 'toolsSet')
-			add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
+			if self.__class__.version >= 70:
+				add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
+			else:
+				add(doc, toolsSet, 'developmentServer', 'localhost')
 			add(doc, toolsSet, 'compilerSet', 'default')
+			if self.__class__.version < 70:
+				add(doc, toolsSet, 'platform', '4')
 			mtype = add(doc, conf, 'makefileType')
 			mtool = add(doc, mtype, 'makeTool')
 			add(doc, mtool, 'buildCommandWorkingDir', '.')
@@ -98,38 +103,38 @@ class netbeans(Build.BuildContext):
 				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 			else:
 				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
+			if self.__class__.version >= 70:
+				ctool = add(doc, mtool, 'cTool')
+				cincdir = add(doc, ctool, 'incDir')
+				cdefines = add(doc, ctool, 'preprocessorList')
+				cctool = add(doc, mtool, 'ccTool')
+				ccincdir = add(doc, cctool, 'incDir')
+				ccdefines = add(doc, cctool, 'preprocessorList')
+			else:
+				ctool = add(doc, mtool, 'cCompilerTool')
+				cincdir = add(doc, ctool, 'includeDirectories')
+				cdefines = add(doc, ctool, 'preprocessorList')
+				cctool = add(doc, mtool, 'ccCompilerTool')
+				ccincdir = add(doc, cctool, 'includeDirectories')
+				ccdefines = add(doc, cctool, 'preprocessorList')
+			add(doc, mtype, 'requiredProjects')
+			includes=set([])
+			defines = set([])
+			for d in ['be_api(x)=', 'BE_EXPORT=']:
+				add(doc, cdefines, 'Elem', d)
+				add(doc, ccdefines, 'Elem', d)
 			for project, category, source, options in sources:
 				options = options[c]
-				name = category+'/'+project
-				f = add(doc, conf, 'folder', {'path': name})
-				if self.__class__.version >= 70:
-					ctool = add(doc, f, 'cTool')
-				else:
-					ctool = add(doc, f, 'cCompilerTool')
-				incdir = add(doc, ctool, 'incDir')
 				for i in options.includedir:
-					add(doc, incdir, 'pElem', i)
-				defines = add(doc, ctool, 'preprocessorList')
-				for d in ['be_api(x)=', 'BE_EXPORT=']:
-					add(doc, defines, 'Elem', d)
+					if i not in includes:
+						includes.add(i)
+						add(doc, cincdir, 'directoryPath', i)
+						add(doc, ccincdir, 'directoryPath', i)
 				for d in env.DEFINES:
-					add(doc, defines, 'Elem', d)
-				for d in options.defines:
-					add(doc, defines, 'Elem', d)
-				if self.__class__.version >= 70:
-					ctool = add(doc, f, 'ccTool')
-				else:
-					ctool = add(doc, f, 'ccCompilerTool')
-				incdir = add(doc, ctool, 'incDir')
-				for i in options.includedir:
-					add(doc, incdir, 'pElem', i)
-				defines = add(doc, ctool, 'preprocessorList')
-				for d in ['be_api(x)=', 'BE_EXPORT=']:
-					add(doc, defines, 'Elem', d)
-				for d in env.DEFINES:
-					add(doc, defines, 'Elem', d)
-				for d in options.defines:
-					add(doc, defines, 'Elem', d)
+					if d not in defines:
+						defines.add(d)
+						add(doc, cdefines, 'Elem', d)
+						add(doc, ccdefines, 'Elem', d)
 
 		return doc
 
