@@ -1,17 +1,21 @@
 from waflib.Configure import conf
 from waflib import Utils
 import re
+import os
 
 format = re.compile('^cc: Sun.*C (..?\..?.?) ([A-Za-z]+)_([^ ]+) .*')
 
 @conf
 def get_available_suncc(conf):
 	conf.env.SUNCC_TARGETS = []
-	cc = conf.find_program('suncc', mandatory=False, var='detect_suncc', silent=True)
-	cxx = conf.find_program('sunCC', mandatory=False, var='detect_suncxx', silent=True)
-	if cc and cxx:
-		conf.get_suncc_targets_32(cc, cxx)
-		conf.get_suncc_targets_64(cc, cxx)
+	for i in os.environ['PATH'].split(':'):
+		cc = conf.find_program('suncc', path_list=[i], mandatory=False, var='detect_suncc', silent=True)
+		cxx = conf.find_program('sunCC', path_list=[i], mandatory=False, var='detect_suncxx', silent=True)
+		if cc and cxx:
+			conf.env.detect_suncc = ''
+			conf.env.detect_suncxx = ''
+			conf.get_suncc_targets_32(cc, cxx)
+			conf.get_suncc_targets_64(cc, cxx)
 
 def to32bits(arch):
 	if arch == 'amd64' or arch == 'x86_64' or arch == 'x64':

@@ -20,7 +20,7 @@ ITask::ITask(istring name, color32 color, Scheduler::Priority priority, Schedule
 ITask::~ITask()
 {
     ScopedCriticalSection scope(m_cs);
-    for (minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         bool result = (*it)->onDisconnected(this);
         be_forceuse(result);
@@ -31,7 +31,7 @@ ITask::~ITask()
 void ITask::end(weak<Scheduler> sc) const
 {
     ScopedCriticalSection scope(m_cs);
-    for (minitl::list< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::vector< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onCompleted(sc, this);
     }
@@ -47,7 +47,7 @@ void ITask::addCallback(weak<ICallback> callback, ICallback::CallbackStatus stat
 bool ITask::removeCallback(weak<ICallback> callback)
 {
     ScopedCriticalSection scope(m_cs);
-    for (minitl::list< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         if (*it == callback)
         {
