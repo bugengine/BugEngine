@@ -60,9 +60,9 @@ public:
     const Scheduler::Priority   priority;
     const Scheduler::Affinity   affinity;
 private:
-    minitl::list< weak<ICallback> > m_callbacks;
-    ref<ICallback>                  m_start;
-    CriticalSection                 m_cs;
+    minitl::vector< weak<ICallback> >   m_callbacks;
+    ref<ICallback>                      m_start;
+    CriticalSection                     m_cs;
 private:
     void addCallback(weak<ICallback> callback, ICallback::CallbackStatus status);
     bool removeCallback(weak<ICallback> callback);

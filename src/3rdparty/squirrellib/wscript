@@ -8,5 +8,5 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.m['squirrellib'] = module.static_library( 'squirrellib', [], '3rdparty')
+	bld.m['squirrellib'] = module.static_library( 'squirrellib', [], '3rdparty', localoptions=module.coptions(defines=['_BSD_SOURCE']))
 	bld.m['squirrellib'].usemaster = True
