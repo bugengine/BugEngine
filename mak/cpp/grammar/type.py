@@ -7,10 +7,12 @@ class TypeDef(cpp.yacc.Nonterm):
 	def type_class(self, cls):
 		"%reduce ClassDef"
 		self.value = cls
+		self.lineno = cls.lineno
 
 	def type_enum(self, cls):
 		"%reduce EnumDef"
 		self.value = cls
+		self.lineno = cls.lineno
 
 
 
@@ -40,6 +42,11 @@ class TypeDecl(cpp.yacc.Nonterm):
 
 class TypePart(cpp.yacc.Nonterm):
 	"%nonterm"
+
+	def type_definition(self, type):
+		"%reduce TypeDef"
+		self.lineno = type.lineno
+		self.value = type.value
 
 	def type_declaration(self, type):
 		"%reduce TypeDecl"
