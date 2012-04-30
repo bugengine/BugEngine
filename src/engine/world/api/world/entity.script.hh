@@ -12,8 +12,6 @@ struct be_api(WORLD) Entity
 {
 published:
     u32 const    id;
-    u16 const    storage;
-    u16 const    index;
 };
 
 }}

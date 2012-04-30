@@ -13,13 +13,30 @@ namespace BugEngine { namespace World
 {
 
 class State;
+class Storage;
+template< typename T, size_t size >
+struct Block;
+class BlockManager;
 
 class be_api(WORLD) World : public Resource
 {
+    friend class Storage;
 private:
-    ref<ITask>      m_task;
-    scoped<State>   m_emptyEntityState;
-    i_u32           m_entityId;
+    union EntitySlot
+    {
+        struct EntityData
+        {
+            u16 storage;
+            u16 index;
+        } data;
+        u32 nextEntity;
+    };
+    ref<ITask>                                  m_task;
+    scoped<State>                               m_emptyEntityState;
+    scoped<BlockManager>                        m_blockManager;
+    u32                                         m_freeEntityId;
+    u32                                         m_lastEntityId;
+    minitl::vector< Block<EntitySlot,65536>* >  m_entityBlocks;
 public:
     weak<ITask> updateWorldTask() const;
 published:
