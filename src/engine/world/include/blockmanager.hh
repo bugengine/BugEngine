@@ -9,49 +9,80 @@
 namespace BugEngine { namespace World
 {
 
-template< typename T, size_t SIZE >
-struct Block
-{
-    template< typename U > Block<U, SIZE>* as() { return reinterpret_cast<Block<U, SIZE>*>(this); }
-    T& operator[](size_t index)
-    {
-        union Item
-        {
-            T t;
-            u8 u;
-        };
-        u8* buffer = reinterpret_cast<u8*>(this);
-        size_t offset = index*be_align(sizeof(T), be_alignof(T));
-        be_assert_recover(offset < SIZE, "accessing at index %d past the end of the buffer"|index, return *reinterpret_cast<T*>(buffer));
-        return *reinterpret_cast<T*>(buffer+offset);
-    }
-};
 
 class BlockManager : public minitl::pointer
 {
 private:
-    Block<u8, 262144>*  m_pool256k;
-    Block<u8, 131072>*  m_pool128k;
-    Block<u8,  65536>*  m_pool64k;
-    Block<u8,  32768>*  m_pool32k;
-    Block<u8,  16384>*  m_pool16k;
-    i_u32               m_usedBlocks;
-private:
-    Block<u8, 262144>* reserve256k();
-    Block<u8, 131072>* reserve128k();
-    Block<u8,  65536>* reserve64k();
-    Block<u8,  32768>* reserve32k();
-    Block<u8,  16384>* reserve16k();
+    minitl::itaggedptr<void>    m_pool256k;
+    minitl::itaggedptr<void>    m_pool128k;
+    minitl::itaggedptr<void>    m_pool64k;
+    minitl::itaggedptr<void>    m_pool32k;
+    minitl::itaggedptr<void>    m_pool16k;
+    i_u32                       m_usedBlocks;
 public:
     BlockManager();
     ~BlockManager();
-    
-    template< typename U > Block<U, 262144>* alloc256k() { return reserve256k()->as<U>(); }
-    template< typename U > Block<U, 131072>* alloc128k() { return reserve128k()->as<U>(); }
-    template< typename U > Block<U,  65536>* alloc64k()  { return reserve64k()->as<U>(); }
-    template< typename U > Block<U,  32768>* alloc32k()  { return reserve32k()->as<U>(); }
-    template< typename U > Block<U,  16384>* alloc16k()  { return reserve16k()->as<U>(); }
+
+    template< size_t SIZEKB > void* alloc();
+    template< size_t SIZEKB > void  free(void* ptr);
+    template< size_t SIZEKB > void* realloc();
 };
+
+template< > void* BlockManager::alloc<256>();
+template< > void* BlockManager::alloc<128>();
+template< > void* BlockManager::alloc<64>();
+template< > void* BlockManager::alloc<32>();
+template< > void* BlockManager::alloc<16>();
+
+template< > void BlockManager::free<256>(void* ptr);
+template< > void BlockManager::free<128>(void* ptr);
+template< > void BlockManager::free<64>(void* ptr);
+template< > void BlockManager::free<32>(void* ptr);
+template< > void BlockManager::free<16>(void* ptr);
+
+
+
+template< typename T, size_t SIZEKB >
+struct Block : public minitl::pointer
+{
+private:
+    weak<BlockManager>      m_manager;
+    minitl::vector< u8* >   m_blocks;
+public:
+    Block(weak<BlockManager> manager)
+        :   m_manager(manager)
+        ,   m_blocks(gameArena())
+    {
+    }
+    ~Block()
+    {
+        for (minitl::vector< u8* >::const_iterator it = m_blocks.begin(); it != m_blocks.end(); ++it)
+        {
+            m_manager->free<SIZEKB>(*it);
+        }
+    }
+
+    T& operator[](u32 index)
+    {
+        u32 block = index >> 16;
+        index = index & 0xffff;
+        if (block >= m_blocks.size() )
+        {
+            be_assert(block == m_blocks.size(), "access past the end of a block");
+            m_blocks.push_back((u8*)manager->alloc<SIZE>());
+        }
+        u8* buffer = m_blocks[block];
+        size_t offset = index*be_align(sizeof(T), be_alignof(T));
+        be_assert_recover(offset < SIZEKB*1024, "accessing at index %d past the end of the buffer"|index, return *reinterpret_cast<T*>(buffer));
+        return *reinterpret_cast<T*>(buffer+offset);
+    }
+
+    size_t capacity() const
+    {
+        return m_blocks.size() * be_checked_numcast<u16>(SIZEKB/be_align(sizeof(T), be_alignof(T)));
+    }
+};
+
 
 }}
 

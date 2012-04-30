@@ -14,7 +14,7 @@ namespace BugEngine { namespace World
 
 class State;
 class Storage;
-template< typename T, size_t size >
+template< typename T, size_t SIZEKB >
 struct Block;
 class BlockManager;
 
@@ -24,19 +24,16 @@ class be_api(WORLD) World : public Resource
 private:
     union EntitySlot
     {
-        struct EntityData
-        {
-            u16 storage;
-            u16 index;
-        } data;
-        u32 nextEntity;
+        Entity data;
+        Entity next;
     };
-    ref<ITask>                                  m_task;
-    scoped<State>                               m_emptyEntityState;
-    scoped<BlockManager>                        m_blockManager;
-    u32                                         m_freeEntityId;
-    u32                                         m_lastEntityId;
-    minitl::vector< Block<EntitySlot,65536>* >  m_entityBlocks;
+private:
+    ref<ITask>                      m_task;
+    scoped<State>                   m_emptyEntityState;
+    scoped<BlockManager>            m_blockManager;
+    Entity                          m_freeEntityId;
+    Entity                          m_lastEntityId;
+    scoped< Block<EntitySlot,64> >  m_entityBlocks;
 public:
     weak<ITask> updateWorldTask() const;
 published:

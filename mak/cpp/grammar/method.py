@@ -135,6 +135,24 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		self.line = lbracket.lineno
 		self.args = args
 		self.attributes = set()
+		
+	def method_operator_lt(self, type, keyword, lt, lparen, args, rparen):
+		"%reduce Type OPERATOR LT LPAREN ArgList RPAREN"
+		self.id = 'operator<'
+		self.name = '?lt'
+		self.return_type = type.value
+		self.line = lt.lineno
+		self.args = args
+		self.attributes = set()
+
+	def method_operator_gt(self, type, keyword, gt, lparen, args, rparen):
+		"%reduce Type OPERATOR GT LPAREN ArgList RPAREN"
+		self.id = 'operator>'
+		self.name = '?gt'
+		self.return_type = type.value
+		self.line = gt.lineno
+		self.args = args
+		self.attributes = set()
 
 	def method_constructor(self, type, lparen, args, rparen):
 		"%reduce Type LPAREN ArgList RPAREN"
