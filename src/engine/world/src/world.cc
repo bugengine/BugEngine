@@ -13,11 +13,15 @@ BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 namespace BugEngine { namespace World
 {
 
+static const Entity s_defaultSlot = { 0, 0 };
+
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
-,   m_freeEntityId(0)
-,   m_entityBlocks(gameArena())
+,   m_blockManager(scoped<BlockManager>::create(gameArena()))
+,   m_freeEntityId(s_defaultSlot)
+,   m_lastEntityId(s_defaultSlot)
+,   m_entityBlocks(scoped< Block<EntitySlot, 64> >::create(gameArena(), m_blockManager))
 {
 }
 
@@ -32,15 +36,8 @@ weak<ITask> World::updateWorldTask() const
 
 Entity World::spawn()
 {
-    u32 newEntity = m_freeEntityId;
-    u32 newEntityStorage = newEntity >> 22;
-    u32 newEntityIndex = newEntity & ((1<<22) - 1);
-    if (newEntityStorage > m_entityBlocks.size())
-    {
-        m_entityBlocks.resize(m_entityBlocks.size() + 4);
-    }
-    Entity e = { m_freeEntityId };
-    m_freeEntityId = (*m_entityBlocks[newEntityStorage])[newEntityIndex].nextEntity;
+    Entity e = m_freeEntityId;
+
     return e;
 }
 

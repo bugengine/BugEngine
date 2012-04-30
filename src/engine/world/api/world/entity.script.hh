@@ -11,7 +11,12 @@ namespace BugEngine { namespace World
 struct be_api(WORLD) Entity
 {
 published:
-    u32 const    id;
+    u16 block;
+    u16 index;
+
+    bool operator ==(const Entity& other) const { return block == other.block && index == other.index; }
+    bool operator !=(const Entity& other) const { return block != other.block || index != other.index; }
+    bool operator <(const Entity& other) const  { return block < other.block || (block == other.block && index < other.index); }
 };
 
 }}
