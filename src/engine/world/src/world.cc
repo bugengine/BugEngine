@@ -16,7 +16,8 @@ namespace BugEngine { namespace World
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
-,   m_entityId(0)
+,   m_freeEntityId(0)
+,   m_entityBlocks(gameArena())
 {
 }
 
@@ -31,7 +32,15 @@ weak<ITask> World::updateWorldTask() const
 
 Entity World::spawn()
 {
-    Entity e = { m_entityId++, 0, 0 };
+    u32 newEntity = m_freeEntityId;
+    u32 newEntityStorage = newEntity >> 22;
+    u32 newEntityIndex = newEntity & ((1<<22) - 1);
+    if (newEntityStorage > m_entityBlocks.size())
+    {
+        m_entityBlocks.resize(m_entityBlocks.size() + 4);
+    }
+    Entity e = { m_freeEntityId };
+    m_freeEntityId = (*m_entityBlocks[newEntityStorage])[newEntityIndex].nextEntity;
     return e;
 }
 
