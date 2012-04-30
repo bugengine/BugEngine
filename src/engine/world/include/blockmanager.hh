@@ -69,7 +69,7 @@ public:
         if (block >= m_blocks.size() )
         {
             be_assert(block == m_blocks.size(), "access past the end of a block");
-            m_blocks.push_back((u8*)manager->alloc<SIZE>());
+            m_blocks.push_back((u8*)m_manager->alloc<SIZEKB>());
         }
         u8* buffer = m_blocks[block];
         size_t offset = index*be_align(sizeof(T), be_alignof(T));
