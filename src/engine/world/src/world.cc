@@ -18,11 +18,30 @@ static const Entity s_defaultSlot = { 0, 0 };
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
-,   m_blockManager(scoped<BlockManager>::create(gameArena()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_lastEntityId(s_defaultSlot)
-,   m_entityBlocks(scoped< Block<EntitySlot, 64> >::create(gameArena(), m_blockManager))
+,   m_allocator(SystemAllocator::Block64kb, 256)
 {
+    u8* memory[55];
+    memory[0] = (u8*)m_allocator.blockAlloc();
+    *memory[0] = 1;
+    memory[1] = (u8*)m_allocator.blockAlloc();
+    *memory[1] = 1;
+    memory[2] = (u8*)m_allocator.blockAlloc();
+    *memory[2] = 1;
+    memory[3] = (u8*)m_allocator.blockAlloc();
+    *memory[3] = 1;
+    memory[4] = (u8*)m_allocator.blockAlloc();
+    *memory[4] = 1;
+
+    m_allocator.blockFree(memory[0]);
+    memory[0] = (u8*)m_allocator.blockAlloc();
+    *memory[0] = 1;
+    m_allocator.blockFree(memory[2]);
+    m_allocator.blockFree(memory[3]);
+    m_allocator.blockFree(memory[1]);
+    m_allocator.blockFree(memory[0]);
+    m_allocator.blockFree(memory[4]);
 }
 
 World::~World()
