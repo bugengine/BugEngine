@@ -15,7 +15,7 @@ static const u32 s_pageSize = sysconf(_SC_PAGE_SIZE);
 void* SystemAllocator::platformReserve(u32 size)
 {
     be_assert(size % s_pageSize == 0, "size %d is not aligned on a page boundary (page size = %d)" | size | s_pageSize);
-    void* result = mmap(0, size, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    void* result = mmap(0, size, PROT_NONE, MAP_PRIVATE|MAP_ANON, -1, 0);
     be_assert(result, "failed to reserve memory: %s" | sys_errlist[errno]);
     return result;
 }
