@@ -7,6 +7,7 @@
 #include    <system/scheduler/task/itask.hh>
 #include    <system/resource/resource.script.hh>
 #include    <world/entity.script.hh>
+#include    <core/memory/allocators/system.hh>
 
 
 namespace BugEngine { namespace World
@@ -28,12 +29,11 @@ private:
         Entity next;
     };
 private:
-    ref<ITask>                      m_task;
-    scoped<State>                   m_emptyEntityState;
-    scoped<BlockManager>            m_blockManager;
-    Entity                          m_freeEntityId;
-    Entity                          m_lastEntityId;
-    scoped< Block<EntitySlot,64> >  m_entityBlocks;
+    ref<ITask>      m_task;
+    scoped<State>   m_emptyEntityState;
+    Entity          m_freeEntityId;
+    Entity          m_lastEntityId;
+    SystemAllocator m_allocator;
 public:
     weak<ITask> updateWorldTask() const;
 published:
