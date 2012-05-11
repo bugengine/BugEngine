@@ -75,7 +75,7 @@ public:
      */
     u32 blockSize() const
     {
-        return 1 << (14+(u32)m_blockSize);
+        return 1 << ((u32)m_blockSize);
     }
 };
 

@@ -23,21 +23,18 @@ class be_api(WORLD) World : public Resource
 {
     friend class Storage;
 private:
-    union EntitySlot
-    {
-        Entity data;
-        Entity next;
-    };
-private:
-    ref<ITask>      m_task;
-    scoped<State>   m_emptyEntityState;
-    Entity          m_freeEntityId;
-    Entity          m_lastEntityId;
-    SystemAllocator m_allocator;
+    ref<ITask>              m_task;
+    scoped<State>           m_emptyEntityState;
+    Entity                  m_freeEntityId;
+    SystemAllocator         m_allocator16k;
+    SystemAllocator         m_allocator64k;
+    minitl::vector<Entity*> m_entityBuffers;
+    i_u32                   m_entityCount;
 public:
     weak<ITask> updateWorldTask() const;
 published:
     Entity spawn();
+    void unspawn(Entity e);
 published:
     World();
     ~World();
