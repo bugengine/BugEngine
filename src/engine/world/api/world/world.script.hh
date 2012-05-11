@@ -15,9 +15,7 @@ namespace BugEngine { namespace World
 
 class State;
 class Storage;
-template< typename T, size_t SIZEKB >
-struct Block;
-class BlockManager;
+struct Component;
 
 class be_api(WORLD) World : public Resource
 {
@@ -32,9 +30,13 @@ private:
     i_u32                   m_entityCount;
 public:
     weak<ITask> updateWorldTask() const;
+public:
+    void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 published:
     Entity spawn();
     void unspawn(Entity e);
+
+    void addComponent(Entity e, RTTI::Value& v);
 published:
     World();
     ~World();

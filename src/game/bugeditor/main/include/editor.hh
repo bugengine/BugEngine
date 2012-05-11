@@ -22,10 +22,11 @@ class Editor : public Application
 {
 private:
     scoped<ResourceManager> const   m_resourceManager;
+    ref<Folder>             const   m_dataFolder;
     PluginContext           const   m_pluginContext;
     Plugin<void>            const   m_renderer;
     Plugin<IResourceLoader> const   m_packageManager;
-    ref<Folder>             const   m_dataFolder;
+    Plugin<IResourceLoader> const   m_luaScripting;
     ref<const Package>      const   m_mainPackage;
     ref<ITask>              const   m_resourceTask;
 public:

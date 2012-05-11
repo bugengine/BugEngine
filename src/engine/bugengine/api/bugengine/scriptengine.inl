@@ -29,6 +29,7 @@ ScriptEngine<T>::~ScriptEngine()
 template< typename T >
 ResourceHandle ScriptEngine<T>::load(weak<const Resource> resource)
 {
+    be_assert(be_checked_cast<const Script>(resource)->m_file, "can't open script: file not found");
     m_manager->addTicket(this, resource, be_checked_cast<const Script>(resource)->m_file);
     return ResourceHandle();
 }

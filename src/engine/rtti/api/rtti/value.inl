@@ -27,7 +27,7 @@ Value::Value(T t)
 {
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
-    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
+    be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
@@ -38,7 +38,7 @@ Value::Value(T t, MakeConstType /*constify*/)
 {
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
-    be_assert(be_typeid<T>::type() <= m_type, "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
+    be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
 }
 
@@ -111,7 +111,7 @@ Value& Value::operator=(const Value& v)
 {
     if (m_reference)
     {
-        be_assert_recover(v.m_type <= m_type, "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
+        be_assert_recover(m_type.isA(v.m_type), "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
@@ -131,7 +131,7 @@ Value& Value::operator=(const T& t)
 {
     if (m_reference)
     {
-        be_assert_recover(be_typeid<T>::type() <= m_type, "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
+        be_assert_recover(m_type.isA(be_typeid<T>::type()), "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
@@ -252,7 +252,7 @@ Value Value::operator()(Value params[], u32 paramCount)
     static const istring callName("?call");
     Value call = (*this)[callName];
     be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
-    be_assert_recover(be_typeid<const Method* const>::type() <= call.type(), "Not a callable object: %s" | m_type.name(), return Value());
+    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type.name(), return Value());
     return call.as<const Method* const>()->doCall(params, paramCount);
 }
 

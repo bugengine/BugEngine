@@ -9,8 +9,9 @@
 namespace BugEngine
 {
 
-PluginContext::PluginContext(weak<ResourceManager> manager)
+PluginContext::PluginContext(weak<ResourceManager> manager, ref<Folder> folder)
     :   resourceManager(manager)
+    ,   dataFolder(folder)
 {
 }
 

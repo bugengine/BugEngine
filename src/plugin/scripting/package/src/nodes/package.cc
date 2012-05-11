@@ -207,7 +207,7 @@ void Package::createObjects(weak<const ResourceManager> manager)
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
         m_values[i] = m_nodes[i]->create();
-        if (be_typeid<const Resource>::type() <= m_values[i].type())
+        if (m_values[i].isA(be_typeid<const Resource>::type()))
         {
             manager->load(m_values[i].type().metaclass, m_values[i].as< weak<const Resource> >());
         }
@@ -218,7 +218,7 @@ void Package::deleteObjects(weak<const ResourceManager> manager)
 {
     for(size_t i = m_values.size(); i > 0; --i)
     {
-        if (be_typeid<const Resource>::type() <= m_values[i-1].type())
+        if (m_values[i-1].isA(be_typeid<const Resource>::type()))
         {
             manager->unload(m_values[i-1].type().metaclass, m_values[i-1].as< weak<const Resource> >());
         }

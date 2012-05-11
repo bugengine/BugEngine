@@ -29,7 +29,7 @@ Allocator& packageArena()
 
 PackageLoader::PackageLoader(const PluginContext& context)
     :   ScriptEngine<Package>(packageArena(), context.resourceManager)
-    ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(packageArena()))
+    ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(packageArena(), context.dataFolder))
 {
 }
 

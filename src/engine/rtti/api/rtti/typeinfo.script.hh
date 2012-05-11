@@ -176,6 +176,8 @@ struct be_api(RTTI) Type
     {
         MaxTypeDistance = 1000000 ///< The maximum distance to indicate two types are not compatible
     };
+public:
+    bool isA(const Type& other) const;
 private:
     Type& operator=(const Type&);
     void*               rawget(const void*) const;
