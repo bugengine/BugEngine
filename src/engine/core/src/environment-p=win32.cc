@@ -41,7 +41,7 @@ void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
-    m_game = istring("bugeditor");
+    m_game = istring("bugeditor.main");
     do
     {
         if (exe[s] == '\\' || exe[s] == '/')
