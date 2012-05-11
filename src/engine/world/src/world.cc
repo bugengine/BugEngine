@@ -19,29 +19,10 @@ World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
 ,   m_freeEntityId(s_defaultSlot)
-,   m_lastEntityId(s_defaultSlot)
-,   m_allocator(SystemAllocator::Block64kb, 256)
+,   m_allocator16k(SystemAllocator::Block64kb, 2048)
+,   m_allocator64k(SystemAllocator::Block64kb, 512)
+,   m_entityBuffers(gameArena())
 {
-    u8* memory[55];
-    memory[0] = (u8*)m_allocator.blockAlloc();
-    *memory[0] = 1;
-    memory[1] = (u8*)m_allocator.blockAlloc();
-    *memory[1] = 1;
-    memory[2] = (u8*)m_allocator.blockAlloc();
-    *memory[2] = 1;
-    memory[3] = (u8*)m_allocator.blockAlloc();
-    *memory[3] = 1;
-    memory[4] = (u8*)m_allocator.blockAlloc();
-    *memory[4] = 1;
-
-    m_allocator.blockFree(memory[0]);
-    memory[0] = (u8*)m_allocator.blockAlloc();
-    *memory[0] = 1;
-    m_allocator.blockFree(memory[2]);
-    m_allocator.blockFree(memory[3]);
-    m_allocator.blockFree(memory[1]);
-    m_allocator.blockFree(memory[0]);
-    m_allocator.blockFree(memory[4]);
 }
 
 World::~World()
@@ -57,8 +38,31 @@ Entity World::spawn()
 {
     Entity e = m_freeEntityId;
 
+    if (e.block >= m_entityBuffers.size())
+    {
+        be_assert(e.block == m_entityBuffers.size(), "mismatch in the entity buffer!");
+        Entity* newBuffer = static_cast<Entity*>(m_allocator64k.blockAlloc());
+        size_t entityCount = m_allocator64k.blockSize()/sizeof(Entity);
+        for (size_t i = 0; i < entityCount-1; ++i)
+        {
+            newBuffer[i].block = e.block;
+            newBuffer[i].index = i+1;
+        }
+        newBuffer[entityCount-1].block = e.block+1;
+        newBuffer[entityCount-1].index = 0;
+    }
+
+    m_freeEntityId = m_entityBuffers[e.block][e.index];
+    ++ m_entityCount;
     return e;
 }
 
+
+void World::unspawn(Entity e)
+{
+    m_entityBuffers[e.block][e.index] = m_freeEntityId;
+    m_freeEntityId = e;
+    -- m_entityCount;
+}
 }}
 
