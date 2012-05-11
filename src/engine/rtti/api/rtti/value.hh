@@ -114,6 +114,11 @@ public:
 
     inline Value operator[](const istring& name);
     inline Value operator()(Value params[], u32 paramCount);
+    
+    inline bool isA(const Type& type) const
+    {
+        return m_type.isA(type);
+    }
 };
 
 }}

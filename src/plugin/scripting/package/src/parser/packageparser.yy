@@ -63,7 +63,7 @@ ref<Object> s_currentObject;
 %}
 
 %token  TOK_ID
-%token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN
+%token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN VAL_FILENAME
 
 %token  KW_import KW_plugin KW_namespace
 
@@ -71,6 +71,7 @@ ref<Object> s_currentObject;
 %type   <iValue>    VAL_INTEGER
 %type   <fValue>    VAL_FLOAT
 %type   <sValue>    VAL_STRING
+%type   <sValue>    VAL_FILENAME
 %type   <sValue>    TOK_ID
 %type   <sValue>    fullname
 %type   <value>     value
@@ -209,6 +210,13 @@ value:
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<StringValue>::create(packageBuilderArena(), $1));
+            free($1);
+        }
+    |
+        VAL_FILENAME
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<FileValue>::create(packageBuilderArena(), ((BuildContext*)param)->folder, $1));
             free($1);
         }
     ;

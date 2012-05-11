@@ -16,8 +16,9 @@ static i_u32 s_useCount = 0;
 namespace BugEngine { namespace PackageBuilder
 {
 
-BuildContext::BuildContext(const Allocator::Block<u8>& buffer)
+BuildContext::BuildContext(const Allocator::Block<u8>& buffer, ref<Folder> folder)
     :   result(ref<Nodes::Package>::create(packageBuilderArena()))
+    ,   folder(folder)
 {
     be_assert(s_useCount++ == 0, "non reentrant parser used by two threads");
     g_buffer = &buffer;

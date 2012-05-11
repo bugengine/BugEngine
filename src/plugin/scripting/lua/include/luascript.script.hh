@@ -7,18 +7,18 @@
 #include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 
-namespace BugEngine { namespace Lua
+namespace BugEngine
 {
 
 class LuaScript : public Script
 {
     friend class PackageLoader;
 published:
-    LuaScript(be_tag(EditHint::Extension(".lua")) ref<const File> file);
+    LuaScript(be_tag(EditHint::Extension(".lua")) weak<const File> script);
     ~LuaScript();
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif

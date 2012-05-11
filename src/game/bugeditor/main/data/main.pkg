@@ -1,4 +1,5 @@
 plugin graphics.3d;
+plugin scripting.lua;
 
 window = graphics.3d.RenderWindow
 (
@@ -15,3 +16,7 @@ node = graphics.3d.RenderScene
     world = world;
 )
 
+luascript = scripting.lua.LuaScript
+(
+	script = <main.lua>;
+)

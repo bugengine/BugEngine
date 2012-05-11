@@ -6,20 +6,25 @@
 /*****************************************************************************/
 #include    <package/nodes/package.hh>
 
-namespace BugEngine { namespace PackageBuilder
+namespace BugEngine
+{
+namespace PackageBuilder
 {
 
 class PackageBuilder : public minitl::pointer
 {
     BE_NOCOPY(PackageBuilder);
+private:
+    ref<Folder> m_dataFolder;
 public:
-    PackageBuilder();
+    PackageBuilder(ref<Folder> dataFolder);
     ~PackageBuilder();
 public:
     ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer);
 };
 
-}}
+}
+}
 
 /*****************************************************************************/
 #endif

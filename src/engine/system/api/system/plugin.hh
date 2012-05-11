@@ -15,10 +15,13 @@ namespace RTTI
 }
 
 class ResourceManager;
+class Folder;
+
 struct be_api(SYSTEM) PluginContext
 {
     weak<ResourceManager>   resourceManager;
-    PluginContext(weak<ResourceManager> manager);
+    ref<Folder>             dataFolder;
+    PluginContext(weak<ResourceManager> manager, ref<Folder> dataFolder);
 };
 
 template< typename Interface >

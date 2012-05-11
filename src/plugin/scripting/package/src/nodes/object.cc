@@ -41,7 +41,7 @@ void Object::setMethod(ref<Reference> reference)
     {
         static const istring callName("?call");
         RTTI::Value call = v[callName];
-        if (call && be_typeid<const RTTI::Method* const>::type() <= call.type())
+        if (call && call.isA(be_typeid<const RTTI::Method* const>::type()))
         {
             m_method = call.as<const RTTI::Method* const>();
             if (m_method)

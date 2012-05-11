@@ -116,7 +116,7 @@ class module:
 		if os.path.isdir(os.path.join(self.root, 'api')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'api'), '', 0, self.platforms, self.archs), 'api')
 		if os.path.isdir(os.path.join(self.root, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', 1, self.platforms, self.archs, sourcelist), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', 1, self.platforms, self.archs, sourcelist, True), 'data')
 		if os.path.isdir(os.path.join(self.root, 'src')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'src'), '', 1, self.platforms, self.archs, sourcelist), 'src')
 
@@ -140,7 +140,7 @@ class module:
 				if os.path.isdir(os.path.join(extraroot, 'src')):
 					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'src'), '', 1, [platform], self.archs, sourcelist), 'src')
 				if os.path.isdir(os.path.join(extraroot, 'data')):
-					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', 1, [platform], self.archs, sourcelist), 'src')
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', 1, [platform], self.archs, sourcelist, True), 'src')
 				if pdir.directories or pdir.files:
 					platformsdirectory.addDirectory(pdir, platform)
 					pdir.prefix = os.path.join(platform, category, name.replace('.', '/'))
@@ -275,7 +275,7 @@ class module:
 			self.tasks[variant]		= task
 		return self.tasks[variant]
 
-	def scandir(self, path, local, process, platforms, archs, sourcelist = []):
+	def scandir(self, path, local, process, platforms, archs, sourcelist = [], deploy_all=False):
 		result = sources.directory()
 
 		for file in os.listdir(path):
@@ -290,12 +290,12 @@ class module:
 						for pname, pgroup in mak.allplatforms.items():
 							if p in pgroup and pname in platforms:
 								newplatforms.append(pname)
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, newplatforms, archs, sourcelist), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file), process, newplatforms, archs, sourcelist, deploy_all), file )
 				elif file[0:5] == 'arch=':
 					newarchs = [a for a in file[5:].split(',') if a in archs]
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, newarchs, sourcelist), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, newarchs, sourcelist, deploy_all), file )
 				else:
-					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs, sourcelist), file )
+					result.addDirectory( self.scandir(os.path.join(path,file), os.path.join(local,file),process, platforms, archs, sourcelist, deploy_all), file )
 			else:
 				filename, ext = os.path.splitext(file)
 				fileplatforms = platforms
@@ -350,7 +350,7 @@ class module:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 				elif ext == '.plist':
 					result.addFile(sources.deployedsource(file, '', 'runbin', fileplatforms, filearchs, doprocess))
-				elif ext in ['.pkg']:
+				elif deploy_all:
 					result.addFile(sources.deployedsource(file, '', 'data', fileplatforms, filearchs, doprocess))
 		return result
 

@@ -13,10 +13,11 @@ namespace BugEngine { namespace Editor
 
 Editor::Editor(const PluginContext& /*context*/)
     :   m_resourceManager(scoped<ResourceManager>::create(gameArena()))
-    ,   m_pluginContext(m_resourceManager)
+    ,   m_dataFolder(ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory()))
+    ,   m_pluginContext(m_resourceManager, m_dataFolder)
     ,   m_renderer("graphics.nullrender", m_pluginContext)
     ,   m_packageManager("scripting.package", m_pluginContext)
-    ,   m_dataFolder(ref<DiskFolder>::create(gameArena(), Environment::getEnvironment().getDataDirectory()))
+    ,   m_luaScripting("scripting.lua", m_pluginContext)
     ,   m_mainPackage(ref<Package>::create(gameArena(), m_dataFolder->openFile(istring("main.pkg"))))
     ,   m_resourceTask(ref< Task< MethodCaller<ResourceManager, &ResourceManager::updateTickets> > >::create(taskArena(), "resource", color32(0,255,0), MethodCaller<ResourceManager, &ResourceManager::updateTickets>(m_resourceManager)))
 {

@@ -57,12 +57,25 @@ Entity World::spawn()
     return e;
 }
 
-
 void World::unspawn(Entity e)
 {
     m_entityBuffers[e.block][e.index] = m_freeEntityId;
     m_freeEntityId = e;
     -- m_entityCount;
 }
+
+void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass)
+{
+    be_forceuse(e);
+    be_forceuse(component);
+    be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
+}
+
+void World::addComponent(Entity e, RTTI::Value& component)
+{
+    be_assert(be_typeid<const Component&>::type() <= component.type(), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
+    addComponent(e, component.as<const Component&>(), component.type().metaclass);
+}
+
 }}
 

@@ -8,8 +8,8 @@ namespace BugEngine
 {
 
 ResourceManager::ResourceManager()
-    :   m_loaders(gameArena())
-    ,   m_tickets(gameArena())
+: m_loaders(gameArena())
+, m_tickets(gameArena())
 {
 }
 
@@ -23,7 +23,7 @@ void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<IResourceLoa
     {
         be_assert_recover(it->loader != loader, "registering twice the same loader for class %s" | classinfo->name, return);
     }
-    be_info("registering loader for type %s"|classinfo->name);
+    be_info("registering loader for type %s" | classinfo->name);
     LoaderInfo loaderInfo;
     loaderInfo.classinfo = classinfo;
     loaderInfo.loader = loader;
@@ -32,11 +32,11 @@ void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<IResourceLoa
 
 void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader)
 {
-    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); )
+    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end();)
     {
         if (it->classinfo == classinfo && it->loader == loader)
         {
-            be_info("unregistering loader for type %s"|classinfo->name);
+            be_info("unregistering loader for type %s" | classinfo->name);
             it = m_loaders.erase(it);
             return;
         }

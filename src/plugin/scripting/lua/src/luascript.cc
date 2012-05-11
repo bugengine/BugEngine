@@ -5,10 +5,10 @@
 
 #include    <luascript.script.hh>
 
-namespace BugEngine { namespace Lua
+namespace BugEngine
 {
 
-LuaScript::LuaScript(ref<const File> file)
+LuaScript::LuaScript(weak<const File> file)
     :   Script(file)
 {
 }
@@ -17,4 +17,4 @@ LuaScript::~LuaScript()
 {
 }
 
-}}
+}

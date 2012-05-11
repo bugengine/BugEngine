@@ -5,6 +5,12 @@
 #define BE_PACKAGE_NODES_VALUE_HH_
 /*****************************************************************************/
 
+namespace BugEngine
+{
+class File;
+class Folder;
+}
+
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
@@ -80,6 +86,19 @@ private:
 public:
     StringValue(const char* value);
     ~StringValue();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class FileValue : public Value
+{
+private:
+    weak<const File> m_value;
+public:
+    FileValue(weak<Folder> folder, const char* value);
+    ~FileValue();
 
     virtual bool        isCompatible(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
