@@ -154,6 +154,16 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		self.args = args
 		self.attributes = set()
 
+
+	def method_operator_cast(self, keyword, type, lparen, args, rparen):
+		"%reduce OPERATOR Type LPAREN ArgList RPAREN"
+		self.id = 'operator %s'%type.value
+		self.name = '#%s'%('_'.join(type.value.split()).replace('*', 'ptr').replace('&', 'ref'))
+		self.return_type = type.value
+		self.line = type.lineno
+		self.args = args
+		self.attributes = set()
+
 	def method_constructor(self, type, lparen, args, rparen):
 		"%reduce Type LPAREN ArgList RPAREN"
 		self.id = '?new'
@@ -250,6 +260,7 @@ class Method(cpp.yacc.Nonterm):
 			decl = fullname.replace(':', '_')
 			tags = self.tags.dump(file, instances, decl)
 			prettyname = self.value.name.replace("?", "_")
+			prettyname = prettyname.replace("#", "_")
 			new_overload = "s_%s_%s_%d" % (decl, prettyname, overload_index)
 			args,param_types = self.value.args.dump(
 					file,
