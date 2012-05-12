@@ -9,7 +9,9 @@
 #include    <rtti/engine/methodinfo.script.hh>
 
 
-namespace BugEngine { namespace Lua
+namespace BugEngine
+{
+namespace Lua
 {
 
 static Allocator& luaArena()
@@ -19,30 +21,30 @@ static Allocator& luaArena()
 
 
 const luaL_Reg Context::s_valueMetaTable[] = {
-    {"__gc",        Context::valueGC},
-    {"__tostring",  Context::valueToString},
-    {"__index",     Context::valueGet},
-    {"__call",      Context::valueCall},
+    {"__gc", Context::valueGC},
+    {"__tostring", Context::valueToString},
+    {"__index", Context::valueGet},
+    {"__call", Context::valueCall},
     {0, 0}
 };
 
-static int luaPrint (lua_State *L)
+static int luaPrint(lua_State *L)
 {
-    int n = lua_gettop(L);  /* number of arguments */
+    int n = lua_gettop(L); /* number of arguments */
     int i;
     lua_getglobal(L, "tostring");
-    for (i=1; i<=n; i++)
+    for (i = 1; i <= n; i++)
     {
         const char *s;
-        lua_pushvalue(L, -1);  /* function to be called */
-        lua_pushvalue(L, i);   /* value to print */
+        lua_pushvalue(L, -1); /* function to be called */
+        lua_pushvalue(L, i); /* value to print */
         lua_call(L, 1, 1);
-        s = lua_tostring(L, -1);  /* get result */
+        s = lua_tostring(L, -1); /* get result */
         if (s == NULL)
             return luaL_error(L, LUA_QL("tostring") " must return a string to "
-                                 LUA_QL("print"));
+                              LUA_QL("print"));
         lua_Debug ar;
-        if (lua_getstack (L, 1, &ar))
+        if (lua_getstack(L, 1, &ar))
         {
             lua_getinfo(L, "Snl", &ar);
             Logger::root()->log(logInfo, ar.source, ar.currentline, s);
@@ -51,15 +53,14 @@ static int luaPrint (lua_State *L)
         {
             be_info(s);
         }
-        lua_pop(L, 1);  /* pop result */
+        lua_pop(L, 1); /* pop result */
     }
     return 0;
 }
 static const luaL_Reg base_funcs[] = {
-  {"print", luaPrint},
-  {NULL, NULL}
+    {"print", luaPrint},
+    {NULL, NULL}
 };
-
 
 void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 {
@@ -82,8 +83,8 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 }
 
 Context::Context(const PluginContext& context)
-:   ScriptEngine<LuaScript>(luaArena(), context.resourceManager)
-,   m_state(lua_newstate(&Context::luaAlloc, 0))
+: ScriptEngine<LuaScript>(luaArena(), context.resourceManager)
+, m_state(lua_newstate(&Context::luaAlloc, 0))
 {
     luaopen_base(m_state);
     luaopen_table(m_state);
@@ -103,14 +104,13 @@ Context::~Context()
 void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block<u8>& block)
 {
     int result;
-    result = luaL_loadbuffer(m_state, (const char *)block.data(), be_checked_numcast<size_t>(block.count()), 0);
+    result = luaL_loadbuffer(m_state, (const char *) block.data(), be_checked_numcast<size_t > (block.count()), 0);
     if (result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
     be_assert(result == 0, lua_tostring(m_state, -1));
 }
-
 
 void Context::push(lua_State* state, const RTTI::Value& v)
 {
@@ -119,11 +119,12 @@ void Context::push(lua_State* state, const RTTI::Value& v)
     {
     }
 
-    void* userdata = lua_newuserdata(state, sizeof(RTTI::Value));
+    void* userdata = lua_newuserdata(state, sizeof (RTTI::Value));
     new(userdata) RTTI::Value(v);
     lua_getglobal(state, "bugvalue");
     lua_setmetatable(state, -2);
 }
+
 /*
 void Context::push(lua_State* state, const RTTI::Value& v)
 {
@@ -163,33 +164,33 @@ RTTI::Value Context::get(lua_State *state, int index)
     switch (t)
     {
     case LUA_TSTRING:
-        {
-            return RTTI::Value(); //std::string(lua_tostring(state, index))
-        }
+    {
+        return RTTI::Value(); //std::string(lua_tostring(state, index))
+    }
     case LUA_TBOOLEAN:
-        {
-            return RTTI::Value(); //lua_toboolean(state, index)?true:false);
-        }
+    {
+        return RTTI::Value(lua_toboolean(state, index)?true:false);
+    }
     case LUA_TNUMBER:
-        {
-            return RTTI::Value(); //double(lua_tonumber(state, index)));
-        }
+    {
+        return RTTI::Value(); //double(lua_tonumber(state, index)));
+    }
     case LUA_TUSERDATA:
+    {
+        lua_getmetatable(state, index);
+        lua_getglobal(state, "bugvalue");
+        if (lua_rawequal(state, -1, -2))
         {
-            lua_getmetatable(state, index);
-            lua_getglobal(state, "bugvalue");
-            if (lua_rawequal(state, -1, -2))
-            {
-                lua_pop(state, 2);
-                return *(RTTI::Value*)lua_touserdata(state, index);
-            }
-            else
-            {
-                lua_pop(state, 2);
-                be_notreached();
-                return RTTI::Value();
-            }
+            lua_pop(state, 2);
+            return *(RTTI::Value*)lua_touserdata(state, index);
         }
+        else
+        {
+            lua_pop(state, 2);
+            be_notreached();
+            return RTTI::Value();
+        }
+    }
     default:
         return RTTI::Value();
     }
@@ -210,17 +211,17 @@ int Context::valueToString(lua_State *state)
         raw<const RTTI::Class> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
         {
-            lua_pushfstring(state, "%s", userdata->as<const inamespace>().str().c_str());
+            lua_pushfstring(state, "%s", userdata->as<const inamespace > ().str().c_str());
             return 1;
         }
         if (metaclass == be_typeid< istring >::klass())
         {
-            lua_pushfstring(state, "%s", userdata->as<const istring>().c_str());
+            lua_pushfstring(state, "%s", userdata->as<const istring > ().c_str());
             return 1;
         }
         if (metaclass == be_typeid< ifilename >::klass())
         {
-            lua_pushfstring(state, "%s", userdata->as<const ifilename>().str().c_str());
+            lua_pushfstring(state, "%s", userdata->as<const ifilename > ().str().c_str());
             return 1;
         }
     }
@@ -249,18 +250,18 @@ int Context::valueCall(lua_State *state)
 
     void* v = 0;
     RTTI::Value* values = 0;
-    v = malloca(be_align(sizeof(RTTI::Value), be_alignof(RTTI::Value))*(top-1));
+    v = malloca(be_align(sizeof (RTTI::Value), be_alignof(RTTI::Value))*(top - 1));
     values = (RTTI::Value*)v;
 
     for (int i = 1; i < top; i++)
     {
-        new((void*)(&values[i])) RTTI::Value(get(state, i));
+        new((void*) (&values[i])) RTTI::Value(get(state, i));
     }
 
-    RTTI::Value result = (*userdata)(values, top-1);
+    RTTI::Value result = (*userdata)(values, top - 1);
 
-    for (int i = top-1; i > 0; --i)
-        values[i-1].~Value();
+    for (int i = top - 1; i > 0; --i)
+        values[i - 1].~Value();
     freea(v);
 
     if (result)
@@ -279,29 +280,29 @@ void Context::printStack(lua_State* l)
     int i;
     int top = lua_gettop(l);
 
-    be_debug("total in stack %d\n"|top);
+    be_debug("total in stack %d\n" | top);
 
     for (i = 1; i <= top; i++)
     {
         int t = lua_type(l, -i);
-        be_debug("%d  %d  " | -i | (top-i+1));
+        be_debug("%d  %d  " | -i | (top - i + 1));
         switch (t)
         {
         case LUA_TSTRING:
             be_debug("string: '%s'\n" | lua_tostring(l, -i));
-            break;  
+            break;
         case LUA_TBOOLEAN:
-            be_debug("boolean %s\n" |lua_toboolean(l, -i) ? "true" : "false");
-            break;  
+            be_debug("boolean %s\n" | lua_toboolean(l, -i) ? "true" : "false");
+            break;
         case LUA_TNUMBER:
             be_debug("number: %g\n" | lua_tonumber(l, -i));
             break;
         case LUA_TUSERDATA:
-            {
-                RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(l, -i);
-                be_forceuse(userdata);
-                be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
-            }
+        {
+            RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(l, -i);
+            be_forceuse(userdata);
+            be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
+        }
             break;
         default:
             be_debug("%s\n" | lua_typename(l, t));
@@ -310,4 +311,5 @@ void Context::printStack(lua_State* l)
     }
 }
 
-}}
+}
+}

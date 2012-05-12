@@ -190,11 +190,16 @@ class Exprs(cpp.yacc.Nonterm):
 	def dump(self, file, instances, namespace, name, owner, parent_name, parent_value):
 		if parent_name:
 			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
+			cast_ptr = "be_typeid< %s >::klass()->cast"%parent_name
 			property_ptr = "be_typeid< %s >::klass()->properties"%parent_name
 			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
 		else:
-			o = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
+			if name:
+				o = "BugEngine::be_%s_Namespace_%s()"%(self.parser.plugin, "_".join(name))
+			else:
+				o = "BugEngine::be_%s_Namespace()"%self.parser.plugin
 			method_ptr = "%s->methods"%o
+			cast_ptr = "{0}"
 			property_ptr = "{0}"
 			object_ptr = "%s->objects"%o
 		constructor_ptr = "{0}"
@@ -221,17 +226,26 @@ class Exprs(cpp.yacc.Nonterm):
 
 			decl = '_'.join(name)
 			prettyname = m.replace("?", "_")
+			prettyname = prettyname.replace("#", "_")
 
+			if m[0] == '#':
+				prev = cast_ptr
+			else:
+				prev = method_ptr
 			file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (decl, prettyname))
 			file.write("    {\n")
 			file.write("        \"%s\",\n" % m)
-			file.write("        %s,\n" % method_ptr)
+			file.write("        %s,\n" % prev)
 			file.write("        {&s_method_%s_%s},\n" % (decl, prettyname))
 			file.write("        {%s}\n" % overload_ptr)
 			file.write("    };\n")
 			if m == "?new":
 				constructor_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
-			method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
-		return object_ptr, method_ptr, constructor_ptr, property_ptr
+				method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+			elif m[0] == '#':
+				cast_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+			else:
+				method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+		return object_ptr, method_ptr, constructor_ptr, cast_ptr, property_ptr
 
 

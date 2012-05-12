@@ -36,10 +36,10 @@ class Namespace(cpp.yacc.Nonterm):
 
 		owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
 		self.exprs.dumpObjects(file, instances, namespace, name, "")
-		object_ptr, method_ptr, constructor, variables = self.exprs.dump(file, instances, namespace, name, "", "", True)
-		if object_ptr != '%s->objects'%owner:
+		object_ptr, method_ptr, constructor, cast, variables = self.exprs.dump(file, instances, namespace, name, "", "", True)
+		if object_ptr != 'BugEngine::%s->objects'%owner:
 			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( %s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
-		if method_ptr != '%s->methods'%owner:
+		if method_ptr != 'BugEngine::%s->methods'%owner:
 			file.write("const ::BugEngine::RTTI::Method* %s_mptr = ( %s->methods.set(%s) );\n" % (method_ptr[2:-1], owner, method_ptr[1:-1]))
 		file.write("\n}\n")
 		return "", "{0}"

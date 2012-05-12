@@ -160,17 +160,17 @@ class ClassDef(cpp.yacc.Nonterm):
 
 		tag_ptr = self.tags.dump(file, instances, decl)
 		if self.members:
-			objects,methods,constructor,properties = self.members.dump(file, instances, namespace, name, fullname, self.inherits, self.value)
+			objects,methods,constructor,cast,properties = self.members.dump(file, instances, namespace, name, fullname, self.inherits, self.value)
 		else:
-			objects = methods = constructor = properties = "{0}"
+			objects = methods = constructor = cast = properties = "{0}"
 
 		file.write("#line %d\n"%self.lineno)
 		if self.parser.useMethods:
 			file.write("static ")
 		file.write("::BugEngine::RTTI::Class s_%s =\\\n" % (decl))
 		file.write("    {\\\n")
-		file.write("        inamespace(\"%s\"),\\\n" % (prettyname))
-		file.write("        be_typeid< %s >::klass(),\\\n" % (self.inherits))
+		file.write("        ::BugEngine::inamespace(\"%s\"),\\\n" % (prettyname))
+		file.write("        ::BugEngine::be_typeid< %s >::klass(),\\\n" % (self.inherits))
 		file.write("        be_checked_numcast<u32>(sizeof(%s)),\\\n" % fullname)
 		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\\\n" % (self.inherits, fullname))
 		file.write("        %s,\\\n" % (tag_ptr))
@@ -178,6 +178,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("        %s,\\\n" % (methods))
 		file.write("        %s,\\\n" % (objects))
 		file.write("        %s,\\\n" % (constructor))
+		file.write("        %s,\\\n" % (cast))
 		if self.value:
 			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\\\n" % fullname)
 			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\\\n" % fullname)
