@@ -31,4 +31,12 @@ BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
     return ci;
 }
 
+template< >
+BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::format<> >::klass()
+{
+    static const RTTI::Class s_format = { "format", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor< sizeof(minitl::format<>) >, &RTTI::nulldestructor };
+    raw<const RTTI::Class> ci = {&s_format};
+    return ci;
+}
+
 }
