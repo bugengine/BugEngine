@@ -243,12 +243,6 @@ class Keyword(cpp.yacc.Nonterm):
 	def kw_int(self, kw):
 		"%reduce INT"
 		self.value = kw.value
-	def kw_float(self, kw):
-		"%reduce FLOAT"
-		self.value = kw.value
-	def kw_double(self, kw):
-		"%reduce DOUBLE"
-		self.value = kw.value
 	def kw_explicit(self, kw):
 		"%reduce EXPLICIT"
 		self.value = kw.value
