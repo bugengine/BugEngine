@@ -15,6 +15,7 @@ namespace BugEngine { namespace World
 
 class State;
 class Storage;
+class Rule;
 struct Component;
 
 class be_api(WORLD) World : public Resource
@@ -28,10 +29,10 @@ private:
     SystemAllocator         m_allocator64k;
     minitl::vector<Entity*> m_entityBuffers;
     i_u32                   m_entityCount;
+private:
+    void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 public:
     weak<ITask> updateWorldTask() const;
-public:
-    void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 published:
     Entity spawn();
     void unspawn(Entity e);
