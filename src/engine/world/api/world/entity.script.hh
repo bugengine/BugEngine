@@ -8,15 +8,23 @@
 namespace BugEngine { namespace World
 {
 
-struct be_api(WORLD) Entity
+union be_api(WORLD) Entity
 {
 published:
-    u16 block;
-    u16 index;
+    struct Index
+    {
+        u16 world;
+        u16 block;
+        u32 offset;
+    };
+published:
+    Index   index;
+    u64     id;
 
-    bool operator ==(const Entity& other) const { return block == other.block && index == other.index; }
-    bool operator !=(const Entity& other) const { return block != other.block || index != other.index; }
-    bool operator <(const Entity& other) const  { return block < other.block || (block == other.block && index < other.index); }
+
+    bool operator ==(const Entity& other) const { return id == other.id; }
+    bool operator !=(const Entity& other) const { return id != other.id; }
+    bool operator < (const Entity& other) const { return id < other.id; }
 };
 
 }}
