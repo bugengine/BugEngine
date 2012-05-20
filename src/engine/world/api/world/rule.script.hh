@@ -10,11 +10,15 @@
 namespace BugEngine { namespace World
 {
 
+class World;
+
 class be_api(WORLD) Rule : public minitl::refcountable
 {
+    friend class World;
 protected:
     Rule();
     ~Rule();
+private:
 public:
     virtual weak<ITask> updateTask() const = 0;
 };
@@ -24,4 +28,3 @@ public:
 
 /*****************************************************************************/
 #endif
-

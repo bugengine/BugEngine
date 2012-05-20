@@ -22,13 +22,15 @@ class be_api(WORLD) World : public Resource
 {
     friend class Storage;
 private:
-    ref<ITask>              m_task;
-    scoped<State>           m_emptyEntityState;
-    Entity                  m_freeEntityId;
-    SystemAllocator         m_allocator16k;
-    SystemAllocator         m_allocator64k;
-    minitl::vector<Entity*> m_entityBuffers;
-    i_u32                   m_entityCount;
+    ref<ITask>                          m_task;
+    minitl::vector< weak<const Rule> >  m_rules;
+    scoped<State>                       m_emptyEntityState;
+    Entity                              m_freeEntityId;
+    SystemAllocator                     m_allocator16k;
+    SystemAllocator                     m_allocator64k;
+    minitl::vector<Entity*>             m_entityBuffers;
+    i_u32                               m_entityCount;
+    u16                                 m_worldIndex;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 public:

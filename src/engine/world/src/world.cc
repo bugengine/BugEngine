@@ -13,16 +13,20 @@ BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 namespace BugEngine { namespace World
 {
 
-static const Entity s_defaultSlot = { 0, 0 };
+static const Entity s_defaultSlot = { {0, 0, 0} };
+static i_u16 s_worldCount = 0;
 
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
+,   m_rules(gameArena())
 ,   m_emptyEntityState(scoped<State>::create(gameArena()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_allocator16k(SystemAllocator::Block64kb, 2048)
 ,   m_allocator64k(SystemAllocator::Block64kb, 512)
 ,   m_entityBuffers(gameArena())
+,   m_worldIndex(s_worldCount++)
 {
+    m_freeEntityId.index.world = m_worldIndex;
 }
 
 World::~World()
@@ -37,42 +41,48 @@ weak<ITask> World::updateWorldTask() const
 Entity World::spawn()
 {
     Entity e = m_freeEntityId;
+    be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
 
-    if (e.block >= m_entityBuffers.size())
+    if (e.index.block >= m_entityBuffers.size())
     {
-        be_assert(e.block == m_entityBuffers.size(), "mismatch in the entity buffer!");
+        be_assert(e.index.block == m_entityBuffers.size(), "mismatch in the entity buffer!");
         Entity* newBuffer = static_cast<Entity*>(m_allocator64k.blockAlloc());
         size_t entityCount = m_allocator64k.blockSize()/sizeof(Entity);
         for (size_t i = 0; i < entityCount-1; ++i)
         {
-            newBuffer[i].block = e.block;
-            newBuffer[i].index = i+1;
+            newBuffer[i].index.world = m_worldIndex;
+            newBuffer[i].index.block = e.index.block;
+            newBuffer[i].index.offset = i+1;
         }
-        newBuffer[entityCount-1].block = e.block+1;
-        newBuffer[entityCount-1].index = 0;
+        newBuffer[entityCount-1].index.world = m_worldIndex;
+        newBuffer[entityCount-1].index.block = e.index.block+1;
+        newBuffer[entityCount-1].index.offset = 0;
     }
 
-    m_freeEntityId = m_entityBuffers[e.block][e.index];
+    m_freeEntityId = m_entityBuffers[e.index.block][e.index.offset];
     ++ m_entityCount;
     return e;
 }
 
 void World::unspawn(Entity e)
 {
-    m_entityBuffers[e.block][e.index] = m_freeEntityId;
+    be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
+    m_entityBuffers[e.index.block][e.index.offset] = m_freeEntityId;
     m_freeEntityId = e;
     -- m_entityCount;
 }
 
 void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass)
 {
+    be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
+    be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
     be_forceuse(e);
     be_forceuse(component);
-    be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
 }
 
 void World::addComponent(Entity e, RTTI::Value& component)
 {
+    be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
     be_assert(be_typeid<const Component&>::type() <= component.type(), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
 }

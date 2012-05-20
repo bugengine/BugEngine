@@ -123,7 +123,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.lineno = union.lineno
 		self.inherits = 'void'
 		self.value = True
-		self.members = members.members
+		self.members = members.members[4]
 
 	def predecl(self, file, instances, name, member):
 		name = name+[self.name]
