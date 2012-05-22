@@ -89,5 +89,15 @@ void World::addComponent(Entity e, RTTI::Value& component)
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
 }
 
+void World::addRule(weak<const Rule> rule)
+{
+    be_forceuse(rule);
+}
+
+void World::removeRule(weak<const Rule> rule)
+{
+    be_forceuse(rule);
+}
+
 }}
 

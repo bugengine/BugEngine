@@ -21,6 +21,7 @@ struct Component;
 class be_api(WORLD) World : public Resource
 {
     friend class Storage;
+    friend class Rule;
 private:
     ref<ITask>                          m_task;
     minitl::vector< weak<const Rule> >  m_rules;
@@ -33,6 +34,8 @@ private:
     u16                                 m_worldIndex;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
+    void addRule(weak<const Rule> rule);
+    void removeRule(weak<const Rule> rule);
 public:
     weak<ITask> updateWorldTask() const;
 published:
