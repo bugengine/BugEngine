@@ -176,6 +176,16 @@ param:
             free($1);
             free($3);
         }
+    |
+        TOK_ID ':'  TOK_ID '=' value ';'
+        {
+            ref<Parameter> parameter = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($3), *$5);
+            s_currentObject->addParameter(parameter);
+            $5->~ref();
+            free($1);
+            free($3);
+            free($5);
+        }
     ;
 
 value:
