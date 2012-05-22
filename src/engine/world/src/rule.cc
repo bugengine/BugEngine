@@ -3,16 +3,20 @@
 
 #include    <world/stdafx.h>
 #include    <world/rule.script.hh>
+#include    <world/world.script.hh>
 
 namespace BugEngine { namespace World
 {
 
-Rule::Rule()
+Rule::Rule(weak<World> world)
+    :   m_world(world)
 {
+    m_world->addRule(this);
 }
 
 Rule::~Rule()
 {
+    m_world->removeRule(this);
 }
 
 }}
