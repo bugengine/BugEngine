@@ -24,7 +24,7 @@ World::World()
 ,   m_allocator16k(SystemAllocator::Block64kb, 2048)
 ,   m_allocator64k(SystemAllocator::Block64kb, 512)
 ,   m_entityBuffers(gameArena())
-,   m_worldIndex(s_worldCount++)
+,   m_worldIndex(++s_worldCount)
 {
     m_freeEntityId.index.world = m_worldIndex;
 }
@@ -41,7 +41,7 @@ weak<ITask> World::updateWorldTask() const
 Entity World::spawn()
 {
     Entity e = m_freeEntityId;
-    be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
+    be_assert(e.index.world == 0, "entity (%d) already in use" | e.index.world);
 
     if (e.index.block >= m_entityBuffers.size())
     {
@@ -50,16 +50,17 @@ Entity World::spawn()
         size_t entityCount = m_allocator64k.blockSize()/sizeof(Entity);
         for (size_t i = 0; i < entityCount-1; ++i)
         {
-            newBuffer[i].index.world = m_worldIndex;
+            newBuffer[i].index.world = 0;
             newBuffer[i].index.block = e.index.block;
             newBuffer[i].index.offset = i+1;
         }
-        newBuffer[entityCount-1].index.world = m_worldIndex;
+        newBuffer[entityCount-1].index.world = 0;
         newBuffer[entityCount-1].index.block = e.index.block+1;
         newBuffer[entityCount-1].index.offset = 0;
     }
 
     m_freeEntityId = m_entityBuffers[e.index.block][e.index.offset];
+    e.index.world = m_worldIndex;
     ++ m_entityCount;
     return e;
 }
@@ -68,6 +69,7 @@ void World::unspawn(Entity e)
 {
     be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
     m_entityBuffers[e.index.block][e.index.offset] = m_freeEntityId;
+    e.index.world = 0;
     m_freeEntityId = e;
     -- m_entityCount;
 }
