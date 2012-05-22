@@ -56,7 +56,11 @@ class ExprType(cpp.yacc.Nonterm):
 		self.value = None
 
 	def expr_typedef(self, tags_left, typedef, typedecl, id, tags_right, semi):
-		"%reduce TagsLeft TYPEDEF TypeDecl ID TagsRight SEMI"
+		"%reduce TagsLeft TYPEDEF Type ID TagsRight SEMI"
+		self.value = TypeDef(id.value)
+
+	def expr_typedef_array(self, tags_left, typedef, typedecl, id, lbracket, value, rbracket, tags_right, semi):
+		"%reduce TagsLeft TYPEDEF Type ID LBRACKET Value RBRACKET TagsRight SEMI"
 		self.value = TypeDef(id.value)
 
 	def expr_typedef_method(self, tags_left, typedef, method_ptr, tags_right, semi):
