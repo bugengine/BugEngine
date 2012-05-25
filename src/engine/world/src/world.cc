@@ -16,6 +16,19 @@ namespace BugEngine { namespace World
 static const Entity s_defaultSlot = { {0, 0, 0} };
 static i_u16 s_worldCount = 0;
 
+World::RuleConnection::RuleConnection(weak<World> world, weak<const Rule> rule)
+    :   world(world)
+    ,   rule(rule)
+    ,   start(be_checked_cast<TaskGroup>(world->m_task), rule->updateTask())
+    ,   end(be_checked_cast<TaskGroup>(world->m_task), rule->updateTask())
+    ,   dependencies(gameArena())
+{
+}
+
+World::RuleConnection::~RuleConnection()
+{
+}
+
 World::World()
 :   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
 ,   m_rules(gameArena())
@@ -91,12 +104,20 @@ void World::addComponent(Entity e, RTTI::Value& component)
 
 void World::addRule(weak<const Rule> rule)
 {
-    be_forceuse(rule);
+    m_rules.push_back(RuleConnection(this, rule));
 }
 
 void World::removeRule(weak<const Rule> rule)
 {
-    be_forceuse(rule);
+    for (minitl::vector< RuleConnection >::iterator it = m_rules.begin(); it != m_rules.end(); ++it)
+    {
+        if (it->rule == rule)
+        {
+            m_rules.erase(it);
+            return;
+        }
+    }
+    be_notreached();
 }
 
 }}
