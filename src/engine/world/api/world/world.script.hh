@@ -8,6 +8,7 @@
 #include    <system/resource/resource.script.hh>
 #include    <world/entity.script.hh>
 #include    <core/memory/allocators/system.hh>
+#include    <system/scheduler/task/group.hh>
 
 
 namespace BugEngine { namespace World
@@ -22,9 +23,23 @@ class be_api(WORLD) World : public Resource
 {
     friend class Storage;
     friend class Rule;
+    struct RuleConnection;
+    friend struct RuleConnection;
+private:
+    struct RuleConnection
+    {
+        weak<World> const                                   world;
+        weak<const Rule> const                              rule;
+        TaskGroup::TaskStartConnection const                start;
+        TaskGroup::TaskEndConnection const                  end;
+        minitl::vector< ITask::CallbackConnection > const   dependencies;
+
+        RuleConnection(weak<World> world, weak<const Rule> rule);
+        ~RuleConnection();
+    };
 private:
     ref<ITask>                          m_task;
-    minitl::vector< weak<const Rule> >  m_rules;
+    minitl::vector< RuleConnection >    m_rules;
     scoped<State>                       m_emptyEntityState;
     Entity                              m_freeEntityId;
     SystemAllocator                     m_allocator16k;

@@ -92,7 +92,7 @@ def plugins(bld):
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None
 	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], platforms=['pc'], category='game')
-	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package], platforms=['pc'])
+	bugeditor		= module.game('bugeditor',					[bugeditor.ui, package], platforms=['pc'])
 
 	bld.recurse('mak', name='plugins', once=False)
 
