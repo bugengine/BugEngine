@@ -14,7 +14,7 @@ static const u32 s_parameterMissing = 100;
 
 OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
     :   m_overload(overload)
-    ,   m_params(packageBuilderArena())
+    ,   m_params(Arena::packageBuilder())
     ,   m_score(0)
 {
     for (raw<const RTTIParameter> param = m_overload->params; param; param = param->next)

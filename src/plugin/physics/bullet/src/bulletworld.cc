@@ -4,29 +4,29 @@
 #include   <stdafx.h>
 #include   <bulletworld.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Arena
 {
 
-static Allocator& bulletArena() { return gameArena(); }
+static Allocator& bullet() { return general(); }
 
-}
+}}
 
 namespace BugEngine { namespace Physics { namespace Bullet
 {
 
 static BE_NOINLINE void* allocate(size_t size)
 {
-    return bulletArena().alloc(size, 16);
+    return Arena::bullet().alloc(size, 16);
 }
 
 static BE_NOINLINE void* allocate(size_t size, int align)
 {
-    return bulletArena().alloc(size, align);
+    return Arena::bullet().alloc(size, align);
 }
 
 static BE_NOINLINE void free(void* block)
 {
-    return bulletArena().free(block);
+    return Arena::bullet().free(block);
 }
 
 

@@ -76,18 +76,18 @@ static int __main(int argc, const char *argv[])
     try
 #endif
     {
-        BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::debugArena()));
+        BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::Arena::debug()));
         ref<BugEngine::DiskFolder>::create(
-                BugEngine::gameArena(),
+                BugEngine::Arena::general(),
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
         ref<BugEngine::DiskFolder> home = ref<BugEngine::DiskFolder>::create(
-                BugEngine::gameArena(),
+                BugEngine::Arena::general(),
                 BugEngine::Environment::getEnvironment().getGameHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
-        BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::debugArena(), home->createFile("log")));
+        BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::Arena::debug(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         BugEngine::Plugin<BugEngine::Application> app(BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()), BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home));
         return app->run();

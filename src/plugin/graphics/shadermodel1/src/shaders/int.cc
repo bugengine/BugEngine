@@ -95,7 +95,7 @@ private:
 };
 ref<Int> operator /(weak<const Int> node1, weak<const Int> node2)
 {
-    return ref<IntdivInt>::create(gameArena(), node1, node2);
+    return ref<IntdivInt>::create(Arena::script(), node1, node2);
 }
 
 class IntaddInt : public Int
@@ -127,7 +127,7 @@ private:
 };
 ref<Int> operator +(weak<const Int> node1, weak<const Int> node2)
 {
-    return ref<IntaddInt>::create(gameArena(), node1, node2);
+    return ref<IntaddInt>::create(Arena::script(), node1, node2);
 }
 
 class IntsubInt : public Int
@@ -159,7 +159,7 @@ private:
 };
 ref<Int> operator -(weak<const Int> node1, weak<const Int> node2)
 {
-    return ref<IntsubInt>::create(gameArena(), node1, node2);
+    return ref<IntsubInt>::create(Arena::script(), node1, node2);
 }
 
 
@@ -252,7 +252,7 @@ private:
 };
 ref<Int2> operator /(weak<const Int2> node1, weak<const Int2> node2)
 {
-    return ref<Int2divInt2>::create(gameArena(), node1, node2);
+    return ref<Int2divInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2addInt2 : public Int2
@@ -284,7 +284,7 @@ private:
 };
 ref<Int2> operator +(weak<const Int2> node1, weak<const Int2> node2)
 {
-    return ref<Int2addInt2>::create(gameArena(), node1, node2);
+    return ref<Int2addInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2subInt2 : public Int2
@@ -316,7 +316,7 @@ private:
 };
 ref<Int2> operator -(weak<const Int2> node1, weak<const Int2> node2)
 {
-    return ref<Int2subInt2>::create(gameArena(), node1, node2);
+    return ref<Int2subInt2>::create(Arena::script(), node1, node2);
 }
 
 class IntmulInt2 : public Int2
@@ -348,7 +348,7 @@ private:
 };
 ref<Int2> operator *(weak<const Int> node1, weak<const Int2> node2)
 {
-    return ref<IntmulInt2>::create(gameArena(), node1, node2);
+    return ref<IntmulInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2mulInt : public Int2
@@ -380,7 +380,7 @@ private:
 };
 ref<Int2> operator *(weak<const Int2> node1, weak<const Int> node2)
 {
-    return ref<Int2mulInt>::create(gameArena(), node1, node2);
+    return ref<Int2mulInt>::create(Arena::script(), node1, node2);
 }
 
 class IntdivInt2 : public Int2
@@ -412,7 +412,7 @@ private:
 };
 ref<Int2> operator /(weak<const Int> node1, weak<const Int2> node2)
 {
-    return ref<IntdivInt2>::create(gameArena(), node1, node2);
+    return ref<IntdivInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2divInt : public Int2
@@ -444,7 +444,7 @@ private:
 };
 ref<Int2> operator /(weak<const Int2> node1, weak<const Int> node2)
 {
-    return ref<Int2divInt>::create(gameArena(), node1, node2);
+    return ref<Int2divInt>::create(Arena::script(), node1, node2);
 }
 
 class IntaddInt2 : public Int2
@@ -476,7 +476,7 @@ private:
 };
 ref<Int2> operator +(weak<const Int> node1, weak<const Int2> node2)
 {
-    return ref<IntaddInt2>::create(gameArena(), node1, node2);
+    return ref<IntaddInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2addInt : public Int2
@@ -508,7 +508,7 @@ private:
 };
 ref<Int2> operator +(weak<const Int2> node1, weak<const Int> node2)
 {
-    return ref<Int2addInt>::create(gameArena(), node1, node2);
+    return ref<Int2addInt>::create(Arena::script(), node1, node2);
 }
 
 class IntsubInt2 : public Int2
@@ -540,7 +540,7 @@ private:
 };
 ref<Int2> operator -(weak<const Int> node1, weak<const Int2> node2)
 {
-    return ref<IntsubInt2>::create(gameArena(), node1, node2);
+    return ref<IntsubInt2>::create(Arena::script(), node1, node2);
 }
 
 class Int2subInt : public Int2
@@ -572,7 +572,7 @@ private:
 };
 ref<Int2> operator -(weak<const Int2> node1, weak<const Int> node2)
 {
-    return ref<Int2subInt>::create(gameArena(), node1, node2);
+    return ref<Int2subInt>::create(Arena::script(), node1, node2);
 }
 
 
@@ -665,7 +665,7 @@ private:
 };
 ref<Int3> operator /(weak<const Int3> node1, weak<const Int3> node2)
 {
-    return ref<Int3divInt3>::create(gameArena(), node1, node2);
+    return ref<Int3divInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3addInt3 : public Int3
@@ -697,7 +697,7 @@ private:
 };
 ref<Int3> operator +(weak<const Int3> node1, weak<const Int3> node2)
 {
-    return ref<Int3addInt3>::create(gameArena(), node1, node2);
+    return ref<Int3addInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3subInt3 : public Int3
@@ -729,7 +729,7 @@ private:
 };
 ref<Int3> operator -(weak<const Int3> node1, weak<const Int3> node2)
 {
-    return ref<Int3subInt3>::create(gameArena(), node1, node2);
+    return ref<Int3subInt3>::create(Arena::script(), node1, node2);
 }
 
 class IntmulInt3 : public Int3
@@ -761,7 +761,7 @@ private:
 };
 ref<Int3> operator *(weak<const Int> node1, weak<const Int3> node2)
 {
-    return ref<IntmulInt3>::create(gameArena(), node1, node2);
+    return ref<IntmulInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3mulInt : public Int3
@@ -793,7 +793,7 @@ private:
 };
 ref<Int3> operator *(weak<const Int3> node1, weak<const Int> node2)
 {
-    return ref<Int3mulInt>::create(gameArena(), node1, node2);
+    return ref<Int3mulInt>::create(Arena::script(), node1, node2);
 }
 
 class IntdivInt3 : public Int3
@@ -825,7 +825,7 @@ private:
 };
 ref<Int3> operator /(weak<const Int> node1, weak<const Int3> node2)
 {
-    return ref<IntdivInt3>::create(gameArena(), node1, node2);
+    return ref<IntdivInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3divInt : public Int3
@@ -857,7 +857,7 @@ private:
 };
 ref<Int3> operator /(weak<const Int3> node1, weak<const Int> node2)
 {
-    return ref<Int3divInt>::create(gameArena(), node1, node2);
+    return ref<Int3divInt>::create(Arena::script(), node1, node2);
 }
 
 class IntaddInt3 : public Int3
@@ -889,7 +889,7 @@ private:
 };
 ref<Int3> operator +(weak<const Int> node1, weak<const Int3> node2)
 {
-    return ref<IntaddInt3>::create(gameArena(), node1, node2);
+    return ref<IntaddInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3addInt : public Int3
@@ -921,7 +921,7 @@ private:
 };
 ref<Int3> operator +(weak<const Int3> node1, weak<const Int> node2)
 {
-    return ref<Int3addInt>::create(gameArena(), node1, node2);
+    return ref<Int3addInt>::create(Arena::script(), node1, node2);
 }
 
 class IntsubInt3 : public Int3
@@ -953,7 +953,7 @@ private:
 };
 ref<Int3> operator -(weak<const Int> node1, weak<const Int3> node2)
 {
-    return ref<IntsubInt3>::create(gameArena(), node1, node2);
+    return ref<IntsubInt3>::create(Arena::script(), node1, node2);
 }
 
 class Int3subInt : public Int3
@@ -985,7 +985,7 @@ private:
 };
 ref<Int3> operator -(weak<const Int3> node1, weak<const Int> node2)
 {
-    return ref<Int3subInt>::create(gameArena(), node1, node2);
+    return ref<Int3subInt>::create(Arena::script(), node1, node2);
 }
 
 
@@ -1078,7 +1078,7 @@ private:
 };
 ref<Int4> operator /(weak<const Int4> node1, weak<const Int4> node2)
 {
-    return ref<Int4divInt4>::create(gameArena(), node1, node2);
+    return ref<Int4divInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4addInt4 : public Int4
@@ -1110,7 +1110,7 @@ private:
 };
 ref<Int4> operator +(weak<const Int4> node1, weak<const Int4> node2)
 {
-    return ref<Int4addInt4>::create(gameArena(), node1, node2);
+    return ref<Int4addInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4subInt4 : public Int4
@@ -1142,7 +1142,7 @@ private:
 };
 ref<Int4> operator -(weak<const Int4> node1, weak<const Int4> node2)
 {
-    return ref<Int4subInt4>::create(gameArena(), node1, node2);
+    return ref<Int4subInt4>::create(Arena::script(), node1, node2);
 }
 
 class IntmulInt4 : public Int4
@@ -1174,7 +1174,7 @@ private:
 };
 ref<Int4> operator *(weak<const Int> node1, weak<const Int4> node2)
 {
-    return ref<IntmulInt4>::create(gameArena(), node1, node2);
+    return ref<IntmulInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4mulInt : public Int4
@@ -1206,7 +1206,7 @@ private:
 };
 ref<Int4> operator *(weak<const Int4> node1, weak<const Int> node2)
 {
-    return ref<Int4mulInt>::create(gameArena(), node1, node2);
+    return ref<Int4mulInt>::create(Arena::script(), node1, node2);
 }
 
 class IntdivInt4 : public Int4
@@ -1238,7 +1238,7 @@ private:
 };
 ref<Int4> operator /(weak<const Int> node1, weak<const Int4> node2)
 {
-    return ref<IntdivInt4>::create(gameArena(), node1, node2);
+    return ref<IntdivInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4divInt : public Int4
@@ -1270,7 +1270,7 @@ private:
 };
 ref<Int4> operator /(weak<const Int4> node1, weak<const Int> node2)
 {
-    return ref<Int4divInt>::create(gameArena(), node1, node2);
+    return ref<Int4divInt>::create(Arena::script(), node1, node2);
 }
 
 class IntaddInt4 : public Int4
@@ -1302,7 +1302,7 @@ private:
 };
 ref<Int4> operator +(weak<const Int> node1, weak<const Int4> node2)
 {
-    return ref<IntaddInt4>::create(gameArena(), node1, node2);
+    return ref<IntaddInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4addInt : public Int4
@@ -1334,7 +1334,7 @@ private:
 };
 ref<Int4> operator +(weak<const Int4> node1, weak<const Int> node2)
 {
-    return ref<Int4addInt>::create(gameArena(), node1, node2);
+    return ref<Int4addInt>::create(Arena::script(), node1, node2);
 }
 
 class IntsubInt4 : public Int4
@@ -1366,7 +1366,7 @@ private:
 };
 ref<Int4> operator -(weak<const Int> node1, weak<const Int4> node2)
 {
-    return ref<IntsubInt4>::create(gameArena(), node1, node2);
+    return ref<IntsubInt4>::create(Arena::script(), node1, node2);
 }
 
 class Int4subInt : public Int4
@@ -1398,7 +1398,7 @@ private:
 };
 ref<Int4> operator -(weak<const Int4> node1, weak<const Int> node2)
 {
-    return ref<Int4subInt>::create(gameArena(), node1, node2);
+    return ref<Int4subInt>::create(Arena::script(), node1, node2);
 }
 
 

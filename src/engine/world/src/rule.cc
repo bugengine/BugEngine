@@ -8,15 +8,12 @@
 namespace BugEngine { namespace World
 {
 
-Rule::Rule(weak<World> world)
-    :   m_world(world)
+Rule::Rule()
 {
-    m_world->addRule(this);
 }
 
 Rule::~Rule()
 {
-    m_world->removeRule(this);
 }
 
 }}

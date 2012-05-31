@@ -11,7 +11,7 @@ namespace BugEngine
 
 static Allocator& ticketPool()
 {
-    return gameArena(); //TODO
+    return Arena::filesystem(); //TODO
 }
 
 File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size)
@@ -80,7 +80,7 @@ ref<const File::Ticket> File::beginWrite(const void* data, u32 size, i64 offset)
         be_assert((u64)offset <= m_size, "writing past end of file");
     else if (offset < 0)
         be_assert(offset+(i64)m_size+1 >= 0, "writing past end of file");
-    ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(tempArena()), this, offset, size, data);
+    ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(Arena::temporary()), this, offset, size, data);
     IOProcess::pushTicket(t);
     return t;
 }

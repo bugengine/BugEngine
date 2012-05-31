@@ -136,8 +136,8 @@ GLWindow::Context::~Context()
 //------------------------------------------------------------------------
 
 GLRenderer::GLRenderer(const PluginContext& context)
-    :   Windowing::Renderer(gameArena(), context.resourceManager)
-    ,   m_context(scoped<Context>::create(arena()))
+    :   Windowing::Renderer(Arena::general(), context.resourceManager)
+    ,   m_context(scoped<Context>::create(Arena::general()))
 {
 }
 
@@ -151,7 +151,7 @@ void GLRenderer::attachWindow(weak<GLWindow> w) const
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
     be_assert(window, "No native window created for BugEngine window");
-    w->m_context = scoped<GLWindow::Context>::create(arena(), window, context, Thread::currentId());
+    w->m_context = scoped<GLWindow::Context>::create(Arena::general(), window, context, Thread::currentId());
     [context release];
 }
 

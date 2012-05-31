@@ -29,7 +29,7 @@ void NullRenderer::flush()
 }
 
 NullRenderer::NullRenderer(const PluginContext& context)
-:   IRenderer(gameArena(), context.resourceManager)
+:   IRenderer(Arena::general(), context.resourceManager)
 {
 }
 

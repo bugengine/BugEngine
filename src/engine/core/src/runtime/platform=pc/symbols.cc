@@ -50,7 +50,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
             PE pe(infos.filename.str().c_str(), 0);
             if (pe)
             {
-                ref<SymbolResolver> resolver = ref<DwarfModule>::create(debugArena(), infos.filename, pe, infos.offset, infos.size);
+                ref<SymbolResolver> resolver = ref<DwarfModule>::create(Arena::debug(), infos.filename, pe, infos.offset, infos.size);
                 resolver->m_next = next;
                 return resolver;
             }
@@ -61,7 +61,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
             Elf elf(infos.filename.str().c_str(), 0);
             if (elf)
             {
-                ref<SymbolResolver> resolver = ref<DwarfModule>::create(debugArena(), infos.filename, elf, infos.offset, infos.size);
+                ref<SymbolResolver> resolver = ref<DwarfModule>::create(Arena::debug(), infos.filename, elf, infos.offset, infos.size);
                 resolver->m_next = next;
                 return resolver;
             }

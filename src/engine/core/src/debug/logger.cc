@@ -23,8 +23,8 @@ const char* ILogListener::s_logNames[] =
 
 
 Logger::Logger()
-:   m_listeners(debugArena())
-,   m_children(debugArena())
+:   m_listeners(Arena::debug())
+,   m_children(Arena::debug())
 ,   m_name("")
 {
 }
@@ -32,8 +32,8 @@ Logger::Logger()
 
 
 Logger::Logger(ref<Logger> parent, const istring& name)
-:   m_listeners(debugArena())
-,   m_children(debugArena())
+:   m_listeners(Arena::debug())
+,   m_children(Arena::debug())
 ,   m_parent(parent)
 ,   m_name(name)
 {
@@ -52,7 +52,7 @@ ref<Logger> Logger::instance(const inamespace& name)
         minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if (it == result->m_children.end())
         {
-            ref<Logger> next = ref<Logger>::create(debugArena(), result, name[i]);
+            ref<Logger> next = ref<Logger>::create(Arena::debug(), result, name[i]);
             result->m_children.insert(std::make_pair(name[i], next));
             result = next;
         }
@@ -64,7 +64,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 
 ref<Logger> Logger::root()
 {
-    static ref<Logger> s_rootLogger = ref<Logger>::create(debugArena());
+    static ref<Logger> s_rootLogger = ref<Logger>::create(Arena::debug());
     return s_rootLogger;
 }
 

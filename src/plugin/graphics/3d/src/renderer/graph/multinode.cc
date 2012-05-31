@@ -10,11 +10,11 @@ namespace BugEngine
 
 MultiNode::MultiNode(const minitl::vector< minitl::weak<INode> >& nodes)
 :   INode()
-,   m_updateTask(ref<TaskGroup>::create(taskArena(), "updateMultiScene", color32(255, 0, 0)))
-,   m_dispatchTask(ref< Task< MethodCaller<MultiNode, &MultiNode::dispatch> > >::create(taskArena(), "dispatchMulti", color32(255,0,0), MethodCaller<MultiNode, &MultiNode::dispatch>(this), Scheduler::High))
+,   m_updateTask(ref<TaskGroup>::create(Arena::task(), "updateMultiScene", color32(255, 0, 0)))
+,   m_dispatchTask(ref< Task< MethodCaller<MultiNode, &MultiNode::dispatch> > >::create(Arena::task(), "dispatchMulti", color32(255,0,0), MethodCaller<MultiNode, &MultiNode::dispatch>(this), Scheduler::High))
 ,   m_startDispatchConnection(m_updateTask, m_dispatchTask->startCallback())
 ,   m_waitOnDispatchConnection(m_dispatchTask, m_dispatchTask->startCallback(), ITask::ICallback::Completed)
-,   m_nodes(taskArena())
+,   m_nodes(Arena::task())
 {
     for(minitl::vector< weak<INode> >::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
     {

@@ -10,13 +10,17 @@ int be_package_parse(void* param);
 
 namespace BugEngine
 {
+
+namespace Arena
+{
+Allocator& packageBuilder()
+{
+    return resource();
+}
+}
+
 namespace PackageBuilder
 {
-
-Allocator& packageBuilderArena()
-{
-    return gameArena();
-}
 
 PackageBuilder::PackageBuilder(ref<Folder> dataFolder)
     :   m_dataFolder(dataFolder)
@@ -34,6 +38,4 @@ ref<Nodes::Package> PackageBuilder::createPackage(const Allocator::Block<u8>& bu
     return context.result;
 }
 
-
-}
-}
+}}

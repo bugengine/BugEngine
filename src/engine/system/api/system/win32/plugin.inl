@@ -21,13 +21,13 @@
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name);                                                   \
     extern "C" BE_EXPORT interface* be_createPlugin (const ::BugEngine::PluginContext& context) \
     {                                                                                           \
-        void* m = ::BugEngine::gameArena().alloc<klass>();                                      \
+        void* m = ::BugEngine::Arena::general().alloc<klass>();                                 \
         return new(m) klass(context);                                                           \
     }                                                                                           \
     extern "C" BE_EXPORT void be_destroyPlugin(klass* cls)                                      \
     {                                                                                           \
         minitl::checked_destroy(cls);                                                           \
-        ::BugEngine::gameArena().free(cls);                                                     \
+        ::BugEngine::Arena::general().free(cls);                                                \
     }
 #define BE_PLUGIN_REGISTER_NAMED_(name, interface, klass)                                       \
     BE_PLUGIN_REGISTER_NAMED(name, interface, klass)
@@ -67,7 +67,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType /*preload*/)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(1))
 {
 }
 
@@ -75,7 +75,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& context)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(1))
 {
     if (m_handle)
     {
@@ -116,7 +116,7 @@ Plugin<Interface>::~Plugin(void)
             FreeLibrary(static_cast<HMODULE>(m_handle));
         }
         minitl::checked_destroy(m_refCount);
-        gameArena().free(m_refCount);
+        Arena::general().free(m_refCount);
     }
 }
 
@@ -146,7 +146,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
             FreeLibrary(static_cast<HMODULE>(m_handle));
         }
         minitl::checked_destroy(m_refCount);
-        gameArena().free(m_refCount);
+        Arena::general().free(m_refCount);
     }
     m_refCount = other.m_refCount;
     m_handle = other.m_handle;

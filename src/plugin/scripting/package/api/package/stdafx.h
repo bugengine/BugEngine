@@ -18,17 +18,13 @@
 # define    PACKAGEEXPORT
 #endif
 
-namespace BugEngine
+namespace BugEngine { namespace Arena
 {
 
-Allocator& packageArena();
+Allocator& package();
+Allocator& packageBuilder();
 
-namespace PackageBuilder
-{
-Allocator& packageBuilderArena();
-}
-
-}
+}}
 
 /*****************************************************************************/
 #endif

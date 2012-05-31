@@ -17,5 +17,10 @@
 # define    WORLDEXPORT
 #endif
 
+namespace BugEngine { namespace Arena
+{
+be_api(WORLD) Allocator& game();
+}}
+
 /*****************************************************************************/
 #endif

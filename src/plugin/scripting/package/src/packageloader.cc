@@ -9,27 +9,22 @@
 #include    <core/runtime/md5.hh>
 
 
-namespace BugEngine
+namespace BugEngine { namespace Arena
 {
 
-Allocator& packageArena()
+Allocator& package()
 {
-    return gameArena();
+    return resource();
 }
 
-}
+}}
 
 namespace BugEngine { namespace PackageManager
 {
 
-Allocator& packageArena()
-{
-    return gameArena();
-}
-
 PackageLoader::PackageLoader(const PluginContext& context)
-    :   ScriptEngine<Package>(packageArena(), context.resourceManager)
-    ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(packageArena(), context.dataFolder))
+    :   ScriptEngine<Package>(Arena::package(), context.resourceManager)
+    ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(Arena::package(), context.dataFolder))
 {
 }
 

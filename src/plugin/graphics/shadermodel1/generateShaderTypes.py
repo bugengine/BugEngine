@@ -200,7 +200,7 @@ private:
 };
 ref<%(TYPE1)s> operator %(OPERATOR)s(weak<const %(TYPE2)s> node1, weak<const %(TYPE3)s> node2)
 {
-    return ref<%(TYPE2)s%(OPNAME)s%(TYPE3)s>::create(gameArena(), node1, node2);
+    return ref<%(TYPE2)s%(OPNAME)s%(TYPE3)s>::create(Arena::script(), node1, node2);
 }
 
 """

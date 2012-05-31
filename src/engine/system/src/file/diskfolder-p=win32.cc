@@ -110,14 +110,14 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                             continue;
                         }
                     }
-                    m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(fsArena(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
+                    m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
                 }
                 else
                 {
                     u64 size = data.nFileSizeHigh;
                     size <<= 32;
                     size += data.nFileSizeLow;
-                    m_files.push_back(minitl::make_pair(name, ref<Win32File>::create(fsArena(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size)));
+                    m_files.push_back(minitl::make_pair(name, ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size)));
                 }
             } while (FindNextFile(h, &data));
             FindClose(h);
@@ -172,7 +172,7 @@ weak<File> DiskFolder::createFile(const istring& name)
         }
         FindClose(h);
         ref<File> result = ref<Win32File>::create(
-                    fsArena(),
+                    Arena::filesystem(),
                     m_path+ifilename(name),
                     File::Media(File::Media::Disk, m_index, 0),
                     0);

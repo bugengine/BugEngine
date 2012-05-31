@@ -5,38 +5,28 @@
 #include    <core/memory/malloc.hh>
 #include    <core/memory/allocators/general.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Arena
 {
 
-Allocator& gameArena()
+Allocator& general()
 {
     static GeneralAllocator s_allocator;
     return s_allocator;
 }
 
-Allocator& tempArena()
+Allocator& temporary()
 {
-    return gameArena();
+    return general();
 }
 
-Allocator& debugArena()
+Allocator& stack()
 {
-    return gameArena();
+    return general();
 }
 
-Allocator& rttiArena()
+Allocator& debug()
 {
-    return gameArena();
+    return general();
 }
 
-Allocator& scriptArena()
-{
-    return gameArena();
-}
-
-Allocator& inputArena()
-{
-    return gameArena();
-}
-
-}
+}}

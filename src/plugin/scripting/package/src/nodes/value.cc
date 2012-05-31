@@ -117,13 +117,13 @@ RTTI::Value FloatValue::as(const RTTI::Type& type) const
 
 
 StringValue::StringValue(const char* value)
-    :   m_value(packageBuilderArena().strdup(value))
+    :   m_value(Arena::packageBuilder().strdup(value))
 {
 }
 
 StringValue::~StringValue()
 {
-    packageBuilderArena().free(m_value);
+    Arena::packageBuilder().free(m_value);
 }
 
 bool StringValue::isCompatible(const RTTI::Type& type) const

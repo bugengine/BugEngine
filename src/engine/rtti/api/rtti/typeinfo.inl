@@ -26,12 +26,12 @@ static inline bool operator<=(Type t1, Type t2)
 
 
 template< typename T >
-struct be_typeid< minitl::vector<T> >
+struct be_typeid< minitl::array<T> >
 {
     static inline raw<const RTTI::Class> klass()
     {
         static RTTI::Class ci = {
-            "vector", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0
+            "array", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0
         };
         raw<const RTTI::Class> c = { &ci };
         return c;

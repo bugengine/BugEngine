@@ -14,8 +14,8 @@ Object::Object(weak<Package> owner)
     :   m_owner(owner)
     ,   m_name("")
     ,   m_method(0)
-    ,   m_parameters(packageBuilderArena())
-    ,   m_overloads(packageBuilderArena())
+    ,   m_parameters(Arena::packageBuilder())
+    ,   m_overloads(Arena::packageBuilder())
 {
 }
 

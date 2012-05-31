@@ -9,7 +9,7 @@ namespace BugEngine { namespace World
 {
 
 
-class Storage
+class Storage : public minitl::refcountable
 {
 
 };

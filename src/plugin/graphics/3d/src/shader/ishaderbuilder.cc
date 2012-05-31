@@ -8,18 +8,18 @@ namespace BugEngine { namespace Shaders
 {
 
 IShaderBuilder::Namespace::Namespace()
-    :   names(tempArena())
+    :   names(Arena::temporary())
 {
 };
 
 IShaderBuilder::IShaderBuilder()
-    :   m_namespaces(tempArena())
+    :   m_namespaces(Arena::temporary())
     ,   m_currentAttribute(0)
     ,   m_currentVarying(0)
     ,   m_currentAttributeToVarying(0)
     ,   m_currentTemporary(0)
-    ,   m_attributeToVarying(tempArena())
-    ,   m_stream(tempArena(), 10000)
+    ,   m_attributeToVarying(Arena::temporary())
+    ,   m_stream(Arena::temporary(), 10000)
     ,   m_indent(0)
     ,   m_counter(0)
 {

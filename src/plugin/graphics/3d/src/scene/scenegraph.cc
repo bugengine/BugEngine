@@ -42,10 +42,10 @@ ref<INode> RenderScene::createNode(weak<const SceneGraphLoader> /*loader*/, weak
         renderTarget = renderer->getRenderWindow(m_renderTarget);
     }
     be_assert_recover(renderTarget, "can't create scene node: render target has not been created yet", return ref<INode>());
-    return ref<SceneNode>::create(gameArena(), be_checked_cast<IRenderTarget>(renderTarget), m_world);
+    return ref<SceneNode>::create(Arena::resource(), be_checked_cast<IRenderTarget>(renderTarget), m_world);
 }
 
-RenderSequence::RenderSequence(const minitl::vector< ref<const RenderNode> >& nodes)
+RenderSequence::RenderSequence(const minitl::array< ref<const RenderNode> >& nodes)
     :   RenderNode()
     ,   m_nodes(nodes)
 {
@@ -57,15 +57,15 @@ RenderSequence::~RenderSequence()
 
 ref<INode> RenderSequence::createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> /*renderer*/) const
 {
-    minitl::vector< weak<INode> > nodes(tempArena());
-    for (minitl::vector< ref<const RenderNode> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
+    minitl::vector< weak<INode> > nodes(Arena::stack());
+    for (minitl::array< ref<const RenderNode> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
     {
         weak<minitl::pointer> childhandle = (*it)->getResourceHandle(loader).handle;
         be_assert(childhandle, "dependent node was not loaded properly");
         if (childhandle) nodes.push_back(be_checked_cast<INode>(childhandle));
     }
 
-    return ref<MultiNode>::create(gameArena(), nodes);
+    return ref<MultiNode>::create(Arena::resource(), nodes);
 }
 
 }

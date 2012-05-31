@@ -95,7 +95,7 @@ private:
 };
 ref<Bool> operator /(weak<const Bool> node1, weak<const Bool> node2)
 {
-    return ref<BooldivBool>::create(gameArena(), node1, node2);
+    return ref<BooldivBool>::create(Arena::script(), node1, node2);
 }
 
 class BooladdBool : public Bool
@@ -127,7 +127,7 @@ private:
 };
 ref<Bool> operator +(weak<const Bool> node1, weak<const Bool> node2)
 {
-    return ref<BooladdBool>::create(gameArena(), node1, node2);
+    return ref<BooladdBool>::create(Arena::script(), node1, node2);
 }
 
 class BoolsubBool : public Bool
@@ -159,7 +159,7 @@ private:
 };
 ref<Bool> operator -(weak<const Bool> node1, weak<const Bool> node2)
 {
-    return ref<BoolsubBool>::create(gameArena(), node1, node2);
+    return ref<BoolsubBool>::create(Arena::script(), node1, node2);
 }
 
 
@@ -252,7 +252,7 @@ private:
 };
 ref<Bool2> operator /(weak<const Bool2> node1, weak<const Bool2> node2)
 {
-    return ref<Bool2divBool2>::create(gameArena(), node1, node2);
+    return ref<Bool2divBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2addBool2 : public Bool2
@@ -284,7 +284,7 @@ private:
 };
 ref<Bool2> operator +(weak<const Bool2> node1, weak<const Bool2> node2)
 {
-    return ref<Bool2addBool2>::create(gameArena(), node1, node2);
+    return ref<Bool2addBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2subBool2 : public Bool2
@@ -316,7 +316,7 @@ private:
 };
 ref<Bool2> operator -(weak<const Bool2> node1, weak<const Bool2> node2)
 {
-    return ref<Bool2subBool2>::create(gameArena(), node1, node2);
+    return ref<Bool2subBool2>::create(Arena::script(), node1, node2);
 }
 
 class BoolmulBool2 : public Bool2
@@ -348,7 +348,7 @@ private:
 };
 ref<Bool2> operator *(weak<const Bool> node1, weak<const Bool2> node2)
 {
-    return ref<BoolmulBool2>::create(gameArena(), node1, node2);
+    return ref<BoolmulBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2mulBool : public Bool2
@@ -380,7 +380,7 @@ private:
 };
 ref<Bool2> operator *(weak<const Bool2> node1, weak<const Bool> node2)
 {
-    return ref<Bool2mulBool>::create(gameArena(), node1, node2);
+    return ref<Bool2mulBool>::create(Arena::script(), node1, node2);
 }
 
 class BooldivBool2 : public Bool2
@@ -412,7 +412,7 @@ private:
 };
 ref<Bool2> operator /(weak<const Bool> node1, weak<const Bool2> node2)
 {
-    return ref<BooldivBool2>::create(gameArena(), node1, node2);
+    return ref<BooldivBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2divBool : public Bool2
@@ -444,7 +444,7 @@ private:
 };
 ref<Bool2> operator /(weak<const Bool2> node1, weak<const Bool> node2)
 {
-    return ref<Bool2divBool>::create(gameArena(), node1, node2);
+    return ref<Bool2divBool>::create(Arena::script(), node1, node2);
 }
 
 class BooladdBool2 : public Bool2
@@ -476,7 +476,7 @@ private:
 };
 ref<Bool2> operator +(weak<const Bool> node1, weak<const Bool2> node2)
 {
-    return ref<BooladdBool2>::create(gameArena(), node1, node2);
+    return ref<BooladdBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2addBool : public Bool2
@@ -508,7 +508,7 @@ private:
 };
 ref<Bool2> operator +(weak<const Bool2> node1, weak<const Bool> node2)
 {
-    return ref<Bool2addBool>::create(gameArena(), node1, node2);
+    return ref<Bool2addBool>::create(Arena::script(), node1, node2);
 }
 
 class BoolsubBool2 : public Bool2
@@ -540,7 +540,7 @@ private:
 };
 ref<Bool2> operator -(weak<const Bool> node1, weak<const Bool2> node2)
 {
-    return ref<BoolsubBool2>::create(gameArena(), node1, node2);
+    return ref<BoolsubBool2>::create(Arena::script(), node1, node2);
 }
 
 class Bool2subBool : public Bool2
@@ -572,7 +572,7 @@ private:
 };
 ref<Bool2> operator -(weak<const Bool2> node1, weak<const Bool> node2)
 {
-    return ref<Bool2subBool>::create(gameArena(), node1, node2);
+    return ref<Bool2subBool>::create(Arena::script(), node1, node2);
 }
 
 
@@ -665,7 +665,7 @@ private:
 };
 ref<Bool3> operator /(weak<const Bool3> node1, weak<const Bool3> node2)
 {
-    return ref<Bool3divBool3>::create(gameArena(), node1, node2);
+    return ref<Bool3divBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3addBool3 : public Bool3
@@ -697,7 +697,7 @@ private:
 };
 ref<Bool3> operator +(weak<const Bool3> node1, weak<const Bool3> node2)
 {
-    return ref<Bool3addBool3>::create(gameArena(), node1, node2);
+    return ref<Bool3addBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3subBool3 : public Bool3
@@ -729,7 +729,7 @@ private:
 };
 ref<Bool3> operator -(weak<const Bool3> node1, weak<const Bool3> node2)
 {
-    return ref<Bool3subBool3>::create(gameArena(), node1, node2);
+    return ref<Bool3subBool3>::create(Arena::script(), node1, node2);
 }
 
 class BoolmulBool3 : public Bool3
@@ -761,7 +761,7 @@ private:
 };
 ref<Bool3> operator *(weak<const Bool> node1, weak<const Bool3> node2)
 {
-    return ref<BoolmulBool3>::create(gameArena(), node1, node2);
+    return ref<BoolmulBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3mulBool : public Bool3
@@ -793,7 +793,7 @@ private:
 };
 ref<Bool3> operator *(weak<const Bool3> node1, weak<const Bool> node2)
 {
-    return ref<Bool3mulBool>::create(gameArena(), node1, node2);
+    return ref<Bool3mulBool>::create(Arena::script(), node1, node2);
 }
 
 class BooldivBool3 : public Bool3
@@ -825,7 +825,7 @@ private:
 };
 ref<Bool3> operator /(weak<const Bool> node1, weak<const Bool3> node2)
 {
-    return ref<BooldivBool3>::create(gameArena(), node1, node2);
+    return ref<BooldivBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3divBool : public Bool3
@@ -857,7 +857,7 @@ private:
 };
 ref<Bool3> operator /(weak<const Bool3> node1, weak<const Bool> node2)
 {
-    return ref<Bool3divBool>::create(gameArena(), node1, node2);
+    return ref<Bool3divBool>::create(Arena::script(), node1, node2);
 }
 
 class BooladdBool3 : public Bool3
@@ -889,7 +889,7 @@ private:
 };
 ref<Bool3> operator +(weak<const Bool> node1, weak<const Bool3> node2)
 {
-    return ref<BooladdBool3>::create(gameArena(), node1, node2);
+    return ref<BooladdBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3addBool : public Bool3
@@ -921,7 +921,7 @@ private:
 };
 ref<Bool3> operator +(weak<const Bool3> node1, weak<const Bool> node2)
 {
-    return ref<Bool3addBool>::create(gameArena(), node1, node2);
+    return ref<Bool3addBool>::create(Arena::script(), node1, node2);
 }
 
 class BoolsubBool3 : public Bool3
@@ -953,7 +953,7 @@ private:
 };
 ref<Bool3> operator -(weak<const Bool> node1, weak<const Bool3> node2)
 {
-    return ref<BoolsubBool3>::create(gameArena(), node1, node2);
+    return ref<BoolsubBool3>::create(Arena::script(), node1, node2);
 }
 
 class Bool3subBool : public Bool3
@@ -985,7 +985,7 @@ private:
 };
 ref<Bool3> operator -(weak<const Bool3> node1, weak<const Bool> node2)
 {
-    return ref<Bool3subBool>::create(gameArena(), node1, node2);
+    return ref<Bool3subBool>::create(Arena::script(), node1, node2);
 }
 
 
@@ -1078,7 +1078,7 @@ private:
 };
 ref<Bool4> operator /(weak<const Bool4> node1, weak<const Bool4> node2)
 {
-    return ref<Bool4divBool4>::create(gameArena(), node1, node2);
+    return ref<Bool4divBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4addBool4 : public Bool4
@@ -1110,7 +1110,7 @@ private:
 };
 ref<Bool4> operator +(weak<const Bool4> node1, weak<const Bool4> node2)
 {
-    return ref<Bool4addBool4>::create(gameArena(), node1, node2);
+    return ref<Bool4addBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4subBool4 : public Bool4
@@ -1142,7 +1142,7 @@ private:
 };
 ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool4> node2)
 {
-    return ref<Bool4subBool4>::create(gameArena(), node1, node2);
+    return ref<Bool4subBool4>::create(Arena::script(), node1, node2);
 }
 
 class BoolmulBool4 : public Bool4
@@ -1174,7 +1174,7 @@ private:
 };
 ref<Bool4> operator *(weak<const Bool> node1, weak<const Bool4> node2)
 {
-    return ref<BoolmulBool4>::create(gameArena(), node1, node2);
+    return ref<BoolmulBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4mulBool : public Bool4
@@ -1206,7 +1206,7 @@ private:
 };
 ref<Bool4> operator *(weak<const Bool4> node1, weak<const Bool> node2)
 {
-    return ref<Bool4mulBool>::create(gameArena(), node1, node2);
+    return ref<Bool4mulBool>::create(Arena::script(), node1, node2);
 }
 
 class BooldivBool4 : public Bool4
@@ -1238,7 +1238,7 @@ private:
 };
 ref<Bool4> operator /(weak<const Bool> node1, weak<const Bool4> node2)
 {
-    return ref<BooldivBool4>::create(gameArena(), node1, node2);
+    return ref<BooldivBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4divBool : public Bool4
@@ -1270,7 +1270,7 @@ private:
 };
 ref<Bool4> operator /(weak<const Bool4> node1, weak<const Bool> node2)
 {
-    return ref<Bool4divBool>::create(gameArena(), node1, node2);
+    return ref<Bool4divBool>::create(Arena::script(), node1, node2);
 }
 
 class BooladdBool4 : public Bool4
@@ -1302,7 +1302,7 @@ private:
 };
 ref<Bool4> operator +(weak<const Bool> node1, weak<const Bool4> node2)
 {
-    return ref<BooladdBool4>::create(gameArena(), node1, node2);
+    return ref<BooladdBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4addBool : public Bool4
@@ -1334,7 +1334,7 @@ private:
 };
 ref<Bool4> operator +(weak<const Bool4> node1, weak<const Bool> node2)
 {
-    return ref<Bool4addBool>::create(gameArena(), node1, node2);
+    return ref<Bool4addBool>::create(Arena::script(), node1, node2);
 }
 
 class BoolsubBool4 : public Bool4
@@ -1366,7 +1366,7 @@ private:
 };
 ref<Bool4> operator -(weak<const Bool> node1, weak<const Bool4> node2)
 {
-    return ref<BoolsubBool4>::create(gameArena(), node1, node2);
+    return ref<BoolsubBool4>::create(Arena::script(), node1, node2);
 }
 
 class Bool4subBool : public Bool4
@@ -1398,7 +1398,7 @@ private:
 };
 ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool> node2)
 {
-    return ref<Bool4subBool>::create(gameArena(), node1, node2);
+    return ref<Bool4subBool>::create(Arena::script(), node1, node2);
 }
 
 

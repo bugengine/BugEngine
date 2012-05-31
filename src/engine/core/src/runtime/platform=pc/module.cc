@@ -16,7 +16,7 @@ namespace BugEngine { namespace Runtime
 Module::Module(const char *filename, u64 baseAddress)
 :   m_filename(filename)
 ,   m_baseAddress(baseAddress)
-,   m_sections(debugArena())
+,   m_sections(Arena::debug())
 {
 }
 

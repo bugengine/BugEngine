@@ -78,7 +78,7 @@ public:
         Ticket& operator=(const Ticket&);
     };
 
-    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, Allocator& arena = tempArena()) const;
+    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, Allocator& arena = Arena::temporary()) const;
     ref<const Ticket> beginWrite(const void* data, u32 size, i64 offset = -1);
 private:
     void fillBuffer(weak<Ticket> ticket) const;
