@@ -49,13 +49,13 @@ public:
     BE_PLUGIN_NAMESPACE_CREATE_(name)                                                   \
     static interface* be_createPlugin (const ::BugEngine::PluginContext& context)       \
     {                                                                                   \
-        void* m = ::BugEngine::gameArena().alloc<klass>();                              \
+        void* m = ::BugEngine::Arena::general().alloc<klass>();                         \
         return new(m) klass(context);                                                   \
     }                                                                                   \
     static void be_destroyPlugin(klass* cls)                                            \
     {                                                                                   \
         minitl::checked_destroy(cls);                                                   \
-        ::BugEngine::gameArena().free(cls);                                             \
+        ::BugEngine::Arena::general().free(cls);                                        \
     }                                                                                   \
     BE_EXPORT BugEngine::impl::PluginList s_##name##Plugin(                             \
             #fullname,                                                                  \
@@ -75,7 +75,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType preload)
 :   m_handle(impl::PluginList::findPlugin(pluginName.str().c_str()))
 ,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(1))
 {
 }
 
@@ -83,7 +83,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& context)
 :   m_handle(impl::PluginList::findPlugin(pluginName.str().c_str()))
 ,   m_interface(0)
-,   m_refCount(new (gameArena()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(1))
 {
     if (m_handle)
     {
@@ -105,7 +105,7 @@ Plugin<Interface>::~Plugin(void)
             (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
         }
         minitl::checked_destroy(m_refCount);
-        gameArena().free(m_refCount);
+        Arena::general().free(m_refCount);
     }
 }
 
@@ -129,7 +129,7 @@ Plugin<Interface>& Plugin<Interface>::operator =(const Plugin<Interface>& other)
             (reinterpret_cast<void(*)(Interface*)>(static_cast<const impl::PluginList*>(m_handle)->destroy))(m_interface);
         }
         minitl::checked_destroy(m_refCount);
-        gameArena().free(m_refCount);
+        Arena::general().free(m_refCount);
     }
     m_refCount = other.m_refCount;
     m_handle = other.m_handle;

@@ -95,7 +95,7 @@ private:
 };
 ref<Uint> operator /(weak<const Uint> node1, weak<const Uint> node2)
 {
-    return ref<UintdivUint>::create(gameArena(), node1, node2);
+    return ref<UintdivUint>::create(Arena::script(), node1, node2);
 }
 
 class UintaddUint : public Uint
@@ -127,7 +127,7 @@ private:
 };
 ref<Uint> operator +(weak<const Uint> node1, weak<const Uint> node2)
 {
-    return ref<UintaddUint>::create(gameArena(), node1, node2);
+    return ref<UintaddUint>::create(Arena::script(), node1, node2);
 }
 
 class UintsubUint : public Uint
@@ -159,7 +159,7 @@ private:
 };
 ref<Uint> operator -(weak<const Uint> node1, weak<const Uint> node2)
 {
-    return ref<UintsubUint>::create(gameArena(), node1, node2);
+    return ref<UintsubUint>::create(Arena::script(), node1, node2);
 }
 
 
@@ -252,7 +252,7 @@ private:
 };
 ref<Uint2> operator /(weak<const Uint2> node1, weak<const Uint2> node2)
 {
-    return ref<Uint2divUint2>::create(gameArena(), node1, node2);
+    return ref<Uint2divUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2addUint2 : public Uint2
@@ -284,7 +284,7 @@ private:
 };
 ref<Uint2> operator +(weak<const Uint2> node1, weak<const Uint2> node2)
 {
-    return ref<Uint2addUint2>::create(gameArena(), node1, node2);
+    return ref<Uint2addUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2subUint2 : public Uint2
@@ -316,7 +316,7 @@ private:
 };
 ref<Uint2> operator -(weak<const Uint2> node1, weak<const Uint2> node2)
 {
-    return ref<Uint2subUint2>::create(gameArena(), node1, node2);
+    return ref<Uint2subUint2>::create(Arena::script(), node1, node2);
 }
 
 class UintmulUint2 : public Uint2
@@ -348,7 +348,7 @@ private:
 };
 ref<Uint2> operator *(weak<const Uint> node1, weak<const Uint2> node2)
 {
-    return ref<UintmulUint2>::create(gameArena(), node1, node2);
+    return ref<UintmulUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2mulUint : public Uint2
@@ -380,7 +380,7 @@ private:
 };
 ref<Uint2> operator *(weak<const Uint2> node1, weak<const Uint> node2)
 {
-    return ref<Uint2mulUint>::create(gameArena(), node1, node2);
+    return ref<Uint2mulUint>::create(Arena::script(), node1, node2);
 }
 
 class UintdivUint2 : public Uint2
@@ -412,7 +412,7 @@ private:
 };
 ref<Uint2> operator /(weak<const Uint> node1, weak<const Uint2> node2)
 {
-    return ref<UintdivUint2>::create(gameArena(), node1, node2);
+    return ref<UintdivUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2divUint : public Uint2
@@ -444,7 +444,7 @@ private:
 };
 ref<Uint2> operator /(weak<const Uint2> node1, weak<const Uint> node2)
 {
-    return ref<Uint2divUint>::create(gameArena(), node1, node2);
+    return ref<Uint2divUint>::create(Arena::script(), node1, node2);
 }
 
 class UintaddUint2 : public Uint2
@@ -476,7 +476,7 @@ private:
 };
 ref<Uint2> operator +(weak<const Uint> node1, weak<const Uint2> node2)
 {
-    return ref<UintaddUint2>::create(gameArena(), node1, node2);
+    return ref<UintaddUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2addUint : public Uint2
@@ -508,7 +508,7 @@ private:
 };
 ref<Uint2> operator +(weak<const Uint2> node1, weak<const Uint> node2)
 {
-    return ref<Uint2addUint>::create(gameArena(), node1, node2);
+    return ref<Uint2addUint>::create(Arena::script(), node1, node2);
 }
 
 class UintsubUint2 : public Uint2
@@ -540,7 +540,7 @@ private:
 };
 ref<Uint2> operator -(weak<const Uint> node1, weak<const Uint2> node2)
 {
-    return ref<UintsubUint2>::create(gameArena(), node1, node2);
+    return ref<UintsubUint2>::create(Arena::script(), node1, node2);
 }
 
 class Uint2subUint : public Uint2
@@ -572,7 +572,7 @@ private:
 };
 ref<Uint2> operator -(weak<const Uint2> node1, weak<const Uint> node2)
 {
-    return ref<Uint2subUint>::create(gameArena(), node1, node2);
+    return ref<Uint2subUint>::create(Arena::script(), node1, node2);
 }
 
 
@@ -665,7 +665,7 @@ private:
 };
 ref<Uint3> operator /(weak<const Uint3> node1, weak<const Uint3> node2)
 {
-    return ref<Uint3divUint3>::create(gameArena(), node1, node2);
+    return ref<Uint3divUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3addUint3 : public Uint3
@@ -697,7 +697,7 @@ private:
 };
 ref<Uint3> operator +(weak<const Uint3> node1, weak<const Uint3> node2)
 {
-    return ref<Uint3addUint3>::create(gameArena(), node1, node2);
+    return ref<Uint3addUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3subUint3 : public Uint3
@@ -729,7 +729,7 @@ private:
 };
 ref<Uint3> operator -(weak<const Uint3> node1, weak<const Uint3> node2)
 {
-    return ref<Uint3subUint3>::create(gameArena(), node1, node2);
+    return ref<Uint3subUint3>::create(Arena::script(), node1, node2);
 }
 
 class UintmulUint3 : public Uint3
@@ -761,7 +761,7 @@ private:
 };
 ref<Uint3> operator *(weak<const Uint> node1, weak<const Uint3> node2)
 {
-    return ref<UintmulUint3>::create(gameArena(), node1, node2);
+    return ref<UintmulUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3mulUint : public Uint3
@@ -793,7 +793,7 @@ private:
 };
 ref<Uint3> operator *(weak<const Uint3> node1, weak<const Uint> node2)
 {
-    return ref<Uint3mulUint>::create(gameArena(), node1, node2);
+    return ref<Uint3mulUint>::create(Arena::script(), node1, node2);
 }
 
 class UintdivUint3 : public Uint3
@@ -825,7 +825,7 @@ private:
 };
 ref<Uint3> operator /(weak<const Uint> node1, weak<const Uint3> node2)
 {
-    return ref<UintdivUint3>::create(gameArena(), node1, node2);
+    return ref<UintdivUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3divUint : public Uint3
@@ -857,7 +857,7 @@ private:
 };
 ref<Uint3> operator /(weak<const Uint3> node1, weak<const Uint> node2)
 {
-    return ref<Uint3divUint>::create(gameArena(), node1, node2);
+    return ref<Uint3divUint>::create(Arena::script(), node1, node2);
 }
 
 class UintaddUint3 : public Uint3
@@ -889,7 +889,7 @@ private:
 };
 ref<Uint3> operator +(weak<const Uint> node1, weak<const Uint3> node2)
 {
-    return ref<UintaddUint3>::create(gameArena(), node1, node2);
+    return ref<UintaddUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3addUint : public Uint3
@@ -921,7 +921,7 @@ private:
 };
 ref<Uint3> operator +(weak<const Uint3> node1, weak<const Uint> node2)
 {
-    return ref<Uint3addUint>::create(gameArena(), node1, node2);
+    return ref<Uint3addUint>::create(Arena::script(), node1, node2);
 }
 
 class UintsubUint3 : public Uint3
@@ -953,7 +953,7 @@ private:
 };
 ref<Uint3> operator -(weak<const Uint> node1, weak<const Uint3> node2)
 {
-    return ref<UintsubUint3>::create(gameArena(), node1, node2);
+    return ref<UintsubUint3>::create(Arena::script(), node1, node2);
 }
 
 class Uint3subUint : public Uint3
@@ -985,7 +985,7 @@ private:
 };
 ref<Uint3> operator -(weak<const Uint3> node1, weak<const Uint> node2)
 {
-    return ref<Uint3subUint>::create(gameArena(), node1, node2);
+    return ref<Uint3subUint>::create(Arena::script(), node1, node2);
 }
 
 
@@ -1078,7 +1078,7 @@ private:
 };
 ref<Uint4> operator /(weak<const Uint4> node1, weak<const Uint4> node2)
 {
-    return ref<Uint4divUint4>::create(gameArena(), node1, node2);
+    return ref<Uint4divUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4addUint4 : public Uint4
@@ -1110,7 +1110,7 @@ private:
 };
 ref<Uint4> operator +(weak<const Uint4> node1, weak<const Uint4> node2)
 {
-    return ref<Uint4addUint4>::create(gameArena(), node1, node2);
+    return ref<Uint4addUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4subUint4 : public Uint4
@@ -1142,7 +1142,7 @@ private:
 };
 ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint4> node2)
 {
-    return ref<Uint4subUint4>::create(gameArena(), node1, node2);
+    return ref<Uint4subUint4>::create(Arena::script(), node1, node2);
 }
 
 class UintmulUint4 : public Uint4
@@ -1174,7 +1174,7 @@ private:
 };
 ref<Uint4> operator *(weak<const Uint> node1, weak<const Uint4> node2)
 {
-    return ref<UintmulUint4>::create(gameArena(), node1, node2);
+    return ref<UintmulUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4mulUint : public Uint4
@@ -1206,7 +1206,7 @@ private:
 };
 ref<Uint4> operator *(weak<const Uint4> node1, weak<const Uint> node2)
 {
-    return ref<Uint4mulUint>::create(gameArena(), node1, node2);
+    return ref<Uint4mulUint>::create(Arena::script(), node1, node2);
 }
 
 class UintdivUint4 : public Uint4
@@ -1238,7 +1238,7 @@ private:
 };
 ref<Uint4> operator /(weak<const Uint> node1, weak<const Uint4> node2)
 {
-    return ref<UintdivUint4>::create(gameArena(), node1, node2);
+    return ref<UintdivUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4divUint : public Uint4
@@ -1270,7 +1270,7 @@ private:
 };
 ref<Uint4> operator /(weak<const Uint4> node1, weak<const Uint> node2)
 {
-    return ref<Uint4divUint>::create(gameArena(), node1, node2);
+    return ref<Uint4divUint>::create(Arena::script(), node1, node2);
 }
 
 class UintaddUint4 : public Uint4
@@ -1302,7 +1302,7 @@ private:
 };
 ref<Uint4> operator +(weak<const Uint> node1, weak<const Uint4> node2)
 {
-    return ref<UintaddUint4>::create(gameArena(), node1, node2);
+    return ref<UintaddUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4addUint : public Uint4
@@ -1334,7 +1334,7 @@ private:
 };
 ref<Uint4> operator +(weak<const Uint4> node1, weak<const Uint> node2)
 {
-    return ref<Uint4addUint>::create(gameArena(), node1, node2);
+    return ref<Uint4addUint>::create(Arena::script(), node1, node2);
 }
 
 class UintsubUint4 : public Uint4
@@ -1366,7 +1366,7 @@ private:
 };
 ref<Uint4> operator -(weak<const Uint> node1, weak<const Uint4> node2)
 {
-    return ref<UintsubUint4>::create(gameArena(), node1, node2);
+    return ref<UintsubUint4>::create(Arena::script(), node1, node2);
 }
 
 class Uint4subUint : public Uint4
@@ -1398,7 +1398,7 @@ private:
 };
 ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint> node2)
 {
-    return ref<Uint4subUint>::create(gameArena(), node1, node2);
+    return ref<Uint4subUint>::create(Arena::script(), node1, node2);
 }
 
 

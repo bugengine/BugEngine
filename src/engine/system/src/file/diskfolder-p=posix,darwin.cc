@@ -87,14 +87,22 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                         continue;
                     }
                 }
-                m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(fsArena(), m_path+ipath(name), scanPolicy == Folder::ScanRecursive?Folder::ScanRecursive : Folder::ScanNone, Folder::CreateNone)));
+                m_folders.push_back(
+                        minitl::make_pair(
+                                name,
+                                ref<DiskFolder>::create(
+                                        Arena::filesystem(),
+                                        m_path+ipath(name),
+                                        scanPolicy == Folder::ScanRecursive?Folder::ScanRecursive : Folder::ScanNone,
+                                        Folder::CreateNone
+                                    )));
             }
             else
             {
                 m_files.push_back(minitl::make_pair(
                     name,
                     ref<PosixFile>::create(
-                            fsArena(),
+                            Arena::filesystem(),
                             m_path+ifilename(name),
                             File::Media(File::Media::Disk, s.st_dev, s.st_ino),
                             s.st_size)));
@@ -121,7 +129,7 @@ weak<File> DiskFolder::createFile(const istring& name)
     }
 
     ref<File> result = ref<PosixFile>::create(
-                fsArena(),
+                Arena::filesystem(),
                 m_path+ifilename(name),
                 File::Media(File::Media::Disk, s.st_dev, s.st_ino),
                 s.st_size);

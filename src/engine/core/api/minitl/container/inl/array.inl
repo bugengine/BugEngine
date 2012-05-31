@@ -6,43 +6,72 @@
 /*****************************************************************************/
 #include    <core/debug/assert.hh>
 #include    <minitl/container/array.hh>
+#include    <minitl/container/algorithm.hh>
 
 namespace minitl
 {
 
 template< typename T >
 array<T>::array(BugEngine::Allocator& allocator, u32 size)
-    :   m_array(new(allocator) T[size])
+    :   m_refCount(new(allocator) i_u32(1))
+    ,   m_array(new(allocator) T[size])
+    ,   m_allocator(allocator)
     ,   m_size(size)
+{
+}
+
+template< typename T >
+template< typename ITERATOR >
+array<T>::array(BugEngine::Allocator& allocator, ITERATOR begin, ITERATOR end)
+    :   m_refCount(new(allocator) i_u32(1))
+    ,   m_array(new(allocator) T[distance(begin, end)])
+    ,   m_allocator(allocator)
+    ,   m_size(distance(begin, end))
+{
+    for (int i = 0; begin != end; ++begin, ++i)
+    {
+        m_array[i] = *begin;
+    }
+}
+
+template< typename T >
+array<T>::array(const array<T>& rhs)
+    :   m_refCount(rhs.m_refCount)
+    ,   m_array(rhs.m_array)
+    ,   m_allocator(rhs.m_allocator)
+    ,   m_size(rhs.m_size)
 {
 }
 
 template< typename T >
 array<T>::~array()
 {
-    ::operator delete[](allocator, m_array);
+    if (0 == (*m_refCount)--)
+    {
+        ::operator delete[](m_array, m_allocator);
+    }
 }
 
 template< typename T >
-T* array<T>::begin()
+typename array<T>::iterator array<T>::begin()
 {
     return m_array;
 }
 
 template< typename T >
-T* array<T>::end()
+typename array<T>::iterator array<T>::end()
 {
     return m_array+m_size;
 }
 
 template< typename T >
-const T* array<T>::begin() const
+typename array<T>::const_iterator array<T>::begin() const
 {
     return m_array;
 }
 
 template< typename T >
-const T* array<T>::end() const
+typename array<T>::const_iterator array<T>::end() const
 {
     return m_array+m_size;
 }

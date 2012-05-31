@@ -11,9 +11,12 @@
 namespace BugEngine
 {
 
-static inline Allocator& stringArena()
+namespace Arena
 {
-    return gameArena();
+static inline Allocator& string()
+{
+    return general();
+}
 }
 
 struct hashIstring
@@ -89,7 +92,7 @@ StringCache::Buffer* StringCache::getBuffer()
 
 StringCache::Buffer::Buffer()
 :   m_next(0)
-,   m_buffer(stringArena(), s_capacity)
+,   m_buffer(Arena::string(), s_capacity)
 ,   m_used(0)
 {
 }
@@ -142,7 +145,7 @@ StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    static StringIndex g_strings(stringArena());
+    static StringIndex g_strings(Arena::string());
     StringIndex::iterator it = g_strings.find(val);
     if (it != g_strings.end())
     {

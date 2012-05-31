@@ -134,12 +134,13 @@ T* Allocator::alloc()
     return (T*)alloc(sizeof(T), be_alignof(T));
 }
 
-be_api(CORE) Allocator& gameArena();
-be_api(CORE) Allocator& tempArena();
-be_api(CORE) Allocator& debugArena();
-be_api(CORE) Allocator& rttiArena();
-be_api(CORE) Allocator& scriptArena();
-be_api(CORE) Allocator& inputArena();
+namespace Arena
+{
+be_api(CORE) Allocator& temporary();
+be_api(CORE) Allocator& stack();
+be_api(CORE) Allocator& debug();
+be_api(CORE) Allocator& general();
+}
 
 }
 

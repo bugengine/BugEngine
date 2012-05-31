@@ -12,8 +12,8 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
 Package::Namespace::Namespace()
-    :   m_values(packageBuilderArena())
-    ,   m_children(packageBuilderArena())
+    :   m_values(Arena::packageBuilder())
+    ,   m_children(Arena::packageBuilder())
 {
 }
 
@@ -77,7 +77,7 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
         std::pair< minitl::hashmap< istring, ref<Namespace> >::iterator, bool > result = m_children.insert(std::make_pair(name[0], ref<Namespace>()));
         if (result.second)
         {
-            result.first->second = ref<Namespace>::create(packageBuilderArena());
+            result.first->second = ref<Namespace>::create(Arena::packageBuilder());
         }
         inamespace childname = name;
         childname.pop_front();
@@ -87,10 +87,10 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
 
 
 Package::Package()
-    :   m_plugins(packageBuilderArena())
-    ,   m_rootNamespace(ref<Namespace>::create(packageBuilderArena()))
-    ,   m_nodes(packageBuilderArena())
-    ,   m_values(packageBuilderArena())
+    :   m_plugins(Arena::packageBuilder())
+    ,   m_rootNamespace(ref<Namespace>::create(Arena::packageBuilder()))
+    ,   m_nodes(Arena::packageBuilder())
+    ,   m_values(Arena::packageBuilder())
 {
     m_rootNamespace->add(inamespace("game"), RTTI::Value(be_game_Namespace()));
 }

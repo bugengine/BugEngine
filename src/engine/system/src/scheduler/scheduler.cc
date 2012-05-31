@@ -109,10 +109,10 @@ void  Scheduler::release_task(void* task, size_t size)
 }
 
 Scheduler::Scheduler()
-:   m_workers(taskArena())
+:   m_workers(Arena::task())
 ,   m_synchro(0)
 ,   m_mainThreadSynchro(0)
-,   m_taskPool(taskArena(), 65535, 16)
+,   m_taskPool(Arena::task(), 65535, 16)
 ,   m_frameCount(0)
 ,   m_tasks()
 ,   m_mainThreadTasks()

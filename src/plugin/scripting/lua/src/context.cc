@@ -11,13 +11,18 @@
 
 namespace BugEngine
 {
+
+namespace Arena
+{
+static Allocator& lua()
+{
+    return script();
+}
+}
+
 namespace Lua
 {
 
-static Allocator& luaArena()
-{
-    return rttiArena();
-}
 
 
 const luaL_Reg Context::s_valueMetaTable[] = {
@@ -68,22 +73,22 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     {
         if (osize)
         {
-            return luaArena().realloc(ptr, nsize, 16);
+            return Arena::lua().realloc(ptr, nsize, 16);
         }
         else
         {
-            return luaArena().alloc(nsize, 16);
+            return Arena::lua().alloc(nsize, 16);
         }
     }
     else
     {
-        luaArena().free(ptr);
+        Arena::lua().free(ptr);
         return 0;
     }
 }
 
 Context::Context(const PluginContext& context)
-: ScriptEngine<LuaScript>(luaArena(), context.resourceManager)
+: ScriptEngine<LuaScript>(Arena::lua(), context.resourceManager)
 , m_state(lua_newstate(&Context::luaAlloc, 0))
 {
     luaopen_base(m_state);

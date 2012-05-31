@@ -15,9 +15,9 @@ namespace BugEngine
 
 
 Folder::Folder()
-    :   m_files(fsArena())
-    ,   m_folders(fsArena())
-    ,   m_mounts(fsArena())
+    :   m_files(Arena::filesystem())
+    ,   m_folders(Arena::filesystem())
+    ,   m_mounts(Arena::filesystem())
     ,   m_upToDate(false)
 {
 }

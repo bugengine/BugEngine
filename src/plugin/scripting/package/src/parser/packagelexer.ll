@@ -20,9 +20,9 @@ using namespace BugEngine::PackageBuilder::Nodes;
 #ifdef free
 # undef free
 #endif
-#define malloc(x)    BugEngine::tempArena().alloc(x, 4)
-#define relloc(x,s)  BugEngine::tempArena().realloc(x, s, 4)
-#define free(x)      BugEngine::tempArena().free(x)
+#define malloc(x)    BugEngine::Arena::temporary().alloc(x, 4)
+#define relloc(x,s)  BugEngine::Arena::temporary().realloc(x, s, 4)
+#define free(x)      BugEngine::Arena::temporary().free(x)
 #ifdef strdup
 # undef strdup
 #endif

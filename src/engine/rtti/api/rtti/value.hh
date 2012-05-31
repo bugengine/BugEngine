@@ -5,6 +5,7 @@
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
 #include   <rtti/typeinfo.script.hh>
+#include    <minitl/type/typemanipulation.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -103,7 +104,7 @@ public:
     inline Type type() const;
 
     template< typename T > inline const T as() const;
-    template< typename T > inline T as();
+    template< typename T > inline typename minitl::remove_const<T>::type as();
 
     template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
     template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }

@@ -18,11 +18,11 @@ namespace BugEngine
 IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
     ,   m_resourceManager(manager)
-    ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(taskArena(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
-    ,   m_sceneLoader(scoped<SceneGraphLoader>::create(gameArena(), this))
-    ,   m_renderSurfaceLoader(scoped< GPUResourceLoader<RenderSurface> >::create(gameArena(), this))
-    ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindow> >::create(gameArena(), this))
-    ,   m_shaderProgramLoader(scoped< GPUResourceLoader<ShaderProgram> >::create(gameArena(), this))
+    ,   m_syncTask(ref< Task< MethodCaller<IRenderer, &IRenderer::flush> > >::create(Arena::task(), "flush", color32(255,0,0),  MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
+    ,   m_sceneLoader(scoped<SceneGraphLoader>::create(Arena::resource(), this))
+    ,   m_renderSurfaceLoader(scoped< GPUResourceLoader<RenderSurface> >::create(Arena::resource(), this))
+    ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindow> >::create(Arena::resource(), this))
+    ,   m_shaderProgramLoader(scoped< GPUResourceLoader<ShaderProgram> >::create(Arena::resource(), this))
 {
     m_resourceManager->attach(be_typeid<RenderNode>::klass(), m_sceneLoader);
     m_resourceManager->attach(be_typeid<RenderSurface>::klass(), m_renderSurfaceLoader);

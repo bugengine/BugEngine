@@ -44,7 +44,7 @@ static D3DPRESENT_PARAMETERS defaultParams(HWND hwnd)
 }
 
 Dx9Renderer::Dx9Renderer(const PluginContext& context)
-:   Renderer(gameArena(), context.resourceManager)
+:   Renderer(Arena::general(), context.resourceManager)
 ,   m_dummyWindow(CreateWindowEx(0, (minitl::format<>("__be__%p__") | (const void*)this).c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0))
 ,   m_dummyParams(defaultParams(m_dummyWindow))
 ,   m_directx(Direct3DCreate9(D3D_SDK_VERSION))

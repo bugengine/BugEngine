@@ -49,9 +49,9 @@ class be_api(_3D) RenderSequence : public RenderNode
 {
     BE_NOCOPY(RenderSequence);
 private:
-    minitl::vector< ref<const RenderNode> > m_nodes;
+    minitl::array< ref<const RenderNode> > m_nodes;
 published:
-    RenderSequence(const minitl::vector< ref<const RenderNode> >& nodes);
+    RenderSequence(const minitl::array< ref<const RenderNode> >& nodes);
     ~RenderSequence();
 private:
     virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const override;

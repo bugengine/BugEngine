@@ -23,30 +23,16 @@ class be_api(WORLD) World : public Resource
 {
     friend class Storage;
     friend class Rule;
-    struct RuleConnection;
-    friend struct RuleConnection;
 private:
-    struct RuleConnection
-    {
-        weak<World> const                                   world;
-        weak<const Rule> const                              rule;
-        TaskGroup::TaskStartConnection const                start;
-        TaskGroup::TaskEndConnection const                  end;
-        minitl::vector< ITask::CallbackConnection > const   dependencies;
-
-        RuleConnection(weak<World> world, weak<const Rule> rule);
-        ~RuleConnection();
-    };
-private:
-    ref<ITask>                          m_task;
-    minitl::vector< RuleConnection >    m_rules;
-    scoped<State>                       m_emptyEntityState;
-    Entity                              m_freeEntityId;
-    SystemAllocator                     m_allocator16k;
-    SystemAllocator                     m_allocator64k;
-    minitl::vector<Entity*>             m_entityBuffers;
-    i_u32                               m_entityCount;
-    u16                                 m_worldIndex;
+    ref<ITask>                      m_task;
+    minitl::array< scoped<Rule> >   m_rules;
+    scoped<State>                   m_emptyEntityState;
+    Entity                          m_freeEntityId;
+    SystemAllocator                 m_allocator16k;
+    SystemAllocator                 m_allocator64k;
+    minitl::vector<Entity*>         m_entityBuffers;
+    i_u32                           m_entityCount;
+    u16                             m_worldIndex;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
     void addRule(weak<const Rule> rule);
@@ -59,7 +45,7 @@ published:
 
     void addComponent(Entity e, RTTI::Value& v);
 published:
-    World();
+    World(minitl::array< scoped<Rule> > rules);
     ~World();
 };
 

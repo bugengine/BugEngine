@@ -50,9 +50,9 @@ static int yyerror(const char *msg)
 #ifdef free
 # undef free
 #endif
-#define malloc(x)    BugEngine::tempArena().alloc(x, 4)
-#define realloc(x,s) BugEngine::tempArena().realloc(x, s, 4)
-#define free(x)      BugEngine::tempArena().free(x)
+#define malloc(x)    BugEngine::Arena::temporary().alloc(x, 4)
+#define realloc(x,s) BugEngine::Arena::temporary().realloc(x, s, 4)
+#define free(x)      BugEngine::Arena::temporary().free(x)
 
 using namespace BugEngine::PackageBuilder;
 using namespace BugEngine::PackageBuilder::Nodes;
@@ -125,13 +125,13 @@ decl_plugin:
 
 decl_object:
         {
-            s_currentObject = ref<Object>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            s_currentObject = ref<Object>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
             ((BuildContext*)param)->result->insertNode(s_currentObject);
         }
         editor_attributes
         TOK_ID '=' fullname
         {
-            ref<Nodes::Reference> reference = ref<Reference>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
             reference->setName(BugEngine::inamespace($5));
             s_currentObject->setMethod(reference);
             s_currentObject->setName($3);
@@ -170,7 +170,7 @@ params:
 param:
         TOK_ID '=' value ';'
         {
-            ref<Parameter> parameter = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($1), *$3);
+            ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($1), *$3);
             s_currentObject->addParameter(parameter);
             $3->~ref();
             free($1);
@@ -179,7 +179,7 @@ param:
     |
         TOK_ID ':'  TOK_ID '=' value ';'
         {
-            ref<Parameter> parameter = ref<Parameter>::create(packageBuilderArena(), BugEngine::istring($3), *$5);
+            ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($3), *$5);
             s_currentObject->addParameter(parameter);
             $5->~ref();
             free($1);
@@ -192,41 +192,41 @@ value:
         fullname
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            ref<Reference> reference = ref<Reference>::create(packageBuilderArena(), ((BuildContext*)param)->result);
+            ref<Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
             reference->setName(BugEngine::inamespace($1));
-            new ($$) ref<Value>(ref<ReferenceValue>::create(packageBuilderArena(), reference));
+            new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(), reference));
             free($1);
         }
     |
         VAL_BOOLEAN
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<BoolValue>::create(packageBuilderArena(), $1));
+            new ($$) ref<Value>(ref<BoolValue>::create(BugEngine::Arena::packageBuilder(), $1));
         }
     |
         VAL_INTEGER
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<IntValue>::create(packageBuilderArena(), $1));
+            new ($$) ref<Value>(ref<IntValue>::create(BugEngine::Arena::packageBuilder(), $1));
         }
     |
         VAL_FLOAT
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<FloatValue>::create(packageBuilderArena(), $1));
+            new ($$) ref<Value>(ref<FloatValue>::create(BugEngine::Arena::packageBuilder(), $1));
         }
     |
         VAL_STRING
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<StringValue>::create(packageBuilderArena(), $1));
+            new ($$) ref<Value>(ref<StringValue>::create(BugEngine::Arena::packageBuilder(), $1));
             free($1);
         }
     |
         VAL_FILENAME
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<FileValue>::create(packageBuilderArena(), ((BuildContext*)param)->folder, $1));
+            new ($$) ref<Value>(ref<FileValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->folder, $1));
             free($1);
         }
     ;

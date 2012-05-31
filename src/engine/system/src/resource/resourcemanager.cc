@@ -8,8 +8,8 @@ namespace BugEngine
 {
 
 ResourceManager::ResourceManager()
-: m_loaders(gameArena())
-, m_tickets(gameArena())
+: m_loaders(Arena::resource())
+, m_tickets(Arena::resource())
 {
 }
 
@@ -78,7 +78,7 @@ void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resourc
     Ticket ticket;
     ticket.loader = loader;
     ticket.resource = resource;
-    ticket.ticket = file->beginRead(0, 0, tempArena());
+    ticket.ticket = file->beginRead(0, 0, Arena::temporary());
     ticket.progress = 0;
     m_tickets.push_back(ticket);
 }

@@ -25,7 +25,7 @@ Value::Value(T t)
 :   m_type(be_typeid<T>::type())
 ,   m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
     be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
@@ -36,7 +36,7 @@ Value::Value(T t, MakeConstType /*constify*/)
 :   m_type(Type::makeType(be_typeid<T>::type(), Type::MakeConst))
 ,   m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
     be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
     m_type.copy(&t, memory());
@@ -46,7 +46,7 @@ Value::Value(const Value& other)
 :   m_type(other.m_type)
 ,   m_reference(other.m_reference)
 {
-    m_ref.m_pointer = other.m_reference ? other.m_ref.m_pointer : (m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0);
+    m_ref.m_pointer = other.m_reference ? other.m_ref.m_pointer : (m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0);
     m_ref.m_deallocate = other.m_reference ? false : (m_ref.m_pointer != 0);
     if (!m_reference)
         m_type.copy(other.memory(), memory());
@@ -64,7 +64,7 @@ Value::Value(Type type, ReserveType)
 :   m_type(type)
 ,   m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? scriptArena().alloc(m_type.size()) : 0;
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
 }
 
@@ -102,7 +102,7 @@ Value::~Value()
         m_type.destroy(memory());
         if (m_type.size() > sizeof(m_buffer) && m_ref.m_deallocate)
         {
-            scriptArena().free(m_ref.m_pointer);
+            Arena::script().free(m_ref.m_pointer);
         }
     }
 }
@@ -163,7 +163,7 @@ const T Value::as() const
 }
 
 template< typename T >
-T Value::as()
+typename minitl::remove_const<T>::type Value::as()
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
     Type ti = be_typeid<T>::type();

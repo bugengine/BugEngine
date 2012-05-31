@@ -15,7 +15,7 @@ DwarfModule::StringBuffer::StringBuffer(size_t size, ref<const StringBuffer> nex
     :   m_next(next)
     ,   m_size(size)
     ,   m_current(0)
-    ,   m_buffer(debugArena(), size)
+    ,   m_buffer(Arena::debug(), size)
 {
 }
 
@@ -256,7 +256,7 @@ DwarfModule::DwarfModule(const ifilename& moduleName, const Module& m, u64 begin
 :   m_begin(begin)
 ,   m_end(begin+size)
 ,   m_moduleName(moduleName)
-,   m_units(debugArena())
+,   m_units(Arena::debug())
 {
     be_info("loading module %s | %d-%d" | moduleName | begin | size);
     switch(m.endianness())
@@ -309,31 +309,31 @@ void DwarfModule::parse(const Module& module)
     const Module::Section& debug_str = module[".debug_str"];
     if (debug_str)
     {
-        m_strings = ref<StringBuffer>::create(debugArena(), be_checked_numcast<size_t>(debug_str.fileSize), m_strings);
+        m_strings = ref<StringBuffer>::create(Arena::debug(), be_checked_numcast<size_t>(debug_str.fileSize), m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
-    debugInfo = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_info.fileSize));
+    debugInfo = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_info.fileSize));
     if (debug_info)
     {
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
-    debugAbbrev = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_abbrev.fileSize));
+    debugAbbrev = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_abbrev.fileSize));
     if (debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
-    lineProgram = Allocator::Block<u8>(tempArena(), be_checked_numcast<size_t>(debug_line.fileSize));
+    lineProgram = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_line.fileSize));
     if (debug_line)
     {
         module.readSection(debug_line, lineProgram);
     }
 
-    minitl::vector<Dwarf::Abbreviation> abbrev(tempArena());
+    minitl::vector<Dwarf::Abbreviation> abbrev(Arena::temporary());
     Buffer<endianness> abbreviations(debugAbbrev, debugAbbrevSize);
     Buffer<endianness> info(debugInfo, debugInfoSize);
 
@@ -360,12 +360,12 @@ const char * DwarfModule::storeString(const char *string)
     be_assert(size < c_stringBufferSize, "string is too big to fit in a pool; string size is %d, pool size is %d" | size | c_stringBufferSize);
     if (!m_strings)
     {
-        m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize, ref<StringBuffer>());
+        m_strings = ref<StringBuffer>::create(Arena::temporary(), c_stringBufferSize, ref<StringBuffer>());
     }
     result = m_strings->store(string, size);
     if (!result)
     {
-        m_strings = ref<StringBuffer>::create(debugArena(), c_stringBufferSize, m_strings);
+        m_strings = ref<StringBuffer>::create(Arena::temporary(), c_stringBufferSize, m_strings);
         result = m_strings->store(string, size);
         be_assert(result, "new empty pool could not store string");
     }
@@ -542,7 +542,7 @@ bool DwarfModule::fillNode(Buffer<endianness>& buffer, CompilationUnit& r, const
     }
     if (abbrev.children)
     {
-        UnitMap m(tempArena());
+        UnitMap m(Arena::temporary());
         while (readInfos(buffer, m, abbreviations, ptrSize)) /* Again */;
     }
     return false; //attributesMatched == 3;

@@ -22,5 +22,12 @@
 #define     published           public
 #define     be_tag(v)
 
+namespace BugEngine { namespace Arena
+{
+be_api(RTTI) Allocator& rtti();
+be_api(RTTI) Allocator& script();
+
+}}
+
 /*****************************************************************************/
 #endif

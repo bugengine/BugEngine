@@ -16,27 +16,14 @@ namespace BugEngine { namespace World
 static const Entity s_defaultSlot = { {0, 0, 0} };
 static i_u16 s_worldCount = 0;
 
-World::RuleConnection::RuleConnection(weak<World> world, weak<const Rule> rule)
-    :   world(world)
-    ,   rule(rule)
-    ,   start(be_checked_cast<TaskGroup>(world->m_task), rule->updateTask())
-    ,   end(be_checked_cast<TaskGroup>(world->m_task), rule->updateTask())
-    ,   dependencies(gameArena())
-{
-}
-
-World::RuleConnection::~RuleConnection()
-{
-}
-
-World::World()
-:   m_task(ref<TaskGroup>::create(taskArena(), "world:update", color32(89, 89, 180)))
-,   m_rules(gameArena())
-,   m_emptyEntityState(scoped<State>::create(gameArena()))
+World::World(minitl::array< scoped<Rule> > rules)
+:   m_task(ref<TaskGroup>::create(Arena::task(), "world:update", color32(89, 89, 180)))
+,   m_rules(rules)
+,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_allocator16k(SystemAllocator::Block64kb, 2048)
 ,   m_allocator64k(SystemAllocator::Block64kb, 512)
-,   m_entityBuffers(gameArena())
+,   m_entityBuffers(Arena::game())
 ,   m_worldIndex(++s_worldCount)
 {
     m_freeEntityId.index.world = m_worldIndex;
@@ -100,24 +87,6 @@ void World::addComponent(Entity e, RTTI::Value& component)
     be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
     be_assert(be_typeid<const Component&>::type() <= component.type(), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
-}
-
-void World::addRule(weak<const Rule> rule)
-{
-    m_rules.push_back(RuleConnection(this, rule));
-}
-
-void World::removeRule(weak<const Rule> rule)
-{
-    for (minitl::vector< RuleConnection >::iterator it = m_rules.begin(); it != m_rules.end(); ++it)
-    {
-        if (it->rule == rule)
-        {
-            m_rules.erase(it);
-            return;
-        }
-    }
-    be_notreached();
 }
 
 }}

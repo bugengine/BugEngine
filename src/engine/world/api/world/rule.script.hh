@@ -16,12 +16,8 @@ class be_api(WORLD) Rule : public minitl::refcountable
 {
     friend class World;
 protected:
-    weak<World> m_world;
-protected:
-    Rule(weak<World> world);
+    Rule();
     ~Rule();
-protected:
-    virtual weak<ITask> updateTask() const = 0;
 };
 
 }}

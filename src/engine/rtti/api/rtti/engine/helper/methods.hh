@@ -95,7 +95,7 @@ struct procedurehelper< T BE_COMMA(BE_METHOD_PARAMS) BE_LIST(BE_METHOD_PARAMS, P
         be_forceuse(paramCount);
         be_assert_recover(paramCount == BE_METHOD_PARAMS, "expecting %d parameter; got %d" | BE_METHOD_PARAMS | paramCount, return Value());
         be_assert_recover((BE_LIST3_AND(BE_METHOD_PARAMS, be_typeid<P, >::type() <= params[BE_PP_NUM_, -1].type())), "invalid parameter", return Value());
-        return Value(ref<T>::create(scriptArena() BE_COMMA(BE_METHOD_PARAMS) BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, -1].as<P, >())));
+        return Value(ref<T>::create(Arena::script() BE_COMMA(BE_METHOD_PARAMS) BE_LIST3(BE_METHOD_PARAMS, params[BE_PP_NUM_, -1].as<P, >())));
     }
 
     static Value construct(Value* params, u32 paramCount)

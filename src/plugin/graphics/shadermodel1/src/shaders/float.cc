@@ -95,7 +95,7 @@ private:
 };
 ref<Float> operator /(weak<const Float> node1, weak<const Float> node2)
 {
-    return ref<FloatdivFloat>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat : public Float
@@ -127,7 +127,7 @@ private:
 };
 ref<Float> operator +(weak<const Float> node1, weak<const Float> node2)
 {
-    return ref<FloataddFloat>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat : public Float
@@ -159,7 +159,7 @@ private:
 };
 ref<Float> operator -(weak<const Float> node1, weak<const Float> node2)
 {
-    return ref<FloatsubFloat>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -252,7 +252,7 @@ private:
 };
 ref<Float2> operator /(weak<const Float2> node1, weak<const Float2> node2)
 {
-    return ref<Float2divFloat2>::create(gameArena(), node1, node2);
+    return ref<Float2divFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2addFloat2 : public Float2
@@ -284,7 +284,7 @@ private:
 };
 ref<Float2> operator +(weak<const Float2> node1, weak<const Float2> node2)
 {
-    return ref<Float2addFloat2>::create(gameArena(), node1, node2);
+    return ref<Float2addFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2subFloat2 : public Float2
@@ -316,7 +316,7 @@ private:
 };
 ref<Float2> operator -(weak<const Float2> node1, weak<const Float2> node2)
 {
-    return ref<Float2subFloat2>::create(gameArena(), node1, node2);
+    return ref<Float2subFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2mulFloat2x2 : public Float2
@@ -348,7 +348,7 @@ private:
 };
 ref<Float2> operator *(weak<const Float2> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2mulFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2mulFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2mulFloat2 : public Float2
@@ -380,7 +380,7 @@ private:
 };
 ref<Float2> operator *(weak<const Float2x2> node1, weak<const Float2> node2)
 {
-    return ref<Float2x2mulFloat2>::create(gameArena(), node1, node2);
+    return ref<Float2x2mulFloat2>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat2 : public Float2
@@ -412,7 +412,7 @@ private:
 };
 ref<Float2> operator *(weak<const Float> node1, weak<const Float2> node2)
 {
-    return ref<FloatmulFloat2>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2mulFloat : public Float2
@@ -444,7 +444,7 @@ private:
 };
 ref<Float2> operator *(weak<const Float2> node1, weak<const Float> node2)
 {
-    return ref<Float2mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float2mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat2 : public Float2
@@ -476,7 +476,7 @@ private:
 };
 ref<Float2> operator /(weak<const Float> node1, weak<const Float2> node2)
 {
-    return ref<FloatdivFloat2>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2divFloat : public Float2
@@ -508,7 +508,7 @@ private:
 };
 ref<Float2> operator /(weak<const Float2> node1, weak<const Float> node2)
 {
-    return ref<Float2divFloat>::create(gameArena(), node1, node2);
+    return ref<Float2divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat2 : public Float2
@@ -540,7 +540,7 @@ private:
 };
 ref<Float2> operator +(weak<const Float> node1, weak<const Float2> node2)
 {
-    return ref<FloataddFloat2>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2addFloat : public Float2
@@ -572,7 +572,7 @@ private:
 };
 ref<Float2> operator +(weak<const Float2> node1, weak<const Float> node2)
 {
-    return ref<Float2addFloat>::create(gameArena(), node1, node2);
+    return ref<Float2addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat2 : public Float2
@@ -604,7 +604,7 @@ private:
 };
 ref<Float2> operator -(weak<const Float> node1, weak<const Float2> node2)
 {
-    return ref<FloatsubFloat2>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat2>::create(Arena::script(), node1, node2);
 }
 
 class Float2subFloat : public Float2
@@ -636,7 +636,7 @@ private:
 };
 ref<Float2> operator -(weak<const Float2> node1, weak<const Float> node2)
 {
-    return ref<Float2subFloat>::create(gameArena(), node1, node2);
+    return ref<Float2subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -729,7 +729,7 @@ private:
 };
 ref<Float3> operator /(weak<const Float3> node1, weak<const Float3> node2)
 {
-    return ref<Float3divFloat3>::create(gameArena(), node1, node2);
+    return ref<Float3divFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3addFloat3 : public Float3
@@ -761,7 +761,7 @@ private:
 };
 ref<Float3> operator +(weak<const Float3> node1, weak<const Float3> node2)
 {
-    return ref<Float3addFloat3>::create(gameArena(), node1, node2);
+    return ref<Float3addFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3subFloat3 : public Float3
@@ -793,7 +793,7 @@ private:
 };
 ref<Float3> operator -(weak<const Float3> node1, weak<const Float3> node2)
 {
-    return ref<Float3subFloat3>::create(gameArena(), node1, node2);
+    return ref<Float3subFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3mulFloat3x3 : public Float3
@@ -825,7 +825,7 @@ private:
 };
 ref<Float3> operator *(weak<const Float3> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3mulFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3mulFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3mulFloat3 : public Float3
@@ -857,7 +857,7 @@ private:
 };
 ref<Float3> operator *(weak<const Float3x3> node1, weak<const Float3> node2)
 {
-    return ref<Float3x3mulFloat3>::create(gameArena(), node1, node2);
+    return ref<Float3x3mulFloat3>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat3 : public Float3
@@ -889,7 +889,7 @@ private:
 };
 ref<Float3> operator *(weak<const Float> node1, weak<const Float3> node2)
 {
-    return ref<FloatmulFloat3>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3mulFloat : public Float3
@@ -921,7 +921,7 @@ private:
 };
 ref<Float3> operator *(weak<const Float3> node1, weak<const Float> node2)
 {
-    return ref<Float3mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float3mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat3 : public Float3
@@ -953,7 +953,7 @@ private:
 };
 ref<Float3> operator /(weak<const Float> node1, weak<const Float3> node2)
 {
-    return ref<FloatdivFloat3>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3divFloat : public Float3
@@ -985,7 +985,7 @@ private:
 };
 ref<Float3> operator /(weak<const Float3> node1, weak<const Float> node2)
 {
-    return ref<Float3divFloat>::create(gameArena(), node1, node2);
+    return ref<Float3divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat3 : public Float3
@@ -1017,7 +1017,7 @@ private:
 };
 ref<Float3> operator +(weak<const Float> node1, weak<const Float3> node2)
 {
-    return ref<FloataddFloat3>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3addFloat : public Float3
@@ -1049,7 +1049,7 @@ private:
 };
 ref<Float3> operator +(weak<const Float3> node1, weak<const Float> node2)
 {
-    return ref<Float3addFloat>::create(gameArena(), node1, node2);
+    return ref<Float3addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat3 : public Float3
@@ -1081,7 +1081,7 @@ private:
 };
 ref<Float3> operator -(weak<const Float> node1, weak<const Float3> node2)
 {
-    return ref<FloatsubFloat3>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat3>::create(Arena::script(), node1, node2);
 }
 
 class Float3subFloat : public Float3
@@ -1113,7 +1113,7 @@ private:
 };
 ref<Float3> operator -(weak<const Float3> node1, weak<const Float> node2)
 {
-    return ref<Float3subFloat>::create(gameArena(), node1, node2);
+    return ref<Float3subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -1206,7 +1206,7 @@ private:
 };
 ref<Float4> operator /(weak<const Float4> node1, weak<const Float4> node2)
 {
-    return ref<Float4divFloat4>::create(gameArena(), node1, node2);
+    return ref<Float4divFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4addFloat4 : public Float4
@@ -1238,7 +1238,7 @@ private:
 };
 ref<Float4> operator +(weak<const Float4> node1, weak<const Float4> node2)
 {
-    return ref<Float4addFloat4>::create(gameArena(), node1, node2);
+    return ref<Float4addFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4subFloat4 : public Float4
@@ -1270,7 +1270,7 @@ private:
 };
 ref<Float4> operator -(weak<const Float4> node1, weak<const Float4> node2)
 {
-    return ref<Float4subFloat4>::create(gameArena(), node1, node2);
+    return ref<Float4subFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4mulFloat4x4 : public Float4
@@ -1302,7 +1302,7 @@ private:
 };
 ref<Float4> operator *(weak<const Float4> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4mulFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4mulFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4mulFloat4 : public Float4
@@ -1334,7 +1334,7 @@ private:
 };
 ref<Float4> operator *(weak<const Float4x4> node1, weak<const Float4> node2)
 {
-    return ref<Float4x4mulFloat4>::create(gameArena(), node1, node2);
+    return ref<Float4x4mulFloat4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat4 : public Float4
@@ -1366,7 +1366,7 @@ private:
 };
 ref<Float4> operator *(weak<const Float> node1, weak<const Float4> node2)
 {
-    return ref<FloatmulFloat4>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4mulFloat : public Float4
@@ -1398,7 +1398,7 @@ private:
 };
 ref<Float4> operator *(weak<const Float4> node1, weak<const Float> node2)
 {
-    return ref<Float4mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float4mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat4 : public Float4
@@ -1430,7 +1430,7 @@ private:
 };
 ref<Float4> operator /(weak<const Float> node1, weak<const Float4> node2)
 {
-    return ref<FloatdivFloat4>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4divFloat : public Float4
@@ -1462,7 +1462,7 @@ private:
 };
 ref<Float4> operator /(weak<const Float4> node1, weak<const Float> node2)
 {
-    return ref<Float4divFloat>::create(gameArena(), node1, node2);
+    return ref<Float4divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat4 : public Float4
@@ -1494,7 +1494,7 @@ private:
 };
 ref<Float4> operator +(weak<const Float> node1, weak<const Float4> node2)
 {
-    return ref<FloataddFloat4>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4addFloat : public Float4
@@ -1526,7 +1526,7 @@ private:
 };
 ref<Float4> operator +(weak<const Float4> node1, weak<const Float> node2)
 {
-    return ref<Float4addFloat>::create(gameArena(), node1, node2);
+    return ref<Float4addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat4 : public Float4
@@ -1558,7 +1558,7 @@ private:
 };
 ref<Float4> operator -(weak<const Float> node1, weak<const Float4> node2)
 {
-    return ref<FloatsubFloat4>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat4>::create(Arena::script(), node1, node2);
 }
 
 class Float4subFloat : public Float4
@@ -1590,7 +1590,7 @@ private:
 };
 ref<Float4> operator -(weak<const Float4> node1, weak<const Float> node2)
 {
-    return ref<Float4subFloat>::create(gameArena(), node1, node2);
+    return ref<Float4subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -1683,7 +1683,7 @@ private:
 };
 ref<Float2x2> operator /(weak<const Float2x2> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x2divFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2divFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2addFloat2x2 : public Float2x2
@@ -1715,7 +1715,7 @@ private:
 };
 ref<Float2x2> operator +(weak<const Float2x2> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x2addFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2addFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2subFloat2x2 : public Float2x2
@@ -1747,7 +1747,7 @@ private:
 };
 ref<Float2x2> operator -(weak<const Float2x2> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x2subFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2subFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2mulFloat2x2 : public Float2x2
@@ -1779,7 +1779,7 @@ private:
 };
 ref<Float2x2> operator *(weak<const Float2x2> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x2mulFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2mulFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2mulFloat2x3 : public Float2x2
@@ -1811,7 +1811,7 @@ private:
 };
 ref<Float2x2> operator *(weak<const Float3x2> node1, weak<const Float2x3> node2)
 {
-    return ref<Float3x2mulFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float3x2mulFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2mulFloat2x4 : public Float2x2
@@ -1843,7 +1843,7 @@ private:
 };
 ref<Float2x2> operator *(weak<const Float4x2> node1, weak<const Float2x4> node2)
 {
-    return ref<Float4x2mulFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float4x2mulFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat2x2 : public Float2x2
@@ -1875,7 +1875,7 @@ private:
 };
 ref<Float2x2> operator *(weak<const Float> node1, weak<const Float2x2> node2)
 {
-    return ref<FloatmulFloat2x2>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2mulFloat : public Float2x2
@@ -1907,7 +1907,7 @@ private:
 };
 ref<Float2x2> operator *(weak<const Float2x2> node1, weak<const Float> node2)
 {
-    return ref<Float2x2mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x2mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat2x2 : public Float2x2
@@ -1939,7 +1939,7 @@ private:
 };
 ref<Float2x2> operator /(weak<const Float> node1, weak<const Float2x2> node2)
 {
-    return ref<FloatdivFloat2x2>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2divFloat : public Float2x2
@@ -1971,7 +1971,7 @@ private:
 };
 ref<Float2x2> operator /(weak<const Float2x2> node1, weak<const Float> node2)
 {
-    return ref<Float2x2divFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x2divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat2x2 : public Float2x2
@@ -2003,7 +2003,7 @@ private:
 };
 ref<Float2x2> operator +(weak<const Float> node1, weak<const Float2x2> node2)
 {
-    return ref<FloataddFloat2x2>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2addFloat : public Float2x2
@@ -2035,7 +2035,7 @@ private:
 };
 ref<Float2x2> operator +(weak<const Float2x2> node1, weak<const Float> node2)
 {
-    return ref<Float2x2addFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x2addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat2x2 : public Float2x2
@@ -2067,7 +2067,7 @@ private:
 };
 ref<Float2x2> operator -(weak<const Float> node1, weak<const Float2x2> node2)
 {
-    return ref<FloatsubFloat2x2>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2subFloat : public Float2x2
@@ -2099,7 +2099,7 @@ private:
 };
 ref<Float2x2> operator -(weak<const Float2x2> node1, weak<const Float> node2)
 {
-    return ref<Float2x2subFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x2subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -2192,7 +2192,7 @@ private:
 };
 ref<Float3x2> operator /(weak<const Float3x2> node1, weak<const Float3x2> node2)
 {
-    return ref<Float3x2divFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float3x2divFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2addFloat3x2 : public Float3x2
@@ -2224,7 +2224,7 @@ private:
 };
 ref<Float3x2> operator +(weak<const Float3x2> node1, weak<const Float3x2> node2)
 {
-    return ref<Float3x2addFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float3x2addFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2subFloat3x2 : public Float3x2
@@ -2256,7 +2256,7 @@ private:
 };
 ref<Float3x2> operator -(weak<const Float3x2> node1, weak<const Float3x2> node2)
 {
-    return ref<Float3x2subFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float3x2subFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2mulFloat3x2 : public Float3x2
@@ -2288,7 +2288,7 @@ private:
 };
 ref<Float3x2> operator *(weak<const Float2x2> node1, weak<const Float3x2> node2)
 {
-    return ref<Float2x2mulFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2mulFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2mulFloat3x3 : public Float3x2
@@ -2320,7 +2320,7 @@ private:
 };
 ref<Float3x2> operator *(weak<const Float3x2> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x2mulFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x2mulFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2mulFloat3x4 : public Float3x2
@@ -2352,7 +2352,7 @@ private:
 };
 ref<Float3x2> operator *(weak<const Float4x2> node1, weak<const Float3x4> node2)
 {
-    return ref<Float4x2mulFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float4x2mulFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat3x2 : public Float3x2
@@ -2384,7 +2384,7 @@ private:
 };
 ref<Float3x2> operator *(weak<const Float> node1, weak<const Float3x2> node2)
 {
-    return ref<FloatmulFloat3x2>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2mulFloat : public Float3x2
@@ -2416,7 +2416,7 @@ private:
 };
 ref<Float3x2> operator *(weak<const Float3x2> node1, weak<const Float> node2)
 {
-    return ref<Float3x2mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x2mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat3x2 : public Float3x2
@@ -2448,7 +2448,7 @@ private:
 };
 ref<Float3x2> operator /(weak<const Float> node1, weak<const Float3x2> node2)
 {
-    return ref<FloatdivFloat3x2>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2divFloat : public Float3x2
@@ -2480,7 +2480,7 @@ private:
 };
 ref<Float3x2> operator /(weak<const Float3x2> node1, weak<const Float> node2)
 {
-    return ref<Float3x2divFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x2divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat3x2 : public Float3x2
@@ -2512,7 +2512,7 @@ private:
 };
 ref<Float3x2> operator +(weak<const Float> node1, weak<const Float3x2> node2)
 {
-    return ref<FloataddFloat3x2>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2addFloat : public Float3x2
@@ -2544,7 +2544,7 @@ private:
 };
 ref<Float3x2> operator +(weak<const Float3x2> node1, weak<const Float> node2)
 {
-    return ref<Float3x2addFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x2addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat3x2 : public Float3x2
@@ -2576,7 +2576,7 @@ private:
 };
 ref<Float3x2> operator -(weak<const Float> node1, weak<const Float3x2> node2)
 {
-    return ref<FloatsubFloat3x2>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2subFloat : public Float3x2
@@ -2608,7 +2608,7 @@ private:
 };
 ref<Float3x2> operator -(weak<const Float3x2> node1, weak<const Float> node2)
 {
-    return ref<Float3x2subFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x2subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -2701,7 +2701,7 @@ private:
 };
 ref<Float4x2> operator /(weak<const Float4x2> node1, weak<const Float4x2> node2)
 {
-    return ref<Float4x2divFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float4x2divFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2addFloat4x2 : public Float4x2
@@ -2733,7 +2733,7 @@ private:
 };
 ref<Float4x2> operator +(weak<const Float4x2> node1, weak<const Float4x2> node2)
 {
-    return ref<Float4x2addFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float4x2addFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2subFloat4x2 : public Float4x2
@@ -2765,7 +2765,7 @@ private:
 };
 ref<Float4x2> operator -(weak<const Float4x2> node1, weak<const Float4x2> node2)
 {
-    return ref<Float4x2subFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float4x2subFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float2x2mulFloat4x2 : public Float4x2
@@ -2797,7 +2797,7 @@ private:
 };
 ref<Float4x2> operator *(weak<const Float2x2> node1, weak<const Float4x2> node2)
 {
-    return ref<Float2x2mulFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float2x2mulFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x2mulFloat4x3 : public Float4x2
@@ -2829,7 +2829,7 @@ private:
 };
 ref<Float4x2> operator *(weak<const Float3x2> node1, weak<const Float4x3> node2)
 {
-    return ref<Float3x2mulFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float3x2mulFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2mulFloat4x4 : public Float4x2
@@ -2861,7 +2861,7 @@ private:
 };
 ref<Float4x2> operator *(weak<const Float4x2> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x2mulFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x2mulFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat4x2 : public Float4x2
@@ -2893,7 +2893,7 @@ private:
 };
 ref<Float4x2> operator *(weak<const Float> node1, weak<const Float4x2> node2)
 {
-    return ref<FloatmulFloat4x2>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2mulFloat : public Float4x2
@@ -2925,7 +2925,7 @@ private:
 };
 ref<Float4x2> operator *(weak<const Float4x2> node1, weak<const Float> node2)
 {
-    return ref<Float4x2mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x2mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat4x2 : public Float4x2
@@ -2957,7 +2957,7 @@ private:
 };
 ref<Float4x2> operator /(weak<const Float> node1, weak<const Float4x2> node2)
 {
-    return ref<FloatdivFloat4x2>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2divFloat : public Float4x2
@@ -2989,7 +2989,7 @@ private:
 };
 ref<Float4x2> operator /(weak<const Float4x2> node1, weak<const Float> node2)
 {
-    return ref<Float4x2divFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x2divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat4x2 : public Float4x2
@@ -3021,7 +3021,7 @@ private:
 };
 ref<Float4x2> operator +(weak<const Float> node1, weak<const Float4x2> node2)
 {
-    return ref<FloataddFloat4x2>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2addFloat : public Float4x2
@@ -3053,7 +3053,7 @@ private:
 };
 ref<Float4x2> operator +(weak<const Float4x2> node1, weak<const Float> node2)
 {
-    return ref<Float4x2addFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x2addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat4x2 : public Float4x2
@@ -3085,7 +3085,7 @@ private:
 };
 ref<Float4x2> operator -(weak<const Float> node1, weak<const Float4x2> node2)
 {
-    return ref<FloatsubFloat4x2>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float4x2subFloat : public Float4x2
@@ -3117,7 +3117,7 @@ private:
 };
 ref<Float4x2> operator -(weak<const Float4x2> node1, weak<const Float> node2)
 {
-    return ref<Float4x2subFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x2subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -3210,7 +3210,7 @@ private:
 };
 ref<Float2x3> operator /(weak<const Float2x3> node1, weak<const Float2x3> node2)
 {
-    return ref<Float2x3divFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float2x3divFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3addFloat2x3 : public Float2x3
@@ -3242,7 +3242,7 @@ private:
 };
 ref<Float2x3> operator +(weak<const Float2x3> node1, weak<const Float2x3> node2)
 {
-    return ref<Float2x3addFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float2x3addFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3subFloat2x3 : public Float2x3
@@ -3274,7 +3274,7 @@ private:
 };
 ref<Float2x3> operator -(weak<const Float2x3> node1, weak<const Float2x3> node2)
 {
-    return ref<Float2x3subFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float2x3subFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3mulFloat2x2 : public Float2x3
@@ -3306,7 +3306,7 @@ private:
 };
 ref<Float2x3> operator *(weak<const Float2x3> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x3mulFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x3mulFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3mulFloat2x3 : public Float2x3
@@ -3338,7 +3338,7 @@ private:
 };
 ref<Float2x3> operator *(weak<const Float3x3> node1, weak<const Float2x3> node2)
 {
-    return ref<Float3x3mulFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3mulFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3mulFloat2x4 : public Float2x3
@@ -3370,7 +3370,7 @@ private:
 };
 ref<Float2x3> operator *(weak<const Float4x3> node1, weak<const Float2x4> node2)
 {
-    return ref<Float4x3mulFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float4x3mulFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat2x3 : public Float2x3
@@ -3402,7 +3402,7 @@ private:
 };
 ref<Float2x3> operator *(weak<const Float> node1, weak<const Float2x3> node2)
 {
-    return ref<FloatmulFloat2x3>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3mulFloat : public Float2x3
@@ -3434,7 +3434,7 @@ private:
 };
 ref<Float2x3> operator *(weak<const Float2x3> node1, weak<const Float> node2)
 {
-    return ref<Float2x3mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x3mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat2x3 : public Float2x3
@@ -3466,7 +3466,7 @@ private:
 };
 ref<Float2x3> operator /(weak<const Float> node1, weak<const Float2x3> node2)
 {
-    return ref<FloatdivFloat2x3>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3divFloat : public Float2x3
@@ -3498,7 +3498,7 @@ private:
 };
 ref<Float2x3> operator /(weak<const Float2x3> node1, weak<const Float> node2)
 {
-    return ref<Float2x3divFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x3divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat2x3 : public Float2x3
@@ -3530,7 +3530,7 @@ private:
 };
 ref<Float2x3> operator +(weak<const Float> node1, weak<const Float2x3> node2)
 {
-    return ref<FloataddFloat2x3>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3addFloat : public Float2x3
@@ -3562,7 +3562,7 @@ private:
 };
 ref<Float2x3> operator +(weak<const Float2x3> node1, weak<const Float> node2)
 {
-    return ref<Float2x3addFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x3addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat2x3 : public Float2x3
@@ -3594,7 +3594,7 @@ private:
 };
 ref<Float2x3> operator -(weak<const Float> node1, weak<const Float2x3> node2)
 {
-    return ref<FloatsubFloat2x3>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3subFloat : public Float2x3
@@ -3626,7 +3626,7 @@ private:
 };
 ref<Float2x3> operator -(weak<const Float2x3> node1, weak<const Float> node2)
 {
-    return ref<Float2x3subFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x3subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -3719,7 +3719,7 @@ private:
 };
 ref<Float3x3> operator /(weak<const Float3x3> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x3divFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3divFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3addFloat3x3 : public Float3x3
@@ -3751,7 +3751,7 @@ private:
 };
 ref<Float3x3> operator +(weak<const Float3x3> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x3addFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3addFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3subFloat3x3 : public Float3x3
@@ -3783,7 +3783,7 @@ private:
 };
 ref<Float3x3> operator -(weak<const Float3x3> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x3subFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3subFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3mulFloat3x2 : public Float3x3
@@ -3815,7 +3815,7 @@ private:
 };
 ref<Float3x3> operator *(weak<const Float2x3> node1, weak<const Float3x2> node2)
 {
-    return ref<Float2x3mulFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float2x3mulFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3mulFloat3x3 : public Float3x3
@@ -3847,7 +3847,7 @@ private:
 };
 ref<Float3x3> operator *(weak<const Float3x3> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x3mulFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3mulFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3mulFloat3x4 : public Float3x3
@@ -3879,7 +3879,7 @@ private:
 };
 ref<Float3x3> operator *(weak<const Float4x3> node1, weak<const Float3x4> node2)
 {
-    return ref<Float4x3mulFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float4x3mulFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat3x3 : public Float3x3
@@ -3911,7 +3911,7 @@ private:
 };
 ref<Float3x3> operator *(weak<const Float> node1, weak<const Float3x3> node2)
 {
-    return ref<FloatmulFloat3x3>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3mulFloat : public Float3x3
@@ -3943,7 +3943,7 @@ private:
 };
 ref<Float3x3> operator *(weak<const Float3x3> node1, weak<const Float> node2)
 {
-    return ref<Float3x3mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x3mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat3x3 : public Float3x3
@@ -3975,7 +3975,7 @@ private:
 };
 ref<Float3x3> operator /(weak<const Float> node1, weak<const Float3x3> node2)
 {
-    return ref<FloatdivFloat3x3>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3divFloat : public Float3x3
@@ -4007,7 +4007,7 @@ private:
 };
 ref<Float3x3> operator /(weak<const Float3x3> node1, weak<const Float> node2)
 {
-    return ref<Float3x3divFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x3divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat3x3 : public Float3x3
@@ -4039,7 +4039,7 @@ private:
 };
 ref<Float3x3> operator +(weak<const Float> node1, weak<const Float3x3> node2)
 {
-    return ref<FloataddFloat3x3>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3addFloat : public Float3x3
@@ -4071,7 +4071,7 @@ private:
 };
 ref<Float3x3> operator +(weak<const Float3x3> node1, weak<const Float> node2)
 {
-    return ref<Float3x3addFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x3addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat3x3 : public Float3x3
@@ -4103,7 +4103,7 @@ private:
 };
 ref<Float3x3> operator -(weak<const Float> node1, weak<const Float3x3> node2)
 {
-    return ref<FloatsubFloat3x3>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3subFloat : public Float3x3
@@ -4135,7 +4135,7 @@ private:
 };
 ref<Float3x3> operator -(weak<const Float3x3> node1, weak<const Float> node2)
 {
-    return ref<Float3x3subFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x3subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -4228,7 +4228,7 @@ private:
 };
 ref<Float4x3> operator /(weak<const Float4x3> node1, weak<const Float4x3> node2)
 {
-    return ref<Float4x3divFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float4x3divFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3addFloat4x3 : public Float4x3
@@ -4260,7 +4260,7 @@ private:
 };
 ref<Float4x3> operator +(weak<const Float4x3> node1, weak<const Float4x3> node2)
 {
-    return ref<Float4x3addFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float4x3addFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3subFloat4x3 : public Float4x3
@@ -4292,7 +4292,7 @@ private:
 };
 ref<Float4x3> operator -(weak<const Float4x3> node1, weak<const Float4x3> node2)
 {
-    return ref<Float4x3subFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float4x3subFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float2x3mulFloat4x2 : public Float4x3
@@ -4324,7 +4324,7 @@ private:
 };
 ref<Float4x3> operator *(weak<const Float2x3> node1, weak<const Float4x2> node2)
 {
-    return ref<Float2x3mulFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float2x3mulFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x3mulFloat4x3 : public Float4x3
@@ -4356,7 +4356,7 @@ private:
 };
 ref<Float4x3> operator *(weak<const Float3x3> node1, weak<const Float4x3> node2)
 {
-    return ref<Float3x3mulFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float3x3mulFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3mulFloat4x4 : public Float4x3
@@ -4388,7 +4388,7 @@ private:
 };
 ref<Float4x3> operator *(weak<const Float4x3> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x3mulFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x3mulFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat4x3 : public Float4x3
@@ -4420,7 +4420,7 @@ private:
 };
 ref<Float4x3> operator *(weak<const Float> node1, weak<const Float4x3> node2)
 {
-    return ref<FloatmulFloat4x3>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3mulFloat : public Float4x3
@@ -4452,7 +4452,7 @@ private:
 };
 ref<Float4x3> operator *(weak<const Float4x3> node1, weak<const Float> node2)
 {
-    return ref<Float4x3mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x3mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat4x3 : public Float4x3
@@ -4484,7 +4484,7 @@ private:
 };
 ref<Float4x3> operator /(weak<const Float> node1, weak<const Float4x3> node2)
 {
-    return ref<FloatdivFloat4x3>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3divFloat : public Float4x3
@@ -4516,7 +4516,7 @@ private:
 };
 ref<Float4x3> operator /(weak<const Float4x3> node1, weak<const Float> node2)
 {
-    return ref<Float4x3divFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x3divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat4x3 : public Float4x3
@@ -4548,7 +4548,7 @@ private:
 };
 ref<Float4x3> operator +(weak<const Float> node1, weak<const Float4x3> node2)
 {
-    return ref<FloataddFloat4x3>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3addFloat : public Float4x3
@@ -4580,7 +4580,7 @@ private:
 };
 ref<Float4x3> operator +(weak<const Float4x3> node1, weak<const Float> node2)
 {
-    return ref<Float4x3addFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x3addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat4x3 : public Float4x3
@@ -4612,7 +4612,7 @@ private:
 };
 ref<Float4x3> operator -(weak<const Float> node1, weak<const Float4x3> node2)
 {
-    return ref<FloatsubFloat4x3>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x3subFloat : public Float4x3
@@ -4644,7 +4644,7 @@ private:
 };
 ref<Float4x3> operator -(weak<const Float4x3> node1, weak<const Float> node2)
 {
-    return ref<Float4x3subFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x3subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -4737,7 +4737,7 @@ private:
 };
 ref<Float2x4> operator /(weak<const Float2x4> node1, weak<const Float2x4> node2)
 {
-    return ref<Float2x4divFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float2x4divFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4addFloat2x4 : public Float2x4
@@ -4769,7 +4769,7 @@ private:
 };
 ref<Float2x4> operator +(weak<const Float2x4> node1, weak<const Float2x4> node2)
 {
-    return ref<Float2x4addFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float2x4addFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4subFloat2x4 : public Float2x4
@@ -4801,7 +4801,7 @@ private:
 };
 ref<Float2x4> operator -(weak<const Float2x4> node1, weak<const Float2x4> node2)
 {
-    return ref<Float2x4subFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float2x4subFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4mulFloat2x2 : public Float2x4
@@ -4833,7 +4833,7 @@ private:
 };
 ref<Float2x4> operator *(weak<const Float2x4> node1, weak<const Float2x2> node2)
 {
-    return ref<Float2x4mulFloat2x2>::create(gameArena(), node1, node2);
+    return ref<Float2x4mulFloat2x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4mulFloat2x3 : public Float2x4
@@ -4865,7 +4865,7 @@ private:
 };
 ref<Float2x4> operator *(weak<const Float3x4> node1, weak<const Float2x3> node2)
 {
-    return ref<Float3x4mulFloat2x3>::create(gameArena(), node1, node2);
+    return ref<Float3x4mulFloat2x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4mulFloat2x4 : public Float2x4
@@ -4897,7 +4897,7 @@ private:
 };
 ref<Float2x4> operator *(weak<const Float4x4> node1, weak<const Float2x4> node2)
 {
-    return ref<Float4x4mulFloat2x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4mulFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat2x4 : public Float2x4
@@ -4929,7 +4929,7 @@ private:
 };
 ref<Float2x4> operator *(weak<const Float> node1, weak<const Float2x4> node2)
 {
-    return ref<FloatmulFloat2x4>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4mulFloat : public Float2x4
@@ -4961,7 +4961,7 @@ private:
 };
 ref<Float2x4> operator *(weak<const Float2x4> node1, weak<const Float> node2)
 {
-    return ref<Float2x4mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x4mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat2x4 : public Float2x4
@@ -4993,7 +4993,7 @@ private:
 };
 ref<Float2x4> operator /(weak<const Float> node1, weak<const Float2x4> node2)
 {
-    return ref<FloatdivFloat2x4>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4divFloat : public Float2x4
@@ -5025,7 +5025,7 @@ private:
 };
 ref<Float2x4> operator /(weak<const Float2x4> node1, weak<const Float> node2)
 {
-    return ref<Float2x4divFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x4divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat2x4 : public Float2x4
@@ -5057,7 +5057,7 @@ private:
 };
 ref<Float2x4> operator +(weak<const Float> node1, weak<const Float2x4> node2)
 {
-    return ref<FloataddFloat2x4>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4addFloat : public Float2x4
@@ -5089,7 +5089,7 @@ private:
 };
 ref<Float2x4> operator +(weak<const Float2x4> node1, weak<const Float> node2)
 {
-    return ref<Float2x4addFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x4addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat2x4 : public Float2x4
@@ -5121,7 +5121,7 @@ private:
 };
 ref<Float2x4> operator -(weak<const Float> node1, weak<const Float2x4> node2)
 {
-    return ref<FloatsubFloat2x4>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat2x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4subFloat : public Float2x4
@@ -5153,7 +5153,7 @@ private:
 };
 ref<Float2x4> operator -(weak<const Float2x4> node1, weak<const Float> node2)
 {
-    return ref<Float2x4subFloat>::create(gameArena(), node1, node2);
+    return ref<Float2x4subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -5246,7 +5246,7 @@ private:
 };
 ref<Float3x4> operator /(weak<const Float3x4> node1, weak<const Float3x4> node2)
 {
-    return ref<Float3x4divFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float3x4divFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4addFloat3x4 : public Float3x4
@@ -5278,7 +5278,7 @@ private:
 };
 ref<Float3x4> operator +(weak<const Float3x4> node1, weak<const Float3x4> node2)
 {
-    return ref<Float3x4addFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float3x4addFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4subFloat3x4 : public Float3x4
@@ -5310,7 +5310,7 @@ private:
 };
 ref<Float3x4> operator -(weak<const Float3x4> node1, weak<const Float3x4> node2)
 {
-    return ref<Float3x4subFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float3x4subFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4mulFloat3x2 : public Float3x4
@@ -5342,7 +5342,7 @@ private:
 };
 ref<Float3x4> operator *(weak<const Float2x4> node1, weak<const Float3x2> node2)
 {
-    return ref<Float2x4mulFloat3x2>::create(gameArena(), node1, node2);
+    return ref<Float2x4mulFloat3x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4mulFloat3x3 : public Float3x4
@@ -5374,7 +5374,7 @@ private:
 };
 ref<Float3x4> operator *(weak<const Float3x4> node1, weak<const Float3x3> node2)
 {
-    return ref<Float3x4mulFloat3x3>::create(gameArena(), node1, node2);
+    return ref<Float3x4mulFloat3x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4mulFloat3x4 : public Float3x4
@@ -5406,7 +5406,7 @@ private:
 };
 ref<Float3x4> operator *(weak<const Float4x4> node1, weak<const Float3x4> node2)
 {
-    return ref<Float4x4mulFloat3x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4mulFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat3x4 : public Float3x4
@@ -5438,7 +5438,7 @@ private:
 };
 ref<Float3x4> operator *(weak<const Float> node1, weak<const Float3x4> node2)
 {
-    return ref<FloatmulFloat3x4>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4mulFloat : public Float3x4
@@ -5470,7 +5470,7 @@ private:
 };
 ref<Float3x4> operator *(weak<const Float3x4> node1, weak<const Float> node2)
 {
-    return ref<Float3x4mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x4mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat3x4 : public Float3x4
@@ -5502,7 +5502,7 @@ private:
 };
 ref<Float3x4> operator /(weak<const Float> node1, weak<const Float3x4> node2)
 {
-    return ref<FloatdivFloat3x4>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4divFloat : public Float3x4
@@ -5534,7 +5534,7 @@ private:
 };
 ref<Float3x4> operator /(weak<const Float3x4> node1, weak<const Float> node2)
 {
-    return ref<Float3x4divFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x4divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat3x4 : public Float3x4
@@ -5566,7 +5566,7 @@ private:
 };
 ref<Float3x4> operator +(weak<const Float> node1, weak<const Float3x4> node2)
 {
-    return ref<FloataddFloat3x4>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4addFloat : public Float3x4
@@ -5598,7 +5598,7 @@ private:
 };
 ref<Float3x4> operator +(weak<const Float3x4> node1, weak<const Float> node2)
 {
-    return ref<Float3x4addFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x4addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat3x4 : public Float3x4
@@ -5630,7 +5630,7 @@ private:
 };
 ref<Float3x4> operator -(weak<const Float> node1, weak<const Float3x4> node2)
 {
-    return ref<FloatsubFloat3x4>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat3x4>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4subFloat : public Float3x4
@@ -5662,7 +5662,7 @@ private:
 };
 ref<Float3x4> operator -(weak<const Float3x4> node1, weak<const Float> node2)
 {
-    return ref<Float3x4subFloat>::create(gameArena(), node1, node2);
+    return ref<Float3x4subFloat>::create(Arena::script(), node1, node2);
 }
 
 
@@ -5755,7 +5755,7 @@ private:
 };
 ref<Float4x4> operator /(weak<const Float4x4> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x4divFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4divFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4addFloat4x4 : public Float4x4
@@ -5787,7 +5787,7 @@ private:
 };
 ref<Float4x4> operator +(weak<const Float4x4> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x4addFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4addFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4subFloat4x4 : public Float4x4
@@ -5819,7 +5819,7 @@ private:
 };
 ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x4subFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4subFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float2x4mulFloat4x2 : public Float4x4
@@ -5851,7 +5851,7 @@ private:
 };
 ref<Float4x4> operator *(weak<const Float2x4> node1, weak<const Float4x2> node2)
 {
-    return ref<Float2x4mulFloat4x2>::create(gameArena(), node1, node2);
+    return ref<Float2x4mulFloat4x2>::create(Arena::script(), node1, node2);
 }
 
 class Float3x4mulFloat4x3 : public Float4x4
@@ -5883,7 +5883,7 @@ private:
 };
 ref<Float4x4> operator *(weak<const Float3x4> node1, weak<const Float4x3> node2)
 {
-    return ref<Float3x4mulFloat4x3>::create(gameArena(), node1, node2);
+    return ref<Float3x4mulFloat4x3>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4mulFloat4x4 : public Float4x4
@@ -5915,7 +5915,7 @@ private:
 };
 ref<Float4x4> operator *(weak<const Float4x4> node1, weak<const Float4x4> node2)
 {
-    return ref<Float4x4mulFloat4x4>::create(gameArena(), node1, node2);
+    return ref<Float4x4mulFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class FloatmulFloat4x4 : public Float4x4
@@ -5947,7 +5947,7 @@ private:
 };
 ref<Float4x4> operator *(weak<const Float> node1, weak<const Float4x4> node2)
 {
-    return ref<FloatmulFloat4x4>::create(gameArena(), node1, node2);
+    return ref<FloatmulFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4mulFloat : public Float4x4
@@ -5979,7 +5979,7 @@ private:
 };
 ref<Float4x4> operator *(weak<const Float4x4> node1, weak<const Float> node2)
 {
-    return ref<Float4x4mulFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x4mulFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatdivFloat4x4 : public Float4x4
@@ -6011,7 +6011,7 @@ private:
 };
 ref<Float4x4> operator /(weak<const Float> node1, weak<const Float4x4> node2)
 {
-    return ref<FloatdivFloat4x4>::create(gameArena(), node1, node2);
+    return ref<FloatdivFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4divFloat : public Float4x4
@@ -6043,7 +6043,7 @@ private:
 };
 ref<Float4x4> operator /(weak<const Float4x4> node1, weak<const Float> node2)
 {
-    return ref<Float4x4divFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x4divFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloataddFloat4x4 : public Float4x4
@@ -6075,7 +6075,7 @@ private:
 };
 ref<Float4x4> operator +(weak<const Float> node1, weak<const Float4x4> node2)
 {
-    return ref<FloataddFloat4x4>::create(gameArena(), node1, node2);
+    return ref<FloataddFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4addFloat : public Float4x4
@@ -6107,7 +6107,7 @@ private:
 };
 ref<Float4x4> operator +(weak<const Float4x4> node1, weak<const Float> node2)
 {
-    return ref<Float4x4addFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x4addFloat>::create(Arena::script(), node1, node2);
 }
 
 class FloatsubFloat4x4 : public Float4x4
@@ -6139,7 +6139,7 @@ private:
 };
 ref<Float4x4> operator -(weak<const Float> node1, weak<const Float4x4> node2)
 {
-    return ref<FloatsubFloat4x4>::create(gameArena(), node1, node2);
+    return ref<FloatsubFloat4x4>::create(Arena::script(), node1, node2);
 }
 
 class Float4x4subFloat : public Float4x4
@@ -6171,7 +6171,7 @@ private:
 };
 ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float> node2)
 {
-    return ref<Float4x4subFloat>::create(gameArena(), node1, node2);
+    return ref<Float4x4subFloat>::create(Arena::script(), node1, node2);
 }
 
 

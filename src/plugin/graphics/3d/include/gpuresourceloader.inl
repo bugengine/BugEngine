@@ -12,7 +12,7 @@ namespace BugEngine
 template< typename R >
 GPUResourceLoader<R>::GPUResourceLoader(weak<const IRenderer> renderer)
     :   m_renderer(renderer)
-    ,   m_deleted(gameArena())
+    ,   m_deleted(Arena::resource())
 {
 }
 

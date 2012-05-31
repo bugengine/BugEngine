@@ -189,8 +189,8 @@ GLWindow::Context::~Context()
 //------------------------------------------------------------------------
 
 GLRenderer::GLRenderer(const PluginContext& context)
-    :   Windowing::Renderer(gameArena(), context.resourceManager)
-    ,   m_context(scoped<Context>::create(arena(), (PlatformData*)getPlatformData()))
+    :   Windowing::Renderer(Arena::general(), context.resourceManager)
+    ,   m_context(scoped<Context>::create(Arena::general(), (PlatformData*)getPlatformData()))
 {
 }
 
@@ -201,7 +201,7 @@ GLRenderer::~GLRenderer()
 void GLRenderer::attachWindow(weak<GLWindow> w) const
 {
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
-    w->m_context = scoped<GLWindow::Context>::create(arena(), m_context->m_glContext, m_context->m_threadId);
+    w->m_context = scoped<GLWindow::Context>::create(Arena::general(), m_context->m_glContext, m_context->m_threadId);
 }
 
 const ShaderExtensions& GLRenderer::shaderext() const

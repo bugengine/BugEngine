@@ -37,14 +37,14 @@ Application::WorldResource::~WorldResource()
 
 Application::Application()
 :   IResourceLoader()
-,   m_scheduler(scoped<Scheduler>::create(taskArena()))
-,   m_updateTask(ref< TaskGroup >::create(taskArena(), "applicationUpdate", color32(255,255,0)))
-,   m_worldTask(ref< TaskGroup >::create(taskArena(), "worldUpdate", color32(255,255,0)))
-,   m_tasks(taskArena())
+,   m_scheduler(scoped<Scheduler>::create(Arena::task()))
+,   m_updateTask(ref< TaskGroup >::create(Arena::task(), "applicationUpdate", color32(255,255,0)))
+,   m_worldTask(ref< TaskGroup >::create(Arena::task(), "worldUpdate", color32(255,255,0)))
+,   m_tasks(Arena::task())
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
 ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
 {
-    addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(taskArena(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
+    addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(Arena::task(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     //m_updateLoop = ITask::CallbackConnection();
 }
 
@@ -83,7 +83,7 @@ int Application::run()
 ResourceHandle Application::load(weak<const Resource> world)
 {
     ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(taskArena(), be_checked_cast<const World::World>(world), m_worldTask);
+    handle.handle = ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask);
     return handle;
 }
 
