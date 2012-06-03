@@ -35,6 +35,8 @@ private:
     u16                             m_worldIndex;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
+
+    template< typename INPUT, typename OUTPUT >
     void addRule(weak<const Rule> rule);
     void removeRule(weak<const Rule> rule);
 public:
@@ -45,7 +47,7 @@ published:
 
     void addComponent(Entity e, RTTI::Value& v);
 published:
-    World(minitl::array< scoped<Rule> > rules);
+    World();
     ~World();
 };
 

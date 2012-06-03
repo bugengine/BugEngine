@@ -16,9 +16,9 @@ namespace BugEngine { namespace World
 static const Entity s_defaultSlot = { {0, 0, 0} };
 static i_u16 s_worldCount = 0;
 
-World::World(minitl::array< scoped<Rule> > rules)
+World::World()
 :   m_task(ref<TaskGroup>::create(Arena::task(), "world:update", color32(89, 89, 180)))
-,   m_rules(rules)
+,   m_rules(Arena::game(), 0)
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_allocator16k(SystemAllocator::Block64kb, 2048)
@@ -85,7 +85,7 @@ void World::addComponent(Entity e, const Component& component, raw<const RTTI::C
 void World::addComponent(Entity e, RTTI::Value& component)
 {
     be_assert(e.index.world == m_worldIndex, "entity (%d) does not belong to this world (%d)" | e.index.world | m_worldIndex);
-    be_assert(be_typeid<const Component&>::type() <= component.type(), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
+    be_assert(component.type().isA(be_typeid<const Component&>::type()), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
 }
 
