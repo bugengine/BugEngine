@@ -94,3 +94,8 @@ def configure(conf):
 
 def build(bld):
 	mak.allplatforms['win32'] = ['win32', 'pc']
+
+def platformbuild(bld):
+	dbghelp			= mak.module.external('dbghelp')
+	win32			= mak.module.external('win32')
+	bld.platforms += [dbghelp, win32]

@@ -58,3 +58,6 @@ def configure(conf):
 
 def build(bld):
 	mak.allplatforms['freebsd'] = ['freebsd', 'posix', 'pc']
+
+def platformbuild(bld):
+	pass

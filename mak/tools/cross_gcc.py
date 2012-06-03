@@ -378,7 +378,7 @@ def find_cross_gcc(conf):
 				if conf.find_program(windres, var='WINRC', path_list=v['GCC_PATH'], mandatory=False, silent=True):
 					break
 	if gcc != 'icc':
-		conf.load('gcc gxx')
+		conf.load('gcc gxx gas')
 	else:
 		conf.load('icc icpc')
 	conf.find_program('objcopy', var='OBJCOPY', mandatory=False)
@@ -416,9 +416,10 @@ def add_standard_gcc_flags(conf):
 	if conf.env.GCC_NAME != 'icc':
 		v['CFLAGS_warnall'] += ['-Wextra', '-pedantic']
 		v['CXXFLAGS_warnall'] += ['-Wextra', '-Wno-sign-compare']
-		v['CXXFLAGS_debug'] += ['-fno-threadsafe-statics']
-		v['CXXFLAGS_profile'] += ['-fno-threadsafe-statics', '-Wno-unused-parameter']
-		v['CXXFLAGS_final'] = ['-fno-threadsafe-statics', '-Wno-unused-parameter']
+		v['CXXFLAGS_profile'] += ['-Wno-unused-parameter']
+		v['CXXFLAGS_final'] += ['-Wno-unused-parameter']
+		if int(v['GCC_VERSION'].split('.')[0]) >= 4:
+			v['CXXFLAGS'] += ['-fno-threadsafe-statics']
 	else:
 		v.append_unique('CFLAGS', ['-static-intel'])
 		v.append_unique('CXXFLAGS', ['-static-intel'])

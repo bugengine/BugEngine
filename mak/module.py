@@ -109,7 +109,7 @@ class module:
 		if os.path.isdir(os.path.join(self.root, 'api')):
 			self.globaloptions.includedir.add(os.path.join(self.root, 'api'))
 
-		self.sourcetree		   = sources.directory()
+		self.sourcetree = sources.directory()
 		self.sourcetree.prefix = self.root
 		if os.path.isdir(os.path.join(self.root, 'include')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'include'), '', 0, self.platforms, self.archs), 'include')

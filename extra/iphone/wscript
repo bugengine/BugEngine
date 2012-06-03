@@ -143,6 +143,9 @@ def setup(conf):
 def build(bld):
 	mak.allplatforms['iphone'] = ['iphone', 'darwin']
 
+def platformbuild(bld):
+	pass
+
 def plugins(bld):
 	pass
 

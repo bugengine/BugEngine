@@ -95,3 +95,6 @@ def configure(conf):
 
 def build(bld):
 	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']
+
+def platformbuild(bld):
+	pass
