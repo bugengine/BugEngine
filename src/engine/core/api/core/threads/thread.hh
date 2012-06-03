@@ -11,7 +11,9 @@ namespace BugEngine
 class be_api(CORE) Thread
 {
 private:
+    class ThreadSpecificData;
     class ThreadParams;
+    static ThreadSpecificData s_threadData;
 private:
     ThreadParams*   m_params;
     void*           m_data;

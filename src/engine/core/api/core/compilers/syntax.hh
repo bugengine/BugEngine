@@ -23,7 +23,6 @@ typedef unsigned long int   ptrdiff_t;
 typedef unsigned long int   intptr_t;
 
 #define override
-#define BE_THREAD_LOCAL
 #define BE_NOINLINE
 #define BE_ALWAYSINLINE
 #define BE_SELECTOVERLOAD(o)

@@ -40,7 +40,6 @@ typedef u8                      byte;
 
 # include <unistd.h>
 # define override
-# define BE_THREAD_LOCAL         __thread
 # define BE_NOINLINE             __attribute__((noinline))
 # define BE_ALWAYSINLINE         __attribute__((always_inline))
 # define BE_SELECTOVERLOAD(o)    
