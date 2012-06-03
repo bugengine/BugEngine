@@ -8,6 +8,7 @@ namespace BugEngine { namespace World
 {
 
 State::State()
+    :   m_groups(Arena::game(), 0)
 {
 }
 

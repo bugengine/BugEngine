@@ -10,15 +10,19 @@
 namespace BugEngine { namespace World
 {
 
+class Rule;
 
 class State : public minitl::pointer
 {
 private:
-    struct Transition
+    struct Group
     {
-        minitl::bitset<128> m_requirements;
-        weak<State>         m_transition;
+//        Storage storage;
+        u32 start;
+        u32 end;
+        u16 componentMask;
     };
+    minitl::array< Group >  m_groups;
 public:
     State();
     ~State();

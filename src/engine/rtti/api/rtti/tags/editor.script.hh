@@ -14,6 +14,11 @@ struct be_api(RTTI) Extension
     Extension(const istring& ext) : ext(ext) { }
 };
 
+struct be_api(RTTI) Temporary
+{
+    Temporary();
+};
+
 }}
 
 /*****************************************************************************/
