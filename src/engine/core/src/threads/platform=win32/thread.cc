@@ -22,8 +22,30 @@ struct THREADNAME_INFO
 #pragma pack(pop)
 
 
-static BE_THREAD_LOCAL const istring* st_name;
+class Thread::ThreadSpecificData
+{
+private:
+    DWORD m_key;
+public:
+    ThreadSpecificData()
+        :   m_key(TlsAlloc())
+    {
+    }
+    ~ThreadSpecificData()
+    {
+        TlsFree(m_key);
+    }
+    void createThreadSpecificData(const Thread::ThreadParams& params)
+    {
+        TlsSetValue(m_key, (void*)&params);
+    }
+    const Thread::ThreadParams& getThreadParams()
+    {
+        return *(const Thread::ThreadParams*)TlsGetValue(m_key);
+    }
+};
 
+Thread::ThreadSpecificData Thread::s_threadData;
 
 class Thread::ThreadParams
 {
@@ -77,7 +99,7 @@ static void setThreadName(const istring& name)
 unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = static_cast<ThreadParams*>(params);
-    st_name = &(p->m_name);
+    s_threadData.createThreadSpecificData(*p);
     be_info("started thread %s" | p->m_name);
     setThreadName(p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
@@ -131,7 +153,7 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    return *st_name;
+    return s_threadData.getThreadParams().m_name;
 }
 
 void Thread::wait() const

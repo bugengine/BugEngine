@@ -25,7 +25,6 @@ typedef uint64_t                u64;
 typedef u8                      byte;
 
 #define    override
-#define BE_THREAD_LOCAL         __thread
 #define BE_NOINLINE            
 #define BE_ALWAYSINLINE         inline
 #define BE_SELECTOVERLOAD(o)    (o)
