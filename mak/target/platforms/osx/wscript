@@ -113,3 +113,6 @@ def build(bld):
 def set_osx_shlib_name(self):
 	if 'osx' in self.env.PLATFORM:
 		self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', self.env.DEPLOY['plugin'], self.link_task.outputs[0].name)])
+
+def platformbuild(bld):
+	pass

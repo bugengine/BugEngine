@@ -68,7 +68,7 @@ class source:
 		self.process	= process
 	def make_source(self, bld, env, prefix, relative, result):
 		if self.process and set(env['PLATFORM']) & set(self.platforms) and env['ARCHITECTURE'] in self.archs:
-			result.append(os.path.join(prefix,	self.filename))
+			result.append(os.path.normpath(os.path.join(prefix, self.filename)))
 	def __lt__(self,other):
 		return self.filename < other.filename
 	def hash(self, md5):
@@ -124,7 +124,7 @@ class deployedsource(source):
 		self.type = type
 	def make_source(self, bld, env, prefix, relative, result):
 		if self.process and set(env['PLATFORM']) & set(self.platforms) and env['ARCHITECTURE'] in self.archs:
-			bld.install_files(os.path.join(env['PREFIX'], env['DEPLOY']['prefix'], env['DEPLOY'][self.type], self.outdir), os.path.join(prefix, self.filename), env=env)
+			bld.install_files(os.path.join(env['PREFIX'], env['DEPLOY']['prefix'], env['DEPLOY'][self.type], self.outdir), os.path.normpath(os.path.join(prefix, self.filename)), env=env)
 
 class datasource(source):
 	def __init__( self, filename, generatedcpp, platforms, archs, process ):

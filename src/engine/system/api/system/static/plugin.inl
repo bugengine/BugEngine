@@ -72,7 +72,7 @@ namespace BugEngine
 {
 
 template< typename Interface >
-Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType preload)
+Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType /*preload*/)
 :   m_handle(impl::PluginList::findPlugin(pluginName.str().c_str()))
 ,   m_interface(0)
 ,   m_refCount(new (Arena::general()) i_u32(1))

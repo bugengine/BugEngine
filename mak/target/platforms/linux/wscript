@@ -80,3 +80,6 @@ def configure(conf):
 
 def build(bld):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
+
+def platformbuild(bld):
+	pass

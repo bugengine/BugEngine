@@ -21,13 +21,12 @@ def build(bld):
 		Options.commands[:0] = [bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS]
 		return
 
-	dbghelp			= module.external('dbghelp')
-	win32			= module.external('win32')
-	zlib			= module.external('zlib')
+	bld.recurse('mak', name='platformbuild', once=False)
 
+	zlib			= module.external('zlib')
 	mak				= module.external('mak')
 
-	core			= module.library('core',		[dbghelp, win32, mak])
+	core			= module.library('core',		bld.platforms+[mak])
 	network			= module.library('network',		[core])
 	rtti			= module.library('rtti',		[core, network, zlib] )
 	system			= module.library('system',		[core, rtti] )
