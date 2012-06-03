@@ -20,5 +20,6 @@ END
 // dummy resource for windres
 0 RCDATA
 {
+    0
 }
 
