@@ -29,7 +29,7 @@ SystemAllocator::~SystemAllocator()
     platformFree(m_buffer, be_checked_numcast<u32>((1ll<<((u64)m_blockSize))*m_maximumBlockCount));
 }
 
-void* SystemAllocator::blockAlloc()
+byte* SystemAllocator::blockAlloc()
 {
     void* result = 0;
     while(!result)
@@ -46,10 +46,10 @@ void* SystemAllocator::blockAlloc()
         }
     }
     ++m_usedBlockCount;
-    return result;
+    return static_cast<byte*>(result);
 }
 
-void SystemAllocator::blockFree(void* block)
+void SystemAllocator::blockFree(byte* block)
 {
     minitl::itaggedptr<void>::ticket_t ticket;
     do
@@ -72,8 +72,13 @@ void SystemAllocator::grow()
                 (s_debugExtraSpace*m_blockCount + 0)*be_checked_numcast<u32>((1ll<<((u64)m_blockSize))),
                 (s_debugExtraSpace*m_blockCount + 1)*be_checked_numcast<u32>((1ll<<((u64)m_blockSize)))
             );
-        blockFree(newBlock);
-        m_blockCount++;
+        minitl::itaggedptr<void>::ticket_t ticket;
+        do
+        {
+            ticket = m_pool.getTicket();
+            *(void**)newBlock = m_pool;
+        } while(!m_pool.setConditional(newBlock, ticket));
+        ++m_blockCount;
     }
 }
 

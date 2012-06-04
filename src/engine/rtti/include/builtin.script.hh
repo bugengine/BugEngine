@@ -132,5 +132,4 @@ struct uint4
 
 }
 
-
 #endif

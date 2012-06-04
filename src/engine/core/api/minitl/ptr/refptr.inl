@@ -12,7 +12,7 @@ namespace minitl
 template< typename T >
 void ref<T>::swap(ref<T>& other)
 {
-    const minitl::refcountable* tmpPtr = other.operator->();
+    typename ptr<T>::pointer tmpPtr = other.operator->();
     other.m_ptr = m_ptr;
     m_ptr = tmpPtr; 
 }
@@ -86,7 +86,7 @@ ref<T>::~ref()
 template< typename T >
 T* ref<T>::operator->() const
 {
-    return static_cast<T*>(const_cast<minitl::refcountable*>(m_ptr));
+    return static_cast<T*>(m_ptr);
 }
 
 template< typename T >
@@ -104,7 +104,7 @@ bool ref<T>::operator!() const
 template< typename T >
 T& ref<T>::operator*()
 {
-    return *static_cast<T*>(const_cast<minitl::refcountable*>(m_ptr));
+    return *static_cast<T*>(m_ptr);
 }
 
 template< typename T >
