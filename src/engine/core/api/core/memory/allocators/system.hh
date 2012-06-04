@@ -63,12 +63,12 @@ public:
      * If no block is available, returns 0.
      * \returns A pointer to a block of free memory.
      */
-    void* blockAlloc();
+    byte* blockAlloc();
     /**
      * Frees the system memory and place it back in the list of free memory blocks.
      * \param ptr A pointer to the beginning of the block.
      */
-    void  blockFree(void* ptr);
+    void  blockFree(byte* ptr);
 
     /**
      * Returns the block size (in bytes) that this allocator has been configured for

@@ -69,7 +69,7 @@ namespace
 }
 
 /*****************************************************************************/
-static int __main(int argc, const char *argv[])
+static int beMain(int argc, const char *argv[])
 {
     BugEngine::Environment::getEnvironment().init(argc, argv);
 #ifdef BE_ENABLE_EXCEPTIONS
@@ -114,13 +114,12 @@ int WINAPI WinMain( HINSTANCE hInstance,
                     int /*nCmdShow*/ )
 {
     BugEngine::hDllInstance = hInstance;
-    int result = __main(__argc, (const char **)__argv);
-    return result;
+    return beMain(__argc, (const char **)__argv);
 }
 #else
 int main(int argc, const char *argv[])
 {
-    return __main(argc, argv);
+    return beMain(argc, argv);
 }
 #endif
 /*****************************************************************************/

@@ -46,7 +46,7 @@ Entity World::spawn()
     if (e.index.block >= m_entityBuffers.size())
     {
         be_assert(e.index.block == m_entityBuffers.size(), "mismatch in the entity buffer!");
-        Entity* newBuffer = static_cast<Entity*>(m_allocator64k.blockAlloc());
+        Entity* newBuffer = reinterpret_cast<Entity*>(m_allocator64k.blockAlloc());
         size_t entityCount = m_allocator64k.blockSize()/sizeof(Entity);
         for (size_t i = 0; i < entityCount-1; ++i)
         {
