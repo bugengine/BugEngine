@@ -23,7 +23,7 @@ typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, co
 be_api(CORE) AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
 be_api(CORE) AssertionCallback_t getAssertionCallback();
 
-#if !defined(BE_ENABLE_ASSERT)
+#if !(BE_ENABLE_ASSERT)
 # define    be_assert_impl_(cond,message,code) ((void)0)
 #else
 # ifdef      assert

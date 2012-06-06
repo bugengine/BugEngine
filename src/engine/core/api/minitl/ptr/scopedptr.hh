@@ -24,12 +24,14 @@ public:
     inline ~scoped();
     inline scoped(const scoped& other);
     template< typename U > inline scoped(const scoped<U>& other);
-    inline scoped& operator=(const scoped& other);
 
     inline T* operator->() const;
     inline operator const void*() const;
     inline bool operator!() const;
     inline T& operator*();
+
+    template< typename U >
+    inline void reset(const scoped<U>& other);
 
     static inline scoped<T> create(::BugEngine::Allocator& allocator)
     {
