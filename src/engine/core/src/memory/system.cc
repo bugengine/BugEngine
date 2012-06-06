@@ -7,7 +7,7 @@
 namespace BugEngine
 {
 
-#ifdef BE_ENABLE_MEMORY_TRACKING
+#if BE_ENABLE_MEMORY_TRACKING
 static const u32 s_debugExtraSpace = 2;
 #else
 static const u32 s_debugExtraSpace = 1;

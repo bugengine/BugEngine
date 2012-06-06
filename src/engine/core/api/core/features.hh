@@ -29,6 +29,15 @@
 # define BE_ENABLE_LOGGING              1
 # define BE_ENABLE_MEMORY_TRACKING      1
 # define BE_ENABLE_EXCEPTIONS           1
+# define BE_ENABLE_COMPONENT_DEBUGGING  1
+#else
+# define BE_ENABLE_ASSERT               0
+# define BE_ENABLE_WEAKCHECK            0
+# define BE_ENABLE_DEBUG_ITERATORS      0
+# define BE_ENABLE_LOGGING              0
+# define BE_ENABLE_MEMORY_TRACKING      0
+# define BE_ENABLE_EXCEPTIONS           0
+# define BE_ENABLE_COMPONENT_DEBUGGING  0
 #endif
 
 /*****************************************************************************/

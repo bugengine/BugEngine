@@ -15,14 +15,16 @@ namespace BugEngine { namespace World
 {
 
 class State;
-class Storage;
 class Rule;
+template< typename T >
+class Storage;
 struct Component;
 
 class be_api(WORLD) World : public Resource
 {
-    friend class Storage;
     friend class Rule;
+    template< typename T >
+    friend class Storage;
 private:
     ref<ITask>                      m_task;
     minitl::array< scoped<Rule> >   m_rules;

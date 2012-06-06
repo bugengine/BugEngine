@@ -44,7 +44,7 @@ public:
     weak(T* ptr)
         : m_ptr(ptr)
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
         #endif
     }
@@ -52,7 +52,7 @@ public:
     weak(ref<U> other)
         : m_ptr(checkIsA<T>(other.operator->()))
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
         #endif
     }
@@ -60,14 +60,14 @@ public:
     weak(const scoped<U>& other)
         : m_ptr(checkIsA<T>(other.operator->()))
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
         #endif
     }
     weak(const weak& other)
         : m_ptr(other.operator->())
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
         #endif
     }
@@ -75,13 +75,13 @@ public:
     weak(const weak<U>& other)
         : m_ptr(checkIsA<T>(other.operator->()))
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
         #endif
     }
     ~weak()
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->decweak();
         #endif
     }
@@ -99,7 +99,7 @@ public:
 
     void clear()
     {
-        #ifdef BE_ENABLE_WEAKCHECK
+        #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->decweak(); m_ptr = 0;
         #endif
     }

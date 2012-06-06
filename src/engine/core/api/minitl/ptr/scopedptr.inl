@@ -45,14 +45,16 @@ scoped<T>::scoped(const scoped<U>& other)
 }
 
 template< typename T >
-scoped<T>& scoped<T>::operator=(const scoped& other)
+template< typename U >
+void scoped<T>::reset(const scoped<U>& other)
 {
-    if (m_ptr) m_ptr->checked_delete();
-    m_ptr = other.m_ptr;
-    other.m_ptr = 0;
-    return *this;
+    if (m_ptr && m_ptr != other.m_ptr)
+    {
+        m_ptr->checked_delete();
+        m_ptr = other.m_ptr;
+        other.m_ptr = 0;
+    }
 }
-
 
 template< typename T >
 T* scoped<T>::operator->() const

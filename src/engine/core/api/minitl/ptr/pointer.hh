@@ -35,7 +35,7 @@ class pointer
     template< typename T >  friend class scoped;
 private:
     mutable ::BugEngine::Allocator* m_allocator;
-#ifdef BE_ENABLE_WEAKCHECK
+#if BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
 public:
@@ -44,7 +44,7 @@ public:
     {}
     inline virtual ~pointer()
     {
-#ifdef BE_ENABLE_WEAKCHECK
+#if BE_ENABLE_WEAKCHECK
         be_assert(m_weakCount == 0, "object is destroyed but has %d weak references" | m_weakCount);
 #endif
     }
@@ -65,7 +65,7 @@ protected:
         checked_destroy(this);
         d->free(this);
     }
-    #ifdef BE_ENABLE_WEAKCHECK
+    #if BE_ENABLE_WEAKCHECK
     inline void addweak() const
     {
         ++m_weakCount;

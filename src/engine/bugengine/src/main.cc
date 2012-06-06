@@ -72,7 +72,7 @@ namespace
 static int beMain(int argc, const char *argv[])
 {
     BugEngine::Environment::getEnvironment().init(argc, argv);
-#ifdef BE_ENABLE_EXCEPTIONS
+#if BE_ENABLE_EXCEPTIONS
     try
 #endif
     {
@@ -92,7 +92,7 @@ static int beMain(int argc, const char *argv[])
         BugEngine::Plugin<BugEngine::Application> app(BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()), BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home));
         return app->run();
     }
-#ifdef BE_ENABLE_EXCEPTIONS
+#if BE_ENABLE_EXCEPTIONS
     catch(...)
     {
         return EXIT_FAILURE;

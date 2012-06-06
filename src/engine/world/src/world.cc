@@ -6,6 +6,15 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 
+#include <world/storage.hh>
+#include <world/component.script.hh>
+struct A : public BugEngine::World::Component
+{
+    int i;
+    void created() {}
+    void destroyed() {}
+};
+
 #include    <state.hh>
 
 BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
@@ -27,6 +36,26 @@ World::World()
 ,   m_worldIndex(++s_worldCount)
 {
     m_freeEntityId.index.world = m_worldIndex;
+
+    scoped< Storage<A> > s (scoped< Storage<A> >::create(Arena::game(), this));
+    s->create(0, A());
+    s->create(1, A());
+    s->create(2, A());
+    s->create(3, A());
+    s->create(4, A());
+    s->destroy(3);
+    s->move(4, 3);
+
+    s->move(2, 4);
+    s->move(1, 2);
+    s->move(0, 1);
+    s->create(0, A());
+
+    s->destroy(4);
+    s->destroy(3);
+    s->destroy(2);
+    s->destroy(1);
+    s->destroy(0);
 }
 
 World::~World()
