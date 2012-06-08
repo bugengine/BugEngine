@@ -22,8 +22,8 @@ template< typename COMPONENT >
 class Storage : public IStorage
 {
 private:
-    minitl::vector<byte*>   m_pointers;
-    SystemAllocator&        m_allocator;
+    SystemAllocator         m_allocator;
+    COMPONENT*              m_components;
     u32                     m_componentCount;
     u32                     m_lastComponentFreed;
 public:

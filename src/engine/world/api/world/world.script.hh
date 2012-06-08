@@ -30,11 +30,10 @@ private:
     minitl::array< scoped<Rule> >   m_rules;
     scoped<State>                   m_emptyEntityState;
     Entity                          m_freeEntityId;
-    SystemAllocator                 m_allocator16k;
-    SystemAllocator                 m_allocator64k;
-    minitl::vector<Entity*>         m_entityBuffers;
-    i_u32                           m_entityCount;
-    u16                             m_worldIndex;
+    SystemAllocator                 m_entityAllocator;
+    Entity*                         m_entityBuffer;
+    u32                             m_entityCount;
+    u32                             m_entityCapacity;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 

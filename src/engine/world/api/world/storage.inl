@@ -16,9 +16,9 @@ namespace BugEngine { namespace World
 static const u32 s_invalidComponent = ~0u;
 
 template< typename COMPONENT >
-Storage<COMPONENT>::Storage(weak<World> world)
-    :   m_pointers(Arena::game())
-    ,   m_allocator(world->m_allocator16k)
+Storage<COMPONENT>::Storage(weak<World> /*world*/)
+    :   m_allocator(COMPONENT::ReservedSize)
+    ,   m_components((COMPONENT*)m_allocator.buffer())
     ,   m_componentCount(0)
     ,   m_lastComponentFreed(s_invalidComponent)
 {
@@ -31,10 +31,6 @@ Storage<COMPONENT>::~Storage()
     be_assert(m_lastComponentFreed == s_invalidComponent, "destroyed storage<%s> still had components" | typeid(COMPONENT).name());
     be_assert(m_componentCount == 0, "destroyed storage<%s> still had components" | typeid(COMPONENT).name());
 #endif
-    for (minitl::vector<byte*>::iterator it = m_pointers.begin(); it != m_pointers.end(); ++it)
-    {
-        m_allocator.blockFree(*it);
-    }
 }
 
 template< typename COMPONENT >
@@ -51,6 +47,7 @@ COMPONENT& Storage<COMPONENT>::create(u32 index, const Component& templateCompon
     else
     {
         ++m_componentCount;
+        m_allocator.setUsage(m_componentCount*be_align(sizeof(COMPONENT), be_alignof(COMPONENT)));
     }
 #endif
     COMPONENT& component = operator[](index);
@@ -69,6 +66,7 @@ void Storage<COMPONENT>::move(u32 component1, u32 component2)
     if (m_lastComponentFreed == s_invalidComponent)
     {
         ++m_componentCount;
+        m_allocator.setUsage(m_componentCount*be_align(sizeof(COMPONENT), be_alignof(COMPONENT)));
     }
     m_lastComponentFreed = component1;
 #endif
@@ -78,6 +76,7 @@ void Storage<COMPONENT>::move(u32 component1, u32 component2)
     {
         m_lastComponentFreed = s_invalidComponent;
         --m_componentCount;
+        m_allocator.setUsage(m_componentCount*be_align(sizeof(COMPONENT), be_alignof(COMPONENT)));
     }
 #endif
 }
@@ -90,6 +89,7 @@ void Storage<COMPONENT>::destroy(u32 component)
     if (component == m_componentCount-1)
     {
         --m_componentCount;
+        m_allocator.setUsage(m_componentCount*be_align(sizeof(COMPONENT), be_alignof(COMPONENT)));
     }
     else
     {
@@ -105,20 +105,7 @@ COMPONENT& Storage<COMPONENT>::operator[](const u32 component)
 #if BE_ENABLE_COMPONENT_DEBUGGING
     be_assert(component < m_componentCount, "component %d is out of range: %d" | component | m_componentCount);
 #endif
-    const u32 size = be_align(sizeof(COMPONENT), be_alignof(COMPONENT));
-    const u32 componentsPerBlock = m_allocator.blockSize() / size;
-    u32 blockIndex = component / componentsPerBlock;
-    u32 componentIndex = component % componentsPerBlock;
-    if (blockIndex >= m_pointers.size())
-    {
-        be_assert(component == m_componentCount - 1, "component %d is invalid" | component);
-        be_assert(componentIndex == 0, "component %d is invalid" | component);
-        be_assert(blockIndex == m_pointers.size(), "component %d is invalid" | component);
-        m_pointers.push_back(m_allocator.blockAlloc());
-    }
-    byte* pool = m_pointers[blockIndex];
-    byte* offset = pool + size * componentIndex;
-    return *reinterpret_cast<COMPONENT*>(offset);
+    return m_components[component];
 }
 
 }}

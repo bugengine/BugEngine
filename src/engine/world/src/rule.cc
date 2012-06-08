@@ -8,13 +8,6 @@
 namespace BugEngine { namespace World
 {
 
-Rule::Rule()
-{
-}
-
-Rule::~Rule()
-{
-}
 
 }}
 

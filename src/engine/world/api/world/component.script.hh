@@ -11,6 +11,8 @@ namespace BugEngine { namespace World
 
 struct be_api(WORLD) Component
 {
+    void created()      {}
+    void destroyed()    {}
 };
 
 }}

@@ -18,11 +18,11 @@ class State : public minitl::pointer
 private:
     struct Group
     {
-        u32 start;
-        u32 end;
-        u16 componentMask;
+        minitl::vector< weak<Rule> >    rules;
+        u32                             count;
+        u32                             componentMask;
     };
-    minitl::array< Group >              m_groups;
+    minitl::vector< Group >             m_groups;
     minitl::array< scoped<IStorage> >   m_storage;
 public:
     State();
