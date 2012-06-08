@@ -8,18 +8,9 @@
 namespace BugEngine { namespace World
 {
 
-union be_api(WORLD) Entity
+struct be_api(WORLD) Entity
 {
-published:
-    struct Index
-    {
-        u16 world;
-        u16 block;
-        u32 offset;
-    };
-published:
-    Index   index;
-    u64     id;
+    u32 id;
 
 
     bool operator ==(const Entity& other) const { return id == other.id; }
