@@ -31,7 +31,7 @@ static const Entity s_defaultSlot = { 0 };
 
 World::World()
 :   m_task(ref<TaskGroup>::create(Arena::task(), "world:update", color32(89, 89, 180)))
-,   m_rules(Arena::game(), 0)
+//,   m_rules(Arena::game(), 0)
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_entityAllocator(20*1024*1024)
