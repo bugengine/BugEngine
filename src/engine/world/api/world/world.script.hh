@@ -27,7 +27,7 @@ class be_api(WORLD) World : public Resource
     friend class Storage;
 private:
     ref<ITask>                      m_task;
-    minitl::array< scoped<Rule> >   m_rules;
+    //minitl::array< scoped<Rule> >   m_rules;
     scoped<State>                   m_emptyEntityState;
     Entity                          m_freeEntityId;
     SystemAllocator                 m_entityAllocator;
