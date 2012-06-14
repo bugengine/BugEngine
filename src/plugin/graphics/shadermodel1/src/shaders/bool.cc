@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/bool.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders {namespace Bool
+namespace BugEngine { namespace BoolVariable
 {
 /* Type *************************************************************/
 Bool::Bool()
@@ -24,12 +24,12 @@ BoolUniform::BoolUniform(const istring& name)
 BoolUniform::~BoolUniform()
 {
 }
-void BoolUniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void BoolUniform::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addUniform(this, currentStage, name, Type_Bool);
+        stream.addUniform(this, currentStage, name, Shaders::Type_Bool);
 }
-void BoolUniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void BoolUniform::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -40,11 +40,11 @@ BoolAttribute::BoolAttribute()
 BoolAttribute::~BoolAttribute()
 {
 }
-void BoolAttribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void BoolAttribute::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
-    stream.addAttribute(this, currentStage, targetStage, Type_Bool);
+    stream.addAttribute(this, currentStage, targetStage, Shaders::Type_Bool);
 }
-void BoolAttribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void BoolAttribute::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -56,13 +56,13 @@ BoolVarying::BoolVarying(weak<const Bool> node)
 BoolVarying::~BoolVarying()
 {
 }
-void BoolVarying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void BoolVarying::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addVarying(this, currentStage, targetStage, Type_Bool);
-    node->buildDeclarations(stream, VertexStage, targetStage);
+        stream.addVarying(this, currentStage, targetStage, Shaders::Type_Bool);
+    node->buildDeclarations(stream, Shaders::VertexStage, targetStage);
 }
-void BoolVarying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void BoolVarying::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -78,18 +78,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool, node1, node2);
         }
     }
 };
@@ -110,18 +110,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool, node1, node2);
         }
     }
 };
@@ -142,18 +142,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool, node1, node2);
         }
     }
 };
@@ -181,12 +181,12 @@ Bool2Uniform::Bool2Uniform(const istring& name)
 Bool2Uniform::~Bool2Uniform()
 {
 }
-void Bool2Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool2Uniform::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addUniform(this, currentStage, name, Type_Bool2);
+        stream.addUniform(this, currentStage, name, Shaders::Type_Bool2);
 }
-void Bool2Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool2Uniform::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -197,11 +197,11 @@ Bool2Attribute::Bool2Attribute()
 Bool2Attribute::~Bool2Attribute()
 {
 }
-void Bool2Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool2Attribute::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
-    stream.addAttribute(this, currentStage, targetStage, Type_Bool2);
+    stream.addAttribute(this, currentStage, targetStage, Shaders::Type_Bool2);
 }
-void Bool2Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool2Attribute::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -213,13 +213,13 @@ Bool2Varying::Bool2Varying(weak<const Bool2> node)
 Bool2Varying::~Bool2Varying()
 {
 }
-void Bool2Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool2Varying::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addVarying(this, currentStage, targetStage, Type_Bool2);
-    node->buildDeclarations(stream, VertexStage, targetStage);
+        stream.addVarying(this, currentStage, targetStage, Shaders::Type_Bool2);
+    node->buildDeclarations(stream, Shaders::VertexStage, targetStage);
 }
-void Bool2Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool2Varying::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -235,18 +235,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -267,18 +267,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -299,18 +299,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -331,18 +331,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -363,18 +363,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -395,18 +395,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -427,18 +427,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -459,18 +459,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -491,18 +491,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -523,18 +523,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -555,18 +555,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool2, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool2, node1, node2);
         }
     }
 };
@@ -594,12 +594,12 @@ Bool3Uniform::Bool3Uniform(const istring& name)
 Bool3Uniform::~Bool3Uniform()
 {
 }
-void Bool3Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool3Uniform::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addUniform(this, currentStage, name, Type_Bool3);
+        stream.addUniform(this, currentStage, name, Shaders::Type_Bool3);
 }
-void Bool3Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool3Uniform::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -610,11 +610,11 @@ Bool3Attribute::Bool3Attribute()
 Bool3Attribute::~Bool3Attribute()
 {
 }
-void Bool3Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool3Attribute::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
-    stream.addAttribute(this, currentStage, targetStage, Type_Bool3);
+    stream.addAttribute(this, currentStage, targetStage, Shaders::Type_Bool3);
 }
-void Bool3Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool3Attribute::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -626,13 +626,13 @@ Bool3Varying::Bool3Varying(weak<const Bool3> node)
 Bool3Varying::~Bool3Varying()
 {
 }
-void Bool3Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool3Varying::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addVarying(this, currentStage, targetStage, Type_Bool3);
-    node->buildDeclarations(stream, VertexStage, targetStage);
+        stream.addVarying(this, currentStage, targetStage, Shaders::Type_Bool3);
+    node->buildDeclarations(stream, Shaders::VertexStage, targetStage);
 }
-void Bool3Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool3Varying::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -648,18 +648,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -680,18 +680,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -712,18 +712,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -744,18 +744,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -776,18 +776,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -808,18 +808,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -840,18 +840,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -872,18 +872,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -904,18 +904,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -936,18 +936,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -968,18 +968,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool3, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool3, node1, node2);
         }
     }
 };
@@ -1007,12 +1007,12 @@ Bool4Uniform::Bool4Uniform(const istring& name)
 Bool4Uniform::~Bool4Uniform()
 {
 }
-void Bool4Uniform::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool4Uniform::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addUniform(this, currentStage, name, Type_Bool4);
+        stream.addUniform(this, currentStage, name, Shaders::Type_Bool4);
 }
-void Bool4Uniform::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool4Uniform::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -1023,11 +1023,11 @@ Bool4Attribute::Bool4Attribute()
 Bool4Attribute::~Bool4Attribute()
 {
 }
-void Bool4Attribute::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool4Attribute::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
-    stream.addAttribute(this, currentStage, targetStage, Type_Bool4);
+    stream.addAttribute(this, currentStage, targetStage, Shaders::Type_Bool4);
 }
-void Bool4Attribute::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool4Attribute::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -1039,13 +1039,13 @@ Bool4Varying::Bool4Varying(weak<const Bool4> node)
 Bool4Varying::~Bool4Varying()
 {
 }
-void Bool4Varying::buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const
+void Bool4Varying::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const
 {
     if (currentStage == targetStage)
-        stream.addVarying(this, currentStage, targetStage, Type_Bool4);
-    node->buildDeclarations(stream, VertexStage, targetStage);
+        stream.addVarying(this, currentStage, targetStage, Shaders::Type_Bool4);
+    node->buildDeclarations(stream, Shaders::VertexStage, targetStage);
 }
-void Bool4Varying::buildDefinitions(IShaderBuilder& /*stream*/, Stage /*currentStage*/, Stage /*targetStage*/) const
+void Bool4Varying::buildDefinitions(Shaders::IShaderBuilder& /*stream*/, Shaders::Stage /*currentStage*/, Shaders::Stage /*targetStage*/) const
 {
 }
 
@@ -1061,18 +1061,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1093,18 +1093,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1125,18 +1125,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1157,18 +1157,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1189,18 +1189,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_mul, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_mul, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1221,18 +1221,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1253,18 +1253,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_div, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_div, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1285,18 +1285,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1317,18 +1317,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_add, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_add, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1349,18 +1349,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1381,18 +1381,18 @@ public:
     {
     }
 private:
-    void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDeclarations(stream, currentStage, targetStage);
         node2->buildDeclarations(stream, currentStage, targetStage);
     }
-    void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override
+    void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override
     {
         node1->buildDefinitions(stream, currentStage, targetStage);
         node2->buildDefinitions(stream, currentStage, targetStage);
         if (targetStage == currentStage)
         {
-            stream.addOperator(this, Op_sub, Type_Bool4, node1, node2);
+            stream.addOperator(this, Shaders::Op_sub, Shaders::Type_Bool4, node1, node2);
         }
     }
 };
@@ -1404,4 +1404,5 @@ ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool> node2)
 
 
 
-}}}
+
+}}

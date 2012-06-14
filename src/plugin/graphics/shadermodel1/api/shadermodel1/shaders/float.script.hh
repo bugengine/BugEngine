@@ -7,10 +7,10 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders { namespace Float
+namespace BugEngine { namespace FloatVariable
 {
 
-class Float : public Node
+class Float : public Shaders::Node
 {
     BE_NOCOPY(Float)
 protected:
@@ -27,8 +27,8 @@ published:
     FloatUniform(const istring& name);
     ~FloatUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class FloatAttribute : public Float
@@ -38,8 +38,8 @@ published:
     FloatAttribute();
     ~FloatAttribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class FloatVarying : public Float
@@ -51,8 +51,8 @@ published:
     FloatVarying(weak<const Float> node);
     ~FloatVarying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float> operator /(weak<const Float> node1, weak<const Float> node2);
@@ -73,7 +73,7 @@ class Float4x3;
 class Float2x4;
 class Float3x4;
 class Float4x4;
-class Float2 : public Node
+class Float2 : public Shaders::Node
 {
     BE_NOCOPY(Float2)
 protected:
@@ -90,8 +90,8 @@ published:
     Float2Uniform(const istring& name);
     ~Float2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2Attribute : public Float2
@@ -101,8 +101,8 @@ published:
     Float2Attribute();
     ~Float2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2Varying : public Float2
@@ -114,8 +114,8 @@ published:
     Float2Varying(weak<const Float2> node);
     ~Float2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float2> operator /(weak<const Float2> node1, weak<const Float2> node2);
@@ -134,7 +134,7 @@ ref<Float2> operator -(weak<const Float2> node1, weak<const Float> node2);
 
 
 
-class Float3 : public Node
+class Float3 : public Shaders::Node
 {
     BE_NOCOPY(Float3)
 protected:
@@ -151,8 +151,8 @@ published:
     Float3Uniform(const istring& name);
     ~Float3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3Attribute : public Float3
@@ -162,8 +162,8 @@ published:
     Float3Attribute();
     ~Float3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3Varying : public Float3
@@ -175,8 +175,8 @@ published:
     Float3Varying(weak<const Float3> node);
     ~Float3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float3> operator /(weak<const Float3> node1, weak<const Float3> node2);
@@ -195,7 +195,7 @@ ref<Float3> operator -(weak<const Float3> node1, weak<const Float> node2);
 
 
 
-class Float4 : public Node
+class Float4 : public Shaders::Node
 {
     BE_NOCOPY(Float4)
 protected:
@@ -212,8 +212,8 @@ published:
     Float4Uniform(const istring& name);
     ~Float4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4Attribute : public Float4
@@ -223,8 +223,8 @@ published:
     Float4Attribute();
     ~Float4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4Varying : public Float4
@@ -236,8 +236,8 @@ published:
     Float4Varying(weak<const Float4> node);
     ~Float4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float4> operator /(weak<const Float4> node1, weak<const Float4> node2);
@@ -256,7 +256,7 @@ ref<Float4> operator -(weak<const Float4> node1, weak<const Float> node2);
 
 
 
-class Float2x2 : public Node
+class Float2x2 : public Shaders::Node
 {
     BE_NOCOPY(Float2x2)
 protected:
@@ -273,8 +273,8 @@ published:
     Float2x2Uniform(const istring& name);
     ~Float2x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x2Attribute : public Float2x2
@@ -284,8 +284,8 @@ published:
     Float2x2Attribute();
     ~Float2x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x2Varying : public Float2x2
@@ -297,8 +297,8 @@ published:
     Float2x2Varying(weak<const Float2x2> node);
     ~Float2x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float2x2> operator /(weak<const Float2x2> node1, weak<const Float2x2> node2);
@@ -318,7 +318,7 @@ ref<Float2x2> operator -(weak<const Float2x2> node1, weak<const Float> node2);
 
 
 
-class Float3x2 : public Node
+class Float3x2 : public Shaders::Node
 {
     BE_NOCOPY(Float3x2)
 protected:
@@ -335,8 +335,8 @@ published:
     Float3x2Uniform(const istring& name);
     ~Float3x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x2Attribute : public Float3x2
@@ -346,8 +346,8 @@ published:
     Float3x2Attribute();
     ~Float3x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x2Varying : public Float3x2
@@ -359,8 +359,8 @@ published:
     Float3x2Varying(weak<const Float3x2> node);
     ~Float3x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float3x2> operator /(weak<const Float3x2> node1, weak<const Float3x2> node2);
@@ -380,7 +380,7 @@ ref<Float3x2> operator -(weak<const Float3x2> node1, weak<const Float> node2);
 
 
 
-class Float4x2 : public Node
+class Float4x2 : public Shaders::Node
 {
     BE_NOCOPY(Float4x2)
 protected:
@@ -397,8 +397,8 @@ published:
     Float4x2Uniform(const istring& name);
     ~Float4x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x2Attribute : public Float4x2
@@ -408,8 +408,8 @@ published:
     Float4x2Attribute();
     ~Float4x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x2Varying : public Float4x2
@@ -421,8 +421,8 @@ published:
     Float4x2Varying(weak<const Float4x2> node);
     ~Float4x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float4x2> operator /(weak<const Float4x2> node1, weak<const Float4x2> node2);
@@ -442,7 +442,7 @@ ref<Float4x2> operator -(weak<const Float4x2> node1, weak<const Float> node2);
 
 
 
-class Float2x3 : public Node
+class Float2x3 : public Shaders::Node
 {
     BE_NOCOPY(Float2x3)
 protected:
@@ -459,8 +459,8 @@ published:
     Float2x3Uniform(const istring& name);
     ~Float2x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x3Attribute : public Float2x3
@@ -470,8 +470,8 @@ published:
     Float2x3Attribute();
     ~Float2x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x3Varying : public Float2x3
@@ -483,8 +483,8 @@ published:
     Float2x3Varying(weak<const Float2x3> node);
     ~Float2x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float2x3> operator /(weak<const Float2x3> node1, weak<const Float2x3> node2);
@@ -504,7 +504,7 @@ ref<Float2x3> operator -(weak<const Float2x3> node1, weak<const Float> node2);
 
 
 
-class Float3x3 : public Node
+class Float3x3 : public Shaders::Node
 {
     BE_NOCOPY(Float3x3)
 protected:
@@ -521,8 +521,8 @@ published:
     Float3x3Uniform(const istring& name);
     ~Float3x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x3Attribute : public Float3x3
@@ -532,8 +532,8 @@ published:
     Float3x3Attribute();
     ~Float3x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x3Varying : public Float3x3
@@ -545,8 +545,8 @@ published:
     Float3x3Varying(weak<const Float3x3> node);
     ~Float3x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float3x3> operator /(weak<const Float3x3> node1, weak<const Float3x3> node2);
@@ -566,7 +566,7 @@ ref<Float3x3> operator -(weak<const Float3x3> node1, weak<const Float> node2);
 
 
 
-class Float4x3 : public Node
+class Float4x3 : public Shaders::Node
 {
     BE_NOCOPY(Float4x3)
 protected:
@@ -583,8 +583,8 @@ published:
     Float4x3Uniform(const istring& name);
     ~Float4x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x3Attribute : public Float4x3
@@ -594,8 +594,8 @@ published:
     Float4x3Attribute();
     ~Float4x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x3Varying : public Float4x3
@@ -607,8 +607,8 @@ published:
     Float4x3Varying(weak<const Float4x3> node);
     ~Float4x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float4x3> operator /(weak<const Float4x3> node1, weak<const Float4x3> node2);
@@ -628,7 +628,7 @@ ref<Float4x3> operator -(weak<const Float4x3> node1, weak<const Float> node2);
 
 
 
-class Float2x4 : public Node
+class Float2x4 : public Shaders::Node
 {
     BE_NOCOPY(Float2x4)
 protected:
@@ -645,8 +645,8 @@ published:
     Float2x4Uniform(const istring& name);
     ~Float2x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x4Attribute : public Float2x4
@@ -656,8 +656,8 @@ published:
     Float2x4Attribute();
     ~Float2x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float2x4Varying : public Float2x4
@@ -669,8 +669,8 @@ published:
     Float2x4Varying(weak<const Float2x4> node);
     ~Float2x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float2x4> operator /(weak<const Float2x4> node1, weak<const Float2x4> node2);
@@ -690,7 +690,7 @@ ref<Float2x4> operator -(weak<const Float2x4> node1, weak<const Float> node2);
 
 
 
-class Float3x4 : public Node
+class Float3x4 : public Shaders::Node
 {
     BE_NOCOPY(Float3x4)
 protected:
@@ -707,8 +707,8 @@ published:
     Float3x4Uniform(const istring& name);
     ~Float3x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x4Attribute : public Float3x4
@@ -718,8 +718,8 @@ published:
     Float3x4Attribute();
     ~Float3x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float3x4Varying : public Float3x4
@@ -731,8 +731,8 @@ published:
     Float3x4Varying(weak<const Float3x4> node);
     ~Float3x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float3x4> operator /(weak<const Float3x4> node1, weak<const Float3x4> node2);
@@ -752,7 +752,7 @@ ref<Float3x4> operator -(weak<const Float3x4> node1, weak<const Float> node2);
 
 
 
-class Float4x4 : public Node
+class Float4x4 : public Shaders::Node
 {
     BE_NOCOPY(Float4x4)
 protected:
@@ -769,8 +769,8 @@ published:
     Float4x4Uniform(const istring& name);
     ~Float4x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x4Attribute : public Float4x4
@@ -780,8 +780,8 @@ published:
     Float4x4Attribute();
     ~Float4x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Float4x4Varying : public Float4x4
@@ -793,8 +793,8 @@ published:
     Float4x4Varying(weak<const Float4x4> node);
     ~Float4x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Float4x4> operator /(weak<const Float4x4> node1, weak<const Float4x4> node2);
@@ -815,6 +815,7 @@ ref<Float4x4> operator -(weak<const Float4x4> node1, weak<const Float> node2);
 
 
 
-}}}
+}}
+
 /*****************************************************************************/
 #endif
