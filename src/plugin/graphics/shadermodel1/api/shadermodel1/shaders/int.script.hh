@@ -7,10 +7,10 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders { namespace Int
+namespace BugEngine { namespace IntVariable
 {
 
-class Int : public Node
+class Int : public Shaders::Node
 {
     BE_NOCOPY(Int)
 protected:
@@ -27,8 +27,8 @@ published:
     IntUniform(const istring& name);
     ~IntUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class IntAttribute : public Int
@@ -38,8 +38,8 @@ published:
     IntAttribute();
     ~IntAttribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class IntVarying : public Int
@@ -51,8 +51,8 @@ published:
     IntVarying(weak<const Int> node);
     ~IntVarying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Int> operator /(weak<const Int> node1, weak<const Int> node2);
@@ -64,7 +64,7 @@ ref<Int> operator -(weak<const Int> node1, weak<const Int> node2);
 class Int2;
 class Int3;
 class Int4;
-class Int2 : public Node
+class Int2 : public Shaders::Node
 {
     BE_NOCOPY(Int2)
 protected:
@@ -81,8 +81,8 @@ published:
     Int2Uniform(const istring& name);
     ~Int2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int2Attribute : public Int2
@@ -92,8 +92,8 @@ published:
     Int2Attribute();
     ~Int2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int2Varying : public Int2
@@ -105,8 +105,8 @@ published:
     Int2Varying(weak<const Int2> node);
     ~Int2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Int2> operator /(weak<const Int2> node1, weak<const Int2> node2);
@@ -123,7 +123,7 @@ ref<Int2> operator -(weak<const Int2> node1, weak<const Int> node2);
 
 
 
-class Int3 : public Node
+class Int3 : public Shaders::Node
 {
     BE_NOCOPY(Int3)
 protected:
@@ -140,8 +140,8 @@ published:
     Int3Uniform(const istring& name);
     ~Int3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int3Attribute : public Int3
@@ -151,8 +151,8 @@ published:
     Int3Attribute();
     ~Int3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int3Varying : public Int3
@@ -164,8 +164,8 @@ published:
     Int3Varying(weak<const Int3> node);
     ~Int3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Int3> operator /(weak<const Int3> node1, weak<const Int3> node2);
@@ -182,7 +182,7 @@ ref<Int3> operator -(weak<const Int3> node1, weak<const Int> node2);
 
 
 
-class Int4 : public Node
+class Int4 : public Shaders::Node
 {
     BE_NOCOPY(Int4)
 protected:
@@ -199,8 +199,8 @@ published:
     Int4Uniform(const istring& name);
     ~Int4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int4Attribute : public Int4
@@ -210,8 +210,8 @@ published:
     Int4Attribute();
     ~Int4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Int4Varying : public Int4
@@ -223,8 +223,8 @@ published:
     Int4Varying(weak<const Int4> node);
     ~Int4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Int4> operator /(weak<const Int4> node1, weak<const Int4> node2);
@@ -242,6 +242,7 @@ ref<Int4> operator -(weak<const Int4> node1, weak<const Int> node2);
 
 
 
-}}}
+}}
+
 /*****************************************************************************/
 #endif

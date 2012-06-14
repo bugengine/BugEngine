@@ -7,10 +7,10 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders { namespace Double
+namespace BugEngine { namespace DoubleVariable
 {
 
-class Double : public Node
+class Double : public Shaders::Node
 {
     BE_NOCOPY(Double)
 protected:
@@ -27,8 +27,8 @@ published:
     DoubleUniform(const istring& name);
     ~DoubleUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class DoubleAttribute : public Double
@@ -38,8 +38,8 @@ published:
     DoubleAttribute();
     ~DoubleAttribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class DoubleVarying : public Double
@@ -51,8 +51,8 @@ published:
     DoubleVarying(weak<const Double> node);
     ~DoubleVarying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double> operator /(weak<const Double> node1, weak<const Double> node2);
@@ -73,7 +73,7 @@ class Double4x3;
 class Double2x4;
 class Double3x4;
 class Double4x4;
-class Double2 : public Node
+class Double2 : public Shaders::Node
 {
     BE_NOCOPY(Double2)
 protected:
@@ -90,8 +90,8 @@ published:
     Double2Uniform(const istring& name);
     ~Double2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2Attribute : public Double2
@@ -101,8 +101,8 @@ published:
     Double2Attribute();
     ~Double2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2Varying : public Double2
@@ -114,8 +114,8 @@ published:
     Double2Varying(weak<const Double2> node);
     ~Double2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double2> operator /(weak<const Double2> node1, weak<const Double2> node2);
@@ -134,7 +134,7 @@ ref<Double2> operator -(weak<const Double2> node1, weak<const Double> node2);
 
 
 
-class Double3 : public Node
+class Double3 : public Shaders::Node
 {
     BE_NOCOPY(Double3)
 protected:
@@ -151,8 +151,8 @@ published:
     Double3Uniform(const istring& name);
     ~Double3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3Attribute : public Double3
@@ -162,8 +162,8 @@ published:
     Double3Attribute();
     ~Double3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3Varying : public Double3
@@ -175,8 +175,8 @@ published:
     Double3Varying(weak<const Double3> node);
     ~Double3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double3> operator /(weak<const Double3> node1, weak<const Double3> node2);
@@ -195,7 +195,7 @@ ref<Double3> operator -(weak<const Double3> node1, weak<const Double> node2);
 
 
 
-class Double4 : public Node
+class Double4 : public Shaders::Node
 {
     BE_NOCOPY(Double4)
 protected:
@@ -212,8 +212,8 @@ published:
     Double4Uniform(const istring& name);
     ~Double4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4Attribute : public Double4
@@ -223,8 +223,8 @@ published:
     Double4Attribute();
     ~Double4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4Varying : public Double4
@@ -236,8 +236,8 @@ published:
     Double4Varying(weak<const Double4> node);
     ~Double4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double4> operator /(weak<const Double4> node1, weak<const Double4> node2);
@@ -256,7 +256,7 @@ ref<Double4> operator -(weak<const Double4> node1, weak<const Double> node2);
 
 
 
-class Double2x2 : public Node
+class Double2x2 : public Shaders::Node
 {
     BE_NOCOPY(Double2x2)
 protected:
@@ -273,8 +273,8 @@ published:
     Double2x2Uniform(const istring& name);
     ~Double2x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x2Attribute : public Double2x2
@@ -284,8 +284,8 @@ published:
     Double2x2Attribute();
     ~Double2x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x2Varying : public Double2x2
@@ -297,8 +297,8 @@ published:
     Double2x2Varying(weak<const Double2x2> node);
     ~Double2x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double2x2> operator /(weak<const Double2x2> node1, weak<const Double2x2> node2);
@@ -318,7 +318,7 @@ ref<Double2x2> operator -(weak<const Double2x2> node1, weak<const Double> node2)
 
 
 
-class Double3x2 : public Node
+class Double3x2 : public Shaders::Node
 {
     BE_NOCOPY(Double3x2)
 protected:
@@ -335,8 +335,8 @@ published:
     Double3x2Uniform(const istring& name);
     ~Double3x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x2Attribute : public Double3x2
@@ -346,8 +346,8 @@ published:
     Double3x2Attribute();
     ~Double3x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x2Varying : public Double3x2
@@ -359,8 +359,8 @@ published:
     Double3x2Varying(weak<const Double3x2> node);
     ~Double3x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double3x2> operator /(weak<const Double3x2> node1, weak<const Double3x2> node2);
@@ -380,7 +380,7 @@ ref<Double3x2> operator -(weak<const Double3x2> node1, weak<const Double> node2)
 
 
 
-class Double4x2 : public Node
+class Double4x2 : public Shaders::Node
 {
     BE_NOCOPY(Double4x2)
 protected:
@@ -397,8 +397,8 @@ published:
     Double4x2Uniform(const istring& name);
     ~Double4x2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x2Attribute : public Double4x2
@@ -408,8 +408,8 @@ published:
     Double4x2Attribute();
     ~Double4x2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x2Varying : public Double4x2
@@ -421,8 +421,8 @@ published:
     Double4x2Varying(weak<const Double4x2> node);
     ~Double4x2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double4x2> operator /(weak<const Double4x2> node1, weak<const Double4x2> node2);
@@ -442,7 +442,7 @@ ref<Double4x2> operator -(weak<const Double4x2> node1, weak<const Double> node2)
 
 
 
-class Double2x3 : public Node
+class Double2x3 : public Shaders::Node
 {
     BE_NOCOPY(Double2x3)
 protected:
@@ -459,8 +459,8 @@ published:
     Double2x3Uniform(const istring& name);
     ~Double2x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x3Attribute : public Double2x3
@@ -470,8 +470,8 @@ published:
     Double2x3Attribute();
     ~Double2x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x3Varying : public Double2x3
@@ -483,8 +483,8 @@ published:
     Double2x3Varying(weak<const Double2x3> node);
     ~Double2x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double2x3> operator /(weak<const Double2x3> node1, weak<const Double2x3> node2);
@@ -504,7 +504,7 @@ ref<Double2x3> operator -(weak<const Double2x3> node1, weak<const Double> node2)
 
 
 
-class Double3x3 : public Node
+class Double3x3 : public Shaders::Node
 {
     BE_NOCOPY(Double3x3)
 protected:
@@ -521,8 +521,8 @@ published:
     Double3x3Uniform(const istring& name);
     ~Double3x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x3Attribute : public Double3x3
@@ -532,8 +532,8 @@ published:
     Double3x3Attribute();
     ~Double3x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x3Varying : public Double3x3
@@ -545,8 +545,8 @@ published:
     Double3x3Varying(weak<const Double3x3> node);
     ~Double3x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double3x3> operator /(weak<const Double3x3> node1, weak<const Double3x3> node2);
@@ -566,7 +566,7 @@ ref<Double3x3> operator -(weak<const Double3x3> node1, weak<const Double> node2)
 
 
 
-class Double4x3 : public Node
+class Double4x3 : public Shaders::Node
 {
     BE_NOCOPY(Double4x3)
 protected:
@@ -583,8 +583,8 @@ published:
     Double4x3Uniform(const istring& name);
     ~Double4x3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x3Attribute : public Double4x3
@@ -594,8 +594,8 @@ published:
     Double4x3Attribute();
     ~Double4x3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x3Varying : public Double4x3
@@ -607,8 +607,8 @@ published:
     Double4x3Varying(weak<const Double4x3> node);
     ~Double4x3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double4x3> operator /(weak<const Double4x3> node1, weak<const Double4x3> node2);
@@ -628,7 +628,7 @@ ref<Double4x3> operator -(weak<const Double4x3> node1, weak<const Double> node2)
 
 
 
-class Double2x4 : public Node
+class Double2x4 : public Shaders::Node
 {
     BE_NOCOPY(Double2x4)
 protected:
@@ -645,8 +645,8 @@ published:
     Double2x4Uniform(const istring& name);
     ~Double2x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x4Attribute : public Double2x4
@@ -656,8 +656,8 @@ published:
     Double2x4Attribute();
     ~Double2x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double2x4Varying : public Double2x4
@@ -669,8 +669,8 @@ published:
     Double2x4Varying(weak<const Double2x4> node);
     ~Double2x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double2x4> operator /(weak<const Double2x4> node1, weak<const Double2x4> node2);
@@ -690,7 +690,7 @@ ref<Double2x4> operator -(weak<const Double2x4> node1, weak<const Double> node2)
 
 
 
-class Double3x4 : public Node
+class Double3x4 : public Shaders::Node
 {
     BE_NOCOPY(Double3x4)
 protected:
@@ -707,8 +707,8 @@ published:
     Double3x4Uniform(const istring& name);
     ~Double3x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x4Attribute : public Double3x4
@@ -718,8 +718,8 @@ published:
     Double3x4Attribute();
     ~Double3x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double3x4Varying : public Double3x4
@@ -731,8 +731,8 @@ published:
     Double3x4Varying(weak<const Double3x4> node);
     ~Double3x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double3x4> operator /(weak<const Double3x4> node1, weak<const Double3x4> node2);
@@ -752,7 +752,7 @@ ref<Double3x4> operator -(weak<const Double3x4> node1, weak<const Double> node2)
 
 
 
-class Double4x4 : public Node
+class Double4x4 : public Shaders::Node
 {
     BE_NOCOPY(Double4x4)
 protected:
@@ -769,8 +769,8 @@ published:
     Double4x4Uniform(const istring& name);
     ~Double4x4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x4Attribute : public Double4x4
@@ -780,8 +780,8 @@ published:
     Double4x4Attribute();
     ~Double4x4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Double4x4Varying : public Double4x4
@@ -793,8 +793,8 @@ published:
     Double4x4Varying(weak<const Double4x4> node);
     ~Double4x4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Double4x4> operator /(weak<const Double4x4> node1, weak<const Double4x4> node2);
@@ -815,6 +815,7 @@ ref<Double4x4> operator -(weak<const Double4x4> node1, weak<const Double> node2)
 
 
 
-}}}
+}}
+
 /*****************************************************************************/
 #endif

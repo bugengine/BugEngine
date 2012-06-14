@@ -7,10 +7,10 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders { namespace Uint
+namespace BugEngine { namespace UintVariable
 {
 
-class Uint : public Node
+class Uint : public Shaders::Node
 {
     BE_NOCOPY(Uint)
 protected:
@@ -27,8 +27,8 @@ published:
     UintUniform(const istring& name);
     ~UintUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class UintAttribute : public Uint
@@ -38,8 +38,8 @@ published:
     UintAttribute();
     ~UintAttribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class UintVarying : public Uint
@@ -51,8 +51,8 @@ published:
     UintVarying(weak<const Uint> node);
     ~UintVarying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Uint> operator /(weak<const Uint> node1, weak<const Uint> node2);
@@ -64,7 +64,7 @@ ref<Uint> operator -(weak<const Uint> node1, weak<const Uint> node2);
 class Uint2;
 class Uint3;
 class Uint4;
-class Uint2 : public Node
+class Uint2 : public Shaders::Node
 {
     BE_NOCOPY(Uint2)
 protected:
@@ -81,8 +81,8 @@ published:
     Uint2Uniform(const istring& name);
     ~Uint2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint2Attribute : public Uint2
@@ -92,8 +92,8 @@ published:
     Uint2Attribute();
     ~Uint2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint2Varying : public Uint2
@@ -105,8 +105,8 @@ published:
     Uint2Varying(weak<const Uint2> node);
     ~Uint2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Uint2> operator /(weak<const Uint2> node1, weak<const Uint2> node2);
@@ -123,7 +123,7 @@ ref<Uint2> operator -(weak<const Uint2> node1, weak<const Uint> node2);
 
 
 
-class Uint3 : public Node
+class Uint3 : public Shaders::Node
 {
     BE_NOCOPY(Uint3)
 protected:
@@ -140,8 +140,8 @@ published:
     Uint3Uniform(const istring& name);
     ~Uint3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint3Attribute : public Uint3
@@ -151,8 +151,8 @@ published:
     Uint3Attribute();
     ~Uint3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint3Varying : public Uint3
@@ -164,8 +164,8 @@ published:
     Uint3Varying(weak<const Uint3> node);
     ~Uint3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Uint3> operator /(weak<const Uint3> node1, weak<const Uint3> node2);
@@ -182,7 +182,7 @@ ref<Uint3> operator -(weak<const Uint3> node1, weak<const Uint> node2);
 
 
 
-class Uint4 : public Node
+class Uint4 : public Shaders::Node
 {
     BE_NOCOPY(Uint4)
 protected:
@@ -199,8 +199,8 @@ published:
     Uint4Uniform(const istring& name);
     ~Uint4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint4Attribute : public Uint4
@@ -210,8 +210,8 @@ published:
     Uint4Attribute();
     ~Uint4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Uint4Varying : public Uint4
@@ -223,8 +223,8 @@ published:
     Uint4Varying(weak<const Uint4> node);
     ~Uint4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Uint4> operator /(weak<const Uint4> node1, weak<const Uint4> node2);
@@ -242,6 +242,7 @@ ref<Uint4> operator -(weak<const Uint4> node1, weak<const Uint> node2);
 
 
 
-}}}
+}}
+
 /*****************************************************************************/
 #endif

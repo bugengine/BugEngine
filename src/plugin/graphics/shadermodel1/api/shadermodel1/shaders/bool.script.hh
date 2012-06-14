@@ -7,10 +7,10 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace Shaders { namespace Bool
+namespace BugEngine { namespace BoolVariable
 {
 
-class Bool : public Node
+class Bool : public Shaders::Node
 {
     BE_NOCOPY(Bool)
 protected:
@@ -27,8 +27,8 @@ published:
     BoolUniform(const istring& name);
     ~BoolUniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class BoolAttribute : public Bool
@@ -38,8 +38,8 @@ published:
     BoolAttribute();
     ~BoolAttribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class BoolVarying : public Bool
@@ -51,8 +51,8 @@ published:
     BoolVarying(weak<const Bool> node);
     ~BoolVarying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Bool> operator /(weak<const Bool> node1, weak<const Bool> node2);
@@ -64,7 +64,7 @@ ref<Bool> operator -(weak<const Bool> node1, weak<const Bool> node2);
 class Bool2;
 class Bool3;
 class Bool4;
-class Bool2 : public Node
+class Bool2 : public Shaders::Node
 {
     BE_NOCOPY(Bool2)
 protected:
@@ -81,8 +81,8 @@ published:
     Bool2Uniform(const istring& name);
     ~Bool2Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool2Attribute : public Bool2
@@ -92,8 +92,8 @@ published:
     Bool2Attribute();
     ~Bool2Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool2Varying : public Bool2
@@ -105,8 +105,8 @@ published:
     Bool2Varying(weak<const Bool2> node);
     ~Bool2Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Bool2> operator /(weak<const Bool2> node1, weak<const Bool2> node2);
@@ -123,7 +123,7 @@ ref<Bool2> operator -(weak<const Bool2> node1, weak<const Bool> node2);
 
 
 
-class Bool3 : public Node
+class Bool3 : public Shaders::Node
 {
     BE_NOCOPY(Bool3)
 protected:
@@ -140,8 +140,8 @@ published:
     Bool3Uniform(const istring& name);
     ~Bool3Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool3Attribute : public Bool3
@@ -151,8 +151,8 @@ published:
     Bool3Attribute();
     ~Bool3Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool3Varying : public Bool3
@@ -164,8 +164,8 @@ published:
     Bool3Varying(weak<const Bool3> node);
     ~Bool3Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Bool3> operator /(weak<const Bool3> node1, weak<const Bool3> node2);
@@ -182,7 +182,7 @@ ref<Bool3> operator -(weak<const Bool3> node1, weak<const Bool> node2);
 
 
 
-class Bool4 : public Node
+class Bool4 : public Shaders::Node
 {
     BE_NOCOPY(Bool4)
 protected:
@@ -199,8 +199,8 @@ published:
     Bool4Uniform(const istring& name);
     ~Bool4Uniform();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool4Attribute : public Bool4
@@ -210,8 +210,8 @@ published:
     Bool4Attribute();
     ~Bool4Attribute();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 class Bool4Varying : public Bool4
@@ -223,8 +223,8 @@ published:
     Bool4Varying(weak<const Bool4> node);
     ~Bool4Varying();
 private:
-    virtual void buildDeclarations(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
-    virtual void buildDefinitions(IShaderBuilder& stream, Stage currentStage, Stage targetStage) const override;
+    virtual void buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
+    virtual void buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage, Shaders::Stage targetStage) const override;
 };
 
 ref<Bool4> operator /(weak<const Bool4> node1, weak<const Bool4> node2);
@@ -242,6 +242,7 @@ ref<Bool4> operator -(weak<const Bool4> node1, weak<const Bool> node2);
 
 
 
-}}}
+}}
+
 /*****************************************************************************/
 #endif
