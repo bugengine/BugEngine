@@ -247,21 +247,21 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump(self, file, instances, namespace, name, parent_name, parent_value, overload_ptr, overload_index):
+	def dump(self, file, instances, namespace, decl, name, parent_name, parent_value, overload_ptr, overload_index):
 		if self.value.id == '?del':
 			return overload_index
 		else:
-
+			prettyname = self.value.name.replace("?", "_")
+			prettyname = prettyname.replace("#", "_")
+			decl = decl + [prettyname]
 			fullname = '::'+'::'.join(name)
 			if parent_name:
 				owner = fullname
 			else:
 				owner = '::BugEngine::RTTI::Class'
-			decl = fullname.replace(':', '_')
-			tags = self.tags.dump(file, instances, decl)
-			prettyname = self.value.name.replace("?", "_")
-			prettyname = prettyname.replace("#", "_")
-			new_overload = "s_%s_%s_%d" % (decl, prettyname, overload_index)
+			prefix = '_'.join(decl)
+			tags = self.tags.dump(file, instances, prefix)
+			new_overload = "s_%s_%s_%d" % (prefix, prettyname, overload_index)
 			args,param_types = self.value.args.dump(
 					file,
 					instances,
@@ -303,14 +303,22 @@ class Method(cpp.yacc.Nonterm):
 					call_ptr = "&%s::call< %s >" % (helper, methodptr)
 
 			file.write("#line %d\n"%self.value.line)
-			file.write("static const ::BugEngine::RTTI::Method::Overload %s =\\\n" % (new_overload))
-			file.write("    {\\\n")
-			file.write("        %s,\\\n" % method_tags)
-			file.write("        {%s},\\\n" % overload_ptr)
-			file.write("        ::BugEngine::be_typeid< %s >::type(),\\\n" % return_type)
-			file.write("        {%s},\\\n" % args)
-			file.write("        %s::VarArg,\\\n" % helper)
-			file.write("        %s\\\n" % call_ptr)
+			file.write("static const ::BugEngine::RTTI::Method::Overload %s =\n" % (new_overload))
+			file.write("#line %d\n"%self.value.line)
+			file.write("    {\n")
+			file.write("#line %d\n"%self.value.line)
+			file.write("        %s,\n" % method_tags)
+			file.write("#line %d\n"%self.value.line)
+			file.write("        {%s},\n" % overload_ptr)
+			file.write("#line %d\n"%self.value.line)
+			file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % return_type)
+			file.write("#line %d\n"%self.value.line)
+			file.write("        {%s},\n" % args)
+			file.write("#line %d\n"%self.value.line)
+			file.write("        %s::VarArg,\n" % helper)
+			file.write("#line %d\n"%self.value.line)
+			file.write("        %s\n" % call_ptr)
+			file.write("#line %d\n"%self.value.line)
 			file.write("    };\n\n")
 			return "&"+new_overload
 

@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace FloatVariable
+namespace BugEngine { namespace Float
 {
 
 class Float : public Shaders::Node

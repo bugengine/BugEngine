@@ -41,12 +41,13 @@ class Unit(cpp.yacc.Nonterm):
 
 		file.write("namespace BugEngine\n{\n\n")
 		file.write("raw< ::BugEngine::RTTI::Class > %s;\n"%owner)
-		self.members.predecl(file, instances, [], "")
+		self.members.predecl(file, instances, [], [], "")
 		file.write("\n}\n\n")
+		self.members.using(file, instances, [], [], "")
 
 		instances.write("namespace BugEngine\n{\n\n")
-		self.members.dumpObjects(file, instances, [], [], owner)
-		self.members.dump(file, instances, [], [], "", "", False)
+		self.members.dumpObjects(file, instances, [], [], [], owner)
+		self.members.dump(file, instances, [], [], [], "", "", False)
 		instances.write("\n}\n\n")
 
 

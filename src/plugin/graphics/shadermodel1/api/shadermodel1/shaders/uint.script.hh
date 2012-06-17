@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace UintVariable
+namespace BugEngine { namespace Uint
 {
 
 class Uint : public Shaders::Node

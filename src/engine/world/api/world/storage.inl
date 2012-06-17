@@ -16,7 +16,7 @@ namespace BugEngine { namespace World
 static const u32 s_invalidComponent = ~0u;
 
 template< typename COMPONENT >
-Storage<COMPONENT>::Storage(weak<World> /*world*/)
+Storage<COMPONENT>::Storage()
     :   m_allocator(COMPONENT::ReservedSize)
     ,   m_components((COMPONENT*)m_allocator.buffer())
     ,   m_componentCount(0)
@@ -34,7 +34,7 @@ Storage<COMPONENT>::~Storage()
 }
 
 template< typename COMPONENT >
-COMPONENT& Storage<COMPONENT>::create(u32 index, const Component& templateComponent)
+COMPONENT& Storage<COMPONENT>::create(u32 index, const COMPONENT& templateComponent)
 {
 #if BE_ENABLE_COMPONENT_DEBUGGING
     be_assert(
@@ -51,7 +51,7 @@ COMPONENT& Storage<COMPONENT>::create(u32 index, const Component& templateCompon
     }
 #endif
     COMPONENT& component = operator[](index);
-    component = static_cast<const COMPONENT&>(templateComponent);
+    component = templateComponent;
     component.created();
     return component;
 }

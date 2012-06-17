@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/int.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace IntVariable
+namespace BugEngine { namespace Int
 {
 /* Type *************************************************************/
 Int::Int()

@@ -158,6 +158,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			continue
 		conf.setenv(name, conf.env.derive())
 		try:
+			conf.env.ENVNAME = name
 			add_gcc_to_env(conf, version, toolchaindir, target, opt, gcc, gxx)
 			if platform == 'win32':
 				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')
@@ -181,6 +182,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			return
 		conf.setenv(name, conf.env.derive())
 		try:
+			conf.env.ENVNAME = name
 			add_gcc_to_env(conf, version, toolchaindir, target, '', gcc, gxx)
 			if platform == 'win32':
 				conf.env['WINRC'] = conf.find_program('%s-windres' % target, path_list = conf.env['PATH'], var='WINRC')

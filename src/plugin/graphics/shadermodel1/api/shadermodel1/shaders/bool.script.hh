@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace BoolVariable
+namespace BugEngine { namespace Bool
 {
 
 class Bool : public Shaders::Node

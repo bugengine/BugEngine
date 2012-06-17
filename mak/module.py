@@ -38,9 +38,6 @@ class coptions:
 				self.pchname+','+
 				self.pchstop)
 
-def expand(modules):
-	result = []
-
 
 class module:
 	def __init__( self,
@@ -66,6 +63,7 @@ class module:
 		self.tasks = {}
 		self.root = os.path.join('src', category, name.replace('.', '/'))
 		self.platforms = set([])
+		self.jobs = {}
 		for p in platforms or mak.allplatforms.keys():
 			for pname, pgroup in mak.allplatforms.items():
 				if p in pgroup:
@@ -112,13 +110,22 @@ class module:
 		self.sourcetree = sources.directory()
 		self.sourcetree.prefix = self.root
 		if os.path.isdir(os.path.join(self.root, 'include')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'include'), '', 0, self.platforms, self.archs), 'include')
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'include'), '', False, self.platforms, self.archs), 'include')
 		if os.path.isdir(os.path.join(self.root, 'api')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'api'), '', 0, self.platforms, self.archs), 'api')
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'api'), '', False, self.platforms, self.archs), 'api')
 		if os.path.isdir(os.path.join(self.root, 'data')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', 1, self.platforms, self.archs, sourcelist, True), 'data')
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', True, self.platforms, self.archs, sourcelist, True), 'data')
 		if os.path.isdir(os.path.join(self.root, 'src')):
-			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'src'), '', 1, self.platforms, self.archs, sourcelist), 'src')
+			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'src'), '', True, self.platforms, self.archs, sourcelist), 'src')
+		if os.path.isdir(os.path.join(self.root, 'jobs')):
+			jobDirectory = sources.directory()
+			self.sourcetree.addDirectory(jobDirectory, 'jobs')
+			for job in os.listdir(os.path.join(self.root, 'jobs')):
+				jobDirectory.addDirectory(self.scandir(os.path.join(self.root, 'jobs', job), '', False, self.platforms, self.archs, sourcelist), job)
+				self.jobs[job] = sources.directory()
+				jobsdir = sources.directory()
+				jobsdir.addDirectory(self.scandir(os.path.join(self.root, 'jobs', job), '', True, self.platforms, self.archs, sourcelist), job)
+				self.jobs[job].addDirectory(jobsdir, 'jobs')
 
 		platformsdirectory = sources.directory()
 		if os.path.isdir('extra'):
@@ -138,9 +145,11 @@ class module:
 					except KeyError:
 						self.localarchoptions[platform] = coptions([os.path.join(extraroot, 'include')])
 				if os.path.isdir(os.path.join(extraroot, 'src')):
-					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'src'), '', 1, [platform], self.archs, sourcelist), 'src')
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'src'), '', True, [platform], self.archs, sourcelist), 'src')
+				if os.path.isdir(os.path.join(extraroot, 'job')):
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'job'), '', True, [platform], self.archs, sourcelist), 'job')
 				if os.path.isdir(os.path.join(extraroot, 'data')):
-					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', 1, [platform], self.archs, sourcelist, True), 'src')
+					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', True, [platform], self.archs, sourcelist, True), 'src')
 				if pdir.directories or pdir.files:
 					platformsdirectory.addDirectory(pdir, platform)
 					pdir.prefix = os.path.join(platform, category, name.replace('.', '/'))
@@ -272,6 +281,25 @@ class module:
 				if task.usemaster and task.source:
 					task.features.append('master')
 				task.do_install			= 1
+				for jobname, jobsources in self.jobs.items():
+					for envname in bld.env.JOBS:
+						if env.STATIC or bld.static:
+							jobtype = 'cxxstlib'
+						else:
+							jobtype = 'cxxshlib'
+						env = bld.all_envs[envname].derive()
+						env.detach()
+						job = bld(
+								target = task.name + '.' + jobname,
+								env = env,
+								source = jobsources.make_sources(bld, env, self.root),
+								features = ['c', 'cxx', jobtype],
+								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['job']))
+							)
+						job.post()
+						if env.STATIC or bld.static:
+							task.use.append(job.target)
+
 			self.tasks[variant]		= task
 		return self.tasks[variant]
 

@@ -85,6 +85,11 @@ struct be_typeid< T* const >
     static inline RTTI::Type  type()  { return RTTI::Type::makeType(be_typeid<T>::klass(), RTTI::Type::RawPtr, minitl::is_const<T>::Value ? RTTI::Type::Const : RTTI::Type::Mutable, RTTI::Type::Const); }
 };
 
+template< typename T >
+struct be_typeid< scoped<T> >
+{
+};
+
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
 
 }

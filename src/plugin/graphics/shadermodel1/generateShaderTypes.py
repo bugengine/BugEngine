@@ -10,7 +10,7 @@ hHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.co
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace %(TYPECAML)sVariable
+namespace BugEngine { namespace %(TYPECAML)s
 {
 
 """
@@ -30,7 +30,7 @@ cppHeader = """/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.
 #include    <%(PROJECT)s/shaders/%(TYPE)s.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace %(TYPECAML)sVariable
+namespace BugEngine { namespace %(TYPECAML)s
 {
 """
 

@@ -183,15 +183,19 @@ class Exprs(cpp.yacc.Nonterm):
 		self.members = []
 		self.objects = []
 
-	def predecl(self, file, instances, name, parent_name):
+	def using(self, file, instances, decl, name, parent_name):
 		for o in self.objects:
-			o.predecl(file, instances, name, parent_name)
+			o.using(file, instances, decl, name, parent_name)
 
-	def dumpObjects(self, file, instances, namespace, name, parent_name):
+	def predecl(self, file, instances, decl, name, parent_name):
 		for o in self.objects:
-			o.varname, o.tag_ptr = o.dump(file, instances, namespace, name, parent_name)
+			o.predecl(file, instances, decl, name, parent_name)
 
-	def dump(self, file, instances, namespace, name, owner, parent_name, parent_value):
+	def dumpObjects(self, file, instances, namespace, decl, name, parent_name):
+		for o in self.objects:
+			o.varname, o.tag_ptr = o.dump(file, instances, namespace, decl, name, parent_name)
+
+	def dump(self, file, instances, namespace, decl, name, owner, parent_name, parent_value):
 		if parent_name:
 			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
 			cast_ptr = "be_typeid< %s >::klass()->cast"%parent_name
@@ -199,7 +203,7 @@ class Exprs(cpp.yacc.Nonterm):
 			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
 		else:
 			if name:
-				o = "BugEngine::be_%s_Namespace_%s()"%(self.parser.plugin, "_".join(name))
+				o = "BugEngine::be_%s_Namespace_%s()"%(self.parser.plugin, "_".join(decl))
 			else:
 				o = "BugEngine::be_%s_Namespace()"%self.parser.plugin
 			method_ptr = "%s->methods"%o
@@ -208,27 +212,27 @@ class Exprs(cpp.yacc.Nonterm):
 			object_ptr = "%s->objects"%o
 		constructor_ptr = "{0}"
 
-		decl = "objects%s" % '_'.join(name)
+		prefix = "objects%s" % '_'.join(decl)
 		alias_index = 0
 		for o in self.objects:
 			if o.varname != '':
 				for n in o.aliases+[o.name]:
 					alias_index += 1
 					file.write("#line %d\n"%o.lineno)
-					file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (decl, o.name, alias_index, object_ptr, o.tag_ptr, n, o.varname))
-					object_ptr = "{&s_%s_%s_obj_%d}"%(decl, o.name, alias_index)
+					file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (prefix, o.decl, alias_index, object_ptr, o.tag_ptr, n, o.varname))
+					object_ptr = "{&s_%s_%s_obj_%d}"%(prefix, o.decl, alias_index)
 
 		for v in self.members:
-			property_ptr,object_ptr = v.dump(file, instances, namespace, name, owner, property_ptr, object_ptr)
+			property_ptr,object_ptr = v.dump(file, instances, namespace, decl, name, owner, property_ptr, object_ptr)
 
 		for m, overloads in self.methods.items():
 			overload_ptr = "0"
 			overload_index = 0
 			for overload in overloads:
-				overload_ptr = overload.dump(file, instances, namespace, name, owner, parent_value, overload_ptr, overload_index)
+				overload_ptr = overload.dump(file, instances, namespace, decl, name, owner, parent_value, overload_ptr, overload_index)
 				overload_index += 1
 
-			decl = '_'.join(name)
+			prefix = '_'.join(decl)
 			prettyname = m.replace("?", "_")
 			prettyname = prettyname.replace("#", "_")
 
@@ -236,20 +240,20 @@ class Exprs(cpp.yacc.Nonterm):
 				prev = cast_ptr
 			else:
 				prev = method_ptr
-			file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (decl, prettyname))
+			file.write("static const ::BugEngine::RTTI::Method s_method_%s_%s =\n" % (prefix, prettyname))
 			file.write("    {\n")
 			file.write("        \"%s\",\n" % m)
 			file.write("        %s,\n" % prev)
-			file.write("        {&s_method_%s_%s},\n" % (decl, prettyname))
+			file.write("        {&s_method_%s_%s},\n" % (prefix, prettyname))
 			file.write("        {%s}\n" % overload_ptr)
 			file.write("    };\n")
 			if m == "?new":
-				constructor_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
-				method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+				constructor_ptr = "{&s_method_%s_%s}" % (prefix, prettyname)
+				method_ptr = "{&s_method_%s_%s}" % (prefix, prettyname)
 			elif m[0] == '#':
-				cast_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+				cast_ptr = "{&s_method_%s_%s}" % (prefix, prettyname)
 			else:
-				method_ptr = "{&s_method_%s_%s}" % (decl, prettyname)
+				method_ptr = "{&s_method_%s_%s}" % (prefix, prettyname)
 		return object_ptr, method_ptr, constructor_ptr, cast_ptr, property_ptr
 
 

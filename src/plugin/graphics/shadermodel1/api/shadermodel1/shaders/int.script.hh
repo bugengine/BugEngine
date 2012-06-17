@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace IntVariable
+namespace BugEngine { namespace Int
 {
 
 class Int : public Shaders::Node

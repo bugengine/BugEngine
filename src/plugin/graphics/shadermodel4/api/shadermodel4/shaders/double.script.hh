@@ -7,7 +7,7 @@
 /*****************************************************************************/
 #include    <3d/shader/node.script.hh>
 
-namespace BugEngine { namespace DoubleVariable
+namespace BugEngine { namespace Double
 {
 
 class Double : public Shaders::Node

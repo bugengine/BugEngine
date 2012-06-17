@@ -71,7 +71,9 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
+									'job':		os.path.join('share', 'bugengine', 'jobs') }
+	conf.env['JOBS'] = [conf.env.ENVNAME]
 
 def add_darwin_flags_to_env(conf, variant, arch):
 	from waflib import Options
