@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/float.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace FloatVariable
+namespace BugEngine { namespace Float
 {
 /* Type *************************************************************/
 Float::Float()

@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/uint.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace UintVariable
+namespace BugEngine { namespace Uint
 {
 /* Type *************************************************************/
 Uint::Uint()

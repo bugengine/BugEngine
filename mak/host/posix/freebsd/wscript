@@ -1,5 +1,5 @@
-# set win32 specific options
-# detect tools : msvc, mingw
+# set FreeBSD specific options
+# detect tools : gcc, clang, llvm
 
 
 import os

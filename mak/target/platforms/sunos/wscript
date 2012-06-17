@@ -65,7 +65,9 @@ def add_sunos_flags_to_env(conf, name, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('share', 'bugengine', 'plugins')  }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
+									'job':		os.path.join('share', 'bugengine', 'jobs')  }
+	conf.env['JOBS'] = [conf.env.ENVNAME]
 
 def configure(conf):
 	mak.allplatforms['sunos'] = ['sunos', 'posix', 'pc']
@@ -75,6 +77,7 @@ def configure(conf):
 		name = 'suncc-sunos-'+arch+'-'+version.replace('-','_')
 		conf.setenv(name, conf.env.derive())
 		try:
+			conf.env.ENVNAME = name
 			conf.env.CC = compilerc
 			conf.env.CXX = compilercxx
 			conf.load('cross_suncc', tooldir='mak/tools')

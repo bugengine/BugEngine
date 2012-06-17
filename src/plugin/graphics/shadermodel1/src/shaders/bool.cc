@@ -6,7 +6,7 @@
 #include    <shadermodel1/shaders/bool.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace BoolVariable
+namespace BugEngine { namespace Bool
 {
 /* Type *************************************************************/
 Bool::Bool()

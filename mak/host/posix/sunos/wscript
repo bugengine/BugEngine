@@ -1,4 +1,4 @@
-# set SunOS/Solaris specific options
+# set Solaris 10/OpenSolaris specific options
 # detect tools : gcc, suncc
 
 import os

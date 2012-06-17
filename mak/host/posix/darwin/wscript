@@ -1,5 +1,5 @@
-# set win32 specific options
-# detect tools : msvc, mingw
+# set MacOS X specific options
+# detect tools : gcc, icc, clang, llvm
 
 
 import os

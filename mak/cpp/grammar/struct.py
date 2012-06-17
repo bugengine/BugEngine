@@ -87,7 +87,8 @@ class ClassDef(cpp.yacc.Nonterm):
 
 	def class_definition(self, cls, name, parent, lbrace, members, rbrace):
 		"%reduce CLASS NameOpt Parent LBRACE Members RBRACE"
-		self.name = name.value
+		self.name = name.value.replace(' ', '')
+		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = cls.lineno
 		self.value = False
 		self.members = members.members[4]
@@ -98,7 +99,8 @@ class ClassDef(cpp.yacc.Nonterm):
 
 	def struct_definition(self, cls, name, parent, lbrace, members, rbrace):
 		"%reduce STRUCT NameOpt Parent LBRACE Members RBRACE"
-		self.name = name.value
+		self.name = name.value.replace(' ', '')
+		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = cls.lineno
 		self.value = True
 		self.members = members.members[3]
@@ -119,77 +121,100 @@ class ClassDef(cpp.yacc.Nonterm):
 
 	def union_definition(self, union, name, lbrace, members, rbrace):
 		"%reduce UNION NameOpt LBRACE Members RBRACE"
-		self.name = name.value
+		self.name = name.value.replace(' ', '')
+		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = union.lineno
 		self.inherits = 'void'
 		self.value = True
 		self.members = members.members[4]
 
-	def predecl(self, file, instances, name, member):
+	def using(self, file, instances, decl, name, parent_name):
+		pass
+
+	def predecl(self, file, instances, decl, name, member):
 		name = name+[self.name]
+		decl = decl+[self.decl]
 		fullname = '::'+'::'.join(name)
-		decl = "class%s" % fullname.replace(':', '_')
+		prefix = "class%s" % '_'.join(decl)
 		if self.parser.useMethods:
-			instances.write("extern const ::BugEngine::RTTI::Class& s_%sFun();\n" % decl)
+			instances.write("extern const ::BugEngine::RTTI::Class& s_%sFun();\n" % prefix)
 		else:
-			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
+			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (prefix))
 		if self.members:
-			self.members.predecl(file, instances, name, self.value)
+			self.members.predecl(file, instances, decl, name, self.value)
 
 
-	def dump(self, file, instances, namespace, name, member):
+	def dump(self, file, instances, namespace, decl, name, member):
 		ns = '::'+'::'.join(namespace)
 		name = name+[self.name]
+		decl = decl+[self.decl]
 		fullname = '::'+'::'.join(name)
 		prettyname = '.'.join(name)
-		decl = "class%s" % fullname.replace(':', '_')
+		prefix = "class%s" % '_'.join(decl)
 
 		if self.members:
-			self.members.dumpObjects(file, instances, namespace, name, fullname)
+			self.members.dumpObjects(file, instances, namespace, decl, name, fullname)
 
 		if member:
 			file.write("#line %d\n"%self.lineno)
 			file.write("typedef %s %s;\n" % ('::'.join(name), self.name))
 
 		if self.parser.useMethods:
-			varname = "%s::s_%sFun()" % (ns, decl)
+			varname = "%s::s_%sFun()" % (ns, prefix)
 			file.write("#line %d\n"%self.lineno)
-			file.write("const ::BugEngine::RTTI::Class& s_%sFun ()\n{\n" % decl)
+			file.write("const ::BugEngine::RTTI::Class& s_%sFun ()\n{\n" % prefix)
 		else:
-			varname = "%s::s_%s" % (ns, decl)
+			varname = "%s::s_%s" % (ns, prefix)
 
-		tag_ptr = self.tags.dump(file, instances, decl)
+		tag_ptr = self.tags.dump(file, instances, prefix)
 		if self.members:
-			objects,methods,constructor,cast,properties = self.members.dump(file, instances, namespace, name, fullname, self.inherits, self.value)
+			objects,methods,constructor,cast,properties = self.members.dump(file, instances, namespace, decl, name, fullname, self.inherits, self.value)
 		else:
 			objects = methods = constructor = cast = properties = "{0}"
 
 		file.write("#line %d\n"%self.lineno)
 		if self.parser.useMethods:
 			file.write("static ")
-		file.write("::BugEngine::RTTI::Class s_%s =\\\n" % (decl))
-		file.write("    {\\\n")
-		file.write("        ::BugEngine::inamespace(\"%s\"),\\\n" % (prettyname))
-		file.write("        ::BugEngine::be_typeid< %s >::klass(),\\\n" % (self.inherits))
-		file.write("        be_checked_numcast<u16>(sizeof(%s)),\\\n" % fullname)
-		file.write("        be_checked_numcast<u16>(be_alignof(%s)),\\\n" % fullname)
-		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\\\n" % (self.inherits, fullname))
-		file.write("        %s,\\\n" % (tag_ptr))
-		file.write("        %s,\\\n" % (properties))
-		file.write("        %s,\\\n" % (methods))
-		file.write("        %s,\\\n" % (objects))
-		file.write("        %s,\\\n" % (constructor))
-		file.write("        %s,\\\n" % (cast))
+		file.write("::BugEngine::RTTI::Class s_%s =\n" % (prefix))
+		file.write("#line %d\n"%self.lineno)
+		file.write("    {\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        ::BugEngine::inamespace(\"%s\"),\n" % (prettyname))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        ::BugEngine::be_typeid< %s >::klass(),\n" % (self.inherits))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<u16>(sizeof(%s)),\n" % fullname)
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<u16>(be_alignof(%s)),\n" % fullname)
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< %s* >((%s*)1)-1),\n" % (self.inherits, fullname))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (tag_ptr))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (properties))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (methods))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (objects))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (constructor))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (cast))
 		if self.value:
-			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\\\n" % fullname)
-			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\\\n" % fullname)
+			file.write("#line %d\n"%self.lineno)
+			file.write("        &::BugEngine::RTTI::wrapCopy< %s >,\n" % fullname)
+			file.write("#line %d\n"%self.lineno)
+			file.write("        &::BugEngine::RTTI::wrapDestroy< %s >\n" % fullname)
 		else:
-			file.write("        0,\\\n")
-			file.write("        0\\\n")
+			file.write("#line %d\n"%self.lineno)
+			file.write("        0,\n")
+			file.write("#line %d\n"%self.lineno)
+			file.write("        0\n")
+		file.write("#line %d\n"%self.lineno)
 		file.write("    };\n")
 		alias_index = 0
 		if self.parser.useMethods:
-			file.write("return s_%s;\n}\n" % decl)
+			file.write("return s_%s;\n}\n" % prefix)
 
 		instances.write("#line %d\n"%self.lineno)
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))

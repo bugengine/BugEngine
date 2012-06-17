@@ -30,7 +30,10 @@ def print_msg(task):
 		tgt_str,tail = os.path.split(tgt_str)
 		tgt = [tail]+tgt
 	tgt = tgt[3:]
-	return '[{0:^11}] {1}\n'.format(task.__class__.__name__.replace('_task', ''), '/'.join(tgt))
+	task_name = task.__class__.__name__.replace('_task', '')
+	if task.env.IS_JOB:
+		task_name = task_name+'{J}'
+	return '[{0:^11}] {1}\n'.format(task_name, '/'.join(tgt))
 Task.Task.__str__ = print_msg
 
 def options(opt):
@@ -115,6 +118,17 @@ def configure(conf):
 			conf.setenv(name, conf.all_envs[envname])
 			conf.env['OPTIMISATION'] = optim
 			conf.env['PREFIX'] = os.path.join('build', name)
+			joblist = []
+			for jobname in conf.env.JOBS:
+				fullname = 'job:'+name
+				conf.setenv(fullname, conf.all_envs[jobname])
+				conf.env.detach()
+				conf.env.OPTIMISATION = optim
+				conf.env.PREFIX = os.path.join('build', name)
+				conf.env.IS_JOB = True
+				joblist.append(fullname)
+			conf.variant = name
+			conf.env.JOBS = joblist
 			selectedvariants.append(name)
 
 	conf.variant = ''

@@ -4,22 +4,14 @@
 #ifndef BE_WORLD_STORAGE_HH_
 #define BE_WORLD_STORAGE_HH_
 /*****************************************************************************/
+#include    <world/istream.script.hh>
+#include    <core/memory/allocators/system.hh>
 
 namespace BugEngine { namespace World
 {
 
-class IStorage : public minitl::pointer
-{
-public:
-    virtual ~IStorage();
-    virtual Component& create(u32 index, const Component& templateComponent) = 0;
-    virtual void destroy(u32 index) = 0;
-    virtual void move(u32 index1, u32 index2) = 0;
-    virtual Component& operator[](u32 index) = 0;
-};
-
 template< typename COMPONENT >
-class Storage : public IStorage
+class Storage : public IStream<COMPONENT>
 {
 private:
     SystemAllocator         m_allocator;
@@ -27,13 +19,13 @@ private:
     u32                     m_componentCount;
     u32                     m_lastComponentFreed;
 public:
-    Storage(weak<World> world);
+    Storage();
     ~Storage();
 
-    virtual COMPONENT& create(u32 index, const Component& templateComponent) override;
-    virtual void destroy(u32 index) override;
-    virtual void move(u32 index1, u32 index2) override;
-    virtual COMPONENT& operator[](u32 index) override;
+    COMPONENT& create(u32 index, const COMPONENT& templateComponent);
+    void destroy(u32 index);
+    void move(u32 index1, u32 index2);
+    COMPONENT& operator[](u32 index);
 };
 
 

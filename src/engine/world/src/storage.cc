@@ -7,9 +7,5 @@
 namespace BugEngine { namespace World
 {
 
-IStorage::~IStorage()
-{
-}
-
 }}
 

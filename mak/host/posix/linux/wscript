@@ -1,3 +1,6 @@
+# set Linux specific options
+# detect tools : clang, llvm, gcc, suncc, icc
+
 import os
 import re
 from waflib import Configure

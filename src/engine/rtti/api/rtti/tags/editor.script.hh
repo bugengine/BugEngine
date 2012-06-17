@@ -16,7 +16,12 @@ struct be_api(RTTI) Extension
 
 struct be_api(RTTI) Temporary
 {
-    Temporary();
+    Temporary() { }
+};
+
+struct be_api(RTTI) OutputNode
+{
+    OutputNode() { }
 };
 
 }}

@@ -8,8 +8,6 @@ namespace BugEngine { namespace World
 {
 
 State::State()
-    :   m_groups(Arena::game(), 0)
-    ,   m_storage(Arena::game(), 0)
 {
 }
 
@@ -18,4 +16,3 @@ State::~State()
 }
 
 }}
-

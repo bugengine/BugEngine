@@ -63,7 +63,9 @@ def add_win32_flags_to_env(conf, name, arch):
 									'api':		os.path.join('dev','include'),
 									'lib':		os.path.join('dev','lib'),
 									'data':		'data',
-									'plugin':	os.path.join('data', 'plugins') }
+									'plugin':	os.path.join('data', 'plugins'),
+									'job':		os.path.join('data', 'jobs') }
+	conf.env.JOBS = [conf.env.ENVNAME]
 
 
 def options(opt):
@@ -79,6 +81,7 @@ def configure(conf):
 			name = '%s-%s-%s-%s' %(compiler, platform, target, version)
 			conf.setenv(name, conf.env.derive())
 			try:
+				conf.env.ENVNAME = name
 				add_msvc_to_env(conf, compiler, version, target, platform, tname)
 				add_win32_flags_to_env(conf, name, tname)
 				conf.recurse(os.path.join('..', '..', '..', 'target', 'archs', tname), once=False)

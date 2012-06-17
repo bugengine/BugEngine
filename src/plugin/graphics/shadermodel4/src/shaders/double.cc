@@ -6,7 +6,7 @@
 #include    <shadermodel4/shaders/double.script.hh>
 #include    <3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace DoubleVariable
+namespace BugEngine { namespace Double
 {
 /* Type *************************************************************/
 Double::Double()
