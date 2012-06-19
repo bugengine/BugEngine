@@ -63,7 +63,7 @@ class module:
 		self.tasks = {}
 		self.root = os.path.join('src', category, name.replace('.', '/'))
 		self.platforms = set([])
-		self.jobs = {}
+		self.kernels = {}
 		for p in platforms or mak.allplatforms.keys():
 			for pname, pgroup in mak.allplatforms.items():
 				if p in pgroup:
@@ -117,15 +117,15 @@ class module:
 			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'data'), '', True, self.platforms, self.archs, sourcelist, True), 'data')
 		if os.path.isdir(os.path.join(self.root, 'src')):
 			self.sourcetree.addDirectory(self.scandir(os.path.join(self.root, 'src'), '', True, self.platforms, self.archs, sourcelist), 'src')
-		if os.path.isdir(os.path.join(self.root, 'jobs')):
-			jobDirectory = sources.directory()
-			self.sourcetree.addDirectory(jobDirectory, 'jobs')
-			for job in os.listdir(os.path.join(self.root, 'jobs')):
-				jobDirectory.addDirectory(self.scandir(os.path.join(self.root, 'jobs', job), '', False, self.platforms, self.archs, sourcelist), job)
-				self.jobs[job] = sources.directory()
-				jobsdir = sources.directory()
-				jobsdir.addDirectory(self.scandir(os.path.join(self.root, 'jobs', job), '', True, self.platforms, self.archs, sourcelist), job)
-				self.jobs[job].addDirectory(jobsdir, 'jobs')
+		if os.path.isdir(os.path.join(self.root, 'kernels')):
+			kernelDirectory = sources.directory()
+			self.sourcetree.addDirectory(kernelDirectory, 'kernels')
+			for kernel in os.listdir(os.path.join(self.root, 'kernels')):
+				kernelDirectory.addDirectory(self.scandir(os.path.join(self.root, 'kernels', kernel), '', False, self.platforms, self.archs, sourcelist), kernel)
+				self.kernels[kernel] = sources.directory()
+				kernelsdir = sources.directory()
+				kernelsdir.addDirectory(self.scandir(os.path.join(self.root, 'kernels', kernel), '', True, self.platforms, self.archs, sourcelist), kernel)
+				self.kernels[kernel].addDirectory(kernelsdir, 'kernels')
 
 		platformsdirectory = sources.directory()
 		if os.path.isdir('extra'):
@@ -146,8 +146,6 @@ class module:
 						self.localarchoptions[platform] = coptions([os.path.join(extraroot, 'include')])
 				if os.path.isdir(os.path.join(extraroot, 'src')):
 					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'src'), '', True, [platform], self.archs, sourcelist), 'src')
-				if os.path.isdir(os.path.join(extraroot, 'job')):
-					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'job'), '', True, [platform], self.archs, sourcelist), 'job')
 				if os.path.isdir(os.path.join(extraroot, 'data')):
 					pdir.addDirectory(self.scandir(os.path.join(extraroot, 'data'), '', True, [platform], self.archs, sourcelist, True), 'src')
 				if pdir.directories or pdir.files:
@@ -281,8 +279,8 @@ class module:
 				if task.usemaster and task.source:
 					task.features.append('master')
 				task.do_install			= 1
-				for jobname, jobsources in self.jobs.items():
-					for envname in bld.env.JOBS:
+				for kernelname, kernelsources in self.kernels.items():
+					for envname in bld.env.KERNELS:
 						if env.STATIC or bld.static:
 							jobtype = 'cxxstlib'
 						else:
@@ -290,11 +288,11 @@ class module:
 						env = bld.all_envs[envname].derive()
 						env.detach()
 						job = bld(
-								target = task.name + '.' + jobname,
+								target = task.name + '.' + kernelname,
 								env = env,
-								source = jobsources.make_sources(bld, env, self.root),
+								source = kernelsources.make_sources(bld, env, self.root),
 								features = ['c', 'cxx', jobtype],
-								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['job']))
+								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel']))
 							)
 						job.post()
 						if env.STATIC or bld.static:

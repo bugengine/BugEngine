@@ -31,8 +31,8 @@ def print_msg(task):
 		tgt = [tail]+tgt
 	tgt = tgt[3:]
 	task_name = task.__class__.__name__.replace('_task', '')
-	if task.env.IS_JOB:
-		task_name = task_name+'{J}'
+	if task.env.IS_KERNEL:
+		task_name = 'k'+task_name
 	return '[{0:^11}] {1}\n'.format(task_name, '/'.join(tgt))
 Task.Task.__str__ = print_msg
 
@@ -119,16 +119,16 @@ def configure(conf):
 			conf.env['OPTIMISATION'] = optim
 			conf.env['PREFIX'] = os.path.join('build', name)
 			joblist = []
-			for jobname in conf.env.JOBS:
-				fullname = 'job:'+name
+			for jobname in conf.env.KERNELS:
+				fullname = 'kernel:'+name
 				conf.setenv(fullname, conf.all_envs[jobname])
 				conf.env.detach()
 				conf.env.OPTIMISATION = optim
 				conf.env.PREFIX = os.path.join('build', name)
-				conf.env.IS_JOB = True
+				conf.env.IS_KERNEL = True
 				joblist.append(fullname)
 			conf.variant = name
-			conf.env.JOBS = joblist
+			conf.env.KERNELS = joblist
 			selectedvariants.append(name)
 
 	conf.variant = ''
