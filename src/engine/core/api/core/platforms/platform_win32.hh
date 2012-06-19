@@ -49,7 +49,7 @@ static inline void displayError()
 # define    freea(p)
 #endif
 
-#define PLUGIN_H    <system/win32/plugin.inl>
+#define PLUGIN_H    <system/plugin/win32/plugin.inl>
 
 /*****************************************************************************/
 #endif
