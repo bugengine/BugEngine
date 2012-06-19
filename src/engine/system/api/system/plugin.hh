@@ -71,7 +71,7 @@ private:
         }                                                                                               \
     }
 #ifdef BE_STATIC
-# include "static/plugin.inl"
+# include "plugin/static/plugin.inl"
 #elif defined(PLUGIN_H)
 # include PLUGIN_H
 #else
