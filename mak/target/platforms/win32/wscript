@@ -64,8 +64,8 @@ def add_win32_flags_to_env(conf, name, arch):
 									'lib':		os.path.join('dev','lib'),
 									'data':		'data',
 									'plugin':	os.path.join('data', 'plugins'),
-									'job':		os.path.join('data', 'jobs') }
-	conf.env.JOBS = [conf.env.ENVNAME]
+									'kernel':	os.path.join('data', 'kernels') }
+	conf.env.KERNELS = [conf.env.ENVNAME]
 
 
 def options(opt):

@@ -51,8 +51,8 @@ def add_linux_flags_to_env(conf, name, arch):
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
 									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
-									'job':		os.path.join('share', 'bugengine', 'jobs') }
-	conf.env['JOBS'] = [conf.env.ENVNAME]
+									'kernel':	os.path.join('share', 'bugengine', 'kernels') }
+	conf.env['KERNELS'] = [conf.env.ENVNAME]
 
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
