@@ -4,36 +4,28 @@
 #ifndef BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 #define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
-#include    <core/threads/thread.hh>
-#include    <core/threads/semaphore.hh>
-#include    <core/threads/event.hh>
-#include    <minitl/memory/pool.hh>
-#include    <core/timer.hh>
-#include    <maths/vector.hh>
 
 namespace BugEngine
 {
 
-template< typename Body >
-class Task;
+class TaskScheduler;
+template< typename BODY > class Task;
 class TaskGroup;
-
+class TaskScheduler;
 namespace ScheduledTasks
 {
 class ITaskItem;
+template< typename RANGE, typename BODY > class TaskItem;
+
 }
 
 class be_api(SYSTEM) Scheduler : public minitl::pointer
 {
     BE_NOCOPY(Scheduler);
-private:
-    class Worker;
-    class HeadTask;
-    friend class Worker;
-    friend class ScheduledTasks::ITaskItem;
-    template< typename Body >
-    friend class Task;
+    template< typename BODY > friend class Task;
+    template< typename RANGE, typename BODY > friend class ScheduledTasks::TaskItem;
     friend class TaskGroup;
+    friend class TaskScheduler;
 public:
     enum Priority
     {
@@ -56,46 +48,37 @@ private:
     };
     friend struct WorkItem;
 private:
-    minitl::vector<Worker*>                     m_workers;
-    Semaphore                                   m_synchro;
-    Semaphore                                   m_mainThreadSynchro;
     struct Buffer { char buffer[128]; };
-    minitl::pool<Buffer>                        m_taskPool;
-    unsigned int                                m_frameCount;
-    Timer                                       m_timer;
-private: //friend Worker
-    minitl::istack<ScheduledTasks::ITaskItem>   m_tasks[PriorityCount];
-    minitl::istack<ScheduledTasks::ITaskItem>   m_mainThreadTasks[PriorityCount];
-    i_u32                                       m_runningTasks;
-    bool volatile                               m_running;
+    minitl::pool<Buffer>    m_taskPool;
+    scoped<TaskScheduler>   m_taskScheduler;
+    i_u32                   m_runningTasks;
+    i_u8                    m_running;
 private:
     void notifyEnd();
-    ScheduledTasks::ITaskItem* pop(Affinity affinity);
-    void queue(ScheduledTasks::ITaskItem* task);
-    void split(ScheduledTasks::ITaskItem* t, size_t count);
-    void* allocate_task(size_t size);
-    void  release_task(void* t, size_t size);
-public:
-    template< typename T > inline void* allocate_task();
-    template< typename T > inline void release_task(T* t);
+private:
+    void queueTask(ScheduledTasks::ITaskItem* task);
+    void* allocate(size_t size);
+    void  release(void* t, size_t size);
+    template< typename T > inline void* allocateTask();
+    template< typename T > inline void releaseTask(T* t);
 public:
     Scheduler();
     ~Scheduler();
 
-    void frameUpdate();
     void mainThreadJoin();
 };
 
 template< typename T >
-void* Scheduler::allocate_task()
+void* Scheduler::allocateTask()
 {
-    return allocate_task(sizeof(T));
+    return allocate(sizeof(T));
 }
+
 template< typename T >
-void Scheduler::release_task(T* t)
+void Scheduler::releaseTask(T* t)
 {
     t->~T();
-    return release_task(reinterpret_cast<void*>(static_cast<ScheduledTasks::ITaskItem*>(t)), sizeof(T));
+    release(t, sizeof(T));
 }
 
 }

@@ -86,12 +86,16 @@ def plugins(bld):
 			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
 			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
+	kernelcpu		= module.plugin('kernel.cpu'	,			[bld.game])
+	kerneldc		= module.plugin('kernel.directcompute',		[bld.game])
+	kernelopencl	= module.plugin('kernel.opencl',			[bld.game])
+	kernelcuda		= module.plugin('kernel.cuda',				[bld.game])
 
 
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None
-	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], platforms=['pc'], category='game')
-	bugeditor		= module.game('bugeditor',					[bugeditor.ui, package], platforms=['pc'])
+	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game')
+	bugeditor		= module.game('bugeditor',					[bugeditor.ui, package])
 
 	bld.recurse('mak', name='plugins', once=False)
 

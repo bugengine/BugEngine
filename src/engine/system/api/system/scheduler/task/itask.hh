@@ -15,9 +15,6 @@ class be_api(SYSTEM) ITask : public minitl::refcountable
     BE_NOCOPY(ITask);
 public:
     class CallbackConnection;
-    friend class CallbackConnection;
-    friend class ScheduledTasks::ITaskItem;
-public:
     class ICallback : public minitl::refcountable
     {
         BE_NOCOPY(ICallback);
@@ -36,6 +33,8 @@ public:
         virtual void onConnected(weak<ITask> to, CallbackStatus) = 0;
         virtual bool onDisconnected(weak<ITask> from) = 0;
     };
+    friend class CallbackConnection;
+    friend class ScheduledTasks::ITaskItem;
 private:
     class ChainCallback : public ICallback
     {
@@ -69,14 +68,15 @@ private:
 public:
     virtual ~ITask();
 
-    virtual void run(weak<Scheduler> scheduler) const = 0;
-    void end(weak<Scheduler> scheduler) const;
+    virtual void schedule(weak<Scheduler> scheduler) const = 0;
+    void completed(weak<Scheduler> scheduler) const;
 
     weak<ICallback> startCallback();
 
 protected:
     ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity);
 };
+
 
 class be_api(SYSTEM) ITask::CallbackConnection
 {

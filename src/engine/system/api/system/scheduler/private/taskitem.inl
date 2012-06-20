@@ -32,7 +32,7 @@ TaskItem<Range, Body>::TaskItem(TaskItem& split)
 template< typename Range, typename Body >
 ITaskItem* TaskItem<Range, Body>::split(weak<Scheduler> sc)
 {
-    void* mem = sc->allocate_task< TaskItem<Range, Body> >();
+    void* mem = sc->allocateTask< TaskItem<Range, Body> >();
     ITaskItem* result = new(mem) TaskItem<Range, Body>(*this);
     return result;
 }
@@ -50,9 +50,9 @@ void TaskItem<Range, Body>::run(weak<Scheduler> sc)
     weak< const Task<Body> > owner = be_checked_cast< const Task<Body> >(m_owner);
     if (++owner->m_taskCompleted == owner->m_taskCount)
     {
-        owner->end(sc);
+        owner->completed(sc);
     }
-    sc->release_task(this);
+    sc->releaseTask(this);
 }
 
 }}

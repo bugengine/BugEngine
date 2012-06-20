@@ -44,7 +44,7 @@ Application::Application()
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
 ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
 {
-    addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(Arena::task(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
+    //addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(Arena::task(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
     //m_updateLoop = ITask::CallbackConnection();
 }
 
@@ -75,7 +75,7 @@ void Application::removeTask(ref<ITask> task)
 
 int Application::run()
 {
-    m_updateTask->run(m_scheduler);
+    m_updateTask->schedule(m_scheduler);
     m_scheduler->mainThreadJoin();
     return 0;
 }

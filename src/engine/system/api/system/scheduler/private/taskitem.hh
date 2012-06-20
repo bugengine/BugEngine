@@ -11,20 +11,20 @@ namespace BugEngine
 {
 
 class ITask;
-template< typename Body >
-class Task;
+template< typename BODY > class Task;
+class TaskScheduler;
+
 
 namespace ScheduledTasks
 {
 
 class be_api(SYSTEM) ITaskItem : public minitl::inode
 {
-    friend class ::BugEngine::Scheduler;
-    friend class ::BugEngine::Scheduler::Worker;
+    friend class ::BugEngine::TaskScheduler;
 protected:
     size_t              m_splitCount;
     weak<const ITask>   m_owner;
-protected: //friend Worker
+public:
     virtual void            run(weak<Scheduler> sc) = 0;
     virtual ITaskItem*      split(weak<Scheduler> sc) = 0;
     virtual bool            atomic() const = 0;

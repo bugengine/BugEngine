@@ -19,7 +19,7 @@ TaskGroup::~TaskGroup()
 {
 }
 
-void TaskGroup::run(weak<Scheduler> scheduler) const
+void TaskGroup::schedule(weak<Scheduler> scheduler) const
 {
     Scheduler::WorkItem item(scheduler);
     if (!m_startTasks.empty())
@@ -31,7 +31,7 @@ void TaskGroup::run(weak<Scheduler> scheduler) const
     }
     else
     {
-        end(scheduler);
+        completed(scheduler);
     }
 }
 
@@ -73,7 +73,7 @@ void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<const ITas
     if (++m_completed == m_owner->m_endTaskCount)
     {
         m_completed = 0;
-        m_owner->end(scheduler);
+        m_owner->completed(scheduler);
     }
 }
 
