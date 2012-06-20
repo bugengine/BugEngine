@@ -5,7 +5,7 @@
 #define BE_CORE_COMPILERS_MSVC_H_
 /*****************************************************************************/
 
-#define be_alignof(t)          __alignof(t)
+#define be_alignof(t)          __alignof(t&)
 
 typedef signed __int8           i8;
 typedef signed __int16          i16;
