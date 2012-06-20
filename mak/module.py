@@ -284,14 +284,14 @@ class module:
 						if env.STATIC or bld.static:
 							jobtype = 'cxxstlib'
 						else:
-							jobtype = 'cxxshlib'
+							jobtype = 'cshlib'
 						env = bld.all_envs[envname].derive()
 						env.detach()
 						job = bld(
 								target = task.name + '.' + kernelname,
 								env = env,
 								source = kernelsources.make_sources(bld, env, self.root),
-								features = ['c', 'cxx', jobtype],
+								features = ['c', 'cxx', jobtype, 'warnall', optim],
 								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel']))
 							)
 						job.post()

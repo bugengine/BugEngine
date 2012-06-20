@@ -120,7 +120,7 @@ def configure(conf):
 			conf.env['PREFIX'] = os.path.join('build', name)
 			joblist = []
 			for jobname in conf.env.KERNELS:
-				fullname = 'kernel:'+name
+				fullname = '(kernel)'+name
 				conf.setenv(fullname, conf.all_envs[jobname])
 				conf.env.detach()
 				conf.env.OPTIMISATION = optim
