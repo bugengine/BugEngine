@@ -14,7 +14,7 @@
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
-
+#include    <core/threads/thread.hh>
 
 #include    <GL/wglext.h>
 
