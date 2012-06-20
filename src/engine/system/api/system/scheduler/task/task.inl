@@ -20,15 +20,15 @@ template< typename Body >
 }
 
 template< typename Body >
-void Task< Body >::run(weak<Scheduler> sc) const
+void Task< Body >::schedule(weak<Scheduler> sc) const
 {
     m_taskCount = 0;
     m_taskCompleted = 0;
 
     typedef typename Body::Range Range;
     Range r = m_body.prepare();
-    void* item = sc->allocate_task< ScheduledTasks::TaskItem<Range, Body> >();
-    sc->queue(new(item) ScheduledTasks::TaskItem<Range, Body>(this, r, m_body));
+    void* item = sc->allocateTask< ScheduledTasks::TaskItem<Range, Body> >();
+    sc->queueTask(new(item) ScheduledTasks::TaskItem<Range, Body>(this, r, m_body));
 }
 
 }

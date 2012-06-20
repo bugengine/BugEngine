@@ -13,6 +13,7 @@
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/rendertarget/glwindow.hh>
+#include    <core/threads/thread.hh>
 
 
 #include    <Cocoa/Cocoa.h>

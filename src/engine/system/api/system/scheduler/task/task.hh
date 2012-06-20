@@ -22,7 +22,7 @@ private:
     mutable i_u32   m_taskCompleted;
 public:
     Task(istring name, color32 color, const Body& body, Scheduler::Priority priority = Scheduler::Default, Scheduler::Affinity affinity = Scheduler::DontCare);
-    virtual void run(weak<Scheduler> sc) const override;
+    virtual void schedule(weak<Scheduler> sc) const override;
 };
 
 }

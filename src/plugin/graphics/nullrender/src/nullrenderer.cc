@@ -4,6 +4,7 @@
 #include    <stdafx.h>
 #include    <nullrenderer.hh>
 
+#include    <core/timer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
 #include    <loaders/nullsurface.hh>
