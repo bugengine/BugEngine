@@ -242,6 +242,7 @@ SIMD_FORCE_INLINE btScalar btFmod(btScalar x,btScalar y) { return fmod(x,y); }
 
 #else
 		
+#include <cmath>
 SIMD_FORCE_INLINE btScalar btSqrt(btScalar y) 
 { 
 #ifdef USE_APPROXIMATION
@@ -259,7 +260,7 @@ SIMD_FORCE_INLINE btScalar btSqrt(btScalar y)
 	x = (btScalar(1.5)*x)-(x*x)*(x*z);
 	return x*y;
 #else
-	return sqrtf(y); 
+	return std::sqrt(y); 
 #endif
 }
 SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { return fabsf(x); }
@@ -271,21 +272,21 @@ SIMD_FORCE_INLINE btScalar btAcos(btScalar x) {
 		x=btScalar(-1); 
 	if (x>btScalar(1))	
 		x=btScalar(1);
-	return acosf(x); 
+	return std::acos(x); 
 }
 SIMD_FORCE_INLINE btScalar btAsin(btScalar x) { 
 	if (x<btScalar(-1))	
 		x=btScalar(-1); 
 	if (x>btScalar(1))	
 		x=btScalar(1);
-	return asinf(x); 
+	return std::asin(x); 
 }
-SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atanf(x); }
-SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2f(x, y); }
-SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return expf(x); }
-SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return logf(x); }
-SIMD_FORCE_INLINE btScalar btPow(btScalar x,btScalar y) { return powf(x,y); }
-SIMD_FORCE_INLINE btScalar btFmod(btScalar x,btScalar y) { return fmodf(x,y); }
+SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return std::atan(x); }
+SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return std::atan2(x, y); }
+SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return std::exp(x); }
+SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return std::log(x); }
+SIMD_FORCE_INLINE btScalar btFmod(btScalar x,btScalar y) { return std::fmod(x,y); }
+SIMD_FORCE_INLINE btScalar btPow(btScalar x,btScalar y) { return std::pow(x,y); }
 	
 #endif
 
