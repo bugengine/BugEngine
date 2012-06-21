@@ -9,7 +9,9 @@
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
 
-#include "system/plugin.hh"
+#include    <core/threads/thread.hh>
+#include    <core/timer.hh>
+#include    <system/plugin.hh>
 
 
 

@@ -5,6 +5,7 @@
 #include    <loaders/dx9window.hh>
 #include    <dx9renderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
+#include    <core/threads/thread.hh>
 
 namespace BugEngine
 {
