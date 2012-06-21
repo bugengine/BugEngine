@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 #include    <system/plugin.hh>
-#include    <cpukernelloader.hh>
+#include    <cpukernelscheduler.hh>
 #include    <rtti/classinfo.script.hh>
 
-//BE_PLUGIN_REGISTER(BugEngine::CpuKernelLoader, BugEngine::CpuKernelLoader);
+BE_PLUGIN_REGISTER(BugEngine::IKernelScheduler, BugEngine::CpuKernelScheduler);

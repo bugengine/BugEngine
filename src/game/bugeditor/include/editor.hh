@@ -13,6 +13,7 @@ namespace BugEngine
 {
 class Folder;
 class Package;
+class IKernelScheduler;
 }
 
 namespace BugEngine { namespace Editor
@@ -21,14 +22,10 @@ namespace BugEngine { namespace Editor
 class Editor : public Application
 {
 private:
-    scoped<ResourceManager> const   m_resourceManager;
-    ref<Folder>             const   m_dataFolder;
-    PluginContext           const   m_pluginContext;
-    Plugin<void>            const   m_renderer;
-    Plugin<IResourceLoader> const   m_packageManager;
-    Plugin<IResourceLoader> const   m_luaScripting;
-    ref<const Package>      const   m_mainPackage;
-    ref<ITask>              const   m_resourceTask;
+    Plugin<void>                const   m_renderer;
+    Plugin<IResourceLoader>     const   m_packageManager;
+    Plugin<IResourceLoader>     const   m_luaScripting;
+    ref<const Package>          const   m_mainPackage;
 public:
     Editor(const PluginContext& context);
     ~Editor();

@@ -7,6 +7,7 @@
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
 #include    <system/plugin.hh>
+#include    <system/scheduler/scheduler.hh>
 #include    <system/resource/resourcemanager.hh>
 
 #include    <cstdio>
@@ -89,7 +90,9 @@ static int beMain(int argc, const char *argv[])
                 BugEngine::DiskFolder::CreateOne);
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::Arena::debug(), home->createFile("log")));
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
-        BugEngine::Plugin<BugEngine::Application> app(BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()), BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home));
+        BugEngine::Plugin<BugEngine::Application> app(
+                BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),
+                BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home));
         return app->run();
     }
 #if BE_ENABLE_EXCEPTIONS
