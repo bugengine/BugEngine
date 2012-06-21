@@ -25,12 +25,14 @@ void  Scheduler::release(void* task, size_t size)
         m_taskPool.release((Buffer*)task);
 }
 
-Scheduler::Scheduler()
-:   m_taskPool(Arena::task(), 65535, 16)
-,   m_taskScheduler(scoped<TaskScheduler>::create(Arena::task(), this))
-,   m_runningTasks(0)
+Scheduler::Scheduler(const PluginContext& context)
+:   m_runningTasks(0)
 ,   m_running(true)
+,   m_taskPool(Arena::task(), 65535, 16)
+,   m_taskScheduler(scoped<TaskScheduler>::create(Arena::task(), this))
+,   m_kernelSchedulers(minitl::vector< Plugin<IKernelScheduler> >(Arena::task()))
 {
+    registerKernelSchedulers(context);
 }
 
 Scheduler::~Scheduler()

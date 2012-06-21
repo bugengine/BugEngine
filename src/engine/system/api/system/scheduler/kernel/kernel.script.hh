@@ -1,21 +1,21 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SYSTEM_SCHEDULER_KERNEL_IKERNELSCHEDULER_HH_
-#define BE_SYSTEM_SCHEDULER_KERNEL_IKERNELSCHEDULER_HH_
+#ifndef BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_HH_
+#define BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_HH_
 /*****************************************************************************/
+#include    <system/resource/resource.script.hh>
 
 namespace BugEngine
 {
 
-class Scheduler;
-class IKernelScheduler : public minitl::pointer
+class be_api(SYSTEM) Kernel : public Resource
 {
 private:
-    istring const           m_name;
+    inamespace const    m_name;
 public:
-    IKernelScheduler(const istring& name);
-    ~IKernelScheduler();
+    Kernel(const inamespace& name);
+    const inamespace& name() const { return m_name; }
 };
 
 }

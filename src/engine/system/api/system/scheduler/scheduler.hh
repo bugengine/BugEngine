@@ -4,11 +4,14 @@
 #ifndef BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 #define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
+#include    <system/plugin.hh>
 
 namespace BugEngine
 {
 
+struct PluginContext;
 class TaskScheduler;
+class IKernelScheduler;
 template< typename BODY > class Task;
 class TaskGroup;
 class TaskScheduler;
@@ -49,12 +52,14 @@ private:
     friend struct WorkItem;
 private:
     struct Buffer { char buffer[128]; };
-    minitl::pool<Buffer>    m_taskPool;
-    scoped<TaskScheduler>   m_taskScheduler;
-    i_u32                   m_runningTasks;
-    i_u8                    m_running;
+    i_u32                           m_runningTasks;
+    i_bool                          m_running;
+    minitl::pool<Buffer>            m_taskPool;
+    scoped<TaskScheduler>           m_taskScheduler;
+    minitl::vector< Plugin<IKernelScheduler> >   m_kernelSchedulers;
 private:
     void notifyEnd();
+    void registerKernelSchedulers(const PluginContext& context);
 private:
     void queueTask(ScheduledTasks::ITaskItem* task);
     void* allocate(size_t size);
@@ -62,10 +67,12 @@ private:
     template< typename T > inline void* allocateTask();
     template< typename T > inline void releaseTask(T* t);
 public:
-    Scheduler();
+    Scheduler(const PluginContext& context);
     ~Scheduler();
 
     void mainThreadJoin();
+    void addKernelScheduler(weak<IKernelScheduler> scheduler);
+    void removeKernelScheduler(weak<IKernelScheduler> scheduler);
 };
 
 template< typename T >

@@ -7,6 +7,8 @@
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 #include    <system/resource/resourceloader.hh>
+#include    <system/file/folder.script.hh>
+#include    <system/plugin.hh>
 
 #include    <world/world.script.hh>
 
@@ -35,21 +37,27 @@ Application::WorldResource::~WorldResource()
 {
 }
 
-Application::Application()
+Application::Application(ref<Folder> dataFolder)
 :   IResourceLoader()
-,   m_scheduler(scoped<Scheduler>::create(Arena::task()))
+,   m_dataFolder(dataFolder)
+,   m_resourceManager(scoped<ResourceManager>::create(Arena::game()))
+,   m_pluginContext(m_resourceManager, m_dataFolder)
+,   m_scheduler(scoped<Scheduler>::create(Arena::task(), m_pluginContext))
 ,   m_updateTask(ref< TaskGroup >::create(Arena::task(), "applicationUpdate", color32(255,255,0)))
 ,   m_worldTask(ref< TaskGroup >::create(Arena::task(), "worldUpdate", color32(255,255,0)))
 ,   m_tasks(Arena::task())
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
 ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
 {
-    //addTask(ref< Task< MethodCaller<Scheduler, &Scheduler::frameUpdate> > >::create(Arena::task(), "scheduler", color32(255,255,0), MethodCaller<Scheduler, &Scheduler::frameUpdate>(m_scheduler)));
+    m_resourceManager->attach<World::World>(this);
+    addTask(ref< Task< MethodCaller<ResourceManager, &ResourceManager::updateTickets> > >::create(Arena::task(), "resource", color32(0,255,0), MethodCaller<ResourceManager, &ResourceManager::updateTickets>(m_resourceManager)));
     //m_updateLoop = ITask::CallbackConnection();
+
 }
 
 Application::~Application(void)
 {
+    m_resourceManager->detach<World::World>(this);
 }
 
 void Application::addTask(ref<ITask> task)

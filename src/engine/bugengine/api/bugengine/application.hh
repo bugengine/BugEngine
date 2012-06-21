@@ -16,6 +16,7 @@ namespace World
 {
 class World;
 }
+class Folder;
 
 class be_api(BUGENGINE) Application : public IResourceLoader
 {
@@ -29,18 +30,22 @@ private:
         TaskGroup::TaskEndConnection    end;
     };
 private:
-    scoped<Scheduler>                               m_scheduler;
-    ref<TaskGroup>                                  m_updateTask;
-    ref<TaskGroup>                                  m_worldTask;
-    minitl::vector< UpdateTask >                    m_tasks;
-    ITask::CallbackConnection                       m_updateLoop;
-    ITask::CallbackConnection                       m_worldLoop;
+    ref<Folder> const               m_dataFolder;
+    scoped<ResourceManager> const   m_resourceManager;
+    PluginContext const             m_pluginContext;
+    scoped<Scheduler>               m_scheduler;
+    ref<TaskGroup>                  m_updateTask;
+    ref<TaskGroup>                  m_worldTask;
+    minitl::vector< UpdateTask >    m_tasks;
+    ITask::CallbackConnection       m_updateLoop;
+    ITask::CallbackConnection       m_worldLoop;
 protected:
     void addTask(ref<ITask> task);
     void removeTask(ref<ITask> task);
-    Application();
+    const PluginContext& pluginContext() const { return m_pluginContext; }
+    Application(ref<Folder> dataFolder);
 public:
-    virtual ~Application(void);
+    virtual ~Application();
 
     int run();
 private:
