@@ -23,6 +23,7 @@ Editor::Editor(const PluginContext& /*context*/)
     pluginContext().resourceManager->load(m_mainPackage);
     ref<Kernel> k = ref<Kernel>::create(Arena::game(), "graphics.3d.batchrender");
     pluginContext().resourceManager->load(k);
+    pluginContext().resourceManager->unload(k);
 }
 
 Editor::~Editor()
