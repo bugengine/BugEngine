@@ -60,6 +60,7 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 :   m_params(new ThreadParams(name, f, p1, p2))
 ,   m_data(new pthread_t)
 {
+    be_info("starting thread %s" | name);
     pthread_create(reinterpret_cast<pthread_t*>(m_data), 0, &ThreadParams::threadWrapper, m_params);
     m_id = reinterpret_cast<unsigned long>(m_data);
     setPriority(p);

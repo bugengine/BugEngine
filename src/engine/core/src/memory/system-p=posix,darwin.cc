@@ -42,8 +42,6 @@ void SystemAllocator::platformCommit(byte* ptr, u32 begin, u32 end)
     be_assert(end % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | end | s_pageSize);
     int failed = mprotect(ptr + begin + s_cacheAhead, end-begin, PROT_READ|PROT_WRITE);
     be_assert(failed == 0, "failed to commit memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
-    failed = madvise(ptr+begin + s_cacheAhead, end-begin, MADV_SEQUENTIAL);
-    be_assert(failed == 0, "failed to free memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
 }
 
 void  SystemAllocator::platformRelease(byte* ptr, u32 begin, u32 end)
@@ -53,8 +51,6 @@ void  SystemAllocator::platformRelease(byte* ptr, u32 begin, u32 end)
     be_assert(end % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | end | s_pageSize);
     int failed = mprotect(ptr + begin + s_cacheAhead, end-begin, PROT_NONE);
     be_assert(failed == 0, "failed to release memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
-    failed = madvise(ptr+begin + s_cacheAhead, end-begin, MADV_FREE);
-    be_assert(failed == 0, "failed to free memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
 }
 
 void  SystemAllocator::platformFree(byte* ptr, u32 size)
@@ -65,8 +61,6 @@ void  SystemAllocator::platformFree(byte* ptr, u32 size)
 #if !BE_ENABLE_MEMORY_DEBUGGING
     failed = mprotect(ptr, s_cacheAhead, PROT_NONE);
     be_assert(failed == 0, "failed to release memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
-    failed = madvise(ptr, s_cacheAhead, MADV_FREE);
-    be_assert(failed == 0, "failed to free memory for %d bytes at offset %d: %s" | (end-begin) | begin | sys_errlist[errno]);
 #endif
     failed = munmap(ptr, size);
     be_assert(failed == 0, "failed to unmap memory for %d bytes: %s" | size | sys_errlist[errno]);
