@@ -21,30 +21,7 @@ def doParseData(task):
 ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} -b ${str(env.BROKEN_INITIALIZER)} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc', before='cxx')
 cls.scan = scan
-"""old_runnable_status = cls.runnable_status
-def runnable_status(self):
-	global count, lock, MAX
-	ret = Task.ASK_LATER
-	if count >= MAX:
-		return ret
-	ret = old_runnable_status(self)
-	if ret == Task.RUN_ME:
-		lock.acquire()
-		count += 1
-		lock.release()
-	return ret
-cls.runnable_status = runnable_status
-old_run = cls.run
-def run(self):
-	global count, lock
-	try:
-		ret = old_run(self)
-	finally:
-		lock.acquire()
-		count -= 1
-		lock.release()
-	return ret
-cls.run = run"""
+
 
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
