@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <cpukernelloader.hh>
+#include    <kernelobject.hh>
 #include    <system/scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
@@ -19,20 +20,15 @@ CpuKernelLoader::~CpuKernelLoader()
 
 ResourceHandle CpuKernelLoader::load(weak<const Resource> resource)
 {
-    be_forceuse(resource);
     be_info("loading CPU kernel %s"|be_checked_cast<const Kernel>(resource)->name());
-    return ResourceHandle();
+    ResourceHandle handle;
+    handle.handle = ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel>(resource)->name());
+    return handle;
 }
 
 void CpuKernelLoader::unload(const ResourceHandle& resource)
 {
     be_forceuse(resource);
-}
-
-void CpuKernelLoader::onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer)
-{
-    be_forceuse(resource);
-    be_forceuse(buffer);
 }
 
 }

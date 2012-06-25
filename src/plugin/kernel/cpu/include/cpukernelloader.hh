@@ -18,8 +18,6 @@ public:
 
     virtual ResourceHandle load(weak<const Resource> resource) override;
     virtual void unload(const ResourceHandle& resource) override;
-
-    virtual void onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer) override;
 };
 
 }
