@@ -64,22 +64,26 @@ Environment& Environment::getEnvironment()
 
 size_t Environment::getProcessorCount() const
 {
-#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN) || defined(BE_PLATFORM_MACOS)
+#if defined(BE_PLATFORM_LINUX) || defined(BE_PLATFORM_SUN)
     return sysconf(_SC_NPROCESSORS_ONLN);
 #else
-    int numCPU = 0;
-    int mib[4];
-    size_t len = sizeof(numCPU);
+    int cpuCount = 0;
+    size_t len = sizeof(cpuCount);
 
+#if defined(BE_PLATFORM_MACOS)
+    if (sysctlbyname("hw.physicalcpu", &cpuCount, &len, NULL, 0) == -1)
+#else
+    int mib[4];
     mib[0] = CTL_HW;
     mib[1] = HW_NCPU;
-    if (sysctl(mib, 2, &numCPU, &len, NULL, 0) == -1)
+    if (sysctl(mib, 2, &cpuCount, &len, NULL, 0) == -1)
+#endif
     {
         be_error("Could not retrieve number of processors: %s" | sys_errlist[errno]);
-        numCPU = 1;
+        cpuCount = 1;
     }
-    be_assert_recover(numCPU >= 1, "Weird number of CPUs returned by sysctl: %d" | numCPU, numCPU=1);
-    return numCPU;
+    be_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount, cpuCount=1);
+    return cpuCount;
 #endif
 }
 
