@@ -152,7 +152,7 @@ void GLRenderer::attachWindow(weak<GLWindow> w) const
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
     be_assert(window, "No native window created for BugEngine window");
-    w->m_context = scoped<GLWindow::Context>::create(Arena::general(), window, context, Thread::currentId());
+    w->m_context.reset(scoped<GLWindow::Context>::create(Arena::general(), window, context, Thread::currentId()));
     [context release];
 }
 
@@ -173,8 +173,7 @@ GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer>
 GLWindow::~GLWindow()
 {
 }
-    
-    
+
 void GLWindow::load(weak<const Resource> resource)
 {
     Window::load(resource);
@@ -185,14 +184,14 @@ void GLWindow::unload()
 {
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
-    m_context = scoped<Context>();
+    m_context.reset(scoped<Context>());
 }
 
 void GLWindow::setCurrent() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         [m_context->m_view->m_context makeCurrentContext];
     }
 }
@@ -201,7 +200,7 @@ void GLWindow::clearCurrent() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         [NSOpenGLContext clearCurrentContext];
     }
 }
@@ -210,7 +209,7 @@ void GLWindow::present() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         CGLFlushDrawable(m_context->m_context);
     }
 }

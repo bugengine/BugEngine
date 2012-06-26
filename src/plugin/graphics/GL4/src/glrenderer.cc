@@ -16,12 +16,31 @@ namespace BugEngine { namespace OpenGL
 void GLRenderer::flush()
 {
     static int frames = 0;
+    static int frameCount = 100;
     static float now = Timer::now();
-    be_forceuse(now);
-    if (++frames%100 == 0)
+    if (++frames%frameCount == 0)
     {
         float time = Timer::now();
-        be_info("FPS: %d" | (int)(1000.0f*100.0f / (time - now)));
+        float t = (time-now)/float(frameCount);
+        if (t > 10.0f)
+        {
+            be_info("Average frame time: %d milliseconds" | (int)t);
+            frameCount = 20;
+        }
+        else
+        {
+            t = 1000.0f*t;
+            if (t > 10.0f)
+            {
+                be_info("Average frame time: %d microseconds" | (int)t);
+                frameCount = 5000;
+            }
+            else
+            {
+                be_info("Average frame time: %d nanoseconds" | (int)(t*1000.0f));
+                frameCount = 50000;
+            }
+        }
         now = time;
     }
 
