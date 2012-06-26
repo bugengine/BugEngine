@@ -9,7 +9,7 @@ namespace BugEngine
 {
 
 class Scheduler;
-class IKernelScheduler : public minitl::pointer
+class be_api(SYSTEM) IKernelScheduler : public minitl::pointer
 {
 private:
     istring const           m_name;

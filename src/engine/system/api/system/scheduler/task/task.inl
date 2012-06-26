@@ -11,11 +11,11 @@ namespace BugEngine
 {
 
 template< typename Body >
-    Task< Body >::Task(istring name, color32 color, const Body& body, Scheduler::Priority priority, Scheduler::Affinity affinity)
-:   ITask(name, color, priority, affinity)
-,   m_body(body)
-,   m_taskCount(0)
-,   m_taskCompleted(0)
+Task< Body >::Task(istring name, color32 color, const Body& body, Scheduler::Priority priority, Scheduler::Affinity affinity)
+    :   ITask(name, color, priority, affinity)
+    ,   m_body(body)
+    ,   m_taskCount(0)
+    ,   m_taskCompleted(0)
 {
 }
 

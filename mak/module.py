@@ -292,7 +292,9 @@ class module:
 								env = env,
 								source = kernelsources.make_sources(bld, env, self.root),
 								features = ['c', 'cxx', jobtype, 'warnall', optim],
-								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel']))
+								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel'])),
+								defines = task.private_defines,
+								includes = task.private_includes
 							)
 						job.post()
 						if env.STATIC or bld.static:

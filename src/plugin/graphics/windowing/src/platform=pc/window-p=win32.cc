@@ -57,12 +57,12 @@ Window::~Window()
 void Window::load(weak<const Resource> resource)
 {
     be_forceuse(resource);
-    m_window = scoped<PlatformWindow>::create(m_renderer->arena(), be_checked_cast<const Renderer>(m_renderer), this);
+    m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), be_checked_cast<const Renderer>(m_renderer), this));
 }
 
 void Window::unload()
 {
-    m_window = scoped<PlatformWindow>();
+    m_window.reset(scoped<PlatformWindow>());
 }
 
 uint2 Window::getDimensions() const
