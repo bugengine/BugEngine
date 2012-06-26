@@ -9,7 +9,9 @@
 namespace BugEngine
 {
 
-static void* loadKernel(const inamespace& kernel)
+#ifndef BE_STATIC
+
+void* KernelObject::loadKernel(const inamespace& kernel)
 {
     minitl::format<> kernelFile = minitl::format<>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | kernel;
     const ipath& kernelDirectory = Environment::getEnvironment().getDataDirectory();
@@ -24,14 +26,21 @@ static void* loadKernel(const inamespace& kernel)
     return handle;
 }
 
-KernelObject::KernelObject(const inamespace& name)
-    :   m_handle(loadKernel(name))
+void* KernelObject::loadSymbol(void* handle, const char *name)
 {
+    void* s = dlsym(handle, name);
+    if (!s)
+    {
+        be_error(dlerror());
+    }
+    return s;
 }
 
-KernelObject::~KernelObject()
+void KernelObject::unloadKernel(void* handle)
 {
-    dlclose(m_handle);
+    dlclose(handle);
 }
+
+#endif
 
 }

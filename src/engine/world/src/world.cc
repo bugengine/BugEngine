@@ -39,25 +39,6 @@ World::World()
 ,   m_entityCount(0)
 ,   m_entityCapacity(0)
 {
-    scoped< Storage<B> > s (scoped< Storage<B> >::create(Arena::game()));
-    s->create(0, B());
-    s->create(1, B());
-    s->create(2, B());
-    s->create(3, B());
-    s->create(4, B());
-    s->destroy(3);
-    s->move(4, 3);
-
-    s->move(2, 4);
-    s->move(1, 2);
-    s->move(0, 1);
-    s->create(0, B());
-
-    s->destroy(4);
-    s->destroy(3);
-    s->destroy(2);
-    s->destroy(1);
-    s->destroy(0);
 }
 
 World::~World()

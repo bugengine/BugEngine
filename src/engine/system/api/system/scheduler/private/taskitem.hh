@@ -22,8 +22,8 @@ class be_api(SYSTEM) ITaskItem : public minitl::inode
 {
     friend class ::BugEngine::TaskScheduler;
 protected:
-    size_t              m_splitCount;
     weak<const ITask>   m_owner;
+    u32                 m_splitCount;
 public:
     virtual void            run(weak<Scheduler> sc) = 0;
     virtual ITaskItem*      split(weak<Scheduler> sc) = 0;

@@ -13,6 +13,7 @@ namespace BugEngine
 
 class ITask;
 
+class Kernel;
 class SceneGraphLoader;
 class RenderSurface;
 class RenderWindow;
@@ -28,13 +29,15 @@ class be_api(_3D) IRenderer : public minitl::pointer
     template< typename R >
     friend class GPUResourceLoader;
 protected:
-    Allocator& m_allocator;
-    weak<ResourceManager> m_resourceManager;
-    ref<ITask> m_syncTask;
-    scoped<SceneGraphLoader> m_sceneLoader;
-    scoped< GPUResourceLoader<RenderSurface> > m_renderSurfaceLoader;
-    scoped< GPUResourceLoader<RenderWindow> > m_renderWindowLoader;
-    scoped< GPUResourceLoader<ShaderProgram> > m_shaderProgramLoader;
+    Allocator&                                  m_allocator;
+    weak<ResourceManager>                       m_resourceManager;
+    ref<ITask>                                  m_syncTask;
+    scoped<SceneGraphLoader>                    m_sceneLoader;
+    scoped< GPUResourceLoader<RenderSurface> >  m_renderSurfaceLoader;
+    scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
+    scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
+    scoped<Kernel>                              m_kernelSort;
+    scoped<Kernel>                              m_kernelRender;
 protected:
     IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();

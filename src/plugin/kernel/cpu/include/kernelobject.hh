@@ -14,6 +14,10 @@ class KernelObject : public minitl::refcountable
 private:
     void*   m_handle;
     void*   m_kernel;
+private:
+    static void* loadKernel(const inamespace& name);
+    static void  unloadKernel(void* handle);
+    static void* loadSymbol(void* handle, const char *name);
 public:
     KernelObject(const inamespace& name);
     ~KernelObject();

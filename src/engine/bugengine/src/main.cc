@@ -5,6 +5,7 @@
 #include    <bugengine/application.hh>
 
 #include    <core/environment.hh>
+#include    <core/threads/thread.hh>
 #include    <system/file/diskfolder.script.hh>
 #include    <system/plugin.hh>
 #include    <system/scheduler/scheduler.hh>
@@ -89,6 +90,7 @@ static int beMain(int argc, const char *argv[])
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::Arena::debug(), home->createFile("log")));
+        be_info("main thread: %d" | BugEngine::Thread::currentId());
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
         BugEngine::Plugin<BugEngine::Application> app(
                 BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),

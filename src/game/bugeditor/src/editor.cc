@@ -15,15 +15,12 @@ namespace BugEngine { namespace Editor
 
 Editor::Editor(const PluginContext& /*context*/)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()))
-    ,   m_renderer("graphics.nullrender", pluginContext())
+    ,   m_renderer("graphics.GL4", pluginContext())
     ,   m_packageManager("scripting.package", pluginContext())
     ,   m_luaScripting("scripting.lua", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("main.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);
-    ref<Kernel> k = ref<Kernel>::create(Arena::game(), "graphics.3d.batchrender");
-    pluginContext().resourceManager->load(k);
-    pluginContext().resourceManager->unload(k);
 }
 
 Editor::~Editor()
