@@ -19,6 +19,8 @@ private:
     mutable T*  m_ptr;
 private:
     scoped(T* value, BugEngine::Allocator& deleter);
+    template< typename U > scoped& operator=(const scoped<U>& other);
+    scoped& operator=(const scoped& other);
 public:
     inline scoped();
     inline ~scoped();

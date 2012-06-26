@@ -48,9 +48,12 @@ template< typename T >
 template< typename U >
 void scoped<T>::reset(const scoped<U>& other)
 {
-    if (m_ptr && m_ptr != other.m_ptr)
+    if (m_ptr != other.m_ptr)
     {
-        m_ptr->checked_delete();
+        if (m_ptr)
+        {
+            m_ptr->checked_delete();
+        }
         m_ptr = other.m_ptr;
         other.m_ptr = 0;
     }
