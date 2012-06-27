@@ -39,6 +39,8 @@ private:
     minitl::vector< UpdateTask >    m_tasks;
     ITask::CallbackConnection       m_updateLoop;
     ITask::CallbackConnection       m_worldLoop;
+private:
+    void frameUpdate();
 protected:
     void addTask(ref<ITask> task);
     void removeTask(ref<ITask> task);

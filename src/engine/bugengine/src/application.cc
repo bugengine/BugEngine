@@ -9,6 +9,7 @@
 #include    <system/resource/resourceloader.hh>
 #include    <system/file/folder.script.hh>
 #include    <system/plugin.hh>
+#include    <core/timer.hh>
 
 #include    <world/world.script.hh>
 
@@ -51,6 +52,7 @@ Application::Application(ref<Folder> dataFolder)
 {
     m_resourceManager->attach<World::World>(this);
     addTask(ref< Task< MethodCaller<ResourceManager, &ResourceManager::updateTickets> > >::create(Arena::task(), "resource", color32(0,255,0), MethodCaller<ResourceManager, &ResourceManager::updateTickets>(m_resourceManager)));
+    addTask(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create(Arena::task(), "update", color32(0,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
     //m_updateLoop = ITask::CallbackConnection();
 
 }
@@ -97,6 +99,38 @@ ResourceHandle Application::load(weak<const Resource> world)
 
 void Application::unload(const ResourceHandle& /*handle*/)
 {
+}
+
+void Application::frameUpdate()
+{
+    static int frames = 0;
+    static int frameCount = 100;
+    static float now = Timer::now();
+    if (++frames%frameCount == 0)
+    {
+        float time = Timer::now();
+        float t = (time-now)/float(frameCount);
+        if (t > 10.0f)
+        {
+            be_info("Average frame time: %d milliseconds" | (int)t);
+            frameCount = 20;
+        }
+        else
+        {
+            t = 1000.0f*t;
+            if (t > 10.0f)
+            {
+                be_info("Average frame time: %d microseconds" | (int)t);
+                frameCount = 5000;
+            }
+            else
+            {
+                be_info("Average frame time: %d nanoseconds" | (int)(t*1000.0f));
+                frameCount = 50000;
+            }
+        }
+        now = time;
+    }
 }
 
 }
