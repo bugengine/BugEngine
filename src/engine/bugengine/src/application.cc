@@ -126,7 +126,7 @@ void Application::frameUpdate()
             else
             {
                 be_info("Average frame time: %d nanoseconds" | (int)(t*1000.0f));
-                frameCount = 50000;
+                frameCount = 10000;
             }
         }
         now = time;

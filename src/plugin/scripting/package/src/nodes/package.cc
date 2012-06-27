@@ -26,12 +26,12 @@ RTTI::Value Package::Namespace::get(const inamespace& name) const
     minitl::hashmap<istring, RTTI::Value>::const_iterator it = m_values.find(name[0]);
     if (it == m_values.end())
     {
-        minitl::hashmap< istring, ref<Namespace> >::const_iterator it = m_children.find(name[0]);
-        if (it != m_children.end())
+        minitl::hashmap< istring, ref<Namespace> >::const_iterator child = m_children.find(name[0]);
+        if (child != m_children.end())
         {
             inamespace childname = name;
             childname.pop_front();
-            return it->second->get(childname);
+            return child->second->get(childname);
         }
         else
         {
