@@ -18,6 +18,7 @@ def options(opt):
 
 def configure(conf):
 	from waflib import Options
+	os.environ['PATH'] = '/System/Library/Frameworks/OpenCL.framework/Libraries:'+os.environ['PATH']
 	for p in Options.options.xcode_sdks.split(',')[::-1]:
 		try:
 			for platform in os.listdir(os.path.join(p, 'Platforms')):

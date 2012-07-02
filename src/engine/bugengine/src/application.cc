@@ -4,6 +4,7 @@
 #include    <bugengine/stdafx.h>
 #include    <bugengine/application.hh>
 
+#include    <system/scheduler/kernel/ikernelscheduler.hh>
 #include    <system/scheduler/task/group.hh>
 #include    <system/scheduler/task/method.hh>
 #include    <system/resource/resourceloader.hh>
@@ -38,12 +39,13 @@ Application::WorldResource::~WorldResource()
 {
 }
 
-Application::Application(ref<Folder> dataFolder)
+Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
 :   IResourceLoader()
 ,   m_dataFolder(dataFolder)
 ,   m_resourceManager(scoped<ResourceManager>::create(Arena::game()))
-,   m_pluginContext(m_resourceManager, m_dataFolder)
-,   m_scheduler(scoped<Scheduler>::create(Arena::task(), m_pluginContext))
+,   m_scheduler(scheduler)
+,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
+,   m_cpuKernelScheduler("kernel.cpu", m_pluginContext)
 ,   m_updateTask(ref< TaskGroup >::create(Arena::task(), "applicationUpdate", color32(255,255,0)))
 ,   m_worldTask(ref< TaskGroup >::create(Arena::task(), "worldUpdate", color32(255,255,0)))
 ,   m_tasks(Arena::task())
@@ -97,7 +99,7 @@ ResourceHandle Application::load(weak<const Resource> world)
     return handle;
 }
 
-void Application::unload(const ResourceHandle& /*handle*/)
+void Application::unload(const ResourceHandle& /*hadnle*/)
 {
 }
 

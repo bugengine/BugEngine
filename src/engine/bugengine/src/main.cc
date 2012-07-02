@@ -90,11 +90,11 @@ static int beMain(int argc, const char *argv[])
                 BugEngine::DiskFolder::ScanRecursive,
                 BugEngine::DiskFolder::CreateOne);
         BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::Arena::debug(), home->createFile("log")));
-        be_info("main thread: %d" | BugEngine::Thread::currentId());
         be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
+        scoped<BugEngine::Scheduler> scheduler = scoped<BugEngine::Scheduler>::create(BugEngine::Arena::task());
         BugEngine::Plugin<BugEngine::Application> app(
                 BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),
-                BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home));
+                BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home, scheduler));
         return app->run();
     }
 #if BE_ENABLE_EXCEPTIONS

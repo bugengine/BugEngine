@@ -14,6 +14,7 @@ class RenderWindow;
 class Mesh;
 class Texture;
 class Shader;
+class IKernelScheduler;
 
 
 namespace OpenGL
@@ -28,7 +29,8 @@ class GLRenderer : public Windowing::Renderer
     friend class GLWindow;
 private:
     class Context;
-    mutable scoped<Context> m_context;
+    mutable scoped<Context>     m_context;
+    Plugin<IKernelScheduler>    m_openCLScheduler;
 public:
     GLRenderer(const PluginContext& context);
     ~GLRenderer();

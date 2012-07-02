@@ -2,31 +2,30 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <cpukernelloader.hh>
-#include    <kernelobject.hh>
+#include    <clkernelloader.hh>
 #include    <system/scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {
 
-CpuKernelLoader::CpuKernelLoader()
+OpenCLKernelLoader::OpenCLKernelLoader()
     :   IKernelLoader()
 {
 }
 
-CpuKernelLoader::~CpuKernelLoader()
+OpenCLKernelLoader::~OpenCLKernelLoader()
 {
 }
 
-ResourceHandle CpuKernelLoader::load(weak<const Resource> resource)
+ResourceHandle OpenCLKernelLoader::load(weak<const Resource> resource)
 {
-    be_info("loading CPU kernel %s"|be_checked_cast<const Kernel>(resource)->name());
+    be_info("loading OpenCL kernel %s"|be_checked_cast<const Kernel>(resource)->name());
     ResourceHandle handle;
-    handle.handle = ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel>(resource)->name());
+    //handle.handle = ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel>(resource)->name());
     return handle;
 }
 
-void CpuKernelLoader::unload(const ResourceHandle& resource)
+void OpenCLKernelLoader::unload(const ResourceHandle& resource)
 {
     be_forceuse(resource);
 }

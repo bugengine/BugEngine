@@ -3,6 +3,7 @@
 
 #include    <system/stdafx.h>
 #include    <system/scheduler/scheduler.hh>
+#include    <system/scheduler/kernel/ikernelscheduler.hh>
 #include    <taskscheduler.hh>
 
 
@@ -25,14 +26,13 @@ void  Scheduler::release(void* task, size_t size)
         m_taskPool.release((Buffer*)task);
 }
 
-Scheduler::Scheduler(const PluginContext& context)
-:   m_runningTasks(0)
-,   m_running(true)
-,   m_taskPool(Arena::task(), 65535, 16)
-,   m_taskScheduler(scoped<TaskScheduler>::create(Arena::task(), this))
-,   m_kernelSchedulers(minitl::vector< Plugin<IKernelScheduler> >(Arena::task()))
+Scheduler::Scheduler()
+    :   m_runningTasks(0)
+    ,   m_running(true)
+    ,   m_taskPool(Arena::task(), 65535, 16)
+    ,   m_taskScheduler(scoped<TaskScheduler>::create(Arena::task(), this))
+    ,   m_kernelSchedulers(Arena::task())
 {
-    registerKernelSchedulers(context);
 }
 
 Scheduler::~Scheduler()
@@ -55,6 +55,24 @@ void Scheduler::notifyEnd()
     be_assert(m_runningTasks == 0, "should not notify end when tasks remain to be done");
     be_info("no more tasks to run; exiting");
     m_taskScheduler->notifyEnd();
+}
+
+void Scheduler::addKernelScheduler(weak<IKernelScheduler> scheduler)
+{
+    m_kernelSchedulers.push_back(scheduler);
+}
+
+void Scheduler::removeKernelScheduler(weak<IKernelScheduler> scheduler)
+{
+    for (minitl::vector< weak<IKernelScheduler> >::iterator it = m_kernelSchedulers.begin(); it != m_kernelSchedulers.end(); ++it)
+    {
+        if (*it == scheduler)
+        {
+            m_kernelSchedulers.erase(it);
+            return;
+        }
+    }
+    be_notreached();
 }
 
 }

@@ -4,15 +4,17 @@
 #include    <system/stdafx.h>
 #include    <system/plugin.hh>
 #include    <system/file/folder.script.hh>
+#include    <system/scheduler/scheduler.hh>
 #include    <system/resource/resourcemanager.hh>
 #include    <cstring>
 
 namespace BugEngine
 {
 
-PluginContext::PluginContext(weak<ResourceManager> manager, ref<Folder> folder)
+PluginContext::PluginContext(weak<ResourceManager> manager, ref<Folder> folder, weak<Scheduler> scheduler)
     :   resourceManager(manager)
     ,   dataFolder(folder)
+    ,   scheduler(scheduler)
 {
 }
 

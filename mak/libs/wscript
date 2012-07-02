@@ -26,10 +26,10 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRAR
 			return string[0:17]+'...'
 		else:
 			return string
-	if self.env[var]:
-		return
 	libname = Utils.to_list(libname)
 	if not var: var = libname[0]
+	if self.env[var]:
+		return
 	try:
 		self.check(
 			compile_filename=[],
@@ -43,6 +43,31 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRAR
 		pass
 	else:
 		self.env[var] = libname
+
+@conf
+def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+	def cut(string):
+		if len(string) > 19:
+			return string[0:17]+'...'
+		else:
+			return string
+	headername = Utils.to_list(headername)
+	if not var: var = os.path.splitext(headername[0])[0]
+	if self.env[var]:
+		return
+	try:
+		self.check(
+			compile_filename=[],
+			features='link_library',
+			msg='check for header %s' %cut(','.join(headername)),
+			libname=[],
+			libpath=libpath,
+			code='\n'.join(["#include <%s>"%h for h in headername]) + '\n' + code,
+			includepath=includepath)
+	except self.errors.ConfigurationError as e:
+		pass
+	else:
+		self.env[var] = headername
 
 def configure(conf):
 	for i in os.listdir(os.path.join('src', '3rdparty')):

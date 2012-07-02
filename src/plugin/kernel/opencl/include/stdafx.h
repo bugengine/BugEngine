@@ -9,5 +9,12 @@
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
 
+#ifdef BE_PLATFORM_MACOS
+# include   <OpenCL/opencl.h>
+# include   <OpenCL/cl.h>
+#else
+# include   <opencl.h>
+#endif
+
 /*****************************************************************************/
 #endif

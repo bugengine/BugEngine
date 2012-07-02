@@ -42,6 +42,7 @@ def plugins(bld):
 	directx10		= module.external('DirectX10')
 	directx11		= module.external('DirectX11')
 	opengl			= module.external('OpenGL')
+	opencl			= module.external('OpenCL')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
 	X11				= module.external('X11')
@@ -88,8 +89,8 @@ def plugins(bld):
 			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
 	kernelcpu		= module.plugin('kernel.cpu'	,			[bld.game])
 	#kerneldc		= module.plugin('kernel.directcompute',		[bld.game])
-	#kernelopencl	= module.plugin('kernel.opencl',			[bld.game])
-	#kernelcuda		= module.plugin('kernel.cuda',				[bld.game])
+	if opencl:
+		kernelopencl	= module.plugin('kernel.opencl',		[bld.game, opencl])
 
 
 	scintilla		= module.external('scintilla')
