@@ -7,6 +7,7 @@
 #include    <core/threads/thread.hh>
 #include    <core/threads/semaphore.hh>
 #include    <core/threads/event.hh>
+#include    <system/scheduler/scheduler.hh>
 #include    <maths/vector.hh>
 
 namespace BugEngine

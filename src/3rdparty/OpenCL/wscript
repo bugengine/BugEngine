@@ -6,6 +6,7 @@ def options(opt):
 	pass
 
 def setup(conf):
+	conf.find_program('openclc', mandatory=False)
 	if 'darwin' in conf.env.PLATFORM:
 		conf.check_header('OpenCL/opencl.h', var='opencl_h')
 	else:
@@ -13,7 +14,7 @@ def setup(conf):
 		conf.check_lib('opencl')
 
 def build(bld):
-	if bld.env.opencl_h or bld.env.PROJECTS:
+	if (bld.env.OPENCLC and bld.env.opencl_h) or bld.env.PROJECTS:
 		bld.m['OpenCL'] = module.util('OpenCL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.opencl))
 	else:
 		bld.m['OpenCL'] = None

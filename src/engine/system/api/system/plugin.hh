@@ -16,12 +16,14 @@ namespace RTTI
 
 class ResourceManager;
 class Folder;
+class Scheduler;
 
 struct be_api(SYSTEM) PluginContext
 {
     weak<ResourceManager>   resourceManager;
     ref<Folder>             dataFolder;
-    PluginContext(weak<ResourceManager> manager, ref<Folder> dataFolder);
+    weak<Scheduler>         scheduler;
+    PluginContext(weak<ResourceManager> manager, ref<Folder> dataFolder, weak<Scheduler> scheduler);
 };
 
 template< typename Interface >
@@ -37,8 +39,8 @@ public:
     enum PreloadType { Preload };
     Plugin(const inamespace &pluginName, PreloadType preload);
     Plugin(const inamespace &pluginName, const PluginContext& context);
-    ~Plugin(void);
     Plugin(const Plugin& other);
+    ~Plugin();
     Plugin& operator=(const Plugin& other);
 
     Interface* operator->()             { return m_interface; }

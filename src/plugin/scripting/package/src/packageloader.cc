@@ -3,10 +3,10 @@
 
 #include    <package/stdafx.h>
 #include    <packageloader.hh>
-#include    <core/threads/thread.hh>
 #include    <packagebuilder.hh>
 #include    <package/nodes/package.hh>
 #include    <core/runtime/md5.hh>
+#include    <system/file/folder.script.hh>
 
 
 namespace BugEngine { namespace Arena

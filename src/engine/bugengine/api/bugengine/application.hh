@@ -12,6 +12,7 @@
 namespace BugEngine
 {
 
+class IKernelScheduler;
 namespace World
 {
 class World;
@@ -32,8 +33,9 @@ private:
 private:
     ref<Folder> const               m_dataFolder;
     scoped<ResourceManager> const   m_resourceManager;
+    weak<Scheduler>                 m_scheduler;
     PluginContext const             m_pluginContext;
-    scoped<Scheduler>               m_scheduler;
+    Plugin<IKernelScheduler>        m_cpuKernelScheduler;
     ref<TaskGroup>                  m_updateTask;
     ref<TaskGroup>                  m_worldTask;
     minitl::vector< UpdateTask >    m_tasks;
@@ -41,18 +43,18 @@ private:
     ITask::CallbackConnection       m_worldLoop;
 private:
     void frameUpdate();
+private:
+    virtual ResourceHandle load(weak<const Resource> scene) override;
+    virtual void unload(const ResourceHandle& handle) override;
 protected:
     void addTask(ref<ITask> task);
     void removeTask(ref<ITask> task);
     const PluginContext& pluginContext() const { return m_pluginContext; }
-    Application(ref<Folder> dataFolder);
+    Application(ref<Folder> dataFolder, weak<Scheduler> scheduler);
 public:
     virtual ~Application();
 
     int run();
-private:
-    virtual ResourceHandle load(weak<const Resource> scene) override;
-    virtual void unload(const ResourceHandle& handle) override;
 };
 
 }
