@@ -108,7 +108,7 @@ ResourceHandle Application::load(weak<const Resource> world)
     return handle;
 }
 
-void Application::unload(const ResourceHandle& /*hadnle*/)
+void Application::unload(const ResourceHandle& /*handle*/)
 {
 }
 
