@@ -47,7 +47,7 @@ public:
     template< typename T > void unload(ref<T> resource) const               { unload(be_typeid<T>::klass(), resource); }
 
     void addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file);
-    void updateTickets();
+    size_t updateTickets();
 };
 
 }

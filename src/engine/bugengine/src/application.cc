@@ -50,12 +50,21 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
 ,   m_worldTask(ref< TaskGroup >::create(Arena::task(), "worldUpdate", color32(255,255,0)))
 ,   m_tasks(Arena::task())
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
+,   m_forceContinue(m_updateTask, m_worldTask->startCallback())
 ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
+,   m_resourceLoadingCount(0)
 {
     m_resourceManager->attach<World::World>(this);
-    addTask(ref< Task< MethodCaller<ResourceManager, &ResourceManager::updateTickets> > >::create(Arena::task(), "resource", color32(0,255,0), MethodCaller<ResourceManager, &ResourceManager::updateTickets>(m_resourceManager)));
-    addTask(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create(Arena::task(), "update", color32(0,255,0), MethodCaller<Application, &Application::frameUpdate>(this)));
-    //m_updateLoop = ITask::CallbackConnection();
+    addTask(ref< Task< MethodCaller<Application, &Application::updateResources> > >::create(
+            Arena::task(),
+            "resource",
+            color32(0,255,0),
+            MethodCaller<Application, &Application::updateResources>(this)));
+    addTask(ref< Task< MethodCaller<Application, &Application::frameUpdate> > >::create(
+            Arena::task(),
+            "update",
+            color32(0,255,0),
+            MethodCaller<Application, &Application::frameUpdate>(this)));
 
 }
 
@@ -101,6 +110,22 @@ ResourceHandle Application::load(weak<const Resource> world)
 
 void Application::unload(const ResourceHandle& /*hadnle*/)
 {
+}
+
+void Application::updateResources()
+{
+    size_t resourceCount = m_resourceManager->updateTickets();
+    if (resourceCount == 0 && m_resourceLoadingCount != 0)
+    {
+        m_forceContinue = ITask::CallbackConnection();
+        m_updateLoop = ITask::CallbackConnection();
+    }
+    else if (resourceCount != 0 && m_resourceLoadingCount == 0)
+    {
+        m_forceContinue = ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
+        m_updateLoop = ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
+    }
+    m_resourceLoadingCount = resourceCount;
 }
 
 void Application::frameUpdate()
