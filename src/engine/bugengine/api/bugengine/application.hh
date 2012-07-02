@@ -40,9 +40,12 @@ private:
     ref<TaskGroup>                  m_worldTask;
     minitl::vector< UpdateTask >    m_tasks;
     ITask::CallbackConnection       m_updateLoop;
+    ITask::CallbackConnection       m_forceContinue;
     ITask::CallbackConnection       m_worldLoop;
+    size_t                          m_resourceLoadingCount;
 private:
     void frameUpdate();
+    void updateResources();
 private:
     virtual ResourceHandle load(weak<const Resource> scene) override;
     virtual void unload(const ResourceHandle& handle) override;

@@ -83,7 +83,7 @@ void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resourc
     m_tickets.push_back(ticket);
 }
 
-void ResourceManager::updateTickets()
+size_t ResourceManager::updateTickets()
 {
     for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
     {
@@ -106,6 +106,7 @@ void ResourceManager::updateTickets()
             ++it;
         }
     }
+    return m_tickets.size();
 }
 
 }
