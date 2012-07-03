@@ -13,7 +13,7 @@ namespace BugEngine
 class IResourceLoader;
 class ResourceManager;
 
-class be_api(SYSTEM) Resource : public minitl::refcountable
+class be_api(SYSTEM) Resource : public minitl::refcountable, public minitl::intrusive_list<const Resource, 2>::item
 {
     friend class ResourceManager;
     BE_NOCOPY(Resource);

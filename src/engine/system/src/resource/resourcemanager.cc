@@ -7,9 +7,16 @@
 namespace BugEngine
 {
 
+ResourceManager::LoaderInfo::LoaderInfo()
+    :   classinfo()
+    ,   loaders(Arena::resource())
+    ,   resources()
+{
+}
+
 ResourceManager::ResourceManager()
-: m_loaders(Arena::resource())
-, m_tickets(Arena::resource())
+    :   m_loaders(Arena::resource(), 1024)
+    ,   m_tickets(Arena::resource())
 {
 }
 
@@ -17,27 +24,50 @@ ResourceManager::~ResourceManager()
 {
 }
 
+ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw<const RTTI::Class> classinfo)
+{
+    for (minitl::array<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
+    {
+        if (it->classinfo == classinfo)
+            return *it;
+        if (!it->classinfo)
+        {
+            it->classinfo = classinfo;
+            return *it;
+        }
+    }
+    be_notreached();
+    return m_loaders[0];
+}
+
 void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<IResourceLoader> loader)
 {
-    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
+    LoaderInfo& info = getLoaderInfo(classinfo);
+    for (minitl::vector< weak<IResourceLoader> >::iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
-        be_assert_recover(it->loader != loader, "registering twice the same loader for class %s" | classinfo->name, return);
+        be_assert_recover(*it != loader, "registering twice the same loader for class %s" | classinfo->name, return);
     }
     be_info("registering loader for type %s" | classinfo->name);
-    LoaderInfo loaderInfo;
-    loaderInfo.classinfo = classinfo;
-    loaderInfo.loader = loader;
-    m_loaders.push_back(loaderInfo);
+    info.loaders.push_back(loader);
+    for (minitl::intrusive_list<const Resource, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
+    {
+        resource->load(loader);
+    }
 }
 
 void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader)
 {
-    for (minitl::vector<LoaderInfo>::iterator it = m_loaders.begin(); it != m_loaders.end();)
+    LoaderInfo& info = getLoaderInfo(classinfo);
+    for (minitl::vector< weak<IResourceLoader> >::iterator it = info.loaders.begin(); it != info.loaders.end();)
     {
-        if (it->classinfo == classinfo && it->loader == loader)
+        if (*it == loader)
         {
             be_info("unregistering loader for type %s" | classinfo->name);
-            it = m_loaders.erase(it);
+            for (minitl::intrusive_list<const Resource, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
+            {
+                resource->unload(*it);
+            }
+            it = info.loaders.erase(it);
             return;
         }
         else
@@ -48,29 +78,24 @@ void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResou
     be_error("loader was not in the list of loaders for type %s" | classinfo->name);
 }
 
-void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const
+void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Resource> resource)
 {
-    int loadedCount = 0;
-    for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
+    LoaderInfo& info = getLoaderInfo(classinfo);
+    for (minitl::vector< weak<IResourceLoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
-        if (classinfo->isA(it->classinfo))
-        {
-            resource->load(it->loader);
-            loadedCount++;
-        }
+        resource->load(*it);
     }
-    be_assert(loadedCount, "resource of type %s has no loader registered" | classinfo->name);
+    info.resources.push_back(*resource.operator->());
 }
 
-void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const
+void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource)
 {
-    for (minitl::vector<LoaderInfo>::const_iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
+    LoaderInfo& info = getLoaderInfo(classinfo);
+    for (minitl::vector< weak<IResourceLoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
-        if (classinfo->isA(it->classinfo))
-        {
-            resource->unload(it->loader);
-        }
+        resource->unload(*it);
     }
+    resource->unhook();
 }
 
 void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file)

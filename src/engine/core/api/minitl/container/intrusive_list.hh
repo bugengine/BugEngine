@@ -12,6 +12,7 @@ namespace minitl
 template< typename T, int INDEX = 0 >
 class intrusive_list
 {
+    BE_NOCOPY(intrusive_list);
 public:
     class item;
 private:

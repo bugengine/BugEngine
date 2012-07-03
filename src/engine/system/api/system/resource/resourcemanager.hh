@@ -17,8 +17,10 @@ class be_api(SYSTEM) ResourceManager : public minitl::pointer
 private:
     struct LoaderInfo
     {
-        raw<const RTTI::Class>  classinfo;
-        weak<IResourceLoader>   loader;
+        LoaderInfo();
+        raw<const RTTI::Class>                      classinfo;
+        minitl::vector< weak<IResourceLoader> >     loaders;
+        minitl::intrusive_list<const Resource, 2>   resources;
     };
     struct Ticket
     {
@@ -28,23 +30,25 @@ private:
         u32                     progress;
     };
 private:
-    minitl::vector<LoaderInfo>  m_loaders;
+    minitl::array<LoaderInfo>   m_loaders;
     minitl::vector<Ticket>      m_tickets;
+private:
+    LoaderInfo& getLoaderInfo(raw<const RTTI::Class> classinfo);
 public:
     ResourceManager();
     ~ResourceManager();
 
     void attach(raw<const RTTI::Class> classinfo, weak<IResourceLoader> loader);
     void detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader);
-    void load(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const;
-    void unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource) const;
+    void load(raw<const RTTI::Class> classinfo, weak<const Resource> resource);
+    void unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource);
 
     template< typename T > void attach(weak<IResourceLoader> loader)        { attach(be_typeid<T>::klass(), loader); }
     template< typename T > void detach(weak<const IResourceLoader> loader)  { detach(be_typeid<T>::klass(), loader); }
-    template< typename T > void load(weak<T> resource) const                { load(be_typeid<T>::klass(), resource); }
-    template< typename T > void load(ref<T> resource) const                 { load(be_typeid<T>::klass(), resource); }
-    template< typename T > void unload(weak<T> resource) const              { unload(be_typeid<T>::klass(), resource); }
-    template< typename T > void unload(ref<T> resource) const               { unload(be_typeid<T>::klass(), resource); }
+    template< typename T > void load(weak<T> resource)                      { load(be_typeid<T>::klass(), resource); }
+    template< typename T > void load(ref<T> resource)                       { load(be_typeid<T>::klass(), resource); }
+    template< typename T > void unload(weak<T> resource)                    { unload(be_typeid<T>::klass(), resource); }
+    template< typename T > void unload(ref<T> resource)                     { unload(be_typeid<T>::klass(), resource); }
 
     void addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file);
     size_t updateTickets();

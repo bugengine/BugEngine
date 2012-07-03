@@ -201,7 +201,7 @@ void Package::textSave() const
 {
 }
 
-void Package::createObjects(weak<const ResourceManager> manager)
+void Package::createObjects(weak<ResourceManager> manager)
 {
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
@@ -214,7 +214,7 @@ void Package::createObjects(weak<const ResourceManager> manager)
     }
 }
 
-void Package::deleteObjects(weak<const ResourceManager> manager)
+void Package::deleteObjects(weak<ResourceManager> manager)
 {
     for(size_t i = m_values.size(); i > 0; --i)
     {
