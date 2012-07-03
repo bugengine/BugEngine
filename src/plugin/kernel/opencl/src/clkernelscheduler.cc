@@ -11,13 +11,21 @@
 namespace BugEngine
 {
 
+static void checkResult(cl_int err)
+{
+    if (err != CL_SUCCESS)
+    {
+        be_error("OpenCL error code %d" | err);
+    }
+}
+
 static minitl::format<1024> getPlatformInfo(cl_platform_id platform, cl_platform_info name)
 {
     minitl::format<1024> result("");
     size_t size = 0;
-    clGetPlatformInfo(platform, name, 0, 0, &size);
+    checkResult(clGetPlatformInfo(platform, name, 0, 0, &size));
     char* temp = (char*)malloca(size+1);
-    clGetPlatformInfo(platform, name, size, temp, 0);
+    checkResult(clGetPlatformInfo(platform, name, size, temp, 0));
     result.append(temp);
     freea(temp);
     return result;
@@ -27,9 +35,9 @@ static minitl::format<1024> getDeviceInfo(cl_device_id device, cl_device_info na
 {
     minitl::format<1024> result("");
     size_t size = 0;
-    clGetDeviceInfo(device, name, 0, 0, &size);
+    checkResult(clGetDeviceInfo(device, name, 0, 0, &size));
     char* temp = (char*)malloca(size+1);
-    clGetDeviceInfo(device, name, size, temp, 0);
+    checkResult(clGetDeviceInfo(device, name, size, temp, 0));
     result.append(temp);
     freea(temp);
     return result;
@@ -37,14 +45,12 @@ static minitl::format<1024> getDeviceInfo(cl_device_id device, cl_device_info na
 
 cl_context OpenCLKernelScheduler::createCLContext()
 {
-    cl_int err;
-
     cl_platform_id platform;
 
     cl_uint platformCount = 0;
-    err = clGetPlatformIDs(0, 0, &platformCount);
+    checkResult(clGetPlatformIDs(0, 0, &platformCount));
     cl_platform_id* platforms = (cl_platform_id*)malloca(sizeof(cl_platform_id)*platformCount);
-    err = clGetPlatformIDs(platformCount, platforms, &platformCount);
+    checkResult(clGetPlatformIDs(platformCount, platforms, &platformCount));
     for (cl_uint i = 0; i < platformCount; ++i)
     {
         cl_platform_id p = platforms[i];
@@ -58,9 +64,9 @@ cl_context OpenCLKernelScheduler::createCLContext()
 
     cl_device_id device;
     cl_uint deviceCount = 0;
-    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 0, 0, &deviceCount);
+    checkResult(clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU|CL_DEVICE_TYPE_ACCELERATOR, 0, 0, &deviceCount));
     cl_device_id* devices = (cl_device_id*)malloca(sizeof(cl_device_id) * deviceCount);
-    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, deviceCount, devices, 0);
+    checkResult(clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU|CL_DEVICE_TYPE_ACCELERATOR, deviceCount, devices, 0));
 
     for (cl_uint i = 0; i < deviceCount; ++i)
     {
@@ -71,22 +77,25 @@ cl_context OpenCLKernelScheduler::createCLContext()
                 |   getDeviceInfo(d, CL_DEVICE_NAME)
                 |   getDeviceInfo(d, CL_DEVICE_VENDOR)
                 |   getDeviceInfo(d, CL_DRIVER_VERSION));
-
-        size_t size = 0;
-        err = clGetDeviceInfo(devices[i], CL_DEVICE_EXTENSIONS, 0, 0, &size);
-        char* deviceExtensions = (char*)malloca(size+1);
-        deviceExtensions[size] = 0;
-        err = clGetDeviceInfo(devices[i], CL_DEVICE_EXTENSIONS, size, deviceExtensions, 0);
-        be_info("Extensions: %s" | deviceExtensions);
-        freea(deviceExtensions);
-
     }
     device = devices[0];
     freea(devices);
 
+
+    size_t size = 0;
+    checkResult(clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
+    char* deviceExtensions = (char*)malloca(size+1);
+    deviceExtensions[size] = 0;
+    checkResult(clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, size, deviceExtensions, 0));
+    be_info("Extensions: %s" | deviceExtensions);
+    freea(deviceExtensions);
+
     cl_context_properties contextProperties[256] = { 0 };
-    fillPlatformSpecificContextProperties(contextProperties, 255);
+    fillPlatformSpecificContextProperties(deviceExtensions, contextProperties, 255);
+    cl_int err;
     cl_context context = clCreateContext(0, 1, &device, 0, 0, &err);
+    checkResult(err);
+
     return context;
 }
 
