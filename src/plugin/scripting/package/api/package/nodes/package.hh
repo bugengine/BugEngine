@@ -52,8 +52,8 @@ public:
     void binarySave() const;
     void textSave() const;
 
-    void createObjects(weak<const ResourceManager> manager);
-    void deleteObjects(weak<const ResourceManager> manager);
+    void createObjects(weak<ResourceManager> manager);
+    void deleteObjects(weak<ResourceManager> manager);
 };
 
 }}}

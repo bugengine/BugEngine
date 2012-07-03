@@ -92,7 +92,6 @@ GLRenderer::Context::Context()
         | (const char*)glGetString(GL_VERSION)
         | (const char *)glGetString(GL_VENDOR)
         | (const char*)glGetString(GL_RENDERER));
-    [NSOpenGLContext clearCurrentContext];
 }
 
 GLRenderer::Context::~Context()

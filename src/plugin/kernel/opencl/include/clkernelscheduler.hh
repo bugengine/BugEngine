@@ -18,6 +18,9 @@ private:
     weak<ResourceManager>       m_resourceManager;
     scoped<OpenCLKernelLoader>  m_loader;
     cl_context                  m_context;
+private:
+    static cl_context createCLContext();
+    static void fillPlatformSpecificContextProperties(cl_context_properties* properties, int maxPropertyCount);
 public:
     OpenCLKernelScheduler(const PluginContext& context);
     ~OpenCLKernelScheduler();

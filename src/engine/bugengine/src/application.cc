@@ -65,7 +65,6 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
             "update",
             color32(0,255,0),
             MethodCaller<Application, &Application::frameUpdate>(this)));
-
 }
 
 Application::~Application(void)

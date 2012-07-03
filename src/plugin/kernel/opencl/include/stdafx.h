@@ -11,7 +11,7 @@
 
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenCL/opencl.h>
-# include   <OpenCL/cl.h>
+# include   <OpenGL/OpenGL.h>
 #else
 # include   <opencl.h>
 #endif
