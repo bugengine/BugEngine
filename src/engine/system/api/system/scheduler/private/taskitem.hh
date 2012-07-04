@@ -7,20 +7,16 @@
 #include    <minitl/interlocked/interlocked.hh>
 #include    <system/scheduler/scheduler.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 class ITask;
 template< typename BODY > class Task;
 class TaskScheduler;
 
-
-namespace ScheduledTasks
-{
-
 class be_api(SYSTEM) ITaskItem : public minitl::inode
 {
-    friend class ::BugEngine::TaskScheduler;
+    friend class TaskScheduler;
 protected:
     weak<const ITask>   m_owner;
     u32                 m_splitCount;

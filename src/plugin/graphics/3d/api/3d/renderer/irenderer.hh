@@ -11,9 +11,16 @@
 namespace BugEngine
 {
 
+namespace Task
+{
 class ITask;
+}
 
+namespace Kernel
+{
 class Kernel;
+}
+
 class SceneGraphLoader;
 class RenderSurface;
 class RenderWindow;
@@ -31,13 +38,13 @@ class be_api(_3D) IRenderer : public minitl::pointer
 protected:
     Allocator&                                  m_allocator;
     weak<ResourceManager>                       m_resourceManager;
-    ref<ITask>                                  m_syncTask;
+    ref<Task::ITask>                            m_syncTask;
     scoped<SceneGraphLoader>                    m_sceneLoader;
     scoped< GPUResourceLoader<RenderSurface> >  m_renderSurfaceLoader;
     scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
     scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
-    scoped<Kernel>                              m_kernelSort;
-    scoped<Kernel>                              m_kernelRender;
+    scoped<Kernel::Kernel>                      m_kernelSort;
+    scoped<Kernel::Kernel>                      m_kernelRender;
 protected:
     IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
@@ -55,7 +62,7 @@ public:
     weak<IGPUResource> getShaderProgram(weak<const Resource> resource) const;
 
     Allocator& arena() const;
-    weak<ITask> syncTask() const;
+    weak<Task::ITask> syncTask() const;
 
     virtual uint2 getScreenSize() = 0;
     virtual u32 getMaxSimultaneousRenderTargets() const = 0;

@@ -4,7 +4,7 @@
 #include    <system/stdafx.h>
 #include    <system/scheduler/task/itask.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 ITask::ITask(istring name, color32 color, Scheduler::Priority priority, Scheduler::Affinity affinity)
@@ -182,4 +182,4 @@ ITask::CallbackConnection::~CallbackConnection()
     }
 }
 
-}
+}}

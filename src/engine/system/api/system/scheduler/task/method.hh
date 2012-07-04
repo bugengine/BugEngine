@@ -7,7 +7,7 @@
 #include    <system/scheduler/task/task.hh>
 #include    <system/scheduler/range/onestep.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 template< typename Owner, void(Owner::*Method)(), template< typename > class Ptr = ::minitl::weak >
@@ -61,7 +61,7 @@ public:
     }
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

@@ -9,7 +9,10 @@
 namespace BugEngine
 {
 
+namespace Task
+{
 class ITask;
+}
 
 class INode : public minitl::refcountable
 {
@@ -19,8 +22,8 @@ protected:
 public:
     virtual ~INode();
 
-    virtual weak<ITask> updateTask() = 0;
-    virtual weak<ITask> dispatchTask() = 0;
+    virtual weak<Task::ITask> updateTask() = 0;
+    virtual weak<Task::ITask> dispatchTask() = 0;
 };
 
 }

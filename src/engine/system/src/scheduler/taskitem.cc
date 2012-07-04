@@ -6,7 +6,7 @@
 #include    <system/scheduler/task/task.hh>
 
 
-namespace BugEngine { namespace ScheduledTasks
+namespace BugEngine { namespace Task
 {
 
 ITaskItem::ITaskItem(weak<const ITask> owner)

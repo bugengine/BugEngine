@@ -4,7 +4,7 @@
 #include    <system/stdafx.h>
 #include    <system/scheduler/task/group.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 TaskGroup::TaskGroup(istring name, color32 color)
@@ -196,4 +196,4 @@ TaskGroup::TaskEndConnection::~TaskEndConnection()
     }
 }
 
-}
+}}

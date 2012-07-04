@@ -14,7 +14,7 @@
 #include    <system/scheduler/range/sequence.hh>
 
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 class TaskScheduler::Worker
@@ -26,7 +26,7 @@ private:
     size_t const                                m_workerId;
     Thread                                      m_workThread;
 protected:
-    void unhook(ScheduledTasks::ITaskItem* prev, ScheduledTasks::ITaskItem* t);
+    void unhook(ITaskItem* prev, ITaskItem* t);
 public:
     Worker(weak<TaskScheduler> scheduler, size_t workerId);
     ~Worker();
@@ -54,12 +54,12 @@ bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
 {
     static const i32& s_taskCount = 16;
 
-    ScheduledTasks::ITaskItem* target = sc->pop(Scheduler::DontCare);
+    ITaskItem* target = sc->pop(Scheduler::DontCare);
     if (!target)
         return false;
     if (!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
-        ScheduledTasks::ITaskItem* newTarget = target->split(sc->m_scheduler);
+        ITaskItem* newTarget = target->split(sc->m_scheduler);
         sc->queue(newTarget);
         sc->queue(target);
     }
@@ -112,7 +112,7 @@ TaskScheduler::~TaskScheduler()
         delete m_workers[i];
 }
 
-void TaskScheduler::queue(ScheduledTasks::ITaskItem* task)
+void TaskScheduler::queue(ITaskItem* task)
 {
     int priority = task->m_owner->priority;
     m_scheduler->m_runningTasks ++;
@@ -128,12 +128,12 @@ void TaskScheduler::queue(ScheduledTasks::ITaskItem* task)
     }
 }
 
-ScheduledTasks::ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
+ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
 {
-    minitl::istack<ScheduledTasks::ITaskItem>* tasks = affinity == Scheduler::DontCare ? m_tasks : m_mainThreadTasks;
+    minitl::istack<ITaskItem>* tasks = affinity == Scheduler::DontCare ? m_tasks : m_mainThreadTasks;
     for (unsigned int i = Scheduler::High; i != Scheduler::Low; --i)
     {
-        ScheduledTasks::ITaskItem* t = tasks[i].pop();
+        ITaskItem* t = tasks[i].pop();
         if (t)
             return t;
     }
@@ -146,7 +146,7 @@ void TaskScheduler::mainThreadJoin()
     {
         if (m_mainThreadSynchro.wait() == Threads::Waitable::Finished)
         {
-            ScheduledTasks::ITaskItem* t = pop(Scheduler::MainThread);
+            ITaskItem* t = pop(Scheduler::MainThread);
             if (t)
             {
                 t->run(m_scheduler);
@@ -168,4 +168,4 @@ void TaskScheduler::notifyEnd()
     m_mainThreadSynchro.release(1);
 }
 
-}
+}}

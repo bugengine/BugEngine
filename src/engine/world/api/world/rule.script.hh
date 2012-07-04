@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <world/entity.script.hh>
 #include    <world/component.script.hh>
-#include    <world/istream.script.hh>
 #include    <system/scheduler/task/itask.hh>
 #include    <rtti/tags/editor.script.hh>
 
@@ -16,7 +15,7 @@ namespace BugEngine { namespace World
 class IRule : public minitl::refcountable
 {
 public:
-    virtual weak<ITask> task() const = 0;
+    virtual weak<Task::ITask> task() const = 0;
 };
 
 }}

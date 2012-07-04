@@ -30,7 +30,7 @@ Scheduler::Scheduler()
     :   m_runningTasks(0)
     ,   m_running(true)
     ,   m_taskPool(Arena::task(), 65535, 16)
-    ,   m_taskScheduler(scoped<TaskScheduler>::create(Arena::task(), this))
+    ,   m_taskScheduler(scoped<Task::TaskScheduler>::create(Arena::task(), this))
     ,   m_kernelSchedulers(Arena::task())
 {
 }
@@ -40,7 +40,7 @@ Scheduler::~Scheduler()
     m_running = false;
 }
 
-void Scheduler::queueTask(ScheduledTasks::ITaskItem* task)
+void Scheduler::queueTask(Task::ITaskItem* task)
 {
     m_taskScheduler->queue(task);
 }
@@ -57,14 +57,14 @@ void Scheduler::notifyEnd()
     m_taskScheduler->notifyEnd();
 }
 
-void Scheduler::addKernelScheduler(weak<IKernelScheduler> scheduler)
+void Scheduler::addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
 {
     m_kernelSchedulers.push_back(scheduler);
 }
 
-void Scheduler::removeKernelScheduler(weak<IKernelScheduler> scheduler)
+void Scheduler::removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
 {
-    for (minitl::vector< weak<IKernelScheduler> >::iterator it = m_kernelSchedulers.begin(); it != m_kernelSchedulers.end(); ++it)
+    for (minitl::vector< weak<Kernel::IKernelScheduler> >::iterator it = m_kernelSchedulers.begin(); it != m_kernelSchedulers.end(); ++it)
     {
         if (*it == scheduler)
         {

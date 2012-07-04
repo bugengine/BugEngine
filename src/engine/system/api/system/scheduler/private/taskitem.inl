@@ -7,7 +7,7 @@
 #include    <system/scheduler/scheduler.hh>
 #include    <system/scheduler/task/task.hh>
 
-namespace BugEngine { namespace ScheduledTasks
+namespace BugEngine { namespace Task
 {
 
 template< typename Range, typename Body >

@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Kernel
 {
 
 class be_api(SYSTEM) Kernel : public Resource
@@ -18,7 +18,7 @@ public:
     const inamespace& name() const { return m_name; }
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

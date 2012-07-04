@@ -4,7 +4,9 @@
 #include    <system/stdafx.h>
 #include    <system/scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine
+BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, Kernel);
+
+namespace BugEngine { namespace Kernel
 {
 
 Kernel::Kernel(const inamespace& name)
@@ -13,4 +15,4 @@ Kernel::Kernel(const inamespace& name)
 {
 }
 
-}
+}}

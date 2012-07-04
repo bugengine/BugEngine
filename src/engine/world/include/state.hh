@@ -5,7 +5,6 @@
 #define BE_WORLD_STATE_HH_
 /*****************************************************************************/
 #include    <world/component.script.hh>
-#include    <world/istream.script.hh>
 
 namespace BugEngine { namespace World
 {

@@ -8,26 +8,27 @@
 namespace BugEngine
 {
 
-struct PluginContext;
-class TaskScheduler;
-class IKernelScheduler;
-template< typename BODY > class Task;
-class TaskGroup;
-class TaskScheduler;
-namespace ScheduledTasks
+namespace Task
 {
-class ITaskItem;
-template< typename RANGE, typename BODY > class TaskItem;
+    class TaskScheduler;
+    template< typename BODY > class Task;
+    class TaskGroup;
+    class ITaskItem;
+    template< typename RANGE, typename BODY > class TaskItem;
+}
 
+namespace Kernel
+{
+    class IKernelScheduler;
 }
 
 class be_api(SYSTEM) Scheduler : public minitl::pointer
 {
     BE_NOCOPY(Scheduler);
-    template< typename BODY > friend class Task;
-    template< typename RANGE, typename BODY > friend class ScheduledTasks::TaskItem;
-    friend class TaskGroup;
-    friend class TaskScheduler;
+    template< typename BODY > friend class Task::Task;
+    template< typename RANGE, typename BODY > friend class Task::TaskItem;
+    friend class Task::TaskGroup;
+    friend class Task::TaskScheduler;
 public:
     enum Priority
     {
@@ -51,15 +52,15 @@ private:
     friend struct WorkItem;
 private:
     struct Buffer { char buffer[128]; };
-    i_u32                                       m_runningTasks;
-    i_bool                                      m_running;
-    minitl::pool<Buffer>                        m_taskPool;
-    scoped<TaskScheduler>                       m_taskScheduler;
-    minitl::vector< weak<IKernelScheduler> >    m_kernelSchedulers;
+    i_u32                                               m_runningTasks;
+    i_bool                                              m_running;
+    minitl::pool<Buffer>                                m_taskPool;
+    scoped<Task::TaskScheduler>                         m_taskScheduler;
+    minitl::vector< weak<Kernel::IKernelScheduler> >    m_kernelSchedulers;
 private:
     void notifyEnd();
 private:
-    void queueTask(ScheduledTasks::ITaskItem* task);
+    void queueTask(Task::ITaskItem* task);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();
@@ -69,8 +70,8 @@ public:
     ~Scheduler();
 
     void mainThreadJoin();
-    void addKernelScheduler(weak<IKernelScheduler> scheduler);
-    void removeKernelScheduler(weak<IKernelScheduler> scheduler);
+    void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
+    void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
 };
 
 template< typename T >

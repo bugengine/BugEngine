@@ -4,14 +4,14 @@
 #ifndef BE_WORLD_STORAGE_HH_
 #define BE_WORLD_STORAGE_HH_
 /*****************************************************************************/
-#include    <world/istream.script.hh>
+#include    <system/scheduler/kernel/istream.hh>
 #include    <core/memory/allocators/system.hh>
 
 namespace BugEngine { namespace World
 {
 
 template< typename COMPONENT >
-class Storage : public IStream<COMPONENT>
+class Storage : public Kernel::Stream<COMPONENT>
 {
 private:
     SystemAllocator         m_allocator;

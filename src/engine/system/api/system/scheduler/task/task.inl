@@ -7,7 +7,7 @@
 #include    <system/scheduler/scheduler.hh>
 #include    <system/scheduler/private/taskitem.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 template< typename Body >
@@ -27,11 +27,11 @@ void Task< Body >::schedule(weak<Scheduler> sc) const
 
     typedef typename Body::Range Range;
     Range r = m_body.prepare();
-    void* item = sc->allocateTask< ScheduledTasks::TaskItem<Range, Body> >();
-    sc->queueTask(new(item) ScheduledTasks::TaskItem<Range, Body>(this, r, m_body));
+    void* item = sc->allocateTask< TaskItem<Range, Body> >();
+    sc->queueTask(new(item) TaskItem<Range, Body>(this, r, m_body));
 }
 
-}
+}}
 
 
 /*****************************************************************************/

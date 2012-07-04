@@ -7,14 +7,14 @@
 #include    <system/scheduler/task/itask.hh>
 #include    <system/scheduler/private/taskitem.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 template< typename Body >
 class Task : public ITask
 {
     template< class B, class R >
-    friend class ScheduledTasks::TaskItem;
+    friend class TaskItem;
     BE_NOCOPY(Task);
 private:
     mutable Body    m_body;
@@ -25,7 +25,7 @@ public:
     virtual void schedule(weak<Scheduler> sc) const override;
 };
 
-}
+}}
 
 #include    <system/scheduler/task/task.inl>
 

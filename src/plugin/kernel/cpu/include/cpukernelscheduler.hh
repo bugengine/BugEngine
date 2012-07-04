@@ -12,7 +12,7 @@ namespace BugEngine
 
 class CpuKernelLoader;
 
-class CpuKernelScheduler : public IKernelScheduler
+class CpuKernelScheduler : public Kernel::IKernelScheduler
 {
 private:
     weak<ResourceManager>   m_resourceManager;

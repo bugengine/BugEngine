@@ -9,6 +9,10 @@ namespace BugEngine
 {
 
 class Scheduler;
+
+namespace Kernel
+{
+
 class be_api(SYSTEM) IKernelScheduler : public minitl::pointer
 {
 private:
@@ -19,7 +23,7 @@ public:
     ~IKernelScheduler();
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif
