@@ -5,7 +5,7 @@
 #define BE_SYSTEM_SCHEDULER_RANGE_ONESTEP_HH_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 class range_onestep
@@ -19,7 +19,7 @@ public:
     inline bool                 atomic() const;
 };
 
-}
+}}
 
 #include    "onestep.inl"
 

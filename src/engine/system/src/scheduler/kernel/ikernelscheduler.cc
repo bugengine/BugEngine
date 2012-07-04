@@ -5,7 +5,7 @@
 #include    <system/scheduler/kernel/ikernelscheduler.hh>
 #include    <system/scheduler/scheduler.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Kernel
 {
 
 IKernelScheduler::IKernelScheduler(const istring& name, weak<Scheduler> scheduler)
@@ -20,4 +20,4 @@ IKernelScheduler::~IKernelScheduler()
     m_scheduler->removeKernelScheduler(this);
 }
 
-}
+}}

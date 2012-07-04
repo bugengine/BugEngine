@@ -2,17 +2,9 @@
    see LICENSE for detail */
 
 #include    <system/stdafx.h>
-#include    <system/scheduler/kernel/ikernelloader.hh>
+#include    <system/scheduler/kernel/cpumemoryprovider.hh>
 
 namespace BugEngine { namespace Kernel
 {
-
-IKernelLoader::IKernelLoader()
-{
-}
-
-IKernelLoader::~IKernelLoader()
-{
-}
 
 }}

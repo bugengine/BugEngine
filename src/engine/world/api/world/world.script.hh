@@ -8,7 +8,6 @@
 #include    <system/resource/resource.script.hh>
 #include    <world/entity.script.hh>
 #include    <core/memory/allocators/system.hh>
-#include    <system/scheduler/task/group.hh>
 
 
 
@@ -27,7 +26,7 @@ class be_api(WORLD) World : public Resource
     template< typename T >
     friend class Storage;
 private:
-    ref<ITask>                      m_task;
+    ref<Task::ITask>                m_task;
     //minitl::array< scoped<Rule> >   m_rules;
     scoped<State>                   m_emptyEntityState;
     Entity                          m_freeEntityId;
@@ -42,7 +41,7 @@ private:
     void addRule(weak<const Rule> rule);
     void removeRule(weak<const Rule> rule);
 public:
-    weak<ITask> updateWorldTask() const;
+    weak<Task::ITask> updateWorldTask() const;
 published:
     Entity spawn();
     void unspawn(Entity e);

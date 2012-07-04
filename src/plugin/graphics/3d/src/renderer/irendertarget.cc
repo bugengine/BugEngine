@@ -21,7 +21,7 @@ IRenderTarget::~IRenderTarget()
 {
 }
 
-weak<ITask> IRenderTarget::syncTask() const
+weak<Task::ITask> IRenderTarget::syncTask() const
 {
     return m_renderer->syncTask();
 }

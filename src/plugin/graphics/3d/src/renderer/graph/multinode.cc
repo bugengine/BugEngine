@@ -10,10 +10,10 @@ namespace BugEngine
 
 MultiNode::MultiNode(const minitl::vector< minitl::weak<INode> >& nodes)
 :   INode()
-,   m_updateTask(ref<TaskGroup>::create(Arena::task(), "updateMultiScene", color32(255, 0, 0)))
-,   m_dispatchTask(ref< Task< MethodCaller<MultiNode, &MultiNode::dispatch> > >::create(Arena::task(), "dispatchMulti", color32(255,0,0), MethodCaller<MultiNode, &MultiNode::dispatch>(this), Scheduler::High))
+,   m_updateTask(ref<Task::TaskGroup>::create(Arena::task(), "updateMultiScene", color32(255, 0, 0)))
+,   m_dispatchTask(ref< Task::Task< Task::MethodCaller<MultiNode, &MultiNode::dispatch> > >::create(Arena::task(), "dispatchMulti", color32(255,0,0), Task::MethodCaller<MultiNode, &MultiNode::dispatch>(this), Scheduler::High))
 ,   m_startDispatchConnection(m_updateTask, m_dispatchTask->startCallback())
-,   m_waitOnDispatchConnection(m_dispatchTask, m_dispatchTask->startCallback(), ITask::ICallback::Completed)
+,   m_waitOnDispatchConnection(m_dispatchTask, m_dispatchTask->startCallback(), Task::ITask::ICallback::Completed)
 ,   m_nodes(Arena::task())
 {
     for(minitl::vector< weak<INode> >::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
@@ -26,12 +26,12 @@ MultiNode::~MultiNode()
 {
 }
 
-weak<ITask> MultiNode::updateTask()
+weak<Task::ITask> MultiNode::updateTask()
 {
     return m_updateTask;
 }
 
-weak<ITask> MultiNode::dispatchTask()
+weak<Task::ITask> MultiNode::dispatchTask()
 {
     return m_dispatchTask;
 }
@@ -43,7 +43,7 @@ void MultiNode::dispatch()
 MultiNode::NodeInfo::NodeInfo(weak<INode> n, weak<MultiNode> owner, weak<INode> previous)
 :   node(n)
 ,   chainUpdate(node->updateTask(), owner->m_updateTask->startCallback())
-,   chainDispatch(previous ? ITask::CallbackConnection(previous->dispatchTask(), n->dispatchTask()->startCallback()) : ITask::CallbackConnection())
+,   chainDispatch(previous ? Task::ITask::CallbackConnection(previous->dispatchTask(), n->dispatchTask()->startCallback()) : Task::ITask::CallbackConnection())
 ,   chainGlobalDispatch(node->dispatchTask(), owner->m_dispatchTask->startCallback())
 {
 }

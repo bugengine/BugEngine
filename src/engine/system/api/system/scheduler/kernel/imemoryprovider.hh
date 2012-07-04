@@ -1,16 +1,16 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WORLD_ISTREAM_SCRIPT_HH_
-#define BE_WORLD_ISTREAM_SCRIPT_HH_
+#ifndef BE_SYSTEM_SCHEDULER_KERNEL_IMEMORYPROVIDER_HH_
+#define BE_SYSTEM_SCHEDULER_KERNEL_IMEMORYPROVIDER_HH_
 /*****************************************************************************/
 
-namespace BugEngine { namespace World
+namespace BugEngine { namespace Kernel
 {
 
-template< typename T >
-class IStream : public minitl::pointer
+class IMemoryProvider : public minitl::pointer
 {
+    
 };
 
 }}

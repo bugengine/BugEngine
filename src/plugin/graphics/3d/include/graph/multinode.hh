@@ -17,17 +17,17 @@ private:
     struct NodeInfo
     {
         weak<INode>                     node;
-        ITask::CallbackConnection       chainUpdate;
-        ITask::CallbackConnection       chainDispatch;
-        ITask::CallbackConnection       chainGlobalDispatch;
+        Task::ITask::CallbackConnection chainUpdate;
+        Task::ITask::CallbackConnection chainDispatch;
+        Task::ITask::CallbackConnection chainGlobalDispatch;
         NodeInfo(weak<INode> node, weak<MultiNode> owner, weak<INode> prevNode);
     };
     friend struct NodeInfo;
 private:
-    ref<TaskGroup>                  m_updateTask;
-    ref<ITask>                      m_dispatchTask;
-    ITask::CallbackConnection       m_startDispatchConnection;
-    ITask::CallbackConnection       m_waitOnDispatchConnection;
+    ref<Task::TaskGroup>            m_updateTask;
+    ref<Task::ITask>                m_dispatchTask;
+    Task::ITask::CallbackConnection m_startDispatchConnection;
+    Task::ITask::CallbackConnection m_waitOnDispatchConnection;
     minitl::vector<NodeInfo>        m_nodes;
 private:
     void dispatch();
@@ -35,8 +35,8 @@ public:
     MultiNode(const minitl::vector< minitl::weak<INode> >& nodes);
     ~MultiNode();
 
-    virtual weak<ITask> updateTask() override;
-    virtual weak<ITask> dispatchTask() override;
+    virtual weak<Task::ITask> updateTask() override;
+    virtual weak<Task::ITask> dispatchTask() override;
 };
 
 }

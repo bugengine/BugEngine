@@ -7,7 +7,7 @@
 #include    <system/scheduler/scheduler.hh>
 #include    <maths/vector.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 class be_api(SYSTEM) ITask : public minitl::refcountable
@@ -34,7 +34,7 @@ public:
         virtual bool onDisconnected(weak<ITask> from) = 0;
     };
     friend class CallbackConnection;
-    friend class ScheduledTasks::ITaskItem;
+    friend class ITaskItem;
 private:
     class ChainCallback : public ICallback
     {
@@ -91,7 +91,7 @@ public:
     ~CallbackConnection();
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

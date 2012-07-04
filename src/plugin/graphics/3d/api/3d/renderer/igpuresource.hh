@@ -9,8 +9,7 @@ namespace BugEngine
 {
 
 class Resource;
-template< typename R >
-class GPUResourceLoader;
+template< typename R > class GPUResourceLoader;
 class IRenderer;
 
 class be_api(_3D) IGPUResource :   public minitl::refcountable

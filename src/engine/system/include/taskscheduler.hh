@@ -13,15 +13,14 @@
 namespace BugEngine
 {
 
-template< typename Body >
-class Task;
-class TaskGroup;
 class Scheduler;
 
-namespace ScheduledTasks
+namespace Task
 {
+
+template< typename Body > class Task;
+class TaskGroup;
 class ITaskItem;
-}
 
 class TaskScheduler : public minitl::pointer
 {
@@ -35,12 +34,12 @@ private:
     Semaphore               m_mainThreadSynchro;
     weak<Scheduler>         m_scheduler;
 private: //friend Worker
-    minitl::istack<ScheduledTasks::ITaskItem>   m_tasks[Scheduler::PriorityCount];
-    minitl::istack<ScheduledTasks::ITaskItem>   m_mainThreadTasks[Scheduler::PriorityCount];
+    minitl::istack<ITaskItem>   m_tasks[Scheduler::PriorityCount];
+    minitl::istack<ITaskItem>   m_mainThreadTasks[Scheduler::PriorityCount];
 public:
-    ScheduledTasks::ITaskItem* pop(Scheduler::Affinity affinity);
-    void queue(ScheduledTasks::ITaskItem* task);
-    void split(ScheduledTasks::ITaskItem* t, size_t count);
+    ITaskItem* pop(Scheduler::Affinity affinity);
+    void queue(ITaskItem* task);
+    void split(ITaskItem* t, size_t count);
 public:
     TaskScheduler(weak<Scheduler> scheduler);
     ~TaskScheduler();
@@ -49,7 +48,7 @@ public:
     void notifyEnd();
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

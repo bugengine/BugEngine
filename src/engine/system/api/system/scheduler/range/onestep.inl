@@ -5,7 +5,7 @@
 #define BE_SYSTEM_SCHEDULER_RANGE_ONESTEP_INL_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 inline range_onestep::range_onestep()
@@ -32,7 +32,7 @@ inline range_onestep range_onestep::split()
     return *this;
 }
 
-}
+}}
 
 /*****************************************************************************/
 #endif

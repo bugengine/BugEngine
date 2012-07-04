@@ -19,7 +19,7 @@ OpenCLKernelLoader::~OpenCLKernelLoader()
 
 ResourceHandle OpenCLKernelLoader::load(weak<const Resource> resource)
 {
-    be_info("loading OpenCL kernel %s"|be_checked_cast<const Kernel>(resource)->name());
+    be_info("loading OpenCL kernel %s"|be_checked_cast<const Kernel::Kernel>(resource)->name());
     ResourceHandle handle;
     //handle.handle = ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel>(resource)->name());
     return handle;

@@ -38,8 +38,8 @@ protected:
 public:
     virtual ~IRenderTarget();
 
-    weak<ITask>     syncTask() const;
-    void            drawBatches(const Batch* batches, size_t count) const;
+    weak<Task::ITask>   syncTask() const;
+    void                drawBatches(const Batch* batches, size_t count) const;
 };
 
 }

@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class CpuKernelLoader : public IKernelLoader
+class CpuKernelLoader : public Kernel::IKernelLoader
 {
 public:
     CpuKernelLoader();

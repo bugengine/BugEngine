@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <system/scheduler/task/itask.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 class be_api(SYSTEM) TaskGroup : public ITask
@@ -72,7 +72,7 @@ public:
     ~TaskEndConnection();
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif

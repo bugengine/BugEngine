@@ -5,7 +5,7 @@
 #define BE_SYSTEM_SCHEDULER_RANGE_SEQUENCE_HH_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 template< typename T >
@@ -26,7 +26,7 @@ public:
     inline bool                 atomic() const;
 };
 
-}
+}}
 
 #include    "sequence.inl"
 

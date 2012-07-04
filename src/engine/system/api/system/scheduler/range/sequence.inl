@@ -5,7 +5,7 @@
 #define BE_SYSTEM_SCHEDULER_RANGE_SEQUENCE_INL_
 /*****************************************************************************/
 
-namespace BugEngine
+namespace BugEngine { namespace Task
 {
 
 template< typename T >
@@ -53,7 +53,7 @@ range_sequence<T> range_sequence<T>::split()
     return range_sequence<T>(oldbegin, m_begin);
 }
 
-}
+}}
 
 /*****************************************************************************/
 #endif

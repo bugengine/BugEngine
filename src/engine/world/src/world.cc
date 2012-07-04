@@ -4,7 +4,6 @@
 #include    <world/stdafx.h>
 #include    <world/world.script.hh>
 #include    <system/scheduler/task/group.hh>
-#include    <system/scheduler/task/method.hh>
 
 #include <world/storage.hh>
 #include <world/component.script.hh>
@@ -30,7 +29,7 @@ namespace BugEngine { namespace World
 static const Entity s_defaultSlot = { 0 };
 
 World::World()
-:   m_task(ref<TaskGroup>::create(Arena::task(), "world:update", color32(89, 89, 180)))
+:   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", color32(89, 89, 180)))
 //,   m_rules(Arena::game(), 0)
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
@@ -45,7 +44,7 @@ World::~World()
 {
 }
 
-weak<ITask> World::updateWorldTask() const
+weak<Task::ITask> World::updateWorldTask() const
 {
     return m_task;
 }

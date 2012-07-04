@@ -6,4 +6,4 @@
 #include    <clkernelscheduler.hh>
 #include    <rtti/classinfo.script.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::IKernelScheduler, BugEngine::OpenCLKernelScheduler);
+BE_PLUGIN_REGISTER(BugEngine::Kernel::IKernelScheduler, BugEngine::OpenCLKernelScheduler);

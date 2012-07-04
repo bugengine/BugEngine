@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class OpenCLKernelLoader : public IKernelLoader
+class OpenCLKernelLoader : public Kernel::IKernelLoader
 {
 public:
     OpenCLKernelLoader();

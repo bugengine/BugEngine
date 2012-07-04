@@ -26,9 +26,9 @@ private:
     class WorldResource;
     struct UpdateTask
     {
-        ref<ITask>                      task;
-        TaskGroup::TaskStartConnection  start;
-        TaskGroup::TaskEndConnection    end;
+        ref<Task::ITask>                        task;
+        Task::TaskGroup::TaskStartConnection    start;
+        Task::TaskGroup::TaskEndConnection      end;
     };
 private:
     ref<Folder> const               m_dataFolder;
@@ -36,12 +36,12 @@ private:
     weak<Scheduler>                 m_scheduler;
     PluginContext const             m_pluginContext;
     Plugin<IKernelScheduler>        m_cpuKernelScheduler;
-    ref<TaskGroup>                  m_updateTask;
-    ref<TaskGroup>                  m_worldTask;
+    ref<Task::TaskGroup>            m_updateTask;
+    ref<Task::TaskGroup>            m_worldTask;
     minitl::vector< UpdateTask >    m_tasks;
-    ITask::CallbackConnection       m_updateLoop;
-    ITask::CallbackConnection       m_forceContinue;
-    ITask::CallbackConnection       m_worldLoop;
+    Task::ITask::CallbackConnection m_updateLoop;
+    Task::ITask::CallbackConnection m_forceContinue;
+    Task::ITask::CallbackConnection m_worldLoop;
     size_t                          m_resourceLoadingCount;
 private:
     void frameUpdate();
@@ -50,8 +50,8 @@ private:
     virtual ResourceHandle load(weak<const Resource> scene) override;
     virtual void unload(const ResourceHandle& handle) override;
 protected:
-    void addTask(ref<ITask> task);
-    void removeTask(ref<ITask> task);
+    void addTask(ref<Task::ITask> task);
+    void removeTask(ref<Task::ITask> task);
     const PluginContext& pluginContext() const { return m_pluginContext; }
     Application(ref<Folder> dataFolder, weak<Scheduler> scheduler);
 public:

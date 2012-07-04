@@ -14,14 +14,14 @@ namespace BugEngine
 SceneNode::SceneNode(weak<IRenderTarget> renderTarget, weak<const BugEngine::World::World> world)
 :   INode()
 ,   m_world(world)
-,   m_renderTask(ref< Task< MethodCaller<SceneNode, &SceneNode::render> > >::create(Arena::task(), "renderScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::render>(this), Scheduler::High))
-,   m_dispatchTask(ref< Task< MethodCaller<SceneNode, &SceneNode::dispatch> > >::create(Arena::task(), "dispatchScene", color32(255,0,0), MethodCaller<SceneNode, &SceneNode::dispatch>(this), Scheduler::High, renderTarget->syncTask()->affinity))
+,   m_renderTask(ref< Task::Task< Task::MethodCaller<SceneNode, &SceneNode::render> > >::create(Arena::task(), "renderScene", color32(255,0,0), Task::MethodCaller<SceneNode, &SceneNode::render>(this), Scheduler::High))
+,   m_dispatchTask(ref< Task::Task< Task::MethodCaller<SceneNode, &SceneNode::dispatch> > >::create(Arena::task(), "dispatchScene", color32(255,0,0), Task::MethodCaller<SceneNode, &SceneNode::dispatch>(this), Scheduler::High, renderTarget->syncTask()->affinity))
 ,   m_renderTarget(renderTarget)
 ,   m_startRender(world->updateWorldTask(), m_renderTask->startCallback())
 ,   m_startDispatch(m_renderTask, m_dispatchTask->startCallback())
 ,   m_startFlush(m_dispatchTask, m_renderTarget->syncTask()->startCallback())
-,   m_waitOnRender(m_renderTask, world->updateWorldTask()->startCallback(), ITask::ICallback::Completed)
-,   m_waitOnFlush(m_renderTarget->syncTask(), m_renderTask->startCallback(), ITask::ICallback::Completed)
+,   m_waitOnRender(m_renderTask, world->updateWorldTask()->startCallback(), Task::ITask::ICallback::Completed)
+,   m_waitOnFlush(m_renderTarget->syncTask(), m_renderTask->startCallback(), Task::ITask::ICallback::Completed)
 {
 }
 
@@ -38,12 +38,12 @@ void SceneNode::dispatch()
     m_renderTarget->drawBatches(0, 0);
 }
 
-weak<ITask> SceneNode::updateTask()
+weak<Task::ITask> SceneNode::updateTask()
 {
     return m_world->updateWorldTask();
 }
 
-weak<ITask> SceneNode::dispatchTask()
+weak<Task::ITask> SceneNode::dispatchTask()
 {
     return m_dispatchTask;
 }
