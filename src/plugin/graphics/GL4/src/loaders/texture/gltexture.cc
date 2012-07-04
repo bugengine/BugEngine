@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <glrenderer.hh>
+#include    <GL4/glrenderer.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <3d/texture/texture.script.hh>
 
