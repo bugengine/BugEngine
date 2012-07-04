@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <glrenderer.hh>
+#include    <GL4/glrenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <3d/shader/shader.script.hh>
 #include    <loaders/rendertarget/glsurface.hh>

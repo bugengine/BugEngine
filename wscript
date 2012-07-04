@@ -76,22 +76,24 @@ def plugins(bld):
 	squirrel		= module.plugin('scripting.squirrel',		[squirellib])
 	input			= module.plugin('input.input',				[])
 
+	kernelcpu		= module.plugin('kernel.cpu'	,			[bld.game])
+	#kerneldc		= module.plugin('kernel.directcompute',		[bld.game])
+	if opencl:
+		kernelopencl	= module.plugin('kernel.opencl',		[bld.game, opencl])
+
 	nullrender		= module.plugin('graphics.nullrender',		[_3d, shadermodel4])
 	if win32 or X11 or cocoa:
 		windowing	= module.library('graphics.windowing',		[bld.game, _3d, X11, win32], category='plugin')
 		if opengl:
 			gl		= module.plugin('graphics.GL4',				[bld.game, windowing, opengl, _3d])
+			if opencl:
+				clgl= module.plugin('kernel.opencl.opengl',		[bld.game, gl, kernelopencl])
 		if directx9:
 			Dx9		= module.plugin('graphics.DX9',				[bld.game, windowing, cgDx, directx9, _3d])
 		#if diretx10:
 			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
 			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
-	kernelcpu		= module.plugin('kernel.cpu'	,			[bld.game])
-	#kerneldc		= module.plugin('kernel.directcompute',		[bld.game])
-	if opencl:
-		kernelopencl	= module.plugin('kernel.opencl',		[bld.game, opencl])
-
 
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None

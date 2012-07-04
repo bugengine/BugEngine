@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <glrenderer.hh>
+#include    <GL4/glrenderer.hh>
 #include    <extensions.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/shader/glshaderbuilder.hh>
