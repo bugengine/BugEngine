@@ -48,13 +48,13 @@ class netbeans(Build.BuildContext):
 				add(doc, elem, 'type', '0')
 		return doc
 
-	def addSourceTree(self, doc, xml, name, folder, prefix):
-		f = add(doc, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
+	def addSourceTree(self, doc, xml, folder, prefix):
 		for subname, subdir in folder.directories.items():
-			self.addSourceTree(doc, f, subname, subdir, os.path.join(prefix, subdir.prefix))
+			f = add(doc, xml, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
+			self.addSourceTree(doc, f, subdir, os.path.join(prefix, subdir.prefix))
 		for source in folder.files:
 			if not source.generated():
-				add(doc, f, 'itemPath', os.path.join(prefix, source.filename))
+				add(doc, xml, 'itemPath', os.path.join(prefix, source.filename))
 
 	def generateConfigurationsXml(self, sources, configurations, bld, out):
 		doc = Document()
@@ -67,14 +67,15 @@ class netbeans(Build.BuildContext):
 		for project, category, source, options in sources:
 			f, subs = categories[category]
 			project = project.split('.')
-			for subname in project[:-1]:
+			for subname in project:
 				try:
 					f, subs = subs[subname]
 				except KeyError:
 					f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
 					subs[subname] = (f, {})
 					f, subs = subs[subname]
-			self.addSourceTree(doc, f, project[-1], source, source.prefix)
+			f.setAttribute('displayName', '<'+project[-1]+'>')
+			self.addSourceTree(doc, f, source, source.prefix)
 		impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
 		add(doc, impfiles, 'itemPath', sys.argv[0])
 		#add(doc, cd, 'sourceFolderFilter')
