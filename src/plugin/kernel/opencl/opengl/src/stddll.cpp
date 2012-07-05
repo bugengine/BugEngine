@@ -1,4 +1,4 @@
-#include    <opencl/stdafx.h>
+#include    <stdafx.h>
 
 #if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)
 
@@ -19,3 +19,4 @@ extern "C" BOOL WINAPI DllMain( HINSTANCE hinstDLL,
 }
 
 #endif
+
