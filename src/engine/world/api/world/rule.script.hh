@@ -8,6 +8,7 @@
 #include    <world/component.script.hh>
 #include    <system/scheduler/task/itask.hh>
 #include    <rtti/tags/editor.script.hh>
+#include    <core/memory/kernel/istream.hh>
 
 namespace BugEngine { namespace World
 {
@@ -19,7 +20,6 @@ public:
 };
 
 }}
-
 
 /*****************************************************************************/
 #endif

@@ -1,8 +1,8 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#include    <system/stdafx.h>
-#include    <system/scheduler/kernel/imemoryprovider.hh>
+#include    <core/stdafx.h>
+#include    <core/memory/kernel/imemorybank.hh>
 
 
 namespace BugEngine { namespace Kernel

@@ -19,10 +19,10 @@ private:
     scoped<OpenCLKernelLoader>  m_loader;
     cl_context                  m_context;
 private:
-    static cl_context createCLContext();
-    static void fillPlatformSpecificContextProperties(const char* extensions, cl_context_properties* properties, int maxPropertyCount);
+    static cl_context createCLContextOnPlatform(const cl_context_properties* properties, cl_platform_id platform, cl_device_type deviceType);
+    static cl_context createCLContext(const cl_context_properties* properties);
 public:
-    OpenCLKernelScheduler(const PluginContext& context);
+    OpenCLKernelScheduler(const PluginContext& context, const cl_context_properties* properties = 0);
     ~OpenCLKernelScheduler();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
