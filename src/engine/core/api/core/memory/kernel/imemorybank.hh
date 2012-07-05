@@ -1,20 +1,22 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_JOBS_CPU_STDAFX_H_
-#define BE_JOBS_CPU_STDAFX_H_
+#ifndef BE_CORE_MEMORY_KERNEL_IMEMORYBANK_HH_
+#define BE_CORE_MEMORY_KERNEL_IMEMORYBANK_HH_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
+namespace BugEngine { namespace Kernel
+{
 
-#ifdef BE_PLATFORM_MACOS
-# include   <OpenCL/opencl.h>
-# include   <OpenGL/OpenGL.h>
-#else
-# include   <opencl.h>
-#endif
+class IMemoryProvider;
+
+class IMemoryBank : public minitl::pointer
+{
+private:
+    weak<const IMemoryProvider> m_provider;
+};
+
+}}
 
 /*****************************************************************************/
 #endif

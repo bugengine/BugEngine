@@ -1,7 +1,7 @@
 /* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
  see LICENSE for detail */
 
-#include    <stdafx.h>
+#include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>
 #include    <extensions.hh>
 
@@ -138,7 +138,7 @@ GLWindow::Context::~Context()
 GLRenderer::GLRenderer(const PluginContext& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general()))
-    ,   m_openCLScheduler("kernel.opencl", context)
+    ,   m_openCLScheduler("kernel.opencl.opengl", context)
 {
     [NSOpenGLContext clearCurrentContext];
 }
