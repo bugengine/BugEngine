@@ -10,8 +10,8 @@ def setup(conf):
 	if 'darwin' in conf.env.PLATFORM:
 		conf.check_header('OpenCL/opencl.h', var='opencl_h')
 	else:
-		conf.check_header('opencl.h', var='opencl_h')
-		conf.check_lib('opencl')
+		conf.check_header('CL/cl.h', var='opencl_h')
+		conf.check_lib('OpenCL')
 
 def build(bld):
 	if (bld.env.OPENCLC and bld.env.opencl_h) or bld.env.PROJECTS:
