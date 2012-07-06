@@ -19,19 +19,7 @@ public:
     virtual weak<Task::ITask> task() const = 0;
 };
 
-be_pod A
-{
-    u32 test;
-};
-
-
 }}
-
-class FakeRule : public BugEngine::World::IRule
-{
-published:
-    weak< BugEngine::Kernel::Stream<BugEngine::World::A> >  doubles;
-};
 
 /*****************************************************************************/
 #endif
