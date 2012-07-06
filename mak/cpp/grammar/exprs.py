@@ -197,10 +197,10 @@ class Exprs(cpp.yacc.Nonterm):
 
 	def dump(self, file, instances, namespace, decl, name, owner, parent_name, parent_value):
 		if parent_name:
-			method_ptr = "be_typeid< %s >::klass()->methods"%parent_name
-			cast_ptr = "be_typeid< %s >::klass()->cast"%parent_name
-			property_ptr = "be_typeid< %s >::klass()->properties"%parent_name
-			object_ptr = "be_typeid< %s >::klass()->objects"%parent_name
+			method_ptr = "BugEngine::be_typeid< %s >::klass()->methods"%parent_name
+			cast_ptr = "BugEngine::be_typeid< %s >::klass()->cast"%parent_name
+			property_ptr = "BugEngine::be_typeid< %s >::klass()->properties"%parent_name
+			object_ptr = "BugEngine::be_typeid< %s >::klass()->objects"%parent_name
 		else:
 			if name:
 				o = "BugEngine::be_%s_Namespace_%s()"%(self.parser.plugin, "_".join(decl))

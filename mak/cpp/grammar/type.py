@@ -14,11 +14,6 @@ class TypeDef(cpp.yacc.Nonterm):
 		self.value = cls
 		self.lineno = cls.lineno
 
-	def type_builtin(self, cls):
-		"%reduce BuiltinDef"
-		self.value = cls
-		self.lineno = cls.lineno
-
 
 
 class TypeDecl(cpp.yacc.Nonterm):

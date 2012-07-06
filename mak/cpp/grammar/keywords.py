@@ -198,6 +198,9 @@ class Keyword(cpp.yacc.Nonterm):
 	def kw_class(self, kw):
 		"%reduce CLASS"
 		self.value = kw.value
+	def kw_be_pod(self, kw):
+		"%reduce BE_POD"
+		self.value = kw.value
 	def kw_enum(self, kw):
 		"%reduce ENUM"
 		self.value = kw.value

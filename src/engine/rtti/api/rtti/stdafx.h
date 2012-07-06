@@ -20,6 +20,7 @@
 #endif
 
 #define     published           public
+#define     be_pod              struct
 #define     be_tag(v)
 
 namespace BugEngine { namespace Arena

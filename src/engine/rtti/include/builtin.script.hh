@@ -3,47 +3,48 @@
 
 #if 0
 
-builtin bool
+be_pod bool
 {
 };
 
-builtin u8
+be_pod u8
 {
 };
 
-builtin u16
+be_pod u16
 {
 };
 
-builtin u32
+be_pod u32
 {
 };
 
-builtin u64
+be_pod u64
 {
 };
 
-builtin i8
+
+be_pod i8
 {
 };
 
-builtin i16
+be_pod i16
 {
 };
 
-builtin i32
+be_pod i32
 {
 };
 
-builtin i64
+be_pod i64
 {
 };
 
-builtin float
+be_pod float
 {
 };
 
-builtin double
+be_pod double
 {
 };
 
@@ -129,6 +130,13 @@ struct uint4
     uint4();
     uint4(u32 x, u32 y, u32 z, u32 w);
 };
+
+namespace Kernel
+{
+class IStream : public minitl::pointer
+{
+};
+}
 
 }
 
