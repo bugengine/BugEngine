@@ -91,6 +91,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = cls.lineno
 		self.value = False
+		self.pod = False
 		self.members = members.members[4]
 		if parent.inherits[0] >= 3:
 			self.inherits = parent.inherits[1]
@@ -103,6 +104,31 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = cls.lineno
 		self.value = True
+		self.pod = False
+		self.members = members.members[3]
+		if self.members and members.members[4]:
+			self.members.members += members.members[4].members
+			self.members.objects += members.members[4].objects
+			for m, methods in members.members[4].methods.items():
+				try:
+					self.members.methods[m] += methods
+				except KeyError:
+					self.members.methods[m] = methods
+		else:
+			self.members = members.members[4]
+		if parent.inherits[0] >= 2:
+			self.inherits = parent.inherits[1]
+		else:
+			self.inherits = "void"
+
+
+	def pod_definition(self, cls, name, parent, lbrace, members, rbrace):
+		"%reduce BE_POD NameOpt Parent LBRACE Members RBRACE"
+		self.name = name.value.replace(' ', '')
+		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
+		self.lineno = cls.lineno
+		self.value = True
+		self.pod = True
 		self.members = members.members[3]
 		if self.members and members.members[4]:
 			self.members.members += members.members[4].members
@@ -126,6 +152,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.lineno = union.lineno
 		self.inherits = 'void'
 		self.value = True
+		self.pod = True
 		self.members = members.members[4]
 
 	def using(self, file, instances, decl, name, parent_name):
@@ -138,19 +165,65 @@ class ClassDef(cpp.yacc.Nonterm):
 		prefix = "class%s" % '_'.join(decl)
 		if self.parser.useMethods:
 			instances.write("extern const ::BugEngine::RTTI::Class& s_%sFun();\n" % prefix)
+			if self.pod:
+				instances.write("extern const ::BugEngine::RTTI::Class& s_pod_def_%sFun();\n" % prefix)
 		else:
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (prefix))
+			if self.pod:
+				instances.write("extern ::BugEngine::RTTI::Class s_pod_def_%s;\n" % (prefix))
 		if self.members:
 			self.members.predecl(file, instances, decl, name, self.value)
 
 
+	def create_pod_def(self, file, instances, name, prefix):
+		file.write("#line %d\n"%self.lineno)
+		if self.parser.useMethods:
+			file.write("static ")
+		file.write("::BugEngine::RTTI::Class s_pod_def_%s =\n" % (prefix))
+		file.write("#line %d\n"%self.lineno)
+		file.write("    {\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        ::BugEngine::inamespace(\"BugEngine.Kernel.Stream<%s>\"),\n" % (self.name))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        ::BugEngine::be_typeid< BugEngine::Kernel::IStream >::klass(),\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<u16>(sizeof(BugEngine::Kernel::Stream< %s >)),\n" % name)
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<u16>(be_alignof(BugEngine::Kernel::Stream< %s >)),\n" % name)
+		file.write("#line %d\n"%self.lineno)
+		file.write("        be_checked_numcast<i32>((ptrdiff_t)static_cast< BugEngine::Kernel::IStream* >((BugEngine::Kernel::Stream< %s >*)1)-1),\n" % (name))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        {0},\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        0,\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("        0\n")
+		file.write("#line %d\n"%self.lineno)
+		file.write("    };\n")
+		instances.write("#line %d\n"%self.lineno)
+		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Stream<%s> >::klass() { raw<const RTTI::Class> ci = {&s_pod_def_%s}; return ci; }\n" % (name, prefix))
+
 	def dump(self, file, instances, namespace, decl, name, member):
-		ns = '::'+'::'.join(namespace)
+		ns = '::'.join(namespace)
 		name = name+[self.name]
 		decl = decl+[self.decl]
-		fullname = '::'+'::'.join(name)
+		fullname = '::'.join(name)
 		prettyname = '.'.join(name)
 		prefix = "class%s" % '_'.join(decl)
+
+		if self.pod:
+			self.create_pod_def(file, instances, fullname,  prefix)
+			
 
 		if self.members:
 			self.members.dumpObjects(file, instances, namespace, decl, name, fullname)

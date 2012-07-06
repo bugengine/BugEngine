@@ -17,6 +17,7 @@ class Unit(cpp.yacc.Nonterm):
 		instances.write("#include    <%s>\n" % self.parser.source)
 		instances.write("#include    <rtti/typeinfo.hh>\n")
 		instances.write("#include    <rtti/classinfo.script.hh>\n")
+		instances.write("#include    <core/memory/kernel/stream.hh>\n")
 		instances.write("#line 1 \"%s\"\n" % (self.parser.source.replace("\\", "\\\\")))
 
 		file.write("#include    <rtti/stdafx.h>\n")
@@ -33,6 +34,7 @@ class Unit(cpp.yacc.Nonterm):
 		file.write("#include    <rtti/engine/helper/set.hh>\n")
 		file.write("#include    <rtti/engine/helper/method.hh>\n")
 		file.write("#include    <rtti/tags/documentation.script.hh>\n")
+		file.write("#include    <core/memory/kernel/stream.hh>\n")
 		file.write("\n")
 		file.write("\n")
 		file.write("#line 1 \"%s\"\n" % (self.parser.source.replace("\\", "\\\\")))
@@ -46,8 +48,12 @@ class Unit(cpp.yacc.Nonterm):
 		self.members.using(file, instances, [], [], "")
 
 		instances.write("namespace BugEngine\n{\n\n")
-		self.members.dumpObjects(file, instances, [], [], [], owner)
-		self.members.dump(file, instances, [], [], [], "", "", False)
+		self.members.dumpObjects(file, instances, [], [], [], "")
+		object_ptr, method_ptr, constructor, cast, variables = self.members.dump(file, instances, [], [], [], "", "", False)
+		if object_ptr != 'BugEngine::%s->objects'%owner:
+			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( BugEngine::%s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
+		if method_ptr != 'BugEngine::%s->methods'%owner:
+			file.write("const ::BugEngine::RTTI::Method* %s_mptr = ( %s->methods.set(%s) );\n" % (method_ptr[2:-1], owner, method_ptr[1:-1]))
 		instances.write("\n}\n\n")
 
 

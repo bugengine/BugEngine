@@ -8,7 +8,7 @@
 #include    <world/component.script.hh>
 #include    <system/scheduler/task/itask.hh>
 #include    <rtti/tags/editor.script.hh>
-#include    <core/memory/kernel/istream.hh>
+#include    <core/memory/kernel/stream.hh>
 
 namespace BugEngine { namespace World
 {
@@ -19,7 +19,19 @@ public:
     virtual weak<Task::ITask> task() const = 0;
 };
 
+be_pod A
+{
+    u32 test;
+};
+
+
 }}
+
+class FakeRule : public BugEngine::World::IRule
+{
+published:
+    weak< BugEngine::Kernel::Stream<BugEngine::World::A> >  doubles;
+};
 
 /*****************************************************************************/
 #endif
