@@ -46,8 +46,8 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
 ,   m_scheduler(scheduler)
 ,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
 ,   m_cpuKernelScheduler("kernel.cpu", m_pluginContext)
-,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate", color32(255,255,0)))
-,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", color32(255,255,0)))
+,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate", Colors::Yellow::Yellow))
+,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
 ,   m_tasks(Arena::task())
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
 ,   m_forceContinue(m_updateTask, m_worldTask->startCallback())
@@ -58,12 +58,12 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
     addTask(ref< Task::Task< Task::MethodCaller<Application, &Application::updateResources> > >::create(
             Arena::task(),
             "resource",
-            color32(0,255,0),
+            Colors::Green::Green,
             Task::MethodCaller<Application, &Application::updateResources>(this)));
     addTask(ref< Task::Task< Task::MethodCaller<Application, &Application::frameUpdate> > >::create(
             Arena::task(),
             "update",
-            color32(0,255,0),
+            Colors::Green::Green,
             Task::MethodCaller<Application, &Application::frameUpdate>(this)));
 }
 
