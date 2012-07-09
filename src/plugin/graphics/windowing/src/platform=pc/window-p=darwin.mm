@@ -46,7 +46,7 @@ Window::~Window()
 
 void Window::load(weak<const Resource> /*resource*/)
 {
-    uint2 dimensions = uint2(800, 600); //be_checked_cast<const RenderWindow>(resource)->dimensions;
+    uint2 dimensions = make_uint2(800, 600); //be_checked_cast<const RenderWindow>(resource)->dimensions;
     m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), dimensions[0], dimensions[1]));
 }
 
@@ -64,7 +64,7 @@ void* Window::getWindowHandle() const
 
 uint2 Window::getDimensions() const
 {
-    return uint2(1920, 1200);
+    return make_uint2(1920, 1200);
 }
 
 }}

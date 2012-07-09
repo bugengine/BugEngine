@@ -16,7 +16,7 @@ RenderTarget::~RenderTarget()
 }
 
 RenderSurface::RenderSurface(u16 width, u16 height)
-    :   dimensions(width, height)
+    :   dimensions(make_uint2(width, height))
 {
 }
 

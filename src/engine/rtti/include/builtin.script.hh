@@ -73,62 +73,41 @@ struct Value
 };
 }
 
-struct float2
+be_pod float2
 {
-published:
-    float2();
-    float2(float x, float y);
 };
 
-struct float3
+be_pod float3
 {
-    float3();
-    float3(float x, float y, float z);
 };
 
-struct float4
+be_pod float4
 {
-    float4();
-    float4(float x, float y, float z, float w);
 };
 
 
-struct int2
+be_pod int2
 {
-published:
-    int2();
-    int2(i32 x, i32 y);
 };
 
-struct int3
+be_pod int3
 {
-    int3();
-    int3(i32 x, i32 y, i32 z);
 };
 
-struct int4
+be_pod int4
 {
-    int4();
-    int4(i32 x, i32 y, i32 z, i32 w);
 };
 
-struct uint2
+be_pod uint2
 {
-published:
-    uint2();
-    uint2(u32 x, u32 y);
 };
 
-struct uint3
+be_pod uint3
 {
-    uint3();
-    uint3(u32 x, u32 y, u32 z);
 };
 
-struct uint4
+be_pod uint4
 {
-    uint4();
-    uint4(u32 x, u32 y, u32 z, u32 w);
 };
 
 namespace Kernel
