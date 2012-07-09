@@ -125,7 +125,7 @@ uint2 Renderer::getScreenSize()
 {
     RECT rect;
     GetWindowRect(GetDesktopWindow(),&rect);
-    return uint2(rect.right - rect.left, rect.bottom - rect.top);
+    return make_uint2(rect.right - rect.left, rect.bottom - rect.top);
 }
 
 }}

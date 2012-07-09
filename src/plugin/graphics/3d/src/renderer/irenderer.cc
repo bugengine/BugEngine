@@ -18,7 +18,7 @@ namespace BugEngine
 IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
     ,   m_resourceManager(manager)
-    ,   m_syncTask(ref< Task::Task< Task::MethodCaller<IRenderer, &IRenderer::flush> > >::create(Arena::task(), "flush", color32(255,0,0),  Task::MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
+    ,   m_syncTask(ref< Task::Task< Task::MethodCaller<IRenderer, &IRenderer::flush> > >::create(Arena::task(), "flush", Colors::Red::Red,  Task::MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
     ,   m_sceneLoader(scoped<SceneGraphLoader>::create(Arena::resource(), this))
     ,   m_renderSurfaceLoader(scoped< GPUResourceLoader<RenderSurface> >::create(Arena::resource(), this))
     ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindow> >::create(Arena::resource(), this))

@@ -136,7 +136,7 @@ Renderer::~Renderer()
 uint2 Renderer::getScreenSize()
 {
     Screen* s = XScreenOfDisplay(m_platformRenderer->m_platformData.display, XDefaultScreen(m_platformRenderer->m_platformData.display));
-    return uint2(XWidthOfScreen(s), XHeightOfScreen(s));
+    return make_uint2(XWidthOfScreen(s), XHeightOfScreen(s));
 }
 
 void Renderer::flush()

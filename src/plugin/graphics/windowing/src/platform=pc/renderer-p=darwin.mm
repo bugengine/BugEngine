@@ -63,7 +63,7 @@ uint2 Renderer::getScreenSize()
     NSArray* screens = [NSScreen screens];
     NSScreen* screen = [screens objectAtIndex:0];
     NSRect frame = [screen visibleFrame];
-    return uint2(frame.size.width, frame.size.height);
+    return make_uint2(frame.size.width, frame.size.height);
 }
 
 void Renderer::flush()
