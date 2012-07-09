@@ -114,7 +114,7 @@ class ClassDef(cpp.yacc.Nonterm):
 					self.members.methods[m] += methods
 				except KeyError:
 					self.members.methods[m] = methods
-		else:
+		elif not self.members:
 			self.members = members.members[4]
 		if parent.inherits[0] >= 2:
 			self.inherits = parent.inherits[1]
@@ -138,7 +138,7 @@ class ClassDef(cpp.yacc.Nonterm):
 					self.members.methods[m] += methods
 				except KeyError:
 					self.members.methods[m] = methods
-		else:
+		elif not self.members:
 			self.members = members.members[4]
 		if parent.inherits[0] >= 2:
 			self.inherits = parent.inherits[1]
@@ -153,7 +153,17 @@ class ClassDef(cpp.yacc.Nonterm):
 		self.inherits = 'void'
 		self.value = True
 		self.pod = True
-		self.members = members.members[4]
+		self.members = members.members[3]
+		if self.members and members.members[4]:
+			self.members.members += members.members[4].members
+			self.members.objects += members.members[4].objects
+			for m, methods in members.members[4].methods.items():
+				try:
+					self.members.methods[m] += methods
+				except KeyError:
+					self.members.methods[m] = methods
+		elif not self.members:
+			self.members = members.members[4]
 
 	def using(self, file, instances, decl, name, parent_name):
 		pass
