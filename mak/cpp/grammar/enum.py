@@ -98,6 +98,9 @@ class EnumDef(cpp.yacc.Nonterm):
 			file.write("const ::BugEngine::RTTI::Class& s_%sFun()\n{\n" % prefix)
 		else:
 			varname = "%s::s_%s" % (ns, prefix)
+		if member:
+			file.write("#line %d\n"%self.lineno)
+			file.write("typedef %s %s;\n" % ('::'.join(name), self.name))
 
 		tag_ptr = self.tags.dump(file, instances, prefix)
 		properties = "{0}"
