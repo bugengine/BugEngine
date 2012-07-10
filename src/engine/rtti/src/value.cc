@@ -90,5 +90,11 @@ void* Value::unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<mini
     return mem;
 }
 
+void Value::store(const void* src)
+{
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = m_ref.m_pointer != 0;
+    m_type.copy(src, memory());
+}
 
 }}
