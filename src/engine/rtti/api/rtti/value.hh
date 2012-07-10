@@ -73,7 +73,6 @@ private:
     inline void* memory();
     inline const void* memory() const;
     inline void* rawget() const;
-    void* getPointerOnRawImplementation(u16 indirection) const;
 private:
     template< typename T >
     struct ByRefType
@@ -84,6 +83,7 @@ private:
         ByRefType& operator=(const ByRefType& other);
     };
     void* unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& ptr);
+    void store(const void* src);
 private:
     enum ReserveType { Reserve };
 

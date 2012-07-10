@@ -25,10 +25,7 @@ Value::Value(T t)
 :   m_type(be_typeid<T>::type())
 ,   m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = m_ref.m_pointer != 0;
-    be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
-    m_type.copy(&t, memory());
+    store(&t);
 }
 
 template< typename T >
@@ -36,10 +33,7 @@ Value::Value(T t, MakeConstType /*constify*/)
 :   m_type(Type::makeType(be_typeid<T>::type(), Type::MakeConst))
 ,   m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = m_ref.m_pointer != 0;
-    be_assert(m_type.isA(be_typeid<T>::type()), "specific typeinfo %s and typeid %s are not compatible" | m_type.name() | be_typeid<T>::type().name());
-    m_type.copy(&t, memory());
+    store(&t);
 }
 
 template< typename T >
