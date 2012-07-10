@@ -33,7 +33,7 @@ template< typename T,
 struct procedurehelper;
 
 
-class Value
+class be_api(RTTI) Value
 {
     friend struct Class;
     friend struct Property;
@@ -73,6 +73,7 @@ private:
     inline void* memory();
     inline const void* memory() const;
     inline void* rawget() const;
+    void* getPointerOnRawImplementation(u16 indirection) const;
 private:
     template< typename T >
     struct ByRefType
@@ -82,6 +83,7 @@ private:
     private:
         ByRefType& operator=(const ByRefType& other);
     };
+    void* unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& ptr);
 private:
     enum ReserveType { Reserve };
 
@@ -90,16 +92,16 @@ public:
     enum MakeConstType { MakeConst };
 
     inline Value();
-    template< typename T > explicit inline Value(T t);
-    template< typename T > explicit inline Value(T t, MakeConstType constify);
-    inline Value(const Value& other);
-    template< typename T > inline Value(ByRefType<T> t);
-    inline Value(Type typeinfo, void* location);
-    inline ~Value();
+    template< typename T > explicit Value(T t);
+    template< typename T > explicit Value(T t, MakeConstType constify);
+    Value(const Value& other);
+    template< typename T > Value(ByRefType<T> t);
+    Value(Type typeinfo, void* location);
+    ~Value();
 
-    template< typename T > inline Value& operator=(const T& t);
-    inline Value& operator=(const Value& other);
-    
+    template< typename T > Value& operator=(const T& t);
+    Value& operator=(const Value& other);
+
     inline Type type();
     inline Type type() const;
 
