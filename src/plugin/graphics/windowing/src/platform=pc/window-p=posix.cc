@@ -72,7 +72,7 @@ void* Window::getWindowHandle() const
 
 uint2 Window::getDimensions() const
 {
-    return int2(1920, 1200);
+    return make_uint2(1920, 1200);
 }
 
 }}

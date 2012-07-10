@@ -12,7 +12,7 @@
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenCL/opencl.h>
 #else
-# include   <opencl.h>
+# include   <CL/opencl.h>
 #endif
 
 /*****************************************************************************/
