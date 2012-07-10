@@ -1,21 +1,24 @@
 import mak
 from mak import module
 from waflib.Logs import info,warn
+import os
 
 def options(opt):
 	pass
 
 def setup(conf):
-	conf.find_program('openclc', mandatory=False)
 	if 'darwin' in conf.env.PLATFORM:
-		conf.check_header('OpenCL/opencl.h', var='opencl_h')
+		conf.find_program('openclc', mandatory=False)
 	else:
-		conf.check_header('CL/cl.h', var='opencl_h')
-		conf.check_lib('OpenCL')
+		conf.check_lib('OpenCL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenCL', 'lib.%s'%conf.env.ARCHITECTURE)])
 
 def build(bld):
-	if (bld.env.OPENCLC and bld.env.opencl_h) or bld.env.PROJECTS:
-		bld.m['OpenCL'] = module.util('OpenCL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.opencl))
+	if (bld.env.OpenCL or bld.env.openclc) or bld.env.PROJECTS:
+		exparchoptions = {
+			'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenCL', 'lib.x86')]),
+			'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenCL', 'lib.amd64')]),
+			}
+		bld.m['OpenCL'] = module.util('OpenCL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.OpenCL), globalarchoptions=exparchoptions)
 	else:
 		bld.m['OpenCL'] = None
 

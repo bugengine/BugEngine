@@ -60,18 +60,20 @@ public:
     static StringCache* unique(const char *begin, const char *end);
 private:
     mutable i_u32  m_refCount;
-    size_t  m_hash;
-    size_t  m_length;
+    u32  m_length;
+    u64  m_hash;
 #   ifdef  BE_DEBUG
+    const char *m_text;
     size_t  m_gard;
 #   endif
 private:
-    StringCache(size_t _hash, size_t len) :
-        m_refCount(0),
-        m_hash(_hash),
-        m_length(len)
+    StringCache(u64 _hash, u32 len)
+        :   m_refCount(0)
+        ,   m_length(len)
+        ,   m_hash(_hash)
 #   ifdef  BE_DEBUG
-        ,m_gard(0xDEADBEEF)
+        ,   m_text((const char *)(this+1))
+        ,   m_gard(0xDEADBEEF)
 #   endif
     {
     }
@@ -185,33 +187,21 @@ const StringCache* istring::init(const char *begin, const char *end)
 
 istring::istring()
 :   m_index(init(""))
-#ifdef BE_DEBUG
-,   m_str(m_index->str())
-#endif
 {
 }
 
 istring::istring(const char *value)
 :   m_index(init(value))
-#ifdef BE_DEBUG
-,   m_str(m_index->str())
-#endif
 {
 }
 
 istring::istring(const char *begin, const char *end)
 :   m_index(init(begin,end))
-#ifdef BE_DEBUG
-,   m_str(m_index->str())
-#endif
 {
 }
 
 istring::istring(const istring& other)
 :   m_index(other.m_index)
-#ifdef BE_DEBUG
-,   m_str(other.m_str)
-#endif
 {
     m_index->retain();
 }
@@ -228,9 +218,6 @@ istring& istring::operator=(const istring& other)
     other.m_index->retain();
     m_index->release();
     m_index = other.m_index;
-#ifdef BE_DEBUG
-    m_str = other.m_str;
-#endif
     return *this;
 }
 
