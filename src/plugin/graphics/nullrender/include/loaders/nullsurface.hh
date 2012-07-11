@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RENDERNULL_LOADERS_NULLSURFACE_HH_
-#define BE_RENDERNULL_LOADERS_NULLSURFACE_HH_
+#ifndef BE_NULLRENDER_LOADERS_NULLSURFACE_HH_
+#define BE_NULLRENDER_LOADERS_NULLSURFACE_HH_
 /*****************************************************************************/
 #include    <3d/renderer/irendertarget.hh>
 #include    <3d/renderer/irenderer.hh>

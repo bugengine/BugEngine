@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RENDERNULL_RENDERER_HH_
-#define BE_RENDERNULL_RENDERER_HH_
+#ifndef BE_NULLRENDER_RENDERER_HH_
+#define BE_NULLRENDER_RENDERER_HH_
 /*****************************************************************************/
 #include    <3d/renderer/irenderer.hh>
 #include    <system/file/folder.script.hh>

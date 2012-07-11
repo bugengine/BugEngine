@@ -1,5 +1,5 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
- see LICENSE for detail */
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+   see LICENSE for detail */
 
 #include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>

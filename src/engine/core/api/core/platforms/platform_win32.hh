@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_PLATFORMS_WIN32_HH_
-#define BE_CORE_PLATFORMS_WIN32_HH_
+#ifndef BE_CORE_PLATFORMS_PLATFORM_WIN32_HH_
+#define BE_CORE_PLATFORMS_PLATFORM_WIN32_HH_
 /*****************************************************************************/
 
 #define WIN32_LEAN_AND_MEAN

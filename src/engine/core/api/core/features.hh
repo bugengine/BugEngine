@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_FEATURES_H_
-#define BE_CORE_FEATURES_H_
+#ifndef BE_CORE_FEATURES_HH_
+#define BE_CORE_FEATURES_HH_
 /*****************************************************************************/
 
 #define     BE_OPTIM_LEVEL_DEBUG    1

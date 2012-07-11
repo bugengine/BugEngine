@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_HH_
-#define BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_HH_
+#ifndef BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
+#define BE_SYSTEM_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
 /*****************************************************************************/
 #include    <system/resource/resource.script.hh>
 

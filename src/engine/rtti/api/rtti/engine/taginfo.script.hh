@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RTTI_TAGINFO_HH_
-#define BE_RTTI_TAGINFO_HH_
+#ifndef BE_RTTI_ENGINE_TAGINFO_SCRIPT_HH_
+#define BE_RTTI_ENGINE_TAGINFO_SCRIPT_HH_
 /*****************************************************************************/
 #include    <rtti/value.hh>
 #include    <rtti/value.inl>

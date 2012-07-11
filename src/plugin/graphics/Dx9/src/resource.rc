@@ -1,3 +1,6 @@
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+   see LICENSE for detail */
+
 #include    <windowing/win32/resource.h>
 
 IDI_BE_ICON        ICON    DISCARDABLE     "directx.ico"
