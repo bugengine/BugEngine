@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_OPENGL_STDAFX_H_
-#define BE_OPENGL_STDAFX_H_
+#ifndef BE_GL4_STDAFX_H_
+#define BE_GL4_STDAFX_H_
 /*****************************************************************************/
 
 #include    <core/stdafx.h>

@@ -1,3 +1,6 @@
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+   see LICENSE for detail */
+
 #include    <GL4/stdafx.h>
 
 #if defined(BE_PLATFORM_WIN32) && defined(BUILDING_DLL)

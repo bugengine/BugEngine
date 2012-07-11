@@ -1,4 +1,5 @@
-//lint -save -e1923
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+   see LICENSE for detail */
 #define IDD_ASSERTDIALOG                100
 
 #define IDC_BUTTONBREAK                 1001
@@ -7,4 +8,3 @@
 #define IDC_BUTTONABORT                 1004
 #define IDC_STATIC                      1005
 #define IDC_EDITCALLSTACK               1006
-//lint -restore

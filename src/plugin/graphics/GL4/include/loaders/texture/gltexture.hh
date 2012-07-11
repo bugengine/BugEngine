@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_OPENGL_LOADERS_TEXTURE_GLTEXTURE_HH_
-#define BE_OPENGL_LOADERS_TEXTURE_GLTEXTURE_HH_
+#ifndef BE_GL4_LOADERS_TEXTURE_GLTEXTURE_HH_
+#define BE_GL4_LOADERS_TEXTURE_GLTEXTURE_HH_
 /*****************************************************************************/
 #include    <3d/renderer/igpuresource.hh>
 

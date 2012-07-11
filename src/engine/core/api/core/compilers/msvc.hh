@@ -1,8 +1,8 @@
-/* BugEngine / Copyright (C) 2005-2009  screetch <screetch@gmail.com>
+/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_COMPILERS_MSVC_H_
-#define BE_CORE_COMPILERS_MSVC_H_
+#ifndef BE_CORE_COMPILERS_MSVC_HH_
+#define BE_CORE_COMPILERS_MSVC_HH_
 /*****************************************************************************/
 
 #define be_alignof(t)          __alignof(t&)
