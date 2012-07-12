@@ -9,16 +9,16 @@
 namespace BugEngine
 {
 
-CpuKernelLoader::CpuKernelLoader()
+CPUKernelLoader::CPUKernelLoader()
     :   IKernelLoader()
 {
 }
 
-CpuKernelLoader::~CpuKernelLoader()
+CPUKernelLoader::~CPUKernelLoader()
 {
 }
 
-ResourceHandle CpuKernelLoader::load(weak<const Resource> resource)
+ResourceHandle CPUKernelLoader::load(weak<const Resource> resource)
 {
     be_info("loading CPU kernel %s"|be_checked_cast<const Kernel::Kernel>(resource)->name());
     ResourceHandle handle;
@@ -26,7 +26,7 @@ ResourceHandle CpuKernelLoader::load(weak<const Resource> resource)
     return handle;
 }
 
-void CpuKernelLoader::unload(const ResourceHandle& resource)
+void CPUKernelLoader::unload(const ResourceHandle& resource)
 {
     be_forceuse(resource);
 }

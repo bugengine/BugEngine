@@ -4,6 +4,7 @@
 #include    <system/stdafx.h>
 #include    <system/scheduler/scheduler.hh>
 #include    <system/scheduler/kernel/ikernelscheduler.hh>
+#include    <system/scheduler/kernel/cpumemoryprovider.hh>
 #include    <taskscheduler.hh>
 
 
@@ -32,6 +33,7 @@ Scheduler::Scheduler()
     ,   m_taskPool(Arena::task(), 65535, 16)
     ,   m_taskScheduler(scoped<Task::TaskScheduler>::create(Arena::task(), this))
     ,   m_kernelSchedulers(Arena::task())
+    ,   m_cpuMemoryProvider(scoped<Kernel::CPUMemoryProvider>::create(Arena::task()))
 {
 }
 
@@ -43,6 +45,12 @@ Scheduler::~Scheduler()
 void Scheduler::queueTask(Task::ITaskItem* task)
 {
     m_taskScheduler->queue(task);
+}
+
+void Scheduler::queueKernel()
+{
+    be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
+    
 }
 
 void Scheduler::mainThreadJoin()

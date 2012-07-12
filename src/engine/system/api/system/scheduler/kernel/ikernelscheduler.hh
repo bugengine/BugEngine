@@ -13,13 +13,17 @@ class Scheduler;
 namespace Kernel
 {
 
+class IMemoryProvider;
+
 class be_api(SYSTEM) IKernelScheduler : public minitl::pointer
 {
+    friend class Scheduler;
 private:
-    istring const           m_name;
-    weak<Scheduler> const   m_scheduler;
+    istring const               m_name;
+    weak<Scheduler> const       m_scheduler;
+    weak<IMemoryProvider> const m_memoryProvider;
 public:
-    IKernelScheduler(const istring& name, weak<Scheduler> scheduler);
+    IKernelScheduler(const istring& name, weak<Scheduler> scheduler, weak<IMemoryProvider> provider);
     ~IKernelScheduler();
 };
 

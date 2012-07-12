@@ -11,15 +11,15 @@
 namespace BugEngine
 {
 
-CpuKernelScheduler::CpuKernelScheduler(const PluginContext& context)
-    :   IKernelScheduler("CPU", context.scheduler)
+CPUKernelScheduler::CPUKernelScheduler(const PluginContext& context)
+    :   IKernelScheduler("CPU", context.scheduler, context.scheduler->memoryProvider())
     ,   m_resourceManager(context.resourceManager)
-    ,   m_loader(scoped<CpuKernelLoader>::create(Arena::task()))
+    ,   m_loader(scoped<CPUKernelLoader>::create(Arena::task()))
 {
     m_resourceManager->attach<Kernel::Kernel>(m_loader);
 }
 
-CpuKernelScheduler::~CpuKernelScheduler()
+CPUKernelScheduler::~CPUKernelScheduler()
 {
     m_resourceManager->detach<Kernel::Kernel>(m_loader);
 }

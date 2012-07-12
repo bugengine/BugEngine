@@ -10,16 +10,16 @@
 namespace BugEngine
 {
 
-class CpuKernelLoader;
+class CPUKernelLoader;
 
-class CpuKernelScheduler : public Kernel::IKernelScheduler
+class CPUKernelScheduler : public Kernel::IKernelScheduler
 {
 private:
     weak<ResourceManager>   m_resourceManager;
-    scoped<CpuKernelLoader> m_loader;
+    scoped<CPUKernelLoader> m_loader;
 public:
-    CpuKernelScheduler(const PluginContext& context);
-    ~CpuKernelScheduler();
+    CPUKernelScheduler(const PluginContext& context);
+    ~CPUKernelScheduler();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

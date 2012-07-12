@@ -7,4 +7,14 @@
 namespace BugEngine { namespace Kernel
 {
 
+CPUMemoryProvider::CPUMemoryProvider()
+{
+    
+}
+
+CPUMemoryProvider::~CPUMemoryProvider()
+{
+    
+}
+
 }}
