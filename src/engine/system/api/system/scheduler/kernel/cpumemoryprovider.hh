@@ -11,7 +11,9 @@ namespace BugEngine { namespace Kernel
 
 class CPUMemoryProvider : public IMemoryProvider
 {
-    
+public:
+    CPUMemoryProvider();
+    ~CPUMemoryProvider();
 };
 
 }}

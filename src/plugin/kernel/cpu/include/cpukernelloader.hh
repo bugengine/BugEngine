@@ -10,11 +10,11 @@
 namespace BugEngine
 {
 
-class CpuKernelLoader : public Kernel::IKernelLoader
+class CPUKernelLoader : public Kernel::IKernelLoader
 {
 public:
-    CpuKernelLoader();
-    ~CpuKernelLoader();
+    CPUKernelLoader();
+    ~CPUKernelLoader();
 
     virtual ResourceHandle load(weak<const Resource> resource) override;
     virtual void unload(const ResourceHandle& resource) override;

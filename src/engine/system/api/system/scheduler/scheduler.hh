@@ -4,6 +4,7 @@
 #ifndef BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 #define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
+#include    <core/memory/kernel/imemoryprovider.hh>
 
 namespace BugEngine
 {
@@ -11,9 +12,10 @@ namespace BugEngine
 namespace Task
 {
     class TaskScheduler;
-    template< typename BODY > class Task;
+    class KernelTask;
     class TaskGroup;
     class ITaskItem;
+    template< typename BODY > class Task;
     template< typename RANGE, typename BODY > class TaskItem;
 }
 
@@ -28,6 +30,7 @@ class be_api(SYSTEM) Scheduler : public minitl::pointer
     template< typename BODY > friend class Task::Task;
     template< typename RANGE, typename BODY > friend class Task::TaskItem;
     friend class Task::TaskGroup;
+    friend class Task::KernelTask;
     friend class Task::TaskScheduler;
 public:
     enum Priority
@@ -57,10 +60,12 @@ private:
     minitl::pool<Buffer>                                m_taskPool;
     scoped<Task::TaskScheduler>                         m_taskScheduler;
     minitl::vector< weak<Kernel::IKernelScheduler> >    m_kernelSchedulers;
+    scoped<Kernel::IMemoryProvider>                     m_cpuMemoryProvider;
 private:
     void notifyEnd();
 private:
     void queueTask(Task::ITaskItem* task);
+    void queueKernel();
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();
@@ -72,6 +77,11 @@ public:
     void mainThreadJoin();
     void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
     void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
+
+    weak<Kernel::IMemoryProvider> memoryProvider() const
+    {
+        return m_cpuMemoryProvider;
+    }
 };
 
 template< typename T >
