@@ -5,22 +5,6 @@
 #include    <world/world.script.hh>
 #include    <system/scheduler/task/group.hh>
 
-#include <world/storage.hh>
-#include <world/component.script.hh>
-struct A : public BugEngine::World::Component
-{
-    int i;
-};
-
-struct B : public A
-{
-    int j;
-    
-    enum { ReservedSize = 4*1024 };
-};
-
-#include    <state.hh>
-
 BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 
 namespace BugEngine { namespace World
