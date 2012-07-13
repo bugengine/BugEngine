@@ -74,7 +74,7 @@ class netbeans(Build.BuildContext):
 					f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
 					subs[subname] = (f, {})
 					f, subs = subs[subname]
-			f.setAttribute('displayName', '<'+project[-1]+'>')
+			f.setAttribute('displayName', '['+project[-1]+']')
 			self.addSourceTree(doc, f, source, source.prefix)
 		impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
 		add(doc, impfiles, 'itemPath', sys.argv[0])
