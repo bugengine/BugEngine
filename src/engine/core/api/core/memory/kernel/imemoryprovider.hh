@@ -12,6 +12,8 @@ class IMemoryProvider : public minitl::pointer
 {
 private:
     istring const   m_name;
+protected:
+    IMemoryProvider();
 public:
     istring name() const { return m_name; }
 };

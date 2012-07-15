@@ -8,4 +8,9 @@
 namespace BugEngine { namespace Kernel
 {
 
+IMemoryProvider::IMemoryProvider()
+    :   m_name("")
+{
+}
+
 }}

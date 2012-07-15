@@ -17,7 +17,7 @@ class IMemoryProvider;
 
 class be_api(SYSTEM) IKernelScheduler : public minitl::pointer
 {
-    friend class Scheduler;
+    friend class ::BugEngine::Scheduler;
 private:
     istring const               m_name;
     weak<Scheduler> const       m_scheduler;

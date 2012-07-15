@@ -12,7 +12,7 @@ import mak.tools.cross_gcc
 def options(opt):
 	opt.add_option( '--xcode-sdks',
 					action='store',
-					default='/Developer',
+					default='/Developer,/Applications/Xcode.app/Contents/Developer',
 					dest='xcode_sdks',
 					help='Paths of the different XCode SDKs')
 
@@ -26,7 +26,7 @@ def configure(conf):
 
 		except:
 			pass
-		os.environ['PATH'] = ('%s/usr/bin:'%p)+os.environ['PATH']
+		os.environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+os.environ['PATH']
 	conf.load("bison flex data", tooldir=['mak/tools'])
 	conf.env['HOST'] = 'osx'
 	conf.env['BUILD_VARIANTS'] = []

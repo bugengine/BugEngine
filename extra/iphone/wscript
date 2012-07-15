@@ -2,7 +2,7 @@
 
 import os
 import mak
-from waflib import Context
+from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
 
@@ -20,6 +20,32 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
+def find_sdks(name, path):
+	sdks = []
+	platform = name+".platform"
+	path,f = os.path.split(path)
+	while path and f:
+		root = path
+		path,f = os.path.split(path)
+		sdks = None
+		try:
+			try:
+				sdkpath = os.path.join(root, "SDKs")
+				sdks = sorted(os.listdir(sdkpath))
+			except OSError:
+				sdkpath = os.path.join(root, "Platforms/%s/Developer/SDKs"%platform)
+				sdks = sorted(os.listdir(sdkpath))
+			for i in sdks:
+				if i.startswith(name):
+					path=''
+					break
+		except OSError:
+			continue
+	if not sdks:
+		raise Errors.WafError('could not find a %s sdk'%name)
+	return sdkpath,sdks
+
+
 def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	from waflib import Options
 	conf.env['PLATFORM'] = mak.allplatforms['iphone']
@@ -28,19 +54,7 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphonesimulator'
 
 
-	path,f = os.path.split(conf.env.CXX[0])
-	while path and f:
-		root = os.path.join(path, "Platforms", "iPhoneSimulator.platform", "Developer", "SDKs")
-		path,f = os.path.split(path)
-		sdks = None
-		try:
-			sdks = sorted(os.listdir(root))
-			break
-		except OSError:
-			continue
-	if not sdks:
-		root = "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs"
-		sdks = sorted(os.listdir(root))
+	root,sdks = find_sdks("iPhoneSimulator", os.path.split(conf.env.CXX[0])[0])
 
 	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
@@ -83,22 +97,10 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 
 
-	path,f = os.path.split(conf.env.CXX[0])
-	while path and f:
-		root = os.path.join(path, "Platforms", "iPhoneOS.platform", "Developer", "SDKs")
-		path,f = os.path.split(path)
-		sdks = None
-		try:
-			sdks = sorted(os.listdir(root))
-			break
-		except OSError:
-			continue
-	if not sdks:
-		root = "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs"
-		sdks = sorted(os.listdir(root))
+	root,sdks = find_sdks("iPhoneOS", os.path.split(conf.env.CXX[0])[0])
 
 	sdk = Options.options.iphone_sdk
-	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
+	if sdk and 'iPhoneOS%s.sdk'%sdk in sdks:
 		full_sdk = os.path.join(root, 'iPhoneOS%s.sdk'%sdk)
 		version = sdk
 	else:
@@ -126,7 +128,10 @@ def add_darwin_flags_to_env(conf, variant, arch):
 									'api':		'include',
 									'lib':		'lib',
 									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('share', 'bugengine', 'plugins') }
+									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
+									'kernel':	os.path.join('share', 'bugengine', 'kernels')}
+	conf.env['KERNELS'] = [conf.env.ENVNAME]
+
 
 def configure(conf):
 	from waflib import Options
