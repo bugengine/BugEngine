@@ -2,7 +2,7 @@
 
 import os
 import mak
-from waflib import Context
+from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
 
@@ -44,11 +44,16 @@ def add_darwin_flags_to_env(conf, name, arch):
 
 	path,f = os.path.split(conf.env.CXX[0])
 	while path and f:
-		root = os.path.join(path, "SDKs")
+		root = path
 		path,f = os.path.split(path)
 		sdks = None
 		try:
-			sdks = sorted(os.listdir(root))
+			try:
+				sdkpath = os.path.join(root, "SDKs")
+				sdks = sorted(os.listdir(sdkpath))
+			except OSError:
+				sdkpath = os.path.join(root, "Platforms/MacOSX.platform/Developer/SDKs")
+				sdks = sorted(os.listdir(sdkpath))
 			for i in sdks:
 				if i.startswith('MacOSX'):
 					path=''
@@ -56,23 +61,23 @@ def add_darwin_flags_to_env(conf, name, arch):
 		except OSError:
 			continue
 	if not sdks:
-		root = "/Developer/SDKs"
-		sdks = sorted(os.listdir(root))
+		raise Errors.WafError('could not find a MacOS X sdk')
 
 	sdk = Options.options.macosx_sdk
 	if sdk and 'MacOSX%s.sdk'%sdk in sdks:
-		full_sdk = os.path.join(root, 'MacOSX%s.sdk'%sdk)
+		full_sdk = os.path.join(sdkpath, 'MacOSX%s.sdk'%sdk)
 		version = sdk
 	else:
 		if sdk:
 			warn("preferred SDK MacOSX%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
-		full_sdk = os.path.join(root, sdks[0])
+		full_sdk = os.path.join(sdkpath, sdks[0])
 		version = sdks[0][6:10]
 	conf.msg('Checking for MacOSX SDK', full_sdk)
 
-	conf.env.append_value('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
-	conf.env.append_value('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/'])
-	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-isysroot', '/', '-L', '%s/usr/lib'%full_sdk])
+
+	conf.env.append_value('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_value('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-L', '%s/usr/lib'%full_sdk])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env['library_PATTERN'] = '%s.a'

@@ -6,6 +6,7 @@
 "flex processing"
 
 from waflib import Task,TaskGen
+import os
 
 flex = '${FLEX} ${FLEXFLAGS} -o${TGT[0].abspath()} ${SRC[0].abspath()}'
 cls = Task.task_factory('flex', flex, 'GREEN', ext_in='.l .ll', ext_out='.c .cc', before='c cxx', shell=False)
@@ -21,6 +22,9 @@ def exec_command_flex(self, *k, **kw):
 				lst.append(carry + a)
 				carry = ''
 			k = [lst]
+	env = os.environ.copy()
+	env['PATH'] = os.path.split(k[0][0])[0]+':'+env['PATH']
+	kw['env'] = env
 
 	return self.generator.bld.exec_command(*k, **kw)
 
