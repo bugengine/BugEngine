@@ -27,7 +27,7 @@ public:
 public:
     explicit ITaskItem(weak<const ITask> owner);
     ITaskItem(ITaskItem& cpy);
-    virtual ~ITaskItem() { }
+    virtual ~ITaskItem();
 };
 
 template< typename Range, typename Body >
