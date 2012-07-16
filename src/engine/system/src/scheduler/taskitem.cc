@@ -21,4 +21,9 @@ ITaskItem::ITaskItem(ITaskItem& cpy)
 {
 }
 
+ITaskItem::~ITaskItem()
+{
+    
+}
+
 }}

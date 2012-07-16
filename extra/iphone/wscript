@@ -103,8 +103,9 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 
-	conf.env.append_unique('CFLAGS', ['-mthumb', '-mcpu=arm11'])
-	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=arm1176jzf-s'])
+	conf.env.append_unique('CFLAGS', ['-mthumb', '-march=armv7', '-mcpu=cortex-a8'])
+	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-march=armv7', '-mcpu=cortex-a8'])
+	conf.env.append_unique('LINKFLAGS', ['-mthumb', '-march=armv7', '-mcpu=cortex-a8'])
 
 	sdkpath,sdks = find_sdks("iPhoneOS", os.path.split(conf.env.CXX[0])[0])
 	sdk = Options.options.iphone_sdk
