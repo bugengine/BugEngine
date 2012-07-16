@@ -78,7 +78,7 @@ def configure(conf):
 			conf.create_gcc_env(version, toolchaindir, target, 'win32', arch, gcc, gxx, add_win32_gcc_flags_to_env, add_win32_flags_to_env)
 	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
 		if platform == 'win32':
-			name = '%s-%s-%s-%s' %(compiler, platform, target, version)
+			name = '%s-%s-%s-%s' %(platform, target, compiler, version)
 			conf.setenv(name, conf.env.derive())
 			try:
 				conf.env.ENVNAME = name

@@ -54,18 +54,25 @@ def add_darwin_simulator_flags_to_env(conf, variant, arch):
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphonesimulator'
 
 
-	root,sdks = find_sdks("iPhoneSimulator", os.path.split(conf.env.CXX[0])[0])
+	sdkpath,sdks = find_sdks("iPhoneSimulator", os.path.split(conf.env.CXX[0])[0])
 
 	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneSimulator%s.sdk'%sdk in sdks:
-		full_sdk = os.path.join(root, 'iPhoneSimulator%s.sdk'%sdk)
+		sdks=['iPhoneSimulator%s.sdk'%sdk]
 		version = sdk
+	elif sdk:
+		warn("preferred SDK iPhoneSimulator%s.sdk not found; using default SDK"%sdk)
+	for sdk in sdks[::-1]:
+		try:
+			full_sdk = os.path.join(sdkpath, sdk)
+			version = sdk[15:18]
+			conf.check_sdk(full_sdk, '-miphoneos-version-min=%s'%version)
+			break
+		except Exception as e:
+			continue
 	else:
-		if sdk:
-			warn("preferred SDK iPhoneSimulator%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
-		full_sdk = os.path.join(root, sdks[0])
-		version = sdks[0][15:18]
-	conf.msg('Checking for iPhoneSimulator SDK', full_sdk)
+		raise Errors.WafError('could not find a suitable iPhoneSimulator SDK')
+
 
 
 	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
@@ -96,22 +103,29 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env['SDKROOT'] = 'iphoneos'
 	conf.env['SUPPORTEDPLATFORMS'] = 'iphoneos'
 
+	conf.env.append_unique('CFLAGS', ['-mthumb', '-mcpu=arm11'])
+	conf.env.append_unique('CXXFLAGS', ['-mthumb', '-mcpu=arm1176jzf-s'])
 
-	root,sdks = find_sdks("iPhoneOS", os.path.split(conf.env.CXX[0])[0])
-
+	sdkpath,sdks = find_sdks("iPhoneOS", os.path.split(conf.env.CXX[0])[0])
 	sdk = Options.options.iphone_sdk
 	if sdk and 'iPhoneOS%s.sdk'%sdk in sdks:
-		full_sdk = os.path.join(root, 'iPhoneOS%s.sdk'%sdk)
+		sdks=['iPhoneOS%s.sdk'%sdk]
 		version = sdk
+	elif sdk:
+		warn("preferred SDK iPhoneOS%s.sdk not found; using default SDK"%sdk)
+	for sdk in sdks[::-1]:
+		try:
+			full_sdk = os.path.join(sdkpath, sdk)
+			version = sdk[8:11]
+			conf.check_sdk(full_sdk, '-miphoneos-version-min=%s'%version)
+			break
+		except Exception as e:
+			continue
 	else:
-		if sdk:
-			warn("preferred SDK iPhoneOS%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
-		full_sdk = os.path.join(root, sdks[0])
-		version = sdks[0][8:11]
-	conf.msg('Checking for iPhoneOS SDK', full_sdk)
+		raise Errors.WafError('could not find a suitable iPhoneOS SDK')
 
-	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-mthumb', '-mcpu=cortex-a8', '-isysroot', full_sdk])
-	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%version, '-mthumb', '-mcpu=cortex-a8', '-isysroot', full_sdk])
+	conf.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
+	conf.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])

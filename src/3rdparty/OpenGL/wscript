@@ -7,14 +7,17 @@ def options(opt):
 
 def setup(conf):
 	if 'darwin' in conf.env.PLATFORM:
-		return
+		conf.check_framework('OpenGL', var='GLFramework')
 	elif 'win32' in conf.env.PLATFORM:
 		conf.check_lib('OpenGL32', var='GL')
 	else:
 		conf.check_lib('GL', var='GL')
 
 def build(bld):
-	if bld.env.GL or 'osx' in bld.env.PLATFORM or bld.env.PROJECTS:
+	if bld.env.GLFramework:
+		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty')
+		bld.env.FRAMEWORKS += bld.env.GLFramework
+	elif bld.env.GL or bld.env.PROJECTS:
 		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GL))
 	else:
 		bld.m['OpenGL'] = None

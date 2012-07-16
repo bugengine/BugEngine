@@ -153,7 +153,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 	worked = False
 	tool = gcc.split('-')[0]
 	for opt,arch in allarchs(originalarch):
-		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(platform, arch, tool, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			continue
 		conf.setenv(name, conf.env.derive())
@@ -177,7 +177,7 @@ def create_gcc_env(conf, version, toolchaindir, target, platform, originalarch, 
 			conf.variant = ''
 	if not worked:
 		arch = originalarch
-		name = '%s-%s-%s-%s' %(tool, platform, arch, version.replace('-', '_'))
+		name = '%s-%s-%s-%s' %(platform, arch, tool, version.replace('-', '_'))
 		if name in conf.env['BUILD_VARIANTS']:
 			return
 		conf.setenv(name, conf.env.derive())

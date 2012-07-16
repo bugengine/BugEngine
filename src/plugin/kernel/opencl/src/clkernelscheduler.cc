@@ -112,7 +112,7 @@ cl_context OpenCLKernelScheduler::createCLContext(const cl_context_properties* p
 }
 
 OpenCLKernelScheduler::OpenCLKernelScheduler(const PluginContext& context, const cl_context_properties* properties)
-    :   IKernelScheduler("OpenCL", context.scheduler)
+    :   IKernelScheduler("OpenCL", context.scheduler, context.scheduler->memoryProvider())
     ,   m_resourceManager(context.resourceManager)
     ,   m_loader(scoped<OpenCLKernelLoader>::create(Arena::task()))
     ,   m_context(createCLContext(properties))

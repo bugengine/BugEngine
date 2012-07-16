@@ -74,7 +74,7 @@ def configure(conf):
 	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
 		if platform.lower() != 'sunos':
 			continue
-		name = 'suncc-sunos-'+arch+'-'+version.replace('-','_')
+		name = 'sunos-'+arch+'-suncc-'+version.replace('-','_')
 		conf.setenv(name, conf.env.derive())
 		try:
 			conf.env.ENVNAME = name
