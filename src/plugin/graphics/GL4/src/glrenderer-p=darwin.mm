@@ -37,8 +37,8 @@
     [super initWithFrame: frame];
     m_context = context;
     [m_context retain];
-    int sync = 0;
-    [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
+    GLint sync = 0;
+    [m_context setValues:&sync  forParameter:NSOpenGLCPSwapInterval];
     return self;
 }
 
@@ -68,16 +68,16 @@ public:
     ~Context();
 };
 
-static const NSOpenGLPixelFormatAttribute s_attributes[] = {
+static NSOpenGLPixelFormatAttribute s_attributes[] = {
     //NSOpenGLPFAAllRenderers,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAWindow,
     NSOpenGLPFAAccelerated,
     NSOpenGLPFANoRecovery,
     NSOpenGLPFAMinimumPolicy,
-    NSOpenGLPFAColorSize, (CGLPixelFormatAttribute)24,
-    NSOpenGLPFAAlphaSize, (CGLPixelFormatAttribute)8,
-    NSOpenGLPFADepthSize, (CGLPixelFormatAttribute)24,
+    NSOpenGLPFAColorSize, (NSOpenGLPixelFormatAttribute)24,
+    NSOpenGLPFAAlphaSize, (NSOpenGLPixelFormatAttribute)8,
+    NSOpenGLPFADepthSize, (NSOpenGLPixelFormatAttribute)24,
     (NSOpenGLPixelFormatAttribute)0
 };
 
@@ -85,7 +85,7 @@ GLRenderer::Context::Context()
     :   m_pixelFormat([[NSOpenGLPixelFormat alloc] initWithAttributes: s_attributes])
     ,   m_context([[NSOpenGLContext alloc] initWithFormat: m_pixelFormat shareContext: nil])
 {
-    int sync = 0;
+    GLint sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
     [m_context makeCurrentContext];
     be_info("Created OpenGL context %s (%s) on %s"

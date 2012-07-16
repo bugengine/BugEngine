@@ -87,6 +87,7 @@ def configure(conf):
 
 	#conf.load('parallel_debug', tooldir='mak/waflib/extras')
 	conf.load('visualstudio netbeans xcode eclipse', tooldir='mak/tools/IDE')
+	conf.recurse('tests')
 	conf.recurse(os.path.join('host', os.name))
 	if os.path.isdir('extra'):
 		for f in os.listdir('extra'):

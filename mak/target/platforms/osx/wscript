@@ -26,7 +26,7 @@ def add_gcc_flags_to_env(conf):
 	v = conf.env
 	v.append_unique('CFLAGS', ['-fPIC'])
 	v.append_unique('CXXFLAGS', ['-fPIC'])
-	v.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa', 'OpenGL', 'OpenCL'])
+	v.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa'])
 	if conf.env.GCC_NAME == 'gcc':
 		v.append_unique('CFLAGS', ['-fvisibility=hidden'])
 		v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
@@ -65,21 +65,27 @@ def add_darwin_flags_to_env(conf, name, arch):
 
 	sdk = Options.options.macosx_sdk
 	if sdk and 'MacOSX%s.sdk'%sdk in sdks:
-		full_sdk = os.path.join(sdkpath, 'MacOSX%s.sdk'%sdk)
+		sdks=['MacOSX%s.sdk'%sdk]
 		version = sdk
+	elif sdk:
+		warn("preferred SDK MacOSX%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
+	for sdk in sdks[::-1]:
+		try:
+			full_sdk = os.path.join(sdkpath, sdk)
+			version = sdks[0][6:10]
+			conf.check_sdk(full_sdk, '-mmacosx-version-min=%s'%version)
+			break
+		except Exception as e:
+			continue
 	else:
-		if sdk:
-			warn("preferred SDK MacOSX%s.sdk not found; using default SDK %s" % (sdk, sdks[0]))
-		full_sdk = os.path.join(sdkpath, sdks[0])
-		version = sdks[0][6:10]
-	conf.msg('Checking for MacOSX SDK', full_sdk)
+		raise Errors.WafError('could not find a suitable MacOSX SDK')
 
 
 	conf.env.append_value('CFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
 	conf.env.append_value('CXXFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk])
-	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-L', '%s/usr/lib'%full_sdk])
-	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
-	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup'])
+	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-L%s/usr/lib'%full_sdk])
+	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+	conf.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['program_PATTERN'] = '%s'
 

@@ -63,8 +63,8 @@ GLhandleARB GLShaderProgram::build(weak<const ShaderProgram> program, Shaders::S
     shaderext.glCompileShader(shader);
 #ifdef BE_DEBUG
     GLint success, loglength;
-    shaderext.glGetObjectParameteriv(shader, GL_OBJECT_COMPILE_STATUS_ARB, &success);
-    shaderext.glGetObjectParameteriv(shader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &loglength);
+    shaderext.glGetObjectParameteriv(shader, GL_COMPILE_STATUS, &success);
+    shaderext.glGetObjectParameteriv(shader, GL_INFO_LOG_LENGTH, &loglength);
     if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;
@@ -99,8 +99,8 @@ void GLShaderProgram::load(weak<const Resource> resource)
 
 #ifdef BE_DEBUG
     GLint success, loglength;
-    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &success);
-    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_OBJECT_INFO_LOG_LENGTH_ARB, &loglength);
+    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_LINK_STATUS, &success);
+    shaderext.glGetObjectParameteriv(m_shaderProgram, GL_INFO_LOG_LENGTH, &loglength);
     if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;

@@ -27,7 +27,7 @@ Semaphore::Semaphore(int initialCount)
         be_error("Could not initialize semaphore: %s" | strerror(errno));
     }
 #else
-    MPCreateSemaphore(maxCount, initialCount, (MPSemaphoreID*)m_data);
+    MPCreateSemaphore(65000, initialCount, (MPSemaphoreID*)m_data);
 #endif
 }
 

@@ -282,7 +282,7 @@ class module:
 				for kernelname, kernelsources in self.kernels.items():
 					for envname in bld.env.KERNELS:
 						if env.STATIC or bld.static:
-							jobtype = 'cxxstlib'
+							jobtype = 'cstlib'
 						else:
 							jobtype = 'cshlib'
 						env = bld.all_envs[envname].derive()
