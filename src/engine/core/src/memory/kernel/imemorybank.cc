@@ -13,7 +13,6 @@ namespace BugEngine { namespace Kernel
 IMemoryBank::IMemoryBank(weak<const IMemoryProvider> owner)
     :   m_owner(owner)
 {
-    
 }
 
 }}
