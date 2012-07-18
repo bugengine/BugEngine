@@ -21,7 +21,7 @@ public:
     u32                 getMaxSimultaneousRenderTargets() const override { return 1; }
 
     void                flush() override;
-    uint2               getScreenSize() override { return make_uint2(1920,1080); }
+    uint2               getScreenSize() const override { return make_uint2(1920,1080); }
 private:
     ref<IGPUResource>   create(weak<const RenderSurface> rendersurface) const override;
     ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;

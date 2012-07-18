@@ -30,7 +30,7 @@ public:
     Renderer(Allocator& allocator, weak<ResourceManager> manager);
     ~Renderer();
 
-    uint2           getScreenSize() override;
+    uint2           getScreenSize() const override;
     void*           getPlatformData();
 };
 

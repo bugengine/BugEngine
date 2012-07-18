@@ -133,7 +133,7 @@ Renderer::~Renderer()
     flush();
 }
 
-uint2 Renderer::getScreenSize()
+uint2 Renderer::getScreenSize() const
 {
     Screen* s = XScreenOfDisplay(m_platformRenderer->m_platformData.display, XDefaultScreen(m_platformRenderer->m_platformData.display));
     return make_uint2(XWidthOfScreen(s), XHeightOfScreen(s));

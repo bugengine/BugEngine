@@ -121,7 +121,7 @@ void Renderer::flush()
     return;
 }
 
-uint2 Renderer::getScreenSize()
+uint2 Renderer::getScreenSize() const
 {
     RECT rect;
     GetWindowRect(GetDesktopWindow(),&rect);

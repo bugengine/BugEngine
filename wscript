@@ -42,6 +42,7 @@ def plugins(bld):
 	directx10		= module.external('DirectX10')
 	directx11		= module.external('DirectX11')
 	opengl			= module.external('OpenGL')
+	opengles		= module.external('OpenGLES2')
 	opencl			= module.external('OpenCL')
 	cgDx			= module.external('CgDx')
 	cgGL			= module.external('CgGL')
@@ -94,6 +95,8 @@ def plugins(bld):
 			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
 			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
+	if opengles:
+		GLES        = module.plugin('graphics.GLES2',			[bld.game, opengles, _3d])
 
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None
