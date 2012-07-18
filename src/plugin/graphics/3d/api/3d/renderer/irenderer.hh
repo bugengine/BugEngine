@@ -64,7 +64,7 @@ public:
     Allocator& arena() const;
     weak<Task::ITask> syncTask() const;
 
-    virtual uint2 getScreenSize() = 0;
+    virtual uint2 getScreenSize() const = 0;
     virtual u32 getMaxSimultaneousRenderTargets() const = 0;
 };
 

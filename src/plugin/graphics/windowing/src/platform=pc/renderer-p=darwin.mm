@@ -58,7 +58,7 @@ Renderer::~Renderer()
 {
 }
 
-uint2 Renderer::getScreenSize()
+uint2 Renderer::getScreenSize() const
 {
     NSArray* screens = [NSScreen screens];
     NSScreen* screen = [screens objectAtIndex:0];

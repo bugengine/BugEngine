@@ -7,18 +7,23 @@ def options(opt):
 	pass
 
 def setup(conf):
-	if 'darwin' not in conf.env.PLATFORM:
+	if 'darwin' in conf.env.PLATFORM:
+		conf.check_framework('OpenGLES', var='GLESFramework')
+	else:
 		conf.check_lib('GLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 		conf.check_lib('libGLESv2', var='GLES2', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 		conf.check_lib('EGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 		conf.check_lib('libEGL', var='EGL', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenGLES2', 'lib.%s'%conf.env.ARCHITECTURE)])
 
 def build(bld):
-	exparchoptions = {
-		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.x86')]),
-		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.amd64')]),
-		}
-	if bld.env.GLES2 or bld.env.PROJECTS:
+	if bld.env.GLESFramework:
+		bld.env.FRAMEWORKS += bld.env.GLESFramework
+		bld.m['OpenGLES2'] = module.util('OpenGLES2', [], '3rdparty')
+	elif bld.env.GLES2 or bld.env.PROJECTS:
+		exparchoptions = {
+			'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.x86')]),
+			'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenGLES2', 'lib.amd64')]),
+			}
 		bld.m['OpenGLES2'] = module.util('OpenGLES2', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GLES2+ bld.env.EGL))
 	else:
 		bld.m['OpenGLES2'] = None

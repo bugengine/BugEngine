@@ -6,16 +6,25 @@ def options(opt):
 	pass
 
 def setup(conf):
-	pass
+	if 'darwin' in conf.env.PLATFORM:
+		conf.check_framework('OpenAL', var='ALFramework')
+	else:
+		conf.check_lib('openal', libpath=[os.path.join('..', '..', '..', '..', 'src', '3rdparty', 'OpenAL', 'lib.%s'%conf.env.ARCHITECTURE)])
 
 def build(bld):
-	expoptions = module.coptions(libs=['openal'])
-	exparchoptions = {
-		'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.x86')]),
-		'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.amd64')]),
-		}
-	bld.m['OpenAL'] = module.util( 'OpenAL', [], '3rdparty', module.coptions(), expoptions, {}, exparchoptions, platforms=['pc'])
-	bld.m['OpenAL'].deploy( 'bin.x86/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['x86'])
-	bld.m['OpenAL'].deploy( 'bin.x86/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['x86'])
-	bld.m['OpenAL'].deploy( 'bin.amd64/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
-	bld.m['OpenAL'].deploy( 'bin.amd64/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
+	if bld.env.ALFramework:
+		bld.env.FRAMEWROKS += bld.env.ALFramework
+		bld.m['OpenAL'] = module.util( 'OpenAL', [], '3rdparty')
+	elif bld.env.OPENAL or bld.env.PROJECTS:
+		expoptions = module.coptions(libs=bld.env.OPENAL)
+		exparchoptions = {
+			'win32-x86': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.x86')]),
+			'win32-amd64': module.coptions(libdir=[os.path.join('src', '3rdparty', 'OpenAL', 'lib.amd64')]),
+			}
+		bld.m['OpenAL'] = module.util( 'OpenAL', [], '3rdparty', module.coptions(), expoptions, {}, exparchoptions, platforms=['pc'])
+		bld.m['OpenAL'].deploy( 'bin.x86/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+		bld.m['OpenAL'].deploy( 'bin.x86/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['x86'])
+		bld.m['OpenAL'].deploy( 'bin.amd64/OpenAL32.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
+		bld.m['OpenAL'].deploy( 'bin.amd64/wrap_oal.dll', '', 'bin', platforms=['win32'], archs=['amd64'])
+	else:
+		bld.m['OpenAL'] = None
