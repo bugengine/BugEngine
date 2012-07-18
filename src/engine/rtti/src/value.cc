@@ -1,7 +1,9 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
+#include <rtti/stdafx.h>
 #include <rtti/value.hh>
+#include <rtti/classinfo.script.hh>
 
 namespace BugEngine { namespace RTTI
 {

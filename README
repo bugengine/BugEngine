@@ -8,8 +8,8 @@ Supported platforms
 
 The following platforms are currently tested and known to build & work :
 - win32 with GCC 4.3/4.4/4.5/4.6/4.7
-- win32 with visual studio 2005/2008/2010/express editions
-- win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2010
+- win32 with visual studio 2005/2008/2010/2012 and express editions
+- win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2012
 
 - linux x86/amd64 with GCC 4.1 to 4.7 (older versions probably work as well)
 - linux powerpc (G5) with GCC 4.1 to 4.7 (older versions probably work as well)
@@ -21,7 +21,7 @@ The following platforms are currently tested and known to build & work :
 - OpenSolaris/Solaris 10 with SunCC
 - FreeBSD with GCC (all versions from 3.4 to 4.7)
 
-- iPhone (iOS 4) with gcc 4.2
+- iPhone (iOS 4) with gcc 4.0/4.2
 
 
 
@@ -34,7 +34,7 @@ You need python installed (tested with python 2.4, 2.5, 2.6 and 3.1)
 You need Flex and Bison (for windows they are included)
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC 2003, 2005, 2008, 2010
+waf can also be used to generate projects for MSVC 2003, 2005, 2008, 2010, 2012
 including express versions, XCode, Eclipse, NetBeans and QtCreator
 
 
@@ -47,18 +47,18 @@ it will detect all the supported toolchains and try and pick the most appropriat
 (it doesn't always pick the best one)
 The last line in the output sums up which version and compiler was picked.
 You can choose manually from the available toolchains with the --toolchains option.
-The format of the toolchain is variant-compiler-platform-architecture-version
+The format of the toolchain is variant-platform-architecture-compiler-version
 where variant is one of the build variants in debug, profile, final
-compiler is the name of the compiler in msvc, wsdk (windows sdk), gcc, icc, opencc, suncc...
 platform is the name of the platform in linux, win32, freebsd, osx, sunos...
 architecture is the name of the CPU architecture in x86, amd64, x64 (alias for amd64), ppc, ppc64, arm...
+compiler is the name of the compiler in msvc, wsdk (windows sdk), gcc, icc, opencc, suncc...
 version is the version of the compiler, it depends on the compiler
 it can be 4.1 or 4.4.1 for GCC, 8.0 or 9.0 for MSVC, the version of the windows SDK for the command line, etc
 
 The argument expected by the --toolchains parameter is a list of regular expressions :
 > python waf configure --toolchains=.*-gcc-.*
 will select all toolchains with GCC (which can be a lot of several versions of GCC are installed)
-> python waf configure --toolchains=debug-msvc-win32-.*-10.0, debug-gcc-win32-x86-4.4
+> python waf configure --toolchains=debug-msvc-win32-.*-10.0,debug-gcc-win32-x86-4.4
 will pick all compilers available for visual studio 2010 (probably x86 and amd64) and GCC 4.4
 
 
@@ -85,20 +85,22 @@ Bulding with IDEs
 ....................
 
 The other way of building is to create projects for the supported IDEs and build from the IDE
-the supported IDEs at the moment are Visual Studio 2005, 2008 and 2010, in their complete or
-express editions.
+the supported IDEs at the moment are Visual Studio 2002 to 2012 in their complete or
+express editions, xcode, and Netbeans.
 To generate the project files, configure the project (which toolchain is selected doesn't
 actually matter) and run
 > python waf [ide-list]
-where [ide-list] is the list of projects you'd like to generate in
-vs2005, vs2008, vs2010, vs2005e or vs2008e, or xcode3, xcode4
+where [ide-list] is the list of projects you'd like to generate.
+run
+> python waf --help
+to print a list of all supported toolchains and IDE.
+
+For instance,
 > python waf vs2005e vs2010
 will create a set of projects and a solution for Visual Studio 2005 express, and another set of
 projects and solutions for Visual Studio 2010.
 You don't need to have these installed to generate the projects, you just need them to actually
 open the projects.
-> python waf --help
-will show all targets available.
 
 
 
@@ -126,7 +128,6 @@ Some folders have a special syntax to let the build system know that they are pl
 sources in the folder platforms=win32/ are built only when the target (and not the host) platform is win32.
 sources in a folder archs=x86/ are only build for x86
 sources in a folder archs=x86,amd64/ are built for these two architectures, but not for powerpc.
-These sources are also excluded from the projects when it makes sense
 
 
 Editor

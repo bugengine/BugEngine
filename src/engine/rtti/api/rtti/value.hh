@@ -4,7 +4,7 @@
 #ifndef BE_RTTI_VALUE_HH_
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.script.hh>
+#include    <rtti/typeinfo.script.hh>
 #include    <minitl/type/typemanipulation.hh>
 
 namespace BugEngine { namespace RTTI
@@ -87,7 +87,7 @@ private:
 private:
     enum ReserveType { Reserve };
 
-    inline Value(Type type, ReserveType);
+    Value(Type type, ReserveType);
 public:
     enum MakeConstType { MakeConst };
 
@@ -117,7 +117,7 @@ public:
 
     inline Value operator[](const istring& name);
     inline Value operator()(Value params[], u32 paramCount);
-    
+
     inline bool isA(const Type& type) const
     {
         return m_type.isA(type);
