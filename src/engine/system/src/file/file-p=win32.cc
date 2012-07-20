@@ -38,7 +38,7 @@ static void setFilePointer(const char *debugName, HANDLE file, i64 wantedOffset)
 void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    minitl::format<1024> pathname = m_file.str();
+    BugEngine::Debug::Format<1024> pathname = m_file.str();
     HANDLE h = CreateFileA ( pathname.c_str(),
                              GENERIC_READ,
                              FILE_SHARE_READ,
@@ -86,7 +86,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 void Win32File::doWriteBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    minitl::format<1024> pathname = m_file.str();
+    BugEngine::Debug::Format<1024> pathname = m_file.str();
     HANDLE h = CreateFileA ( pathname.c_str(),
                              GENERIC_WRITE,
                              0,

@@ -5,7 +5,7 @@
 #define BE_RTTI_VALUE_HH_
 /*****************************************************************************/
 #include    <rtti/typeinfo.script.hh>
-#include    <minitl/type/typemanipulation.hh>
+#include    <minitl/typemanipulation.hh>
 
 namespace BugEngine { namespace RTTI
 {

@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_REFERENCE_HH_
 #define BE_PACKAGE_NODES_REFERENCE_HH_
 /*****************************************************************************/
+#include    <minitl/intrusive_list.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

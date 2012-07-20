@@ -130,7 +130,7 @@ bool StringValue::isCompatible(const RTTI::Type& type) const
 {
     return be_typeid<istring>::type().isA(type)
         || be_typeid<inamespace>::type().isA(type)
-        || be_typeid< minitl::format<> >::type().isA(type);
+        || be_typeid< BugEngine::Debug::Format<> >::type().isA(type);
 }
 
 RTTI::Value StringValue::as(const RTTI::Type& type) const
@@ -140,8 +140,8 @@ RTTI::Value StringValue::as(const RTTI::Type& type) const
         return RTTI::Value(istring(m_value));
     if (be_typeid< inamespace >::type().isA(type))
         return RTTI::Value(inamespace(m_value));
-    if (be_typeid< minitl::format<> >::type().isA(type))
-        return RTTI::Value(minitl::format<>(m_value));
+    if (be_typeid< BugEngine::Debug::Format<> >::type().isA(type))
+        return RTTI::Value(BugEngine::Debug::Format<>(m_value));
     return RTTI::Value();
 }
 

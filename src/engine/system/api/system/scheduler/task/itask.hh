@@ -5,7 +5,8 @@
 #define BE_SYSTEM_SCHEDULER_TASK_ITASK_HH_
 /*****************************************************************************/
 #include    <system/scheduler/scheduler.hh>
-#include    <maths/vector.hh>
+#include    <core/threads/criticalsection.hh>
+#include    <kernel/colors.hh>
 
 namespace BugEngine { namespace Task
 {

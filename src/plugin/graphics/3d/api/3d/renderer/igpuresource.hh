@@ -4,6 +4,8 @@
 #ifndef BE_3D_RENDERER_IGPURESOURCE_HH_
 #define BE_3D_RENDERER_IGPURESOURCE_HH_
 /*****************************************************************************/
+#include    <minitl/refcountable.hh>
+#include    <minitl/intrusive_list.hh>
 
 namespace BugEngine
 {

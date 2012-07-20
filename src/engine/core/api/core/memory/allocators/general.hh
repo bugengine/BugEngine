@@ -4,7 +4,7 @@
 #ifndef BE_CORE_MEMORY_ALLOCATORS_GENERAL_HH_
 #define BE_CORE_MEMORY_ALLOCATORS_GENERAL_HH_
 /*****************************************************************************/
-#include    <core/memory/malloc.hh>
+#include    <minitl/allocator.hh>
 
 namespace BugEngine
 {

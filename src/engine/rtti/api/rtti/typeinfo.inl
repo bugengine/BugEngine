@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <minitl/array.hh>
 
 
 namespace BugEngine { namespace RTTI

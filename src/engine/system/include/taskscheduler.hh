@@ -8,7 +8,8 @@
 #include    <core/threads/semaphore.hh>
 #include    <core/threads/event.hh>
 #include    <system/scheduler/scheduler.hh>
-#include    <maths/vector.hh>
+#include    <kernel/interlocked_stack.hh>
+#include    <kernel/simd.hh>
 
 namespace BugEngine
 {

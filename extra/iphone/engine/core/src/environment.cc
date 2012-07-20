@@ -18,7 +18,7 @@ Environment::Environment()
 ,   m_game("bugeditor")
 ,   m_user(getenv("USER"))
 {
-    m_homeDirectory.push_back(minitl::format<>(".bugengine"));
+    m_homeDirectory.push_back(BugEngine::Debug::Format<>(".bugengine"));
 }
 
 void Environment::init(int argc, const char *argv[])

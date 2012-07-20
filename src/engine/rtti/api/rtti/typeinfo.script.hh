@@ -146,7 +146,7 @@ struct be_api(RTTI) Type
      * \returns
      *   A formatted string including the indirection, access right and constness of this type.
      */
-    minitl::format<>    name() const;
+    BugEngine::Debug::Format<>  name() const;
     /// Calculate the distance to another type
     /*!
      * Two types can be compatible but not necessarily equivalent. In order to

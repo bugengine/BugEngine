@@ -5,8 +5,6 @@
 #include    <system/file/folder.script.hh>
 #include    <system/file/file.script.hh>
 
-#include    <minitl/container/algorithm.hh>
-
 #include    <core/threads/thread.hh>
 #include    <core/threads/semaphore.hh>
 

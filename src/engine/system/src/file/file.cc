@@ -18,7 +18,7 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 si
     :   action(Read)
     ,   file(file)
     ,   buffer(arena, 0)
-    ,   processed(0)
+    ,   processed(i_u32::Zero)
     ,   offset(offset)
     ,   total(size)
 {
@@ -29,7 +29,7 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 si
     :   action(Write)
     ,   file(file)
     ,   buffer(arena, size)
-    ,   processed(0)
+    ,   processed(i_u32::Zero)
     ,   offset(offset)
     ,   total(size)
 {

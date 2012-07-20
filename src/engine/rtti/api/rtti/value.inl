@@ -8,7 +8,7 @@
 #include    <rtti/typeinfo.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/classinfo.script.hh>
-#include    <minitl/type/typemanipulation.hh>
+#include    <minitl/typemanipulation.hh>
 #include    <rtti/typeinfo.inl>
 
 namespace BugEngine { namespace RTTI
