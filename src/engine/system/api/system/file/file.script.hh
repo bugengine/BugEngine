@@ -5,6 +5,8 @@
 #define BE_SYSTEM_FILE_FILE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <core/string/istring.hh>
+#include    <kernel/interlocked_stack.hh>
+#include    <minitl/intrusive_list.hh>
 
 namespace BugEngine
 {

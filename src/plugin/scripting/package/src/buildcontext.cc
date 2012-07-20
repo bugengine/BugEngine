@@ -11,7 +11,7 @@ int g_bufferPosition = 0;
 int g_packageLine = 0;
 int g_packageColumnBefore = 0;
 int g_packageColumnAfter = 0;
-static i_u32 s_useCount = 0;
+static i_u32 s_useCount = i_u32::Zero;
 
 namespace BugEngine { namespace PackageBuilder
 {

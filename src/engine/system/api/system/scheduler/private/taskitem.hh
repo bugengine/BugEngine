@@ -4,7 +4,6 @@
 #ifndef BE_SYSTEM_SCHEDULER_TASKITEM_HH_
 #define BE_SYSTEM_SCHEDULER_TASKITEM_HH_
 /*****************************************************************************/
-#include    <minitl/interlocked/interlocked.hh>
 #include    <system/scheduler/scheduler.hh>
 
 namespace BugEngine { namespace Task

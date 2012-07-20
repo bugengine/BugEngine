@@ -26,7 +26,10 @@ def build(bld):
 	zlib			= module.external('zlib')
 	mak				= module.external('mak')
 
-	core			= module.library('core',		bld.platforms+[mak])
+	kernel			= module.library('kernel',		[])
+	debug			= module.library('debug',		[kernel])
+	minitl			= module.library('minitl',		[debug, kernel])
+	core			= module.library('core',		bld.platforms+[mak, minitl, debug, kernel])
 	network			= module.library('network',		[core])
 	rtti			= module.library('rtti',		[core, network, zlib] )
 	system			= module.library('system',		[core, rtti] )
@@ -60,6 +63,8 @@ def plugins(bld):
 	lualib			= module.external('lualib')
 	squirellib		= module.external('squirrellib')
 
+	runtime			= module.plugin('debug.runtime', [])
+	assertdlg		= module.plugin('debug.assert', [runtime])
 
 	package			= module.plugin('scripting.package',		[])
 

@@ -18,7 +18,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    minitl::format<1024u> pathname = path.str();
+    BugEngine::Debug::Format<1024u> pathname = path.str();
     if (!CreateDirectoryA(pathname.c_str(), 0))
     {
         int err = GetLastError();
@@ -49,7 +49,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     ,   m_index(s_diskIndex++)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
-    minitl::format<1024u> pathname = m_path.str();
+    BugEngine::Debug::Format<1024u> pathname = m_path.str();
     m_handle.ptrHandle = CreateFileA (pathname.c_str(),
                                       GENERIC_READ,
                                       FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
@@ -89,7 +89,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
-        minitl::format<1024u> pathname = m_path.str();
+        BugEngine::Debug::Format<1024u> pathname = m_path.str();
         pathname.append("\\*");
         HANDLE h = FindFirstFile(pathname.c_str(), &data);
         if (h != INVALID_HANDLE_VALUE)
@@ -127,7 +127,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    const minitl::format<1024u> path = (m_path+ifilename(name)).str();
+    const BugEngine::Debug::Format<1024u> path = (m_path+ifilename(name)).str();
     HANDLE h = CreateFileA ( path.c_str(),
                              GENERIC_WRITE,
                              0,

@@ -6,6 +6,46 @@
 
 #if 0
 
+namespace BugEngine
+{
+
+struct istring
+{
+};
+
+struct inamespace
+{
+};
+
+struct ifilename
+{
+};
+
+struct ipath
+{
+};
+
+}
+
+namespace BugEngine { namespace RTTI
+{
+
+struct Value
+{
+};
+
+}}
+
+namespace BugEngine { namespace Kernel
+{
+
+class IStream : public minitl::pointer
+{
+};
+
+}}
+
+
 be_pod bool
 {
 };
@@ -51,30 +91,6 @@ be_pod double
 {
 };
 
-namespace BugEngine
-{
-struct istring
-{
-};
-
-struct inamespace
-{
-};
-
-struct ifilename
-{
-};
-
-struct ipath
-{
-};
-
-namespace RTTI
-{
-struct Value
-{
-};
-}
 be_pod byte1x2
 {
     u8 operator[](u32) const;
@@ -713,14 +729,5 @@ be_pod float4x4
     const float4& operator[](u32) const;
     float4& operator[](u32);
 };
-
-namespace Kernel
-{
-class IStream : public minitl::pointer
-{
-};
-}
-
-}
 
 #endif

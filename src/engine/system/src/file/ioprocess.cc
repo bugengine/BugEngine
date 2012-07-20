@@ -21,7 +21,7 @@ struct IOContext
 };
 
 
-static i_u8         s_ioDone(0);
+static i_u8         s_ioDone(i_u8::Zero);
 static Semaphore    s_ioSemaphore(0);
 static Thread       s_ioThread("IOThread", &IOContext::ioProcess, 0, 0, Thread::Highest);
 static IOContext    s_iocontext;

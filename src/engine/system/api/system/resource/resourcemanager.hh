@@ -4,7 +4,8 @@
 #ifndef BE_SYSTEM_RESOURCE_RESOURCEMANAGER_HH_
 #define BE_SYSTEM_RESOURCE_RESOURCEMANAGER_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable.hh>
+#include    <minitl/refcountable.hh>
+#include    <minitl/intrusive_list.hh>
 #include    <system/resource/resource.script.hh>
 #include    <system/file/file.script.hh>
 

@@ -4,7 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <core/threads/criticalsection.hh>
-#include    <minitl/container/algorithm.hh>
+#include    <minitl/algorithm.hh>
 #include    <cstring>
 
 
@@ -68,7 +68,7 @@ private:
 #   endif
 private:
     StringCache(u64 _hash, u32 len)
-        :   m_refCount(0)
+        :   m_refCount(i_u32::Zero)
         ,   m_length(len)
         ,   m_hash(_hash)
 #   ifdef  BE_DEBUG
@@ -95,7 +95,7 @@ StringCache::Buffer* StringCache::getBuffer()
 StringCache::Buffer::Buffer()
 :   m_next(0)
 ,   m_buffer(Arena::string(), s_capacity)
-,   m_used(0)
+,   m_used(i_size_t::Zero)
 {
 }
 
@@ -394,7 +394,7 @@ inamespace::inamespace(const char* _str)
 {
 }
 
-minitl::format<inamespace::MaxNamespaceLength> inamespace::str() const
+BugEngine::Debug::Format<inamespace::MaxNamespaceLength> inamespace::str() const
 {
     return igenericnamespace::tostring<inamespace::MaxNamespaceLength>(".");
 }
@@ -450,7 +450,7 @@ ipath::ipath(const char *begin, const char *end)
 {
 }
 
-minitl::format<ipath::MaxFilenameLength> ipath::str() const
+BugEngine::Debug::Format<ipath::MaxFilenameLength> ipath::str() const
 {
 #   ifdef BE_PLATFORM_WIN32
     return igenericnamespace::tostring<ipath::MaxFilenameLength>("\\");
@@ -485,7 +485,7 @@ ifilename::ifilename(const char *_str)
 {
 }
 
-minitl::format<ifilename::MaxFilenameLength> ifilename::str() const
+BugEngine::Debug::Format<ifilename::MaxFilenameLength> ifilename::str() const
 {
 #   ifdef BE_PLATFORM_WIN32
     return igenericnamespace::tostring<ifilename::MaxFilenameLength>("\\");

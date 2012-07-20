@@ -5,6 +5,8 @@
 #define BE_PACKAGE_NODES_PACKAGE_HH_
 /*****************************************************************************/
 #include    <system/plugin.hh>
+#include    <minitl/vector.hh>
+#include    <minitl/intrusive_list.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

@@ -3,7 +3,6 @@
 
 #include    <core/stdafx.h>
 #include    <core/memory/streams.hh>
-#include    <minitl/container/algorithm.hh>
 
 namespace BugEngine
 {

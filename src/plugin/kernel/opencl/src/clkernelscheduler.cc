@@ -13,9 +13,9 @@ namespace BugEngine
 
 #define checkResult(a) do { cl_int err = a; if (err != CL_SUCCESS) be_error("OpenCL call %s failed with error code %d"|#a|err); } while (0)
 
-static minitl::format<1024> getPlatformInfo(cl_platform_id platform, cl_platform_info name)
+static BugEngine::Debug::Format<1024> getPlatformInfo(cl_platform_id platform, cl_platform_info name)
 {
-    minitl::format<1024> result("");
+    BugEngine::Debug::Format<1024> result("");
     size_t size = 0;
     checkResult(clGetPlatformInfo(platform, name, 0, 0, &size));
     char* temp = (char*)malloca(size+1);
@@ -25,9 +25,9 @@ static minitl::format<1024> getPlatformInfo(cl_platform_id platform, cl_platform
     return result;
 }
 
-static minitl::format<1024> getDeviceInfo(cl_device_id device, cl_device_info name)
+static BugEngine::Debug::Format<1024> getDeviceInfo(cl_device_id device, cl_device_info name)
 {
-    minitl::format<1024> result("");
+    BugEngine::Debug::Format<1024> result("");
     size_t size = 0;
     checkResult(clGetDeviceInfo(device, name, 0, 0, &size));
     char* temp = (char*)malloca(size+1);

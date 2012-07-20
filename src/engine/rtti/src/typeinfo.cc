@@ -28,9 +28,9 @@ u32 Type::size() const
     }
 }
 
-minitl::format<> Type::name() const
+BugEngine::Debug::Format<> Type::name() const
 {
-    minitl::format<> n(metaclass->name.str());
+    BugEngine::Debug::Format<> n(metaclass->name.str());
     switch(access)
     {
     case Const:
@@ -47,13 +47,13 @@ minitl::format<> Type::name() const
     case Value:
         break;
     case RawPtr:
-        n = minitl::format<>("raw<%s>") | n;
+        n = BugEngine::Debug::Format<>("raw<%s>") | n;
         break;
     case WeakPtr:
-        n = minitl::format<>("weak<%s>") | n;
+        n = BugEngine::Debug::Format<>("weak<%s>") | n;
         break;
     case RefPtr:
-        n = minitl::format<>("ref<%s>") | n;
+        n = BugEngine::Debug::Format<>("ref<%s>") | n;
         break;
     default:
         be_notreached();

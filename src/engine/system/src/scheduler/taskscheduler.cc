@@ -5,9 +5,6 @@
 #include    <taskscheduler.hh>
 
 #include    <core/environment.hh>
-#include    <core/threads/mutex.hh>
-#include    <minitl/interlocked/stack.hh>
-#include    <maths/vector.hh>
 
 #include    <system/scheduler/task/task.hh>
 #include    <system/scheduler/private/taskitem.hh>
@@ -39,7 +36,7 @@ public:
 TaskScheduler::Worker::Worker(weak<TaskScheduler> scheduler, size_t workerId)
 :   m_workerId(workerId)
 ,   m_workThread(
-        istring(minitl::format<>("worker %u") | workerId),
+        istring(BugEngine::Debug::Format<>("worker %u") | workerId),
         &TaskScheduler::Worker::work, reinterpret_cast<intptr_t>(this),
         reinterpret_cast<intptr_t>(scheduler.operator->()),
         Thread::BelowNormal)

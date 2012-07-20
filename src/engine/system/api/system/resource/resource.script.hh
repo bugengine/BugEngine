@@ -4,8 +4,9 @@
 #ifndef BE_SYSTEM_RESOURCE_RESOURCE_SCRIPT_HH_
 #define BE_SYSTEM_RESOURCE_RESOURCE_SCRIPT_HH_
 /*****************************************************************************/
-#include    <minitl/ptr/refcountable.hh>
+#include    <minitl/refcountable.hh>
 #include    <system/resource/resourcehandle.hh>
+#include    <minitl/intrusive_list.hh>
 
 namespace BugEngine
 {

@@ -82,7 +82,7 @@ ITask::ChainCallback::ChainCallback(weak<ITask> task)
 :   ICallback()
 ,   m_starts(task)
 ,   m_startedBy(Arena::task())
-,   m_completed(0)
+,   m_completed(i_u32::Zero)
 {
 }
 

@@ -40,9 +40,9 @@ BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
 }
 
 template< >
-BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::format<> >::klass()
+BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Debug::Format<> >::klass()
 {
-    static const RTTI::Class s_format = { "format", {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor< sizeof(minitl::format<>) >, &RTTI::nulldestructor };
+    static const RTTI::Class s_format = { "Format", {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor< sizeof(BugEngine::Debug::Format<>) >, &RTTI::nulldestructor };
     raw<const RTTI::Class> ci = {&s_format};
     return ci;
 }

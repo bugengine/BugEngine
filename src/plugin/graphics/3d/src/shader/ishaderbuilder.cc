@@ -96,7 +96,7 @@ void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage
 {
     if (currentStage == targetStage)
     {
-        istring name = minitl::format<>("b_varying%d") | m_currentVarying;
+        istring name = BugEngine::Debug::Format<>("b_varying%d") | m_currentVarying;
         if (m_namespaces.front().names.insert(std::make_pair(node, name)).second)
         {
             m_currentVarying++;
@@ -109,8 +109,8 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
 {
     if (VertexStage == targetStage)
     {
-        istring nameAttribute = minitl::format<>("b_attribute%d") | m_currentAttribute;
-        istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
+        istring nameAttribute = BugEngine::Debug::Format<>("b_attribute%d") | m_currentAttribute;
+        istring nameVarying = BugEngine::Debug::Format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
         if (m_namespaces.front().names.insert(std::make_pair(node, nameAttribute)).second)
         {
             m_currentAttribute++;
@@ -129,7 +129,7 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
     }
     else if(currentStage == targetStage)
     {
-        istring nameVarying = minitl::format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
+        istring nameVarying = BugEngine::Debug::Format<>("b_attributeToVarying%d") | m_currentAttributeToVarying;
         if (m_namespaces.front().names.insert(std::make_pair(node, nameVarying)).second)
         {
             m_currentAttributeToVarying++;
@@ -165,7 +165,7 @@ void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
 
 void IShaderBuilder::addOperator(weak<const Node> node, Operator op, ValueType type, weak<const Node> node1, weak<const Node> node2)
 {
-    istring var = minitl::format<>("temp_%d") | m_currentTemporary;
+    istring var = BugEngine::Debug::Format<>("temp_%d") | m_currentTemporary;
     if (m_namespaces.front().names.insert(std::make_pair(node, var)).second)
     {
         m_currentTemporary++;

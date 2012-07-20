@@ -66,7 +66,7 @@ public:
 
 static HWND createDummyWnd(weak<const GLRenderer> renderer)
 {
-    minitl::format<> classname = minitl::format<>("__be__%p__") | (const void*)renderer;
+    BugEngine::Debug::Format<> classname = BugEngine::Debug::Format<>("__be__%p__") | (const void*)renderer;
     HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0);
     if (!hWnd)
     {

@@ -28,8 +28,8 @@ void  Scheduler::release(void* task, size_t size)
 }
 
 Scheduler::Scheduler()
-    :   m_runningTasks(0)
-    ,   m_running(true)
+    :   m_runningTasks(i_u32::Zero)
+    ,   m_running(i_bool::One)
     ,   m_taskPool(Arena::task(), 65535, 16)
     ,   m_taskScheduler(scoped<Task::TaskScheduler>::create(Arena::task(), this))
     ,   m_kernelSchedulers(Arena::task())
@@ -50,7 +50,6 @@ void Scheduler::queueTask(Task::ITaskItem* task)
 void Scheduler::queueKernel()
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
-    
 }
 
 void Scheduler::mainThreadJoin()

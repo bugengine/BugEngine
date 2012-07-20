@@ -23,7 +23,7 @@ void PosixFile::doFillBuffer(weak<File::Ticket> ticket) const
     static const int g_bufferSize = 1024;
 
     be_assert(ticket->file == this, "trying to read wrong file");
-    minitl::format<1024> pathname = m_file.str();
+    BugEngine::Debug::Format<1024> pathname = m_file.str();
     FILE* f = fopen(pathname.c_str(), "rb");
     if (!f)
     {
@@ -65,7 +65,7 @@ void PosixFile::doWriteBuffer(weak<Ticket> ticket) const
     static const int g_bufferSize = 1024;
 
     be_assert(ticket->file == this, "trying to write to wrong file");
-    minitl::format<1024> pathname = m_file.str();
+    BugEngine::Debug::Format<1024> pathname = m_file.str();
     FILE* f = fopen(pathname.c_str(), "ab");
     if (!f)
     {

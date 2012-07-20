@@ -6,9 +6,8 @@
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
-#include    <core/debug/logger.hh>
-#include    <maths/vector.hh>
-#include    <maths/colors.hh>
+#include    <kernel/simd.hh>
+#include    <kernel/colors.hh>
 
 
 #if defined(building_rtti) || defined(RTTI_EXPORTS)

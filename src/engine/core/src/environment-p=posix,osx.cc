@@ -3,7 +3,6 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <core/debug/logger.hh>
 #include    <unistd.h>
 #if !defined(BE_PLATFORM_LINUX) && !defined(BE_PLATFORM_SUN)
 # include   <sys/types.h>
@@ -20,7 +19,7 @@ Environment::Environment()
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
-    m_homeDirectory.push_back(minitl::format<>(".bugengine"));
+    m_homeDirectory.push_back(BugEngine::Debug::Format<>(".bugengine"));
 }
 
 void Environment::init(int argc, const char *argv[])

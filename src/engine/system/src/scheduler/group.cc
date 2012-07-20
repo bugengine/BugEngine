@@ -10,7 +10,7 @@ namespace BugEngine { namespace Task
 TaskGroup::TaskGroup(istring name, color32 color)
     :   ITask(name, color, Scheduler::High, Scheduler::DontCare)
     ,   m_startTasks(Arena::task())
-    ,   m_endTaskCount(0)
+    ,   m_endTaskCount()
     ,   m_completionCallback(ref<Callback>::create(Arena::task(), this))
 {
 }
@@ -60,7 +60,7 @@ bool TaskGroup::removeStartTask(weak<ITask> task)
 TaskGroup::Callback::Callback(weak<TaskGroup> owner)
 :   ICallback()
 ,   m_owner(owner)
-,   m_completed(0)
+,   m_completed(i_u32::Zero)
 {
 }
 

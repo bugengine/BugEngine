@@ -5,6 +5,11 @@
 #define BE_CORE_STDAFX_H_
 /*****************************************************************************/
 
+#include    <kernel/stdafx.h>
+#include    <debug/stdafx.h>
+#include    <minitl/stdafx.h>
+#include    <core/preproc.hh>
+
 #define     BE_FILE             __FILE__
 #define     BE_LINE             __LINE__
 #ifdef _MSC_VER
@@ -18,10 +23,7 @@
 #define     BE_HERE             BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
 #define     BE_NOCOPY(x)        private: x(const x&); x& operator=(const x&);
 
-#include    <core/preproc.hh>
-#include    <core/compilers.hh>
 #include    <core/platforms.hh>
-#include    <core/features.hh>
 
 #if defined(building_core) || defined(CORE_EXPORTS)
 # define    COREEXPORT          BE_EXPORT
@@ -30,18 +32,8 @@
 #else
 # define    COREEXPORT
 #endif
-#define     be_api(module) module##EXPORT
 
-template< bool p >
-struct StaticAssert_;
-
-template< >
-struct StaticAssert_<true>
-{
-    struct Defined {};
-};
-
-#define StaticAssert(expr) StaticAssert_<expr>::Defined ;
+#define     be_forceuse(p)   static_cast<void>(p)
 
 template< typename T >
 inline T be_align(T value, size_t alignment)
@@ -62,36 +54,26 @@ inline T be_max(T t1, T t2)
     return t1 > t2 ? t1 : t2;
 }
 
-#include    <core/memory/malloc.hh>
-#include    <cstdlib>
-#include    <cstdio>
-#include    <cstring>
-#include    <minitl/container/pair.hh>
-#include    <minitl/container/array.hh>
-#include    <minitl/container/vector.hh>
-#include    <minitl/container/hash_map.hh>
-#include    <minitl/container/intrusive_list.hh>
-#include    <minitl/interlocked/interlocked.hh>
-#include    <minitl/string/format.hh>
+#include    <minitl/allocator.hh>
 
+namespace BugEngine { namespace Arena
+{
+be_api(CORE) Allocator& temporary();
+be_api(CORE) Allocator& stack();
+be_api(CORE) Allocator& debug();
+be_api(CORE) Allocator& general();
+}}
 
+#include    <debug/assert.hh>
 
-#define be_forceuse(p)   static_cast<void>(p)
+#include    <minitl/refcountable.hh>
+#include    <minitl/rawptr.hh>
+#include    <minitl/scopedptr.hh>
+#include    <minitl/refptr.hh>
+#include    <minitl/weakptr.hh>
+#include    <minitl/cast.hh>
 
-#include    <core/debug/assert.hh>
-#include    <core/string/istring.hh>
-#include    <core/debug/logger.hh>
-#include    <core/string/message.hh>
-
-#include    <maths/float.hh>
-
-#include    <minitl/ptr/refcountable.hh>
-#include    <minitl/ptr/rawptr.hh>
-#include    <minitl/ptr/scopedptr.hh>
-#include    <minitl/ptr/refptr.hh>
-#include    <minitl/ptr/weakptr.hh>
-#include    <minitl/type/cast.hh>
-#include    <core/endianness.hh>
+#include    <core/logger.hh>
 
 using minitl::raw;
 using minitl::ref;

@@ -49,10 +49,10 @@ namespace BugEngine
 
 static void* loadLibrary(const inamespace& pluginName)
 {
-    minitl::format<> plugingFile = minitl::format<>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
+    BugEngine::Debug::Format<> plugingFile = BugEngine::Debug::Format<>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     static const ipath pluginSubdir = ipath("plugins");
-    minitl::format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
+    BugEngine::Debug::Format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
     be_info("loading plugin %s (%s)" | pluginName | pluginPath);
     void* handle = dlopen(pluginPath.c_str(), RTLD_NOW|RTLD_LOCAL);
     if (!handle)
@@ -66,7 +66,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType /*preload*/)
 :   m_handle(loadLibrary(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (Arena::general()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
 }
 
@@ -74,7 +74,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& context)
 :   m_handle(loadLibrary(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (Arena::general()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
     if  (m_handle)
     {

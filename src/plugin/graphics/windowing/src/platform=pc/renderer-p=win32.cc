@@ -52,7 +52,7 @@ namespace
 
 Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
 :   m_renderer(renderer)
-,   m_windowClassName(minitl::format<>("__be__%p__") | (const void*)renderer)
+,   m_windowClassName(BugEngine::Debug::Format<>("__be__%p__") | (const void*)renderer)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();

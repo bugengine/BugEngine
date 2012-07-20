@@ -21,7 +21,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    minitl::format<1024u> p = path.str();
+    BugEngine::Debug::Format<1024u> p = path.str();
     if (mkdir(p.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
     {
         if (errno != EEXIST)
@@ -36,7 +36,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     ,   m_index(0)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
-    minitl::format<1024u> pathname = m_path.str();
+    BugEngine::Debug::Format<1024u> pathname = m_path.str();
     m_handle.ptrHandle = opendir(pathname.c_str());
     if (!m_handle.ptrHandle)
     {
@@ -60,7 +60,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     Folder::doRefresh(scanPolicy);
     if (m_handle.ptrHandle)
     {
-        minitl::format<1024u> pathname = m_path.str();
+        BugEngine::Debug::Format<1024u> pathname = m_path.str();
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
@@ -69,7 +69,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             if (d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0)
                 continue;
             istring name = d->d_name;
-            minitl::format<1024u> filename = pathname;
+            BugEngine::Debug::Format<1024u> filename = pathname;
             filename.append("/");
             filename.append(d->d_name);
             struct stat s;
@@ -113,7 +113,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    const minitl::format<1024u> path = (m_path+ifilename(name)).str();
+    const BugEngine::Debug::Format<1024u> path = (m_path+ifilename(name)).str();
     struct stat s;
     errno = 0;
     FILE* f = fopen(path.c_str(), "w");

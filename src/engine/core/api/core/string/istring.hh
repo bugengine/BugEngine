@@ -7,7 +7,6 @@
 
 namespace BugEngine
 {
-# pragma warning(disable:4251)
 
 class StringCache;
 
@@ -24,7 +23,7 @@ public:
     istring(const char *begin, const char *end);
     istring(const istring& other);
     template< u16 SIZE >
-    istring(const minitl::format<SIZE>& f)
+    istring(const BugEngine::Debug::Format<SIZE>& f)
         :   m_index(init(f))
     {
     }
@@ -55,9 +54,9 @@ protected:
     igenericnamespace(const char *str, const char* sep);
     igenericnamespace(const char *begin, const char *end, const char* sep);
     template< u16 MAXLENGTH >
-    minitl::format<MAXLENGTH> tostring(const char* sep) const
+    BugEngine::Debug::Format<MAXLENGTH> tostring(const char* sep) const
     {
-        minitl::format<MAXLENGTH> result("");
+        BugEngine::Debug::Format<MAXLENGTH> result("");
         if (m_size > 0)
         {
             result.append(m_namespace[0].c_str());
@@ -93,7 +92,7 @@ public:
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~inamespace() {}
 
-    minitl::format<MaxNamespaceLength> str() const;
+    BugEngine::Debug::Format<MaxNamespaceLength> str() const;
 
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
@@ -115,7 +114,7 @@ public:
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ifilename() {}
 
-    minitl::format<MaxFilenameLength> str() const;
+    BugEngine::Debug::Format<MaxFilenameLength> str() const;
 private:
     ifilename();
 };
@@ -130,7 +129,7 @@ public:
     //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ipath() {}
 
-    minitl::format<MaxFilenameLength> str() const;
+    BugEngine::Debug::Format<MaxFilenameLength> str() const;
 
     ipath& operator+=(const ipath& other);
 private:
@@ -142,38 +141,44 @@ be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
 }
 
-#include <minitl/string/format.hh>
+#include <debug/format.hh>
 
-namespace minitl
+namespace BugEngine { namespace Debug
 {
 inline size_t hash_value(const BugEngine::istring& key) { return (size_t)key.hash(); }
 
 template< u16 size >
-const format<size>& operator|(const format<size>& f, const BugEngine::istring& value)
+const Format<size>& operator|(const Format<size>& f, const BugEngine::istring& value)
 {
     return f | value.c_str();
 }
 
 template< u16 size >
-const format<size>& operator|(const format<size>& f, const BugEngine::inamespace& value)
+const Format<size>& operator|(const Format<size>& f, const BugEngine::inamespace& value)
 {
-    format<4096u> s = value.str();
+    Format<4096u> s = value.str();
     return f | s.c_str();
 }
 
 template< u16 size >
-const format<size>& operator|(const format<size>& f, const BugEngine::ipath& value)
+const Format<size>& operator|(const Format<size>& f, const BugEngine::ipath& value)
 {
-    format<1024u> s = value.str();
+    Format<1024u> s = value.str();
     return f | s.c_str();
 }
 
 template< u16 size >
-const format<size>& operator|(const format<size>& f, const BugEngine::ifilename& value)
+const Format<size>& operator|(const Format<size>& f, const BugEngine::ifilename& value)
 {
-    format<1024u> s = value.str();
+    Format<1024u> s = value.str();
     return f | s.c_str();
 }
+
+}}
+
+#include    <minitl/hash_map.hh>
+namespace minitl
+{
 
 template<>
 struct hash<BugEngine::istring>
