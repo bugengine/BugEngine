@@ -85,7 +85,6 @@ public:
         :   m_value((typename impl::value_t)(t))
     {
     }
-    static const iptr<T> Zero = {0};
     operator const T*() const                       { return static_cast<T*>(m_value); }
     operator T*()                                   { return static_cast<T*>(m_value); }
     T* operator->()                                 { return static_cast<T*>(m_value); }
