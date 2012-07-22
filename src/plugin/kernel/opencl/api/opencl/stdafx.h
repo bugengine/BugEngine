@@ -9,6 +9,15 @@
 #include    <rtti/stdafx.h>
 #include    <system/stdafx.h>
 
+
+#if defined(building_opencl) || defined(OPENCL_EXPORTS)
+# define    OPENCLEXPORT        BE_EXPORT
+#elif defined(core_dll)
+# define    OPENCLEXPORT        BE_IMPORT
+#else
+# define    OPENCLEXPORT
+#endif
+
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenCL/opencl.h>
 #else

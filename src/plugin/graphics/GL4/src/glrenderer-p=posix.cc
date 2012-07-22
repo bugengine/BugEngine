@@ -116,7 +116,7 @@ static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
                 break;
         }
     }
-    else
+    if (!context)
     {
         context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE, 0, True);
     }

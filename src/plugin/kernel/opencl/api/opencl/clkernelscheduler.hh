@@ -12,7 +12,7 @@ namespace BugEngine
 
 class OpenCLKernelLoader;
 
-class OpenCLKernelScheduler : public Kernel::IKernelScheduler
+class be_api(OPENCL) OpenCLKernelScheduler : public Kernel::IKernelScheduler
 {
 private:
     weak<ResourceManager>       m_resourceManager;
