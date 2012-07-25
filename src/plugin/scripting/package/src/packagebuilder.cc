@@ -13,7 +13,7 @@ namespace BugEngine
 
 namespace Arena
 {
-Allocator& packageBuilder()
+minitl::Allocator& packageBuilder()
 {
     return resource();
 }
@@ -31,7 +31,7 @@ PackageBuilder::~PackageBuilder()
 {
 }
 
-ref<Nodes::Package> PackageBuilder::createPackage(const Allocator::Block<u8>& buffer)
+ref<Nodes::Package> PackageBuilder::createPackage(const minitl::Allocator::Block<u8>& buffer)
 {
     BuildContext context(buffer, m_dataFolder);
     be_package_parse(&context);

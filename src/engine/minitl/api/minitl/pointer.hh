@@ -34,7 +34,7 @@ class pointer
     template< typename T >  friend class weak;
     template< typename T >  friend class scoped;
 private:
-    mutable ::BugEngine::Allocator* m_allocator;
+    mutable Allocator* m_allocator;
 #if BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
@@ -64,7 +64,7 @@ protected:
 protected:
     inline void checked_delete() const
     {
-        BugEngine::Allocator* d = m_allocator;
+        Allocator* d = m_allocator;
         checked_destroy(this);
         d->free(this);
     }

@@ -37,7 +37,8 @@ bool BoolValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value BoolValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from bool to %s" | type.name());
+    be_assert(isCompatible(type), "invalid conversion from bool to %s" | type);
+    be_forceuse(type);
     return RTTI::Value(m_value);
 }
 
@@ -67,7 +68,7 @@ bool IntValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value IntValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from int to %s" | type.name());
+    be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
     if (be_typeid<i8>::type().isA(type))
         return RTTI::Value(be_checked_numcast<i8>(m_value));
     if (be_typeid<i16>::type().isA(type))
@@ -106,7 +107,7 @@ bool FloatValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value FloatValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from float to %s" | type.name());
+    be_assert(isCompatible(type), "invalid conversion from float to %s" | type);
     if (be_typeid<float>::type().isA(type))
         return RTTI::Value((float)m_value);
     else
@@ -129,19 +130,16 @@ StringValue::~StringValue()
 bool StringValue::isCompatible(const RTTI::Type& type) const
 {
     return be_typeid<istring>::type().isA(type)
-        || be_typeid<inamespace>::type().isA(type)
-        || be_typeid< BugEngine::Debug::Format<> >::type().isA(type);
+        || be_typeid<inamespace>::type().isA(type);
 }
 
 RTTI::Value StringValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from string to %s" | type.name());
+    be_assert(isCompatible(type), "invalid conversion from string to %s" | type);
     if (be_typeid< istring >::type().isA(type))
         return RTTI::Value(istring(m_value));
     if (be_typeid< inamespace >::type().isA(type))
         return RTTI::Value(inamespace(m_value));
-    if (be_typeid< BugEngine::Debug::Format<> >::type().isA(type))
-        return RTTI::Value(BugEngine::Debug::Format<>(m_value));
     return RTTI::Value();
 }
 
@@ -164,7 +162,8 @@ bool ReferenceValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value ReferenceValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType().name() | type.name());
+    be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType() | type);
+    be_forceuse(type);
     return m_value->getValue();
 }
 
@@ -190,7 +189,8 @@ bool FileValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value FileValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type().name() | type.name());
+    be_assert(isCompatible(type), "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type() | type);
+    be_forceuse(type);
     return RTTI::Value(m_value);
 }
 

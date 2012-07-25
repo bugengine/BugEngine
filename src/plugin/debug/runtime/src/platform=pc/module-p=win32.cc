@@ -25,7 +25,7 @@ ref<const Module> Module::self()
     DWORD requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
     size_t moduleCount = requiredSize/sizeof(HMODULE);
-    Allocator::Block<HMODULE> hmodules(Arena::stack(), moduleCount);
+    minitl::Allocator::Block<HMODULE> hmodules(Arena::stack(), moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
     for (; seen < moduleCount; seen++)

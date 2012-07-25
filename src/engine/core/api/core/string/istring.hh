@@ -22,11 +22,6 @@ public:
     istring(const char *str);
     istring(const char *begin, const char *end);
     istring(const istring& other);
-    template< u16 SIZE >
-    istring(const BugEngine::Debug::Format<SIZE>& f)
-        :   m_index(init(f))
-    {
-    }
 
     ~istring();
 
@@ -53,24 +48,11 @@ protected:
     explicit igenericnamespace(const istring& onlycomponent);
     igenericnamespace(const char *str, const char* sep);
     igenericnamespace(const char *begin, const char *end, const char* sep);
-    template< u16 MAXLENGTH >
-    BugEngine::Debug::Format<MAXLENGTH> tostring(const char* sep) const
-    {
-        BugEngine::Debug::Format<MAXLENGTH> result("");
-        if (m_size > 0)
-        {
-            result.append(m_namespace[0].c_str());
-            for (size_t i = 1; i < m_size; ++i)
-            {
-                result.append(sep);
-                result.append(m_namespace[i].c_str());
-            }
-        }
-        return result;
-    }
+    ~igenericnamespace() {}
+    void str(char* buffer, char separator, u32 size) const;
 public:
-    size_t size() const;
-    const istring& operator[](size_t index) const;
+    u32 size() const;
+    const istring& operator[](u32 index) const;
 
     void push_back(const istring& component);
     istring pop_back();
@@ -86,16 +68,18 @@ be_api(CORE) bool operator<(const igenericnamespace& ns1, const igenericnamespac
 class be_api(CORE) inamespace : public igenericnamespace
 {
 public:
-    enum { MaxNamespaceLength = 4096 };
+    enum { Separator = '.', MaxPathLength = 1024 };
+    struct Path
+    {
+        char name[MaxPathLength];
+    };
     explicit inamespace(const istring& onlycomponent);
     inamespace(const char *str);
-    //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~inamespace() {}
-
-    BugEngine::Debug::Format<MaxNamespaceLength> str() const;
-
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
+
+    Path str() const;
 private:
     inamespace();
 };
@@ -108,13 +92,16 @@ be_api(CORE) inamespace operator+(const inamespace& ns1, const inamespace& ns2);
 class be_api(CORE) ifilename : public igenericnamespace
 {
 public:
-    enum { MaxFilenameLength = 1024 };
+    enum { Separator = '/', MaxFilenameLength = 1024 };
+    struct Filename
+    {
+        char name[MaxFilenameLength];
+    };
     explicit ifilename(const istring& onlycomponent);
     ifilename(const char *str);
-    //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ifilename() {}
 
-    BugEngine::Debug::Format<MaxFilenameLength> str() const;
+    Filename str() const;
 private:
     ifilename();
 };
@@ -122,16 +109,18 @@ private:
 class be_api(CORE) ipath : public igenericnamespace
 {
 public:
-    enum { MaxFilenameLength = 1024 };
+    enum { Separator = '/', MaxFilenameLength = 1024 };
+    struct Filename
+    {
+        char name[MaxFilenameLength];
+    };
     explicit ipath(const istring& onlycomponent);
     ipath(const char *str);
     ipath(const char *begin, const char *end);
-    //lint -e{1509} : no virtual table needed in the namespaces/paths, no pointer will be handled
     ~ipath() {}
 
-    BugEngine::Debug::Format<MaxFilenameLength> str() const;
-
     ipath& operator+=(const ipath& other);
+    Filename str() const;
 private:
     ipath();
 };
@@ -141,41 +130,7 @@ be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
 }
 
-#include <debug/format.hh>
-
-namespace BugEngine { namespace Debug
-{
-inline size_t hash_value(const BugEngine::istring& key) { return (size_t)key.hash(); }
-
-template< u16 size >
-const Format<size>& operator|(const Format<size>& f, const BugEngine::istring& value)
-{
-    return f | value.c_str();
-}
-
-template< u16 size >
-const Format<size>& operator|(const Format<size>& f, const BugEngine::inamespace& value)
-{
-    Format<4096u> s = value.str();
-    return f | s.c_str();
-}
-
-template< u16 size >
-const Format<size>& operator|(const Format<size>& f, const BugEngine::ipath& value)
-{
-    Format<1024u> s = value.str();
-    return f | s.c_str();
-}
-
-template< u16 size >
-const Format<size>& operator|(const Format<size>& f, const BugEngine::ifilename& value)
-{
-    Format<1024u> s = value.str();
-    return f | s.c_str();
-}
-
-}}
-
+#include    <minitl/format.hh>
 #include    <minitl/hash_map.hh>
 namespace minitl
 {
@@ -186,6 +141,59 @@ struct hash<BugEngine::istring>
     inline u64 operator()(const BugEngine::istring& v)                               { return v.hash(); }
     inline int operator()(const BugEngine::istring& v1, const BugEngine::istring& v2){ return v1 == v2; }
 };
+
+inline size_t hash_value(const BugEngine::istring& key) { return (size_t)key.hash(); }
+
+template< u16 SIZE >
+static inline const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::istring& value)
+{
+    return f | value.c_str();
+}
+
+template< u16 SIZE >
+const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::inamespace& value)
+{
+    if (value.size() > 0)
+    {
+        f | value[0];
+        for (u32 i = 1; i < value.size(); ++i)
+        {
+            f | (char)value.Separator;
+            f | value[i];
+        }
+    }
+    return f;
+}
+
+template< u16 SIZE >
+const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::ipath& value)
+{
+    if (value.size() > 0)
+    {
+        f | value[0];
+        for (u32 i = 1; i < value.size(); ++i)
+        {
+            f | (char)value.Separator;
+            f | value[i];
+        }
+    }
+    return f;
+}
+
+template< u16 SIZE >
+const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::ifilename& value)
+{
+    if (value.size() > 0)
+    {
+        f | value[0];
+        for (u32 i = 1; i < value.size(); ++i)
+        {
+            f | (char)value.Separator;
+            f | value[i];
+        }
+    }
+    return f;
+}
 
 }
 

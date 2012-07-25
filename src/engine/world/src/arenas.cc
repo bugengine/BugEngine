@@ -6,6 +6,6 @@
 namespace BugEngine { namespace Arena
 {
 
-Allocator& game() { return general(); }
+minitl::Allocator& game() { return general(); }
 
 }}

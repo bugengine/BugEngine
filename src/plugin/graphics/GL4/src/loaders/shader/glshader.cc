@@ -68,7 +68,7 @@ GLhandleARB GLShaderProgram::build(weak<const ShaderProgram> program, Shaders::S
     if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;
-        Allocator::Block<GLcharARB> log(Arena::stack(), loglength);
+        minitl::Allocator::Block<GLcharARB> log(Arena::stack(), loglength);
         shaderext.glGetInfoLog(shader, maxLength, &result, log.data());
         if (!success)
         {
@@ -104,7 +104,7 @@ void GLShaderProgram::load(weak<const Resource> resource)
     if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;
-        Allocator::Block<GLcharARB> log(Arena::stack(), loglength);
+        minitl::Allocator::Block<GLcharARB> log(Arena::stack(), loglength);
         shaderext.glGetInfoLog(m_shaderProgram, maxLength, &result, log.data());
         if (!success)
         {

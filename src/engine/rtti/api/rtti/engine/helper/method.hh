@@ -29,142 +29,35 @@ static inline void wrapDestroy(void* src)
 }
 
 template< size_t size >
-inline void nullconstructor(const void* src, void* dst) { memcpy(dst, src, size); }
+inline void nullconstructor(const void* src, void* dst)
+{
+    memcpy(dst, src, size);
+}
+
 template< >
-inline void nullconstructor<0>(const void* /*src*/, void* /*dst*/) {}
-static inline void nulldestructor(void*) { }
+inline void nullconstructor<0>(const void* /*src*/, void* /*dst*/)
+{
+}
 
+static inline void nulldestructor(void*)
+{
+}
 
-template< typename T,
-          typename P1=void,
-          typename P2=void,
-          typename P3=void,
-          typename P4=void,
-          typename P5=void,
-          typename P6=void,
-          typename P7=void,
-          typename P8=void,
-          typename P9=void,
-          typename P10=void,
-          typename P11=void,
-          typename P12=void,
-          typename P13=void,
-          typename P14=void,
-          typename P15=void,
-          typename P16=void,
-          typename Dummy=void>
-struct procedurehelper;
-template< typename T,
-          typename R,
-          typename P1=void,
-          typename P2=void,
-          typename P3=void,
-          typename P4=void,
-          typename P5=void,
-          typename P6=void,
-          typename P7=void,
-          typename P8=void,
-          typename P9=void,
-          typename P10=void,
-          typename P11=void,
-          typename P12=void,
-          typename P13=void,
-          typename P14=void,
-          typename P15=void,
-          typename P16=void,
-          typename Dummy=void>
-struct functionhelper;
+template< typename T, Value(T::*call)(Value*, u32) >
+static Value wrapCall(Value* params, u32 paramCount)
+{
+    be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T*>::type() | params[0].type(), return Value());
+    return (params[0].as<T&>().*call)(params + 1, paramCount - 1);
+}
 
+template< typename T, Value(T::*call)(Value*, u32) const >
+static Value wrapCallConst(Value* params, u32 paramCount)
+{
+    be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<const T*>::type() | params[0].type(), return Value());
+    return (params[0].as<const T&>().*call)(params + 1, paramCount - 1);
+}
 
 }}
-
-#define BE_METHOD_PARAMS      0
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      1
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      2
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      3
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      4
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      5
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      6
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      7
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      8
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      9
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      10
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      11
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      12
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      13
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      14
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      15
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-#define BE_METHOD_PARAMS      16
-#include    <rtti/engine/helper/methods.hh>
-#undef BE_METHOD_PARAMS
-
-
-
-#include    <rtti/engine/helper/methodvararg.hh>
 
 /*****************************************************************************/
 #endif

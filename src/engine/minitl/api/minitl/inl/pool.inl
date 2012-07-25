@@ -10,7 +10,7 @@ namespace minitl
 {
 
 template< typename T >
-pool<T>::pool(BugEngine::Allocator& allocator, size_t capacity, size_t alignment)
+pool<T>::pool(Allocator& allocator, size_t capacity, size_t alignment)
 :   m_pool(allocator, capacity, alignment)
 ,   m_end(&m_pool[capacity])
 {

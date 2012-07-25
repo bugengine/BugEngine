@@ -19,7 +19,7 @@ Environment::Environment()
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
-    m_homeDirectory.push_back(BugEngine::Debug::Format<>(".bugengine"));
+    m_homeDirectory.push_back(".bugengine");
 }
 
 void Environment::init(int argc, const char *argv[])
@@ -40,7 +40,10 @@ void Environment::init(int argc, const char *argv[])
         filename--;
     }
     ipath rootdir = ipath(argv[0], filename);
-    chdir(rootdir.str().c_str());
+    for (u32 i = 0; i < rootdir.size(); ++i)
+    {
+        chdir(rootdir[i].c_str());
+    }
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')

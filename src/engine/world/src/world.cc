@@ -65,11 +65,12 @@ void World::addComponent(Entity e, const Component& component, raw<const RTTI::C
     be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
     be_forceuse(e);
     be_forceuse(component);
+    be_forceuse(metaclass);
 }
 
 void World::addComponent(Entity e, RTTI::Value& component)
 {
-    be_assert(component.type().isA(be_typeid<const Component&>::type()), "component of type %s is not a subclass of BugEngine::World::Component"|component.type().name());
+    be_assert(component.type().isA(be_typeid<const Component&>::type()), "component of type %s is not a subclass of BugEngine::World::Component"|component.type());
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
 }
 

@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class be_api(CORE) StackAllocator : public Allocator
+class be_api(CORE) StackAllocator : public minitl::Allocator
 {
 public:
     StackAllocator();

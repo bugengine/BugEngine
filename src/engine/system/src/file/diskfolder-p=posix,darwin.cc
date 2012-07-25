@@ -21,8 +21,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    BugEngine::Debug::Format<1024u> p = path.str();
-    if (mkdir(p.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
+    ipath::Filename p = path.str();
+    if (mkdir(p.name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
     {
         if (errno != EEXIST)
         {
@@ -36,8 +36,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     ,   m_index(0)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
-    BugEngine::Debug::Format<1024u> pathname = m_path.str();
-    m_handle.ptrHandle = opendir(pathname.c_str());
+    ipath::Filename pathname = m_path.str();
+    m_handle.ptrHandle = opendir(pathname.name);
     if (!m_handle.ptrHandle)
     {
         be_error("Could not open directory %s: %s" | diskpath | strerror(errno));
@@ -60,7 +60,6 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     Folder::doRefresh(scanPolicy);
     if (m_handle.ptrHandle)
     {
-        BugEngine::Debug::Format<1024u> pathname = m_path.str();
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
@@ -69,14 +68,14 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             if (d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0)
                 continue;
             istring name = d->d_name;
-            BugEngine::Debug::Format<1024u> filename = pathname;
-            filename.append("/");
-            filename.append(d->d_name);
+            ipath p = m_path;
+            p.push_back(name);
+            ipath::Filename filename = p.str();
             struct stat s;
-            stat(filename.c_str(), &s);
+            stat(filename.name, &s);
             if (errno == 0)
             {
-                be_error("could not stat file %s: %s(%d)" | filename.c_str() | strerror(errno) | errno);
+                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno) | errno);
             }
             else if (s.st_mode & S_IFDIR)
             {
@@ -113,18 +112,18 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    const BugEngine::Debug::Format<1024u> path = (m_path+ifilename(name)).str();
+    ifilename::Filename path = (m_path+ifilename(name)).str();
     struct stat s;
     errno = 0;
-    FILE* f = fopen(path.c_str(), "w");
+    FILE* f = fopen(path.name, "w");
     if (f == 0)
     {
-        be_error("could not create file %s: %s(%d)" | path.c_str() | strerror(errno) | errno);
+        be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
         return ref<File>();
     }
-    if (stat(path.c_str(), &s) != 0)
+    if (stat(path.name, &s) != 0)
     {
-        be_error("could not create file %s: %s(%d)" | path.c_str() | strerror(errno) | errno);
+        be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
         return ref<File>();
     }
 

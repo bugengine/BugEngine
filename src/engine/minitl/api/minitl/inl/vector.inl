@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INL_VECTOR_INL_
 #define BE_MINITL_CONTAINER_INL_VECTOR_INL_
 /*****************************************************************************/
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 
 namespace minitl
 {
@@ -198,7 +198,7 @@ struct vector<T>::const_reverse_iterator_policy
 
 
 template< typename T >
-vector<T>::vector(BugEngine::Allocator& allocator, size_type count)
+vector<T>::vector(Allocator& allocator, size_type count)
 :   m_memory(allocator, count)
 ,   m_end(m_memory)
 ,   m_capacity(m_memory)
@@ -216,7 +216,7 @@ vector<T>::vector(const vector& other)
 
 template< typename T >
 template< typename ITERATOR >
-vector<T>::vector(BugEngine::Allocator& allocator, ITERATOR first, ITERATOR last)
+vector<T>::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
     :   m_memory(allocator, minitl::distance(first, last))
     ,   m_end(m_memory)
     ,   m_capacity(m_memory)
@@ -448,7 +448,7 @@ void                                                vector<T>::reserve(size_type
         size = size >> 16 | size;
         size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
         size++;
-        BugEngine::Allocator::Block<T> block(m_memory.arena(), size);
+        Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
         for (pointer t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {

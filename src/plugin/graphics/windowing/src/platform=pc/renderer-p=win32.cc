@@ -52,7 +52,7 @@ namespace
 
 Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
 :   m_renderer(renderer)
-,   m_windowClassName(BugEngine::Debug::Format<>("__be__%p__") | (const void*)renderer)
+,   m_windowClassName(minitl::format<128u>("__be__%p__") | (const void*)renderer)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName  = m_windowClassName.c_str();
@@ -100,7 +100,7 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer(Allocator& allocator, weak<ResourceManager> manager)
+Renderer::Renderer(minitl::Allocator& allocator, weak<ResourceManager> manager)
     :   IRenderer(allocator, manager, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(allocator, this))
 {

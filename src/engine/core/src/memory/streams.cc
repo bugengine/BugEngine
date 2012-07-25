@@ -7,7 +7,7 @@
 namespace BugEngine
 {
 
-MemoryStream::MemoryStream(Allocator& allocator, u64 size)
+MemoryStream::MemoryStream(minitl::Allocator& allocator, u64 size)
     :   m_memory(allocator, size)
     ,   m_size(size)
     ,   m_capacity(0)

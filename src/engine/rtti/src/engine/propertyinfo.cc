@@ -13,7 +13,7 @@ namespace BugEngine { namespace RTTI
 
 Value Property::get(Value& from) const
 {
-    be_assert(from.type().metaclass->isA(owner.metaclass), "getting property on object of type %s, while expecting type %s" | from.type().name() | owner.name());
+    be_assert(from.type().metaclass->isA(owner.metaclass), "getting property on object of type %s, while expecting type %s" | from.type() | owner);
     i32 offset = from.type().metaclass->offset - owner.metaclass->offset;
     return (*getter)((void*)((char*)from.rawget() + offset), from.isConst());
 }

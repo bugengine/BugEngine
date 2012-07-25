@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 #include    <runtime/callstack.hh>
 #include    <runtime/module.hh>
 #include    <runtime/symbols.hh>

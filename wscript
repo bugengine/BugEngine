@@ -27,9 +27,8 @@ def build(bld):
 	mak				= module.external('mak')
 
 	kernel			= module.library('kernel',		[])
-	debug			= module.library('debug',		[kernel])
-	minitl			= module.library('minitl',		[debug, kernel])
-	core			= module.library('core',		bld.platforms+[mak, minitl, debug, kernel])
+	minitl			= module.library('minitl',		[kernel])
+	core			= module.library('core',		bld.platforms+[mak, minitl, kernel])
 	network			= module.library('network',		[core])
 	rtti			= module.library('rtti',		[core, network, zlib] )
 	system			= module.library('system',		[core, rtti] )

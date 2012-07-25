@@ -32,7 +32,7 @@ struct BuildContext
     ref<Nodes::Package> result;
     ref<Folder> folder;
 
-    BuildContext(const Allocator::Block<u8>& buffer, ref<Folder> folder);
+    BuildContext(const minitl::Allocator::Block<u8>& buffer, ref<Folder> folder);
     ~BuildContext();
 };
 
@@ -43,7 +43,7 @@ extern int g_packageLine;
 extern int g_packageColumnBefore;
 extern int g_packageColumnAfter;
 
-extern const BugEngine::Allocator::Block<u8>* g_buffer;
+extern const minitl::Allocator::Block<u8>* g_buffer;
 extern int g_bufferPosition;
 
 /*****************************************************************************/

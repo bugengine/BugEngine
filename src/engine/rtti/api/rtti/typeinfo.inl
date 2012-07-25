@@ -32,7 +32,7 @@ struct be_typeid< minitl::array<T> >
     static inline raw<const RTTI::Class> klass()
     {
         static RTTI::Class ci = {
-            "array", {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0
+            "array", {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0
         };
         raw<const RTTI::Class> c = { &ci };
         return c;
