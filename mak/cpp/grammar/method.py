@@ -223,6 +223,71 @@ class Initializers(cpp.yacc.Nonterm):
 		"%reduce ID LPAREN Value RPAREN COMMA Initializers"
 
 
+template_class_procedure = """#line %(LINE)d
+static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
+#line %(LINE)d
+{
+#line %(LINE)d
+    be_forceuse(paramCount);
+#line %(LINE)d
+    be_forceuse(params);
+#line %(LINE)d
+    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+#line %(LINE)d
+	%(ID)s(%(PARAMS)s);
+#line %(LINE)d
+	return ::BugEngine::RTTI::Value();
+#line %(LINE)d
+}
+"""
+template_member_procedure = """#line %(LINE)d
+static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
+#line %(LINE)d
+{
+#line %(LINE)d
+    be_forceuse(paramCount);
+#line %(LINE)d
+    be_forceuse(params);
+#line %(LINE)d
+    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+#line %(LINE)d
+	params[0].as<%(CLASS)s&>().%(ID)s(%(PARAMS)s);
+#line %(LINE)d
+	return ::BugEngine::RTTI::Value();
+#line %(LINE)d
+}
+"""
+
+template_class_function = """#line %(LINE)d
+static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
+#line %(LINE)d
+{
+#line %(LINE)d
+    be_forceuse(paramCount);
+#line %(LINE)d
+    be_forceuse(params);
+#line %(LINE)d
+    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+#line %(LINE)d
+	::BugEngine::RTTI::Value(%(ID)s(%(PARAMS)s));
+#line %(LINE)d
+}
+"""
+template_member_function = """#line %(LINE)d
+static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
+#line %(LINE)d
+{
+#line %(LINE)d
+    be_forceuse(paramCount);
+#line %(LINE)d
+    be_forceuse(params);
+#line %(LINE)d
+    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+#line %(LINE)d
+	return ::BugEngine::RTTI::Value(params[0].as<%(CLASS)s&>().%(ID)s(%(PARAMS)s));
+#line %(LINE)d
+}
+"""
 
 
 class Method(cpp.yacc.Nonterm):
@@ -254,6 +319,8 @@ class Method(cpp.yacc.Nonterm):
 	def dump(self, file, instances, namespace, decl, name, parent_name, parent_value, overload_ptr, overload_index):
 		if self.value.id == '?del':
 			return overload_index
+		elif self.value.id == '?new':
+			return overload_index
 		else:
 			prettyname = self.value.name.replace("?", "_")
 			prettyname = prettyname.replace("#", "_")
@@ -272,6 +339,10 @@ class Method(cpp.yacc.Nonterm):
 					'const' in self.value.attributes,
 					self.value.line)
 			return_type = self.value.return_type
+			if 'const' in self.value.attributes:
+				constness = 'const '
+			else:
+				constness = ''
 
 			vararg = 0
 			method_ptr = "0"
@@ -287,19 +358,28 @@ class Method(cpp.yacc.Nonterm):
 							else:
 								method_ptr = '&BugEngine::RTTI::wrapCall< %s, &%s::%s >'%(fullname, fullname, self.value.id)
 			else:
+				param = 0
 				file.write("#line %d\n"%self.value.line)
-				file.write("static BugEngine::RTTI::Value %s_trampoline(BugEngine::RTTI::Value* params, u32 paramCount)\n"%new_overload)
-				file.write("#line %d\n"%self.value.line)
-				file.write("{\n")
-				file.write("    be_forceuse(paramCount);\n")
-				file.write("    be_forceuse(params);\n")
-				file.write("    be_assert(paramCount == %d, \"%%s: expected %%d parameters, got %%d\" | \"%s\" | paramCount | %d);\n" % (len(extra_params)+len(param_types), self.value.id, len(extra_params)+len(param_types)))
-				if self.value.name == '?new':
-					if parent_value:
-						return_type = "ref< %s >"%return_type
-				file.write("    return BugEngine::RTTI::Value();\n")
-				file.write("#line %d\n"%self.value.line)
-				file.write("}\n")
+				if parent_name:
+					param += 1
+					if return_type == 'void':
+						template = template_member_procedure
+					else:
+						template = template_member_function
+				else:
+					if return_type == 'void':
+						template = template_class_procedure
+					else:
+						template = template_class_function
+				method = template % {
+						'PREFIX':new_overload,
+						'PARAMCOUNT':len(extra_params)+len(param_types),
+						'ID': self.value.id,
+						'PARAMS':','.join(['params[%d].as< %s >()'%(i,s) for i,s in zip(xrange(param,param+len(param_types)), param_types)]),
+						'CLASS':parent_name,
+						'LINE':self.value.line
+					}
+				file.write(method)
 				method_ptr = "&%s_trampoline"%new_overload
 				
 			
