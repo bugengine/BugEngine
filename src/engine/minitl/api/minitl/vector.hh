@@ -34,15 +34,15 @@ public:
     typedef base_iterator<reverse_iterator_policy>          reverse_iterator;
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
-    BugEngine::Allocator::Block<T>  m_memory;
-    T*                              m_end;
-    T*                              m_capacity;
+    Allocator::Block<T> m_memory;
+    T*                  m_end;
+    T*                  m_capacity;
 public:
-    explicit vector(BugEngine::Allocator& allocator, size_type count = 0);
+    explicit vector(Allocator& allocator, size_type count = 0);
     vector(const vector<T>& other);
     vector& operator=(const vector<T>& other);
     template< typename ITERATOR >
-    vector(BugEngine::Allocator& allocator, ITERATOR first, ITERATOR last);
+    vector(Allocator& allocator, ITERATOR first, ITERATOR last);
     ~vector();
 
     iterator                begin();

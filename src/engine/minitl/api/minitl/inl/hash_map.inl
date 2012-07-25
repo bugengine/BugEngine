@@ -4,7 +4,6 @@
 #ifndef BE_MINITL_CONTAINER_INL_HASHMAP_INL_
 #define BE_MINITL_CONTAINER_INL_HASHMAP_INL_
 /*****************************************************************************/
-#include    <debug/assert.hh>
 
 namespace minitl
 {
@@ -199,7 +198,7 @@ struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
 
 
 template< typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& allocator, size_type reserved)
+hashmap< Key, Value, Hash >::hashmap(minitl::Allocator& allocator, size_type reserved)
 :   m_objects(allocator, reserved)
 ,   m_hashes(allocator, reserved)
 ,   m_size(0)
@@ -225,7 +224,7 @@ void hashmap< Key, Value, Hash >::reserve(size_type reserved)
 
 
 template< typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::hashmap(BugEngine::Allocator& /*allocator*/, size_type /*reserved*/)
+hashmap< Key, Value, Hash >::hashmap(minitl::Allocator& /*allocator*/, size_type /*reserved*/)
 {
 }
 

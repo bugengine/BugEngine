@@ -19,7 +19,7 @@
 
 namespace BugEngine { namespace Arena
 {
-be_api(WORLD) Allocator& game();
+be_api(WORLD) minitl::Allocator& game();
 }}
 
 /*****************************************************************************/

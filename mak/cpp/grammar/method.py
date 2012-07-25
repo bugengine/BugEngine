@@ -86,12 +86,16 @@ class ArgList(cpp.yacc.Nonterm):
 			file.write("        {%s},\\\n" % arg_pointer)
 			file.write("        \"%s\",\\\n" % "this")
 			if is_const:
-				file.write("        ::BugEngine::be_typeid< const %s* >::type()\\\n" % parent_name)
+				file.write("        ::BugEngine::be_typeid< const %s& >::type()\\\n" % parent_name)
+				extra_args = ['const %s&' % parent_name]
 			else:
-				file.write("        ::BugEngine::be_typeid< %s* >::type()\\\n" % parent_name)
+				file.write("        ::BugEngine::be_typeid< %s& >::type()\\\n" % parent_name)
+				extra_args = ['%s&' % parent_name]
 			file.write("    };\n")
 			arg_pointer = "&%s_p%d" % (decl, arg_index)
-		return (arg_pointer, ",".join([arg.type for arg in self.args]))
+		else:
+			extra_args = []
+		return (arg_pointer, extra_args,[arg.type for arg in self.args])
 
 
 
@@ -255,14 +259,11 @@ class Method(cpp.yacc.Nonterm):
 			prettyname = prettyname.replace("#", "_")
 			decl = decl + [prettyname]
 			fullname = '::'+'::'.join(name)
-			if parent_name:
-				owner = fullname
-			else:
-				owner = '::BugEngine::RTTI::Class'
 			prefix = '_'.join(decl)
 			tags = self.tags.dump(file, instances, prefix)
+
 			new_overload = "s_%s_%s_%d" % (prefix, prettyname, overload_index)
-			args,param_types = self.value.args.dump(
+			args,extra_params,param_types = self.value.args.dump(
 					file,
 					instances,
 					new_overload,
@@ -271,43 +272,44 @@ class Method(cpp.yacc.Nonterm):
 					'const' in self.value.attributes,
 					self.value.line)
 			return_type = self.value.return_type
-			method_tags = "{0}"
 
-			if self.value.id == '?new':
-				if param_types: param_types = ', '+param_types
-				helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (parent_name, param_types)
-				if parent_value:
-					call_ptr = "&%s::construct" % helper
-					return_type = parent_name
-				else:
-					call_ptr = "&%s::constructPtr" % helper
-					return_type = "ref< %s >" % parent_name
+			vararg = 0
+			method_ptr = "0"
+			if return_type.strip() == 'Value':
+				if len(param_types) == 2:
+					if param_types[0].replace(' ', '') == 'Value*':
+						if param_types[1].strip() == 'u32':
+							vararg = 1
+							if not parent_name:
+								method_ptr = '&%s::%s'%(fullname, self.name)
+							elif 'const' in self.value.attributes:
+								method_ptr = '&BugEngine::RTTI::wrapCallConst< %s, &%s::%s >'%(fullname, fullname, self.value.id)
+							else:
+								method_ptr = '&BugEngine::RTTI::wrapCall< %s, &%s::%s >'%(fullname, fullname, self.value.id)
 			else:
-				if 'static' in self.value.attributes or not parent_name:
-					ptr = "%s (*) (%s)" % (return_type, param_types)
-				else:
-					ptr = "%s (%s::*) (%s)" % (return_type, fullname, param_types)
-					if 'const' in self.value.attributes:
-						ptr += ' const'
-				methodptr = "BE_SELECTOVERLOAD(%s)&%s::%s" % (ptr, fullname, self.value.id)
-				if param_types: param_types = ', '+param_types
-				if return_type != 'void':
-					helper = "BugEngine::RTTI::functionhelper< %s, %s%s >" % (owner, return_type, param_types)
-				else:
-					helper = "BugEngine::RTTI::procedurehelper< %s%s >" % (owner, param_types)
-				if 'static' in self.value.attributes or not parent_name:
-					call_ptr = "&%s::callStatic< %s >" % (helper, methodptr)
-				elif 'const' in self.value.attributes:
-					call_ptr = "&%s::callConst< %s >" % (helper, methodptr)
-				else:
-					call_ptr = "&%s::call< %s >" % (helper, methodptr)
+				file.write("#line %d\n"%self.value.line)
+				file.write("static BugEngine::RTTI::Value %s_trampoline(BugEngine::RTTI::Value* params, u32 paramCount)\n"%new_overload)
+				file.write("#line %d\n"%self.value.line)
+				file.write("{\n")
+				file.write("    be_forceuse(paramCount);\n")
+				file.write("    be_forceuse(params);\n")
+				file.write("    be_assert(paramCount == %d, \"%%s: expected %%d parameters, got %%d\" | \"%s\" | paramCount | %d);\n" % (len(extra_params)+len(param_types), self.value.id, len(extra_params)+len(param_types)))
+				if self.value.name == '?new':
+					if parent_value:
+						return_type = "ref< %s >"%return_type
+				file.write("    return BugEngine::RTTI::Value();\n")
+				file.write("#line %d\n"%self.value.line)
+				file.write("}\n")
+				method_ptr = "&%s_trampoline"%new_overload
+				
+			
 
 			file.write("#line %d\n"%self.value.line)
 			file.write("static const ::BugEngine::RTTI::Method::Overload %s =\n" % (new_overload))
 			file.write("#line %d\n"%self.value.line)
 			file.write("    {\n")
 			file.write("#line %d\n"%self.value.line)
-			file.write("        %s,\n" % method_tags)
+			file.write("        %s,\n" % tags)
 			file.write("#line %d\n"%self.value.line)
 			file.write("        {%s},\n" % overload_ptr)
 			file.write("#line %d\n"%self.value.line)
@@ -315,9 +317,9 @@ class Method(cpp.yacc.Nonterm):
 			file.write("#line %d\n"%self.value.line)
 			file.write("        {%s},\n" % args)
 			file.write("#line %d\n"%self.value.line)
-			file.write("        %s::VarArg,\n" % helper)
+			file.write("        %d,\n"%vararg)
 			file.write("#line %d\n"%self.value.line)
-			file.write("        %s\n" % call_ptr)
+			file.write("        %s\n" % method_ptr)
 			file.write("#line %d\n"%self.value.line)
 			file.write("    };\n\n")
 			return "&"+new_overload

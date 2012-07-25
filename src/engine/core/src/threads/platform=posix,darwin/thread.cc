@@ -120,7 +120,7 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    return BugEngine::Debug::Format<>("thread %d") | currentId();
+    return istring(minitl::format<128u>("thread %d") | currentId());
 }
 
 void Thread::wait() const

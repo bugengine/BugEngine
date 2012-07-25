@@ -7,23 +7,23 @@
 namespace BugEngine { namespace Arena
 {
 
-Allocator& general()
+minitl::Allocator& general()
 {
     static GeneralAllocator s_allocator;
     return s_allocator;
 }
 
-Allocator& temporary()
+minitl::Allocator& temporary()
 {
     return general();
 }
 
-Allocator& stack()
+minitl::Allocator& stack()
 {
     return general();
 }
 
-Allocator& debug()
+minitl::Allocator& debug()
 {
     return general();
 }

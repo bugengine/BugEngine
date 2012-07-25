@@ -1,12 +1,12 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#include    <debug/stdafx.h>
-#include    <debug/assert.hh>
+#include    <minitl/stdafx.h>
+#include    <minitl/assert.hh>
 #include    <stdio.h>
 #include    <stdarg.h>
 
-namespace BugEngine { namespace Debug
+namespace minitl
 {
 
 AssertionResult defaultAssertionCallback(const char */*file*/, int /*line*/, const char */*expr*/, const char */*message*/, ...)
@@ -27,5 +27,5 @@ AssertionCallback_t getAssertionCallback()
     return g_callback;
 }
 
-}}
+}
 

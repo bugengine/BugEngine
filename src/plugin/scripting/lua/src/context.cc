@@ -14,7 +14,7 @@ namespace BugEngine
 
 namespace Arena
 {
-static Allocator& lua()
+static minitl::Allocator& lua()
 {
     return script();
 }
@@ -23,7 +23,35 @@ static Allocator& lua()
 namespace Lua
 {
 
-
+static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
+{
+    const char* constness = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+    const char* reference;
+    const char* closing;
+    switch(userdata->type().indirection)
+    {
+        case RTTI::Type::RefPtr:
+            reference = "ref<";
+            closing = ">";
+            break;
+        case RTTI::Type::WeakPtr:
+            reference = "weak<";
+            closing = ">";
+            break;
+        case RTTI::Type::RawPtr:
+            reference = "raw<";
+            closing = ">";
+            break;
+        case RTTI::Type::Value:
+            reference = "";
+            constness = "";
+            closing = "";
+            break;
+    }
+    const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
+    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access, userdata->type().metaclass->name.str().name, closing, userdata);
+    return 1;
+}
 
 const luaL_Reg Context::s_valueMetaTable[] = {
     {"__gc", Context::valueGC},
@@ -106,7 +134,7 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::runBuffer(weak<const LuaScript> /*script*/, const Allocator::Block<u8>& block)
+void Context::runBuffer(weak<const LuaScript> /*script*/, const minitl::Allocator::Block<u8>& block)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *) block.data(), be_checked_numcast<size_t > (block.count()), 0);
@@ -216,7 +244,7 @@ int Context::valueToString(lua_State *state)
         raw<const RTTI::Class> metaclass = userdata->type().metaclass;
         if (metaclass == be_typeid< inamespace >::klass())
         {
-            lua_pushfstring(state, "%s", userdata->as<const inamespace > ().str().c_str());
+            lua_pushfstring(state, "%s", userdata->as<const inamespace > ().str().name);
             return 1;
         }
         if (metaclass == be_typeid< istring >::klass())
@@ -226,12 +254,11 @@ int Context::valueToString(lua_State *state)
         }
         if (metaclass == be_typeid< ifilename >::klass())
         {
-            lua_pushfstring(state, "%s", userdata->as<const ifilename > ().str().c_str());
+            lua_pushfstring(state, "%s", userdata->as<const ifilename > ().str().name);
             return 1;
         }
     }
-    lua_pushfstring(state, "[%s object @0x%p]", userdata->type().name().c_str(), userdata);
-    return 1;
+    return pushUserdataString(state, userdata);
 }
 
 int Context::valueGet(lua_State *state)
@@ -306,9 +333,33 @@ void Context::printStack(lua_State* l)
         {
             RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(l, -i);
             be_forceuse(userdata);
-            be_debug("object : [%s object @0x%p]\n" | userdata->type().name().c_str() | userdata);
-        }
+            const char* constness = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+            const char* reference;
+            const char* closing;
+            switch(userdata->type().indirection)
+            {
+                case RTTI::Type::RefPtr:
+                    reference = "ref<";
+                    closing = ">";
+                    break;
+                case RTTI::Type::WeakPtr:
+                    reference = "weak<";
+                    closing = ">";
+                    break;
+                case RTTI::Type::RawPtr:
+                    reference = "raw<";
+                    closing = ">";
+                    break;
+                case RTTI::Type::Value:
+                    reference = "";
+                    constness = "";
+                    closing = "";
+                    break;
+            }
+            const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
+            be_debug("[%s%s%s%s%s object @0x%p]" | constness | reference | access | userdata->type().metaclass->name.str().name | closing | userdata);
             break;
+        }
         default:
             be_debug("%s\n" | lua_typename(l, t));
             break;

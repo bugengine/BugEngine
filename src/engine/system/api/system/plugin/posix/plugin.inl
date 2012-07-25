@@ -49,12 +49,12 @@ namespace BugEngine
 
 static void* loadLibrary(const inamespace& pluginName)
 {
-    BugEngine::Debug::Format<> plugingFile = BugEngine::Debug::Format<>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
+    const minitl::format<1024u>& plugingFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     static const ipath pluginSubdir = ipath("plugins");
-    BugEngine::Debug::Format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | pluginPath);
-    void* handle = dlopen(pluginPath.c_str(), RTLD_NOW|RTLD_LOCAL);
+    ifilename::Filename pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
+    be_info("loading plugin %s (%s)" | pluginName | pluginPath.name);
+    void* handle = dlopen(pluginPath.name, RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
         be_error(dlerror());

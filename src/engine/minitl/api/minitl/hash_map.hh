@@ -20,7 +20,7 @@ template< typename Key, typename Value, typename Hash = std::less<Key> >
 class hashmap : public std::map<Key, Value, Hash>
 {
 public:
-    hashmap(BugEngine::Allocator& allocator, size_type reserved = 0);
+    hashmap(minitl::Allocator& allocator, size_type reserved = 0);
     ~hashmap();
 };
 /*{
@@ -45,11 +45,11 @@ public:
     typedef base_iterator<const_reverse_iterator_policy>    const_reverse_iterator;
 private:
     minitl::pool<value_type>                    m_objects;
-    BugEngine::Allocator::Block<value_type*>    m_hashes;
+    minitl::Allocator::Block<value_type*>       m_hashes;
     size_type                                   m_size;
     size_type                                   m_capacity;
 public:
-    hashmap(BugEngine::Allocator& allocator, size_type reserved = 0);
+    hashmap(minitl::Allocator& allocator, size_type reserved = 0);
     ~hashmap();
 
     void                            reserve(size_type size);

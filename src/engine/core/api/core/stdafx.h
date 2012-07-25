@@ -6,7 +6,6 @@
 /*****************************************************************************/
 
 #include    <kernel/stdafx.h>
-#include    <debug/stdafx.h>
 #include    <minitl/stdafx.h>
 #include    <core/preproc.hh>
 
@@ -21,7 +20,6 @@
 #endif
 #define     BE_PROJECT          BE_STRINGIZE(BE_PROJECTCATEGORY) "." BE_STRINGIZE(BE_PROJECTNAME)
 #define     BE_HERE             BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
-#define     BE_NOCOPY(x)        private: x(const x&); x& operator=(const x&);
 
 #include    <core/platforms.hh>
 
@@ -33,38 +31,18 @@
 # define    COREEXPORT
 #endif
 
-#define     be_forceuse(p)   static_cast<void>(p)
-
-template< typename T >
-inline T be_align(T value, size_t alignment)
-{
-    size_t v = (size_t)(value);
-    return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
-}
-
-template< typename T >
-inline T be_min(T t1, T t2)
-{
-    return t1 < t2 ? t1 : t2;
-}
-
-template< typename T >
-inline T be_max(T t1, T t2)
-{
-    return t1 > t2 ? t1 : t2;
-}
 
 #include    <minitl/allocator.hh>
 
 namespace BugEngine { namespace Arena
 {
-be_api(CORE) Allocator& temporary();
-be_api(CORE) Allocator& stack();
-be_api(CORE) Allocator& debug();
-be_api(CORE) Allocator& general();
+be_api(CORE) minitl::Allocator& temporary();
+be_api(CORE) minitl::Allocator& stack();
+be_api(CORE) minitl::Allocator& debug();
+be_api(CORE) minitl::Allocator& general();
 }}
 
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 
 #include    <minitl/refcountable.hh>
 #include    <minitl/rawptr.hh>

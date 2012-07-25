@@ -12,28 +12,25 @@ namespace BugEngine
 {
 
 #define checkResult(a) do { cl_int err = a; if (err != CL_SUCCESS) be_error("OpenCL call %s failed with error code %d"|#a|err); } while (0)
-
-static BugEngine::Debug::Format<1024> getPlatformInfo(cl_platform_id platform, cl_platform_info name)
+struct CLStringInfo
 {
-    BugEngine::Debug::Format<1024> result("");
-    size_t size = 0;
-    checkResult(clGetPlatformInfo(platform, name, 0, 0, &size));
-    char* temp = (char*)malloca(size+1);
-    checkResult(clGetPlatformInfo(platform, name, size, temp, 0));
-    result.append(temp);
-    freea(temp);
+    enum { InfoLogSize = 1024 };
+    char info[InfoLogSize];
+};
+
+static CLStringInfo getPlatformInfo(cl_platform_id platform, cl_platform_info name)
+{
+    CLStringInfo result;
+    size_t size = CLStringInfo::InfoLogSize;
+    checkResult(clGetPlatformInfo(platform, name, size, result.info, 0));
     return result;
 }
 
-static BugEngine::Debug::Format<1024> getDeviceInfo(cl_device_id device, cl_device_info name)
+static CLStringInfo getDeviceInfo(cl_device_id device, cl_device_info name)
 {
-    BugEngine::Debug::Format<1024> result("");
-    size_t size = 0;
-    checkResult(clGetDeviceInfo(device, name, 0, 0, &size));
-    char* temp = (char*)malloca(size+1);
-    checkResult(clGetDeviceInfo(device, name, size, temp, 0));
-    result.append(temp);
-    freea(temp);
+    CLStringInfo result;
+    size_t size = CLStringInfo::InfoLogSize;
+    checkResult(clGetDeviceInfo(device, name, size, result.info, 0));
     return result;
 }
 
@@ -52,11 +49,11 @@ cl_context OpenCLKernelScheduler::createCLContextOnPlatform(const cl_context_pro
         {
             device = devices[i];
             be_info("Found %s %s on %s (%s/%s)"
-                    |   getDeviceInfo(device, CL_DEVICE_VERSION)
-                    |   getDeviceInfo(device, CL_DEVICE_PROFILE)
-                    |   getDeviceInfo(device, CL_DEVICE_NAME)
-                    |   getDeviceInfo(device, CL_DEVICE_VENDOR)
-                    |   getDeviceInfo(device, CL_DRIVER_VERSION));
+                    |   getDeviceInfo(device, CL_DEVICE_VERSION).info
+                    |   getDeviceInfo(device, CL_DEVICE_PROFILE).info
+                    |   getDeviceInfo(device, CL_DEVICE_NAME).info
+                    |   getDeviceInfo(device, CL_DEVICE_VENDOR).info
+                    |   getDeviceInfo(device, CL_DRIVER_VERSION).info);
             size_t size = 0;
             checkResult(clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
             char* deviceExtensions = (char*)malloca(size+1);
@@ -88,9 +85,9 @@ cl_context OpenCLKernelScheduler::createCLContext(const cl_context_properties* p
     {
         cl_platform_id p = platforms[i];
         be_info("Found OpenCL platform %s (%s/%s)"
-                |   getPlatformInfo(p, CL_PLATFORM_NAME)
-                |   getPlatformInfo(p, CL_PLATFORM_VENDOR)
-                |   getPlatformInfo(p, CL_PLATFORM_VERSION));
+                |   getPlatformInfo(p, CL_PLATFORM_NAME).info
+                |   getPlatformInfo(p, CL_PLATFORM_VENDOR).info
+                |   getPlatformInfo(p, CL_PLATFORM_VERSION).info);
         context = createCLContextOnPlatform(properties, p, CL_DEVICE_TYPE_ACCELERATOR);
         if (!context)
         {

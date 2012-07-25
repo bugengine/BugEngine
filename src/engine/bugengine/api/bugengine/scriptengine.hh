@@ -14,19 +14,19 @@ template< typename T >
 class ScriptEngine : public IResourceLoader
 {
 protected:
-    Allocator&                                                                      m_scriptArena;
-    weak<ResourceManager>                                                           m_manager;
+    minitl::Allocator&      m_scriptArena;
+    weak<ResourceManager>   m_manager;
 public:
     virtual ~ScriptEngine();
 protected:
-    ScriptEngine(Allocator& arena, weak<ResourceManager> manager);
-    virtual void runBuffer(weak<const T> resource, const Allocator::Block<u8>& buffer) = 0;
+    ScriptEngine(minitl::Allocator& arena, weak<ResourceManager> manager);
+    virtual void runBuffer(weak<const T> resource, const minitl::Allocator::Block<u8>& buffer) = 0;
     virtual void unloadScript(const ResourceHandle& handle);
 
 private:
     virtual ResourceHandle load(weak<const Resource> script) override;
     virtual void unload(const ResourceHandle& handle) override;
-    virtual void onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer) override;
+    virtual void onTicketLoaded(weak<const Resource> resource, const minitl::Allocator::Block<u8>& buffer) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

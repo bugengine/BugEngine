@@ -38,8 +38,8 @@ static void setFilePointer(const char *debugName, HANDLE file, i64 wantedOffset)
 void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    BugEngine::Debug::Format<1024> pathname = m_file.str();
-    HANDLE h = CreateFileA ( pathname.c_str(),
+    ifilename::Filename pathname = m_file.str();
+    HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_READ,
                              FILE_SHARE_READ,
                              0,
@@ -86,8 +86,8 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 void Win32File::doWriteBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    BugEngine::Debug::Format<1024> pathname = m_file.str();
-    HANDLE h = CreateFileA ( pathname.c_str(),
+    filename::Filename pathname = m_file.str();
+    HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_WRITE,
                              0,
                              0,
@@ -112,7 +112,7 @@ void Win32File::doWriteBuffer(weak<Ticket> ticket) const
     else
     {
         static const int s_bufferSize = 1024;
-        setFilePointer(pathname.c_str(), h, ticket->offset);
+        setFilePointer(pathname.name, h, ticket->offset);
         for (ticket->processed = 0; !ticket->done(); )
         {
             DWORD written;

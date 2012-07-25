@@ -4,8 +4,6 @@
 #ifndef BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
 #define BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
 /*****************************************************************************/
-#include    <debug/assert.hh>
-
 
 namespace minitl
 {

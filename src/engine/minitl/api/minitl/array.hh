@@ -15,17 +15,17 @@ template< typename T >
 class array
 {
 private:
-    i_u32*                  m_refCount;
-    T*                      m_array;
-    BugEngine::Allocator&   m_allocator;
-    u32                     m_size;
+    i_u32*      m_refCount;
+    T*          m_array;
+    Allocator&  m_allocator;
+    u32         m_size;
 public:
     typedef const T* const_iterator;
     typedef T* iterator;
 public:
-    inline array(BugEngine::Allocator& allocator, u32 size);
+    inline array(Allocator& allocator, u32 size);
     template< typename ITERATOR >
-    inline array(BugEngine::Allocator& allocator, ITERATOR begin, ITERATOR end);
+    inline array(Allocator& allocator, ITERATOR begin, ITERATOR end);
     inline array(const array<T>& rhs);
     inline ~array();
 

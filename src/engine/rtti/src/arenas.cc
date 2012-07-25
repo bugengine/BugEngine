@@ -6,7 +6,7 @@
 namespace BugEngine { namespace Arena
 {
 
-Allocator& rtti() { return general(); }
-Allocator& script() { return general(); }
+minitl::Allocator& rtti() { return general(); }
+minitl::Allocator& script() { return general(); }
 
 }}

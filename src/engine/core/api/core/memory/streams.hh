@@ -11,11 +11,11 @@ namespace BugEngine
 class be_api(CORE) MemoryStream
 {
 private:
-    Allocator::Block<u8>    m_memory;
-    u64                     m_size;
-    u64                     m_capacity;
+    minitl::Allocator::Block<u8>    m_memory;
+    u64                             m_size;
+    u64                             m_capacity;
 public:
-    MemoryStream(Allocator& allocator, u64 size = 0);
+    MemoryStream(minitl::Allocator& allocator, u64 size = 0);
     ~MemoryStream();
 
     void*       memory()                                { return m_memory; }

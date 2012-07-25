@@ -12,7 +12,7 @@ namespace BugEngine
 {
 
 template< typename T >
-ScriptEngine<T>::ScriptEngine(Allocator& arena, weak<ResourceManager> manager)
+ScriptEngine<T>::ScriptEngine(minitl::Allocator& arena, weak<ResourceManager> manager)
     :   IResourceLoader()
     ,   m_scriptArena(arena)
     ,   m_manager(manager)
@@ -49,7 +49,7 @@ void ScriptEngine<T>::unloadScript(const ResourceHandle& /*handle*/)
 }
 
 template< typename T >
-void ScriptEngine<T>::onTicketLoaded(weak<const Resource> resource, const Allocator::Block<u8>& buffer)
+void ScriptEngine<T>::onTicketLoaded(weak<const Resource> resource, const minitl::Allocator::Block<u8>& buffer)
 {
     runBuffer(be_checked_cast<const T>(resource), buffer);
 }

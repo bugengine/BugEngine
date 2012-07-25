@@ -62,25 +62,25 @@ public:
             Read,
             Write
         };
-        Action const                action;
-        weak<const File>            file;
-        Allocator::Block<u8>        buffer;
-        i_u32                       processed;
-        const i64                   offset;
-        const u32                   total;
-        i_bool                      error;
+        Action const                    action;
+        weak<const File>                file;
+        minitl::Allocator::Block<u8>    buffer;
+        i_u32                           processed;
+        const i64                       offset;
+        const u32                       total;
+        i_bool                          error;
 
         inline bool done() const    { return error || processed == total; }
 
-        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size);
-        Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data);
+        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size);
+        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data);
         ~Ticket();
     private:
         Ticket(const Ticket&);
         Ticket& operator=(const Ticket&);
     };
 
-    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, Allocator& arena = Arena::temporary()) const;
+    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, minitl::Allocator& arena = Arena::temporary()) const;
     ref<const Ticket> beginWrite(const void* data, u32 size, i64 offset = -1);
 private:
     void fillBuffer(weak<Ticket> ticket) const;

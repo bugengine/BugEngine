@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <core/stdafx.h>
-#include    <core/runtime/md5.hh>
+#include    <core/md5.hh>
 
 extern"C"
 {

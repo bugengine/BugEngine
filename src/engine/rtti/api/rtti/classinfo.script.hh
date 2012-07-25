@@ -5,7 +5,7 @@
 #define BE_RTTI_CLASSINFO_SCRIPT_HH_
 /*****************************************************************************/
 #include    <rtti/value.hh>
-#include    <core/runtime/md5.hh>
+#include    <core/md5.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -32,9 +32,7 @@ published:
 
     raw<const Class> const      parent;
 
-    u16 const                   size;
-
-    u16 const                   align;
+    u32 const                   size;
 
     i32 const                   offset;
 
@@ -90,7 +88,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n()                                                                                   \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                       \
+        static RTTI::Class ci = { #n, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                          \
         static RTTI::Class::ObjectInfo ob = { be_##plugin##_Namespace()->objects, {0}, #n, RTTI::Value(&ci) };                                  \
         static raw<const RTTI::Class::ObjectInfo> result = {be_##plugin##_Namespace()->objects.set(&ob)};                                       \
         be_forceuse(result);                                                                                                                    \
@@ -105,7 +103,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2()                                                                           \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n1"."#n2, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                \
+        static RTTI::Class ci = { #n1"."#n2, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                   \
         static RTTI::Class::ObjectInfo ob = { be_##plugin##_Namespace_##n1()->objects, {0}, #n2, RTTI::Value(&ci) };                            \
         static raw<const RTTI::Class::ObjectInfo> result = {be_##plugin##_Namespace_##n1()->objects.set(&ob)};                                  \
         be_forceuse(result);                                                                                                                    \
@@ -120,7 +118,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3()                                                                    \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n1"."#n2"."#n3, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                          \
+        static RTTI::Class ci = { #n1"."#n2"."#n3, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                             \
         static RTTI::Class::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2()->objects, {0}, #n3, RTTI::Value(&ci) };                     \
         static raw<const RTTI::Class::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2()->objects.set(&ob)};                           \
         be_forceuse(result);                                                                                                                    \
@@ -134,7 +132,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                                                             \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n1"."#n2"."#n3"."#n4, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                    \
+        static RTTI::Class ci = { #n1"."#n2"."#n3"."#n4, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                       \
         static RTTI::Class::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects, {0}, #n4, RTTI::Value(&ci) };              \
         static raw<const RTTI::Class::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.set(&ob)};                    \
         static raw<const RTTI::Class::ObjectInfo> result = be_##plugin##_Namespace_##n1##_##n2##_##n3()->objects = {&ob};                       \
@@ -150,7 +148,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()                                                      \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n1"."#n2"."#n3"."#n4"."#n5, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                              \
+        static RTTI::Class ci = { #n1"."#n2"."#n3"."#n4"."#n5, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                 \
         static RTTI::Class::ObjectInfo ob = { be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects, {0}, #n5, RTTI::Value(&ci) };       \
         static raw<const RTTI::Class::ObjectInfo> result = {be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.set(&ob)};             \
         be_forceuse(result);                                                                                                                    \
