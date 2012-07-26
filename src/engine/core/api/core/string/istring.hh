@@ -153,46 +153,22 @@ static inline const format<SIZE>& operator|(const format<SIZE>& f, const BugEngi
 template< u16 SIZE >
 const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::inamespace& value)
 {
-    if (value.size() > 0)
-    {
-        f | value[0];
-        for (u32 i = 1; i < value.size(); ++i)
-        {
-            f | (char)value.Separator;
-            f | value[i];
-        }
-    }
-    return f;
+    BugEngine::inamespace::Path p = value.str();
+    return f|p.name;
 }
 
 template< u16 SIZE >
 const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::ipath& value)
 {
-    if (value.size() > 0)
-    {
-        f | value[0];
-        for (u32 i = 1; i < value.size(); ++i)
-        {
-            f | (char)value.Separator;
-            f | value[i];
-        }
-    }
-    return f;
+    BugEngine::ipath::Filename p = value.str();
+    return f|p.name;
 }
 
 template< u16 SIZE >
 const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::ifilename& value)
 {
-    if (value.size() > 0)
-    {
-        f | value[0];
-        for (u32 i = 1; i < value.size(); ++i)
-        {
-            f | (char)value.Separator;
-            f | value[i];
-        }
-    }
-    return f;
+    BugEngine::ifilename::Filename p = value.str();
+    return f|p.name;
 }
 
 }

@@ -59,7 +59,7 @@ def configure(conf):
 	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
 		if platform.lower() != 'linux':
 			continue
-		name = 'suncc-linux-'+arch+'-'+version.replace('-','_')
+		name = 'linux-%s-suncc-%s'%(arch,version.replace('-','_'))
 		conf.setenv(name, conf.env.derive())
 		try:
 			conf.env.ENVNAME = name

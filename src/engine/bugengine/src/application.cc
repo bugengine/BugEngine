@@ -117,12 +117,12 @@ void Application::updateResources()
     if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
+        /*TODO*/
         m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
-        m_updateLoop = Task::ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
     }
     m_resourceLoadingCount = resourceCount;
 }

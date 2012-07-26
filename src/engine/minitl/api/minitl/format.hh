@@ -13,7 +13,7 @@ template< u16 SIZE >
 class format
 {
 private:
-    mutable char* m_buffer;
+    mutable char  m_buffer[SIZE];
     mutable char* m_firstFormat;
 private:
     void findToken() const;
@@ -40,7 +40,7 @@ public:
 template< u16 SIZE >
 format<SIZE>::format(const char *formatstr)
     :   m_buffer()
-    ,   m_firstFormat()
+    ,   m_firstFormat(m_buffer)
 {
     strncpy(m_buffer, formatstr, SIZE-1);
     m_buffer[SIZE-1] = 0;

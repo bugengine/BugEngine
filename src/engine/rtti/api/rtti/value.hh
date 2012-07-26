@@ -32,7 +32,6 @@ private:
     };
     bool                 m_reference;
 private:
-    inline void* memory();
     inline const void* memory() const;
     inline void* rawget() const;
 private:
@@ -50,6 +49,7 @@ public:
     enum ReserveType { Reserve };
 
     Value(Type type, ReserveType);
+    inline void* memory();
 public:
     enum MakeConstType { MakeConst };
 

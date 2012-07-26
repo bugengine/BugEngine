@@ -223,7 +223,8 @@ class Initializers(cpp.yacc.Nonterm):
 		"%reduce ID LPAREN Value RPAREN COMMA Initializers"
 
 
-template_class_procedure = """#line %(LINE)d
+
+template_header = """#line %(LINE)d
 static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
 #line %(LINE)d
 {
@@ -233,60 +234,44 @@ static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* 
     be_forceuse(params);
 #line %(LINE)d
     be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+"""
+template_footer = """#line %(LINE)d
+}
+"""
+
+template_class_procedure = """
 #line %(LINE)d
 	%(ID)s(%(PARAMS)s);
 #line %(LINE)d
 	return ::BugEngine::RTTI::Value();
-#line %(LINE)d
-}
 """
-template_member_procedure = """#line %(LINE)d
-static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
-#line %(LINE)d
-{
-#line %(LINE)d
-    be_forceuse(paramCount);
-#line %(LINE)d
-    be_forceuse(params);
-#line %(LINE)d
-    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+template_member_procedure = """
 #line %(LINE)d
 	params[0].as<%(CLASS)s&>().%(ID)s(%(PARAMS)s);
 #line %(LINE)d
 	return ::BugEngine::RTTI::Value();
-#line %(LINE)d
-}
 """
 
-template_class_function = """#line %(LINE)d
-static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
+template_class_function = """
 #line %(LINE)d
-{
-#line %(LINE)d
-    be_forceuse(paramCount);
-#line %(LINE)d
-    be_forceuse(params);
-#line %(LINE)d
-    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
-#line %(LINE)d
-	::BugEngine::RTTI::Value(%(ID)s(%(PARAMS)s));
-#line %(LINE)d
-}
+	return ::BugEngine::RTTI::Value(%(ID)s(%(PARAMS)s));
 """
-template_member_function = """#line %(LINE)d
-static ::BugEngine::RTTI::Value %(PREFIX)s_trampoline(::BugEngine::RTTI::Value* params, u32 paramCount)
-#line %(LINE)d
-{
-#line %(LINE)d
-    be_forceuse(paramCount);
-#line %(LINE)d
-    be_forceuse(params);
-#line %(LINE)d
-    be_assert(paramCount == %(PARAMCOUNT)d, "%%s: expected %%d parameters, got %%d" | "%(ID)s" | paramCount | %(PARAMCOUNT)d);
+
+template_member_function = """
 #line %(LINE)d
 	return ::BugEngine::RTTI::Value(params[0].as<%(CLASS)s&>().%(ID)s(%(PARAMS)s));
+"""
+template_new_ptr = """
 #line %(LINE)d
-}
+	::BugEngine::RTTI::Value v (::BugEngine::be_typeid< minitl::ref<%(CLASS)s > >::type(), ::BugEngine::RTTI::Value::Reserve);
+	new(v.memory()) minitl::ref< %(CLASS)s >( minitl::ref< %(CLASS)s >::create(::BugEngine::Arena::script()%(PARAMSCOMMA)s) );
+	return v;
+"""
+template_new_value = """
+#line %(LINE)d
+	::BugEngine::RTTI::Value v (::BugEngine::be_typeid< %(CLASS)s >::type(), ::BugEngine::RTTI::Value::Reserve);
+	new(v.memory()) %(CLASS)s(%(PARAMS)s);
+	return v;
 """
 
 
@@ -318,8 +303,6 @@ class Method(cpp.yacc.Nonterm):
 
 	def dump(self, file, instances, namespace, decl, name, parent_name, parent_value, overload_ptr, overload_index):
 		if self.value.id == '?del':
-			return overload_index
-		elif self.value.id == '?new':
 			return overload_index
 		else:
 			prettyname = self.value.name.replace("?", "_")
@@ -360,7 +343,12 @@ class Method(cpp.yacc.Nonterm):
 			else:
 				param = 0
 				file.write("#line %d\n"%self.value.line)
-				if parent_name:
+				if self.value.id == '?new':
+					if parent_value:
+						template = template_new_value
+					else:
+						template = template_new_ptr
+				elif parent_name:
 					param += 1
 					if return_type == 'void':
 						template = template_member_procedure
@@ -371,11 +359,17 @@ class Method(cpp.yacc.Nonterm):
 						template = template_class_procedure
 					else:
 						template = template_class_function
-				method = template % {
+				params = ','.join(['params[%d].as< %s >()'%(i,s) for i,s in zip(range(param,param+len(param_types)), param_types)])
+				if params:
+					paramscomma = ', ' + params
+				else:
+					paramscomma = ''
+				method = (template_header+template+template_footer) % {
 						'PREFIX':new_overload,
 						'PARAMCOUNT':len(extra_params)+len(param_types),
 						'ID': self.value.id,
-						'PARAMS':','.join(['params[%d].as< %s >()'%(i,s) for i,s in zip(xrange(param,param+len(param_types)), param_types)]),
+						'PARAMS': params,
+						'PARAMSCOMMA': paramscomma,
 						'CLASS':parent_name,
 						'LINE':self.value.line
 					}

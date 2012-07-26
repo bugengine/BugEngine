@@ -156,8 +156,8 @@ class Exprs(cpp.yacc.Nonterm):
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
-		#if v.value:
-		#	self.members.append(v.value)
+		if v.value:
+			self.members.append(v.value)
 
 	def expr_template(self, e, exprs):
 		"%reduce ExprTemplate Exprs"
