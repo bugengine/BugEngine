@@ -13,7 +13,7 @@ namespace BugEngine
 
 namespace Arena
 {
-static inline Allocator& string()
+static inline minitl::Allocator& string()
 {
     return general();
 }
@@ -35,10 +35,10 @@ private:
     class Buffer
     {
     private:
-        Buffer*                 m_next;
-        Allocator::Block<byte>  m_buffer;
-        i_size_t                m_used;
-        static const size_t     s_capacity = 1024*200;
+        Buffer*                         m_next;
+        minitl::Allocator::Block<byte>  m_buffer;
+        i_size_t                        m_used;
+        static const size_t             s_capacity = 1024*200;
     private:
         StringCache*    reserveNext(size_t size);
     public:
@@ -310,12 +310,12 @@ igenericnamespace::igenericnamespace(const char *str, const char* sep)
     parse(str, str+strlen(str), sep, m_namespace, m_size);
 }
 
-size_t igenericnamespace::size() const
+u32 igenericnamespace::size() const
 {
     return m_size;
 }
 
-const istring& igenericnamespace::operator[](size_t index) const
+const istring& igenericnamespace::operator[](u32 index) const
 {
     be_assert(m_size > index, "index %d out of range %d" | index | m_size);
     return m_namespace[index];
@@ -336,7 +336,7 @@ istring igenericnamespace::pop_back()
 istring igenericnamespace::pop_front()
 {
     istring backup = m_namespace[0];
-    for (size_t i = 1; i < m_size; ++i)
+    for (u32 i = 1; i < m_size; ++i)
         m_namespace[i-1] = m_namespace[i];
     m_size--;
     return backup;
@@ -346,7 +346,7 @@ bool igenericnamespace::operator==(const igenericnamespace& other) const
 {
     if ( this->size() != other.size())
         return false;
-    for (size_t i = 0; i < other.size(); ++i)
+    for (u32 i = 0; i < other.size(); ++i)
         if (m_namespace[i] != other[i])
             return false;
     return true;
@@ -356,7 +356,7 @@ bool igenericnamespace::operator!=(const igenericnamespace& other) const
 {
     if ( this->size() != other.size())
         return true;
-    for (size_t i = 0; i < other.size(); ++i)
+    for (u32 i = 0; i < other.size(); ++i)
         if (m_namespace[i] != other[i])
             return true;
     return false;
@@ -364,7 +364,7 @@ bool igenericnamespace::operator!=(const igenericnamespace& other) const
 
 bool startswith(const igenericnamespace& start, const igenericnamespace& full)
 {
-    for (size_t i = 0; i < start.size(); ++i)
+    for (u32 i = 0; i < start.size(); ++i)
         if (start[i] != full[i])
             return false;
     return true;
@@ -372,7 +372,7 @@ bool startswith(const igenericnamespace& start, const igenericnamespace& full)
 
 bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2)
 {
-    for (size_t i = 0; i < minitl::min(ns1.size(), ns2.size()); ++i)
+    for (u32 i = 0; i < minitl::min(ns1.size(), ns2.size()); ++i)
     {
         if (ns1[i] < ns2[i])
             return true;
@@ -380,6 +380,23 @@ bool operator<(const igenericnamespace& ns1, const igenericnamespace& ns2)
             return false;
     }
     return ns1.size() < ns2.size();
+}
+
+void igenericnamespace::str(char* buffer, char separator, u32 size) const
+{
+    buffer[0] = 0;
+    buffer[size-1] = 0;
+    char sep[2] = {separator, '\0'};
+    if (m_size > 0)
+    {
+        strncpy(buffer, m_namespace[0].c_str(), size-1);
+        for (u32 i = 1; i < m_size; ++i)
+        {
+            strncat(buffer, sep, size - strlen(buffer) - 1);
+            strncat(buffer, m_namespace[i].c_str(), size - strlen(buffer) - 1);
+        }
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -394,11 +411,6 @@ inamespace::inamespace(const char* _str)
 {
 }
 
-BugEngine::Debug::Format<inamespace::MaxNamespaceLength> inamespace::str() const
-{
-    return igenericnamespace::tostring<inamespace::MaxNamespaceLength>(".");
-}
-
 inamespace& inamespace::operator+=(const istring& str2)
 {
     return this->operator +=(inamespace(str2));
@@ -406,7 +418,7 @@ inamespace& inamespace::operator+=(const istring& str2)
 
 inamespace& inamespace::operator+=(const inamespace& str2)
 {
-    for (size_t i = 0; i < str2.size(); ++i)
+    for (u32 i = 0; i < str2.size(); ++i)
         push_back(str2[i]);
     return *this;
 }
@@ -433,6 +445,13 @@ inamespace operator+(const inamespace& ns1, const inamespace& ns2)
     return result;
 }
 
+inamespace::Path inamespace::str() const
+{
+    Path p;
+    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    return p;
+}
+
 //-----------------------------------------------------------------------------
 
 ipath::ipath(const istring& onlycomponent)
@@ -450,18 +469,9 @@ ipath::ipath(const char *begin, const char *end)
 {
 }
 
-BugEngine::Debug::Format<ipath::MaxFilenameLength> ipath::str() const
-{
-#   ifdef BE_PLATFORM_WIN32
-    return igenericnamespace::tostring<ipath::MaxFilenameLength>("\\");
-#   else
-    return igenericnamespace::tostring<ipath::MaxFilenameLength>("/");
-#   endif
-}
-
 ipath& ipath::operator+=(const ipath& str2)
 {
-    for (size_t i = 0; i < str2.size(); ++i)
+    for (u32 i = 0; i < str2.size(); ++i)
         push_back(str2[i]);
     return *this;
 }
@@ -473,8 +483,15 @@ ipath operator+(const ipath& path1, const ipath& path2)
     return result;
 }
 
+ipath::Filename ipath::str() const
+{
+    Filename p;
+    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    return p;
+}
+
 //-----------------------------------------------------------------------------
-    
+
 ifilename::ifilename(const istring& onlycomponent)
 :   igenericnamespace(onlycomponent)
 {
@@ -485,23 +502,21 @@ ifilename::ifilename(const char *_str)
 {
 }
 
-BugEngine::Debug::Format<ifilename::MaxFilenameLength> ifilename::str() const
-{
-#   ifdef BE_PLATFORM_WIN32
-    return igenericnamespace::tostring<ifilename::MaxFilenameLength>("\\");
-#   else
-    return igenericnamespace::tostring<ifilename::MaxFilenameLength>("/");
-#   endif
-}
-
 ifilename operator+(const ipath& path, const ifilename& file)
 {
     ifilename result("");
-    for (size_t i = 0; i < path.size(); ++i)
+    for (u32 i = 0; i < path.size(); ++i)
         result.push_back(path[i]);
-    for (size_t i = 0; i < file.size(); ++i)
+    for (u32 i = 0; i < file.size(); ++i)
         result.push_back(file[i]);
     return result;
+}
+
+ifilename::Filename ifilename::str() const
+{
+    Filename p;
+    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    return p;
 }
 
 }

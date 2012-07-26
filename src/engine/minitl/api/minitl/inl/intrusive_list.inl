@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INL_INTRUSIVE_LIST_INL_
 #define BE_MINITL_CONTAINER_INL_INTRUSIVE_LIST_INL_
 /*****************************************************************************/
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 
 
 namespace minitl

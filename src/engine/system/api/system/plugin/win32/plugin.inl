@@ -40,12 +40,12 @@ namespace BugEngine
 static HANDLE loadPlugin(const inamespace &pluginName)
 {
     SetLastError(0);
-    BugEngine::Debug::Format<> plugingFile = BugEngine::Debug::Format<>("%s.dll") | pluginName;
+    minitl::format<1024u> plugingFile = minitl::format<1024u>("%s.dll") | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     static const ipath pluginSubdir = ipath("plugins");
-    BugEngine::Debug::Format<ifilename::MaxFilenameLength> pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | pluginPath);
-    HANDLE h = LoadLibrary(pluginPath.c_str());
+    ifilename::Filename pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
+    be_info("loading plugin %s (%s)" | pluginName | pluginPath.name);
+    HANDLE h = LoadLibrary(pluginPath.name);
     if (!h)
     {
         char *errorMessage = 0;

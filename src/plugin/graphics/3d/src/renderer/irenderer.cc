@@ -15,7 +15,7 @@
 namespace BugEngine
 {
 
-IRenderer::IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
+IRenderer::IRenderer(minitl::Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
     ,   m_resourceManager(manager)
     ,   m_syncTask(ref< Task::Task< Task::MethodCaller<IRenderer, &IRenderer::flush> > >::create(Arena::task(), "flush", Colors::Red::Red,  Task::MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
@@ -49,7 +49,7 @@ weak<Task::ITask> IRenderer::syncTask() const
     return m_syncTask;
 }
 
-Allocator& IRenderer::arena() const
+minitl::Allocator& IRenderer::arena() const
 {
     return m_allocator;
 }

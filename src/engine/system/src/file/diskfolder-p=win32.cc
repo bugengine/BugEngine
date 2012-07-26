@@ -18,8 +18,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    BugEngine::Debug::Format<1024u> pathname = path.str();
-    if (!CreateDirectoryA(pathname.c_str(), 0))
+    ipath::Filename pathname = path.str();
+    if (!CreateDirectoryA(pathname.name, 0))
     {
         int err = GetLastError();
         if (err == ERROR_ALREADY_EXISTS)
@@ -49,8 +49,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     ,   m_index(s_diskIndex++)
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
-    BugEngine::Debug::Format<1024u> pathname = m_path.str();
-    m_handle.ptrHandle = CreateFileA (pathname.c_str(),
+    ipath::Filename pathname = m_path.str();
+    m_handle.ptrHandle = CreateFileA (pathname.name,
                                       GENERIC_READ,
                                       FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
                                       0,
@@ -89,9 +89,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
-        BugEngine::Debug::Format<1024u> pathname = m_path.str();
-        pathname.append("\\*");
-        HANDLE h = FindFirstFile(pathname.c_str(), &data);
+        ipath::Filename pathname = (m_path+istring("*")).str();
+        HANDLE h = FindFirstFile(pathname.name, &data);
         if (h != INVALID_HANDLE_VALUE)
         {
             do
@@ -127,8 +126,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    const BugEngine::Debug::Format<1024u> path = (m_path+ifilename(name)).str();
-    HANDLE h = CreateFileA ( path.c_str(),
+    const ifilename::Filename path = (m_path+ifilename(name)).str();
+    HANDLE h = CreateFileA ( path.name,
                              GENERIC_WRITE,
                              0,
                              0,

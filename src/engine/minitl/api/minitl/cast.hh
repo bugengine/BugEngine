@@ -4,10 +4,10 @@
 #ifndef BE_MINITL_CAST_
 #define BE_MINITL_CAST_
 /*****************************************************************************/
-#include    <debug/assert.hh>
-#include    <typeinfo>
+#include    <minitl/assert.hh>
 #include    <minitl/refptr.hh>
 #include    <minitl/weakptr.hh>
+#include    <typeinfo>
 
 namespace minitl
 {

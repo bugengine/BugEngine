@@ -94,5 +94,59 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
 
 }
 
+
+namespace minitl
+{
+
+template<u16 SIZE>
+const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const BugEngine::RTTI::Type& type)
+{
+    be_forceuse(type);
+    /*BugEngine::Debug::Format<> n(metaclass->name.str());
+    switch(access)
+    {
+    case Const:
+        n.append(" const");
+        break;
+    case Mutable:
+        break;
+    default:
+        be_notreached();
+    }
+
+    switch(indirection)
+    {
+    case Value:
+        break;
+    case RawPtr:
+        n = BugEngine::Debug::Format<>("raw<%s>") | n;
+        break;
+    case WeakPtr:
+        n = BugEngine::Debug::Format<>("weak<%s>") | n;
+        break;
+    case RefPtr:
+        n = BugEngine::Debug::Format<>("ref<%s>") | n;
+        break;
+    default:
+        be_notreached();
+        break;
+    }
+
+    switch(constness)
+    {
+    case Const:
+        n.append(" const");
+        break;
+    case Mutable:
+        break;
+    default:
+        be_notreached();
+    }
+    return n;*/
+    return format;
+}
+
+}
+
 /*****************************************************************************/
 #endif

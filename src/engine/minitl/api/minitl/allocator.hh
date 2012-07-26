@@ -6,25 +6,39 @@
 /*****************************************************************************/
 #include    <minitl/stdafx.h>
 #include    <cstring>
-#include    <debug/assert.hh>
 #include    <minitl/algorithm.hh>
 
-namespace BugEngine
+#define     be_forceuse(p)   static_cast<void>(p)
+
+template< typename T >
+inline T be_align(T value, size_t alignment)
+{
+    size_t v = (size_t)(value);
+    return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
+}
+
+template< typename T >
+inline T be_min(T t1, T t2)
+{
+    return t1 < t2 ? t1 : t2;
+}
+
+template< typename T >
+inline T be_max(T t1, T t2)
+{
+    return t1 > t2 ? t1 : t2;
+}
+
+namespace minitl
 {
 
-class be_api(CORE) Allocator
+class be_api(MINITL) Allocator
 {
 public:
     template< typename T >
     class Block
     {
         BE_NOCOPY(Block);
-    private:
-        /* doesn't handle destructors; make sure there is no complex data in here */
-        union PODCheck
-        {
-            T t;
-        };
     private:
         Allocator*  m_allocator;
         u64         m_count;
@@ -129,14 +143,14 @@ T* Allocator::alloc()
 
 #include    <new>
 
-inline void* operator new(size_t size, BugEngine::Allocator& allocator)                         { return allocator.alloc(size); }
-inline void* operator new(size_t size, BugEngine::Allocator& allocator, size_t align)           { return allocator.alloc(size, align); }
-inline void  operator delete(void* ptr, BugEngine::Allocator& allocator)                        { allocator.free(ptr); }
-inline void  operator delete(void* ptr, BugEngine::Allocator& allocator, size_t /*align*/)      { allocator.free(ptr); }
-inline void* operator new[](size_t size, BugEngine::Allocator& allocator)                       { return allocator.alloc(size); }
-inline void* operator new[](size_t size, BugEngine::Allocator& allocator, size_t align)         { return allocator.alloc(size, align); }
-inline void  operator delete[](void* ptr, BugEngine::Allocator& allocator)                      { allocator.free(ptr); }
-inline void  operator delete[](void* ptr, BugEngine::Allocator& allocator, size_t /*align*/)    { allocator.free(ptr); }
+inline void* operator new(size_t size, minitl::Allocator& allocator)                         { return allocator.alloc(size); }
+inline void* operator new(size_t size, minitl::Allocator& allocator, size_t align)           { return allocator.alloc(size, align); }
+inline void  operator delete(void* ptr, minitl::Allocator& allocator)                        { allocator.free(ptr); }
+inline void  operator delete(void* ptr, minitl::Allocator& allocator, size_t /*align*/)      { allocator.free(ptr); }
+inline void* operator new[](size_t size, minitl::Allocator& allocator)                       { return allocator.alloc(size); }
+inline void* operator new[](size_t size, minitl::Allocator& allocator, size_t align)         { return allocator.alloc(size, align); }
+inline void  operator delete[](void* ptr, minitl::Allocator& allocator)                      { allocator.free(ptr); }
+inline void  operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*align*/)    { allocator.free(ptr); }
 
 /*****************************************************************************/
 #endif

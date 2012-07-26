@@ -122,18 +122,18 @@ GLShaderBuilder::~GLShaderBuilder()
 
 void GLShaderBuilder::doAddUniformDeclaration(const istring& name, Shaders::Stage /*stage*/, Shaders::ValueType type)
 {
-    writeln((BugEngine::Debug::Format<>("uniform %s %s;") | toString(type) | name).c_str());
+    writeln((minitl::format<1024u>("uniform %s %s;") | toString(type) | name).c_str());
 }
 
 void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage, Shaders::ValueType type)
 {
     if (stage == Shaders::VertexStage)
     {
-        writeln((BugEngine::Debug::Format<>("out %s %s;") | toString(type) | name).c_str());
+        writeln((minitl::format<1024u>("out %s %s;") | toString(type) | name).c_str());
     }
     else
     {
-        writeln((BugEngine::Debug::Format<>("in %s %s;") | toString(type) | name).c_str());
+        writeln((minitl::format<1024u>("in %s %s;") | toString(type) | name).c_str());
     }
 }
 
@@ -141,7 +141,7 @@ void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::St
 {
     if (stage == Shaders::VertexStage)
     {
-        writeln((BugEngine::Debug::Format<>("in %s %s;") | toString(type) | name).c_str());
+        writeln((minitl::format<1024u>("in %s %s;") | toString(type) | name).c_str());
     }
     else if (stage ==Shaders::FragmentStage)
     {
@@ -152,7 +152,7 @@ void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::St
 void GLShaderBuilder::doAddMethod(const istring& name)
 {
     writeln("");
-    writeln((BugEngine::Debug::Format<>("void %s ()") | name).c_str());
+    writeln((minitl::format<1024u>("void %s ()") | name).c_str());
     writeln("{");
     indent();
 }
@@ -165,17 +165,17 @@ void GLShaderBuilder::doEndMethod()
 
 void GLShaderBuilder::doSaveTo(Shaders::Semantic semantic, const istring& value)
 {
-    writeln((BugEngine::Debug::Format<>("%s = %s;") | toString(semantic) | value).c_str());
+    writeln((minitl::format<1024u>("%s = %s;") | toString(semantic) | value).c_str());
 }
 
 void GLShaderBuilder::doSaveTo(const istring& name, const istring& value)
 {
-    writeln((BugEngine::Debug::Format<>("%s = %s;") | name | value).c_str());
+    writeln((minitl::format<1024u>("%s = %s;") | name | value).c_str());
 }
 
 void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::ValueType type, const istring& result, const istring& op1, const istring& op2)
 {
-    writeln((BugEngine::Debug::Format<>("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op | op2).c_str());
+    writeln((minitl::format<1024u>("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op | op2).c_str());
 }
 
 }}

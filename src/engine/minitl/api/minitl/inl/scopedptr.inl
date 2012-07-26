@@ -10,7 +10,7 @@ namespace minitl
 {
 
 template< typename T >
-scoped<T>::scoped(T* value, BugEngine::Allocator& allocator)
+scoped<T>::scoped(T* value, Allocator& allocator)
 :   m_ptr(value)
 {
     be_assert(value->pointer::m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());

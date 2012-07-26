@@ -9,7 +9,7 @@
 namespace BugEngine
 {
 
-class be_api(CORE) PoolAllocator : public Allocator
+class be_api(CORE) PoolAllocator : public minitl::Allocator
 {
 public:
     PoolAllocator();

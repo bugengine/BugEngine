@@ -5,7 +5,7 @@
 #define BE_DEBUG_ASSERT_STDAFX_H_
 /*****************************************************************************/
 
-#include    <debug/stdafx.h>
+#include    <minitl/stdafx.h>
 #include    <core/stdafx.h>
 #include    <runtime/stdafx.h>
 
