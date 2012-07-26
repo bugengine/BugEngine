@@ -36,7 +36,7 @@ public:
 TaskScheduler::Worker::Worker(weak<TaskScheduler> scheduler, size_t workerId)
 :   m_workerId(workerId)
 ,   m_workThread(
-        istring(BugEngine::Debug::Format<>("worker %u") | workerId),
+        istring(minitl::format<128u>("worker %u") | workerId),
         &TaskScheduler::Worker::work, reinterpret_cast<intptr_t>(this),
         reinterpret_cast<intptr_t>(scheduler.operator->()),
         Thread::BelowNormal)

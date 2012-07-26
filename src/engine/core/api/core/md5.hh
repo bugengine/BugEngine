@@ -4,7 +4,7 @@
 #ifndef BE_CORE_RUNTIME_MD5_HH_
 #define BE_CORE_RUNTIME_MD5_HH_
 /*****************************************************************************/
-#include    <debug/format.hh>
+#include    <minitl/format.hh>
 
 namespace BugEngine
 {
@@ -25,14 +25,14 @@ static inline bool operator==(const MD5& hash1, const MD5& hash2)
 be_api(CORE) MD5 digest(const void* data, u64 size);
 
 template< typename T >
-static inline MD5 digest(const Allocator::Block<T>& block)
+static inline MD5 digest(const minitl::Allocator::Block<T>& block)
 {
     return digest(block.data(), block.byteCount());
 }
 
 }
 
-namespace BugEngine { namespace Debug
+namespace minitl
 {
 
 static char hex(unsigned char value)
@@ -40,8 +40,8 @@ static char hex(unsigned char value)
     return value >= 10 ? value-10+'a' : value + '0';
 }
 
-template< u16 size >
-const Format<size>& operator|(const Format<size>& f, const BugEngine::MD5& value)
+template<u16 SIZE>
+static inline const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::MD5& value)
 {
     char str[33];
     for(int i = 0; i < 4; ++i)
@@ -59,7 +59,7 @@ const Format<size>& operator|(const Format<size>& f, const BugEngine::MD5& value
     return f | str;
 }
 
-}}
+}
 
 /*****************************************************************************/
 #endif

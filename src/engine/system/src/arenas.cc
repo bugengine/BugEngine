@@ -6,8 +6,8 @@
 namespace BugEngine { namespace Arena
 {
 
-Allocator& task() { return general(); }
-Allocator& filesystem() { return general(); }
-Allocator& resource() { return general(); }
+minitl::Allocator& task() { return general(); }
+minitl::Allocator& filesystem() { return general(); }
+minitl::Allocator& resource() { return general(); }
 
 }}

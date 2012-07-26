@@ -27,7 +27,7 @@ private:
         const ref<const StringBuffer>   m_next;
         u64 const                       m_size;
         u64                             m_current;
-        Allocator::Block<char>          m_buffer;
+        minitl::Allocator::Block<char>  m_buffer;
     public:
         StringBuffer(size_t size, ref<const StringBuffer> next);
         ~StringBuffer();

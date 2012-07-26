@@ -36,7 +36,7 @@ class be_api(_3D) IRenderer : public minitl::pointer
     template< typename R >
     friend class GPUResourceLoader;
 protected:
-    Allocator&                                  m_allocator;
+    minitl::Allocator&                          m_allocator;
     weak<ResourceManager>                       m_resourceManager;
     ref<Task::ITask>                            m_syncTask;
     scoped<SceneGraphLoader>                    m_sceneLoader;
@@ -46,7 +46,7 @@ protected:
     scoped<Kernel::Kernel>                      m_kernelSort;
     scoped<Kernel::Kernel>                      m_kernelRender;
 protected:
-    IRenderer(Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
+    IRenderer(minitl::Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
 protected:
     virtual void flush();
@@ -61,7 +61,7 @@ public:
     weak<IGPUResource> getRenderWindow(weak<const Resource> resource) const;
     weak<IGPUResource> getShaderProgram(weak<const Resource> resource) const;
 
-    Allocator& arena() const;
+    minitl::Allocator& arena() const;
     weak<Task::ITask> syncTask() const;
 
     virtual uint2 getScreenSize() const = 0;

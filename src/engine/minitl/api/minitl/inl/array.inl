@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_INL_ARRAY_INL_
 #define BE_MINITL_INL_ARRAY_INL_
 /*****************************************************************************/
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 #include    <minitl/array.hh>
 #include    <minitl/algorithm.hh>
 
@@ -12,7 +12,7 @@ namespace minitl
 {
 
 template< typename T >
-array<T>::array(BugEngine::Allocator& allocator, u32 size)
+array<T>::array(Allocator& allocator, u32 size)
     :   m_refCount(new(allocator) i_u32(i_u32::Zero))
     ,   m_array(new(allocator) T[size])
     ,   m_allocator(allocator)
@@ -23,7 +23,7 @@ array<T>::array(BugEngine::Allocator& allocator, u32 size)
 
 template< typename T >
 template< typename ITERATOR >
-array<T>::array(BugEngine::Allocator& allocator, ITERATOR begin, ITERATOR end)
+array<T>::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
     :   m_refCount(new(allocator) i_u32(i_u32::Zero))
     ,   m_array(new(allocator) T[distance(begin, end)])
     ,   m_allocator(allocator)

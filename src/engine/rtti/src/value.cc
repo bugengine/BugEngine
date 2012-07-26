@@ -50,7 +50,7 @@ Value& Value::operator=(const Value& v)
 {
     if (m_reference)
     {
-        be_assert_recover(m_type.isA(v.m_type), "Value has type %s; unable to copy from type %s" | m_type.name() | v.m_type.name(), return *this);
+        be_assert_recover(m_type.isA(v.m_type), "Value has type %s; unable to copy from type %s" | m_type | v.m_type, return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
@@ -67,9 +67,9 @@ Value& Value::operator=(const Value& v)
 
 void* Value::unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& obj)
 {
-    be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert(ti.indirection <= m_type.indirection, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
-    be_assert(ti.access <= m_type.access, "Value has type %s; unable to unbox to type %s" | m_type.name() | ti.name());
+    be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type | ti);
+    be_assert(ti.indirection <= m_type.indirection, "Value has type %s; unable to unbox to type %s" | m_type | ti);
+    be_assert(ti.access <= m_type.access, "Value has type %s; unable to unbox to type %s" | m_type | ti);
     void* mem = memory();
     switch(m_type.indirection)
     {

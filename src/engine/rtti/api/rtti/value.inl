@@ -68,7 +68,7 @@ Value& Value::operator=(const T& t)
 {
     if (m_reference)
     {
-        be_assert_recover(m_type.isA(be_typeid<T>::type()), "Value has type %s; unable to copy from type %s" | m_type.name() | be_typeid<T>::type().name(), return *this);
+        be_assert_recover(m_type.isA(be_typeid<T>::type()), "Value has type %s; unable to copy from type %s" | m_type | be_typeid<T>::type(), return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
@@ -163,8 +163,8 @@ Value Value::operator()(Value params[], u32 paramCount)
 {
     static const istring callName("?call");
     Value call = (*this)[callName];
-    be_assert_recover(call, "Not a callable object: %s" | m_type.name(), return Value());
-    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type.name(), return Value());
+    be_assert_recover(call, "Not a callable object: %s" | m_type, return Value());
+    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type, return Value());
     return call.as<const Method* const>()->doCall(params, paramCount);
 }
 

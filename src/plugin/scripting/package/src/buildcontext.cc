@@ -6,7 +6,7 @@
 
 int be_package_lex_destroy();
 
-const BugEngine::Allocator::Block<u8>* g_buffer = 0;
+const minitl::Allocator::Block<u8>* g_buffer = 0;
 int g_bufferPosition = 0;
 int g_packageLine = 0;
 int g_packageColumnBefore = 0;
@@ -16,7 +16,7 @@ static i_u32 s_useCount = i_u32::Zero;
 namespace BugEngine { namespace PackageBuilder
 {
 
-BuildContext::BuildContext(const Allocator::Block<u8>& buffer, ref<Folder> folder)
+BuildContext::BuildContext(const minitl::Allocator::Block<u8>& buffer, ref<Folder> folder)
     :   result(ref<Nodes::Package>::create(Arena::packageBuilder()))
     ,   folder(folder)
 {

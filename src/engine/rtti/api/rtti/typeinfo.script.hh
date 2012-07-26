@@ -140,13 +140,6 @@ struct be_api(RTTI) Type
      */
     u32                 size() const;
 
-    /// Returns the name of this type
-    /*!
-     * Builds the type name depending on the access and indirection.
-     * \returns
-     *   A formatted string including the indirection, access right and constness of this type.
-     */
-    BugEngine::Debug::Format<>  name() const;
     /// Calculate the distance to another type
     /*!
      * Two types can be compatible but not necessarily equivalent. In order to

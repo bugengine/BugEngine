@@ -5,14 +5,14 @@
 #include    <packageloader.hh>
 #include    <packagebuilder.hh>
 #include    <package/nodes/package.hh>
-#include    <core/runtime/md5.hh>
+#include    <core/md5.hh>
 #include    <system/file/folder.script.hh>
 
 
 namespace BugEngine { namespace Arena
 {
 
-Allocator& package()
+minitl::Allocator& package()
 {
     return resource();
 }
@@ -32,7 +32,7 @@ PackageLoader::~PackageLoader()
 {
 }
 
-void PackageLoader::runBuffer(weak<const Package> script, const Allocator::Block<u8>& buffer)
+void PackageLoader::runBuffer(weak<const Package> script, const minitl::Allocator::Block<u8>& buffer)
 {
     MD5 md5 = digest(buffer);
     be_info("md5 sum of package: %s" | md5);

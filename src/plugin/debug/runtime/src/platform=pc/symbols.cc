@@ -47,7 +47,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
         return next;
     case SymbolInformations::PEDwarf:
         {
-            PE pe(infos.filename.str().c_str(), 0);
+            PE pe(infos.filename.str().name, 0);
             if (pe)
             {
                 ref<SymbolResolver> resolver = ref<DwarfModule>::create(Arena::debug(), infos.filename, pe, infos.offset, infos.size);
@@ -58,7 +58,7 @@ ref<const SymbolResolver> SymbolResolver::loadSymbols(const SymbolInformations& 
         return next;
     case SymbolInformations::ELFDwarf:
         {
-            Elf elf(infos.filename.str().c_str(), 0);
+            Elf elf(infos.filename.str().name, 0);
             if (elf)
             {
                 ref<SymbolResolver> resolver = ref<DwarfModule>::create(Arena::debug(), infos.filename, elf, infos.offset, infos.size);

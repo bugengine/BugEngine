@@ -20,7 +20,7 @@ public:
     PackageBuilder(ref<Folder> dataFolder);
     ~PackageBuilder();
 public:
-    ref<Nodes::Package> createPackage(const Allocator::Block<u8>& buffer);
+    ref<Nodes::Package> createPackage(const minitl::Allocator::Block<u8>& buffer);
 };
 
 }

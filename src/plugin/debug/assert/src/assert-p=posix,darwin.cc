@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <debug/assert.hh>
+#include    <minitl/assert.hh>
 #include    <runtime/callstack.hh>
 #include    <runtime/module.hh>
 #include    <runtime/symbols.hh>
@@ -12,7 +12,7 @@
 namespace BugEngine { namespace Debug
 {
 
-AssertionResult defaultAssertionCallback( const char *file,
+minitl::AssertionResult AssertionCallback(const char *file,
                                           int        line,
                                           const char *expr,
                                           const char *message,
@@ -47,21 +47,7 @@ AssertionResult defaultAssertionCallback( const char *file,
         }
     }
 
-    return Break;
-}
-
-static AssertionCallback_t g_callback = defaultAssertionCallback;
-
-AssertionCallback_t setAssertionCallback(AssertionCallback_t callback)
-{
-    AssertionCallback_t previous = g_callback;
-    g_callback = callback;
-    return previous;
-}
-
-AssertionCallback_t getAssertionCallback()
-{
-    return g_callback;
+    return minitl::Break;
 }
 
 }}

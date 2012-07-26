@@ -313,21 +313,21 @@ void DwarfModule::parse(const Module& module)
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
-    debugInfo = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_info.fileSize));
+    debugInfo = minitl::Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_info.fileSize));
     if (debug_info)
     {
         debugInfoSize = debug_info.size;
         module.readSection(debug_info, debugInfo);
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
-    debugAbbrev = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_abbrev.fileSize));
+    debugAbbrev = minitl::Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_abbrev.fileSize));
     if (debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
-    lineProgram = Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_line.fileSize));
+    lineProgram = minitl::Allocator::Block<u8>(Arena::temporary(), be_checked_numcast<size_t>(debug_line.fileSize));
     if (debug_line)
     {
         module.readSection(debug_line, lineProgram);

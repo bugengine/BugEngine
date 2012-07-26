@@ -26,7 +26,7 @@ ref<T>::ref(T* value)
 }
 
 template< typename T >
-ref<T>::ref(T* value, BugEngine::Allocator& deleter)
+ref<T>::ref(T* value, Allocator& deleter)
 :   m_ptr(value)
 {
     be_assert(value->pointer::m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());

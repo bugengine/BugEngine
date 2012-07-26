@@ -21,8 +21,8 @@
 namespace BugEngine { namespace Arena
 {
 
-Allocator& package();
-Allocator& packageBuilder();
+minitl::Allocator& package();
+minitl::Allocator& packageBuilder();
 
 }}
 

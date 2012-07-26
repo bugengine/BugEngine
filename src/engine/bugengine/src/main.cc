@@ -31,7 +31,7 @@ namespace
     protected:
         virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
         {
-            BugEngine::Debug::Format<4096> message = BugEngine::Debug::Format<4096>("%s:%d (%s)\t(%s) %s\n") | filename | line | logname.c_str() | s_logNames[level] | msg;
+            const minitl::format<1024u>& message = minitl::format<1024u>("%s:%d (%s)\t(%s) %s\n") | filename | line | logname.c_str() | s_logNames[level] | msg;
             m_logFile->beginWrite(message.c_str(), be_checked_numcast<u32>(strlen(message.c_str())));
             return true;
         }
@@ -51,7 +51,7 @@ namespace
         {
 #ifdef BE_PLATFORM_WIN32
             OutputDebugString(filename);
-            OutputDebugString(BugEngine::Debug::Format<>("(%d) :") | line);
+            OutputDebugString(minitl::format<1024u>("(%d) :") | line);
             OutputDebugString(logname.c_str());
             OutputDebugString("\t\t(");
             OutputDebugString(s_logNames[level]);

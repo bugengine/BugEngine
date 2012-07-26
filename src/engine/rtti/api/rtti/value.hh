@@ -12,50 +12,12 @@ namespace BugEngine { namespace RTTI
 
 struct Class;
 struct Property;
-template< typename T,
-          typename P1,
-          typename P2,
-          typename P3,
-          typename P4,
-          typename P5,
-          typename P6,
-          typename P7,
-          typename P8,
-          typename P9,
-          typename P10,
-          typename P11,
-          typename P12,
-          typename P13,
-          typename P14,
-          typename P15,
-          typename P16,
-          typename Dummy>
-struct procedurehelper;
 
 
 class be_api(RTTI) Value
 {
     friend struct Class;
     friend struct Property;
-    template< typename T,
-          typename P1,
-          typename P2,
-          typename P3,
-          typename P4,
-          typename P5,
-          typename P6,
-          typename P7,
-          typename P8,
-          typename P9,
-          typename P10,
-          typename P11,
-          typename P12,
-          typename P13,
-          typename P14,
-          typename P15,
-          typename P16,
-          typename Dummy>
-    friend struct procedurehelper;
 private:
     Type                m_type;
     struct Reference
@@ -84,7 +46,7 @@ private:
     };
     void* unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& ptr);
     void store(const void* src);
-private:
+public:
     enum ReserveType { Reserve };
 
     Value(Type type, ReserveType);

@@ -9,12 +9,12 @@
 namespace BugEngine
 {
 
-static Allocator& ticketPool()
+static minitl::Allocator& ticketPool()
 {
     return Arena::filesystem(); //TODO
 }
 
-File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size)
+File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size)
     :   action(Read)
     ,   file(file)
     ,   buffer(arena, 0)
@@ -25,7 +25,7 @@ File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 si
     file->addref();
 }
 
-File::Ticket::Ticket(Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data)
+File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data)
     :   action(Write)
     ,   file(file)
     ,   buffer(arena, size)
@@ -54,7 +54,7 @@ File::~File()
 {
 }
 
-ref<const File::Ticket> File::beginRead(u32 size, i64 offset, Allocator& arena) const
+ref<const File::Ticket> File::beginRead(u32 size, i64 offset, minitl::Allocator& arena) const
 {
     u32 s;
     if (offset >= 0)

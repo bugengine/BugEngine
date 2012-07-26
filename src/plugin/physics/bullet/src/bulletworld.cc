@@ -7,7 +7,7 @@
 namespace BugEngine { namespace Arena
 {
 
-static Allocator& bullet() { return general(); }
+static minitl::Allocator& bullet() { return general(); }
 
 }}
 

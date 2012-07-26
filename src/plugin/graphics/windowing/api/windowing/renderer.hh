@@ -27,7 +27,7 @@ protected:
 protected:
     void*           createDummyHandle();
 public:
-    Renderer(Allocator& allocator, weak<ResourceManager> manager);
+    Renderer(minitl::Allocator& allocator, weak<ResourceManager> manager);
     ~Renderer();
 
     uint2           getScreenSize() const override;

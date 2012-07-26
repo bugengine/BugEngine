@@ -24,8 +24,8 @@
 
 namespace BugEngine { namespace Arena
 {
-be_api(RTTI) Allocator& rtti();
-be_api(RTTI) Allocator& script();
+be_api(RTTI) minitl::Allocator& rtti();
+be_api(RTTI) minitl::Allocator& script();
 
 }}
 
