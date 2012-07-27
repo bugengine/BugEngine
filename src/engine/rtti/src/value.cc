@@ -4,6 +4,7 @@
 #include <rtti/stdafx.h>
 #include <rtti/value.hh>
 #include <rtti/classinfo.script.hh>
+#include <rtti/typeinfo.inl>
 
 namespace BugEngine { namespace RTTI
 {
