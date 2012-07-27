@@ -169,8 +169,17 @@ struct be_api(RTTI) Type
     {
         MaxTypeDistance = 1000000 ///< The maximum distance to indicate two types are not compatible
     };
-public:
+
+    /// Checks if a type is compatible with another type
+    /*! returns true if this type is compatible with type other
+     * \param other Type to test
+     * \returns
+     *  true if this type is compatible with other,
+     *  false otherwise 
+     */
     bool isA(const Type& other) const;
+public:
+    template< typename T > bool isA() const;
 private:
     Type& operator=(const Type&);
     void*               rawget(const void*) const;
