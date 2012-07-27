@@ -32,7 +32,7 @@ BoolValue::~BoolValue()
 
 bool BoolValue::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid<bool>::type().isA(type);
+    return type.isA<bool>();
 }
 
 RTTI::Value BoolValue::as(const RTTI::Type& type) const
@@ -56,34 +56,34 @@ IntValue::~IntValue()
 
 bool IntValue::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid<i8>::type().isA(type)
-        || be_typeid<i16>::type().isA(type)
-        || be_typeid<i32>::type().isA(type)
-        || be_typeid<i64>::type().isA(type)
-        || be_typeid<u8>::type().isA(type)
-        || be_typeid<u16>::type().isA(type)
-        || be_typeid<u32>::type().isA(type)
-        || be_typeid<u64>::type().isA(type);
+    return type.isA<i8>()
+        || type.isA<i16>()
+        || type.isA<i32>()
+        || type.isA<i64>()
+        || type.isA<u8>()
+        || type.isA<u16>()
+        || type.isA<u32>()
+        || type.isA<u64>();
 }
 
 RTTI::Value IntValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
-    if (be_typeid<i8>::type().isA(type))
+    if (type.isA<i8>())
         return RTTI::Value(be_checked_numcast<i8>(m_value));
-    if (be_typeid<i16>::type().isA(type))
+    if (type.isA<i16>())
         return RTTI::Value(be_checked_numcast<i16>(m_value));
-    if (be_typeid<i32>::type().isA(type))
+    if (type.isA<i32>())
         return RTTI::Value(be_checked_numcast<i32>(m_value));
-    if (be_typeid<i64>::type().isA(type))
+    if (type.isA<i64>())
         return RTTI::Value(be_checked_numcast<i64>(m_value));
-    if (be_typeid<u8>::type().isA(type))
+    if (type.isA<u8>())
         return RTTI::Value(be_checked_numcast<u8>(m_value));
-    if (be_typeid<u16>::type().isA(type))
+    if (type.isA<u16>())
         return RTTI::Value(be_checked_numcast<u16>(m_value));
-    if (be_typeid<u32>::type().isA(type))
+    if (type.isA<u32>())
         return RTTI::Value(be_checked_numcast<u32>(m_value));
-    if (be_typeid<u64>::type().isA(type))
+    if (type.isA<u64>())
         return RTTI::Value(be_checked_numcast<u64>(m_value));
     return RTTI::Value();
 }
@@ -101,14 +101,14 @@ FloatValue::~FloatValue()
 
 bool FloatValue::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid<float>::type().isA(type)
-        || be_typeid<double>::type().isA(type);
+    return type.isA<float>()
+        || type.isA<double>();
 }
 
 RTTI::Value FloatValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from float to %s" | type);
-    if (be_typeid<float>::type().isA(type))
+    if (type.isA<float>())
         return RTTI::Value((float)m_value);
     else
         return RTTI::Value((double)m_value);
@@ -129,16 +129,16 @@ StringValue::~StringValue()
 
 bool StringValue::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid<istring>::type().isA(type)
-        || be_typeid<inamespace>::type().isA(type);
+    return type.isA<istring>()
+        || type.isA<inamespace>();
 }
 
 RTTI::Value StringValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from string to %s" | type);
-    if (be_typeid< istring >::type().isA(type))
+    if (type.isA< istring >())
         return RTTI::Value(istring(m_value));
-    if (be_typeid< inamespace >::type().isA(type))
+    if (type.isA< inamespace >())
         return RTTI::Value(inamespace(m_value));
     return RTTI::Value();
 }
@@ -157,7 +157,7 @@ ReferenceValue::~ReferenceValue()
 
 bool ReferenceValue::isCompatible(const RTTI::Type& type) const
 {
-    return m_value->getType().isA(type);
+    return type.isA(m_value->getType());
 }
 
 RTTI::Value ReferenceValue::as(const RTTI::Type& type) const
@@ -184,7 +184,7 @@ FileValue::~FileValue()
 
 bool FileValue::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid< weak<const File> >::type().isA(type);
+    return type.isA< weak<const File> >();
 }
 
 RTTI::Value FileValue::as(const RTTI::Type& type) const

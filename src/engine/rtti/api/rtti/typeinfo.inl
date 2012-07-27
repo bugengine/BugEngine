@@ -8,7 +8,6 @@
 #include    <rtti/classinfo.script.hh>
 #include    <minitl/array.hh>
 
-
 namespace BugEngine { namespace RTTI
 {
 
@@ -21,6 +20,12 @@ static inline bool operator<=(Type t1, Type t2)
     return     (t1.indirection <= t2.indirection)
             && t1.access <= t2.access
             && t2.metaclass->isA(t1.metaclass);
+}
+
+template< typename T >
+bool Type::isA() const
+{
+    return isA(be_typeid<T>::type());
 }
 
 }
@@ -39,7 +44,6 @@ struct be_typeid< minitl::array<T> >
     }
     static inline RTTI::Type  type()  { return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
 };
-
 
 }
 
