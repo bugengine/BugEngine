@@ -19,4 +19,22 @@ KernelObject::~KernelObject()
     unloadKernel(m_handle);
 }
 
+#ifdef BE_STATIC
+
+void* KernelObject::loadKernel(const inamespace& kernel)
+{
+    return 0;
+}
+
+void* KernelObject::loadSymbol(void* handle, const char *name)
+{
+    return 0;
+}
+
+void KernelObject::unloadKernel(void* handle)
+{
+}
+
+#endif
+
 }
