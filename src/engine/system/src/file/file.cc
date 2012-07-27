@@ -21,6 +21,7 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset
     ,   processed(i_u32::Zero)
     ,   offset(offset)
     ,   total(size)
+    ,   error(i_bool::Zero)
 {
     file->addref();
 }
@@ -32,6 +33,7 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset
     ,   processed(i_u32::Zero)
     ,   offset(offset)
     ,   total(size)
+    ,   error(i_bool::Zero)
 {
     memcpy(buffer.data(), data, size);
     file->addref();

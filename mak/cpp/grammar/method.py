@@ -345,8 +345,10 @@ class Method(cpp.yacc.Nonterm):
 				file.write("#line %d\n"%self.value.line)
 				if self.value.id == '?new':
 					if parent_value:
+						return_type = parent_name
 						template = template_new_value
 					else:
+						return_type = "ref< %s >"%parent_name
 						template = template_new_ptr
 				elif parent_name:
 					param += 1
