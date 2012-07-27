@@ -18,7 +18,7 @@ class Reference : public minitl::refcountable, public minitl::intrusive_list<Ref
 private:
     weak< Package > const   m_owner;
     inamespace              m_name;
-    RTTI::Value        m_value;
+    RTTI::Value             m_value;
     weak<const Object>      m_object;
 public:
     Reference(weak<Package> owner);
