@@ -24,12 +24,12 @@
 # elif defined(_ARM)
 #  include <kernel/gcc/arm/interlocked.inl>
 # elif defined(_MIPS)
-#  include <kernel/interlocked/gcc/mips/interlocked.inl>
+#  include <kernel/gcc/mips/interlocked.inl>
 # else
 #  error Architecture not implemented on GCC
 # endif
 #elif defined(BE_COMPILER_SUNCC)
-# include <kernel/interlocked/suncc/interlocked.inl>
+# include <kernel/suncc/interlocked.inl>
 #else
 # error Compiler not implemented
 #endif
