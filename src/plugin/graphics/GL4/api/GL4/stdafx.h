@@ -16,11 +16,8 @@
 
 
 #ifdef BE_PLATFORM_MACOS
-# define GL3_PROTOTYPES
-# define GL_ARB_vertex_shader    1
-# define GL_ARB_fragment_shader  1
-# define GL_EXT_geometry_shader4 1
 # include   <OpenGL/OpenGL.h>
+# include   <OpenGL/gl.h>
 # ifndef APIENTRY
 #  define APIENTRY
 # endif
