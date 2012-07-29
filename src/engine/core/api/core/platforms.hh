@@ -12,7 +12,7 @@
 
 #ifdef _PPC
 
-/* POWERPC*********************/
+/* POWERPC ********************/
 # define    BE_BIGENDIAN
 # ifdef _PPC64
 #  define   BE_64
