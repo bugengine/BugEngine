@@ -28,7 +28,7 @@ array<T>::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
 {
     for (int i = 0; begin != end; ++begin, ++i)
     {
-        new (&m_array[i])(*begin);
+        new (&m_array[i])T(*begin);
     }
 }
 

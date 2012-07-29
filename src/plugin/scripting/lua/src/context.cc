@@ -48,7 +48,7 @@ static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
             closing = "";
             break;
         default:
-            reference = "???<";
+            reference = "??? <";
             constness = "??? ";
             closing = ">";
             break;
@@ -362,7 +362,7 @@ void Context::printStack(lua_State* l)
                     break;
                 default:
                     be_notreached();
-                    reference = "???<";
+                    reference = "??? <";
                     constness = "??? ";
                     closing=">";
                     break;
