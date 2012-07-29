@@ -45,16 +45,16 @@ class vs2003(Build.BuildContext):
 					allplatforms.append((i, options))
 
 				node = projects.make_node("%s.%s%s" % (tg.category, tg.name, klass.extensions[0]))
-				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.category, self.all_envs)
+				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.type, self.all_envs)
 				project.writeHeader(allplatforms, self.game.name)
 				project.addDirectory(tg.sourcetree)
 				project.writeFooter()
 				project_list.append((project, node))
 		for project, node in project_list:
-			if project.category == 'game':
+			if project.type == 'game':
 				s.addProject(project, node.path_from(self.srcnode))
 		for project, node in project_list:
-			if project.category != 'game':
+			if project.type != 'game':
 				s.addProject(project, node.path_from(self.srcnode))
 		s.writeFooter(self.env.ALL_VARIANTS)
 
@@ -94,8 +94,15 @@ class vs11(vs2003):
 	fun = 'build'
 	version =	(('Visual Studio 11', '12.00', True),(vcxproj.VCxproj, ('4.5','11.0')))
 
+class vs2012(vs11):
+	cmd = 'vs2012'
+	fun = 'build'
+
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
 	version =	(('Visual C++ Express 11', '12.00', False),(vcxproj.VCxproj, ('4.5','11.0')))
 
+class vs2012e(vs11e):
+	cmd = 'vs2012e'
+	fun = 'build'

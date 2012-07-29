@@ -39,6 +39,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 ,   m_param2(p2)
 ,   m_result(0)
 {
+    be_info("starting thread %s" | name);
 }
 
 Thread::ThreadParams::~ThreadParams()
@@ -60,7 +61,6 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 :   m_params(new ThreadParams(name, f, p1, p2))
 ,   m_data(new pthread_t)
 {
-    be_info("starting thread %s" | name);
     pthread_create(reinterpret_cast<pthread_t*>(m_data), 0, &ThreadParams::threadWrapper, m_params);
     m_id = u64(ptrdiff_t(*reinterpret_cast<pthread_t*>(m_data)));
     setPriority(p);

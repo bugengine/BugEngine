@@ -10,7 +10,7 @@ namespace BugEngine { namespace Task
 TaskGroup::TaskGroup(istring name, color32 color)
     :   ITask(name, color, Scheduler::High, Scheduler::DontCare)
     ,   m_startTasks(Arena::task())
-    ,   m_endTaskCount()
+    ,   m_endTaskCount(i_u32::Zero)
     ,   m_completionCallback(ref<Callback>::create(Arena::task(), this))
 {
 }

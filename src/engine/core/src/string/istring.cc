@@ -155,11 +155,11 @@ StringCache* StringCache::unique(const char *val)
     }
     else
     {
-        size_t len = strlen(val);
+        u32 len = be_checked_numcast<u32>(strlen(val));
         StringCache* cache = getBuffer()->reserve(len);
         char *data = (char*)cache + sizeof(StringCache);
 
-        size_t hashval = minitl::str_hash(val,len);
+        u64 hashval = minitl::str_hash(val,len);
         (void)(new(cache) StringCache(hashval, len));
         strcpy(data, val);
 

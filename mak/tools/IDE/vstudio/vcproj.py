@@ -37,6 +37,7 @@ class VCproj:
 		self.targetName = filename
 		self.userconfigName = filename+'.%s.%s.user'%(host,user)
 		self.envs = envs
+		self.type = type
 
 	def writeHeader(self, configs, engine):
 		self.output.write('<VisualStudioProject\n	ProjectType="Visual C++"\n	Version="%s"\n	Name="%s"\n	ProjectGUID="%s"\n	RootNamespace="%s"\n	Keyword="Win32Proj">\n' % (self.versionNumber, self.category+'.'+self.name, solution.generateGUID(self.targetName, self.name), self.name))

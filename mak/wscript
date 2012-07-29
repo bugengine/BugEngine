@@ -9,7 +9,7 @@ from mak import module
 from waflib.Logs import pprint
 from waflib.Tools import ccroot,c,cxx
 
-projects = ['vs2003', 'vs2005', 'vs2005e', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e',
+projects = ['vs2003', 'vs2005', 'vs2005e', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e', 'vs11', 'vs11e', 'vs2012', 'vs2012e',
 			'xcode3', 'xcode4', 'eclipse', 'netbeans', 'qtcreator']
 
 from waflib.Tools.ccroot import USELIB_VARS
@@ -273,11 +273,14 @@ def private_headers(self):
 @after_method("process_source")
 def individual_pdb(self):
 	if self.env.CC_NAME == 'msvc':
-		for t in self.compiled_tasks:
-			if t.__class__ == cxx.cxx or t.__class__ == c.c:
-				pdb = t.outputs[0].change_ext('.pdb')
-				t.env.append_unique('CFLAGS', ['/Fd%s'%pdb.bldpath()])
-				t.env.append_unique('CXXFLAGS', ['/Fd%s' % pdb.bldpath()])
+		try:
+			for t in self.compiled_tasks:
+				if t.__class__ == cxx.cxx or t.__class__ == c.c:
+					pdb = t.outputs[0].change_ext('.pdb')
+					t.env.append_unique('CFLAGS', ['/Fd%s'%pdb.bldpath()])
+					t.env.append_unique('CXXFLAGS', ['/Fd%s' % pdb.bldpath()])
+		except AttributeError:
+			pass
 
 
 @feature('dummy')

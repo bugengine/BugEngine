@@ -67,7 +67,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, PreloadType /*preload*/)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (Arena::general()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
 }
 
@@ -75,7 +75,7 @@ template< typename Interface >
 Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& context)
 :   m_handle(loadPlugin(pluginName))
 ,   m_interface(0)
-,   m_refCount(new (Arena::general()) i_u32(1))
+,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
     if (m_handle)
     {

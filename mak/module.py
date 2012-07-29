@@ -207,7 +207,7 @@ class module:
 				task.target				= self.dstname
 				task.env				= env.derive()
 				task.env.detach()
-				task.type				= type
+				task.type				= self.__class__.__name__
 				task.features			= ['c', 'cxx', type]
 				task.sourcetree			= self.sourcetree
 				task.options = {}

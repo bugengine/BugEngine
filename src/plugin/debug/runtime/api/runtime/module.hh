@@ -14,7 +14,7 @@ namespace BugEngine { namespace Runtime
 class Symbol;
 class SymbolResolver;
 
-class Module : public minitl::refcountable
+class be_api(RUNTIME) Module : public minitl::refcountable
 {
     BE_NOCOPY(Module);
 public:

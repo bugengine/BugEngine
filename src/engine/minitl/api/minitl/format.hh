@@ -39,8 +39,7 @@ public:
 
 template< u16 SIZE >
 format<SIZE>::format(const char *formatstr)
-    :   m_buffer()
-    ,   m_firstFormat(m_buffer)
+    :   m_firstFormat(m_buffer)
 {
     strncpy(m_buffer, formatstr, SIZE-1);
     m_buffer[SIZE-1] = 0;

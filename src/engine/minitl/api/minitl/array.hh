@@ -15,10 +15,9 @@ template< typename T >
 class array
 {
 private:
-    i_u32*      m_refCount;
-    T*          m_array;
-    Allocator&  m_allocator;
-    u32         m_size;
+    mutable minitl::Allocator::Block<T> m_array;
+private:
+    array& operator=(const array& other);
 public:
     typedef const T* const_iterator;
     typedef T* iterator;
@@ -26,7 +25,7 @@ public:
     inline array(Allocator& allocator, u32 size);
     template< typename ITERATOR >
     inline array(Allocator& allocator, ITERATOR begin, ITERATOR end);
-    inline array(const array<T>& rhs);
+    inline array(const array& other);
     inline ~array();
 
     inline iterator begin();

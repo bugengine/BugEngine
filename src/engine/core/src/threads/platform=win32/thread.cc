@@ -70,6 +70,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 ,   m_param2(p2)
 ,   m_result(0)
 {
+    be_info("starting thread %s" | name);
 }
 
 Thread::ThreadParams::~ThreadParams()
