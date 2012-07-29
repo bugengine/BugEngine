@@ -42,7 +42,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 
 }
 
-static i_u32 s_diskIndex = 0;
+static i_u32 s_diskIndex = i_u32::Zero;
 
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
@@ -89,7 +89,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
-        ipath::Filename pathname = (m_path+istring("*")).str();
+        ifilename::Filename pathname = (m_path+ifilename("*")).str();
         HANDLE h = FindFirstFile(pathname.name, &data);
         if (h != INVALID_HANDLE_VALUE)
         {
@@ -145,7 +145,7 @@ weak<File> DiskFolder::createFile(const istring& name)
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        be_error("File %s could not be created: CreateFile returned an error (%d) %s" | path | errorCode | errorMessage);
+        be_error("File %s could not be created: CreateFile returned an error (%d) %s" | m_path | errorCode | errorMessage);
         ::LocalFree(errorMessage);
         return weak<File>();
     }
@@ -153,7 +153,7 @@ weak<File> DiskFolder::createFile(const istring& name)
     {
         CloseHandle(h);
         WIN32_FIND_DATA data;
-        HANDLE h = FindFirstFile(path.c_str(), &data);
+        HANDLE h = FindFirstFile(path.name, &data);
         if (h == INVALID_HANDLE_VALUE)
         {
             char *errorMessage = 0;
@@ -165,7 +165,7 @@ weak<File> DiskFolder::createFile(const istring& name)
                 reinterpret_cast<LPSTR>(&errorMessage),
                 0,
                 NULL);
-            be_error("File %s could not be created: FindFirstFile returned an error (%d) %s" | path | errorCode | errorMessage);
+            be_error("File %s could not be created: FindFirstFile returned an error (%d) %s" | m_path | errorCode | errorMessage);
             ::LocalFree(errorMessage);
             return weak<File>();
         }

@@ -8,10 +8,10 @@
 namespace BugEngine { namespace Runtime
 {
 
-class Callstack
+class be_api(RUNTIME) Callstack
 {
 public:
-    class Address
+    class be_api(RUNTIME) Address
     {
         friend class Callstack;
     private:

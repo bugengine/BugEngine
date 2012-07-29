@@ -26,6 +26,7 @@ typedef u8                      byte;
 
 #pragma warning(error:4715)     // not all control paths return a value
 
+#pragma warning(disable:4251)   // class 'X' needs to have dll-interface to be used by clients of class 'Y'
 #pragma warning(disable:4275)   // non dll-interface class 'X' used as base for dll-interface class 'Y'
 #ifdef NDEBUG
 # pragma warning(error:4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'

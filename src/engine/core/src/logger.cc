@@ -47,7 +47,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 {
     ref<Logger> result = root();
 
-    for (size_t i = 0; i < name.size(); ++i)
+    for (u32 i = 0; i < name.size(); ++i)
     {
         minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if (it == result->m_children.end())

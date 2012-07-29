@@ -12,7 +12,7 @@ namespace BugEngine { namespace Runtime
 class Module;
 class SymbolResolver;
 
-class Symbol
+class be_api(RUNTIME) Symbol
 {
     friend class SymbolResolver;
     friend class Module;
@@ -31,7 +31,7 @@ public:
     const char *function() const    { return m_function; }
 };
 
-class SymbolResolver : public minitl::refcountable
+class be_api(RUNTIME) SymbolResolver : public minitl::refcountable
 {
     BE_NOCOPY(SymbolResolver);
 private:

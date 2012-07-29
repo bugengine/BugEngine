@@ -64,7 +64,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
     else
     {
         static const int s_bufferSize = 1024;
-        setFilePointer(pathname.c_str(), h, ticket->offset);
+        setFilePointer(pathname.name, h, ticket->offset);
         for (ticket->processed = 0; !ticket->done(); )
         {
             DWORD read;
@@ -86,7 +86,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 void Win32File::doWriteBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    filename::Filename pathname = m_file.str();
+    ifilename::Filename pathname = m_file.str();
     HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_WRITE,
                              0,

@@ -86,7 +86,7 @@ class Solution:
 			l[lst[-1]] = (projectGUID, {})
 
 
-		self.projectlist.append((projectGUID, project.category))
+		self.projectlist.append((projectGUID, project.type))
 		self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.guid, name, filename, projectGUID))
 		self.file.write('EndProject\n')
 

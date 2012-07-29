@@ -47,6 +47,11 @@ static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
             constness = "";
             closing = "";
             break;
+        default:
+            reference = "???<";
+            constness = "??? ";
+            closing = ">";
+            break;
     }
     const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
     lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access, userdata->type().metaclass->name.str().name, closing, userdata);
@@ -354,6 +359,12 @@ void Context::printStack(lua_State* l)
                     reference = "";
                     constness = "";
                     closing = "";
+                    break;
+                default:
+                    be_notreached();
+                    reference = "???<";
+                    constness = "??? ";
+                    closing=">";
                     break;
             }
             const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";

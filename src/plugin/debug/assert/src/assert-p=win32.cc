@@ -55,11 +55,11 @@ namespace BugEngine { namespace Debug
     static char outmessage[BUFFER_SIZE];
     static char callstack[BUFFER_SIZE];
     static char buffer[BUFFER_SIZE];
-    AssertionResult defaultAssertionCallback( const char *file,
-                                              int        line,
-                                              const char *expr,
-                                              const char *message,
-                                              ...)
+    minitl::AssertionResult defaultAssertionCallback( const char *file,
+                                                      int        line,
+                                                      const char *expr,
+                                                      const char *message,
+                                                      ...)
     {
         {
             va_list l;
@@ -121,20 +121,20 @@ namespace BugEngine { namespace Debug
                              NULL);
             (void)MessageBox(0, outmessage, "Failed to open assertion dialog", MB_ICONERROR | MB_OK);
             (void)LocalFree(errorMessage);
-            return Ignore;
+            return minitl::Ignore;
         }
         else if (locr == IDC_BUTTONBREAK)
         {
-            return Break;
+            return minitl::Break;
         }
         else if (locr == IDC_BUTTONIGNORE)
-            return Ignore;
+            return minitl::Ignore;
         else if (locr == IDC_BUTTONIGNOREALL)
-            return IgnoreAll;
+            return minitl::IgnoreAll;
         else if (locr == IDC_BUTTONABORT)
-            return Abort;
+            return minitl::Abort;
         else
-            return Ignore;
+            return minitl::Ignore;
     }
 
 }}

@@ -71,11 +71,11 @@ struct InterlockedType<8>
     typedef long long incr_t;
     static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
     {
-        return InterlockedExchangeAdd64(p, incr);
+        return _InterlockedExchangeAdd64(p, incr);
     }
     static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
     {
-        return InterlockedExchangeAdd64(p, -incr);
+        return _InterlockedExchangeAdd64(p, -incr);
     }
     static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
     {

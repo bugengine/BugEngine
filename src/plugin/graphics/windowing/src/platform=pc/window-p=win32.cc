@@ -69,7 +69,7 @@ uint2 Window::getDimensions() const
 {
     RECT r;
     GetClientRect(m_window->m_window, &r);
-    return int2(r.right-r.left, r.bottom-r.top);
+    return make_uint2(r.right-r.left, r.bottom-r.top);
 }
 
 void* Window::getWindowHandle() const

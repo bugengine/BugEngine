@@ -44,7 +44,6 @@ public:
 private:
     const Media     m_media;
     u64             m_size;
-    mutable i_u32   m_ticketCount;
 protected:
     File(Media media, u64 size);
 public:

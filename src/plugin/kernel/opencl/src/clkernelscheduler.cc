@@ -39,7 +39,10 @@ cl_context OpenCLKernelScheduler::createCLContextOnPlatform(const cl_context_pro
     cl_device_id device;
     cl_context context = 0;
     cl_uint deviceCount = 0;
-    checkResult(clGetDeviceIDs(platform, deviceType, 0, 0, &deviceCount));
+    cl_int error = clGetDeviceIDs(platform, deviceType, 0, 0, &deviceCount);
+    if (error == CL_DEVICE_NOT_FOUND)
+        return context;
+    checkResult(error);
     if (deviceCount > 0)
     {
         cl_device_id* devices = (cl_device_id*)malloca(sizeof(cl_device_id) * deviceCount);
@@ -75,7 +78,7 @@ cl_context OpenCLKernelScheduler::createCLContextOnPlatform(const cl_context_pro
 
 cl_context OpenCLKernelScheduler::createCLContext(const cl_context_properties* properties)
 {
-    cl_context context;
+    cl_context context = 0;
 
     cl_uint platformCount = 0;
     checkResult(clGetPlatformIDs(0, 0, &platformCount));

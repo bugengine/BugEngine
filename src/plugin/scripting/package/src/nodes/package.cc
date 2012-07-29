@@ -45,7 +45,7 @@ RTTI::Value Package::Namespace::get(const inamespace& name) const
     else
     {
         RTTI::Value v(it->second);
-        for (size_t i = 1; i < name.size(); ++i)
+        for (u32 i = 1; i < name.size(); ++i)
         {
             v = v[name[i]];
             if (!v)

@@ -63,7 +63,7 @@ void Environment::init(int argc, const char *argv[])
         m_game = argv[arg];
     }
 
-    SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().c_str());
+    SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().name);
 }
 
     size_t Environment::getProcessorCount() const
