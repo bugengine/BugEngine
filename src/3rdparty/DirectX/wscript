@@ -41,9 +41,9 @@ def setup(conf):
 		from waflib import Options
 		includes=[os.path.join(Options.options.dx_sdk, 'Include')]
 		libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
-		conf.check_lib('d3d9 d3dx9', var='dx9', libpath=libdirs)
-		conf.check_lib('d3d10 d3dx10', var='dx10', libpath=libdirs)
-		conf.check_lib('d3d11 d3dx11', var='dx11', libpath=libdirs)
+		conf.check_lib('d3d9', var='dx9', libpath=libdirs)
+		conf.check_lib('d3d10', var='dx10', libpath=libdirs)
+		conf.check_lib('d3d11', var='dx11', libpath=libdirs)
 
 def build(bld):
 	from waflib import Options
