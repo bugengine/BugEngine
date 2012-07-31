@@ -3,6 +3,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/criticalsection.hh>
+#include    <windows.h>
 
 
 namespace BugEngine
@@ -12,11 +13,12 @@ CriticalSection::CriticalSection()
 :   m_data(new CRITICAL_SECTION)
 {
     CRITICAL_SECTION* s = (CRITICAL_SECTION*)m_data;
-    InitializeCriticalSection(s);
+    InitializeCriticalSectionEx(s, 3500, 0);
 }
 
 CriticalSection::~CriticalSection()
 {
+    DeleteCriticalSection((CRITICAL_SECTION*)m_data);
     delete (CRITICAL_SECTION*)m_data;
 }
 

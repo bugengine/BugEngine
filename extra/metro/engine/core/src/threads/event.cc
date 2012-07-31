@@ -10,7 +10,7 @@ namespace BugEngine
 
 /* condition variables are only supported in Vista+ */
 Event::Event()
-:   m_data(CreateEvent(0, FALSE, FALSE, 0))
+:   m_data(CreateEventEx(0, 0, 0, 0))
 {
 }
 
@@ -34,7 +34,7 @@ void Event::unlock()
 
 Threads::Waitable::WaitResult Event::wait()
 {
-    DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
+    DWORD rcode = WaitForSingleObjectEx((HANDLE)m_data, INFINITE, FALSE);
     switch(rcode)
     {
     case WAIT_OBJECT_0:

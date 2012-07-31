@@ -70,8 +70,8 @@ namespace
     };
 }
 
-/*****************************************************************************/
-static int beMain(int argc, const char *argv[])
+
+int beMain(int argc, const char *argv[])
 {
     BugEngine::Environment::getEnvironment().init(argc, argv);
 #if BE_ENABLE_EXCEPTIONS
@@ -104,27 +104,3 @@ static int beMain(int argc, const char *argv[])
     }
 #endif
 }
-/*****************************************************************************/
-#if defined(BE_PLATFORM_WIN32)
-
-namespace BugEngine
-{
-    HINSTANCE hDllInstance;
-}
-
-extern "C"
-int WINAPI WinMain( HINSTANCE hInstance,
-                    HINSTANCE /*hPrevInstance*/,
-                    LPSTR /*lpCmdLine*/,
-                    int /*nCmdShow*/ )
-{
-    BugEngine::hDllInstance = hInstance;
-    return beMain(__argc, (const char **)__argv);
-}
-#else
-int main(int argc, const char *argv[])
-{
-    return beMain(argc, argv);
-}
-#endif
-/*****************************************************************************/
