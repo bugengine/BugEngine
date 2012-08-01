@@ -152,7 +152,8 @@ class module:
 					platformsdirectory.addDirectory(pdir, platform)
 					pdir.prefix = os.path.join(platform, category, name.replace('.', '/'))
 					self.sourcetree.addDirectory(platformsdirectory, 'platforms')
-			platformsdirectory.prefix = os.path.join('..', '..', '..', 'extra')
+			goback = '/'.join(['..' for i in ['src', category]+name.split('.')])
+			platformsdirectory.prefix = os.path.join(goback, 'extra')
 
 		for arch in mak.allarchs:
 			if os.path.isdir(os.path.join(self.root, 'lib.'+arch)):
