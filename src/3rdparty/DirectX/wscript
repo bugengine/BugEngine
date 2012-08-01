@@ -37,13 +37,12 @@ def options(opt):
 				help='Location of the DirectX SDK')
 
 def setup(conf):
-	if 'win32' in conf.env.PLATFORM:
-		from waflib import Options
-		includes=[os.path.join(Options.options.dx_sdk, 'Include')]
-		libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
-		conf.check_lib('d3d9', var='dx9', libpath=libdirs)
-		conf.check_lib('d3d10', var='dx10', libpath=libdirs)
-		conf.check_lib('d3d11', var='dx11', libpath=libdirs)
+	from waflib import Options
+	includes=[os.path.join(Options.options.dx_sdk, 'Include')]
+	libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
+	conf.check_lib('d3d9', var='dx9', libpath=libdirs)
+	conf.check_lib('d3d10', var='dx10', libpath=libdirs)
+	conf.check_lib('d3d11', var='dx11', libpath=libdirs)
 
 def build(bld):
 	from waflib import Options

@@ -128,18 +128,24 @@ call "%s" %s
 echo PATH=%%PATH%%
 echo INCLUDE=%%INCLUDE%%
 echo LIB=%%LIB%%
+echo LIBPATH=%%LIBPATH%%
 """ % (vcvars,target))
 	sout = conf.cmd_and_log(['cmd', '/E:on', '/V:on', '/C', batfile.abspath()])
 	lines = sout.splitlines()
+	MSVC_PATH = []
+	MSVC_INCDIR = []
+	MSVC_LIBDIR = []
 
 	for line in lines:
 		if line.startswith('PATH='):
 			path = line[5:]
 			MSVC_PATH = path.split(';')
 		elif line.startswith('INCLUDE='):
-			MSVC_INCDIR = [i for i in line[8:].split(';') if i]
+			MSVC_INCDIR += [i for i in line[8:].split(';') if i]
 		elif line.startswith('LIB='):
-			MSVC_LIBDIR = [i for i in line[4:].split(';') if i]
+			MSVC_LIBDIR += [i for i in line[4:].split(';') if i]
+		elif line.startswith('LIBPATH='):
+			MSVC_LIBDIR += [i for i in line[8:].split(';') if i]
 
 	# Check if the compiler is usable at all.
 	# The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
