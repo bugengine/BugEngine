@@ -107,5 +107,8 @@ def plugins(bld):
 	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game')
 	bugeditor		= module.game('bugeditor',					[bugeditor.ui, package])
 
+	samples = lambda: None
+	samples.kernel	= module.game('samples.kernel',				[])
+
 	bld.recurse('mak', name='plugins', once=False)
 

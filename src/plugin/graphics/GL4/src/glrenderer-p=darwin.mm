@@ -3,6 +3,7 @@
 
 #include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>
+#include    <GL4/glmemoryprovider.hh>
 #include    <extensions.hh>
 
 #include    <3d/mesh/mesh.script.hh>
@@ -138,6 +139,7 @@ GLWindow::Context::~Context()
 GLRenderer::GLRenderer(const PluginContext& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general()))
+    ,   m_openGLMemoryProvider(scoped<GLMemoryProvider>::create(Arena::general()))
     ,   m_openCLScheduler("kernel.opencl.opengl", context)
 {
     [NSOpenGLContext clearCurrentContext];
