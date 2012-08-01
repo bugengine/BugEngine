@@ -8,13 +8,12 @@ namespace BugEngine { namespace Kernel
 {
 
 CPUMemoryProvider::CPUMemoryProvider()
+    :   IMemoryProvider("CPU")
 {
-    
 }
 
 CPUMemoryProvider::~CPUMemoryProvider()
 {
-    
 }
 
 }}
