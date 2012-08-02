@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <kernelsample.hh>
+#include    <kerneltask.script.hh>
 #include    <core/environment.hh>
 #include    <system/file/diskfolder.script.hh>
 
@@ -11,14 +12,14 @@ namespace BugEngine { namespace Samples
 
 KernelSample::KernelSample(const PluginContext& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
-    ,   m_kernelSample(scoped<Kernel::Kernel>::create(Arena::general(), "samples.kernel.add"))
+    ,   m_kernelTask(scoped<KernelSampleTask>::create(Arena::general()))
 {
-    pluginContext().resourceManager->load(weak<Kernel::Kernel>(m_kernelSample));
+    pluginContext().resourceManager->load(weak<KernelSampleTask>(m_kernelTask));
 }
 
 KernelSample::~KernelSample()
 {
-    pluginContext().resourceManager->unload(weak<Kernel::Kernel>(m_kernelSample));
+    pluginContext().resourceManager->unload(weak<KernelSampleTask>(m_kernelTask));
 }
 
 }}

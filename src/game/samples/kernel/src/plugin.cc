@@ -7,3 +7,4 @@
 #include    <bugengine/application.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::Application, BugEngine::Samples::KernelSample);
+BE_REGISTER_NAMESPACE_2(BugEngine, Samples);
