@@ -17,6 +17,7 @@ CriticalSection::CriticalSection()
 
 CriticalSection::~CriticalSection()
 {
+    DeleteCriticalSection((CRITICAL_SECTION*)m_data);
     delete (CRITICAL_SECTION*)m_data;
 }
 

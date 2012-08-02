@@ -4,8 +4,8 @@
 #include    <core/stdafx.h>
 
 #include    <core/threads/thread.hh>
-
-
+#include    <windows.h>
+#include    <process.h>
 
 namespace BugEngine
 {
@@ -22,31 +22,6 @@ struct THREADNAME_INFO
 #pragma pack(pop)
 
 
-class Thread::ThreadSpecificData
-{
-private:
-    DWORD m_key;
-public:
-    ThreadSpecificData()
-        :   m_key(TlsAlloc())
-    {
-    }
-    ~ThreadSpecificData()
-    {
-        TlsFree(m_key);
-    }
-    void createThreadSpecificData(const Thread::ThreadParams& params)
-    {
-        TlsSetValue(m_key, (void*)&params);
-    }
-    const Thread::ThreadParams& getThreadParams()
-    {
-        return *(const Thread::ThreadParams*)TlsGetValue(m_key);
-    }
-};
-
-Thread::ThreadSpecificData Thread::s_threadData;
-
 class Thread::ThreadParams
 {
     friend class Thread;
@@ -60,8 +35,11 @@ public:
     ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2);
     ~ThreadParams();
 
-    static unsigned long WINAPI threadWrapper(void* params);
+    static unsigned int WINAPI threadWrapper(void* params);
+    static __declspec(thread) const ThreadParams* s_threadParams;
 };
+
+const Thread::ThreadParams* Thread::ThreadParams::s_threadParams;
 
 Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2)
 :   m_name(name)
@@ -97,10 +75,10 @@ static void setThreadName(const istring& name)
 #endif
 }
 
-unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
+unsigned int WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = static_cast<ThreadParams*>(params);
-    s_threadData.createThreadSpecificData(*p);
+    ThreadParams::s_threadParams = p;
     be_info("started thread %s" | p->m_name);
     setThreadName(p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
@@ -113,38 +91,27 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 
 Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
 :   m_params(new ThreadParams(name, f, p1, p2))
-,   m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, 0, &m_id))
+,   m_data((void*)_beginthreadex(0, 0, &ThreadParams::threadWrapper, m_params, 0, (unsigned int*)&m_id))
 {
     setPriority(p);
 }
 
 Thread::~Thread()
 {
-    DWORD result = WaitForSingleObject((HANDLE)m_data, 2000);
+    DWORD result = WaitForSingleObjectEx((HANDLE)m_data, 2000, FALSE);
     be_assert(result != WAIT_TIMEOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
     be_forceuse(result);
     CloseHandle((HANDLE)m_data);
     delete static_cast<ThreadParams*>(m_params);
 }
 
-void Thread::resume()
-{
-    ResumeThread((HANDLE)m_data);
-}
-
-void Thread::sleep(int millisecond)
-{
-    Sleep(millisecond);
-}
-
 void Thread::yield()
 {
-    Sleep(0);
 }
 
 u64 Thread::id() const
 {
-    return m_id;
+    return *(unsigned int*)&m_id;
 }
 
 u64 Thread::currentId()
@@ -154,40 +121,17 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    return s_threadData.getThreadParams().m_name;
+    return ThreadParams::s_threadParams->m_name;
 }
 
 void Thread::wait() const
 {
-    WaitForSingleObject((HANDLE)m_data, INFINITE);
+    WaitForSingleObjectEx((HANDLE)m_data, INFINITE, FALSE);
 }
 
 void Thread::setPriority(Priority p)
 {
-    switch(p)
-    {
-    case Idle:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_IDLE);
-        return;
-    case Lowest:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_LOWEST);
-        return;
-    case BelowNormal:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_BELOW_NORMAL);
-        return;
-    case Normal:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_NORMAL);
-        return;
-    case AboveNormal:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_ABOVE_NORMAL);
-        return;
-    case Highest:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_HIGHEST);
-        return;
-    case Critical:
-        SetThreadPriority((HANDLE)m_data, THREAD_PRIORITY_TIME_CRITICAL);
-        return;
-    }
+    be_forceuse(p);
 }
 
 }

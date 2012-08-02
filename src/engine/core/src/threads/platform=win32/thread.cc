@@ -127,16 +127,6 @@ Thread::~Thread()
     delete static_cast<ThreadParams*>(m_params);
 }
 
-void Thread::resume()
-{
-    ResumeThread((HANDLE)m_data);
-}
-
-void Thread::sleep(int millisecond)
-{
-    Sleep(millisecond);
-}
-
 void Thread::yield()
 {
     Sleep(0);

@@ -9,7 +9,7 @@ namespace BugEngine
 {
 
 Mutex::Mutex()
-:   m_data(CreateMutex(0, FALSE, 0))
+:   m_data(CreateMutexEx(0, 0, 0, 0))
 {
 }
 
@@ -25,7 +25,7 @@ void Mutex::release()
 
 Threads::Waitable::WaitResult Mutex::wait()
 {
-    DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
+    DWORD rcode = WaitForSingleObjectEx((HANDLE)m_data, INFINITE, FALSE);
     switch(rcode)
     {
     case WAIT_OBJECT_0:

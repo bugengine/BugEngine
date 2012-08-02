@@ -83,20 +83,6 @@ Thread::~Thread()
     delete reinterpret_cast<pthread_t*>(m_data);
 }
 
-void Thread::resume()
-{
-}
-
-void Thread::sleep(int milliseconds)
-{
-    timespec r = { 0, 0 };
-    r.tv_nsec = milliseconds * 1000000;
-    r.tv_sec  = r.tv_nsec / 1000000000;
-    r.tv_nsec = r.tv_nsec % 1000000000;
-    while (nanosleep(&r, &r) == -1)
-        /*again*/;
-}
-
 void Thread::yield()
 {
 #ifdef BE_PLATFORM_SUN
