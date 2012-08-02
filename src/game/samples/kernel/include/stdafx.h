@@ -1,20 +1,14 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_MEMORY_KERNEL_STREAM_HH_
-#define BE_CORE_MEMORY_KERNEL_STREAM_HH_
+#ifndef BE_SAMPLES_KERNEL_STDAFX_H_
+#define BE_SAMPLES_KERNEL_STDAFX_H_
 /*****************************************************************************/
-#include    <core/memory/kernel/istream.hh>
 
-namespace BugEngine { namespace Kernel
-{
-
-template< typename T >
-class Stream : public IStream
-{
-};
-
-}}
+#include    <core/stdafx.h>
+#include    <rtti/stdafx.h>
+#include    <system/stdafx.h>
+#include    <bugengine/stdafx.h>
 
 /*****************************************************************************/
 #endif

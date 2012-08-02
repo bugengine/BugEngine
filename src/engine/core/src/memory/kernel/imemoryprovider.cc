@@ -8,8 +8,8 @@
 namespace BugEngine { namespace Kernel
 {
 
-IMemoryProvider::IMemoryProvider()
-    :   m_name("")
+IMemoryProvider::IMemoryProvider(const istring& name)
+    :   m_name(name)
 {
 }
 

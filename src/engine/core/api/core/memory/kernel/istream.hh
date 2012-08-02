@@ -15,18 +15,27 @@ class IMemoryBank;
 class IStream : public minitl::refcountable
 {
 private:
+    enum BankState
+    {
+        Freed,
+        Reserved,
+        Updated
+    };
     struct MemoryState
     {
         weak<const IMemoryProvider> provider;
         weak<IMemoryBank>           bank;
+        BankState                   state;
+
+        static const MemoryState null;
+        operator const void*() const    { return (const void*)(this - &null); }
+        bool operator!() const          { return this == &null; }
     };
-    static const u32 s_memoryStatesCount = 4;
+    static const u32 s_memoryStatesCount = 8;
 private:
     MemoryState m_states[s_memoryStatesCount];
 public:
-    weak<IMemoryBank>           currentBank()       { return m_states[0].bank; }
-    weak<const IMemoryProvider> currentProvider()   { return m_states[0].provider; }
-    weak<IMemoryBank>           getBank(weak<const IMemoryProvider> provider);
+    const MemoryState& getBank(weak<const IMemoryProvider> provider) const;
 };
 
 }}

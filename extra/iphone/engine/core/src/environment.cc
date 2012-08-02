@@ -3,7 +3,6 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <core/debug/logger.hh>
 #include    <unistd.h>
 #include    <sys/types.h>
 #include    <sys/sysctl.h>
