@@ -11,6 +11,7 @@ namespace BugEngine
     HINSTANCE hDllInstance;
 }
 
+[Platform::MTAThread]
 extern "C"
 int WINAPI WinMain( HINSTANCE hInstance,
                     HINSTANCE /*hPrevInstance*/,
