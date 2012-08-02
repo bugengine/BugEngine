@@ -8,12 +8,12 @@
 namespace BugEngine { namespace Kernel
 {
 
-class IMemoryProvider : public minitl::pointer
+class be_api(CORE) IMemoryProvider : public minitl::pointer
 {
 private:
     istring const   m_name;
 protected:
-    IMemoryProvider();
+    IMemoryProvider(const istring& name);
 public:
     istring name() const { return m_name; }
 };
