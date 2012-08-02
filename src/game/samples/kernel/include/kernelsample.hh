@@ -13,10 +13,12 @@
 namespace BugEngine { namespace Samples
 {
 
+class KernelSampleTask;
+
 class KernelSample : public Application
 {
 private:
-    scoped<Kernel::Kernel> m_kernelSample;
+    scoped<KernelSampleTask> m_kernelTask;
 public:
     KernelSample(const PluginContext& context);
     ~KernelSample();
