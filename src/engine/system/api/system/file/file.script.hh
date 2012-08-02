@@ -11,16 +11,10 @@
 namespace BugEngine
 {
 
-namespace IOProcess
-{
-struct IOContext;
-}
-
 class be_api(SYSTEM) File : public minitl::refcountable
 {
 public:
     class Ticket;
-    friend struct IOProcess::IOContext;
     friend class Ticket;
 public:
     struct Media
@@ -53,7 +47,6 @@ public:
                  ,  public minitl::inode
                  ,  public minitl::intrusive_list<Ticket>::item
     {
-        friend struct IOProcess::IOContext;
         friend class File;
     public:
         enum Action
@@ -70,7 +63,7 @@ public:
         i_bool                          error;
 
         inline bool done() const    { return error || processed == total; }
-
+    public:
         Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size);
         Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data);
         ~Ticket();
@@ -81,10 +74,11 @@ public:
 
     ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, minitl::Allocator& arena = Arena::temporary()) const;
     ref<const Ticket> beginWrite(const void* data, u32 size, i64 offset = -1);
-private:
+
     void fillBuffer(weak<Ticket> ticket) const;
-    virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     void writeBuffer(weak<Ticket> ticket) const;
+private:
+    virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;
 };
 

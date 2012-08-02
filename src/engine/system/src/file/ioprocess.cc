@@ -4,58 +4,43 @@
 #include    <system/stdafx.h>
 #include    <ioprocess.hh>
 
-#include    <core/threads/thread.hh>
-#include    <core/threads/semaphore.hh>
-
 namespace BugEngine { namespace IOProcess
 {
 
-struct IOContext
-{
-    IOContext();
-    ~IOContext();
-
-    minitl::intrusive_list<File::Ticket> tickets;
-    minitl::istack<File::Ticket> requests;
-    static intptr_t ioProcess(intptr_t p1, intptr_t p2);
-};
-
-
-static i_u8         s_ioDone(i_u8::Zero);
-static Semaphore    s_ioSemaphore(0);
-static Thread       s_ioThread("IOThread", &IOContext::ioProcess, 0, 0, Thread::Highest);
-static IOContext    s_iocontext;
-
 IOContext::IOContext()
+    :   m_ioDone(i_u8::Zero)
+    ,   m_ioSemaphore(0)
+    ,   m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast<intptr_t>(this), 0, Thread::Highest)
 {
 };
 
 IOContext::~IOContext()
 {
-    s_ioDone++;
-    s_ioSemaphore.release(1);
-    s_ioThread.wait();
-    be_assert(s_iocontext.tickets.empty(), "Tickets still in queue when exiting IO process");
+    m_ioDone++;
+    m_ioSemaphore.release(1);
+    m_ioThread.wait();
+    be_assert(m_tickets.empty(), "Tickets still in queue when exiting IO process");
 }
 
-intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
+intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
 {
+    IOContext* context = reinterpret_cast<IOContext*>(p1);
     while(1)
     {
-        s_ioSemaphore.wait();
-        File::Ticket* request = s_iocontext.requests.pop();
+        context->m_ioSemaphore.wait();
+        File::Ticket* request = context->m_requests.pop();
         if (!request)
         {
-            be_assert(s_ioDone, "IO context exited but was not yet finished");
+            be_assert(context->m_ioDone, "IO context exited but was not yet finished");
             break;
         }
-        s_iocontext.tickets.push_front(*request);
-        File::Ticket* t = s_iocontext.tickets.begin().operator->();
-        s_iocontext.tickets.erase(s_iocontext.tickets.begin());
+        context->m_tickets.push_front(*request);
+        File::Ticket* t = context->m_tickets.begin().operator->();
+        context->m_tickets.erase(context->m_tickets.begin());
         switch(t->action)
         {
         case File::Ticket::Read:
-            if (!s_ioDone)
+            if (!context->m_ioDone)
             {
                 t->buffer.realloc(t->total);
                 t->file->fillBuffer(t);
@@ -74,12 +59,12 @@ intptr_t IOContext::ioProcess(intptr_t /*p1*/, intptr_t /*p2*/)
 }
 
 
-void pushTicket(ref<File::Ticket> ticket)
+void IOContext::pushTicket(ref<File::Ticket> ticket)
 {
     File::Ticket* t = ticket.operator->();
     t->addref();
-    s_iocontext.requests.push(t);
-    s_ioSemaphore.release(1);
+    m_requests.push(t);
+    m_ioSemaphore.release(1);
 }
 
 }}
