@@ -92,7 +92,7 @@ def plugins(bld):
 		if opengl:
 			gl		= module.plugin('graphics.GL4',				[bld.game, windowing, opengl, _3d])
 			if opencl:
-				clgl= module.plugin('kernel.opencl.opengl',		[bld.game, gl, kernelopencl])
+				clgl= module.plugin('kernel.opencl_gl',			[bld.game, gl, kernelopencl])
 		if directx9:
 			Dx9		= module.plugin('graphics.DX9',				[bld.game, windowing, cgDx, directx9, _3d])
 		#if diretx10:
@@ -105,7 +105,7 @@ def plugins(bld):
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None
 	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game')
-	bugeditor		= module.game('bugeditor',					[bugeditor.ui, package])
+	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package])
 
 	samples = lambda: None
 	samples.kernel	= module.game('samples.kernel',				[])

@@ -46,7 +46,13 @@ static HMODULE loadPlugin(const inamespace &pluginName)
     static const ipath pluginSubdir = ipath("plugins");
     ifilename::Filename pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
     be_info("loading plugin %s (%s)" | pluginName | pluginPath.name);
-    HMODULE h = LoadPackagedLibrary(pluginPath.name, 0);
+
+    int length = be_checked_numcast<int>(strlen(pluginPath.name));
+    int count = MultiByteToWideChar(0, 0, pluginPath.name, length, 0, 0);
+    minitl::Allocator::Block<wchar_t> wPath(Arena::stack(), count);
+    count = MultiByteToWideChar(0, 0, pluginPath.name, length, wPath, count);
+
+    HMODULE h = LoadPackagedLibrary(wPath, 0);
     if (!h)
     {
         char errorMessage[1024];
@@ -82,16 +88,15 @@ Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& con
         Interface* (*be_pluginCreate)(const PluginContext&) = reinterpret_cast<Interface* (*)(const PluginContext&)>(GetProcAddress(static_cast<HINSTANCE>(m_handle), "be_createPlugin"));
         if (!be_pluginCreate)
         {
-            char *errorMessage;
-            ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            char errorMessage[1024];
+            ::FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL,
                 ::GetLastError(),
                 0,
-                reinterpret_cast<LPTSTR>(&errorMessage),
-                0,
+                errorMessage,
+                1024,
                 NULL);
             be_error(errorMessage);
-            ::LocalFree(errorMessage);
         }
         else
         {

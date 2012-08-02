@@ -9,7 +9,7 @@
 namespace BugEngine { namespace OpenGL
 {
 
-class GLMemoryProvider : public Kernel::IMemoryProvider
+class be_api(GL4) GLMemoryProvider : public Kernel::IMemoryProvider
 {
 public:
     GLMemoryProvider();

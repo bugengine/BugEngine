@@ -3,13 +3,13 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/semaphore.hh>
-
+#include    <windows.h>
 
 namespace BugEngine
 {
 
 Semaphore::Semaphore(int initialCount)
-:   m_data(CreateSemaphore(NULL, initialCount, 65535, NULL))
+    :   m_data(CreateSemaphoreExW(NULL, initialCount, 65535, NULL, 0, 0))
 {
 }
 
@@ -25,7 +25,7 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
+    DWORD rcode = WaitForSingleObjectEx((HANDLE)m_data, INFINITE, FALSE);
     switch(rcode)
     {
     case WAIT_OBJECT_0:
