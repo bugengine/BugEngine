@@ -31,7 +31,7 @@ def datagen(self, node):
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
 	tsk.env.detach()
-	if self.category == 'plugin':
+	if self.category == 'plugin' or self.category == 'game':
 		tsk.env.PLUGIN = self.sname
 	else:
 		tsk.env.PLUGIN = 'game'
