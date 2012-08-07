@@ -4,8 +4,6 @@
 #include    <system/stdafx.h>
 #include    <system/scheduler/kernel/kernel.script.hh>
 
-BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, Kernel);
-
 namespace BugEngine { namespace Kernel
 {
 

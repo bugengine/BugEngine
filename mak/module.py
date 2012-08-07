@@ -231,7 +231,7 @@ class module:
 				task.target				= self.dstname
 				task.env				= env.derive()
 				task.env.detach()
-				task.type				= type
+				task.type				= self.__class__.__name__
 				task.features			= ['c', 'cxx', type]
 				task.usemaster			= self.usemaster
 
@@ -291,6 +291,7 @@ class module:
 						job = bld(
 								target = task.name + '.' + kernelname,
 								env = env,
+								type='job',
 								source = kernelsources.make_sources(bld, env, self.root),
 								features = ['c', 'cxx', jobtype, 'warnall', optim],
 								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel'])),
@@ -378,7 +379,7 @@ class module:
 					else:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 				elif ext == '.plist':
-					result.addFile(sources.deployedsource(file, '', 'runbin', fileplatforms, filearchs, doprocess))
+					result.addFile(sources.deployedsource(file, '', 'prefix', fileplatforms, filearchs, doprocess))
 				elif deploy_all:
 					result.addFile(sources.deployedsource(file, '', 'data', fileplatforms, filearchs, doprocess))
 		return result
@@ -427,7 +428,7 @@ class library(module):
 				  sources=[],
 				  dstname = None,
 				):
-		self.install_path = 'lib'
+		self.install_path = 'runbin'
 		module.__init__(self,
 						name,
 						dstname or name,
@@ -446,7 +447,12 @@ class library(module):
 			if d not in blacklist:
 				d._post(builder, blacklist)
 		options = coptions()
-		task = self.gentask(builder, 'cobjects', options, blacklist=blacklist)
+		if builder.dynamic:
+			options.defines.add('BUILDING_DLL')
+			options.defines.add('_USRDLL')
+			task = self.gentask(builder, 'cxxshlib', options, blacklist=blacklist)
+		else:
+			task = self.gentask(builder, 'cobjects', options, blacklist=blacklist)
 
 
 
