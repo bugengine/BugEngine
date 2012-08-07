@@ -48,7 +48,7 @@ class Unit(cpp.yacc.Nonterm):
 		self.members.using(file, instances, [], [], "")
 
 		instances.write("namespace BugEngine\n{\n\n")
-		self.members.dumpObjects(file, instances, [], [], [], "")
+		self.members.dumpObjects(file, instances, [], '::BugEngine::'+owner, [], [], "")
 		object_ptr, method_ptr, constructor, cast, variables = self.members.dump(file, instances, [], [], [], "", "", False)
 		if object_ptr != 'BugEngine::%s->objects'%owner:
 			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( BugEngine::%s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))

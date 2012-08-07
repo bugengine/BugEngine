@@ -191,9 +191,9 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects:
 			o.predecl(file, instances, decl, name, parent_name)
 
-	def dumpObjects(self, file, instances, namespace, decl, name, parent_name):
+	def dumpObjects(self, file, instances, namespace, owner, decl, name, parent_name):
 		for o in self.objects:
-			o.varname, o.tag_ptr = o.dump(file, instances, namespace, decl, name, parent_name)
+			o.varname, o.tag_ptr = o.dump(file, instances, namespace, owner, decl, name, parent_name)
 
 	def dump(self, file, instances, namespace, decl, name, owner, parent_name, parent_value):
 		if parent_name:

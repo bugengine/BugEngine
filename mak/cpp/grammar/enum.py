@@ -84,9 +84,9 @@ class EnumDef(cpp.yacc.Nonterm):
 		else:
 			instances.write("extern ::BugEngine::RTTI::Class s_%s;\n" % (decl))
 
-	def dump(self, file, instances, namespace, decl, name, member):
+	def dump(self, file, instances, namespace, owner, decl, name, member):
 		ns = '::'+'::'.join(namespace)
-		owner = '::'+'::'.join(name)
+		owner_ = '::'+'::'.join(name)
 		name = name+[self.name]
 		decl = decl+[self.decl]
 		fullname = '::'+'::'.join(name)
@@ -104,7 +104,7 @@ class EnumDef(cpp.yacc.Nonterm):
 
 		tag_ptr = self.tags.dump(file, instances, prefix)
 		properties = "{0}"
-		objects = self.value.dump(file, instances, prefix, owner, self.name)
+		objects = self.value.dump(file, instances, prefix, owner_, self.name)
 		methods = "{0}"
 
 		file.write("#line %d\n"%self.lineno)
@@ -114,7 +114,9 @@ class EnumDef(cpp.yacc.Nonterm):
 		file.write("#line %d\n"%self.lineno)
 		file.write("    {\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::inamespace(\"%s\"),\n" % (prettyname))
+		file.write("        ::BugEngine::istring(\"%s\"),\n" % (self.name))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % owner)
 		file.write("#line %d\n"%self.lineno)
 		file.write("        ::BugEngine::be_typeid< void >::klass(),\n")
 		file.write("#line %d\n"%self.lineno)
