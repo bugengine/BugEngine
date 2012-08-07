@@ -207,8 +207,8 @@ GLWindow::Context::~Context()
 {
     ReleaseDC(m_hwnd, m_dc);
     /*if (m_glContext)
-    {
-        wglDeleteContext(m_glContext);
+    { 
+       wglDeleteContext(m_glContext);
         m_glContext = 0;
     }*/
 }
@@ -218,7 +218,7 @@ GLWindow::Context::~Context()
 GLRenderer::GLRenderer(const PluginContext& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general(), this))
-    ,   m_openCLScheduler("kernel.opencl.opengl", context)
+    ,   m_openCLScheduler("kernel.opencl_gl", context)
 {
 }
 

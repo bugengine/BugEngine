@@ -12,6 +12,7 @@
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, RTTI);
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, EditHint);
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, Documentation);
+BE_REGISTER_NAMESPACE_2_(game, BugEngine, Kernel);
 
 namespace BugEngine
 {

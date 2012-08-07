@@ -63,15 +63,20 @@ def options(opt):
 					dest='toolchains',
 					help='build for the selected toolchains')
 	gr.add_option( '--nomaster',
-					action='store_true',
-					default=False,
-					dest='nomaster',
-					help='build without master files')
+					action = 'store_true',
+					default = False,
+					dest = 'nomaster',
+					help = 'build without master files')
 	gr.add_option( '--static',
-					action='store_true',
-					default=False,
-					dest='static',
-					help='build a static executable (all plugins built into the engine)')
+					action = 'store_true',
+					default = False,
+					dest = 'static',
+					help = 'build a static executable (all plugins built into the engine)')
+	gr.add_option( '--dynamic',
+					action = 'store_true',
+					default = False,
+					dest = 'dynamic',
+					help = 'build a dynamic engine (all engine components built into shared objects)')
 
 	for i in os.listdir(os.path.join('src', '3rdparty')):
 		if i in ['.svn', '.cvs']:
@@ -184,9 +189,9 @@ def build(bld):
 						if lib not in ['.svn', '.cvs']:
 							extra3rdparties.append(os.path.join('extra', target, '3rdparty', lib))
 	selectToolchains(bld)
-	global builder
 	mak.builder = bld
 	mak.builder.static = Options.options.static
+	mak.builder.dynamic = Options.options.dynamic
 	bld.m = {}
 	for i in os.listdir(os.path.join('src', '3rdparty')):
 		if i not in ['.svn', '.cvs']:
