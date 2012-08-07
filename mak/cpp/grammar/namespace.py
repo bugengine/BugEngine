@@ -37,7 +37,7 @@ class Namespace(cpp.yacc.Nonterm):
 		self.exprs.predecl(file, instances, decl, name, member)
 		instances.write("\n}\n")
 
-	def dump(self, file, instances, namespace, decl, name, member):
+	def dump(self, file, instances, namespace, unused, decl, name, member):
 		namespace = name+[self.name]
 		name = name+[self.name]
 		decl = decl+[self.decl]
@@ -45,7 +45,7 @@ class Namespace(cpp.yacc.Nonterm):
 		file.write("{\n")
 
 		owner = ("be_%s_Namespace_"%self.parser.plugin) + "_".join(name) + "()"
-		self.exprs.dumpObjects(file, instances, namespace, decl, name, "")
+		self.exprs.dumpObjects(file, instances, namespace, owner, decl, name, "")
 		object_ptr, method_ptr, constructor, cast, variables = self.exprs.dump(file, instances, namespace, decl, name, "", "", True)
 		if object_ptr != 'BugEngine::%s->objects'%owner:
 			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( %s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))

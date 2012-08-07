@@ -54,7 +54,7 @@ static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
             break;
     }
     const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
-    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access, userdata->type().metaclass->name.str().name, closing, userdata);
+    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access, userdata->type().metaclass->name.c_str(), closing, userdata);
     return 1;
 }
 
@@ -368,7 +368,7 @@ void Context::printStack(lua_State* l)
                     break;
             }
             const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
-            be_debug("[%s%s%s%s%s object @0x%p]" | constness | reference | access | userdata->type().metaclass->name.str().name | closing | userdata);
+            be_debug("[%s%s%s%s%s object @0x%p]" | constness | reference | access | userdata->type().metaclass->name.c_str() | closing | userdata);
             break;
         }
         default:

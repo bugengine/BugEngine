@@ -193,7 +193,9 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("#line %d\n"%self.lineno)
 		file.write("    {\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::inamespace(\"BugEngine.Kernel.Stream<%s>\"),\n" % (self.name))
+		file.write("        ::BugEngine::istring(\"Stream<%s>\"),\n" % (self.name))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        ::BugEngine::be_game_Namespace_BugEngine_Kernel(),\n")
 		file.write("#line %d\n"%self.lineno)
 		file.write("        ::BugEngine::be_typeid< BugEngine::Kernel::IStream >::klass(),\n")
 		file.write("#line %d\n"%self.lineno)
@@ -221,7 +223,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		instances.write("#line %d\n"%self.lineno)
 		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Stream<%s> >::klass() { raw<const RTTI::Class> ci = {&s_pod_def_%s}; return ci; }\n" % (name, prefix))
 
-	def dump(self, file, instances, namespace, decl, name, member):
+	def dump(self, file, instances, namespace, owner, decl, name, member):
 		ns = '::'.join(namespace)
 		name = name+[self.name]
 		decl = decl+[self.decl]
@@ -234,7 +236,7 @@ class ClassDef(cpp.yacc.Nonterm):
 			
 
 		if self.members:
-			self.members.dumpObjects(file, instances, namespace, decl, name, fullname)
+			self.members.dumpObjects(file, instances, namespace, '::BugEngine::be_typeid< %s >::klass()'%fullname, decl, name, fullname)
 
 		if member:
 			file.write("#line %d\n"%self.lineno)
@@ -260,7 +262,9 @@ class ClassDef(cpp.yacc.Nonterm):
 		file.write("#line %d\n"%self.lineno)
 		file.write("    {\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::inamespace(\"%s\"),\n" % (prettyname))
+		file.write("        ::BugEngine::istring(\"%s\"),\n" % (self.name))
+		file.write("#line %d\n"%self.lineno)
+		file.write("        %s,\n" % (owner))
 		file.write("#line %d\n"%self.lineno)
 		file.write("        ::BugEngine::be_typeid< %s >::klass(),\n" % (self.inherits))
 		file.write("#line %d\n"%self.lineno)
