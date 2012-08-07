@@ -112,19 +112,21 @@ size_t ResourceManager::updateTickets()
 {
     for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
     {
-        if (it->ticket->processed != it->progress)
+        if (it->ticket->error)
         {
-            if (it->ticket->done())
-            {
-                it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
-                it = m_tickets.erase(it);
-            }
-            else
-            {
-                it->progress = it->ticket->processed;
-                it->loader->onTicketUpdated(it->resource, it->ticket->buffer, it->progress);
-                ++it;
-            }
+            be_error("resource loading error");
+            it = m_tickets.erase(it);
+        }
+        else if (it->ticket->done())
+        {
+            it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
+            it = m_tickets.erase(it);
+        }
+        else if (it->ticket->processed != it->progress)
+        {
+            it->progress = it->ticket->processed;
+            it->loader->onTicketUpdated(it->resource, it->ticket->buffer, it->progress);
+            ++it;
         }
         else
         {
