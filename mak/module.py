@@ -379,7 +379,7 @@ class module:
 					else:
 						result.addFile(sources.hsource(file, fileplatforms, filearchs, doprocess))
 				elif ext == '.plist':
-					result.addFile(sources.deployedsource(file, '', 'prefix', fileplatforms, filearchs, doprocess))
+					result.addFile(sources.deployedsource(file, '', 'root', fileplatforms, filearchs, doprocess))
 				elif deploy_all:
 					result.addFile(sources.deployedsource(file, '', 'data', fileplatforms, filearchs, doprocess))
 		return result
