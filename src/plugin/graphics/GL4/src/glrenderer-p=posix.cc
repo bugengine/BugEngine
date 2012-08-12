@@ -39,10 +39,13 @@ class GLRenderer::Context : public minitl::refcountable
     friend class GLRenderer;
     friend class GLWindow;
 private:
-    ::Display*  m_display;
-    ::Window    m_defaultWindow;
-    GLXContext  m_glContext;
-    u64         m_threadId;
+    typedef int(*FGLXSwapInterval)(int);
+private:
+    ::Display*          m_display;
+    ::Window            m_defaultWindow;
+    GLXContext          m_glContext;
+    u64                 m_threadId;
+    FGLXSwapInterval    glXSwapInterval;
 public:
     const ShaderExtensions  shaderext;
 public:
@@ -157,6 +160,11 @@ GLRenderer::Context::Context(PlatformData* data)
 {
     glXMakeCurrent(m_display, m_defaultWindow, m_glContext);
     be_info("Creating OpenGL %s (%s) on %s" | (const char*)glGetString(GL_VERSION) | (const char *)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
+    glXSwapInterval = (FGLXSwapInterval)glXGetProcAddress((const GLubyte*)"glXSwapIntervalMESA");
+    if (!glXSwapInterval)
+        glXSwapInterval = (FGLXSwapInterval)glXGetProcAddress((const GLubyte*)"glXSwapIntervalEXT");
+    if (!glXSwapInterval)
+        glXSwapInterval = (FGLXSwapInterval)glXGetProcAddress((const GLubyte*)"glXSwapIntervalSGI");
 }
 
 GLRenderer::Context::~Context()
@@ -204,6 +212,12 @@ void GLRenderer::attachWindow(weak<GLWindow> w) const
 {
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     w->m_context.reset(scoped<GLWindow::Context>::create(Arena::general(), m_context->m_glContext, m_context->m_threadId));
+    if (m_context->glXSwapInterval)
+    {
+        w->setCurrent();
+        (*m_context->glXSwapInterval)(0);
+        w->clearCurrent();
+    }
 }
 
 const ShaderExtensions& GLRenderer::shaderext() const
