@@ -4,15 +4,26 @@
 
 import os
 from waflib.Logs import pprint
+from waflib import Utils
 import mak.tools.cross_gcc
 
 
 
 
 def options(opt):
+	try:
+		p = Utils.subprocess.Popen(['xcode-select', '--print-path'], stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[0]
+	except:
+		out = '/Developper,/Applications/Xcode.app/Contents/Developer'
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')[0]
+
 	opt.add_option( '--xcode-sdks',
 					action='store',
-					default='/Developer,/Applications/Xcode.app/Contents/Developer',
+					default=out,
 					dest='xcode_sdks',
 					help='Paths of the different XCode SDKs')
 
