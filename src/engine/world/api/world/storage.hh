@@ -4,7 +4,6 @@
 #ifndef BE_WORLD_STORAGE_HH_
 #define BE_WORLD_STORAGE_HH_
 /*****************************************************************************/
-#include    <core/memory/kernel/stream.hh>
 #include    <core/memory/allocators/system.hh>
 
 namespace BugEngine { namespace World

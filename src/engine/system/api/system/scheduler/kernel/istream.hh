@@ -1,10 +1,10 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_MEMORY_KERNEL_ISTREAM_HH_
-#define BE_CORE_MEMORY_KERNEL_ISTREAM_HH_
+#ifndef BE_SYSTEM_SCHEDULER_KERNEL_ISTREAM_HH_
+#define BE_SYSTEM_SCHEDULER_KERNEL_ISTREAM_HH_
 /*****************************************************************************/
-#include    <core/memory/kernel/imemorybank.hh>
+#include    <system/scheduler/kernel/imemorybank.hh>
 
 namespace BugEngine { namespace Kernel
 {
@@ -12,7 +12,7 @@ namespace BugEngine { namespace Kernel
 class IMemoryProvider;
 class IMemoryBank;
 
-class IStream : public minitl::refcountable
+class be_api(SYSTEM) IStream : public minitl::refcountable
 {
 private:
     enum BankState

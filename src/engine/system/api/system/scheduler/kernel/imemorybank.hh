@@ -1,17 +1,17 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_CORE_MEMORY_KERNEL_IMEMORYBANK_HH_
-#define BE_CORE_MEMORY_KERNEL_IMEMORYBANK_HH_
+#ifndef BE_SYSTEM_SCHEDULER_KERNEL_IMEMORYBANK_HH_
+#define BE_SYSTEM_SCHEDULER_KERNEL_IMEMORYBANK_HH_
 /*****************************************************************************/
-#include    <core/memory/kernel/imemoryprovider.hh>
+#include    <system/scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine { namespace Kernel
 {
 
 class IMemoryProvider;
 
-class IMemoryBank : public minitl::pointer
+class be_api(SYSTEM) IMemoryBank : public minitl::pointer
 {
 private:
     weak<const IMemoryProvider> const   m_owner;

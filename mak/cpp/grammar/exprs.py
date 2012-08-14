@@ -50,6 +50,12 @@ class ExprType(cpp.yacc.Nonterm):
 		self.value.tags.tags += tags_right.tags
 		self.value.aliases = tags_left.aliases
 		
+	def expr_stream(self, tags_left, stream, tags_right, semi):
+		"%reduce TagsLeft StreamDef TagsRight SEMI"
+		self.value = stream
+		self.value.tags = tags_left
+		self.value.tags.tags += tags_right.tags
+		self.value.aliases = tags_left.aliases
 
 	def expr_typedecl(self, tags_left, type, tags_right, semi):
 		"%reduce TagsLeft TypeDecl TagsRight SEMI"

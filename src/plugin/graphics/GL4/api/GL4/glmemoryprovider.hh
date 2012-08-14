@@ -4,7 +4,7 @@
 #ifndef BE_GL4_GLMEMORYPROVIDER_HH_
 #define BE_GL4_GLMEMORYPROVIDER_HH_
 /*****************************************************************************/
-#include    <core/memory/kernel/imemoryprovider.hh>
+#include    <system/scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine { namespace OpenGL
 {

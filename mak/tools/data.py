@@ -51,6 +51,7 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/grammar/tag.py'),
 		self.path.find_or_declare('mak/cpp/grammar/comment.py'),
 		self.path.find_or_declare('mak/cpp/grammar/struct.py'),
+		self.path.find_or_declare('mak/cpp/grammar/stream.py'),
 		self.path.find_or_declare('mak/cpp/grammar/enum.py'),
 		self.path.find_or_declare('mak/cpp/grammar/method.py'),
 		self.path.find_or_declare('mak/cpp/grammar/variable.py'),

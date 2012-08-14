@@ -184,56 +184,13 @@ class ClassDef(cpp.yacc.Nonterm):
 		if self.members:
 			self.members.predecl(file, instances, decl, name, self.value)
 
-
-	def create_pod_def(self, file, instances, name, prefix):
-		file.write("#line %d\n"%self.lineno)
-		if self.parser.useMethods:
-			file.write("static ")
-		file.write("::BugEngine::RTTI::Class s_pod_def_%s =\n" % (prefix))
-		file.write("#line %d\n"%self.lineno)
-		file.write("    {\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::istring(\"Stream<%s>\"),\n" % (self.name))
-		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::be_game_Namespace_BugEngine_Kernel(),\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::be_typeid< BugEngine::Kernel::IStream >::klass(),\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        (u32)(sizeof(BugEngine::Kernel::Stream< %s >)),\n" % name)
-		file.write("#line %d\n"%self.lineno)
-		file.write("        (i32)((ptrdiff_t)static_cast< BugEngine::Kernel::IStream* >((BugEngine::Kernel::Stream< %s >*)1)-1),\n" % (name))
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        {0},\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        0,\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("        0\n")
-		file.write("#line %d\n"%self.lineno)
-		file.write("    };\n")
-		instances.write("#line %d\n"%self.lineno)
-		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Stream<%s> >::klass() { raw<const RTTI::Class> ci = {&s_pod_def_%s}; return ci; }\n" % (name, prefix))
-
 	def dump(self, file, instances, namespace, owner, decl, name, member):
 		ns = '::'.join(namespace)
 		name = name+[self.name]
 		decl = decl+[self.decl]
 		fullname = '::'.join(name)
 		prettyname = '.'.join(name)
-		prefix = "class%s" % '_'.join(decl)
-
-		if self.pod:
-			self.create_pod_def(file, instances, fullname,  prefix)
-			
+		prefix = "class%s" % '_'.join(decl)			
 
 		if self.members:
 			self.members.dumpObjects(file, instances, namespace, '::BugEngine::be_typeid< %s >::klass()'%fullname, decl, name, fullname)
@@ -295,7 +252,7 @@ class ClassDef(cpp.yacc.Nonterm):
 			file.write("        0\n")
 		file.write("#line %d\n"%self.lineno)
 		file.write("    };\n")
-		alias_index = 0
+
 		if self.parser.useMethods:
 			file.write("return s_%s;\n}\n" % prefix)
 

@@ -288,4 +288,7 @@ class Keyword(cpp.yacc.Nonterm):
 	def kw_be_tag(self, kw):
 		"%reduce BE_TAG"
 		self.value = kw.value
+	def kw_be_stream(self, kw):
+		"%reduce BE_STREAM"
+		self.value = kw.value
 
