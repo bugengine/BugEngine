@@ -4,7 +4,7 @@
 #ifndef BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 #define BE_SYSTEM_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
-#include    <core/memory/kernel/imemoryprovider.hh>
+#include    <system/scheduler/kernel/imemoryprovider.hh>
 #include    <minitl/pool.hh>
 
 namespace BugEngine

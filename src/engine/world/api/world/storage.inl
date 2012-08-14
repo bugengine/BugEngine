@@ -4,7 +4,6 @@
 #ifndef BE_WORLD_STORAGE_INL_
 #define BE_WORLD_STORAGE_INL_
 /*****************************************************************************/
-
 #include    <world/stdafx.h>
 #include    <world/storage.hh>
 #include    <world/world.script.hh>

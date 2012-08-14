@@ -36,15 +36,6 @@ struct Value
 
 }}
 
-namespace BugEngine { namespace Kernel
-{
-
-class IStream : public minitl::pointer
-{
-};
-
-}}
-
 
 be_pod bool
 {
