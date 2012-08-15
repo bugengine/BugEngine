@@ -5,8 +5,8 @@
 #define BE_NULLRENDER_RENDERER_HH_
 /*****************************************************************************/
 #include    <3d/renderer/irenderer.hh>
-#include    <system/file/folder.script.hh>
-#include    <system/plugin.hh>
+#include    <filesystem/folder.script.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine { namespace Null
 {

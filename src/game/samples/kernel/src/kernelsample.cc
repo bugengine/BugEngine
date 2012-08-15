@@ -5,7 +5,7 @@
 #include    <kernelsample.hh>
 #include    <kerneltask.script.hh>
 #include    <core/environment.hh>
-#include    <system/file/diskfolder.script.hh>
+#include    <filesystem/diskfolder.script.hh>
 
 namespace BugEngine { namespace Samples
 {

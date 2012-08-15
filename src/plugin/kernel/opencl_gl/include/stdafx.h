@@ -5,6 +5,8 @@
 #define BE_KERNEL_OPENCL_OPENGL_STDAFX_H_
 /*****************************************************************************/
 
+#include    <bugengine/stdafx.h>
+
 #include    <GL4/stdafx.h>
 #include    <opencl/stdafx.h>
 

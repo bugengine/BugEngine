@@ -6,8 +6,8 @@
 #include    <3d/renderer/irenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 
-#include    <system/scheduler/task/task.hh>
-#include    <system/scheduler/range/onestep.hh>
+#include    <scheduler/task/task.hh>
+#include    <scheduler/range/onestep.hh>
 
 namespace BugEngine
 {

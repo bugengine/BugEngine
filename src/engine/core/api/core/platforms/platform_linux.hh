@@ -18,7 +18,7 @@
 #define     malloca alloca
 #define     freea(p)
 #define     DIRENT_H    <dirent.h>
-#define     PLUGIN_H    <system/plugin/posix/plugin.inl>
+#define     PLUGIN_H    <plugin/posix/plugin.inl>
 
 /*****************************************************************************/
 #endif

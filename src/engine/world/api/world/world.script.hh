@@ -4,8 +4,8 @@
 #ifndef BE_WORLD_WORLD_SCRIPT_HH_
 #define BE_WORLD_WORLD_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task/itask.hh>
-#include    <system/resource/resource.script.hh>
+#include    <scheduler/task/itask.hh>
+#include    <resource/resource.script.hh>
 #include    <world/entity.script.hh>
 #include    <core/memory/allocators/system.hh>
 

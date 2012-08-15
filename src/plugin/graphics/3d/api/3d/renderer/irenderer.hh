@@ -4,9 +4,9 @@
 #ifndef BE_3D_RENDERER_IRENDERER_HH_
 #define BE_3D_RENDERER_IRENDERER_HH_
 /*****************************************************************************/
-#include    <system/resource/resourcemanager.hh>
+#include    <resource/resourcemanager.hh>
 #include    <3d/renderer/igpuresource.hh>
-#include    <system/scheduler/scheduler.hh>
+#include    <scheduler/scheduler.hh>
 
 namespace BugEngine
 {

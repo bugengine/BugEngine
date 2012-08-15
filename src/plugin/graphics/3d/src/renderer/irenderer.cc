@@ -3,8 +3,8 @@
 
 #include    <3d/stdafx.h>
 #include    <3d/renderer/irenderer.hh>
-#include    <system/scheduler/task/method.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
+#include    <scheduler/task/method.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 #include    <3d/mesh/mesh.script.hh>
 #include    <3d/shader/shader.script.hh>
 #include    <3d/texture/texture.script.hh>

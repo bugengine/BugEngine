@@ -4,7 +4,7 @@
 #include    <world/stdafx.h>
 #include    <world/world.script.hh>
 #include    <state.hh>
-#include    <system/scheduler/task/group.hh>
+#include    <scheduler/task/group.hh>
 
 BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 

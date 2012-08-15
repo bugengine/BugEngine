@@ -4,10 +4,10 @@
 #ifndef BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 #define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 /*****************************************************************************/
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <package/nodes/package.hh>
 #include    <package/nodes/value.hh>
-#include    <system/file/folder.script.hh>
+#include    <filesystem/folder.script.hh>
 
 union YYSTYPE
 {

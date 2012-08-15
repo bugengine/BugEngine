@@ -15,7 +15,7 @@
 
 #define DIRENT_H    <sys/dir.h>
 #define PLUGIN_EXT  ".dylib"
-#define PLUGIN_H    <system/plugin/posix/plugin.inl>
+#define PLUGIN_H    <plugin/posix/plugin.inl>
 
 /*****************************************************************************/
 #endif

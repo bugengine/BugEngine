@@ -5,7 +5,7 @@
 #include    <package/nodes/value.hh>
 #include    <package/nodes/reference.hh>
 
-#include    <system/file/folder.script.hh>
+#include    <filesystem/folder.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

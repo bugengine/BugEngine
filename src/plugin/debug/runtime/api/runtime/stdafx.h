@@ -5,10 +5,8 @@
 #define BE_DEBUG_RUNTIME_STDAFX_H_
 /*****************************************************************************/
 
-#include    <kernel/stdafx.h>
-#include    <minitl/stdafx.h>
-#include    <core/stdafx.h>
-#include    <system/stdafx.h>
+#include    <bugengine/stdafx.h>
+
 
 #if defined(building_runtime) || defined(RUNTIME_EXPORTS)
 # define     RUNTIMEEXPORT          BE_EXPORT

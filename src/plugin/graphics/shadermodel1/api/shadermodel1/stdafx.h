@@ -5,9 +5,8 @@
 #define BE_SHADERMODEL1_STDAFX_H_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
+#include    <bugengine/stdafx.h>
+
 #include    <3d/stdafx.h>
 
 /*****************************************************************************/

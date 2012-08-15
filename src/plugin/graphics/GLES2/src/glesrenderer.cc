@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <glesrenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
-#include    <system/scheduler/scheduler.hh>
+#include    <scheduler/scheduler.hh>
 
 namespace BugEngine { namespace OpenGLES
 {

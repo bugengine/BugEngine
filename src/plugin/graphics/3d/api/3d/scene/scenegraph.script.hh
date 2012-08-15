@@ -4,7 +4,7 @@
 #ifndef BE_3D_SCENE_SCENEGRAPH_SCRIPT_HH_
 #define BE_3D_SCENE_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.script.hh>
+#include    <resource/resource.script.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <world/world.script.hh>
 

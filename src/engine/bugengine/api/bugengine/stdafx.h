@@ -7,7 +7,10 @@
 
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
+#include    <filesystem/stdafx.h>
+#include    <resource/stdafx.h>
+#include    <scheduler/stdafx.h>
+#include    <plugin/stdafx.h>
 #include    <world/stdafx.h>
 
 #if defined(building_bugengine) || defined(BUGENGINE_EXPORTS)

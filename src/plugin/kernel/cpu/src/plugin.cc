@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <cpukernelscheduler.hh>
 #include    <rtti/classinfo.script.hh>
 

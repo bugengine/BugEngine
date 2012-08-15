@@ -6,9 +6,9 @@
 /*****************************************************************************/
 #include    <world/entity.script.hh>
 #include    <world/component.script.hh>
-#include    <system/scheduler/task/itask.hh>
+#include    <scheduler/task/itask.hh>
 #include    <rtti/tags/editor.script.hh>
-#include    <system/scheduler/kernel/stream.hh>
+#include    <scheduler/kernel/stream.hh>
 
 namespace BugEngine { namespace World
 {

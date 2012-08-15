@@ -4,7 +4,7 @@
 #ifndef BE_GRAPHICS_RENDERER_GRAPH_INODE_HH_
 #define BE_GRAPHICS_RENDERER_GRAPH_INODE_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task/itask.hh>
+#include    <scheduler/task/itask.hh>
 
 namespace BugEngine
 {

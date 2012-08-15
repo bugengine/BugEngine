@@ -4,7 +4,7 @@
 #ifndef BE_PACKAGE_NODES_PACKAGE_HH_
 #define BE_PACKAGE_NODES_PACKAGE_HH_
 /*****************************************************************************/
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <minitl/vector.hh>
 #include    <minitl/intrusive_list.hh>
 

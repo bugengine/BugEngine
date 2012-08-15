@@ -4,10 +4,10 @@
 #ifndef BE_BUGENGINE_APPLICATION_HH_
 #define BE_BUGENGINE_APPLICATION_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task/group.hh>
-#include    <system/resource/resourcehandle.hh>
+#include    <scheduler/task/group.hh>
+#include    <resource/resourcehandle.hh>
 #include    <bugengine/scriptengine.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {

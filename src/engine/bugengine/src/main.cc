@@ -6,10 +6,11 @@
 
 #include    <core/environment.hh>
 #include    <core/threads/thread.hh>
-#include    <system/file/diskfolder.script.hh>
-#include    <system/plugin.hh>
-#include    <system/scheduler/scheduler.hh>
-#include    <system/resource/resourcemanager.hh>
+#include    <filesystem/diskfolder.script.hh>
+#include    <scheduler/scheduler.hh>
+#include    <resource/resourcemanager.hh>
+
+#include    <plugin/plugin.hh>
 
 #include    <cstdio>
 #include    <cstdlib>

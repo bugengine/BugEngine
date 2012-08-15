@@ -4,7 +4,7 @@
 #ifndef BE_GLES2_RENDERER_HH_
 #define BE_GLES2_RENDERER_HH_
 /*****************************************************************************/
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <3d/renderer/irenderer.hh>
 
 namespace BugEngine { namespace OpenGLES

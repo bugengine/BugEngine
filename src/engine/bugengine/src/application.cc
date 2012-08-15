@@ -4,12 +4,12 @@
 #include    <bugengine/stdafx.h>
 #include    <bugengine/application.hh>
 
-#include    <system/scheduler/kernel/ikernelscheduler.hh>
-#include    <system/scheduler/task/group.hh>
-#include    <system/scheduler/task/method.hh>
-#include    <system/resource/resourceloader.hh>
-#include    <system/file/folder.script.hh>
-#include    <system/plugin.hh>
+#include    <scheduler/kernel/ikernelscheduler.hh>
+#include    <scheduler/task/group.hh>
+#include    <scheduler/task/method.hh>
+#include    <resource/resourceloader.hh>
+#include    <filesystem/folder.script.hh>
+#include    <plugin/plugin.hh>
 #include    <core/timer.hh>
 
 #include    <world/world.script.hh>

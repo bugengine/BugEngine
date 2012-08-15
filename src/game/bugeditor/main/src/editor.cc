@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <editor.hh>
 #include    <package/package.script.hh>
-#include    <system/file/diskfolder.script.hh>
+#include    <filesystem/diskfolder.script.hh>
 
 
 namespace BugEngine { namespace Editor

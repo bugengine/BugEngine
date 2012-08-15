@@ -3,6 +3,6 @@
 
 #include    <stdafx.h>
 #include    <glesrenderer.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::IRenderer, BugEngine::OpenGLES::GLESRenderer);

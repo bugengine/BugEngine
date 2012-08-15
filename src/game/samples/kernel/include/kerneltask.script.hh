@@ -4,10 +4,10 @@
 #ifndef BE_SAMPLES_KERNEL_KERNELTASK_SCRIPT_HH_
 #define BE_SAMPLES_KERNEL_KERNELTASK_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/scheduler/kernel/kernel.script.hh>
-#include    <system/scheduler/task/kerneltask.hh>
-#include    <system/resource/resource.script.hh>
-#include    <system/scheduler/kernel/stream.hh>
+#include    <scheduler/kernel/kernel.script.hh>
+#include    <scheduler/task/kerneltask.hh>
+#include    <resource/resource.script.hh>
+#include    <scheduler/kernel/stream.hh>
 
 namespace BugEngine { namespace Samples
 {

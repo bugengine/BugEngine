@@ -5,7 +5,7 @@
 #define BE_KERNEL_OPENCL_OPENGL_CLGLKERNELSCHEDULER_HH_
 /*****************************************************************************/
 #include    <opencl/clkernelscheduler.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {

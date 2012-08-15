@@ -5,7 +5,7 @@
 #include    <package/nodes/package.hh>
 #include    <package/nodes/reference.hh>
 #include    <package/nodes/object.hh>
-#include    <system/resource/resourcemanager.hh>
+#include    <resource/resourcemanager.hh>
 
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes

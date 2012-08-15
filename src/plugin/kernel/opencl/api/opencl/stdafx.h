@@ -5,10 +5,7 @@
 #define BE_KERNEL_OPENCL_STDAFX_H_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
-
+#include    <bugengine/stdafx.h>
 
 #if defined(building_opencl) || defined(OPENCL_EXPORTS)
 # define    OPENCLEXPORT        BE_EXPORT
