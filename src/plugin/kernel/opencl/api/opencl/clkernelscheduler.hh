@@ -4,8 +4,8 @@
 #ifndef BE_KERNEL_OPENCL_CLKERNELSCHEDULER_HH_
 #define BE_KERNEL_OPENCL_CLKERNELSCHEDULER_HH_
 /*****************************************************************************/
-#include    <system/scheduler/kernel/ikernelscheduler.hh>
-#include    <system/plugin.hh>
+#include    <scheduler/kernel/ikernelscheduler.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {

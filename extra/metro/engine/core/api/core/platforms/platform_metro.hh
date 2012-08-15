@@ -12,7 +12,7 @@
 #include    <stdlib.h>
 #define     malloca _alloca
 #define     freea   _freea
-#define     PLUGIN_H    <system/plugin/metro/plugin.inl>
+#define     PLUGIN_H    <plugin/metro/plugin.inl>
 
 /*****************************************************************************/
 #endif

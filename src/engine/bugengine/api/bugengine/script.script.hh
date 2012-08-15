@@ -4,8 +4,8 @@
 #ifndef BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 #define BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/file/file.script.hh>
-#include    <system/resource/resource.script.hh>
+#include    <filesystem/file.script.hh>
+#include    <resource/resource.script.hh>
 
 namespace BugEngine
 {

@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_CPU_CPUKERNELLOADER_HH_
 #define BE_KERNEL_CPU_CPUKERNELLOADER_HH_
 /*****************************************************************************/
-#include    <system/scheduler/kernel/ikernelloader.hh>
+#include    <scheduler/kernel/ikernelloader.hh>
 
 
 namespace BugEngine

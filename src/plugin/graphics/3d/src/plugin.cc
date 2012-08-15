@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <3d/stdafx.h>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <rtti/classinfo.script.hh>
 
 BE_PLUGIN_NAMESPACE_REGISTER();

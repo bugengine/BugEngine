@@ -7,8 +7,8 @@
 #include    <bugengine/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.inl>
-#include    <system/file/file.script.hh>
-#include    <system/plugin.hh>
+#include    <filesystem/file.script.hh>
+#include    <plugin/plugin.hh>
 #include    <luascript.script.hh>
 
 namespace BugEngine { namespace Lua

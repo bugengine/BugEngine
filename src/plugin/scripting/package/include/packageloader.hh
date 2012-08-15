@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <package/package.script.hh>
 #include    <bugengine/scriptengine.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine { namespace PackageBuilder
 {

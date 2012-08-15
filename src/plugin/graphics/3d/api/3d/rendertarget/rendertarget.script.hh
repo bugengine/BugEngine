@@ -4,7 +4,7 @@
 #ifndef BE_3D_RENDERTARGET_RENDERTARGET_SCRIPT_HH_
 #define BE_3D_RENDERTARGET_RENDERTARGET_SCRIPT_HH_
 /*****************************************************************************/
-#include    <system/resource/resource.script.hh>
+#include    <resource/resource.script.hh>
 
 namespace BugEngine
 {

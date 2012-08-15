@@ -5,7 +5,7 @@
 #define BE_GRAPHICS_RENDERER_GRAPH_MULTINODE_HH_
 /*****************************************************************************/
 #include    <graph/inode.hh>
-#include    <system/scheduler/task/group.hh>
+#include    <scheduler/task/group.hh>
 
 
 namespace BugEngine

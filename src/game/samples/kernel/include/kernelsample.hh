@@ -4,11 +4,11 @@
 #ifndef BE_SAMPLES_KERNEL_KERNELSAMPLE_HH_
 #define BE_SAMPLES_KERNEL_KERNELSAMPLE_HH_
 /*****************************************************************************/
-#include    <system/file/folder.script.hh>
+#include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
-#include    <system/resource/resourcemanager.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
-#include    <system/plugin.hh>
+#include    <resource/resourcemanager.hh>
+#include    <scheduler/kernel/kernel.script.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine { namespace Samples
 {

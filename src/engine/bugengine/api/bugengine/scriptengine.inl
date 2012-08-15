@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <bugengine/stdafx.h>
 #include    <bugengine/scriptengine.hh>
-#include    <system/resource/resourcemanager.hh>
+#include    <resource/resourcemanager.hh>
 
 namespace BugEngine
 {

@@ -6,7 +6,9 @@
 /*****************************************************************************/
 
 #include    <core/stdafx.h>
-#include    <system/stdafx.h>
+#include    <filesystem/stdafx.h>
+#include    <resource/stdafx.h>
+#include    <scheduler/stdafx.h>
 #include    <rtti/stdafx.h>
 
 #if defined(building_world) || defined(WORLD_EXPORTS)

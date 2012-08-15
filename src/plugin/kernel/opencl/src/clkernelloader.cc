@@ -3,7 +3,7 @@
 
 #include    <opencl/stdafx.h>
 #include    <clkernelloader.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {

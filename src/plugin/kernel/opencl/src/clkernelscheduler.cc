@@ -4,9 +4,9 @@
 #include    <opencl/stdafx.h>
 #include    <opencl/clkernelscheduler.hh>
 #include    <clkernelloader.hh>
-#include    <system/resource/resourcemanager.hh>
-#include    <system/scheduler/scheduler.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
+#include    <resource/resourcemanager.hh>
+#include    <scheduler/scheduler.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {

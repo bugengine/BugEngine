@@ -5,9 +5,7 @@
 #define BE_KERNEL_CPU_STDAFX_H_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
+#include    <bugengine/stdafx.h>
 
 /*****************************************************************************/
 #endif

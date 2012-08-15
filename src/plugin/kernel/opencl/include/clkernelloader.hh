@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_OPENCL_CLKERNELLOADER_HH_
 #define BE_KERNEL_OPENCL_CLKERNELLOADER_HH_
 /*****************************************************************************/
-#include    <system/scheduler/kernel/ikernelloader.hh>
+#include    <scheduler/kernel/ikernelloader.hh>
 
 
 namespace BugEngine

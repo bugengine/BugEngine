@@ -4,9 +4,9 @@
 #include    <stdafx.h>
 #include    <cpukernelscheduler.hh>
 #include    <cpukernelloader.hh>
-#include    <system/resource/resourcemanager.hh>
-#include    <system/scheduler/scheduler.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
+#include    <resource/resourcemanager.hh>
+#include    <scheduler/scheduler.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {

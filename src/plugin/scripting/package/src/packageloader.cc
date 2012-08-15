@@ -6,7 +6,7 @@
 #include    <packagebuilder.hh>
 #include    <package/nodes/package.hh>
 #include    <core/md5.hh>
-#include    <system/file/folder.script.hh>
+#include    <filesystem/folder.script.hh>
 
 
 namespace BugEngine { namespace Arena

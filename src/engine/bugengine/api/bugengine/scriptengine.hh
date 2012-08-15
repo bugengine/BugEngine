@@ -5,7 +5,7 @@
 #define BE_BUGENGINE_SCRIPTENGINE_HH_
 /*****************************************************************************/
 #include    <bugengine/script.script.hh>
-#include    <system/resource/resourceloader.hh>
+#include    <resource/resourceloader.hh>
 
 namespace BugEngine
 {

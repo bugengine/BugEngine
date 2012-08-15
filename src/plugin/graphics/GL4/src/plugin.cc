@@ -3,6 +3,6 @@
 
 #include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::IRenderer, BugEngine::OpenGL::GLRenderer);

@@ -4,7 +4,7 @@
 #include    <3d/stdafx.h>
 #include    <3d/renderer/irenderer.hh>
 #include    <3d/renderer/igpuresource.hh>
-#include    <system/resource/resource.script.hh>
+#include    <resource/resource.script.hh>
 
 namespace BugEngine
 {

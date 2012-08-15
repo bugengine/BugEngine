@@ -4,7 +4,7 @@
 #ifndef BE_GL4_RENDERER_HH_
 #define BE_GL4_RENDERER_HH_
 /*****************************************************************************/
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {

@@ -5,7 +5,7 @@
 #include    <graph/scenenode.hh>
 #include    <3d/renderer/irendertarget.hh>
 #include    <world/world.script.hh>
-#include    <system/scheduler/task/method.hh>
+#include    <scheduler/task/method.hh>
 
 
 namespace BugEngine

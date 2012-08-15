@@ -4,7 +4,7 @@
 #ifndef BE_3D_RENDERER_IRENDERTARGET_HH_
 #define BE_3D_RENDERER_IRENDERTARGET_HH_
 /*****************************************************************************/
-#include    <system/scheduler/task/group.hh>
+#include    <scheduler/task/group.hh>
 #include    <3d/renderer/igpuresource.hh>
 
 namespace BugEngine

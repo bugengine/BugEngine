@@ -4,10 +4,10 @@
 #ifndef BE_EDITOR_EDITOR_HH_
 #define BE_EDITOR_EDITOR_HH_
 /*****************************************************************************/
-#include    <system/file/folder.script.hh>
+#include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
-#include    <system/resource/resourcemanager.hh>
-#include    <system/plugin.hh>
+#include    <resource/resourcemanager.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {

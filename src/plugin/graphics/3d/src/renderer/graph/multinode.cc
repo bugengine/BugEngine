@@ -3,7 +3,7 @@
 
 #include    <3d/stdafx.h>
 #include    <graph/multinode.hh>
-#include    <system/scheduler/task/method.hh>
+#include    <scheduler/task/method.hh>
 
 namespace BugEngine
 {

@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <cpukernelloader.hh>
 #include    <kernelobject.hh>
-#include    <system/scheduler/kernel/kernel.script.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {

@@ -3,6 +3,6 @@
 
 #include    <stdafx.h>
 #include    <nullrenderer.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::IRenderer, BugEngine::Null::NullRenderer);

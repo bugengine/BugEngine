@@ -30,11 +30,14 @@ def build(bld):
 	minitl			= module.library('minitl',		[kernel])
 	core			= module.library('core',		bld.platforms+[mak, minitl, kernel])
 	network			= module.library('network',		[core])
-	rtti			= module.library('rtti',		[core, network, zlib] )
-	system			= module.library('system',		[core, rtti] )
-	world			= module.library('world',		[core, rtti, system] )
+	rtti			= module.library('rtti',		[core, network, zlib])
+	filesystem		= module.library('filesystem',	[core, rtti])
+	resource		= module.library('resource',	[core, rtti, filesystem])
+	scheduler		= module.library('scheduler',	[core, rtti, resource])
+	world			= module.library('world',		[core, rtti, resource, scheduler])
+	plugin			= module.library('plugin',		[core, rtti, filesystem, resource, scheduler])
 
-	bld.game		= module.engine('bugengine',	[core, rtti, system, world])
+	bld.game		= module.engine('bugengine',	[core, rtti, scheduler, filesystem, world, plugin])
 	bld.recurse('.', name='plugins', once=False)
 	bld.game.post(bld)
 
