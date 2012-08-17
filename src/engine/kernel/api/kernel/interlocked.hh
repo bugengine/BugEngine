@@ -13,6 +13,8 @@
 #  include <kernel/msvc/amd64/interlocked.inl>
 # elif defined(_PPC)
 #  include <kernel/msvc/ppc/interlocked.inl>
+# elif defined(_ARM)
+#  include <kernel/msvc/arm/interlocked.inl>
 # else
 #  error Architecture not implemented on MSVC
 # endif

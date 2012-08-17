@@ -27,7 +27,7 @@ def link_library_test(self):
 		task.outputs[0].write(task.generator.code)
 	bld = self.bld
 	bld(rule=write_test_file, target='main.cc', code=self.code)
-	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath)
+	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, use=self.use)
 
 @feature("link_framework")
 @before_method("process_source")
@@ -45,7 +45,7 @@ def link_framework_test(self):
 	if self.version:
 		env.append_unique('CXXFLAGS', [self.version])
 		env.append_unique('LINKFLAGS', [self.version])
-	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env)
+	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env, use=self.use)
 
 
 @conf
@@ -67,7 +67,8 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRAR
 			libname=libname,
 			libpath=libpath,
 			code=code,
-			includepath=includepath)
+			includepath=includepath,
+			use=['debug'])
 	except self.errors.ConfigurationError:
 		pass
 	else:
@@ -92,7 +93,8 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 			libname=[],
 			libpath=libpath,
 			code='\n'.join(["#include <%s>"%h for h in headername]) + '\n' + code,
-			includepath=includepath)
+			includepath=includepath,
+			use=['debug'])
 	except self.errors.ConfigurationError as e:
 		pass
 	else:
@@ -120,7 +122,8 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], code=U
 			code=code,
 			includepath=includepath,
 			sdk='',
-			version='')
+			version='',
+			use=['debug'])
 	except self.errors.ConfigurationError as e:
 		pass
 	else:
@@ -138,7 +141,8 @@ def check_sdk(self, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE)
 		code=code,
 		includepath=includepath,
 		sdk=sdk,
-		version=version)
+		version=version,
+		use=['debug'])
 
 
 def configure(conf):

@@ -25,7 +25,11 @@ static inline void** st_next(void** stack_pointer)
 BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
     void** stackPointer;
+#ifdef BE_COMPILER_MSVC
+    stackPointer = 0;
+#else
     __asm__ volatile ("mov %0,r13" : "=r" (stackPointer));
+#endif
     size_t result = 0;
     while (stackPointer && result < count)
     {

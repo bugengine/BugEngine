@@ -183,11 +183,12 @@ def build(bld):
 	if os.path.isdir('extra'):
 		for target in os.listdir(os.path.join('extra')):
 			if target not in ['.svn', '.cvs']:
-				bld.recurse(os.path.join('..', 'extra', target))
-				if os.path.isdir(os.path.join('extra', target, '3rdparty')):
-					for lib in os.listdir(os.path.join('extra', target, '3rdparty')):
-						if lib not in ['.svn', '.cvs']:
-							extra3rdparties.append(os.path.join('extra', target, '3rdparty', lib))
+				if os.path.isfile(os.path.join('extra', target, 'wscript')):
+					bld.recurse(os.path.join('..', 'extra', target))
+					if os.path.isdir(os.path.join('extra', target, '3rdparty')):
+						for lib in os.listdir(os.path.join('extra', target, '3rdparty')):
+							if lib not in ['.svn', '.cvs']:
+								extra3rdparties.append(os.path.join('extra', target, '3rdparty', lib))
 	selectToolchains(bld)
 	mak.builder = bld
 	mak.builder.static = Options.options.static
@@ -210,13 +211,15 @@ def platformbuild(bld):
 	if os.path.isdir('extra'):
 		for target in os.listdir(os.path.join('extra')):
 			if target not in ['.svn', '.cvs']:
-				bld.recurse(os.path.join('..', 'extra', target), name='platformbuild', once=False)
+				if os.path.isdir(os.path.join('extra', target)) and os.path.isfile(os.path.join('extra', target, 'wscript')):
+					bld.recurse(os.path.join('..', 'extra', target), name='platformbuild', once=False)
 
 def plugins(bld):
 	if os.path.isdir('extra'):
 		for target in os.listdir(os.path.join('extra')):
 			if target not in ['.svn', '.cvs']:
-				bld.recurse(os.path.join('..', 'extra', target), name='plugins', once=False)
+				if os.path.isdir(os.path.join('extra', target)) and os.path.isfile(os.path.join('extra', target, 'wscript')):
+					bld.recurse(os.path.join('..', 'extra', target), name='plugins', once=False)
 
 
 def clean(ctx):

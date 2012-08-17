@@ -17,7 +17,12 @@ def get_available_msvc(conf):
 		compiler,version = compiler.split()
 		for (target, (tname, paths)) in targets:
 			if tname in conf.env['ARCHITECTURES']:
-				conf.env['MSVC_TARGETS'].append((compiler, version, target, 'win32', tname))
+				if compiler == 'winphone':
+					conf.env['MSVC_TARGETS'].append((compiler, version, target, 'winprt', tname))
+				else:
+					if float(version.split('.')[0]) >= 11:
+						conf.env['MSVC_TARGETS'].append((compiler, version, target, 'winrt', tname))
+					conf.env['MSVC_TARGETS'].append((compiler, version, target, 'win32', tname))
 
 
 def options(opt):
