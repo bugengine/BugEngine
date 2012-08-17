@@ -89,12 +89,12 @@ Plugin<Interface>::Plugin(const inamespace &pluginName, const PluginContext& con
         if (!be_pluginCreate)
         {
             char errorMessage[1024];
-            ::FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            ::FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL,
                 ::GetLastError(),
                 0,
                 errorMessage,
-                1024,
+                sizeof(errorMessage),
                 NULL);
             be_error(errorMessage);
         }

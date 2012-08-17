@@ -60,9 +60,9 @@ typedef u8                      byte;
 #endif
 
 #if _MSC_VER >= 1300
-# ifndef _XBOX
+/*# ifndef _XBOX
 #  include <xmmintrin.h>
-# endif
+# endif*/
 # define be_break() __debugbreak()
 #else
 # define be_break() asm  { int 3; }

@@ -9,8 +9,6 @@ def configure(conf):
 	conf.env['ARCHITECTURE'] = 'arm'
 	conf.env.append_unique('DEFINES', ['ARM', '_ARM', '__ARM__'])
 	conf.env['AS'] = conf.env['CC']
-	conf.env.append_unique('CFLAGS', ['-mthumb'])
-	conf.env.append_unique('CXXFLAGS', ['-mthumb'])
 
 def build(bld):
 	pass

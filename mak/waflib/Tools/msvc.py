@@ -81,7 +81,7 @@ wintrust wldap32 wmiutils wow32 ws2_32 wsnmp32 wsock32 wst wtsapi32 xaswitch xol
 '''.split()
 """importlibs provided by MSVC/Platform SDK. Do NOT search them"""
 
-all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86_amd64', 'amd64'), ('x86_ia64', 'ia64') ]
+all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86_amd64', 'amd64'), ('x86_ia64', 'ia64'), ('x86_arm', 'arm') ]
 """List of msvc platforms"""
 
 all_wince_platforms = [ ('armv4', 'arm'), ('armv4i', 'arm'), ('mipsii', 'mips'), ('mipsii_fp', 'mips'), ('mipsiv', 'mips'), ('mipsiv_fp', 'mips'), ('sh4', 'sh'), ('x86', 'cex86') ]
@@ -259,7 +259,7 @@ def gather_msvc_detected_versions():
 	#Detected MSVC versions!
 	version_pattern = re.compile('^(\d\d?\.\d\d?)(Exp)?$')
 	detected_versions = []
-	for vcver,vcvar in [('VCExpress','Exp'), ('VisualStudio','')]:
+	for vcver,vcvar in [('VisualStudio',''), ('VCExpress','Exp')]:
 		try:
 			prefix = 'SOFTWARE\\Wow6432node\\Microsoft\\'+vcver
 			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, prefix)
@@ -317,7 +317,6 @@ def gather_msvc_targets(conf, versions, version, vc_path):
 
 @conf
 def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_platforms):
-	#Looking for Win CE compilers!
 	for device,platforms in supported_platforms:
 		cetargets = []
 		for platform,compiler,include,lib in platforms:
@@ -337,8 +336,21 @@ def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_pla
 			versions.append((device + ' ' + version, cetargets))
 
 @conf
+def gather_winphone_targets(conf, versions, version, vc_path, vsvars):
+	#Looking for WinPhone compilers
+	targets = []
+	for target,realtarget in all_msvc_platforms[::-1]:
+		try:
+			targets.append((target, (realtarget, conf.get_msvc_version('winphone', version, target, vsvars))))
+		except conf.errors.ConfigurationError as e:
+			pass
+	versions.append(('winphone '+ version, targets))
+
+
+@conf
 def gather_msvc_versions(conf, versions):
 	vc_paths = []
+	found = set([])
 	for (v,version,reg) in gather_msvc_detected_versions():
 		try:
 			try:
@@ -346,7 +358,10 @@ def gather_msvc_versions(conf, versions):
 			except WindowsError:
 				msvc_version = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, reg + "\\Setup\\Microsoft Visual C++")
 			path,type = _winreg.QueryValueEx(msvc_version, 'ProductDir')
-			vc_paths.append((version, os.path.abspath(str(path))))
+
+			if path not in found:
+				vc_paths.append((version, os.path.abspath(str(path))))
+				found.add(path)
 		except WindowsError:
 			continue
 
@@ -360,6 +375,9 @@ def gather_msvc_versions(conf, versions):
 		#debug("Looking for ce targets!", vsvars, os.path.isfile(vsvars))
 		if wince_supported_platforms and os.path.isfile(vsvars):
 			conf.gather_wince_targets(versions, version, vc_path, vsvars, wince_supported_platforms)
+		vsvars = os.path.join(vs_path, 'VC', 'WPSDK', 'WP80', 'vcvarsphoneall.bat')
+		if os.path.isfile(vsvars):
+			conf.gather_winphone_targets(versions, version, vc_path, vsvars)
 
 @conf
 def gather_icl_suite_versions(conf, versions):
