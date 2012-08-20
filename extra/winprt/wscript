@@ -15,7 +15,7 @@ def add_msvc_winprt_to_env(conf, compiler, version, target):
 
 	conf.env.append_unique('CFLAGS', ['/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'] + ['/AI%s'%p for p in conf.env.LIBPATH])
 	conf.env.append_unique('CXXFLAGS', ['/EHsc', '/ZW', '/TP', '/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'] + ['/AI%s'%p for p in conf.env.LIBPATH])
-	conf.env.append_unique('LINKFLAGS', ['/MANIFEST:NO', '/WINMD:NO', '/NODEFAULTLIB:ole32.lib'])
+	conf.env.append_unique('LINKFLAGS', ['/MANIFEST:NO', '/WINMD:NO', '/NODEFAULTLIB:ole32.lib', 'PhoneAppModelHost.lib'])
 	conf.env['CFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
 	conf.env['CFLAGS_warnnone'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
 	conf.env['CXXFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']

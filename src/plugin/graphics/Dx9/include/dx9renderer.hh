@@ -5,7 +5,7 @@
 #define BE_DX9_RENDERER_HH_
 /*****************************************************************************/
 #include    <windowing/renderer.hh>
-#include    <system/plugin.hh>
+#include    <plugin/plugin.hh>
 #include    <d3d9.h>
 
 namespace BugEngine
