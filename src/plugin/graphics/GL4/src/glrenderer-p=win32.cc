@@ -18,12 +18,6 @@
 
 #include    <GL/wglext.h>
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
-
 namespace BugEngine { namespace OpenGL
 {
 
@@ -67,7 +61,7 @@ public:
 static HWND createDummyWnd(weak<const GLRenderer> renderer)
 {
     minitl::format<128u> classname = minitl::format<128u>("__be__%p__") | (const void*)renderer;
-    HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, hDllInstance, 0);
+    HWND hWnd = CreateWindowEx( 0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0, (HINSTANCE)::GetModuleHandle(0), 0);
     if (!hWnd)
     {
         char *errorMessage;

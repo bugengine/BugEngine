@@ -5,11 +5,10 @@
 #define BE_DX9_STDAFX_H_
 /*****************************************************************************/
 
-#include   <core/stdafx.h>
-#include   <rtti/stdafx.h>
-#include   <system/stdafx.h>
-#include   <3d/stdafx.h>
-#include   <windowing/stdafx.h>
+#include    <bugengine/stdafx.h>
+
+#include    <3d/stdafx.h>
+#include    <windowing/stdafx.h>
 
 #ifdef BE_COMPILER_MSVC
 # pragma warning(disable:4985)

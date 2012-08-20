@@ -7,9 +7,9 @@
 
 extern "C"
 {
-LONG  __cdecl _InterlockedCompareExchange(LONG volatile* Dest, LONG Exchange, LONG Comp);
-LONG  __cdecl _InterlockedExchange(LONG volatile* Target, LONG Value);
-LONG  __cdecl _InterlockedExchangeAdd(LONG volatile* Addend, LONG Value);
+long  __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
+long  __cdecl _InterlockedExchange(long volatile* Target, long Value);
+long  __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
 __int64  __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest, __int64 Exchange, __int64 Comp);
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)

@@ -14,13 +14,9 @@
 
 #include    <resource.h>
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
 namespace BugEngine { namespace Debug
 {
+    HINSTANCE hDllInstance;
 
     static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) 
     { 
@@ -138,4 +134,9 @@ namespace BugEngine { namespace Debug
     }
 
 }}
+
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD /*reason*/, LPVOID /*reserved*/)
+{
+    BugEngine::Debug::hDllInstance = hInstance;
+}
 

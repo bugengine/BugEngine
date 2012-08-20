@@ -8,11 +8,6 @@
 #include    <core/threads/event.hh>
 #pragma warning(disable:4311 4312 4355)
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
 
 namespace BugEngine { namespace Windowing
 {
@@ -59,8 +54,8 @@ Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
     m_wndClassEx.cbSize         = sizeof(WNDCLASSEX);
     m_wndClassEx.style          = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     m_wndClassEx.lpfnWndProc    = WindowProc;
-    m_wndClassEx.hInstance      = hDllInstance;
-    m_wndClassEx.hIcon          = LoadIcon(hDllInstance, (LPCTSTR)IDI_BE_ICON);
+    m_wndClassEx.hInstance      = (HINSTANCE)::GetModuleHandle(0);
+    m_wndClassEx.hIcon          = LoadIcon((HINSTANCE)::GetModuleHandle(0), (LPCTSTR)IDI_BE_ICON);
     m_wndClassEx.hIconSm        = 0;
     m_wndClassEx.hCursor        = LoadCursor(0, (LPCTSTR)IDC_ARROW);
     m_wndClassEx.hbrBackground  = NULL;
@@ -73,7 +68,7 @@ Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    UnregisterClass(m_windowClassName.c_str(), hDllInstance);
+    UnregisterClass(m_windowClassName.c_str(), (HINSTANCE)::GetModuleHandle(0));
 }
 
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
@@ -84,7 +79,7 @@ HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreation
                                 flags.flags,
                                 flags.x, flags.y,
                                 flags.size.right-flags.size.left, flags.size.bottom-flags.size.top,
-                                NULL, NULL, hDllInstance, NULL );
+                                NULL, NULL, (HINSTANCE)::GetModuleHandle(0), NULL );
     return hWnd;
 }
 
