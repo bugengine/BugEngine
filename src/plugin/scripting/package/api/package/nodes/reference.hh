@@ -26,7 +26,7 @@ public:
 
     void setName(const inamespace& name);
 
-    const RTTI::Value& getValue() const;
+    RTTI::Value getValue() const;
     RTTI::Type getType() const;
 };
 

@@ -3,6 +3,7 @@
 
 #include    <world/stdafx.h>
 #include    <world/world.script.hh>
+#include    <world/entitystorage.script.hh>
 #include    <state.hh>
 #include    <scheduler/task/group.hh>
 
@@ -13,9 +14,9 @@ namespace BugEngine { namespace World
 
 static const Entity s_defaultSlot = { 0 };
 
-World::World()
+World::World(weak<EntityStorage> storage)
 :   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
-//,   m_rules(Arena::game(), 0)
+,   m_storage(storage)
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_entityAllocator(20*1024*1024)

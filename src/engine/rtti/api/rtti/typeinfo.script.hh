@@ -181,7 +181,6 @@ struct be_api(RTTI) Type
 public:
     template< typename T > bool isA() const;
 private:
-    Type& operator=(const Type&);
     void*               rawget(const void*) const;
     void                copy(const void* source, void* dest) const;
     void                create(void* obj) const;

@@ -9,8 +9,9 @@
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <plugin/plugin.hh>
+#include    <package/package.script.hh>
 
-namespace BugEngine { namespace Samples
+namespace BugEngine
 {
 
 class KernelSampleTask;
@@ -18,7 +19,9 @@ class KernelSampleTask;
 class KernelSample : public Application
 {
 private:
-    scoped<KernelSampleTask> m_kernelTask;
+    Plugin<IResourceLoader>     const   m_packageManager;
+    Plugin<IResourceLoader>     const   m_lua;
+    ref<const Package>          const   m_mainPackage;
 public:
     KernelSample(const PluginContext& context);
     ~KernelSample();
@@ -28,7 +31,7 @@ public:
     void  operator delete(void* memory)              { be_notreached(); ::operator delete(memory); }
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif

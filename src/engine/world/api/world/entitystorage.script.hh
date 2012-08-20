@@ -1,26 +1,32 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WORLD_IRULE_SCRIPT_HH_
-#define BE_WORLD_IRULE_SCRIPT_HH_
+#ifndef BE_WORLD_ENTITYSTORAGE_SCRIPT_HH_
+#define BE_WORLD_ENTITYSTORAGE_SCRIPT_HH_
 /*****************************************************************************/
-#include    <world/entity.script.hh>
-#include    <world/component.script.hh>
 #include    <scheduler/task/itask.hh>
-#include    <rtti/tags/editor.script.hh>
-#include    <scheduler/kernel/stream.hh>
 
 namespace BugEngine { namespace World
 {
 
-class IRule : public minitl::refcountable
+class World;
+
+class be_api(WORLD) EntityStorage : public minitl::refcountable
 {
-public:
-    virtual weak<Task::ITask> task() const = 0;
+    friend class World;
+private:
+    scoped<Task::ITask> m_task;
+private:
+    void start();
+protected:
+    EntityStorage();
+    ~EntityStorage();
+
+    weak<Task::ITask>   initialTask() const;
 };
 
-
 }}
+
 
 /*****************************************************************************/
 #endif

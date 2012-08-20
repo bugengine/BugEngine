@@ -5,6 +5,7 @@
 #define BE_SCHEDULER_KERNEL_ISTREAM_HH_
 /*****************************************************************************/
 #include    <scheduler/kernel/imemorybank.hh>
+#include    <scheduler/task/itask.hh>
 
 namespace BugEngine { namespace Kernel
 {
@@ -33,9 +34,11 @@ private:
     };
     static const u32 s_memoryStatesCount = 8;
 private:
-    MemoryState m_states[s_memoryStatesCount];
+    MemoryState         m_states[s_memoryStatesCount];
+    weak<Task::ITask>   m_producer;
 public:
     const MemoryState& getBank(weak<const IMemoryProvider> provider) const;
+    weak<Task::ITask> getProducer() const;
 };
 
 }}
