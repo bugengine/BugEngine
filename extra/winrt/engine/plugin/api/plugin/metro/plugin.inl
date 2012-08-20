@@ -52,7 +52,7 @@ static HMODULE loadPlugin(const inamespace &pluginName)
     minitl::Allocator::Block<wchar_t> wPath(Arena::stack(), count);
     count = MultiByteToWideChar(0, 0, pluginPath.name, length, wPath, count);
 
-    HMODULE h = LoadPackagedLibrary(wPath, 0);
+    HMODULE h = ::LoadPackagedLibrary(wPath, 0);
     if (!h)
     {
         char errorMessage[1024];

@@ -7,12 +7,6 @@
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <core/threads/thread.hh>
 
-namespace BugEngine
-{
-    extern HINSTANCE hDllInstance;
-}
-
-
 namespace BugEngine { namespace DirectX9
 {
 
