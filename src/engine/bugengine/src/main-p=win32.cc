@@ -6,17 +6,11 @@
 
 int beMain(int argc, const char *argv[]);
 
-namespace BugEngine
-{
-    HINSTANCE hDllInstance;
-}
-
 extern "C"
-int WINAPI WinMain( HINSTANCE hInstance,
+int WINAPI WinMain( HINSTANCE /*hInstance*/,
                     HINSTANCE /*hPrevInstance*/,
                     LPSTR /*lpCmdLine*/,
                     int /*nCmdShow*/ )
 {
-    BugEngine::hDllInstance = hInstance;
     return beMain(__argc, (const char **)__argv);
 }
