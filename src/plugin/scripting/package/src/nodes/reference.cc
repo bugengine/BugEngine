@@ -6,6 +6,8 @@
 #include    <package/nodes/object.hh>
 #include    <package/nodes/package.hh>
 
+#include "rtti/engine/propertyinfo.script.hh"
+
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -28,7 +30,7 @@ void Reference::setName(const inamespace& name)
     m_owner->resolveReference(this);
 }
 
-const RTTI::Value& Reference::getValue() const
+RTTI::Value Reference::getValue() const
 {
     if (m_value)
     {
@@ -36,7 +38,12 @@ const RTTI::Value& Reference::getValue() const
     }
     else if (m_object)
     {
-        return m_owner->getValue(m_object);
+        RTTI::Value v = m_owner->getValue(m_object);
+        for (u32 i = 1; i < m_name.size(); ++i)
+        {
+            v = v[m_name[i]];
+        }
+        return v;
     }
     else
     {
@@ -53,7 +60,22 @@ RTTI::Type Reference::getType() const
     }
     else if (m_object)
     {
-        return m_object->getType();
+        RTTI::Type t = m_object->getType();
+        for (u32 i = 1; i < m_name.size(); ++i)
+        {
+            raw<const RTTI::Property> p = t.metaclass->properties;
+            while (p && p->name != m_name[i])
+            {
+                p = p->next;
+            }
+            if (!p)
+            {
+                be_notreached();
+                return be_typeid<void>::type();
+            }
+            t = p->type;
+        }
+        return t;
     }
     else
     {

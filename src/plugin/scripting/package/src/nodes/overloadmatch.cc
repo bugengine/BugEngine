@@ -42,7 +42,6 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
                 m_score -= s_parameterMissing;
                 if (! param->isCompatible(it->match->type))
                 {
-                    param->isCompatible(it->match->type);
                     m_score += s_parameterBadType;
                 }
             }
@@ -60,9 +59,9 @@ bool OverloadMatch::operator<(const OverloadMatch& other) const
     return m_score < other.m_score;
 }
 
-RTTI::Value OverloadMatch::create() const
+RTTI::Value OverloadMatch::create(istring name) const
 {
-    be_assert(m_score == 0, "cannot create object when no perfect match was found");
+    be_assert(m_score == 0, "cannot create object of type %s: no perfect match was found" | name);
     be_assert(m_params.size() <= 16, "parameter count larger than buffer; grow buffer");
     RTTI::Value v[16];
     for(size_t i = 0; i < m_params.size(); ++i)

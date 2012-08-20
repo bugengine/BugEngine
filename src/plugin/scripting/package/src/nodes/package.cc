@@ -182,13 +182,9 @@ void Package::resolveReference(weak<Reference> reference)
     if (name.size())
     {
         reference->m_value = m_rootNamespace->get(name);
-        if (!reference->m_value && name.size() == 1)
+        if (!reference->m_value)
         {
             reference->m_object = findByName(name[0]);
-            if (!reference->m_object)
-            {
-                be_notreached();
-            }
         }
     }
 }
@@ -216,14 +212,14 @@ void Package::createObjects(weak<ResourceManager> manager)
 
 void Package::deleteObjects(weak<ResourceManager> manager)
 {
-    for(size_t i = m_values.size(); i > 0; --i)
+    for(size_t i =m_values.size(); i > 0; --i)
     {
-        if (m_values[i-1].isA(be_typeid<const Resource>::type()))
+        if (m_values.back().isA(be_typeid<const Resource>::type()))
         {
-            manager->unload(m_values[i-1].type().metaclass, m_values[i-1].as< weak<const Resource> >());
+            manager->unload(m_values.back().type().metaclass, m_values.back().as< weak<const Resource> >());
         }
+        m_values.pop_back();
     }
-    m_values.clear();
 }
 
 }}}

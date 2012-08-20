@@ -7,20 +7,21 @@
 #include    <core/environment.hh>
 #include    <filesystem/diskfolder.script.hh>
 
-namespace BugEngine { namespace Samples
+namespace BugEngine
 {
 
 KernelSample::KernelSample(const PluginContext& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
-    ,   m_kernelTask(scoped<KernelSampleTask>::create(Arena::general()))
+    ,   m_packageManager("scripting.package", pluginContext())
+    ,   m_lua("scripting.lua", pluginContext())
+    ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-kernel.pkg"))))
 {
-    pluginContext().resourceManager->load(weak<KernelSampleTask>(m_kernelTask));
+    pluginContext().resourceManager->load(m_mainPackage);
 }
 
 KernelSample::~KernelSample()
 {
-    pluginContext().resourceManager->unload(weak<KernelSampleTask>(m_kernelTask));
+    pluginContext().resourceManager->unload(m_mainPackage);
 }
 
-}}
-
+}

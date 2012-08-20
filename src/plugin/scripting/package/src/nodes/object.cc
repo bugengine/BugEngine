@@ -101,7 +101,7 @@ RTTI::Type Object::getType() const
 
 RTTI::Value Object::create() const
 {
-    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create();
+    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create(m_name);
 }
 
 }}}

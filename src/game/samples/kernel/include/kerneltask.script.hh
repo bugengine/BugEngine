@@ -9,19 +9,22 @@
 #include    <resource/resource.script.hh>
 #include    <scheduler/kernel/stream.hh>
 
-namespace BugEngine { namespace Samples
+namespace BugEngine
 {
 
 class KernelSampleTask : public Kernel::Kernel
 {
 private:
-    scoped<Task::KernelTask>    m_kernelTask;
+    scoped<Task::KernelTask>                        m_kernelTask;
+    scoped< BugEngine::Kernel::Stream<u32> >        m_out;
 published:
-    KernelSampleTask();
+    weak< BugEngine::Kernel::Stream<u32> > const    out;
+published:
+    KernelSampleTask(weak< BugEngine::Kernel::Stream<u32> > const in1, weak< BugEngine::Kernel::Stream<u32> > out1);
     ~KernelSampleTask();
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif

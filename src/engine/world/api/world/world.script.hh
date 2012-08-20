@@ -16,18 +16,15 @@ namespace BugEngine { namespace World
 
 class State;
 class Rule;
-template< typename T >
-class Storage;
+class EntityStorage;
 struct Component;
 
 class be_api(WORLD) World : public Resource
 {
     friend class Rule;
-    template< typename T >
-    friend class Storage;
 private:
     ref<Task::ITask>                m_task;
-    //minitl::array< scoped<Rule> >   m_rules;
+    weak<EntityStorage> const       m_storage;
     scoped<State>                   m_emptyEntityState;
     Entity                          m_freeEntityId;
     SystemAllocator                 m_entityAllocator;
@@ -48,7 +45,7 @@ published:
 
     void addComponent(Entity e, RTTI::Value& v);
 published:
-    World();
+    World(weak<EntityStorage> storage);
     ~World();
 };
 

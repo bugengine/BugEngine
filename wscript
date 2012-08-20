@@ -111,7 +111,7 @@ def plugins(bld):
 	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package])
 
 	samples = lambda: None
-	samples.kernel	= module.game('samples.kernel',				[])
+	samples.kernel	= module.game('samples.kernel',				[package])
 
 	bld.recurse('mak', name='plugins', once=False)
 

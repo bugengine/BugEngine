@@ -1,0 +1,22 @@
+plugin samples.kernel;
+plugin scripting.lua;
+
+storage = samples.kernel.KernelStorage
+(
+)
+
+world = game.World.World
+(
+	storage = storage;
+)
+
+sample = samples.kernel.KernelSampleTask
+(
+	in1 = storage.stream1;
+	out1 = storage.stream2;
+)
+
+luascript = scripting.lua.LuaScript
+(
+	script = <main.lua>;
+)
