@@ -5,14 +5,14 @@
 #define BE_KERNEL_SUNCC_INTERLOCKED_INL_
 /*****************************************************************************/
 
-extern "C" i32 fetch_and_add_32(volatile i32* p, i32 add);
-extern "C" i32 fetch_and_set_32(volatile i32* p, i32 v);
-extern "C" i32 set_conditional_32(volatile i32* p, i32 v, i32 condition);
-extern "C" i64 set_conditional_64(volatile i64* p, i64 v, i64 condition);
+extern "C" i32 fetch_and_add_32(i32* p, i32 add);
+extern "C" i32 fetch_and_set_32(i32* p, i32 v);
+extern "C" i32 set_conditional_32(i32* p, i32 v, i32 condition);
+extern "C" i64 set_conditional_64(i64* p, i64 v, i64 condition);
 #ifdef _AMD64
-extern "C" i64 fetch_and_add_64(volatile i64* p, i64 add);
-extern "C" i64 fetch_and_set_64(volatile i64* p, i64 v);
-extern "C" char set_conditional_128(volatile i64* p, i64 nvalue, i64 oldvalue, i64 tag);
+extern "C" i64 fetch_and_add_64(i64* p, i64 add);
+extern "C" i64 fetch_and_set_64(i64* p, i64 v);
+extern "C" char set_conditional_128(i64* p, i64 nvalue, i64 oldvalue, i64 tag);
 #endif
 
 namespace _Kernel
@@ -26,24 +26,24 @@ template<>
 struct InterlockedType<4>
 {
     typedef i32 value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         return fetch_and_add_32(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(value_t *p, value_t incr)
     {
         return fetch_and_add_32(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         return fetch_and_set_32(p, v);
     }
 
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
         return set_conditional_32(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(value_t *p, value_t v)
     {
         fetch_and_set_32(p, v);
         return v;
@@ -56,8 +56,8 @@ struct InterlockedType<4>
         typedef tagged_t    tag_t;
         struct
         {
-            volatile counter_t   tag;
-            volatile value_t     value;
+            counter_t   tag;
+            value_t     value;
         } taggedvalue;
 
         tagged_t(value_t value = 0)
@@ -89,11 +89,11 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         i64 old = *(i64*)&condition;
         i64 value = *(i64*)&v;
-        volatile i64* dest = (volatile i64*)p;
+        i64* dest = (i64*)p;
         return set_conditional_64(dest, value, old) == old;
     }
 };
@@ -114,23 +114,23 @@ template<>
 struct InterlockedType<8>
 {
     typedef i64 value_t;
-    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         return fetch_and_add_64(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
+    static inline value_t fetch_and_sub(value_t *p, value_t incr)
     {
         return fetch_and_add_64(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
+    static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         return fetch_and_set_64(p, v);
     }
-    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
         return set_conditional_64(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
+    static inline value_t set_and_fetch(value_t *p, value_t v)
     {
         fetch_and_set_64(p, v);
         return v;
@@ -144,8 +144,8 @@ struct InterlockedType<8>
         typedef tagged_t    tag_t;
         struct
         {
-            volatile counter_t   tag;
-            volatile value_t     value;
+            counter_t   tag;
+            value_t     value;
         } taggedvalue;
 
         tagged_t(value_t value = 0)
@@ -177,9 +177,9 @@ struct InterlockedType<8>
     {
         return p;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        return set_conditional_128((volatile i64*)p, v, condition.taggedvalue.tag, condition.taggedvalue.value);
+        return set_conditional_128((i64*)p, v, condition.taggedvalue.tag, condition.taggedvalue.value);
     }
 };
 #endif
