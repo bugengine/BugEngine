@@ -29,14 +29,6 @@ private:
 
 
     static const luaL_Reg s_valueMetaTable[];
-    static void printStack(lua_State* state);
-    static RTTI::Value get(lua_State* state, int index);
-    static void push(lua_State* state, const RTTI::Value& v);
-
-    static int valueGC(lua_State* state);
-    static int valueToString(lua_State *state);
-    static int valueGet(lua_State *state);
-    static int valueCall(lua_State *state);
 };
 
 }}
