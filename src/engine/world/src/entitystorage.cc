@@ -28,6 +28,7 @@ weak<Task::ITask> EntityStorage::initialTask() const
 
 void EntityStorage::start()
 {
+    be_info("frame");
 }
 
 }}

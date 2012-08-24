@@ -12,11 +12,11 @@ namespace BugEngine
 class KernelStorage : public World::EntityStorage
 {
 private:
-    scoped< BugEngine::Kernel::Stream<u32> >        m_stream1;
-    scoped< BugEngine::Kernel::Stream<u32> >        m_stream2;
+    scoped< BugEngine::Kernel::Stream<u32> >    m_stream1;
+    scoped< BugEngine::Kernel::Stream<u32> >    m_stream2;
 published:
-    weak< BugEngine::Kernel::Stream<u32> > const    stream1;
-    weak< BugEngine::Kernel::Stream<u32> > const    stream2;
+    BugEngine::Kernel::Product<u32> const   components1;
+    BugEngine::Kernel::Product<u32> const   components2;
 published:
     KernelStorage();
     ~KernelStorage();

@@ -17,6 +17,8 @@ static const Entity s_defaultSlot = { 0 };
 World::World(weak<EntityStorage> storage)
 :   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
 ,   m_storage(storage)
+,   m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
+,   m_taskEnd(Task::TaskGroup::TaskEndConnection(m_task, m_storage->initialTask()))
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_entityAllocator(20*1024*1024)

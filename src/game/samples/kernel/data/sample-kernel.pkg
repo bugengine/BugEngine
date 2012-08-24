@@ -12,8 +12,8 @@ world = game.World.World
 
 sample = samples.kernel.KernelSampleTask
 (
-	in1 = storage.stream1;
-	out1 = storage.stream2;
+	in1 = storage.components1;
+	out1 = storage.components2;
 )
 
 luascript = scripting.lua.LuaScript
