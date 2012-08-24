@@ -5,7 +5,7 @@ class StreamDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
 	def stream_definition(self, stream, lparen, name, rparen):
-		"%reduce BE_STREAM LPAREN ID RPAREN"
+		"%reduce BE_PRODUCT LPAREN ID RPAREN"
 		self.name = name.value.replace(' ', '')
 		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = stream.lineno
@@ -52,15 +52,15 @@ class StreamDef(cpp.yacc.Nonterm):
 		file.write("#line %d\n"%self.lineno)
 		file.write("    {\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::istring(\"Stream<%s>\"),\n" % (self.name))
+		file.write("        ::BugEngine::istring(\"Product<%s>\"),\n" % (self.name))
 		file.write("#line %d\n"%self.lineno)
 		file.write("        ::BugEngine::be_game_Namespace_BugEngine_Kernel(),\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::be_typeid< BugEngine::Kernel::IStream >::klass(),\n")
+		file.write("        ::BugEngine::be_typeid< void >::klass(),\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        (u32)(sizeof(BugEngine::Kernel::Stream< %s >)),\n" % fullname)
+		file.write("        (u32)(sizeof(BugEngine::Kernel::Product< %s >)),\n" % fullname)
 		file.write("#line %d\n"%self.lineno)
-		file.write("        (i32)((ptrdiff_t)static_cast< BugEngine::Kernel::IStream* >((BugEngine::Kernel::Stream< %s >*)1)-1),\n" % (fullname))
+		file.write("        (i32)(0),\n")
 		file.write("#line %d\n"%self.lineno)
 		file.write("        %s,\n" % tag_ptr)
 		file.write("#line %d\n"%self.lineno)
@@ -83,7 +83,7 @@ class StreamDef(cpp.yacc.Nonterm):
 			file.write("return s_%s;\n}\n" % prefix)
 
 		instances.write("#line %d\n"%self.lineno)
-		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Stream<%s> >::klass() { raw<const RTTI::Class> ci = {&s_%s}; return ci; }\n" % (fullname, prefix))
+		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Product<%s> >::klass() { raw<const RTTI::Class> ci = {&s_%s}; return ci; }\n" % (fullname, prefix))
 
 		return varname, "{0}"
 

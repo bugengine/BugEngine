@@ -50,6 +50,7 @@ void Scheduler::queueTask(Task::ITaskItem* task)
 void Scheduler::queueKernel()
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
+    be_info("kernel goes here");
 }
 
 void Scheduler::mainThreadJoin()
