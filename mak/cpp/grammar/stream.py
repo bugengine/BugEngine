@@ -56,7 +56,7 @@ class StreamDef(cpp.yacc.Nonterm):
 		file.write("#line %d\n"%self.lineno)
 		file.write("        ::BugEngine::be_game_Namespace_BugEngine_Kernel(),\n")
 		file.write("#line %d\n"%self.lineno)
-		file.write("        ::BugEngine::be_typeid< void >::klass(),\n")
+		file.write("        ::BugEngine::be_typeid< BugEngine::Kernel::IProduct >::klass(),\n")
 		file.write("#line %d\n"%self.lineno)
 		file.write("        (u32)(sizeof(BugEngine::Kernel::Product< %s >)),\n" % fullname)
 		file.write("#line %d\n"%self.lineno)

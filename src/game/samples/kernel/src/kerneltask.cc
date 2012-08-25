@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-KernelSampleTask::KernelSampleTask(BugEngine::Kernel::Product< u32 > const in1, BugEngine::Kernel::Product< u32 > const out1)
+KernelSampleTask::KernelSampleTask(const BugEngine::Kernel::Product< u32 >& in1, const BugEngine::Kernel::Product< u32 >& out1)
     :   Kernel("samples.kernel.add")
     ,   m_kernelTask(scoped<Task::KernelTask>::create(Arena::general(), "samples.kernel.add", Colors::Red::Red, Scheduler::High, this))
     ,   m_input1(in1)

@@ -104,6 +104,20 @@ public:
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
+
+class ArrayValue : public Value
+{
+private:
+    minitl::vector< ref<Value> >    m_values;
+public:
+    ArrayValue(const minitl::vector< ref<Value> >& values);
+    ~ArrayValue();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
 }}}
 
 /*****************************************************************************/

@@ -194,4 +194,62 @@ RTTI::Value FileValue::as(const RTTI::Type& type) const
     return RTTI::Value(m_value);
 }
 
+
+
+ArrayValue::ArrayValue(const minitl::vector< ref<Value> >& values)
+    :   m_values(values)
+{
+}
+
+ArrayValue::~ArrayValue()
+{
+}
+
+bool ArrayValue::isCompatible(const RTTI::Type& type) const
+{
+    if (type.metaclass->name == istring("array"))
+    {
+        raw<const RTTI::Class::ObjectInfo> prop = type.metaclass->objects;
+        while (prop && prop->name != istring("value_type"))
+        {
+            prop = prop->next;
+        }
+        if (prop)
+        {
+            if (prop->value.type().isA(be_typeid<const RTTI::Type>::type()))
+            {
+                RTTI::Type valueType = prop->value.as<const RTTI::Type>();
+                for (minitl::vector< ref<Value> >::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
+                {
+                    if (!(*it)->isCompatible(valueType))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+RTTI::Value ArrayValue::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from array to %s" | type);
+    raw<const RTTI::Class::ObjectInfo> prop = type.metaclass->objects;
+    while (prop && prop->name != istring("value_type"))
+    {
+        prop = prop->next;
+    }
+    be_assert(prop, "unable to find the array value type");
+    RTTI::Type valueType = prop->value.as<const RTTI::Type>();
+
+    minitl::array<RTTI::Value> v(Arena::temporary(), m_values.size());
+    for (u32 i = 0; i < m_values.size(); ++i)
+    {
+        v[i] = m_values[i]->as(valueType);
+    }
+    return type.metaclass->constructor->doCall(&v[0], m_values.size());
+}
+
 }}}

@@ -35,6 +35,8 @@ public:
 
     inline T& operator[](u32 index);
     inline const T& operator[](u32 index) const;
+
+    inline u32 size() const;
 };
 
 }

@@ -23,7 +23,7 @@ private:
 published:
     BugEngine::Kernel::Product< u32 > const output;
 published:
-    KernelSampleTask(BugEngine::Kernel::Product< u32 > const in1, BugEngine::Kernel::Product< u32 > const out1);
+    KernelSampleTask(const BugEngine::Kernel::Product< u32 >& in1, const BugEngine::Kernel::Product< u32 >& out1);
     ~KernelSampleTask();
 };
 

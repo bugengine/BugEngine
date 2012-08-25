@@ -47,10 +47,11 @@ void Scheduler::queueTask(Task::ITaskItem* task)
     m_taskScheduler->queue(task);
 }
 
-void Scheduler::queueKernel()
+void Scheduler::queueKernel(weak<const Task::ITask> task)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
     be_info("kernel goes here");
+    task->completed(this);
 }
 
 void Scheduler::mainThreadJoin()

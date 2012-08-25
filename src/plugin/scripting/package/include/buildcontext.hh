@@ -16,6 +16,7 @@ union YYSTYPE
     double fValue;
     char* sValue;
     ref<BugEngine::PackageBuilder::Nodes::Value>* value;
+    minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Value> >* array;
 };
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL 1

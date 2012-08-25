@@ -86,6 +86,12 @@ const T& array<T>::operator[](u32 index) const
     return m_array[index];
 }
 
+template< typename T >
+u32 array<T>::size() const
+{
+    return m_array.count();
+}
+
 }
 
 /*****************************************************************************/

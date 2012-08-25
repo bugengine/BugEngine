@@ -20,7 +20,7 @@ KernelTask::~KernelTask()
 
 void KernelTask::schedule(weak<Scheduler> scheduler) const
 {
-    scheduler->queueKernel();
+    scheduler->queueKernel(this);
 }
 
 }}
