@@ -104,7 +104,7 @@ u32 Type::distance(const Type& other) const
 bool Type::isA(const Type& other) const
 {
     return     other.indirection <= indirection
-            && other.access <= access
+            && indirection*other.access <= indirection*access
             && metaclass->isA(other.metaclass);
 }
 

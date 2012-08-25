@@ -68,9 +68,7 @@ Value& Value::operator=(const Value& v)
 
 void* Value::unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& obj)
 {
-    be_assert(m_type.metaclass->isA(ti.metaclass), "Value has type %s; unable to unbox to type %s" | m_type | ti);
-    be_assert(ti.indirection <= m_type.indirection, "Value has type %s; unable to unbox to type %s" | m_type | ti);
-    be_assert(ti.access <= m_type.access, "Value has type %s; unable to unbox to type %s" | m_type | ti);
+    be_assert(m_type.isA(ti), "Value has type %s; unable to unbox to type %s" | m_type | ti);
     void* mem = memory();
     switch(m_type.indirection)
     {

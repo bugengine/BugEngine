@@ -5,15 +5,16 @@ storage = samples.kernel.KernelStorage
 (
 )
 
-world = game.World.World
-(
-	storage = storage;
-)
-
 sample = samples.kernel.KernelSampleTask
 (
 	in1 = storage.components1;
 	out1 = storage.components2;
+)
+
+world = game.World.World
+(
+	storage = storage;
+	products = [sample.output];
 )
 
 luascript = scripting.lua.LuaScript

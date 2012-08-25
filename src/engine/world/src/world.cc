@@ -14,11 +14,12 @@ namespace BugEngine { namespace World
 
 static const Entity s_defaultSlot = { 0 };
 
-World::World(weak<EntityStorage> storage)
+World::World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> products)
 :   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
 ,   m_storage(storage)
 ,   m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
 ,   m_taskEnd(Task::TaskGroup::TaskEndConnection(m_task, m_storage->initialTask()))
+,   m_productEnds(Arena::task(), products.size())
 ,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_entityAllocator(20*1024*1024)
@@ -26,6 +27,11 @@ World::World(weak<EntityStorage> storage)
 ,   m_entityCount(0)
 ,   m_entityCapacity(0)
 {
+    minitl::array<Task::TaskGroup::TaskEndConnection>::iterator connection = m_productEnds.begin();
+    for (minitl::array<Kernel::IProduct>::const_iterator product = products.begin(); product != products.end(); ++product, ++connection)
+    {
+        *connection = Task::TaskGroup::TaskEndConnection(m_task, product->producer);
+    }
 }
 
 World::~World()
