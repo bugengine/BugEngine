@@ -9,5 +9,4 @@ def setup(conf):
 	pass
 
 def build(bld):
-	print('bla')
 	bld.m['stl-gabi++'] = module.static_library( 'stl-gabi++', [], '3rdparty', platforms=['android'])
