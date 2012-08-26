@@ -14,20 +14,23 @@ def options(opt):
 					help='Version of the Android SDK to target')
 
 def find_android_sdk(gcc):
-	path = gcc[0]
-	for i in range(1,7):
-		path = os.path.split(path)[0]
-	path = os.path.join(path, 'platforms')
-	sdks = sorted(os.listdir(path), key = lambda x: int(x.split('-')[1]))
-	sdk = sdks[-1]
-	from waflib import Options
-	favorite_sdk = Options.options.android_sdk
-	if favorite_sdk:
-		if 'android-%s'%favorite_sdk in sdks:
-			sdk = 'android-%s'%favorite_sdk
-		else:
-			warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
-	return os.path.join(path, sdk)
+	try:
+		path = gcc[0]
+		for i in range(1,7):
+			path = os.path.split(path)[0]
+		path = os.path.join(path, 'platforms')
+		sdks = sorted(os.listdir(path), key = lambda x: int(x.split('-')[1]))
+		sdk = sdks[-1]
+		from waflib import Options
+		favorite_sdk = Options.options.android_sdk
+		if favorite_sdk:
+			if 'android-%s'%favorite_sdk in sdks:
+				sdk = 'android-%s'%favorite_sdk
+			else:
+				warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
+		return os.path.join(path, sdk)
+	except Exception as e:
+		print(e)
 
 
 def add_android_gcc_flags_to_env(conf):
@@ -49,7 +52,7 @@ def add_android_flags_to_env(conf, variant, arch):
 	sdk_path = os.path.join(sdk_path, 'arch-%s'%arch)
 
 	conf.env.append_unique('CFLAGS', ['--sysroot=%s'%sdk_path])
-	conf.env.append_unique('CXXFLAGS', ['--sysroot=%s'%sdk_path])
+	conf.env.append_unique('CXXFLAGS', ['--sysroot=%s'%sdk_path, '-I%s'%'../../../extra/android/3rdparty/stl-gabi++/api'])
 	conf.env.append_unique('LINKFLAGS', ['--sysroot=%s'%sdk_path])
 	conf.env['library_PATTERN'] = '%s.a'
 	conf.env['shlib_PATTERN']   = '%s.so'
