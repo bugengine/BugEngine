@@ -1,0 +1,90 @@
+# set Android specific options
+
+import os
+import mak
+from waflib import Context, Errors
+from waflib.Logs import info,warn,pprint
+from waflib.TaskGen import feature, before_method, after_method
+
+def options(opt):
+	opt.add_option( '--android-sdk',
+					action='store',
+					default='',
+					dest='android_sdk',
+					help='Version of the Android SDK to target')
+
+def find_android_sdk(gcc):
+	path = gcc[0]
+	for i in range(1,7):
+		path = os.path.split(path)[0]
+	path = os.path.join(path, 'platforms')
+	sdks = sorted(os.listdir(path), key = lambda x: int(x.split('-')[1]))
+	sdk = sdks[-1]
+	from waflib import Options
+	favorite_sdk = Options.options.android_sdk
+	if favorite_sdk:
+		if 'android-%s'%favorite_sdk in sdks:
+			sdk = 'android-%s'%favorite_sdk
+		else:
+			warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
+	return os.path.join(path, sdk)
+
+
+def add_android_gcc_flags_to_env(conf):
+	conf.env.append_unique('CFLAGS', ['-fPIC'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+	conf.env.append_unique('LINKFLAGS', [])
+	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+
+def add_android_flags_to_env(conf, variant, arch):
+	conf.env['PLATFORM'] = mak.allplatforms['android']
+
+	if arch == 'arm':
+		conf.env.append_unique('CFLAGS', ['-mthumb', '-march=armv7'])
+		conf.env.append_unique('CXXFLAGS', ['-mthumb', '-march=armv7'])
+		conf.env.append_unique('LINKFLAGS', ['-mthumb', '-march=armv7'])
+
+	sdk_path = find_android_sdk(conf.env.CC)
+	sdk_path = os.path.join(sdk_path, 'arch-%s'%arch)
+
+	conf.env.append_unique('CFLAGS', ['--sysroot=%s'%sdk_path])
+	conf.env.append_unique('CXXFLAGS', ['--sysroot=%s'%sdk_path])
+	conf.env.append_unique('LINKFLAGS', ['--sysroot=%s'%sdk_path])
+	conf.env['library_PATTERN'] = '%s.a'
+	conf.env['shlib_PATTERN']   = '%s.so'
+	conf.env['program_PATTERN'] = '%s'
+
+	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_android', 'ANDROID', '_ANDROID', '_ANDROID_', '__ANDROID__'])
+	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', variant))
+	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname'),
+									'bin':		'',
+									'etc':		'',
+									'runbin':	'',
+									'api':		'include',
+									'lib':		'lib',
+									'data':		os.path.join('share', 'bugengine'),
+									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
+									'kernel':	os.path.join('share', 'bugengine', 'kernels')}
+	conf.env['KERNELS'] = [conf.env.ENVNAME]
+
+
+def configure(conf):
+	from waflib import Options
+	mak.allplatforms['android'] = ['android']
+	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
+		if target.find('android') != -1:
+				conf.create_gcc_env(version, toolchaindir, target, 'android', arch, gcc, gxx, add_android_gcc_flags_to_env, add_android_flags_to_env)
+
+def setup(conf):
+	pass
+
+def build(bld):
+	mak.allplatforms['android'] = ['android']
+
+def platformbuild(bld):
+	bld.platforms.append(mak.module.external('stl-gabi++'))
+
+def plugins(bld):
+	pass
+

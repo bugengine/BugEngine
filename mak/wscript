@@ -120,7 +120,7 @@ def configure(conf):
 	selectedvariants = []
 	for optim in mak.alloptims:
 		for envname in conf.env['BUILD_VARIANTS']:
-			name = optim+'-'+envname
+			name = envname+'-'+optim
 			conf.setenv(name, conf.all_envs[envname])
 			conf.env['OPTIMISATION'] = optim
 			conf.env['PREFIX'] = os.path.join('build', name)
@@ -154,7 +154,7 @@ def configure(conf):
 		if not selectedvariants:
 			conf.fatal('No toolchain matches the pattern %s, available : %s' % (Options.options.toolchains,str(allvariants)))
 	else:
-		conf.env['SELECTED_TOOLCHAINS'] = '^debug-'+conf.env['DEFAULT_BUILD_TOOL']+"$"
+		conf.env['SELECTED_TOOLCHAINS'] = '^'+conf.env['DEFAULT_BUILD_TOOL']+"-debug$"
 		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
 	conf.env.store('.build/be_toolchains.py')
 	conf.recurse('libs')

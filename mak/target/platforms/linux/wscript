@@ -56,7 +56,7 @@ def add_linux_flags_to_env(conf, name, arch):
 
 def configure(conf):
 	mak.allplatforms['linux'] = ['linux', 'posix', 'pc']
-	for compilerc, compilercxx, version,platform,arch in conf.env.SUNCC_TARGETS:
+	for compilerc, compilercxx, version, platform, arch in conf.env.SUNCC_TARGETS:
 		if platform.lower() != 'linux':
 			continue
 		name = 'linux-%s-suncc-%s'%(arch,version.replace('-','_'))
@@ -78,7 +78,7 @@ def configure(conf):
 			warn('suncc not available: '+str(e))
 			conf.variant = ''
 	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
-		if target.find('linux') != -1 or target == 'ppu':
+		if target.find('linux-gnu') != -1 or target == 'ppu':
 			conf.create_gcc_env(version, toolchaindir, target, 'linux', arch, gcc, gxx, add_gcc_flags_to_env, add_linux_flags_to_env)
 
 def build(bld):
