@@ -244,12 +244,12 @@ RTTI::Value ArrayValue::as(const RTTI::Type& type) const
     be_assert(prop, "unable to find the array value type");
     RTTI::Type valueType = prop->value.as<const RTTI::Type>();
 
-    minitl::array<RTTI::Value> v(Arena::temporary(), m_values.size());
+    minitl::array<RTTI::Value> v(Arena::temporary(), be_checked_numcast<u32>(m_values.size()));
     for (u32 i = 0; i < m_values.size(); ++i)
     {
         v[i] = m_values[i]->as(valueType);
     }
-    return type.metaclass->constructor->doCall(&v[0], m_values.size());
+    return type.metaclass->constructor->doCall(&v[0], be_checked_numcast<u32>(m_values.size()));
 }
 
 }}}
