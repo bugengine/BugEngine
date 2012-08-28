@@ -107,8 +107,8 @@ def plugins(bld):
 
 	scintilla		= module.external('scintilla')
 	bugeditor = lambda: None
-	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game')
-	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package])
+	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game', platforms=['pc'])
+	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package], platforms=['pc'])
 
 	samples = lambda: None
 	samples.kernel	= module.game('samples.kernel',				[package])

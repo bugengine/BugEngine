@@ -51,11 +51,11 @@ namespace BugEngine { namespace Debug
     static char outmessage[BUFFER_SIZE];
     static char callstack[BUFFER_SIZE];
     static char buffer[BUFFER_SIZE];
-    minitl::AssertionResult defaultAssertionCallback( const char *file,
-                                                      int        line,
-                                                      const char *expr,
-                                                      const char *message,
-                                                      ...)
+    minitl::AssertionResult AssertionCallback(const char *file,
+                                              int        line,
+                                              const char *expr,
+                                              const char *message,
+                                              ...)
     {
         {
             va_list l;
