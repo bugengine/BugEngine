@@ -238,9 +238,9 @@ GLWindow::~GLWindow()
 {
 }
 
-void GLWindow::load(weak<const Resource> resource)
+void GLWindow::load(weak<const Resource::Description> description)
 {
-    Window::load(resource);
+    Window::load(description);
     be_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
 }
 

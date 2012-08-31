@@ -95,7 +95,7 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer(minitl::Allocator& allocator, weak<ResourceManager> manager)
+Renderer::Renderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager)
     :   IRenderer(allocator, manager, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(allocator, this))
 {

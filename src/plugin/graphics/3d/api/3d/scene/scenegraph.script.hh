@@ -4,7 +4,7 @@
 #ifndef BE_3D_SCENE_SCENEGRAPH_SCRIPT_HH_
 #define BE_3D_SCENE_SCENEGRAPH_SCRIPT_HH_
 /*****************************************************************************/
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 #include    <world/world.script.hh>
 
@@ -21,7 +21,7 @@ class SceneGraphLoader;
 class INode;
 class IRenderer;
 
-class be_api(_3D) RenderNode : public Resource
+class be_api(_3D) RenderNode : public Resource::Description
 {
     friend class SceneGraphLoader;
     BE_NOCOPY(RenderNode);

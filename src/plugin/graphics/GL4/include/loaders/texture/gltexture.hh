@@ -14,10 +14,10 @@ class GLRenderer;
 class GLTexture : public IGPUResource
 {
 public:
-    GLTexture(weak<const Resource> resource, weak<GLRenderer> renderer);
+    GLTexture(weak<const Resource::Description> textureDescription, weak<GLRenderer> renderer);
     ~GLTexture();
 
-    virtual void load(weak<const Resource> resource) override;
+    virtual void load(weak<const Resource::Description> textureDescription) override;
     virtual void unload() override;
 };
 

@@ -14,10 +14,10 @@ class GLRenderer;
 class GLMesh : public IGPUResource
 {
 public:
-    GLMesh(weak<const Resource> resource, weak<GLRenderer> renderer);
+    GLMesh(weak<const Resource::Description> meshDescription, weak<GLRenderer> renderer);
     ~GLMesh();
 
-    virtual void load(weak<const Resource> resource) override;
+    virtual void load(weak<const Resource::Description> meshDescription) override;
     virtual void unload() override;
 };
 

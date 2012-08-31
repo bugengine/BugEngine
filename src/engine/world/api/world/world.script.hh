@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <scheduler/task/group.hh>
 #include    <scheduler/kernel/iproduct.script.hh>
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 #include    <world/entity.script.hh>
 #include    <core/memory/allocators/system.hh>
 
@@ -20,7 +20,7 @@ class Rule;
 class EntityStorage;
 struct Component;
 
-class be_api(WORLD) World : public Resource
+class be_api(WORLD) World : public Resource::Description
 {
     friend class Rule;
 private:

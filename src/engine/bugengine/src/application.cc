@@ -7,7 +7,7 @@
 #include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <scheduler/task/group.hh>
 #include    <scheduler/task/method.hh>
-#include    <resource/resourceloader.hh>
+#include    <resource/loader.hh>
 #include    <filesystem/folder.script.hh>
 #include    <plugin/plugin.hh>
 #include    <core/timer.hh>
@@ -40,9 +40,9 @@ Application::WorldResource::~WorldResource()
 }
 
 Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
-:   IResourceLoader()
+:   ILoader()
 ,   m_dataFolder(dataFolder)
-,   m_resourceManager(scoped<ResourceManager>::create(Arena::game()))
+,   m_resourceManager(scoped<Resource::ResourceManager>::create(Arena::game()))
 ,   m_scheduler(scheduler)
 ,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
 ,   m_cpuKernelScheduler("kernel.cpu", m_pluginContext)
@@ -100,15 +100,14 @@ int Application::run()
     return 0;
 }
 
-ResourceHandle Application::load(weak<const Resource> world)
+void Application::load(weak<const Resource::Description> world, Resource::Resource& resource)
 {
-    ResourceHandle handle;
-    handle.handle = ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask);
-    return handle;
+    resource.setRefHandle(ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask));
 }
 
-void Application::unload(const ResourceHandle& /*handle*/)
+void Application::unload(Resource::Resource& resource)
 {
+    resource.clearRefHandle();
 }
 
 void Application::updateResources()

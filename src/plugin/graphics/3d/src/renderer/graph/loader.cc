@@ -24,15 +24,14 @@ SceneGraphLoader::~SceneGraphLoader()
 {
 }
 
-ResourceHandle SceneGraphLoader::load(weak<const Resource> source)
+void SceneGraphLoader::load(weak<const Resource::Description> description, Resource::Resource& resource)
 {
-    ResourceHandle handle;
-    handle.handle = be_checked_cast<const RenderNode>(source)->createNode(this, m_renderer);
-    return handle;
+    resource.setRefHandle(be_checked_cast<const RenderNode>(description)->createNode(this, m_renderer));
 }
 
-void SceneGraphLoader::unload(const ResourceHandle& /*resource*/)
+void SceneGraphLoader::unload(Resource::Resource& resource)
 {
+    resource.clearRefHandle();
 }
 
 }

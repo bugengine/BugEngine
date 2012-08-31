@@ -5,7 +5,7 @@
 #define BE_BUGENGINE_APPLICATION_HH_
 /*****************************************************************************/
 #include    <scheduler/task/group.hh>
-#include    <resource/resourcehandle.hh>
+#include    <resource/loader.hh>
 #include    <bugengine/scriptengine.hh>
 #include    <plugin/plugin.hh>
 
@@ -19,7 +19,7 @@ class World;
 }
 class Folder;
 
-class be_api(BUGENGINE) Application : public IResourceLoader
+class be_api(BUGENGINE) Application : public Resource::ILoader
 {
     BE_NOCOPY(Application);
 private:
@@ -31,24 +31,24 @@ private:
         Task::TaskGroup::TaskEndConnection      end;
     };
 private:
-    ref<Folder> const               m_dataFolder;
-    scoped<ResourceManager> const   m_resourceManager;
-    weak<Scheduler>                 m_scheduler;
-    PluginContext const             m_pluginContext;
-    Plugin<IKernelScheduler>        m_cpuKernelScheduler;
-    ref<Task::TaskGroup>            m_updateTask;
-    ref<Task::TaskGroup>            m_worldTask;
-    minitl::vector< UpdateTask >    m_tasks;
-    Task::ITask::CallbackConnection m_updateLoop;
-    Task::ITask::CallbackConnection m_forceContinue;
-    Task::ITask::CallbackConnection m_worldLoop;
-    size_t                          m_resourceLoadingCount;
+    ref<Folder> const                       m_dataFolder;
+    scoped<Resource::ResourceManager> const m_resourceManager;
+    weak<Scheduler>                         m_scheduler;
+    PluginContext const                     m_pluginContext;
+    Plugin<IKernelScheduler>                m_cpuKernelScheduler;
+    ref<Task::TaskGroup>                    m_updateTask;
+    ref<Task::TaskGroup>                    m_worldTask;
+    minitl::vector< UpdateTask >            m_tasks;
+    Task::ITask::CallbackConnection         m_updateLoop;
+    Task::ITask::CallbackConnection         m_forceContinue;
+    Task::ITask::CallbackConnection         m_worldLoop;
+    size_t                                  m_resourceLoadingCount;
 private:
     void frameUpdate();
     void updateResources();
 private:
-    virtual ResourceHandle load(weak<const Resource> scene) override;
-    virtual void unload(const ResourceHandle& handle) override;
+    virtual void load(weak<const Resource::Description> scene, Resource::Resource& resource) override;
+    virtual void unload(Resource::Resource& resource) override;
 protected:
     void addTask(ref<Task::ITask> task);
     void removeTask(ref<Task::ITask> task);

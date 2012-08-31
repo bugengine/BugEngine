@@ -197,26 +197,26 @@ void Package::textSave() const
 {
 }
 
-void Package::createObjects(weak<ResourceManager> manager)
+void Package::createObjects(weak<Resource::ResourceManager> manager)
 {
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
         m_values[i] = m_nodes[i]->create();
-        if (m_values[i].isA(be_typeid<const Resource>::type()))
+        if (m_values[i].isA(be_typeid<const Resource::Description>::type()))
         {
-            manager->load(m_values[i].type().metaclass, m_values[i].as< weak<const Resource> >());
+            manager->load(m_values[i].type().metaclass, m_values[i].as< weak<const Resource::Description> >());
         }
     }
 }
 
-void Package::deleteObjects(weak<ResourceManager> manager)
+void Package::deleteObjects(weak<Resource::ResourceManager> manager)
 {
     for(size_t i =m_values.size(); i > 0; --i)
     {
-        if (m_values.back().isA(be_typeid<const Resource>::type()))
+        if (m_values.back().isA(be_typeid<const Resource::Description>::type()))
         {
-            manager->unload(m_values.back().type().metaclass, m_values.back().as< weak<const Resource> >());
+            manager->unload(m_values.back().type().metaclass, m_values.back().as< weak<const Resource::Description> >());
         }
         m_values.pop_back();
     }

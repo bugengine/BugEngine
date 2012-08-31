@@ -54,9 +54,9 @@ Window::~Window()
 {
 }
 
-void Window::load(weak<const Resource> resource)
+void Window::load(weak<const Resource::Description> description)
 {
-    be_forceuse(resource);
+    be_forceuse(description);
     m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), be_checked_cast<const Renderer>(m_renderer), this));
 }
 

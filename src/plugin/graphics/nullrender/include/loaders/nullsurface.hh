@@ -20,7 +20,7 @@ public:
     ~NullSurface();
 
 private:
-    void load(weak<const Resource> resource) override;
+    void load(weak<const Resource::Description> surfaceDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;

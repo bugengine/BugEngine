@@ -16,8 +16,8 @@ public:
     OpenCLKernelLoader();
     ~OpenCLKernelLoader();
 
-    virtual ResourceHandle load(weak<const Resource> resource) override;
-    virtual void unload(const ResourceHandle& resource) override;
+    virtual void load(weak<const Resource::Description> kernelDescription, Resource::Resource& resource) override;
+    virtual void unload(Resource::Resource& resource) override;
 };
 
 }

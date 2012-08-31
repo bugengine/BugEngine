@@ -4,6 +4,7 @@
 #ifndef BE_3D_RENDERER_GPURESOURCELOADER_HH_
 #define BE_3D_RENDERER_GPURESOURCELOADER_HH_
 /*****************************************************************************/
+#include <resource/loader.hh>
 
 namespace BugEngine
 {
@@ -12,7 +13,7 @@ class IRenderer;
 class IGPUResource;
 
 template< typename R >
-class GPUResourceLoader : public IResourceLoader
+class GPUResourceLoader : public Resource::ILoader
 {
     friend class IRenderer;
     BE_NOCOPY(GPUResourceLoader);
@@ -20,13 +21,13 @@ private:
     weak<const IRenderer>                   m_renderer;
     minitl::intrusive_list<IGPUResource>    m_pending;
     minitl::intrusive_list<IGPUResource>    m_resources;
-    minitl::vector< ref<IGPUResource> >     m_deleted;
+    minitl::vector< weak<IGPUResource> >    m_deleted;
 public:
     GPUResourceLoader(weak<const IRenderer> renderer);
     ~GPUResourceLoader();
 protected:
-    virtual ResourceHandle load(weak<const Resource> resource) override;
-    virtual void unload(const ResourceHandle& handle) override;
+    virtual void load(weak<const Resource::Description> description, Resource::Resource& resource) override;
+    virtual void unload(Resource::Resource& handle) override;
     void flush();
 };
 

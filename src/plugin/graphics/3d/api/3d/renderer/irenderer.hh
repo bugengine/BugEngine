@@ -37,7 +37,7 @@ class be_api(_3D) IRenderer : public minitl::pointer
     friend class GPUResourceLoader;
 protected:
     minitl::Allocator&                          m_allocator;
-    weak<ResourceManager>                       m_resourceManager;
+    weak<Resource::ResourceManager>             m_resourceManager;
     ref<Task::ITask>                            m_syncTask;
     scoped<SceneGraphLoader>                    m_sceneLoader;
     scoped< GPUResourceLoader<RenderSurface> >  m_renderSurfaceLoader;
@@ -46,7 +46,7 @@ protected:
     scoped<Kernel::Kernel>                      m_kernelSort;
     scoped<Kernel::Kernel>                      m_kernelRender;
 protected:
-    IRenderer(minitl::Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
+    IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
 protected:
     virtual void flush();
@@ -57,9 +57,9 @@ protected:
     virtual ref<IGPUResource> create(weak<const ShaderProgram> shader) const = 0;
     //virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
-    weak<IGPUResource> getRenderSurface(weak<const Resource> resource) const;
-    weak<IGPUResource> getRenderWindow(weak<const Resource> resource) const;
-    weak<IGPUResource> getShaderProgram(weak<const Resource> resource) const;
+    weak<IGPUResource> getRenderSurface(weak<const Resource::Description> description) const;
+    weak<IGPUResource> getRenderWindow(weak<const Resource::Description> description) const;
+    weak<IGPUResource> getShaderProgram(weak<const Resource::Description> description) const;
 
     minitl::Allocator& arena() const;
     weak<Task::ITask> syncTask() const;

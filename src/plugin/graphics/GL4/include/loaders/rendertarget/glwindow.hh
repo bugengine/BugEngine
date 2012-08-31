@@ -24,13 +24,13 @@ private:
     void clearCurrent() const;
     void present() const;
 private:
-    void load(weak<const Resource> resource) override;
+    void load(weak<const Resource::Description> windowDescription) override;
     void unload() override;
 public:
     virtual void    begin(ClearMode clear) const override;
     virtual void    end(PresentMode present) const override;
 public:
-    GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer> renderer);
+    GLWindow(weak<const RenderWindow> windowDescription, weak<const GLRenderer> renderer);
     ~GLWindow();
 };
 

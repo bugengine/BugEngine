@@ -167,8 +167,8 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak<const RenderWindow> renderwindow, weak<const GLRenderer> renderer)
-:   Windowing::Window(renderwindow, renderer)
+GLWindow::GLWindow(weak<const RenderWindow> windowDescription, weak<const GLRenderer> renderer)
+:   Windowing::Window(windowDescription, renderer)
 ,   m_context(scoped<Context>())
 {
 }
@@ -177,9 +177,9 @@ GLWindow::~GLWindow()
 {
 }
 
-void GLWindow::load(weak<const Resource> resource)
+void GLWindow::load(weak<const Resource::Description> windowDescription)
 {
-    Window::load(resource);
+    Window::load(windowDescription);
     be_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
 }
 

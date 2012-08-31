@@ -15,11 +15,11 @@ class NullRenderer;
 class NullShaderProgram : public IGPUResource
 {
 public:
-    NullShaderProgram(weak<const ShaderProgram> resource, weak<const NullRenderer> renderer);
+    NullShaderProgram(weak<const ShaderProgram> shaderDescription, weak<const NullRenderer> renderer);
     ~NullShaderProgram();
 
 private:
-    void load(weak<const Resource> resource) override;
+    void load(weak<const Resource::Description> shaderDescription) override;
     void unload() override;
 };
 

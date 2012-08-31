@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-PluginContext::PluginContext(weak<ResourceManager> manager, ref<Folder> folder, weak<Scheduler> scheduler)
+PluginContext::PluginContext(weak<Resource::ResourceManager> manager, ref<Folder> folder, weak<Scheduler> scheduler)
     :   resourceManager(manager)
     ,   dataFolder(folder)
     ,   scheduler(scheduler)

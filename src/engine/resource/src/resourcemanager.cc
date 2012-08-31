@@ -4,7 +4,7 @@
 #include    <resource/stdafx.h>
 #include    <resource/resourcemanager.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Resource
 {
 
 ResourceManager::LoaderInfo::LoaderInfo()
@@ -40,30 +40,30 @@ ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw<const RTTI::Clas
     return m_loaders[0];
 }
 
-void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<IResourceLoader> loader)
+void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<ILoader> loader)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
-    for (minitl::vector< weak<IResourceLoader> >::iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
+    for (minitl::vector< weak<ILoader> >::iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
         be_assert_recover(*it != loader, "registering twice the same loader for class %s" | classinfo->name, return);
     }
     be_info("registering loader for type %s" | classinfo->name);
     info.loaders.push_back(loader);
-    for (minitl::intrusive_list<const Resource, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
+    for (minitl::intrusive_list<const Description, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
     {
         resource->load(loader);
     }
 }
 
-void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResourceLoader> loader)
+void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const ILoader> loader)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
-    for (minitl::vector< weak<IResourceLoader> >::iterator it = info.loaders.begin(); it != info.loaders.end();)
+    for (minitl::vector< weak<ILoader> >::iterator it = info.loaders.begin(); it != info.loaders.end();)
     {
         if (*it == loader)
         {
             be_info("unregistering loader for type %s" | classinfo->name);
-            for (minitl::intrusive_list<const Resource, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
+            for (minitl::intrusive_list<const Description, 2>::iterator resource = info.resources.begin(); resource != info.resources.end(); ++resource)
             {
                 resource->unload(*it);
             }
@@ -78,31 +78,31 @@ void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const IResou
     be_error("loader was not in the list of loaders for type %s" | classinfo->name);
 }
 
-void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Resource> resource)
+void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Description> description)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
-    for (minitl::vector< weak<IResourceLoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
+    for (minitl::vector< weak<ILoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
-        resource->load(*it);
+        description->load(*it);
     }
-    info.resources.push_back(*resource.operator->());
+    info.resources.push_back(*description.operator->());
 }
 
-void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Resource> resource)
+void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Description> description)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
-    for (minitl::vector< weak<IResourceLoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
+    for (minitl::vector< weak<ILoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
-        resource->unload(*it);
+        description->unload(*it);
     }
-    resource->unhook();
+    description->unhook();
 }
 
-void ResourceManager::addTicket(weak<IResourceLoader> loader, weak<const Resource> resource, weak<const File> file)
+void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file)
 {
     Ticket ticket;
     ticket.loader = loader;
-    ticket.resource = resource;
+    ticket.resource = description;
     ticket.ticket = file->beginRead(0, 0, Arena::temporary());
     ticket.progress = 0;
     m_tickets.push_back(ticket);
@@ -119,13 +119,13 @@ size_t ResourceManager::updateTickets()
         }
         else if (it->ticket->done())
         {
-            it->loader->onTicketLoaded(it->resource, it->ticket->buffer);
+            it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer);
             it = m_tickets.erase(it);
         }
         else if (it->ticket->processed != it->progress)
         {
             it->progress = it->ticket->processed;
-            it->loader->onTicketUpdated(it->resource, it->ticket->buffer, it->progress);
+            it->loader->onTicketUpdated(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->progress);
             ++it;
         }
         else
@@ -136,4 +136,4 @@ size_t ResourceManager::updateTickets()
     return m_tickets.size();
 }
 
-}
+}}

@@ -14,16 +14,19 @@ namespace RTTI
     struct Class;
 }
 
+namespace Resource
+{
 class ResourceManager;
+}
 class Folder;
 class Scheduler;
 
 struct be_api(PLUGIN) PluginContext
 {
-    weak<ResourceManager>   resourceManager;
-    ref<Folder>             dataFolder;
-    weak<Scheduler>         scheduler;
-    PluginContext(weak<ResourceManager> manager, ref<Folder> dataFolder, weak<Scheduler> scheduler);
+    weak<Resource::ResourceManager> resourceManager;
+    ref<Folder>                     dataFolder;
+    weak<Scheduler>                 scheduler;
+    PluginContext(weak<Resource::ResourceManager> manager, ref<Folder> dataFolder, weak<Scheduler> scheduler);
 };
 
 template< typename Interface >

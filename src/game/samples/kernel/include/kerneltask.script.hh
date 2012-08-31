@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <scheduler/task/itask.hh>
-#include    <resource/resource.script.hh>
 #include    <scheduler/kernel/product.hh>
 
 namespace BugEngine

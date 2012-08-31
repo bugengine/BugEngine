@@ -10,8 +10,8 @@
 namespace BugEngine { namespace OpenGL
 {
 
-GLSurface::GLSurface(weak<const RenderSurface> resource, weak<GLRenderer> renderer)
-    :   IRenderTarget(resource, renderer)
+GLSurface::GLSurface(weak<const RenderSurface> surfaceDescription, weak<GLRenderer> renderer)
+    :   IRenderTarget(surfaceDescription, renderer)
 {
 }
 
@@ -19,7 +19,7 @@ GLSurface::~GLSurface()
 {
 }
 
-void GLSurface::load(weak<const Resource> /*resource*/)
+void GLSurface::load(weak<const Resource::Description> /*surfaceDescription*/)
 {
 }
 
