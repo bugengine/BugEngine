@@ -18,17 +18,15 @@ CPUKernelLoader::~CPUKernelLoader()
 {
 }
 
-ResourceHandle CPUKernelLoader::load(weak<const Resource> resource)
+void CPUKernelLoader::load(weak<const Resource::Description> kernelDescription, Resource::Resource& resource)
 {
-    be_info("loading CPU kernel %s"|be_checked_cast<const Kernel::Kernel>(resource)->name());
-    ResourceHandle handle;
-    handle.handle = ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel::Kernel>(resource)->name());
-    return handle;
+    be_info("loading CPU kernel %s"|be_checked_cast<const Kernel::Kernel>(kernelDescription)->name());
+    resource.setRefHandle(ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel::Kernel>(kernelDescription)->name()));
 }
 
-void CPUKernelLoader::unload(const ResourceHandle& resource)
+void CPUKernelLoader::unload(Resource::Resource& resource)
 {
-    be_forceuse(resource);
+    resource.clearRefHandle();
 }
 
 }

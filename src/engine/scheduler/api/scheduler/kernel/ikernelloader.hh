@@ -4,12 +4,12 @@
 #ifndef BE_SCHEDULER_KERNEL_IKERNELLOADER_HH_
 #define BE_SCHEDULER_KERNEL_IKERNELLOADER_HH_
 /*****************************************************************************/
-#include    <resource/resourceloader.hh>
+#include    <resource/loader.hh>
 
 namespace BugEngine { namespace Kernel
 {
 
-class be_api(SCHEDULER) IKernelLoader : public IResourceLoader
+class be_api(SCHEDULER) IKernelLoader : public Resource::ILoader
 {
     BE_NOCOPY(IKernelLoader);
 protected:

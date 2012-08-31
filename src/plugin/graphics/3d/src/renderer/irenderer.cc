@@ -15,7 +15,7 @@
 namespace BugEngine
 {
 
-IRenderer::IRenderer(minitl::Allocator& allocator, weak<ResourceManager> manager, Scheduler::Affinity affinity)
+IRenderer::IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity)
     :   m_allocator(allocator)
     ,   m_resourceManager(manager)
     ,   m_syncTask(ref< Task::Task< Task::MethodCaller<IRenderer, &IRenderer::flush> > >::create(Arena::task(), "flush", Colors::Red::Red,  Task::MethodCaller<IRenderer, &IRenderer::flush>(this), Scheduler::High, affinity))
@@ -61,19 +61,19 @@ void IRenderer::flush()
     m_shaderProgramLoader->flush();
 }
 
-weak<IGPUResource> IRenderer::getRenderSurface(weak<const Resource> resource) const
+weak<IGPUResource> IRenderer::getRenderSurface(weak<const Resource::Description> description) const
 {
-    return be_checked_cast<IGPUResource>(resource->getResourceHandle(m_renderSurfaceLoader).handle);
+    return description->getResource(m_renderSurfaceLoader).getRefHandle<IGPUResource>();
 }
 
-weak<IGPUResource> IRenderer::getRenderWindow(weak<const Resource> resource) const
+weak<IGPUResource> IRenderer::getRenderWindow(weak<const Resource::Description> description) const
 {
-    return be_checked_cast<IGPUResource>(resource->getResourceHandle(m_renderWindowLoader).handle);
+    return description->getResource(m_renderWindowLoader).getRefHandle<IGPUResource>();
 }
 
-weak<IGPUResource> IRenderer::getShaderProgram(weak<const Resource> resource) const
+weak<IGPUResource> IRenderer::getShaderProgram(weak<const Resource::Description> description) const
 {
-    return be_checked_cast<IGPUResource>(resource->getResourceHandle(m_shaderProgramLoader).handle);
+    return description->getResource(m_shaderProgramLoader).getRefHandle<IGPUResource>();
 }
 
 }

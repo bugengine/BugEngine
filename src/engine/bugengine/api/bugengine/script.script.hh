@@ -5,14 +5,14 @@
 #define BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 /*****************************************************************************/
 #include    <filesystem/file.script.hh>
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 
 namespace BugEngine
 {
 
 template< typename T >
 class ScriptEngine;
-class BE_EXPORT Script : public Resource
+class BE_EXPORT Script : public Resource::Description
 {
     template< typename T >
     friend class ScriptEngine;

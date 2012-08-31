@@ -23,7 +23,7 @@ public:
     Context(const PluginContext& context);
     ~Context();
 private:
-    void runBuffer(weak<const LuaScript> resource, const minitl::Allocator::Block<u8>& buffer) override;
+    void runBuffer(weak<const LuaScript> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 

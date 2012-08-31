@@ -4,7 +4,7 @@
 #ifndef BE_3D_SHADER_SHADER_SCRIPT_HH_
 #define BE_3D_SHADER_SHADER_SCRIPT_HH_
 /*****************************************************************************/
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 
 namespace BugEngine { namespace Shaders
 {
@@ -22,7 +22,7 @@ enum Stage
 
 }
 
-class be_api(_3D) ShaderProgram : public Resource
+class be_api(_3D) ShaderProgram : public Resource::Description
 {
     BE_NOCOPY(ShaderProgram);
 protected:

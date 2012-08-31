@@ -4,12 +4,12 @@
 #include    <3d/stdafx.h>
 #include    <3d/renderer/irenderer.hh>
 #include    <3d/renderer/igpuresource.hh>
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 
 namespace BugEngine
 {
 
-IGPUResource::IGPUResource(weak<const Resource> owner, weak<const IRenderer> renderer)
+IGPUResource::IGPUResource(weak<const Resource::Description> owner, weak<const IRenderer> renderer)
     :   m_renderer(renderer)
     ,   m_resource(owner)
     ,   m_index(-1)

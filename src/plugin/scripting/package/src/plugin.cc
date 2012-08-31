@@ -5,5 +5,5 @@
 #include    <packageloader.hh>
 #include    <plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::IResourceLoader, BugEngine::PackageManager::PackageLoader);
+BE_PLUGIN_REGISTER(BugEngine::Resource::ILoader, BugEngine::PackageManager::PackageLoader);
 BE_REGISTER_NAMESPACE_2(BugEngine, PackageManager);

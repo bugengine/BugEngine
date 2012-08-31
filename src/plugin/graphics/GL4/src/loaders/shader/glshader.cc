@@ -11,8 +11,8 @@
 namespace BugEngine { namespace OpenGL
 {
 
-GLShaderProgram::GLShaderProgram(weak<const Resource> resource, weak<const GLRenderer> renderer)
-    :   IGPUResource(resource, renderer)
+GLShaderProgram::GLShaderProgram(weak<const Resource::Description> shaderDescription, weak<const GLRenderer> renderer)
+    :   IGPUResource(shaderDescription, renderer)
     ,   m_shaderProgram(0)
 {
 }
@@ -83,9 +83,9 @@ GLhandleARB GLShaderProgram::build(weak<const ShaderProgram> program, Shaders::S
     return shader;
 }
 
-void GLShaderProgram::load(weak<const Resource> resource)
+void GLShaderProgram::load(weak<const Resource::Description> shaderDescription)
 {
-    weak<const ShaderProgram> program = be_checked_cast<const ShaderProgram>(resource);
+    weak<const ShaderProgram> program = be_checked_cast<const ShaderProgram>(shaderDescription);
     be_assert(m_shaderProgram == 0, "shader program loaded twice?");
 
     const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();

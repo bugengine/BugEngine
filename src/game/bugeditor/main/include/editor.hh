@@ -23,8 +23,8 @@ class Editor : public Application
 {
 private:
     Plugin<void>                const   m_renderer;
-    Plugin<IResourceLoader>     const   m_packageManager;
-    Plugin<IResourceLoader>     const   m_luaScripting;
+    Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin<Resource::ILoader>   const   m_luaScripting;
     ref<const Package>          const   m_mainPackage;
 public:
     Editor(const PluginContext& context);

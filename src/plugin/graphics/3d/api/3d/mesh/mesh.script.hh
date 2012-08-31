@@ -4,12 +4,12 @@
 #ifndef BE_3D_MESH_MESH_SCRIPT_HH_
 #define BE_3D_MESH_MESH_SCRIPT_HH_
 /*****************************************************************************/
-#include    <resource/resource.script.hh>
+#include    <resource/description.script.hh>
 
 namespace BugEngine
 {
 
-class be_api(_3D) Mesh : public Resource
+class be_api(_3D) Mesh : public Resource::Description
 {
 public:
     Mesh();

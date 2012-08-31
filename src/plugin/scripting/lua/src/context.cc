@@ -334,7 +334,7 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::runBuffer(weak<const LuaScript> /*script*/, const minitl::Allocator::Block<u8>& block)
+void Context::runBuffer(weak<const LuaScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
 {
     int result;
     result = luaL_loadbuffer(m_state, (const char *) block.data(), be_checked_numcast<size_t > (block.count()), 0);

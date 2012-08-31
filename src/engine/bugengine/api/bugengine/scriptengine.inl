@@ -12,8 +12,8 @@ namespace BugEngine
 {
 
 template< typename T >
-ScriptEngine<T>::ScriptEngine(minitl::Allocator& arena, weak<ResourceManager> manager)
-    :   IResourceLoader()
+ScriptEngine<T>::ScriptEngine(minitl::Allocator& arena, weak<Resource::ResourceManager> manager)
+    :   ILoader()
     ,   m_scriptArena(arena)
     ,   m_manager(manager)
 {
@@ -27,31 +27,27 @@ ScriptEngine<T>::~ScriptEngine()
 }
 
 template< typename T >
-ResourceHandle ScriptEngine<T>::load(weak<const Resource> resource)
+void ScriptEngine<T>::load(weak<const Resource::Description> script, Resource::Resource& /*resource*/)
 {
-    be_assert(be_checked_cast<const Script>(resource)->m_file, "can't open script: file not found");
-    m_manager->addTicket(this, resource, be_checked_cast<const Script>(resource)->m_file);
-    return ResourceHandle();
+    be_assert(be_checked_cast<const Script>(script)->m_file, "can't open script: file not found");
+    m_manager->addTicket(this, script, be_checked_cast<const Script>(script)->m_file);
 }
 
 template< typename T >
-void ScriptEngine<T>::unload(const ResourceHandle& handle)
+void ScriptEngine<T>::unload(Resource::Resource& resource)
 {
-    if (handle.handle)
-    {
-        unloadScript(handle);
-    }
+    unloadScript(resource);
 }
 
 template< typename T >
-void ScriptEngine<T>::unloadScript(const ResourceHandle& /*handle*/)
+void ScriptEngine<T>::unloadScript(Resource::Resource& /*resource*/)
 {
 }
 
 template< typename T >
-void ScriptEngine<T>::onTicketLoaded(weak<const Resource> resource, const minitl::Allocator::Block<u8>& buffer)
+void ScriptEngine<T>::onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer)
 {
-    runBuffer(be_checked_cast<const T>(resource), buffer);
+    runBuffer(be_checked_cast<const T>(script), resource, buffer);
 }
 
 }

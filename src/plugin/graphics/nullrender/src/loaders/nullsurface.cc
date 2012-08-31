@@ -18,8 +18,8 @@ void NullSurface::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullSurface::NullSurface(weak<const RenderSurface> resource, weak<const NullRenderer> renderer)
-:   IRenderTarget(resource, renderer)
+NullSurface::NullSurface(weak<const RenderSurface> surfaceDescription, weak<const NullRenderer> renderer)
+:   IRenderTarget(surfaceDescription, renderer)
 {
 }
 
@@ -31,7 +31,7 @@ void NullSurface::present() const
 {
 }
 
-void NullSurface::load(weak<const Resource> /*resource*/)
+void NullSurface::load(weak<const Resource::Description> /*surfaceDescription*/)
 {
 }
 

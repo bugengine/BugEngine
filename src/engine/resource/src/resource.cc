@@ -2,71 +2,54 @@
    see LICENSE for detail */
 
 #include    <resource/stdafx.h>
-#include    <resource/resource.script.hh>
-#include    <resource/resourceloader.hh>
+#include    <resource/resource.hh>
 
-namespace BugEngine
+BE_REGISTER_NAMESPACE_2_(game, BugEngine, Resource);
+
+namespace BugEngine { namespace Resource
 {
 
+static const Handle s_nullHandle = { 0, {0} };
 Resource::Resource()
+    :   m_handle(s_nullHandle)
 {
 }
 
 Resource::~Resource()
 {
+    be_assert(m_handle.id.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
 }
 
-const ResourceHandle& Resource::getResourceHandle(weak<const IResourceLoader> owner) const
+Resource& Resource::null()
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
-    {
-        if (m_handles[i].first == owner)
-        {
-            return m_handles[i].second;
-        }
-    }
-    return ResourceHandle::null();
+    static Resource s_nullResource;
+    return s_nullResource;
 }
 
-void Resource::load(weak<IResourceLoader> loader) const
+void Resource::setRefHandle(ref<minitl::refcountable> handle)
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    be_assert(m_handle.id.ptrId == 0, "setRefHandle called but handle already has a value; use clearRefHandle before calling setRefHandle");
+    minitl::refcountable* object = handle.operator->();
+    if (object)
     {
-        if (!m_handles[i].first)
-        {
-            m_handles[i].first = loader;
-            m_handles[i].second = loader->load(this);
-            return;
-        }
+        object->addref();
+        m_handle.id.ptrId = object;
     }
-    be_notreached();
 }
 
-void Resource::unload(weak<const IResourceLoader> loader) const
+void Resource::clearRefHandle()
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    minitl::refcountable* object = (minitl::refcountable*)m_handle.id.ptrId;
+    if (object)
     {
-        if (m_handles[i].first == loader)
-        {
-            m_handles[i].first->unload(m_handles[i].second);
-            m_handles[i].first = weak<IResourceLoader>();
-            m_handles[i].second = ResourceHandle();
-            return;
-        }
+        object->decref();
+        m_handle.id.ptrId = 0;
     }
-    be_notreached();
 }
 
-ResourceHandle& Resource::getResourceHandleForWriting(weak<const IResourceLoader> owner) const
+minitl::refcountable* Resource::getRefHandleInternal() const
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
-    {
-        if (m_handles[i].first == owner)
-        {
-            return m_handles[i].second;
-        }
-    }
-    return ResourceHandle::null();
+    return (minitl::refcountable*)m_handle.id.ptrId;
 }
 
-}
+}}

@@ -15,8 +15,8 @@ class CPUKernelLoader;
 class CPUKernelScheduler : public Kernel::IKernelScheduler
 {
 private:
-    weak<ResourceManager>   m_resourceManager;
-    scoped<CPUKernelLoader> m_loader;
+    weak<Resource::ResourceManager> m_resourceManager;
+    scoped<CPUKernelLoader>         m_loader;
 public:
     CPUKernelScheduler(const PluginContext& context);
     ~CPUKernelScheduler();

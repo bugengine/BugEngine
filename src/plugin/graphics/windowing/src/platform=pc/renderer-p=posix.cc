@@ -122,7 +122,7 @@ int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* even
 
 
 
-Renderer::Renderer(minitl::Allocator& arena, weak<ResourceManager> manager)
+Renderer::Renderer(minitl::Allocator& arena, weak<Resource::ResourceManager> manager)
     :   IRenderer(arena, manager, Scheduler::MainThread)
     ,   m_platformRenderer(scoped<PlatformRenderer>::create(arena))
 {

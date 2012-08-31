@@ -6,5 +6,5 @@
 #include    <context.h>
 #include    <plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::IResourceLoader, BugEngine::Lua::Context);
+BE_PLUGIN_REGISTER(BugEngine::Resource::ILoader, BugEngine::Lua::Context);
 BE_REGISTER_NAMESPACE_2(BugEngine, Lua);

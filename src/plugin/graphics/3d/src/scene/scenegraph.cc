@@ -60,9 +60,9 @@ ref<INode> RenderSequence::createNode(weak<const SceneGraphLoader> loader, weak<
     minitl::vector< weak<INode> > nodes(Arena::stack());
     for (minitl::array< ref<const RenderNode> >::const_iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
     {
-        weak<minitl::pointer> childhandle = (*it)->getResourceHandle(loader).handle;
+        weak<INode> childhandle = (*it)->getResource(loader).getRefHandle<INode>();
         be_assert(childhandle, "dependent node was not loaded properly");
-        if (childhandle) nodes.push_back(be_checked_cast<INode>(childhandle));
+        if (childhandle) nodes.push_back(childhandle);
     }
 
     return ref<MultiNode>::create(Arena::resource(), nodes);

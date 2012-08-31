@@ -23,10 +23,10 @@ private:
     GLhandleARB build(weak<const ShaderProgram> program, Shaders::Stage stage) const;
     void attach();
 public:
-    GLShaderProgram(weak<const Resource> resource, weak<const GLRenderer> renderer);
+    GLShaderProgram(weak<const Resource::Description> shaderDescription, weak<const GLRenderer> renderer);
     ~GLShaderProgram();
 
-    virtual void load(weak<const Resource> resource) override;
+    virtual void load(weak<const Resource::Description> shaderDescription) override;
     virtual void unload() override;
 };
 

@@ -82,7 +82,7 @@ int beMain(int argc, const char *argv[])
         BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::Arena::debug()));
         BugEngine::Plugin<minitl::pointer> platformAssert(
                 BugEngine::inamespace("debug.assert"),
-                BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
+                BugEngine::PluginContext(weak<BugEngine::Resource::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
         ref<BugEngine::DiskFolder>::create(
                 BugEngine::Arena::general(),
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
@@ -98,7 +98,7 @@ int beMain(int argc, const char *argv[])
         scoped<BugEngine::Scheduler> scheduler = scoped<BugEngine::Scheduler>::create(BugEngine::Arena::task());
         BugEngine::Plugin<BugEngine::Application> app(
                 BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),
-                BugEngine::PluginContext(weak<BugEngine::ResourceManager>(), home, scheduler));
+                BugEngine::PluginContext(weak<BugEngine::Resource::ResourceManager>(), home, scheduler));
         return app->run();
     }
 #if BE_ENABLE_EXCEPTIONS

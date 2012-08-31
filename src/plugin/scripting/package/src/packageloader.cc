@@ -32,19 +32,19 @@ PackageLoader::~PackageLoader()
 {
 }
 
-void PackageLoader::runBuffer(weak<const Package> script, const minitl::Allocator::Block<u8>& buffer)
+void PackageLoader::runBuffer(weak<const Package> /*script*/, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer)
 {
     MD5 md5 = digest(buffer);
     be_info("md5 sum of package: %s" | md5);
     ref<PackageBuilder::Nodes::Package> package = m_packageBuilder->createPackage(buffer);
-    script->getResourceHandleForWriting(this).handle = package;
+    resource.setRefHandle(package);
     package->createObjects(m_manager);
 }
 
-void PackageLoader::unloadScript(const ResourceHandle& handle)
+void PackageLoader::unloadScript(Resource::Resource& resource)
 {
-    ref<PackageBuilder::Nodes::Package> package = be_checked_cast<PackageBuilder::Nodes::Package>(handle.handle);
-    package->deleteObjects(m_manager);
+    resource.getRefHandle<PackageBuilder::Nodes::Package>()->deleteObjects(m_manager);
+    resource.clearRefHandle();
 }
 
 }}

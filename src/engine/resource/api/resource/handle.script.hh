@@ -1,22 +1,28 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_3D_TEXTURE_TEXTURE_SCRIPT_HH_
-#define BE_3D_TEXTURE_TEXTURE_SCRIPT_HH_
+#ifndef BE_RESOURCE_HANDLE_HH_
+#define BE_RESOURCE_HANDLE_HH_
 /*****************************************************************************/
-#include    <resource/description.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Resource
 {
 
-class be_api(_3D) Texture : public Resource::Description
+class ILoader;
+
+struct be_api(RESOURCE) Handle
 {
-public:
-    Texture();
-    ~Texture();
+    union Id
+    {
+        void*   ptrId;
+        u32     intId;
+    };
+    u32 owner;
+    Id  id;
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif
+

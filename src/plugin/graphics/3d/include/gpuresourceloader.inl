@@ -23,26 +23,32 @@ GPUResourceLoader<R>::~GPUResourceLoader()
 }
 
 template< typename R >
-ResourceHandle GPUResourceLoader<R>::load(weak<const Resource> resource)
+void GPUResourceLoader<R>::load(weak<const Resource::Description> description, Resource::Resource& resource)
 {
-    ResourceHandle r;
-    ref<IGPUResource> handle = m_renderer->create(be_checked_cast<const R>(resource));
-    r.handle = handle;
+    ref<IGPUResource> handle = m_renderer->create(be_checked_cast<const R>(description));
+    resource.setRefHandle(handle);
     m_pending.push_back(*handle.operator->());
-    return r;
 }
 
 template< typename R >
-void GPUResourceLoader<R>::unload(const ResourceHandle& handle)
+void GPUResourceLoader<R>::unload(Resource::Resource& resource)
 {
-    be_checked_cast<IGPUResource>(handle.handle)->m_resource.clear();
-    m_deleted.push_back(be_checked_cast<IGPUResource>(handle.handle));
+    weak<IGPUResource> gpuResource = resource.getRefHandle<IGPUResource>();
+    gpuResource->m_resource.clear();
+    gpuResource->addref();
+    m_deleted.push_back(gpuResource);
+    resource.clearRefHandle();
 }
 
 template< typename R >
 void GPUResourceLoader<R>::flush()
 {
-    m_deleted.clear();
+    while (!m_deleted.empty())
+    {
+        IGPUResource* resource = m_deleted.back().operator->();
+        m_deleted.pop_back();
+        resource->decref();
+    }
     for (minitl::intrusive_list<IGPUResource>::iterator it = m_pending.begin(); it != m_pending.end(); )
     {
         IGPUResource& resource = *it;
