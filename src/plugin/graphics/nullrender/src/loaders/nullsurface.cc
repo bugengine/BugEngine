@@ -18,7 +18,7 @@ void NullSurface::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullSurface::NullSurface(weak<const RenderSurface> surfaceDescription, weak<const NullRenderer> renderer)
+NullSurface::NullSurface(weak<const RenderSurfaceDescription> surfaceDescription, weak<const NullRenderer> renderer)
 :   IRenderTarget(surfaceDescription, renderer)
 {
 }

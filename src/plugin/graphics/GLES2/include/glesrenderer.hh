@@ -25,9 +25,9 @@ public:
 private:
     void                    attachWindow(weak<GLESWindow> w) const;
 private:
-    ref<IGPUResource>       create(weak<const RenderSurface> rendersurface) const override;
-    ref<IGPUResource>       create(weak<const RenderWindow> renderwindow) const override;
-    ref<IGPUResource>       create(weak<const ShaderProgram> shader) const override;
+    ref<IGPUResource>       create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const override;
+    ref<IGPUResource>       create(weak<const RenderWindowDescription> renderWindowDescription) const override;
+    ref<IGPUResource>       create(weak<const ShaderProgramDescription> shaderDescription) const override;
     uint2                   getScreenSize() const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

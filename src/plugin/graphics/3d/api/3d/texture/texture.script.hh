@@ -9,11 +9,11 @@
 namespace BugEngine
 {
 
-class be_api(_3D) Texture : public Resource::Description
+class be_api(_3D) TextureDescription : public Resource::Description
 {
 public:
-    Texture();
-    ~Texture();
+    TextureDescription();
+    ~TextureDescription();
 };
 
 }

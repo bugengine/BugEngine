@@ -22,12 +22,12 @@ enum Stage
 
 }
 
-class be_api(_3D) ShaderProgram : public Resource::Description
+class be_api(_3D) ShaderProgramDescription : public Resource::Description
 {
-    BE_NOCOPY(ShaderProgram);
+    BE_NOCOPY(ShaderProgramDescription);
 protected:
-    ShaderProgram();
-    ~ShaderProgram();
+    ShaderProgramDescription();
+    ~ShaderProgramDescription();
 public:
     virtual void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const;
 };

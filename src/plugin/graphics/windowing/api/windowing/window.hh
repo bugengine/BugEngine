@@ -21,10 +21,10 @@ private:
 protected:
     void* getWindowHandle() const;
 public:
-    Window(weak<const RenderWindow> description, weak<const Renderer> renderer);
+    Window(weak<const RenderWindowDescription> renderWindowDescription, weak<const Renderer> renderer);
     ~Window();
 
-    void load(weak<const Resource::Description> resource) override;
+    void load(weak<const Resource::Description> renderWindowDescription) override;
     void unload() override;
 
     uint2 getDimensions() const;

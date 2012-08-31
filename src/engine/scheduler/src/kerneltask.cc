@@ -8,7 +8,7 @@
 namespace BugEngine { namespace Task
 {
 
-KernelTask::KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::Kernel> kernel)
+KernelTask::KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::KernelDescription> kernel)
 :   ITask(name, color, priority, Scheduler::DontCare)
 ,   m_kernel(kernel)
 {

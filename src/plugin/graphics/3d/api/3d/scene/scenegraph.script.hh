@@ -16,7 +16,7 @@ namespace World
 class World;
 }
 
-class RenderTarget;
+class RenderTargetDescription;
 class SceneGraphLoader;
 class INode;
 class IRenderer;
@@ -36,10 +36,10 @@ class be_api(_3D) RenderScene : public RenderNode
 {
     BE_NOCOPY(RenderScene);
 private:
-    ref<RenderTarget>       m_renderTarget;
-    ref<const World::World> m_world;
+    ref<RenderTargetDescription>    m_renderTarget;
+    ref<const World::World>         m_world;
 published:
-    RenderScene(ref<RenderTarget> rendertarget, ref<const World::World> world);
+    RenderScene(ref<RenderTargetDescription> renderTarget, ref<const World::World> world);
     ~RenderScene();
 private:
     virtual ref<INode> createNode(weak<const SceneGraphLoader> loader, weak<const IRenderer> renderer) const override;

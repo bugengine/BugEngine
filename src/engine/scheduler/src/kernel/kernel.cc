@@ -9,7 +9,7 @@ BE_REGISTER_NAMESPACE_2_(game, BugEngine, Kernel);
 namespace BugEngine { namespace Kernel
 {
 
-Kernel::Kernel(const inamespace& name)
+KernelDescription::KernelDescription(const inamespace& name)
     :   Description()
     ,   m_name(name)
 {

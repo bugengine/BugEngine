@@ -49,7 +49,7 @@ static GLenum toGLShaderStage(Shaders::Stage stage)
     }
 }
 
-GLhandleARB GLShaderProgram::build(weak<const ShaderProgram> program, Shaders::Stage stage) const
+GLhandleARB GLShaderProgram::build(weak<const ShaderProgramDescription> program, Shaders::Stage stage) const
 {
     GLenum shaderType = toGLShaderStage(stage);
     GLShaderBuilder builder(shaderType);
@@ -85,7 +85,7 @@ GLhandleARB GLShaderProgram::build(weak<const ShaderProgram> program, Shaders::S
 
 void GLShaderProgram::load(weak<const Resource::Description> shaderDescription)
 {
-    weak<const ShaderProgram> program = be_checked_cast<const ShaderProgram>(shaderDescription);
+    weak<const ShaderProgramDescription> program = be_checked_cast<const ShaderProgramDescription>(shaderDescription);
     be_assert(m_shaderProgram == 0, "shader program loaded twice?");
 
     const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();

@@ -16,12 +16,12 @@ CPUKernelScheduler::CPUKernelScheduler(const PluginContext& context)
     ,   m_resourceManager(context.resourceManager)
     ,   m_loader(scoped<CPUKernelLoader>::create(Arena::task()))
 {
-    m_resourceManager->attach<Kernel::Kernel>(m_loader);
+    m_resourceManager->attach<Kernel::KernelDescription>(m_loader);
 }
 
 CPUKernelScheduler::~CPUKernelScheduler()
 {
-    m_resourceManager->detach<Kernel::Kernel>(m_loader);
+    m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
 }
 
 }

@@ -23,9 +23,9 @@ public:
     void                flush() override;
     uint2               getScreenSize() const override { return make_uint2(1920,1080); }
 private:
-    ref<IGPUResource>   create(weak<const RenderSurface> rendersurface) const override;
-    ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;
-    ref<IGPUResource>   create(weak<const ShaderProgram> shader) const override;
+    ref<IGPUResource>   create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const override;
+    ref<IGPUResource>   create(weak<const RenderWindowDescription> renderWindowDescription) const override;
+    ref<IGPUResource>   create(weak<const ShaderProgramDescription> shaderDescription) const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

@@ -16,7 +16,7 @@ class NullRenderer;
 class NullSurface : public IRenderTarget
 {
 public:
-    NullSurface(weak<const RenderSurface> resource, weak<const NullRenderer> renderer);
+    NullSurface(weak<const RenderSurfaceDescription> resource, weak<const NullRenderer> renderer);
     ~NullSurface();
 
 private:

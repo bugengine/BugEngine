@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-class KernelSampleTask : public Kernel::Kernel
+class KernelSampleTask : public Kernel::KernelDescription
 {
 private:
     scoped< BugEngine::Task::ITask > const  m_kernelTask;

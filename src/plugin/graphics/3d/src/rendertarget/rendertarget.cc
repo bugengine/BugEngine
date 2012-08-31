@@ -7,29 +7,29 @@
 namespace BugEngine
 {
 
-RenderTarget::RenderTarget()
+RenderTargetDescription::RenderTargetDescription()
 {
 }
 
-RenderTarget::~RenderTarget()
+RenderTargetDescription::~RenderTargetDescription()
 {
 }
 
-RenderSurface::RenderSurface(u16 width, u16 height)
+RenderSurfaceDescription::RenderSurfaceDescription(u16 width, u16 height)
     :   dimensions(make_uint2(width, height))
 {
 }
 
-RenderSurface::~RenderSurface()
+RenderSurfaceDescription::~RenderSurfaceDescription()
 {
 }
 
-RenderWindow::RenderWindow(istring title)
+RenderWindowDescription::RenderWindowDescription(istring title)
     :   title(title)
 {
 }
 
-RenderWindow::~RenderWindow()
+RenderWindowDescription::~RenderWindowDescription()
 {
 }
 
