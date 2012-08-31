@@ -9,12 +9,12 @@
 namespace BugEngine { namespace Kernel
 {
 
-class be_api(SCHEDULER) Kernel : public Resource::Description
+class be_api(SCHEDULER) KernelDescription : public Resource::Description
 {
 private:
     inamespace const    m_name;
 public:
-    Kernel(const inamespace& name);
+    KernelDescription(const inamespace& name);
     const inamespace& name() const { return m_name; }
 };
 

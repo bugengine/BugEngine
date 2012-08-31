@@ -9,33 +9,33 @@
 namespace BugEngine
 {
 
-class be_api(_3D) RenderTarget : public Resource::Description
+class be_api(_3D) RenderTargetDescription : public Resource::Description
 {
-    BE_NOCOPY(RenderTarget);
+    BE_NOCOPY(RenderTargetDescription);
 protected:
-    RenderTarget();
+    RenderTargetDescription();
 public:
-    ~RenderTarget();
+    ~RenderTargetDescription();
 };
 
-class be_api(_3D) RenderSurface : public RenderTarget
+class be_api(_3D) RenderSurfaceDescription : public RenderTargetDescription
 {
-    BE_NOCOPY(RenderSurface);
+    BE_NOCOPY(RenderSurfaceDescription);
 published:
     const uint2 dimensions;
 published:
-    RenderSurface(u16 width, u16 height);
-    ~RenderSurface();
+    RenderSurfaceDescription(u16 width, u16 height);
+    ~RenderSurfaceDescription();
 };
 
-class be_api(_3D) RenderWindow : public RenderTarget
+class be_api(_3D) RenderWindowDescription : public RenderTargetDescription
 {
-    BE_NOCOPY(RenderWindow);
+    BE_NOCOPY(RenderWindowDescription);
 published:
     const istring title;
 published:
-    RenderWindow(istring title);
-    ~RenderWindow();
+    RenderWindowDescription(istring title);
+    ~RenderWindowDescription();
 };
 
 }

@@ -8,18 +8,17 @@
 namespace BugEngine
 {
 
-ShaderProgram::ShaderProgram()
+ShaderProgramDescription::ShaderProgramDescription()
 {
 }
 
-ShaderProgram::~ShaderProgram()
+ShaderProgramDescription::~ShaderProgramDescription()
 {
 }
 
-void ShaderProgram::buildSource(Shaders::IShaderBuilder& /*builder*/, Shaders::Stage /*stage*/) const
+void ShaderProgramDescription::buildSource(Shaders::IShaderBuilder& /*builder*/, Shaders::Stage /*stage*/) const
 {
-/*
-    if (color) color->buildDeclarations(builder, Shaders::FragmentStage, stage);
+/*    if (color) color->buildDeclarations(builder, Shaders::FragmentStage, stage);
     if (depth) depth->buildDeclarations(builder, Shaders::FragmentStage, stage);
     if (position) position->buildDeclarations(builder, Shaders::VertexStage, stage);
 

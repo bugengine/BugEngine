@@ -17,7 +17,7 @@ private:
     void setCurrent() const;
     void clearCurrent() const;
 public:
-    GLSurface(weak<const RenderSurface> surfaceDescription, weak<GLRenderer> renderer);
+    GLSurface(weak<const RenderSurfaceDescription> surfaceDescription, weak<GLRenderer> renderer);
     ~GLSurface();
 
     virtual void load(weak<const Resource::Description> surfaceDescription) override;

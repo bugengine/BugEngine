@@ -18,15 +18,15 @@ class ITask;
 
 namespace Kernel
 {
-class Kernel;
+class KernelDescription;
 }
 
 class SceneGraphLoader;
-class RenderSurface;
-class RenderWindow;
-class Mesh;
-class ShaderProgram;
-class Texture;
+class RenderSurfaceDescription;
+class RenderWindowDescription;
+class MeshDescription;
+class ShaderProgramDescription;
+class TextureDescription;
 class IGPUResource;
 template< typename R >
 class GPUResourceLoader;
@@ -36,25 +36,25 @@ class be_api(_3D) IRenderer : public minitl::pointer
     template< typename R >
     friend class GPUResourceLoader;
 protected:
-    minitl::Allocator&                          m_allocator;
-    weak<Resource::ResourceManager>             m_resourceManager;
-    ref<Task::ITask>                            m_syncTask;
-    scoped<SceneGraphLoader>                    m_sceneLoader;
-    scoped< GPUResourceLoader<RenderSurface> >  m_renderSurfaceLoader;
-    scoped< GPUResourceLoader<RenderWindow> >   m_renderWindowLoader;
-    scoped< GPUResourceLoader<ShaderProgram> >  m_shaderProgramLoader;
-    scoped<Kernel::Kernel>                      m_kernelSort;
-    scoped<Kernel::Kernel>                      m_kernelRender;
+    minitl::Allocator&                                      m_allocator;
+    weak<Resource::ResourceManager>                         m_resourceManager;
+    ref<Task::ITask>                                        m_syncTask;
+    scoped<SceneGraphLoader>                                m_sceneLoader;
+    scoped< GPUResourceLoader<RenderSurfaceDescription> >   m_renderSurfaceLoader;
+    scoped< GPUResourceLoader<RenderWindowDescription> >    m_renderWindowLoader;
+    scoped< GPUResourceLoader<ShaderProgramDescription> >   m_shaderProgramLoader;
+    scoped<Kernel::KernelDescription>                       m_kernelSort;
+    scoped<Kernel::KernelDescription>                       m_kernelRender;
 protected:
     IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();
 protected:
     virtual void flush();
 
-    virtual ref<IGPUResource> create(weak<const RenderSurface> rendertarget) const = 0;
-    virtual ref<IGPUResource> create(weak<const RenderWindow> renderwindow) const = 0;
+    virtual ref<IGPUResource> create(weak<const RenderSurfaceDescription> rendertarget) const = 0;
+    virtual ref<IGPUResource> create(weak<const RenderWindowDescription> renderwindow) const = 0;
     //virtual ref<IGPUResource>   create(weak<const Mesh> mesh) const = 0;
-    virtual ref<IGPUResource> create(weak<const ShaderProgram> shader) const = 0;
+    virtual ref<IGPUResource> create(weak<const ShaderProgramDescription> shader) const = 0;
     //virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
     weak<IGPUResource> getRenderSurface(weak<const Resource::Description> description) const;

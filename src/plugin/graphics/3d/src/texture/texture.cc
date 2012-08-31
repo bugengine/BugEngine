@@ -7,11 +7,11 @@
 namespace BugEngine
 {
 
-Texture::Texture()
+TextureDescription::TextureDescription()
 {
 }
 
-Texture::~Texture()
+TextureDescription::~TextureDescription()
 {
 }
 

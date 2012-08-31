@@ -8,7 +8,7 @@
 
 namespace BugEngine { namespace Kernel
 {
-class Kernel;
+class KernelDescription;
 }}
 
 namespace BugEngine { namespace Task
@@ -18,9 +18,9 @@ class be_api(SCHEDULER) KernelTask : public ITask
 {
     BE_NOCOPY(KernelTask);
 private:
-    weak<const BugEngine::Kernel::Kernel> const m_kernel;
+    weak<const BugEngine::Kernel::KernelDescription> const m_kernel;
 public:
-    KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::Kernel> kernel);
+    KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::KernelDescription> kernel);
     ~KernelTask();
 
     virtual void schedule(weak<Scheduler> scheduler) const override;

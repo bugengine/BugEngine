@@ -37,8 +37,8 @@ Window::PlatformWindow::~PlatformWindow()
 
 
 
-Window::Window(weak<const RenderWindow> resource, weak<const Renderer> renderer)
-:   IRenderTarget(resource, renderer)
+Window::Window(weak<const RenderWindowDescription> renderWindowDescription, weak<const Renderer> renderer)
+:   IRenderTarget(renderWindowDescription, renderer)
 ,   m_window()
 {
 }
@@ -47,7 +47,7 @@ Window::~Window()
 {
 }
 
-void Window::load(weak<const Resource::Description> /*description*/)
+void Window::load(weak<const Resource::Description> /*renderWindowDescription*/)
 {
     m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(),
                                               be_checked_cast<const Renderer>(m_renderer)->m_platformRenderer->m_platformData.display,

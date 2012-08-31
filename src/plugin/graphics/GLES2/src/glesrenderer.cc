@@ -23,17 +23,17 @@ void GLESRenderer::flush()
     IRenderer::flush();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const RenderSurface> /*rendersurface*/) const
+ref<IGPUResource> GLESRenderer::create(weak<const RenderSurfaceDescription> /*renderSurfaceDescription*/) const
 {
     return ref<IGPUResource>();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const RenderWindow> /*renderwindow*/) const
+ref<IGPUResource> GLESRenderer::create(weak<const RenderWindowDescription> /*renderWindowDescription*/) const
 {
     return ref<IGPUResource>();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const ShaderProgram> /*shader*/) const
+ref<IGPUResource> GLESRenderer::create(weak<const ShaderProgramDescription> /*shaderDescription*/) const
 {
     return ref<IGPUResource>();
 }

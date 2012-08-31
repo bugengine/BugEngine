@@ -119,7 +119,7 @@ OpenCLKernelScheduler::OpenCLKernelScheduler(const PluginContext& context, const
 {
     if (m_context)
     {
-        m_resourceManager->attach<Kernel::Kernel>(m_loader);
+        m_resourceManager->attach<Kernel::KernelDescription>(m_loader);
     }
 }
 
@@ -127,7 +127,7 @@ OpenCLKernelScheduler::~OpenCLKernelScheduler()
 {
     if (m_context)
     {
-        m_resourceManager->detach<Kernel::Kernel>(m_loader);
+        m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
         clReleaseContext(m_context);
     }
 }
