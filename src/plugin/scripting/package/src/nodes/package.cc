@@ -61,7 +61,7 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
 {
     if (name.size() == 1)
     {
-        bool inserted = m_values.insert(std::make_pair(name[0], value)).second;
+        bool inserted = m_values.insert(name[0], value).second;
         if (!inserted)
         {
             be_notreached();
@@ -69,12 +69,12 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
     }
     else
     {
-        minitl::hashmap< istring, RTTI::Value >::const_iterator it = m_values.find(name[0]);
+        minitl::hashmap< istring, RTTI::Value >::iterator it = m_values.find(name[0]);
         if (it != m_values.end())
         {
             be_notreached();
         }
-        std::pair< minitl::hashmap< istring, ref<Namespace> >::iterator, bool > result = m_children.insert(std::make_pair(name[0], ref<Namespace>()));
+        minitl::pair< minitl::hashmap< istring, ref<Namespace> >::iterator, bool > result = m_children.insert(name[0], ref<Namespace>());
         if (result.second)
         {
             result.first->second = ref<Namespace>::create(Arena::packageBuilder());

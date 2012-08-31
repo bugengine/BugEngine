@@ -86,7 +86,7 @@ istring IShaderBuilder::referenceNode(weak<const Node> node)
 
 void IShaderBuilder::addUniform(weak<const Node> node, Stage stage, const istring& name, ValueType type)
 {
-    if (m_namespaces.front().names.insert(std::make_pair(node, name)).second)
+    if (m_namespaces.front().names.insert(node, name).second)
     {
         doAddUniformDeclaration(name, stage, type);
     }
@@ -97,7 +97,7 @@ void IShaderBuilder::addVarying(weak<const Node> node, Stage currentStage, Stage
     if (currentStage == targetStage)
     {
         istring name (minitl::format<1024u>("b_varying%d") | m_currentVarying);
-        if (m_namespaces.front().names.insert(std::make_pair(node, name)).second)
+        if (m_namespaces.front().names.insert(node, name).second)
         {
             m_currentVarying++;
             doAddVaryingDeclaration(name, currentStage, type);
@@ -111,7 +111,7 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
     {
         istring nameAttribute (minitl::format<1024u>("b_attribute%d") | m_currentAttribute);
         istring nameVarying (minitl::format<1024u>("b_attributeToVarying%d") | m_currentAttributeToVarying);
-        if (m_namespaces.front().names.insert(std::make_pair(node, nameAttribute)).second)
+        if (m_namespaces.front().names.insert(node, nameAttribute).second)
         {
             m_currentAttribute++;
             if (currentStage == VertexStage)
@@ -130,7 +130,7 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
     else if(currentStage == targetStage)
     {
         istring nameVarying (minitl::format<1024u>("b_attributeToVarying%d") | m_currentAttributeToVarying);
-        if (m_namespaces.front().names.insert(std::make_pair(node, nameVarying)).second)
+        if (m_namespaces.front().names.insert(node, nameVarying).second)
         {
             m_currentAttributeToVarying++;
             doAddVaryingDeclaration(nameVarying, targetStage, type);
@@ -166,7 +166,7 @@ void IShaderBuilder::saveTo(Semantic semantic, weak<const Node> node)
 void IShaderBuilder::addOperator(weak<const Node> node, Operator op, ValueType type, weak<const Node> node1, weak<const Node> node2)
 {
     istring var (minitl::format<1024u>("temp_%d") | m_currentTemporary);
-    if (m_namespaces.front().names.insert(std::make_pair(node, var)).second)
+    if (m_namespaces.front().names.insert(node, var).second)
     {
         m_currentTemporary++;
         const istring& op1 = referenceNode(node1);

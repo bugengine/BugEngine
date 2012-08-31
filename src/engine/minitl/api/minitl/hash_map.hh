@@ -18,14 +18,22 @@ template< typename Key, typename Value, typename Hash = hash<Key> >
 class hashmap
 {
 private:
-    struct iterator;
-    struct const_iterator;
-    struct reverse_iterator;
-    struct const_reverse_iterator;
+    template< typename POLICY >
+    struct iterator_base;
 
-    typedef minitl::pair<const Key, Value>  value_type;
-    typedef minitl::pair<const Key, Value>& reference;
-    typedef minitl::pair<const Key, Value>& const_reference;
+    struct iterator_policy;
+    struct reverse_iterator_policy;
+    struct const_iterator_policy;
+    struct const_reverse_iterator_policy;
+public:
+    typedef iterator_base<iterator_policy>                  iterator;
+    typedef iterator_base<reverse_iterator_policy>          reverse_iterator;
+    typedef iterator_base<const_iterator_policy>            const_iterator;
+    typedef iterator_base<const_reverse_iterator_policy>    const_reverse_iterator;
+
+    typedef minitl::pair<const Key, Value>          value_type;
+    typedef minitl::pair<const Key, Value>&         reference;
+    typedef const minitl::pair<const Key, Value>&   const_reference;
 public:
     hashmap(minitl::Allocator& allocator, size_type reserved = 0);
     ~hashmap();

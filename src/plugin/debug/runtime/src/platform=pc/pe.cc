@@ -381,7 +381,7 @@ PE::PE(const char *filename, u64 baseAddress)
 :   Module(filename, baseAddress)
 {
     be_info("loading file %s" | filename);
-    MSDosHeader dosh;
+    /*MSDosHeader dosh;
     ImageHeader   imageHeader;
     m_file = fopen(filename, "rb");
     if (m_file)
@@ -517,7 +517,7 @@ PE::PE(const char *filename, u64 baseAddress)
             m_symbolInformations.offset = m_baseAddress + code.offset;
             m_symbolInformations.size = code.size;
         }
-    }
+    }*/
 }
 
 PE::~PE()
