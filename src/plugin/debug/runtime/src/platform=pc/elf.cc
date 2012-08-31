@@ -247,7 +247,7 @@ Elf::Elf(const char *filename, u64 baseAddress)
 ,   m_class(klass_invalid)
 ,   m_endianness(msb_invalid)
 {
-    FILE* file = fopen(filename, "rb");
+    /*FILE* file = fopen(filename, "rb");
     if (file)
     {
         be_debug("loading file %s" | filename);
@@ -281,7 +281,7 @@ Elf::Elf(const char *filename, u64 baseAddress)
             be_notreached();
         }
         fclose(file);
-    }
+    }*/
 }
 
 Elf::~Elf()
@@ -289,8 +289,9 @@ Elf::~Elf()
 }
 
 template< ElfClass klass, ElfEndianness e >
-void Elf::parse(FILE* f)
+void Elf::parse()
 {
+    /*
     ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
     be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
@@ -311,7 +312,7 @@ void Elf::parse(FILE* f)
         Section sec = { stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
         m_sections.push_back(sec);
     }
-    freea(sections);
+    freea(sections);*/
 }
 
 SymbolResolver::SymbolInformations Elf::getSymbolInformation() const

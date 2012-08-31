@@ -19,14 +19,13 @@ private:
         char    strings[1];
     };
 private:
-    FILE*                               m_file;
     SymbolResolver::SymbolInformations  m_symbolInformations;
 public:
     PE(const char *filename, u64 baseAddress);
     ~PE();
 
-    operator void*() const { return (void*) m_file; }
-    bool operator !() const { return m_file != 0; }
+    operator void*() const { return 0; }
+    bool operator !() const { return 0; }
 
     virtual Endianness endianness() const override { return Endianness_Little; }
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;

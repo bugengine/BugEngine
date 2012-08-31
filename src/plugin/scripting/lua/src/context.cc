@@ -325,8 +325,8 @@ Context::Context(const PluginContext& context)
     luaopen_math(m_state);
     luaopen_debug(m_state);
 
-    luaL_register(m_state, "_G", base_funcs);
-    luaL_register(m_state, "bugvalue", s_valueMetaTable);
+    //luaL_register(m_state, "_G", base_funcs);
+    //luaL_register(m_state, "bugvalue", s_valueMetaTable);
 }
 
 Context::~Context()
