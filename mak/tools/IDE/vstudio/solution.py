@@ -62,6 +62,7 @@ class Solution:
 		self.done = set([])
 		self.folders = folders
 		self.layout = {}
+		self.mak = ''
 
 	def writeHeader(self):
 		self.file.write("""Microsoft Visual Studio Solution File, Format Version %s\n""" % (self.versionnumber))
@@ -84,10 +85,17 @@ class Solution:
 					l[i] = (generateGUID(i, i), {})
 					l = l[i][1]
 			l[lst[-1]] = (projectGUID, {})
+		if project.type == 'waf':
+			self.mak = projectGUID
 
 
 		self.projectlist.append((projectGUID, project.type))
 		self.file.write("Project(\"%s\") = \"%s\", \"%s\", \"%s\"\n" % (self.guid, name, filename, projectGUID))
+		if project.type == 'game':
+			self.file.write("	ProjectSection(ProjectDependencies) = postProject\n")
+			self.file.write("		%s = %s\n" %(self.mak, self.mak))
+			self.file.write("	EndProjectSection\n")
+
 		self.file.write('EndProject\n')
 
 	def writeLayout(self, folder):
@@ -111,7 +119,8 @@ class Solution:
 		if float(self.versionnumber) >= 9.0:
 			self.file.write("Global\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n")
 			for conf in configs:
-				self.file.write("\t\t%s|%s = %s|%s\n" % (conf,'win32',conf,'win32'))
+				platform, arch, compiler, version, flavor = conf.split('-')
+				self.file.write("\t\t%s|%s-%s-%s-%s = %s|%s-%s-%s-%s\n" % (flavor, platform, arch, compiler, version, flavor, platform, arch, compiler, version))
 		else:
 			self.file.write("Global\n\tGlobalSection(SolutionConfiguration) = preSolution\n")
 			for conf in configs:
@@ -122,14 +131,16 @@ class Solution:
 			self.file.write("""\tEndGlobalSection\n\tGlobalSection(ProjectConfiguration) = postSolution\n""")
 		for proj,type in self.projectlist:
 			for conf in configs:
+				platform, arch, compiler, version, flavor = conf.split('-')
+				platformname = '%s-%s-%s-%s'%(platform, arch, compiler, version)
 				if float(self.versionnumber) >= 9.0:
-					self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
-					if type == 'game':
-						self.file.write("""\t\t%(GUID)s.%(CONF)s|%(PLATFORM)s.Build.0 = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+					self.file.write("""\t\t%s.%s|%s.ActiveCfg = %s|%s\n""" % (proj, flavor, platformname, conf, 'Win32'))
+					if type == 'waf':
+						self.file.write("""\t\t%s.%s|%s.Build.0 = %s|%s\n""" % (proj, flavor, platformname, conf, 'Win32'))
 				else:
-					self.file.write("""\t\t%(GUID)s.%(CONF)s.ActiveCfg = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
-					if type == 'game':
-						self.file.write("""\t\t%(GUID)s.%(CONF)s.Build.0 = %(CONF)s|%(PLATFORM)s\n""" % {'GUID':proj,'CONF':conf,'PLATFORM':'win32'})
+					self.file.write("""\t\t%s.%s.ActiveCfg = %s|%s\n""" % (proj, flavor, conf, 'Win32'))
+					if type == 'waf':
+						self.file.write("""\t\t%s.%s.Build.0 = %s|%s\n""" % (proj, flavor, conf, 'Win32'))
 		if self.folders:
 			self.file.write("""\tEndGlobalSection\n\tGlobalSection(NestedProjects) = preSolution\n""")
 			self.writeProjectFolders("", self.layout)

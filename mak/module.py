@@ -687,5 +687,34 @@ class util(module):
 			d._post(builder,  blacklist)
 		task = self.gentask(builder, 'dummy')
 
+""" the Makefile project """
+class waf(util):
+	def __init__( self,
+				  name,
+				  depends = [],
+				  category = 'engine',
+				  localoptions = coptions(),
+				  globaloptions = coptions(),
+				  localarchoptions = {},
+				  globalarchoptions = {},
+				  platforms = [],
+				  archs = [],
+				  sources=[],
+				  dstname = None,
+				):
+		util.__init__(self,
+						name,
+						depends,
+						category,
+						localoptions,
+						globaloptions,
+						localarchoptions,
+						globalarchoptions,
+						platforms,
+						archs,
+						sources,
+						dstname)
+		self.usemaster = False
+
 def external(name):
 	return mak.builder.m[name]
