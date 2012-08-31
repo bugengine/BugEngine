@@ -32,7 +32,8 @@ class VCxproj:
 		self.output.write('<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">\n')
 		self.output.write('  <ItemGroup Label="ProjectConfigurations">\n')
 		for (config, options) in configs:
-			self.output.write('    <ProjectConfiguration Include="%s|Win32">\n' % (config))
+			platform,arch,compiler,version,flavor = config.split('-')
+			self.output.write('    <ProjectConfiguration Include="%s|%s-%s-%s-%s">\n' % (flavor, platform, arch, compiler, version))
 			self.output.write('      <Configuration>%s</Configuration>\n' % config)
 			self.output.write('      <Platform>Win32</Platform>\n')
 			self.output.write('    </ProjectConfiguration>\n')
@@ -42,6 +43,7 @@ class VCxproj:
 		self.output.write('    <TargetFrameworkVersion>v%s</TargetFrameworkVersion>\n' % self.versionNumber[0])
 		self.output.write('    <RootNamespace>%s</RootNamespace>\n' % self.name)
 		self.output.write('  </PropertyGroup>\n')
+
 		self.output.write('  <Import Project="$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />\n')
 		self.output.write('  <ImportGroup Label="PropertySheets">\n')
 		self.output.write('  </ImportGroup>\n')
@@ -53,6 +55,16 @@ class VCxproj:
 		self.output.write('    <IntDir>$(SolutionDir)build\\$(Configuration)\\</IntDir>\n')
 		self.output.write('    <PlatformToolset>v%d</PlatformToolset>\n' % (float(self.versionNumber[1])*10))
 		self.output.write('  </PropertyGroup>\n')
+
+		for (config, options) in configs:
+			platform,arch,compiler,version,flavor = config.split('-')
+			platformname = '%s-%s-%s-%s'%(platform, arch, compiler, version)
+			self.output.write('    <PropertyGroup>\n')
+			self.output.write('      <PlatformShortName>%s</PlatformShortName>\n' % platformname)
+			self.output.write('      <PlatformArchitecture>%s</PlatformArchitecture>\n' % arch)
+			self.output.write('      <PlatformTarget>%s</PlatformTarget>\n' % platformname)
+			self.output.write('    </PropertyGroup>\n')
+
 		for (config, options) in configs:
 			env = self.envs[config]
 			if options:
@@ -64,7 +76,7 @@ class VCxproj:
 			includes = [os.path.abspath(i) for i in includes]
 			self.output.write('  <PropertyGroup Condition="\'$(Configuration)\'==\'%s\'">\n' % (config))
 			if self.type == 'game':
-				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % config)
+				self.output.write('    <NMakeBuildCommandLine></NMakeBuildCommandLine>\n')
 				self.output.write('    <NMakeOutput>$(SolutionDir)%s\\%s\\%s</NMakeOutput>\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%engine))
 				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s</NMakeCleanCommandLine>\n' % config)
 				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
@@ -72,7 +84,10 @@ class VCxproj:
 				self.output.write('    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>')
 				self.output.write('    <LocalDebuggerCommandArguments>%s</LocalDebuggerCommandArguments>' % self.name)
 			else:
-				self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s --targets=%s</NMakeBuildCommandLine>\n' % (config, self.name))
+				if self.type == 'waf':
+					self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % (config))
+				else:
+					self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s --targets=%s</NMakeBuildCommandLine>\n' % (config, self.name))
 				self.output.write('    <NMakeOutput></NMakeOutput>\n')
 				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s --targets=%s</NMakeCleanCommandLine>\n' % (config, self.name))
 				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s --targets=%s</NMakeReBuildCommandLine>\n' % (config, config, self.name))
