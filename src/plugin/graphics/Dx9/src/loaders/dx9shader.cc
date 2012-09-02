@@ -9,8 +9,8 @@
 namespace BugEngine { namespace DirectX9
 {
 
-Dx9ShaderProgram::Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<const Dx9Renderer> renderer)
-    :   IGPUResource(resource, renderer)
+Dx9ShaderProgram::Dx9ShaderProgram(weak<const ShaderProgramDescription> shaderDescription, weak<const Dx9Renderer> renderer)
+    :   IGPUResource(shaderDescription, renderer)
 {
 }
 
@@ -18,8 +18,9 @@ Dx9ShaderProgram::~Dx9ShaderProgram()
 {
 }
 
-void Dx9ShaderProgram::load(weak<const Resource> resource)
+void Dx9ShaderProgram::load(weak<const Resource::Description> shaderDescription)
 {
+    be_forceuse(shaderDescription);
 }
 
 void Dx9ShaderProgram::unload()

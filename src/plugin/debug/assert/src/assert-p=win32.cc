@@ -138,5 +138,6 @@ namespace BugEngine { namespace Debug
 BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD /*reason*/, LPVOID /*reserved*/)
 {
     BugEngine::Debug::hDllInstance = hInstance;
+    return TRUE;
 }
 
