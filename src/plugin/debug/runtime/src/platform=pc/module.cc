@@ -35,11 +35,11 @@ const Module::Section& Module::operator[](const istring& name) const
     return s_empty;
 }
 
-void Module::readSection(const Section &section, void *data) const
+void Module::readSection(const Section &/*section*/, void * /*data*/) const
 {
-    FILE*f = fopen(m_filename.str().name, "rb");
+    /*FILE*f = fopen(m_filename.str().name, "rb");
     fseek(f, be_checked_numcast<long int>(section.fileOffset), SEEK_SET);
-    fread(data, be_checked_numcast<long int>(section.fileSize), 1, f);
+    fread(data, be_checked_numcast<long int>(section.fileSize), 1, f);*/
 }
 
 

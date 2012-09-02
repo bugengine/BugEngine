@@ -67,7 +67,12 @@ class VCproj:
 			self.output.write('			>\n')
 			self.output.write('			<Tool\n')
 			self.output.write('				Name="VCNMakeTool"\n')
-			self.output.write('				BuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s %s"\n' % (config, target))
+			if self.type == 'waf':
+				self.output.write('				BuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s"\n' % (config))
+			elif self.type == 'game':
+				self.output.write('				BuildCommandLine=""\n')
+			else:
+				self.output.write('				BuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s %s"\n' % (config, target))
 			self.output.write('				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s %s"\n' %(config, config, target))
 			self.output.write('				CleanCommandLine="cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s %s"\n' %(config, target))
 			self.output.write('				Output="$(SolutionDir)%s\\%s\\%s"\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%engine))

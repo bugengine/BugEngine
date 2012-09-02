@@ -51,11 +51,7 @@ class vs2003(Build.BuildContext):
 				project.writeFooter()
 				project_list.append((project, node))
 		for project, node in project_list:
-			if project.type == 'game':
-				s.addProject(project, node.path_from(self.srcnode))
-		for project, node in project_list:
-			if project.type != 'game':
-				s.addProject(project, node.path_from(self.srcnode))
+			s.addProject(project, node.path_from(self.srcnode))
 		s.writeFooter(self.env.ALL_VARIANTS)
 
 class vs2005(vs2003):

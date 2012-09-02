@@ -163,7 +163,7 @@ StringCache* StringCache::unique(const char *val)
         (void)(new(cache) StringCache(hashval, len));
         strcpy(data, val);
 
-        std::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(std::make_pair((const char*)data, cache));
+        minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(minitl::make_pair((const char*)data, cache));
         be_forceuse(insertresult);
         return cache;
     }

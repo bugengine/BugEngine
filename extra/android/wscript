@@ -51,7 +51,7 @@ def add_android_flags_to_env(conf, variant, arch):
 	sdk_path = find_android_sdk(conf.env.CC)
 	sdk_path = os.path.join(sdk_path, 'arch-%s'%arch)
 
-	conf.env.append_unique('CFLAGS', ['--sysroot=%s'%sdk_path])
+	conf.env.append_unique('CFLAGS', ['-std=c99', '--sysroot=%s'%sdk_path])
 	conf.env.append_unique('CXXFLAGS', ['--sysroot=%s'%sdk_path, '-I%s'%'../../../extra/android/3rdparty/stl-gabi++/api'])
 	conf.env.append_unique('LINKFLAGS', ['--sysroot=%s'%sdk_path])
 	conf.env['library_PATTERN'] = '%s.a'
