@@ -89,7 +89,7 @@ const T& array<T>::operator[](u32 index) const
 template< typename T >
 u32 array<T>::size() const
 {
-    return m_array.count();
+    return be_checked_numcast<u32>(m_array.count());
 }
 
 }

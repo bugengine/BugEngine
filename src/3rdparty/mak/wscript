@@ -9,7 +9,7 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.m['mak'] = module.util('mak', [], 'engine')
+	bld.m['mak'] = module.waf('mak')
 	bld.m['mak'].sourcetree.prefix = ''
 
 	def addEntries(p, path, recurse):

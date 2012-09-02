@@ -8,5 +8,5 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.m['lualib'] = module.library( 'lualib', [], '3rdparty', module.coptions(defines=['__STRICT_ANSI__', 'LUA_CORE']))
+	bld.m['lualib'] = module.library( 'lualib', [], '3rdparty', module.coptions(defines=['LUA_CORE', 'LUA_LIB']))
 	#bld.m['lualib'].usemaster = False

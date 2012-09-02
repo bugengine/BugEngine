@@ -29,8 +29,7 @@ class Elf : public Module
 {
     BE_NOCOPY(Elf);
 private:
-    template< ElfClass klass, ElfEndianness endianness >
-    void parse(FILE* file);
+    template< ElfClass klass, ElfEndianness endianness > void parse(/*FILE* file*/);
 private:
     ElfClass                m_class;
     ElfEndianness           m_endianness;
