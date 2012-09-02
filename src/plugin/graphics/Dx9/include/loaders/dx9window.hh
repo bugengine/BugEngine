@@ -19,13 +19,13 @@ private:
 private:
     void setCurrent() const;
 
-    void load(weak<const Resource> resource) override;
+    void load(weak<const Resource::Description> windowDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;
     void end(PresentMode present) const override;
 public:
-    Dx9Window(weak<const RenderWindow> resource, weak<const Dx9Renderer> renderer);
+    Dx9Window(weak<const RenderWindowDescription> resource, weak<const Dx9Renderer> renderer);
     ~Dx9Window();
 };
 

@@ -108,19 +108,20 @@ void Dx9Renderer::flush()
     }
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const RenderSurface> rendersurface) const
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const
 {
+    be_forceuse(renderSurfaceDescription);
     return ref<IGPUResource>();
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const RenderWindow> renderwindow) const
+ref<IGPUResource> Dx9Renderer::create(weak<const RenderWindowDescription> renderWindowDescription) const
 {
-    return ref<Dx9Window>::create(m_allocator, renderwindow, this);
+    return ref<Dx9Window>::create(m_allocator, renderWindowDescription, this);
 }
 
-ref<IGPUResource> Dx9Renderer::create(weak<const ShaderProgram> shader) const
+ref<IGPUResource> Dx9Renderer::create(weak<const ShaderProgramDescription> shaderDescription) const
 {
-    return ref<Dx9ShaderProgram>::create(m_allocator, shader, this);
+    return ref<Dx9ShaderProgram>::create(m_allocator, shaderDescription, this);
 }
 
 }}

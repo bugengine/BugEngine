@@ -11,8 +11,8 @@ namespace BugEngine { namespace DirectX9
 {
 
 
-Dx9Window::Dx9Window(weak<const RenderWindow> resource, weak<const Dx9Renderer> renderer)
-:   Windowing::Window(resource, renderer)
+Dx9Window::Dx9Window(weak<const RenderWindowDescription> windowDescription, weak<const Dx9Renderer> renderer)
+:   Windowing::Window(windowDescription, renderer)
 ,   m_swapChain(0)
 {
 }
@@ -62,10 +62,10 @@ void Dx9Window::end(PresentMode present) const
     }
 }
 
-void Dx9Window::load(weak<const Resource> resource)
+void Dx9Window::load(weak<const Resource::Description> windowDescription)
 {
     be_assert(Thread::currentId() == be_checked_cast<const Dx9Renderer>(m_renderer)->m_threadId, "render command on wrong thread");
-    Window::load(resource);
+    Window::load(windowDescription);
     D3DPRESENT_PARAMETERS d3dpp;
     ZeroMemory(&d3dpp, sizeof(d3dpp));
     d3dpp.Windowed = true;

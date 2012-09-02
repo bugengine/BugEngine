@@ -14,10 +14,10 @@ namespace BugEngine { namespace DirectX9
 class Dx9ShaderProgram : public IGPUResource
 {
 private:
-    void load(weak<const Resource> resource) override;
+    void load(weak<const Resource::Description> resource) override;
     void unload() override;
 public:
-    Dx9ShaderProgram(weak<const ShaderProgram> resource, weak<const Dx9Renderer> renderer);
+    Dx9ShaderProgram(weak<const ShaderProgramDescription> shaderDescription, weak<const Dx9Renderer> renderer);
     ~Dx9ShaderProgram();
 };
 

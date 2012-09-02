@@ -11,11 +11,11 @@
 namespace BugEngine
 {
 
-class RenderSurface;
-class RenderWindow;
-class Mesh;
-class Texture;
-class Shader;
+class RenderSurfaceDescription;
+class RenderWindowDescription;
+class MeshDescription;
+class TextureDescription;
+class ShaderDescription;
 
 
 namespace DirectX9
@@ -61,9 +61,9 @@ public:
 private:
     void                flush() override;
 
-    ref<IGPUResource>   create(weak<const RenderSurface> rendersurface) const override;
-    ref<IGPUResource>   create(weak<const RenderWindow> renderwindow) const override;
-    ref<IGPUResource>   create(weak<const ShaderProgram> shader) const override;
+    ref<IGPUResource>   create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const override;
+    ref<IGPUResource>   create(weak<const RenderWindowDescription> renderWindowDescription) const override;
+    ref<IGPUResource>   create(weak<const ShaderProgramDescription> shaderDescription) const override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
