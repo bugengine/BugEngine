@@ -147,7 +147,7 @@ typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::fi
 }
 
 template< typename Key, typename Value, typename Hash >
-void hashmap<Key, Value, Hash>::erase(iterator it)
+void hashmap<Key, Value, Hash>::erase(iterator /*it*/)
 {
 }
 

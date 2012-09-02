@@ -133,6 +133,7 @@ struct ElfSectionHeader
 };
 
 
+/*
 static const char *s_elfFileType [] =
 {
     "No file type",
@@ -240,7 +241,7 @@ static const char* s_elfMachineType [] =
 "OpenRISC 32-bit embedded processor",                   // 92
 "ARC Cores Tangent-A5",                                 // 93
 "Tensilica Xtensa Architecture",                        // 94
-};
+};*/
 
 Elf::Elf(const char *filename, u64 baseAddress)
 :   Module(filename, baseAddress)
