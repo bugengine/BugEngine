@@ -97,7 +97,7 @@ def plugins(bld):
 			if opencl:
 				clgl= module.plugin('kernel.opencl_gl',			[bld.game, gl, kernelopencl])
 		if directx9:
-			Dx9		= module.plugin('graphics.DX9',				[bld.game, windowing, cgDx, directx9, _3d])
+			Dx9		= module.plugin('graphics.Dx9',				[bld.game, windowing, cgDx, directx9, _3d])
 		#if diretx10:
 			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
 		#if diretx11:
