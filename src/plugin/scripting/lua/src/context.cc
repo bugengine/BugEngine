@@ -162,7 +162,7 @@ extern "C" int valueCall(lua_State *state)
 
     void* v = 0;
     RTTI::Value* values = 0;
-    v = malloca(be_align(sizeof (RTTI::Value), be_alignof(RTTI::Value))*(top - 1));
+    v = malloca(minitl::align(sizeof (RTTI::Value), be_alignof(RTTI::Value))*(top - 1));
     values = (RTTI::Value*)v;
 
     for (int i = 1; i < top; i++)

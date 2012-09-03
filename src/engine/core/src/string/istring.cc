@@ -106,7 +106,7 @@ StringCache::Buffer::~Buffer()
 
 StringCache* StringCache::Buffer::reserve(size_t size)
 {
-    size_t allsize = be_align(size+1+sizeof(StringCache), be_alignof(StringCache));
+    size_t allsize = minitl::align(size+1+sizeof(StringCache), be_alignof(StringCache));
     be_assert(allsize < s_capacity, "string size is bigger than pool size");
     if (m_used > s_capacity)
     {

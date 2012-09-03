@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_INL_HASH_MAP_INL_
 #define BE_MINITL_INL_HASH_MAP_INL_
 /*****************************************************************************/
+#include    <minitl/algorithm.hh>
 
 namespace minitl
 {
@@ -48,13 +49,33 @@ struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
 };
 
 template< typename Key, typename Value, typename Hash >
-hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& /*allocator*/, size_type /*reserved*/)
+hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, size_type reserved)
+    :   m_itemPool(allocator, minitl::min(reserved, size_type(8)))
+    ,   m_items()
+    ,   m_index(allocator, minitl::min(reserved, size_type(8)))
+    ,   m_count(0)
 {
 }
 
 template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>::~hashmap()
 {
+}
+
+template< typename Key, typename Value, typename Hash >
+hashmap<Key, Value, Hash>::hashmap(const hashmap& other)
+    :   m_itemPool(other.m_index.arena(), other.m_count)
+    ,   m_items()
+    ,   m_index(other.m_index.arena(), other.m_index.count())
+    ,   m_count(0)
+{
+}
+
+template< typename Key, typename Value, typename Hash >
+hashmap<Key, Value, Hash>& hashmap<Key, Value, Hash>::operator=(const hashmap& other)
+{
+    be_forceuse(other);
+    return *this;
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -147,7 +168,7 @@ typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::fi
 }
 
 template< typename Key, typename Value, typename Hash >
-void hashmap<Key, Value, Hash>::erase(iterator /*it*/)
+typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(iterator /*it*/)
 {
 }
 

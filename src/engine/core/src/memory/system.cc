@@ -8,7 +8,7 @@ namespace BugEngine
 {
 
 SystemAllocator::SystemAllocator(u32 maximumBytes)
-:   m_buffer(platformReserve(be_align(maximumBytes, platformPageSize())))
+:   m_buffer(platformReserve(minitl::align(maximumBytes, platformPageSize())))
 ,   m_capacity(maximumBytes)
 ,   m_usage(0)
 ,   m_realUsage(0)
@@ -18,13 +18,13 @@ SystemAllocator::SystemAllocator(u32 maximumBytes)
 SystemAllocator::~SystemAllocator()
 {
     be_assert(m_usage == 0, "Not all blocks reclaimed when system allocator was freed");
-    platformFree(m_buffer, be_align(m_capacity, platformPageSize()));
+    platformFree(m_buffer, minitl::align(m_capacity, platformPageSize()));
 }
 
 void SystemAllocator::setUsage(u32 byteCount)
 {
     m_usage = byteCount;
-    u32 realUsage = be_align(byteCount, platformPageSize());
+    u32 realUsage = minitl::align(byteCount, platformPageSize());
     if (realUsage < m_realUsage)
     {
         platformRelease(m_buffer, realUsage, m_realUsage);
