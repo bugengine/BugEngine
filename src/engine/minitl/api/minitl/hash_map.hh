@@ -7,6 +7,8 @@
 #include    <minitl/pair.hh>
 #include    <minitl/traits.hh>
 #include    <minitl/iterator.hh>
+#include    <minitl/intrusive_list.hh>
+#include    <minitl/pool.hh>
 
 namespace minitl
 {
@@ -34,9 +36,26 @@ public:
     typedef minitl::pair<const Key, Value>          value_type;
     typedef minitl::pair<const Key, Value>&         reference;
     typedef const minitl::pair<const Key, Value>&   const_reference;
+private:
+    struct empty_item : public minitl::intrusive_list<empty_item>::item
+    {
+    };
+    struct item : public empty_item
+    {
+        value_type value;
+        item(const value_type& value) : value(value) {}
+    };
+    typedef typename intrusive_list<empty_item>::iterator list_iterator;
+private:
+    minitl::pool<item>                      m_itemPool;
+    minitl::intrusive_list<empty_item>      m_items;
+    minitl::Allocator::Block<list_iterator> m_index;
+    size_type                               m_count;
 public:
     hashmap(minitl::Allocator& allocator, size_type reserved = 0);
     ~hashmap();
+    hashmap(const hashmap& other);
+    hashmap& operator=(const hashmap& other);
 
     void                            reserve(size_type size);
 
@@ -58,7 +77,7 @@ public:
     iterator                        find(const Key& key);
     const_iterator                  find(const Key& key) const;
 
-    void                            erase(iterator it);
+    iterator                        erase(iterator it);
 
     minitl::pair<iterator, bool>    insert(const Key& k, const Value& value);
     minitl::pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);

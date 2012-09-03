@@ -33,12 +33,6 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p);
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE f);
 
-template< typename T >
-T min(T t1, T t2);
-
-template< typename T >
-T max(T t1, T t2);
-
 }
 
 #include <minitl/inl/algorithm.inl>

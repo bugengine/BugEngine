@@ -8,27 +8,6 @@
 #include    <cstring>
 #include    <minitl/algorithm.hh>
 
-#define     be_forceuse(p)   static_cast<void>(p)
-
-template< typename T >
-inline T be_align(T value, size_t alignment)
-{
-    size_t v = (size_t)(value);
-    return (T)(alignment==v?v:((v+alignment-1) & ~(alignment-1)));
-}
-
-template< typename T >
-inline T be_min(T t1, T t2)
-{
-    return t1 < t2 ? t1 : t2;
-}
-
-template< typename T >
-inline T be_max(T t1, T t2)
-{
-    return t1 > t2 ? t1 : t2;
-}
-
 namespace minitl
 {
 
@@ -47,7 +26,7 @@ public:
         Block(Allocator& allocator, u64 count, u64 alignment = be_alignof(T))
             :   m_allocator(&allocator)
             ,   m_count(count)
-            ,   m_data((T*)allocator.alloc(be_align(sizeof(T), be_alignof(T))*count, be_min<u64>(16, alignment)))
+            ,   m_data((T*)allocator.alloc(align(sizeof(T), be_alignof(T))*count, min<u64>(16, alignment)))
         {
         };
         ~Block()
@@ -60,11 +39,11 @@ public:
         operator T*()                   { return m_data; }
         operator const T*() const       { return m_data; }
         u64 count() const               { return m_count; }
-        u64 byteCount() const           { return be_align(sizeof(T), be_alignof(T))*m_count; }
+        u64 byteCount() const           { return align(sizeof(T), be_alignof(T))*m_count; }
 
         bool resize(u64 count)
         {
-            u64 size = be_align(sizeof(T), be_alignof(T))*count;
+            u64 size = align(sizeof(T), be_alignof(T))*count;
             if (m_allocator->resize(m_data, size))
             {
                 m_count = count;
@@ -75,9 +54,9 @@ public:
                 return false;
             }
         }
-        void realloc(u64 count, u64 alignment = be_min<u64>(16, be_alignof(T)))
+        void realloc(u64 count, u64 alignment = min<u64>(16, be_alignof(T)))
         {
-            u64 size = be_align(sizeof(T), be_alignof(T))*count;
+            u64 size = align(sizeof(T), be_alignof(T))*count;
             m_count = count;
             m_data = (T*)m_allocator->realloc(m_data, size, alignment);
         }
