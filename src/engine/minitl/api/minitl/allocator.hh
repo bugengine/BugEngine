@@ -40,6 +40,10 @@ public:
         operator const T*() const       { return m_data; }
         u64 count() const               { return m_count; }
         u64 byteCount() const           { return align(sizeof(T), be_alignof(T))*m_count; }
+        T* begin()                      { return m_data; }
+        T* end()                        { return m_data + m_count; }
+        const T* begin() const          { return m_data; }
+        const T* end() const            { return m_data + m_count; }
 
         bool resize(u64 count)
         {

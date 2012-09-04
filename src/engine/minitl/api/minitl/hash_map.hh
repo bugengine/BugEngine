@@ -46,41 +46,44 @@ private:
         item(const value_type& value) : value(value) {}
     };
     typedef typename intrusive_list<empty_item>::iterator list_iterator;
+    typedef pair<empty_item, list_iterator> index_item;
 private:
-    minitl::pool<item>                      m_itemPool;
-    minitl::intrusive_list<empty_item>      m_items;
-    minitl::Allocator::Block<list_iterator> m_index;
-    size_type                               m_count;
+    pool<item>                      m_itemPool;
+    intrusive_list<empty_item>      m_items;
+    Allocator::Block<index_item>    m_index;
+    size_type                       m_count;
+private:
+    void buildIndex();
 public:
-    hashmap(minitl::Allocator& allocator, size_type reserved = 0);
+    hashmap(Allocator& allocator, size_type reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
     hashmap& operator=(const hashmap& other);
 
-    void                            reserve(size_type size);
+    void                    reserve(size_type size);
 
-    iterator                        begin();
-    iterator                        end();
-    const_iterator                  begin() const;
-    const_iterator                  end() const;
-    reverse_iterator                rbegin();
-    reverse_iterator                rend();
-    const_reverse_iterator          rbegin() const;
-    const_reverse_iterator          rend() const;
+    iterator                begin();
+    iterator                end();
+    const_iterator          begin() const;
+    const_iterator          end() const;
+    reverse_iterator        rbegin();
+    reverse_iterator        rend();
+    const_reverse_iterator  rbegin() const;
+    const_reverse_iterator  rend() const;
 
-    size_type                       size() const;
-    bool                            empty() const;
+    size_type               size() const;
+    bool                    empty() const;
 
-    reference                       operator[](const Key& key);
-    const_reference                 operator[](const Key& key) const;
+    reference               operator[](const Key& key);
+    const_reference         operator[](const Key& key) const;
 
-    iterator                        find(const Key& key);
-    const_iterator                  find(const Key& key) const;
+    iterator                find(const Key& key);
+    const_iterator          find(const Key& key) const;
 
-    iterator                        erase(iterator it);
+    iterator                erase(iterator it);
 
-    minitl::pair<iterator, bool>    insert(const Key& k, const Value& value);
-    minitl::pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);
+    pair<iterator, bool>    insert(const Key& k, const Value& value);
+    pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);
 };
 
 }

@@ -50,25 +50,51 @@ struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
 
 template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, size_type reserved)
-    :   m_itemPool(allocator, minitl::min(reserved, size_type(8)))
+    :   m_itemPool(allocator, minitl::min(nextPowerOf2(reserved), size_type(8)))
     ,   m_items()
-    ,   m_index(allocator, minitl::min(reserved, size_type(8)))
+    ,   m_index(allocator, 1+minitl::min(nextPowerOf2(reserved), size_type(8)))
     ,   m_count(0)
 {
+    buildIndex();
+}
+
+template< typename Key, typename Value, typename Hash >
+hashmap<Key, Value, Hash>::hashmap(const hashmap& other)
+    :   m_itemPool(other.m_index.arena(), other.m_index.count()-1)
+    ,   m_items()
+    ,   m_index(other.m_index.arena(), other.m_index.count())
+    ,   m_count(0)
+{
+    buildIndex();
 }
 
 template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>::~hashmap()
 {
+    for (index_item* it = m_index.begin(); it != m_index.end()-1; /*nothing*/)
+    {
+        list_iterator object = it->second;
+        object++;
+        while (object != (it+1)->second)
+        {
+            list_iterator itemToDelete = object++;
+            m_itemPool.release(&static_cast<item&>(*itemToDelete));
+        }
+        index_item* indexToDelete = it++;
+        indexToDelete->~index_item();
+    }
+    (m_index.end()-1)->~index_item();
 }
 
 template< typename Key, typename Value, typename Hash >
-hashmap<Key, Value, Hash>::hashmap(const hashmap& other)
-    :   m_itemPool(other.m_index.arena(), other.m_count)
-    ,   m_items()
-    ,   m_index(other.m_index.arena(), other.m_index.count())
-    ,   m_count(0)
+void hashmap<Key, Value, Hash>::buildIndex()
 {
+    list_iterator current = m_items.begin();
+    for (index_item* it = m_index.begin(); it != m_index.end(); ++it)
+    {
+        new (it) index_item;
+        current = it->second = m_items.insert(current, it->first);
+    }
 }
 
 template< typename Key, typename Value, typename Hash >
