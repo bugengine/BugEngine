@@ -42,6 +42,19 @@ T max(T t1, T t2)
     return t1 > t2 ? t1 : t2;
 }
 
+template< typename T >
+T nextPowerOf2(T t)
+{
+    u64 result = t;
+    result &= result << 1;
+    result &= result << 2;
+    result &= result << 4;
+    result &= result << 8;
+    result &= result << 16;
+    result &= result << 32;
+    return static_cast<T>(t + 1);
+}
+
 }
 
 /*****************************************************************************/
