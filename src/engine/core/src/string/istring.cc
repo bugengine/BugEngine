@@ -5,6 +5,7 @@
 #include    <core/string/istring.hh>
 #include    <core/threads/criticalsection.hh>
 #include    <minitl/algorithm.hh>
+#include    <minitl/hash_map.hh>
 #include    <cstring>
 
 

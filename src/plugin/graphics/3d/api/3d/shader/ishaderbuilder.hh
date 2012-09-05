@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <core/memory/streams.hh>
 #include    <3d/shader/node.script.hh>
+#include    <minitl/hash_map.hh>
 
 
 namespace BugEngine { namespace Shaders

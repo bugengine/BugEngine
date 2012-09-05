@@ -5,6 +5,7 @@
 #define BE_MINITL_HASH_MAP_HH_
 /*****************************************************************************/
 #include    <minitl/pair.hh>
+#include    <minitl/hash.hh>
 #include    <minitl/traits.hh>
 #include    <minitl/iterator.hh>
 #include    <minitl/intrusive_list.hh>
@@ -12,9 +13,6 @@
 
 namespace minitl
 {
-
-template< typename T >
-struct hash;
 
 template< typename Key, typename Value, typename Hash = hash<Key> >
 class hashmap
