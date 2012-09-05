@@ -11,11 +11,17 @@ namespace BugEngine { namespace Kernel
 class KernelDescription;
 }}
 
+namespace BugEngine
+{
+class Scheduler;
+}
+
 namespace BugEngine { namespace Task
 {
 
 class be_api(SCHEDULER) KernelTask : public ITask
 {
+    friend class Scheduler;
     BE_NOCOPY(KernelTask);
 private:
     weak<const BugEngine::Kernel::KernelDescription> const m_kernel;

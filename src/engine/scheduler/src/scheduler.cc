@@ -5,6 +5,8 @@
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <scheduler/kernel/cpumemoryprovider.hh>
+#include    <scheduler/kernel/istream.hh>
+#include    <scheduler/task/kerneltask.hh>
 #include    <taskscheduler.hh>
 
 
@@ -47,10 +49,10 @@ void Scheduler::queueTask(Task::ITaskItem* task)
     m_taskScheduler->queue(task);
 }
 
-void Scheduler::queueKernel(weak<const Task::ITask> task)
+void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<Kernel::IStream> >& parameters)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
-    be_info("kernel goes here");
+    m_kernelSchedulers[0]->run(task->m_kernel, parameters);
     task->completed(this);
 }
 

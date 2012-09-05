@@ -14,6 +14,8 @@ namespace Kernel
 {
 
 class IMemoryProvider;
+class IStream;
+class KernelDescription;
 
 class be_api(SCHEDULER) IKernelScheduler : public minitl::pointer
 {
@@ -25,6 +27,8 @@ private:
 public:
     IKernelScheduler(const istring& name, weak<Scheduler> scheduler, weak<IMemoryProvider> provider);
     ~IKernelScheduler();
+
+    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) = 0;
 };
 
 }}

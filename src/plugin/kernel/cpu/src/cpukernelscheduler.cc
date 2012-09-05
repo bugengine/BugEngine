@@ -4,6 +4,7 @@
 #include    <stdafx.h>
 #include    <cpukernelscheduler.hh>
 #include    <cpukernelloader.hh>
+#include    <kernelobject.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/kernel.script.hh>
@@ -22,6 +23,13 @@ CPUKernelScheduler::CPUKernelScheduler(const PluginContext& context)
 CPUKernelScheduler::~CPUKernelScheduler()
 {
     m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
+}
+
+void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters)
+{
+    weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
+    be_assert(object, "kernel is not loaded");
+    be_forceuse(parameters);
 }
 
 }

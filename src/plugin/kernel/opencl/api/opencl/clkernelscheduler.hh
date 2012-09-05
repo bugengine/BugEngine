@@ -24,6 +24,7 @@ private:
 public:
     OpenCLKernelScheduler(const PluginContext& context, const cl_context_properties* properties = 0);
     ~OpenCLKernelScheduler();
+    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

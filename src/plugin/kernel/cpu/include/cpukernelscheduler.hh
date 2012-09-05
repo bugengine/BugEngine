@@ -11,6 +11,11 @@ namespace BugEngine
 {
 
 class CPUKernelLoader;
+namespace Kernel
+{
+class IStream;
+}
+
 
 class CPUKernelScheduler : public Kernel::IKernelScheduler
 {
@@ -20,6 +25,8 @@ private:
 public:
     CPUKernelScheduler(const PluginContext& context);
     ~CPUKernelScheduler();
+
+    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
