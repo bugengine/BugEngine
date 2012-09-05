@@ -16,6 +16,7 @@ namespace Task
     class KernelTask;
     class TaskGroup;
     class ITask;
+    class KernelTask;
     class ITaskItem;
     template< typename BODY > class Task;
     template< typename RANGE, typename BODY > class TaskItem;
@@ -24,6 +25,7 @@ namespace Task
 namespace Kernel
 {
     class IKernelScheduler;
+    class IStream;
 }
 
 class be_api(SCHEDULER) Scheduler : public minitl::pointer
@@ -67,7 +69,7 @@ private:
     void notifyEnd();
 private:
     void queueTask(Task::ITaskItem* task);
-    void queueKernel(weak<const Task::ITask> task);
+    void queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<Kernel::IStream> >& parameters);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();

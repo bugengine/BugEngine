@@ -25,6 +25,7 @@ private:
     };
     mutable Resource m_resources[MaxResourceCount];
 private:
+    Resource& getResourceForWriting(weak<const ILoader> owner) const;
     void load(weak<ILoader> loader) const;
     void unload(weak<ILoader> loader) const;
 protected:
@@ -32,7 +33,6 @@ protected:
     ~Description();
 public:
     const Resource& getResource(weak<const ILoader> owner) const;
-    Resource& getResourceForWriting(weak<const ILoader> owner) const;
 };
 
 }}
