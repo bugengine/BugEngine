@@ -7,6 +7,7 @@
 #include    <plugin/plugin.hh>
 #include    <minitl/vector.hh>
 #include    <minitl/intrusive_list.hh>
+#include    <minitl/hash_map.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
