@@ -111,8 +111,8 @@ public:
     base_iterator();
     ~base_iterator();
 public:
-    bool operator==(const base_iterator<POLICY>& other);
-    bool operator!=(const base_iterator<POLICY>& other);
+    bool operator==(const base_iterator<POLICY>& other) const;
+    bool operator!=(const base_iterator<POLICY>& other) const;
 
     base_iterator<POLICY>& operator++()
     {
@@ -163,14 +163,14 @@ intrusive_list<T, INDEX>::base_iterator<POLICY>::~base_iterator()
 
 template< typename T, int INDEX >
 template< typename POLICY >
-bool intrusive_list<T, INDEX>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other)
+bool intrusive_list<T, INDEX>::base_iterator<POLICY>::operator==(const base_iterator<POLICY>& other) const
 {
     return m_iterator == other.m_iterator;
 }
 
 template< typename T, int INDEX >
 template< typename POLICY >
-bool intrusive_list<T, INDEX>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other)
+bool intrusive_list<T, INDEX>::base_iterator<POLICY>::operator!=(const base_iterator<POLICY>& other) const
 {
     return m_iterator != other.m_iterator;
 }

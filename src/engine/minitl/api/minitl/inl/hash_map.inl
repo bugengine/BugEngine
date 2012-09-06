@@ -20,6 +20,8 @@ private:
     iterator                    m_current;
 public:
     iterator_base()
+        :   m_owner(0)
+        ,   m_current()
     {
     }
     iterator_base(hashmap<Key, Value, Hash>& owner, iterator l)
@@ -27,31 +29,55 @@ public:
         ,   m_current(l)
     {
     }
-    bool operator==(const iterator_base& /*other*/) { return true; }
-    bool operator!=(const iterator_base& /*other*/) { return true; }
-    typename POLICY::reference operator*() const { return *(typename POLICY::value_type*)0; }
-    typename POLICY::pointer operator->() const  { return (typename POLICY::pointer)0; }
+    bool operator==(const iterator_base& other) const
+    {
+        return m_owner == other.m_owner && m_current == other.m_current;
+    }
+    bool operator!=(const iterator_base& other) const
+    {
+        return m_owner != other.m_owner || m_current != other.m_current;
+    }
+    typename POLICY::reference operator*() const
+    {
+        return static_cast<typename hashmap<Key, Value, Hash>::item*>(m_current.operator->())->value;
+    }
+    typename POLICY::pointer operator->() const
+    {
+        return &static_cast<typename hashmap<Key, Value, Hash>::item*>(m_current.operator->())->value;
+    }
 
     iterator_base& operator++()
     {
-        m_current = POLICY::next(m_current);
+        do
+        {
+            m_current = POLICY::next(m_current);
+        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
         return *this;
     }
-    iterator_base& operator++(int)
+    iterator_base  operator++(int)
     {
         iterator_base copy = *this;
-        m_current = POLICY::next(m_current);
+        do
+        {
+            m_current = POLICY::next(m_current);
+        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
         return copy;
     }
     iterator_base& operator--()
     {
-        m_current = POLICY::previous(m_current);
+        do
+        {
+            m_current = POLICY::previous(m_current);
+        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
         return *this;
     }
-    iterator_base& operator--(int)
+    iterator_base  operator--(int)
     {
         iterator_base copy = *this;
-        m_current = POLICY::previous(m_current);
+        do
+        {
+            m_current = POLICY::previous(m_current);
+        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
         return copy;
     }
 };
@@ -171,36 +197,39 @@ template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>& hashmap<Key, Value, Hash>::operator=(const hashmap& other)
 {
     be_forceuse(other);
+    be_notreached();
     return *this;
 }
 
 template< typename Key, typename Value, typename Hash >
-void hashmap<Key, Value, Hash>::reserve(size_type /*size*/)
+void hashmap<Key, Value, Hash>::reserve(size_type size)
 {
+    be_forceuse(size);
+    be_notreached();
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::begin()
 {
-    return iterator();
+    return ++iterator(*this, m_index.begin());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::end()
 {
-    return iterator();
+    return iterator(*this, m_items.end());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::begin() const
 {
-    return const_iterator();
+    return ++const_iterator(*this, m_index.begin());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::end() const
 {
-    return const_iterator();
+    return const_iterator(*this, m_items.end());
 }
 
 template< typename Key, typename Value, typename Hash >
