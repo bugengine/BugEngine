@@ -14,17 +14,17 @@ template< typename POLICY >
 struct hashmap<Key, Value, Hash>::iterator_base
 {
 private:
-    typedef typename hashmap<Key, Value, Hash>::list_iterator   iterator;
+    typedef typename POLICY::iterator   iterator;
 private:
     hashmap<Key, Value, Hash>*  m_owner;
-    iterator                    m_current;
+    typename POLICY::iterator   m_current;
 public:
     iterator_base()
         :   m_owner(0)
         ,   m_current()
     {
     }
-    iterator_base(hashmap<Key, Value, Hash>& owner, iterator l)
+    iterator_base(hashmap<Key, Value, Hash>& owner, typename POLICY::iterator l)
         :   m_owner(&owner)
         ,   m_current(l)
     {
@@ -39,19 +39,19 @@ public:
     }
     typename POLICY::reference operator*() const
     {
-        return static_cast<typename hashmap<Key, Value, Hash>::item*>(m_current.operator->())->value;
+        return static_cast<typename POLICY::item*>(m_current.operator->())->value;
     }
     typename POLICY::pointer operator->() const
     {
-        return &static_cast<typename hashmap<Key, Value, Hash>::item*>(m_current.operator->())->value;
+        return &(static_cast<typename POLICY::item*>(m_current.operator->()))->value;
     }
 
     iterator_base& operator++()
     {
         do
         {
-            m_current = POLICY::next(m_current);
-        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
+            ++m_current;
+        } while ((char*)m_current.operator->() >= (char*)m_owner->m_index.begin() && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
     iterator_base  operator++(int)
@@ -59,16 +59,16 @@ public:
         iterator_base copy = *this;
         do
         {
-            m_current = POLICY::next(m_current);
-        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
+            ++m_current;
+        } while ((char*)m_current.operator->() >= (char*)m_owner->m_index.begin() && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
     iterator_base& operator--()
     {
         do
         {
-            m_current = POLICY::previous(m_current);
-        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
+            --m_current;
+        } while ((char*)m_current.operator->() >= (char*)m_owner->m_index.begin() && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
     iterator_base  operator--(int)
@@ -76,8 +76,8 @@ public:
         iterator_base copy = *this;
         do
         {
-            m_current = POLICY::previous(m_current);
-        } while (m_current.operator->() >= m_owner->m_index.begin() && m_current.operator->() < m_owner->m_index.end());
+            --m_current;
+        } while ((char*)m_current.operator->() >= (char*)m_owner->m_index.begin() && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
 };
@@ -88,14 +88,8 @@ struct hashmap<Key, Value, Hash>::iterator_policy
     typedef typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef typename hashmap<Key, Value, Hash>::value_type* pointer;
-    static typename hashmap<Key, Value, Hash>::list_iterator next(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return ++it;
-    }
-    static typename hashmap<Key, Value, Hash>::list_iterator previous(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return --it;
-    }
+    typedef typename hashmap<Key, Value, Hash>::item item;
+    typedef typename hashmap<Key, Value, Hash>::list_iterator iterator;
 };
 template< typename Key, typename Value, typename Hash >
 struct hashmap<Key, Value, Hash>::const_iterator_policy
@@ -103,14 +97,8 @@ struct hashmap<Key, Value, Hash>::const_iterator_policy
     typedef const typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef const typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef const typename hashmap<Key, Value, Hash>::value_type* pointer;
-    static typename hashmap<Key, Value, Hash>::list_iterator next(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return ++it;
-    }
-    static typename hashmap<Key, Value, Hash>::list_iterator previous(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return --it;
-    }
+    typedef const typename hashmap<Key, Value, Hash>::item item;
+    typedef typename hashmap<Key, Value, Hash>::const_list_iterator iterator;
 };
 template< typename Key, typename Value, typename Hash >
 struct hashmap<Key, Value, Hash>::reverse_iterator_policy
@@ -118,14 +106,8 @@ struct hashmap<Key, Value, Hash>::reverse_iterator_policy
     typedef typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef typename hashmap<Key, Value, Hash>::value_type* pointer;
-    static typename hashmap<Key, Value, Hash>::list_iterator next(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return --it;
-    }
-    static typename hashmap<Key, Value, Hash>::list_iterator previous(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return ++it;
-    }
+    typedef typename hashmap<Key, Value, Hash>::item item;
+    typedef typename hashmap<Key, Value, Hash>::reverse_list_iterator iterator;
 };
 template< typename Key, typename Value, typename Hash >
 struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
@@ -133,14 +115,8 @@ struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
     typedef const typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef const typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef const typename hashmap<Key, Value, Hash>::value_type* pointer;
-    static typename hashmap<Key, Value, Hash>::list_iterator next(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return --it;
-    }
-    static typename hashmap<Key, Value, Hash>::list_iterator previous(typename hashmap<Key, Value, Hash>::list_iterator it)
-    {
-        return ++it;
-    }
+    typedef const typename hashmap<Key, Value, Hash>::item item;
+    typedef typename hashmap<Key, Value, Hash>::const_reverse_list_iterator iterator;
 };
 
 
@@ -211,7 +187,7 @@ void hashmap<Key, Value, Hash>::reserve(size_type size)
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::begin()
 {
-    return ++iterator(*this, m_index.begin());
+    return ++iterator(*this, m_items.begin());
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -223,7 +199,7 @@ typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::end()
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::begin() const
 {
-    return ++const_iterator(*this, m_index.begin());
+    return ++const_iterator(*this, m_items.begin());
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -235,25 +211,25 @@ typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::en
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::reverse_iterator hashmap<Key, Value, Hash>::rbegin()
 {
-    return reverse_iterator();
+    return ++reverse_iterator(*this, m_items.rbegin());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::reverse_iterator hashmap<Key, Value, Hash>::rend()
 {
-    return reverse_iterator();
+    return reverse_iterator(*this, m_items.rend());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, Hash>::rbegin() const
 {
-    return const_reverse_iterator();
+    return ++const_reverse_iterator(*this, m_items.rbegin());
 }
 
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, Hash>::rend() const
 {
-    return const_reverse_iterator();
+    return const_reverse_iterator(*this, m_items.rend());
 }
 
 template< typename Key, typename Value, typename Hash >
