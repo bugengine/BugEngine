@@ -49,7 +49,7 @@ ref<Logger> Logger::instance(const inamespace& name)
 
     for (u32 i = 0; i < name.size(); ++i)
     {
-        minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
+        /*minitl::hashmap< istring, ref<Logger> >::iterator it = result->m_children.find(name[i]);
         if (it == result->m_children.end())
         {
             ref<Logger> next = ref<Logger>::create(Arena::debug(), result, name[i]);
@@ -57,7 +57,7 @@ ref<Logger> Logger::instance(const inamespace& name)
             result = next;
         }
         else
-            result = it->second;
+            result = it->second;*/
     }
     return result;
 }

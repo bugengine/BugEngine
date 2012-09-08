@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include <core/string/istring.hh>
 #include <minitl/vector.hh>
+#include <minitl/pair.hh>
 
 namespace BugEngine
 {
@@ -37,10 +38,10 @@ class be_api(CORE) Logger : public minitl::refcountable
     friend struct ScopedLogListener;
     BE_NOCOPY(Logger);
 private:
-    minitl::vector< minitl::weak<ILogListener> >    m_listeners;
-    minitl::hashmap< istring, minitl::ref<Logger> > m_children;
-    minitl::weak<Logger>                            m_parent;
-    istring                                         m_name;
+    minitl::vector< minitl::weak<ILogListener> >                    m_listeners;
+    minitl::vector< minitl::pair<istring, minitl::ref<Logger> > >   m_children;
+    minitl::weak<Logger>                                            m_parent;
+    istring                                                         m_name;
 private:
     Logger();
 public:

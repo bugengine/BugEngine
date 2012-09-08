@@ -5,6 +5,7 @@
 #define BE_DEBUG_RUNTIME_DWARF_HH_
 /*****************************************************************************/
 #include    <runtime/symbols.hh>
+#include    <minitl/hash_map.hh>
 #include    <elf.hh>
 
 namespace BugEngine { namespace Runtime
