@@ -6,42 +6,6 @@
 #include    <core/environment.hh>
 #include    <rtti/classinfo.script.hh>
 
-#include    <dlfcn.h>
-
-#ifndef     PLUGIN_PREFIX
-# define    PLUGIN_PREFIX "lib"
-#endif
-#ifndef     PLUGIN_EXT
-# define    PLUGIN_EXT ".so"
-#endif
-
-#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                \
-    BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
-    extern "C" BE_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                     \
-    {                                                                                           \
-        return BugEngine::be_##name##_Namespace().operator->();                                 \
-    }
-#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                     \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)
-#define BE_PLUGIN_NAMESPACE_REGISTER()                                                          \
-    BE_PLUGIN_NAMESPACE_REGISTER_(BE_PROJECTSHORTNAME)
-
-#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                        \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name);                                                   \
-    extern "C" BE_EXPORT interface* be_createPlugin (const ::BugEngine::PluginContext& context) \
-    {                                                                                           \
-        void* m = ::BugEngine::Arena::general().alloc<klass>();                                 \
-        return new(m) klass(context);                                                           \
-    }                                                                                           \
-    extern "C" BE_EXPORT void be_destroyPlugin(klass* cls)                                      \
-    {                                                                                           \
-        minitl::checked_destroy(cls);                                                           \
-        ::BugEngine::Arena::general().free(cls);                                                \
-    }
-#define BE_PLUGIN_REGISTER_NAMED_(name, interface, klass)                                       \
-    BE_PLUGIN_REGISTER_NAMED(name, interface, klass)
-#define BE_PLUGIN_REGISTER(interface, klass)                                                    \
-    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTSHORTNAME, interface, klass)
 
 
 namespace BugEngine
@@ -49,17 +13,6 @@ namespace BugEngine
 
 static void* loadLibrary(const inamespace& pluginName)
 {
-    const minitl::format<1024u>& plugingFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
-    const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
-    static const ipath pluginSubdir = ipath("plugins");
-    ifilename::Filename pluginPath = (pluginDir + pluginSubdir + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | pluginPath.name);
-    void* handle = dlopen(pluginPath.name, RTLD_NOW|RTLD_LOCAL);
-    if (!handle)
-    {
-        be_error(dlerror());
-    }
-    return handle;
 }
 
 template< typename Interface >

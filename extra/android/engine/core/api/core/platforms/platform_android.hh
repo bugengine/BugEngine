@@ -13,7 +13,6 @@
 #define freea(p)
 #define DIRENT_H    <dirent.h>
 #define PLUGIN_EXT  ".so"
-#define PLUGIN_H    <plugin/posix/plugin.inl>
 
 /*****************************************************************************/
 #endif

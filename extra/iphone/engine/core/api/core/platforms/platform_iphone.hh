@@ -14,7 +14,6 @@
 #define freea(p)
 #define DIRENT_H    <dirent.h>
 #define PLUGIN_EXT  ".dylib"
-#define PLUGIN_H    <plugin/posix/plugin.inl>
 
 /*****************************************************************************/
 #endif
