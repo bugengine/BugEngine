@@ -91,7 +91,7 @@ public:
 
 #include    <minitl/inl/hash_map.inl>
 
-static minitl::hashmap<int,int>::const_iterator it = ((const minitl::hashmap<int,int>*)0)->begin();
+static minitl::hashmap<int,int>::const_reverse_iterator it = ((const minitl::hashmap<int,int>*)0)->rbegin();
 
 /*****************************************************************************/
 #endif
