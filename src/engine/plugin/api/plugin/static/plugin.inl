@@ -8,30 +8,6 @@
 namespace BugEngine { namespace impl
 {
 
-class be_api(PLUGIN) PluginList
-{
-    BE_NOCOPY(PluginList);
-private:
-    static const size_t s_maxPlugins = 64;
-    static size_t       s_currentPlugin;
-    static PluginList*  s_plugins[s_maxPlugins];
-public:
-    typedef void*(*Create)(const PluginContext& context);
-    typedef void(*Destroy)(void*);
-    typedef raw<RTTI::Class> (*Namespace)();
-public:
-    const char* const   name;
-    Create const        create;
-    Destroy const       destroy;
-    Namespace const     ns;
-public:
-    PluginList(const char* name, Create c, Destroy d, Namespace n);
-    ~PluginList();
-    static PluginList* findPlugin(const char *name);
-};
-
-}}
-
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(fullname, name)                              \
     BE_PLUGIN_NAMESPACE_CREATE_(name)                                                   \
     BE_EXPORT BugEngine::impl::PluginList s_##name##Plugin(                             \
