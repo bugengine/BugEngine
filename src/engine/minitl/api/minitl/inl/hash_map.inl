@@ -16,15 +16,15 @@ struct hashmap<Key, Value, Hash>::iterator_base
 private:
     typedef typename POLICY::iterator   iterator;
 private:
-    hashmap<Key, Value, Hash>*  m_owner;
-    typename POLICY::iterator   m_current;
+    const hashmap<Key, Value, Hash>*    m_owner;
+    typename POLICY::iterator           m_current;
 public:
     iterator_base()
         :   m_owner(0)
         ,   m_current()
     {
     }
-    iterator_base(hashmap<Key, Value, Hash>& owner, typename POLICY::iterator l)
+    iterator_base(const hashmap<Key, Value, Hash>& owner, iterator l)
         :   m_owner(&owner)
         ,   m_current(l)
     {
