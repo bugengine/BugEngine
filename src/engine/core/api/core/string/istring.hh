@@ -131,7 +131,8 @@ be_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 }
 
 #include    <minitl/format.hh>
-#include    <minitl/hash_map.hh>
+#include    <minitl/hash.hh>
+
 namespace minitl
 {
 

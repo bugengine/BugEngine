@@ -5,6 +5,7 @@
 #define BE_MINITL_HASH_MAP_HH_
 /*****************************************************************************/
 #include    <minitl/pair.hh>
+#include    <minitl/hash.hh>
 #include    <minitl/traits.hh>
 #include    <minitl/iterator.hh>
 #include    <minitl/intrusive_list.hh>
@@ -12,9 +13,6 @@
 
 namespace minitl
 {
-
-template< typename T >
-struct hash;
 
 template< typename Key, typename Value, typename Hash = hash<Key> >
 class hashmap
@@ -45,7 +43,10 @@ private:
         value_type value;
         item(const value_type& value) : value(value) {}
     };
-    typedef typename intrusive_list<empty_item>::iterator list_iterator;
+    typedef typename intrusive_list<empty_item>::iterator               list_iterator;
+    typedef typename intrusive_list<empty_item>::const_iterator         const_list_iterator;
+    typedef typename intrusive_list<empty_item>::reverse_iterator       reverse_list_iterator;
+    typedef typename intrusive_list<empty_item>::const_reverse_iterator const_reverse_list_iterator;
     typedef pair<empty_item, list_iterator> index_item;
 private:
     pool<item>                      m_itemPool;
@@ -89,6 +90,8 @@ public:
 }
 
 #include    <minitl/inl/hash_map.inl>
+
+static minitl::hashmap<int,int>::const_iterator it = ((const minitl::hashmap<int,int>*)0)->begin();
 
 /*****************************************************************************/
 #endif
