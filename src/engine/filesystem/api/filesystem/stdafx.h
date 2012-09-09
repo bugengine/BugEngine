@@ -8,11 +8,6 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#include    <rtti/typeinfo.hh>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/value.hh>
-#include    <rtti/value.inl>
-
 #if defined(building_filesystem) || defined(FILESYSTEM_EXPORTS)
 # define    FILESYSTEMEXPORT    BE_EXPORT
 #elif defined(filesystem_dll)

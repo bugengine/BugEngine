@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <plugin/dynobject.hh>
 
-namespace BugEngine { namespace Plugin
+namespace BugEngine
 {
 
 namespace RTTI
@@ -21,12 +21,15 @@ class ResourceManager;
 class Folder;
 class Scheduler;
 
+namespace Plugin
+{
+
 struct be_api(PLUGIN) Context
 {
     weak<Resource::ResourceManager> resourceManager;
     ref<Folder>                     dataFolder;
     weak<Scheduler>                 scheduler;
-    PluginContext(weak<Resource::ResourceManager> manager, ref<Folder> dataFolder, weak<Scheduler> scheduler);
+    Context(weak<Resource::ResourceManager> manager, ref<Folder> dataFolder, weak<Scheduler> scheduler);
 };
 
 template< typename Interface >
@@ -37,7 +40,7 @@ private:
 public:
     enum PreloadType { Preload };
     Plugin(const inamespace &pluginName, PreloadType preload);
-    Plugin(const inamespace &pluginName, const PluginContext& context);
+    Plugin(const inamespace &pluginName, const Context& context);
     ~Plugin();
 
     Interface* operator->()             { return m_interface; }

@@ -235,42 +235,77 @@ typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, H
 template< typename Key, typename Value, typename Hash >
 size_type hashmap<Key, Value, Hash>::size() const
 {
-    return 0;
+    return m_count;
 }
 
 template< typename Key, typename Value, typename Hash >
 bool hashmap<Key, Value, Hash>::empty() const
 {
-    return true;
+    return m_count == 0;
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::reference hashmap<Key, Value, Hash>::operator[](const Key& /*key*/)
+typename hashmap<Key, Value, Hash>::reference hashmap<Key, Value, Hash>::operator[](const Key& key)
 {
-    return *(hashmap<Key, Value, Hash>::value_type*)0;
+    u32 hash = Hash()(key) % (m_index.count()-1);
+    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    {
+        if (((item*)it.operator->())->first == key)
+        {
+            return ((item*)it.operator->())->second;
+        }
+    }
+    be_error("object not found in hash map for key %s" | key);
+    return *(Value*)0;
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::const_reference hashmap<Key, Value, Hash>::operator[](const Key& /*key*/) const
+typename hashmap<Key, Value, Hash>::const_reference hashmap<Key, Value, Hash>::operator[](const Key& key) const
 {
-    return *(const hashmap<Key, Value, Hash>::value_type*)0;
+    u32 hash = Hash()(key) % (m_index.count()-1);
+    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    {
+        if (((item*)it.operator->())->first == key)
+        {
+            return ((item*)it.operator->())->second;
+        }
+    }
+    be_error("object not found in hash map for key %s" | key);
+    return *(const Value*)0;
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(const Key& /*key*/)
+typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(const Key& key)
 {
-    return iterator();
+    u32 hash = Hash()(key) % (m_index.count()-1);
+    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    {
+        if (((item*)it.operator->())->value.first == key)
+        {
+            return iterator(*this, it);
+        }
+    }
+    return end();
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::find(const Key& /*key*/) const
+typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::find(const Key& key) const
 {
-    return const_iterator();
+    u32 hash = Hash()(key) % (m_index.count()-1);
+    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    {
+        if (((item*)it.operator->())->value.first == key)
+        {
+            return iterator(*this, it);
+        }
+    }
+    return end();
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(iterator /*it*/)
+typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(iterator it)
 {
+    m_itemPool.release((item*)it.operator->());
 }
 
 template< typename Key, typename Value, typename Hash >

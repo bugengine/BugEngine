@@ -4,8 +4,9 @@
 #ifndef BE_PLUGIN_DYNOBJECT_HH_
 #define BE_PLUGIN_DYNOBJECT_HH_
 /*****************************************************************************/
+#include    <core/string/istring.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Plugin
 {
 
 class DynamicObject
@@ -18,12 +19,12 @@ private:
 private:
     static Handle load(const inamespace& objectName, const ipath& objectPath);
     static void   unload(Handle handle);
-    static void*  getSymbolInternal(Handle handle, const istring& symbolName) const;
+    static void*  getSymbolInternal(Handle handle, const istring& symbolName);
 public:
     explicit DynamicObject(const inamespace &objectName, const ipath& objectPath);
     DynamicObject(const DynamicObject& other);
     ~DynamicObject();
-    DynamicObject& operator=(const Plugin& other);
+    DynamicObject& operator=(const DynamicObject& other);
 
     operator const void*() const        { return m_handle; }
     bool operator!() const              { return m_handle == 0; }
@@ -35,33 +36,7 @@ public:
     }
 };
 
-#ifdef BE_STATIC
-
-class be_api(PLUGIN) DynamicObjectList
-{
-    BE_NOCOPY(DynamicObjectList);
-private:
-    static const size_t s_maxDynamicObjects = 64;
-    static size_t       s_currentDynamicObject;
-    static PluginList*  s_dynamicObjects[s_maxDynamicObjects];
-    struct Symbol
-    {
-        const char* name;
-        void*       symbol;
-    };
-public:
-    const char* const   name;
-    Symbol              symbols[16];
-public:
-    DynamicObjectList(const char* name);
-    ~DynamicObjectList();
-    void registerSymbol(const char *name, void* value);
-    static DynamicObjectList* findPlugin(const char *name);
-};
-
-#endif
-
-}
+}}
 
 /*****************************************************************************/
 #endif

@@ -4,8 +4,11 @@
 #ifndef BE_RESOURCE_RESOURCEMANAGER_HH_
 #define BE_RESOURCE_RESOURCEMANAGER_HH_
 /*****************************************************************************/
-#include    <minitl/refcountable.hh>
+#include    <minitl/array.hh>
 #include    <minitl/intrusive_list.hh>
+#include    <minitl/refcountable.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/typeinfo.hh>
 #include    <resource/description.script.hh>
 #include    <filesystem/file.script.hh>
 

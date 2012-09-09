@@ -33,17 +33,17 @@ public:
         {
             m_allocator->free(m_data);
         }
-        inline Allocator& arena() const { return *m_allocator; }
-        T* data()                       { return m_data; }
-        const T* data() const           { return m_data; }
-        operator T*()                   { return m_data; }
-        operator const T*() const       { return m_data; }
-        u64 count() const               { return m_count; }
-        u64 byteCount() const           { return align(sizeof(T), be_alignof(T))*m_count; }
-        T* begin()                      { return m_data; }
-        T* end()                        { return m_data + m_count; }
-        const T* begin() const          { return m_data; }
-        const T* end() const            { return m_data + m_count; }
+        inline Allocator& arena() const         { return *m_allocator; }
+        T* data()                               { return m_data; }
+        const T* data() const                   { return m_data; }
+        operator T*()                           { return m_data; }
+        operator const T*() const               { return m_data; }
+        u64 count() const                       { return m_count; }
+        u64 byteCount() const                   { return align(sizeof(T), be_alignof(T))*m_count; }
+        T* begin()                              { return m_data; }
+        T* end()                                { return m_data + m_count; }
+        const T* begin() const                  { return m_data; }
+        const T* end() const                    { return m_data + m_count; }
 
         bool resize(u64 count)
         {

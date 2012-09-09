@@ -11,11 +11,6 @@
 #include    <resource/stdafx.h>
 #include    <scheduler/stdafx.h>
 
-#include    <rtti/typeinfo.hh>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/value.hh>
-#include    <rtti/value.inl>
-
 #if defined(building_plugin) || defined(PLUGIN_EXPORTS)
 # define    PLUGINEXPORT        BE_EXPORT
 #elif defined(system_dll)

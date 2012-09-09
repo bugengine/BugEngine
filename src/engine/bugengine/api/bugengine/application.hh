@@ -34,8 +34,8 @@ private:
     ref<Folder> const                       m_dataFolder;
     scoped<Resource::ResourceManager> const m_resourceManager;
     weak<Scheduler>                         m_scheduler;
-    PluginContext const                     m_pluginContext;
-    Plugin<IKernelScheduler>                m_cpuKernelScheduler;
+    Plugin::Context const                   m_pluginContext;
+    Plugin::Plugin<IKernelScheduler>        m_cpuKernelScheduler;
     ref<Task::TaskGroup>                    m_updateTask;
     ref<Task::TaskGroup>                    m_worldTask;
     minitl::vector< UpdateTask >            m_tasks;
@@ -52,7 +52,7 @@ private:
 protected:
     void addTask(ref<Task::ITask> task);
     void removeTask(ref<Task::ITask> task);
-    const PluginContext& pluginContext() const { return m_pluginContext; }
+    const Plugin::Context& pluginContext() const { return m_pluginContext; }
     Application(ref<Folder> dataFolder, weak<Scheduler> scheduler);
 public:
     virtual ~Application();

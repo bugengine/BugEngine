@@ -3,6 +3,7 @@
 
 #include    <resource/stdafx.h>
 #include    <resource/resourcemanager.hh>
+#include    <resource/loader.hh>
 
 namespace BugEngine { namespace Resource
 {
