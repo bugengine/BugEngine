@@ -22,9 +22,13 @@ static inline minitl::Allocator& string()
 
 struct hashIstring
 {
+    bool operator()(const char *str) const
+    {
+        return minitl::str_hash(str, strlen(str));
+    }
     bool operator()(const char *str1, const char *str2) const
     {
-        return strcmp(str1, str2) < 0;
+        return strcmp(str1, str2) == 0;
     }
 };
 

@@ -29,5 +29,14 @@ be_api(RTTI) minitl::Allocator& script();
 
 }}
 
+namespace BugEngine { namespace RTTI
+{
+
+struct Class;
+struct Type;
+class Value;
+
+}}
+
 /*****************************************************************************/
 #endif

@@ -9,11 +9,6 @@
 #include    <rtti/stdafx.h>
 #include    <filesystem/stdafx.h>
 
-#include    <rtti/typeinfo.hh>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/value.hh>
-#include    <rtti/value.inl>
-
 #if defined(building_resource) || defined(RESOURCE_EXPORTS)
 # define    RESOURCEEXPORT      BE_EXPORT
 #elif defined(resource_dll)

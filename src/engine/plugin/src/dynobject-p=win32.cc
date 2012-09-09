@@ -1,11 +1,12 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#include    <plugin/plugin.hh>
+#include    <plugin/stdafx.h>
+#include    <plugin/dynobject.hh>
 #include    <core/environment.hh>
 #include    <winerror.h>
 
-namespace BugEngine
+namespace BugEngine { namespace Plugin
 {
 
 DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ipath& pluginPath)
@@ -13,9 +14,9 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
     SetLastError(0);
     minitl::format<1024u> plugingFile = minitl::format<1024u>("%s.dll") | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
-    ifilename::Filename pluginPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | pluginPath.name);
-    HANDLE h = LoadLibrary(pluginPath.name);
+    ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
+    be_info("loading plugin %s (%s)" | pluginName | fullPath.name);
+    HANDLE h = LoadLibrary(fullPath.name);
     if (!h)
     {
         char *errorMessage = 0;
@@ -38,11 +39,10 @@ void DynamicObject::unload(Handle handle)
     FreeLibrary(static_cast<HMODULE>(handle));
 }
 
-void* DynamicObject::getSymbolInternal(Handle handle, const char* name)
+void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 {
-    return GetProcAddress(static_cast<HINSTANCE>(handle), name);
+    return GetProcAddress(static_cast<HINSTANCE>(handle), name.c_str());
 }
 
-
-}
+}}
 

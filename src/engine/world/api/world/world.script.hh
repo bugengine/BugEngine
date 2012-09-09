@@ -8,6 +8,7 @@
 #include    <scheduler/kernel/iproduct.script.hh>
 #include    <resource/description.script.hh>
 #include    <world/entity.script.hh>
+#include    <world/entitystorage.script.hh>
 #include    <core/memory/allocators/system.hh>
 
 

@@ -4,6 +4,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/ikernelscheduler.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 #include    <scheduler/kernel/cpumemoryprovider.hh>
 #include    <scheduler/kernel/istream.hh>
 #include    <scheduler/task/kerneltask.hh>

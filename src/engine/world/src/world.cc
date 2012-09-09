@@ -6,6 +6,9 @@
 #include    <world/entitystorage.script.hh>
 #include    <state.hh>
 #include    <scheduler/task/group.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/typeinfo.hh>
+#include    <rtti/value.inl>
 
 BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
 

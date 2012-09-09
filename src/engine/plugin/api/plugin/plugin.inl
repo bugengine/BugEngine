@@ -55,31 +55,25 @@ namespace BugEngine { namespace Plugin
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTSHORTNAME, interface, klass)
 
 
-Plugin::Plugin(const inamespace& pluginName, PreloadType preload)
+template< typename T >
+Plugin<T>::Plugin(const inamespace& pluginName, PreloadType preload)
     :   DynamicObject(pluginName, "plugins")
 {
-    
+    be_forceuse(preload);
 }
 
-Plugin::Plugin(const inamespace& pluginName, const Context& context)
+template< typename T >
+Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
     :   DynamicObject(pluginName, "plugins")
 {
-    
+    be_forceuse(context);
 }
 
-Plugin::~Plugin()
+template< typename T >
+Plugin<T>::~Plugin()
 {
     
 }
 
-T* Plugin::operator->()
-{
-    
-}
-
-const T* Plugin::operator->() const
-{
-    
-}
 
 }}

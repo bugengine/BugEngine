@@ -10,11 +10,6 @@
 #include    <filesystem/stdafx.h>
 #include    <resource/stdafx.h>
 
-#include    <rtti/typeinfo.hh>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/value.hh>
-#include    <rtti/value.inl>
-
 #if defined(building_scheduler) || defined(SCHEDULER_EXPORTS)
 # define    SCHEDULEREXPORT     BE_EXPORT
 #elif defined(system_dll)

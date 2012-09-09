@@ -6,7 +6,6 @@
 #include    <filesystem/folder.script.hh>
 #include    <scheduler/scheduler.hh>
 #include    <resource/resourcemanager.hh>
-#include    <cstring>
 
 namespace BugEngine { namespace Plugin
 {
@@ -18,4 +17,4 @@ Context::Context(weak<Resource::ResourceManager> manager, ref<Folder> folder, we
 {
 }
 
-}
+}}
