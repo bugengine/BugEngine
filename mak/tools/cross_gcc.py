@@ -396,8 +396,8 @@ def add_standard_gcc_flags(conf):
 
 	v['CFLAGS_warnnone'] = ['-w']
 	v['CXXFLAGS_warnnone'] = ['-w']
-	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Winline', '-Wno-unknown-pragmas', '-Werror']
-	v['CXXFLAGS_warnall'] = ['-Wall', '-Wno-unknown-pragmas', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+	v['CFLAGS_warnall'] = ['-std=c99', '-Wall', '-Winline', '-Werror']
+	v['CXXFLAGS_warnall'] = ['-Wall', '-Werror', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
 
 	v['CFLAGS_debug'] = ['-pipe', '-g', '-D_DEBUG']
