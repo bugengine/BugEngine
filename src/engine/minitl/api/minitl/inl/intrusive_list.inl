@@ -26,6 +26,7 @@ protected:
     ~item();
     item(const item& other);
     item& operator=(const item& other);
+    void swap(item& other);
 private:
     void insert(const item* after) const;
 protected:
@@ -59,6 +60,13 @@ intrusive_list<T, INDEX>::item::~item()
 {
     be_assert_recover(m_next == this, "destroying item that is still in a list", unhook());
     be_assert_recover(m_previous == this, "destroying item that is still in a list", unhook());
+}
+
+template< typename T, int INDEX >
+void intrusive_list<T, INDEX>::item::swap(item& other)
+{
+    minitl::swap(m_next, other.m_next);
+    minitl::swap(m_previous, other.m_previous);
 }
 
 template< typename T, int INDEX >
@@ -400,6 +408,12 @@ void                                                        intrusive_list<T, IN
         ++first;
         i->unhook();
     }
+}
+
+template< typename T, int INDEX >
+void                                                        intrusive_list<T, INDEX>::swap(intrusive_list<T, INDEX>& other)
+{
+    m_root.swap(other.m_root);
 }
 
 }

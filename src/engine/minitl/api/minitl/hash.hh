@@ -16,11 +16,11 @@ struct hash;
             (static_cast<u32>((d)[1]) << 8)          \
         +   (static_cast<u32>((d)[0])) )
 
-static inline size_t str_hash(const char * _data, size_t len)
+static inline u32 str_hash(const char * _data, u32 len)
 {
     const u8 *data = reinterpret_cast<const u8 *>(_data);
-    size_t hashvalue = len, tmp;
-    size_t rem;
+    u32 hashvalue = len, tmp;
+    u32 rem;
     if (len == 0 || data == NULL) return 0;
 
     rem = len & 3;

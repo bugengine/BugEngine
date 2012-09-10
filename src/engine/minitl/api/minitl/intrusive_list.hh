@@ -65,6 +65,7 @@ public:
     const_reference         back() const;
 
     void                    clear();
+    void                    swap(intrusive_list& other);
 };
 
 }

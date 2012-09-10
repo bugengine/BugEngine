@@ -52,16 +52,17 @@ private:
     pool<item>                      m_itemPool;
     intrusive_list<empty_item>      m_items;
     Allocator::Block<index_item>    m_index;
-    size_type                       m_count;
+    u32                             m_count;
 private:
     void buildIndex();
+    void grow(u32 size);
 public:
-    hashmap(Allocator& allocator, size_type reserved = 0);
+    hashmap(Allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
     hashmap& operator=(const hashmap& other);
 
-    void                    reserve(size_type size);
+    void                    reserve(u32 size);
 
     iterator                begin();
     iterator                end();
@@ -72,11 +73,10 @@ public:
     const_reverse_iterator  rbegin() const;
     const_reverse_iterator  rend() const;
 
-    size_type               size() const;
+    u32                     size() const;
     bool                    empty() const;
 
     reference               operator[](const Key& key);
-    const_reference         operator[](const Key& key) const;
 
     iterator                find(const Key& key);
     const_iterator          find(const Key& key) const;
@@ -90,8 +90,6 @@ public:
 }
 
 #include    <minitl/inl/hash_map.inl>
-
-static minitl::hashmap<int,int>::const_reverse_iterator it = ((const minitl::hashmap<int,int>*)0)->rbegin();
 
 /*****************************************************************************/
 #endif

@@ -68,6 +68,14 @@ void pool<T>::release(T* t)
     m_items.push((inode*)t);
 }
 
+template< typename T >
+void pool<T>::swap(pool<T>& other)
+{
+    minitl::swap(m_items, other.m_items);
+    m_pool.swap(other.m_pool);
+    minitl::swap(m_end, other.m_end);
+}
+
 }
 
 /*****************************************************************************/

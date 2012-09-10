@@ -22,9 +22,9 @@ static inline minitl::Allocator& string()
 
 struct hashIstring
 {
-    bool operator()(const char *str) const
+    u32 operator()(const char *str) const
     {
-        return minitl::str_hash(str, strlen(str));
+        return (u32)minitl::str_hash(str, (u32)strlen(str));
     }
     bool operator()(const char *str1, const char *str2) const
     {
