@@ -22,12 +22,12 @@ namespace BugEngine { namespace Editor
 class Editor : public Application
 {
 private:
-    Plugin<void>                const   m_renderer;
-    Plugin<Resource::ILoader>   const   m_packageManager;
-    Plugin<Resource::ILoader>   const   m_luaScripting;
-    ref<const Package>          const   m_mainPackage;
+    Plugin::Plugin<void>                const   m_renderer;
+    Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin::Plugin<Resource::ILoader>   const   m_luaScripting;
+    ref<const Package>                  const   m_mainPackage;
 public:
-    Editor(const PluginContext& context);
+    Editor(const Plugin::Context& context);
     ~Editor();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

@@ -121,10 +121,10 @@ struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
 
 
 template< typename Key, typename Value, typename Hash >
-hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, size_type reserved)
-    :   m_itemPool(allocator, minitl::max(nextPowerOf2(reserved), size_type(8)))
+hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, u32 reserved)
+    :   m_itemPool(allocator, minitl::max(nextPowerOf2(reserved), u32(8)))
     ,   m_items()
-    ,   m_index(allocator, 1+minitl::max(nextPowerOf2(reserved), size_type(8)))
+    ,   m_index(allocator, 1+minitl::max(nextPowerOf2(reserved), u32(8)))
     ,   m_count(0)
 {
     buildIndex();
@@ -170,6 +170,36 @@ void hashmap<Key, Value, Hash>::buildIndex()
 }
 
 template< typename Key, typename Value, typename Hash >
+void hashmap<Key, Value, Hash>::grow(u32 size)
+{
+    be_assert(size > m_count, "cannot resize from %d to smaller capacity %d" | m_count | size);
+    size = nextPowerOf2(size);
+    pool<item> newPool(m_index.arena(), size);
+    Allocator::Block<index_item> newIndex(m_index.arena(), size+1);
+    intrusive_list<empty_item> newList;
+    newList.swap(m_items);
+    newPool.swap(m_itemPool);
+    newIndex.swap(m_index);
+    buildIndex();
+    for (index_item* it = newIndex.begin(); it != newIndex.end()-1; /*nothing*/)
+    {
+        list_iterator object = it->second;
+        object++;
+        while (object != (it+1)->second)
+        {
+            list_iterator itemToCopy = object++;
+            u32 hash = Hash()(((item*)(itemToCopy.operator->()))->value.first);
+            item* newItem = m_itemPool.allocate(((item*)(itemToCopy.operator->()))->value);
+            m_items.insert(m_index[hash%(m_index.count()-1)].second, *newItem);
+            newPool.release(&static_cast<item&>(*itemToCopy));
+        }
+        index_item* indexToDelete = it++;
+        indexToDelete->~index_item();
+    }
+    (m_index.end()-1)->~index_item();
+}
+
+template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>& hashmap<Key, Value, Hash>::operator=(const hashmap& other)
 {
     be_forceuse(other);
@@ -178,10 +208,10 @@ hashmap<Key, Value, Hash>& hashmap<Key, Value, Hash>::operator=(const hashmap& o
 }
 
 template< typename Key, typename Value, typename Hash >
-void hashmap<Key, Value, Hash>::reserve(size_type size)
+void hashmap<Key, Value, Hash>::reserve(u32 size)
 {
-    be_forceuse(size);
-    be_notreached();
+    if (size >= m_index.count())
+        grow(size);
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -233,7 +263,7 @@ typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, H
 }
 
 template< typename Key, typename Value, typename Hash >
-size_type hashmap<Key, Value, Hash>::size() const
+u32 hashmap<Key, Value, Hash>::size() const
 {
     return m_count;
 }
@@ -247,31 +277,7 @@ bool hashmap<Key, Value, Hash>::empty() const
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::reference hashmap<Key, Value, Hash>::operator[](const Key& key)
 {
-    u32 hash = Hash()(key) % (m_index.count()-1);
-    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
-    {
-        if (((item*)it.operator->())->first == key)
-        {
-            return ((item*)it.operator->())->second;
-        }
-    }
-    be_error("object not found in hash map for key %s" | key);
-    return *(Value*)0;
-}
-
-template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::const_reference hashmap<Key, Value, Hash>::operator[](const Key& key) const
-{
-    u32 hash = Hash()(key) % (m_index.count()-1);
-    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
-    {
-        if (((item*)it.operator->())->first == key)
-        {
-            return ((item*)it.operator->())->second;
-        }
-    }
-    be_error("object not found in hash map for key %s" | key);
-    return *(const Value*)0;
+    return insert(key, Value()).first->second;
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -305,19 +311,36 @@ typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::fi
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(iterator it)
 {
+    m_count--;
     m_itemPool.release((item*)it.operator->());
 }
 
 template< typename Key, typename Value, typename Hash >
-minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& /*k*/, const Value& /*value*/)
+minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& key, const Value& value)
 {
-    return minitl::make_pair(iterator(), false);
+    u32 hash = Hash()(key) % (m_index.count()-1);
+    list_iterator it = ++m_index[hash].second;
+    for (; it != m_index[hash+1].second; ++it)
+    {
+        if (((item*)it.operator->())->value.first == key)
+        {
+            return minitl::make_pair(iterator(*this, it), false);
+        }
+    }
+    --it;
+    if (m_count == m_index.count()-1)
+    {
+        grow(m_count*2);
+    }
+    m_count++;
+    item* i = m_itemPool.allocate(minitl::make_pair(key, value));
+    return minitl::make_pair(iterator(*this, m_items.insert(it, *i)), true);
 }
 
 template< typename Key, typename Value, typename Hash >
-minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const minitl::pair<const Key, Value>& /*v*/)
+minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const minitl::pair<const Key, Value>& v)
 {
-    return minitl::make_pair(iterator(), false);
+    return insert(v.first, v.second);
 }
 
 }

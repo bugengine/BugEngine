@@ -34,6 +34,8 @@ public:
     template< typename T1, typename T2, typename T3 >
     T* allocate(const T1& t1, const T2& t2, const T3& t3);
     void release(T* t);
+
+    void swap(pool<T>& other);
 };
 
 }

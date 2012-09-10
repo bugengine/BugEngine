@@ -29,7 +29,7 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
             0,
             NULL);
         be_error("%s : %s"|pluginName|errorMessage);
-        ::LocalFree(errorMessage)
+        ::LocalFree(errorMessage);
     }
     return h;
 }
