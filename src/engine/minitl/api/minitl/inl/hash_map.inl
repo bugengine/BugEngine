@@ -29,11 +29,13 @@ public:
         ,   m_current(l)
     {
     }
-    bool operator==(const iterator_base& other) const
+    template< typename OTHER_POLICY >
+    bool operator==(const iterator_base<OTHER_POLICY>& other) const
     {
         return m_owner == other.m_owner && m_current == other.m_current;
     }
-    bool operator!=(const iterator_base& other) const
+    template< typename OTHER_POLICY >
+    bool operator!=(const iterator_base<OTHER_POLICY>& other) const
     {
         return m_owner != other.m_owner || m_current != other.m_current;
     }
@@ -284,7 +286,8 @@ template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(const Key& key)
 {
     u32 hash = Hash()(key) % (m_index.count()-1);
-    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    list_iterator it = m_index[hash].second;
+    for (++it; it != m_index[hash+1].second; ++it)
     {
         if (((item*)it.operator->())->value.first == key)
         {
@@ -298,11 +301,12 @@ template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::find(const Key& key) const
 {
     u32 hash = Hash()(key) % (m_index.count()-1);
-    for (list_iterator it = ++m_index[hash].second; it != m_index[hash+1].second; ++it)
+    list_iterator it = list_iterator(m_index[hash].second);
+    for (++it; it != m_index[hash+1].second; ++it)
     {
         if (((item*)it.operator->())->value.first == key)
         {
-            return iterator(*this, it);
+            return const_iterator(*this, it);
         }
     }
     return end();

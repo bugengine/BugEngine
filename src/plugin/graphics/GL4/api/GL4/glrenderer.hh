@@ -34,7 +34,7 @@ private:
     scoped<GLMemoryProvider>    m_openGLMemoryProvider;
     Plugin<IKernelScheduler>    m_openCLScheduler;
 public:
-    GLRenderer(const PluginContext& context);
+    GLRenderer(const Plugin::Context& context);
     ~GLRenderer();
 
     u32                     getMaxSimultaneousRenderTargets() const override { return 1; }

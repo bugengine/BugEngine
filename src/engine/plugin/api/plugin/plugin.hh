@@ -33,7 +33,7 @@ struct be_api(PLUGIN) Context
 };
 
 template< typename Interface >
-class Plugin : DynamicObject
+class Plugin : public DynamicObject
 {
 private:
     Interface*      m_interface;
@@ -50,6 +50,16 @@ public:
 };
 
 }}
+
+#ifdef BE_STATIC
+#define _BE_PLUGIN_EXPORT                   static
+#define _BE_REGISTER_PLUGIN(name)           
+#define _BE_REGISTER_METHOD(name,type,x)    
+#else
+#define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
+#define _BE_REGISTER_PLUGIN(name)           
+#define _BE_REGISTER_METHOD(name,type,x)    
+#endif
 
 #include    <plugin/plugin.inl>
 

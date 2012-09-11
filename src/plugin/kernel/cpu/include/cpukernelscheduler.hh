@@ -23,7 +23,7 @@ private:
     weak<Resource::ResourceManager> m_resourceManager;
     scoped<CPUKernelLoader>         m_loader;
 public:
-    CPUKernelScheduler(const PluginContext& context);
+    CPUKernelScheduler(const Plugin::Context& context);
     ~CPUKernelScheduler();
 
     virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) override;

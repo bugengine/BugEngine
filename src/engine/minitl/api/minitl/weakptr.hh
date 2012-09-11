@@ -4,9 +4,10 @@
 #ifndef BE_MINITL_WEAKPTR_HH_
 #define BE_MINITL_WEAKPTR_HH_
 /*****************************************************************************/
-#include <minitl/refcountable.hh>
-#include <minitl/scopedptr.hh>
-#include <minitl/refptr.hh>
+#include    <minitl/refcountable.hh>
+#include    <minitl/scopedptr.hh>
+#include    <minitl/refptr.hh>
+#include    <minitl/hash.hh>
 
 
 namespace minitl
@@ -102,6 +103,19 @@ public:
         #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->decweak(); m_ptr = 0;
         #endif
+    }
+};
+
+template< typename T >
+struct hash< weak<T> >
+{
+    u32 operator()(weak<T> t)
+    {
+        return u32(ptrdiff_t(t.operator->()));
+    }
+    bool operator()(weak<T> t1, weak<T> t2)
+    {
+        return t1 == t2;
     }
 };
 

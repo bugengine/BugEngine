@@ -24,13 +24,20 @@ private:
         const char* name;
         void*       symbol;
     };
-public:
+private:
     const char* const   name;
     Symbol              symbols[16];
+private:
+    bool registerSymbolInternal(const char *name, void* value);
 public:
     DynamicObjectList(const char* name);
     ~DynamicObjectList();
-    void registerSymbol(const char *name, void* value);
+
+    template< typename SYMBOL >
+    bool registerSymbol(SYMBOL symbol, const char *name)
+    {
+        return registerSymbolInternal(name);
+    }
     static DynamicObjectList* findPlugin(const char *name);
 };
 

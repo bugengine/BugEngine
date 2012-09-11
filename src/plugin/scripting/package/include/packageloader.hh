@@ -22,7 +22,7 @@ class PackageLoader : public ScriptEngine<Package>
 private:
     scoped<PackageBuilder::PackageBuilder>   m_packageBuilder;
 public:
-    PackageLoader(const PluginContext& context);
+    PackageLoader(const Plugin::Context& context);
     ~PackageLoader();
 private:
     virtual void runBuffer(weak<const Package> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;

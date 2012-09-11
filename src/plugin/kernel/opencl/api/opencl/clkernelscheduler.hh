@@ -22,7 +22,7 @@ private:
     static cl_context createCLContextOnPlatform(const cl_context_properties* properties, cl_platform_id platform, cl_device_type deviceType);
     static cl_context createCLContext(const cl_context_properties* properties);
 public:
-    OpenCLKernelScheduler(const PluginContext& context, const cl_context_properties* properties = 0);
+    OpenCLKernelScheduler(const Plugin::Context& context, const cl_context_properties* properties = 0);
     ~OpenCLKernelScheduler();
     virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) override;
 public:

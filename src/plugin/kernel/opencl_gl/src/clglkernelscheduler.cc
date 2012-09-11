@@ -7,7 +7,7 @@
 namespace BugEngine
 {
 
-OpenCLOpenGLKernelScheduler::OpenCLOpenGLKernelScheduler(const PluginContext& context)
+OpenCLOpenGLKernelScheduler::OpenCLOpenGLKernelScheduler(const Plugin::Context& context)
     :   OpenCLKernelScheduler(context, &createPlatformSpecificContextProperties()[0])
 {
 }

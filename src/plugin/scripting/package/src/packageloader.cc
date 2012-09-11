@@ -22,7 +22,7 @@ minitl::Allocator& package()
 namespace BugEngine { namespace PackageManager
 {
 
-PackageLoader::PackageLoader(const PluginContext& context)
+PackageLoader::PackageLoader(const Plugin::Context& context)
     :   ScriptEngine<Package>(Arena::package(), context.resourceManager)
     ,   m_packageBuilder(scoped<PackageBuilder::PackageBuilder>::create(Arena::package(), context.dataFolder))
 {

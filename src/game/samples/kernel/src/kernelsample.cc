@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-KernelSample::KernelSample(const PluginContext& context)
+KernelSample::KernelSample(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
     ,   m_packageManager("scripting.package", pluginContext())
     ,   m_lua("scripting.lua", pluginContext())

@@ -20,7 +20,7 @@ private:
     lua_State*  m_state;
     ref<Logger> m_logger;
 public:
-    Context(const PluginContext& context);
+    Context(const Plugin::Context& context);
     ~Context();
 private:
     void runBuffer(weak<const LuaScript> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;

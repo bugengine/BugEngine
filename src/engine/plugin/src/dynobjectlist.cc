@@ -50,7 +50,7 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
     return 0;
 }
 
-void DynamicObjectList::registerSymbol(const char* name, void* value)
+bool DynamicObjectList::registerSymbolInternal(const char* name, void* value)
 {
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
@@ -58,10 +58,11 @@ void DynamicObjectList::registerSymbol(const char* name, void* value)
         {
             m_symbols[i].name = name;
             m_symbols[i].value = value;
-            return;
+            return true;
         }
     }
     be_notreached();
+    return false;
 }
 
 void* DynamicObjectList::findSymbol(const char* name)

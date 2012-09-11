@@ -158,7 +158,7 @@ const RTTI::Value& Package::getValue(weak<const Object> object) const
 
 void Package::loadPlugin(inamespace plugin)
 {
-    Plugin<void*> p(plugin, Plugin<void*>::Preload);
+    Plugin::Plugin<void*> p(plugin, Plugin::Plugin<void*>::Preload);
     if (!p)
     {
         be_notreached();

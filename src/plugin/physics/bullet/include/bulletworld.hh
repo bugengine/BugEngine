@@ -21,7 +21,7 @@ namespace BugEngine { namespace Physics { namespace Bullet
 class BulletWorld : public minitl::pointer
 {
 public:
-    BulletWorld(const PluginContext& context);
+    BulletWorld(const Plugin::Context& context);
     ~BulletWorld();
 
     void step();

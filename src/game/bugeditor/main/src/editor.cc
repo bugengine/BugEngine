@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Editor
 {
 
-Editor::Editor(const PluginContext& context)
+Editor::Editor(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
     ,   m_renderer("graphics.GL4", pluginContext())
     ,   m_packageManager("scripting.package", pluginContext())

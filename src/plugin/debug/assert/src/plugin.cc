@@ -18,7 +18,7 @@ class AssertSetup : public minitl::pointer
 private:
     minitl::AssertionCallback_t   m_previousAssertionCallback;
 public:
-    AssertSetup(const BugEngine::PluginContext& /*context*/)
+    AssertSetup(const BugEngine::Plugin::Context& /*context*/)
         :   m_previousAssertionCallback(minitl::setAssertionCallback(AssertionCallback))
     {
             be_info("installed assert callback");

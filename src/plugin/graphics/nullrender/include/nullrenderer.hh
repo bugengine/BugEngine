@@ -15,7 +15,7 @@ class NullRenderer : public IRenderer
 {
     BE_NOCOPY(NullRenderer);
 public:
-    NullRenderer(const PluginContext& context);
+    NullRenderer(const Plugin::Context& context);
     ~NullRenderer();
 
     u32                 getMaxSimultaneousRenderTargets() const override { return 1; }
