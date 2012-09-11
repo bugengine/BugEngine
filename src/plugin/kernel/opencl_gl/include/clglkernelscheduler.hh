@@ -15,7 +15,7 @@ class OpenCLOpenGLKernelScheduler : public OpenCLKernelScheduler
 private:
     static minitl::array<cl_context_properties> createPlatformSpecificContextProperties();
 public:
-    OpenCLOpenGLKernelScheduler(const PluginContext& context);
+    OpenCLOpenGLKernelScheduler(const Plugin::Context& context);
     ~OpenCLOpenGLKernelScheduler();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

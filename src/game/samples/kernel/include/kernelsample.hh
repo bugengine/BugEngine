@@ -23,7 +23,7 @@ private:
     Plugin<Resource::ILoader>   const   m_lua;
     ref<const Package>          const   m_mainPackage;
 public:
-    KernelSample(const PluginContext& context);
+    KernelSample(const Plugin::Context& context);
     ~KernelSample();
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }

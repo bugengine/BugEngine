@@ -4,6 +4,8 @@
 #ifndef BE_PACKAGE_NODES_OVERLOADMATCH_HH_
 #define BE_PACKAGE_NODES_OVERLOADMATCH_HH_
 /*****************************************************************************/
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

@@ -54,7 +54,7 @@ private:
     u64                     m_threadId;
     mutable DeviceState     m_deviceState;
 public:
-    Dx9Renderer(const PluginContext& context);
+    Dx9Renderer(const Plugin::Context& context);
     ~Dx9Renderer();
 
     u32                 getMaxSimultaneousRenderTargets() const override { return m_caps.NumSimultaneousRTs; }

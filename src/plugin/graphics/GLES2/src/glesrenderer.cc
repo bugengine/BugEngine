@@ -9,7 +9,7 @@
 namespace BugEngine { namespace OpenGLES
 {
 
-GLESRenderer::GLESRenderer(const PluginContext& context)
+GLESRenderer::GLESRenderer(const Plugin::Context& context)
     :   IRenderer(Arena::general(), context.resourceManager, Scheduler::MainThread)
 {
 }

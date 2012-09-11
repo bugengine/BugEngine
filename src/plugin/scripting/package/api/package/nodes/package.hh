@@ -32,12 +32,12 @@ private:
         void add(const inamespace& name, const RTTI::Value& value);
     };
 private:
-    minitl::vector< Plugin<void*> >     m_plugins;
-    ref<Namespace>                      m_rootNamespace;
-    minitl::vector< ref<Object> >       m_nodes;
-    minitl::intrusive_list<Reference>   m_references;
-    minitl::vector<RTTI::Value>         m_values;
-    RTTI::Value                         m_empty;
+    minitl::vector< Plugin::Plugin<void*> > m_plugins;
+    ref<Namespace>                          m_rootNamespace;
+    minitl::vector< ref<Object> >           m_nodes;
+    minitl::intrusive_list<Reference>       m_references;
+    minitl::vector<RTTI::Value>             m_values;
+    RTTI::Value                             m_empty;
 private:
     void addReference(weak<Reference> reference);
     void resolveReference(weak<Reference> reference);

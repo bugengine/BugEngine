@@ -17,7 +17,7 @@ class GLESRenderer : public IRenderer
 {
     friend class GLESWindow;
 public:
-    GLESRenderer(const PluginContext& context);
+    GLESRenderer(const Plugin::Context& context);
     ~GLESRenderer();
 
     u32                     getMaxSimultaneousRenderTargets() const override { return 1; }

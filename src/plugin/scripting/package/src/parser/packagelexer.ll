@@ -11,7 +11,10 @@ using namespace BugEngine::PackageBuilder::Nodes;
 #define yylval  be_package_lval
 #include "packageparser.hh"
 
+#ifdef _MSC_VER
+#pragma warning(push)
 #pragma warning(disable:4127 4244 4267 4996 4505)
+#endif
 
 #ifdef malloc
 # undef malloc
@@ -105,3 +108,7 @@ namespace                               { update(be_package_leng); return KW_nam
 .                                       { update(be_package_leng); return *be_package_text; }
 
 %%
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

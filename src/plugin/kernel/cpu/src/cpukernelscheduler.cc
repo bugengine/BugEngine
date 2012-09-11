@@ -12,7 +12,7 @@
 namespace BugEngine
 {
 
-CPUKernelScheduler::CPUKernelScheduler(const PluginContext& context)
+CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
     :   IKernelScheduler("CPU", context.scheduler, context.scheduler->memoryProvider())
     ,   m_resourceManager(context.resourceManager)
     ,   m_loader(scoped<CPUKernelLoader>::create(Arena::task()))

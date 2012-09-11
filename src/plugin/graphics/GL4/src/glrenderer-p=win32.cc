@@ -209,7 +209,7 @@ GLWindow::Context::~Context()
 
 //------------------------------------------------------------------------
 
-GLRenderer::GLRenderer(const PluginContext& context)
+GLRenderer::GLRenderer(const Plugin::Context& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general(), this))
     ,   m_openCLScheduler("kernel.opencl_gl", context)

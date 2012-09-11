@@ -315,7 +315,7 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     }
 }
 
-Context::Context(const PluginContext& context)
+Context::Context(const Plugin::Context& context)
 : ScriptEngine<LuaScript>(Arena::lua(), context.resourceManager)
 , m_state(lua_newstate(&Context::luaAlloc, 0))
 {

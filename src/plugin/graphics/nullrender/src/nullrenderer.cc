@@ -18,7 +18,7 @@ void NullRenderer::flush()
     IRenderer::flush();
 }
 
-NullRenderer::NullRenderer(const PluginContext& context)
+NullRenderer::NullRenderer(const Plugin::Context& context)
 :   IRenderer(Arena::general(), context.resourceManager)
 {
 }
