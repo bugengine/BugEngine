@@ -19,9 +19,9 @@ class KernelSampleTask;
 class KernelSample : public Application
 {
 private:
-    Plugin<Resource::ILoader>   const   m_packageManager;
-    Plugin<Resource::ILoader>   const   m_lua;
-    ref<const Package>          const   m_mainPackage;
+    Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin::Plugin<Resource::ILoader>   const   m_lua;
+    ref<const Package>                  const   m_mainPackage;
 public:
     KernelSample(const Plugin::Context& context);
     ~KernelSample();

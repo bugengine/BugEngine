@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_CPU_KERNELOBJECT_HH_
 #define BE_KERNEL_CPU_KERNELOBJECT_HH_
 /*****************************************************************************/
-
+#include    <plugin/dynobject.hh>
 
 namespace BugEngine
 {
@@ -12,12 +12,7 @@ namespace BugEngine
 class KernelObject : public minitl::refcountable
 {
 private:
-    void*   m_handle;
-    void*   m_kernel;
-private:
-    static void* loadKernel(const inamespace& name);
-    static void  unloadKernel(void* handle);
-    static void* loadSymbol(void* handle, const char *name);
+    Plugin::DynamicObject   m_kernel;
 public:
     KernelObject(const inamespace& name);
     ~KernelObject();

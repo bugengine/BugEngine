@@ -15,6 +15,7 @@
 #include    <cstdio>
 #include    <cstdlib>
 
+#include    <minitl/hash_map.hh>
 namespace
 {
     class FileLogListener : public BugEngine::ILogListener
@@ -80,6 +81,25 @@ int beMain(int argc, const char *argv[])
 #endif
     {
         BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::Arena::debug()));
+        {
+            minitl::hashmap<const char*, const char*> hashtest(BugEngine::Arena::debug());
+            hashtest["Monday"] = "lundi";
+            hashtest["Tuesday"] = "mardi";
+            hashtest["Wednesday"] = "mercredi";
+            hashtest["Thursday"] = "jeudi";
+            hashtest["Friday"] = "vendredi";
+            hashtest["Saturday"] = "samedi";
+            hashtest["Sunday"] = "dimanche";
+            be_info("Friday is %s"|hashtest["Friday"]);
+            hashtest["Monday"] = "lendi";
+            hashtest["Tuesday"] = "mordi";
+            hashtest["Wednesday"] = "credi";
+            hashtest["Thursday"] = "joudi";
+            hashtest["Friday"] = "dredi";
+            hashtest["Saturday"] = "sadi";
+            hashtest["Sunday"] = "gromanche";
+            be_info("Friday is %s"|hashtest["Friday"]);
+        }
         BugEngine::Plugin::Plugin<minitl::pointer> platformAssert(
                 BugEngine::inamespace("debug.assert"),
                 BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
