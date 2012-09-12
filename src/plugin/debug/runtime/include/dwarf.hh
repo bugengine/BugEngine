@@ -7,6 +7,7 @@
 #include    <runtime/symbols.hh>
 #include    <minitl/hash_map.hh>
 #include    <elf.hh>
+#include    <minitl/hash.hh>
 
 namespace BugEngine { namespace Runtime
 {
@@ -36,7 +37,7 @@ private:
         const char* store(const char* string, size_t size);
         char* data();
     };
-private:
+public:
     struct AddressRange
     {
         u64 begin;
@@ -50,8 +51,8 @@ private:
     class CompilationUnit
     {
     public:
-        const char*                                         name;
-        AddressRange                                        range;
+        const char*     name;
+        AddressRange    range;
 
         CompilationUnit() : name(0) { }
         ~CompilationUnit() { }
@@ -87,6 +88,23 @@ public:
 
 }}
 
+namespace minitl
+{
+
+template< >
+struct hash<BugEngine::Runtime::DwarfModule::AddressRange>
+{
+    bool operator()(const BugEngine::Runtime::DwarfModule::AddressRange& range1, const BugEngine::Runtime::DwarfModule::AddressRange& range2)
+    {
+        return range1 == range2;
+    }
+    u32 operator()(const BugEngine::Runtime::DwarfModule::AddressRange& range)
+    {
+        return u32(range.begin ^ range.end);
+    }
+};
+
+}
 /*****************************************************************************/
 #endif
 

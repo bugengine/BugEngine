@@ -76,7 +76,7 @@ public:
     u32                     size() const;
     bool                    empty() const;
 
-    reference               operator[](const Key& key);
+    Value&                  operator[](const Key& key);
 
     iterator                find(const Key& key);
     const_iterator          find(const Key& key) const;

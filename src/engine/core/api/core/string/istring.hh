@@ -29,7 +29,7 @@ public:
 
     const char *c_str() const;
     size_t size() const;
-    u64 hash() const;
+    u32 hash() const;
 
     bool operator==(const istring& other) const;
     bool operator!=(const istring& other) const;

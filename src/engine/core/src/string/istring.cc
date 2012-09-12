@@ -20,22 +20,8 @@ static inline minitl::Allocator& string()
 }
 }
 
-struct hashIstring
-{
-    u32 operator()(const char *str) const
-    {
-        return (u32)minitl::str_hash(str, (u32)strlen(str));
-    }
-    bool operator()(const char *str1, const char *str2) const
-    {
-        return strcmp(str1, str2) == 0;
-    }
-};
-
-
 class StringCache
 {
-    friend class StringInit;
 private:
     class Buffer
     {
@@ -53,11 +39,7 @@ private:
         StringCache*        reserve(size_t size);
     };
 private:
-    friend struct hashWithOffset;
-    friend struct lessWithOffset;
-    friend struct equaltoWithOffset;
-private:
-    typedef minitl::hashmap< const char *, StringCache*, hashIstring > StringIndex;
+    typedef minitl::hashmap< const char *, StringCache* > StringIndex;
 private:
     static Buffer*  getBuffer();
 public:
@@ -66,16 +48,14 @@ public:
 private:
     mutable i_u32  m_refCount;
     u32  m_length;
-    u64  m_hash;
 #   ifdef  BE_DEBUG
     const char *m_text;
     size_t  m_gard;
 #   endif
 private:
-    StringCache(u64 _hash, u32 len)
+    StringCache(u32 len)
         :   m_refCount(i_u32::Zero)
         ,   m_length(len)
-        ,   m_hash(_hash)
 #   ifdef  BE_DEBUG
         ,   m_text((const char *)(this+1))
         ,   m_gard(0xDEADBEEF)
@@ -86,7 +66,6 @@ private:
 public:
     void retain(void) const     { m_refCount++; }
     void release(void) const    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
-    u64 hash() const            { return m_hash; }
     size_t size() const         { return m_length; }
     const char *str() const     { return reinterpret_cast<const char *>(this+1); }
 };
@@ -152,7 +131,7 @@ StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    static StringIndex g_strings(Arena::string());
+    static StringIndex g_strings(Arena::string(), 65536);
     StringIndex::iterator it = g_strings.find(val);
     if (it != g_strings.end())
     {
@@ -164,8 +143,7 @@ StringCache* StringCache::unique(const char *val)
         StringCache* cache = getBuffer()->reserve(len);
         char *data = (char*)cache + sizeof(StringCache);
 
-        u64 hashval = minitl::str_hash(val,len);
-        (void)(new(cache) StringCache(hashval, len));
+        (void)(new(cache) StringCache(len));
         strcpy(data, val);
 
         minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(minitl::make_pair((const char*)data, cache));
@@ -226,9 +204,9 @@ istring& istring::operator=(const istring& other)
     return *this;
 }
 
-u64 istring::hash() const
+u32 istring::hash() const
 {
-    return m_index->hash();
+    return u32(ptrdiff_t(m_index));
 }
 
 size_t istring::size() const

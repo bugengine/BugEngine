@@ -277,7 +277,7 @@ bool hashmap<Key, Value, Hash>::empty() const
 }
 
 template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::reference hashmap<Key, Value, Hash>::operator[](const Key& key)
+Value& hashmap<Key, Value, Hash>::operator[](const Key& key)
 {
     return insert(key, Value()).first->second;
 }
@@ -289,7 +289,7 @@ typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(con
     list_iterator it = m_index[hash].second;
     for (++it; it != m_index[hash+1].second; ++it)
     {
-        if (((item*)it.operator->())->value.first == key)
+        if (Hash()(((item*)it.operator->())->value.first, key))
         {
             return iterator(*this, it);
         }
@@ -304,7 +304,7 @@ typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::fi
     list_iterator it = list_iterator(m_index[hash].second);
     for (++it; it != m_index[hash+1].second; ++it)
     {
-        if (((item*)it.operator->())->value.first == key)
+        if (Hash()(((item*)it.operator->())->value.first, key))
         {
             return const_iterator(*this, it);
         }
@@ -326,7 +326,7 @@ minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Va
     list_iterator it = ++m_index[hash].second;
     for (; it != m_index[hash+1].second; ++it)
     {
-        if (((item*)it.operator->())->value.first == key)
+        if (Hash()(((item*)it.operator->())->value.first, key))
         {
             return minitl::make_pair(iterator(*this, it), false);
         }

@@ -30,9 +30,9 @@ class GLRenderer : public Windowing::Renderer
     friend class GLWindow;
 private:
     class Context;
-    mutable scoped<Context>     m_context;
-    scoped<GLMemoryProvider>    m_openGLMemoryProvider;
-    Plugin<IKernelScheduler>    m_openCLScheduler;
+    mutable scoped<Context>             m_context;
+    scoped<GLMemoryProvider>            m_openGLMemoryProvider;
+    Plugin::Plugin<IKernelScheduler>    m_openCLScheduler;
 public:
     GLRenderer(const Plugin::Context& context);
     ~GLRenderer();
