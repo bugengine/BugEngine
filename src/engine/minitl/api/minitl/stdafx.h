@@ -53,7 +53,7 @@ T nextPowerOf2(T t)
     result |= result >> 8;
     result |= result >> 16;
     result |= result >> 32;
-    return static_cast<T>(t + 1);
+    return static_cast<T>(result + 1);
 }
 
 }

@@ -102,25 +102,6 @@ struct hashmap<Key, Value, Hash>::const_iterator_policy
     typedef const typename hashmap<Key, Value, Hash>::item item;
     typedef typename hashmap<Key, Value, Hash>::const_list_iterator iterator;
 };
-template< typename Key, typename Value, typename Hash >
-struct hashmap<Key, Value, Hash>::reverse_iterator_policy
-{
-    typedef typename hashmap<Key, Value, Hash>::value_type  value_type;
-    typedef typename hashmap<Key, Value, Hash>::value_type& reference;
-    typedef typename hashmap<Key, Value, Hash>::value_type* pointer;
-    typedef typename hashmap<Key, Value, Hash>::item item;
-    typedef typename hashmap<Key, Value, Hash>::reverse_list_iterator iterator;
-};
-template< typename Key, typename Value, typename Hash >
-struct hashmap<Key, Value, Hash>::const_reverse_iterator_policy
-{
-    typedef const typename hashmap<Key, Value, Hash>::value_type  value_type;
-    typedef const typename hashmap<Key, Value, Hash>::value_type& reference;
-    typedef const typename hashmap<Key, Value, Hash>::value_type* pointer;
-    typedef const typename hashmap<Key, Value, Hash>::item item;
-    typedef typename hashmap<Key, Value, Hash>::const_reverse_list_iterator iterator;
-};
-
 
 template< typename Key, typename Value, typename Hash >
 hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, u32 reserved)
@@ -176,24 +157,27 @@ void hashmap<Key, Value, Hash>::grow(u32 size)
 {
     be_assert(size > m_count, "cannot resize from %d to smaller capacity %d" | m_count | size);
     size = nextPowerOf2(size);
-    pool<item> newPool(m_index.arena(), size);
-    Allocator::Block<index_item> newIndex(m_index.arena(), size+1);
-    intrusive_list<empty_item> newList;
-    newList.swap(m_items);
-    newPool.swap(m_itemPool);
-    newIndex.swap(m_index);
+    pool<item> oldPool(m_index.arena(), size);
+    Allocator::Block<index_item> oldIndex(m_index.arena(), size+1);
+    intrusive_list<empty_item> oldList;
+
+    oldList.swap(m_items);
+    oldPool.swap(m_itemPool);
+    oldIndex.swap(m_index);
     buildIndex();
-    for (index_item* it = newIndex.begin(); it != newIndex.end()-1; /*nothing*/)
+
+    for (index_item* it = oldIndex.begin(); it != oldIndex.end()-1; /*nothing*/)
     {
         list_iterator object = it->second;
         object++;
         while (object != (it+1)->second)
         {
             list_iterator itemToCopy = object++;
-            u32 hash = Hash()(((item*)(itemToCopy.operator->()))->value.first);
-            item* newItem = m_itemPool.allocate(((item*)(itemToCopy.operator->()))->value);
+            item* i = static_cast<item*>(itemToCopy.operator->());
+            u32 hash = Hash()(i->value.first);
+            item* newItem = m_itemPool.allocate(i->value);
             m_items.insert(m_index[hash%(m_index.count()-1)].second, *newItem);
-            newPool.release(&static_cast<item&>(*itemToCopy));
+            oldPool.release(i);
         }
         index_item* indexToDelete = it++;
         indexToDelete->~index_item();
@@ -238,30 +222,6 @@ template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::end() const
 {
     return const_iterator(*this, m_items.end());
-}
-
-template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::reverse_iterator hashmap<Key, Value, Hash>::rbegin()
-{
-    return ++reverse_iterator(*this, m_items.rbegin());
-}
-
-template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::reverse_iterator hashmap<Key, Value, Hash>::rend()
-{
-    return reverse_iterator(*this, m_items.rend());
-}
-
-template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, Hash>::rbegin() const
-{
-    return ++const_reverse_iterator(*this, m_items.rbegin());
-}
-
-template< typename Key, typename Value, typename Hash >
-typename hashmap<Key, Value, Hash>::const_reverse_iterator hashmap<Key, Value, Hash>::rend() const
-{
-    return const_reverse_iterator(*this, m_items.rend());
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -316,7 +276,18 @@ template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(iterator it)
 {
     m_count--;
-    m_itemPool.release((item*)it.operator->());
+    item* i = (item*)it.operator->();
+    iterator result (*this, m_items.erase(it));
+    m_itemPool.release(i);
+    return result;
+}
+
+template< typename Key, typename Value, typename Hash >
+typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(const Key& key)
+{
+    iterator it = find(key);
+    be_assert(it != end(), "could not find item with index %s"|key);
+    return erase(it);
 }
 
 template< typename Key, typename Value, typename Hash >
