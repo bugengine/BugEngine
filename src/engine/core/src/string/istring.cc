@@ -131,7 +131,7 @@ StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    static StringIndex g_strings(Arena::string(), 65536);
+    static StringIndex g_strings(Arena::string(), 8);
     StringIndex::iterator it = g_strings.find(val);
     if (it != g_strings.end())
     {
@@ -146,7 +146,7 @@ StringCache* StringCache::unique(const char *val)
         (void)(new(cache) StringCache(len));
         strcpy(data, val);
 
-        minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(minitl::make_pair((const char*)data, cache));
+        minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(data, cache);
         be_forceuse(insertresult);
         return cache;
     }

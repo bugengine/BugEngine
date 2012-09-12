@@ -27,9 +27,7 @@ private:
     struct const_reverse_iterator_policy;
 public:
     typedef iterator_base<iterator_policy>                  iterator;
-    typedef iterator_base<reverse_iterator_policy>          reverse_iterator;
     typedef iterator_base<const_iterator_policy>            const_iterator;
-    typedef iterator_base<const_reverse_iterator_policy>    const_reverse_iterator;
 
     typedef minitl::pair<const Key, Value>          value_type;
     typedef minitl::pair<const Key, Value>&         reference;
@@ -37,6 +35,7 @@ public:
 private:
     struct empty_item : public minitl::intrusive_list<empty_item>::item
     {
+        ~empty_item() { this->unhook(); }
     };
     struct item : public empty_item
     {
@@ -45,8 +44,6 @@ private:
     };
     typedef typename intrusive_list<empty_item>::iterator               list_iterator;
     typedef typename intrusive_list<empty_item>::const_iterator         const_list_iterator;
-    typedef typename intrusive_list<empty_item>::reverse_iterator       reverse_list_iterator;
-    typedef typename intrusive_list<empty_item>::const_reverse_iterator const_reverse_list_iterator;
     typedef pair<empty_item, list_iterator> index_item;
 private:
     pool<item>                      m_itemPool;
@@ -68,10 +65,6 @@ public:
     iterator                end();
     const_iterator          begin() const;
     const_iterator          end() const;
-    reverse_iterator        rbegin();
-    reverse_iterator        rend();
-    const_reverse_iterator  rbegin() const;
-    const_reverse_iterator  rend() const;
 
     u32                     size() const;
     bool                    empty() const;
@@ -82,6 +75,7 @@ public:
     const_iterator          find(const Key& key) const;
 
     iterator                erase(iterator it);
+    iterator                erase(const Key& key);
 
     pair<iterator, bool>    insert(const Key& k, const Value& value);
     pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);
