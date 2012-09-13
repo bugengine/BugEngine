@@ -104,10 +104,10 @@ struct hashmap<Key, Value, Hash>::const_iterator_policy
 };
 
 template< typename Key, typename Value, typename Hash >
-hashmap<Key, Value, Hash>::hashmap(minitl::Allocator& allocator, u32 reserved)
-    :   m_itemPool(allocator, minitl::max(nextPowerOf2(reserved), u32(8)))
+hashmap<Key, Value, Hash>::hashmap(Allocator& allocator, u32 reserved)
+    :   m_itemPool(allocator, max(nextPowerOf2(reserved), u32(8)))
     ,   m_items()
-    ,   m_index(allocator, 1+minitl::max(nextPowerOf2(reserved), u32(8)))
+    ,   m_index(allocator, 1+max(nextPowerOf2(reserved), u32(8)))
     ,   m_count(0)
 {
     buildIndex();
@@ -121,6 +121,7 @@ hashmap<Key, Value, Hash>::hashmap(const hashmap& other)
     ,   m_count(0)
 {
     buildIndex();
+    be_notreached();
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -166,23 +167,23 @@ void hashmap<Key, Value, Hash>::grow(u32 size)
     oldIndex.swap(m_index);
     buildIndex();
 
-    for (index_item* it = oldIndex.begin(); it != oldIndex.end()-1; /*nothing*/)
+    for (index_item* index = oldIndex.begin(); index != oldIndex.end()-1; /*nothing*/)
     {
-        list_iterator object = it->second;
+        list_iterator object = index->second;
         object++;
-        while (object != (it+1)->second)
+        while (object != (index+1)->second)
         {
             list_iterator itemToCopy = object++;
             item* i = static_cast<item*>(itemToCopy.operator->());
-            u32 hash = Hash()(i->value.first);
+            u32 hash = Hash()(i->value.first) % (m_index.count()-1);
             item* newItem = m_itemPool.allocate(i->value);
-            m_items.insert(m_index[hash%(m_index.count()-1)].second, *newItem);
+            m_items.insert(m_index[hash].second, *newItem);
             oldPool.release(i);
         }
-        index_item* indexToDelete = it++;
+        index_item* indexToDelete = index++;
         indexToDelete->~index_item();
     }
-    (m_index.end()-1)->~index_item();
+    (oldIndex.end()-1)->~index_item();
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -291,31 +292,42 @@ typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::erase(co
 }
 
 template< typename Key, typename Value, typename Hash >
-minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& key, const Value& value)
+pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& key, const Value& value)
 {
-    u32 hash = Hash()(key) % (m_index.count()-1);
-    list_iterator it = ++m_index[hash].second;
-    for (; it != m_index[hash+1].second; ++it)
+    u32 hash = Hash()(key);
+    list_iterator it = m_index[hash % (m_index.count()-1)].second;
+    for (++it; it != m_index[1 + hash % (m_index.count()-1)].second; ++it)
     {
         if (Hash()(((item*)it.operator->())->value.first, key))
         {
-            return minitl::make_pair(iterator(*this, it), false);
+            return make_pair(iterator(*this, it), false);
         }
     }
     --it;
     if (m_count == m_index.count()-1)
     {
         grow(m_count*2);
+        it = m_index[hash % (m_index.count()-1)].second;
+        ++it;
     }
     m_count++;
-    item* i = m_itemPool.allocate(minitl::make_pair(key, value));
-    return minitl::make_pair(iterator(*this, m_items.insert(it, *i)), true);
+    item* i = m_itemPool.allocate(make_pair(key, value));
+    return make_pair(iterator(*this, m_items.insert(it, *i)), true);
 }
 
 template< typename Key, typename Value, typename Hash >
-minitl::pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const minitl::pair<const Key, Value>& v)
+pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const pair<const Key, Value>& v)
 {
     return insert(v.first, v.second);
+}
+
+template< typename Key, typename Value, typename Hash >
+void hashmap<Key, Value, Hash>::swap(hashmap& other)
+{
+    m_index.swap(other.m_index);
+    m_items.swap(other.m_items);
+    m_itemPool.swap(other.m_itemPool);
+    swap(m_count, other.m_count);
 }
 
 }
