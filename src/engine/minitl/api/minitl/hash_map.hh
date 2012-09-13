@@ -29,11 +29,11 @@ public:
     typedef iterator_base<iterator_policy>                  iterator;
     typedef iterator_base<const_iterator_policy>            const_iterator;
 
-    typedef minitl::pair<const Key, Value>          value_type;
-    typedef minitl::pair<const Key, Value>&         reference;
-    typedef const minitl::pair<const Key, Value>&   const_reference;
+    typedef pair<const Key, Value>          value_type;
+    typedef pair<const Key, Value>&         reference;
+    typedef const pair<const Key, Value>&   const_reference;
 private:
-    struct empty_item : public minitl::intrusive_list<empty_item>::item
+    struct empty_item : public intrusive_list<empty_item>::item
     {
         ~empty_item() { this->unhook(); }
     };
@@ -78,7 +78,9 @@ public:
     iterator                erase(const Key& key);
 
     pair<iterator, bool>    insert(const Key& k, const Value& value);
-    pair<iterator, bool>    insert(const minitl::pair<const Key, Value>& v);
+    pair<iterator, bool>    insert(const pair<const Key, Value>& v);
+
+    void                    swap(hashmap& other);
 };
 
 }
