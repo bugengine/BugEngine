@@ -35,7 +35,7 @@ public:
 private:
     struct empty_item : public intrusive_list<empty_item>::item
     {
-        ~empty_item() { this->unhook(); }
+        ~empty_item() { if (this->hooked()) this->unhook(); }
     };
     struct item : public empty_item
     {
@@ -75,7 +75,7 @@ public:
     const_iterator          find(const Key& key) const;
 
     iterator                erase(iterator it);
-    iterator                erase(const Key& key);
+    void                    erase(const Key& key);
 
     pair<iterator, bool>    insert(const Key& k, const Value& value);
     pair<iterator, bool>    insert(const pair<const Key, Value>& v);
