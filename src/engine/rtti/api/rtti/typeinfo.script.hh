@@ -187,6 +187,10 @@ private:
     void                destroy(void* obj) const;
 };
 
+
+bool operator==(Type t1, Type t2);
+bool operator<=(Type t1, Type t2);
+
 }}
 
 /*****************************************************************************/

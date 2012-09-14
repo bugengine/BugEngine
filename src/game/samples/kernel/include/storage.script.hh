@@ -5,6 +5,8 @@
 #define BE_SAMPLES_KERNEL_STORAGE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <world/entitystorage.script.hh>
+#include    <scheduler/kernel/stream.hh>
+#include    <scheduler/kernel/product.hh>
 
 namespace BugEngine
 {

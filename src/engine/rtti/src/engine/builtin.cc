@@ -3,11 +3,8 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
-#include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/engine/helper/get.hh>
-#include    <rtti/engine/helper/set.hh>
+#include    <rtti/engine/namespace.hh>
 #include    <rtti/engine/helper/method.hh>
-
 
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, RTTI);
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, EditHint);

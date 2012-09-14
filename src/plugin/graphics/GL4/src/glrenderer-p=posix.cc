@@ -3,6 +3,7 @@
 
 #include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>
+#include    <GL4/glmemoryprovider.hh>
 #include    <extensions.hh>
 
 

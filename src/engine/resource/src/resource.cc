@@ -3,7 +3,7 @@
 
 #include    <resource/stdafx.h>
 #include    <resource/resource.hh>
-#include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/namespace.hh>
 
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, Resource);
 

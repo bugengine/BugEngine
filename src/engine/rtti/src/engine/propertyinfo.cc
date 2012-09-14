@@ -6,7 +6,7 @@
 #include    <rtti/engine/taginfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/typeinfo.hh>
-#include    <rtti/value.inl>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {

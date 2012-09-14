@@ -6,7 +6,8 @@
 #include    <package/nodes/object.hh>
 #include    <package/nodes/package.hh>
 
-#include "rtti/engine/propertyinfo.script.hh"
+#include    <rtti/value.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
 
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes

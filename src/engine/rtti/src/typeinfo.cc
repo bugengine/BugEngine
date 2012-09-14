@@ -108,4 +108,15 @@ bool Type::isA(const Type& other) const
             && metaclass->isA(other.metaclass);
 }
 
+bool operator==(Type t1, Type t2)
+{
+    return t1.metaclass == t2.metaclass && t1.indirection == t2.indirection && t1.access == t2.access && t1.constness == t2.constness;
+}
+bool operator<=(Type t1, Type t2)
+{
+    return     (t1.indirection <= t2.indirection)
+            && t1.access <= t2.access
+            && t2.metaclass->isA(t1.metaclass);
+}
+
 }}

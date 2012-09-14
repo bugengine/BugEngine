@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include    <bugengine/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
-#include    <rtti/value.inl>
+#include    <rtti/value.hh>
 #include    <filesystem/file.script.hh>
 #include    <plugin/plugin.hh>
 #include    <luascript.script.hh>

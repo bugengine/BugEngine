@@ -4,12 +4,9 @@
 #ifndef BE_RTTI_VALUE_INL_
 #define BE_RTTI_VALUE_INL_
 /*****************************************************************************/
-#include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
-#include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
-#include    <rtti/typeinfo.inl>
 
 namespace BugEngine { namespace RTTI
 {
@@ -152,20 +149,6 @@ bool Value::operator!() const
 void* Value::rawget() const
 {
     return m_type.rawget(memory());
-}
-
-Value Value::operator[](const istring& name)
-{
-    return m_type.metaclass->get(*this, name);
-}
-
-Value Value::operator()(Value params[], u32 paramCount)
-{
-    static const istring callName("?call");
-    Value call = (*this)[callName];
-    be_assert_recover(call, "Not a callable object: %s" | m_type, return Value());
-    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type, return Value());
-    return call.as<const Method* const>()->doCall(params, paramCount);
 }
 
 }}

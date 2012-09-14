@@ -6,6 +6,9 @@
 #include    <package/nodes/reference.hh>
 
 #include    <filesystem/folder.script.hh>
+#include    <rtti/engine/objectinfo.script.hh>
+#include    <rtti/value.hh>
+#include    <rtti/engine/array.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -209,7 +212,7 @@ bool ArrayValue::isCompatible(const RTTI::Type& type) const
 {
     if (type.metaclass->name == istring("array"))
     {
-        raw<const RTTI::Class::ObjectInfo> prop = type.metaclass->objects;
+        raw<const RTTI::ObjectInfo> prop = type.metaclass->objects;
         while (prop && prop->name != istring("value_type"))
         {
             prop = prop->next;
@@ -236,7 +239,7 @@ bool ArrayValue::isCompatible(const RTTI::Type& type) const
 RTTI::Value ArrayValue::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from array to %s" | type);
-    raw<const RTTI::Class::ObjectInfo> prop = type.metaclass->objects;
+    raw<const RTTI::ObjectInfo> prop = type.metaclass->objects;
     while (prop && prop->name != istring("value_type"))
     {
         prop = prop->next;
