@@ -131,7 +131,7 @@ StringCache* StringCache::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    static StringIndex g_strings(Arena::string(), 8);
+    static StringIndex g_strings(Arena::string(), 65536);
     StringIndex::iterator it = g_strings.find(val);
     if (it != g_strings.end())
     {
