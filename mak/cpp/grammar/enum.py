@@ -53,7 +53,7 @@ class EnumValueList(cpp.yacc.Nonterm):
 			file.write("static const %s::%s s_%s_%s_value(%s::%s);\\\n" % (owner, type, decl, enum.name, owner, enum.name))
 			alias_index = 0
 			for name in [enum.name]+enum.tags.aliases:
-				file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_enum_%s_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(s_%s_%s_value)) };\n" % (decl, enum.name, alias_index, enums_pointer, enum_tag, name, decl, enum.name))
+				file.write("static ::BugEngine::RTTI::ObjectInfo s_%s_enum_%s_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(s_%s_%s_value)) };\n" % (decl, enum.name, alias_index, enums_pointer, enum_tag, name, decl, enum.name))
 				enums_pointer = "{&s_%s_enum_%s_%d}" % (decl, enum.name, alias_index)
 				alias_index += 1
 		return enums_pointer

@@ -225,7 +225,7 @@ class Exprs(cpp.yacc.Nonterm):
 				for n in o.aliases+[o.name]:
 					alias_index += 1
 					file.write("#line %d\n"%o.lineno)
-					file.write("static ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (prefix, o.decl, alias_index, object_ptr, o.tag_ptr, n, o.varname))
+					file.write("static ::BugEngine::RTTI::ObjectInfo s_%s_%s_obj_%d = { %s, %s, \"%s\", ::BugEngine::RTTI::Value(&%s) };\n" % (prefix, o.decl, alias_index, object_ptr, o.tag_ptr, n, o.varname))
 					object_ptr = "{&s_%s_%s_obj_%d}"%(prefix, o.decl, alias_index)
 
 		for v in self.members:

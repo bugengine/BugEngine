@@ -78,7 +78,7 @@ class Variable(cpp.yacc.Nonterm):
 		for name in [self.name]+self.aliases:
 			if not parent_name or 'static' in self.attributes:
 				file.write("#line %d\n" % self.lineno)
-				file.write("static const ::BugEngine::RTTI::Class::ObjectInfo s_%s_%s_%d =\n" % (prefix, self.name, index))
+				file.write("static const ::BugEngine::RTTI::ObjectInfo s_%s_%s_%d =\n" % (prefix, self.name, index))
 				file.write("#line %d\n" % self.lineno)
 				file.write("    {\n")
 				file.write("#line %d\n" % self.lineno)

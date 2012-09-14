@@ -26,6 +26,8 @@ class Unit(cpp.yacc.Nonterm):
 		file.write("#include    <rtti/value.hh>\n")
 		file.write("#include    <rtti/value.inl>\n")
 		file.write("#include    <rtti/classinfo.script.hh>\n")
+		file.write("#include    <rtti/engine/array.hh>\n")
+		file.write("#include    <rtti/engine/objectinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/methodinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/propertyinfo.script.hh>\n")
 		file.write("#include    <rtti/engine/taginfo.script.hh>\n")
@@ -49,7 +51,7 @@ class Unit(cpp.yacc.Nonterm):
 		self.members.dumpObjects(file, instances, [], '::BugEngine::'+owner, [], [], "")
 		object_ptr, method_ptr, constructor, cast, variables = self.members.dump(file, instances, [], [], [], "", "", False)
 		if object_ptr != 'BugEngine::%s->objects'%owner:
-			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( BugEngine::%s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
+			file.write("const ::BugEngine::RTTI::ObjectInfo* %s_optr = ( BugEngine::%s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
 		if method_ptr != 'BugEngine::%s->methods'%owner:
 			file.write("const ::BugEngine::RTTI::Method* %s_mptr = ( %s->methods.set(%s) );\n" % (method_ptr[2:-1], owner, method_ptr[1:-1]))
 		instances.write("\n}\n\n")

@@ -3,7 +3,7 @@
 
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/kernel.script.hh>
-#include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/namespace.hh>
 
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, Kernel);
 

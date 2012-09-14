@@ -4,12 +4,13 @@
 #ifndef BE_RTTI_ENGINE_METHODINFO_SCRIPT_HH_
 #define BE_RTTI_ENGINE_METHODINFO_SCRIPT_HH_
 /*****************************************************************************/
-#include   <rtti/typeinfo.hh>
-#include   <rtti/value.hh>
+#include    <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
+class Value;
+struct Tag;
 
 struct be_api(RTTI) Method
 {
@@ -60,8 +61,6 @@ private:
 
 
 }}
-
-#include   <rtti/value.inl>
 
 /*****************************************************************************/
 #endif

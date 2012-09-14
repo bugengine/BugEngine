@@ -48,7 +48,7 @@ class Namespace(cpp.yacc.Nonterm):
 		self.exprs.dumpObjects(file, instances, namespace, owner, decl, name, "")
 		object_ptr, method_ptr, constructor, cast, variables = self.exprs.dump(file, instances, namespace, decl, name, "", "", True)
 		if object_ptr != 'BugEngine::%s->objects'%owner:
-			file.write("const ::BugEngine::RTTI::Class::ObjectInfo* %s_optr = ( %s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
+			file.write("const ::BugEngine::RTTI::ObjectInfo* %s_optr = ( %s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
 		if method_ptr != 'BugEngine::%s->methods'%owner:
 			file.write("const ::BugEngine::RTTI::Method* %s_mptr = ( %s->methods.set(%s) );\n" % (method_ptr[2:-1], owner, method_ptr[1:-1]))
 		file.write("\n}\n")

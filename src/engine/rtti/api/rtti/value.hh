@@ -77,8 +77,8 @@ public:
     inline operator const void*() const;
     inline bool operator!() const;
 
-    inline Value operator[](const istring& name);
-    inline Value operator()(Value params[], u32 paramCount);
+    Value operator[](const istring& name);
+    Value operator()(Value params[], u32 paramCount);
 
     inline bool isA(const Type& type) const
     {
@@ -87,6 +87,8 @@ public:
 };
 
 }}
+
+#include    <rtti/value.inl>
 
 /*****************************************************************************/
 #endif

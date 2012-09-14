@@ -4,6 +4,7 @@
 #include    <package/stdafx.h>
 #include    <package/nodes/overloadmatch.hh>
 #include    <package/nodes/parameter.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

@@ -4,10 +4,11 @@
 #ifndef BE_RTTI_ENGINE_HELPER_METHOD_HH_
 #define BE_RTTI_ENGINE_HELPER_METHOD_HH_
 /*****************************************************************************/
-#include   <rtti/value.inl>
 
 namespace BugEngine { namespace RTTI
 {
+
+class Value;
 
 template< typename T >
 static inline Value call(Value& _this, Value* params, u32 paramCount)

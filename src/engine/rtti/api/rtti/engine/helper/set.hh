@@ -4,7 +4,7 @@
 #ifndef BE_RTTI_ENGINE_HELPER_SET_HH_
 #define BE_RTTI_ENGINE_HELPER_SET_HH_
 /*****************************************************************************/
-#include   <rtti/value.inl>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {

@@ -1,10 +1,11 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#include <rtti/stdafx.h>
-#include <rtti/value.hh>
-#include <rtti/classinfo.script.hh>
-#include <rtti/typeinfo.inl>
+#include    <rtti/stdafx.h>
+#include    <rtti/value.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/typeinfo.inl>
 
 namespace BugEngine { namespace RTTI
 {
@@ -99,6 +100,20 @@ void Value::store(const void* src)
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = m_ref.m_pointer != 0;
     m_type.copy(src, memory());
+}
+
+Value Value::operator[](const istring& name)
+{
+    return m_type.metaclass->get(*this, name);
+}
+
+Value Value::operator()(Value params[], u32 paramCount)
+{
+    static const istring callName("?call");
+    Value call = (*this)[callName];
+    be_assert_recover(call, "Not a callable object: %s" | m_type, return Value());
+    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type, return Value());
+    return call.as<const Method* const>()->doCall(params, paramCount);
 }
 
 }}

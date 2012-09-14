@@ -5,6 +5,8 @@
 #include    <package/nodes/parameter.hh>
 #include    <package/nodes/value.hh>
 
+#include    <rtti/value.hh>
+
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
