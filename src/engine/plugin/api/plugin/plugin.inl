@@ -64,23 +64,82 @@ namespace BugEngine { namespace Plugin
 
 
 template< typename T >
-Plugin<T>::Plugin(const inamespace& pluginName, PreloadType preload)
-    :   DynamicObject(pluginName, "plugins")
+Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
+    :   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
+    ,   m_interface(0)
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
-    be_forceuse(preload);
 }
 
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
-    :   DynamicObject(pluginName, "plugins")
+    :   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
+    ,   m_interface(0)
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
-    be_forceuse(context);
+    if (*m_dynamicObject)
+    {
+        CreateFunction* create = m_dynamicObject->getSymbol<CreateFunction>("be_createPlugin");
+        be_assert_recover(create, "could not load method be_createPlugin", return);
+        m_interface = (*create)(context);
+    }
 }
 
 template< typename T >
 Plugin<T>::~Plugin()
 {
-    
+    if (-- *m_refCount == 0)
+    {
+        if (m_interface)
+        {
+            DestroyFunction* destroy = m_dynamicObject->getSymbol<DestroyFunction>("be_destroyPlugin");
+            be_assert(destroy, "could not load method be_destroyPlugin");
+            (*destroy)(m_interface);
+        }
+        m_dynamicObject->~DynamicObject();
+        Arena::general().free(m_refCount);
+        Arena::general().free(m_dynamicObject);
+    }
+}
+
+template< typename T >
+Plugin<T>::Plugin(const Plugin& other)
+    :   m_dynamicObject(other.m_dynamicObject)
+    ,   m_interface(other.m_interface)
+    ,   m_refCount(other.m_refCount)
+{
+    ++ *m_refCount;
+}
+
+template< typename T >
+Plugin<T>& Plugin<T>::operator=(Plugin other)
+{
+    other.swap(*this);
+}
+
+template< typename T >
+void Plugin<T>::swap(Plugin& other)
+{
+    minitl::swap(m_dynamicObject, other.m_dynamicObject);
+    minitl::swap(m_interface, other.m_interface);
+    minitl::swap(m_refCount, other.m_refCount);
+}
+
+template< typename T >
+raw<const RTTI::Class> Plugin<T>::pluginNamespace() const
+{
+    if (*m_dynamicObject)
+    {
+        GetPluginNamespace* getNamespace = m_dynamicObject->getSymbol<GetPluginNamespace>("be_pluginNamespace");
+        if (getNamespace)
+        {
+            raw<const RTTI::Class> ci = {(*getNamespace)()};
+            return ci;
+        }
+    }
+    raw<const RTTI::Class> ci = {0};
+    return ci;
+
 }
 
 
