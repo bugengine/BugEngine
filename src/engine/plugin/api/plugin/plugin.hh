@@ -33,20 +33,33 @@ struct be_api(PLUGIN) Context
 };
 
 template< typename Interface >
-class Plugin : public DynamicObject
+class Plugin
 {
 private:
+    DynamicObject*  m_dynamicObject;
     Interface*      m_interface;
+    i_u32*          m_refCount;
+private:
+    typedef Interface* (CreateFunction)(const Context& context);
+    typedef void (DestroyFunction)(Interface* interface);
+    typedef const RTTI::Class* (GetPluginNamespace)();
 public:
     enum PreloadType { Preload };
+public:
     Plugin(const inamespace &pluginName, PreloadType preload);
     Plugin(const inamespace &pluginName, const Context& context);
+    Plugin(const Plugin& other);
     ~Plugin();
+    Plugin& operator=(Plugin other);
 
     Interface* operator->()             { return m_interface; }
     const Interface* operator->() const { return m_interface; }
+    operator const void*() const        { return (const void*)m_dynamicObject; }
+    bool operator!() const              { return !m_dynamicObject; }
 
     raw<const RTTI::Class> pluginNamespace() const;
+
+    void swap(Plugin& other);
 };
 
 }}

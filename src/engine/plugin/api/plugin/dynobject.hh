@@ -15,16 +15,13 @@ private:
     typedef void*   Handle;
 private:
     Handle          m_handle;
-    i_u32*          m_refCount;
 private:
     static Handle load(const inamespace& objectName, const ipath& objectPath);
     static void   unload(Handle handle);
     static void*  getSymbolInternal(Handle handle, const istring& symbolName);
 public:
-    explicit DynamicObject(const inamespace &objectName, const ipath& objectPath);
-    DynamicObject(const DynamicObject& other);
+    DynamicObject(const inamespace &objectName, const ipath& objectPath);
     ~DynamicObject();
-    DynamicObject& operator=(const DynamicObject& other);
 
     operator const void*() const        { return m_handle; }
     bool operator!() const              { return m_handle == 0; }
@@ -32,7 +29,7 @@ public:
     template< typename T >
     T* getSymbol(const istring& name) const
     {
-        return (T*)getSymbolInternal(m_handle, name);
+        return reinterpret_cast<T*>(getSymbolInternal(m_handle, name));
     }
 };
 
