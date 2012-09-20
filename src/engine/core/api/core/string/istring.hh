@@ -139,11 +139,9 @@ namespace minitl
 template<>
 struct hash<BugEngine::istring>
 {
-    inline u64 operator()(const BugEngine::istring& v)                               { return v.hash(); }
+    inline u32 operator()(const BugEngine::istring& v)                               { return v.hash(); }
     inline int operator()(const BugEngine::istring& v1, const BugEngine::istring& v2){ return v1 == v2; }
 };
-
-inline size_t hash_value(const BugEngine::istring& key) { return (size_t)key.hash(); }
 
 template< u16 SIZE >
 static inline const format<SIZE>& operator|(const format<SIZE>& f, const BugEngine::istring& value)
