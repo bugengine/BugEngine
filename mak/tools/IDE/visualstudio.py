@@ -32,6 +32,17 @@ class vs2003(Build.BuildContext):
 		s.writeHeader()
 
 		project_list = []
+		allplatforms = []
+		for i in self.env.ALL_VARIANTS:
+			env = self.all_envs[i]
+			allplatforms.append((i, mak.module.coptions()))
+		for name,action in [('update projects', self.__class__.cmd)]:
+			node = projects.make_node("%s%s" % (name, klass.extensions[0]))
+			project = klass(node.path_from(self.srcnode), name, '', version, version_project, action, self.all_envs)
+			project.writeHeader(allplatforms, self.game.name)
+			project.writeFooter()
+			project_list.append((project, node))
+
 		for g in self.groups:
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
@@ -50,6 +61,7 @@ class vs2003(Build.BuildContext):
 				project.addDirectory(tg.sourcetree)
 				project.writeFooter()
 				project_list.append((project, node))
+
 		for project, node in project_list:
 			s.addProject(project, node.path_from(self.srcnode))
 		s.writeFooter(self.env.ALL_VARIANTS)

@@ -1,7 +1,7 @@
 import os
 from mak.tools.IDE.vstudio import solution
 import mak
-from mak import sources
+from mak import sources, module
 
 try:
 	import cStringIO as StringIO
@@ -78,19 +78,20 @@ class VCxproj:
 			if self.type == 'game':
 				self.output.write('    <NMakeBuildCommandLine></NMakeBuildCommandLine>\n')
 				self.output.write('    <NMakeOutput>$(SolutionDir)%s\\%s\\%s</NMakeOutput>\n' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN%engine))
-				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s</NMakeCleanCommandLine>\n' % config)
-				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
 				self.output.write('    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>')
 				self.output.write('    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>')
 				self.output.write('    <LocalDebuggerCommandArguments>%s</LocalDebuggerCommandArguments>' % self.name)
 			else:
 				if self.type == 'waf':
 					self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s</NMakeBuildCommandLine>\n' % (config))
-				else:
+					self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s</NMakeReBuildCommandLine>\n' % (config, config))
+				elif self.type in dir(module):
 					self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf install_%s --targets=%s</NMakeBuildCommandLine>\n' % (config, self.name))
+					self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s --targets=%s</NMakeReBuildCommandLine>\n' % (config, config, self.name))
+				else:
+					self.output.write('    <NMakeBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf %s</NMakeBuildCommandLine>\n' % (self.type))
 				self.output.write('    <NMakeOutput></NMakeOutput>\n')
 				self.output.write('    <NMakeCleanCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s --targets=%s</NMakeCleanCommandLine>\n' % (config, self.name))
-				self.output.write('    <NMakeReBuildCommandLine>cd $(SolutionDir) &amp;&amp; mak\\win32\\bin\\python.exe waf clean_%s install_%s --targets=%s</NMakeReBuildCommandLine>\n' % (config, config, self.name))
 			self.output.write('    <NMakePreprocessorDefinitions>%s</NMakePreprocessorDefinitions>\n' % ';'.join(defines))
 			self.output.write('    <NMakeIncludeSearchPath>%s</NMakeIncludeSearchPath>\n' % ';'.join(includes))
 			self.output.write('  </PropertyGroup>\n')

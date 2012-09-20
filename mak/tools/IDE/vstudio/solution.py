@@ -73,7 +73,10 @@ class Solution:
 			return
 		self.done.add(project)
 
-		name = project.category+'.'+project.name
+		if project.category:
+			name = project.category+'.'+project.name
+		else:
+			name = project.name
 		projectGUID = generateGUID(project.targetName, project.name)
 		if self.folders:
 			lst = name.split('.')
