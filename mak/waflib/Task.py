@@ -299,6 +299,8 @@ class TaskBase(evil):
 				tmp -= master.ready.qsize()
 			return master.processed + tmp
 
+		if self.generator.bld.silent:
+			return ""
 		if self.generator.bld.progress_bar == 1:
 			return self.generator.bld.progress_line(cur(), master.total, col1, col2)
 

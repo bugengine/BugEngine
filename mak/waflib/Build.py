@@ -97,6 +97,7 @@ class BuildContext(Context.Context):
 		self.cache_global = Options.cache_global
 		self.nocache = Options.options.nocache
 		self.progress_bar = Options.options.progress_bar
+		self.silent = Options.options.silent
 
 		############ stuff below has not been reviewed
 

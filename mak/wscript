@@ -24,16 +24,8 @@ def dummy(c):
 	pass
 
 def print_msg(task):
-	tgt_str = task.outputs[0].nice_path(task.env)
-	tgt = []
-	while tgt_str:
-		tgt_str,tail = os.path.split(tgt_str)
-		tgt = [tail]+tgt
-	tgt = tgt[3:]
-	task_name = task.__class__.__name__.replace('_task', '')
-	if task.env.IS_KERNEL:
-		task_name = 'k'+task_name
-	return '[{0:^11}] {1}\n'.format(task_name, '/'.join(tgt))
+	tgt = str(task.outputs[0])
+	return tgt+'\n'
 Task.Task.__str__ = print_msg
 
 def options(opt):
