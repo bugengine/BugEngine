@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Plugin
 {
 
-class DynamicObject
+class be_api(PLUGIN) DynamicObject
 {
 private:
     typedef void*   Handle;
