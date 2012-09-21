@@ -369,7 +369,7 @@ def master_sig_deps(task):
 	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
 		task.m.update(f)
 		task.m.update(b';')
-MasterTask = Task.task_factory("master", create_master_file, color='CYAN', before='c cxx')
+MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
 MasterTask.sig_explicit_deps = master_sig_deps
 
 

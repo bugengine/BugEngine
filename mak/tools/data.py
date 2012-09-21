@@ -19,7 +19,7 @@ def doParseData(task):
 	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.plugin, task.env.BROKEN_INITIALIZER)
 
 ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} -b ${str(env.BROKEN_INITIALIZER)} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
-cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc', before='cxx')
+cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
 

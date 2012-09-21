@@ -29,7 +29,7 @@ def add_gcc_flags_to_env(conf):
 	conf.env.append_unique('CFLAGS', ['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', ['-ldl', '-lrt', '-lpthread', '-rdynamic', '-Wl,-E'])
-	if conf.env.GCC_NAME == 'gcc':
+	if conf.env.GCC_NAME == 'gcc' or conf.env.GCC_NAME == 'clang':
 		conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
 		conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 
