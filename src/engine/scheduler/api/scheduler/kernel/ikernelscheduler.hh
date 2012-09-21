@@ -21,14 +21,14 @@ class KernelDescription;
 class be_api(SCHEDULER) IKernelScheduler : public minitl::pointer
 {
     friend class ::BugEngine::Scheduler;
-private:
+protected:
     istring const               m_name;
     weak<Scheduler> const       m_scheduler;
-    weak<IMemoryProvider> const m_memoryProvider;
 public:
-    IKernelScheduler(const istring& name, weak<Scheduler> scheduler, weak<IMemoryProvider> provider);
+    IKernelScheduler(const istring& name, weak<Scheduler> scheduler);
     ~IKernelScheduler();
 
+    virtual weak<IMemoryProvider> memoryProvider() const = 0;
     virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) = 0;
 };
 

@@ -4,7 +4,6 @@
 #ifndef BE_SCHEDULER_SCHEDULER_HH_
 #define BE_SCHEDULER_SCHEDULER_HH_
 /*****************************************************************************/
-#include    <scheduler/kernel/imemoryprovider.hh>
 #include    <minitl/array.hh>
 #include    <minitl/pool.hh>
 
@@ -65,7 +64,6 @@ private:
     minitl::pool<Buffer>                                m_taskPool;
     scoped<Task::TaskScheduler>                         m_taskScheduler;
     minitl::vector< weak<Kernel::IKernelScheduler> >    m_kernelSchedulers;
-    scoped<Kernel::IMemoryProvider>                     m_cpuMemoryProvider;
 private:
     void notifyEnd();
 private:
@@ -82,11 +80,6 @@ public:
     void mainThreadJoin();
     void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
     void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
-
-    weak<Kernel::IMemoryProvider> memoryProvider() const
-    {
-        return m_cpuMemoryProvider;
-    }
 };
 
 template< typename T >

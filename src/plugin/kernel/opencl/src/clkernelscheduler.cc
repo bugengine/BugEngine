@@ -3,6 +3,7 @@
 
 #include    <opencl/stdafx.h>
 #include    <opencl/clkernelscheduler.hh>
+#include    <opencl/clmemoryprovider.hh>
 #include    <clkernelloader.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
@@ -112,9 +113,10 @@ cl_context OpenCLKernelScheduler::createCLContext(const cl_context_properties* p
 }
 
 OpenCLKernelScheduler::OpenCLKernelScheduler(const Plugin::Context& context, const cl_context_properties* properties)
-    :   IKernelScheduler("OpenCL", context.scheduler, context.scheduler->memoryProvider())
+    :   IKernelScheduler("OpenCL", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
     ,   m_loader(scoped<OpenCLKernelLoader>::create(Arena::task()))
+    ,   m_memoryProvider(scoped<OpenCLMemoryProvider>::create(Arena::task()))
     ,   m_context(createCLContext(properties))
 {
     if (m_context)
@@ -137,6 +139,11 @@ void OpenCLKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, co
     be_forceuse(kernel);
     be_forceuse(parameters);
     be_notreached();
+}
+
+weak<Kernel::IMemoryProvider> OpenCLKernelScheduler::memoryProvider() const
+{
+    return m_memoryProvider;
 }
 
 }

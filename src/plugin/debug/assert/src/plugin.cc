@@ -21,7 +21,7 @@ public:
     AssertSetup(const BugEngine::Plugin::Context& /*context*/)
         :   m_previousAssertionCallback(minitl::setAssertionCallback(AssertionCallback))
     {
-            be_info("installed assert callback");
+        be_debug("installed assert callback");
     }
     ~AssertSetup()
     {
