@@ -81,6 +81,7 @@ class opt_parser(optparse.OptionParser):
 		self.add_option_group(gr)
 
 		gr.add_option('-p', '--progress', dest='progress_bar', default=0, action='count', help= '-p: progress bar; -pp: ide output')
+		gr.add_option('-s', '--silent',   dest='silent', default=False, action='store_true', help= '-s: silent; no output')
 		gr.add_option('--targets',        dest='targets', default='', action='store', help='task generators, e.g. "target1,target2"')
 
 		gr = optparse.OptionGroup(self, 'step options')
