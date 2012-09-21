@@ -8,10 +8,9 @@
 namespace BugEngine { namespace Kernel
 {
 
-IKernelScheduler::IKernelScheduler(const istring& name, weak<Scheduler> scheduler, weak<IMemoryProvider> provider)
+IKernelScheduler::IKernelScheduler(const istring& name, weak<Scheduler> scheduler)
     :   m_name(name)
     ,   m_scheduler(scheduler)
-    ,   m_memoryProvider(provider)
 {
     m_scheduler->addKernelScheduler(this);
 }

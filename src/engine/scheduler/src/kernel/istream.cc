@@ -22,9 +22,4 @@ const IStream::MemoryState& IStream::getBank(weak<const IMemoryProvider> provide
     return MemoryState::null;
 }
 
-weak<Task::ITask> IStream::getProducer() const
-{
-    return m_producer;
-}
-
 }}

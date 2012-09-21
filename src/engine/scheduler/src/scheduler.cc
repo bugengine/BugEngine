@@ -5,7 +5,6 @@
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <scheduler/kernel/kernel.script.hh>
-#include    <scheduler/kernel/cpumemoryprovider.hh>
 #include    <scheduler/kernel/istream.hh>
 #include    <scheduler/task/kerneltask.hh>
 #include    <taskscheduler.hh>
@@ -36,7 +35,6 @@ Scheduler::Scheduler()
     ,   m_taskPool(Arena::task(), 65535, 16)
     ,   m_taskScheduler(scoped<Task::TaskScheduler>::create(Arena::task(), this))
     ,   m_kernelSchedulers(Arena::task())
-    ,   m_cpuMemoryProvider(scoped<Kernel::CPUMemoryProvider>::create(Arena::task()))
 {
 }
 

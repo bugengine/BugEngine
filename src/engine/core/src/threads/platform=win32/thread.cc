@@ -101,7 +101,7 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = static_cast<ThreadParams*>(params);
     s_threadData.createThreadSpecificData(*p);
-    be_info("started thread %s" | p->m_name);
+    be_debug("started thread %s" | p->m_name);
     setThreadName(p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
     be_info("stopped thread %s" | p->m_name);
