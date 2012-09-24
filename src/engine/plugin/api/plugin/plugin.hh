@@ -41,7 +41,7 @@ private:
     i_u32*          m_refCount;
 private:
     typedef Interface* (CreateFunction)(const Context& context);
-    typedef void (DestroyFunction)(Interface* interface);
+    typedef void (DestroyFunction)(Interface* instance);
     typedef const RTTI::Class* (GetPluginNamespace)();
 public:
     enum PreloadType { Preload };

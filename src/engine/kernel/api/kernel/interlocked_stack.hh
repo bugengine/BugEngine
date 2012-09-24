@@ -1,24 +1,24 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_INTERLOCKED_STACK_
-#define BE_MINITL_INTERLOCKED_STACK_
+#ifndef BE_MINITL_INTERLOCKED_STACK_HH_
+#define BE_MINITL_INTERLOCKED_STACK_HH_
 /*****************************************************************************/
 #include    <kernel/interlocked.hh>
 
 namespace minitl
 {
 
-struct inode
-{
-    inode* next;
-};
-
 template< typename T >
 class istack
 {
+public:
+    struct inode
+    {
+        inode* next;
+    };
 private:
-    _Kernel::itaggedptr<inode> m_head;
+    itaggedptr<inode> m_head;
 public:
     istack();
     ~istack();
@@ -41,7 +41,7 @@ istack<T>::~istack()
 template< typename T >
 void istack<T>::push(T* t)
 {
-    _Kernel::itaggedptr<inode>::ticket_t ticket;
+    itaggedptr<inode>::ticket_t ticket;
     do
     {
         ticket = m_head.getTicket();
@@ -52,7 +52,7 @@ void istack<T>::push(T* t)
 template< typename T >
 T* istack<T>::pop()
 {
-    _Kernel::itaggedptr<inode>::ticket_t ticket;
+    itaggedptr<inode>::ticket_t ticket;
     T* result;
     do
     {

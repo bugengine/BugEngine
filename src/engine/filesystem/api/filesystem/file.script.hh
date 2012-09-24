@@ -5,7 +5,7 @@
 #define BE_FILESYSTEM_FILE_FILE_SCRIPT_HH_
 /*****************************************************************************/
 #include    <core/string/istring.hh>
-#include    <kernel/interlocked_stack.hh>
+#include    <core/threads/queue.hh>
 #include    <minitl/intrusive_list.hh>
 
 namespace BugEngine
@@ -44,7 +44,7 @@ public:
     ~File();
 public:
     class Ticket :  public minitl::refcountable
-                 ,  public minitl::inode
+                 ,  public Queue<Ticket>::Node
                  ,  public minitl::intrusive_list<Ticket>::item
     {
         friend class File;
