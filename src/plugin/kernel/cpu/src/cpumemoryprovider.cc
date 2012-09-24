@@ -1,14 +1,14 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/cpumemoryprovider.hh>
+#include    <stdafx.h>
+#include    <cpumemoryprovider.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine
 {
 
 CPUMemoryProvider::CPUMemoryProvider()
-    :   IMemoryProvider("CPU")
+    :   Kernel::IMemoryProvider("CPU")
 {
 }
 
@@ -16,4 +16,4 @@ CPUMemoryProvider::~CPUMemoryProvider()
 {
 }
 
-}}
+}

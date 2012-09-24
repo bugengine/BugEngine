@@ -11,19 +11,20 @@ namespace BugEngine
 {
 
 class CPUKernelLoader;
+class CPUMemoryProvider;
+
 namespace Kernel
 {
 class IStream;
-class CPUMemoryProvider;
 }
 
 
 class CPUKernelScheduler : public Kernel::IKernelScheduler
 {
 private:
-    weak<Resource::ResourceManager>     m_resourceManager;
-    scoped<CPUKernelLoader>             m_loader;
-    scoped<Kernel::CPUMemoryProvider>   m_cpuMemoryProvider;
+    weak<Resource::ResourceManager> m_resourceManager;
+    scoped<CPUKernelLoader>         m_loader;
+    scoped<CPUMemoryProvider>       m_cpuMemoryProvider;
 public:
     CPUKernelScheduler(const Plugin::Context& context);
     ~CPUKernelScheduler();
