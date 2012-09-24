@@ -15,6 +15,9 @@ template< typename T >
 class pool
 {
 private:
+    struct inode : public minitl::istack<inode>::inode
+    {
+    };
     enum
     {
         ElementSize = sizeof(T)

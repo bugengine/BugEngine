@@ -73,12 +73,14 @@ const interlocked<T> interlocked<T>::Zero = { 0 };
 template< typename T >
 const interlocked<T> interlocked<T>::One = { 1 };
 
+}
+
 
 template< typename T >
 class iptr
 {
 private:
-    typedef InterlockedType< sizeof(T*) >   impl;
+    typedef _Kernel::InterlockedType< sizeof(T*) >   impl;
     typedef typename impl::value_t          value_t;
 private:
     value_t m_value;
@@ -102,7 +104,7 @@ template< typename T >
 class itaggedptr
 {
 private:
-    typedef InterlockedType< sizeof(T*) > impl;
+    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
     typedef typename impl::tagged_t                         type_t;
     typedef typename type_t::value_t                        value_t;
 private:
@@ -122,8 +124,6 @@ public:
     ticket_t getTicket()                              { return impl::get_ticket(m_value); }
     bool setConditional(T* value, ticket_t& condition){ return impl::set_conditional(&m_value, reinterpret_cast<value_t>(value), condition); }
 };
-
-}
 
 
 typedef _Kernel::interlocked<bool>   i_bool;

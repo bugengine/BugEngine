@@ -13,7 +13,7 @@ class ITask;
 template< typename BODY > class Task;
 class TaskScheduler;
 
-class be_api(SCHEDULER) ITaskItem : public minitl::inode
+class be_api(SCHEDULER) ITaskItem : public minitl::istack<ITaskItem>::inode
 {
     friend class TaskScheduler;
 protected:

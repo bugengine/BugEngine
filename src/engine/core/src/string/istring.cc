@@ -206,7 +206,7 @@ istring& istring::operator=(const istring& other)
 
 u32 istring::hash() const
 {
-    return u32(ptrdiff_t(m_index));
+    return (u32)(ptrdiff_t(m_index) & 0xFFFFFFFF);
 }
 
 size_t istring::size() const

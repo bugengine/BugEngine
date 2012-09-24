@@ -6,7 +6,6 @@
 #include    <filesystem/file.script.hh>
 
 #include    <core/threads/thread.hh>
-#include    <core/threads/semaphore.hh>
 
 namespace BugEngine
 {

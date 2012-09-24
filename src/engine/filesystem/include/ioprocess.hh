@@ -6,7 +6,6 @@
 /*****************************************************************************/
 #include    <filesystem/file.script.hh>
 #include    <core/threads/thread.hh>
-#include    <core/threads/semaphore.hh>
 
 namespace BugEngine { namespace IOProcess
 {
@@ -15,10 +14,9 @@ class IOContext
 {
 private:
     i_u8                                    m_ioDone;
-    Semaphore                               m_ioSemaphore;
     Thread                                  m_ioThread;
     minitl::intrusive_list<File::Ticket>    m_tickets;
-    minitl::istack<File::Ticket>            m_requests;
+    Queue<File::Ticket>                     m_requests;
 
 private:
     static intptr_t ioProcess(intptr_t p1, intptr_t p2);
