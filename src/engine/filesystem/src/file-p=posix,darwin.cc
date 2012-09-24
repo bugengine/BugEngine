@@ -4,6 +4,7 @@
 #include    <filesystem/stdafx.h>
 #include    <posix/file.hh>
 #include    <cerrno>
+#include    <cstdio>
 
 namespace BugEngine
 {

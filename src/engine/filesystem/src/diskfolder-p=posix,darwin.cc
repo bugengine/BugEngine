@@ -7,6 +7,7 @@
 #include    <sys/stat.h>
 #include    DIRENT_H
 #include    <errno.h>
+#include    <stdio.h>
 #include    <posix/file.hh>
 
 namespace BugEngine
