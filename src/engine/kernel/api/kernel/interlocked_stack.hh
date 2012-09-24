@@ -41,7 +41,7 @@ istack<T>::~istack()
 template< typename T >
 void istack<T>::push(T* t)
 {
-    itaggedptr<inode>::ticket_t ticket;
+    typename itaggedptr<inode>::ticket_t ticket;
     do
     {
         ticket = m_head.getTicket();
@@ -52,7 +52,7 @@ void istack<T>::push(T* t)
 template< typename T >
 T* istack<T>::pop()
 {
-    itaggedptr<inode>::ticket_t ticket;
+    typename itaggedptr<inode>::ticket_t ticket;
     T* result;
     do
     {
