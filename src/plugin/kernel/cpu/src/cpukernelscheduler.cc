@@ -4,13 +4,12 @@
 #include    <stdafx.h>
 #include    <cpukernelscheduler.hh>
 #include    <cpukernelloader.hh>
+#include    <cpumemoryprovider.hh>
 
-#include "scheduler/kernel/istream.hh"
 #include    <kernelobject.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/kernel.script.hh>
-#include    <scheduler/kernel/cpumemoryprovider.hh>
 
 namespace BugEngine
 {
@@ -26,7 +25,7 @@ CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
     :   IKernelScheduler("CPU", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
     ,   m_loader(scoped<CPUKernelLoader>::create(Arena::task()))
-    ,   m_cpuMemoryProvider(scoped<Kernel::CPUMemoryProvider>::create(Arena::task()))
+    ,   m_cpuMemoryProvider(scoped<CPUMemoryProvider>::create(Arena::task()))
 {
     m_resourceManager->attach<Kernel::KernelDescription>(m_loader);
 }

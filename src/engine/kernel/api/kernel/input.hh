@@ -17,7 +17,12 @@ private:
     const T* const  m_end;
     const T*        m_current;
 public:
-    in(const T* begin, const T* end);
+    in(const T* begin, const T* end)
+        :   m_begin(begin)
+        ,   m_end(end)
+        ,   m_current(begin)
+    {
+    }
     operator void*() const { return (void*)(m_end - m_current); }
     in& operator++() { m_current++; return *this; }
     in& operator--() { m_current--; return *this; }
@@ -36,7 +41,12 @@ private:
     T* const  m_end;
     T*        m_current;
 public:
-    inout(T* begin, T* end);
+    inout(T* begin, T* end)
+        :   m_begin(begin)
+        ,   m_end(end)
+        ,   m_current(begin)
+    {
+    }
     operator void*() const { return (void*)(m_end - m_current); }
     inout& operator++() { m_current++; return *this; }
     inout& operator--() { m_current--; return *this; }

@@ -1,11 +1,11 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/cpumemorybank.hh>
-#include    <scheduler/kernel/cpumemoryprovider.hh>
+#include    <stdafx.h>
+#include    <cpumemorybank.hh>
+#include    <cpumemoryprovider.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine
 {
 
 CPUMemoryBank::CPUMemoryBank(weak<const CPUMemoryProvider> provider)
@@ -17,4 +17,4 @@ CPUMemoryBank::~CPUMemoryBank()
 {
 }
 
-}}
+}

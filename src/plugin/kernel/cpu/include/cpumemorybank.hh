@@ -1,24 +1,24 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SCHEDULER_KERNEL_CPUMEMORYBANK_HH_
-#define BE_SCHEDULER_KERNEL_CPUMEMORYBANK_HH_
+#ifndef BE_KERNEL_CPU_CPUMEMORYBANK_HH_
+#define BE_KERNEL_CPU_CPUMEMORYBANK_HH_
 /*****************************************************************************/
 #include    <scheduler/kernel/imemorybank.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine
 {
 
 class CPUMemoryProvider;
 
-class CPUMemoryBank : public IMemoryBank
+class CPUMemoryBank : public Kernel::IMemoryBank
 {
 public:
     CPUMemoryBank(weak<const CPUMemoryProvider> provider);
     ~CPUMemoryBank();
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif
