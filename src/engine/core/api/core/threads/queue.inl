@@ -27,7 +27,7 @@ Queue<T>::~Queue()
 template< typename T >
 void Queue<T>::push(T* t)
 {
-    itaggedptr<Node>::ticket_t ticket;
+    typename itaggedptr<Node>::ticket_t ticket;
     do
     {
         ticket = m_head.next.getTicket();
@@ -47,11 +47,7 @@ T* Queue<T>::pop()
     }
     else
     {
-        itaggedptr<Node>::ticket_t ticket;
-        do
-        {
-            ticket = m_tail.getTicket();
-        } while (!m_tail.setConditional(previous, ticket));
+        return 0;
     }
 }
 
