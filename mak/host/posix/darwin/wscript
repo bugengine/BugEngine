@@ -2,7 +2,7 @@
 # detect tools : gcc, icc, clang, llvm
 
 
-import os
+import os, sys
 from waflib.Logs import pprint
 from waflib import Utils
 import mak.tools.cross_gcc
