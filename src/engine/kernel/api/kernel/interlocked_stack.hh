@@ -1,8 +1,8 @@
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_MINITL_INTERLOCKED_STACK_HH_
-#define BE_MINITL_INTERLOCKED_STACK_HH_
+#ifndef BE_KERNEL_INTERLOCKED_STACK_HH_
+#define BE_KERNEL_INTERLOCKED_STACK_HH_
 /*****************************************************************************/
 #include    <kernel/interlocked.hh>
 
@@ -13,12 +13,12 @@ template< typename T >
 class istack
 {
 public:
-    struct inode
+    struct node
     {
-        inode* next;
+        node* next;
     };
 private:
-    itaggedptr<inode> m_head;
+    itaggedptr<node> m_head;
 public:
     istack();
     ~istack();
@@ -41,25 +41,25 @@ istack<T>::~istack()
 template< typename T >
 void istack<T>::push(T* t)
 {
-    typename itaggedptr<inode>::ticket_t ticket;
+    typename itaggedptr<node>::ticket_t ticket;
     do
     {
         ticket = m_head.getTicket();
-        t->next = static_cast<T*>((inode*)m_head);
+        t->next = static_cast<T*>((node*)m_head);
     } while (!m_head.setConditional(t, ticket));
 }
 
 template< typename T >
 T* istack<T>::pop()
 {
-    typename itaggedptr<inode>::ticket_t ticket;
+    typename itaggedptr<node>::ticket_t ticket;
     T* result;
     do
     {
         ticket = m_head.getTicket();
-        result = static_cast<T*>((inode*)m_head);
+        result = static_cast<T*>((node*)m_head);
     }
-    while (result && !m_head.setConditional(const_cast<inode*>(result->next), ticket));
+    while (result && !m_head.setConditional(const_cast<node*>(result->next), ticket));
     return result;
 }
 

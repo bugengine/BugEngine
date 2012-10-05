@@ -57,8 +57,8 @@ bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
     if (!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
     {
         ITaskItem* newTarget = target->split(sc->m_scheduler);
-        sc->queue(newTarget);
-        sc->queue(target);
+        sc->queue(newTarget, Scheduler::Immediate);
+        sc->queue(target, Scheduler::Immediate);
     }
     else
     {
@@ -109,9 +109,8 @@ TaskScheduler::~TaskScheduler()
         delete m_workers[i];
 }
 
-void TaskScheduler::queue(ITaskItem* task)
+void TaskScheduler::queue(ITaskItem* task, int priority)
 {
-    int priority = task->m_owner->priority;
     m_scheduler->m_runningTasks ++;
     if (task->m_owner->affinity == Scheduler::DontCare)
     {
@@ -123,6 +122,11 @@ void TaskScheduler::queue(ITaskItem* task)
         m_mainThreadTasks[priority].push(task);
         m_mainThreadSynchro.release(1);
     }
+}
+
+void TaskScheduler::queue(ITaskItem* task)
+{
+    queue(task, task->m_owner->priority);
 }
 
 ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)

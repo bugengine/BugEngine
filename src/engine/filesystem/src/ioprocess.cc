@@ -8,7 +8,8 @@ namespace BugEngine { namespace IOProcess
 {
 
 IOContext::IOContext()
-    :   m_ioDone(i_u8::Zero)
+    :   m_lock(0)
+    ,   m_ioDone(i_u8::Zero)
     ,   m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast<intptr_t>(this), 0, Thread::Highest)
 {
 };
@@ -16,6 +17,7 @@ IOContext::IOContext()
 IOContext::~IOContext()
 {
     m_ioDone++;
+    m_lock.release(1);
     m_ioThread.wait();
     be_assert(m_tickets.empty(), "Tickets still in queue when exiting IO process");
 }
@@ -25,6 +27,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
     IOContext* context = reinterpret_cast<IOContext*>(p1);
     while(1)
     {
+        context->m_lock.wait();
         File::Ticket* request = context->m_requests.pop();
         if (!request)
         {
@@ -61,6 +64,7 @@ void IOContext::pushTicket(ref<File::Ticket> ticket)
     File::Ticket* t = ticket.operator->();
     t->addref();
     m_requests.push(t);
+    m_lock.release(1);
 }
 
 }}
