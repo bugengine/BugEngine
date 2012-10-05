@@ -42,7 +42,8 @@ public:
         Low = 0,
         Default = 1,
         High = 2,
-        PriorityCount = 3
+        Immediate = 3,
+        PriorityCount = 4
     };
     enum Affinity
     {
