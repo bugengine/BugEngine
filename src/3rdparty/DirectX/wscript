@@ -47,15 +47,12 @@ def setup(conf):
 def build(bld):
 	from waflib import Options
 	includes=[os.path.join(Options.options.dx_sdk, 'Include')]
-	libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64')]
 	exparchoptions = {
 		'win32-x86': module.coptions(
-			libdir=libdirs,
-			#libs=['bufferoverflowu', 'chkstk'],
+			libdir=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86')],
 			includedir=includes),
 		'win32-amd64': module.coptions(
-			libdir=libdirs,
-			#libs=[ 'bufferoverflowu', 'chkstk'],
+			libdir=[os.path.join(Options.options.dx_sdk, 'Lib', 'x64')],
 			includedir=includes)
 		}
 	if bld.env.dx9 or bld.env.PROJECTS:
