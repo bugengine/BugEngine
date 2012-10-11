@@ -36,6 +36,7 @@ ref<const Module> Module::self()
                 continue;
             char filename[4096];
             fread(filename, 1, 4096, cmdline);
+            fclose(cmdline);
             s_module = ref<Elf>::create(Arena::debug(), filename, lmap->l_addr);
             module = s_module;
         }
