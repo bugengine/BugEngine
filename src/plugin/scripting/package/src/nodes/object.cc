@@ -41,32 +41,35 @@ void Object::setMethod(ref<Reference> reference)
     {
         static const istring callName("?call");
         RTTI::Value call = v[callName];
-        if (call && call.isA(be_typeid<const RTTI::Method* const>::type()))
+        if (call)
         {
-            m_method = call.as<const RTTI::Method* const>();
-            if (m_method)
+            if (call.isA(be_typeid<const RTTI::Method* const>::type()))
             {
-                m_overloads.clear();
-                for (raw<const RTTI::Method::Overload> overload = m_method->overloads; overload; overload = overload->next)
+                m_method = call.as<const RTTI::Method* const>();
+                if (m_method)
                 {
-                    m_overloads.push_back(OverloadMatch(overload));
-                    OverloadMatch& match = m_overloads.back();
-                    for(minitl::vector< ref<Parameter> >::const_iterator it = m_parameters.begin(); it != m_parameters.end(); ++it)
+                    m_overloads.clear();
+                    for (raw<const RTTI::Method::Overload> overload = m_method->overloads; overload; overload = overload->next)
                     {
-                        match.addParameter(*it);
+                        m_overloads.push_back(OverloadMatch(overload));
+                        OverloadMatch& match = m_overloads.back();
+                        for(minitl::vector< ref<Parameter> >::const_iterator it = m_parameters.begin(); it != m_parameters.end(); ++it)
+                        {
+                            match.addParameter(*it);
+                        }
                     }
+                    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
                 }
-                minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
+                else
+                {
+                    be_unimplemented();
+                }
             }
             else
             {
+                // error
                 be_unimplemented();
             }
-        }
-        else if (call)
-        {
-            // error
-            be_unimplemented();
         }
         else
         {
