@@ -30,7 +30,7 @@ def add_msvc_to_env(conf, compiler, version, target, platform, tname):
 
 def add_win32_gcc_flags_to_env(conf):
 	conf.env['CFLAGS_warnall'] += ['-Wno-comments']
-	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new']
+	conf.env['CXXFLAGS_warnall'] += ['-Wno-comments', '-fcheck-new', '-Wno-unknown-pragmas']
 	conf.env['shlib_CXXFLAGS'] = []
 	conf.env['shlib_CFLAGS'] = []
 	conf.env.append_unique('CFLAGS', '-mwindows')

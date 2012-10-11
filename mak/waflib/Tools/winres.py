@@ -28,6 +28,15 @@ class winrc(Task.Task):
 	run_str = '${WINRC} ${WINRCFLAGS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${WINRC_TGT_F} ${TGT} ${WINRC_SRC_F} ${SRC}'
 	color   = 'BLUE'
 
+	def exec_command(self, *k, **kw):
+		if self.env.CC_NAME != 'msvc':
+			newcl = []
+			for clitem in k[0]:
+				if clitem[0:2] != '-I' or clitem.find(' ') == -1:
+					newcl.append(clitem)
+			k = [newcl]
+		return Task.Task.exec_command(self,* k, **kw)
+
 def configure(conf):
 	"""
 	Detect the programs RC or windres, depending on the C/C++ compiler in use
@@ -37,13 +46,12 @@ def configure(conf):
 	v['WINRC_SRC_F'] = '-i'
 
 	# find rc.exe
-	if not conf.env.WINRC:
-		if v.CC_NAME == 'msvc':
-			conf.find_program('RC', var='WINRC', path_list = v['PATH'], mandatory=False)
-			v['WINRC_TGT_F'] = '/fo'
-			v['WINRC_SRC_F'] = ''
-		else:
-			conf.find_program('windres', var='WINRC', path_list = v['PATH'], mandatory=False)
+	if v.CC_NAME == 'msvc':
+		conf.find_program('RC', var='WINRC', path_list = v['PATH'], mandatory=False)
+		v['WINRC_TGT_F'] = '/fo'
+		v['WINRC_SRC_F'] = ''
+	else:
+		conf.find_program('windres', var='WINRC', path_list = v['PATH'], mandatory=False)
 
 	v['WINRCFLAGS'] = []
 

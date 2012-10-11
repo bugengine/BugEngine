@@ -41,7 +41,7 @@ void DynamicObject::unload(Handle handle)
 
 void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 {
-    return GetProcAddress(static_cast<HINSTANCE>(handle), name.c_str());
+    return reinterpret_cast<void*>(GetProcAddress(static_cast<HINSTANCE>(handle), name.c_str()));
 }
 
 }}
