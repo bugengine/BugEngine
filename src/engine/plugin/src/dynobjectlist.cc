@@ -13,15 +13,20 @@ namespace BugEngine { namespace Plugin
 
 size_t              DynamicObjectList::s_currentDynamicObject;
 
-DynamicObjectList*  DynamicObjectList::s_dynamicObjects[s_maxDynamicObject];
+DynamicObjectList*  DynamicObjectList::s_dynamicObjects[DynamicObjectList::s_maxDynamicObjects];
+
+DynamicObjectList::Symbol::Symbol()
+    :   name(0)
+    ,   symbol(0)
+{
+}
 
 DynamicObjectList::DynamicObjectList(const char* name)
-    :   name(name)
+    :   m_name(name)
 {
-    be_assert(s_currentDynamicObject < s_maxDynamicObject, "too many dynamic objects registered; increase the value of DynamicObjectList::s_maxDynamicObject to more than %d" | s_maxDynamicObject);
+    be_assert(s_currentDynamicObject < s_maxDynamicObjects, "too many dynamic objects registered; increase the value of DynamicObjectList::s_maxDynamicObjects to more than %d" | s_maxDynamicObjects);
     be_info("Registering built-in dynamic object %s" | name);
-    s_dynamicObjects[s_maxDynamicObject++] = this;
-    memset(m_symbols, 0, sizeof(m_symbols));
+    s_dynamicObjects[s_currentDynamicObject++] = this;
 }
 
 DynamicObjectList::~DynamicObjectList()
@@ -42,7 +47,7 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
     be_info("loading dynamic object %s (built-in)" | name);
     for (size_t i = 0; i < s_currentDynamicObject; ++i)
     {
-        if (strcmp(name, s_dynamicObjects[i]->name) == 0)
+        if (strcmp(name, s_dynamicObjects[i]->m_name) == 0)
         {
             return s_dynamicObjects[i];
         }
@@ -54,10 +59,10 @@ bool DynamicObjectList::registerSymbolInternal(const char* name, void* value)
 {
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
-        if (m_symbols[i] == 0)
+        if (m_symbols[i].name == 0)
         {
             m_symbols[i].name = name;
-            m_symbols[i].value = value;
+            m_symbols[i].symbol = value;
             return true;
         }
     }
@@ -65,20 +70,20 @@ bool DynamicObjectList::registerSymbolInternal(const char* name, void* value)
     return false;
 }
 
-void* DynamicObjectList::findSymbol(const char* name)
+void* DynamicObjectList::findSymbol(const char* name) const
 {
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
-        if ((m_symbols[i], name) == 0)
+        if (strcmp(m_symbols[i].name, name) == 0)
         {
-            return m_symbols[i].value = value;
+            return m_symbols[i].symbol;
         }
     }
     return 0;
 }
 
 
-DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const inamespace& objectPath)
+DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const ipath& objectPath)
 {
     return (Handle)DynamicObjectList::findDynamicObject(objectName.str().name);
 }
@@ -87,9 +92,9 @@ void DynamicObject::unload(Handle handle)
 {
 }
 
-void* DynamicObject::getSymbolInternal(Handle handle, const char* name)
+void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 {
-    return (DynamicObjectList*)handle->findSymbol(name);
+    return reinterpret_cast<DynamicObjectList*>(handle)->findSymbol(name.c_str());
 }
 
 #endif

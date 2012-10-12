@@ -23,10 +23,11 @@ private:
     {
         const char* name;
         void*       symbol;
+        Symbol();
     };
 private:
-    const char* const   name;
-    Symbol              symbols[16];
+    const char* const   m_name;
+    Symbol              m_symbols[16];
 private:
     bool registerSymbolInternal(const char *name, void* value);
 public:
@@ -38,7 +39,8 @@ public:
     {
         return registerSymbolInternal(name);
     }
-    static DynamicObjectList* findPlugin(const char *name);
+    void* findSymbol(const char *name) const;
+    static DynamicObjectList* findDynamicObject(const char *name);
 };
 
 #endif
