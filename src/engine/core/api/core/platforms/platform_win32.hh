@@ -8,7 +8,10 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
-#pragma warning(disable:4505)
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4505)
+#endif
 static inline void displayError()
 {
     char* msg;
@@ -22,6 +25,9 @@ static inline void displayError()
     MessageBox(0, msg, "Win32 error", MB_OK);
     ::LocalFree(msg);
 }
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 #define BE_WIN32_PRINTERROR()       displayError()
 #define BE_WIN32_CHECKRESULT(x)     if ((x) == (UINT)-1) BE_WIN32_PRINTERROR()
 

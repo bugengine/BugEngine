@@ -8,7 +8,9 @@
 # include   <sys/types.h>
 # include   <sys/sysctl.h>
 #endif
-#include    <errno.h>
+#include    <cerrno>
+#include    <cstdio>
+
 
 namespace BugEngine
 {

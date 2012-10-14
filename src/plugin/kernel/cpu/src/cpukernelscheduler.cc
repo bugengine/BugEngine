@@ -16,9 +16,12 @@ namespace BugEngine
 
 struct CPUKernelTask
 {
-    minitl::array<KernelObjectParameter> params;
+    minitl::array<Kernel::KernelParameter> params;
 
-    CPUKernelTask(u32 parameterCount) : params(Arena::task(), parameterCount)   {}
+    CPUKernelTask(const minitl::array<Kernel::KernelParameter>& params)
+        :   params(Arena::task(), params.begin(), params.end())
+    {
+    }
 };
 
 CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
@@ -35,15 +38,11 @@ CPUKernelScheduler::~CPUKernelScheduler()
     m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
 }
 
-void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters)
+void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
-    CPUKernelTask task(parameters.size());
-    for (u32 i = 0; i < parameters.size(); ++i)
-    {
-        //task.params[i] = parameters[i]->getBank(m_memoryProvider);
-    }
+    CPUKernelTask task(parameters);
 }
 
 weak<Kernel::IMemoryProvider> CPUKernelScheduler::memoryProvider() const

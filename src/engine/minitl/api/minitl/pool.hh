@@ -15,14 +15,14 @@ template< typename T >
 class pool
 {
 private:
-    struct inode : public minitl::istack<inode>::inode
+    struct node : public minitl::istack<node>::node
     {
     };
     enum
     {
         ElementSize = sizeof(T)
     };
-    istack<inode>       m_items;
+    istack<node>        m_items;
     Allocator::Block<T> m_pool;
     T*                  m_end;
 public:

@@ -8,6 +8,13 @@
 namespace BugEngine { namespace Kernel
 {
 
+class IMemoryBank;
+struct KernelParameter
+{
+    void*   p1;
+    void*   p2;
+};
+
 class be_api(SCHEDULER) IMemoryProvider : public minitl::pointer
 {
 private:
@@ -16,6 +23,8 @@ protected:
     IMemoryProvider(const istring& name);
 public:
     istring name() const { return m_name; }
+
+    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const = 0;
 };
 
 }}

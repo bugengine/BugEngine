@@ -9,16 +9,15 @@
 namespace BugEngine
 {
 
-struct KernelObjectParameter
+namespace Kernel
 {
-    void* begin;
-    void* end;
-};
+struct KernelParameter;
+}
 
 class KernelObject : public minitl::refcountable
 {
 private:
-    typedef void(KernelMain)(KernelObjectParameter params[]);
+    typedef void(KernelMain)(Kernel::KernelParameter params[]);
 private:
     Plugin::DynamicObject   m_kernel;
     KernelMain*             m_entryPoint;
@@ -26,7 +25,7 @@ public:
     KernelObject(const inamespace& name);
     ~KernelObject();
 
-    void run(KernelObjectParameter params[]);
+    void run(Kernel::KernelParameter params[]);
 };
 
 }

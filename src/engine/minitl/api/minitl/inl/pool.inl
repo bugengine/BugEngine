@@ -15,7 +15,7 @@ pool<T>::pool(Allocator& allocator, size_t capacity, size_t alignment)
 ,   m_end(&m_pool[capacity])
 {
     for (size_t i = 0; i < capacity; ++i)
-        m_items.push((inode*)(&m_pool[i]));
+        m_items.push((node*)(&m_pool[i]));
 }
 
 template< typename T >
@@ -65,7 +65,7 @@ void pool<T>::release(T* t)
 {
     t->~T();
     be_assert(t >= m_pool && t < m_end, "releasing a node that is outside the node range");
-    m_items.push((inode*)t);
+    m_items.push((node*)t);
 }
 
 template< typename T >

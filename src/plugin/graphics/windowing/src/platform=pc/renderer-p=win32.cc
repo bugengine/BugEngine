@@ -6,7 +6,6 @@
 #include    <windowing/window.hh>
 #include    <win32/platformrenderer.hh>
 #include    <core/threads/event.hh>
-#pragma warning(disable:4311 4312 4355)
 
 
 namespace BugEngine { namespace Windowing
