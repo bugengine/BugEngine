@@ -18,6 +18,8 @@ class IMemoryProvider;
 class IStream;
 class KernelDescription;
 
+struct KernelParameter;
+
 class be_api(SCHEDULER) IKernelScheduler : public minitl::pointer
 {
     friend class ::BugEngine::Scheduler;
@@ -29,7 +31,7 @@ public:
     ~IKernelScheduler();
 
     virtual weak<IMemoryProvider> memoryProvider() const = 0;
-    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters) = 0;
+    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array<KernelParameter>& parameters) = 0;
 };
 
 }}

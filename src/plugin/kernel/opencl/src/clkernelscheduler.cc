@@ -134,7 +134,7 @@ OpenCLKernelScheduler::~OpenCLKernelScheduler()
     }
 }
 
-void OpenCLKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters)
+void OpenCLKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
 {
     be_forceuse(kernel);
     be_forceuse(parameters);

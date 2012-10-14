@@ -4,9 +4,9 @@
 #include    <stdafx.h>
 #include    <kerneltask.script.hh>
 #include    <scheduler/task/kerneltask.hh>
+#include    <scheduler/kernel/product.hh>
 #include    <kernel/colors.hh>
 
-#include "scheduler/kernel/product.hh"
 
 namespace BugEngine
 {
