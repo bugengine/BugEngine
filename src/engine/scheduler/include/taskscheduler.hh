@@ -37,13 +37,15 @@ private:
 private: //friend Worker
     minitl::istack<ITaskItem>   m_tasks[Scheduler::PriorityCount];
     minitl::istack<ITaskItem>   m_mainThreadTasks[Scheduler::PriorityCount];
-public:
+private:
+    void queue(ITaskItem* task, int affinity);
     ITaskItem* pop(Scheduler::Affinity affinity);
-    void queue(ITaskItem* task);
     void split(ITaskItem* t, size_t count);
 public:
     TaskScheduler(weak<Scheduler> scheduler);
     ~TaskScheduler();
+
+    void queue(ITaskItem* task);
 
     void mainThreadJoin();
     void notifyEnd();

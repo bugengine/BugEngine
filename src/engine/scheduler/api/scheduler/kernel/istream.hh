@@ -22,6 +22,7 @@ private:
         Reserved,
         Updated
     };
+public:
     struct MemoryState
     {
         weak<const IMemoryProvider> provider;

@@ -14,6 +14,8 @@ class CPUMemoryProvider : public Kernel::IMemoryProvider
 public:
     CPUMemoryProvider();
     ~CPUMemoryProvider();
+protected:
+    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const override;
 };
 
 }

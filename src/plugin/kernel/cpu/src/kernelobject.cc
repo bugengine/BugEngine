@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 #include    <kernelobject.hh>
-
+#include    <scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine
 {
@@ -19,7 +19,7 @@ KernelObject::~KernelObject()
 {
 }
 
-void KernelObject::run(KernelObjectParameter params[])
+void KernelObject::run(Kernel::KernelParameter params[])
 {
     (*m_entryPoint)(params);
 }

@@ -14,6 +14,8 @@ class OpenCLMemoryProvider : public Kernel::IMemoryProvider
 public:
     OpenCLMemoryProvider();
     ~OpenCLMemoryProvider();
+protected:
+    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const override;
 };
 
 }
