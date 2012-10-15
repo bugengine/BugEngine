@@ -11,6 +11,11 @@ namespace BugEngine
 
 class Scheduler;
 
+namespace Task
+{
+class ITask;
+}
+
 namespace Kernel
 {
 
@@ -31,7 +36,7 @@ public:
     ~IKernelScheduler();
 
     virtual weak<IMemoryProvider> memoryProvider() const = 0;
-    virtual void run(weak<const Kernel::KernelDescription> kernel, const minitl::array<KernelParameter>& parameters) = 0;
+    virtual void run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<KernelParameter>& parameters) = 0;
 };
 
 }}

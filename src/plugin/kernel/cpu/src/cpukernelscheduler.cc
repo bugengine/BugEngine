@@ -9,6 +9,7 @@
 #include    <kernelobject.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
+#include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
@@ -38,11 +39,12 @@ CPUKernelScheduler::~CPUKernelScheduler()
     m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
 }
 
-void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
+void CPUKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
-    CPUKernelTask task(parameters);
+    CPUKernelTask t(parameters);
+    task->completed(m_scheduler);
 }
 
 weak<Kernel::IMemoryProvider> CPUKernelScheduler::memoryProvider() const
