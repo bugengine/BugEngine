@@ -9,7 +9,7 @@ namespace BugEngine { namespace IOProcess
 
 IOContext::IOContext()
     :   m_availableTickets(0)
-    ,   m_freeSlots(128)
+    ,   m_freeSlots(SlotCount)
     ,   m_firstFreeSlot(i_u32::Zero)
     ,   m_firstUsedSlot(i_u32::Zero)
     ,   m_ioDone(i_u8::Zero)
