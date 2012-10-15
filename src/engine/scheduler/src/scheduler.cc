@@ -58,7 +58,7 @@ void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::arr
         Kernel::IStream::MemoryState state = parameters[i]->getBank(m_kernelSchedulers[0]->memoryProvider());
         kernelParams[i] = state.provider->getKernelParameterFromBank(state.bank);
     }
-    m_kernelSchedulers[0]->run(task->m_kernel, kernelParams);
+    m_kernelSchedulers[0]->run(task, task->m_kernel, kernelParams);
 }
 
 void Scheduler::mainThreadJoin()
