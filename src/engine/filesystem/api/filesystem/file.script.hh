@@ -44,8 +44,6 @@ public:
     ~File();
 public:
     class Ticket :  public minitl::refcountable
-                 ,  public minitl::istack<Ticket>::node
-                 ,  public minitl::intrusive_list<Ticket>::item
     {
         friend class File;
     public:

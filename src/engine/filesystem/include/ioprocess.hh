@@ -14,12 +14,14 @@ namespace BugEngine { namespace IOProcess
 class IOContext
 {
 private:
-    Semaphore                               m_lock;
-    i_u8                                    m_ioDone;
-    Thread                                  m_ioThread;
-    minitl::intrusive_list<File::Ticket>    m_tickets;
-    minitl::istack<File::Ticket>            m_requests;
-
+    enum { SlotCount = 128 };
+    Semaphore           m_availableTickets;
+    Semaphore           m_freeSlots;
+    i_u32               m_firstFreeSlot;
+    i_u32               m_firstUsedSlot;
+    i_u8                m_ioDone;
+    ref<File::Ticket>   m_ticketPool[SlotCount];
+    Thread              m_ioThread;
 private:
     static intptr_t ioProcess(intptr_t p1, intptr_t p2);
 
