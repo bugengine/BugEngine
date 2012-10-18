@@ -105,10 +105,9 @@ public:
     typedef typename POLICY::item_pointer               item_ptr;
 private:
     item_ptr m_iterator;
-private:
-    explicit base_iterator(item_ptr it);
 public:
     base_iterator();
+    explicit base_iterator(item_ptr it);
     ~base_iterator();
 public:
     bool operator==(const base_iterator<POLICY>& other) const;
