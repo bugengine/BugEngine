@@ -189,7 +189,19 @@ const format<SIZE>& operator|(const format<SIZE>& f, const T* value)
 template< u16 SIZE, typename T >
 const format<SIZE>& operator|(const format<SIZE>& f, T* value)
 {
-    return f | (const T*)value;
+    static const size_t s = 2+sizeof(value)*2;
+    char result[s+1];
+    result[0] = '0';
+    result[1] = 'x';
+    result[s] = 0;
+    for (size_t i = 0; i < sizeof(value)*2; ++i)
+    {
+        result[i+2] = (char)(((size_t)value >> ((sizeof(value)*2-i-1)*4)) & 0xf) + '0';
+        if (result[i+2] > '9')
+            result[i+2] = result[i+2]+'A'-'9'-1;
+    }
+    f.put(result);
+    return f;
 }
 
 }
