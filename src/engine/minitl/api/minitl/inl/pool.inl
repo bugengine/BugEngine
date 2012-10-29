@@ -10,11 +10,11 @@ namespace minitl
 {
 
 template< typename T >
-pool<T>::pool(Allocator& allocator, size_t capacity, size_t alignment)
+pool<T>::pool(Allocator& allocator, u64 capacity, u64 alignment)
 :   m_pool(allocator, capacity, alignment)
 ,   m_end(&m_pool[capacity])
 {
-    for (size_t i = 0; i < capacity; ++i)
+    for (u64 i = 0; i < capacity; ++i)
         m_items.push((node*)(&m_pool[i]));
 }
 
