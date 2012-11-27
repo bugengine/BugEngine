@@ -8,13 +8,15 @@
 using namespace Kernel;
 /* END BOILERPLATE */
 
-void kmain(in<i32> input, inout<i32> output)
+void kmain(u32 index, const u32 total, in<i32> input, inout<i32> output)
 {
-    while(input)
+    input += index;
+    while(index < total)
     {
         *output = 2 * *input;
         ++input;
         ++output;
+        index++;
     }
 }
 
@@ -26,8 +28,8 @@ struct Parameter
     void* end;
 };
 
-extern "C" BE_EXPORT void _kmain(Parameter argv[])
+extern "C" BE_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
 {
-    kmain(in<i32>((i32*)argv[0].begin, (i32*)argv[0].end), inout<i32>((i32*)argv[1].begin, (i32*)argv[1].end));
+    kmain(index, total, in<i32>((i32*)argv[0].begin, (i32*)argv[0].end), inout<i32>((i32*)argv[1].begin, (i32*)argv[1].end));
 }
 /* END BOILERPLATE */

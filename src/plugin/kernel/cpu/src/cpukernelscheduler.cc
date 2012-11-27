@@ -16,9 +16,41 @@ namespace BugEngine
 
 struct CPUKernelTask
 {
-    minitl::array<KernelObjectParameter> params;
+    weak<KernelObject>      object;
+    KernelObjectParameter   params[16];
+    i_u32                   splitCount;
 
-    CPUKernelTask(u32 parameterCount) : params(Arena::task(), parameterCount)   {}
+    struct Range
+    {
+        u32     index;
+        i_u32&  total;
+        Range(i_u32& taskCount)
+            :   index(taskCount)
+            ,   total(taskCount)
+        {
+            taskCount++;
+        }
+        bool atomic() const { return false; }
+        Range split()
+        {
+            return Range(total);
+        }
+    };
+
+    CPUKernelTask(weak<KernelObject> object)
+        :   object(object)
+        ,   splitCount(i_u32::Zero)
+    {}
+
+    Range prepare()
+    {
+        splitCount = i_u32::Zero;
+        return Range(splitCount);
+    }
+    void operator()(const Range& range)
+    {
+        object->run(range.index, range.total, params);
+    }
 };
 
 CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
@@ -39,10 +71,8 @@ void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
-    CPUKernelTask task(parameters.size());
     for (u32 i = 0; i < parameters.size(); ++i)
     {
-        //task.params[i] = parameters[i]->getBank(m_memoryProvider);
     }
 }
 

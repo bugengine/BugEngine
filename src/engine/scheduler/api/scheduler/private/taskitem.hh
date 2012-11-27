@@ -33,8 +33,8 @@ template< typename Range, typename Body >
 class TaskItem : public ITaskItem
 {
 private:
-    Range   m_range;
-    Body    m_body;
+    Range       m_range;
+    const Body& m_body;
 public:
     TaskItem(weak< const Task<Body> > owner, const Range& r, const Body& b);
     TaskItem(TaskItem& split);
