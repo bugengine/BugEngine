@@ -59,7 +59,7 @@ private:
     };
     friend struct WorkItem;
 private:
-    struct Buffer { char buffer[128]; };
+    struct Buffer { char buffer[256]; };
     i_u32                                               m_runningTasks;
     i_bool                                              m_running;
     minitl::pool<Buffer>                                m_taskPool;

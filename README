@@ -14,8 +14,9 @@ The following platforms are currently tested and known to build & work :
 - linux x86/amd64 with GCC 4.1 to 4.7 (older versions probably work as well)
 - linux powerpc (G5) with GCC 4.1 to 4.7 (older versions probably work as well)
 - linux x86/amd64 with sunCC
+- linux x86/amd64 with clang 2.9 to 4.0
 
-- MacOS X 10.4 to 10.6 (ppc/ppc64 and x86/amd64) with GCC 4.0 or 4.2
+- MacOS X 10.4 to 10.8 (ppc/ppc64 and x86/amd64) with GCC 4.0 or 4.2, llvm or clang (depending on XCode)
 
 - OpenSolaris/Solaris 10 with GCC
 - OpenSolaris/Solaris 10 with SunCC
@@ -43,23 +44,25 @@ Configuring
 
 In the root folder of the project, run
 > python waf configure
-it will detect all the supported toolchains and try and pick the most appropriated one
-(it doesn't always pick the best one)
-The last line in the output sums up which version and compiler was picked.
-You can choose manually from the available toolchains with the --toolchains option.
+it will detect all the supported toolchains and try and pick the best one.
+The last line in the output sums up which version and compiler was picked as a default.
+You can choose manually which toolchain(s) will be the default one with the --toolchains option.
 The format of the toolchain is variant-platform-architecture-compiler-version
 where variant is one of the build variants in debug, profile, final
 platform is the name of the platform in linux, win32, freebsd, osx, sunos...
 architecture is the name of the CPU architecture in x86, amd64, x64 (alias for amd64), ppc, ppc64, arm...
-compiler is the name of the compiler in msvc, wsdk (windows sdk), gcc, icc, opencc, suncc...
+compiler is the name of the compiler in msvc, wsdk (windows sdk), clang, gcc, icc, opencc, suncc...
 version is the version of the compiler, it depends on the compiler
 it can be 4.1 or 4.4.1 for GCC, 8.0 or 9.0 for MSVC, the version of the windows SDK for the command line, etc
 
 The argument expected by the --toolchains parameter is a list of regular expressions :
 > python waf configure --toolchains=.*-gcc-.*
-will select all toolchains with GCC (which can be a lot of several versions of GCC are installed)
+will select all toolchains with GCC
 > python waf configure --toolchains=debug-msvc-win32-.*-10.0,debug-gcc-win32-x86-4.4
 will pick all compilers available for visual studio 2010 (probably x86 and amd64) and GCC 4.4
+
+the default toolchains are used only when no toolchain is specified during build; if a toolchain
+is manually specified during build, then the default toolchains are ignored.
 
 
 Discovering
@@ -78,7 +81,13 @@ Building from the command line
 when you have decided which compiler to use, you can build & "install" by running
 > python waf install
 It should build all source files, compile all libs and a sample executable
-and move them to a folder specific to the toolchain
+and move them to a folder specific to the toolchain.
+For building for a specific platform, use
+> python waf install_(toolchain)
+see the configuration paragraph for the format of the toolchain arument.
+For instance,
+> python waf install_debug-linux-x86-suncc-5.10
+
 
 
 Bulding with IDEs
@@ -86,7 +95,7 @@ Bulding with IDEs
 
 The other way of building is to create projects for the supported IDEs and build from the IDE
 the supported IDEs at the moment are Visual Studio 2002 to 2012 in their complete or
-express editions, xcode, and Netbeans.
+express editions, XCode, and NetBeans, and there is limited support for Eclipse and QtCreator.
 To generate the project files, configure the project (which toolchain is selected doesn't
 actually matter) and run
 > python waf [ide-list]
@@ -101,6 +110,9 @@ will create a set of projects and a solution for Visual Studio 2005 express, and
 projects and solutions for Visual Studio 2010.
 You don't need to have these installed to generate the projects, you just need them to actually
 open the projects.
+
+In most IDE, you will be able to pick which toolchain to ue with the "target" or "platform" setting
+of the IDE.
 
 
 

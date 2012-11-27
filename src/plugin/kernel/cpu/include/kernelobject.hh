@@ -18,7 +18,7 @@ struct KernelObjectParameter
 class KernelObject : public minitl::refcountable
 {
 private:
-    typedef void(KernelMain)(KernelObjectParameter params[]);
+    typedef void(KernelMain)(const u32, const u32, KernelObjectParameter params[]);
 private:
     Plugin::DynamicObject   m_kernel;
     KernelMain*             m_entryPoint;
@@ -26,7 +26,7 @@ public:
     KernelObject(const inamespace& name);
     ~KernelObject();
 
-    void run(KernelObjectParameter params[]);
+    void run(const u32 index, const u32 total, KernelObjectParameter params[]);
 };
 
 }

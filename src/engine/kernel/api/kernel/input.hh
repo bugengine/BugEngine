@@ -28,6 +28,7 @@ public:
     in& operator--() { m_current--; return *this; }
     in  operator++(int) { in result = *this; m_current++; return result; }
     in  operator--(int) { in result = *this; m_current--; return result; }
+    in& operator+=(u32 count) { m_current += count; return *this; }
 
     const T* operator->() const { return m_current; }
     const T& operator*() const { return *m_current; }
@@ -52,6 +53,7 @@ public:
     inout& operator--() { m_current--; return *this; }
     inout  operator++(int) { inout result = *this; m_current++; return result; }
     inout  operator--(int) { inout result = *this; m_current--; return result; }
+    inout& operator+=(u32 count) { m_current += count; return *this; }
 
     T* operator->() const { return m_current; }
     T& operator*() const { return *m_current; }

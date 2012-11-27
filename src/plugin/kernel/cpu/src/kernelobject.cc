@@ -19,9 +19,9 @@ KernelObject::~KernelObject()
 {
 }
 
-void KernelObject::run(KernelObjectParameter params[])
+void KernelObject::run(const u32 index, const u32 total, KernelObjectParameter params[])
 {
-    (*m_entryPoint)(params);
+    (*m_entryPoint)(index, total, params);
 }
 
 }
