@@ -69,7 +69,7 @@ private:
 public:
     virtual ~ITask();
 
-    virtual void schedule(weak<Scheduler> scheduler) const = 0;
+    virtual void schedule(weak<Scheduler> scheduler) = 0;
     void completed(weak<Scheduler> scheduler) const;
 
     weak<ICallback> startCallback();

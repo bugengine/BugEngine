@@ -7,51 +7,13 @@
 #include    <cpumemoryprovider.hh>
 
 #include    <kernelobject.hh>
+#include    <scheduler/kernel/istream.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
 {
-
-struct CPUKernelTask
-{
-    weak<KernelObject>      object;
-    KernelObjectParameter   params[16];
-    i_u32                   splitCount;
-
-    struct Range
-    {
-        u32     index;
-        i_u32&  total;
-        Range(i_u32& taskCount)
-            :   index(taskCount)
-            ,   total(taskCount)
-        {
-            taskCount++;
-        }
-        bool atomic() const { return false; }
-        Range split()
-        {
-            return Range(total);
-        }
-    };
-
-    CPUKernelTask(weak<KernelObject> object)
-        :   object(object)
-        ,   splitCount(i_u32::Zero)
-    {}
-
-    Range prepare()
-    {
-        splitCount = i_u32::Zero;
-        return Range(splitCount);
-    }
-    void operator()(const Range& range)
-    {
-        object->run(range.index, range.total, params);
-    }
-};
 
 CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
     :   IKernelScheduler("CPU", context.scheduler)
@@ -71,8 +33,11 @@ void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
+    //CPUKernelTask& task = object->m_task->body;
     for (u32 i = 0; i < parameters.size(); ++i)
     {
+        Kernel::IStream::MemoryState state = parameters[i]->getBank(m_cpuMemoryProvider);
+        //task.params[i] = m_cpuMemoryProvider->getKernelParam(state);
     }
 }
 

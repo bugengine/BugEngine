@@ -35,7 +35,7 @@ public:
     TaskGroup(istring name, color32 color);
     ~TaskGroup();
 public: //ITask
-    virtual void schedule(weak<Scheduler> scheduler) const override;
+    virtual void schedule(weak<Scheduler> scheduler) override;
 public:
     void addStartTask(weak<ITask> task);
     bool removeStartTask(weak<ITask> task);
