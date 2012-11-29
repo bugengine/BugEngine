@@ -5,6 +5,7 @@
 #define BE_KERNEL_CPU_CPUMEMORYPROVIDER_HH_
 /*****************************************************************************/
 #include    <scheduler/kernel/imemoryprovider.hh>
+#include    <scheduler/kernel/istream.hh>
 
 namespace BugEngine
 {

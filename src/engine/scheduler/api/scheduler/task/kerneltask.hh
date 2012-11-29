@@ -29,7 +29,7 @@ public:
     KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::KernelDescription> kernel);
     ~KernelTask();
 
-    virtual void schedule(weak<Scheduler> scheduler) const override;
+    virtual void schedule(weak<Scheduler> scheduler) override;
 };
 
 }}

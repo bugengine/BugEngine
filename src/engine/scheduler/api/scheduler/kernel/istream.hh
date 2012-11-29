@@ -15,12 +15,12 @@ class IMemoryBank;
 
 class be_api(SCHEDULER) IStream : public minitl::refcountable
 {
-private:
+public:
     enum BankState
     {
-        Freed,
-        Reserved,
-        Updated
+        Free,
+        Allocated,
+        Current
     };
     struct MemoryState
     {
@@ -29,8 +29,8 @@ private:
         BankState                   state;
 
         static const MemoryState null;
-        operator const void*() const    { return (const void*)(this - &null); }
-        bool operator!() const          { return this == &null; }
+        operator const void*() const    { return provider.operator const void*(); }
+        bool operator!() const          { return !provider; }
     };
     static const u32 s_memoryStatesCount = 8;
 private:

@@ -7,7 +7,7 @@
 namespace BugEngine { namespace Kernel
 {
 
-const IStream::MemoryState IStream::MemoryState::null = { weak<const IMemoryProvider>(), weak<IMemoryBank>(), IStream::Freed };
+const IStream::MemoryState IStream::MemoryState::null = { weak<const IMemoryProvider>(), weak<IMemoryBank>(), IStream::Free };
 
 const IStream::MemoryState& IStream::getBank(weak<const IMemoryProvider> provider) const
 {

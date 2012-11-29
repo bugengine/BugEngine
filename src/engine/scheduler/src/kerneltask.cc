@@ -18,7 +18,7 @@ KernelTask::~KernelTask()
 {
 }
 
-void KernelTask::schedule(weak<Scheduler> scheduler) const
+void KernelTask::schedule(weak<Scheduler> scheduler)
 {
     scheduler->queueKernel(this, minitl::array< weak<Kernel::IStream> >(Arena::debug(), 0));
 }

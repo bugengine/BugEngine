@@ -16,13 +16,14 @@ class Task : public ITask
     template< class B, class R >
     friend class TaskItem;
     BE_NOCOPY(Task);
+public:
+    Body            body;
 private:
-    mutable Body    m_body;
     mutable i_u32   m_taskCount;
     mutable i_u32   m_taskCompleted;
 public:
     Task(istring name, color32 color, const Body& body, Scheduler::Priority priority = Scheduler::Default, Scheduler::Affinity affinity = Scheduler::DontCare);
-    virtual void schedule(weak<Scheduler> sc) const override;
+    virtual void schedule(weak<Scheduler> sc) override;
 };
 
 }}

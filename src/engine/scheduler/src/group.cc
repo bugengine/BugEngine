@@ -19,7 +19,7 @@ TaskGroup::~TaskGroup()
 {
 }
 
-void TaskGroup::schedule(weak<Scheduler> scheduler) const
+void TaskGroup::schedule(weak<Scheduler> scheduler)
 {
     Scheduler::WorkItem item(scheduler);
     if (!m_startTasks.empty())
