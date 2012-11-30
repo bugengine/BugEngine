@@ -14,6 +14,8 @@ class be_api(GL4) GLMemoryProvider : public Kernel::IMemoryProvider
 public:
     GLMemoryProvider();
     ~GLMemoryProvider();
+protected:
+    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const override;
 };
 
 }}

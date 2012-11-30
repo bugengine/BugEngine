@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 #include    <kernelobject.hh>
-
+#include    <scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine
 {

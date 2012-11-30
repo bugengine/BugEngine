@@ -122,6 +122,7 @@ weak<File> DiskFolder::createFile(const istring& name)
         be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
         return ref<File>();
     }
+    fclose(f);
     if (stat(path.name, &s) != 0)
     {
         be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);

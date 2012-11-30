@@ -26,7 +26,7 @@ private:
     Allocator::Block<T> m_pool;
     T*                  m_end;
 public:
-    pool(Allocator& allocator, size_t capacity, size_t alignment = be_alignof(T));
+    pool(Allocator& allocator, u64 capacity, u64 alignment = be_alignof(T));
     ~pool();
     
     T* allocate();

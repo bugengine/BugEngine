@@ -83,7 +83,7 @@ class StreamDef(cpp.yacc.Nonterm):
 			file.write("return s_%s;\n}\n" % prefix)
 
 		instances.write("#line %d\n"%self.lineno)
-		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Product<%s> >::klass() { raw<const RTTI::Class> ci = {&s_%s}; return ci; }\n" % (fullname, prefix))
+		instances.write("template< > BE_EXPORT raw<const RTTI::Class> be_typeid< BugEngine::Kernel::Product<%s> >::klass() { raw<const RTTI::Class> ci = {&%s}; return ci; }\n" % (fullname, varname))
 
 		return varname, "{0}"
 

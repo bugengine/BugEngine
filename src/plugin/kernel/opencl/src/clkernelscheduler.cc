@@ -7,6 +7,7 @@
 #include    <clkernelloader.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
+#include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
@@ -134,11 +135,12 @@ OpenCLKernelScheduler::~OpenCLKernelScheduler()
     }
 }
 
-void OpenCLKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters)
+void OpenCLKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
 {
     be_forceuse(kernel);
     be_forceuse(parameters);
     be_notreached();
+    task->completed(m_scheduler);
 }
 
 weak<Kernel::IMemoryProvider> OpenCLKernelScheduler::memoryProvider() const

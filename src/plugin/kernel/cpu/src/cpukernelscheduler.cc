@@ -10,6 +10,7 @@
 #include    <scheduler/kernel/istream.hh>
 #include    <resource/resourcemanager.hh>
 #include    <scheduler/scheduler.hh>
+#include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine
@@ -29,16 +30,16 @@ CPUKernelScheduler::~CPUKernelScheduler()
     m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
 }
 
-void CPUKernelScheduler::run(weak<const Kernel::KernelDescription> kernel, const minitl::array< weak<Kernel::IStream> >& parameters)
+void CPUKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
-    //CPUKernelTask& task = object->m_task->body;
+    CPUKernelTask& taskBody = object->m_task->body;
     for (u32 i = 0; i < parameters.size(); ++i)
     {
-        Kernel::IStream::MemoryState state = parameters[i]->getBank(m_cpuMemoryProvider);
-        //task.params[i] = m_cpuMemoryProvider->getKernelParam(state);
+        taskBody.params[i] = parameters[i];
     }
+    task->completed(m_scheduler);
 }
 
 weak<Kernel::IMemoryProvider> CPUKernelScheduler::memoryProvider() const
