@@ -5,6 +5,8 @@
 #include    <plugin/dynobject.hh>
 #include    <core/environment.hh>
 
+#if !BE_STATIC
+
 #include    <dlfcn.h>
 
 #ifndef     PLUGIN_PREFIX
@@ -42,3 +44,5 @@ void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 }
 
 }}
+
+#endif

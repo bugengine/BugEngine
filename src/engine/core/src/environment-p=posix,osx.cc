@@ -8,7 +8,9 @@
 # include   <sys/types.h>
 # include   <sys/sysctl.h>
 #endif
-#include    <errno.h>
+#include    <cerrno>
+#include    <cstdio>
+
 
 namespace BugEngine
 {
@@ -24,7 +26,7 @@ Environment::Environment()
 
 void Environment::init(int argc, const char *argv[])
 {
-    m_game = istring("bugeditor.main");
+    m_game = istring("samples.kernel");
     const char* filename = argv[0];
     while (*filename != 0)
     {

@@ -6,22 +6,17 @@
 /*****************************************************************************/
 #include    <plugin/dynobject.hh>
 #include    <scheduler/task/task.hh>
+#include    <scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine
 {
 
 class KernelObject;
 
-struct KernelObjectParameter
-{
-    void* begin;
-    void* end;
-};
-
 struct CPUKernelTask
 {
     weak<KernelObject>      object;
-    KernelObjectParameter   params[16];
+    Kernel::KernelParameter params[16];
     i_u32                   splitCount;
 
     struct Range;
@@ -35,7 +30,7 @@ class KernelObject : public minitl::refcountable
 {
     friend class CPUKernelScheduler;
 private:
-    typedef KernelObjectParameter KernelParameterList[];
+    typedef Kernel::KernelParameter KernelParameterList[];
     typedef void(KernelMain)(const u32, const u32, const KernelParameterList params);
 private:
     Plugin::DynamicObject               m_kernel;

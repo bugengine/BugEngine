@@ -48,11 +48,17 @@ void Scheduler::queueTask(Task::ITaskItem* task)
     m_taskScheduler->queue(task);
 }
 
-void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<Kernel::IStream> >& parameters)
+void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
-    m_kernelSchedulers[0]->run(task->m_kernel, parameters);
-    task->completed(this);
+    u32 paramCount = parameters.size();
+    minitl::array<Kernel::KernelParameter> kernelParams(Arena::temporary(), paramCount);
+    for (u32 i = 0; i < paramCount; ++i)
+    {
+        Kernel::IStream::MemoryState state = parameters[i]->getBank(m_kernelSchedulers[0]->memoryProvider());
+        kernelParams[i] = state.provider->getKernelParameterFromBank(state.bank);
+    }
+    m_kernelSchedulers[0]->run(task, task->m_kernel, kernelParams);
 }
 
 void Scheduler::mainThreadJoin()

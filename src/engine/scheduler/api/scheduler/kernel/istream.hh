@@ -22,6 +22,7 @@ public:
         Allocated,
         Current
     };
+public:
     struct MemoryState
     {
         weak<const IMemoryProvider> provider;

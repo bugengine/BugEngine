@@ -57,8 +57,8 @@ void PosixFile::doFillBuffer(weak<File::Ticket> ticket) const
                 ticket->error = true;
             }
         }
+        fclose(f);
     }
-    fclose(f);
 }
 
 void PosixFile::doWriteBuffer(weak<Ticket> ticket) const
