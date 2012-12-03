@@ -13,7 +13,7 @@ void kmain(u32 index, const u32 total, in<i32> input, inout<i32> output)
     input += index;
     while(index < total)
     {
-        *output = 2 * *input;
+        //*output = 2 * *input;
         ++input;
         ++output;
         index++;

@@ -176,7 +176,7 @@ void hashmap<Key, Value, Hash>::grow(u32 size)
             {
                 list_iterator itemToCopy = object++;
                 item* i = static_cast<item*>(itemToCopy.operator->());
-                u32 hash = Hash()(i->value.first) % (m_index.count()-1);
+                u32 hash = Hash()(i->value.first) % (u32)(m_index.count()-1);
                 item* newItem = m_itemPool.allocate(i->value);
                 m_items.insert(m_index[hash].second, *newItem);
                 oldPool.release(i);
@@ -247,7 +247,7 @@ Value& hashmap<Key, Value, Hash>::operator[](const Key& key)
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(const Key& key)
 {
-    u32 hash = Hash()(key) % (m_index.count()-1);
+    u32 hash = Hash()(key) % (u32)(m_index.count()-1);
     list_iterator it = m_index[hash].second;
     for (++it; it != m_index[hash+1].second; ++it)
     {
@@ -262,7 +262,7 @@ typename hashmap<Key, Value, Hash>::iterator hashmap<Key, Value, Hash>::find(con
 template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::find(const Key& key) const
 {
-    u32 hash = Hash()(key) % (m_index.count()-1);
+    u32 hash = Hash()(key) % (u32)(m_index.count()-1);
     list_iterator it = list_iterator(m_index[hash].second);
     for (++it; it != m_index[hash+1].second; ++it)
     {
