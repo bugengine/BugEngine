@@ -3,6 +3,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/threads/semaphore.hh>
+#include    <objc/objc.h>
 #include    <dispatch/dispatch.h>
 #include    <stdio.h>
 #include    <errno.h>

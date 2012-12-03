@@ -138,6 +138,7 @@ def add_darwin_flags_to_env(conf, variant, arch):
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_iphone', 'IPHONE', '_IPHONE', '_IPHONE_', '__IPHONE__'])
 	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', variant))
 	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname')+'.app/',
+									'root':		'',
 									'bin':		'',
 									'etc':		'',
 									'runbin':	'',
