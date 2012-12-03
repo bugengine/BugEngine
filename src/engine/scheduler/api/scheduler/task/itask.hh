@@ -16,7 +16,7 @@ class be_api(SCHEDULER) ITask : public minitl::refcountable
     BE_NOCOPY(ITask);
 public:
     class CallbackConnection;
-    class ICallback : public minitl::refcountable
+    class be_api(SCHEDULER) ICallback : public minitl::refcountable
     {
         BE_NOCOPY(ICallback);
     protected:

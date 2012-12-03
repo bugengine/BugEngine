@@ -27,6 +27,7 @@ public:
     explicit ITaskItem(weak<const ITask> owner);
     ITaskItem(ITaskItem& cpy);
     virtual ~ITaskItem();
+    inline u32 splitCount() const {return m_splitCount; }
 };
 
 template< typename Range, typename Body >

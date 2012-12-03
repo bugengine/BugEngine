@@ -39,7 +39,6 @@ CPUKernelTask::Range CPUKernelTask::prepare()
 
 void CPUKernelTask::operator()(const Range& range) const
 {
-    be_info("bla");
     object->run(range.index, range.total, params);
 }
 

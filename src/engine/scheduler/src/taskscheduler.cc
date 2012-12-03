@@ -54,7 +54,7 @@ bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
     ITaskItem* target = sc->pop(Scheduler::DontCare);
     if (!target)
         return false;
-    if (!target->atomic() && 1l << target->m_splitCount <= s_taskCount)
+    if (!target->atomic() && 1l << target->splitCount() <= s_taskCount)
     {
         ITaskItem* newTarget = target->split(sc->m_scheduler);
         sc->queue(newTarget, Scheduler::Immediate);
@@ -132,7 +132,7 @@ void TaskScheduler::queue(ITaskItem* task)
 ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
 {
     minitl::istack<ITaskItem>* tasks = affinity == Scheduler::DontCare ? m_tasks : m_mainThreadTasks;
-    for (unsigned int i = Scheduler::High; i != Scheduler::Low; --i)
+    for (unsigned int i = Scheduler::Immediate; i != Scheduler::Low; --i)
     {
         ITaskItem* t = tasks[i].pop();
         if (t)
