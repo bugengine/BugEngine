@@ -16,6 +16,7 @@ class KernelObject;
 struct CPUKernelTask
 {
     weak<KernelObject>      object;
+    weak<const Task::ITask> sourceTask;
     Kernel::KernelParameter params[16];
     i_u32                   splitCount;
 
@@ -33,9 +34,13 @@ private:
     typedef Kernel::KernelParameter KernelParameterList[];
     typedef void(KernelMain)(const u32, const u32, const KernelParameterList params);
 private:
+    class Callback;
+private:
     Plugin::DynamicObject               m_kernel;
     KernelMain*                         m_entryPoint;
     scoped< Task::Task<CPUKernelTask> > m_task;
+    scoped< Task::ITask::ICallback >    m_callback;
+    Task::ITask::CallbackConnection     m_callbackConnection;
 public:
     KernelObject(const inamespace& name);
     ~KernelObject();
