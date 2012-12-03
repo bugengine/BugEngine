@@ -35,11 +35,12 @@ void CPUKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::Ke
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
     CPUKernelTask& taskBody = object->m_task->body;
+    taskBody.sourceTask = task;
     for (u32 i = 0; i < parameters.size(); ++i)
     {
         taskBody.params[i] = parameters[i];
     }
-    task->completed(m_scheduler);
+    object->m_task->schedule(m_scheduler);
 }
 
 weak<Kernel::IMemoryProvider> CPUKernelScheduler::memoryProvider() const
