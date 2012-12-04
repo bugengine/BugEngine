@@ -14,7 +14,7 @@ sample = samples.kernel.KernelSampleTask
 world = game.World.World
 (
 	storage = storage;
-	products = [sample.output];
+	products = [sample.output, ];
 )
 
 luascript = scripting.lua.LuaScript

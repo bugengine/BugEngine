@@ -232,40 +232,40 @@ value:
             new ($$) ref<Value>(ref<FileValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->folder, $1));
             free($1);
         }
-	|
-		'[' value_array ']'
-		{
+    |
+        '[' value_array ']'
+        {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<ArrayValue>::create(BugEngine::Arena::packageBuilder(), *$2));
-			$2->~vector();
+            $2->~vector();
             free($2);
-		}
+        }
     ;
 
 value_array:
-		/*empty*/
-		{
+        /*empty*/
+        {
             $$ = (minitl::vector< ref<Value> >*)malloc(sizeof(*$$));
             new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());		
-		}
-	|
-		value
-		{
+        }
+    |
+        value
+        {
             $$ = (minitl::vector< ref<Value> >*)malloc(sizeof(*$$));
             new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());
-			$$->push_back(*$1);
-			$1->~ref();
-			free($1);
-		}
-	|
-		value_array ',' value
-		{
-            $$ = $1;
-			$$->push_back(*$3);
-			$3->~ref();
-			free($3);
-		}
-	;
+            $$->push_back(*$1);
+            $1->~ref();
+            free($1);
+        }
+    |
+        value ',' value_array
+        {
+            $$ = $3;
+            $$->push_back(*$1);
+            $1->~ref();
+            free($1);
+        }
+    ;
 
 fullname:
         TOK_ID
