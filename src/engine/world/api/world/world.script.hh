@@ -16,7 +16,6 @@
 namespace BugEngine { namespace World
 {
 
-class State;
 class Rule;
 class EntityStorage;
 struct Component;
@@ -30,7 +29,6 @@ private:
     Task::TaskGroup::TaskStartConnection                m_taskStart;
     Task::TaskGroup::TaskEndConnection                  m_taskEnd;
     minitl::array<Task::TaskGroup::TaskEndConnection>   m_productEnds;
-    scoped<State>                                       m_emptyEntityState;
     Entity                                              m_freeEntityId;
     SystemAllocator                                     m_entityAllocator;
     Entity*                                             m_entityBuffer;
