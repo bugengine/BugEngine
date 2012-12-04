@@ -4,7 +4,7 @@
 #include    <network/stdafx.h>
 #include    <network/socket.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Network
 {
 
 Socket::Socket()
@@ -15,4 +15,4 @@ Socket::~Socket()
 {
 }
 
-}
+}}

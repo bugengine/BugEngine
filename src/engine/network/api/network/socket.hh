@@ -6,7 +6,7 @@
 /*****************************************************************************/
 
 
-namespace BugEngine
+namespace BugEngine { namespace Network
 {
 
 class be_api(NETWORK) Socket
@@ -16,7 +16,7 @@ public:
     ~Socket(void);
 };
 
-}
+}}
 
 /*****************************************************************************/
 #endif
