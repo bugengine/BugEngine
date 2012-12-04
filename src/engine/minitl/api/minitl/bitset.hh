@@ -16,7 +16,7 @@ private:
     {
         Bits = BITS,
         Bytes = (BITS+7)/8,
-        Words = (BITS+21)/32
+        Words = (BITS+31)/32
     };
     u32 m_bits[Words];
     struct bit
