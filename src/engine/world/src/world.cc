@@ -4,7 +4,6 @@
 #include    <world/stdafx.h>
 #include    <world/world.script.hh>
 #include    <world/entitystorage.script.hh>
-#include    <state.hh>
 #include    <scheduler/task/group.hh>
 #include    <rtti/engine/namespace.hh>
 
@@ -21,7 +20,6 @@ World::World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> produc
 ,   m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
 ,   m_taskEnd(Task::TaskGroup::TaskEndConnection(m_task, m_storage->initialTask()))
 ,   m_productEnds(Arena::task(), products.size())
-,   m_emptyEntityState(scoped<State>::create(Arena::game()))
 ,   m_freeEntityId(s_defaultSlot)
 ,   m_entityAllocator(20*1024*1024)
 ,   m_entityBuffer((Entity*)m_entityAllocator.buffer())
