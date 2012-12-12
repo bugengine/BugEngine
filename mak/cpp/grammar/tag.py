@@ -36,6 +36,7 @@ class TagsLeft(cpp.yacc.Nonterm):
 		"%reduce DoxyComment TagList"
 		self.tags = taglist.tags
 		self.aliases = taglist.aliases
+		self.comment = comment
 
 	def dump(self, file, instances, prefix):
 		tag_ptr = "{0}"
@@ -63,3 +64,4 @@ class TagsRight(cpp.yacc.Nonterm):
 	def taglistcomment(self, comment):
 		"%reduce DoxyCommentRight"
 		self.tags = []
+		self.comment = comment

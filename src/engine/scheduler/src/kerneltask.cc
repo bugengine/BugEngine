@@ -8,9 +8,12 @@
 namespace BugEngine { namespace Task
 {
 
-KernelTask::KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::KernelDescription> kernel)
+KernelTask::KernelTask(istring name, color32 color, Scheduler::Priority priority,
+                       weak<const BugEngine::Kernel::KernelDescription> kernel,
+                       minitl::array< weak<const Kernel::IStream> > parameters)
 :   ITask(name, color, priority, Scheduler::DontCare)
 ,   m_kernel(kernel)
+,   m_parameters(parameters)
 {
 }
 
@@ -20,7 +23,7 @@ KernelTask::~KernelTask()
 
 void KernelTask::schedule(weak<Scheduler> scheduler)
 {
-    scheduler->queueKernel(this, minitl::array< weak<const Kernel::IStream> >(Arena::debug(), 0));
+    scheduler->queueKernel(this, m_parameters);
 }
 
 }}

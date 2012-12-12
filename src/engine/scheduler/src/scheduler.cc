@@ -56,7 +56,13 @@ void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::arr
     for (u32 i = 0; i < paramCount; ++i)
     {
         Kernel::IStream::MemoryState state = parameters[i]->getBank(m_kernelSchedulers[0]->memoryProvider());
-        kernelParams[i] = state.provider->getKernelParameterFromBank(state.bank);
+        if (state.bank)
+            kernelParams[i] = state.provider->getKernelParameterFromBank(state.bank);
+        else
+        {
+            kernelParams[i].p1 = 0;
+            kernelParams[i].p2 = 0;
+        }
     }
     m_kernelSchedulers[0]->run(task, task->m_kernel, kernelParams);
 }

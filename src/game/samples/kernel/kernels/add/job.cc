@@ -5,18 +5,22 @@
 #include    <kernel/compilers.hh>
 #include    <kernel/simd.hh>
 #include    <kernel/input.hh>
+#include <cstdio>
 using namespace Kernel;
 /* END BOILERPLATE */
 
 void kmain(u32 index, const u32 total, in<i32> input, inout<i32> output)
 {
-    input += index;
-    while(index < total)
+    u32 first = index * input.size() / total;
+    u32 last = (index+1) * input.size() / total;
+    printf("%d/%d\n", index, total);
+    input += first;
+    while(first < last)
     {
         //*output = 2 * *input;
         ++input;
         ++output;
-        index++;
+        ++first;
     }
 }
 

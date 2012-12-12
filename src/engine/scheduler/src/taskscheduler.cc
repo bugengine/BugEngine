@@ -22,6 +22,8 @@ protected:
 private:
     size_t const                                m_workerId;
     Thread                                      m_workThread;
+private:
+    u32 split(weak<TaskScheduler> sc, ITaskItem** items, u32 currentCount, u32 maxCount) const;
 protected:
     void unhook(ITaskItem* prev, ITaskItem* t);
 public:
@@ -47,22 +49,40 @@ TaskScheduler::Worker::~Worker()
 {
 }
 
+
+u32 TaskScheduler::Worker::split(weak<TaskScheduler> sc, ITaskItem**items, u32 currentCount, u32 maxCount) const
+{
+    u32 originalCount = currentCount;
+    for (u32 i = 0; i < originalCount && currentCount < maxCount; ++i)
+    {
+        if (!items[i]->atomic())
+            items[currentCount++] = items[i]->split(sc->m_scheduler);
+    }
+    if (originalCount != currentCount)
+        return split(sc, items, currentCount, maxCount);
+    else
+        return currentCount;
+}
+
 bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
 {
     static const i32& s_taskCount = 16;
+    ITaskItem* items[s_taskCount];
+    items[0] = sc->pop(Scheduler::DontCare);
 
-    ITaskItem* target = sc->pop(Scheduler::DontCare);
-    if (!target)
+    if (!items[0])
         return false;
-    if (!target->atomic() && 1l << target->splitCount() <= s_taskCount)
+    if (2<<items[0]->splitCount() >= s_taskCount || items[0]->atomic())
     {
-        ITaskItem* newTarget = target->split(sc->m_scheduler);
-        sc->queue(newTarget, Scheduler::Immediate);
-        sc->queue(target, Scheduler::Immediate);
+        items[0]->run(sc->m_scheduler);
     }
     else
     {
-        target->run(sc->m_scheduler);
+        u32 itemCount = split(sc, items, 1, s_taskCount);
+        for (u32 i = 0; i < itemCount; ++i)
+        {
+            sc->queue(items[i], Scheduler::Immediate);
+        }
     }
     be_assert(sc->m_scheduler->m_runningTasks > 0, "running task count should be more than 1");
     return --sc->m_scheduler->m_runningTasks == 0;

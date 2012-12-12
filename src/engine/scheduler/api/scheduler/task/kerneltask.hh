@@ -5,6 +5,7 @@
 #define BE_SCHEDULER_TASK_KERNELTASK_HH_
 /*****************************************************************************/
 #include    <scheduler/task/itask.hh>
+#include    <scheduler/kernel/istream.hh>
 
 namespace BugEngine { namespace Kernel
 {
@@ -24,9 +25,12 @@ class be_api(SCHEDULER) KernelTask : public ITask
     friend class ::BugEngine::Scheduler;
     BE_NOCOPY(KernelTask);
 private:
-    weak<const BugEngine::Kernel::KernelDescription> const m_kernel;
+    weak<const Kernel::KernelDescription> const         m_kernel;
+    minitl::array< weak<const Kernel::IStream> > const  m_parameters;
 public:
-    KernelTask(istring name, color32 color, Scheduler::Priority priority, weak<const BugEngine::Kernel::KernelDescription> kernel);
+    KernelTask(istring name, color32 color, Scheduler::Priority priority,
+               weak<const BugEngine::Kernel::KernelDescription> kernel,
+               minitl::array< weak<const Kernel::IStream> > parameters);
     ~KernelTask();
 
     virtual void schedule(weak<Scheduler> scheduler) override;

@@ -13,9 +13,9 @@ namespace BugEngine
 
 KernelSampleTask::KernelSampleTask(const BugEngine::Kernel::Product< u32 >& in1, const BugEngine::Kernel::Product< u32 >& out1)
     :   KernelDescription("samples.kernel.add")
-    ,   m_kernelTask(scoped<Task::KernelTask>::create(Arena::general(), "samples.kernel.add", Colors::Red::Red, Scheduler::High, this))
     ,   m_input1(in1)
     ,   m_input2(out1)
+    ,   m_kernelTask(scoped<Task::KernelTask>::create(Arena::general(), "samples.kernel.add", Colors::Red::Red, Scheduler::High, this, makeParameters()))
     ,   m_chainInput1(in1.producer, m_kernelTask->startCallback())
     ,   m_chainInput2(out1.producer, m_kernelTask->startCallback())
     ,   output(out1.stream, m_kernelTask)
@@ -24,6 +24,14 @@ KernelSampleTask::KernelSampleTask(const BugEngine::Kernel::Product< u32 >& in1,
 
 KernelSampleTask::~KernelSampleTask()
 {
+}
+
+minitl::array< weak<const Kernel::IStream> > KernelSampleTask::makeParameters() const
+{
+    minitl::array< weak<const Kernel::IStream> > result(Arena::task(), 2);
+    result[0] = m_input1.stream;
+    result[1] = m_input2.stream;
+    return result;
 }
 
 }
