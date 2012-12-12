@@ -14,9 +14,9 @@ namespace BugEngine
 class KernelSampleTask : public Kernel::KernelDescription
 {
 private:
-    scoped< BugEngine::Task::ITask > const  m_kernelTask;
     BugEngine::Kernel::Product< u32 > const m_input1;
     BugEngine::Kernel::Product< u32 > const m_input2;
+    scoped< BugEngine::Task::ITask > const  m_kernelTask;
     Task::ITask::CallbackConnection const   m_chainInput1;
     Task::ITask::CallbackConnection const   m_chainInput2;
 published:
@@ -24,6 +24,8 @@ published:
 published:
     KernelSampleTask(const BugEngine::Kernel::Product< u32 >& in1, const BugEngine::Kernel::Product< u32 >& out1);
     ~KernelSampleTask();
+private:
+    minitl::array< weak<const Kernel::IStream> > makeParameters() const;
 };
 
 }

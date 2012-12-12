@@ -9,12 +9,10 @@
 namespace BugEngine
 {
 
-/// Allocates regions of contiguous virtual memory and divides it in blocks of equal size
+/// Allocates regions of contiguous virtual memory.
 /**
- * The system allocator allocates big blocks of memory in virtual memory and divides it
- * in blocks of several kilobytes.
- * It is suitable mostly for big arrays of data.
- * Use with caution; on 32 bits systms, it can quickly run out of virtual address space.
+ * The system allocator reserves blocks in virtual memory, without actually
+ * allocating memory until it is needed.
  */
 class be_api(CORE) SystemAllocator
 {
@@ -43,7 +41,7 @@ public:
     ~SystemAllocator();
     /**
      * Returns a pointer to the beginning of the buffer.
-     * \returns A pointer to the buffer.
+     * @returns A pointer to the buffer.
      */
     byte* buffer()
     {
@@ -53,7 +51,7 @@ public:
      * Set the current needed memory. If the needed memory decreases, some pages will become
      * available again. If the needed memory increases, some pages will be requested to the
      * operating system.
-     * \param byteCount The current needed memory usage.
+     * @param byteCount The current needed memory usage.
      */
     void  setUsage(u32 byteCount);
 };
