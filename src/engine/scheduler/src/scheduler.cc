@@ -57,7 +57,9 @@ void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::arr
     {
         Kernel::IStream::MemoryState state = parameters[i]->getBank(m_kernelSchedulers[0]->memoryProvider());
         if (state.bank)
+        {
             kernelParams[i] = state.provider->getKernelParameterFromBank(state.bank);
+        }
         else
         {
             kernelParams[i].p1 = 0;
