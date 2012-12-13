@@ -170,6 +170,7 @@ void TaskScheduler::mainThreadJoin()
             ITaskItem* t = pop(Scheduler::MainThread);
             if (t)
             {
+                // No split since only one main thread
                 t->run(m_scheduler);
                 if (--m_scheduler->m_runningTasks == 0)
                 {
