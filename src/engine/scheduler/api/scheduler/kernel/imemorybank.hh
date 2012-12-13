@@ -19,6 +19,7 @@ protected:
     IMemoryBank(weak<const IMemoryProvider> owner);
 public:
     weak<const IMemoryProvider> provider() const    { return m_owner; }
+    KernelParameter getKernelParameter() const      { return m_owner->getKernelParameterFromBank(this); }
 };
 
 }}

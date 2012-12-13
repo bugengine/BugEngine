@@ -17,14 +17,15 @@ struct KernelParameter
 
 class be_api(SCHEDULER) IMemoryProvider : public minitl::pointer
 {
+    friend class IMemoryBank;
 private:
     istring const   m_name;
 protected:
     IMemoryProvider(const istring& name);
+    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const = 0;
 public:
     istring name() const { return m_name; }
 
-    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const = 0;
 };
 
 }}
