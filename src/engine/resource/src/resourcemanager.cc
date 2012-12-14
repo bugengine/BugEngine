@@ -111,6 +111,7 @@ void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> de
 
 size_t ResourceManager::updateTickets()
 {
+    size_t ticketCount = m_tickets.size();
     for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
     {
         if (it->ticket->error)
@@ -134,7 +135,7 @@ size_t ResourceManager::updateTickets()
             ++it;
         }
     }
-    return m_tickets.size();
+    return ticketCount;
 }
 
 }}
