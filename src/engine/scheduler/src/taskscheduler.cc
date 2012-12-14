@@ -66,7 +66,7 @@ u32 TaskScheduler::Worker::split(weak<TaskScheduler> sc, ITaskItem**items, u32 c
 
 bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
 {
-    static const i32& s_taskCount = 16;
+    static const i32 s_taskCount = 16;
     ITaskItem* items[s_taskCount];
     items[0] = sc->pop(Scheduler::DontCare);
 

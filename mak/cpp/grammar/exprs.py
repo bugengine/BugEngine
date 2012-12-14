@@ -9,7 +9,7 @@ class ExprMethod(cpp.yacc.Nonterm):
 		self.value = method
 		self.value.tags = tags_left
 		self.value.tags.tags += tags_right.tags
-                self.value.tags.comment_right = tags_right.comment
+		self.value.tags.comment_right = tags_right.comment
 		self.value.aliases = tags_left.aliases
 
 
@@ -18,7 +18,7 @@ class ExprMethod(cpp.yacc.Nonterm):
 		self.value = method
 		self.value.tags = tags_left
 		self.value.tags.tags += tags_right.tags
-                self.value.tags.comment_right = tags_right.comment
+		self.value.tags.comment_right = tags_right.comment
 		self.value.aliases = tags_left.aliases
 
 
@@ -50,7 +50,7 @@ class ExprType(cpp.yacc.Nonterm):
 		self.value = type.value
 		self.value.tags = tags_left
 		self.value.tags.tags += tags_right.tags
-                self.value.tags.comment_right = tags_right.comment
+		self.value.tags.comment_right = tags_right.comment
 		self.value.aliases = tags_left.aliases
 		
 	def expr_stream(self, tags_left, stream, tags_right, semi):
@@ -58,7 +58,7 @@ class ExprType(cpp.yacc.Nonterm):
 		self.value = stream
 		self.value.tags = tags_left
 		self.value.tags.tags += tags_right.tags
-                self.value.tags.comment_right = tags_right.comment
+		self.value.tags.comment_right = tags_right.comment
 		self.value.aliases = tags_left.aliases
 
 	def expr_typedecl(self, tags_left, type, tags_right, semi):
@@ -91,7 +91,7 @@ class ExprVariable(cpp.yacc.Nonterm):
 		self.value = variable
 		self.value.tags = tags_left
 		self.value.tags.tags += tags_right.tags
-                self.value.tags.comment_right = tags_right.comment
+		self.value.tags.comment_right = tags_right.comment
 		self.value.aliases = tags_left.aliases
 
 
