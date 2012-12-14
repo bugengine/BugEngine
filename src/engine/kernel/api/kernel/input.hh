@@ -30,7 +30,7 @@ public:
     in  operator--(int) { in result = *this; m_current--; return result; }
     in& operator+=(u32 count) { m_current += count; return *this; }
 
-    u32 size() const            { return m_end - m_begin; }
+    u32 size() const            { return (u32)(m_end - m_begin); }
 
     const T* operator->() const { return m_current; }
     const T& operator*() const { return *m_current; }
@@ -57,7 +57,7 @@ public:
     inout  operator--(int) { inout result = *this; m_current--; return result; }
     inout& operator+=(u32 count) { m_current += count; return *this; }
 
-    u32 size() const            { return m_end - m_begin; }
+    u32 size() const            { return (u32)(m_end - m_begin); }
 
     T* operator->() const { return m_current; }
     T& operator*() const { return *m_current; }
