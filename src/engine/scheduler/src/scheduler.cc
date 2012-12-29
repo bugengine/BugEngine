@@ -55,10 +55,10 @@ void Scheduler::queueKernel(weak<const Task::KernelTask> task, const minitl::arr
     minitl::array<Kernel::KernelParameter> kernelParams(Arena::temporary(), paramCount);
     for (u32 i = 0; i < paramCount; ++i)
     {
-        Kernel::IStream::MemoryState state = parameters[i]->getBank(m_kernelSchedulers[0]->memoryProvider());
-        if (state.bank)
+        weak<const Kernel::IMemoryBank> bank = parameters[i]->getCurrentBank();
+        if (bank)
         {
-            kernelParams[i] = state.bank->getKernelParameter();
+            kernelParams[i] = bank->getKernelParameter();
         }
         else
         {

@@ -37,7 +37,8 @@ public:
 private:
     MemoryState         m_states[s_memoryStatesCount];
 public:
-    const MemoryState& getBank(weak<const IMemoryProvider> provider) const;
+    weak<const IMemoryBank> getCurrentBank() const;
+    void setBank(weak<IMemoryBank> bank);
 };
 
 }}
