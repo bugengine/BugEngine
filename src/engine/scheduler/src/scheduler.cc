@@ -16,7 +16,7 @@ namespace BugEngine
 void* Scheduler::allocate(size_t size)
 {
     if (size > 128)
-        return new char[size];
+        return Arena::task().alloc(size, 1);
     else
         return (void*)m_taskPool.allocate();
 }
@@ -24,7 +24,7 @@ void* Scheduler::allocate(size_t size)
 void  Scheduler::release(void* task, size_t size)
 {
     if (size > 128)
-        delete[] (char*)task;
+        Arena::task().free(task);
     else
         m_taskPool.release((Buffer*)task);
 }
