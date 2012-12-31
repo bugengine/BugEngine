@@ -21,7 +21,7 @@ World::World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> produc
 ,   m_taskEnd(Task::TaskGroup::TaskEndConnection(m_task, m_storage->initialTask()))
 ,   m_productEnds(Arena::task(), products.size())
 ,   m_freeEntityId(s_defaultSlot)
-,   m_entityAllocator(20*1024*1024)
+,   m_entityAllocator(sizeof(Entity)*4*1024*1024)
 ,   m_entityBuffer((Entity*)m_entityAllocator.buffer())
 ,   m_entityCount(0)
 ,   m_entityCapacity(0)
@@ -58,11 +58,13 @@ Entity World::spawn()
 
     m_freeEntityId = m_entityBuffer[e.id];
     ++ m_entityCount;
+    m_storage->spawn(e);
     return e;
 }
 
 void World::unspawn(Entity e)
 {
+    m_storage->unspawn(e);
     m_entityBuffer[e.id] = m_freeEntityId;
     m_freeEntityId = e;
     -- m_entityCount;

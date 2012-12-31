@@ -14,6 +14,9 @@ EntityStorage::EntityStorage()
                     "start",
                     Colors::Green::Green,
                     Task::MethodCaller<EntityStorage, &EntityStorage::start>(this)))
+    ,   m_entityMappingBuffer(sizeof(u32)*4*1024*1024)
+    ,   m_entityMapping((u32*)m_entityMappingBuffer.buffer())
+    ,   m_componentTypes(Arena::game())
 {
 }
 
@@ -28,6 +31,17 @@ weak<Task::ITask> EntityStorage::initialTask() const
 
 void EntityStorage::start()
 {
+}
+
+void EntityStorage::spawn(Entity e)
+{
+    m_entityMappingBuffer.setUsage(e.id * sizeof(u32));
+    m_entityMapping[e.id] = 0;
+}
+
+void EntityStorage::unspawn(Entity e)
+{
+    m_entityMapping[e.id] = 0;
 }
 
 }}
