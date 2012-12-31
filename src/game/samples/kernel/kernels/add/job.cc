@@ -6,8 +6,10 @@
 #include    <kernel/simd.hh>
 #include    <kernel/input.hh>
 using namespace Kernel;
+#define be_tag(x)
 /* END BOILERPLATE */
 
+be_tag(Join(input, output))
 void kmain(u32 index, const u32 total, in<i32> input, inout<i32> output)
 {
     u32 first = index * input.size() / total;
