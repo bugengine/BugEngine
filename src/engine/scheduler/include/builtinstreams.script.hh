@@ -1,5 +1,7 @@
 #include    <scheduler/kernel/product.hh>
 
+be_product(void);
+
 be_product(u8);
 be_product(u16);
 be_product(u32);

@@ -7,7 +7,7 @@ class StreamDef(cpp.yacc.Nonterm):
 	def stream_definition(self, stream, lparen, name, rparen):
 		"%reduce BE_PRODUCT LPAREN ID RPAREN"
 		self.name = name.value.replace(' ', '')
-		self.decl = name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
+		self.decl = 'product_'+name.value.replace(' ', '').replace(':', '_').replace('<', '__').replace('>', '__')
 		self.lineno = stream.lineno
 
 	def using(self, file, instances, decl, name, parent_name):

@@ -23,5 +23,7 @@ namespace BugEngine { namespace Arena
 be_api(SCHEDULER) minitl::Allocator& task();
 }}
 
+#define be_product(x)
+
 /*****************************************************************************/
 #endif

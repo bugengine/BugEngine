@@ -4,25 +4,23 @@
 #ifndef BE_SAMPLES_KERNEL_STORAGE_SCRIPT_HH_
 #define BE_SAMPLES_KERNEL_STORAGE_SCRIPT_HH_
 /*****************************************************************************/
-#include    <world/entitystorage.script.hh>
+#include    <world/entitystorage.factory.hh>
 #include    <scheduler/kernel/stream.hh>
 #include    <scheduler/kernel/product.hh>
+#include    <components.script.hh>
 
 namespace BugEngine
 {
 
-class KernelStorage : public World::EntityStorage
+class KernelStorage : public World::EntityStorageFactory<A, B>
 {
-private:
-    scoped< BugEngine::Kernel::Stream<u32> >    m_stream1;
-    scoped< BugEngine::Kernel::Stream<u32> >    m_stream2;
-published:
-    BugEngine::Kernel::Product<u32> const   components1;
-    BugEngine::Kernel::Product<u32> const   components2;
 published:
     KernelStorage();
     ~KernelStorage();
 };
+
+be_product(A);
+be_product(B);
 
 }
 
