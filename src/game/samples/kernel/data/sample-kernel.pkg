@@ -7,8 +7,8 @@ storage = samples.kernel.KernelStorage
 
 sample = samples.kernel.KernelSampleTask
 (
-	in1 = storage.components1;
-	out1 = storage.components2;
+	in1 = storage.A;
+	out1 = storage.B;
 )
 
 world = game.World.World

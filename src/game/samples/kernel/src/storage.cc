@@ -9,11 +9,7 @@ namespace BugEngine
 {
 
 KernelStorage::KernelStorage()
-    :   EntityStorage()
-    ,   m_stream1(scoped< BugEngine::Kernel::Stream<u32> >::create(Arena::game()))
-    ,   m_stream2(scoped< BugEngine::Kernel::Stream<u32> >::create(Arena::game()))
-    ,   components1(m_stream1, initialTask())
-    ,   components2(m_stream2, initialTask())
+    :   EntityStorageFactory()
 {
 }
 

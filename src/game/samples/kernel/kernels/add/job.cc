@@ -7,17 +7,20 @@
 #include    <kernel/input.hh>
 using namespace Kernel;
 #define be_tag(x)
+#define be_product(x)
 /* END BOILERPLATE */
 
+#include <components.script.hh>
+
 be_tag(Join(input, output))
-void kmain(u32 index, const u32 total, in<i32> input, inout<i32> output)
+void kmain(u32 index, const u32 total, in<BugEngine::A> input, inout<BugEngine::B> output)
 {
     u32 first = index * input.size() / total;
     u32 last = (index+1) * input.size() / total;
     input += first;
     while(first < last)
     {
-        *output += 2 * *input;
+        output->value += 2 * input->value;
         ++input;
         ++output;
         ++first;
@@ -34,6 +37,8 @@ struct Parameter
 
 extern "C" BE_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
 {
-    kmain(index, total, in<i32>((i32*)argv[0].begin, (i32*)argv[0].end), inout<i32>((i32*)argv[1].begin, (i32*)argv[1].end));
+    kmain(index, total,
+          in<BugEngine::A>((BugEngine::A*)argv[0].begin, (BugEngine::A*)argv[0].end),
+          inout<BugEngine::B>((BugEngine::B*)argv[1].begin, (BugEngine::B*)argv[1].end));
 }
 /* END BOILERPLATE */

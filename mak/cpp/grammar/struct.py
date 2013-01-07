@@ -190,7 +190,8 @@ class ClassDef(cpp.yacc.Nonterm):
 		decl = decl+[self.decl]
 		fullname = '::'.join(name)
 		prettyname = '.'.join(name)
-		prefix = "class%s" % '_'.join(decl)			
+		prefix = "class%s" % '_'.join(decl)
+
 
 		if self.members:
 			self.members.dumpObjects(file, instances, namespace, '::BugEngine::be_typeid< %s >::klass()'%fullname, decl, name, fullname)
@@ -210,7 +211,11 @@ class ClassDef(cpp.yacc.Nonterm):
 		if self.members:
 			objects,methods,constructor,cast,properties = self.members.dump(file, instances, namespace, decl, name, fullname, self.inherits, self.value)
 		else:
-			objects = methods = constructor = cast = properties = "{0}"
+			objects = "::BugEngine::be_typeid< %s >::klass()->objects" % self.inherits
+			methods = "::BugEngine::be_typeid< %s >::klass()->methods" % self.inherits
+			constructor = "{0}"
+			cast =  "::BugEngine::be_typeid< %s >::klass()->cast" % self.inherits
+			properties = "::BugEngine::be_typeid< %s >::klass()->properties" % self.inherits
 
 		file.write("#line %d\n"%self.lineno)
 		if self.parser.useMethods:
