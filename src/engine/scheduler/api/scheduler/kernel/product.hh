@@ -24,5 +24,39 @@ public:
 
 }}
 
+namespace BugEngine
+{
+template< typename T >
+BE_EXPORT struct be_typeid< Kernel::Product<T> >
+{
+    static inline RTTI::Type  type()
+    {
+        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    }
+    static inline raw<const RTTI::Class> klass()
+    {
+        static const RTTI::Class s_class =
+        {
+            istring(minitl::format<1024u>("Product<%s>") | be_typeid<T>::klass()->name),
+            {0},
+            be_typeid<Kernel::IProduct>::klass(),
+            0,
+            0,
+            {0},
+            {0},
+            {0},
+            {0},
+            {0},
+            {0},
+            0,
+            0
+        };
+        raw<const RTTI::Class> result = { &s_class };
+        return result;
+    }
+};
+
+}
+
 /*****************************************************************************/
 #endif
