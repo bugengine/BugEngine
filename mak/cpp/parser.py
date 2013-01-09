@@ -12,7 +12,6 @@ spec = cpp.yacc.Spec(
 					cpp.grammar.tag,
 					cpp.grammar.comment,
 					cpp.grammar.struct,
-					cpp.grammar.stream,
 					cpp.grammar.enum,
 					cpp.grammar.method,
 					cpp.grammar.variable,

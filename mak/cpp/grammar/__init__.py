@@ -6,7 +6,6 @@ import cpp.grammar.name
 import cpp.grammar.namespace
 import cpp.grammar.skip
 import cpp.grammar.struct
-import cpp.grammar.stream
 import cpp.grammar.tag
 import cpp.grammar.template
 import cpp.grammar.type
