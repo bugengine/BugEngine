@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <scheduler/kernel/iproduct.script.hh>
 #include    <scheduler/kernel/stream.hh>
+#include    <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace Kernel
 {
@@ -26,8 +27,9 @@ public:
 
 namespace BugEngine
 {
+
 template< typename T >
-BE_EXPORT struct be_typeid< Kernel::Product<T> >
+struct BE_EXPORT be_typeid< Kernel::Product<T> >
 {
     static inline RTTI::Type  type()
     {
