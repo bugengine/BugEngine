@@ -14,11 +14,8 @@ class DynamicObject;
 
 class be_api(PLUGIN) DynamicObjectList
 {
-    BE_NOCOPY(DynamicObjectList);
 private:
-    static const size_t         s_maxDynamicObjects = 64;
-    static size_t               s_currentDynamicObject;
-    static DynamicObjectList*   s_dynamicObjects[s_maxDynamicObjects];
+    static DynamicObjectList*   s_dynamicObjectRoot;
 private:
     struct SymbolPointer
     {
@@ -38,6 +35,7 @@ private:
         Symbol();
     };
 private:
+    DynamicObjectList*  m_next;
     const char* const   m_name;
     Symbol              m_symbols[16];
 private:
@@ -71,6 +69,18 @@ public:
     }
     static DynamicObjectList* findDynamicObject(const char *name);
 };
+
+#define _BE_PLUGIN_EXPORT                   static
+#define _BE_REGISTER_PLUGIN_(id, name)      extern "C" BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
+#define _BE_REGISTER_PLUGIN(id, name)       _BE_REGISTER_PLUGIN_(id, name)
+#define _BE_REGISTER_METHOD_(id, x)         static bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(x,#x);
+#define _BE_REGISTER_METHOD(id, x)          _BE_REGISTER_METHOD_(id, x)
+
+#else
+
+#define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
+#define _BE_REGISTER_PLUGIN(id, name)       
+#define _BE_REGISTER_METHOD(id, x)          
 
 #endif
 
