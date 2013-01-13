@@ -17,7 +17,7 @@ DynamicObjectList*  DynamicObjectList::s_dynamicObjects[DynamicObjectList::s_max
 
 DynamicObjectList::Symbol::Symbol()
     :   name(0)
-    ,   symbol(0)
+    ,   symbol()
 {
 }
 
@@ -52,10 +52,11 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
             return s_dynamicObjects[i];
         }
     }
+    be_info("unable to load dynamic object %s" | name);
     return 0;
 }
 
-bool DynamicObjectList::registerSymbolInternal(const char* name, void* value)
+bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer value)
 {
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
@@ -70,13 +71,13 @@ bool DynamicObjectList::registerSymbolInternal(const char* name, void* value)
     return false;
 }
 
-void* DynamicObjectList::findSymbol(const char* name) const
+const DynamicObjectList::SymbolPointer* DynamicObjectList::findSymbolInternal(const char* name) const
 {
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
         if (strcmp(m_symbols[i].name, name) == 0)
         {
-            return m_symbols[i].symbol;
+            return &m_symbols[i].symbol;
         }
     }
     return 0;
@@ -94,7 +95,7 @@ void DynamicObject::unload(Handle handle)
 
 void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 {
-    return reinterpret_cast<DynamicObjectList*>(handle)->findSymbol(name.c_str());
+    return reinterpret_cast<DynamicObjectList*>(handle)->findSymbol<void*>(name.c_str());
 }
 
 #endif

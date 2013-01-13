@@ -14,7 +14,7 @@ namespace BugEngine { namespace IOProcess
 class IOContext
 {
 private:
-    enum { SlotCount = 128 };
+    enum { SlotCount = 1 };
     Semaphore           m_availableTickets;
     Semaphore           m_freeSlots;
     i_u32               m_firstFreeSlot;
