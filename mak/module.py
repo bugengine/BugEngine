@@ -76,7 +76,8 @@ class module:
 		self.localoptions.merge(localoptions)
 		self.localoptions.defines |= set([ 'building_'+self.sname,
 										   'BE_PROJECTSHORTNAME='+self.sname,
-										   'BE_PROJECTNAME='+self.name])
+										   'BE_PROJECTNAME='+self.name,
+										   'BE_PROJECTID='+self.name.replace('.','_')])
 		self.globaloptions = coptions()
 		self.globaloptions.merge(globaloptions)
 		self.localarchoptions = localarchoptions

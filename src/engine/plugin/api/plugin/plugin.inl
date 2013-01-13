@@ -3,12 +3,23 @@
 
 #include    <plugin/stdafx.h>
 #include    <plugin/plugin.hh>
+#include    <plugin/dynobjectlist.hh>
 #include    <core/environment.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
 
 namespace BugEngine { namespace Plugin
 {
+
+#ifdef BE_STATIC
+#define _BE_PLUGIN_EXPORT                   static
+#define _BE_REGISTER_PLUGIN(id, name)       extern "C" BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
+#define _BE_REGISTER_METHOD(id, type, x)    static bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol<type>(x,#x);
+#else
+#define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
+#define _BE_REGISTER_PLUGIN(id, name)       
+#define _BE_REGISTER_METHOD(id, type, x)    
+#endif
 
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                   \
     namespace BugEngine                                                                                     \
@@ -27,22 +38,24 @@ namespace BugEngine { namespace Plugin
             return be_##name##_Namespace();                                                                 \
         }                                                                                                   \
     }
-#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                    \
-    BE_PLUGIN_NAMESPACE_CREATE_(name)                                                               \
+#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                              \
+    BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                 \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
     {                                                                                               \
-        return BugEngine::be_##name##_Namespace().operator->();                                     \
+        return BugEngine::be_##id##_Namespace().operator->();                                       \
     }                                                                                               \
-    _BE_REGISTER_PLUGIN(name);                                                                      \
-    _BE_REGISTER_METHOD(name, const BugEngine::RTTI::Class*(*)(),"be_pluginNamespace");
+    _BE_REGISTER_PLUGIN(id, name);                                                                  \
+    _BE_REGISTER_METHOD(id, const BugEngine::RTTI::Class*(*)(),be_pluginNamespace);
 
-#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                         \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)
+#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, id)                                               \
+    BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)
+#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                    \
+    BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, name)
 #define BE_PLUGIN_NAMESPACE_REGISTER()                                                              \
-    BE_PLUGIN_NAMESPACE_REGISTER_(BE_PROJECTSHORTNAME)
+    BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID)
 
-#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                            \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name);                                                       \
+#define BE_PLUGIN_REGISTER_NAMED__(name, id, interface, klass)                                      \
+    BE_PLUGIN_NAMESPACE_CREATE_(id);                                                                \
     _BE_PLUGIN_EXPORT interface* be_createPlugin (const ::BugEngine::Plugin::Context& context)      \
     {                                                                                               \
         void* m = ::BugEngine::Arena::general().alloc<klass>();                                     \
@@ -53,14 +66,20 @@ namespace BugEngine { namespace Plugin
         minitl::checked_destroy(cls);                                                               \
         ::BugEngine::Arena::general().free(cls);                                                    \
     }                                                                                               \
-    _BE_REGISTER_PLUGIN(name);                                                                      \
-    _BE_REGISTER_METHOD(name, interface*(*)(const ::BugEngine::Plugin::Context&),"be_createPlugin");\
-    _BE_REGISTER_METHOD(name, void(*)(klass*),"be_destroyPlugin");                                  \
-    _BE_REGISTER_METHOD(name, const BugEngine::RTTI::Class*(*)(),"be_pluginNamespace");
-#define BE_PLUGIN_REGISTER_NAMED_(name, interface, klass)                                           \
-    BE_PLUGIN_REGISTER_NAMED(name, interface, klass)
+    _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
+    {                                                                                               \
+        return BugEngine::be_##id##_Namespace().operator->();                                       \
+    }                                                                                               \
+    _BE_REGISTER_PLUGIN(id, name);                                                                  \
+    _BE_REGISTER_METHOD(id, interface*(*)(const ::BugEngine::Plugin::Context&),be_createPlugin);    \
+    _BE_REGISTER_METHOD(id, void(*)(klass*),be_destroyPlugin);                                      \
+    _BE_REGISTER_METHOD(id, const BugEngine::RTTI::Class*(*)(),be_pluginNamespace);
+#define BE_PLUGIN_REGISTER_NAMED_(name, id, interface, klass)                                       \
+    BE_PLUGIN_REGISTER_NAMED__(name, id, interface, klass)
+#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                            \
+    BE_PLUGIN_REGISTER_NAMED_(name, name, interface, klass)
 #define BE_PLUGIN_REGISTER(interface, klass)                                                        \
-    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTSHORTNAME, interface, klass)
+    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, interface, klass)
 
 
 template< typename T >

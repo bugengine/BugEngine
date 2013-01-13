@@ -32,7 +32,7 @@ def datagen(self, node):
 	tsk.path = self.bld.variant_dir
 	tsk.env.detach()
 	if self.category == 'plugin' or self.category == 'game':
-		tsk.env.PLUGIN = self.sname
+		tsk.env.PLUGIN = self.name.replace('.', '_')
 	else:
 		tsk.env.PLUGIN = 'game'
 	try:

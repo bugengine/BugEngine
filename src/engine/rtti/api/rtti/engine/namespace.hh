@@ -101,15 +101,15 @@ namespace BugEngine                                                             
 
 
 #define BE_REGISTER_NAMESPACE_1(n1)                                     \
-    BE_REGISTER_NAMESPACE_1_(BE_PROJECTSHORTNAME, n1)
+    BE_REGISTER_NAMESPACE_1_(BE_PROJECTID, n1)
 #define BE_REGISTER_NAMESPACE_2(n1, n2)                                 \
-    BE_REGISTER_NAMESPACE_2_(BE_PROJECTSHORTNAME, n1, n2)
+    BE_REGISTER_NAMESPACE_2_(BE_PROJECTID, n1, n2)
 #define BE_REGISTER_NAMESPACE_3(n1, n2, n3)                             \
-    BE_REGISTER_NAMESPACE_3_(BE_PROJECTSHORTNAME, n1, n2, n3)
+    BE_REGISTER_NAMESPACE_3_(BE_PROJECTID, n1, n2, n3)
 #define BE_REGISTER_NAMESPACE_4(n1, n2, n3, n4)                         \
-    BE_REGISTER_NAMESPACE_4_(BE_PROJECTSHORTNAME, n1, n2, n3, n4)
+    BE_REGISTER_NAMESPACE_4_(BE_PROJECTID, n1, n2, n3, n4)
 #define BE_REGISTER_NAMESPACE_5(n1, n2, n3, n4, n5)                     \
-    BE_REGISTER_NAMESPACE_5_(BE_PROJECTSHORTNAME, n1, n2, n3, n4, n5)
+    BE_REGISTER_NAMESPACE_5_(BE_PROJECTID, n1, n2, n3, n4, n5)
 
 /*****************************************************************************/
 #endif
