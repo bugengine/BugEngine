@@ -11,16 +11,6 @@
 namespace BugEngine { namespace Plugin
 {
 
-#ifdef BE_STATIC
-#define _BE_PLUGIN_EXPORT                   static
-#define _BE_REGISTER_PLUGIN(id, name)       extern "C" BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
-#define _BE_REGISTER_METHOD(id, type, x)    static bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol<type>(x,#x);
-#else
-#define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
-#define _BE_REGISTER_PLUGIN(id, name)       
-#define _BE_REGISTER_METHOD(id, type, x)    
-#endif
-
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                   \
     namespace BugEngine                                                                                     \
     {                                                                                                       \
@@ -45,7 +35,7 @@ namespace BugEngine { namespace Plugin
         return BugEngine::be_##id##_Namespace().operator->();                                       \
     }                                                                                               \
     _BE_REGISTER_PLUGIN(id, name);                                                                  \
-    _BE_REGISTER_METHOD(id, const BugEngine::RTTI::Class*(*)(),be_pluginNamespace);
+    _BE_REGISTER_METHOD(id, be_pluginNamespace);
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, id)                                               \
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)
@@ -71,9 +61,9 @@ namespace BugEngine { namespace Plugin
         return BugEngine::be_##id##_Namespace().operator->();                                       \
     }                                                                                               \
     _BE_REGISTER_PLUGIN(id, name);                                                                  \
-    _BE_REGISTER_METHOD(id, interface*(*)(const ::BugEngine::Plugin::Context&),be_createPlugin);    \
-    _BE_REGISTER_METHOD(id, void(*)(klass*),be_destroyPlugin);                                      \
-    _BE_REGISTER_METHOD(id, const BugEngine::RTTI::Class*(*)(),be_pluginNamespace);
+    _BE_REGISTER_METHOD(id, be_createPlugin);                                                       \
+    _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                      \
+    _BE_REGISTER_METHOD(id, be_pluginNamespace);
 #define BE_PLUGIN_REGISTER_NAMED_(name, id, interface, klass)                                       \
     BE_PLUGIN_REGISTER_NAMED__(name, id, interface, klass)
 #define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                            \

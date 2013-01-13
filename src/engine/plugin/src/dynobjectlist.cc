@@ -11,9 +11,7 @@ namespace BugEngine { namespace Plugin
 
 #ifdef BE_STATIC
 
-size_t              DynamicObjectList::s_currentDynamicObject;
-
-DynamicObjectList*  DynamicObjectList::s_dynamicObjects[DynamicObjectList::s_maxDynamicObjects];
+DynamicObjectList*  DynamicObjectList::s_dynamicObjectRoot = 0;
 
 DynamicObjectList::Symbol::Symbol()
     :   name(0)
@@ -22,35 +20,30 @@ DynamicObjectList::Symbol::Symbol()
 }
 
 DynamicObjectList::DynamicObjectList(const char* name)
-    :   m_name(name)
+    :   m_next(s_dynamicObjectRoot)
+    ,   m_name(name)
 {
-    be_assert(s_currentDynamicObject < s_maxDynamicObjects, "too many dynamic objects registered; increase the value of DynamicObjectList::s_maxDynamicObjects to more than %d" | s_maxDynamicObjects);
     be_info("Registering built-in dynamic object %s" | name);
-    s_dynamicObjects[s_currentDynamicObject++] = this;
+    s_dynamicObjectRoot = this;
 }
 
 DynamicObjectList::~DynamicObjectList()
 {
-    for (size_t i = 0; i < s_currentDynamicObject; ++i)
-    {
-        if (s_dynamicObjects[i] == this)
-        {
-            s_dynamicObjects[i] = s_dynamicObjects[--s_currentDynamicObject];
-            return;
-        }
-    }
-    be_notreached();
+    be_assert(s_dynamicObjectRoot == this,"Invalid order in create/destroy dynamic object");
+    s_dynamicObjectRoot = m_next;
 }
 
 DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
 {
     be_info("loading dynamic object %s (built-in)" | name);
-    for (size_t i = 0; i < s_currentDynamicObject; ++i)
+    DynamicObjectList* current = s_dynamicObjectRoot;
+    while(current)
     {
-        if (strcmp(name, s_dynamicObjects[i]->m_name) == 0)
+        if (strcmp(name, current->m_name) == 0)
         {
-            return s_dynamicObjects[i];
+            return current;
         }
+        current = current->m_next;
     }
     be_info("unable to load dynamic object %s" | name);
     return 0;

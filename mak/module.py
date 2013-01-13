@@ -284,19 +284,20 @@ class module:
 				for kernelname, kernelsources in self.kernels.items():
 					for envname in bld.env.KERNELS:
 						if env.STATIC or bld.static:
-							jobtype = 'cstlib'
+							jobtype = 'cobjects'
 						else:
 							jobtype = 'cshlib'
 						env = bld.all_envs[envname].derive()
 						env.detach()
+						fullname = task.name + '.' + kernelname
 						job = bld(
-								target = task.name + '.' + kernelname,
+								target = fullname,
 								env = env,
 								type='job',
 								source = kernelsources.make_sources(bld, env, self.root),
 								features = ['c', 'cxx', jobtype, 'warnall', optim],
 								install_path = os.path.abspath(os.path.join(env['PREFIX'],env['DEPLOY']['prefix'],env['DEPLOY']['kernel'])),
-								defines = task.private_defines,
+								defines = task.private_defines + ['BE_KERNELNAME=%s' % fullname, 'BE_KERNELID=%s' % fullname.replace('.','_') ],
 								includes = task.private_includes
 							)
 						job.post()

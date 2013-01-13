@@ -2,9 +2,11 @@
    see LICENSE for detail */
 
 /* BEGIN BOILERPLATE */
+#define be_api(X)
 #include    <kernel/compilers.hh>
 #include    <kernel/simd.hh>
 #include    <kernel/input.hh>
+#include    <plugin/dynobjectlist.hh>
 using namespace Kernel;
 #define be_tag(x)
 #define be_product(x)
@@ -12,7 +14,6 @@ using namespace Kernel;
 
 #include <components.script.hh>
 
-be_tag(Join(input, output))
 void kmain(u32 index, const u32 total, in<BugEngine::A> input, inout<BugEngine::B> output)
 {
     u32 first = index * input.size() / total;
@@ -35,10 +36,13 @@ struct Parameter
     void* end;
 };
 
-extern "C" BE_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
+_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
 {
     kmain(index, total,
           in<BugEngine::A>((BugEngine::A*)argv[0].begin, (BugEngine::A*)argv[0].end),
           inout<BugEngine::B>((BugEngine::B*)argv[1].begin, (BugEngine::B*)argv[1].end));
 }
+_BE_REGISTER_PLUGIN(BE_KERNELID, BE_KERNELNAME);
+_BE_REGISTER_METHOD(BE_KERNELID, _kmain);
+
 /* END BOILERPLATE */
