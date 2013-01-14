@@ -16,6 +16,7 @@
 #include    <cstdlib>
 
 #include    <minitl/hash_map.hh>
+#include    <rtti/engine/array.hh>
 namespace
 {
     class FileLogListener : public BugEngine::ILogListener
@@ -100,6 +101,7 @@ int beMain(int argc, const char *argv[])
         BugEngine::Plugin::Plugin<BugEngine::Application> app(
                 BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),
                 BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), home, scheduler));
+        be_info("%s"|BugEngine::be_typeid< minitl::array<u32> >::klass()->name);
         return app->run();
     }
 #if BE_ENABLE_EXCEPTIONS

@@ -9,7 +9,6 @@ namespace BugEngine
 {
 
 KernelStorage::KernelStorage()
-    :   EntityStorageFactory()
 {
 }
 

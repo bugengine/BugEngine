@@ -178,8 +178,10 @@ struct be_api(RTTI) Type
      *  false otherwise 
      */
     bool isA(const Type& other) const;
+
 public:
     template< typename T > bool isA() const;
+    minitl::format<1024u> name() const;
 private:
     void*               rawget(const void*) const;
     void                copy(const void* source, void* dest) const;

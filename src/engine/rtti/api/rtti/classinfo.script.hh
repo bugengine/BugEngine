@@ -34,16 +34,16 @@ published:
 
     raw<Tag>                    tags;
 
-    raw<const Property> const   properties;
+    raw<const Property>         properties;
 
     raw<const Method>           methods;
 
     raw<const ObjectInfo>       objects;
 
     be_tag(Alias("?call"))
-    raw<const Method> const     constructor;
+    raw<const Method>           constructor;
 
-    raw<const Method> const     cast;
+    raw<const Method>           cast;
 public:
 
     typedef void (*CopyConstructor)(const void* source, void* destination);

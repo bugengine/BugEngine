@@ -101,6 +101,31 @@ u32 Type::distance(const Type& other) const
     return result + metaclass->distance(other.metaclass);
 }
 
+minitl::format<1024u> Type::name() const
+{
+    static const char *constnessPrefix[] = {
+        "const ",
+        ""
+    };
+    static const char* indirectionPrefix[] = {
+        "",
+        "raw<",
+        "weak<",
+        "ref<"
+    };
+    static const char* indirectionSuffix[] = {
+        "",
+        ">",
+        ">",
+        ">"
+    };
+    return minitl::format<1024u>("%s%s%s%s")
+            | indirectionPrefix[indirection]
+            | constnessPrefix[constness]
+            | metaclass->name
+            | indirectionSuffix[indirection];
+}
+
 bool Type::isA(const Type& other) const
 {
     return     other.indirection <= indirection
@@ -112,6 +137,7 @@ bool operator==(Type t1, Type t2)
 {
     return t1.metaclass == t2.metaclass && t1.indirection == t2.indirection && t1.access == t2.access && t1.constness == t2.constness;
 }
+
 bool operator<=(Type t1, Type t2)
 {
     return     (t1.indirection <= t2.indirection)
