@@ -72,7 +72,14 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 {
     static RTTI::Class ci = {
-        "array", be_game_Namespace(), {0}, 0, 0, {0}, {0}, {0}, {&valueTypeObject}, {&constructor}, {0}, &RTTI::wrapCopy< minitl::array<T> >, &RTTI::wrapDestroy< minitl::array<T> >
+        istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
+        be_game_Namespace(),
+        {0}, 0, 0, {0}, {0}, {0},
+        {&valueTypeObject},
+        {&constructor},
+        {0},
+        &RTTI::wrapCopy< minitl::array<T> >,
+        &RTTI::wrapDestroy< minitl::array<T> >
     };
     raw<const RTTI::Class> c = { &ci };
     return c;

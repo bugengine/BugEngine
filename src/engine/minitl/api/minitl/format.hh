@@ -204,6 +204,13 @@ const format<SIZE>& operator|(const format<SIZE>& f, T* value)
     return f;
 }
 
+template< u16 SIZE, u16 SIZE2 >
+const format<SIZE>& operator|(const format<SIZE>& f, const format<SIZE2>& other)
+{
+    return f | other.c_str();
+}
+
+
 }
 
 /*****************************************************************************/
