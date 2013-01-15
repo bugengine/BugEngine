@@ -43,17 +43,13 @@ class Unit(cpp.yacc.Nonterm):
 
 		file.write("namespace BugEngine\n{\n\n")
 		file.write("raw< ::BugEngine::RTTI::Class > %s;\n"%owner)
-		self.members.predecl(file, instances, [], [], "")
+		self.members.predecl((file, instances), [], '::BugEngine::'+owner)
 		file.write("\n}\n\n")
-		self.members.using(file, instances, [], [], "")
+		self.members.using((file, instances), [], '::BugEngine::'+owner)
 
 		instances.write("namespace BugEngine\n{\n\n")
-		self.members.dumpObjects(file, instances, [], '::BugEngine::'+owner, [], [], "")
-		object_ptr, method_ptr, constructor, cast, variables = self.members.dump(file, instances, [], [], [], "", "", False)
-		if object_ptr != 'BugEngine::%s->objects'%owner:
-			file.write("const ::BugEngine::RTTI::ObjectInfo* %s_optr = ( BugEngine::%s->objects.set(%s) );\n" % (object_ptr[2:-1], owner, object_ptr[1:-1]))
-		if method_ptr != 'BugEngine::%s->methods'%owner:
-			file.write("const ::BugEngine::RTTI::Method* %s_mptr = ( %s->methods.set(%s) );\n" % (method_ptr[2:-1], owner, method_ptr[1:-1]))
+		self.members.dumpObjects((file, instances), [], '::BugEngine::'+owner)
+		self.members.dump((file, instances), [], '::BugEngine::'+owner)
 		instances.write("\n}\n\n")
 
 
