@@ -66,52 +66,5 @@ class Variable(cpp.yacc.Nonterm):
 		self.attributes = variable.attributes
 		self.lineno = variable.lineno
 
-	def dump(self, file, instances, namespace, decl, name, parent_name, property_ptr, object_ptr):
-		if name:
-			fullname = '::'+'::'.join(name)
-		else:
-			fullname = ""
-		decl = decl+[self.name]
-		prefix = '_'.join(decl)
-		tag_ptr = self.tags.dump(file, instances, prefix)
-		index = 0
-		for name in [self.name]+self.aliases:
-			if not parent_name or 'static' in self.attributes:
-				file.write("#line %d\n" % self.lineno)
-				file.write("static const ::BugEngine::RTTI::ObjectInfo s_%s_%s_%d =\n" % (prefix, self.name, index))
-				file.write("#line %d\n" % self.lineno)
-				file.write("    {\n")
-				file.write("#line %d\n" % self.lineno)
-				file.write("        %s,\n" % object_ptr)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        %s,\n" % tag_ptr)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        \"%s\",\n" % name)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n" % (fullname, self.name))
-				file.write("#line %d\n" % self.lineno)
-				file.write("    };\n\n")
-				object_ptr = "{&s_%s_%s_%d}" % (prefix, self.name, index)
-				index = index + 1
-			else:
-				file.write("#line %d\n" % self.lineno)
-				file.write("static const ::BugEngine::RTTI::Property s_%s_%s_%d =\n" % (prefix, self.name, index))
-				file.write("#line %d\n" % self.lineno)
-				file.write("    {\n")
-				file.write("#line %d\n" % self.lineno)
-				file.write("        %s,\n" % tag_ptr)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        %s,\n" % property_ptr)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        \"%s\",\n" % name)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % fullname)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        ::BugEngine::be_typeid< %s >::type(),\n" % self.type)
-				file.write("#line %d\n" % self.lineno)
-				file.write("        &::BugEngine::RTTI::PropertyHelper<%s, %s, &%s::%s>::get\n" % (self.type, fullname, fullname, self.name))
-				file.write("#line %d\n" % self.lineno)
-				file.write("    };\n\n")
-				property_ptr = "{&s_%s_%s_%d}" % (prefix, self.name, index)
-				index = index + 1
-		return property_ptr, object_ptr
+	def dump(self, files, namespace, owner):
+		pass
