@@ -186,20 +186,18 @@ class Exprs(cpp.yacc.Nonterm):
 		self.members = []
 		self.objects = []
 
-	def using(self, files, namespace, owner):
+	def using(self, files, namespace, parent):
 		for o in self.objects:
-			o.using(files, namespace, owner)
+			o.using(files, namespace, parent)
 
-	def predecl(self, files, namespace, owner):
+	def predecl(self, files, namespace, parent):
 		for o in self.objects:
-			o.predecl(files, namespace, owner)
+			o.predecl(files, namespace, parent)
 
-	def dumpObjects(self, files, namespace, owner):
+	def dumpObjects(self, files, namespace, parent):
 		for o in self.objects:
-			o.dump(files, namespace, owner)
+			o.dump(files, namespace, parent)
 
-	def dump(self, files, namespace, owner):
-		for o in self.objects:
-			o.dump(files, namespace, owner)
-
+	def dump(self, files, namespace, parent):
+		pass
 

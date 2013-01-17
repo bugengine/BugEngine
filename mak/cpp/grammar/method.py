@@ -301,7 +301,7 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump(self, files, namespace, owner):
+	def dump(self, files, namespace, parent):
 		pass
 
 

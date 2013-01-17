@@ -55,11 +55,17 @@ class EnumDef(cpp.yacc.Nonterm):
 		self.value = enums
 		self.lineno = enum.lineno
 
-	def using(self, files, namespace, owner):
-		pass
+	def using(self, files, namespace, parent):
+		parent = parent + [self.name]
 
-	def predecl(self, files, namespace, owner):
-		pass
+	def predecl(self, files, namespace, parent):
+		parent = parent + [self.name]
 
-	def dump(self, files, namespace, owner):
-		pass
+	def dump(self, files, namespace, parent):
+		if parent:
+			owner = '::BugEngine::be_typeid< %s >::klass()' % ('::'.join(namespace + parent))
+		elif namespace:
+			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		else:
+			owner = '::BugEngine::be_%s_Namespace()' % self.parser.plugin
+		parent = parent + [self.name]

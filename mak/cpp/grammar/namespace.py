@@ -19,16 +19,24 @@ class Namespace(cpp.yacc.Nonterm):
 		self.lineno = namespace.lineno
 		self.members = None
 
-	def using(self, files, namespace, owner):
+	def using(self, files, namespace, parent):
+		namespace = namespace + [self.name]
 		if self.members:
-			self.members.using(files, namespace, owner)
+			self.members.using(files, namespace, [])
 
-	def predecl(self, files, namespace, owner):
+	def predecl(self, files, namespace, parent):
+		namespace = namespace + [self.name]
+		files[1].write('namespace %s\n{\n' % self.name)
 		if self.members:
-			self.members.predecl(files, namespace, owner)
+			self.members.predecl(files, namespace, [])
+		files[1].write('}\n')
 
-	def dump(self, files, namespace, owner):
+	def dump(self, files, namespace, parent):
+		owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		namespace = namespace + [self.name]
 		if self.members:
-			self.members.dumpObjects(files, namespace, owner)
-			self.members.dump(files, namespace, owner)
+			files[0].write('namespace %s\n{\n' % self.name)
+			self.members.dumpObjects(files, namespace, parent)
+			self.members.dump(files, namespace, parent)
+			files[0].write('}\n')
 

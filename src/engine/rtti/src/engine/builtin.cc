@@ -13,26 +13,35 @@ BE_REGISTER_NAMESPACE_2_(game, BugEngine, Documentation);
 namespace BugEngine
 {
 
+template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass()
+{
+    static RTTI::Class s_void = { "void", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    raw<RTTI::Class> ci = {&s_void};
+    return ci;
+}
+
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
 {
-    static const RTTI::Class s_void = { "void", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
-    raw<const RTTI::Class> ci = {&s_void};
+    return preklass();
+}
+
+template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
+{
+    static RTTI::Class s_pointer = { "pointer", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    raw<RTTI::Class> ci = {&s_pointer};
     return ci;
 }
 
-template< >
-BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::klass()
 {
-    static const RTTI::Class s_pointer = { "pointer", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
-    raw<const RTTI::Class> ci = {&s_pointer};
-    return ci;
+    return preklass();
 }
 
 template< >
-BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
+BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
 {
-    static const RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
-    raw<const RTTI::Class> ci = {&s_refcountable};
+    static RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    raw<RTTI::Class> ci = {&s_refcountable};
     return ci;
 }
 
