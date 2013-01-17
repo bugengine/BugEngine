@@ -66,5 +66,9 @@ class Variable(cpp.yacc.Nonterm):
 		self.attributes = variable.attributes
 		self.lineno = variable.lineno
 
-	def dump(self, files, namespace, owner):
-		pass
+	def dump(self, files, namespace, parent):
+		if parent:
+			owner = '::BugEngine::be_typeid< ::%s::%s >::klass()' % ('::'.join(namespace + parent))
+		else:
+			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		parent = parent + [self.name]

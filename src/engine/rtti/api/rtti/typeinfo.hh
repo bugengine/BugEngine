@@ -13,7 +13,13 @@ namespace BugEngine
 template< typename T >
 struct be_typeid
 {
-    static BE_EXPORT raw<const RTTI::Class> klass();
+    template< typename T2 > friend struct be_typeid;
+    static BE_EXPORT raw<RTTI::Class> preklass();
+    static inline raw<const RTTI::Class> klass()
+    {
+        static raw<const RTTI::Class> cls = preklass();
+        return cls;
+    }
     static inline RTTI::Type  type()  { return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
 };
 
