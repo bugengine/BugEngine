@@ -33,11 +33,11 @@ struct BE_EXPORT be_typeid< Kernel::Product<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+        return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
     }
-    static inline raw<const RTTI::Class> klass()
+    static inline raw<RTTI::Class> preklass()
     {
-        static const RTTI::Class s_class =
+        static RTTI::Class s_class =
         {
             istring(minitl::format<1024u>("Product<%s>") | be_typeid<T>::klass()->name),
             {0},
@@ -53,8 +53,12 @@ struct BE_EXPORT be_typeid< Kernel::Product<T> >
             0,
             0
         };
-        raw<const RTTI::Class> result = { &s_class };
+        raw<RTTI::Class> result = { &s_class };
         return result;
+    }
+    static inline raw<const RTTI::Class> klass()
+    {
+        return preklass();
     }
 };
 

@@ -139,10 +139,7 @@ u32 Class::distance(raw<const Class> other) const
 
 raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };
-    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };
-    static const RTTI::ObjectInfo* obptr = ((ob.value = RTTI::Value(&ci)), &ob);
-    be_forceuse(obptr);
+    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }
@@ -151,5 +148,8 @@ raw<RTTI::Class> be_game_Namespace_BugEngine()
 {
     return be_game_Namespace();
 }
+
+static RTTI::ObjectInfo ob = { be_game_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_game_Namespace()) };
+static const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
 
 }

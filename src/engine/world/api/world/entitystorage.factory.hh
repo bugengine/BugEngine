@@ -336,7 +336,7 @@ struct be_typeid< World::EntityStorageFactory<T1, T2, T3, T4, T5, T6, T7, T8, T9
                                        T31, T32, T33, T34, T35, T36, T37, T38, T39, T40,
                                        T41, T42, T43, T44, T45, T46, T47, T48, T49, T50> >
 {
-    static inline RTTI::Type  type()  { return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
+    static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
     static inline raw<RTTI::Class> preklass()
     {
         static RTTI::Class s_class =
