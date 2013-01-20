@@ -37,6 +37,13 @@ class Namespace(cpp.yacc.Nonterm):
 		if self.members:
 			files[0].write('namespace %s\n{\n' % self.name)
 			self.members.dumpObjects(files, namespace, parent)
-			self.members.dump(files, namespace, parent)
+			objects = self.members.dump(files, namespace, parent)
+
+			if objects:
+				selfname = owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+				files[0].write('static const ::BugEngine::RTTI::ObjectInfo* const s_%s_namespace_%s =\n' % (self.name, self.members.objects[0].name))
+				files[0].write('	%s->objects.set(&%s);\n' % (selfname, objects))
+
 			files[0].write('}\n')
+			
 

@@ -173,6 +173,7 @@ class ClassDef(cpp.yacc.Nonterm):
 	def predecl(self, files, namespace, parent):
 		parent = parent + [self.name]
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_preklass();\n' % '_'.join(parent))
+		files[1].write('raw< ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
 		if self.members:
 			self.members.predecl(files, namespace, parent)
 
@@ -197,7 +198,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('		%s,\n' % owner)
 		files[0].write('		::BugEngine::be_typeid< %s >::preklass(),\n' % self.inherits)
 		files[0].write('		u32(sizeof(%s)),\n' % '::'.join(parent))
-		files[0].write('		i32(0),\n')
+		files[0].write('		i32(ptrdiff_t(static_cast<%s*>((%s*)(4))))-4,\n' % ('::'.join(parent), self.inherits))
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
@@ -211,10 +212,24 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('	return result;\n')
 		files[0].write('}\n')
 
+		files[0].write('raw< const ::BugEngine::RTTI::Class > %s_properties()\n' % '_'.join(parent))
+		files[0].write('{\n')
+		files[0].write('	raw< ::BugEngine::RTTI::Class > result = %s_preklass();\n' % '_'.join(parent))
+		files[0].write('	return result;\n')
+		files[0].write('}\n')
+
+		files[0].write('BE_EXPORT raw< const ::BugEngine::RTTI::Class > %s_create = ::BugEngine::be_typeid< %s >::klass();\n' % ('_'.join(parent), '::'.join(parent)))
+		
+
 		files[1].write('template<> BE_EXPORT raw<RTTI::Class> be_typeid< %s >::preklass()\n' % '::'.join(namespace + parent))
 		files[1].write('{\n')
 		files[1].write('	return %s::%s_preklass();\n' % ('::'.join(namespace), '_'.join(parent)))
 		files[1].write('}\n')
+		files[1].write('template<> BE_EXPORT raw<const RTTI::Class> be_typeid< %s >::registerProperties()\n' % '::'.join(namespace + parent))
+		files[1].write('{\n')
+		files[1].write('	return %s::%s_properties();\n' % ('::'.join(namespace), '_'.join(parent)))
+		files[1].write('}\n')
 
 		if self.members:
 			self.members.dump(files, namespace, parent)
+		return '%s_preklass()' % '_'.join(parent), '{0}'

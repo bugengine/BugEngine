@@ -133,6 +133,7 @@ class Exprs(cpp.yacc.Nonterm):
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 		for name in m.value.aliases+[m.value.value.name]:
 			try:
 				self.methods[name].append(m.value)
@@ -144,13 +145,15 @@ class Exprs(cpp.yacc.Nonterm):
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
-		self.objects.append(n.value)
+		self.namespaces = exprs.namespaces
+		self.namespaces.append(n.value)
 
 	def expr_type(self, t, exprs):
 		"%reduce ExprType Exprs"
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 		if t.value:
 			self.objects.append(t.value)
 
@@ -159,6 +162,7 @@ class Exprs(cpp.yacc.Nonterm):
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 		if v.value:
 			self.members.append(v.value)
 
@@ -167,37 +171,67 @@ class Exprs(cpp.yacc.Nonterm):
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 
 	def expr_friend(self, f, exprs):
 		"%reduce ExprFriend Exprs"
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 
 	def expr_ignore(self, i, exprs):
 		"%reduce ExprIgnore Exprs"
 		self.methods = exprs.methods
 		self.members = exprs.members
 		self.objects = exprs.objects
+		self.namespaces = exprs.namespaces
 
 	def empty(self):
 		"%reduce"
 		self.methods = {}
 		self.members = []
 		self.objects = []
+		self.namespaces = []
 
 	def using(self, files, namespace, parent):
-		for o in self.objects:
+		for o in self.objects + self.namespaces:
 			o.using(files, namespace, parent)
 
 	def predecl(self, files, namespace, parent):
-		for o in self.objects:
+		for o in self.objects + self.namespaces:
 			o.predecl(files, namespace, parent)
 
 	def dumpObjects(self, files, namespace, parent):
+		self.dumpedObjects = []
 		for o in self.objects:
-			o.dump(files, namespace, parent)
+			expr_value, expr_tags = o.dump(files, namespace, parent)
+			self.dumpedObjects.append((o, expr_value, expr_tags))
+		for n in self.namespaces:
+			n.dump(files, namespace, parent)
 
 	def dump(self, files, namespace, parent):
-		pass
+		if parent:
+			owner = '::BugEngine::be_typeid< %s >::preklass()' % ('::'.join(namespace + parent))
+		elif namespace:
+			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		else:
+			owner = '::BugEngine::be_%s_Namespace()' % self.parser.plugin
+
+		objects = None
+		if self.dumpedObjects:
+			previous = '%s->objects' % owner
+			for o, expr_value, expr_tags in self.dumpedObjects:
+				for name in [o.name]+o.tags.aliases:
+					varname = 's_%s_%s_object' % ('_'.join(parent), name)
+					files[0].write('static ::BugEngine::RTTI::ObjectInfo %s =\n' % varname)
+					files[0].write('{\n')
+					files[0].write('	%s,\n' % previous)
+					files[0].write('	%s,\n' % expr_tags)
+					files[0].write('	::BugEngine::istring("%s"),\n' % name)
+					files[0].write('	::BugEngine::RTTI::Value(%s)\n' % expr_value)
+					files[0].write('};\n')
+					previous = '{&%s}' % varname
+			objects = varname
+		return objects
 
