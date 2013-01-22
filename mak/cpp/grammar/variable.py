@@ -66,9 +66,22 @@ class Variable(cpp.yacc.Nonterm):
 		self.attributes = variable.attributes
 		self.lineno = variable.lineno
 
-	def dump(self, files, namespace, parent):
-		if parent:
-			owner = '::BugEngine::be_typeid< ::%s::%s >::klass()' % ('::'.join(namespace + parent))
-		else:
-			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
-		parent = parent + [self.name]
+	def dump(self, files, namespace, parent, owner, previous_object, previous_property):
+		if parent and not 'static' in self.attributes:
+			for name in [self.name] + self.tags.aliases:
+				pretty_name = name.replace('?', '_').replace('#', '_')
+				new_property = 's_%s_property' % pretty_name
+				files[0].write('static const ::BugEngine::RTTI::Property %s =\n' % new_property)
+				files[0].write('{\n')
+				files[0].write('	{0},\n')
+				files[0].write('	%s,\n' % previous_property)
+				files[0].write('	"%s",\n' % name)
+				files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % '::'.join(parent))
+				files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.type)
+				files[0].write('	&::BugEngine::RTTI::PropertyHelper< %s, %s, &%s::%s >::get\n' % (self.type, '::'.join(parent), '::'.join(parent), self.name))
+				files[0].write('};\n')
+				previous_property = '{&%s}' % new_property
+		elif parent or not 'static' in self.attributes:
+			pass
+
+		return previous_object, previous_property

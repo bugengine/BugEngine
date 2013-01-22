@@ -42,11 +42,10 @@ class Unit(cpp.yacc.Nonterm):
 		file.write("namespace BugEngine\n{\n\n")
 		self.members.predecl((file, instances), [], [])
 		file.write("\n}\n\n")
-		self.members.using((file, instances), [], [])
 
 		instances.write("namespace BugEngine\n{\n\n")
 		self.members.dumpObjects((file, instances), [], [])
-		self.members.dump((file, instances), [], [])
+		self.members.dump((file, instances), [], [], '::BugEngine::be_%s_Namespace()'%self.parser.plugin)
 		instances.write("\n}\n\n")
 
 

@@ -18,11 +18,13 @@ struct PropertyHelper
     {
         if (isConst)
         {
-            return Value::ByRef(reinterpret_cast<const Owner*>(from)->*Member);
+            const Owner* owner = reinterpret_cast<const Owner*>(from); 
+            return Value::ByRef(owner->*Member);
         }
         else
         {
-            return Value::ByRef(reinterpret_cast<Owner*>(from)->*Member);
+            Owner* owner = reinterpret_cast<Owner*>(from); 
+            return Value::ByRef(owner->*Member);
         }
     }
 };
