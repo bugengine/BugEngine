@@ -98,7 +98,7 @@ struct be_typeid< scoped<T> >
 {
 };
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
+template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass();
 
 }
 

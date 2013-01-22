@@ -19,11 +19,11 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass()
     raw<RTTI::Class> ci = {&s_void};
     return ci;
 }
-
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::registerProperties()
 {
     return preklass();
 }
+
 
 template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
 {
@@ -32,7 +32,7 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
     return ci;
 }
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::registerProperties()
 {
     return preklass();
 }
@@ -43,6 +43,11 @@ BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
     static RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};
     return ci;
+}
+
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::registerProperties()
+{
+    return preklass();
 }
 
 }

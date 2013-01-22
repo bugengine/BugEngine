@@ -210,28 +210,53 @@ class Exprs(cpp.yacc.Nonterm):
 		for n in self.namespaces:
 			n.dump(files, namespace, parent)
 
-	def dump(self, files, namespace, parent):
-		if parent:
-			owner = '::BugEngine::be_typeid< %s >::preklass()' % ('::'.join(namespace + parent))
-		elif namespace:
-			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
-		else:
-			owner = '::BugEngine::be_%s_Namespace()' % self.parser.plugin
-
+	def dump(self, files, namespace, parent, owner):
 		objects = None
 		if self.dumpedObjects:
-			previous = '%s->objects' % owner
+			objects = '%s->objects' % owner
 			for o, expr_value, expr_tags in self.dumpedObjects:
 				for name in [o.name]+o.tags.aliases:
-					varname = 's_%s_%s_object' % ('_'.join(parent), name)
-					files[0].write('static ::BugEngine::RTTI::ObjectInfo %s =\n' % varname)
+					varname = 's_%s_object' % (name)
+					files[0].write('static const ::BugEngine::RTTI::ObjectInfo %s =\n' % varname)
 					files[0].write('{\n')
-					files[0].write('	%s,\n' % previous)
+					files[0].write('	%s,\n' % objects)
 					files[0].write('	%s,\n' % expr_tags)
 					files[0].write('	::BugEngine::istring("%s"),\n' % name)
 					files[0].write('	::BugEngine::RTTI::Value(%s)\n' % expr_value)
 					files[0].write('};\n')
-					previous = '{&%s}' % varname
-			objects = varname
-		return objects
+					objects = '{&%s}' % varname
+
+		properties = None
+		if self.members:
+			if not objects:
+				objects = '%s->objects' % owner
+			properties = '%s->properties' % owner
+			for prop in self.members:
+				objects, properties = prop.dump(files, namespace, parent, owner, objects, properties)	
+
+		methods = None
+		try:
+			del self.methods['?del']
+		except KeyError:
+			pass
+		if self.methods:
+			methods = '%s->methods' % owner
+			for method_name, overloads in self.methods.iteritems():
+				method_pretty_name = method_name.replace('?', '_').replace('#', '_')
+				overload_ptr = '{0}'
+				index = 0
+				for overload in overloads:
+					overload_ptr = overload.dump(files, namespace, parent, method_pretty_name, overload_ptr, index)
+					index = index+1
+				varname = 's_%s_method' % (method_pretty_name)
+				files[0].write('static const ::BugEngine::RTTI::Method %s =\n' % varname)
+				files[0].write('{\n')
+				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)
+				files[0].write('	%s,\n' % methods)
+				files[0].write('	{&%s},\n' % varname)
+				files[0].write('	%s\n' % overload_ptr)
+				files[0].write('};\n')
+				methods = '{&%s}' % varname
+
+		return objects, methods, properties
 

@@ -62,7 +62,8 @@ class ArgList(cpp.yacc.Nonterm):
 		"%reduce ArgSequence"
 		self.args = arg_sequence.args
 
-	def dump(self, file, instances, decl, parent_name, is_static, is_const, lineno):
+	def dump(self, files, namespace, parent):
+		return "{0}"
 		arg_pointer = "0"
 		arg_index = 0
 		for arg in self.args[::-1]:
@@ -301,8 +302,22 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump(self, files, namespace, parent):
-		pass
+	def dump_trampoline(self, files, namespace, parent):
+		return "0"
+
+	def dump(self, files, namespace, parent, name, previous, index):
+		arguments = self.value.args.dump(files, namespace, parent)
+		trampoline = self.dump_trampoline(files, namespace, parent)
+		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s_overload_%d =\n' % (name, index))
+		files[0].write('{\n')
+		files[0].write('	{0},\n')
+		files[0].write('	%s,\n' % previous)
+		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.value.return_type)
+		files[0].write('	%s,\n' % arguments)
+		files[0].write('	0,\n')
+		files[0].write('	%s\n' % trampoline)
+		files[0].write('};\n')
+		return '{&%s_overload_%d}'% (name, index)
 
 
 

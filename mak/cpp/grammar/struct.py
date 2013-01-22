@@ -167,6 +167,8 @@ class ClassDef(cpp.yacc.Nonterm):
 
 	def using(self, files, namespace, parent):
 		parent = parent + [self.name]
+		if len(parent) > 1:
+			files[0].write('	typedef %s %s;\n' % ('::'.join(parent), self.name))
 		if self.members:
 			self.members.using(files, namespace, parent)
 
@@ -179,7 +181,7 @@ class ClassDef(cpp.yacc.Nonterm):
 
 	def dump(self, files, namespace, parent):
 		if parent:
-			owner = '::BugEngine::be_typeid< %s >::klass()' % ('::'.join(namespace + parent))
+			owner = '::BugEngine::be_typeid< %s >::preklass()' % ('::'.join(namespace + parent))
 		elif namespace:
 			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
 		else:
@@ -214,7 +216,30 @@ class ClassDef(cpp.yacc.Nonterm):
 
 		files[0].write('raw< const ::BugEngine::RTTI::Class > %s_properties()\n' % '_'.join(parent))
 		files[0].write('{\n')
+		i = 2
+		while i <= len(parent):
+			files[0].write('	typedef %s %s;\n' % ('::'.join(parent[:i]), parent[i-1]))
+			i = i+1
+		self.using(files, namespace, parent[:-1])
 		files[0].write('	raw< ::BugEngine::RTTI::Class > result = %s_preklass();\n' % '_'.join(parent))
+		if self.members:
+			files[0].write('	raw< const ::BugEngine::RTTI::Class > parent = ::BugEngine::be_typeid< %s >::klass();\n' % self.inherits)
+			objects, methods, properties = self.members.dump(files, namespace, parent, 'parent')
+			if objects:
+				files[0].write('	raw< const ::BugEngine::RTTI::ObjectInfo > objects = %s;\n' % objects)
+				files[0].write('	result->objects.set(objects.operator->());\n')
+			else:
+				files[0].write('	result->objects = parent->objects;\n')
+			if methods:
+				files[0].write('	raw< const ::BugEngine::RTTI::Method > methods = %s;\n' % methods)
+				files[0].write('	result->methods.set(methods.operator->());\n')
+			else:
+				files[0].write('	result->methods = parent->methods;\n')
+			if properties:
+				files[0].write('	raw< const ::BugEngine::RTTI::Property > properties = %s;\n' % properties)
+				files[0].write('	result->properties.set(properties.operator->());\n')
+			else:
+				files[0].write('	result->properties = parent->properties;\n')
 		files[0].write('	return result;\n')
 		files[0].write('}\n')
 
@@ -230,6 +255,4 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[1].write('	return %s::%s_properties();\n' % ('::'.join(namespace), '_'.join(parent)))
 		files[1].write('}\n')
 
-		if self.members:
-			self.members.dump(files, namespace, parent)
 		return '%s_preklass()' % '_'.join(parent), '{0}'

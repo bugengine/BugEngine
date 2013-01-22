@@ -57,6 +57,8 @@ class EnumDef(cpp.yacc.Nonterm):
 
 	def using(self, files, namespace, parent):
 		parent = parent + [self.name]
+		if len(parent) > 1:
+			files[0].write('	typedef %s %s;\n' % ('::'.join(parent), self.name))
 
 	def predecl(self, files, namespace, parent):
 		parent = parent + [self.name]
@@ -65,7 +67,7 @@ class EnumDef(cpp.yacc.Nonterm):
 
 	def dump(self, files, namespace, parent):
 		if parent:
-			owner = '::BugEngine::be_typeid< %s >::klass()' % ('::'.join(namespace + parent))
+			owner = '::BugEngine::be_typeid< %s >::preklass()' % ('::'.join(namespace + parent))
 		elif namespace:
 			owner = '::BugEngine::be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
 		else:
