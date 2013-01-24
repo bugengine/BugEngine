@@ -38,8 +38,19 @@ class TagsLeft(cpp.yacc.Nonterm):
 		self.aliases = taglist.aliases
 		self.comment = comment
 
-	def dump(self, files, namespace, owner):
-		pass
+	def dump(self, files, decl):
+		tag_ptr = "{0}"
+		tag_index = 0
+		for type,tag,lineno in self.tags:
+			files[0].write("static %s %s_tag_value_%d = %s(%s);\n" % (type, decl, tag_index, type, tag))
+			files[0].write("static ::BugEngine::RTTI::Tag %s_tag_%d =\n" % (decl, tag_index))
+			files[0].write("    {\n")
+			files[0].write("        %s,\n" % tag_ptr)
+			files[0].write("        ::BugEngine::RTTI::Value(be_typeid< %s >::type(), (void*)&%s_tag_value_%d)\n" % (type, decl, tag_index))
+			files[0].write("    };\n")
+			tag_ptr = "{&%s_tag_%d}" % (decl, tag_index)
+			tag_index += 1
+		return tag_ptr
 
 class TagsRight(cpp.yacc.Nonterm):
 	"%nonterm"

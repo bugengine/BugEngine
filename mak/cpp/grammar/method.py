@@ -66,7 +66,7 @@ class ArgList(cpp.yacc.Nonterm):
 		arg_pointer = "{0}"
 		arg_index = 0
 		for arg in self.args[::-1]:
-			arg_tag = "{0}" #arg.tags.dump(files, decl)
+			arg_tag = arg.tags.dump(files, decl)
 			files[0].write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_param_%d =\n" % (decl, arg_index))
 			files[0].write("{\n")
 			files[0].write("    %s,\n" % arg_tag)
@@ -334,9 +334,10 @@ class Method(cpp.yacc.Nonterm):
 	def dump(self, files, namespace, parent, name, previous, index):
 		method_name = '%s_overload_%d' % (name, index)
 		arguments = self.value.args.dump(files, namespace, parent, method_name, 'static' in self.value.attributes, 'const' in self.value.attributes)
+		tags = self.tags.dump(files, method_name)
 		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s =\n' % method_name)
 		files[0].write('{\n')
-		files[0].write('	{0},\n')
+		files[0].write('	%s,\n' % tags)
 		files[0].write('	%s,\n' % previous)
 		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.value.return_type)
 		files[0].write('	%s,\n' % arguments)

@@ -207,8 +207,12 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
-		files[0].write('		0,\n')
-		files[0].write('		0\n')
+		if self.value:
+			files[0].write('		&::BugEngine::RTTI::wrapCopy< %s >,\n' % '::'.join(parent))
+			files[0].write('		&::BugEngine::RTTI::wrapDestroy< %s >\n' % '::'.join(parent))
+		else:
+			files[0].write('		0,\n')
+			files[0].write('		0\n')
 		files[0].write('	};\n')
 		files[0].write('	raw< ::BugEngine::RTTI::Class > result = { &klass };\n')
 		files[0].write('	return result;\n')
@@ -247,6 +251,10 @@ class ClassDef(cpp.yacc.Nonterm):
 				files[0].write('	result->properties.set(properties.operator->());\n')
 			else:
 				files[0].write('	result->properties = parent->properties;\n')
+		if self.tags:
+			tags = self.tags.dump(files, '%s_klass' % '_'.join(parent))
+			files[0].write('	raw< ::BugEngine::RTTI::Tag > tags = %s;\n' % tags)
+			files[0].write('	result->tags = tags;\n')
 		files[0].write('	return result;\n')
 		files[0].write('}\n')
 
