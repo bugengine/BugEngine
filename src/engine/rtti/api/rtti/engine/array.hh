@@ -32,11 +32,13 @@ template< typename T >
 struct be_typeid< minitl::array<T> >
 {
     static const RTTI::Type value_type;
-    static inline raw<const RTTI::Class> klass();
-    static inline RTTI::Type  type();
     static RTTI::Method::Overload constructor_overload;
     static RTTI::Method constructor;
     static RTTI::ObjectInfo valueTypeObject;
+
+    static inline raw<RTTI::Class> preklass();
+    static inline raw<const RTTI::Class> klass();
+    static inline RTTI::Type  type();
 };
 
 template< typename T >
@@ -69,7 +71,7 @@ RTTI::ObjectInfo be_typeid< minitl::array<T> >::valueTypeObject = {
 };
 
 template< typename T >
-raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
+raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
     static RTTI::Class ci = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
@@ -81,14 +83,20 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
         &RTTI::wrapCopy< minitl::array<T> >,
         &RTTI::wrapDestroy< minitl::array<T> >
     };
-    raw<const RTTI::Class> c = { &ci };
+    raw<RTTI::Class> c = { &ci };
     return c;
+}
+
+template< typename T >
+raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
+{
+    return preklass();
 }
 
 template< typename T >
 RTTI::Type be_typeid< minitl::array<T> >::type()
 {
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
 }

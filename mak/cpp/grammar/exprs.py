@@ -198,9 +198,15 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects + self.namespaces:
 			o.using(files, namespace, parent)
 
-	def predecl(self, files, namespace, parent):
+	def predecl(self, files, namespace, parent, parent_value):
 		for o in self.objects + self.namespaces:
 			o.predecl(files, namespace, parent)
+		for method_name, overloads in self.methods.iteritems():
+			method_pretty_name = method_name.replace('?', '_').replace('#', '_')
+			index = 0
+			for overload in overloads:
+				overload.predecl(files, namespace, parent, parent_value, method_pretty_name, index)
+				index = index+1
 
 	def dumpObjects(self, files, namespace, parent):
 		self.dumpedObjects = []
@@ -235,6 +241,8 @@ class Exprs(cpp.yacc.Nonterm):
 				objects, properties = prop.dump(files, namespace, parent, owner, objects, properties)	
 
 		methods = None
+		constructor = None
+		cast = None
 		try:
 			del self.methods['?del']
 		except KeyError:
@@ -248,15 +256,26 @@ class Exprs(cpp.yacc.Nonterm):
 				for overload in overloads:
 					overload_ptr = overload.dump(files, namespace, parent, method_pretty_name, overload_ptr, index)
 					index = index+1
+
 				varname = 's_%s_method' % (method_pretty_name)
+				if method_name == '?new':
+					chain = methods
+					methods = '{&%s}' % varname
+					constructor = '{&%s}' % varname
+				elif method_name[0] == '#':
+					chain = cast or "{0}"
+					cast = '{&%s}' % varname
+				else:
+					chain = methods
+					methods = '{&%s}' % varname
+					
 				files[0].write('static const ::BugEngine::RTTI::Method %s =\n' % varname)
 				files[0].write('{\n')
 				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)
-				files[0].write('	%s,\n' % methods)
+				files[0].write('	%s,\n' % chain)
 				files[0].write('	{&%s},\n' % varname)
 				files[0].write('	%s\n' % overload_ptr)
 				files[0].write('};\n')
-				methods = '{&%s}' % varname
 
-		return objects, methods, properties
+		return objects, (methods, constructor, cast), properties
 

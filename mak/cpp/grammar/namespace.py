@@ -21,10 +21,10 @@ class Namespace(cpp.yacc.Nonterm):
 
 	def predecl(self, files, namespace, parent):
 		namespace = namespace + [self.name]
-		files[1].write('namespace %s\n{\n' % self.name)
 		if self.members:
-			self.members.predecl(files, namespace, [])
-		files[1].write('}\n')
+			files[1].write('namespace %s\n{\n\n' % self.name)
+			self.members.predecl(files, namespace, [], False)
+			files[1].write('\n}\n')
 
 	def dump(self, files, namespace, parent):
 		namespace = namespace + [self.name]

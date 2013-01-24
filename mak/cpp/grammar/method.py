@@ -62,41 +62,34 @@ class ArgList(cpp.yacc.Nonterm):
 		"%reduce ArgSequence"
 		self.args = arg_sequence.args
 
-	def dump(self, files, namespace, parent):
-		return "{0}"
-		arg_pointer = "0"
+	def dump(self, files, namespace, parent, decl, static, const):
+		arg_pointer = "{0}"
 		arg_index = 0
 		for arg in self.args[::-1]:
-			arg_tag = arg.tags.dump(file, instances, decl+"_p%d"%arg_index)
-			file.write("#line %d\n"%arg.lineno)
-			file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_p%d =\\\n" % (decl, arg_index))
-			file.write("    {\\\n")
-			file.write("        %s,\\\n" % arg_tag)
-			file.write("        {%s},\\\n" % arg_pointer)
-			file.write("        \"%s\",\\\n" % arg.name)
-			file.write("        ::BugEngine::be_typeid< %s >::type()\\\n" % arg.type)
-			file.write("    };\n")
-			arg_pointer = "&%s_p%d" % (decl, arg_index)
+			arg_tag = "{0}" #arg.tags.dump(files, decl)
+			files[0].write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_param_%d =\n" % (decl, arg_index))
+			files[0].write("{\n")
+			files[0].write("    %s,\n" % arg_tag)
+			files[0].write("    %s,\n" % arg_pointer)
+			files[0].write("    \"%s\",\n" % arg.name)
+			files[0].write("    ::BugEngine::be_typeid< %s >::type()\n" % arg.type)
+			files[0].write("};\n")
+			arg_pointer = "{&%s_param_%d}" % (decl, arg_index)
 			arg_index = arg_index + 1
-		if parent_name and not is_static:
+		if parent and not static:
 			arg_tag = "{0}"
-			file.write("#line %d\n"%lineno)
-			file.write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_p%d =\\\n" % (decl, arg_index))
-			file.write("    {\\\n")
-			file.write("        %s,\\\n" % arg_tag)
-			file.write("        {%s},\\\n" % arg_pointer)
-			file.write("        \"%s\",\\\n" % "this")
-			if is_const:
-				file.write("        ::BugEngine::be_typeid< const %s& >::type()\\\n" % parent_name)
-				extra_args = ['const %s&' % parent_name]
+			files[0].write("static const ::BugEngine::RTTI::Method::Overload::Parameter %s_param_%d =\n" % (decl, arg_index))
+			files[0].write("{\n")
+			files[0].write("    %s,\n" % arg_tag)
+			files[0].write("    %s,\n" % arg_pointer)
+			files[0].write("    \"%s\",\n" % "this")
+			if const:
+				files[0].write("    ::BugEngine::be_typeid< const %s& >::type()\n" % '::'.join(parent))
 			else:
-				file.write("        ::BugEngine::be_typeid< %s& >::type()\\\n" % parent_name)
-				extra_args = ['%s&' % parent_name]
-			file.write("    };\n")
-			arg_pointer = "&%s_p%d" % (decl, arg_index)
-		else:
-			extra_args = []
-		return (arg_pointer, extra_args,[arg.type for arg in self.args])
+				files[0].write("    ::BugEngine::be_typeid< %s& >::type()\n" % '::'.join(parent))
+			files[0].write("};\n")
+			arg_pointer = "{&%s_param_%d}" % (decl, arg_index)
+		return arg_pointer
 
 
 
@@ -302,22 +295,55 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def dump_trampoline(self, files, namespace, parent):
+	def predecl(self, files, namespace, parent, parent_value, pretty_name, index):
+		funname = '%s_%d' % (pretty_name, index)
+		if self.value.name == '?new':
+			if parent_value:
+				self.trampoline = self.dump_new_ref(files, namespace, parent, funname)
+			else:
+				self.trampoline = self.dump_new_struct(files, namespace, parent, funname)
+		elif not parent or 'static' in self.value.attributes:
+			if self.value.return_type != 'void':
+				self.trampoline = self.dump_static_method(files, namespace, parent, funname)
+			else:
+				self.trampoline = self.dump_static_procedure(files, namespace, parent, funname)
+		else:
+			if self.value.return_type != 'void':
+				self.trampoline = self.dump_member_method(files, namespace, parent, funname)
+			else:
+				self.trampoline = self.dump_member_procedure(files, namespace, parent, funname)
+
+	def dump_new_ref(self, files, namespace, parent, funname):
+		return "0"
+
+	def dump_new_struct(self, files, namespace, parent, funname):
+		return "0"
+
+	def dump_static_method(self, files, namespace, parent, funname):
+		return "0"
+
+	def dump_static_procedure(self, files, namespace, parent, funname):
+		return "0"
+
+	def dump_member_method(self, files, namespace, parent, funname):
+		return "0"
+
+	def dump_member_procedure(self, files, namespace, parent, funname):
 		return "0"
 
 	def dump(self, files, namespace, parent, name, previous, index):
-		arguments = self.value.args.dump(files, namespace, parent)
-		trampoline = self.dump_trampoline(files, namespace, parent)
-		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s_overload_%d =\n' % (name, index))
+		method_name = '%s_overload_%d' % (name, index)
+		arguments = self.value.args.dump(files, namespace, parent, method_name, 'static' in self.value.attributes, 'const' in self.value.attributes)
+		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s =\n' % method_name)
 		files[0].write('{\n')
 		files[0].write('	{0},\n')
 		files[0].write('	%s,\n' % previous)
 		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.value.return_type)
 		files[0].write('	%s,\n' % arguments)
 		files[0].write('	0,\n')
-		files[0].write('	%s\n' % trampoline)
+		files[0].write('	%s\n' % self.trampoline)
 		files[0].write('};\n')
-		return '{&%s_overload_%d}'% (name, index)
+		return '{&%s}'% (method_name)
 
 
 
