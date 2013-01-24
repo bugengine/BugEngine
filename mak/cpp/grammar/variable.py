@@ -68,20 +68,32 @@ class Variable(cpp.yacc.Nonterm):
 
 	def dump(self, files, namespace, parent, owner, previous_object, previous_property):
 		if parent and not 'static' in self.attributes:
+			tags = self.tags.dump(files, 's_%s_property' % self.name)
 			for name in [self.name] + self.tags.aliases:
 				pretty_name = name.replace('?', '_').replace('#', '_')
 				new_property = 's_%s_property' % pretty_name
 				files[0].write('static const ::BugEngine::RTTI::Property %s =\n' % new_property)
 				files[0].write('{\n')
-				files[0].write('	{0},\n')
+				files[0].write('	%s,\n' % tags)
 				files[0].write('	%s,\n' % previous_property)
-				files[0].write('	"%s",\n' % name)
+				files[0].write('	::BugEngine::istring("%s"),\n' % name)
 				files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % '::'.join(parent))
 				files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.type)
 				files[0].write('	&::BugEngine::RTTI::PropertyHelper< %s, %s, &%s::%s >::get\n' % (self.type, '::'.join(parent), '::'.join(parent), self.name))
 				files[0].write('};\n')
 				previous_property = '{&%s}' % new_property
 		elif parent or not 'static' in self.attributes:
-			pass
+			tags = self.tags.dump(files, 's_%s_property' % self.name)
+			for name in [self.name] + self.tags.aliases:
+				pretty_name = name.replace('?', '_').replace('#', '_')
+				new_object = 's_%s_property' % pretty_name
+				files[0].write('static const ::BugEngine::RTTI::ObjectInfo %s =\n' % new_object)
+				files[0].write('{\n')
+				files[0].write('	%s,\n' % previous_object)
+				files[0].write('	%s,\n' % tags)
+				files[0].write('	::BugEngine::istring("%s"),\n' % name)
+				files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(parent), self.name))
+				files[0].write('};\n')
+				previous_object = '{&%s}' % new_object
 
 		return previous_object, previous_property
