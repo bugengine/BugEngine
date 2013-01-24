@@ -177,7 +177,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_preklass();\n' % '_'.join(parent))
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
 		if self.members:
-			self.members.predecl(files, namespace, parent)
+			self.members.predecl(files, namespace, parent, self.value)
 
 	def dump(self, files, namespace, parent):
 		if parent:
@@ -224,7 +224,8 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('	raw< ::BugEngine::RTTI::Class > result = %s_preklass();\n' % '_'.join(parent))
 		if self.members:
 			files[0].write('	raw< const ::BugEngine::RTTI::Class > parent = ::BugEngine::be_typeid< %s >::klass();\n' % self.inherits)
-			objects, methods, properties = self.members.dump(files, namespace, parent, 'parent')
+			objects, all_methods, properties = self.members.dump(files, namespace, parent, 'parent')
+			methods, constructor, cast = all_methods
 			if objects:
 				files[0].write('	raw< const ::BugEngine::RTTI::ObjectInfo > objects = %s;\n' % objects)
 				files[0].write('	result->objects.set(objects.operator->());\n')
@@ -235,6 +236,12 @@ class ClassDef(cpp.yacc.Nonterm):
 				files[0].write('	result->methods.set(methods.operator->());\n')
 			else:
 				files[0].write('	result->methods = parent->methods;\n')
+			if constructor:
+				files[0].write('	raw< const ::BugEngine::RTTI::Method > constructor = %s;\n' % constructor)
+				files[0].write('	result->constructor.set(constructor.operator->());\n')
+			if cast:
+				files[0].write('	raw< const ::BugEngine::RTTI::Method > cast = %s;\n' % cast)
+				files[0].write('	result->constructor.set(cast.operator->());\n')
 			if properties:
 				files[0].write('	raw< const ::BugEngine::RTTI::Property > properties = %s;\n' % properties)
 				files[0].write('	result->properties.set(properties.operator->());\n')
