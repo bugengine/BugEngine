@@ -177,7 +177,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_preklass();\n' % '_'.join(parent))
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
 		if self.members:
-			self.members.predecl(files, namespace, parent, self.value)
+			self.members.predecl(files, namespace, parent, self.value, self)
 
 	def dump(self, files, namespace, parent):
 		if parent:

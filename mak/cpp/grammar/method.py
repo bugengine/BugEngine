@@ -62,9 +62,13 @@ class ArgList(cpp.yacc.Nonterm):
 		"%reduce ArgSequence"
 		self.args = arg_sequence.args
 
-	def param_list(self, add_this):
+	def param_list(self, prefix, add_this):
 		if self.args:
-			return ', ' + ', '.join(['parameters[%d].as< %s >()'%(arg_index, self.args[arg_index].type) for arg_index in xrange(0, len(self.args))])
+			if add_this:
+				arg_offset = 1
+			else:
+				arg_offset = 0
+			return prefix + ', '.join(['parameters[%d].as< %s >()'%(arg_index + arg_offset, self.args[arg_index].type) for arg_index in xrange(0, len(self.args))])
 		else:
 			return ''
 	
@@ -301,12 +305,18 @@ class Method(cpp.yacc.Nonterm):
 		"%reduce Method COLON Initializers"
 		self.value = method.value
 
-	def predecl(self, files, namespace, parent, parent_value, pretty_name, index):
+	def predecl(self, files, namespace, parent, parent_value, parent_object, pretty_name, index):
 		funname = '%s_%d' % (pretty_name, index)
 		files[0].write('static ::BugEngine::RTTI::Value %s_trampoline(::BugEngine::RTTI::Value* parameters, u32 parameterCount)\n' % funname)
 		files[0].write('{\n')
 		files[0].write('	be_forceuse(parameters);\n')
 		files[0].write('	be_forceuse(parameterCount);\n')
+		if parent:
+			i = 2
+			while i <= len(parent):
+				files[0].write('	typedef %s %s;\n' % ('::'.join(parent[:i]), parent[i-1]))
+				i = i+1
+			parent_object.using(files, namespace, parent[:-1])
 		arg_count = len(self.value.args.args)
 		if self.value.name == '?new':
 			files[0].write('	be_assert(parameterCount == %d, "%%s: expected %%d parameters, got %%d" | "%s" | %d | parameterCount);\n' % (arg_count, self.value.name, arg_count))
@@ -333,22 +343,37 @@ class Method(cpp.yacc.Nonterm):
 	def dump_new_ref(self, files, namespace, parent):
 		classname = '::'.join(parent)
 		files[0].write('	::BugEngine::RTTI::Value result(::BugEngine::be_typeid< minitl::ref< %s > >::type(), ::BugEngine::RTTI::Value::Reserve);\n' % (classname))
-		files[0].write('	new(result.memory()) minitl::ref< %s >( minitl::ref< %s >::create(::BugEngine::Arena::script()%s));\n' % (classname, classname, self.value.args.param_list(False)))
+		files[0].write('	new(result.memory()) minitl::ref< %s >( minitl::ref< %s >::create(::BugEngine::Arena::script()%s));\n' % (classname, classname, self.value.args.param_list(", ", False)))
 		files[0].write('	return result;\n')
 
 	def dump_new_struct(self, files, namespace, parent):
-		files[0].write('	return ::BugEngine::RTTI::Value();\n')
+		classname = '::'.join(parent)
+		files[0].write('	::BugEngine::RTTI::Value result(::BugEngine::be_typeid< %s >::type(), ::BugEngine::RTTI::Value::Reserve);\n' % (classname))
+		files[0].write('	new(result.memory()) %s(%s);\n' % (classname, self.value.args.param_list("", False)))
+		files[0].write('	return result;\n')
 
 	def dump_static_method(self, files, namespace, parent):
-		files[0].write('	return ::BugEngine::RTTI::Value();\n')
+		classname = '::'.join(namespace+parent)
+		files[0].write('	return ::BugEngine::RTTI::Value(%s::%s(%s));\n' % (classname, self.value.id, self.value.args.param_list("", False)))
 
 	def dump_static_procedure(self, files, namespace, parent):
+		classname = '::'.join(namespace+parent)
+		files[0].write('	%s::%s(%s);\n' % (classname, self.value.id, self.value.args.param_list("", False)))
 		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
 	def dump_member_method(self, files, namespace, parent):
-		files[0].write('	return ::BugEngine::RTTI::Value();\n')
+		if 'const' in self.value.attributes:
+			owner = 'parameters[0].as< const %s& >()' % '::'.join(parent)
+		else:
+			owner = 'parameters[0].as< %s& >()' % '::'.join(parent)
+		files[0].write('	return ::BugEngine::RTTI::Value(%s.%s(%s));\n' % (owner, self.value.id, self.value.args.param_list("", True)))
 
 	def dump_member_procedure(self, files, namespace, parent):
+		if 'const' in self.value.attributes:
+			owner = 'parameters[0].as< const %s& >()' % '::'.join(parent)
+		else:
+			owner = 'parameters[0].as< %s& >()' % '::'.join(parent)
+		files[0].write('	%s.%s(%s);\n' % (owner, self.value.id, self.value.args.param_list("", True)))
 		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
 	def dump(self, files, namespace, parent, name, previous, index):
