@@ -4,6 +4,7 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/namespace.hh>
+#include    <rtti/engine/array.hh>
 #include    <rtti/engine/helper/method.hh>
 
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, RTTI);
@@ -46,6 +47,19 @@ BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
 }
 
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::registerProperties()
+{
+    return preklass();
+}
+
+template< >
+BE_EXPORT raw<RTTI::Class> be_typeid< minitl::iarray >::preklass()
+{
+    static RTTI::Class s_iarray = { "iarray", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    raw<RTTI::Class> ci = {&s_iarray};
+    return ci;
+}
+
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::iarray >::registerProperties()
 {
     return preklass();
 }

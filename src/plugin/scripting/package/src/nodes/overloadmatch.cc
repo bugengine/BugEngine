@@ -44,6 +44,7 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
                 if (! param->isCompatible(it->match->type))
                 {
                     m_score += s_parameterBadType;
+                    param->isCompatible(it->match->type);
                 }
             }
             return;

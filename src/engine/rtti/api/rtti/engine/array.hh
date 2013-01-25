@@ -11,9 +11,17 @@
 #include    <rtti/engine/helper/method.hh>
 #include    <minitl/array.hh>
 
-namespace BugEngine
+namespace minitl
 {
 
+struct iarray
+{
+};
+
+}
+
+namespace BugEngine
+{
 
 template< typename T >
 static RTTI::Value make_array(RTTI::Value* v, u32 count)
@@ -76,7 +84,8 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
     static RTTI::Class ci = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
         be_game_Namespace(),
-        {0}, 0, 0, {0}, {0}, {0},
+        be_typeid< minitl::iarray >::preklass(),
+        0, 0, {0}, {0}, {0},
         {&valueTypeObject},
         {&constructor},
         {0},
