@@ -62,6 +62,12 @@ class ArgList(cpp.yacc.Nonterm):
 		"%reduce ArgSequence"
 		self.args = arg_sequence.args
 
+	def param_list(self, add_this):
+		if self.args:
+			return ', ' + ', '.join(['parameters[%d].as< %s >()'%(arg_index, self.args[arg_index].type) for arg_index in xrange(0, len(self.args))])
+		else:
+			return ''
+	
 	def dump(self, files, namespace, parent, decl, static, const):
 		arg_pointer = "{0}"
 		arg_index = 0
@@ -102,7 +108,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type Name LPAREN ArgList RPAREN"
 		self.id = name.value
 		self.name = name.value
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = name.lineno
 		self.args = args
 		self.attributes = set()
@@ -111,7 +117,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type OPERATOR Operator LPAREN ArgList RPAREN"
 		self.id = 'operator%s'%operator.value
 		self.name = operator.rtti_name
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = operator.lineno
 		self.args = args
 		self.attributes = set()
@@ -120,7 +126,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type OPERATOR LPAREN RPAREN LPAREN ArgList RPAREN"
 		self.id = 'operator()'
 		self.name = '?call'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = lparen_op.lineno
 		self.args = args
 		self.attributes = set()
@@ -129,7 +135,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type OPERATOR LBRACKET RBRACKET LPAREN ArgList RPAREN"
 		self.id = 'operator[]'
 		self.name = '?index'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = lbracket.lineno
 		self.args = args
 		self.attributes = set()
@@ -138,7 +144,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type OPERATOR LT LPAREN ArgList RPAREN"
 		self.id = 'operator<'
 		self.name = '?lt'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = lt.lineno
 		self.args = args
 		self.attributes = set()
@@ -147,7 +153,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type OPERATOR GT LPAREN ArgList RPAREN"
 		self.id = 'operator>'
 		self.name = '?gt'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = gt.lineno
 		self.args = args
 		self.attributes = set()
@@ -157,7 +163,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce OPERATOR Type LPAREN ArgList RPAREN"
 		self.id = 'operator %s'%type.value
 		self.name = '#%s'%('_'.join(type.value.split()).replace('*', 'ptr').replace('&', 'ref'))
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = type.lineno
 		self.args = args
 		self.attributes = set()
@@ -166,7 +172,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce Type LPAREN ArgList RPAREN"
 		self.id = '?new'
 		self.name = '?new'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = type.lineno
 		self.args = args
 		self.attributes = set(['static'])
@@ -175,7 +181,7 @@ class MethodPrototype(cpp.yacc.Nonterm):
 		"%reduce NOT Type LPAREN ArgList RPAREN"
 		self.id = '?del'
 		self.name = '?del'
-		self.return_type = type.value
+		self.return_type = type.value.strip()
 		self.line = type.lineno
 		self.args = args
 		self.attributes = set(['static'])
@@ -297,39 +303,53 @@ class Method(cpp.yacc.Nonterm):
 
 	def predecl(self, files, namespace, parent, parent_value, pretty_name, index):
 		funname = '%s_%d' % (pretty_name, index)
+		files[0].write('static ::BugEngine::RTTI::Value %s_trampoline(::BugEngine::RTTI::Value* parameters, u32 parameterCount)\n' % funname)
+		files[0].write('{\n')
+		files[0].write('	be_forceuse(parameters);\n')
+		files[0].write('	be_forceuse(parameterCount);\n')
+		arg_count = len(self.value.args.args)
 		if self.value.name == '?new':
+			files[0].write('	be_assert(parameterCount == %d, "%%s: expected %%d parameters, got %%d" | "%s" | %d | parameterCount);\n' % (arg_count, self.value.name, arg_count))
 			if parent_value:
-				self.trampoline = self.dump_new_ref(files, namespace, parent, funname)
+				self.dump_new_struct(files, namespace, parent)
 			else:
-				self.trampoline = self.dump_new_struct(files, namespace, parent, funname)
+				self.value.return_type = '::minitl::ref< %s >' % '::'.join(parent)
+				self.dump_new_ref(files, namespace, parent)
 		elif not parent or 'static' in self.value.attributes:
+			files[0].write('	be_assert(parameterCount == %d, "%%s: expected %%d parameters, got %%d" | "%s" | %d | parameterCount);\n' % (arg_count, self.value.name, arg_count))
 			if self.value.return_type != 'void':
-				self.trampoline = self.dump_static_method(files, namespace, parent, funname)
+				self.dump_static_method(files, namespace, parent)
 			else:
-				self.trampoline = self.dump_static_procedure(files, namespace, parent, funname)
+				self.dump_static_procedure(files, namespace, parent)
 		else:
+			files[0].write('	be_assert(parameterCount == %d, "%%s: expected %%d parameters, got %%d" | "%s" | %d | parameterCount);\n' % (arg_count+1, self.value.name, arg_count+1))
 			if self.value.return_type != 'void':
-				self.trampoline = self.dump_member_method(files, namespace, parent, funname)
+				self.dump_member_method(files, namespace, parent)
 			else:
-				self.trampoline = self.dump_member_procedure(files, namespace, parent, funname)
+				self.dump_member_procedure(files, namespace, parent)
+		files[0].write('}\n\n')
+		self.trampoline = '&%s_trampoline' % funname
 
-	def dump_new_ref(self, files, namespace, parent, funname):
-		return "0"
+	def dump_new_ref(self, files, namespace, parent):
+		classname = '::'.join(parent)
+		files[0].write('	::BugEngine::RTTI::Value result(::BugEngine::be_typeid< minitl::ref< %s > >::type(), ::BugEngine::RTTI::Value::Reserve);\n' % (classname))
+		files[0].write('	new(result.memory()) minitl::ref< %s >( minitl::ref< %s >::create(::BugEngine::Arena::script()%s));\n' % (classname, classname, self.value.args.param_list(False)))
+		files[0].write('	return result;\n')
 
-	def dump_new_struct(self, files, namespace, parent, funname):
-		return "0"
+	def dump_new_struct(self, files, namespace, parent):
+		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
-	def dump_static_method(self, files, namespace, parent, funname):
-		return "0"
+	def dump_static_method(self, files, namespace, parent):
+		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
-	def dump_static_procedure(self, files, namespace, parent, funname):
-		return "0"
+	def dump_static_procedure(self, files, namespace, parent):
+		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
-	def dump_member_method(self, files, namespace, parent, funname):
-		return "0"
+	def dump_member_method(self, files, namespace, parent):
+		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
-	def dump_member_procedure(self, files, namespace, parent, funname):
-		return "0"
+	def dump_member_procedure(self, files, namespace, parent):
+		files[0].write('	return ::BugEngine::RTTI::Value();\n')
 
 	def dump(self, files, namespace, parent, name, previous, index):
 		method_name = '%s_overload_%d' % (name, index)

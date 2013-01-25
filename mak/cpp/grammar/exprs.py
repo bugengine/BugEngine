@@ -202,7 +202,7 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects + self.namespaces:
 			o.predecl(files, namespace, parent)
 		for method_name, overloads in self.methods.iteritems():
-			method_pretty_name = method_name.replace('?', '_').replace('#', '_')
+			method_pretty_name = '%s_%s' % ('_'.join(parent), method_name.replace('?', '_').replace('#', '_'))
 			index = 0
 			for overload in overloads:
 				overload.predecl(files, namespace, parent, parent_value, method_pretty_name, index)
