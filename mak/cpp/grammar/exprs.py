@@ -198,14 +198,18 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects + self.namespaces:
 			o.using(files, namespace, parent)
 
-	def predecl(self, files, namespace, parent, parent_value):
+	def predecl(self, files, namespace, parent, parent_value, parent_object):
+		try:
+			del self.methods['?del']
+		except KeyError:
+			pass
 		for o in self.objects + self.namespaces:
 			o.predecl(files, namespace, parent)
 		for method_name, overloads in self.methods.iteritems():
 			method_pretty_name = '%s_%s' % ('_'.join(parent), method_name.replace('?', '_').replace('#', '_'))
 			index = 0
 			for overload in overloads:
-				overload.predecl(files, namespace, parent, parent_value, method_pretty_name, index)
+				overload.predecl(files, namespace, parent, parent_value, parent_object, method_pretty_name, index)
 				index = index+1
 
 	def dumpObjects(self, files, namespace, parent):
@@ -243,10 +247,6 @@ class Exprs(cpp.yacc.Nonterm):
 		methods = None
 		constructor = None
 		cast = None
-		try:
-			del self.methods['?del']
-		except KeyError:
-			pass
 		if self.methods:
 			methods = '%s->methods' % owner
 			for method_name, overloads in self.methods.iteritems():

@@ -24,7 +24,7 @@ class Namespace(cpp.yacc.Nonterm):
 		if self.members:
 			files[0].write('namespace %s\n{\n\n' % self.name)
 			files[1].write('namespace %s\n{\n\n' % self.name)
-			self.members.predecl(files, namespace, [], False)
+			self.members.predecl(files, namespace, [], False, None)
 			files[0].write('\n}\n')
 			files[1].write('\n}\n')
 
