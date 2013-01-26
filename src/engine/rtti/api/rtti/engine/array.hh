@@ -83,8 +83,8 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
     static RTTI::Class ci = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
-        be_game_Namespace(),
-        be_typeid< minitl::iarray >::preklass(),
+        {be_game_Namespace().m_ptr},
+        {be_typeid< minitl::iarray >::preklass().m_ptr},
         0, 0, {0}, {0}, {0},
         {&valueTypeObject},
         {&constructor},

@@ -22,12 +22,12 @@ CPUKernelScheduler::CPUKernelScheduler(const Plugin::Context& context)
     ,   m_loader(scoped<CPUKernelLoader>::create(Arena::task()))
     ,   m_cpuMemoryProvider(scoped<CPUMemoryProvider>::create(Arena::task()))
 {
-    m_resourceManager->attach<Kernel::KernelDescription>(m_loader);
+    m_resourceManager->attach<Kernel::KernelDescription>(weak<Resource::ILoader>(m_loader));
 }
 
 CPUKernelScheduler::~CPUKernelScheduler()
 {
-    m_resourceManager->detach<Kernel::KernelDescription>(m_loader);
+    m_resourceManager->detach<Kernel::KernelDescription>(weak<const Resource::ILoader>(m_loader));
 }
 
 void CPUKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
