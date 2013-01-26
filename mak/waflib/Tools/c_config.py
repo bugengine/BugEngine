@@ -687,6 +687,10 @@ def run_c_code(self, *k, **kw):
 	dir = self.bldnode.abspath() + os.sep + (not Utils.is_win32 and '.' or '') + 'conf_check_' + Utils.to_hex(h)
 
 	try:
+		shutil.rmtree(dir)
+	except:
+		pass
+	try:
 		os.makedirs(dir)
 	except:
 		pass

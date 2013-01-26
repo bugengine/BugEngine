@@ -324,7 +324,7 @@ def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_pla
 			if not os.path.isdir(winCEpath):
 				continue
 			try:
-				common_bindirs,_1,_2 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
+				common_bindirs,_1,_2,_3,_4 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
 			except conf.errors.ConfigurationError:
 				continue
 			if os.path.isdir(os.path.join(winCEpath, 'lib', platform)):
