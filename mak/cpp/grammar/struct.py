@@ -175,7 +175,7 @@ class ClassDef(cpp.yacc.Nonterm):
 	def predecl(self, files, namespace, parent):
 		parent = parent + [self.name]
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_preklass();\n' % '_'.join(parent))
-		files[1].write('raw< ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
+		files[1].write('raw< const ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
 		if self.members:
 			self.members.predecl(files, namespace, parent, self.value, self)
 
@@ -259,7 +259,6 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('}\n')
 
 		files[0].write('BE_EXPORT raw< const ::BugEngine::RTTI::Class > %s_create = ::BugEngine::be_typeid< %s >::klass();\n' % ('_'.join(parent), '::'.join(parent)))
-		
 
 		files[1].write('template<> BE_EXPORT raw<RTTI::Class> be_typeid< %s >::preklass()\n' % '::'.join(namespace + parent))
 		files[1].write('{\n')

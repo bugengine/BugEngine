@@ -45,6 +45,22 @@ class EnumValueList(cpp.yacc.Nonterm):
 		"%reduce EnumSequence"
 		self.enums = enums_sequence.enums
 
+	def dump(self, files, namespace, parent):
+		result = None
+		for enum in self.enums:
+			name = '%s_%s' % ('_'.join(parent), enum.name)
+			tags = enum.tags.dump(files, name)
+			for name in [enum.name] + enum.tags.aliases:
+				new_name = '%s_%s' % ('_'.join(parent), name)
+				files[0].write('static const ::BugEngine::RTTI::ObjectInfo %s =\n' % new_name)
+				files[0].write('{\n')
+				files[0].write('	%s,\n' % (result or '{0}'))
+				files[0].write('	%s,\n' % tags)
+				files[0].write('	::BugEngine::istring("%s"),\n' % name)
+				files[0].write('	::BugEngine::RTTI::Value(%s::%s)\n' % ('::'.join(parent), name))
+				files[0].write('};\n')
+				result = '{&%s}' % new_name
+
 class EnumDef(cpp.yacc.Nonterm):
 	"%nonterm"
 
@@ -63,7 +79,7 @@ class EnumDef(cpp.yacc.Nonterm):
 	def predecl(self, files, namespace, parent):
 		parent = parent + [self.name]
 		files[1].write('raw< ::BugEngine::RTTI::Class > %s_preklass();\n' % '_'.join(parent))
-		files[1].write('raw< ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
+		files[1].write('raw< const ::BugEngine::RTTI::Class > %s_properties();\n' % '_'.join(parent))
 
 	def dump(self, files, namespace, parent):
 		if parent:
@@ -88,8 +104,8 @@ class EnumDef(cpp.yacc.Nonterm):
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
-		files[0].write('		0,\n')
-		files[0].write('		0\n')
+		files[0].write('		&::BugEngine::RTTI::wrapCopy< %s >,\n' % '::'.join(parent))
+		files[0].write('		&::BugEngine::RTTI::wrapDestroy< %s >\n' % '::'.join(parent))
 		files[0].write('	};\n')
 		files[0].write('	raw< ::BugEngine::RTTI::Class > result = { &klass };\n')
 		files[0].write('	return result;\n')
@@ -98,6 +114,14 @@ class EnumDef(cpp.yacc.Nonterm):
 		files[0].write('raw< const ::BugEngine::RTTI::Class > %s_properties()\n' % '_'.join(parent))
 		files[0].write('{\n')
 		files[0].write('	raw< ::BugEngine::RTTI::Class > result = %s_preklass();\n' % '_'.join(parent))
+		objects = self.value.dump(files, namespace, parent)
+		if objects:
+			files[0].write('	raw< const ::BugEngine::RTTI::ObjectInfo > objects = %s;\n' % objects)
+			files[0].write('	result->objects.set(objects.operator->());\n')
+		if self.tags:
+			tags = self.tags.dump(files, '%s_enum' % '_'.join(parent))
+			files[0].write('	raw< ::BugEngine::RTTI::Tag > tags = %s;\n' % tags)
+			files[0].write('	result->tags = tags;\n')
 		files[0].write('	return result;\n')
 		files[0].write('}\n')
 		
