@@ -198,7 +198,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('	static ::BugEngine::RTTI::Class klass = {\n')
 		files[0].write('		::BugEngine::istring("%s"),\n' % self.name)
 		files[0].write('		{%s.m_ptr},\n' % owner)
-		files[0].write('		::BugEngine::be_typeid< %s >::preklass(),\n' % self.inherits)
+		files[0].write('		{::BugEngine::be_typeid< %s >::preklass().m_ptr},\n' % self.inherits)
 		files[0].write('		u32(sizeof(%s)),\n' % '::'.join(parent))
 		files[0].write('		i32(ptrdiff_t(static_cast<%s*>((%s*)(4))))-4,\n' % ('::'.join(parent), self.inherits))
 		files[0].write('		{0},\n')
