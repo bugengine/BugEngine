@@ -29,7 +29,8 @@ public:
     template< typename T >
     T* getSymbol(const istring& name) const
     {
-        return (T*)(getSymbolInternal(m_handle, name));
+        void* symbol = getSymbolInternal(m_handle, name);
+        return *(T**)&symbol;
     }
 };
 
