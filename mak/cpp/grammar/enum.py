@@ -57,7 +57,10 @@ class EnumValueList(cpp.yacc.Nonterm):
 				files[0].write('	%s,\n' % (result or '{0}'))
 				files[0].write('	%s,\n' % tags)
 				files[0].write('	::BugEngine::istring("%s"),\n' % name)
-				files[0].write('	::BugEngine::RTTI::Value(%s::%s)\n' % ('::'.join(parent), name))
+				if len(parent) > 1:
+					files[0].write('	::BugEngine::RTTI::Value(%s::%s)\n' % ('::'.join(parent[:-1]), name))
+				else:
+					files[0].write('	::BugEngine::RTTI::Value(%s)\n' % (name))
 				files[0].write('};\n')
 				result = '{&%s}' % new_name
 
