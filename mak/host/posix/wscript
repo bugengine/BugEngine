@@ -9,3 +9,7 @@ def options(opt):
 def configure(conf):
 	osname = os.uname()[0].lower()
 	conf.recurse(osname)
+
+def build(bld):
+	osname = os.uname()[0].lower()
+	bld.recurse(osname)

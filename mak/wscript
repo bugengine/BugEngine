@@ -167,6 +167,10 @@ def build(bld):
 	from waflib import Options
 	if bld.__class__.__name__ in projects:
 		bld.env.PROJECTS = [bld.__class__.__name__]
+	try:
+		bld.recurse(os.path.join('host', os.name))
+	except WafError:
+		pass
 	for l in 'platforms','archs':
 		for target in os.listdir(os.path.join('mak', 'target', l)):
 			if target not in ['.svn', '.cvs']:

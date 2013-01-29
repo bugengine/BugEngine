@@ -87,8 +87,10 @@ def add_darwin_flags_to_env(conf, name, arch):
 	conf.env.append_value('LINKFLAGS', ['-mmacosx-version-min=%s'%version, '-isysroot', full_sdk, '-L%s/usr/lib'%full_sdk])
 	conf.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 	conf.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['program_PATTERN'] = '%s'
+	conf.env['cstlib_PATTERN'] = 'lib%s.a'
+	conf.env['cprogram_PATTERN'] = '%s'
+	conf.env['cshlib_PATTERN'] = 'lib%s.dylib'
+	conf.env['cxxshlib_PATTERN'] = 'lib%s.dylib'
 
 	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_darwin', '__POSIX__'])
 	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', name))
