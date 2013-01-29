@@ -10,10 +10,8 @@
 
 #if defined(building_filesystem) || defined(FILESYSTEM_EXPORTS)
 # define    FILESYSTEMEXPORT    BE_EXPORT
-#elif defined(filesystem_dll)
-# define    FILESYSTEMEXPORT    BE_IMPORT
 #else
-# define    FILESYSTEMEXPORT
+# define    FILESYSTEMEXPORT    BE_IMPORT
 #endif
 
 namespace BugEngine { namespace Arena

@@ -14,7 +14,7 @@ namespace BugEngine
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
 ,   m_dataDirectory("share/bugengine")
-,   m_game("bugeditor.main")
+,   m_game("samples.kernel")
 ,   m_user(getenv("USER"))
 {
     m_homeDirectory.push_back(".bugengine");
@@ -22,16 +22,18 @@ Environment::Environment()
 
 void Environment::init(int argc, const char *argv[])
 {
-    const char* filename = argv[0];
-    while (*filename != 0)
+    char* path = strdup(argv[0]);
+    char* filename = path;
+    char* lastSlash = path;
+    for (filename = path; *filename; ++filename)
     {
-        filename++;
+        if (*filename == '/')
+            lastSlash = filename;
     }
-    while (*filename != '/' && filename != argv[0])
-    {
-        filename--;
-    }
-    filename--;
+    *lastSlash = 0;
+    filename = lastSlash + 1;
+    printf("%s\n", path);
+    chdir(path);
     for( int arg = 1; arg < argc; arg++ )
     {
         printf("%s\n", argv[arg]);
@@ -44,6 +46,7 @@ void Environment::init(int argc, const char *argv[])
     m_dataDirectory = ipath(argv[0], filename);
     m_dataDirectory += "share";
     m_dataDirectory += "bugengine";
+    free(path);
 }
 
 Environment::~Environment()

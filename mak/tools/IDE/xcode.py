@@ -129,8 +129,9 @@ class PBXGroup(XCodeNode):
 			self.children.append(group)
 			group.add(dir, os.path.join(path, dir.prefix))
 		for file in sourcetree.files:
-			ref = PBXFileReference(file.filename, os.path.join(path, file.filename))
-			self.children.append(ref)
+			if not file.generated():
+				ref = PBXFileReference(file.filename, os.path.join(path, file.filename))
+				self.children.append(ref)
 		self.sort()
 
 	def sort(self):
@@ -145,22 +146,22 @@ class PBXGroup(XCodeNode):
 
 # Targets
 class PBXLegacyTarget(XCodeNode):
-	def __init__(self, action, target=''):
+	def __init__(self, toolchain, action, target=''):
 		XCodeNode.__init__(self)
 		self.buildConfigurationList = XCConfigurationList([
 			XCBuildConfiguration('debug', {}),
 			XCBuildConfiguration('profile', {}),
 			XCBuildConfiguration('final', {}),
 			])
-		if not target:
-			self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
+		if not toolchain:
+			self.buildArgumentsString = "%s %s%s-${CONFIG}" % (sys.argv[0], action)
 		else:
-			self.buildArgumentsString = "%s %s --targets=%s" % (sys.argv[0], action, target)
+			self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
 		self.buildPhases = []
 		self.buildToolPath = sys.executable
 		self.buildWorkingDirectory = ""
 		self.dependencies = []
-		self.name = target or action
+		self.name = toolchain or action
 		self.productName = target or action
 		self.passBuildSettingsInEnvironment = 0
 
@@ -179,11 +180,11 @@ class PBXNativeTarget(XCodeNode):
 	def __init__(self, action, toolchain, app, output, archs, sdk, platforms):
 		XCodeNode.__init__(self)
 		debug = XCBuildConfiguration('debug',
-				{ 'PRODUCT_NAME':app, 'CONFIGURATION_BUILD_DIR':output%'debug', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
+				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'debug', 'CONFIGURATION_BUILD_DIR':output%'debug', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
 		profile = XCBuildConfiguration('profile',
-				{ 'PRODUCT_NAME':app, 'CONFIGURATION_BUILD_DIR':output%'profile', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
+				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'profile', 'CONFIGURATION_BUILD_DIR':output%'profile', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
 		final = XCBuildConfiguration('final',
-				{ 'PRODUCT_NAME':app, 'CONFIGURATION_BUILD_DIR':output%'final', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
+				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'release', 'CONFIGURATION_BUILD_DIR':output%'final', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
 		self.buildConfigurationList = XCConfigurationList([debug, profile, final])
 		self.buildPhases = [PBXShellScriptBuildPhase(action, toolchain+'-${CONFIG}')]
 		self.buildRules = []
@@ -215,9 +216,9 @@ class PBXProject(XCodeNode):
 	def __init__(self, name, version):
 		XCodeNode.__init__(self)
 		self.buildConfigurationList = XCConfigurationList([
-			XCBuildConfiguration('debug', {'CONFIG':'debug'}),
-			XCBuildConfiguration('profile', {'CONFIG':'profile'}),
-			XCBuildConfiguration('final', {'CONFIG':'final'}),
+			XCBuildConfiguration('debug', {'BUILT_OUTPUTS_DIR':'build', 'CONFIG':'debug'}),
+			XCBuildConfiguration('profile', {'BUILT_OUTPUTS_DIR':'build', 'CONFIG':'profile'}),
+			XCBuildConfiguration('final', {'BUILT_OUTPUTS_DIR':'build', 'CONFIG':'final'}),
 			])
 		self.compatibilityVersion = version[0]
 		self.hasScannedForEncodings = 1;
@@ -265,7 +266,7 @@ class PBXProject(XCodeNode):
 				g = newgroup
 		g.children.append(group)
 		g.sort()
-		if p.category == 'game':
+		if p.type == 'waf':
 			appname = getattr(Context.g_module, 'APPNAME', 'noname')
 			for toolchain in bld.env.ALL_VARIANTS:
 				if toolchain.endswith('-debug'):
@@ -278,7 +279,7 @@ class PBXProject(XCodeNode):
 						self.targets.append(target)
 						self._output.children.append(target.productReference)
 					else:
-						self.targets.append(PBXLegacyTarget('install_', p.name))
+						self.targets.append(PBXLegacyTarget(toolchain, 'install_', p.name))
 
 
 class xcode3(Build.BuildContext):

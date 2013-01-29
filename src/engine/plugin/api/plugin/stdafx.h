@@ -13,10 +13,8 @@
 
 #if defined(building_plugin) || defined(PLUGIN_EXPORTS)
 # define    PLUGINEXPORT        BE_EXPORT
-#elif defined(system_dll)
-# define    PLUGINEXPORT        BE_IMPORT
 #else
-# define    PLUGINEXPORT
+# define    PLUGINEXPORT        BE_IMPORT
 #endif
 
 /*****************************************************************************/
