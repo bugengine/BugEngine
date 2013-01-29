@@ -185,7 +185,7 @@ class PBXNativeTarget(XCodeNode):
 		final = XCBuildConfiguration('final',
 				{ 'PRODUCT_NAME':app, 'CONFIGURATION_BUILD_DIR':output%'final', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
 		self.buildConfigurationList = XCConfigurationList([debug, profile, final])
-		self.buildPhases = [PBXShellScriptBuildPhase(action, "${CONFIG}-"+toolchain)]
+		self.buildPhases = [PBXShellScriptBuildPhase(action, toolchain+'-${CONFIG}')]
 		self.buildRules = []
 		self.dependencies = []
 		self.name = toolchain
@@ -268,12 +268,12 @@ class PBXProject(XCodeNode):
 		if p.category == 'game':
 			appname = getattr(Context.g_module, 'APPNAME', 'noname')
 			for toolchain in bld.env.ALL_VARIANTS:
-				if toolchain.startswith('debug-'):
+				if toolchain.endswith('-debug'):
 					env = bld.all_envs[toolchain]
-					toolchain = toolchain[6:]
+					toolchain = toolchain[:-6]
 					if env.ABI == 'mach_o':
 						target = PBXNativeTarget('install_', toolchain, appname,
-								env.PREFIX.replace('debug-'+toolchain, '%s-'+toolchain),
+								env.PREFIX.replace(toolchain+'-debug', toolchain+'-%s'),
 								macarch(env.ARCHITECTURE, env.LP64), env.SDKROOT, env.SUPPORTEDPLATFORMS)
 						self.targets.append(target)
 						self._output.children.append(target.productReference)
@@ -284,7 +284,7 @@ class PBXProject(XCodeNode):
 class xcode3(Build.BuildContext):
 	cmd = 'xcode3'
 	fun = 'build'
-	version = ('Xcode 3.2', 45)
+	version = ('Xcode 3.1', 45)
 
 	def execute(self):
 		"""
