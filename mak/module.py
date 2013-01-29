@@ -480,7 +480,7 @@ class shared_library(module):
 						depends,
 						category,
 						localoptions,
-						globaloptions.merge(coptions( defines = [name+'_dll'] )),
+						globaloptions,
 						localarchoptions,
 						globalarchoptions,
 						platforms,

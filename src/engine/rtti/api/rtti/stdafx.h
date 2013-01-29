@@ -12,10 +12,8 @@
 
 #if defined(building_rtti) || defined(RTTI_EXPORTS)
 # define     RTTIEXPORT          BE_EXPORT
-#elif defined(rtti_dll)
-# define     RTTIEXPORT          BE_IMPORT
 #else
-# define     RTTIEXPORT
+# define     RTTIEXPORT          BE_IMPORT
 #endif
 
 #define     published           public

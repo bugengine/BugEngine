@@ -9,11 +9,11 @@
 namespace BugEngine { namespace Debug
 {
 
-minitl::AssertionResult defaultAssertionCallback(const char *file,
-                                                 int        line,
-                                                 const char *expr,
-                                                 const char *message,
-                                                 ...)
+minitl::AssertionResult AssertionCallback(const char *file,
+                                          int        line,
+                                          const char *expr,
+                                          const char *message,
+                                          ...)
 {
     fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     va_list l;
@@ -22,7 +22,7 @@ minitl::AssertionResult defaultAssertionCallback(const char *file,
     va_end(l);
     fprintf(stderr, "\n");
 
-    return minitl::Ignore;
+    return minitl::Break;
 }
 
 }}

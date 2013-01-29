@@ -12,10 +12,8 @@
 
 #if defined(building_scheduler) || defined(SCHEDULER_EXPORTS)
 # define    SCHEDULEREXPORT     BE_EXPORT
-#elif defined(system_dll)
-# define    SCHEDULEREXPORT     BE_IMPORT
 #else
-# define    SCHEDULEREXPORT
+# define    SCHEDULEREXPORT     BE_IMPORT
 #endif
 
 namespace BugEngine { namespace Arena

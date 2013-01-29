@@ -9,10 +9,8 @@
 
 #if defined(building_opencl) || defined(OPENCL_EXPORTS)
 # define    OPENCLEXPORT        BE_EXPORT
-#elif defined(core_dll)
-# define    OPENCLEXPORT        BE_IMPORT
 #else
-# define    OPENCLEXPORT
+# define    OPENCLEXPORT        BE_IMPORT
 #endif
 
 #ifdef BE_PLATFORM_MACOS

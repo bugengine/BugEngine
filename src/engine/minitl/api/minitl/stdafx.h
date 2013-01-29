@@ -14,10 +14,8 @@
 
 #if defined(building_minitl) || defined(MINITL_EXPORTS)
 # define    MINITLEXPORT         BE_EXPORT
-#elif defined(minitl_dll)
-# define    MINITLEXPORT         BE_IMPORT
 #else
-# define    MINITLEXPORT
+# define    MINITLEXPORT         BE_IMPORT
 #endif
 
 namespace minitl

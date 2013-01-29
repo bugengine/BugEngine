@@ -25,10 +25,8 @@
 
 #if defined(building_core) || defined(CORE_EXPORTS)
 # define    COREEXPORT          BE_EXPORT
-#elif defined(core_dll)
-# define    COREEXPORT          BE_IMPORT
 #else
-# define    COREEXPORT
+# define    COREEXPORT          BE_IMPORT
 #endif
 
 

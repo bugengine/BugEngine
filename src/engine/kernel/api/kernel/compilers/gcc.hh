@@ -50,7 +50,7 @@ typedef u8                      byte;
 #  define BE_IMPORT
 # elif __GNUC__ > 3
 #  define BE_EXPORT              __attribute__ ((visibility("default")))
-#  define BE_IMPORT
+#  define BE_IMPORT              __attribute__ ((visibility("default")))
 # else
 #  define BE_EXPORT
 #  define BE_IMPORT

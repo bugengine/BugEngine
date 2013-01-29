@@ -13,10 +13,8 @@
 
 #if defined(building_world) || defined(WORLD_EXPORTS)
 # define    WORLDEXPORT         BE_EXPORT
-#elif defined(world_dll)
-# define    WORLDEXPORT         BE_IMPORT
 #else
-# define    WORLDEXPORT
+# define    WORLDEXPORT         BE_IMPORT
 #endif
 
 namespace BugEngine { namespace Arena

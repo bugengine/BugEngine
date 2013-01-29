@@ -11,10 +11,8 @@
 
 #if defined(building_resource) || defined(RESOURCE_EXPORTS)
 # define    RESOURCEEXPORT      BE_EXPORT
-#elif defined(resource_dll)
-# define    RESOURCEEXPORT      BE_IMPORT
 #else
-# define    RESOURCEEXPORT
+# define    RESOURCEEXPORT      BE_IMPORT
 #endif
 
 namespace BugEngine { namespace Arena
