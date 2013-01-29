@@ -27,9 +27,8 @@ def add_gcc_flags_to_env(conf):
 	v.append_unique('CFLAGS', ['-fPIC'])
 	v.append_unique('CXXFLAGS', ['-fPIC'])
 	v.append_unique('FRAMEWORK', ['CoreServices', 'Foundation', 'Cocoa'])
-	if conf.env.GCC_NAME == 'gcc':
-		v.append_unique('CFLAGS', ['-fvisibility=hidden'])
-		v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	v.append_unique('CFLAGS', ['-fvisibility=hidden'])
+	v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 	v.append_unique('LINKFLAGS', ['-lc', '-lstdc++', '-ldl'])
 	v['FRAMEWORKPATH_ST']    = '-F%s'
 	v['FRAMEWORK_ST']        = ['-framework']
