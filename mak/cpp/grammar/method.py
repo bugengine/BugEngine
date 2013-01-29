@@ -68,7 +68,7 @@ class ArgList(cpp.yacc.Nonterm):
 				arg_offset = 1
 			else:
 				arg_offset = 0
-			return prefix + ', '.join(['parameters[%d].as< %s >()'%(arg_index + arg_offset, self.args[arg_index].type) for arg_index in xrange(0, len(self.args))])
+			return prefix + ', '.join(['parameters[%d].as< %s >()'%(arg_index + arg_offset, self.args[arg_index].type) for arg_index in range(0, len(self.args))])
 		else:
 			return ''
 	

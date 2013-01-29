@@ -23,6 +23,8 @@ struct iarray
 namespace BugEngine
 {
 
+template< > raw<RTTI::Class> be_typeid< minitl::iarray >::preklass();
+
 template< typename T >
 static RTTI::Value make_array(RTTI::Value* v, u32 count)
 {
