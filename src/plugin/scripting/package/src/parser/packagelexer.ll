@@ -105,6 +105,7 @@ namespace                               { update(be_package_leng); return KW_nam
 -?[0-9]+                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
 "\n"                                    { newline(); }
 [ \r\t]+                                { update(be_package_leng); }
+\#[^\n]*\n                              { update(be_package_leng); }
 .                                       { update(be_package_leng); return *be_package_text; }
 
 %%
