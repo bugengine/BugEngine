@@ -1,22 +1,135 @@
 from waflib.TaskGen import feature
 from waflib.Configure import conf
 from waflib import Context, TaskGen, Build
-import os, sys
+import os, sys, random, time
 import mak
-import random
-import time
+from xml.dom.minidom import Document
 
 x = 2000
 y = 10500999
-def newid():
+def new_xcode_id():
 	global x, y
 	y = y + 1
 	return "%04X%04X%04X%012d" % (0, x, 0, y)
 
 
+class XmlNode:
+	def __init__(self):
+		self.document = Document()
+		self.document.encoding = 'UTF-8'
+
+	def _add(self, node, child_node, value = None):
+		def setAttributes(node, attrs):
+			for k, v in attrs.items():
+				node.setAttribute(k, v)
+		el = self.document.createElement(child_node)
+		if (value):
+			if type(value) == type(str()):
+				el.appendChild(self.document.createTextNode(value))
+			elif type(value) == type(dict()):
+				setAttributes(el, value)
+		node.appendChild(el)
+		return el
+
+	def write(self, node):
+		node.write(self.document.toxml())
+
+class XCodeScheme(XmlNode):
+	def __init__(self, id, name, product, project, dummy):
+		XmlNode.__init__(self)
+		self.id = id
+		self.name = name
+		self.dummy = dummy
+		scheme = self._add(self.document, 'Scheme', {'LastUpgradeVersion': '0450', 'version': '1.3'})
+		buildAction = self._add(scheme, 'BuildAction', {'parallelizeBuildables': 'YES', 'buildImplicitDependencies': 'YES'})
+		buildActionEntries = self._add(buildAction, 'BuildActionEntries')
+		if not dummy:
+			buildActionEntry = self._add(buildActionEntries, 'BuildActionEntry', {
+					'buildForTesting': 'YES',
+					'buildForRunning': 'YES',
+					'buildForProfiling': 'YES',
+					'buildForArchiving': 'YES',
+					'buildForAnalyzing': 'YES'})
+			testAction = self._add(scheme, 'TestAction', {
+					'selectedDebuggerIdentifier': 'Xcode.DebuggerFoundation.Debugger.LLDB',
+					'selectedLaunchIdentifier': 'Xcode.DebuggerFoundation.Debugger.LLDB',
+					'shouldUseLaunchSchemeArgsEnv': 'YES',
+					'buildConfiguration': 'debug'
+					})
+			self._add(testAction, 'Testables')
+			macroExpansion = self._add(testAction, 'MacroExpansion')
+			launchAction = self._add(scheme, 'LaunchAction', {
+					'selectedDebuggerIdentifier': 'Xcode.DebuggerFoundation.Debugger.LLDB',
+					'selectedLaunchIdentifier': 'Xcode.DebuggerFoundation.Debugger.LLDB',
+					'launchStyle': '0',
+					'useCustomWorkingDirectory': 'NO',
+					'buildConfiguration': 'debug',
+					'ignoresPersistentStateOnLaunch': 'NO',
+					'debugDocumentVersioning': 'NO',
+					'allowLocationSimulation': 'YES'})
+			buildableProductRunnable = self._add(launchAction, 'BuildableProductRunnable')
+			self._add(launchAction, 'AdditionalOptions')
+			profileAction = self._add(scheme, 'ProfileAction', {
+					'buildConfiguration': 'profile',
+					'shouldUseLaunchSchemeArgsEnv': 'YES',
+					'savedToolIdentifier': '',
+					'useCustomWorkingDirectory': 'NO',
+					'debugDocumentVersioning': 'NO'})
+			buildableProductRunnable2 = self._add(profileAction, 'BuildableProductRunnable')
+			analyzeAction = self._add(scheme, 'AnalyzeAction', {'buildConfiguration': 'debug'})
+			archiveAction = self._add(scheme, 'ArchiveAction', {'buildConfiguration': 'final', 'revealArchiveInOrganizer': 'YES'})
+			for node in [buildActionEntry, macroExpansion, buildableProductRunnable, buildableProductRunnable2]:
+				self._add(node, 'BuildableReference', {
+						'BuildableIdentifier': 'primary',
+						'BlueprintIdentifier': self.id,
+						'BuildableName': product,
+						'BlueprintName': name,
+						'ReferencedContainer': 'container:%s' % project})
+		else:
+			buildActionEntry = self._add(buildActionEntries, 'BuildActionEntry', {
+					'buildForTesting': 'NO',
+					'buildForRunning': 'NO',
+					'buildForProfiling': 'NO',
+					'buildForArchiving': 'NO',
+					'buildForAnalyzinf': 'NO'})
+			self._add(buildActionEntry, 'BuildableReference', {
+					'BuildableIdentifier': 'primary',
+					'BlueprintIdentifier': self.id,
+					'BuildableName': product,
+					'BlueprintName': name,
+					'ReferencedContainer': 'container:%s' % project})
+
+
+class XCodeSchemeList(XmlNode):
+	def __init__(self):
+		XmlNode.__init__(self)
+		plist = self._add(self.document, 'plist', {'version': '1.0'})
+		dict = self._add(plist, 'dict')
+		self._add(dict, 'key', 'SchemeUserState')
+		self.userstates = self._add(dict, 'dict')
+		self._add(dict, 'key', 'SuppressBuildableAutocreation')
+		self.autocreation = self._add(dict, 'dict')
+		self.order = 0
+
+	def add(self, scheme):
+		self._add(self.userstates, 'key', '%s.xcscheme'%scheme.name)
+		dict = self._add(self.userstates, 'dict')
+		self._add(dict, 'key', 'isShown')
+		if scheme.dummy:
+			self._add(dict, 'false')
+		else:
+			self._add(dict, 'true')
+		self._add(dict, 'key', 'orderHint')
+		self._add(dict, 'integer', self.order.__str__())
+		self._add(self.autocreation, 'key', scheme.id)
+		dict = self._add(self.autocreation, 'dict')
+		self._add(dict, 'key', 'primary')
+		self._add(dict, 'true')
+		self.order = self.order + 1
+
 class XCodeNode:
 	def __init__(self):
-		self._id = newid()
+		self._id = new_xcode_id()
 
 	def tostring(self, value):
 		if isinstance(value, dict):
@@ -177,22 +290,17 @@ class PBXShellScriptBuildPhase(XCodeNode):
 		self.shellScript = "%s %s %s%s" % (sys.executable, sys.argv[0], action,  toolchain)
 
 class PBXNativeTarget(XCodeNode):
-	def __init__(self, action, toolchain, app, output, archs, sdk, platforms):
+	def __init__(self, name, product, productType, build, configs):
 		XCodeNode.__init__(self)
-		debug = XCBuildConfiguration('debug',
-				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'debug', 'CONFIGURATION_BUILD_DIR':output%'debug', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
-		profile = XCBuildConfiguration('profile',
-				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'profile', 'CONFIGURATION_BUILD_DIR':output%'profile', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
-		final = XCBuildConfiguration('final',
-				{ 'PRODUCT_NAME':app, 'BUILT_PRODUCTS_DIR': output%'release', 'CONFIGURATION_BUILD_DIR':output%'final', 'ARCHS':archs, 'SDKROOT': sdk, 'SUPPORTED_PLATFORMS':platforms})
-		self.buildConfigurationList = XCConfigurationList([debug, profile, final])
-		self.buildPhases = [PBXShellScriptBuildPhase(action, toolchain+'-${CONFIG}')]
+		self.buildConfigurationList = XCConfigurationList(configs)
+		self.buildPhases = []
 		self.buildRules = []
 		self.dependencies = []
-		self.name = toolchain
-		self.productName = toolchain
-		self.productType = "com.apple.product-type.application"
-		self.productReference = PBXFileReference(app, app+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR')
+		self.name = name
+		self.productName = name
+		self.productType = productType
+		self.productReference =product
+
 
 # Root project object
 
@@ -251,7 +359,7 @@ class PBXProject(XCodeNode):
 		w("\trootObject = %s;\n" % self._id)
 		w("}\n")
 
-	def add(self, bld, p):
+	def add(self, bld, p, schemes, schememanagement):
 		names = p.name.split('.')
 		group = PBXGroup(names[-1])
 		group.add(p.sourcetree, p.sourcetree.prefix)
@@ -273,13 +381,43 @@ class PBXProject(XCodeNode):
 					env = bld.all_envs[toolchain]
 					toolchain = toolchain[:-6]
 					if env.ABI == 'mach_o':
-						target = PBXNativeTarget('install_', toolchain, appname,
-								env.PREFIX.replace(toolchain+'-debug', toolchain+'-%s'),
-								macarch(env.ARCHITECTURE, env.LP64), env.SDKROOT, env.SUPPORTEDPLATFORMS)
+						debug = XCBuildConfiguration('debug', {
+								'PRODUCT_NAME':appname,
+								'BUILT_PRODUCTS_DIR': env.PREFIX,
+								'CONFIGURATION_BUILD_DIR': env.PREFIX,
+								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
+								'SDKROOT': env.SDKROOT,
+								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
+						profile = XCBuildConfiguration('profile', {
+								'PRODUCT_NAME':appname,
+								'BUILT_PRODUCTS_DIR' :env.PREFIX.replace(toolchain+'-debug', toolchain+'-profile'),
+								'CONFIGURATION_BUILD_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-profile'),
+								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
+								'SDKROOT': env.SDKROOT,
+								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
+						final = XCBuildConfiguration('final', {
+								'PRODUCT_NAME':appname,
+								'BUILT_PRODUCTS_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-final'),
+								'CONFIGURATION_BUILD_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-final'),
+								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
+								'SDKROOT': env.SDKROOT,
+								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
+						build = PBXShellScriptBuildPhase('install_', toolchain+'-${CONFIG}')
+						target = PBXNativeTarget(
+								toolchain,
+								PBXFileReference(appname, appname+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
+								"com.apple.product-type.application",
+								build,
+								[debug, profile, final])
 						self.targets.append(target)
 						self._output.children.append(target.productReference)
+						scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
 					else:
-						self.targets.append(PBXLegacyTarget(toolchain, 'install_', p.name))
+						target = PBXLegacyTarget(toolchain, 'install_', p.name)
+						self.targets.append(target)
+						scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
+					scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
+					schememanagement.add(scheme)
 
 
 class xcode3(Build.BuildContext):
@@ -296,21 +434,32 @@ class xcode3(Build.BuildContext):
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.recurse([self.run_dir])
-
-
 		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+		import getpass
+
+
+		project = self.srcnode.make_node('%s.%s.xcodeproj' % (appname, self.__class__.cmd))
+		project.mkdir()
+		userdata = project.make_node('xcuserdata')
+		userdata.mkdir()
+		userdata = userdata.make_node('%s.xcuserdatad' % getpass.getuser())
+		userdata.mkdir()
+		schemes = userdata.make_node('xcschemes')
+		schemes.mkdir()
+		schemes.project_name = project.name
 		p = PBXProject(appname, self.__class__.version)
+
+		schememanagement = XCodeSchemeList()
 
 		for g in self.groups:
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
-				p.add(self, tg)
+				p.add(self, tg, schemes, schememanagement)
 
-		node = self.srcnode.make_node('%s.%s.xcodeproj' % (appname, self.__class__.cmd))
-		node.mkdir()
-		node = node.make_node('project.pbxproj')
+		schememanagement.write(schemes.make_node('xcschememanagement.plist'))
+		node = project.make_node('project.pbxproj')
 		p.write(open(node.abspath(), 'w'))
 
 
