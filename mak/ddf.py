@@ -1,7 +1,6 @@
 import sys
 import cpp
 import os
-import rtti
 
 from optparse import OptionParser
 

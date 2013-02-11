@@ -15,9 +15,26 @@ world = game.World.World
 (
 	storage = storage;
 	products = [sample.output, ];
+    entities = zip(
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B()),
+        (A(), B())
+    );
 )
 
 luascript = scripting.lua.LuaScript
 (
 	script = <sample.lua>;
 )
+

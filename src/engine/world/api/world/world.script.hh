@@ -10,6 +10,7 @@
 #include    <world/entity.script.hh>
 #include    <world/entitystorage.script.hh>
 #include    <core/memory/allocators/system.hh>
+#include    <rtti/typeinfo.hh>
 
 
 
@@ -27,20 +28,19 @@ private:
     Task::TaskGroup::TaskStartConnection                m_taskStart;
     Task::TaskGroup::TaskEndConnection                  m_taskEnd;
     minitl::array<Task::TaskGroup::TaskEndConnection>   m_productEnds;
-    Entity                                              m_freeEntityId;
-    SystemAllocator                                     m_entityAllocator;
-    Entity*                                             m_entityBuffer;
-    u32                                                 m_entityCount;
-    u32                                                 m_entityCapacity;
 private:
     void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
 public:
     weak<Task::ITask> updateWorldTask() const;
+    template< typename T > void addComponent(Entity e, const T& component)
+    {
+        addComponent(e, component, be_typeid<T>::klass());
+    }
 published:
     Entity spawn();
     void unspawn(Entity e);
 
-    void addComponent(Entity e, RTTI::Value& v);
+    void addComponent(Entity e, const RTTI::Value& v);
 published:
     World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> products);
     ~World();
