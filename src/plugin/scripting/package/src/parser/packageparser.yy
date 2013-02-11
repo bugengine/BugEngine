@@ -67,7 +67,7 @@ ref<Object> s_currentObject;
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN VAL_FILENAME
 
-%token  KW_import KW_plugin KW_namespace
+%token  KW_import KW_plugin KW_namespace KW_zip
 
 %type   <bValue>    VAL_BOOLEAN
 %type   <iValue>    VAL_INTEGER
@@ -240,6 +240,8 @@ value:
             $2->~vector();
             free($2);
         }
+    |
+        value_zip
     ;
 
 value_array:
@@ -266,6 +268,34 @@ value_array:
             free($1);
         }
     ;
+
+value_zip:
+        KW_zip
+        '('
+            zip_array
+        ')'
+    ;
+
+zip_array:
+        /* empty */
+    |
+        zip_value
+    |
+        zip_value ',' zip_array
+    ;
+
+zip_value:
+        '(' component_array ')'
+    ;
+
+component_array:
+        /* empty */
+    |
+        decl_object
+    |
+        decl_object ',' component_array
+    ;
+
 
 fullname:
         TOK_ID

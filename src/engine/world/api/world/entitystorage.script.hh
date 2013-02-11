@@ -12,19 +12,28 @@ namespace BugEngine { namespace World
 {
 
 class World;
+struct Component;
 
 class be_api(WORLD) EntityStorage : public minitl::refcountable
 {
     friend class World;
 private:
+    struct EntityInfo;
+private:
     scoped<Task::ITask>                         m_task;
-    SystemAllocator                             m_entityMappingBuffer;
-    u32*                                        m_entityMapping;
+    Entity                                      m_freeEntityId;
+    SystemAllocator                             m_entityAllocator;
+    EntityInfo*                                 m_entityInfoBuffer;
+    u32                                         m_entityCount;
+    u32                                         m_entityCapacity;
     minitl::vector< raw<const RTTI::Class> >    m_componentTypes;
 private:
     void start();
-    void spawn(Entity e);
+private: // friend World
+    Entity spawn();
     void unspawn(Entity e);
+    void addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType);
+    void removeComponent(Entity e, raw<const RTTI::Class> componentType);
 protected:
     EntityStorage();
     ~EntityStorage();
