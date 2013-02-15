@@ -7,6 +7,7 @@
 #include    <plugin/plugin.hh>
 #include    <package/nodes/package.hh>
 #include    <package/nodes/value.hh>
+#include    <package/nodes/entity.hh>
 #include    <filesystem/folder.script.hh>
 
 union YYSTYPE
@@ -16,7 +17,7 @@ union YYSTYPE
     double fValue;
     char* sValue;
     ref<BugEngine::PackageBuilder::Nodes::Value>* value;
-    minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Value> >* array;
+    minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Value> >* value_array;
 };
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL 1
