@@ -1,32 +1,7 @@
 plugin samples.kernel;
 plugin scripting.lua;
 
-storage = samples.kernel.KernelStorage
-(
-)
 
-sample = samples.kernel.KernelSampleTask
-(
-	in1 = storage.A;
-	out1 = storage.B;
-)
-
-world = game.World.World
-(
-	storage = storage;
-	products = [sample.output, ];
-	entities = zip(
-		e1 = (A(), B());
-		e2 = (A(), B());
-		e3 = (A(), B());
-		e4 = (A(), B());
-		e5 = (A(), B());
-		e6 = (A());
-		e7 = (B());
-		e8 = (A());
-		e9 = (B());
-	);
-)
 
 luascript = scripting.lua.LuaScript
 (
