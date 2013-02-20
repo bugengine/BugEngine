@@ -286,9 +286,9 @@ value_array:
 value_zip:
         KW_zip
         {
-            $<value>$ = (ref<Value>*)malloc(sizeof(*$$));
+            $<value>$ = (ref<Value>*)malloc(sizeof(*$<value>$));
             s_currentZip = ref<ZipValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
-            new ($$) ref<Value>(s_currentZip);
+            new ($<value>$) ref<Value>(s_currentZip);
         }
         '(' zip_array ')'
         {

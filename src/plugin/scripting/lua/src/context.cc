@@ -7,6 +7,7 @@
 
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <plugin/plugin.hh>
 
 
 namespace BugEngine
@@ -67,7 +68,7 @@ static void push(lua_State* state, const RTTI::Value& v)
 
     void* userdata = lua_newuserdata(state, sizeof (RTTI::Value));
     new(userdata) RTTI::Value(v);
-    lua_getglobal(state, "bugvalue");
+    luaL_getmetatable(state, "BugEngine.Object");
     lua_setmetatable(state, -2);
 }
 
@@ -91,7 +92,7 @@ static RTTI::Value get(lua_State *state, int index)
     case LUA_TUSERDATA:
     {
         lua_getmetatable(state, index);
-        lua_getglobal(state, "bugvalue");
+        luaL_getmetatable(state, "BugEngine.Object");
         if (lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
@@ -238,7 +239,6 @@ extern "C" void printStack(lua_State* l)
                 default:
                     be_notreached();
                     reference = "??? <";
-                    constness = "??? ";
                     closing=">";
                     break;
             }
@@ -290,8 +290,24 @@ extern "C" int luaPrint(lua_State *L)
     }
     return 0;
 }
+
+extern "C" int luaPlugin(lua_State* state)
+{
+    int n = lua_gettop(state); /* number of arguments */
+    if (n != 1)
+    {
+        /* error */
+        return 0;
+    }
+    const char *plugin = lua_tostring(state, -1);
+    static Plugin::Plugin<void> s_plugin (inamespace(plugin), Plugin::Plugin<void>::Preload);
+    push(state, RTTI::Value(s_plugin.pluginNamespace()));
+    return 1;
+}
+
 static const luaL_Reg base_funcs[] = {
     {"print", luaPrint},
+    {"plugin", luaPlugin},
     {NULL, NULL}
 };
 
@@ -325,8 +341,18 @@ Context::Context(const Plugin::Context& context)
     luaopen_math(m_state);
     luaopen_debug(m_state);
 
-    //luaL_register(m_state, "_G", base_funcs);
-    //luaL_register(m_state, "bugvalue", s_valueMetaTable);
+    luaL_newmetatable(m_state, "BugEngine.Object");
+    lua_pushstring(m_state, "__index");
+    lua_pushvalue(m_state, -2);
+    lua_settable(m_state, -3);
+    luaL_setfuncs(m_state, s_valueMetaTable, 0);
+    push(m_state, RTTI::Value(be_game_Namespace()));
+    lua_setglobal(m_state, "BugEngine");
+    for (const luaL_Reg* method = base_funcs; method->func != 0; ++method)
+    {
+        lua_pushcfunction(m_state, method->func);
+        lua_setglobal(m_state, method->name);
+    }
 }
 
 Context::~Context()
@@ -344,38 +370,5 @@ void Context::runBuffer(weak<const LuaScript> /*script*/, Resource::Resource& /*
     }
     be_assert(result == 0, lua_tostring(m_state, -1));
 }
-
-/*
-void Context::push(lua_State* state, const RTTI::Value& v)
-{
-    switch(v.type())
-    {
-    case RTTI::PropertyTypeBool:
-        lua_pushboolean(state, v.as<bool>());
-        break;
-    case RTTI::PropertyTypeInteger:
-        lua_pushinteger(state, (lua_Integer)v.as<i64>());
-        break;
-    case RTTI::PropertyTypeUnsigned:
-        lua_pushinteger(state, (lua_Integer)v.as<u64>());
-        break;
-    case RTTI::PropertyTypeFloat:
-        lua_pushnumber(state, v.as<double>());
-        break;
-    case RTTI::PropertyTypeString:
-        lua_pushstring(state, v.as<std::string>().c_str());
-        break;
-    case RTTI::PropertyTypeObject:
-        push(state, v.as< ref<Object> >());
-        break;
-    case RTTI::PropertyTypeWeakObject:
-        push(state, v.as< weak<Object> >());
-        break;
-    case RTTI::PropertyTypeVariant:
-    case RTTI::PropertyTypeNotSet:
-        be_unimplemented();
-        break;
-    }
-}*/
 
 }}
