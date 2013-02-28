@@ -35,6 +35,7 @@ published:
         raw<Tag> const          tags;
         raw<const Overload>     next;
         Type                    returnType;
+        u32                     parameterCount;
         raw<const Parameter>    params;
         bool                    vararg;
     published:
@@ -52,6 +53,7 @@ published:
     raw<const Method>   next;
     be_tag(Alias("?call"))
     raw<const Method>   call;
+    u32                 overloadCount;
     raw<const Overload> overloads;
 published:
     Value doCall(Value* params, u32 nparams) const;

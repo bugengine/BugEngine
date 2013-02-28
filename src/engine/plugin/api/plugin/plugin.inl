@@ -17,7 +17,8 @@ namespace BugEngine { namespace Plugin
         BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                                  \
         {                                                                                                   \
             static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };                          \
-            static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };  \
+            static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace,               \
+                                      {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };                               \
             static raw<const RTTI::ObjectInfo> obptr = {((ob.value = RTTI::Value(&ci)), &ob)};              \
             be_forceuse(obptr);                                                                             \
             raw<RTTI::Class> ptr = {&ci};                                                                   \
@@ -74,7 +75,8 @@ namespace BugEngine { namespace Plugin
 
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
-    :   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
+    :   m_name(pluginName)
+    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
@@ -82,7 +84,8 @@ Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
 
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
-    :   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
+    :   m_name(pluginName)
+    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
@@ -113,7 +116,8 @@ Plugin<T>::~Plugin()
 
 template< typename T >
 Plugin<T>::Plugin(const Plugin& other)
-    :   m_dynamicObject(other.m_dynamicObject)
+    :   m_name(other.m_name)
+    ,   m_dynamicObject(other.m_dynamicObject)
     ,   m_interface(other.m_interface)
     ,   m_refCount(other.m_refCount)
 {
@@ -129,6 +133,7 @@ Plugin<T>& Plugin<T>::operator=(Plugin other)
 template< typename T >
 void Plugin<T>::swap(Plugin& other)
 {
+    minitl::swap(m_name, other.m_name);
     minitl::swap(m_dynamicObject, other.m_dynamicObject);
     minitl::swap(m_interface, other.m_interface);
     minitl::swap(m_refCount, other.m_refCount);

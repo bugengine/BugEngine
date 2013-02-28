@@ -101,6 +101,7 @@ class EnumDef(cpp.yacc.Nonterm):
 		files[0].write('		{::BugEngine::be_typeid< void >::preklass().m_ptr},\n')
 		files[0].write('		u32(sizeof(%s)),\n' % '::'.join(parent))
 		files[0].write('		i32(0),\n')
+		files[0].write('		::BugEngine::RTTI::ClassType_Enum,\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')

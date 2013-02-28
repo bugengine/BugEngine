@@ -135,11 +135,23 @@ u32 Class::distance(raw<const Class> other) const
     return Type::MaxTypeDistance;
 }
 
+inamespace Class::fullname() const
+{
+    if (!owner)
+    {
+        return inamespace(name);
+    }
+    else
+    {
+        return owner->fullname() + name;
+    }
+}
+
 }
 
 raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
+    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }

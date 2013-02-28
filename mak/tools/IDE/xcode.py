@@ -203,6 +203,7 @@ class PBXFileReference(XCodeNode):
 				filetype = "sourcecode.c.h"
 			elif ext in ['.hh', '.inl', '.hpp']:
 				filetype = "sourcecode.cpp.h"
+				self.xcLanguageSpecificationIdentifier = "xcode.lang.cpp"
 			elif ext == '.c':
 				filetype = "sourcecode.c.c"
 			elif ext == '.m':
@@ -221,6 +222,9 @@ class PBXFileReference(XCodeNode):
 				filetype = "wrapper.nib"
 			elif ext == ".xib":
 				filetype = "text.xib"
+			elif name == 'wscript' or ext == '.py':
+				filetype = "sourcecode.script.python"
+				self.xcLanguageSpecificationIdentifier = "xcode.lang.python"
 			else:
 				filetype = "text"
 		self.lastKnownFileType = filetype

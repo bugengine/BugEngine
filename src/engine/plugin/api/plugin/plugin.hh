@@ -36,6 +36,7 @@ template< typename Interface >
 class Plugin
 {
 private:
+    inamespace      m_name;
     DynamicObject*  m_dynamicObject;
     Interface*      m_interface;
     i_u32*          m_refCount;
@@ -58,6 +59,7 @@ public:
     bool operator!() const              { return !m_dynamicObject; }
 
     raw<const RTTI::Class> pluginNamespace() const;
+    const inamespace& name() const { return m_name; }
 
     void swap(Plugin& other);
 };
