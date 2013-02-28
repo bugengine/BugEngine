@@ -22,13 +22,17 @@ private:
 public:
     Context(const Plugin::Context& context);
     ~Context();
+
+    static void printStack(lua_State* l);
+    static void typeError(lua_State* state, int narg, const char* expected, const char* got);
+    static void push(lua_State* state, const RTTI::Value& v);
+    static void checkArg(lua_State* state, int narg, int type);
+    static void checkArg(lua_State* state, int narg, const char* userDataType);
+
 private:
     void runBuffer(weak<const LuaScript> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
-
-
-    static const luaL_Reg s_valueMetaTable[];
 };
 
 }}

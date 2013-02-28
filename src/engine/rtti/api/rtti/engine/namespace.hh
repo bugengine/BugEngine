@@ -13,7 +13,7 @@ namespace BugEngine                                                             
 {                                                                                                                                               \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n()                                                                                   \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n, {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                     \
+        static RTTI::Class ci = { #n, {0}, {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                          \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
@@ -28,7 +28,8 @@ namespace BugEngine                                                             
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1();                                                                                 \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2()                                                                           \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n2, {be_##plugin##_Namespace_##n1().m_ptr}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                 \
+        static RTTI::Class ci = { #n2, {be_##plugin##_Namespace_##n1().m_ptr}, {0}, 0, 0, RTTI::ClassType_Namespace,                            \
+                                  {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                                         \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
@@ -44,7 +45,8 @@ namespace BugEngine                                                             
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2();                                                                          \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3()                                                                    \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n3, {be_##plugin##_Namespace_##n1##_##n2().m_ptr}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };          \
+        static RTTI::Class ci = { #n3, {be_##plugin##_Namespace_##n1##_##n2().m_ptr}, {0}, 0, 0, RTTI::ClassType_Namespace,                     \
+                                  {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                                         \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
@@ -60,7 +62,8 @@ namespace BugEngine                                                             
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3();                                                                   \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                                                             \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n4, {be_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };   \
+        static RTTI::Class ci = { #n4, {be_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr}, {0}, 0, 0,                                         \
+                                  RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                              \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
@@ -80,7 +83,7 @@ namespace BugEngine                                                             
             {                                                                                                                                   \
                 #n5,                                                                                                                            \
                 {be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4().m_ptr},                                                                    \
-                {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                                                \
+                {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                                                     \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \

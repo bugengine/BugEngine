@@ -274,6 +274,7 @@ class Exprs(cpp.yacc.Nonterm):
 				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)
 				files[0].write('	%s,\n' % chain)
 				files[0].write('	{&%s},\n' % varname)
+				files[0].write('	%s,\n' % index)
 				files[0].write('	%s\n' % overload_ptr)
 				files[0].write('};\n')
 

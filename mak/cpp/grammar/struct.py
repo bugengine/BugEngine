@@ -201,6 +201,14 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('		{::BugEngine::be_typeid< %s >::preklass().m_ptr},\n' % self.inherits)
 		files[0].write('		u32(sizeof(%s)),\n' % '::'.join(parent))
 		files[0].write('		i32(ptrdiff_t(static_cast<%s*>((%s*)(4))))-4,\n' % ('::'.join(parent), self.inherits))
+		if self.tags.index:
+			files[0].write('		%s,\n' % self.tags.index)
+		elif self.pod:
+			files[0].write('		::BugEngine::RTTI::ClassType_Pod,\n')
+		elif self.value:
+			files[0].write('		::BugEngine::RTTI::ClassType_Struct,\n')
+		else:
+			files[0].write('		::BugEngine::RTTI::ClassType_Object,\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')

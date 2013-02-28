@@ -15,6 +15,17 @@ struct Property;
 struct Method;
 struct Tag;
 
+enum ClassType
+{
+    ClassType_Object    = 0,
+    ClassType_Struct    = 1,
+    ClassType_Pod       = 2,
+    ClassType_Namespace = 3,
+    ClassType_Array     = 4,
+    ClassType_Enum      = 5,
+    ClassType_String    = 6,
+    ClassType_Integer   = 7
+};
 
 struct be_api(RTTI) Class
 {
@@ -31,6 +42,8 @@ published:
     u32 const                   size;
 
     i32 const                   offset;
+
+    u32 const                   id;
 
     raw<Tag>                    tags;
 
@@ -57,6 +70,11 @@ published:
     Value get(Value& from, istring name) const;
 
     bool isA(raw<const Class> klass) const;
+
+    inamespace fullname() const;
+
+    inline ClassType type() const       { return ClassType(id & 0xffff); }
+    inline u32 index() const            { return id >> 16; }
 public:
     typedef void(*EnumerateCallback)(const Value& v);
     enum EnumerateRecursion
