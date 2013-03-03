@@ -75,6 +75,9 @@ published:
 
     inline ClassType type() const       { return ClassType(id & 0xffff); }
     inline u32 index() const            { return id >> 16; }
+
+    raw<const Property> getProperty(istring name) const;
+    raw<const Method> getMethod(istring name) const;
 public:
     typedef void(*EnumerateCallback)(const Value& v);
     enum EnumerateRecursion

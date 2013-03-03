@@ -56,33 +56,151 @@ void Context::checkArg(lua_State* state, int narg, const char *userDataType)
     if (!lua_rawequal(state, -1, -2))
     {
         lua_pop(state, 1);
-        const char* type = luaL_typename(state, narg);
+        const char* typeName = luaL_typename(state, narg);
         for (u32 i = 0; i < sizeof(s_metaTables)/sizeof(s_metaTables[0]); ++i)
         {
             luaL_getmetatable(state, s_metaTables[i]);
             if (lua_rawequal(state, -1, -2))
             {
-                type = s_metaTables[i];
+                typeName = s_metaTables[i];
             }
             lua_pop(state, 1);
         }
         lua_pop(state, 1);
-        typeError(state, narg, userDataType, type);
+        typeError(state, narg, userDataType, typeName);
     }
     lua_pop(state, 2);
+}
+
+void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
+{
+    if (lua_type(state, narg) != LUA_TUSERDATA)
+    {
+        typeError(state, narg, type.name().c_str(), luaL_typename(state, narg));
+    }
+    lua_getmetatable(state, narg);
+    luaL_getmetatable(state, "BugEngine.Object");
+    if (!lua_rawequal(state, -1, -2))
+    {
+        lua_pop(state, 1);
+        const char* typeName = luaL_typename(state, narg);
+        for (u32 i = 0; i < sizeof(s_metaTables)/sizeof(s_metaTables[0]); ++i)
+        {
+            luaL_getmetatable(state, s_metaTables[i]);
+            if (lua_rawequal(state, -1, -2))
+            {
+                typeName = s_metaTables[i];
+            }
+            lua_pop(state, 1);
+        }
+        lua_pop(state, 1);
+        typeError(state, narg, type.name().c_str(), typeName);
+    }
+    lua_pop(state, 2);
+    RTTI::Value* value = (RTTI::Value*)lua_touserdata(state, narg);
+    if (!value->type().isA(type))
+    {
+        typeError(state, narg, type.name().c_str(), value->type().name().c_str());
+    }
 }
 
 void Context::push(lua_State* state, const RTTI::Value& v)
 {
     const RTTI::Type& t = v.type();
-    if (t.metaclass == be_typeid<u8>::klass() || t.metaclass == be_typeid<u16>::klass())
+    if (t.metaclass == be_typeid<i32>::klass())
     {
+        lua_pushnumber(state, v.as<i32>());
     }
+    else
+    {
+        void* userdata = lua_newuserdata(state, sizeof (RTTI::Value));
+        new(userdata) RTTI::Value(v);
+        luaL_getmetatable(state, "BugEngine.Object");
+        lua_setmetatable(state, -2);
+    }
+}
 
-    void* userdata = lua_newuserdata(state, sizeof (RTTI::Value));
-    new(userdata) RTTI::Value(v);
-    luaL_getmetatable(state, "BugEngine.Object");
-    lua_setmetatable(state, -2);
+minitl::format<1024u> Context::tostring(lua_State* state, int element)
+{
+    int t = lua_type(state, element);
+    switch (t)
+    {
+        case LUA_TSTRING:
+            return minitl::format<1024u>("lua_string('%s')") | lua_tostring(state, element);
+        case LUA_TBOOLEAN:
+            return minitl::format<1024u>("lua_boolean(%s)") | lua_toboolean(state, element);
+        case LUA_TNUMBER:
+            return minitl::format<1024u>("lua_number(%g)") | lua_tonumber(state, element);
+        case LUA_TUSERDATA:
+        {
+            lua_getmetatable(state, element);
+            luaL_getmetatable(state, "BugEngine.Object");
+            if (lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, element);
+                const char* constness = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+                const char* reference;
+                const char* closing;
+                switch(userdata->type().indirection)
+                {
+                    case RTTI::Type::RefPtr:
+                        reference = "ref<";
+                        closing = ">";
+                        break;
+                    case RTTI::Type::WeakPtr:
+                        reference = "weak<";
+                        closing = ">";
+                        break;
+                    case RTTI::Type::RawPtr:
+                        reference = "raw<";
+                        closing = ">";
+                        break;
+                    case RTTI::Type::Value:
+                        reference = "";
+                        constness = "";
+                        closing = "";
+                        break;
+                    default:
+                        be_notreached();
+                        reference = "??? <";
+                        closing=">";
+                        break;
+                }
+                const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
+                return minitl::format<1024u>("%s%s%s%s%s[@0x%p]") | constness | reference | access | userdata->type().metaclass->name.c_str() | closing | userdata;
+            }
+            lua_pop(state, 1);
+            luaL_getmetatable(state, "BugEngine.Plugin");
+            if (lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                Plugin::Plugin<void>* userdata = (Plugin::Plugin<void>*)lua_touserdata(state, element);
+                return minitl::format<1024u>("BugEngine.Plugin[%s]") | userdata->name();
+            }
+            lua_pop(state, 1);
+            luaL_getmetatable(state, "BugEngine.ResourceManager");
+            if (lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                return minitl::format<1024u>("BugEngine.ResourceManager");
+            }
+            lua_pop(state, 1);
+            luaL_getmetatable(state, "BugEngine.Resource");
+            if (lua_rawequal(state, -1, -2))
+            {
+                lua_pop(state, 2);
+                return minitl::format<1024u>("BugEngine.Resource");
+            }
+            else
+            {
+                lua_pop(state, 2);
+                return minitl::format<1024u>("lua_userdata[@0x%p]") | lua_touserdata(state, element);
+            }
+        }
+        default:
+            return minitl::format<1024u>("%s") | lua_typename(state, t);
+    }
 }
 
 void Context::printStack(lua_State* state)
@@ -94,95 +212,7 @@ void Context::printStack(lua_State* state)
 
     for (i = 1; i <= top; i++)
     {
-        int t = lua_type(state, -i);
-        switch (t)
-        {
-        case LUA_TSTRING:
-            be_debug("%d: string: '%s'\n" | top-i+1 | lua_tostring(state, -i));
-            break;
-        case LUA_TBOOLEAN:
-            be_debug("%d: boolean %s\n" | top-i+1 | lua_toboolean(state, -i) ? "true" : "false");
-            break;
-        case LUA_TNUMBER:
-            be_debug("%d: number: %g\n" | top-i+1 | lua_tonumber(state, -i));
-            break;
-        case LUA_TUSERDATA:
-        {
-            lua_getmetatable(state, -i);
-            luaL_getmetatable(state, "BugEngine.Object");
-            if (lua_rawequal(state, -1, -2))
-            {
-                RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -i-2);
-                const char* constness = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
-                const char* reference;
-                const char* closing;
-                switch(userdata->type().indirection)
-                {
-                case RTTI::Type::RefPtr:
-                    reference = "ref<";
-                    closing = ">";
-                    break;
-                case RTTI::Type::WeakPtr:
-                    reference = "weak<";
-                    closing = ">";
-                    break;
-                case RTTI::Type::RawPtr:
-                    reference = "raw<";
-                    closing = ">";
-                    break;
-                case RTTI::Type::Value:
-                    reference = "";
-                    constness = "";
-                    closing = "";
-                    break;
-                default:
-                    be_notreached();
-                    reference = "??? <";
-                    closing=">";
-                    break;
-                }
-                const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
-                be_debug("%d: [%s%s%s%s%s object @0x%p]" | top-i+1 | constness | reference | access | userdata->type().metaclass->name.c_str() | closing | userdata);
-            }
-            else
-            {
-                lua_pop(state, 1);
-                luaL_getmetatable(state, "BugEngine.Plugin");
-                if (lua_rawequal(state, -1, -2))
-                {
-                    Plugin::Plugin<void>* userdata = (Plugin::Plugin<void>*)lua_touserdata(state, -i-2);
-                    be_debug("%d: plugin[%s]" | top-i+1 | userdata->name());
-                }
-                else
-                {
-                    lua_pop(state, 1);
-                    luaL_getmetatable(state, "BugEngine.ResourceManager");
-                    if (lua_rawequal(state, -1, -2))
-                    {
-                        be_debug("%d: ResourceManager" | top-i+1);
-                    }
-                    else
-                    {
-                        lua_pop(state, 1);
-                        luaL_getmetatable(state, "BugEngine.Resource");
-                        if (lua_rawequal(state, -1, -2))
-                        {
-                            be_debug("%d: Resource" | top-i+1);
-                        }
-                        else
-                        {
-                            be_debug("%d: unknown userdata" | top-i+1);
-                        }
-                    }
-                }
-            }
-            lua_pop(state, 2);
-            break;
-        }
-        default:
-            be_debug("%s\n" | lua_typename(state, t));
-            break;
-        }
+        be_debug(" %d: %s" | top-i+1 | tostring(state, -i).c_str());
     }
 }
 

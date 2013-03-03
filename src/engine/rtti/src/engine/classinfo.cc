@@ -39,6 +39,35 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
     }
 }
 
+
+raw<const Property> Class::getProperty(istring name) const
+{
+    raw<const Property> p = properties;
+    while(p)
+    {
+        if (p->name == name)
+        {
+            break;
+        }
+        p = p->next;
+    }
+    return p;
+}
+
+raw<const Method> Class::getMethod(istring name) const
+{
+    raw<const Method> m = methods;
+    while(m)
+    {
+        if (m->name == name)
+        {
+            break;
+        }
+        m = m->next;
+    }
+    return m;
+}
+
 Value Class::get(Value& from, istring propname) const
 {
     static raw<const Class> const s_metaClass = be_typeid<Class>::klass();

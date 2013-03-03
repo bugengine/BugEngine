@@ -11,8 +11,8 @@
 #define BE_PLATFORM_PC          1
 
 #include <stdlib.h>
-#define malloca alloca
-#define freea(p)
+#define malloca     alloca
+#define freea(p)    (void)p
 #define DIRENT_H    <dirent.h>
 
 /*****************************************************************************/
