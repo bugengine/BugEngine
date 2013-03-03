@@ -10,7 +10,7 @@
 
 #include <malloc.h>
 #define malloca     alloca
-#define freea(p)
+#define freea(p)    (void)p
 #define DIRENT_H    <dirent.h>
 #define PLUGIN_EXT  ".so"
 

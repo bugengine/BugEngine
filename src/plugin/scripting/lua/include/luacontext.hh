@@ -23,11 +23,13 @@ public:
     Context(const Plugin::Context& context);
     ~Context();
 
+    static minitl::format<1024u> tostring(lua_State* state, int element);
     static void printStack(lua_State* l);
     static void typeError(lua_State* state, int narg, const char* expected, const char* got);
     static void push(lua_State* state, const RTTI::Value& v);
     static void checkArg(lua_State* state, int narg, int type);
     static void checkArg(lua_State* state, int narg, const char* userDataType);
+    static void checkArg(lua_State* state, int narg, const RTTI::Type& type);
 
 private:
     void runBuffer(weak<const LuaScript> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;

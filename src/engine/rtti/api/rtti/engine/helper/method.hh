@@ -58,6 +58,33 @@ static Value wrapCallConst(Value* params, u32 paramCount)
     return (params[0].as<const T&>().*call)(params + 1, paramCount - 1);
 }
 
+template< typename T >
+struct ToParameterType
+{
+    typedef T Type;
+};
+
+
+template< typename T >
+struct ToParameterType<T&>
+{
+    typedef T& Type;
+};
+
+
+template< typename T >
+struct ToParameterType<const T&>
+{
+    typedef const T& Type;
+};
+
+template< typename T >
+struct ToParameterType<const T>
+{
+    typedef T Type;
+};
+
+
 }}
 
 /*****************************************************************************/

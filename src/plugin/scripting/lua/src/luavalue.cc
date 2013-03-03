@@ -103,24 +103,9 @@ extern "C" int valueGet(lua_State *state)
 extern "C" int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
-
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, 1);
-    const RTTI::Method& method = (*userdata)["?call"].as<const RTTI::Method&>();
-    raw<const RTTI::Method::Overload> overload = method.overloads;
-    u32 overloadCount = 0;
-    while(overload)
-    {
-        overloadCount ++;
-        overload = overload->next;
-    }
-    if (overloadCount == 1)
-    {
-        return call(state, userdata, method.overloads);
-    }
-    else
-    {
-        return 0;
-    }
+    raw<const RTTI::Method> method = (*userdata)["?call"].as< raw<const RTTI::Method> >();
+    return call(state, method);
 }
 
 const luaL_Reg s_valueMetaTable[] = {
