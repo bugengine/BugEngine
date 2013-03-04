@@ -44,46 +44,23 @@ static inline void nulldestructor(void*)
 {
 }
 
-template< typename T, Value(T::*call)(Value*, u32) >
-static Value wrapCall(Value* params, u32 paramCount)
+template< typename T >
+static Value createPod(Value* params, u32 paramCount)
 {
-    be_assert_recover(be_typeid<T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<T*>::type() | params[0].type(), return Value());
-    return (params[0].as<T&>().*call)(params + 1, paramCount - 1);
+    be_forceuse(params);
+    be_forceuse(paramCount);
+    be_assert(paramCount == 0, "too many parameters to POD construction");
+    return Value(be_typeid<T>::type(), Value::Reserve);
 }
 
-template< typename T, Value(T::*call)(Value*, u32) const >
-static Value wrapCallConst(Value* params, u32 paramCount)
+
+template< typename T >
+static Value createPodCopy(Value* params, u32 paramCount)
 {
-    be_assert_recover(be_typeid<const T*>::type() <= params[0].type(), "expected parameter of type %s; got %s" | be_typeid<const T*>::type() | params[0].type(), return Value());
-    return (params[0].as<const T&>().*call)(params + 1, paramCount - 1);
+    be_forceuse(paramCount);
+    be_assert(paramCount == 1, "invalid parameter count to POD copy");
+    return params[0];
 }
-
-template< typename T >
-struct ToParameterType
-{
-    typedef T Type;
-};
-
-
-template< typename T >
-struct ToParameterType<T&>
-{
-    typedef T& Type;
-};
-
-
-template< typename T >
-struct ToParameterType<const T&>
-{
-    typedef const T& Type;
-};
-
-template< typename T >
-struct ToParameterType<const T>
-{
-    typedef T Type;
-};
-
 
 }}
 

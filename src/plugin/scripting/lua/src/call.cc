@@ -143,7 +143,7 @@ static int convertUserdataToValue(lua_State *state, int index, const RTTI::Type&
     {
         lua_pop(state, 2);
         RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, index);
-        u32 distance = userdata->type().distance(type);
+        u32 distance = type.metaclass->type() == RTTI::ClassType_Variant ? 10 : userdata->type().distance(type);
         if (distance >= RTTI::Type::MaxTypeDistance)
         {
             return -1;
@@ -212,7 +212,8 @@ static int convertTableToValue(lua_State *state, int index, const RTTI::Type& ty
     else if (type.metaclass->type() == RTTI::ClassType_Pod)
     {
         be_assert(type.indirection == RTTI::Type::Value, "POD type can only be value");
-        new (value) RTTI::Value(type, RTTI::Value::Reserve);
+        RTTI::Type valueType = RTTI::Type::makeType(type.metaclass, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+        new (value) RTTI::Value(valueType, RTTI::Value::Reserve);
         lua_pushnil(state);
         while (lua_next(state, index) != 0)
         {
@@ -232,13 +233,15 @@ static int convertTableToValue(lua_State *state, int index, const RTTI::Type& ty
             }
             RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
             int score = get(state, -1, property->type, v);
-            freea(v);
             if (score < 0)
             {
                 lua_pop(state, 2);
                 value->~Value();
+                freea(v);
                 return -1;
             }
+            property->set(*value, *v);
+            freea(v);
             lua_pop(state, 1);
         }
         return 0;
