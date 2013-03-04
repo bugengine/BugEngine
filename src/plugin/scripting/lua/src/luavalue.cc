@@ -104,8 +104,46 @@ extern "C" int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, 1);
-    raw<const RTTI::Method> method = (*userdata)["?call"].as< raw<const RTTI::Method> >();
-    return call(state, method);
+    RTTI::Value value = (*userdata)["?call"];
+    if (!value)
+    {
+        lua_Debug ar;
+        if (!lua_getstack(state, 0, &ar))
+        {
+            ar.name = "?";
+        }
+        else
+        {
+            lua_getinfo(state, "n", &ar);
+            if (ar.name == NULL)
+            {
+                ar.name = "?";
+            }
+        }
+        return luaL_error(state, LUA_QS ": object is not callable", ar.name);
+    }
+    raw<const RTTI::Method> method = value.as< raw<const RTTI::Method> >();
+    if (method)
+    {
+        return call(state, method);
+    }
+    else
+    {
+        lua_Debug ar;
+        if (!lua_getstack(state, 0, &ar))
+        {
+            ar.name = "?";
+        }
+        else
+        {
+            lua_getinfo(state, "n", &ar);
+            if (ar.name == NULL)
+            {
+                ar.name = "?";
+            }
+        }
+        return luaL_error(state, LUA_QS ": method is not implemented", ar.name);
+    }
 }
 
 const luaL_Reg s_valueMetaTable[] = {

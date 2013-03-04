@@ -34,6 +34,7 @@ struct ipath
 namespace BugEngine { namespace RTTI
 {
 
+be_tag(Index(BugEngine::RTTI::ClassType_Variant))
 struct Value
 {
 };
