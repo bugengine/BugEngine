@@ -147,6 +147,246 @@ protected:
         be_forceuse(isConst);
         return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out2.product));
     }
+    static RTTI::Value getProperty3(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out3.product));
+    }
+    static RTTI::Value getProperty4(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out4.product));
+    }
+    static RTTI::Value getProperty5(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out5.product));
+    }
+    static RTTI::Value getProperty6(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out6.product));
+    }
+    static RTTI::Value getProperty7(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out7.product));
+    }
+    static RTTI::Value getProperty8(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out8.product));
+    }
+    static RTTI::Value getProperty9(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out9.product));
+    }
+    static RTTI::Value getProperty10(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out10.product));
+    }
+    static RTTI::Value getProperty11(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out11.product));
+    }
+    static RTTI::Value getProperty12(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out12.product));
+    }
+    static RTTI::Value getProperty13(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out13.product));
+    }
+    static RTTI::Value getProperty14(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out14.product));
+    }
+    static RTTI::Value getProperty15(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out15.product));
+    }
+    static RTTI::Value getProperty16(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out16.product));
+    }
+    static RTTI::Value getProperty17(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out17.product));
+    }
+    static RTTI::Value getProperty18(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out18.product));
+    }
+    static RTTI::Value getProperty19(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out19.product));
+    }
+    static RTTI::Value getProperty20(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out20.product));
+    }
+    static RTTI::Value getProperty21(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out21.product));
+    }
+    static RTTI::Value getProperty22(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out22.product));
+    }
+    static RTTI::Value getProperty23(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out23.product));
+    }
+    static RTTI::Value getProperty24(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out24.product));
+    }
+    static RTTI::Value getProperty25(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out25.product));
+    }
+    static RTTI::Value getProperty26(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out26.product));
+    }
+    static RTTI::Value getProperty27(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out27.product));
+    }
+    static RTTI::Value getProperty28(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out28.product));
+    }
+    static RTTI::Value getProperty29(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out29.product));
+    }
+    static RTTI::Value getProperty30(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out30.product));
+    }
+    static RTTI::Value getProperty31(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out31.product));
+    }
+    static RTTI::Value getProperty32(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out32.product));
+    }
+    static RTTI::Value getProperty33(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out33.product));
+    }
+    static RTTI::Value getProperty34(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out34.product));
+    }
+    static RTTI::Value getProperty35(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out35.product));
+    }
+    static RTTI::Value getProperty36(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out36.product));
+    }
+    static RTTI::Value getProperty37(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out37.product));
+    }
+    static RTTI::Value getProperty38(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out38.product));
+    }
+    static RTTI::Value getProperty39(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out39.product));
+    }
+    static RTTI::Value getProperty40(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out40.product));
+    }
+    static RTTI::Value getProperty41(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out41.product));
+    }
+    static RTTI::Value getProperty42(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out42.product));
+    }
+    static RTTI::Value getProperty43(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out43.product));
+    }
+    static RTTI::Value getProperty44(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out44.product));
+    }
+    static RTTI::Value getProperty45(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out45.product));
+    }
+    static RTTI::Value getProperty46(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out46.product));
+    }
+    static RTTI::Value getProperty47(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out47.product));
+    }
+    static RTTI::Value getProperty48(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out48.product));
+    }
+    static RTTI::Value getProperty49(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out49.product));
+    }
+    static RTTI::Value getProperty50(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        return RTTI::Value(RTTI::Value::ByRef(((const ThisType*)from)->m_out50.product));
+    }
     static RTTI::Value getEmptyProperty(void* from, bool isConst)
     {
         be_forceuse(from);
@@ -225,54 +465,54 @@ const RTTI::Property EntityStorageFactory<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 {
     { {0}, {!minitl::type_equals<T2, void>::Value ? &s_properties[1] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T1>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T1, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T1>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
     { {0}, {!minitl::type_equals<T3, void>::Value ? &s_properties[2] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T2>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T2, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T2>& >::type(), minitl::type_equals<T2, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty2 },
-    { {0}, {!minitl::type_equals<T4, void>::Value ? &s_properties[3] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T3>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T3, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T3>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T5, void>::Value ? &s_properties[4] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T4>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T4, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T4>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T6, void>::Value ? &s_properties[5] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T5>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T5, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T5>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T7, void>::Value ? &s_properties[6] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T6>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T6, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T6>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T8, void>::Value ? &s_properties[7] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T7>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T7, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T7>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T9, void>::Value ? &s_properties[8] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T8>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T8, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T8>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T10, void>::Value ? &s_properties[9] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T9>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T9, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T9>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T11, void>::Value ? &s_properties[10] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T10>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T10, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T10>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T12, void>::Value ? &s_properties[11] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T11>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T11, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T11>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T13, void>::Value ? &s_properties[12] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T12>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T12, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T12>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T14, void>::Value ? &s_properties[13] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T13>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T13, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T13>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T15, void>::Value ? &s_properties[14] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T14>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T14, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T14>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T16, void>::Value ? &s_properties[15] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T15>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T15, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T15>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T17, void>::Value ? &s_properties[16] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T16>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T16, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T16>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T18, void>::Value ? &s_properties[17] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T17>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T17, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T17>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T19, void>::Value ? &s_properties[18] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T18>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T18, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T18>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T20, void>::Value ? &s_properties[19] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T19>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T19, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T19>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T21, void>::Value ? &s_properties[20] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T20>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T20, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T20>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T22, void>::Value ? &s_properties[21] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T21>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T21, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T21>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T23, void>::Value ? &s_properties[22] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T22>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T22, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T22>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T24, void>::Value ? &s_properties[23] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T23>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T23, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T23>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T25, void>::Value ? &s_properties[24] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T24>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T24, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T24>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T26, void>::Value ? &s_properties[25] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T25>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T25, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T25>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T27, void>::Value ? &s_properties[26] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T26>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T26, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T26>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T28, void>::Value ? &s_properties[27] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T27>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T27, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T27>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T29, void>::Value ? &s_properties[28] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T28>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T28, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T28>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T30, void>::Value ? &s_properties[29] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T29>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T29, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T29>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T31, void>::Value ? &s_properties[30] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T30>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T30, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T30>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T32, void>::Value ? &s_properties[31] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T31>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T31, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T31>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T33, void>::Value ? &s_properties[32] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T32>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T32, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T32>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T34, void>::Value ? &s_properties[33] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T33>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T33, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T33>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T35, void>::Value ? &s_properties[34] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T34>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T34, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T34>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T36, void>::Value ? &s_properties[35] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T35>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T35, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T35>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T37, void>::Value ? &s_properties[36] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T36>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T36, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T36>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T38, void>::Value ? &s_properties[37] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T37>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T37, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T37>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T39, void>::Value ? &s_properties[38] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T38>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T38, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T38>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T40, void>::Value ? &s_properties[39] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T39>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T39, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T39>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T41, void>::Value ? &s_properties[40] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T40>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T40, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T40>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T42, void>::Value ? &s_properties[41] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T41>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T41, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T41>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T43, void>::Value ? &s_properties[42] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T42>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T42, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T42>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T44, void>::Value ? &s_properties[43] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T43>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T43, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T43>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T45, void>::Value ? &s_properties[44] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T44>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T44, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T44>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T46, void>::Value ? &s_properties[45] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T45>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T45, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T45>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T47, void>::Value ? &s_properties[46] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T46>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T46, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T46>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T48, void>::Value ? &s_properties[47] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T47>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T47, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T47>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T49, void>::Value ? &s_properties[48] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T48>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T48, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T48>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {!minitl::type_equals<T50, void>::Value ? &s_properties[49] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T49>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T49, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T49>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
-    { {0}, {be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T50>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T1, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T50>& >::type(), minitl::type_equals<T50, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty1 },
+    { {0}, {!minitl::type_equals<T4, void>::Value ? &s_properties[3] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T3>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T3, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T3>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty3 },
+    { {0}, {!minitl::type_equals<T5, void>::Value ? &s_properties[4] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T4>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T4, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T4>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty4 },
+    { {0}, {!minitl::type_equals<T6, void>::Value ? &s_properties[5] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T5>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T5, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T5>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty5 },
+    { {0}, {!minitl::type_equals<T7, void>::Value ? &s_properties[6] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T6>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T6, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T6>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty6 },
+    { {0}, {!minitl::type_equals<T8, void>::Value ? &s_properties[7] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T7>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T7, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T7>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty7 },
+    { {0}, {!minitl::type_equals<T9, void>::Value ? &s_properties[8] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T8>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T8, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T8>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty8 },
+    { {0}, {!minitl::type_equals<T10, void>::Value ? &s_properties[9] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T9>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T9, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T9>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty9 },
+    { {0}, {!minitl::type_equals<T11, void>::Value ? &s_properties[10] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T10>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T10, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T10>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty10 },
+    { {0}, {!minitl::type_equals<T12, void>::Value ? &s_properties[11] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T11>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T11, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T11>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty11 },
+    { {0}, {!minitl::type_equals<T13, void>::Value ? &s_properties[12] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T12>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T12, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T12>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty12 },
+    { {0}, {!minitl::type_equals<T14, void>::Value ? &s_properties[13] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T13>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T13, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T13>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty13 },
+    { {0}, {!minitl::type_equals<T15, void>::Value ? &s_properties[14] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T14>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T14, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T14>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty14 },
+    { {0}, {!minitl::type_equals<T16, void>::Value ? &s_properties[15] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T15>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T15, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T15>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty15 },
+    { {0}, {!minitl::type_equals<T17, void>::Value ? &s_properties[16] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T16>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T16, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T16>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty16 },
+    { {0}, {!minitl::type_equals<T18, void>::Value ? &s_properties[17] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T17>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T17, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T17>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty17 },
+    { {0}, {!minitl::type_equals<T19, void>::Value ? &s_properties[18] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T18>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T18, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T18>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty18 },
+    { {0}, {!minitl::type_equals<T20, void>::Value ? &s_properties[19] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T19>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T19, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T19>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty19 },
+    { {0}, {!minitl::type_equals<T21, void>::Value ? &s_properties[20] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T20>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T20, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T20>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty20 },
+    { {0}, {!minitl::type_equals<T22, void>::Value ? &s_properties[21] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T21>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T21, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T21>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty21 },
+    { {0}, {!minitl::type_equals<T23, void>::Value ? &s_properties[22] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T22>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T22, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T22>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty22 },
+    { {0}, {!minitl::type_equals<T24, void>::Value ? &s_properties[23] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T23>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T23, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T23>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty23 },
+    { {0}, {!minitl::type_equals<T25, void>::Value ? &s_properties[24] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T24>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T24, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T24>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty24 },
+    { {0}, {!minitl::type_equals<T26, void>::Value ? &s_properties[25] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T25>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T25, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T25>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty25 },
+    { {0}, {!minitl::type_equals<T27, void>::Value ? &s_properties[26] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T26>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T26, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T26>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty26 },
+    { {0}, {!minitl::type_equals<T28, void>::Value ? &s_properties[27] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T27>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T27, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T27>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty27 },
+    { {0}, {!minitl::type_equals<T29, void>::Value ? &s_properties[28] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T28>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T28, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T28>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty28 },
+    { {0}, {!minitl::type_equals<T30, void>::Value ? &s_properties[29] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T29>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T29, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T29>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty29 },
+    { {0}, {!minitl::type_equals<T31, void>::Value ? &s_properties[30] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T30>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T30, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T30>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty30 },
+    { {0}, {!minitl::type_equals<T32, void>::Value ? &s_properties[31] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T31>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T31, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T31>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty31 },
+    { {0}, {!minitl::type_equals<T33, void>::Value ? &s_properties[32] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T32>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T32, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T32>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty32 },
+    { {0}, {!minitl::type_equals<T34, void>::Value ? &s_properties[33] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T33>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T33, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T33>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty33 },
+    { {0}, {!minitl::type_equals<T35, void>::Value ? &s_properties[34] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T34>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T34, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T34>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty34 },
+    { {0}, {!minitl::type_equals<T36, void>::Value ? &s_properties[35] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T35>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T35, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T35>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty35 },
+    { {0}, {!minitl::type_equals<T37, void>::Value ? &s_properties[36] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T36>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T36, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T36>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty36 },
+    { {0}, {!minitl::type_equals<T38, void>::Value ? &s_properties[37] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T37>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T37, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T37>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty37 },
+    { {0}, {!minitl::type_equals<T39, void>::Value ? &s_properties[38] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T38>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T38, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T38>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty38 },
+    { {0}, {!minitl::type_equals<T40, void>::Value ? &s_properties[39] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T39>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T39, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T39>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty39 },
+    { {0}, {!minitl::type_equals<T41, void>::Value ? &s_properties[40] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T40>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T40, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T40>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty40 },
+    { {0}, {!minitl::type_equals<T42, void>::Value ? &s_properties[41] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T41>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T41, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T41>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty41 },
+    { {0}, {!minitl::type_equals<T43, void>::Value ? &s_properties[42] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T42>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T42, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T42>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty42 },
+    { {0}, {!minitl::type_equals<T44, void>::Value ? &s_properties[43] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T43>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T43, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T43>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty43 },
+    { {0}, {!minitl::type_equals<T45, void>::Value ? &s_properties[44] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T44>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T44, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T44>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty44 },
+    { {0}, {!minitl::type_equals<T46, void>::Value ? &s_properties[45] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T45>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T45, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T45>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty45 },
+    { {0}, {!minitl::type_equals<T47, void>::Value ? &s_properties[46] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T46>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T46, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T46>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty46 },
+    { {0}, {!minitl::type_equals<T48, void>::Value ? &s_properties[47] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T47>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T47, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T47>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty47 },
+    { {0}, {!minitl::type_equals<T49, void>::Value ? &s_properties[48] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T48>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T48, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T48>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty48 },
+    { {0}, {!minitl::type_equals<T50, void>::Value ? &s_properties[49] : be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T49>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T49, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T49>& >::type(), minitl::type_equals<T1, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty49 },
+    { {0}, {be_typeid<EntityStorage>::klass()->properties.m_ptr}, be_typeid<T50>::klass()->name, be_typeid<ThisType>::type(), minitl::type_equals<T1, void>::Value ? be_typeid<void>::type() : be_typeid< const Kernel::Product<T50>& >::type(), minitl::type_equals<T50, void>::Value ? &ThisType::getEmptyProperty : &ThisType::getProperty50 },
 };
 
 }}
