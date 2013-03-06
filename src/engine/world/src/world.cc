@@ -48,9 +48,13 @@ void World::unspawn(Entity e)
 void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass)
 {
     be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
-    be_forceuse(e);
-    be_forceuse(component);
-    be_forceuse(metaclass);
+    m_storage->addComponent(e, component, metaclass);
+}
+
+void World::removeComponent(Entity e, raw<const RTTI::Class> metaclass)
+{
+    be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
+    m_storage->removeComponent(e, metaclass);
 }
 
 void World::addComponent(Entity e, const RTTI::Value& component)

@@ -107,9 +107,69 @@ void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
 void Context::push(lua_State* state, const RTTI::Value& v)
 {
     const RTTI::Type& t = v.type();
-    if (t.metaclass == be_typeid<i32>::klass())
+    if (t.metaclass->type() == RTTI::ClassType_Integer)
     {
-        lua_pushnumber(state, v.as<i32>());
+        switch(t.metaclass->index())
+        {
+        case 0:
+            be_assert(be_typeid<bool>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<bool>::klass()->fullname());
+            lua_pushnumber(state, v.as<bool>() ? 1 : 0);
+            return;
+        case 1:
+            be_assert(be_typeid<u8>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u8>::klass()->fullname());
+            lua_pushnumber(state, v.as<u8>());
+            return;
+        case 2:
+            be_assert(be_typeid<u16>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u16>::klass()->fullname());
+            lua_pushnumber(state, v.as<u16>());
+            return;
+        case 3:
+            be_assert(be_typeid<u32>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u32>::klass()->fullname());
+            lua_pushnumber(state, v.as<u32>());
+            return;
+        case 4:
+            be_assert(be_typeid<u64>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u64>::klass()->fullname());
+            lua_pushnumber(state, v.as<u64>());
+            return;
+        case 5:
+            be_assert(be_typeid<i8>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i8>::klass()->fullname());
+            lua_pushnumber(state, v.as<i8>());
+            return;
+        case 6:
+            be_assert(be_typeid<i16>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i16>::klass()->fullname());
+            lua_pushnumber(state, v.as<i16>());
+            return;
+        case 7:
+            be_assert(be_typeid<i32>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i32>::klass()->fullname());
+            lua_pushnumber(state, v.as<i32>());
+            return;
+        case 8:
+            be_assert(be_typeid<i64>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i64>::klass()->fullname());
+            lua_pushnumber(state, v.as<i64>());
+            return;
+        case 9:
+            be_assert(be_typeid<float>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<float>::klass()->fullname());
+            lua_pushnumber(state, v.as<float>());
+            return;
+        case 10:
+            be_assert(be_typeid<double>::klass() == t.metaclass,
+                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<double>::klass()->fullname());
+            lua_pushnumber(state, v.as<double>());
+            return;
+        default:
+            be_notreached();
+            lua_pushnumber(state, 0);
+        }
     }
     else
     {
