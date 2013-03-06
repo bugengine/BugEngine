@@ -33,6 +33,8 @@ world:addComponent(e6, kernel.A({value = 1}))
 world:addComponent(e7, kernel.A({value = 1}))
 world:addComponent(e7, kernel.B({value = 1}))
 
+world:removeComponent(e7, kernel.A)
+
 
 -- world:unspawn(e1)
 -- world:unspawn(e2)
