@@ -134,7 +134,7 @@ void Context::push(lua_State* state, const RTTI::Value& v)
         case 4:
             be_assert(be_typeid<u64>::klass() == t.metaclass,
                       "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u64>::klass()->fullname());
-            lua_pushnumber(state, v.as<u64>());
+            lua_pushnumber(state, (lua_Number)v.as<u64>());
             return;
         case 5:
             be_assert(be_typeid<i8>::klass() == t.metaclass,
@@ -154,7 +154,7 @@ void Context::push(lua_State* state, const RTTI::Value& v)
         case 8:
             be_assert(be_typeid<i64>::klass() == t.metaclass,
                       "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i64>::klass()->fullname());
-            lua_pushnumber(state, v.as<i64>());
+            lua_pushnumber(state, (lua_Number)v.as<i64>());
             return;
         case 9:
             be_assert(be_typeid<float>::klass() == t.metaclass,
