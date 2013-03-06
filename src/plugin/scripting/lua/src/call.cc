@@ -428,7 +428,7 @@ int call(lua_State* state, raw<const RTTI::Method> method)
         if (nargs != 0)
         {
             strcat(errorMessage, "parameters:\n\t");
-            for (int i = 0; i < nargs; ++i)
+            for (u32 i = 0; i < nargs; ++i)
             {
                 strcat(errorMessage, Context::tostring(state, i+2).c_str());
                 if (i != nargs-1)
