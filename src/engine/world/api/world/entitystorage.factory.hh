@@ -136,6 +136,56 @@ protected:
         ,   m_out49(initialTask())
         ,   m_out50(initialTask())
     {
+        registerType(be_typeid<T1>::klass());
+        registerType(be_typeid<T2>::klass());
+        registerType(be_typeid<T3>::klass());
+        registerType(be_typeid<T4>::klass());
+        registerType(be_typeid<T5>::klass());
+        registerType(be_typeid<T6>::klass());
+        registerType(be_typeid<T7>::klass());
+        registerType(be_typeid<T8>::klass());
+        registerType(be_typeid<T9>::klass());
+        registerType(be_typeid<T10>::klass());
+        registerType(be_typeid<T11>::klass());
+        registerType(be_typeid<T12>::klass());
+        registerType(be_typeid<T13>::klass());
+        registerType(be_typeid<T14>::klass());
+        registerType(be_typeid<T15>::klass());
+        registerType(be_typeid<T16>::klass());
+        registerType(be_typeid<T17>::klass());
+        registerType(be_typeid<T18>::klass());
+        registerType(be_typeid<T19>::klass());
+        registerType(be_typeid<T20>::klass());
+        registerType(be_typeid<T21>::klass());
+        registerType(be_typeid<T22>::klass());
+        registerType(be_typeid<T23>::klass());
+        registerType(be_typeid<T24>::klass());
+        registerType(be_typeid<T25>::klass());
+        registerType(be_typeid<T26>::klass());
+        registerType(be_typeid<T27>::klass());
+        registerType(be_typeid<T28>::klass());
+        registerType(be_typeid<T29>::klass());
+        registerType(be_typeid<T30>::klass());
+        registerType(be_typeid<T31>::klass());
+        registerType(be_typeid<T32>::klass());
+        registerType(be_typeid<T33>::klass());
+        registerType(be_typeid<T34>::klass());
+        registerType(be_typeid<T35>::klass());
+        registerType(be_typeid<T36>::klass());
+        registerType(be_typeid<T37>::klass());
+        registerType(be_typeid<T38>::klass());
+        registerType(be_typeid<T39>::klass());
+        registerType(be_typeid<T40>::klass());
+        registerType(be_typeid<T41>::klass());
+        registerType(be_typeid<T42>::klass());
+        registerType(be_typeid<T43>::klass());
+        registerType(be_typeid<T44>::klass());
+        registerType(be_typeid<T45>::klass());
+        registerType(be_typeid<T46>::klass());
+        registerType(be_typeid<T47>::klass());
+        registerType(be_typeid<T48>::klass());
+        registerType(be_typeid<T49>::klass());
+        registerType(be_typeid<T50>::klass());
     }
     static RTTI::Value getProperty1(void* from, bool isConst)
     {
