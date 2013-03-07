@@ -34,11 +34,15 @@ private: // friend World
     void unspawn(Entity e);
     void addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType);
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
+    bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
 protected:
     EntityStorage();
     ~EntityStorage();
 
     weak<Task::ITask>   initialTask() const;
+
+    void registerType(raw<const RTTI::Class> componentType);
+    u32 indexOf(raw<const RTTI::Class> componentType) const;
 };
 
 }}

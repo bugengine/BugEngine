@@ -35,6 +35,8 @@ world:addComponent(e7, kernel.B({value = 1}))
 
 world:removeComponent(e7, kernel.A)
 
+print(world:hasComponent(e7, kernel.A))
+print(world:hasComponent(e7, kernel.B))
 
 -- world:unspawn(e1)
 -- world:unspawn(e2)
