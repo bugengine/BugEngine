@@ -21,7 +21,7 @@ private:
     struct EntityInfo;
 private:
     scoped<Task::ITask>                         m_task;
-    Entity                                      m_freeEntityId;
+    u32                                         m_freeEntityId;
     SystemAllocator                             m_entityAllocator;
     EntityInfo*                                 m_entityInfoBuffer;
     u32                                         m_entityCount;

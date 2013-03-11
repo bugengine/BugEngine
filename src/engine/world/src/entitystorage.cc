@@ -15,14 +15,15 @@ struct EntityStorage::EntityInfo
 {
     union
     {
-        Entity next;
+        u32 next;
         u32 bucket;
     };
     u32 index;
     u64 mask;
 };
 
-static const Entity s_defaultSlot = { 0 };
+static const u32 s_usedBit = 0x80000000;
+static const u32 s_indexMask = 0x7FFFFFFF;
 
 EntityStorage::EntityStorage()
     :   m_task(scoped< Task::Task< Task::MethodCaller<EntityStorage, &EntityStorage::start> > >::create(
@@ -30,7 +31,7 @@ EntityStorage::EntityStorage()
                     "start",
                     Colors::Green::Green,
                     Task::MethodCaller<EntityStorage, &EntityStorage::start>(this)))
-    ,   m_freeEntityId(s_defaultSlot)
+    ,   m_freeEntityId(0)
     ,   m_entityAllocator(sizeof(EntityInfo)*4*1024*1024)
     ,   m_entityInfoBuffer((EntityInfo*)m_entityAllocator.buffer())
     ,   m_entityCount(0)
@@ -78,7 +79,7 @@ void EntityStorage::start()
 
 Entity EntityStorage::spawn()
 {
-    Entity e = m_freeEntityId;
+    Entity e = { m_freeEntityId };
 
     if (e.id >= m_entityCapacity)
     {
@@ -86,13 +87,14 @@ Entity EntityStorage::spawn()
         m_entityAllocator.setUsage(m_entityCapacity*sizeof(EntityInfo));
         for (u32 i = m_entityCapacity - 1024; i < m_entityCapacity; ++i)
         {
-            m_entityInfoBuffer[i].next.id = i+1;
+            m_entityInfoBuffer[i].next = i+1;
         }
     }
 
+    be_assert((m_entityInfoBuffer[e.id].index & s_usedBit) == 0, "Entity %s is already in use; entity buffer inconsistent");
     m_freeEntityId = m_entityInfoBuffer[e.id].next;
-    m_entityInfoBuffer[e.id].next.id = 0;
-    m_entityInfoBuffer[e.id].index = 0;
+    m_entityInfoBuffer[e.id].bucket = 0;
+    m_entityInfoBuffer[e.id].index = s_usedBit;
     m_entityInfoBuffer[e.id].mask = 0;
     ++ m_entityCount;
     return e;
@@ -100,8 +102,10 @@ Entity EntityStorage::spawn()
 
 void EntityStorage::unspawn(Entity e)
 {
+    be_assert_recover(e.id < m_entityCapacity, "Entity has invalid ID %s" | e.id, return);
+    be_assert_recover((m_entityInfoBuffer[e.id].index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return);
     m_entityInfoBuffer[e.id].next = m_freeEntityId;
-    m_freeEntityId = e;
+    m_freeEntityId = e.id;
     // unspawn components
     m_entityInfoBuffer[e.id].index = 0;
     m_entityInfoBuffer[e.id].mask = 0;
@@ -110,6 +114,8 @@ void EntityStorage::unspawn(Entity e)
 
 void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType)
 {
+    be_assert_recover(e.id < m_entityCapacity, "Entity has invalid ID %s" | e.id, return);
+    be_assert_recover((m_entityInfoBuffer[e.id].index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return);
     be_forceuse(c);
     u32 componentIndex = indexOf(componentType);
     be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return);
@@ -121,6 +127,8 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
 
 void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentType)
 {
+    be_assert_recover(e.id < m_entityCapacity, "Entity has invalid ID %s" | e.id, return);
+    be_assert_recover((m_entityInfoBuffer[e.id].index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return);
     u32 componentIndex = indexOf(componentType);
     be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return);
     u64 mask = 1;
@@ -131,6 +139,8 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
 
 bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
 {
+    be_assert_recover(e.id < m_entityCapacity, "Entity has invalid ID %s" | e.id, return false);
+    be_assert_recover((m_entityInfoBuffer[e.id].index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return false);
     u32 componentIndex = indexOf(componentType);
     be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return false);
     u64 mask = 1;
