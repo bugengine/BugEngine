@@ -11,7 +11,7 @@ namespace BugEngine { namespace World
 
 struct be_api(WORLD) Entity
 {
-    u32 id;
+    const u32 id;
 
 
     bool operator ==(const Entity& other) const { return id == other.id; }
