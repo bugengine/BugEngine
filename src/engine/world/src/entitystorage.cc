@@ -65,11 +65,8 @@ weak<Task::ITask> EntityStorage::initialTask() const
 
 void EntityStorage::registerType(raw<const RTTI::Class> componentType)
 {
-    if (componentType != be_typeid<void>::klass())
-    {
-        be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
-        m_componentTypes.push_back(componentType);
-    }
+    be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
+    m_componentTypes.push_back(componentType);
 }
 
 u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
