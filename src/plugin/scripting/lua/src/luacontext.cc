@@ -272,7 +272,7 @@ void Context::printStack(lua_State* state)
 
     for (i = 1; i <= top; i++)
     {
-        be_debug(" %d: %s" | top-i+1 | tostring(state, -i).c_str());
+        be_debug(" %d: %s" | (top-i+1) | tostring(state, -i).c_str());
     }
 }
 
