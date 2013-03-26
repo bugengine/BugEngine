@@ -8,11 +8,26 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/typeinfo.hh>
 
-#include    <bucket.hh>
-#include    <componentgroup.hh>
-
 namespace BugEngine { namespace World
 {
+
+EntityStorage::Bucket::Bucket()
+{
+}
+
+EntityStorage::Bucket::~Bucket()
+{
+}
+
+EntityStorage::ComponentGroup::ComponentGroup()
+:   m_bucket(Arena::game(), 0)
+{
+}
+
+EntityStorage::ComponentGroup::~ComponentGroup()
+{
+}
+
 
 struct EntityStorage::EntityInfo
 {
