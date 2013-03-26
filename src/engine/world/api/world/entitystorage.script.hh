@@ -18,9 +18,23 @@ class be_api(WORLD) EntityStorage : public minitl::refcountable
 {
     friend class World;
 private:
+    struct Bucket
+    {
+        u64 componentMask;
+        u32* indices;
+
+        Bucket();
+        ~Bucket();
+    };
+    struct ComponentGroup
+    {
+        u64 componentMask;
+        minitl::array<EntityStorage::Bucket> m_bucket;
+
+        ComponentGroup();
+        ~ComponentGroup();
+    };
     struct EntityInfo;
-    struct ComponentGroup;
-    struct Bucket;
 private:
     scoped<Task::ITask>                         m_task;
     u32                                         m_freeEntityId;
