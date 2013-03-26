@@ -24,6 +24,9 @@ struct OutputStream
         ,   product(stream, producer)
     {
     }
+private:
+    OutputStream(const OutputStream& other);
+    OutputStream& operator=(const OutputStream& other);
 };
 
 template< typename T, typename TAIL >
@@ -37,6 +40,9 @@ struct ComponentList : public TAIL
         ,   stream(task)
     {
     }
+private:
+    ComponentList(const ComponentList& other);
+    ComponentList& operator=(const ComponentList& other);
 };
 
 template< typename T >
@@ -185,9 +191,9 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST> >
     ::BugEngine::World::ComponentList<T1, void>
 #define COMPONENT_LIST_2(T1, T2)                                                                    \
     ::BugEngine::World::ComponentList< T1, COMPONENT_LIST_1(T2) >
-#define COMPONENT_LIST_3(T1, T2, T3)                                                                    \
+#define COMPONENT_LIST_3(T1, T2, T3)                                                                \
     ::BugEngine::World::ComponentList< T1, COMPONENT_LIST_2(T2, T3) >
-#define COMPONENT_LIST_4(T1, T2, T3, T4)                                                                    \
+#define COMPONENT_LIST_4(T1, T2, T3, T4)                                                            \
     ::BugEngine::World::ComponentList< T1, COMPONENT_LIST_3(T2, T3, T4) >
 
 /*****************************************************************************/

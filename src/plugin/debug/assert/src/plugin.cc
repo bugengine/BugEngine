@@ -11,15 +11,14 @@ namespace BugEngine { namespace Debug
 minitl::AssertionResult AssertionCallback(const char* file,
                                           int         line,
                                           const char* expr,
-                                          const char* message,
-                                          ...);
+                                          const char* message);
 class AssertSetup : public minitl::pointer
 {
 private:
     minitl::AssertionCallback_t   m_previousAssertionCallback;
 public:
     AssertSetup(const BugEngine::Plugin::Context& /*context*/)
-        :   m_previousAssertionCallback(minitl::setAssertionCallback(AssertionCallback))
+        :   m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
     {
         be_debug("installed assert callback");
     }

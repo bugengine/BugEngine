@@ -2,6 +2,7 @@
  see LICENSE for detail */
 
 #include    <package/stdafx.h>
+#include    <package/nodes/package.hh>
 #include    <package/nodes/zip.hh>
 #include    <package/nodes/entity.hh>
 #include    <package/nodes/event.hh>

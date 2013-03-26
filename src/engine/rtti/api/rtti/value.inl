@@ -113,6 +113,12 @@ inline Value& Value::as<Value&>()
     return *this;
 }
 
+template< >
+inline const Value& Value::as<const Value&>()
+{
+    return *this;
+}
+
 void* Value::memory()
 {
     if (!m_reference && m_type.size() <= sizeof(m_buffer))
