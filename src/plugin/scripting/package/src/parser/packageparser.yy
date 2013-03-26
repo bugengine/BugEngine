@@ -6,9 +6,11 @@
 #include    <package/nodes/package.hh>
 #include    <package/nodes/object.hh>
 #include    <package/nodes/entity.hh>
+#include    <package/nodes/component.hh>
 #include    <package/nodes/reference.hh>
 #include    <package/nodes/parameter.hh>
 #include    <package/nodes/value.hh>
+#include    <package/nodes/zip.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex

@@ -19,6 +19,13 @@ class Namespace(cpp.yacc.Nonterm):
 		self.lineno = namespace.lineno
 		self.members = None
 
+	def dumpNamespaces(self, files, namespace):
+		namespace = namespace + [self.name]
+		owner = 'be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		files[0].write('raw<RTTI::Class> %s;\n' % owner)
+		if self.members:
+			self.members.dumpNamespaces(files, namespace)
+
 	def predecl(self, files, namespace, parent):
 		namespace = namespace + [self.name]
 		if self.members:
