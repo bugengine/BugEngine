@@ -198,6 +198,11 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects + self.namespaces:
 			o.using(files, namespace, parent)
 
+	def dumpNamespaces(self, files, namespace):
+		for n in self.namespaces:
+			n.dumpNamespaces(files, namespace)
+
+
 	def predecl(self, files, namespace, parent, parent_value, parent_object):
 		try:
 			del self.methods['?del']
@@ -274,6 +279,7 @@ class Exprs(cpp.yacc.Nonterm):
 				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)
 				files[0].write('	%s,\n' % chain)
 				files[0].write('	{&%s},\n' % varname)
+				files[0].write('	%s,\n' % index)
 				files[0].write('	%s\n' % overload_ptr)
 				files[0].write('};\n')
 

@@ -9,7 +9,7 @@
 namespace minitl
 {
 
-AssertionResult defaultAssertionCallback(const char* /*file*/, int /*line*/, const char* /*expr*/, const char* /*message*/, ...)
+AssertionResult defaultAssertionCallback(const char* /*file*/, int /*line*/, const char* /*expr*/, const char* /*message*/)
 {
     return Break;
 }

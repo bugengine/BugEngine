@@ -102,18 +102,20 @@ int Application::run()
 
 void Application::load(weak<const Resource::Description> world, Resource::Resource& resource)
 {
+    m_worldCount++;
     resource.setRefHandle(ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask));
 }
 
 void Application::unload(Resource::Resource& resource)
 {
+    m_worldCount--;
     resource.clearRefHandle();
 }
 
 void Application::updateResources()
 {
     size_t resourceCount = m_resourceManager->updateTickets();
-    if (resourceCount == 0 && m_resourceLoadingCount != 0)
+    if (resourceCount == 0 && m_resourceLoadingCount != 0 && m_worldCount == 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
         /*TODO*/

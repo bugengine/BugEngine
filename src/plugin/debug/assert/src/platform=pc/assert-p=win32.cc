@@ -54,18 +54,10 @@ namespace BugEngine { namespace Debug
     minitl::AssertionResult AssertionCallback(const char *file,
                                               int        line,
                                               const char *expr,
-                                              const char *message,
-                                              ...)
+                                              const char *message)
     {
         {
-            va_list l;
-            va_start(l,message);
-            char assertmsg[BUFFER_SIZE];
-            (void)_vsnprintf(assertmsg,sizeof(outmessage)-1,message,l);
-            assertmsg[sizeof(assertmsg)-1] = 0;
-            va_end(l);
-
-            (void)_snprintf(outmessage,BUFFER_SIZE-1,"%s:%d : Assertion %s failed - %s\r\n", file, line, expr, assertmsg);
+            (void)_snprintf(outmessage,BUFFER_SIZE-1,"%s:%d : Assertion %s failed - %s\r\n", file, line, expr, message);
             outmessage[BUFFER_SIZE-1] = 0;
             OutputDebugString(outmessage);
         }

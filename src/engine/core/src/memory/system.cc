@@ -7,33 +7,55 @@
 namespace BugEngine
 {
 
-SystemAllocator::SystemAllocator(u32 maximumBytes)
-:   m_buffer(platformReserve(minitl::align(maximumBytes, platformPageSize())))
-,   m_capacity(maximumBytes)
-,   m_usage(0)
-,   m_realUsage(0)
+SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
+    :   m_head(0)
+    ,   m_capacity(initialCount)
+    ,   m_used(0)
+    ,   m_blockSize(size)
 {
+    for (u32 i = 0; i < initialCount; ++i)
+    {
+        Block* block = (Block*)platformReserve(blockSize());
+        platformCommit((byte*)block, 0, blockSize());
+        block->next = m_head;
+        m_head = block;
+    }
 }
 
 SystemAllocator::~SystemAllocator()
 {
-    be_assert(m_usage == 0, "Not all blocks reclaimed when system allocator was freed");
-    platformFree(m_buffer, minitl::align(m_capacity, platformPageSize()));
+    be_assert(m_used == 0, "Not all blocks reclaimed when system allocator was freed");
+    while (m_head)
+    {
+        byte* buffer = (byte*)m_head;
+        m_head = m_head->next;
+        platformFree(buffer, blockSize());
+    }
 }
 
-void SystemAllocator::setUsage(u32 byteCount)
+void* SystemAllocator::allocate()
 {
-    m_usage = byteCount;
-    u32 realUsage = minitl::align(byteCount, platformPageSize());
-    if (realUsage < m_realUsage)
+    ++ m_used;
+    void* result = m_head;
+    if (! result)
     {
-        platformRelease(m_buffer, realUsage, m_realUsage);
+        /* TODO */
     }
-    else if (realUsage > m_realUsage)
-    {
-        platformCommit(m_buffer, m_realUsage, realUsage);
-    }
-    m_realUsage = realUsage;
+    m_head = m_head->next;
+    return result;
+}
+
+void  SystemAllocator::free(void* memory)
+{
+    -- m_used;
+    Block* newblock = (Block*)memory;
+    newblock->next = m_head;
+    m_head = newblock;
+}
+
+u32 SystemAllocator::blockSize() const
+{
+    return 1 << (((u32)m_blockSize * 2) + 12);
 }
 
 }

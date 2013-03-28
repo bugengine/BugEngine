@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
+#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
@@ -109,49 +110,39 @@ namespace minitl
 template<u16 SIZE>
 const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const BugEngine::RTTI::Type& type)
 {
-    be_forceuse(type);
-    /*BugEngine::Debug::Format<> n(metaclass->name.str());
-    switch(access)
+    minitl::format<4096> typeName("%s%s%s%s%s");
+    if (type.constness == BugEngine::RTTI::Type::Const)
     {
-    case Const:
-        n.append(" const");
+        typeName | "const ";
+    }
+    else
+    {
+        typeName | "";
+    }
+    const char* constness = "";
+    if (type.access == BugEngine::RTTI::Type::Const)
+    {
+        constness = "const ";
+    }
+    switch(type.indirection)
+    {
+        case BugEngine::RTTI::Type::RefPtr:
+        typeName | "ref<" | constness | type.metaclass->fullname() | ">";
         break;
-    case Mutable:
+    case BugEngine::RTTI::Type::WeakPtr:
+        typeName | "weak<" | constness | type.metaclass->fullname() | ">";
+        break;
+    case BugEngine::RTTI::Type::RawPtr:
+        typeName | "raw<" | constness | type.metaclass->fullname() | ">";
+        break;
+    case BugEngine::RTTI::Type::Value:
+        typeName | "" | "" | type.metaclass->fullname() | "";
         break;
     default:
         be_notreached();
-    }
-
-    switch(indirection)
-    {
-    case Value:
-        break;
-    case RawPtr:
-        n = BugEngine::Debug::Format<>("raw<%s>") | n;
-        break;
-    case WeakPtr:
-        n = BugEngine::Debug::Format<>("weak<%s>") | n;
-        break;
-    case RefPtr:
-        n = BugEngine::Debug::Format<>("ref<%s>") | n;
-        break;
-    default:
-        be_notreached();
         break;
     }
-
-    switch(constness)
-    {
-    case Const:
-        n.append(" const");
-        break;
-    case Mutable:
-        break;
-    default:
-        be_notreached();
-    }
-    return n;*/
-    return format;
+    return format | typeName.c_str();
 }
 
 }

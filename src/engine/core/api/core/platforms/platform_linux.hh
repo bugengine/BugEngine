@@ -13,10 +13,10 @@
 #include    <strings.h>
 #include    <stdlib.h>
 #include    <malloc.h>
-#define     stricmp strcasecmp
-#define     strnicmp strncasecmp
-#define     malloca alloca
-#define     freea(p)
+#define     stricmp     strcasecmp
+#define     strnicmp    strncasecmp
+#define     malloca     alloca
+#define     freea(p)    (void)p
 #define     DIRENT_H    <dirent.h>
 
 /*****************************************************************************/

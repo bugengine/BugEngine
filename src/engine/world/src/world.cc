@@ -45,14 +45,24 @@ void World::unspawn(Entity e)
     m_storage->unspawn(e);
 }
 
-void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass)
+void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> componentType)
 {
-    be_assert(metaclass->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|metaclass->name);
-    be_forceuse(e);
-    be_forceuse(component);
-    be_forceuse(metaclass);
+    be_assert(componentType->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|componentType->name);
+    m_storage->addComponent(e, component, componentType);
 }
 
+void World::removeComponent(Entity e, raw<const RTTI::Class> componentType)
+{
+    be_assert(componentType->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|componentType->name);
+    m_storage->removeComponent(e, componentType);
+}
+
+bool World::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
+{
+    be_assert(componentType->isA(be_typeid<Component>::klass()), "component of type %s is not a subclass of BugEngine::World::Component"|componentType->name);
+    return m_storage->hasComponent(e, componentType);
+}
+    
 void World::addComponent(Entity e, const RTTI::Value& component)
 {
     be_assert(component.type().isA(be_typeid<const Component&>::type()), "component of type %s is not a subclass of BugEngine::World::Component"|component.type());

@@ -19,7 +19,7 @@ enum AssertionResult
 };
 
 
-typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, const char *expr, const char *message, ...);
+typedef AssertionResult(*AssertionCallback_t)(const char *filename, int line, const char *expr, const char *message);
 be_api(MINITL) AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
 be_api(MINITL) AssertionCallback_t getAssertionCallback();
 

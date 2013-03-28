@@ -210,7 +210,7 @@ ArrayValue::~ArrayValue()
 
 bool ArrayValue::isCompatible(const RTTI::Type& type) const
 {
-    if (type.metaclass->isA(be_typeid< minitl::iarray >::klass()))
+    if (type.metaclass->type() == RTTI::ClassType_Array)
     {
         raw<const RTTI::ObjectInfo> prop = type.metaclass->objects;
         while (prop && prop->name != istring("value_type"))
