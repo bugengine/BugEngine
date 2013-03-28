@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 
-#include    <context.h>
+#include    <luacontext.hh>
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 

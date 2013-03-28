@@ -42,6 +42,14 @@ class VariableAttributes(cpp.yacc.Nonterm):
 		self.attributes.add('mutable')
 		self.lineno = variable.lineno
 
+	def static_variable(self, static, variable):
+		"%reduce EXTERN VariableAttributes"
+		self.type = variable.type
+		self.name = variable.name
+		self.attributes = variable.attributes
+		self.attributes.add('extern')
+		self.lineno = variable.lineno
+
 class Variable(cpp.yacc.Nonterm):
 	"%nonterm"
 
@@ -92,7 +100,10 @@ class Variable(cpp.yacc.Nonterm):
 				files[0].write('	%s,\n' % previous_object)
 				files[0].write('	%s,\n' % tags)
 				files[0].write('	::BugEngine::istring("%s"),\n' % name)
-				files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(parent), self.name))
+				if parent:
+					files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(parent), self.name))
+				else:
+					files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(namespace), self.name))
 				files[0].write('};\n')
 				previous_object = '{&%s}' % new_object
 

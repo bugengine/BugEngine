@@ -99,7 +99,8 @@ class ArgList(cpp.yacc.Nonterm):
 				files[0].write("    ::BugEngine::be_typeid< %s& >::type()\n" % '::'.join(parent))
 			files[0].write("};\n")
 			arg_pointer = "{&%s_param_%d}" % (decl, arg_index)
-		return arg_pointer
+			arg_index = arg_index + 1
+		return arg_pointer, arg_index
 
 
 
@@ -378,13 +379,14 @@ class Method(cpp.yacc.Nonterm):
 
 	def dump(self, files, namespace, parent, name, previous, index):
 		method_name = '%s_overload_%d' % (name, index)
-		arguments = self.value.args.dump(files, namespace, parent, method_name, 'static' in self.value.attributes, 'const' in self.value.attributes)
+		arguments, argument_count = self.value.args.dump(files, namespace, parent, method_name, 'static' in self.value.attributes, 'const' in self.value.attributes)
 		tags = self.tags.dump(files, method_name)
 		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s =\n' % method_name)
 		files[0].write('{\n')
 		files[0].write('	%s,\n' % tags)
 		files[0].write('	%s,\n' % previous)
 		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.value.return_type)
+		files[0].write('	%d,\n' % argument_count)
 		files[0].write('	%s,\n' % arguments)
 		files[0].write('	0,\n')
 		files[0].write('	%s\n' % self.trampoline)

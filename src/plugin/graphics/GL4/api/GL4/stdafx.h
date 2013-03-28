@@ -12,7 +12,7 @@
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
 
-#if defined(building_gl4)
+#if defined(building_GL4)
 # define    GL4EXPORT      BE_EXPORT
 #else
 # define    GL4EXPORT      BE_IMPORT

@@ -9,51 +9,43 @@
 namespace BugEngine
 {
 
-/// Allocates regions of contiguous virtual memory.
+/// Allocates regions of memory.
 /**
- * The system allocator reserves blocks in virtual memory, without actually
- * allocating memory until it is needed.
+ * The system allocator allocates blocks of a large size to store contiguous objects.
  */
 class be_api(CORE) SystemAllocator
 {
-private:
-    byte* const m_buffer;
-    u32 const   m_capacity;
-    u32         m_usage;
-    u32         m_realUsage;
-private:
-    static u32   platformPageSize();
-    static byte* platformReserve(u32 size);
-    static void  platformCommit(byte* ptr, u32 begin, u32 end);
-    static void  platformRelease(byte* ptr, u32 begin, u32 end);
-    static void  platformFree(byte* ptr, u32 size);
 public:
-    /**
-     * Creates a new contiguous memory region of maximumBytes size.
-     * The allocator will actually reserve a contiguous space for maximumBytes but won't commit all
-     * the memory. The committed memory will grow when needed.
-     * @param maximumBytes maximum number of bytes than can be used.
-     */
-    SystemAllocator(u32 maximumBytes);
-    /**
-     * Destroys the pool. Asserts in case some of the memory in the pool has not been released.
-     */
-    ~SystemAllocator();
-    /**
-     * Returns a pointer to the beginning of the buffer.
-     * @returns A pointer to the buffer.
-     */
-    byte* buffer()
+    enum BlockSize
     {
-        return m_buffer;
-    }
-    /**
-     * Set the current needed memory. If the needed memory decreases, some pages will become
-     * available again. If the needed memory increases, some pages will be requested to the
-     * operating system.
-     * @param byteCount The current needed memory usage.
-     */
-    void  setUsage(u32 byteCount);
+        BlockSize_4k    = 0,
+        BlockSize_16k   = 1,
+        BlockSize_64k   = 2,
+        BlockSize_256k  = 3
+    };
+private:
+    struct Block
+    {
+        Block* next;
+    };
+    Block*      m_head;
+    u32         m_capacity;
+    u32         m_used;
+    BlockSize   m_blockSize;
+private:
+    u32     platformPageSize();
+    byte*   platformReserve(u32 size);
+    void    platformCommit(byte* ptr, u32 start, u32 stop);
+    void    platformRelease(byte* ptr, u32 start, u32 stop);
+    void    platformFree(byte* ptr, u32 size);
+public:
+    SystemAllocator(BlockSize size, u32 initialCount);
+    ~SystemAllocator();
+
+    void* allocate();
+    void  free(void* memory);
+
+    u32 blockSize() const;
 };
 
 }

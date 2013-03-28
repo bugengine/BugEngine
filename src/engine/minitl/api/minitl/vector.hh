@@ -37,6 +37,8 @@ private:
     Allocator::Block<T> m_memory;
     T*                  m_end;
     T*                  m_capacity;
+private:
+    void ensure(size_type size);
 public:
     explicit vector(Allocator& allocator, size_type count = 0);
     vector(const vector<T>& other);

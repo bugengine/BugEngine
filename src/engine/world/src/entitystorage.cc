@@ -5,18 +5,43 @@
 #include    <world/entitystorage.script.hh>
 #include    <world/component.script.hh>
 #include    <scheduler/task/method.hh>
+#include    <rtti/classinfo.script.hh>
+#include    <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace World
 {
 
+EntityStorage::Bucket::Bucket()
+{
+}
+
+EntityStorage::Bucket::~Bucket()
+{
+}
+
+EntityStorage::ComponentGroup::ComponentGroup()
+:   m_bucket(Arena::game(), 0)
+{
+}
+
+EntityStorage::ComponentGroup::~ComponentGroup()
+{
+}
+
+
 struct EntityStorage::EntityInfo
 {
-    Entity next;
+    union
+    {
+        u32 next;
+        u32 bucket;
+    };
     u32 index;
     u64 mask;
 };
 
-static const Entity s_defaultSlot = { 0 };
+static const u32 s_usedBit = 0x80000000;
+static const u32 s_indexMask = 0x7FFFFFFF;
 
 EntityStorage::EntityStorage()
     :   m_task(scoped< Task::Task< Task::MethodCaller<EntityStorage, &EntityStorage::start> > >::create(
@@ -24,19 +49,28 @@ EntityStorage::EntityStorage()
                     "start",
                     Colors::Green::Green,
                     Task::MethodCaller<EntityStorage, &EntityStorage::start>(this)))
-    ,   m_freeEntityId(s_defaultSlot)
-    ,   m_entityAllocator(sizeof(EntityInfo)*4*1024*1024)
-    ,   m_entityInfoBuffer((EntityInfo*)m_entityAllocator.buffer())
+    ,   m_freeEntityId(0)
+    ,   m_entityAllocator(SystemAllocator::BlockSize_16k, 32)
+    ,   m_entityInfoBuffer((EntityInfo**)m_entityAllocator.allocate())
     ,   m_entityCount(0)
-    ,   m_entityCapacity(0)
+    ,   m_entityBufferCount(0)
+    ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
+    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityInfo))
     ,   m_componentTypes(Arena::game())
+    ,   m_componentGroups(Arena::game())
 {
+    m_entityInfoBuffer[0] = 0;
+    m_componentTypes.reserve(64);
 }
 
 EntityStorage::~EntityStorage()
 {
     be_assert(m_entityCount == 0, "%d entities still spawned when deleting world" | m_entityCount);
-    m_entityAllocator.setUsage(0);
+    for (EntityInfo** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
+    {
+        m_entityAllocator.free(*buffer);
+    }
+    m_entityAllocator.free(m_entityInfoBuffer);
 }
 
 weak<Task::ITask> EntityStorage::initialTask() const
@@ -44,47 +78,131 @@ weak<Task::ITask> EntityStorage::initialTask() const
     return m_task;
 }
 
+void EntityStorage::registerType(raw<const RTTI::Class> componentType)
+{
+    be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
+    m_componentTypes.push_back(componentType);
+}
+
+u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
+{
+    for (u32 i = 0; i < m_componentTypes.size(); ++i)
+    {
+        if (m_componentTypes[i] == componentType)
+        {
+            return i;
+        }
+    }
+    return (u32) -1;
+}
+
 void EntityStorage::start()
 {
 }
 
+EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::Entity e)
+{
+    u32 bufferIndex = e.id >> 16;
+    u32 bufferOffset = e.id & 0xFFFF;
+    be_assert(bufferIndex < m_entityBufferCount, "Entity %d: invalid block index %d" | e.id | bufferIndex);
+    be_assert(bufferOffset < m_bufferCapacity, "Entity %d: invalid block offset %d" | e.id | bufferOffset);
+    return m_entityInfoBuffer[bufferIndex][bufferOffset];
+}
+
+const EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::Entity e) const
+{
+    u32 bufferIndex = e.id >> 16;
+    u32 bufferOffset = e.id & 0xFFFF;
+    be_assert(bufferIndex < m_entityBufferCount, "Entity %d: invalid block index %d" | e.id | bufferIndex);
+    be_assert(bufferOffset < m_bufferCapacity, "Entity %d: invalid block offset %d" | e.id | bufferOffset);
+    return m_entityInfoBuffer[bufferIndex][bufferOffset];
+}
+
 Entity EntityStorage::spawn()
 {
-    Entity e = m_freeEntityId;
+    Entity e = { m_freeEntityId };
 
-    if (e.id >= m_entityCapacity)
+    u32 bufferIndex = e.id >> 16;
+    be_assert(bufferIndex <= m_entityBufferCount, "invalid buffer index: %d (range: %d, %d)" | bufferIndex);
+    if (bufferIndex == m_entityBufferCount)
     {
-        m_entityCapacity += 1024;
-        m_entityAllocator.setUsage(m_entityCapacity*sizeof(EntityInfo));
-        for (u32 i = m_entityCapacity - 1024; i < m_entityCapacity; ++i)
+        be_assert(m_entityInfoBuffer[bufferIndex] == 0, "buffer index %d inconsistent" | bufferIndex);
+        EntityInfo* buffer = (EntityInfo*)m_entityAllocator.allocate();
+        u32 index = 1 + (bufferIndex << 16);
+        for (u32 i = 0; i < m_bufferCapacity; ++i)
         {
-            m_entityInfoBuffer[i].next.id = i+1;
+            buffer[i].next = index + i + 1;
+            buffer[i].index = 0;
+            buffer[i].mask = 0;
         }
+        buffer[m_bufferCapacity-1].next = (1 + bufferIndex) << 16;
+
+        m_entityInfoBuffer[bufferIndex] = buffer;
+        m_entityInfoBuffer[bufferIndex+1] = 0;
+        m_entityBufferCount++;
     }
 
-    m_freeEntityId = m_entityInfoBuffer[e.id].next;
+    EntityInfo& entityInfo = getEntityInfo(e);
+    be_assert((entityInfo.index & s_usedBit) == 0, "Entity %s is already in use; entity buffer inconsistent" | e.id);
+    m_freeEntityId = entityInfo.next;
+    entityInfo.bucket = 0;
+    entityInfo.index = s_usedBit;
+    entityInfo.mask = 0;
     ++ m_entityCount;
     return e;
 }
 
 void EntityStorage::unspawn(Entity e)
 {
-    m_entityInfoBuffer[e.id].next = m_freeEntityId;
-    m_freeEntityId = e;
+    EntityInfo& info = getEntityInfo(e);
+    // unspawn components
+    info.next = m_freeEntityId;
+    info.index = 0;
+    info.mask = 0;
+    m_freeEntityId = e.id;
     -- m_entityCount;
 }
 
 void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType)
 {
-    be_forceuse(e);
+    EntityInfo& info = getEntityInfo(e);
+    be_assert_recover((info.index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return);
     be_forceuse(c);
-    be_forceuse(componentType);
+    u32 componentIndex = indexOf(componentType);
+    be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return);
+    u64 mask = 1;
+    mask <<= componentIndex;
+    be_assert_recover((info.mask & mask) == 0, "entity %d already has a component %s" | e.id | componentType->fullname(), return);
+    info.mask |= mask;
 }
 
 void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentType)
 {
-    be_forceuse(e);
-    be_forceuse(componentType);
+    EntityInfo& info = getEntityInfo(e);
+    be_assert_recover((info.index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return);
+    u32 componentIndex = indexOf(componentType);
+    be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return);
+    u64 mask = 1;
+    mask <<= componentIndex;
+    be_assert_recover((info.mask & mask) != 0, "entity %d does not has a component %s" | e.id | componentType->fullname(), return);
+    info.mask &= ~mask;
 }
+
+bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
+{
+    const EntityInfo& info = getEntityInfo(e);
+    be_assert_recover((info.index & s_usedBit) != 0, "Entity %s is not currently spawned (maybe already unspawned)" | e.id, return false);
+    u32 componentIndex = indexOf(componentType);
+    be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return false);
+    u64 mask = 1;
+    mask <<= componentIndex;
+    return (info.mask & mask) != 0;
+}
+/*
+ComponentGroup& EntityStorage::getComponentGroup(u64 mask)
+{
+    
+}
+*/
 
 }}

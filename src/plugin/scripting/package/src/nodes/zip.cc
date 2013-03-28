@@ -2,6 +2,7 @@
  see LICENSE for detail */
 
 #include    <package/stdafx.h>
+#include    <package/nodes/package.hh>
 #include    <package/nodes/zip.hh>
 #include    <package/nodes/entity.hh>
 #include    <package/nodes/event.hh>
@@ -42,7 +43,7 @@ bool ZipValue::isCompatible(const RTTI::Type& type) const
 
 RTTI::Value ZipValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type() | type);
+    be_assert(isCompatible(type), minitl::format<4096>("invalid conversion from %s to %s") | be_typeid< weak<const File> >::type() | type);
     return RTTI::Value();
 }
 }}}

@@ -90,12 +90,12 @@ void Type::destroy(void* ptr) const
 u32 Type::distance(const Type& other) const
 {
     u32 result = 0;
-    if (access < other.access)
-        return 1000000;
+    if (other.indirection > 0 && access < other.access)
+        return MaxTypeDistance;
     else
         result += access - other.access;
     if (indirection < other.indirection)
-        return 1000000;
+        return MaxTypeDistance;
     else
         result += indirection - other.indirection;
     return result + metaclass->distance(other.metaclass);
@@ -122,7 +122,7 @@ minitl::format<1024u> Type::name() const
     return minitl::format<1024u>("%s%s%s%s")
             | indirectionPrefix[indirection]
             | constnessPrefix[constness]
-            | metaclass->name
+            | metaclass->fullname()
             | indirectionSuffix[indirection];
 }
 

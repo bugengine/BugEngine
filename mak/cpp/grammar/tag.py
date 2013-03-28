@@ -16,16 +16,20 @@ class TagList(cpp.yacc.Nonterm):
 		"%reduce"
 		self.tags = []
 		self.aliases = []
+		self.index = 0
 
 	def taglist(self, taglist, tag):
 		"%reduce TagList Tag"
 		self.tags = taglist.tags
 		self.aliases = taglist.aliases
+		self.index = 0
 		if tag.value[0] == 'Alias':
 			if tag.value[1][0] == '"':
 				self.aliases.append(tag.value[1][1:-1])
 			else:
 				self.aliases.append(tag.value[1])
+		elif tag.value[0] == 'Index':
+			self.index = tag.value[1]
 		else:
 			self.tags.append(tag.value)
 
@@ -35,6 +39,7 @@ class TagsLeft(cpp.yacc.Nonterm):
 	def taglistcomment(self, comment, taglist):
 		"%reduce DoxyComment TagList"
 		self.tags = taglist.tags
+		self.index = taglist.index
 		self.aliases = taglist.aliases
 		self.comment = comment
 
