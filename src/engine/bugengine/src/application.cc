@@ -65,10 +65,12 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
             "update",
             Colors::Green::Green,
             Task::MethodCaller<Application, &Application::frameUpdate>(this)));
+    registerInterruptions();
 }
 
 Application::~Application(void)
 {
+    unregisterInterruptions();
     m_resourceManager->detach<World::World>(this);
 }
 
@@ -115,11 +117,9 @@ void Application::unload(Resource::Resource& resource)
 void Application::updateResources()
 {
     size_t resourceCount = m_resourceManager->updateTickets();
-    if (resourceCount == 0 && m_resourceLoadingCount != 0 && m_worldCount == 0)
+    if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
-        /*TODO*/
-        m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {
@@ -158,6 +158,11 @@ void Application::frameUpdate()
         }
         now = time;
     }
+}
+
+void Application::finish()
+{
+    m_updateLoop = Task::ITask::CallbackConnection();
 }
 
 }
