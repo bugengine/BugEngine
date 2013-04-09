@@ -62,12 +62,10 @@ namespace
             OutputDebugString(msg);
             if (msg[strlen(msg)-1] != '\n')
                 OutputDebugString("\n");
-#else
+#endif
             fprintf(stderr, "%s(%d) :%s\t\t(%s) %s", filename, line, logname.c_str(), s_logNames[level], msg);
             if (msg[strlen(msg)-1] != '\n')
                 fprintf(stderr, "\n");
-
-#endif
             return true;
         }
     };
