@@ -13,23 +13,22 @@ Javac is one of the few compilers that behaves very badly:
 
 #. it outputs an undefined amount of files (inner classes)
 
-This tool uses the -verbose flag to track the java classes created.
 Remember that the compilation can be performed using Jython[1] rather than regular Python. Instead of
 running one of the following commands::
 
-    ./waf configure
-    python waf configure
+   ./waf configure
+   python waf configure
 
 You would have to run::
 
-    java -jar /path/to/jython.jar waf configure
+   java -jar /path/to/jython.jar waf configure
 
 [1] http://www.jython.org/
 """
 
-import os, re
+import os, re, tempfile, shutil
+from waflib import TaskGen, Task, Utils, Options, Build, Errors, Node, Logs
 from waflib.Configure import conf
-from waflib import TaskGen, Task, Utils, Options, Build, Errors, Node
 from waflib.TaskGen import feature, before_method, after_method
 
 from waflib.Tools import ccroot
@@ -38,8 +37,6 @@ ccroot.USELIB_VARS['javac'] = set(['CLASSPATH', 'JAVACFLAGS'])
 
 SOURCE_RE = '**/*.java'
 JAR_RE = '**/*'
-re_verbose = re.compile(r'^\[.*?\]\n*', re.M)
-re_classes = re.compile(r'\[wrote (?:RegularFileObject\[)*(.*?\.class)\]')
 
 class_check_source = '''
 public class Test {
@@ -81,6 +78,7 @@ def apply_java(self):
 	else:
 		outdir = self.path.get_bld()
 	outdir.mkdir()
+	self.outdir = outdir
 	self.env['OUTDIR'] = outdir.abspath()
 
 	self.javac_task = tsk = self.create_task('javac')
@@ -124,7 +122,7 @@ def use_javac_files(self):
 	for x in names:
 		try:
 			y = get(x)
-		except:
+		except Exception:
 			self.uselib.append(x)
 		else:
 			y.post()
@@ -153,7 +151,7 @@ def jar_files(self):
 	"""
 	destfile = getattr(self, 'destfile', 'test.jar')
 	jaropts = getattr(self, 'jaropts', [])
-        manifest = getattr(self, 'manifest', None)
+	manifest = getattr(self, 'manifest', None)
 
 	basedir = getattr(self, 'basedir', None)
 	if basedir:
@@ -165,13 +163,13 @@ def jar_files(self):
 		self.bld.fatal('Could not find the basedir %r for %r' % (self.basedir, self))
 
 	self.jar_task = tsk = self.create_task('jar_create')
-        if manifest:
-            jarcreate = getattr(self, 'jarcreate', 'cfm')
-            node = self.path.find_node(manifest)
-            tsk.dep_nodes.append(node)
-            jaropts.insert(0, node.abspath())
-        else:
-            jarcreate = getattr(self, 'jarcreate', 'cf')
+	if manifest:
+		jarcreate = getattr(self, 'jarcreate', 'cfm')
+		node = self.path.find_node(manifest)
+		tsk.dep_nodes.append(node)
+		jaropts.insert(0, node.abspath())
+	else:
+		jarcreate = getattr(self, 'jarcreate', 'cf')
 	if not isinstance(destfile, Node.Node):
 		destfile = self.path.find_or_declare(destfile)
 	if not destfile:
@@ -203,7 +201,7 @@ def use_jar_files(self):
 	for x in names:
 		try:
 			y = get(x)
-		except:
+		except Exception:
 			self.uselib.append(x)
 		else:
 			y.post()
@@ -228,7 +226,7 @@ class jar_create(Task.Task):
 			global JAR_RE
 			try:
 				self.inputs = [x for x in self.basedir.ant_glob(JAR_RE, remove=False) if id(x) != id(self.outputs[0])]
-			except:
+			except Exception:
 				raise Errors.WafError('Could not find the basedir %r for %r' % (self.basedir, self))
 		return super(jar_create, self).runnable_status()
 
@@ -243,7 +241,7 @@ class javac(Task.Task):
 	The .class files cannot be put into a cache at the moment
 	"""
 
-	vars    = ['CLASSPATH', 'JAVACFLAGS', 'JAVAC', 'OUTDIR']
+	vars = ['CLASSPATH', 'JAVACFLAGS', 'JAVAC', 'OUTDIR']
 	"""
 	The javac task will be executed again if the variables CLASSPATH, JAVACFLAGS, JAVAC or OUTDIR change.
 	"""
@@ -274,37 +272,92 @@ class javac(Task.Task):
 		def to_list(xx):
 			if isinstance(xx, str): return [xx]
 			return xx
-		self.last_cmd = lst = []
-		lst.extend(to_list(env['JAVAC']))
-		lst.extend(['-classpath'])
-		lst.extend(to_list(env['CLASSPATH']))
-		lst.extend(['-d'])
-		lst.extend(to_list(env['OUTDIR']))
-		lst.extend(to_list(env['JAVACFLAGS']))
-		lst.extend([a.path_from(bld.bldnode) for a in self.inputs])
-		lst = [x for x in lst if x]
+		cmd = []
+		cmd.extend(to_list(env['JAVAC']))
+		cmd.extend(['-classpath'])
+		cmd.extend(to_list(env['CLASSPATH']))
+		cmd.extend(['-d'])
+		cmd.extend(to_list(env['OUTDIR']))
+		cmd.extend(to_list(env['JAVACFLAGS']))
+
+		files = [a.path_from(bld.bldnode) for a in self.inputs]
+
+		# workaround for command line length limit:
+		# http://support.microsoft.com/kb/830473
+		tmp = None
 		try:
-			self.out = self.generator.bld.cmd_and_log(lst, cwd=wd, env=env.env or None, output=0, quiet=0)[1]
-		except:
-			self.generator.bld.cmd_and_log(lst, cwd=wd, env=env.env or None)
+			if len(str(files)) + len(str(cmd)) > 8192:
+				(fd, tmp) = tempfile.mkstemp(dir=bld.bldnode.abspath())
+				try:
+					os.write(fd, '\n'.join(files).encode())
+				finally:
+					if tmp:
+						os.close(fd)
+				if Logs.verbose:
+					Logs.debug('runner: %r' % (cmd + files))
+				cmd.append('@' + tmp)
+			else:
+				cmd += files
+
+			ret = self.exec_command(cmd, cwd=wd, env=env.env or None)
+		finally:
+			if tmp:
+				os.unlink(tmp)
+		return ret
 
 	def post_run(self):
 		"""
-		The -verbose flags gives us the files created, so we have to parse the outputs
-		to update the signatures of the nodes created.
 		"""
-		for x in re_classes.findall(self.out):
-			if os.path.isabs(x):
-				n = self.generator.bld.root.find_node(x)
-			else:
-				n = self.generator.bld.bldnode.find_node(x)
-			if not n:
-				raise ValueError('cannot find %r in %r' % (x, self.generator.bld.bldnode.abspath()))
-			n.sig = Utils.h_file(n.abspath())
+		for n in self.generator.outdir.ant_glob('**/*.class'):
+			n.sig = Utils.h_file(n.abspath()) # careful with this
 		self.generator.bld.task_sigs[self.uid()] = self.cache_sig
-		out = re_verbose.sub('', self.out).strip()
-		if out:
-			self.generator.bld.to_log(out + '\n')
+
+@feature('javadoc')
+@after_method('process_rule')
+def create_javadoc(self):
+	tsk = self.create_task('javadoc')
+	tsk.classpath = getattr(self, 'classpath', [])
+	self.javadoc_package = Utils.to_list(self.javadoc_package)
+	if not isinstance(self.javadoc_output, Node.Node):
+		self.javadoc_output = self.bld.path.find_or_declare(self.javadoc_output)
+
+class javadoc(Task.Task):
+	color = 'BLUE'
+
+	def __str__(self):
+		return '%s: %s -> %s\n' % (self.__class__.__name__, self.generator.srcdir, self.generator.javadoc_output)
+
+	def run(self):
+		env = self.env
+		bld = self.generator.bld
+		wd = bld.bldnode.abspath()
+
+		#add src node + bld node (for generated java code)
+		srcpath = self.generator.path.abspath() + os.sep + self.generator.srcdir
+		srcpath += os.pathsep
+		srcpath += self.generator.path.get_bld().abspath() + os.sep + self.generator.srcdir
+
+		classpath = env.CLASSPATH
+		classpath += os.pathsep
+		classpath += os.pathsep.join(self.classpath)
+		classpath = "".join(classpath)
+
+		self.last_cmd = lst = []
+		lst.extend(Utils.to_list(env['JAVADOC']))
+		lst.extend(['-d', self.generator.javadoc_output.abspath()])
+		lst.extend(['-sourcepath', srcpath])
+		lst.extend(['-classpath', classpath])
+		lst.extend(['-subpackages'])
+		lst.extend(self.generator.javadoc_package)
+		lst = [x for x in lst if x]
+
+		self.generator.bld.cmd_and_log(lst, cwd=wd, env=env.env or None, quiet=0)
+
+	def post_run(self):
+		nodes = self.generator.javadoc_output.ant_glob('**')
+		for x in nodes:
+			x.sig = Utils.h_file(x.abspath())
+		self.generator.bld.task_sigs[self.uid()] = self.cache_sig
 
 def configure(self):
 	"""
@@ -318,7 +371,7 @@ def configure(self):
 		java_path = [os.path.join(self.environ['JAVA_HOME'], 'bin')] + java_path
 		self.env['JAVA_HOME'] = [self.environ['JAVA_HOME']]
 
-	for x in 'javac java jar'.split():
+	for x in 'javac java jar javadoc'.split():
 		self.find_program(x, var=x.upper(), path_list=java_path)
 		self.env[x.upper()] = self.cmd_to_list(self.env[x.upper()])
 
@@ -327,8 +380,9 @@ def configure(self):
 
 	if not v['JAR']: self.fatal('jar is required for making java packages')
 	if not v['JAVAC']: self.fatal('javac is required for compiling java classes')
+
 	v['JARCREATE'] = 'cf' # can use cvf
-	v['JAVACFLAGS'] = ['-verbose'] # required
+	v['JAVACFLAGS'] = []
 
 @conf
 def check_java_class(self, classname, with_classpath=None):
@@ -341,8 +395,6 @@ def check_java_class(self, classname, with_classpath=None):
 	:type with_classpath: string
 	"""
 
-	import shutil
-
 	javatestdir = '.waf-javatest'
 
 	classpath = javatestdir
@@ -354,9 +406,7 @@ def check_java_class(self, classname, with_classpath=None):
 	shutil.rmtree(javatestdir, True)
 	os.mkdir(javatestdir)
 
-	java_file = open(os.path.join(javatestdir, 'Test.java'), 'w')
-	java_file.write(class_check_source)
-	java_file.close()
+	Utils.writef(os.path.join(javatestdir, 'Test.java'), class_check_source)
 
 	# Compile the source
 	self.exec_command(self.env['JAVAC'] + [os.path.join(javatestdir, 'Test.java')], shell=False)
@@ -399,6 +449,8 @@ def check_jni_headers(conf):
 
 	dir = conf.root.find_dir(conf.env.JAVA_HOME[0] + '/include')
 	if dir is None:
+		dir = conf.root.find_dir(conf.env.JAVA_HOME[0] + '/../Headers') # think different?!
+	if dir is None:
 		conf.fatal('JAVA_HOME does not seem to be set properly')
 
 	f = dir.ant_glob('**/(jni|jni_md).h')
@@ -418,10 +470,11 @@ def check_jni_headers(conf):
 		try:
 			conf.check(header_name='jni.h', define_name='HAVE_JNI_H', lib='jvm',
 				libpath=d, includes=incDirs, uselib_store='JAVA', uselib='JAVA')
-		except:
+		except Exception:
 			pass
 		else:
 			break
 	else:
 		conf.fatal('could not find lib jvm in %r (see config.log)' % libDirs)
+
 

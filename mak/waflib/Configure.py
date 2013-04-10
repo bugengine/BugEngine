@@ -17,7 +17,7 @@ from waflib import ConfigSet, Utils, Options, Logs, Context, Build, Errors
 
 try:
 	from urllib import request
-except:
+except ImportError:
 	from urllib import urlopen
 else:
 	urlopen = request.urlopen
@@ -67,16 +67,16 @@ def download_tool(tool, force=False, ctx=None):
 				continue
 			else:
 				tmp = ctx.root.make_node(os.sep.join((Context.waf_dir, 'waflib', 'extras', tool + '.py')))
-				tmp.write(web.read())
+				tmp.write(web.read(), 'wb')
 				Logs.warn('Downloaded %s from %s' % (tool, url))
 				download_check(tmp)
 				try:
 					module = Context.load_tool(tool)
-				except:
+				except Exception:
 					Logs.warn('The tool %s from %s is unusable' % (tool, url))
 					try:
 						tmp.delete()
-					except:
+					except Exception:
 						pass
 					continue
 				return module
@@ -111,7 +111,8 @@ class ConfigurationContext(Context.Context):
 
 	def setenv(self, name, env=None):
 		"""
-		Set a new config set for conf.env
+		Set a new config set for conf.env. If a config set of that name already exists,
+		recall it without modification.
 
 		The name is the filename prefix to save to ``c4che/NAME_cache.py``, and it
 		is also used as *variants* by the build commands.
@@ -130,12 +131,13 @@ class ConfigurationContext(Context.Context):
 		:param env: ConfigSet to copy, or an empty ConfigSet is created
 		:type env: :py:class:`waflib.ConfigSet.ConfigSet`
 		"""
-		if not env:
-			env = ConfigSet.ConfigSet()
-			self.prepare_env(env)
-		else:
-			env = env.derive()
-		self.all_envs[name] = env
+		if name not in self.all_envs or env:
+			if not env:
+				env = ConfigSet.ConfigSet()
+				self.prepare_env(env)
+			else:
+				env = env.derive()
+			self.all_envs[name] = env
 		self.variant = name
 
 	def get_env(self):
@@ -170,13 +172,13 @@ class ConfigurationContext(Context.Context):
 		if not out:
 			out = getattr(Context.g_module, Context.OUT, None)
 		if not out:
-			out = Options.lockfile.replace('.lock-waf', '')
+			out = Options.lockfile.replace('.lock-waf_%s_' % sys.platform, '').replace('.lock-waf', '')
 
 		self.bldnode = (os.path.isabs(out) and self.root or self.path).make_node(out)
 		self.bldnode.mkdir()
 
 		if not os.path.isdir(self.bldnode.abspath()):
-			conf.fatal('could not create the build directory %s' % self.bldnode.abspath())
+			conf.fatal('Could not create the build directory %s' % self.bldnode.abspath())
 
 	def execute(self):
 		"""
@@ -252,7 +254,10 @@ class ConfigurationContext(Context.Context):
 		:param env: a ConfigSet, usually ``conf.env``
 		"""
 		if not env.PREFIX:
-			env.PREFIX = os.path.abspath(os.path.expanduser(Options.options.prefix))
+			if Options.options.prefix or Utils.is_win32:
+				env.PREFIX = os.path.abspath(os.path.expanduser(Options.options.prefix))
+			else:
+				env.PREFIX = ''
 		if not env.BINDIR:
 			env.BINDIR = Utils.subst_vars('${PREFIX}/bin', env)
 		if not env.LIBDIR:
@@ -386,9 +391,9 @@ def conf(f):
 
 		try:
 			return f(*k, **kw)
-		except Errors.ConfigurationError as e:
+		except Errors.ConfigurationError:
 			if mandatory:
-				raise e
+				raise
 
 	setattr(ConfigurationContext, f.__name__, fun)
 	setattr(Build.BuildContext, f.__name__, fun)
@@ -429,12 +434,11 @@ def cmd_to_list(self, cmd):
 	return cmd
 
 @conf
-def check_waf_version(self, mini='1.6.0', maxi='1.7.0'):
+def check_waf_version(self, mini='1.6.99', maxi='1.8.0'):
 	"""
-	check for the waf version
+	Raise a Configuration error if the Waf version does not strictly match the given bounds::
 
-	Versions should be supplied as hex. 0x01000000 means 1.0.0,
-	0x010408 means 1.4.8, etc.
+		conf.check_waf_version(mini='1.7.0', maxi='1.8.0')
 
 	:type  mini: number, tuple or string
 	:param mini: Minimum required version
@@ -487,8 +491,6 @@ def find_program(self, filename, **kw):
 
 	environ = kw.get('environ', os.environ)
 
-	silent = kw.get('silent', False)
-
 	ret = ''
 	filename = Utils.to_list(filename)
 
@@ -529,7 +531,7 @@ def find_program(self, filename, **kw):
 	if not ret and Utils.winreg:
 		ret = Utils.get_registry_app_path(Utils.winreg.HKEY_LOCAL_MACHINE, filename)
 
-	if not silent: self.msg('Checking for program ' + ','.join(filename), ret or False)
+	self.msg('Checking for program ' + ','.join(filename), ret or False)
 	self.to_log('find program=%r paths=%r var=%r -> %r' % (filename, path_list, var, ret))
 
 	if not ret:
@@ -559,7 +561,7 @@ def find_perl_program(self, filename, path_list=[], var=None, environ=None, exts
 
 	try:
 		app = self.find_program(filename, path_list=path_list, var=var, environ=environ, exts=exts)
-	except:
+	except Exception:
 		self.find_program('perl', var='PERL')
 		app = self.find_file(filename, os.environ['PATH'].split(os.pathsep))
 		if not app:

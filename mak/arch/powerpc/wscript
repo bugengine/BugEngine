@@ -1,0 +1,5 @@
+
+def configure(conf):
+	conf.env.ARCHITECTURE = 'ppc'
+	conf.env.VALID_ARCHITECTURE = ['ppc', 'powerpc']
+	conf.env.append_unique('DEFINES', ['_PPC', '_POWERPC'])

@@ -1,0 +1,61 @@
+from waflib import Errors, Logs
+from waflib.Configure import conf
+from waflib.TaskGen import feature, before_method, after_method
+
+
+@conf
+def set_windows_options(self):
+	self.env.VALID_PLATFORMS = ['windows', 'pc']
+
+@conf
+def set_windows_msvc_options(self):
+	self.env.append_unique('LIB', ['advapi32', 'userenv'])
+
+@conf
+def set_windows_gcc_options(self):
+	self.env.append_unique('LIB', ['advapi32', 'userenv'])
+
+
+def options(opt):
+	pass
+
+def configure(conf):
+	seen = set([])
+	for version, config in conf.env.MSVC_INSTALLED_VERSIONS:
+		version_name, version_number = version.split()
+		if version_name in ['intel', 'wsdk', 'msvc', 'winphone']:
+			for target_arch, infos in config:
+				if (target_arch, version) in seen:
+					continue
+				seen.add((target_arch, version))
+				arch, (bindir, libdir, includedir) = infos
+				toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.env.MSVC_VERSIONS = [version]
+					conf.env.MSVC_TARGETS = [target_arch]
+					conf.load('msvc')
+					conf.set_windows_options()
+					conf.set_windows_msvc_options()
+					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+
+def build(bld):
+	bld.platforms.append(bld.external('3rdparty.win32'))
+	bld.platforms.append(bld.external('3rdparty.dbghelp'))
+
+def plugins(bld):
+	pass
+
+@feature('cprogram', 'cxxprogram')
+@after_method('apply_link')
+@before_method('apply_implib')
+def apply_implib_program(self):
+	self.apply_implib()
+
+

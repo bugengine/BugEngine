@@ -4,7 +4,7 @@
 
 "Module called for configuring, compiling and installing targets"
 
-import os, shutil, traceback, errno, sys, stat
+import os, shlex, shutil, traceback, errno, sys, stat
 from waflib import Utils, Configure, Logs, Options, ConfigSet, Context, Errors, Build, Node
 
 build_dir_override = None
@@ -32,6 +32,7 @@ def waf_entry_point(current_directory, version, wafdir):
 		sys.exit(1)
 
 	if '--version' in sys.argv:
+		Context.run_dir = current_directory
 		ctx = Context.create_context('options')
 		ctx.curdir = current_directory
 		ctx.parse_args()
@@ -39,6 +40,14 @@ def waf_entry_point(current_directory, version, wafdir):
 
 	Context.waf_dir = wafdir
 	Context.launch_dir = current_directory
+
+	# if 'configure' is in the commands, do not search any further
+	no_climb = os.environ.get('NOCLIMB', None)
+	if not no_climb:
+		for k in no_climb_commands:
+			if k in sys.argv:
+				no_climb = True
+				break
 
 	# try to find a lock file (if the project was configured)
 	# at the same time, store the first wscript file seen
@@ -63,7 +72,7 @@ def waf_entry_point(current_directory, version, wafdir):
 						# if the filesystem features symlinks, compare the inode numbers
 						try:
 							ino2 = os.stat(x)[stat.ST_INO]
-						except:
+						except OSError:
 							pass
 						else:
 							if ino == ino2:
@@ -88,17 +97,13 @@ def waf_entry_point(current_directory, version, wafdir):
 			break
 		cur = next
 
-		# if 'configure' is in the commands, do not search any further
-		for k in no_climb_commands:
-			if k in sys.argv:
-				break
-		else:
-			continue
-		break
+		if no_climb:
+			break
 
 	if not Context.run_dir:
 		if '-h' in sys.argv or '--help' in sys.argv:
 			Logs.warn('No wscript file found: the help message may be incomplete')
+			Context.run_dir = current_directory
 			ctx = Context.create_context('options')
 			ctx.curdir = current_directory
 			ctx.parse_args()
@@ -123,13 +128,11 @@ def waf_entry_point(current_directory, version, wafdir):
 		traceback.print_exc(file=sys.stdout)
 		sys.exit(2)
 
-	parse_options()
-
 	"""
 	import cProfile, pstats
-	cProfile.runctx("import Scripting; Scripting.run_commands()", {}, {}, 'profi.txt')
+	cProfile.runctx("from waflib import Scripting; Scripting.run_commands()", {}, {}, 'profi.txt')
 	p = pstats.Stats('profi.txt')
-	p.sort_stats('time').print_stats(25)
+	p.sort_stats('time').print_stats(25) # or 'cumulative'
 	"""
 	try:
 		run_commands()
@@ -138,6 +141,8 @@ def waf_entry_point(current_directory, version, wafdir):
 			Logs.pprint('RED', e.verbose_msg)
 		Logs.error(e.msg)
 		sys.exit(1)
+	except SystemExit:
+		raise
 	except Exception as e:
 		traceback.print_exc(file=sys.stdout)
 		sys.exit(2)
@@ -184,6 +189,7 @@ def parse_options():
 
 	if not Options.commands:
 		Options.commands = [default_cmd]
+	Options.commands = [x for x in Options.commands if x != 'options'] # issue 1076
 
 	# process some internal Waf options
 	Logs.verbose = Options.options.verbose
@@ -207,6 +213,7 @@ def run_command(cmd_name):
 	:type cmd_name: string
 	"""
 	ctx = Context.create_context(cmd_name)
+	ctx.log_timer = Utils.Timer()
 	ctx.options = Options.options # provided for convenience
 	ctx.cmd = cmd_name
 	ctx.execute()
@@ -214,19 +221,16 @@ def run_command(cmd_name):
 
 def run_commands():
 	"""
-	Execute the commands that were given on the command-line.
+	Execute the commands that were given on the command-line, and the other options
 	Called by :py:func:`waflib.Scripting.waf_entry_point` during the initialization, and executed
 	after :py:func:`waflib.Scripting.parse_options`.
 	"""
+	parse_options()
 	run_command('init')
 	while Options.commands:
 		cmd_name = Options.commands.pop(0)
-
-		timer = Utils.Timer()
-		run_command(cmd_name)
-		if not Options.options.progress_bar:
-			elapsed = ' (%s)' % str(timer)
-			Logs.info('%r finished successfully%s' % (cmd_name, elapsed))
+		ctx = run_command(cmd_name)
+		Logs.info('%r finished successfully (%s)' % (cmd_name, str(ctx.log_timer)))
 	run_command('shutdown')
 
 ###########################################################################################
@@ -253,18 +257,18 @@ def distclean_dir(dirname):
 				fname = root + os.sep + f
 				try:
 					os.unlink(fname)
-				except:
-					Logs.warn('could not remove %r' % fname)
+				except OSError:
+					Logs.warn('Could not remove %r' % fname)
 
 	for x in [Context.DBFILE, 'config.log']:
 		try:
 			os.unlink(x)
-		except:
+		except OSError:
 			pass
 
 	try:
 		shutil.rmtree('c4che')
-	except:
+	except OSError:
 		pass
 
 def distclean(ctx):
@@ -274,8 +278,8 @@ def distclean(ctx):
 		if f == Options.lockfile:
 			try:
 				proj = ConfigSet.ConfigSet(f)
-			except:
-				Logs.warn('could not read %r' % f)
+			except IOError:
+				Logs.warn('Could not read %r' % f)
 				continue
 
 			if proj['out_dir'] != proj['top_dir']:
@@ -297,15 +301,11 @@ def distclean(ctx):
 						Logs.warn('file %r cannot be removed' % f)
 
 		# remove the local waf cache
-		if f.startswith('.waf-') and not Options.commands:
+		if f.startswith('.waf') and not Options.commands:
 			shutil.rmtree(f, ignore_errors=True)
 
 class Dist(Context.Context):
-	"""
-	Create an archive containing the project source code::
-
-		$ waf dist
-	"""
+	'''creates an archive containing the project source code'''
 	cmd = 'dist'
 	fun = 'dist'
 	algo = 'tar.bz2'
@@ -328,13 +328,13 @@ class Dist(Context.Context):
 
 		try:
 			self.base_path
-		except:
+		except AttributeError:
 			self.base_path = self.path
 
 		node = self.base_path.make_node(arch_name)
 		try:
 			node.delete()
-		except:
+		except Exception:
 			pass
 
 		files = self.get_files()
@@ -343,19 +343,7 @@ class Dist(Context.Context):
 			tar = tarfile.open(arch_name, 'w:' + self.algo.replace('tar.', ''))
 
 			for x in files:
-				tinfo = tar.gettarinfo(name=x.abspath(), arcname=self.get_tar_prefix() + '/' + x.path_from(self.base_path))
-				tinfo.uid   = 0
-				tinfo.gid   = 0
-				tinfo.uname = 'root'
-				tinfo.gname = 'root'
-
-				fu = None
-				try:
-					fu = open(x.abspath(), 'rb')
-					tar.addfile(tinfo, fileobj=fu)
-				finally:
-					fu.close()
-
+				self.add_tar_file(x, tar)
 			tar.close()
 		elif self.algo == 'zip':
 			import zipfile
@@ -374,15 +362,41 @@ class Dist(Context.Context):
 			from sha import sha
 		try:
 			digest = " (sha=%r)" % sha(node.read()).hexdigest()
-		except:
+		except Exception:
 			digest = ''
 
 		Logs.info('New archive created: %s%s' % (self.arch_name, digest))
 
+	def get_tar_path(self, node):
+		"""
+		return the path to use for a node in the tar archive, the purpose of this
+		is to let subclases resolve symbolic links or to change file names
+		"""
+		return node.abspath()
+
+	def add_tar_file(self, x, tar):
+		"""
+		Add a file to the tar archive. Transform symlinks into files if the files lie out of the project tree.
+		"""
+		p = self.get_tar_path(x)
+		tinfo = tar.gettarinfo(name=p, arcname=self.get_tar_prefix() + '/' + x.path_from(self.base_path))
+		tinfo.uid   = 0
+		tinfo.gid   = 0
+		tinfo.uname = 'root'
+		tinfo.gname = 'root'
+
+		fu = None
+		try:
+			fu = open(p, 'rb')
+			tar.addfile(tinfo, fileobj=fu)
+		finally:
+			if fu:
+				fu.close()
+
 	def get_tar_prefix(self):
 		try:
 			return self.tar_prefix
-		except:
+		except AttributeError:
 			return self.get_base_name()
 
 	def get_arch_name(self):
@@ -396,7 +410,7 @@ class Dist(Context.Context):
 		"""
 		try:
 			self.arch_name
-		except:
+		except AttributeError:
 			self.arch_name = self.get_base_name() + '.' + self.ext_algo.get(self.algo, self.algo)
 		return self.arch_name
 
@@ -412,7 +426,7 @@ class Dist(Context.Context):
 		"""
 		try:
 			self.base_name
-		except:
+		except AttributeError:
 			appname = getattr(Context.g_module, Context.APPNAME, 'noname')
 			version = getattr(Context.g_module, Context.VERSION, '1.0')
 			self.base_name = appname + '-' + version
@@ -430,8 +444,8 @@ class Dist(Context.Context):
 		"""
 		try:
 			return self.excl
-		except:
-			self.excl = Node.exclude_regs + ' **/waf-1.6.* **/.waf-1.6* **/*~ **/*.rej **/*.orig **/*.pyc **/*.pyo **/*.bak **/*.swp **/.lock-w*'
+		except AttributeError:
+			self.excl = Node.exclude_regs + ' **/waf-1.7.* **/.waf-1.7* **/waf3-1.7.* **/.waf3-1.7* **/*~ **/*.rej **/*.orig **/*.pyc **/*.pyo **/*.bak **/*.swp **/.lock-w*'
 			nd = self.root.find_node(Context.out_dir)
 			if nd:
 				self.excl += ' ' + nd.path_from(self.base_path)
@@ -454,7 +468,7 @@ class Dist(Context.Context):
 		"""
 		try:
 			files = self.files
-		except:
+		except AttributeError:
 			files = self.base_path.ant_glob('**/*', excl=self.get_excl())
 		return files
 
@@ -496,8 +510,15 @@ class DistCheck(Dist):
 			if t:
 				t.close()
 
+		cfg = []
+
+		if Options.options.distcheck_args:
+			cfg = shlex.split(Options.options.distcheck_args)
+		else:
+			cfg = [x for x in sys.argv if x.startswith('-')]
+
 		instdir = tempfile.mkdtemp('.inst', self.get_base_name())
-		ret = Utils.subprocess.Popen([sys.argv[0], 'configure', 'install', 'uninstall', '--destdir=' + instdir], cwd=self.get_base_name()).wait()
+		ret = Utils.subprocess.Popen([sys.argv[0], 'configure', 'install', 'uninstall', '--destdir=' + instdir] + cfg, cwd=self.get_base_name()).wait()
 		if ret:
 			raise Errors.WafError('distcheck failed with code %i' % ret)
 

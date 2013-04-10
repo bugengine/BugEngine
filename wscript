@@ -1,10 +1,6 @@
 VERSION = "0.2.0"
 APPNAME = "BugEngine"
 
-from mak import module
-import os
-from waflib import Options, Logs
-
 top = '.'
 out = '.build/waf'
 
@@ -14,104 +10,77 @@ def options(opt):
 def configure(conf):
 	conf.recurse('mak')
 
-
 def build(bld):
 	bld.recurse('mak')
-	if not bld.variant and not bld.env.PROJECTS:
-		Options.commands[:0] = [bld.__class__.cmd+'_' + i for i in bld.env.BUILD_VARIANTS]
-		return
 
-	bld.recurse('mak', name='platformbuild', once=False)
+	bld.external('3rdparty.zlib')
+	bld.external('3rdparty.mak')
 
-	zlib			= module.external('zlib')
-	mak				= module.external('mak')
+	bld.library('engine.kernel',				[])
+	bld.library('engine.minitl',				bld.platforms+['engine.kernel'])
+	bld.library('engine.core',					['3rdparty.mak', 'engine.minitl', 'engine.kernel'])
+	bld.library('engine.network',				['engine.core'])
+	bld.library('engine.rtti',					['engine.core', 'engine.network', '3rdparty.zlib'])
+	bld.library('engine.filesystem',			['engine.core', 'engine.rtti'])
+	bld.library('engine.resource',				['engine.core', 'engine.rtti', 'engine.filesystem'])
+	bld.library('engine.scheduler',				['engine.core', 'engine.rtti', 'engine.resource'])
+	bld.library('engine.world',					['engine.core', 'engine.rtti', 'engine.resource', 'engine.scheduler'])
+	bld.library('engine.plugin',				['engine.core', 'engine.rtti', 'engine.filesystem', 'engine.resource', 'engine.scheduler'])
 
-	kernel			= module.library('kernel',		[])
-	minitl			= module.library('minitl',		bld.platforms+[kernel])
-	core			= module.library('core',		[mak, minitl, kernel])
-	network			= module.library('network',		[core])
-	rtti			= module.library('rtti',		[core, network, zlib])
-	filesystem		= module.library('filesystem',	[core, rtti])
-	resource		= module.library('resource',	[core, rtti, filesystem])
-	scheduler		= module.library('scheduler',	[core, rtti, resource])
-	world			= module.library('world',		[core, rtti, resource, scheduler])
-	plugin			= module.library('plugin',		[core, rtti, filesystem, resource, scheduler])
+	bld.engine('engine.bugengine',				['engine.core', 'engine.rtti', 'engine.scheduler', 'engine.filesystem', 'engine.world', 'engine.plugin'])
 
-	bld.game		= module.engine('bugengine',	[core, rtti, scheduler, filesystem, world, plugin])
-	bld.recurse('.', name='plugins', once=False)
-	bld.game.post(bld)
+	bld.external('3rdparty.DirectX9')
+	bld.external('3rdparty.DirectX10')
+	bld.external('3rdparty.DirectX11')
+	bld.external('3rdparty.OpenGL')
+	bld.external('3rdparty.OpenGLES2')
+	bld.external('3rdparty.OpenCL')
 
+	bld.external('3rdparty.OpenAL')
+	bld.external('3rdparty.oggvorbis')
 
-def plugins(bld):
-	directx9		= module.external('DirectX9')
-	directx10		= module.external('DirectX10')
-	directx11		= module.external('DirectX11')
-	opengl			= module.external('OpenGL')
-	opengles		= module.external('OpenGLES2')
-	opencl			= module.external('OpenCL')
-	cgDx			= module.external('CgDx')
-	cgGL			= module.external('CgGL')
-	X11				= module.external('X11')
-	cocoa			= module.external('cocoa')
-	win32			= module.external('win32')
+	bld.external('3rdparty.bullet')
 
-	freetype		= module.external('freetype')
+	bld.external('3rdparty.lua')
+	bld.external('3rdparty.squirrel')
 
-	openal			= module.external('OpenAL')
-	oggvorbis		= module.external('oggvorbis')
+	bld.plugin('plugin.debug.runtime',			['engine.bugengine'])
+	bld.plugin('plugin.debug.assert',			['engine.bugengine', 'plugin.debug.runtime'])
 
-	bulletengine	= module.external('bulletengine')
+	bld.plugin('plugin.scripting.package',		['engine.bugengine'])
 
-	lualib			= module.external('lualib')
-	squirellib		= module.external('squirrellib')
+	bld.plugin('plugin.physics.bullet',			['engine.bugengine', '3rdparty.bullet'])
 
-	runtime			= module.plugin('debug.runtime', [])
-	assertdlg		= module.plugin('debug.assert', [runtime])
+	bld.plugin('plugin.graphics.3d',			['engine.bugengine'])
+	bld.plugin('plugin.graphics.shadermodel1',	['engine.bugengine', 'plugin.graphics.3d'])
+	bld.plugin('plugin.graphics.shadermodel2',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
+	bld.plugin('plugin.graphics.shadermodel3',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2'])
+	bld.plugin('plugin.graphics.shadermodel4',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2', 'plugin.graphics.shadermodel3'])
 
-	package			= module.plugin('scripting.package',		[])
+	#bld.plugin('plugin.audio.AL',				['engine.bugengine', '3rdparty.OpenAL'])
 
-	bullet			= module.plugin('physics.bullet',			[bulletengine])
+	bld.plugin('plugin.scripting.lua',			['engine.bugengine', '3rdparty.lua'])
+	bld.plugin('plugin.scripting.squirrel',		['engine.bugengine', '3rdparty.squirrel'])
+	bld.plugin('plugin.input.input',			['engine.bugengine'])
 
-	_3d				= module.plugin('graphics.3d',				[freetype])
-	shadermodel1	= module.plugin('graphics.shadermodel1',	[_3d])
-	shadermodel2	= module.plugin('graphics.shadermodel2',	[_3d, shadermodel1])
-	shadermodel3	= module.plugin('graphics.shadermodel3',	[_3d, shadermodel1, shadermodel2])
-	shadermodel4	= module.plugin('graphics.shadermodel4',	[_3d, shadermodel1, shadermodel2, shadermodel3])
+	bld.plugin('plugin.kernel.cpu'	,			['engine.bugengine'])
+	#bld.plugin('plugin.kernel.directcompute',	['engine.bugengine'])
+	bld.plugin('plugin.kernel.opencl',			['engine.bugengine', '3rdparty.OpenCL'], features=['OpenCL'])
 
-	#AL				= module.plugin('audio.AL',					[openal])
+	bld.plugin('plugin.graphics.nullrender',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2', 'plugin.graphics.shadermodel3', 'plugin.graphics.shadermodel4'])
+	bld.library('plugin.graphics.windowing',	['engine.bugengine', 'plugin.graphics.3d'], features=['GUI'])
+	bld.plugin('plugin.graphics.GL4',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.OpenGL'], features=['OpenGL', 'GUI'])
+	bld.plugin('plugin.kernel.opencl_gl',		['engine.bugengine', '3rdparty.OpenGL', 'engine.plugin.kernel.opencl'], features=['OpenGL', 'OpenCL'])
+	bld.plugin('plugin.graphics.Dx9',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX9'], features=['DirectX9'])
+	#bld.plugin('plugin.graphics.Dx10',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX10'], features=['DirectX10'])
+	#bld.plugin('plugin.graphics.Dx11',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX11'], features=['DirectX11'])
+	bld.plugin('plugin.graphics.GLES2',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.OpenGLES2'], features=['OpenGLES2'])
 
-	lua				= module.plugin('scripting.lua',			[lualib])
-	squirrel		= module.plugin('scripting.squirrel',		[squirellib])
-	input			= module.plugin('input.input',				[])
+	bld.external('3rdparty.scintilla')
+	bld.plugin('game.bugeditor.ui',				['engine.bugengine', '3rdparty.scintilla'], platforms=['pc'])
+	bld.game('game.bugeditor.main',				['engine.bugengine', 'game.bugeditor.ui', 'plugin.scripting.package'], platforms=['pc'])
 
-	kernelcpu		= module.plugin('kernel.cpu'	,			[bld.game])
-	#kerneldc		= module.plugin('kernel.directcompute',		[bld.game])
-	if opencl:
-		kernelopencl	= module.plugin('kernel.opencl',		[bld.game, opencl])
-
-	nullrender		= module.plugin('graphics.nullrender',		[_3d, shadermodel4])
-	if win32 or X11 or cocoa:
-		windowing	= module.library('graphics.windowing',		[bld.game, _3d, X11, win32], category='plugin')
-		if opengl:
-			gl		= module.plugin('graphics.GL4',				[bld.game, windowing, opengl, _3d])
-			if opencl:
-				clgl= module.plugin('kernel.opencl_gl',			[bld.game, gl, kernelopencl])
-		if directx9:
-			Dx9		= module.plugin('graphics.Dx9',				[bld.game, windowing, cgDx, directx9, _3d])
-		#if diretx10:
-			#Dx10	= module.plugin('graphics.DX10',			[bld.game, windowing, cgDx, directx10, _3d])
-		#if diretx11:
-			#Dx11	= module.plugin('graphics.DX11',			[bld.game, windowing, cgDx, directx11, _3d])
-	if opengles:
-		GLES        = module.plugin('graphics.GLES2',			[bld.game, opengles, _3d])
-
-	scintilla		= module.external('scintilla')
-	bugeditor = lambda: None
-	bugeditor.ui	= module.plugin('bugeditor.ui',				[scintilla], category='game', platforms=['pc'])
-	bugeditor.main	= module.game('bugeditor.main',				[bugeditor.ui, package], platforms=['pc'])
-
-	samples = lambda: None
-	samples.kernel	= module.game('samples.kernel',				[package])
+	bld.game('game.samples.kernel',				['engine.bugengine', 'plugin.scripting.package'])
 
 	bld.recurse('mak', name='plugins', once=False)
 

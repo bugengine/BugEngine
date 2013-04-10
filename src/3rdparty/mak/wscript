@@ -1,6 +1,3 @@
-import mak
-from mak import module
-import os
 
 def options(opt):
 	pass
@@ -9,18 +6,9 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.m['mak'] = module.waf('mak')
-	bld.m['mak'].sourcetree.prefix = ''
-
-	def addEntries(p, path, recurse):
-		for entries in os.listdir(path):
-			if entries == '.svn' or entries == '.cvs' or entries == 'win32':
-				continue
-			entry = os.path.join(path, entries)
-			if os.path.isdir(entry):
-				recurse(p, entry, recurse)
-			elif entries == 'wscript' or entries == 'wscript_build' or entries.endswith('.py'):
-				p.addFile(entry)
-	addEntries(bld.m['mak'], 'mak', addEntries)
-	bld.m['mak'].addFile('wscript')
+	mak = bld(target = '3rdparty.mak', source = [])
+	def add_files(p, path):
+		pass
+	add_files(mak, bld.bugenginenode.make_node('mak'))
+	#mak.source.append(bld.bugenginenode.make_node('wscript'))
 

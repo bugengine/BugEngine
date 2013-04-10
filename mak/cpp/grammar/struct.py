@@ -187,7 +187,7 @@ class ClassDef(cpp.yacc.Nonterm):
 		else:
 			owner = '::BugEngine::be_%s_Namespace()' % self.parser.plugin
 		parent = parent + [self.name]
-		
+
 		if self.members:
 			self.members.dumpObjects(files, namespace, parent)
 		else:

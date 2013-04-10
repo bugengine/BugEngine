@@ -198,6 +198,10 @@ class Exprs(cpp.yacc.Nonterm):
 		for o in self.objects + self.namespaces:
 			o.using(files, namespace, parent)
 
+	def declare_namespace(self, files, namespace):
+		for n in self.namespaces:
+			n.declare_namespace(files, namespace)
+
 	def predecl(self, files, namespace, parent, parent_value, parent_object):
 		try:
 			del self.methods['?del']
@@ -242,7 +246,7 @@ class Exprs(cpp.yacc.Nonterm):
 				objects = '%s->objects' % owner
 			properties = '%s->properties' % owner
 			for prop in self.members:
-				objects, properties = prop.dump(files, namespace, parent, owner, objects, properties)	
+				objects, properties = prop.dump(files, namespace, parent, owner, objects, properties)
 
 		methods = None
 		constructor = None
@@ -268,7 +272,7 @@ class Exprs(cpp.yacc.Nonterm):
 				else:
 					chain = methods
 					methods = '{&%s}' % varname
-					
+
 				files[0].write('static const ::BugEngine::RTTI::Method %s =\n' % varname)
 				files[0].write('{\n')
 				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)

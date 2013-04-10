@@ -5,10 +5,7 @@
 #define BE_AUDIO_OPENAL_STDAFX_H_
 /*****************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <system/stdafx.h>
-#include    <audio/stdafx.h>
+#include    <bugengine/stdafx.h>
 
 #include    <AL/al.h>
 #include    <AL/alc.h>

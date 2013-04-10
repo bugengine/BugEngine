@@ -1,414 +1,185 @@
-#set general options for building
+from waflib.Configure import conf
+from waflib.TaskGen import feature, extension
+from waflib import Node, Errors, Utils
+import os, sys
 
-import os
-import re
-from waflib.TaskGen import taskgen_method,feature,before_method,after_method,extension,before
-from waflib import Options,Task,Node,Errors
-import mak
-from mak import module
-from waflib.Logs import pprint
-from waflib.Tools import ccroot,c,cxx
 
-projects = ['vs2003', 'vs2005', 'vs2005e', 'vs2008', 'vs2008e', 'vs2010', 'vs2010e', 'vs11', 'vs11e', 'vs2012', 'vs2012e',
-			'xcode3', 'xcode4', 'eclipse', 'netbeans', 'qtcreator']
+def module(bld, name, depends, features):
+	archs = bld.env.VALID_ARCHITECTURES
+	platforms = bld.env.VALID_PLATFORMS
+	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
 
-from waflib.Tools.ccroot import USELIB_VARS
-USELIB_VARS['debug'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
-USELIB_VARS['profile'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
-USELIB_VARS['final'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
-USELIB_VARS['warnall'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
-USELIB_VARS['warnnone'] = set(['CFLAGS', 'CXXFLAGS', 'LINKFLAGS'])
+	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', '.so', '.dll', '.plist', '.png']
+	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
+	sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
+	sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
+	all_sources = source_node.ant_glob(['**'])
+	api = source_node.make_node('api')
+	include = source_node.make_node('include')
+	lib_paths = [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific]
+	if os.path.isfile(os.path.join(api.abspath(), name.split('.')[-1], 'stdafx.h')):
+		pchstop = '%s/%s'%(name.split('.')[-1], 'stdafx.h')
+	elif os.path.isfile(os.path.join(include.abspath(), 'stdafx.h')):
+		pchstop = 'stdafx.h'
+	else:
+		pchstop = None
 
-@feature('debug', 'profile', 'final', 'warnall', 'warnnone')
-def dummy(c):
+	return bld(
+		target = name,
+		use = depends,
+		features = features,
+		defines = ['building_%s' % name.split('.')[-1]],
+		export_defines = [],
+		includes = [api.path_from(bld.path), include.path_from(bld.path)],
+		libs = [],
+		lib_paths = lib_paths,
+		export_includes = [source_node.make_node('api').path_from(bld.path)],
+		frameworks = [],
+		source = sources,
+		pchstop = pchstop,
+		all_sources = all_sources)
+
+@conf
+def external(bld, name):
+	bld.recurse('src/%s' % name.replace('.', '/'))
+
+@conf
+def thirdparty(bld, name, depends=[], libs=[], lib_paths = [], frameworks=[], includes=[], defines=[]):
+	m = module(bld, name, depends, ['bugengine_fake_lib'])
+	if m:
+		m.libs = libs
+		m.frameworks = frameworks
+		m.export_includes = includes
+		m.export_defines = defines
+		m.lib_paths += lib_paths
+	return m
+
+@conf
+def library(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx'])
+
+@conf
+def static_library(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx', 'cxxstlib'])
+
+@conf
+def shared_library(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx', 'cxxshlib'])
+
+@conf
+def engine(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx', 'cxxprogram'])
+
+@conf
+def game(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'])
+
+@conf
+def plugin(bld, name, depends=[], features=[], platforms=[]):
+	for f in features:
+		if f not in bld.features:
+			return None
+	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'])
+
+@feature('plugin')
+def plugin_feature(task):
 	pass
 
-def print_msg(task):
-	tgt = str(task.outputs[0])
-	return tgt+'\n'
-Task.Task.__str__ = print_msg
+@feature('game')
+def game_feature(task):
+	pass
 
 def options(opt):
-	opt.recurse(os.path.join('host', os.name))
-	opt.load('visualstudio netbeans xcode eclipse qtcreator', tooldir='mak/tools/IDE')
-	#opt.load('parallel_debug', tooldir='mak/waflib/extras')
-	for l in 'platforms','archs':
-		for target in os.listdir(os.path.join('mak', 'target', l)):
-			if target not in ['.svn', '.cvs']:
-				opt.recurse(os.path.join('target', l, target))
-	extra3rdparties=[]
-	if os.path.isdir('extra'):
-		for f in os.listdir('extra'):
-			if f in ['.svn', '.cvs']:
-				continue
-			if os.path.isdir(os.path.join('extra', f)):
-				if os.path.isfile(os.path.join('extra', f, 'wscript')):
-					opt.recurse(os.path.join('..', 'extra', f))
-					if os.path.isdir(os.path.join('extra', f, '3rdparty')):
-						for lib in os.listdir(os.path.join('extra', f, '3rdparty')):
-							if lib not in ['.svn', '.cvs']:
-								extra3rdparties.append(os.path.join('extra', f, '3rdparty', lib))
-	gr = opt.get_option_group('build and install options')
-	gr.add_option( '--toolchains',
-					action='store',
-					default='',
-					dest='toolchains',
-					help='build for the selected toolchains')
-	gr.add_option( '--nomaster',
-					action = 'store_true',
-					default = False,
-					dest = 'nomaster',
-					help = 'build without master files')
-	gr.add_option( '--static',
-					action = 'store_true',
-					default = False,
-					dest = 'static',
-					help = 'build a static executable (all plugins built into the engine)')
-	gr.add_option( '--dynamic',
-					action = 'store_true',
-					default = False,
-					dest = 'dynamic',
-					help = 'build a dynamic engine (all engine components built into shared objects)')
-
-	for i in os.listdir(os.path.join('src', '3rdparty')):
-		if i in ['.svn', '.cvs']:
-			continue
-		if os.path.isdir(os.path.join('src', '3rdparty', i)):
-			opt.recurse(os.path.join('..', 'src', '3rdparty', i))
-	for i in extra3rdparties:
-		opt.recurse(os.path.join('..', i))
+	opt.bugenginenode = opt.path.parent
+	opt.recurse('host')
+	opt.recurse('source')
+	opt.recurse('target')
+	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
+		opt.recurse('../src/3rdparty/%s'%third_party)
 
 def configure(conf):
-	conf.mak = os.getcwd() + "/mak"
-	conf.env['ARCHITECTURES']	= mak.allarchs
+	conf.bugenginenode = conf.path.parent
+	conf.recurse('checks')
+	conf.recurse('host')
+	conf.recurse('source')
+	conf.recurse('target')
 
-	#conf.load('parallel_debug', tooldir='mak/waflib/extras')
-	conf.load('visualstudio netbeans xcode eclipse', tooldir='mak/tools/IDE')
-	conf.recurse('tests')
-	conf.recurse(os.path.join('host', os.name))
-	if os.path.isdir('extra'):
-		for f in os.listdir('extra'):
-			if f in ['.svn', '.cvs']:
-				continue
-			if os.path.isdir(os.path.join('extra', f)) and os.path.isfile(os.path.join('extra', f, 'wscript')):
-				pprint('BLUE', '_'*40)
-				pprint('BLUE', '| '+('configure for extra package '+f).ljust(36)+ ' |')
-				conf.recurse(os.path.join('..', 'extra', f), once=False)
-	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
-		if platform == conf.env.HOST: continue
-		if platform not in ['.svn', '.cvs']:
-			pprint('BLUE', '_'*40)
-			pprint('BLUE', '| '+('configure for target '+platform).ljust(36)+' |')
-			conf.recurse(os.path.join('target', 'platforms', platform))
-	pprint('BLUE', '_'*40)
-	pprint('BLUE', '| '+('configure for target '+conf.env.HOST).ljust(36)+' |')
-	conf.recurse(os.path.join('target', 'platforms', conf.env.HOST))
-
-
-	if len(conf.env['BUILD_VARIANTS']) == 0:
-		raise SystemExit("no match found : make sure you selected a valid toolchain")
-	conf.env['DEFAULT_BUILD_TOOL'] = conf.env['BUILD_VARIANTS'][-1]
-
-	selectedvariants = []
-	for optim in mak.alloptims:
-		for envname in conf.env['BUILD_VARIANTS']:
-			name = envname+'-'+optim
-			conf.setenv(name, conf.all_envs[envname])
-			conf.env['OPTIMISATION'] = optim
-			conf.env['PREFIX'] = os.path.join('build', name)
-			joblist = []
-			for jobname in conf.env.KERNELS:
-				fullname = '(kernel)'+name
-				conf.setenv(fullname, conf.all_envs[jobname])
-				conf.env.detach()
-				conf.env.OPTIMISATION = optim
-				conf.env.PREFIX = os.path.join('build', name)
-				conf.env.IS_KERNEL = True
-				joblist.append(fullname)
-			conf.variant = name
-			conf.env.KERNELS = joblist
-			selectedvariants.append(name)
-
-	conf.variant = ''
-	conf.env['BUILD_VARIANTS'] = selectedvariants
-	conf.env['ALL_VARIANTS'] = selectedvariants
-
-	if Options.options.toolchains:
-		conf.env['SELECTED_TOOLCHAINS'] = Options.options.toolchains
-		selectedtoolchains = [re.compile(selected) for selected in conf.env['SELECTED_TOOLCHAINS'].split(',')]
-		allvariants = conf.env['BUILD_VARIANTS']
-		selectedvariants = []
-		for v in allvariants:
-			for e in selectedtoolchains:
-				if e.match(v):
-					pprint('GREEN', 'selected variant %s for build' % v)
-					selectedvariants.append(v)
-		if not selectedvariants:
-			conf.fatal('No toolchain matches the pattern %s, available : %s' % (Options.options.toolchains,str(allvariants)))
-	else:
-		conf.env['SELECTED_TOOLCHAINS'] = '^'+conf.env['DEFAULT_BUILD_TOOL']+"-debug$"
-		pprint('GREEN', 'selected variant %s for build' % str(conf.env['SELECTED_TOOLCHAINS']))
-	conf.env.store('.build/be_toolchains.py')
-	conf.recurse('libs')
-
-def selectToolchains(ctx):
-	if not Options.options.toolchains:
-		Options.options.toolchains = ctx.env['SELECTED_TOOLCHAINS']
-	selectedtoolchains = [re.compile(selected) for selected in Options.options.toolchains.split(',')]
-	selectedvariants = []
-	allvariants = ctx.env['BUILD_VARIANTS']
-	for v in allvariants:
-		for e in selectedtoolchains:
-			if e.match(v):
-				selectedvariants.append(v)
-	ctx.env['BUILD_VARIANTS'] = selectedvariants
+def setup(conf):
+	for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
+		conf.recurse('../src/3rdparty/%s'%third_party, name='setup', once=False)
 
 def build(bld):
-	from waflib import Options
-	if bld.__class__.__name__ in projects:
-		bld.env.PROJECTS = [bld.__class__.__name__]
-	for l in 'platforms','archs':
-		for target in os.listdir(os.path.join('mak', 'target', l)):
-			if target not in ['.svn', '.cvs']:
-				bld.recurse(os.path.join('target', l, target))
-	extra3rdparties = []
-	if os.path.isdir('extra'):
-		for target in os.listdir(os.path.join('extra')):
-			if target not in ['.svn', '.cvs']:
-				if os.path.isfile(os.path.join('extra', target, 'wscript')):
-					bld.recurse(os.path.join('..', 'extra', target))
-					if os.path.isdir(os.path.join('extra', target, '3rdparty')):
-						for lib in os.listdir(os.path.join('extra', target, '3rdparty')):
-							if lib not in ['.svn', '.cvs']:
-								extra3rdparties.append(os.path.join('extra', target, '3rdparty', lib))
-	selectToolchains(bld)
-	mak.builder = bld
-	mak.builder.static = Options.options.static
-	mak.builder.dynamic = Options.options.dynamic
-	bld.m = {}
-	for i in os.listdir(os.path.join('src', '3rdparty')):
-		if i not in ['.svn', '.cvs']:
-			if os.path.isdir(os.path.join('src', '3rdparty', i)):
-				bld.recurse(os.path.join('..', 'src', '3rdparty', i), once=False)
-	for i in extra3rdparties:
-		bld.recurse(os.path.join('..', i), once=False)
-
-
-
-def platformbuild(bld):
+	bld.bugenginenode = bld.path.parent
+	if bld.variant == '':
+		raise Errors.WafError('Call %s %s %s:toolchain:variant, with toolchain in\n\t%s\nvariant in\n\t%s' %
+								(sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
 	bld.platforms = []
-	for platform in os.listdir(os.path.join('mak', 'target', 'platforms')):
-		if platform not in ['.svn', '.cvs']:
-			bld.recurse(os.path.join('target', 'platforms', platform), name='platformbuild', once=False)
-	if os.path.isdir('extra'):
-		for target in os.listdir(os.path.join('extra')):
-			if target not in ['.svn', '.cvs']:
-				if os.path.isdir(os.path.join('extra', target)) and os.path.isfile(os.path.join('extra', target, 'wscript')):
-					bld.recurse(os.path.join('..', 'extra', target), name='platformbuild', once=False)
+	bld.features = []
+	bld.bugenginenode = bld.path.parent
+	bld.recurse('host')
+	bld.recurse('source')
+	bld.recurse('target')
 
 def plugins(bld):
-	if os.path.isdir('extra'):
-		for target in os.listdir(os.path.join('extra')):
-			if target not in ['.svn', '.cvs']:
-				if os.path.isdir(os.path.join('extra', target)) and os.path.isfile(os.path.join('extra', target, 'wscript')):
-					bld.recurse(os.path.join('..', 'extra', target), name='plugins', once=False)
+	bld.recurse('host')
+	bld.recurse('target')
 
 
-def clean(ctx):
-	selectToolchains(ctx)
 
-def install(ctx):
-	selectToolchains(ctx)
+SYSTEM_LIB_PATHS = ['/usr/lib64', '/usr/lib', '/usr/local/lib64', '/usr/local/lib']
+lib_patterns = ['lib%s.a', '%s.lib']
 
-def uninstall(ctx):
-	selectToolchains(ctx)
+@feature('*')
+def check_use_taskgens(self):
+	"""
+	Checks all names in 'use' are valid task generators
+	"""
+	use = getattr(self, 'use', [])
+	for name in use:
+		if name not in self.env.ALL_VARIANTS:
+			self.bld.get_tgen_by_name(name)
 
-@extension('.m')
-def m_hook(self, node):
-	"""Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
-	return self.create_compiled_task('c', node)
+@feature('bugengine_fake_lib')
+def process_3rdparty_lib(self):
+	"""
+	Find the location of a foreign library. Used by :py:class:`waflib.Tools.ccroot.read_shlib` and :py:class:`waflib.Tools.ccroot.read_stlib`.
+	"""
+	nodes = []
 
-@extension('.mm')
-def mm_hook(self, node):
-	"""Alias .mm files to be compiled the same as .cxx files, gcc will do the right thing."""
-	return self.create_compiled_task('cxx', node)
-
-@taskgen_method
-@feature('c','cxx')
-@before_method('process_source')
-def filter_sources(self):
-	v = self.env
-	self.source = self.to_list(self.source)
-	rejectedsources = []
-	self.allsources = {}
-	for source in self.source:
-		head,tail = os.path.split(source)
-		while tail:
-			head,tail = os.path.split(head)
-			if tail[0:5] == 'arch=':
-				archs=set(tail[5:].split(','))
-				if not v['ARCHITECTURE'] in archs:
-					try: self.allsources[tail].append(source)
-					except KeyError: self.allsources[tail] = [source]
-					rejectedsources.append(source)
+	for name in self.libs:
+		node = None
+		names = [x % name for x in lib_patterns]
+		for x in self.lib_paths + [self.path] + SYSTEM_LIB_PATHS:
+			print(x)
+			if not isinstance(x, Node.Node):
+				x = self.bld.root.find_node(x) or self.path.find_node(x)
+				if not x:
 					continue
-			if tail[0:9] == 'platform=':
-				platforms=set(tail[9:].split(','))
-				if not set(v['PLATFORM']) & platforms:
-					try: self.allsources[tail].append(source)
-					except KeyError: self.allsources[tail] = [source]
-					rejectedsources.append(source)
-					continue
-	for src in rejectedsources:
-		self.source.remove(src)
-
-@feature('c', 'cxx')
-@before_method('apply_incpaths')
-@after_method('propagate_uselib_vars')
-def private_headers(self):
-	self.env.append_value('DEFINES', getattr(self, 'private_defines', []))
-	self.env.append_value('INCLUDES', ['.']+getattr(self, 'private_includes', []))
-
-@feature('c', 'cxx')
-@after_method("process_source")
-def individual_pdb(self):
-	if self.env.CC_NAME == 'msvc':
-		try:
-			for t in self.compiled_tasks:
-				if t.__class__ == cxx.cxx or t.__class__ == c.c:
-					pdb = t.outputs[0].change_ext('.pdb')
-					t.env.append_unique('CFLAGS', ['/Fd%s'%pdb.bldpath()])
-					t.env.append_unique('CXXFLAGS', ['/Fd%s' % pdb.bldpath()])
-		except AttributeError:
-			pass
-
-
-@feature('dummy')
-def dummy_dummy(self):
-	pass
-@feature('cobjects')
-def dummy_cobjects(self):
-	pass
-
-
-
-
-objcpydbg = '${OBJCOPY} ${OBJCOPYFLAGS} --only-keep-debug ${SRC[0].abspath()} ${TGT[0].abspath()}'
-objcpydbgcls = Task.task_factory('dbg', objcpydbg, color='YELLOW', ext_in='.all', ext_out='.dbg', shell=False)
-objcpystrip = '${OBJCOPY} ${OBJCOPYFLAGS} --strip-debug --strip-unneeded --keep-symbol .gnu_debuglink --add-gnu-debuglink ${SRC[0].change_ext(".dbg").path_from(tsk.inputs[0].parent)} ${SRC[0].abspath()} ${TGT[0].abspath()}'
-objcpystripcls = Task.task_factory('strip', objcpystrip, color='YELLOW', ext_in='.all', shell=False)
-
-@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
-@after_method('apply_link')
-@after_method('apply_implib')
-@after_method('apply_implib_program')
-def extract_debug_info(self):
-	if self.env.CXX_NAME in ['gcc', 'sun'] and self.env.OBJCOPY:
-		self.link_task_real = self.link_task
-		innode = self.link_task_real.outputs[0]
-		outnode = innode.parent.find_or_declare('full').find_or_declare(innode.name)
-		debugnode = innode.change_ext('.dbg')
-		self.link_task_real.outputs[0] = outnode
-
-		self.link_debug_task = self.create_task('dbg', outnode)
-		self.link_debug_task.set_outputs(debugnode)
-		self.link_debug_task.set_run_after(self.link_task_real)
-
-		try:
-			inst_to = self.install_path
-		except AttributeError:
-			inst_to = self.link_task.__class__.inst_to
-		self.bld.install_files(inst_to, self.link_debug_task.outputs[:], env=self.env)
-
-
-
-		self.link_task = self.create_task('strip', outnode)
-		self.link_task.set_outputs(innode)
-		self.link_task.set_run_after(self.link_debug_task)
-
-
-@feature('cprogram', 'cxxprogram')
-@after_method('apply_link')
-@before_method('apply_implib')
-def apply_implib_program(self):
-	ccroot.apply_implib(self)
-
-from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, ListContext
-from waflib import ConfigSet
-try:
-	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
-	for toolchain in env.BUILD_VARIANTS:
-		for y in (BuildContext, CleanContext, InstallContext, UninstallContext, ListContext):
-			name = y.__name__.replace('Context','').lower()
-			class tmp(y):
-				cmd = name + '_' + toolchain
-				variant = toolchain
-except:
-	pass
-
-class foo(BuildContext):
-	cmd = 'build'
-	fun = 'build'
-	returned_tasks = []
-	def compile(self):
-		pass
-
-def create_master_file(task):
-	with open(task.outputs[0].abspath(), 'w') as f:
-		for src in task.inputs:
-			f.write('#include "%s"\n' % src.path_from(task.generator.bld.path).replace('\\','/'))
-def master_sig_deps(task):
-	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
-		task.m.update(f)
-		task.m.update(b';')
-MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
-MasterTask.sig_explicit_deps = master_sig_deps
-
-
-@extension('.c')
-def c_hook(self, node):
-	if 'master' in self.features and not Options.options.nomaster:
-		try:
-			mastertask_c = self.mastertasks_c[-1]
-			if len(mastertask_c.inputs) <= 20:
-				mastertask_c.set_inputs([node])
+			for y in names:
+				node = x.find_node(y)
+				if node:
+					node.sig = Utils.h_file(node.abspath())
+					break
 			else:
-				output = self.path.find_or_declare(self.target+'-c-%d-master.c' % len(self.mastertasks_c))
-				mastertask_c = self.create_task('master', [node], [output])
-				self.mastertasks_c.append(mastertask_c)
-				self.create_compiled_task('c', output)
-		except:
-			output = self.path.find_or_declare(self.target+'-c-0-master.c')
-			mastertask_c = self.create_task('master', [node], [output])
-			self.mastertasks_c = [mastertask_c]
-			self.create_compiled_task('c', output)
-	else:
-		self.create_compiled_task('c', node)
-
-@extension('.cc', '.cxx', '.cpp')
-def cc_hook(self, node):
-	if 'master' in self.features and not Options.options.nomaster:
-		if node.name.endswith('-instances.cc'):
-			try:
-				self.instancetask_cxx.set_inputs([node])
-			except:
-				output = self.path.find_or_declare(self.target+'-cxx-instances-master.cc')
-				self.instancetask_cxx = self.create_task('master', [node], [output])
-				self.create_compiled_task('cxx', output)
+				continue
+			break
 		else:
-			try:
-				mastertask_cxx = self.mastertasks_cxx[-1]
-				if len(mastertask_cxx.inputs) <= 20:
-					mastertask_cxx.set_inputs([node])
-				else:
-					output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
-					mastertask_cxx = self.create_task('master', [node], [output])
-					self.mastertasks_cxx.append(mastertask_cxx)
-					self.create_compiled_task('cxx', output)
-			except:
-				output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
-				mastertask_cxx = self.create_task('master', [node], [output])
-				self.mastertasks_cxx = [mastertask_cxx]
-				self.create_compiled_task('cxx', output)
-	else:
-		self.create_compiled_task('cxx', node)
+			raise Errors.WafError('%s: could not find library %r' % (self.name, name))
+		nodes.append(node)
+	self.link_task = self.create_task('fake_stlib', [], nodes)
+	self.target = self.name

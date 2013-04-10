@@ -15,10 +15,7 @@ MAX = 1
 def scan(self):
 	return ([], [])
 
-def doParseData(task):
-	return mak.ddf.doParse(task.inputs[0].abspath(), task.outputs[0].abspath(), '.build', [], ['mak/macros_ignore'], task.pch, task.plugin, task.env.BROKEN_INITIALIZER)
-
-ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} -b ${str(env.BROKEN_INITIALIZER)} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
+ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
@@ -31,14 +28,12 @@ def datagen(self, node):
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
 	tsk.env.detach()
-	if self.category == 'plugin' or self.category == 'game':
+	category = self.target.split('.')[0]
+	if category == 'plugin' or category == 'game':
 		tsk.env.PLUGIN = self.name.replace('.', '_')
 	else:
 		tsk.env.PLUGIN = 'game'
-	try:
-		tsk.env.PCH = self.pchheader
-	except AttributeError:
-		pass
+	tsk.env.PCH = self.pchstop
 	tsk.dep_nodes = [
 		self.path.find_or_declare('mak/ddf.py'),
 		self.path.find_or_declare('mak/cpp/lexer.py'),
@@ -62,7 +57,4 @@ def datagen(self, node):
 		]
 	self.source.append(outs[0])
 	self.source.append(outs[1])
-
-def configure(conf):
-	pass
 

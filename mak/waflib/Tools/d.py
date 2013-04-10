@@ -3,11 +3,8 @@
 # Carlos Rafael Giani, 2007 (dv)
 # Thomas Nagy, 2007-2010 (ita)
 
-import os, sys
 from waflib import Utils, Task, Errors
-from waflib.TaskGen import taskgen_method, feature, after_method, before_method, extension
-from waflib.Configure import conf
-from waflib.Tools.ccroot import link_task
+from waflib.TaskGen import taskgen_method, feature, extension
 from waflib.Tools import d_scan, d_config
 from waflib.Tools.ccroot import link_task, stlink_task
 
@@ -28,9 +25,8 @@ class d_header(Task.Task):
 
 class dprogram(link_task):
 	"Link object files into a d program"
-	run_str = '${D_LINKER} ${DLNK_SRC_F}${SRC} ${DLNK_TGT_F:TGT} ${RPATH_ST:RPATH} ${DSTLIB_MARKER} ${DSTLIBPATH_ST:STLIBPATH} ${DSTLIB_ST:STLIB} ${DSHLIB_MARKER} ${LIBPATH_ST:LIBPATH} ${DSHLIB_ST:LIB} ${LINKFLAGS}'
+	run_str = '${D_LINKER} ${LINKFLAGS} ${DLNK_SRC_F}${SRC} ${DLNK_TGT_F:TGT} ${RPATH_ST:RPATH} ${DSTLIB_MARKER} ${DSTLIBPATH_ST:STLIBPATH} ${DSTLIB_ST:STLIB} ${DSHLIB_MARKER} ${DLIBPATH_ST:LIBPATH} ${DSHLIB_ST:LIB}'
 	inst_to = '${BINDIR}'
-	chmod   = Utils.O755
 
 class dshlib(dprogram):
 	"Link object files into a d shared library"
@@ -49,16 +45,25 @@ def d_hook(self, node):
 			bld.program(source='foo.d', target='app', generate_headers=True)
 
 	"""
+	ext = Utils.destos_to_binfmt(self.env.DEST_OS) == 'pe' and 'obj' or 'o'
+	out = '%s.%d.%s' % (node.name, self.idx, ext)
+	def create_compiled_task(self, name, node):
+		task = self.create_task(name, node, node.parent.find_or_declare(out))
+		try:
+			self.compiled_tasks.append(task)
+		except AttributeError:
+			self.compiled_tasks = [task]
+		return task
+
 	if getattr(self, 'generate_headers', None):
-		task = self.create_compiled_task('d_with_header', node)
-		header_node = node.change_ext(self.env['DHEADER_ext'])
-		task.outputs.append(header_node)
+		tsk = create_compiled_task(self, 'd_with_header', node)
+		tsk.outputs.append(node.change_ext(self.env['DHEADER_ext']))
 	else:
-		task = self.create_compiled_task('d', node)
-	return task
+		tsk = create_compiled_task(self, 'd', node)
+	return tsk
 
 @taskgen_method
-def generate_header(self, filename, install_path=None):
+def generate_header(self, filename):
 	"""
 	See feature request #104::
 
@@ -70,12 +75,11 @@ def generate_header(self, filename, install_path=None):
 
 	:param filename: header to create
 	:type filename: string
-	:param install_path: unused (TODO)
 	"""
 	try:
-		self.header_lst.append([filename, install_path])
+		self.header_lst.append([filename, self.install_path])
 	except AttributeError:
-		self.header_lst = [[filename, install_path]]
+		self.header_lst = [[filename, self.install_path]]
 
 @feature('d')
 def process_header(self):

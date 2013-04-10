@@ -1,0 +1,153 @@
+from waflib import Utils
+from waflib.Configure import conf
+from waflib.TaskGen import feature, before_method, after_method
+import os
+
+
+USE_LIBRARY_CODE="""
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+int main(int argc, char *argv[]) { return 0; }
+"""
+
+USE_SDK_CODE="""
+#include <iostream>
+#include <cstdlib>
+#include <cassert>
+#include <stdio.h>
+
+int main(int argc, const char *argv[])
+{ return EXIT_SUCCESS; }
+"""
+
+@feature("link_library")
+@before_method("process_source")
+def link_library_test(self):
+	def write_test_file(task):
+		task.outputs[0].write(task.generator.code)
+	bld = self.bld
+	bld(rule=write_test_file, target='main.cc', code=self.code)
+	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, use=self.use)
+
+@feature("link_framework")
+@before_method("process_source")
+def link_framework_test(self):
+	def write_test_file(task):
+		task.outputs[0].write(task.generator.code)
+	bld = self.bld
+	bld(rule=write_test_file, target='main.cc', code=self.code)
+	env = self.env.derive()
+	env.detach()
+	env.FRAMEWORK = self.frameworks
+	if self.sdk:
+		env.append_unique('CXXFLAGS', ['-isysroot', self.sdk])
+		env.append_unique('LINKFLAGS', ['-isysroot', self.sdk, '-L%s/usr/lib'%self.sdk])
+	if self.version:
+		env.append_unique('CXXFLAGS', [self.version])
+		env.append_unique('LINKFLAGS', [self.version])
+	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env, use=self.use)
+
+
+@conf
+def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+	def cut(string):
+		if len(string) > 19:
+			return string[0:17]+'...'
+		else:
+			return string
+	libname = Utils.to_list(libname)
+	if not var: var = libname[0]
+	if self.env[var]:
+		return
+	try:
+		self.check(
+			compile_filename=[],
+			features='link_library',
+			msg='check for libraries %s' %cut(','.join(libname)),
+			libname=libname,
+			libpath=libpath,
+			code=code,
+			includepath=includepath,
+			use=['debug'])
+	except self.errors.ConfigurationError:
+		pass
+	else:
+		self.env[var] = libname
+	return self.env[var]
+
+@conf
+def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+	def cut(string):
+		if len(string) > 19:
+			return string[0:17]+'...'
+		else:
+			return string
+	headername = Utils.to_list(headername)
+	if not var: var = os.path.splitext(headername[0])[0]
+	if self.env[var]:
+		return
+	try:
+		self.check(
+			compile_filename=[],
+			features='link_library',
+			msg='check for header %s' %cut(','.join(headername)),
+			libname=[],
+			libpath=libpath,
+			code='\n'.join(["#include <%s>"%h for h in headername]) + '\n' + code,
+			includepath=includepath,
+			use=['debug'])
+	except self.errors.ConfigurationError as e:
+		pass
+	else:
+		self.env[var] = headername
+	return self.env[var]
+
+@conf
+def check_framework(self, frameworks, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+	def cut(string):
+		if len(string) > 19:
+			return string[0:17]+'...'
+		else:
+			return string
+	frameworks = Utils.to_list(frameworks)
+	if not var: var = os.path.splitext(frameworks[0])[0]
+	if self.env[var]:
+		return
+	try:
+		self.check(
+			compile_filename=[],
+			features='link_framework',
+			msg='check for framework %s' %cut(','.join(frameworks)),
+			libname=[],
+			frameworks=frameworks,
+			libpath=libpath,
+			code=code,
+			includepath=includepath,
+			sdk='',
+			version='',
+			use=['debug'])
+	except self.errors.ConfigurationError as e:
+		pass
+	else:
+		self.env[var] = frameworks
+	return self.env[var]
+
+@conf
+def check_sdk(self, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
+	self.check(
+		compile_filename=[],
+		features='link_framework',
+		msg='check for SDK %s' %os.path.split(sdk)[1],
+		libname=[],
+		frameworks=[],
+		libpath=libpath,
+		code=code,
+		includepath=includepath,
+		sdk=sdk,
+		version=version,
+		use=['debug'])
+
+
+def configure(conf):
+	pass

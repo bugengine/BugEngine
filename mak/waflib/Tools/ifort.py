@@ -5,7 +5,7 @@
 
 import re
 from waflib import Utils
-from waflib.Tools import fc, fc_config, fc_scan
+from waflib.Tools import fc, fc_config, fc_scan, ar
 from waflib.Configure import conf
 
 @conf
@@ -18,6 +18,14 @@ def find_ifort(conf):
 @conf
 def ifort_modifier_cygwin(conf):
 	raise NotImplementedError("Ifort on cygwin not yet implemented")
+
+@conf
+def ifort_modifier_win32(conf):
+	fc_config.fortran_modifier_win32(conf)
+
+@conf
+def ifort_modifier_darwin(conf):
+	fc_config.fortran_modifier_darwin(conf)
 
 @conf
 def ifort_modifier_platform(conf):
@@ -44,6 +52,9 @@ def get_ifort_version(conf, fc):
 
 def configure(conf):
 	conf.find_ifort()
-	conf.find_ar()
+	conf.find_program('xiar', var='AR')
+	conf.env.ARFLAGS = 'rcs'
 	conf.fc_flags()
+	conf.fc_add_flags()
 	conf.ifort_modifier_platform()
+

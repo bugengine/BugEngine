@@ -7,21 +7,23 @@ Classes and methods shared by tools providing support for C-like language such
 as C/C++/D/Assembly/Go (this support module is almost never used alone).
 """
 
-import os, sys, re
-from waflib import TaskGen, Task, Utils, Logs, Build, Options, Node, Errors
-from waflib.Logs import error, debug, warn
-from waflib.TaskGen import after_method, before_method, feature, taskgen_method
+import os, re
+from waflib import Task, Utils, Node, Errors
+from waflib.TaskGen import after_method, before_method, feature, taskgen_method, extension
 from waflib.Tools import c_aliases, c_preproc, c_config, c_osx, c_tests
 from waflib.Configure import conf
+
+SYSTEM_LIB_PATHS = ['/usr/lib64', '/usr/lib', '/usr/local/lib64', '/usr/local/lib']
 
 USELIB_VARS = Utils.defaultdict(set)
 """
 Mapping for features to :py:class:`waflib.ConfigSet.ConfigSet` variables. See :py:func:`waflib.Tools.ccroot.propagate_uselib_vars`.
 """
 
-USELIB_VARS['c']   = set(['INCLUDES', 'FRAMEWORKPATH', 'DEFINES', 'CPPFLAGS', 'CCDEPS', 'CFLAGS', 'ARCH'])
-USELIB_VARS['cxx'] = set(['INCLUDES', 'FRAMEWORKPATH', 'DEFINES', 'CPPFLAGS', 'CXXDEPS', 'CXXFLAGS', 'ARCH'])
-USELIB_VARS['d']   = set(['INCLUDES', 'DFLAGS'])
+USELIB_VARS['c']        = set(['INCLUDES', 'FRAMEWORKPATH', 'DEFINES', 'CPPFLAGS', 'CCDEPS', 'CFLAGS', 'ARCH'])
+USELIB_VARS['cxx']      = set(['INCLUDES', 'FRAMEWORKPATH', 'DEFINES', 'CPPFLAGS', 'CXXDEPS', 'CXXFLAGS', 'ARCH'])
+USELIB_VARS['d']        = set(['INCLUDES', 'DFLAGS'])
+USELIB_VARS['includes'] = set(['INCLUDES', 'FRAMEWORKPATH', 'ARCH'])
 
 USELIB_VARS['cprogram'] = USELIB_VARS['cxxprogram'] = set(['LIB', 'STLIB', 'LIBPATH', 'STLIBPATH', 'LINKFLAGS', 'RPATH', 'LINKDEPS', 'FRAMEWORK', 'FRAMEWORKPATH', 'ARCH'])
 USELIB_VARS['cshlib']   = USELIB_VARS['cxxshlib']   = set(['LIB', 'STLIB', 'LIBPATH', 'STLIBPATH', 'LINKFLAGS', 'RPATH', 'LINKDEPS', 'FRAMEWORK', 'FRAMEWORKPATH', 'ARCH'])
@@ -30,9 +32,6 @@ USELIB_VARS['cstlib']   = USELIB_VARS['cxxstlib']   = set(['ARFLAGS', 'LINKDEPS'
 USELIB_VARS['dprogram'] = set(['LIB', 'STLIB', 'LIBPATH', 'STLIBPATH', 'LINKFLAGS', 'RPATH', 'LINKDEPS'])
 USELIB_VARS['dshlib']   = set(['LIB', 'STLIB', 'LIBPATH', 'STLIBPATH', 'LINKFLAGS', 'RPATH', 'LINKDEPS'])
 USELIB_VARS['dstlib']   = set(['ARFLAGS', 'LINKDEPS'])
-
-USELIB_VARS['go'] = set(['GOCFLAGS'])
-USELIB_VARS['goprogram'] = set(['GOLFLAGS'])
 
 USELIB_VARS['asm'] = set(['ASFLAGS'])
 
@@ -80,7 +79,7 @@ def to_incnodes(self, inlst):
 	lst = []
 	seen = set([])
 	for x in self.to_list(inlst):
-		if x in seen:
+		if x in seen or not x:
 			continue
 		seen.add(x)
 
@@ -96,12 +95,13 @@ def to_incnodes(self, inlst):
 				else:
 					p = self.path.get_bld().make_node(x)
 					v = self.path.make_node(x)
-				p.mkdir()
+				if p.is_child_of(self.bld.bldnode):
+					p.mkdir()
 				lst.append(p)
 				lst.append(v)
 	return lst
 
-@feature('c', 'cxx', 'd', 'go', 'asm', 'fc', 'includes')
+@feature('c', 'cxx', 'd', 'asm', 'fc', 'includes')
 @after_method('propagate_uselib_vars', 'process_source')
 def apply_incpaths(self):
 	"""
@@ -132,7 +132,7 @@ class link_task(Task.Task):
 	inst_to = None
 	"""Default installation path for the link task outputs, or None to disable"""
 
-	chmod   = Utils.O644
+	chmod   = Utils.O755
 	"""Default installation mode for the link task outputs"""
 
 	def add_target(self, target):
@@ -172,7 +172,7 @@ def rm_tgt(cls):
 	setattr(cls, 'run', wrap)
 rm_tgt(stlink_task)
 
-@feature('c', 'cxx', 'd', 'go', 'fc', 'asm')
+@feature('c', 'cxx', 'd', 'fc', 'asm')
 @after_method('process_source')
 def apply_link(self):
 	"""
@@ -203,15 +203,14 @@ def apply_link(self):
 	self.link_task = self.create_task(link, objs)
 	self.link_task.add_target(self.target)
 
-	if getattr(self.bld, 'is_install', None):
-		# remember that the install paths are given by the task generators
-		try:
-			inst_to = self.install_path
-		except AttributeError:
-			inst_to = self.link_task.__class__.inst_to
-		if inst_to:
-			# install a copy of the node list we have at this moment (implib not added)
-			self.install_task = self.bld.install_files(inst_to, self.link_task.outputs[:], env=self.env, chmod=self.link_task.chmod)
+	# remember that the install paths are given by the task generators
+	try:
+		inst_to = self.install_path
+	except AttributeError:
+		inst_to = self.link_task.__class__.inst_to
+	if inst_to:
+		# install a copy of the node list we have at this moment (implib not added)
+		self.install_task = self.bld.install_files(inst_to, self.link_task.outputs[:], env=self.env, chmod=self.link_task.chmod)
 
 @taskgen_method
 def use_rec(self, name, **kw):
@@ -241,7 +240,7 @@ def use_rec(self, name, **kw):
 		y.tmp_use_var = ''
 	else:
 		objects = False
-		if not isinstance(y.link_task, stlink_task):
+		if not isinstance(link_task, stlink_task):
 			stlib = False
 			y.tmp_use_var = 'LIB'
 		else:
@@ -251,7 +250,7 @@ def use_rec(self, name, **kw):
 	for x in self.to_list(getattr(y, 'use', [])):
 		try:
 			p[x].append(name)
-		except:
+		except KeyError:
 			p[x] = [name]
 		self.use_rec(x, objects=objects, stlib=stlib)
 
@@ -270,7 +269,7 @@ def process_use(self):
 	"""
 
 	use_not = self.tmp_use_not = set([])
-	use_seen = self.tmp_use_seen = [] # we would like an ordered set
+	self.tmp_use_seen = [] # we would like an ordered set
 	use_prec = self.tmp_use_prec = {}
 	self.uselib = self.to_list(getattr(self, 'uselib', []))
 	self.includes = self.to_list(getattr(self, 'includes', []))
@@ -316,14 +315,12 @@ def process_use(self):
 	for x in out:
 		y = self.bld.get_tgen_by_name(x)
 		var = y.tmp_use_var
-		if var:
+		if var and link_task:
 			if var == 'LIB' or y.tmp_use_stlib:
-				if (not 'cprogram' in y.features and not 'cxxprogram' in y.features) or self.env.DEST_BINFMT == 'pe':
-					self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
-					if link_task:
-						self.link_task.dep_nodes.extend(y.link_task.outputs)
-					tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
-					self.env.append_value(var + 'PATH', [tmp_path])
+				self.env.append_value(var, [y.target[y.target.rfind(os.sep) + 1:]])
+				self.link_task.dep_nodes.extend(y.link_task.outputs)
+				tmp_path = y.link_task.outputs[0].parent.path_from(self.bld.bldnode)
+				self.env.append_value(var + 'PATH', [tmp_path])
 		else:
 			if y.tmp_use_objects:
 				self.add_objects_from_tgen(y)
@@ -331,11 +328,15 @@ def process_use(self):
 		if getattr(y, 'export_includes', None):
 			self.includes.extend(y.to_incnodes(y.export_includes))
 
+		if getattr(y, 'export_defines', None):
+			self.env.append_value('DEFINES', self.to_list(y.export_defines))
+
+
 	# and finally, add the uselib variables (no recursion needed)
 	for x in names:
 		try:
 			y = self.bld.get_tgen_by_name(x)
-		except:
+		except Exception:
 			if not self.env['STLIB_' + x] and not x in self.uselib:
 				self.uselib.append(x)
 		else:
@@ -344,9 +345,21 @@ def process_use(self):
 					self.uselib.append(k)
 
 @taskgen_method
+def accept_node_to_link(self, node):
+	"""
+	PRIVATE INTERNAL USE ONLY
+	"""
+	return not node.name.endswith('.pdb')
+
+@taskgen_method
 def add_objects_from_tgen(self, tg):
-	# Not public yet, wait for waf 1.6.7 at least - the purpose of this is to add pdb files to the compiled
-	# tasks but not to the link tasks (to avoid errors)
+	"""
+	Add the objects from the depending compiled tasks as link task inputs.
+
+	Some objects are filtered: for instance, .pdb files are added
+	to the compiled tasks but not to the link tasks (to avoid errors)
+	PRIVATE INTERNAL USE ONLY
+	"""
 	try:
 		link_task = self.link_task
 	except AttributeError:
@@ -354,7 +367,7 @@ def add_objects_from_tgen(self, tg):
 	else:
 		for tsk in getattr(tg, 'compiled_tasks', []):
 			for x in tsk.outputs:
-				if x.name.endswith('.o') or x.name.endswith('.obj'):
+				if self.accept_node_to_link(x):
 					link_task.inputs.append(x)
 
 @taskgen_method
@@ -369,7 +382,7 @@ def get_uselib_vars(self):
 			_vars |= USELIB_VARS[x]
 	return _vars
 
-@feature('c', 'cxx', 'd', 'fc', 'javac', 'cs', 'uselib')
+@feature('c', 'cxx', 'd', 'fc', 'javac', 'cs', 'uselib', 'asm')
 @after_method('process_use')
 def propagate_uselib_vars(self):
 	"""
@@ -444,12 +457,13 @@ def apply_implib(self):
 	if not inst_to:
 		return
 
-	self.implib_install_task = self.bld.install_as('${PREFIX}/lib/%s' % implib.name, implib, self.env)
+	self.implib_install_task = self.bld.install_as('${LIBDIR}/%s' % implib.name, implib, self.env)
 
 # ============ the code above must not know anything about vnum processing on unix platforms =========
 
+re_vnum = re.compile('^([1-9]\\d*|0)[.]([1-9]\\d*|0)[.]([1-9]\\d*|0)$')
 @feature('cshlib', 'cxxshlib', 'dshlib', 'fcshlib', 'vnum')
-@after_method('apply_link')
+@after_method('apply_link', 'propagate_uselib_vars')
 def apply_vnum(self):
 	"""
 	Enforce version numbering on shared libraries. The valid version numbers must have at most two dots::
@@ -466,6 +480,8 @@ def apply_vnum(self):
 		return
 
 	link = self.link_task
+	if not re_vnum.match(self.vnum):
+		raise Errors.WafError('Invalid version %r for %r' % (self.vnum, self))
 	nums = self.vnum.split('.')
 	node = link.outputs[0]
 
@@ -483,16 +499,27 @@ def apply_vnum(self):
 		self.env.append_value('LINKFLAGS', v.split())
 
 	# the following task is just to enable execution from the build dir :-/
-	tsk = self.create_task('vnum', node, [node.parent.find_or_declare(name2), node.parent.find_or_declare(name3)])
+	self.create_task('vnum', node, [node.parent.find_or_declare(name2), node.parent.find_or_declare(name3)])
 
-	if getattr(self.bld, 'is_install', None):
+	if getattr(self, 'install_task', None):
 		self.install_task.hasrun = Task.SKIP_ME
 		bld = self.bld
 		path = self.install_task.dest
-		t1 = bld.install_as(path + os.sep + name3, node, env=self.env)
+		t1 = bld.install_as(path + os.sep + name3, node, env=self.env, chmod=self.link_task.chmod)
 		t2 = bld.symlink_as(path + os.sep + name2, name3)
 		t3 = bld.symlink_as(path + os.sep + libname, name3)
 		self.vnum_install_task = (t1, t2, t3)
+
+	if '-dynamiclib' in self.env['LINKFLAGS']:
+		# this requires after(propagate_uselib_vars)
+		try:
+			inst_to = self.install_path
+		except AttributeError:
+			inst_to = self.link_task.__class__.inst_to
+		if inst_to:
+			p = Utils.subst_vars(inst_to, self.env)
+			path = os.path.join(p, self.link_task.outputs[0].name)
+			self.env.append_value('LINKFLAGS', ['-install_name', path])
 
 class vnum(Task.Task):
 	"""
@@ -559,7 +586,7 @@ def read_stlib(self, name, paths=[]):
 	return self(name=name, features='fake_lib', lib_paths=paths, lib_type='stlib')
 
 lib_patterns = {
-	'shlib' : ['lib%s.so', '%s.so', 'lib%s.dll', '%s.dll'],
+	'shlib' : ['lib%s.so', '%s.so', 'lib%s.dylib', 'lib%s.dll', '%s.dll'],
 	'stlib' : ['lib%s.a', '%s.a', 'lib%s.dll', '%s.dll', 'lib%s.lib', '%s.lib'],
 }
 
@@ -571,7 +598,7 @@ def process_lib(self):
 	node = None
 
 	names = [x % self.name for x in lib_patterns[self.lib_type]]
-	for x in self.lib_paths + [self.path, '/usr/lib64', '/usr/lib', '/usr/local/lib64', '/usr/local/lib']:
+	for x in self.lib_paths + [self.path] + SYSTEM_LIB_PATHS:
 		if not isinstance(x, Node.Node):
 			x = self.bld.root.find_node(x) or self.path.find_node(x)
 			if not x:
@@ -589,4 +616,38 @@ def process_lib(self):
 		raise Errors.WafError('could not find library %r' % self.name)
 	self.link_task = self.create_task('fake_%s' % self.lib_type, [], [node])
 	self.target = self.name
+
+
+class fake_o(Task.Task):
+	def runnable_status(self):
+		return Task.SKIP_ME
+
+@extension('.o', '.obj')
+def add_those_o_files(self, node):
+	tsk = self.create_task('fake_o', [], node)
+	try:
+		self.compiled_tasks.append(tsk)
+	except AttributeError:
+		self.compiled_tasks = [tsk]
+
+@feature('fake_obj')
+@before_method('process_source')
+def process_objs(self):
+	"""
+	Puts object files in the task generator outputs
+	"""
+	for node in self.to_nodes(self.source):
+		self.add_those_o_files(node)
+	self.source = []
+
+@conf
+def read_object(self, obj):
+	"""
+	Read an object file, enabling injection in libs/programs. Will trigger a rebuild if the file changes.
+
+	:param obj: object file path, as string or Node
+	"""
+	if not isinstance(obj, self.path.__class__):
+		obj = self.path.find_resource(obj)
+	return self(features='fake_obj', source=obj, name=obj.name)
 

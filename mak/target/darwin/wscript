@@ -1,0 +1,12 @@
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+
+def build(bld):
+	bld.platforms.append(bld.external('3rdparty.cocoa').target)
+
+def plugins(bld):
+	pass
+

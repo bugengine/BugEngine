@@ -27,11 +27,10 @@ spec = cpp.yacc.Spec(
 				verbose=False)
 
 class Parser(cpp.yacc.Lr):
-	def __init__(self, filename, instancesname, useMethods, plugin, source, pch):
+	def __init__(self, filename, instancesname, plugin, source, pch):
 		cpp.yacc.Lr.__init__(self, spec)
 		self.filename = filename
 		self.instancesname = instancesname
-		self.useMethods = useMethods
 		self.plugin = plugin
 		self.source = source
 		self.pch = pch
