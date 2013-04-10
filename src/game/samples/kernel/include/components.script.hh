@@ -9,12 +9,12 @@
 namespace BugEngine
 {
 
-struct A : public World::Component
+be_pod A : public World::Component
 {
     u32 value;
 };
 
-struct B : public World::Component
+be_pod B : public World::Component
 {
     u32 value;
 };

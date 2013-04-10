@@ -8,23 +8,6 @@
 namespace BugEngine
 {
 
-struct CPUKernelTask::Range
-{
-    u32     index;
-    i_u32&  total;
-    Range(i_u32& taskCount)
-        :   index(taskCount)
-        ,   total(taskCount)
-    {
-        taskCount++;
-    }
-    bool atomic() const { return false; }
-    Range split()
-    {
-        return Range(total);
-    }
-};
-
 CPUKernelTask::CPUKernelTask(weak<KernelObject> object)
     :   object(object)
     ,   splitCount(i_u32::Zero)

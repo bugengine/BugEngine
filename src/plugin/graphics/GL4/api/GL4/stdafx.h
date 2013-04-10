@@ -12,12 +12,10 @@
 #include    <windowing/window.hh>
 #include    <windowing/renderer.hh>
 
-#if defined(building_gl4)
+#if defined(building_GL4)
 # define    GL4EXPORT      BE_EXPORT
-#elif defined(gl4_dll)
-# define    GL4EXPORT      BE_IMPORT
 #else
-# define    GL4EXPORT
+# define    GL4EXPORT      BE_IMPORT
 #endif
 
 #ifdef BE_PLATFORM_MACOS

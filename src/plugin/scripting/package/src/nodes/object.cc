@@ -11,10 +11,8 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
 Object::Object(weak<Package> owner)
-    :   m_owner(owner)
-    ,   m_name("")
+    :   Instance(owner)
     ,   m_method(0)
-    ,   m_parameters(Arena::packageBuilder())
     ,   m_overloads(Arena::packageBuilder())
 {
 }
@@ -23,14 +21,13 @@ Object::~Object()
 {
 }
 
-void Object::setName(istring name)
+void Object::addedParameter(ref<Parameter> parameter)
 {
-    if (m_owner->findByName(name))
+    for (minitl::vector< OverloadMatch >::iterator it = m_overloads.begin(); it != m_overloads.end(); ++it)
     {
-        // error
-        be_unimplemented();
+        it->addParameter(parameter);
     }
-    m_name = name;
+    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
 void Object::setMethod(ref<Reference> reference)
@@ -77,16 +74,6 @@ void Object::setMethod(ref<Reference> reference)
             be_unimplemented();
         }
     }
-}
-
-void Object::addParameter(ref<Parameter> param)
-{
-    m_parameters.push_back(param);
-    for (minitl::vector< OverloadMatch >::iterator it = m_overloads.begin(); it != m_overloads.end(); ++it)
-    {
-        it->addParameter(param);
-    }
-    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
 RTTI::Type Object::getType() const

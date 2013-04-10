@@ -47,7 +47,7 @@ static inline void displayError()
 # if _MSC_VER >= 1400
 #  define   freea   _freea
 # else
-#  define   freea(p)
+#  define   freea(p)    (void)p
 # endif
 #else
 # include   <malloc.h>

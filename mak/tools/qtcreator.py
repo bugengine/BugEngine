@@ -146,7 +146,7 @@ def create_creator_user(self, appname, out):
 
 def append_directory(self, tree, path):
 	source = ""
-	for name,subdir in tree.directories.iteritems():
+	for name,subdir in tree.directories.items():
 		source += self.append_directory(subdir, os.path.join(path, subdir.prefix))
 	for file in tree.files:
 		if not file.generated():

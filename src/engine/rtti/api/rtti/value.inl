@@ -107,6 +107,18 @@ typename minitl::remove_const<T>::type Value::as()
     return *(REALTYPE*)unpackAs(ti, rptr, wptr, obj);
 }
 
+template< >
+inline Value& Value::as<Value&>()
+{
+    return *this;
+}
+
+template< >
+inline const Value& Value::as<const Value&>()
+{
+    return *this;
+}
+
 void* Value::memory()
 {
     if (!m_reference && m_type.size() <= sizeof(m_buffer))

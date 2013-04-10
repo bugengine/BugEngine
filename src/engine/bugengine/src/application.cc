@@ -65,10 +65,12 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
             "update",
             Colors::Green::Green,
             Task::MethodCaller<Application, &Application::frameUpdate>(this)));
+    registerInterruptions();
 }
 
 Application::~Application(void)
 {
+    unregisterInterruptions();
     m_resourceManager->detach<World::World>(this);
 }
 
@@ -102,11 +104,13 @@ int Application::run()
 
 void Application::load(weak<const Resource::Description> world, Resource::Resource& resource)
 {
+    m_worldCount++;
     resource.setRefHandle(ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask));
 }
 
 void Application::unload(Resource::Resource& resource)
 {
+    m_worldCount--;
     resource.clearRefHandle();
 }
 
@@ -116,8 +120,6 @@ void Application::updateResources()
     if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
-        /*TODO*/
-        m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {
@@ -156,6 +158,11 @@ void Application::frameUpdate()
         }
         now = time;
     }
+}
+
+void Application::finish()
+{
+    m_updateLoop = Task::ITask::CallbackConnection();
 }
 
 }

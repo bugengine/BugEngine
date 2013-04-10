@@ -209,7 +209,7 @@ class Exprs(cpp.yacc.Nonterm):
 			pass
 		for o in self.objects + self.namespaces:
 			o.predecl(files, namespace, parent)
-		for method_name, overloads in self.methods.iteritems():
+		for method_name, overloads in self.methods.items():
 			method_pretty_name = '%s_%s' % ('_'.join(parent), method_name.replace('?', '_').replace('#', '_'))
 			index = 0
 			for overload in overloads:
@@ -253,7 +253,7 @@ class Exprs(cpp.yacc.Nonterm):
 		cast = None
 		if self.methods:
 			methods = '%s->methods' % owner
-			for method_name, overloads in self.methods.iteritems():
+			for method_name, overloads in self.methods.items():
 				method_pretty_name = method_name.replace('?', '_').replace('#', '_')
 				overload_ptr = '{0}'
 				index = 0
@@ -278,6 +278,7 @@ class Exprs(cpp.yacc.Nonterm):
 				files[0].write('	::BugEngine::istring("%s"),\n' % method_name)
 				files[0].write('	%s,\n' % chain)
 				files[0].write('	{&%s},\n' % varname)
+				files[0].write('	%s,\n' % index)
 				files[0].write('	%s\n' % overload_ptr)
 				files[0].write('};\n')
 

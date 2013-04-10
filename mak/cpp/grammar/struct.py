@@ -179,6 +179,48 @@ class ClassDef(cpp.yacc.Nonterm):
 		if self.members:
 			self.members.predecl(files, namespace, parent, self.value, self)
 
+	def create_pod_constructor(self, files, namespace, parent):
+		decl = '_'.join(parent)
+		method_name = '%s_constructor_overload_default' % (decl)
+		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s =\n' % method_name)
+		files[0].write('{\n')
+		files[0].write('	{0},\n')
+		files[0].write('	{0},\n')
+		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % '::'.join(parent))
+		files[0].write('	0,\n')
+		files[0].write('	{0},\n')
+		files[0].write('	0,\n')
+		files[0].write('	&::BugEngine::RTTI::createPod< %s >\n' % '::'.join(parent))
+		files[0].write('};\n')
+		files[0].write('static const ::BugEngine::RTTI::Method::Overload::Parameter %s_constructor_overload_param =\n' % (decl))
+		files[0].write('{\n')
+		files[0].write('	{0},\n')
+		files[0].write('	{0},\n')
+		files[0].write('	\"other\",\n')
+		files[0].write('	::BugEngine::be_typeid< const %s& >::type()\n' % '::'.join(parent))
+		files[0].write('};\n')
+		method_name = '%s_constructor_overload_copy' % ('_'.join(parent))
+		files[0].write('static const ::BugEngine::RTTI::Method::Overload %s =\n' % method_name)
+		files[0].write('{\n')
+		files[0].write('	{0},\n')
+		files[0].write('	{&%s_constructor_overload_default},\n' % decl)
+		files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % '::'.join(parent))
+		files[0].write('	1,\n')
+		files[0].write('	{&%s_constructor_overload_param},\n' % decl)
+		files[0].write('	0,\n')
+		files[0].write('	&::BugEngine::RTTI::createPodCopy< %s >\n' % '::'.join(parent))
+		files[0].write('};\n')
+		files[0].write('static const ::BugEngine::RTTI::Method %s_constructor =\n' % decl)
+		files[0].write('{\n')
+		files[0].write('	::BugEngine::istring("?new"),\n')
+		files[0].write('	{0},\n')
+		files[0].write('	{&%s_constructor},\n' % decl)
+		files[0].write('	%s,\n' % 2)
+		files[0].write('	{&%s}\n' % method_name)
+		files[0].write('};\n')
+		return '{&%s_constructor}' % decl
+
+
 	def dump(self, files, namespace, parent):
 		if parent:
 			owner = '::BugEngine::be_typeid< %s >::preklass()' % ('::'.join(namespace + parent))
@@ -201,6 +243,14 @@ class ClassDef(cpp.yacc.Nonterm):
 		files[0].write('		{::BugEngine::be_typeid< %s >::preklass().m_ptr},\n' % self.inherits)
 		files[0].write('		u32(sizeof(%s)),\n' % '::'.join(parent))
 		files[0].write('		i32(ptrdiff_t(static_cast<%s*>((%s*)(4))))-4,\n' % ('::'.join(parent), self.inherits))
+		if self.tags.index:
+			files[0].write('		%s,\n' % self.tags.index)
+		elif self.pod:
+			files[0].write('		::BugEngine::RTTI::ClassType_Pod,\n')
+		elif self.value:
+			files[0].write('		::BugEngine::RTTI::ClassType_Struct,\n')
+		else:
+			files[0].write('		::BugEngine::RTTI::ClassType_Object,\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
 		files[0].write('		{0},\n')
@@ -230,6 +280,8 @@ class ClassDef(cpp.yacc.Nonterm):
 			files[0].write('	raw< const ::BugEngine::RTTI::Class > parent = ::BugEngine::be_typeid< %s >::klass();\n' % self.inherits)
 			objects, all_methods, properties = self.members.dump(files, namespace, parent, 'parent')
 			methods, constructor, cast = all_methods
+			if self.pod:
+				constructor = self.create_pod_constructor(files, namespace, parent)
 			if objects:
 				files[0].write('	raw< const ::BugEngine::RTTI::ObjectInfo > objects = %s;\n' % objects)
 				files[0].write('	result->objects.set(objects.operator->());\n')

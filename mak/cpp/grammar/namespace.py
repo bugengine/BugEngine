@@ -49,5 +49,11 @@ class Namespace(cpp.yacc.Nonterm):
 				files[0].write('static const ::BugEngine::RTTI::ObjectInfo* const s_%s_namespace_%s =\n' % (self.name, self.members.objects[0].name))
 				files[0].write('	%s->objects.set(s_%s_namespace_%s_obj.operator->());\n' % (owner, self.name, self.members.objects[0].name))
 
+			if methods[0]:
+				name = min(self.members.methods).replace('?', '_').replace('#', '_')
+				files[0].write('static raw<const ::BugEngine::RTTI::Method> const s_%s_namespace_%s_m = %s;\n' % (self.name, name, methods[0]))
+				files[0].write('static const ::BugEngine::RTTI::Method* const s_%s_namespace_%s =\n' % (self.name, name))
+				files[0].write('	%s->methods.set(s_%s_namespace_%s_m.operator->());\n' % (owner, self.name, name))
+
 			files[0].write('}\n')
 

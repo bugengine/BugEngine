@@ -21,7 +21,6 @@ namespace Kernel
 class KernelDescription;
 }
 
-class SceneGraphLoader;
 class RenderSurfaceDescription;
 class RenderWindowDescription;
 class MeshDescription;
@@ -39,7 +38,6 @@ protected:
     minitl::Allocator&                                      m_allocator;
     weak<Resource::ResourceManager>                         m_resourceManager;
     ref<Task::ITask>                                        m_syncTask;
-    scoped<SceneGraphLoader>                                m_sceneLoader;
     scoped< GPUResourceLoader<RenderSurfaceDescription> >   m_renderSurfaceLoader;
     scoped< GPUResourceLoader<RenderWindowDescription> >    m_renderWindowLoader;
     scoped< GPUResourceLoader<ShaderProgramDescription> >   m_shaderProgramLoader;
