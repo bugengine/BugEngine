@@ -10,10 +10,8 @@
 
 #if defined(building_input) || defined(INPUT_EXPORTS)
 # define    INPUTEXPORT         BE_EXPORT
-#elif defined(input_dll)
-# define    INPUTEXPORT         BE_IMPORT
 #else
-# define    INPUTEXPORT
+# define    INPUTEXPORT         BE_IMPORT
 #endif
 
 /*****************************************************************************/

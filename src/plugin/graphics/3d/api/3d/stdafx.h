@@ -10,10 +10,8 @@
 
 #if defined(building_3d)
 # define    _3DEXPORT      BE_EXPORT
-#elif defined(_3d_dll)
-# define    _3DEXPORT      BE_IMPORT
 #else
-# define    _3DEXPORT
+# define    _3DEXPORT      BE_IMPORT
 #endif
 
 /*****************************************************************************/

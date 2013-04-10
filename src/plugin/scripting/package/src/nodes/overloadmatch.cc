@@ -53,6 +53,7 @@ void OverloadMatch::addParameter(weak<const Parameter> param)
     ParameterMatch unusedParam;
     unusedParam.parameter = param;
     unusedParam.match = raw<const RTTIParameter>::null();
+    m_score += s_parameterTooMany;
     m_params.push_back(unusedParam);
 }
 

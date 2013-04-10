@@ -10,10 +10,8 @@
 
 #if defined(building_runtime) || defined(RUNTIME_EXPORTS)
 # define     RUNTIMEEXPORT          BE_EXPORT
-#elif defined(bugengine_dll)
-# define     RUNTIMEEXPORT          BE_IMPORT
 #else
-# define     RUNTIMEEXPORT
+# define     RUNTIMEEXPORT          BE_IMPORT
 #endif
 
 /*****************************************************************************/

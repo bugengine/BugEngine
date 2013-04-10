@@ -5,9 +5,12 @@
 #include    <buildcontext.hh>
 #include    <package/nodes/package.hh>
 #include    <package/nodes/object.hh>
+#include    <package/nodes/entity.hh>
+#include    <package/nodes/component.hh>
 #include    <package/nodes/reference.hh>
 #include    <package/nodes/parameter.hh>
 #include    <package/nodes/value.hh>
+#include    <package/nodes/zip.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -60,26 +63,33 @@ using namespace BugEngine::PackageBuilder;
 using namespace BugEngine::PackageBuilder::Nodes;
 
 
-ref<Object> s_currentObject;
+ref<Instance> s_currentInstance;
+ref<Instance> s_previousInstance;
+ref<ZipValue> s_currentZip;
+ref<Entity> s_currentEntity;
 
 %}
 
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN VAL_FILENAME
 
-%token  KW_import KW_plugin KW_namespace
+%token  KW_import KW_plugin KW_namespace KW_zip KW_notify
 
-%type   <bValue>    VAL_BOOLEAN
-%type   <iValue>    VAL_INTEGER
-%type   <fValue>    VAL_FLOAT
-%type   <sValue>    VAL_STRING
-%type   <sValue>    VAL_FILENAME
-%type   <sValue>    TOK_ID
-%type   <sValue>    fullname
-%type   <value>     value
-%type	<array>		value_array
+%type   <bValue>        VAL_BOOLEAN
+%type   <iValue>        VAL_INTEGER
+%type   <fValue>        VAL_FLOAT
+%type   <sValue>        VAL_STRING
+%type   <sValue>        VAL_FILENAME
+%type   <sValue>        TOK_ID
+%type   <sValue>        fullname
+%type   <value>         value value_zip
+%type   <value_array>   value_array
 
 %start  file
+
+%destructor { free($$); }                   VAL_STRING VAL_FILENAME TOK_ID fullname
+%destructor { $$->~ref(); free($$); }       value value_zip
+%destructor { $$->~vector(); free($$); }    value_array
 
 %%
 
@@ -128,22 +138,23 @@ decl_plugin:
 
 decl_object:
         {
-            s_currentObject = ref<Object>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
-            ((BuildContext*)param)->result->insertNode(s_currentObject);
+            ref<Object> newObject = ref<Object>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            s_currentInstance = newObject;
+            ((BuildContext*)param)->result->insertNode(newObject);
         }
         editor_attributes
         TOK_ID '=' fullname
         {
             ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
             reference->setName(BugEngine::inamespace($5));
-            s_currentObject->setMethod(reference);
-            s_currentObject->setName($3);
+            s_currentInstance->setName($3);
+            be_checked_cast<Object>(s_currentInstance)->setMethod(reference);
         }
         '('
             params
         ')'
         {
-            s_currentObject.clear();
+            s_currentInstance.clear();
             free($3);
             free($5);
         }
@@ -160,6 +171,8 @@ attribute:
         TOK_ID '=' value
         {
             free($1);
+            $3->~ref();
+            free($3);
         }
     ;
 
@@ -174,7 +187,7 @@ param:
         TOK_ID '=' value ';'
         {
             ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($1), *$3);
-            s_currentObject->addParameter(parameter);
+            s_currentInstance->addParameter(parameter);
             $3->~ref();
             free($1);
             free($3);
@@ -183,7 +196,7 @@ param:
         TOK_ID ':'  TOK_ID '=' value ';'
         {
             ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($3), *$5);
-            s_currentObject->addParameter(parameter);
+            s_currentInstance->addParameter(parameter);
             $5->~ref();
             free($1);
             free($3);
@@ -240,6 +253,11 @@ value:
             $2->~vector();
             free($2);
         }
+    |
+        value_zip
+        {
+            $$ = $1;
+        }
     ;
 
 value_array:
@@ -264,6 +282,73 @@ value_array:
             $$->push_back(*$1);
             $1->~ref();
             free($1);
+        }
+    ;
+
+value_zip:
+        KW_zip
+        {
+            $<value>$ = (ref<Value>*)malloc(sizeof(*$<value>$));
+            s_currentZip = ref<ZipValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            new ($<value>$) ref<Value>(s_currentZip);
+        }
+        '(' zip_array ')'
+        {
+            $$ = $<value>2;
+            s_currentZip = ref<ZipValue>();
+        }
+    ;
+
+zip_array:
+        /* empty */
+    |
+        zip_value ';' zip_array 
+    ;
+
+zip_value:
+        TOK_ID '='
+        {
+            s_currentEntity = ref<Entity>::create(BugEngine::Arena::packageBuilder());
+            s_currentZip->addEntity(s_currentEntity);
+            free($1);
+        }
+        '(' component_array ')'
+        {
+            s_currentEntity = ref<Entity>();
+        }
+    |
+        TOK_ID '.' TOK_ID '.' TOK_ID KW_notify TOK_ID '.' TOK_ID '.' TOK_ID
+        {
+            free($1);
+            free($3);
+            free($5);
+            free($7);
+            free($9);
+            free($11);
+        }
+    ;
+
+component_array:
+        /* empty */
+    |
+        decl_component
+    |
+        component_array ',' decl_component
+    ;
+
+decl_component:
+        fullname
+        {
+            ref<Component> component = minitl::ref<Component>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            s_previousInstance = s_currentInstance;
+            s_currentInstance = component;
+            s_currentEntity->addComponent(component);
+            free($1);
+        }
+        '(' params ')'
+        {
+            s_currentInstance = s_previousInstance;
+            s_previousInstance = ref<Instance>();
         }
     ;
 

@@ -320,7 +320,7 @@ typename vector<T>::const_reference          vector<T>::operator[](size_type i) 
 template< typename T >
 void                                                vector<T>::push_back(const_reference r)
 {
-    reserve(size() + 1);
+    ensure(size() + 1);
     new((void*)m_end) T(r);
     m_end = advance_ptr(m_end, 1);
 }
@@ -330,7 +330,7 @@ template< typename ITERATOR >
 void                                                vector<T>::push_back(ITERATOR first, ITERATOR last)
 {
     size_type count = minitl::distance(first, last);
-    reserve(size() + count);
+    ensure(size() + count);
     while (first != last)
     {
         new((void*)m_end) T(*first);
@@ -412,7 +412,7 @@ void                                                vector<T>::resize(size_type 
     size_type s = distance(m_memory.data(), m_end);
     if (size > s)
     {
-        reserve(size);
+        ensure(size);
         pointer newend = advance_ptr(m_memory.data(), size);
         for (pointer t = m_end; t != newend; ++t)
             new((void*)t) T;
@@ -436,7 +436,7 @@ void                                                vector<T>::clear()
 }
 
 template< typename T >
-void                                                vector<T>::reserve(size_type size)
+void                                                vector<T>::ensure(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
     if (size > capacity)
@@ -448,6 +448,16 @@ void                                                vector<T>::reserve(size_type
         size = size >> 16 | size;
         size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
         size++;
+        reserve(size);
+    }
+}
+
+template< typename T >
+void                                                vector<T>::reserve(size_type size)
+{
+    size_type capacity = distance(m_memory.data(), m_capacity);
+    if (size > capacity)
+    {
         Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
         for (pointer t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))

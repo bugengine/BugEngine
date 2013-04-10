@@ -16,7 +16,7 @@ namespace BugEngine
 
 template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass()
 {
-    static RTTI::Class s_void = { "void", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    static RTTI::Class s_void = { "void", {0}, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_void};
     return ci;
 }
@@ -28,7 +28,7 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::registerProperti
 
 template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
 {
-    static RTTI::Class s_pointer = { "pointer", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    static RTTI::Class s_pointer = { "pointer", {0}, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_pointer};
     return ci;
 }
@@ -41,25 +41,12 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::regis
 template< >
 BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
 {
-    static RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+    static RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};
     return ci;
 }
 
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::registerProperties()
-{
-    return preklass();
-}
-
-template< >
-BE_EXPORT raw<RTTI::Class> be_typeid< minitl::iarray >::preklass()
-{
-    static RTTI::Class s_iarray = { "iarray", {0}, {0}, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
-    raw<RTTI::Class> ci = {&s_iarray};
-    return ci;
-}
-
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::iarray >::registerProperties()
 {
     return preklass();
 }

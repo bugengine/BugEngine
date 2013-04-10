@@ -59,8 +59,8 @@ class Parser(cpp.yacc.Lr):
 			with open(self.filename, 'w') as implementation:
 				with open(self.instancesname, 'w') as instances:
 					if self.pch:
-						implementation.write("#include <%s>\n" % self.pch)
-						instances.write("#include <%s>\n" % self.pch)
+						implementation.write("#include    <%s>\n" % self.pch)
+						instances.write("#include    <%s>\n" % self.pch)
 					self.root.dump(implementation, instances)
 		except IOError as e:
 			raise Exception("cannot open output file : %s" % str(e))

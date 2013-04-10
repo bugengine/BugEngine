@@ -9,18 +9,22 @@
 namespace BugEngine
 {
 
+be_tag(Index(BugEngine::RTTI::ClassType_String + (0 << 16)))
 struct istring
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_String + (1 << 16)))
 struct inamespace
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_String + (2 << 16)))
 struct ifilename
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_String + (3 << 16)))
 struct ipath
 {
 };
@@ -30,6 +34,7 @@ struct ipath
 namespace BugEngine { namespace RTTI
 {
 
+be_tag(Index(BugEngine::RTTI::ClassType_Variant))
 struct Value
 {
 };
@@ -37,47 +42,58 @@ struct Value
 }}
 
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer))
 be_pod bool
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (1 << 16)))
 be_pod u8
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (2 << 16)))
 be_pod u16
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (3 << 16)))
 be_pod u32
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (4 << 16)))
 be_pod u64
 {
 };
 
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (5 << 16)))
 be_pod i8
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (6 << 16)))
 be_pod i16
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (7 << 16)))
 be_pod i32
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (8 << 16)))
 be_pod i64
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (9 << 16)))
 be_pod float
 {
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Integer + (10 << 16)))
 be_pod double
 {
 };

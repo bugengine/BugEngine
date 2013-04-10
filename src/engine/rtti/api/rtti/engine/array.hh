@@ -11,15 +11,6 @@
 #include    <rtti/engine/helper/method.hh>
 #include    <minitl/array.hh>
 
-namespace minitl
-{
-
-struct iarray
-{
-};
-
-}
-
 namespace BugEngine
 {
 
@@ -57,6 +48,7 @@ RTTI::Method::Overload be_typeid< minitl::array<T> >::constructor_overload = {
     {0},
     {0},
     be_typeid< minitl::array<T> >::type(),
+    0,
     {0},
     true,
     &make_array<T>
@@ -67,6 +59,7 @@ RTTI::Method be_typeid< minitl::array<T> >::constructor = {
     "?new",
     {0},
     {&constructor},
+    1,
     {&constructor_overload}
 };
 
@@ -84,8 +77,8 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
     static RTTI::Class ci = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
         {be_game_Namespace().m_ptr},
-        {be_typeid< minitl::iarray >::preklass().m_ptr},
-        0, 0, {0}, {0}, {0},
+        {be_typeid< void >::preklass().m_ptr},
+        0, 0, RTTI::ClassType_Array, {0}, {0}, {0},
         {&valueTypeObject},
         {&constructor},
         {0},

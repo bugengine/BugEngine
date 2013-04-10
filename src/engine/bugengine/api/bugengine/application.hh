@@ -47,12 +47,16 @@ private:
     Task::ITask::CallbackConnection             m_forceContinue;
     Task::ITask::CallbackConnection             m_worldLoop;
     size_t                                      m_resourceLoadingCount;
+    u32                                         m_worldCount;
 private:
     void frameUpdate();
     void updateResources();
 private:
     virtual void load(weak<const Resource::Description> scene, Resource::Resource& resource) override;
     virtual void unload(Resource::Resource& resource) override;
+private:
+    void registerInterruptions();
+    void unregisterInterruptions();
 protected:
     void addTask(ref<Task::ITask> task);
     void removeTask(ref<Task::ITask> task);
@@ -62,6 +66,7 @@ public:
     virtual ~Application();
 
     int run();
+    void finish();
 };
 
 }

@@ -15,10 +15,8 @@
 
 #if defined(building_bugengine) || defined(BUGENGINE_EXPORTS)
 # define     BUGENGINEEXPORT          BE_EXPORT
-#elif defined(bugengine_dll)
-# define     BUGENGINEEXPORT          BE_IMPORT
 #else
-# define     BUGENGINEEXPORT
+# define     BUGENGINEEXPORT          BE_IMPORT
 #endif
 
 /*****************************************************************************/
