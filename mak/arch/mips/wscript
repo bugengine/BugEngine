@@ -1,0 +1,6 @@
+
+def configure(conf):
+	conf.env.ARCHITECTURE = 'mips'
+	conf.env.VALID_ARCHITECTURE = ['mips']
+	conf.env.append_unique('DEFINES', ['_MIPS'])
+

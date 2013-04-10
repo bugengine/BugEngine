@@ -1,6 +1,3 @@
-import mak
-from mak import module
-import os
 
 def options(opt):
 	pass
@@ -9,8 +6,6 @@ def setup(conf):
 	pass
 
 def build(bld):
-	if ('osx' in bld.env.PLATFORM and bld.env.GCC_NAME != 'icc') or bld.env.PROJECTS:
-		bld.m['cocoa'] = module.util('cocoa', [])
-	else:
-		bld.m['cocoa'] = None
+	bld.thirdparty('3rdparty.cocoa', frameworks=['Cocoa'])
+	bld.features.append('GUI')
 

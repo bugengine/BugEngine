@@ -35,7 +35,7 @@ commands = []
 List of commands to execute extracted from the command-line. This list is consumed during the execution, see :py:func:`waflib.Scripting.run_commands`.
 """
 
-lockfile = os.environ.get('WAFLOCK', '.lock-wafbuild')
+lockfile = os.environ.get('WAFLOCK', '.lock-waf_%s_build' % sys.platform)
 try: cache_global = os.path.abspath(os.environ['WAFCACHE'])
 except KeyError: cache_global = ''
 platform = Utils.unversioned_sys_platform()
@@ -54,7 +54,7 @@ class opt_parser(optparse.OptionParser):
 
 		jobs = ctx.jobs()
 		p('-j', '--jobs',     dest='jobs',    default=jobs, type='int', help='amount of parallel jobs (%r)' % jobs)
-		p('-k', '--keep',     dest='keep',    default=False, action='store_true', help='keep running happily even if errors are found')
+		p('-k', '--keep',     dest='keep',    default=0,     action='count', help='keep running happily even if errors are found')
 		p('-v', '--verbose',  dest='verbose', default=0,     action='count', help='verbosity level -v -vv or -vvv [default: 0]')
 		p('--nocache',        dest='nocache', default=False, action='store_true', help='ignore the WAFCACHE (if set)')
 		p('--zones',          dest='zones',   default='',    action='store', help='debugging zones (task_gen, deps, tasks, etc)')
@@ -81,7 +81,6 @@ class opt_parser(optparse.OptionParser):
 		self.add_option_group(gr)
 
 		gr.add_option('-p', '--progress', dest='progress_bar', default=0, action='count', help= '-p: progress bar; -pp: ide output')
-		gr.add_option('-s', '--silent',   dest='silent', default=False, action='store_true', help= '-s: silent; no output')
 		gr.add_option('--targets',        dest='targets', default='', action='store', help='task generators, e.g. "target1,target2"')
 
 		gr = optparse.OptionGroup(self, 'step options')
@@ -93,6 +92,8 @@ class opt_parser(optparse.OptionParser):
 		self.add_option_group(gr)
 		gr.add_option('--destdir', help='installation root [default: %r]' % default_destdir, default=default_destdir, dest='destdir')
 		gr.add_option('-f', '--force', dest='force', default=False, action='store_true', help='force file installation')
+
+		gr.add_option('--distcheck-args', help='arguments to pass to distcheck', default=None, action='store')
 
 	def get_usage(self):
 		"""
@@ -170,10 +171,14 @@ class OptionsContext(Context.Context):
 						count = int(os.sysconf('SC_NPROCESSORS_ONLN'))
 					elif 'SC_NPROCESSORS_CONF' in os.sysconf_names:
 						count = int(os.sysconf('SC_NPROCESSORS_CONF'))
-				elif os.name not in ('nt', 'java'):
-					tmp = self.cmd_and_log(['sysctl', '-n', 'hw.ncpu'])
-					if re.match('^[0-9]+$', tmp):
-						count = int(tmp)
+				if not count and os.name not in ('nt', 'java'):
+					try:
+						tmp = self.cmd_and_log(['sysctl', '-n', 'hw.ncpu'], quiet=0)
+					except Exception:
+						pass
+					else:
+						if re.match('^[0-9]+$', tmp):
+							count = int(tmp)
 		if count < 1:
 			count = 1
 		elif count > 1024:
@@ -188,19 +193,19 @@ class OptionsContext(Context.Context):
 				ctx.add_option('-u', '--use', dest='use', default=False, action='store_true',
 					help='a boolean option')
 		"""
-		self.parser.add_option(*k, **kw)
+		return self.parser.add_option(*k, **kw)
 
 	def add_option_group(self, *k, **kw):
 		"""
 		Wrapper for optparse.add_option_group::
 
 			def options(ctx):
-				ctx.add_option_group('some options')
+				gr = ctx.add_option_group('some options')
 				gr.add_option('-u', '--use', dest='use', default=False, action='store_true')
 		"""
 		try:
 			gr = self.option_groups[k[0]]
-		except:
+		except KeyError:
 			gr = self.parser.add_option_group(*k, **kw)
 		self.option_groups[k[0]] = gr
 		return gr

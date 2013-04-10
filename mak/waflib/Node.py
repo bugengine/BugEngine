@@ -52,13 +52,12 @@ exclude_regs = '''
 **/{arch}
 **/_darcs
 **/_darcs/**
+**/.intlcache
 **/.DS_Store'''
 """
 Ant patterns for files and folders to exclude while doing the
 recursive traversal in :py:meth:`waflib.Node.Node.ant_glob`
 """
-
-# TODO optimize split_path by performing a replacement when unpacking?
 
 def split_path(path):
 	"""
@@ -97,9 +96,11 @@ class Node(object):
 
 	* The basic methods meant for filesystem access (compute paths, create folders, etc)
 	* The methods bound to a :py:class:`waflib.Build.BuildContext` (require ``bld.srcnode`` and ``bld.bldnode``)
+
+	The Node objects are not thread safe in any way.
 	"""
 
-	__slots__ = ('name', 'sig', 'children', 'parent', 'cache_abspath', 'cache_isdir')
+	__slots__ = ('name', 'sig', 'children', 'parent', 'cache_abspath', 'cache_isdir', 'cache_sig')
 	def __init__(self, name, parent):
 		self.name = name
 		self.parent = parent
@@ -142,7 +143,7 @@ class Node(object):
 		"Implemented to prevent nodes from being copied (raises an exception)"
 		raise Errors.WafError('nodes are not supposed to be copied')
 
-	def read(self, flags='r'):
+	def read(self, flags='r', encoding='ISO8859-1'):
 		"""
 		Return the contents of the file represented by this node::
 
@@ -156,9 +157,9 @@ class Node(object):
 		:rtype: string
 		:return: File contents
 		"""
-		return Utils.readf(self.abspath(), flags)
+		return Utils.readf(self.abspath(), flags, encoding)
 
-	def write(self, data, flags='w'):
+	def write(self, data, flags='w', encoding='ISO8859-1'):
 		"""
 		Write some text to the physical file represented by this node::
 
@@ -170,13 +171,7 @@ class Node(object):
 		:type  flags: string
 		:param flags: Write mode
 		"""
-		f = None
-		try:
-			f = open(self.abspath(), flags)
-			f.write(data)
-		finally:
-			if f:
-				f.close()
+		Utils.writef(self.abspath(), data, flags, encoding)
 
 	def chmod(self, val):
 		"""
@@ -188,19 +183,19 @@ class Node(object):
 		os.chmod(self.abspath(), val)
 
 	def delete(self):
-		"""Delete the file/folder physically (but not the node)"""
+		"""Delete the file/folders, and remove this node from the tree. It becomes invalid after that"""
 		try:
 			if getattr(self, 'children', None):
 				shutil.rmtree(self.abspath())
 			else:
 				os.unlink(self.abspath())
-		except:
+		except OSError:
 			pass
+		self.evict()
 
-		try:
-			delattr(self, 'children')
-		except:
-			pass
+	def evict(self):
+		"""Internal - called when a node is removed"""
+		del self.parent.children[self.name]
 
 	def suffix(self):
 		"""Return the file extension"""
@@ -223,13 +218,16 @@ class Node(object):
 		return lst
 
 	def mkdir(self):
-		"""Create a folder represented by this node"""
+		"""
+		Create a folder represented by this node, creating intermediate nodes as needed
+		An exception will be raised only when the folder cannot possibly exist there
+		"""
 		if getattr(self, 'cache_isdir', None):
 			return
 
 		try:
 			self.parent.mkdir()
-		except:
+		except OSError:
 			pass
 
 		if self.name:
@@ -243,7 +241,7 @@ class Node(object):
 
 			try:
 				self.children
-			except:
+			except AttributeError:
 				self.children = {}
 
 		self.cache_isdir = True
@@ -266,21 +264,31 @@ class Node(object):
 				continue
 
 			try:
-				if x in cur.children:
+				ch = cur.children
+			except AttributeError:
+				cur.children = {}
+			else:
+				try:
 					cur = cur.children[x]
 					continue
-			except:
-				cur.children = {}
+				except KeyError:
+					pass
 
 			# optimistic: create the node first then look if it was correct to do so
 			cur = self.__class__(x, cur)
 			try:
 				os.stat(cur.abspath())
-			except:
-				del cur.parent.children[x]
+			except OSError:
+				cur.evict()
 				return None
 
 		ret = cur
+
+		try:
+			os.stat(ret.abspath())
+		except OSError:
+			ret.evict()
+			return None
 
 		try:
 			while not getattr(cur.parent, 'cache_isdir', None):
@@ -316,7 +324,7 @@ class Node(object):
 			cur = self.__class__(x, cur)
 		return cur
 
-	def search(self, lst):
+	def search_node(self, lst):
 		"""
 		Search for a node without looking on the filesystem
 
@@ -327,15 +335,15 @@ class Node(object):
 			lst = [x for x in split_path(lst) if x and x != '.']
 
 		cur = self
-		try:
-			for x in lst:
-				if x == '..':
-					cur = cur.parent or cur
-				else:
+		for x in lst:
+			if x == '..':
+				cur = cur.parent or cur
+			else:
+				try:
 					cur = cur.children[x]
-			return cur
-		except:
-			pass
+				except (AttributeError, KeyError):
+					return None
+		return cur
 
 	def path_from(self, node):
 		"""
@@ -344,7 +352,7 @@ class Node(object):
 			def build(bld):
 				n1 = bld.path.find_node('foo/bar/xyz.txt')
 				n2 = bld.path.find_node('foo/stuff/')
-				n1.path_from(n2) # './bar/xyz.txt'
+				n1.path_from(n2) # '../bar/xyz.txt'
 
 		:param node: path to use as a reference
 		:type node: :py:class:`waflib.Node.Node`
@@ -387,7 +395,7 @@ class Node(object):
 		"""
 		try:
 			return self.cache_abspath
-		except:
+		except AttributeError:
 			pass
 		# think twice before touching this (performance + complexity + correctness)
 
@@ -449,11 +457,12 @@ class Node(object):
 
 		try:
 			lst = set(self.children.keys())
+		except AttributeError:
+			self.children = {}
+		else:
 			if remove:
 				for x in lst - set(dircont):
-					del self.children[x]
-		except:
-			self.children = {}
+					self.children[x].evict()
 
 		for name in dircont:
 			npats = accept(name, pats)
@@ -474,7 +483,7 @@ class Node(object):
 				if getattr(node, 'cache_isdir', None) or isdir:
 					node.cache_isdir = True
 					if maxdepth:
-						for k in node.ant_iter(accept=accept, maxdepth=maxdepth - 1, pats=npats, dir=dir, src=src):
+						for k in node.ant_iter(accept=accept, maxdepth=maxdepth - 1, pats=npats, dir=dir, src=src, remove=remove):
 							yield k
 		raise StopIteration
 
@@ -495,7 +504,8 @@ class Node(object):
 
 		For more information see http://ant.apache.org/manual/dirtasks.html
 
-		The nodes that correspond to files and folders that do not exist will be removed
+		The nodes that correspond to files and folders that do not exist will be removed. To prevent this
+		behaviour, pass 'remove=False'
 
 		:param incl: ant patterns or list of patterns to include
 		:type incl: string or list of strings
@@ -509,6 +519,8 @@ class Node(object):
 		:type remove: bool
 		:param maxdepth: maximum depth of recursion
 		:type maxdepth: int
+		:param ignorecase: ignore case while matching (False by default)
+		:type ignorecase: bool
 		"""
 
 		src = kw.get('src', True)
@@ -516,6 +528,7 @@ class Node(object):
 
 		excl = kw.get('excl', exclude_regs)
 		incl = k and k[0] or kw.get('incl', '**')
+		reflags = kw.get('ignorecase', 0) and re.I
 
 		def to_pat(s):
 			lst = Utils.to_list(s)
@@ -534,7 +547,7 @@ class Node(object):
 						k = '^%s$' % k
 						try:
 							#print "pattern", k
-							accu.append(re.compile(k))
+							accu.append(re.compile(k, flags=reflags))
 						except Exception as e:
 							raise Errors.WafError("Invalid pattern: %s" % k, e)
 				ret.append(accu)
@@ -568,34 +581,6 @@ class Node(object):
 			return ' '.join([x.path_from(self) for x in ret])
 
 		return ret
-
-	def find_nodes(self, find_dirs=True, find_files=True, match_fun=lambda x: True):
-		# FIXME not part of the stable API: find_node vs find_nodes? consistency with argument names on other functions?
-		x = """
-		Recursively finds nodes::
-
-			def configure(cnf):
-				cnf.find_nodes()
-
-		:param find_dirs: whether to return directories
-		:param find_files: whether to return files
-		:param match_fun: matching function, taking a node as parameter
-		:rtype generator
-		:return: a generator that iterates over all the requested files
-		"""
-		files = self.listdir()
-		for f in files:
-			node = self.make_node([f])
-			if os.path.isdir(node.abspath()):
-				if find_dirs and match_fun(node):
-					yield node
-				gen = node.find_nodes(find_dirs, find_files, match_fun)
-				for g in gen:
-					yield g
-			else:
-				if find_files and match_fun(node):
-					yield node
-
 
 	# --------------------------------------------------------------------------------
 	# the following methods require the source/build folders (bld.srcnode/bld.bldnode)
@@ -673,7 +658,11 @@ class Node(object):
 				return self.ctx.bldnode.make_node(lst)
 			lst.append(cur.name)
 			cur = cur.parent
-		return self
+		# the file is external to the current project, make a fake root in the current build directory
+		lst.reverse()
+		if lst and Utils.is_win32 and len(lst[0]) == 2 and lst[0].endswith(':'):
+			lst[0] = lst[0][0]
+		return self.ctx.bldnode.make_node(['__root__'] + lst)
 
 	def find_resource(self, lst):
 		"""
@@ -685,18 +674,13 @@ class Node(object):
 		if isinstance(lst, str):
 			lst = [x for x in split_path(lst) if x and x != '.']
 
-		node = self.get_bld().search(lst)
+		node = self.get_bld().search_node(lst)
 		if not node:
 			self = self.get_src()
-			node = self.search(lst)
-			if not node:
-				node = self.find_node(lst)
-		try:
-			pat = node.abspath()
-			if os.path.isdir(pat):
+			node = self.find_node(lst)
+		if node:
+			if os.path.isdir(node.abspath()):
 				return None
-		except:
-			pass
 		return node
 
 	def find_or_declare(self, lst):
@@ -712,24 +696,18 @@ class Node(object):
 		if isinstance(lst, str):
 			lst = [x for x in split_path(lst) if x and x != '.']
 
-		node = self.get_bld().search(lst)
+		node = self.get_bld().search_node(lst)
 		if node:
 			if not os.path.isfile(node.abspath()):
 				node.sig = None
-				try:
-					node.parent.mkdir()
-				except:
-					pass
+				node.parent.mkdir()
 			return node
 		self = self.get_src()
 		node = self.find_node(lst)
 		if node:
 			if not os.path.isfile(node.abspath()):
 				node.sig = None
-				try:
-					node.parent.mkdir()
-				except:
-					pass
+				node.parent.mkdir()
 			return node
 		node = self.get_bld().make_node(lst)
 		node.parent.mkdir()
@@ -774,10 +752,8 @@ class Node(object):
 
 	def nice_path(self, env=None):
 		"""
-		Return the path seen from the launch directory. It is often used for printing nodes in the console to open
-		files easily.
-
-		:param env: unused, left for compatibility with waf 1.5
+		Return the path seen from the launch directory.
+		Can be used for opening files easily (copy-paste in the console).
 		"""
 		return self.path_from(self.ctx.launch_node())
 
@@ -813,18 +789,18 @@ class Node(object):
 		Node signature, assuming the file is in the build directory
 		"""
 		try:
-			ret = self.ctx.hash_cache[id(self)]
-		except KeyError:
-			pass
+			return self.cache_sig
 		except AttributeError:
-			self.ctx.hash_cache = {}
-		else:
-			return ret
+			pass
 
 		if not self.is_bld() or self.ctx.bldnode is self.ctx.srcnode:
 			self.sig = Utils.h_file(self.abspath())
-		self.ctx.hash_cache[id(self)] = ret = self.sig
+		self.cache_sig = ret = self.sig
 		return ret
+
+
+	# TODO Waf 1.8
+	search = search_node
 
 pickle_lock = Utils.threading.Lock()
 """Lock mandatory for thread-safe node serialization"""

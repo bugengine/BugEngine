@@ -1,0 +1,12 @@
+
+def options(opt):
+	pass
+
+def setup(conf):
+	pass
+
+def build(bld):
+	bullet = bld.static_library('3rdparty.bullet')
+	bullet.defines.append('BT_NO_PROFILE')
+	bullet.includes.append(bld.path.make_node('src').abspath())
+	bullet.export_includes.append(bld.path.make_node('src').abspath())

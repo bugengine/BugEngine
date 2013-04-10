@@ -136,12 +136,7 @@ class fc(Task.Task):
 				for t in outs[k]:
 					tmp.extend(t.outputs)
 				a.dep_nodes.extend(tmp)
-
-				# old python versions
-				try:
-					a.dep_nodes.sort(key=lambda x: x.abspath())
-				except:
-					a.dep_nodes.sort(lambda x, y: cmp(x.abspath(), y.abspath()))
+				a.dep_nodes.sort(key=lambda x: x.abspath())
 
 		# the task objects have changed: clear the signature cache
 		for tsk in lst:
@@ -155,9 +150,8 @@ class fc(Task.Task):
 class fcprogram(ccroot.link_task):
 	"""Link fortran programs"""
 	color = 'YELLOW'
-	run_str = '${FC} ${FCLNK_SRC_F}${SRC} ${FCLNK_TGT_F}${TGT[0].abspath()} ${RPATH_ST:RPATH} ${FCSTLIB_MARKER} ${FCSTLIBPATH_ST:STLIBPATH} ${FCSTLIB_ST:STLIB} ${FCSHLIB_MARKER} ${FCLIBPATH_ST:LIBPATH} ${FCLIB_ST:LIB} ${LINKFLAGS}'
+	run_str = '${FC} ${LINKFLAGS} ${FCLNK_SRC_F}${SRC} ${FCLNK_TGT_F}${TGT[0].abspath()} ${RPATH_ST:RPATH} ${FCSTLIB_MARKER} ${FCSTLIBPATH_ST:STLIBPATH} ${FCSTLIB_ST:STLIB} ${FCSHLIB_MARKER} ${FCLIBPATH_ST:LIBPATH} ${FCLIB_ST:LIB}'
 	inst_to = '${BINDIR}'
-	chmod   = Utils.O755
 
 class fcshlib(fcprogram):
 	"""Link fortran libraries"""

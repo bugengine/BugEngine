@@ -6,11 +6,11 @@
 "Bison processing"
 
 from waflib import Task,TaskGen
-import re
 import os
 
 bison = '${BISON} ${BISONFLAGS} ${SRC[0].abspath()} -o ${TGT[0].name}'
-cls = Task.task_factory('bison', bison, 'GREEN', ext_in=['.yc', '.y', '.yy'], ext_out='.cxx .h', before='c cxx flex')
+cls = Task.task_factory('bison', bison, color='GREEN', ext_in=['.yc', '.y', '.yy'], ext_out='.cxx .h', before='c cxx flex')
+
 def post_run_bison(task):
 	source = task.outputs[0]
 	header = task.outputs[1]

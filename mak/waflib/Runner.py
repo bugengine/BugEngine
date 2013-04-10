@@ -10,9 +10,9 @@ Runner.py: Task scheduling and execution
 import random, atexit
 try:
 	from queue import Queue
-except:
+except ImportError:
 	from Queue import Queue
-from waflib import Utils, Task, Errors
+from waflib import Utils, Task, Errors, Logs
 
 GAP = 10
 """
@@ -40,7 +40,7 @@ class TaskConsumer(Utils.threading.Thread):
 		"""
 		try:
 			self.loop()
-		except:
+		except Exception:
 			pass
 
 	def loop(self):
@@ -70,7 +70,7 @@ def get_pool():
 	"""
 	try:
 		return pool.get(False)
-	except:
+	except Exception:
 		return TaskConsumer()
 
 def put_pool(x):
@@ -176,7 +176,7 @@ class Parallel(object):
 			elif self.frozen:
 				try:
 					cond = self.deadlock == self.processed
-				except:
+				except AttributeError:
 					pass
 				else:
 					if cond:
@@ -188,7 +188,7 @@ class Parallel(object):
 						lst = []
 						for tsk in self.frozen:
 							lst.append('%s\t-> %r' % (repr(tsk), [id(x) for x in tsk.run_after]))
-						raise Errors.WafError("Deadlock detected: %s%s" % (msg, ''.join(lst)))
+						raise Errors.WafError('Deadlock detected: %s%s' % (msg, ''.join(lst)))
 				self.deadlock = self.processed
 
 			if self.frozen:
@@ -222,6 +222,7 @@ class Parallel(object):
 			self.add_more_tasks(tsk)
 		self.count -= 1
 		self.dirty = True
+		return tsk
 
 	def error_handler(self, tsk):
 		"""
@@ -267,7 +268,7 @@ class Parallel(object):
 			self.out.put(self)
 		try:
 			pool = self.pool
-		except:
+		except AttributeError:
 			pass
 		else:
 			for x in pool:
@@ -305,26 +306,32 @@ class Parallel(object):
 				self.processed += 1
 				continue
 
+			if self.stop: # stop immediately after a failure was detected
+				break
+
 			try:
 				st = tsk.runnable_status()
 			except Exception:
 				self.processed += 1
-				if self.stop and not self.bld.keep:
-					tsk.hasrun = Task.SKIPPED
-					continue
+				# TODO waf 1.7 this piece of code should go in the error_handler
 				tsk.err_msg = Utils.ex_stack()
+				if not self.stop and self.bld.keep:
+					tsk.hasrun = Task.SKIPPED
+					if self.bld.keep == 1:
+						# if -k stop at the first exception, if -kk try to go as far as possible
+						if Logs.verbose > 1 or not self.error:
+							self.error.append(tsk)
+						self.stop = True
+					else:
+						if Logs.verbose > 1:
+							self.error.append(tsk)
+					continue
 				tsk.hasrun = Task.EXCEPTION
 				self.error_handler(tsk)
 				continue
 
 			if st == Task.ASK_LATER:
 				self.postpone(tsk)
-				# TODO optimize this
-				if self.outstanding:
-					for x in tsk.run_after:
-						if x in self.outstanding:
-							self.outstanding.remove(x)
-							self.outstanding.insert(0, x)
 			elif st == Task.SKIP_ME:
 				self.processed += 1
 				tsk.hasrun = Task.SKIPPED

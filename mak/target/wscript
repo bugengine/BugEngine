@@ -1,0 +1,73 @@
+import os, platform
+from waflib.Logs import pprint
+from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, ListContext
+from waflib.Configure import conf
+
+
+def add_build_command(toolchain, optim):
+	for command in (BuildContext, CleanContext, InstallContext, UninstallContext, ListContext):
+		name = command.__name__.replace('Context','').lower()
+		class Command(command):
+			cmd = name + ':' + toolchain + ':' + optim
+			variant = toolchain + '-' + optim
+
+@conf
+def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
+	original_env = self.env
+	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
+	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
+	original_env.DEFINES.append('BE_PLATFORM=%s'%platform)
+	toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
+	for optim in self.env.ALL_VARIANTS:
+		env = original_env.derive()
+		self.setenv(toolchain+'-'+optim, env)
+		self.env.VARIANT = optim
+		add_build_command(toolchain, optim)
+	self.variant = ''
+	self.env.append_unique('ALL_TOOLCHAINS', toolchain)
+	self.env.append_unique('ALL_PLATFORMS', [p for p in original_env.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
+	self.env.append_unique('ALL_ARCHITECTURES', [a for a in original_env.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
+
+def options(opt):
+	for extra in opt.path.parent.parent.make_node('extra').listdir():
+		#opt.recurse('../../extra/%s'%extra)
+		pass
+	for target in opt.path.listdir():
+		if target != 'wscript':
+			opt.recurse(target)
+
+def configure(conf):
+	conf.env.ALL_VARIANTS = ['debug', 'profile', 'final']
+	for extra in conf.path.parent.parent.make_node('extra').listdir():
+		pprint('BLUE', '_'*40)
+		pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
+		#conf.recurse('../../extra/%s'%extra)
+		pass
+	for target in conf.path.listdir():
+		if target != 'wscript':
+			pprint('BLUE', '_'*40)
+			pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
+			conf.recurse(target)
+	conf.env.store('.build/be_toolchains.py')
+
+
+def build(bld):
+	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
+		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
+	if os.path.isdir(bld.env.VALID_PLATFORMS[0]):
+		bld.recurse(bld.env.VALID_PLATFORMS[0])
+
+def plugins(bld):
+	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
+		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
+	if os.path.isdir(bld.env.VALID_PLATFORMS[0]):
+		bld.recurse(bld.env.VALID_PLATFORMS[0])
+
+from waflib import ConfigSet
+try:
+	env = ConfigSet.ConfigSet('.build/be_toolchains.py')
+	for toolchain in env.ALL_TOOLCHAINS:
+		for optim in env.ALL_VARIANTS:
+			add_build_command(toolchain, optim)
+except:
+	pass

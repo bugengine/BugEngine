@@ -9,7 +9,7 @@ from waflib import Task,TaskGen
 import os
 
 flex = '${FLEX} ${FLEXFLAGS} -o${TGT[0].abspath()} ${SRC[0].abspath()}'
-cls = Task.task_factory('flex', flex, 'GREEN', ext_in='.l .ll', ext_out='.c .cc', before='c cxx', shell=False)
+cls = Task.task_factory('flex', flex, color='GREEN', ext_in=['.l', '.ll'], ext_out=['.c', '.cc'], before=['c', 'cxx'], shell=False)
 
 def exec_command_flex(self, *k, **kw):
 	if isinstance(k[0], list):

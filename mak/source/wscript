@@ -1,0 +1,64 @@
+import os
+from waflib.TaskGen import taskgen_method, before_method, after_method, feature, extension
+
+@taskgen_method
+@feature('*')
+@before_method('process_source')
+def filter_sources(self):
+	self.source = self.to_nodes(getattr(self, 'source', []))
+	sources = []
+	for file in self.source:
+		basename,ext = os.path.splitext(file.name)
+		add_platform = True
+		add_arch = True
+		platform = file.name.find('-p=')
+		if platform != -1:
+			add_platform = False
+			platforms = basename[platform+3:].split(',')
+			for p in platforms:
+				add_platform = add_platform or p in self.env.VALID_PLATFORMS
+		arch = file.name.find('-a=')
+		if arch != -1:
+			add_arch = False
+			architectures = basename[arch+3:].split(',')
+			for a in architectures:
+				add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+		node = file.parent
+		while node and node != self.path:
+			if node.name.startswith('platform='):
+				add_platform = False
+				platforms = node.name[9:].split(',')
+				for p in platforms:
+					add_platform = add_platform or p in self.env.VALID_PLATFORMS
+				if not add_platform: break
+			if node.name.startswith('arch='):
+				add_platform = False
+				architectures = node.name[5:].split(',')
+				for a in architectures:
+					add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+				if not add_arch: break
+			node = node.parent
+		if add_platform and add_arch:
+			sources.append(file)
+	self.source = sources
+
+@extension('.ico', '.pkg', '.lua')
+def ignore_source(self, node):
+	pass
+
+@extension('.dll', '.so')
+def install_binary(self, node):
+	#self.bld.install_as(node, binary)
+	pass
+
+def options(opt):
+	pass
+
+def configure(conf):
+	conf.load('flex', tooldir=['mak/tools'])
+	conf.load('bison', tooldir=['mak/tools'])
+	conf.load('data', tooldir=['mak/tools'])
+
+def build(bld):
+	pass
+

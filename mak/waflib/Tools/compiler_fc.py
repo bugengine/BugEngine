@@ -26,19 +26,17 @@ def configure(conf):
 	"""
 	try: test_for_compiler = conf.options.check_fc
 	except AttributeError: conf.fatal("Add options(opt): opt.load('compiler_fc')")
-	orig = conf.env
 	for compiler in test_for_compiler.split():
+		conf.env.stash()
+		conf.start_msg('Checking for %r (fortran compiler)' % compiler)
 		try:
-			conf.start_msg('Checking for %r (fortran compiler)' % compiler)
-			conf.env = orig.derive()
 			conf.load(compiler)
 		except conf.errors.ConfigurationError as e:
+			conf.env.revert()
 			conf.end_msg(False)
 			Logs.debug('compiler_fortran: %r' % e)
 		else:
 			if conf.env['FC']:
-				orig.table = conf.env.get_merged_dict()
-				conf.env = orig
 				conf.end_msg(conf.env.get_flat('FC'))
 				conf.env.COMPILER_FORTRAN = compiler
 				break

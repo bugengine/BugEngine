@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # encoding: utf-8
-# Thomas Nagy, 2010 (ita)
+# Thomas Nagy, 2011 (ita)
 
 """
-errheck: Search for common mistakes
+errcheck: highlight common mistakes
 
-There is a performance hit, so this tool is only loaded when running "waf -vv"
+There is a performance hit, so this tool is only loaded when running "waf -v"
 """
 
 typos = {
@@ -17,6 +17,7 @@ typos = {
 'define':'defines',
 'importpath':'includes',
 'installpath':'install_path',
+'iscopy':'is_copy',
 }
 
 meths_typos = ['__call__', 'program', 'shlib', 'stlib', 'objects']
@@ -36,7 +37,7 @@ def check_same_targets(self):
 			mp[node].append(tsk)
 		try:
 			uids[tsk.uid()].append(tsk)
-		except:
+		except KeyError:
 			uids[tsk.uid()] = [tsk]
 
 	for g in self.groups:
@@ -52,14 +53,18 @@ def check_same_targets(self):
 	for (k, v) in mp.items():
 		if len(v) > 1:
 			dupe = True
-			Logs.error('* Node %r is created by more than one task. The task generators are:' % k)
+			msg = '* Node %r is created more than once%s. The task generators are:' % (k, Logs.verbose == 1 and " (full message on 'waf -v -v')" or "")
+			Logs.error(msg)
 			for x in v:
-				Logs.error('  %d. %r' % (1 + v.index(x), x.generator))
+				if Logs.verbose > 1:
+					Logs.error('  %d. %r' % (1 + v.index(x), x.generator))
+				else:
+					Logs.error('  %d. %r in %r' % (1 + v.index(x), x.generator.name, getattr(x.generator, 'path', None)))
 
 	if not dupe:
 		for (k, v) in uids.items():
 			if len(v) > 1:
-				Logs.error('* Several tasks use the same identifier. Please check the information on\n   http://waf.googlecode.com/svn/docs/apidocs/Task.html#waflib.Task.Task.uid')
+				Logs.error('* Several tasks use the same identifier. Please check the information on\n   http://docs.waf.googlecode.com/git/apidocs_16/Task.html#waflib.Task.Task.uid')
 				for tsk in v:
 					Logs.error('  - object %r (%r) defined in %r' % (tsk.__class__.__name__, tsk, tsk.generator))
 
@@ -83,6 +88,8 @@ def check_invalid_constraints(self):
 			for y in Utils.to_list(getattr(cls, x, [])):
 				if not Task.classes.get(y, None):
 					Logs.error('Erroneous order constraint %r=%r on task class %r' % (x, y, cls.__name__))
+		if getattr(cls, 'rule', None):
+			Logs.error('Erroneous attribute "rule" on task class %r (rename to "run_str")' % cls.__name__)
 
 def replace(m):
 	"""
@@ -94,6 +101,8 @@ def replace(m):
 		ret = oldcall(self, *k, **kw)
 		for x in typos:
 			if x in kw:
+				if x == 'iscopy' and 'subst' in getattr(self, 'features', ''):
+					continue
 				err = True
 				Logs.error('Fix the typo %r -> %r on %r' % (x, typos[x], ret))
 		return ret
@@ -107,14 +116,20 @@ def enhance_lib():
 		replace(m)
 
 	# catch '..' in ant_glob patterns
-	old_ant_glob = Node.Node.ant_glob
 	def ant_glob(self, *k, **kw):
 		if k:
 			lst=Utils.to_list(k[0])
 			for pat in lst:
 				if '..' in pat.split('/'):
 					Logs.error("In ant_glob pattern %r: '..' means 'two dots', not 'parent directory'" % k[0])
-		return old_ant_glob(self, *k, **kw)
+		if kw.get('remove', True):
+			try:
+				if self.is_child_of(self.ctx.bldnode) and not kw.get('quiet', False):
+					Logs.error('Using ant_glob on the build folder (%r) is dangerous (quiet=True to disable this warning)' % self)
+			except AttributeError:
+				pass
+		return self.old_ant_glob(*k, **kw)
+	Node.Node.old_ant_glob = Node.Node.ant_glob
 	Node.Node.ant_glob = ant_glob
 
 	# catch conflicting ext_in/ext_out/before/after declarations
@@ -139,7 +154,7 @@ def enhance_lib():
 
 	# check for erroneous order constraints
 	def check_err_order(self):
-		if not hasattr(self, 'rule'):
+		if not hasattr(self, 'rule') and not 'subst' in Utils.to_list(self.features):
 			for x in ('before', 'after', 'ext_in', 'ext_out'):
 				if hasattr(self, x):
 					Logs.warn('Erroneous order constraint %r on non-rule based task generator %r' % (x, self))
@@ -147,19 +162,39 @@ def enhance_lib():
 			for x in ('before', 'after'):
 				for y in self.to_list(getattr(self, x, [])):
 					if not Task.classes.get(y, None):
-						Logs.error('Erroneous order constraint %s=%r on %r' % (x, y, self))
+						Logs.error('Erroneous order constraint %s=%r on %r (no such class)' % (x, y, self))
 	TaskGen.feature('*')(check_err_order)
 
 	# check for @extension used with @feature/@before_method/@after_method
-	old_compile = Build.BuildContext.compile
 	def check_compile(self):
 		check_invalid_constraints(self)
 		try:
-			ret = old_compile(self)
+			ret = self.orig_compile()
 		finally:
 			check_same_targets(self)
 		return ret
+	Build.BuildContext.orig_compile = Build.BuildContext.compile
 	Build.BuildContext.compile = check_compile
+
+	# check for invalid build groups #914
+	def use_rec(self, name, **kw):
+		try:
+			y = self.bld.get_tgen_by_name(name)
+		except Errors.WafError:
+			pass
+		else:
+			idx = self.bld.get_group_idx(self)
+			odx = self.bld.get_group_idx(y)
+			if odx > idx:
+				msg = "Invalid 'use' across build groups:"
+				if Logs.verbose > 1:
+					msg += '\n  target %r\n  uses:\n  %r' % (self, y)
+				else:
+					msg += " %r uses %r (try 'waf -v -v' for the full error)" % (self.name, name)
+				raise Errors.WafError(msg)
+		self.orig_use_rec(name, **kw)
+	TaskGen.task_gen.orig_use_rec = TaskGen.task_gen.use_rec
+	TaskGen.task_gen.use_rec = use_rec
 
 	# check for env.append
 	def getattri(self, name, default=None):
