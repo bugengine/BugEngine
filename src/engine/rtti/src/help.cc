@@ -6,6 +6,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/value.hh>
 #include    <zlib.h>
 
 namespace BugEngine

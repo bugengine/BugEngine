@@ -26,8 +26,8 @@ A dumb preprocessor is also available in the tool *c_dumbpreproc*
 """
 # TODO: more varargs, pragma once
 
-import re, sys, os, string, traceback
-from waflib import Logs, Build, Utils, Errors
+import re, string, traceback
+from waflib import Logs, Utils, Errors
 from waflib.Logs import debug, error
 
 class PreprocError(Errors.WafError):
@@ -40,7 +40,7 @@ recursion_limit = 150
 "Limit on the amount of files to read in the dependency scanner"
 
 go_absolute = False
-"Set to 1 to track headers on files in /usr/include - else absolute paths are ignored"
+"Set to True to track headers on files in /usr/include, else absolute paths are ignored (but it becomes very slow)"
 
 standard_includes = ['/usr/include']
 if Utils.is_win32:
@@ -270,6 +270,7 @@ def get_num(lst):
 			num, lst = get_num(lst[1:])
 			return (int(not int(num)), lst)
 		elif v == '~':
+			num, lst = get_num(lst[1:])
 			return (~ int(num), lst)
 		else:
 			raise PreprocError("Invalid op token %r for get_num" % lst)
@@ -299,11 +300,7 @@ def get_term(lst):
 		return (num, [])
 	(p, v) = lst[0]
 	if p == OP:
-		if v == '&&' and not num:
-			return (num, [])
-		elif v == '||' and num:
-			return (num, [])
-		elif v == ',':
+		if v == ',':
 			# skip
 			return get_term(lst[1:])
 		elif v == '?':
@@ -449,8 +446,10 @@ def reduce_tokens(lst, defs, ban=[]):
 			if isinstance(macro_def[0], list):
 				# macro without arguments
 				del lst[i]
-				for x in range(len(to_add)):
-					lst.insert(i, to_add[x])
+				accu = to_add[:]
+				reduce_tokens(accu, defs, ban+[v])
+				for x in range(len(accu)):
+					lst.insert(i, accu[x])
 					i += 1
 			else:
 				# collect the arguments for the funcall
@@ -711,7 +710,6 @@ def parse_char(txt):
 		try: return chr_esc[c]
 		except KeyError: raise PreprocError("could not parse char literal '%s'" % txt)
 
-@Utils.run_once
 def tokenize(s):
 	"""
 	Convert a string into a list of tokens (shlex.split does not apply to c/c++/d)
@@ -721,7 +719,10 @@ def tokenize(s):
 	:return: a list of tokens
 	:rtype: list of tuple(token, value)
 	"""
-	# the same headers are read again and again - 10% improvement on preprocessing the samba headers
+	return tokenize_private(s)[:] # force a copy of the results
+
+@Utils.run_once
+def tokenize_private(s):
 	ret = []
 	for match in re_clexer.finditer(s):
 		m = match.group
@@ -812,7 +813,7 @@ class c_parser(object):
 		"""
 		try:
 			nd = node.ctx.cache_nd
-		except:
+		except AttributeError:
 			nd = node.ctx.cache_nd = {}
 
 		tup = (node, filename)
@@ -824,7 +825,7 @@ class c_parser(object):
 				if getattr(ret, 'children', None):
 					ret = None
 				elif ret.is_child_of(node.ctx.bldnode):
-					tmp = node.ctx.srcnode.search(ret.path_from(node.ctx.bldnode))
+					tmp = node.ctx.srcnode.search_node(ret.path_from(node.ctx.bldnode))
 					if tmp and getattr(tmp, 'children', None):
 						ret = None
 			nd[tup] = ret
@@ -852,7 +853,7 @@ class c_parser(object):
 				break
 			found = self.cached_find_resource(n, filename)
 
-		if found:
+		if found and not found in self.ban_includes:
 			# TODO the duplicates do not increase the no-op build times too much, but they may be worth removing
 			self.nodes.append(found)
 			if filename[-4:] != '.moc':
@@ -920,6 +921,7 @@ class c_parser(object):
 			bld.parse_cache = {}
 			self.parse_cache = bld.parse_cache
 
+		self.current_file = node
 		self.addlines(node)
 
 		# macros may be defined on the command-line, so they must be parsed as if they were part of the file
@@ -951,9 +953,9 @@ class c_parser(object):
 					state.pop()
 
 				# skip lines when in a dead 'if' branch, wait for the endif
-				#if token[0] != 'e':
-				#	if skipped in self.state or ignored in self.state:
-				#		continue
+				if token[0] != 'e':
+					if skipped in self.state or ignored in self.state:
+						continue
 
 				if token == 'if':
 					ret = eval_macro(tokenize(line), self.defs)
@@ -969,13 +971,11 @@ class c_parser(object):
 					else: state[-1] = accepted
 				elif token == 'include' or token == 'import':
 					(kind, inc) = extract_include(line, self.defs)
-					if inc in self.ban_includes:
-						continue
-					#if token == 'import': self.ban_includes.add(inc)
-					self.ban_includes.add(inc)
 					if ve: debug('preproc: include found %s    (%s) ', inc, kind)
 					if kind == '"' or not strict_quotes:
-						self.tryfind(inc)
+						self.current_file = self.tryfind(inc)
+						if token == 'import':
+							self.ban_includes.add(self.current_file)
 				elif token == 'elif':
 					if state[-1] == accepted:
 						state[-1] = skipped
@@ -988,7 +988,7 @@ class c_parser(object):
 				elif token == 'define':
 					try:
 						self.defs[define_name(line)] = line
-					except:
+					except Exception:
 						raise PreprocError("Invalid define line %s" % line)
 				elif token == 'undef':
 					m = re_mac.match(line)
@@ -997,7 +997,7 @@ class c_parser(object):
 						#print "undef %s" % name
 				elif token == 'pragma':
 					if re_pragma_once.match(line.lower()):
-						self.ban_includes.add(self.curfile)
+						self.ban_includes.add(self.current_file)
 			except Exception as e:
 				if Logs.verbose:
 					debug('preproc: line parsing failed (%s): %s %s', e, line, Utils.ex_stack())
@@ -1019,7 +1019,7 @@ def scan(task):
 		raise Errors.WafError('%r is missing a feature such as "c", "cxx" or "includes": ' % task.generator)
 
 	if go_absolute:
-		nodepaths = incn
+		nodepaths = incn + [task.generator.bld.root.find_dir(x) for x in standard_includes]
 	else:
 		nodepaths = [x for x in incn if x.is_child_of(x.ctx.srcnode) or x.is_child_of(x.ctx.bldnode)]
 

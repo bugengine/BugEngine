@@ -3,11 +3,16 @@
 # Carlos Rafael Giani, 2006 (dv)
 # Tamas Pal, 2007 (folti)
 # Nicolas Mercier, 2009
+# Matt Clarkson, 2012
 
 """
 Microsoft Visual C++/Intel C++ compiler support
 
 Usage::
+
+	$ waf configure --msvc_version="msvc 10.0,msvc 9.0" --msvc_target="x64"
+
+or::
 
 	def configure(conf):
 		conf.env['MSVC_VERSIONS'] = ['msvc 10.0', 'msvc 9.0', 'msvc 8.0', 'msvc 7.1', 'msvc 7.0', 'msvc 6.0', 'wsdk 7.0', 'intel 11', 'PocketPC 9.0', 'Smartphone 8.0']
@@ -29,9 +34,10 @@ Supported platforms: ia64, x64, x86, x86_amd64, x86_ia64
 
 Compilers supported:
 
-* msvc       => Visual Studio, versions 6.0 (VC 98, VC .NET 2002) to 10.0 (Visual Studio 2010)
-* wsdk       => Windows SDK, versions 6.0, 6.1, 7.0
-* icl        => Intel compiler, versions 9,10,11
+* msvc       => Visual Studio, versions 6.0 (VC 98, VC .NET 2002) to 11.0 (Visual Studio 2012)
+* wsdk       => Windows SDK, versions 6.0, 6.1, 7.0, 7.1, 8.0
+* icl        => Intel compiler, versions 9, 10, 11, 13
+* winphone   => Visual Studio to target Windows Phone 8 native (version 8.0 for now)
 * Smartphone => Compiler/SDK for Smartphone devices (armv4/v4i)
 * PocketPC   => Compiler/SDK for PocketPC devices (armv4/v4i)
 
@@ -43,21 +49,12 @@ Setting PYTHONUNBUFFERED gives the unbuffered output.
 """
 
 import os, sys, re, tempfile
-try:
-	import _winreg
-except:
-	try:
-		import winreg as _winreg
-	except:
-		_winreg = None
-
-from waflib import Utils, TaskGen, Runner, Configure, Task, Options
-from waflib.Logs import debug, info, warn, error
-from waflib.TaskGen import after_method, before_method, feature
+from waflib import Utils, Task, Logs, Options, Errors
+from waflib.Logs import debug, warn
+from waflib.TaskGen import after_method, feature
 
 from waflib.Configure import conf
 from waflib.Tools import ccroot, c, cxx, ar, winres
-
 
 g_msvc_systemlibs = '''
 aclui activeds ad1 adptif adsiid advapi32 asycfilt authz bhsupp bits bufferoverflowu cabinet
@@ -90,9 +87,17 @@ all_wince_platforms = [ ('armv4', 'arm'), ('armv4i', 'arm'), ('mipsii', 'mips'),
 all_icl_platforms = [ ('intel64', 'amd64'), ('em64t', 'amd64'), ('ia32', 'x86'), ('Itanium', 'ia64')]
 """List of icl platforms"""
 
-def setup_msvc(conf, versions):
-	platforms = Utils.to_list(conf.env['MSVC_TARGETS']) or [i for i,j in all_msvc_platforms+all_icl_platforms+all_wince_platforms]
-	desired_versions = conf.env['MSVC_VERSIONS'] or [v for v,_ in versions][::-1]
+def options(opt):
+	opt.add_option('--msvc_version', type='string', help = 'msvc version, eg: "msvc 10.0,msvc 9.0"', default='')
+	opt.add_option('--msvc_targets', type='string', help = 'msvc targets, eg: "x64,arm"', default='')
+
+def setup_msvc(conf, versions, arch = False):
+	platforms = getattr(Options.options, 'msvc_targets', '').split(',')
+	if platforms == ['']:
+		platforms=Utils.to_list(conf.env['MSVC_TARGETS']) or [i for i,j in all_msvc_platforms+all_icl_platforms+all_wince_platforms]
+	desired_versions = getattr(Options.options, 'msvc_version', '').split(',')
+	if desired_versions == ['']:
+		desired_versions = conf.env['MSVC_VERSIONS'] or [v for v,_ in versions][::-1]
 	versiondict = dict(versions)
 
 	for version in desired_versions:
@@ -100,9 +105,12 @@ def setup_msvc(conf, versions):
 			targets = dict(versiondict [version])
 			for target in platforms:
 				try:
-					arch,(p1,p2,p3,p4,p5) = targets[target]
-					compiler,revision = version.split()
-					return compiler,revision,p1,p2,p3,p4,p5
+					arch,(p1,p2,p3) = targets[target]
+					compiler,revision = version.rsplit(' ', 1)
+					if arch:
+						return compiler,revision,p1,p2,p3,arch
+					else:
+						return compiler,revision,p1,p2,p3
 				except KeyError: continue
 		except KeyError: continue
 	conf.fatal('msvc: Impossible to find a valid architecture for building (in setup_msvc)')
@@ -127,30 +135,29 @@ set LIB=
 call "%s" %s
 echo PATH=%%PATH%%
 echo INCLUDE=%%INCLUDE%%
-echo LIB=%%LIB%%
-echo LIBPATH=%%LIBPATH%%
+echo LIB=%%LIB%%;%%LIBPATH%%
 """ % (vcvars,target))
 	sout = conf.cmd_and_log(['cmd', '/E:on', '/V:on', '/C', batfile.abspath()])
 	lines = sout.splitlines()
-	MSVC_PATH = []
-	MSVC_INCDIR = []
-	MSVC_LIBDIR = []
 
+	if not lines[0]:
+		lines.pop(0)
+
+	MSVC_PATH = MSVC_INCDIR = MSVC_LIBDIR = None
 	for line in lines:
 		if line.startswith('PATH='):
 			path = line[5:]
 			MSVC_PATH = path.split(';')
 		elif line.startswith('INCLUDE='):
-			MSVC_INCDIR += [i for i in line[8:].split(';') if i]
+			MSVC_INCDIR = [i for i in line[8:].split(';') if i]
 		elif line.startswith('LIB='):
-			MSVC_LIBDIR += [i for i in line[4:].split(';') if i]
-		elif line.startswith('LIBPATH='):
-			MSVC_LIBDIR += [i for i in line[8:].split(';') if i]
+			MSVC_LIBDIR = [i for i in line[4:].split(';') if i]
+	if None in (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR):
+		conf.fatal('msvc: Could not find a valid architecture for building (get_msvc_version_3)')
 
 	# Check if the compiler is usable at all.
 	# The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
-	env = {}
-	env.update(os.environ)
+	env = dict(os.environ)
 	env.update(PATH = path)
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
 	cxx = conf.find_program(compiler_name, path_list=MSVC_PATH)
@@ -172,7 +179,7 @@ echo LIBPATH=%%LIBPATH%%
 	finally:
 		conf.env[compiler_name] = ''
 
-	return (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR, vcvars, target)
+	return (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR)
 
 @conf
 def gather_wsdk_versions(conf, versions):
@@ -184,29 +191,29 @@ def gather_wsdk_versions(conf, versions):
 	"""
 	version_pattern = re.compile('^v..?.?\...?.?')
 	try:
-		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows')
+		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows')
 	except WindowsError:
 		try:
-			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows')
+			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows')
 		except WindowsError:
 			return
 	index = 0
 	while 1:
 		try:
-			version = _winreg.EnumKey(all_versions, index)
+			version = Utils.winreg.EnumKey(all_versions, index)
 		except WindowsError:
 			break
 		index = index + 1
 		if not version_pattern.match(version):
 			continue
 		try:
-			msvc_version = _winreg.OpenKey(all_versions, version)
-			path,type = _winreg.QueryValueEx(msvc_version,'InstallationFolder')
+			msvc_version = Utils.winreg.OpenKey(all_versions, version)
+			path,type = Utils.winreg.QueryValueEx(msvc_version,'InstallationFolder')
 		except WindowsError:
 			continue
 		if os.path.isfile(os.path.join(path, 'bin', 'SetEnv.cmd')):
 			targets = []
-			for target,arch in all_msvc_platforms[::-1]:
+			for target,arch in all_msvc_platforms:
 				try:
 					targets.append((target, (arch, conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
 				except conf.errors.ConfigurationError:
@@ -222,10 +229,10 @@ def gather_wince_supported_platforms():
 	"""
 	supported_wince_platforms = []
 	try:
-		ce_sdk = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Windows CE Tools\\SDKs')
+		ce_sdk = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Windows CE Tools\\SDKs')
 	except WindowsError:
 		try:
-			ce_sdk = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Windows CE Tools\\SDKs')
+			ce_sdk = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Windows CE Tools\\SDKs')
 		except WindowsError:
 			ce_sdk = ''
 	if not ce_sdk:
@@ -234,15 +241,19 @@ def gather_wince_supported_platforms():
 	ce_index = 0
 	while 1:
 		try:
-			sdk_device = _winreg.EnumKey(ce_sdk, ce_index)
+			sdk_device = Utils.winreg.EnumKey(ce_sdk, ce_index)
 		except WindowsError:
 			break
 		ce_index = ce_index + 1
-		sdk = _winreg.OpenKey(ce_sdk, sdk_device)
+		sdk = Utils.winreg.OpenKey(ce_sdk, sdk_device)
 		try:
-			path,type = _winreg.QueryValueEx(sdk, 'SDKRootDir')
+			path,type = Utils.winreg.QueryValueEx(sdk, 'SDKRootDir')
 		except WindowsError:
-			continue
+			try:
+				path,type = Utils.winreg.QueryValueEx(sdk,'SDKInformation')
+				path,xml = os.path.split(path)
+			except WindowsError:
+				continue
 		path=str(path)
 		path,device = os.path.split(path)
 		if not device:
@@ -259,21 +270,21 @@ def gather_msvc_detected_versions():
 	#Detected MSVC versions!
 	version_pattern = re.compile('^(\d\d?\.\d\d?)(Exp)?$')
 	detected_versions = []
-	for vcver,vcvar in [('VisualStudio',''), ('VCExpress','Exp')]:
+	for vcver,vcvar in [('VCExpress','Exp'), ('VisualStudio','')]:
 		try:
 			prefix = 'SOFTWARE\\Wow6432node\\Microsoft\\'+vcver
-			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, prefix)
+			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, prefix)
 		except WindowsError:
 			try:
 				prefix = 'SOFTWARE\\Microsoft\\'+vcver
-				all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, prefix)
+				all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, prefix)
 			except WindowsError:
 				continue
 
 		index = 0
 		while 1:
 			try:
-				version = _winreg.EnumKey(all_versions, index)
+				version = Utils.winreg.EnumKey(all_versions, index)
 			except WindowsError:
 				break
 			index = index + 1
@@ -286,11 +297,7 @@ def gather_msvc_detected_versions():
 	def fun(tup):
 		return tup[0]
 
-	try:
-		detected_versions.sort(key = fun)
-	except:
-		# old python sort
-		detected_versions.sort(lambda x,y: cmp(x[0], y[0]))
+	detected_versions.sort(key = fun)
 	return detected_versions
 
 @conf
@@ -301,7 +308,7 @@ def gather_msvc_targets(conf, versions, version, vc_path):
 		for target,realtarget in all_msvc_platforms[::-1]:
 			try:
 				targets.append((target, (realtarget, conf.get_msvc_version('msvc', version, target, os.path.join(vc_path, 'vcvarsall.bat')))))
-			except conf.errors.ConfigurationError as e:
+			except conf.errors.ConfigurationError:
 				pass
 	elif os.path.isfile(os.path.join(vc_path, 'Common7', 'Tools', 'vsvars32.bat')):
 		try:
@@ -313,10 +320,12 @@ def gather_msvc_targets(conf, versions, version, vc_path):
 			targets.append(('x86', ('x86', conf.get_msvc_version('msvc', version, '', os.path.join(vc_path, 'Bin', 'vcvars32.bat')))))
 		except conf.errors.ConfigurationError:
 			pass
-	versions.append(('msvc '+ version, targets))
+	if targets:
+		versions.append(('msvc '+ version, targets))
 
 @conf
 def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_platforms):
+	#Looking for Win CE compilers!
 	for device,platforms in supported_platforms:
 		cetargets = []
 		for platform,compiler,include,lib in platforms:
@@ -324,13 +333,13 @@ def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_pla
 			if not os.path.isdir(winCEpath):
 				continue
 			try:
-				common_bindirs,_1,_2,_3,_4 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
+				common_bindirs,_1,_2 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
 			except conf.errors.ConfigurationError:
 				continue
 			if os.path.isdir(os.path.join(winCEpath, 'lib', platform)):
 				bindirs = [os.path.join(winCEpath, 'bin', compiler), os.path.join(winCEpath, 'bin', 'x86_'+compiler)] + common_bindirs
-				incdirs = [include, os.path.join(winCEpath, 'include'), os.path.join(winCEpath, 'atlmfc', 'include')]
-				libdirs = [lib, os.path.join(winCEpath, 'lib', platform), os.path.join(winCEpath, 'atlmfc', 'lib', platform)]
+				incdirs = [os.path.join(winCEpath, 'include'), os.path.join(winCEpath, 'atlmfc', 'include'), include]
+				libdirs = [os.path.join(winCEpath, 'lib', platform), os.path.join(winCEpath, 'atlmfc', 'lib', platform), lib]
 				cetargets.append((platform, (platform, (bindirs,incdirs,libdirs))))
 		if cetargets:
 			versions.append((device + ' ' + version, cetargets))
@@ -344,24 +353,20 @@ def gather_winphone_targets(conf, versions, version, vc_path, vsvars):
 			targets.append((target, (realtarget, conf.get_msvc_version('winphone', version, target, vsvars))))
 		except conf.errors.ConfigurationError as e:
 			pass
-	versions.append(('winphone '+ version, targets))
-
+	if targets:
+		versions.append(('winphone '+ version, targets))
 
 @conf
 def gather_msvc_versions(conf, versions):
 	vc_paths = []
-	found = set([])
 	for (v,version,reg) in gather_msvc_detected_versions():
 		try:
 			try:
-				msvc_version = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, reg + "\\Setup\\VC")
+				msvc_version = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, reg + "\\Setup\\VC")
 			except WindowsError:
-				msvc_version = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, reg + "\\Setup\\Microsoft Visual C++")
-			path,type = _winreg.QueryValueEx(msvc_version, 'ProductDir')
-
-			if path not in found:
-				vc_paths.append((version, os.path.abspath(str(path))))
-				found.add(path)
+				msvc_version = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, reg + "\\Setup\\Microsoft Visual C++")
+			path,type = Utils.winreg.QueryValueEx(msvc_version, 'ProductDir')
+			vc_paths.append((version, os.path.abspath(str(path))))
 		except WindowsError:
 			continue
 
@@ -369,65 +374,17 @@ def gather_msvc_versions(conf, versions):
 
 	for version,vc_path in vc_paths:
 		vs_path = os.path.dirname(vc_path)
-		#debug("Check", version, vc_path, vs_path)
-		conf.gather_msvc_targets(versions, version, vc_path)
 		vsvars = os.path.join(vs_path, 'Common7', 'Tools', 'vsvars32.bat')
-		#debug("Looking for ce targets!", vsvars, os.path.isfile(vsvars))
 		if wince_supported_platforms and os.path.isfile(vsvars):
 			conf.gather_wince_targets(versions, version, vc_path, vsvars, wince_supported_platforms)
+
 		vsvars = os.path.join(vs_path, 'VC', 'WPSDK', 'WP80', 'vcvarsphoneall.bat')
 		if os.path.isfile(vsvars):
-			conf.gather_winphone_targets(versions, version, vc_path, vsvars)
+			conf.gather_winphone_targets(versions, '8.0', vc_path, vsvars)
 
-@conf
-def gather_icl_suite_versions(conf, versions):
-	"""
-	Checks ICL compiler suites
-
-	:param versions: list to modify
-	:type versions: list
-	"""
-	version_pattern = re.compile('^...?.?\..?')
-	try:
-		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Suites')
-	except WindowsError:
-		try:
-			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Suites')
-		except WindowsError:
-			return
-	index = 0
-	while 1:
-		try:
-			version_key = _winreg.EnumKey(all_versions, index)
-			version = _winreg.OpenKey(all_versions, version_key)
-		except WindowsError:
-			break
-		index = index + 1
-		if not version_pattern.match(version_key):
-			continue
-		indexsub = 0
-		while 1:
-			try:
-				subversion_key = _winreg.EnumKey(version, indexsub)
-			except WindowsError:
-				break
-			indexsub = indexsub + 1
-
-			targets = []
-			try:
-				icl_version = _winreg.OpenKey(all_versions, os.path.join(version_key, subversion_key, 'C++'))
-				path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
-				if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
-					for target,arch in all_icl_platforms:
-						try:
-							targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
-						except conf.errors.ConfigurationError:
-							pass
-			except WindowsError:
-				continue
-		major = version_key[0:2]
-		versions.append(('intel ' + major, targets))
-
+	for version,vc_path in vc_paths:
+		vs_path = os.path.dirname(vc_path)
+		conf.gather_msvc_targets(versions, version, vc_path)
 
 @conf
 def gather_icl_versions(conf, versions):
@@ -439,16 +396,16 @@ def gather_icl_versions(conf, versions):
 	"""
 	version_pattern = re.compile('^...?.?\....?.?')
 	try:
-		all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Compilers\\C++')
+		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Compilers\\C++')
 	except WindowsError:
 		try:
-			all_versions = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Compilers\\C++')
+			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Compilers\\C++')
 		except WindowsError:
 			return
 	index = 0
 	while 1:
 		try:
-			version = _winreg.EnumKey(all_versions, index)
+			version = Utils.winreg.EnumKey(all_versions, index)
 		except WindowsError:
 			break
 		index = index + 1
@@ -459,27 +416,96 @@ def gather_icl_versions(conf, versions):
 			try:
 				if target=='intel64': targetDir='EM64T_NATIVE'
 				else: targetDir=target
-				_winreg.OpenKey(all_versions,version+'\\'+targetDir)
-				icl_version=_winreg.OpenKey(all_versions,version)
-				path,type=_winreg.QueryValueEx(icl_version,'ProductDir')
-				if os.path.isfile(os.path.join(path,'bin','iclvars.bat')):
+				Utils.winreg.OpenKey(all_versions,version+'\\'+targetDir)
+				icl_version=Utils.winreg.OpenKey(all_versions,version)
+				path,type=Utils.winreg.QueryValueEx(icl_version,'ProductDir')
+				batch_file=os.path.join(path,'bin','iclvars.bat')
+				if os.path.isfile(batch_file):
 					try:
-						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,os.path.join(path,'bin','iclvars.bat')))))
+						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,batch_file))))
 					except conf.errors.ConfigurationError:
 						pass
 			except WindowsError:
 				pass
 		for target,arch in all_icl_platforms:
 			try:
-				icl_version = _winreg.OpenKey(all_versions, version+'\\'+target)
-				path,type = _winreg.QueryValueEx(icl_version,'ProductDir')
-				if os.path.isfile(os.path.join(path, 'bin', 'iclvars.bat')):
+				icl_version = Utils.winreg.OpenKey(all_versions, version+'\\'+target)
+				path,type = Utils.winreg.QueryValueEx(icl_version,'ProductDir')
+				batch_file=os.path.join(path,'bin','iclvars.bat')
+				if os.path.isfile(batch_file):
 					try:
-						targets.append((target, (arch, conf.get_msvc_version('intel', version, target, os.path.join(path, 'bin', 'iclvars.bat')))))
+						targets.append((target, (arch, conf.get_msvc_version('intel', version, target, batch_file))))
 					except conf.errors.ConfigurationError:
 						pass
 			except WindowsError:
 				continue
+		major = version[0:2]
+		versions.append(('intel ' + major, targets))
+
+@conf
+def gather_intel_composer_versions(conf, versions):
+	"""
+	Checks ICL compilers that are part of Intel Composer Suites
+
+	:param versions: list to modify
+	:type versions: list
+	"""
+	version_pattern = re.compile('^...?.?\...?.?.?')
+	try:
+		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Suites')
+	except WindowsError:
+		try:
+			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Suites')
+		except WindowsError:
+			return
+	index = 0
+	while 1:
+		try:
+			version = Utils.winreg.EnumKey(all_versions, index)
+		except WindowsError:
+			break
+		index = index + 1
+		if not version_pattern.match(version):
+			continue
+		targets = []
+		for target,arch in all_icl_platforms:
+			try:
+				if target=='intel64': targetDir='EM64T_NATIVE'
+				else: targetDir=target
+				try:
+					defaults = Utils.winreg.OpenKey(all_versions,version+'\\Defaults\\C++\\'+targetDir)
+				except WindowsError:
+					if targetDir=='EM64T_NATIVE':
+						defaults = Utils.winreg.OpenKey(all_versions,version+'\\Defaults\\C++\\EM64T')
+					else:
+						raise WindowsError
+				uid,type = Utils.winreg.QueryValueEx(defaults, 'SubKey')
+				Utils.winreg.OpenKey(all_versions,version+'\\'+uid+'\\C++\\'+targetDir)
+				icl_version=Utils.winreg.OpenKey(all_versions,version+'\\'+uid+'\\C++')
+				path,type=Utils.winreg.QueryValueEx(icl_version,'ProductDir')
+				batch_file=os.path.join(path,'bin','iclvars.bat')
+				if os.path.isfile(batch_file):
+					try:
+						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,batch_file))))
+					except conf.errors.ConfigurationError as e:
+						pass
+				# The intel compilervar_arch.bat is broken when used with Visual Studio Express 2012
+				# http://software.intel.com/en-us/forums/topic/328487
+				compilervars_warning_attr = '_compilervars_warning_key'
+				if version[0:2] == '13' and getattr(conf, compilervars_warning_attr, True):
+					setattr(conf, compilervars_warning_attr, False)
+					patch_url = 'http://software.intel.com/en-us/forums/topic/328487'
+					compilervars_arch = os.path.join(path, 'bin', 'compilervars_arch.bat')
+					vs_express_path = os.environ['VS110COMNTOOLS'] + r'..\IDE\VSWinExpress.exe'
+					dev_env_path = os.environ['VS110COMNTOOLS'] + r'..\IDE\devenv.exe'
+					if (r'if exist "%VS110COMNTOOLS%..\IDE\VSWinExpress.exe"' in Utils.readf(compilervars_arch) and
+						not os.path.exists(vs_express_path) and not os.path.exists(dev_env_path)):
+						Logs.warn(('The Intel compilervar_arch.bat only checks for one Visual Studio SKU '
+						           '(VSWinExpress.exe) but it does not seem to be installed at %r. '
+						           'The intel command line set up will fail to configure unless the file %r'
+						           'is patched. See: %s') % (vs_express_path, compilervars_arch, patch_url))
+			except WindowsError:
+				pass
 		major = version[0:2]
 		versions.append(('intel ' + major, targets))
 
@@ -492,7 +518,7 @@ def get_msvc_versions(conf):
 	if not conf.env['MSVC_INSTALLED_VERSIONS']:
 		lst = []
 		conf.gather_icl_versions(lst)
-		conf.gather_icl_suite_versions(lst)
+		conf.gather_intel_composer_versions(lst)
 		conf.gather_wsdk_versions(lst)
 		conf.gather_msvc_versions(lst)
 		conf.env['MSVC_INSTALLED_VERSIONS'] = lst
@@ -504,14 +530,14 @@ def print_all_msvc_detected(conf):
 	Print the contents of *conf.env.MSVC_INSTALLED_VERSIONS*
 	"""
 	for version,targets in conf.env['MSVC_INSTALLED_VERSIONS']:
-		info(version)
+		Logs.info(version)
 		for target,l in targets:
-			info("\t"+target)
+			Logs.info("\t"+target)
 
 @conf
-def detect_msvc(conf):
+def detect_msvc(conf, arch = False):
 	versions = get_msvc_versions(conf)
-	return setup_msvc(conf, versions)
+	return setup_msvc(conf, versions, arch)
 
 @conf
 def find_lt_names_msvc(self, libname, is_static=False):
@@ -632,7 +658,7 @@ def configure(conf):
 	"""
 	Configuration methods to call for detecting msvc
 	"""
-	conf.autodetect()
+	conf.autodetect(True)
 	conf.find_msvc()
 	conf.msvc_common_flags()
 	conf.cc_load_tools()
@@ -648,19 +674,23 @@ def no_autodetect(conf):
 	configure(conf)
 
 @conf
-def autodetect(conf):
+def autodetect(conf, arch = False):
 	v = conf.env
 	if v.NO_MSVC_DETECT:
 		return
-	compiler, version, path, includes, libdirs, cmd, flag = conf.detect_msvc()
+	if arch:
+		compiler, version, path, includes, libdirs, arch = conf.detect_msvc(True)
+		v['DEST_CPU'] = arch
+	else:
+		compiler, version, path, includes, libdirs = conf.detect_msvc()
+
 	v['PATH'] = path
 	v['INCLUDES'] = includes
 	v['LIBPATH'] = libdirs
 	v['MSVC_COMPILER'] = compiler
-	v['MSVC_ENVIRONMENT'] = [cmd, flag]
 	try:
 		v['MSVC_VERSION'] = float(version)
-	except:
+	except Exception:
 		v['MSVC_VERSION'] = float(version[:-3])
 
 def _get_prog_names(conf, compiler):
@@ -688,8 +718,7 @@ def find_msvc(conf):
 	version = v['MSVC_VERSION']
 
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
-	if 'MSVC_MANIFEST' not in v:
-		v.MSVC_MANIFEST = (compiler == 'msvc' and version >= 8) or (compiler == 'wsdk' and version >= 6) or (compiler == 'intel' and version >= 11)
+	v.MSVC_MANIFEST = (compiler == 'msvc' and version >= 8) or (compiler == 'wsdk' and version >= 6) or (compiler == 'intel' and version >= 11)
 
 	# compiler
 	cxx = None
@@ -726,34 +755,27 @@ def find_msvc(conf):
 
 	# manifest tool. Not required for VS 2003 and below. Must have for VS 2005 and later
 	if v.MSVC_MANIFEST:
-		mt = conf.find_program('MT', path_list=path, var='MT')
+		conf.find_program('MT', path_list=path, var='MT')
 		v['MTFLAGS'] = ['/NOLOGO']
 
-	conf.load('winres')
-
-	if not conf.env['WINRC']:
+	try:
+		conf.load('winres')
+	except Errors.WafError:
 		warn('Resource compiler not found. Compiling resource file is disabled')
 
 @conf
 def visual_studio_add_flags(self):
 	"""visual studio flags found in the system environment"""
 	v = self.env
-	try: v.prepend_value('INCLUDES', self.environ['INCLUDE'].split(';')) # notice the 'S'
-	except: pass
-	try: v.prepend_value('LIBPATH', self.environ['LIB'].split(';'))
-	except: pass
+	try: v.prepend_value('INCLUDES', [x for x in self.environ['INCLUDE'].split(';') if x]) # notice the 'S'
+	except Exception: pass
+	try: v.prepend_value('LIBPATH', [x for x in self.environ['LIB'].split(';') if x])
+	except Exception: pass
 
 @conf
 def msvc_common_flags(conf):
 	"""
 	Setup the flags required for executing the msvc compiler
-
-	The default is to allow a static and a shared library having the same name in the same directory, the static one being prefixed by 'lib'. If you feel that this
-	is incorrect, just change the extension (issue #824)::
-
-		bld.env.STLIB_ST = bld.env.SHLIB_ST = '%s.lib'
-		bld.stlib(..., name='libfoo')
-		bld.shlib(..., name='foo')
 	"""
 	v = conf.env
 
@@ -792,7 +814,7 @@ def msvc_common_flags(conf):
 	# linker
 	v['LIB_ST']            = '%s.lib' # template for adding shared libs
 	v['LIBPATH_ST']        = '/LIBPATH:%s' # template for adding libpaths
-	v['STLIB_ST']          = 'lib%s.lib'
+	v['STLIB_ST']          = '%s.lib'
 	v['STLIBPATH_ST']      = '/LIBPATH:%s'
 
 	v.append_value('LINKFLAGS', ['/NOLOGO'])
@@ -809,7 +831,7 @@ def msvc_common_flags(conf):
 
 	# static library
 	v['LINKFLAGS_cstlib']  = []
-	v['cstlib_PATTERN']    = v['cxxstlib_PATTERN'] = 'lib%s.lib'
+	v['cstlib_PATTERN']    = v['cxxstlib_PATTERN'] = '%s.lib'
 
 	# program
 	v['cprogram_PATTERN']  = v['cxxprogram_PATTERN']    = '%s.exe'
@@ -931,7 +953,7 @@ def exec_response_command(self, cmd, **kw):
 			program = cmd[0] #unquoted program name, otherwise exec_command will fail
 			cmd = [self.quote_response_command(x) for x in cmd]
 			(fd, tmp) = tempfile.mkstemp()
-			os.write(fd, ' '.join(i.replace('\\', '\\\\') for i in cmd[1:]).encode())
+			os.write(fd, '\r\n'.join(i.replace('\\', '\\\\') for i in cmd[1:]).encode())
 			os.close(fd)
 			cmd = [program, '@' + tmp]
 		# no return here, that's on purpose
@@ -940,7 +962,7 @@ def exec_response_command(self, cmd, **kw):
 		if tmp:
 			try:
 				os.remove(tmp)
-			except:
+			except OSError:
 				pass # anti-virus and indexers can keep the files open -_-
 	return ret
 
@@ -951,22 +973,22 @@ def exec_command_msvc(self, *k, **kw):
 	Change the command-line execution for msvc programs.
 	Instead of quoting all the paths and keep using the shell, we can just join the options msvc is interested in
 	"""
-	if self.env['CC_NAME'] == 'msvc':
-		if isinstance(k[0], list):
-			lst = []
-			carry = ''
-			for a in k[0]:
-				if a == '/Fo' or a == '/doc' or a[-1] == ':':
-					carry = a
-				else:
-					lst.append(carry + a)
-					carry = ''
-			k = [lst]
+	assert self.env['CC_NAME'] == 'msvc'
+	if isinstance(k[0], list):
+		lst = []
+		carry = ''
+		for a in k[0]:
+			if a == '/Fo' or a == '/doc' or a[-1] == ':':
+				carry = a
+			else:
+				lst.append(carry + a)
+				carry = ''
+		k = [lst]
 
-		if self.env['PATH']:
-			env = dict(os.environ)
-			env.update(PATH = ';'.join(self.env['PATH']))
-			kw['env'] = env
+	if self.env['PATH']:
+		env = dict(self.env.env or os.environ)
+		env.update(PATH = ';'.join(self.env['PATH']))
+		kw['env'] = env
 
 	bld = self.generator.bld
 	try:
@@ -980,11 +1002,58 @@ def exec_command_msvc(self, *k, **kw):
 		ret = self.exec_mf()
 	return ret
 
-for k in 'c cxx cprogram cxxprogram cshlib cxxshlib cstlib cxxstlib'.split():
-	cls = Task.classes.get(k, None)
-	if cls:
-		cls.exec_command = exec_command_msvc
-		cls.exec_response_command = exec_response_command
-		cls.quote_response_command = quote_response_command
-		cls.exec_mf = exec_mf
+def wrap_class(class_name):
+	"""
+	Manifest file processing and @response file workaround for command-line length limits on Windows systems
+	The indicated task class is replaced by a subclass to prevent conflicts in case the class is wrapped more than once
+	"""
+	cls = Task.classes.get(class_name, None)
 
+	if not cls:
+		return None
+
+	derived_class = type(class_name, (cls,), {})
+
+	def exec_command(self, *k, **kw):
+		if self.env['CC_NAME'] == 'msvc':
+			return self.exec_command_msvc(*k, **kw)
+		else:
+			return super(derived_class, self).exec_command(*k, **kw)
+
+	# Chain-up monkeypatch needed since exec_command() is in base class API
+	derived_class.exec_command = exec_command
+
+	# No chain-up behavior needed since the following methods aren't in
+	# base class API
+	derived_class.exec_response_command = exec_response_command
+	derived_class.quote_response_command = quote_response_command
+	derived_class.exec_command_msvc = exec_command_msvc
+	derived_class.exec_mf = exec_mf
+
+	return derived_class
+
+for k in 'c cxx cprogram cxxprogram cshlib cxxshlib cstlib cxxstlib'.split():
+	wrap_class(k)
+
+def make_winapp(self, family):
+	append = self.env.append_unique
+	append('DEFINES', 'WINAPI_FAMILY=%s' % family)
+	append('CXXFLAGS', '/ZW')
+	append('CXXFLAGS', '/TP')
+	for lib_path in self.env.LIBPATH:
+		append('CXXFLAGS','/AI%s'%lib_path)
+
+@feature('winphoneapp')
+@after_method('process_use')
+@after_method('propagate_uselib_vars')
+def make_winphone_app(self):
+	make_winapp(self, 'WINAPI_FAMILY_PHONE_APP')
+	conf.env.append_unique('LINKFLAGS', '/NODEFAULTLIB:ole32.lib')
+	conf.env.append_unique('LINKFLAGS', 'PhoneAppModelHost.lib')
+
+
+@feature('winapp')
+@after_method('process_use')
+@after_method('propagate_uselib_vars')
+def make_windows_app(self):
+	make_winapp(self, 'WINAPI_FAMILY_DESKTOP_APP')

@@ -10,8 +10,10 @@ The inheritance tree is the following:
 """
 
 import os, sys, errno, re, shutil
-try: import cPickle
-except: import pickle as cPickle
+try:
+	import cPickle
+except ImportError:
+	import pickle as cPickle
 from waflib import Runner, TaskGen, Utils, ConfigSet, Task, Logs, Options, Context, Errors
 import waflib.Node
 
@@ -97,7 +99,6 @@ class BuildContext(Context.Context):
 		self.cache_global = Options.cache_global
 		self.nocache = Options.options.nocache
 		self.progress_bar = Options.options.progress_bar
-		self.silent = Options.options.silent
 
 		############ stuff below has not been reviewed
 
@@ -151,6 +152,35 @@ class BuildContext(Context.Context):
 		self.task_gen_cache_names = {} # reset the cache, each time
 		self.add_to_group(ret, group=kw.get('group', None))
 		return ret
+	
+	def rule(self, *k, **kw):
+		"""
+		Wrapper for creating a task generator using the decorator notation.
+
+
+		The the following code:
+
+			@bld.rule(
+				target = "foo"
+			)
+			def _(tsk):
+				print("bar")
+
+		is equivalent to:
+
+			def bar(tsk):
+				print("bar")
+
+			bld(
+				target = "foo",
+				rule = bar,
+			)
+		"""
+		def f(rule):
+			ret = self(*k, **kw)
+			ret.rule = rule
+			return ret
+		return f
 
 	def __copy__(self):
 		"""Implemented to prevents copies of build contexts (raises an exception)"""
@@ -174,31 +204,26 @@ class BuildContext(Context.Context):
 		creates a :py:class:`waflib.ConfigSet.ConfigSet` instance for each ``NAME`` by reading those
 		files. The config sets are then stored in the dict :py:attr:`waflib.Build.BuildContext.allenvs`.
 		"""
-		try:
-			lst = Utils.listdir(self.cache_dir)
-		except OSError as e:
-			if e.errno == errno.ENOENT:
-				raise Errors.WafError('The project was not configured: run "waf configure" first!')
-			else:
-				raise
+		node = self.root.find_node(self.cache_dir)
+		if not node:
+			raise Errors.WafError('The project was not configured: run "waf configure" first!')
+		lst = node.ant_glob('**/*%s' % CACHE_SUFFIX, quiet=True)
 
 		if not lst:
 			raise Errors.WafError('The cache directory is empty: reconfigure the project')
 
-		for fname in lst:
-			if fname.endswith(CACHE_SUFFIX):
-				env = ConfigSet.ConfigSet(os.path.join(self.cache_dir, fname))
-				name = fname[:-len(CACHE_SUFFIX)]
-				self.all_envs[name] = env
-
-				for f in env[CFG_FILES]:
-					newnode = self.root.find_resource(f)
-					try:
-						h = Utils.h_file(newnode.abspath())
-					except (IOError, AttributeError):
-						Logs.error('cannot find %r' % f)
-						h = Utils.SIG_NIL
-					newnode.sig = h
+		for x in lst:
+			name = x.path_from(node).replace(CACHE_SUFFIX, '').replace('\\', '/')
+			env = ConfigSet.ConfigSet(x.abspath())
+			self.all_envs[name] = env
+			for f in env[CFG_FILES]:
+				newnode = self.root.find_resource(f)
+				try:
+					h = Utils.h_file(newnode.abspath())
+				except (IOError, AttributeError):
+					Logs.error('cannot find %r' % f)
+					h = Utils.SIG_NIL
+				newnode.sig = h
 
 	def init_dirs(self):
 		"""
@@ -270,29 +295,25 @@ class BuildContext(Context.Context):
 			for t in env['tools']:
 				self.setup(**t)
 
-		f = None
+		dbfn = os.path.join(self.variant_dir, Context.DBFILE)
 		try:
+			data = Utils.readf(dbfn, 'rb')
+		except (IOError, EOFError):
+			# handle missing file/empty file
+			Logs.debug('build: Could not load the build cache %s (missing)' % dbfn)
+		else:
 			try:
-				f = open(os.path.join(self.variant_dir, Context.DBFILE), 'rb')
-			except (IOError, EOFError):
-				# handle missing file/empty file
-				Logs.debug('build: could not load the build cache (missing)')
-			else:
+				waflib.Node.pickle_lock.acquire()
+				waflib.Node.Nod3 = self.node_class
 				try:
-					waflib.Node.pickle_lock.acquire()
-					waflib.Node.Nod3 = self.node_class
-					try:
-						data = cPickle.load(f)
-					except Exception as e:
-						Logs.debug('build: could not load the build cache %r' % e)
-					else:
-						for x in SAVED_ATTRS:
-							setattr(self, x, data[x])
-				finally:
-					waflib.Node.pickle_lock.release()
-		finally:
-			if f:
-				f.close()
+					data = cPickle.loads(data)
+				except Exception as e:
+					Logs.debug('build: Could not pickle the build cache %s: %r' % (dbfn, e))
+				else:
+					for x in SAVED_ATTRS:
+						setattr(self, x, data[x])
+			finally:
+				waflib.Node.pickle_lock.release()
 
 		self.init_dirs()
 
@@ -310,16 +331,11 @@ class BuildContext(Context.Context):
 		try:
 			waflib.Node.pickle_lock.acquire()
 			waflib.Node.Nod3 = self.node_class
-
-			f = None
-			try:
-				f = open(db + '.tmp', 'wb')
-				cPickle.dump(data, f)
-			finally:
-				if f:
-					f.close()
+			x = cPickle.dumps(data, -1)
 		finally:
 			waflib.Node.pickle_lock.release()
+
+		Utils.writef(db + '.tmp', x, m='wb')
 
 		try:
 			st = os.stat(db)
@@ -404,13 +420,20 @@ class BuildContext(Context.Context):
 		:param value: value to depend on
 		:type value: :py:class:`waflib.Node.Node`, string, or function returning a string
 		"""
+		if path is None:
+			raise ValueError('Invalid input')
+
 		if isinstance(path, waflib.Node.Node):
 			node = path
 		elif os.path.isabs(path):
 			node = self.root.find_resource(path)
 		else:
 			node = self.path.find_resource(path)
-		self.deps_man[id(node)].append(value)
+
+		if isinstance(value, list):
+			self.deps_man[id(node)].extend(value)
+		else:
+			self.deps_man[id(node)].append(value)
 
 	def launch_node(self):
 		"""Returns the launch directory as a :py:class:`waflib.Node.Node` object"""
@@ -452,7 +475,7 @@ class BuildContext(Context.Context):
 
 		lst = [env[a] for a in vars_lst]
 		ret = Utils.h_list(lst)
-		Logs.debug('envhash: %r %r', ret, lst)
+		Logs.debug('envhash: %s %r', Utils.to_hex(ret), lst)
 
 		cache[idx] = ret
 
@@ -679,6 +702,15 @@ class BuildContext(Context.Context):
 				to_post.append(tg)
 		return (min_grp, to_post)
 
+	def get_all_task_gen(self):
+		"""
+		Utility method, returns a list of all task generators - if you need something more complicated, implement your own
+		"""
+		lst = []
+		for g in self.groups:
+			lst.extend(g)
+		return lst
+
 	def post_group(self):
 		"""
 		Post the task generators from the group indexed by self.cur, used by :py:meth:`waflib.Build.BuildContext.get_build_iterator`
@@ -705,6 +737,12 @@ class BuildContext(Context.Context):
 					tg.post()
 		else:
 			ln = self.launch_node()
+			if ln.is_child_of(self.bldnode):
+				Logs.warn('Building from the build directory, forcing --targets=*')
+				ln = self.srcnode
+			elif not ln.is_child_of(self.srcnode):
+				Logs.warn('CWD %s is not under %s, forcing --targets=* (run distclean?)' % (ln.abspath(), self.srcnode.abspath()))
+				ln = self.srcnode
 			for tg in self.groups[self.cur]:
 				try:
 					f = tg.post
@@ -720,11 +758,10 @@ class BuildContext(Context.Context):
 		"""
 		tasks = []
 		for tg in self.groups[idx]:
-			# TODO a try-except might be more efficient
-			if isinstance(tg, Task.TaskBase):
-				tasks.append(tg)
-			else:
+			try:
 				tasks.extend(tg.tasks)
+			except AttributeError: # not a task generator, can be the case for installation tasks
+				tasks.append(tg)
 		return tasks
 
 	def get_build_iterator(self):
@@ -779,10 +816,14 @@ class BuildContext(Context.Context):
 
 class inst(Task.Task):
 	"""
-    Special task used for installing files and symlinks, it behaves both like a task
+	Special task used for installing files and symlinks, it behaves both like a task
 	and like a task generator
 	"""
 	color = 'CYAN'
+
+	def uid(self):
+		lst = [self.dest, self.path] + self.source
+		return Utils.h_list(repr(lst))
 
 	def post(self):
 		"""
@@ -795,6 +836,8 @@ class inst(Task.Task):
 			else:
 				y = self.path.find_resource(x)
 				if not y:
+					if Logs.verbose:
+						Logs.warn('Could not find %s immediately (may cause broken builds)' % x)
 					idx = self.generator.bld.get_group_idx(self)
 					for tg in self.generator.bld.groups[idx]:
 						if not isinstance(tg, inst) and id(tg) != id(self):
@@ -803,7 +846,7 @@ class inst(Task.Task):
 						if y:
 							break
 					else:
-						raise Errors.WafError('could not find %r in %r' % (x, self.path))
+						raise Errors.WafError('Could not find %r in %r' % (x, self.path))
 			buf.append(y)
 		self.inputs = buf
 
@@ -824,14 +867,14 @@ class inst(Task.Task):
 		"""The attribute 'exec_task' holds the method to execute"""
 		return self.generator.exec_task()
 
-	def get_install_path(self):
+	def get_install_path(self, destdir=True):
 		"""
 		Installation path obtained from ``self.dest`` and prefixed by the destdir.
 		The variables such as '${PREFIX}/bin' are substituted.
 		"""
-		dest = self.dest.replace('/', os.sep)
 		dest = Utils.subst_vars(self.dest, self.env)
-		if Options.options.destdir:
+		dest = dest.replace('/', os.sep)
+		if destdir and Options.options.destdir:
 			dest = os.path.join(Options.options.destdir, os.path.splitdrive(dest)[1].lstrip(os.sep))
 		return dest
 
@@ -862,7 +905,10 @@ class inst(Task.Task):
 		Predefined method for installing a symlink
 		"""
 		destfile = self.get_install_path()
-		self.generator.bld.do_link(self.link, destfile)
+		src = self.link
+		if self.relative_trick:
+			src = os.path.relpath(src, os.path.dirname(destfile))
+		self.generator.bld.do_link(src, destfile)
 
 class InstallContext(BuildContext):
 	'''installs the targets on the system'''
@@ -905,9 +951,9 @@ class InstallContext(BuildContext):
 				pass
 			else:
 				# same size and identical timestamps -> make no copy
-				if st1.st_mtime >= st2.st_mtime and st1.st_size == st2.st_size:
-					#if not self.progress_bar:
-					#	Logs.info('- install %s (from %s)' % (tgt, srclbl))
+				if st1.st_mtime + 2 >= st2.st_mtime and st1.st_size == st2.st_size:
+					if not self.progress_bar:
+						Logs.info('- install %s (from %s)' % (tgt, srclbl))
 					return False
 
 		if not self.progress_bar:
@@ -1040,7 +1086,7 @@ class InstallContext(BuildContext):
 		self.run_task_now(tsk, postpone)
 		return tsk
 
-	def symlink_as(self, dest, src, env=None, cwd=None, add=True, postpone=True):
+	def symlink_as(self, dest, src, env=None, cwd=None, add=True, postpone=True, relative_trick=False):
 		"""
 		Create a task to install a symlink::
 
@@ -1057,6 +1103,8 @@ class InstallContext(BuildContext):
 		:type add: bool
 		:param postpone: execute the task immediately to perform the installation
 		:type postpone: bool
+		:param relative_trick: make the symlink relative (default: ``False``)
+		:type relative_trick: bool
 		"""
 
 		if Utils.is_win32:
@@ -1069,6 +1117,7 @@ class InstallContext(BuildContext):
 		tsk.path = cwd or self.path
 		tsk.source = []
 		tsk.link = src
+		tsk.relative_trick = relative_trick
 		tsk.exec_task = tsk.exec_symlink_as
 		if add: self.add_to_group(tsk)
 		self.run_task_now(tsk, postpone)
@@ -1096,7 +1145,7 @@ class UninstallContext(InstallContext):
 					self.uninstall_error = True
 					Logs.warn('build: some files could not be uninstalled (retry with -vv to list them)')
 				if Logs.verbose > 1:
-					Logs.warn('could not remove %s (error code %r)' % (e.filename, e.errno))
+					Logs.warn('Could not remove %s (error code %r)' % (e.filename, e.errno))
 
 		# TODO ita refactor this into a post build action to uninstall the folders (optimization)
 		while tgt:
@@ -1156,13 +1205,15 @@ class CleanContext(BuildContext):
 			self.store()
 
 	def clean(self):
-		"""clean the data and some files in the build dir .. well, TODO"""
+		"""Remove files from the build directory if possible, and reset the caches"""
 		Logs.debug('build: clean called')
 
 		if self.bldnode != self.srcnode:
 			# would lead to a disaster if top == out
-			lst = [self.root.find_or_declare(f) for f in self.env[CFG_FILES]]
-			for n in self.bldnode.ant_glob('**/*', excl='lock* *conf_check_*/** config.log c4che/*'):
+			lst=[]
+			for e in self.all_envs.values():
+				lst.extend(self.root.find_or_declare(f) for f in e[CFG_FILES])
+			for n in self.bldnode.ant_glob('**/*', excl='.lock* *conf_check_*/** config.log c4che/*', quiet=True):
 				if n in lst:
 					continue
 				n.delete()
@@ -1201,7 +1252,7 @@ class ListContext(BuildContext):
 		try:
 			# force the cache initialization
 			self.get_tgen_by_name('')
-		except:
+		except Exception:
 			pass
 		lst = list(self.task_gen_cache_names.keys())
 		lst.sort()
@@ -1229,8 +1280,15 @@ class StepContext(BuildContext):
 			BuildContext.compile(self)
 			return
 
+		targets = None
+		if self.targets and self.targets != '*':
+			targets = self.targets.split(',')
+
 		for g in self.groups:
 			for tg in g:
+				if targets and tg.name not in targets:
+					continue
+
 				try:
 					f = tg.post
 				except AttributeError:
@@ -1238,23 +1296,8 @@ class StepContext(BuildContext):
 				else:
 					f()
 
-		for pat in self.files.split(','):
-			inn = True
-			out = True
-			if pat.startswith('in:'):
-				out = False
-				pat = pat.replace('in:', '')
-			elif pat.startswith('out:'):
-				inn = False
-				pat = pat.replace('out:', '')
-
-			if not pat.startswith('^'):
-				pat = '^.+?%s' % pat
-			if not pat.endswith('$'):
-				pat = '%s$' % pat
-			pat = re.compile(pat)
-
-			for g in self.groups:
+			for pat in self.files.split(','):
+				matcher = self.get_matcher(pat)
 				for tg in g:
 					if isinstance(tg, Task.TaskBase):
 						lst = [tg]
@@ -1262,19 +1305,49 @@ class StepContext(BuildContext):
 						lst = tg.tasks
 					for tsk in lst:
 						do_exec = False
-						if inn:
-							for node in getattr(tsk, 'inputs', []):
-								if pat.match(node.abspath()):
-									do_exec = True
-									break
-						if out and not do_exec:
-							for node in getattr(tsk, 'outputs', []):
-								if pat.match(node.abspath()):
-									do_exec = True
-									break
+						for node in getattr(tsk, 'inputs', []):
+							if matcher(node, output=False):
+								do_exec = True
+								break
+						for node in getattr(tsk, 'outputs', []):
+							if matcher(node, output=True):
+								do_exec = True
+								break
 						if do_exec:
 							ret = tsk.run()
-							Logs.info('%s -> %r' % (str(tsk), ret))
+							Logs.info('%s -> exit %r' % (str(tsk), ret))
+
+	def get_matcher(self, pat):
+		# this returns a function
+		inn = True
+		out = True
+		if pat.startswith('in:'):
+			out = False
+			pat = pat.replace('in:', '')
+		elif pat.startswith('out:'):
+			inn = False
+			pat = pat.replace('out:', '')
+
+		anode = self.root.find_node(pat)
+		pattern = None
+		if not anode:
+			if not pat.startswith('^'):
+				pat = '^.+?%s' % pat
+			if not pat.endswith('$'):
+				pat = '%s$' % pat
+			pattern = re.compile(pat)
+
+		def match(node, output):
+			if output == True and not out:
+				return False
+			if output == False and not inn:
+				return False
+
+			if anode:
+				return anode == node
+			else:
+				return pattern.match(node.abspath())
+		return match
 
 BuildContext.store = Utils.nogc(BuildContext.store)
 BuildContext.restore = Utils.nogc(BuildContext.restore)

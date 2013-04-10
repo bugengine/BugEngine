@@ -6,8 +6,9 @@
 Various configuration tests.
 """
 
+from waflib import Task
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method
+from waflib.TaskGen import feature, before_method, after_method
 import sys
 
 LIB_CODE = '''
@@ -26,7 +27,10 @@ MAIN_CODE = '''
 #define testEXPORT
 #endif
 testEXPORT int lib_func(void);
-int main(void) {return !(lib_func() == 9);}
+int main(int argc, char **argv) {
+	(void)argc; (void)argv;
+	return !(lib_func() == 9);
+}
 '''
 
 @feature('link_lib_test')
@@ -45,14 +49,15 @@ def link_lib_test_fun(self):
 
 	mode = self.mode
 	m = '%s %s' % (mode, mode)
+	ex = self.test_exec and 'test_exec' or ''
 	bld = self.bld
 	bld(rule=write_test_file, target='test.' + mode, code=LIB_CODE)
 	bld(rule=write_test_file, target='main.' + mode, code=MAIN_CODE)
-	bld(features= m + 'shlib', source='test.' + mode, target='test')
-	bld(features= m + 'program test_exec', source='main.' + mode, target='app', use='test', rpath=rpath)
+	bld(features='%sshlib' % m, source='test.' + mode, target='test')
+	bld(features='%sprogram %s' % (m, ex), source='main.' + mode, target='app', use='test', rpath=rpath)
 
 @conf
-def check_library(self, mode=None):
+def check_library(self, mode=None, test_exec=True):
 	"""
 	Check if libraries can be linked with the current linker. Uses :py:func:`waflib.Tools.c_tests.link_lib_test_fun`.
 
@@ -67,7 +72,8 @@ def check_library(self, mode=None):
 		compile_filename = [],
 		features = 'link_lib_test',
 		msg = 'Checking for libraries',
-		mode = mode
+		mode = mode,
+		test_exec = test_exec,
 		)
 
 ########################################################################################
@@ -120,7 +126,12 @@ def check_inline(self, **kw):
 
 ########################################################################################
 
-LARGE_FRAGMENT = '#include <unistd.h>\nint main() { return !(sizeof(off_t) >= 8); }\n'
+LARGE_FRAGMENT = '''#include <unistd.h>
+int main(int argc, char **argv) {
+	(void)argc; (void)argv;
+	return !(sizeof(off_t) >= 8);
+}
+'''
 
 @conf
 def check_large_file(self, **kw):
@@ -172,4 +183,44 @@ def check_large_file(self, **kw):
 
 ########################################################################################
 
+ENDIAN_FRAGMENT = '''
+short int ascii_mm[] = { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
+short int ascii_ii[] = { 0x694C, 0x5454, 0x656C, 0x6E45, 0x6944, 0x6E61, 0 };
+int use_ascii (int i) {
+	return ascii_mm[i] + ascii_ii[i];
+}
+short int ebcdic_ii[] = { 0x89D3, 0xE3E3, 0x8593, 0x95C5, 0x89C4, 0x9581, 0 };
+short int ebcdic_mm[] = { 0xC2C9, 0xC785, 0x95C4, 0x8981, 0x95E2, 0xA8E2, 0 };
+int use_ebcdic (int i) {
+	return ebcdic_mm[i] + ebcdic_ii[i];
+}
+extern int foo;
+'''
+
+class grep_for_endianness(Task.Task):
+	color = 'PINK'
+	def run(self):
+		txt = self.inputs[0].read(flags='rb').decode('iso8859-1')
+		if txt.find('LiTTleEnDian') > -1:
+			self.generator.tmp.append('little')
+		elif txt.find('BIGenDianSyS') > -1:
+			self.generator.tmp.append('big')
+		else:
+			return -1
+
+@feature('grep_for_endianness')
+@after_method('process_source')
+def grep_for_endianness_fun(self):
+	self.create_task('grep_for_endianness', self.compiled_tasks[0].outputs[0])
+
+@conf
+def check_endianness(self):
+	"""
+	Execute a configuration test to determine the endianness
+	"""
+	tmp = []
+	def check_msg(self):
+		return tmp[0]
+	self.check(fragment=ENDIAN_FRAGMENT, features='c grep_for_endianness', msg="Checking for endianness", define='ENDIANNESS', tmp=tmp, okmsg=check_msg)
+	return tmp[0]
 

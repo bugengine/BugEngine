@@ -6,9 +6,9 @@
 C/C++/D configuration helpers
 """
 
-import os, imp, sys, shlex, shutil
-from waflib import Build, Utils, Configure, Task, Options, Logs, TaskGen, Errors, ConfigSet, Runner
-from waflib.TaskGen import before_method, after_method, feature
+import os, re, shlex, sys
+from waflib import Build, Utils, Task, Options, Logs, Errors, ConfigSet, Runner
+from waflib.TaskGen import after_method, feature
 from waflib.Configure import conf
 
 WAF_CONFIG_H   = 'config.h'
@@ -24,8 +24,9 @@ cfg_ver = {
 }
 
 SNIP_FUNCTION = '''
-	int main() {
+int main(int argc, char **argv) {
 	void *p;
+	(void)argc; (void)argv;
 	p=(void*)(%s);
 	return 0;
 }
@@ -33,78 +34,88 @@ SNIP_FUNCTION = '''
 """Code template for checking for functions"""
 
 SNIP_TYPE = '''
-int main() {
+int main(int argc, char **argv) {
+	(void)argc; (void)argv;
 	if ((%(type_name)s *) 0) return 0;
 	if (sizeof (%(type_name)s)) return 0;
+	return 1;
 }
 '''
 """Code template for checking for types"""
 
-SNIP_CLASS = '''
-int main() {
-	if (
-}
-'''
-
 SNIP_EMPTY_PROGRAM = '''
-int main() {
+int main(int argc, char **argv) {
+	(void)argc; (void)argv;
 	return 0;
 }
 '''
 
 SNIP_FIELD = '''
-int main() {
+int main(int argc, char **argv) {
 	char *off;
+	(void)argc; (void)argv;
 	off = (char*) &((%(type_name)s*)0)->%(field_name)s;
 	return (size_t) off < sizeof(%(type_name)s);
 }
 '''
 
 MACRO_TO_DESTOS = {
-'__linux__'   : 'linux',
-'__GNU__'     : 'gnu',
-'__FreeBSD__' : 'freebsd',
-'__NetBSD__'  : 'netbsd',
-'__OpenBSD__' : 'openbsd',
-'__sun'       : 'sunos',
-'__hpux'      : 'hpux',
-'__sgi'       : 'irix',
-'_AIX'        : 'aix',
-'__CYGWIN__'  : 'cygwin',
-'__MSYS__'    : 'msys',
-'_UWIN'       : 'uwin',
-'_WIN64'      : 'win32',
-'_WIN32'      : 'win32',
-'__POWERPC__' : 'powerpc',
-'__QNX__'     : 'qnx'
+'__linux__'                                      : 'linux',
+'__GNU__'                                        : 'gnu', # hurd
+'__FreeBSD__'                                    : 'freebsd',
+'__NetBSD__'                                     : 'netbsd',
+'__OpenBSD__'                                    : 'openbsd',
+'__sun'                                          : 'sunos',
+'__hpux'                                         : 'hpux',
+'__sgi'                                          : 'irix',
+'_AIX'                                           : 'aix',
+'__CYGWIN__'                                     : 'cygwin',
+'__MSYS__'                                       : 'msys',
+'_UWIN'                                          : 'uwin',
+'_WIN64'                                         : 'win32',
+'_WIN32'                                         : 'win32',
+# Note about darwin: this is also tested with 'defined __APPLE__ && defined __MACH__' somewhere below in this file.
+'__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__'  : 'darwin', 
+'__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__' : 'darwin', # iphone
+'__QNX__'                                        : 'qnx',
+'__native_client__'                              : 'nacl' # google native client platform
 }
 
 MACRO_TO_DEST_CPU = {
 '__x86_64__'  : 'x86_64',
+'__amd64__'   : 'x86_64',
 '__i386__'    : 'x86',
 '__ia64__'    : 'ia',
 '__mips__'    : 'mips',
 '__sparc__'   : 'sparc',
 '__alpha__'   : 'alpha',
+'__aarch64__' : 'aarch64',
+'__thumb__'   : 'thumb',
 '__arm__'     : 'arm',
 '__hppa__'    : 'hppa',
 '__powerpc__' : 'powerpc',
+'__ppc__'     : 'powerpc',
+'__convex__'  : 'convex',
+'__m68k__'    : 'm68k',
+'__s390x__'   : 's390x',
+'__s390__'    : 's390',
+'__sh__'      : 'sh',
 }
 
 @conf
-def parse_flags(self, line, uselib, env=None):
+def parse_flags(self, line, uselib_store, env=None, force_static=False):
 	"""
 	Parse the flags from the input lines, and add them to the relevant use variables::
 
 		def configure(conf):
-			conf.parse_flags('-O3', uselib_store='FOO')
+			conf.parse_flags('-O3', 'FOO')
 			# conf.env.CXXFLAGS_FOO = ['-O3']
 			# conf.env.CFLAGS_FOO = ['-O3']
 
 	:param line: flags
 	:type line: string
-	:param uselib: where to add the flags
-	:type uselib: string
+	:param uselib_store: where to add the flags
+	:type uselib_store: string
 	:param env: config set or conf.env by default
 	:type env: :py:class:`waflib.ConfigSet.ConfigSet`
 	"""
@@ -125,6 +136,7 @@ def parse_flags(self, line, uselib, env=None):
 	lex.commenters = ''
 	lst = list(lex)
 
+	uselib = uselib_store
 	while lst:
 		x = lst.pop(0)
 		st = x[:2]
@@ -137,15 +149,18 @@ def parse_flags(self, line, uselib, env=None):
 			tmp = [x, lst.pop(0)]
 			app('CFLAGS', tmp)
 			app('CXXFLAGS', tmp)
-		elif st == '-D' or (self.env.CXX_NAME == 'msvc' and st == '/D'): # not perfect but..
+		elif st == '-D' or (env.CXX_NAME == 'msvc' and st == '/D'): # not perfect but..
 			if not ot: ot = lst.pop(0)
 			app('DEFINES_' + uselib, [ot])
 		elif st == '-l':
 			if not ot: ot = lst.pop(0)
-			appu('LIB_' + uselib, [ot])
+			prefix = force_static and 'STLIB_' or 'LIB_'
+			appu(prefix + uselib, [ot])
 		elif st == '-L':
 			if not ot: ot = lst.pop(0)
 			appu('LIBPATH_' + uselib, [ot])
+		elif x.startswith('/LIBPATH:'):
+			appu('LIBPATH_' + uselib, [x.replace('/LIBPATH:', '')])
 		elif x == '-pthread' or x.startswith('+') or x.startswith('-std'):
 			app('CFLAGS_' + uselib, [x])
 			app('CXXFLAGS_' + uselib, [x])
@@ -159,12 +174,17 @@ def parse_flags(self, line, uselib, env=None):
 		elif x.startswith('-m') or x.startswith('-f') or x.startswith('-dynamic'):
 			app('CFLAGS_' + uselib, [x])
 			app('CXXFLAGS_' + uselib, [x])
+		elif x.startswith('-bundle'):
+			app('LINKFLAGS_' + uselib, [x])
+		elif x.startswith('-undefined'):
+			arg = lst.pop(0)
+			app('LINKFLAGS_' + uselib, [x, arg])
 		elif x.startswith('-arch') or x.startswith('-isysroot'):
 			tmp = [x, lst.pop(0)]
 			app('CFLAGS_' + uselib, tmp)
 			app('CXXFLAGS_' + uselib, tmp)
 			app('LINKFLAGS_' + uselib, tmp)
-		elif x.endswith('.a') or x.endswith('.so') or x.endswith('.dylib'):
+		elif x.endswith('.a') or x.endswith('.so') or x.endswith('.dylib') or x.endswith('.lib'):
 			appu('LINKFLAGS_' + uselib, [x]) # not cool, #762
 
 @conf
@@ -248,6 +268,9 @@ def exec_cfg(self, kw):
 	:type define_variable: dict(string: string)
 	"""
 
+	def define_it():
+		self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
+
 	# pkg-config version
 	if 'atleast_pkgconfig_version' in kw:
 		cmd = [kw['path'], '--atleast-pkgconfig-version=%s' % kw['atleast_pkgconfig_version']]
@@ -263,7 +286,7 @@ def exec_cfg(self, kw):
 			self.cmd_and_log([kw['path'], '--%s=%s' % (x, kw[y]), kw['package']])
 			if not 'okmsg' in kw:
 				kw['okmsg'] = 'yes'
-			self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
+			define_it()
 			break
 
 	# retrieving the version of a module
@@ -280,9 +303,6 @@ def exec_cfg(self, kw):
 	for key, val in defi.items():
 		lst.append('--define-variable=%s=%s' % (key, val))
 
-	if kw['package']:
-		lst.extend(Utils.to_list(kw['package']))
-
 	# retrieving variables of a module
 	if 'variables' in kw:
 		env = kw.get('env', self.env)
@@ -296,15 +316,23 @@ def exec_cfg(self, kw):
 			kw['okmsg'] = 'yes'
 		return
 
+	static = False
 	if 'args' in kw:
-		lst += Utils.to_list(kw['args'])
+		args = Utils.to_list(kw['args'])
+		if '--static' in args or '--static-libs' in args:
+			static = True
+		lst += args
+
+	# tools like pkgconf expect the package argument after the -- ones -_-
+	lst.extend(Utils.to_list(kw['package']))
+
 	# so we assume the command-line will output flags to be parsed afterwards
 	ret = self.cmd_and_log(lst)
 	if not 'okmsg' in kw:
 		kw['okmsg'] = 'yes'
 
-	self.define(self.have_define(kw.get('uselib_store', kw['package'])), 1, 0)
-	self.parse_flags(ret, kw.get('uselib_store', kw['package'].upper()), kw.get('env', self.env))
+	define_it()
+	self.parse_flags(ret, kw.get('uselib_store', kw['package'].upper()), kw.get('env', self.env), force_static=static)
 	return ret
 
 @conf
@@ -341,7 +369,7 @@ def check_cfg(self, *k, **kw):
 	ret = None
 	try:
 		ret = self.exec_cfg(kw)
-	except self.errors.WafError as e:
+	except self.errors.WafError:
 		if 'errmsg' in kw:
 			self.end_msg(kw['errmsg'], 'YELLOW')
 		if Logs.verbose > 1:
@@ -360,8 +388,6 @@ def validate_c(self, kw):
 	"""
 	pre-check the parameters that will be given to run_c_code
 
-	:param env: an optional environment (modified -> provide a copy)
-	:type env: :py:class:`waflib.ConfigSet.ConfigSet`
 	:param compiler: c or cxx (tries to guess what is best)
 	:type compiler: string
 	:param type: cprogram, cshlib, cstlib - not required if *features are given directly*
@@ -554,7 +580,6 @@ def post_check(self, *k, **kw):
 	if 'define_name' in kw:
 		# TODO simplify?
 		if 'header_name' in kw or 'function_name' in kw or 'type_name' in kw or 'fragment' in kw:
-			nm = kw['define_name']
 			if kw['execute'] and kw.get('define_ret', None) and isinstance(is_success, str):
 				self.define(kw['define_name'], is_success, quote=kw.get('quote', 1))
 			else:
@@ -599,7 +624,7 @@ def check(self, *k, **kw):
 	ret = None
 	try:
 		ret = self.run_c_code(*k, **kw)
-	except self.errors.ConfigurationError as e:
+	except self.errors.ConfigurationError:
 		self.end_msg(kw['errmsg'], 'YELLOW')
 		if Logs.verbose > 1:
 			raise
@@ -607,11 +632,13 @@ def check(self, *k, **kw):
 			self.fatal('The configuration failed')
 	else:
 		kw['success'] = ret
-		self.end_msg(self.ret_msg(kw['okmsg'], kw))
 
 	ret = self.post_check(*k, **kw)
 	if not ret:
+		self.end_msg(kw['errmsg'], 'YELLOW')
 		self.fatal('The configuration failed %r' % ret)
+	else:
+		self.end_msg(self.ret_msg(kw['okmsg'], kw))
 	return ret
 
 class test_exec(Task.Task):
@@ -656,7 +683,8 @@ COMPILE_ERRORS = 2
 def run_c_code(self, *k, **kw):
 	"""
 	Create a temporary build context to execute a build. A reference to that build
-	context is kept on self.test_bld for debugging purposes.
+	context is kept on self.test_bld for debugging purposes, and you should not rely
+	on it too much (read the note on the cache below).
 	The parameters given in the arguments to this function are passed as arguments for
 	a single task generator created in the build. Only three parameters are obligatory:
 
@@ -687,27 +715,23 @@ def run_c_code(self, *k, **kw):
 	dir = self.bldnode.abspath() + os.sep + (not Utils.is_win32 and '.' or '') + 'conf_check_' + Utils.to_hex(h)
 
 	try:
-		shutil.rmtree(dir)
-	except:
-		pass
-	try:
 		os.makedirs(dir)
-	except:
+	except OSError:
 		pass
 
 	try:
 		os.stat(dir)
-	except:
+	except OSError:
 		self.fatal('cannot use the configuration test folder %r' % dir)
 
 	cachemode = getattr(Options.options, 'confcache', None)
 	if cachemode == CACHE_RESULTS:
 		try:
 			proj = ConfigSet.ConfigSet(os.path.join(dir, 'cache_run_c_code'))
-			ret = proj['cache_run_c_code']
-		except:
+		except OSError:
 			pass
 		else:
+			ret = proj['cache_run_c_code']
 			if isinstance(ret, str) and ret.startswith('Test does not build'):
 				self.fatal(ret)
 			return ret
@@ -776,7 +800,7 @@ def check_cc(self, *k, **kw):
 @conf
 def define(self, key, val, quote=True):
 	"""
-	Store a single define and its state into conf.env.DEFINES
+	Store a single define and its state into conf.env.DEFINES. If the value is True, False or None it is cast to 1 or 0.
 
 	:param key: define name
 	:type key: string
@@ -786,6 +810,11 @@ def define(self, key, val, quote=True):
 	:type quote: bool
 	"""
 	assert key and isinstance(key, str)
+
+	if val is True:
+		val = 1
+	elif val in (False, None):
+		val = 0
 
 	if isinstance(val, int) or isinstance(val, float):
 		s = '%s=%s'
@@ -881,10 +910,10 @@ def have_define(self, key):
 	:return: the input key prefixed by *HAVE_* and substitute any invalid characters.
 	:rtype: string
 	"""
-	return self.__dict__.get('HAVE_PAT', 'HAVE_%s') % Utils.quote_define_name(key)
+	return (self.env.HAVE_PAT or 'HAVE_%s') % Utils.quote_define_name(key)
 
 @conf
-def write_config_header(self, configfile='', guard='', top=False, env=None, defines=True, headers=False, remove=True):
+def write_config_header(self, configfile='', guard='', top=False, env=None, defines=True, headers=False, remove=True, define_prefix=''):
 	"""
 	Write a configuration header containing defines and includes::
 
@@ -894,19 +923,25 @@ def write_config_header(self, configfile='', guard='', top=False, env=None, defi
 
 	:param configfile: relative path to the file to create
 	:type configfile: string
-	:param env: config set to read the definitions from (default is conf.env)
-	:type env: :py:class:`waflib.ConfigSet.ConfigSet`
+	:param guard: include guard name to add, by default it is computed from the file name
+	:type guard: string
 	:param top: write the configuration header from the build directory (default is from the current path)
 	:type top: bool
 	:param defines: add the defines (yes by default)
 	:type defines: bool
 	:param headers: add #include in the file
 	:type headers: bool
-	:param remove: remove the defines after they are added (yes by default)
+	:param remove: remove the defines after they are added (yes by default, works like in autoconf)
 	:type remove: bool
+	:type define_prefix: string
+	:param define_prefix: prefix all the defines in the file with a particular prefix
 	"""
+	# TODO waf 1.8: the parameter env is not used
+	if env:
+		Logs.warn('Cannot pass env to write_config_header')
+
 	if not configfile: configfile = WAF_CONFIG_H
-	waf_guard = guard or '_%s_WAF' % Utils.quote_define_name(configfile)
+	waf_guard = guard or 'W_%s_WAF' % Utils.quote_define_name(configfile)
 
 	node = top and self.bldnode or self.path.get_bld()
 	node = node.make_node(configfile)
@@ -914,15 +949,13 @@ def write_config_header(self, configfile='', guard='', top=False, env=None, defi
 
 	lst = ['/* WARNING! All changes made to this file will be lost! */\n']
 	lst.append('#ifndef %s\n#define %s\n' % (waf_guard, waf_guard))
-	lst.append(self.get_config_header(defines, headers))
+	lst.append(self.get_config_header(defines, headers, define_prefix=define_prefix))
 	lst.append('\n#endif /* %s */\n' % waf_guard)
 
 	node.write('\n'.join(lst))
 
-	env = env or self.env
-
 	# config files are not removed on "waf clean"
-	env.append_unique(Build.CFG_FILES, [node.abspath()])
+	self.env.append_unique(Build.CFG_FILES, [node.abspath()])
 
 	if remove:
 		for key in self.env[DEFKEYS]:
@@ -930,7 +963,7 @@ def write_config_header(self, configfile='', guard='', top=False, env=None, defi
 		self.env[DEFKEYS] = []
 
 @conf
-def get_config_header(self, defines=True, headers=False):
+def get_config_header(self, defines=True, headers=False, define_prefix=''):
 	"""
 	Create the contents of a ``config.h`` file from the defines and includes
 	set in conf.env.define_key / conf.env.include_key. No include guards are added.
@@ -939,6 +972,8 @@ def get_config_header(self, defines=True, headers=False):
 	:type defines: bool
 	:param headers: write the headers
 	:type headers: bool
+	:type define_prefix: string
+	:param define_prefix: prefix all the defines with a particular prefix
 	:return: the contents of a ``config.h`` file
 	:rtype: string
 	"""
@@ -951,9 +986,9 @@ def get_config_header(self, defines=True, headers=False):
 		for x in self.env[DEFKEYS]:
 			if self.is_defined(x):
 				val = self.get_define(x)
-				lst.append('#define %s %s' % (x, val))
+				lst.append('#define %s %s' % (define_prefix + x, val))
 			else:
-				lst.append('/* #undef %s */' % x)
+				lst.append('/* #undef %s */' % (define_prefix + x))
 	return "\n".join(lst)
 
 @conf
@@ -1006,15 +1041,16 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 	The variables CC_VERSION, DEST_OS, DEST_BINFMT and DEST_CPU will be set in *conf.env*
 	"""
 	cmd = cc + ['-dM', '-E', '-']
+	env = conf.env.env or None
 	try:
-		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE, env=env)
 		p.stdin.write('\n'.encode())
 		out = p.communicate()[0]
-	except:
-		conf.fatal('could not determine the compiler version %r' % cmd)
+	except Exception:
+		conf.fatal('Could not determine the compiler version %r' % cmd)
 
 	if not isinstance(out, str):
-		out = out.decode(sys.stdout.encoding)
+		out = out.decode(sys.stdout.encoding or 'iso8859-1')
 
 	if gcc:
 		if out.find('__INTEL_COMPILER') >= 0:
@@ -1027,9 +1063,7 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 
 	k = {}
 	if icc or gcc:
-		out = out.split('\n')
-		import shlex
-
+		out = out.splitlines()
 		for line in out:
 			lst = shlex.split(line)
 			if len(lst)>2:
@@ -1079,8 +1113,32 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 			ver = k['__INTEL_COMPILER']
 			conf.env['CC_VERSION'] = (ver[:-2], ver[-2], ver[-1])
 		else:
-			conf.env['CC_VERSION'] = (k['__GNUC__'], k['__GNUC_MINOR__'], k['__GNUC_PATCHLEVEL__'])
+			if isD('__clang__'):
+				conf.env['CC_VERSION'] = (k['__clang_major__'], k['__clang_minor__'], k['__clang_patchlevel__'])
+			else:
+				conf.env['CC_VERSION'] = (k['__GNUC__'], k['__GNUC_MINOR__'], k['__GNUC_PATCHLEVEL__'])
 	return k
+
+@conf
+def get_xlc_version(conf, cc):
+	"""Get the compiler version"""
+
+	cmd = cc + ['-qversion']
+	try:
+		out, err = conf.cmd_and_log(cmd, output=0)
+	except Errors.WafError:
+		conf.fatal('Could not find xlc %r' % cmd)
+
+	# the intention is to catch the 8.0 in "IBM XL C/C++ Enterprise Edition V8.0 for AIX..."
+	for v in (r"IBM XL C/C\+\+.* V(?P<major>\d*)\.(?P<minor>\d*)",):
+		version_re = re.compile(v, re.I).search
+		match = version_re(out or err)
+		if match:
+			k = match.groupdict()
+			conf.env['CC_VERSION'] = (k['major'], k['minor'])
+			break
+	else:
+		conf.fatal('Could not determine the XLC version.')
 
 # ============ the --as-needed flag should added during the configuration, not at runtime =========
 
@@ -1107,6 +1165,9 @@ class cfgtask(Task.TaskBase):
 	def runnable_status(self):
 		return Task.RUN_ME
 
+	def uid(self):
+		return Utils.SIG_NIL
+
 	def run(self):
 		conf = self.conf
 		bld = Build.BuildContext(top_dir=conf.srcnode.abspath(), out_dir=conf.bldnode.abspath())
@@ -1116,7 +1177,7 @@ class cfgtask(Task.TaskBase):
 		bld.logger = self.logger
 		try:
 			bld.check(**self.args)
-		except:
+		except Exception:
 			return 1
 
 @conf
@@ -1132,6 +1193,7 @@ def multicheck(self, *k, **kw):
 			self.cache_global = Options.cache_global
 			self.nocache = Options.options.nocache
 			self.returned_tasks = []
+			self.task_sigs = {}
 		def total(self):
 			return len(tasks)
 		def to_log(self, *k, **kw):

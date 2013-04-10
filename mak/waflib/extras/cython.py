@@ -10,7 +10,10 @@ from waflib import Task
 from waflib.TaskGen import extension, feature, before_method, after_method
 
 cy_api_pat = re.compile(r'\s*?cdef\s*?(public|api)\w*')
-re_cyt = re.compile('import\\s(\\w+)\\s*$', re.M)
+re_cyt = re.compile(r"""
+	(?:from\s+(\w+)\s+)?   # optionally match "from foo" and capture foo
+	c?import\s(\w+|[*])    # require "import bar" and capture bar
+	""", re.M | re.VERBOSE)
 
 @extension('.pyx')
 def add_cython_file(self, node):
@@ -25,6 +28,13 @@ def add_cython_file(self, node):
 	if 'cxx' in self.features:
 		self.env.append_unique('CYTHONFLAGS', '--cplus')
 		ext = '.cc'
+
+	for x in getattr(self, 'cython_includes', []):
+		# TODO re-use these nodes in "scan" below
+		d = self.path.find_dir(x)
+		if d:
+			self.env.append_unique('CYTHONFLAGS', '-I%s' % d.abspath())
+
 	tsk = self.create_task('cython', node, node.change_ext(ext))
 	self.source += tsk.outputs
 
@@ -70,7 +80,10 @@ class cython(Task.Task):
 
 		mods = []
 		for m in re_cyt.finditer(txt):
-			mods.append(m.group(1))
+			if m.group(1):  # matches "from foo import bar"
+				mods.append(m.group(1))
+			else:
+				mods.append(m.group(2))
 
 		_msg.debug("cython: mods %r" % mods)
 		incs = getattr(self.generator, 'cython_includes', [])

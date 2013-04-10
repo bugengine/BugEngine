@@ -1,6 +1,3 @@
-import mak
-from mak import module
-from waflib.Logs import info,warn
 
 def options(opt):
 	pass
@@ -8,17 +5,10 @@ def options(opt):
 def setup(conf):
 	if 'darwin' in conf.env.PLATFORM:
 		conf.check_framework('OpenGL', var='GLFramework')
-	elif 'win32' in conf.env.PLATFORM:
-		conf.check_lib('OpenGL32', var='GL')
 	else:
-		conf.check_lib('GL', var='GL')
+		conf.check_lib('OpenGL32', var='OpenGL') or conf.check_lib('GL', var='OpenGL')
 
 def build(bld):
-	if bld.env.GLFramework:
-		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty')
-		bld.env.FRAMEWORKS += bld.env.GLFramework
-	elif bld.env.GL or bld.env.PROJECTS:
-		bld.m['OpenGL'] = module.util('OpenGL', [], '3rdparty', module.coptions(), module.coptions(libs=bld.env.GL))
-	else:
-		bld.m['OpenGL'] = None
-
+	if bld.env.GLFramework or bld.env.OpenGL or bld.env.PROJECTS:
+		bld.thirdparty('3rdparty.OpenGL', libs=bld.env.OpenGL, frameworks=bld.env.GLFramework)
+		bld.features.append('OpenGL')

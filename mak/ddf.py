@@ -12,7 +12,6 @@ options.add_option("-d", dest="macro", action="append", help="define <macro> so 
 options.add_option("-D", dest="macrofile", action="append", help="add the content of <macrofile> to the macros, one macro per line")
 options.add_option("-p", "--pch", dest="pch", help="insert an include for precompiled header at the start of the file")
 options.add_option("-n", "--namespace", dest="namespace", help="namespace root")
-options.add_option("-b", "--brokengcc", dest="brokengcc", help="generate code for an older/broken version of GCC")
 
 
 global_macro_map = {
@@ -26,13 +25,13 @@ global_macro_map = {
 	"PASCAL": False,
 }
 
-def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="", useMethods=False):
+def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name=""):
 	lexer = cpp.lex.lex(module=cpp.lexer)
 	lexer.inside = 0
 	lexer.sourcename = source
 	lexer.error = 0
 	file, ext = os.path.splitext(output)
-	yacc = cpp.parser.Parser(output, file+'-instances'+ext, useMethods, name, source, pch)
+	yacc = cpp.parser.Parser(output, file+'-instances'+ext, name, source, pch)
 
 	lexer.macro_map = dict(global_macro_map)
 	if macro:
@@ -91,7 +90,7 @@ if __name__ == '__main__':
 			raise Exception("source file and target file are the same: %s" % outputname)
 
 		path = os.path.abspath(os.path.split(sys.argv[0])[0])
-		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch, options.namespace, options.brokengcc == "True") > 0:
+		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch, options.namespace) > 0:
 			exit(1)
 	exit(0)
 
