@@ -4,6 +4,7 @@
 #include    <world/stdafx.h>
 #include    <world/world.script.hh>
 #include    <world/entitystorage.script.hh>
+#include    <world/component.script.hh>
 #include    <scheduler/task/group.hh>
 #include    <rtti/engine/namespace.hh>
 

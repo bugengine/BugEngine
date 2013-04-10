@@ -80,8 +80,6 @@ def gxx_modifier_win32(conf):
 
 	v['CXXFLAGS_cxxshlib']   = []
 
-	v.append_value('CXXFLAGS_cxxshlib', ['-DDLL_EXPORT']) # TODO adding nonstandard defines like this DLL_EXPORT is not a good idea
-
 	# Auto-import is enabled by default even without this option,
 	# but enabling it explicitly has the nice effect of suppressing the rather boring, debug-level messages
 	# that the linker emits otherwise.
@@ -100,7 +98,7 @@ def gxx_modifier_cygwin(conf):
 def gxx_modifier_darwin(conf):
 	"""Configuration flags for executing g++ on MacOS"""
 	v = conf.env
-	v['CXXFLAGS_cxxshlib']   = ['-fPIC']
+	v['CXXFLAGS_cxxshlib']   = ['-fPIC', '-compatibility_version', '1', '-current_version', '1']
 	v['LINKFLAGS_cxxshlib']  = ['-dynamiclib']
 	v['cxxshlib_PATTERN']    = 'lib%s.dylib'
 	v['FRAMEWORKPATH_ST']    = '-F%s'
@@ -126,6 +124,7 @@ def gxx_modifier_aix(conf):
 def gxx_modifier_hpux(conf):
 	v = conf.env
 	v['SHLIB_MARKER']        = []
+	v['STLIB_MARKER']        = '-Bstatic'
 	v['CFLAGS_cxxshlib']     = ['-fPIC','-DPIC']
 	v['cxxshlib_PATTERN']    = 'lib%s.sl'
 
@@ -137,7 +136,7 @@ def gxx_modifier_platform(conf):
 	#   and if it's not recognised, it fallbacks to sys.platform.
 	gxx_modifier_func = getattr(conf, 'gxx_modifier_' + conf.env.DEST_OS, None)
 	if gxx_modifier_func:
-			gxx_modifier_func()
+		gxx_modifier_func()
 
 def configure(conf):
 	"""

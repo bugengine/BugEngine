@@ -19,6 +19,14 @@ class Namespace(cpp.yacc.Nonterm):
 		self.lineno = namespace.lineno
 		self.members = None
 
+	def declare_namespace(self, files, namespace):
+		namespace = namespace + [self.name]
+		owner = 'be_%s_Namespace_%s()' % (self.parser.plugin, '_'.join(namespace))
+		files[0].write('raw<RTTI::Class> %s\n;' % owner)
+		files[1].write('raw<RTTI::Class> %s\n;' % owner)
+		if self.members:
+			self.members.declare_namespace(files, namespace)
+
 	def predecl(self, files, namespace, parent):
 		namespace = namespace + [self.name]
 		if self.members:
@@ -42,5 +50,4 @@ class Namespace(cpp.yacc.Nonterm):
 				files[0].write('	%s->objects.set(s_%s_namespace_%s_obj.operator->());\n' % (owner, self.name, self.members.objects[0].name))
 
 			files[0].write('}\n')
-			
 

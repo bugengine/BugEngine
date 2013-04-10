@@ -1,0 +1,5 @@
+
+def configure(conf):
+	conf.env.ARCHITECTURE = 'ppc64'
+	conf.env.VALID_ARCHITECTURE = ['ppc64', 'powerpc64']
+	conf.env.append_unique('DEFINES', ['_PPC', '_POWERPC', '_PPC64', '_POWERPC64'])

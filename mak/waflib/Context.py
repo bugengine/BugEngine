@@ -11,19 +11,19 @@ from waflib import Utils, Errors, Logs
 import waflib.Node
 
 # the following 3 constants are updated on each new release (do not touch)
-HEXVERSION=0x1060600
+HEXVERSION=0x1070a00
 """Constant updated on new releases"""
 
-WAFVERSION="1.6.6"
+WAFVERSION="1.7.10"
 """Constant updated on new releases"""
 
-WAFREVISION="11388"
+WAFREVISION="661a034d911e4379c9dfac604d7dfb086a8c4212"
 """Constant updated on new releases"""
 
 ABI = 98
 """Version of the build data cache file format (used in :py:const:`waflib.Context.DBFILE`)"""
 
-DBFILE = '.wafpickle-%d' % ABI
+DBFILE = '.wafpickle-%s-%d-%d' % (sys.platform, sys.hexversion, ABI)
 """Name of the pickle file for storing the build data"""
 
 APPNAME = 'APPNAME'
@@ -55,14 +55,14 @@ waf_dir = ''
 
 local_repo = ''
 """Local repository containing additional Waf tools (plugins)"""
-remote_repo = 'http://waf.googlecode.com/svn/'
+remote_repo = 'http://waf.googlecode.com/git/'
 """
 Remote directory containing downloadable waf tools. The missing tools can be downloaded by using::
 
 	$ waf configure --download
 """
 
-remote_locs = ['branches/waf-%s/waflib/extras' % WAFVERSION, 'trunk/waflib/extras', 'trunk/waflib/Tools']
+remote_locs = ['waflib/extras', 'waflib/Tools']
 """
 Remote directories for use with :py:const:`waflib.Context.remote_repo`
 """
@@ -257,7 +257,7 @@ class Context(ctx):
 		"""
 		try:
 			cache = self.recurse_cache
-		except:
+		except AttributeError:
 			cache = self.recurse_cache = {}
 
 		for d in Utils.to_list(dirs):
@@ -280,8 +280,9 @@ class Context(ctx):
 					self.post_recurse(node)
 			elif not node:
 				node = self.root.find_node(WSCRIPT)
-				if node and (not once or node not in cache):
-					cache[node] = True
+				tup = (node, name or self.fun)
+				if node and (not once or tup not in cache):
+					cache[tup] = True
 					self.pre_recurse(node)
 					try:
 						wscript_module = load_module(node.abspath())
@@ -307,8 +308,8 @@ class Context(ctx):
 				ret = tsk.generator.bld.exec_command('touch foo.txt')
 				return ret
 
-		Do not confuse this method with :py:meth:`waflib.Context.Context.cmd_and_log` which is used to
-		return the standard output/error values.
+		This method captures the standard/error outputs (Issue 1101), but it does not return the values
+		unlike :py:meth:`waflib.Context.Context.cmd_and_log`
 
 		:param cmd: command argument for subprocess.Popen
 		:param kw: keyword arguments for subprocess.Popen
@@ -318,25 +319,41 @@ class Context(ctx):
 		Logs.debug('runner: %r' % cmd)
 		Logs.debug('runner_env: kw=%s' % kw)
 
+		if self.logger:
+			self.logger.info(cmd)
+
+		if 'stdout' not in kw:
+			kw['stdout'] = subprocess.PIPE
+		if 'stderr' not in kw:
+			kw['stderr'] = subprocess.PIPE
+
 		try:
-			if self.logger:
-				# warning: may deadlock with a lot of output (subprocess limitation)
-
-				self.logger.info(cmd)
-
-				kw['stdout'] = kw['stderr'] = subprocess.PIPE
+			if kw['stdout'] or kw['stderr']:
 				p = subprocess.Popen(cmd, **kw)
 				(out, err) = p.communicate()
-				if out:
-					self.logger.debug('out: %s' % out.decode(sys.stdout.encoding))
-				if err:
-					self.logger.error('err: %s' % err.decode(sys.stdout.encoding))
-				return p.returncode
+				ret = p.returncode
 			else:
-				p = subprocess.Popen(cmd, **kw)
-				return p.wait()
-		except OSError:
-			return -1
+				out, err = (None, None)
+				ret = subprocess.Popen(cmd, **kw).wait()
+		except Exception as e:
+			raise Errors.WafError('Execution failure: %s' % str(e), ex=e)
+
+		if out:
+			if not isinstance(out, str):
+				out = out.decode(sys.stdout.encoding or 'iso8859-1')
+			if self.logger:
+				self.logger.debug('out: %s' % out)
+			else:
+				sys.stdout.write(out)
+		if err:
+			if not isinstance(err, str):
+				err = err.decode(sys.stdout.encoding or 'iso8859-1')
+			if self.logger:
+				self.logger.error('err: %s' % err)
+			else:
+				sys.stderr.write(err)
+
+		return ret
 
 	def cmd_and_log(self, cmd, **kw):
 		"""
@@ -378,16 +395,12 @@ class Context(ctx):
 			p = subprocess.Popen(cmd, **kw)
 			(out, err) = p.communicate()
 		except Exception as e:
-			try:
-				self.to_log(str(err))
-			except:
-				pass
-			raise Errors.WafError('Execution failure', ex=e)
+			raise Errors.WafError('Execution failure: %s' % str(e), ex=e)
 
 		if not isinstance(out, str):
-			out = out.decode(sys.stdout.encoding)
+			out = out.decode(sys.stdout.encoding or 'iso8859-1')
 		if not isinstance(err, str):
-			err = err.decode(sys.stdout.encoding)
+			err = err.decode(sys.stdout.encoding or 'iso8859-1')
 
 		if out and quiet != STDOUT and quiet != BOTH:
 			self.to_log('out: %s' % out)
@@ -395,7 +408,7 @@ class Context(ctx):
 			self.to_log('err: %s' % err)
 
 		if p.returncode:
-			e = Errors.WafError('command %r returned %r' % (cmd, p.returncode))
+			e = Errors.WafError('Command %r returned %r' % (cmd, p.returncode))
 			e.returncode = p.returncode
 			e.stderr = err
 			e.stdout = out
@@ -423,7 +436,7 @@ class Context(ctx):
 			self.logger.info('from %s: %s' % (self.path.abspath(), msg))
 		try:
 			msg = '%s\n(complete log in %s)' % (msg, self.logger.handlers[0].baseFilename)
-		except:
+		except Exception:
 			pass
 		raise self.errors.ConfigurationError(msg, ex=ex)
 
@@ -482,7 +495,7 @@ class Context(ctx):
 			if self.in_msg:
 				self.in_msg += 1
 				return
-		except:
+		except AttributeError:
 			self.in_msg = 0
 		self.in_msg += 1
 
@@ -565,9 +578,12 @@ def load_tool(tool, tooldir=None):
 	:type  tooldir: list
 	:param tooldir: List of directories to search for the tool module
 	"""
-	tool = tool.replace('++', 'xx')
-	tool = tool.replace('java', 'javaw')
-	tool = tool.replace('compiler_cc', 'compiler_c')
+	if tool == 'java':
+		tool = 'javaw' # jython
+	elif tool == 'compiler_cc':
+		tool = 'compiler_c' # TODO remove in waf 1.8
+	else:
+		tool = tool.replace('++', 'xx')
 
 	if tooldir:
 		assert isinstance(tooldir, list)
@@ -584,13 +600,15 @@ def load_tool(tool, tooldir=None):
 		global waf_dir
 		try:
 			os.stat(os.path.join(waf_dir, 'waflib', 'extras', tool + '.py'))
-			d = 'waflib.extras.%s' % tool
-		except:
+		except OSError:
 			try:
 				os.stat(os.path.join(waf_dir, 'waflib', 'Tools', tool + '.py'))
-				d = 'waflib.Tools.%s' % tool
-			except:
+			except OSError:
 				d = tool # user has messed with sys.path
+			else:
+				d = 'waflib.Tools.%s' % tool
+		else:
+			d = 'waflib.extras.%s' % tool
 
 		__import__(d)
 		ret = sys.modules[d]

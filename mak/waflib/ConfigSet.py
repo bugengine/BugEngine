@@ -9,7 +9,7 @@ ConfigSet: a special dict
 The values put in :py:class:`ConfigSet` must be lists
 """
 
-import copy, re
+import copy, re, os
 from waflib import Logs, Utils
 re_imp = re.compile('^(#)*?([^#=]*?)\ =\ (.*?)$', re.M)
 
@@ -270,18 +270,19 @@ class ConfigSet(object):
 		:param filename: file to use
 		:type filename: string
 		"""
-		f = None
 		try:
-			f = open(filename, 'w')
-			merged_table = self.get_merged_dict()
-			keys = list(merged_table.keys())
-			keys.sort()
-			for k in keys:
-				if k != 'undo_stack':
-					f.write('%s = %r\n' % (k, merged_table[k]))
-		finally:
-			if f:
-				f.close()
+			os.makedirs(os.path.split(filename)[0])
+		except OSError:
+			pass
+
+		buf = []
+		merged_table = self.get_merged_dict()
+		keys = list(merged_table.keys())
+		keys.sort()
+		for k in keys:
+			if k != 'undo_stack':
+				buf.append('%s = %r\n' % (k, merged_table[k]))
+		Utils.writef(filename, ''.join(buf))
 
 	def load(self, filename):
 		"""
@@ -291,7 +292,7 @@ class ConfigSet(object):
 		:type filename: string
 		"""
 		tbl = self.table
-		code = Utils.readf(filename)
+		code = Utils.readf(filename, m='rU')
 		for m in re_imp.finditer(code):
 			g = m.group
 			tbl[g(2)] = eval(g(3))
@@ -321,8 +322,11 @@ class ConfigSet(object):
 
 		The history is kept in a stack, and is lost during the serialization by :py:meth:`ConfigSet.store`
 		"""
-		self.undo_stack = self.undo_stack + [self.table]
-		self.table = self.table.copy()
+		orig = self.table
+		tbl = self.table = self.table.copy()
+		for x in tbl.keys():
+			tbl[x] = copy.deepcopy(tbl[x])
+		self.undo_stack = self.undo_stack + [orig]
 
 	def revert(self):
 		"""

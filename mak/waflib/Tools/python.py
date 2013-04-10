@@ -19,9 +19,8 @@ Support for Python, detect the headers and libraries and provide
 """
 
 import os, sys
-from waflib import TaskGen, Utils, Utils, Runner, Options, Build, Errors
-from waflib.Logs import debug, warn, info, error
-from waflib.TaskGen import extension, taskgen_method, before_method, after_method, feature
+from waflib import Utils, Options, Errors, Logs
+from waflib.TaskGen import extension, before_method, after_method, feature
 from waflib.Configure import conf
 
 FRAG = '''
@@ -34,8 +33,9 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-int main()
+int main(int argc, char **argv)
 {
+   (void)argc; (void)argv;
    Py_Initialize();
    Py_Finalize();
    return 0;
@@ -47,12 +47,13 @@ Piece of C/C++ code used in :py:func:`waflib.Tools.python.check_python_headers`
 
 INST = '''
 import sys, py_compile
-for pyfile in sys.argv[1:]:
-	py_compile.compile(pyfile, pyfile + %r)
+py_compile.compile(sys.argv[1], sys.argv[2], sys.argv[3])
 '''
 """
 Piece of Python code used in :py:func:`waflib.Tools.python.install_pyfile` for installing python files
 """
+
+DISTUTILS_IMP = ['from distutils.sysconfig import get_config_var, get_python_lib']
 
 @extension('.py')
 def process_py(self, node):
@@ -62,10 +63,13 @@ def process_py(self, node):
 	try:
 		if not self.bld.is_install:
 			return
-	except:
+	except AttributeError:
 		return
 
-	if not getattr(self, 'install_path', None):
+	try:
+		if not self.install_path:
+			return
+	except AttributeError:
 		self.install_path = '${PYTHONDIR}'
 
 	# i wonder now why we wanted to do this after the build is over
@@ -90,7 +94,7 @@ def install_pyfile(self, node, install_from=None):
 	path = tsk.get_install_path()
 
 	if self.bld.is_install < 0:
-		info("+ removing byte compiled python files")
+		Logs.info("+ removing byte compiled python files")
 		for x in 'co':
 			try:
 				os.remove(path + x)
@@ -100,8 +104,8 @@ def install_pyfile(self, node, install_from=None):
 	if self.bld.is_install > 0:
 		try:
 			st1 = os.stat(path)
-		except:
-			error('The python file is missing, this should not happen')
+		except OSError:
+			Logs.error('The python file is missing, this should not happen')
 
 		for x in ['c', 'o']:
 			do_inst = self.env['PY' + x.upper()]
@@ -115,9 +119,11 @@ def install_pyfile(self, node, install_from=None):
 
 			if do_inst:
 				lst = (x == 'o') and [self.env['PYFLAGS_OPT']] or []
-				argv = self.env['PYTHON'] + lst + ['-c', INST % x, path]
-				info('+ byte compiling %r' % (path + x))
-				ret = Utils.subprocess.Popen(argv).wait()
+				(a, b, c) = (path, path + x, tsk.get_install_path(destdir=False) + x)
+				argv = self.env['PYTHON'] + lst + ['-c', INST, a, b, c]
+				Logs.info('+ byte compiling %r' % (path + x))
+				env = self.env.env or None
+				ret = Utils.subprocess.Popen(argv, env=env).wait()
 				if ret:
 					raise Errors.WafError('py%s compilation failed %r' % (x, path))
 
@@ -130,18 +136,30 @@ def feature_py(self):
 
 @feature('pyext')
 @before_method('propagate_uselib_vars', 'apply_link')
+@after_method('apply_bundle')
 def init_pyext(self):
 	"""
 	Change the values of *cshlib_PATTERN* and *cxxshlib_PATTERN* to remove the
 	*lib* prefix from library names.
 	"""
-	if not getattr(self, 'install_path', None):
-		self.install_path = '${PYTHONARCHDIR}'
 	self.uselib = self.to_list(getattr(self, 'uselib', []))
 	if not 'PYEXT' in self.uselib:
 		self.uselib.append('PYEXT')
 	# override shlib_PATTERN set by the osx module
-	self.env['cshlib_PATTERN'] = self.env['cxxshlib_PATTERN'] = self.env['pyext_PATTERN']
+	self.env.cshlib_PATTERN = self.env.cxxshlib_PATTERN = self.env.macbundle_PATTERN = self.env.pyext_PATTERN
+	self.env.fcshlib_PATTERN = self.env.dshlib_PATTERN = self.env.pyext_PATTERN
+
+	try:
+		if not self.install_path:
+			return
+	except AttributeError:
+		self.install_path = '${PYTHONARCHDIR}'
+
+@feature('pyext')
+@before_method('apply_link', 'apply_bundle')
+def set_bundle(self):
+	if Utils.unversioned_sys_platform() == 'darwin':
+		self.mac_bundle = True
 
 @before_method('propagate_uselib_vars')
 @feature('pyembed')
@@ -154,9 +172,9 @@ def init_pyembed(self):
 		self.uselib.append('PYEMBED')
 
 @conf
-def get_python_variables(conf, variables, imports=['import sys']):
+def get_python_variables(self, variables, imports=None):
 	"""
-	Execute a python interpreter to dump configuration variables
+	Spawn a new python process to dump configuration variables
 
 	:param variables: variables to print
 	:type variables: list of string
@@ -165,7 +183,13 @@ def get_python_variables(conf, variables, imports=['import sys']):
 	:return: the variable values
 	:rtype: list of string
 	"""
-	program = list(imports)
+	if not imports:
+		try:
+			imports = self.python_imports
+		except AttributeError:
+			imports = DISTUTILS_IMP
+
+	program = list(imports) # copy
 	program.append('')
 	for v in variables:
 		program.append("print(repr(%s))" % v)
@@ -176,9 +200,10 @@ def get_python_variables(conf, variables, imports=['import sys']):
 		pass
 
 	try:
-		out = conf.cmd_and_log(conf.env.PYTHON + ['-c', '\n'.join(program)], env=os_env)
+		out = self.cmd_and_log(self.env.PYTHON + ['-c', '\n'.join(program)], env=os_env)
 	except Errors.WafError:
-		conf.fatal('The distutils module is unusable: install "python-devel"?')
+		self.fatal('The distutils module is unusable: install "python-devel"?')
+	self.to_log(out)
 	return_values = []
 	for s in out.split('\n'):
 		s = s.strip()
@@ -186,8 +211,8 @@ def get_python_variables(conf, variables, imports=['import sys']):
 			continue
 		if s == 'None':
 			return_values.append(None)
-		elif s[0] == "'" and s[-1] == "'":
-			return_values.append(s[1:-1])
+		elif (s[0] == "'" and s[-1] == "'") or (s[0] == '"' and s[-1] == '"'):
+			return_values.append(eval(s))
 		elif s[0].isdigit():
 			return_values.append(int(s))
 		else: break
@@ -205,21 +230,20 @@ def check_python_headers(conf):
 
 	# FIXME rewrite
 
-	if not conf.env['CC_NAME'] and not conf.env['CXX_NAME']:
+	env = conf.env
+	if not env['CC_NAME'] and not env['CXX_NAME']:
 		conf.fatal('load a compiler first (gcc, g++, ..)')
 
-	if not conf.env['PYTHON_VERSION']:
+	if not env['PYTHON_VERSION']:
 		conf.check_python_version()
 
-	env = conf.env
 	pybin = conf.env.PYTHON
 	if not pybin:
-		conf.fatal('could not find the python executable')
+		conf.fatal('Could not find the python executable')
 
 	v = 'prefix SO LDFLAGS LIBDIR LIBPL INCLUDEPY Py_ENABLE_SHARED MACOSX_DEPLOYMENT_TARGET LDSHARED CFLAGS'.split()
 	try:
-		lst = conf.get_python_variables(["get_config_var('%s') or ''" % x for x in v],
-			['from distutils.sysconfig import get_config_var'])
+		lst = conf.get_python_variables(["get_config_var('%s') or ''" % x for x in v])
 	except RuntimeError:
 		conf.fatal("Python development headers not found (-v for details).")
 
@@ -235,15 +259,17 @@ def check_python_headers(conf):
 
 	# Check for python libraries for embedding
 
-	all_flags = dct['LDFLAGS'] + ' ' + dct['LDSHARED'] + ' ' + dct['CFLAGS']
+	all_flags = dct['LDFLAGS'] + ' ' + dct['CFLAGS']
 	conf.parse_flags(all_flags, 'PYEMBED')
+
+	all_flags = dct['LDFLAGS'] + ' ' + dct['LDSHARED'] + ' ' + dct['CFLAGS']
 	conf.parse_flags(all_flags, 'PYEXT')
 
 	result = None
 	#name = 'python' + env['PYTHON_VERSION']
 
 	# TODO simplify this
-	for name in ('python' + env['PYTHON_VERSION'], 'python' + env['PYTHON_VERSION'].replace('.', '')):
+	for name in ('python' + env['PYTHON_VERSION'], 'python' + env['PYTHON_VERSION'] + 'm', 'python' + env['PYTHON_VERSION'].replace('.', '')):
 
 		# LIBPATH_PYEMBED is already set; see if it works.
 		if not result and env['LIBPATH_PYEMBED']:
@@ -278,14 +304,14 @@ def check_python_headers(conf):
 	# under certain conditions, python extensions must link to
 	# python libraries, not just python embedding programs.
 	if (Utils.is_win32 or sys.platform.startswith('os2')
-		or sys.platform == 'darwin' or dct['Py_ENABLE_SHARED']):
+		or dct['Py_ENABLE_SHARED']):
 		env['LIBPATH_PYEXT'] = env['LIBPATH_PYEMBED']
 		env['LIB_PYEXT'] = env['LIB_PYEMBED']
 
 	# We check that pythonX.Y-config exists, and if it exists we
 	# use it to get only the includes, else fall back to distutils.
 	num = '.'.join(env['PYTHON_VERSION'].split('.')[:2])
-	conf.find_program(['python%s-config' % num, 'python-config-%s' % num, 'python%sm-config' % num], var='PYTHON_CONFIG', mandatory=False)
+	conf.find_program([''.join(pybin) + '-config', 'python%s-config' % num, 'python-config-%s' % num, 'python%sm-config' % num], var='PYTHON_CONFIG', mandatory=False)
 
 	includes = []
 	if conf.env.PYTHON_CONFIG:
@@ -296,8 +322,7 @@ def check_python_headers(conf):
 			# append include path, unless already given
 			if incstr not in includes:
 				includes.append(incstr)
-		conf.to_log("Include path for Python extensions "
-			       "(found via python-config --includes): %r\n" % (includes,))
+		conf.to_log("Include path for Python extensions (found via python-config --includes): %r\n" % (includes,))
 		env['INCLUDES_PYEXT'] = includes
 		env['INCLUDES_PYEMBED'] = includes
 	else:
@@ -314,17 +339,37 @@ def check_python_headers(conf):
 		env.append_value('CXXFLAGS_PYEMBED', ['-fno-strict-aliasing'])
 		env.append_value('CXXFLAGS_PYEXT', ['-fno-strict-aliasing'])
 
+	if env.CC_NAME == "msvc":
+		from distutils.msvccompiler import MSVCCompiler
+		dist_compiler = MSVCCompiler()
+		dist_compiler.initialize()
+		env.append_value('CFLAGS_PYEXT', dist_compiler.compile_options)
+		env.append_value('CXXFLAGS_PYEXT', dist_compiler.compile_options)
+		env.append_value('LINKFLAGS_PYEXT', dist_compiler.ldflags_shared)
+
 	# See if it compiles
 	try:
 		conf.check(header_name='Python.h', define_name='HAVE_PYTHON_H',
 		   uselib='PYEMBED', fragment=FRAG,
-		   errmsg='Could not find the python development headers')
+		   errmsg=':-(')
 	except conf.errors.ConfigurationError:
 		# python3.2, oh yeah
-		conf.check_cfg(path=conf.env.PYTHON_CONFIG, package='', uselib_store='PYEMBED', args=['--cflags', '--libs'])
-		conf.check(header_name='Python.h', define_name='HAVE_PYTHON_H', msg='Getting the python flags from python-config',
-			uselib='PYEMBED', fragment=FRAG,
-				errmsg='Could not find the python development headers elsewhere')
+		xx = conf.env.CXX_NAME and 'cxx' or 'c'
+
+		flags = ['--cflags', '--libs', '--ldflags']
+
+		for f in flags:
+			conf.check_cfg(msg='Asking python-config for pyembed %s flags' % f,
+				path=conf.env.PYTHON_CONFIG, package='', uselib_store='PYEMBED', args=[f])
+		conf.check(header_name='Python.h', define_name='HAVE_PYTHON_H', msg='Getting pyembed flags from python-config',
+			fragment=FRAG, errmsg='Could not build a python embedded interpreter',
+			features='%s %sprogram pyembed' % (xx, xx))
+
+		for f in flags:
+			conf.check_cfg(msg='Asking python-config for pyext %s flags' % f,
+				path=conf.env.PYTHON_CONFIG, package='', uselib_store='PYEXT', args=[f])
+		conf.check(header_name='Python.h', define_name='HAVE_PYTHON_H', msg='Getting pyext flags from python-config',
+			features='%s %sshlib pyext' % (xx, xx), fragment=FRAG, errmsg='Could not build python extensions')
 
 @conf
 def check_python_version(conf, minver=None):
@@ -348,7 +393,7 @@ def check_python_version(conf, minver=None):
 
 	# Get python version string
 	cmd = pybin + ['-c', 'import sys\nfor x in sys.version_info: print(str(x))']
-	debug('python: Running python command %r' % cmd)
+	Logs.debug('python: Running python command %r' % cmd)
 	lines = conf.cmd_and_log(cmd).split()
 	assert len(lines) == 5, "found %i lines, expected 5: %r" % (len(lines), lines)
 	pyver_tuple = (int(lines[0]), int(lines[1]), int(lines[2]), lines[3], int(lines[4]))
@@ -365,17 +410,12 @@ def check_python_version(conf, minver=None):
 			pydir = conf.environ['PYTHONDIR']
 		else:
 			if Utils.is_win32:
-				(python_LIBDEST, pydir) = \
-						conf.get_python_variables(
-											  ["get_config_var('LIBDEST') or ''",
-											   "get_python_lib(standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']],
-											  ['from distutils.sysconfig import get_config_var, get_python_lib'])
+				(python_LIBDEST, pydir) = conf.get_python_variables(
+					  ["get_config_var('LIBDEST') or ''",
+					   "get_python_lib(standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']])
 			else:
 				python_LIBDEST = None
-				(pydir,) = \
-						conf.get_python_variables(
-											  ["get_python_lib(standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']],
-											  ['from distutils.sysconfig import get_python_lib'])
+				(pydir,) = conf.get_python_variables( ["get_python_lib(standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']])
 			if python_LIBDEST is None:
 				if conf.env['LIBDIR']:
 					python_LIBDEST = os.path.join(conf.env['LIBDIR'], "python" + pyver)
@@ -386,9 +426,7 @@ def check_python_version(conf, minver=None):
 		if 'PYTHONARCHDIR' in conf.environ:
 			pyarchdir = conf.environ['PYTHONARCHDIR']
 		else:
-			(pyarchdir, ) = conf.get_python_variables(
-											["get_python_lib(plat_specific=1, standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']],
-											['from distutils.sysconfig import get_python_lib'])
+			(pyarchdir, ) = conf.get_python_variables( ["get_python_lib(plat_specific=1, standard_lib=0, prefix=%r) or ''" % conf.env['PREFIX']])
 			if not pyarchdir:
 				pyarchdir = pydir
 
@@ -411,28 +449,57 @@ def check_python_version(conf, minver=None):
 		conf.fatal('The python version is too old, expecting %r' % (minver,))
 
 PYTHON_MODULE_TEMPLATE = '''
-import %s
-print(1)
+import %s as current_module
+version = getattr(current_module, '__version__', None)
+if version is not None:
+    print(str(version))
+else:
+    print('unknown version')
 '''
 
 @conf
-def check_python_module(conf, module_name):
+def check_python_module(conf, module_name, condition=''):
 	"""
 	Check if the selected python interpreter can import the given python module::
 
 		def configure(conf):
 			conf.check_python_module('pygccxml')
+			conf.check_python_module('re', condition="ver > num(2, 0, 4) and ver <= num(3, 0, 0)")
 
 	:param module_name: module
 	:type module_name: string
 	"""
-	conf.start_msg('Python module %s' % module_name)
+	msg = 'Python module %s' % module_name
+	if condition:
+		msg = '%s (%s)' % (msg, condition)
+	conf.start_msg(msg)
 	try:
-		conf.cmd_and_log(conf.env['PYTHON'] + ['-c', PYTHON_MODULE_TEMPLATE % module_name])
-	except:
+		ret = conf.cmd_and_log(conf.env['PYTHON'] + ['-c', PYTHON_MODULE_TEMPLATE % module_name])
+	except Exception:
 		conf.end_msg(False)
 		conf.fatal('Could not find the python module %r' % module_name)
-	conf.end_msg(True)
+
+	ret = ret.strip()
+	if condition:
+		conf.end_msg(ret)
+		if ret == 'unknown version':
+			conf.fatal('Could not check the %s version' % module_name)
+
+		from distutils.version import LooseVersion
+		def num(*k):
+			if isinstance(k[0], int):
+				return LooseVersion('.'.join([str(x) for x in k]))
+			else:
+				return LooseVersion(k[0])
+		d = {'num': num, 'ver': LooseVersion(ret)}
+		ev = eval(condition, {}, d)
+		if not ev:
+			conf.fatal('The %s version does not satisfy the requirements' % module_name)
+	else:
+		if ret == 'unknown version':
+			conf.end_msg(True)
+		else:
+			conf.end_msg(ret)
 
 def configure(conf):
 	"""
@@ -441,11 +508,11 @@ def configure(conf):
 	try:
 		conf.find_program('python', var='PYTHON')
 	except conf.errors.ConfigurationError:
-		warn("could not find a python executable, setting to sys.executable '%s'" % sys.executable)
+		Logs.warn("could not find a python executable, setting to sys.executable '%s'" % sys.executable)
 		conf.env.PYTHON = sys.executable
 
 	if conf.env.PYTHON != sys.executable:
-		warn("python executable '%s' different from sys.executable '%s'" % (conf.env.PYTHON, sys.executable))
+		Logs.warn("python executable %r differs from system %r" % (conf.env.PYTHON, sys.executable))
 	conf.env.PYTHON = conf.cmd_to_list(conf.env.PYTHON)
 
 	v = conf.env

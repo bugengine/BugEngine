@@ -39,6 +39,11 @@ class Unit(cpp.yacc.Nonterm):
 		file.write("\n")
 		#file.write("#line 1 \"%s\"\n" % (self.parser.source.replace("\\", "\\\\")))
 
+		instances.write('namespace BugEngine\n{\n')
+		file.write('namespace BugEngine\n{\n')
+		self.members.declare_namespace((file, instances), [])
+		instances.write('}\n\n')
+		file.write('}\n\n')
 		self.members.predecl((file, instances), [], [], False, None)
 		instances.write("namespace BugEngine\n{\n\n")
 		self.members.dumpObjects((file, instances), [], [])

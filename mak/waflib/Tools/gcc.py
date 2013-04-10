@@ -80,8 +80,6 @@ def gcc_modifier_win32(conf):
 
 	v['CFLAGS_cshlib']       = []
 
-	v.append_value('CFLAGS_cshlib', ['-DDLL_EXPORT']) # TODO adding nonstandard defines like this DLL_EXPORT is not a good idea
-
 	# Auto-import is enabled by default even without this option,
 	# but enabling it explicitly has the nice effect of suppressing the rather boring, debug-level messages
 	# that the linker emits otherwise.
@@ -100,7 +98,7 @@ def gcc_modifier_cygwin(conf):
 def gcc_modifier_darwin(conf):
 	"""Configuration flags for executing gcc on MacOS"""
 	v = conf.env
-	v['CFLAGS_cshlib']       = ['-fPIC']
+	v['CFLAGS_cshlib']       = ['-fPIC', '-compatibility_version', '1', '-current_version', '1']
 	v['LINKFLAGS_cshlib']    = ['-dynamiclib']
 	v['cshlib_PATTERN']      = 'lib%s.dylib'
 	v['FRAMEWORKPATH_ST']    = '-F%s'
@@ -125,6 +123,7 @@ def gcc_modifier_aix(conf):
 def gcc_modifier_hpux(conf):
 	v = conf.env
 	v['SHLIB_MARKER']        = []
+	v['STLIB_MARKER']        = '-Bstatic'
 	v['CFLAGS_cshlib']       = ['-fPIC','-DPIC']
 	v['cshlib_PATTERN']      = 'lib%s.sl'
 
@@ -136,7 +135,7 @@ def gcc_modifier_platform(conf):
 	#   and if it's not recognised, it fallbacks to sys.platform.
 	gcc_modifier_func = getattr(conf, 'gcc_modifier_' + conf.env.DEST_OS, None)
 	if gcc_modifier_func:
-			gcc_modifier_func()
+		gcc_modifier_func()
 
 def configure(conf):
 	"""

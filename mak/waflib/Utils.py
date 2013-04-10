@@ -10,13 +10,7 @@ through Python versions 2.3 to 3.X and across different platforms (win32, linux,
 """
 
 import os, sys, errno, traceback, inspect, re, shutil, datetime, gc
-try:
-	import subprocess
-except:
-	try:
-		import waflib.extras.subprocess as subprocess
-	except:
-		print("The subprocess module is missing (python2.3?):\n try calling 'waf update --files=subprocess'\n or add a copy of subprocess.py to the python libraries")
+import subprocess # <- leave this!
 
 try:
 	from collections import deque
@@ -27,31 +21,31 @@ except ImportError:
 			return self.pop(0)
 try:
 	import _winreg as winreg
-except:
+except ImportError:
 	try:
 		import winreg
-	except:
+	except ImportError:
 		winreg = None
 
 from waflib import Errors
 
 try:
 	from collections import UserDict
-except:
+except ImportError:
 	from UserDict import UserDict
 
 try:
 	from hashlib import md5
-except:
+except ImportError:
 	try:
 		from md5 import md5
-	except:
+	except ImportError:
 		# never fail to enable fixes from another module
 		pass
 
 try:
 	import threading
-except:
+except ImportError:
 	class threading(object):
 		"""
 			A fake threading class for platforms lacking the threading module.
@@ -72,7 +66,7 @@ else:
 			run_old(*args, **kwargs)
 		except (KeyboardInterrupt, SystemExit):
 			raise
-		except:
+		except Exception:
 			sys.excepthook(*sys.exc_info())
 	threading.Thread.run = run
 
@@ -116,10 +110,11 @@ indicator = '\x1b[K%s%s%s\r'
 if is_win32 and 'NOCOLOR' in os.environ:
 	indicator = '%s%s%s\r'
 
-def readf(fname, m='r'):
+def readf(fname, m='r', encoding='ISO8859-1'):
 	"""
-	Read an entire file into a string, in practice the wrapper
-	node.read(..) should be used instead of this method::
+	Read an entire file into a string, use this function instead of os.open() whenever possible.
+
+	In practice the wrapper node.read(..) should be preferred to this function::
 
 		def build(ctx):
 			from waflib import Utils
@@ -130,50 +125,161 @@ def readf(fname, m='r'):
 	:param fname: Path to file
 	:type  m: string
 	:param m: Open mode
+	:type encoding: string
+	:param encoding: encoding value, only used for python 3
 	:rtype: string
 	:return: Content of the file
 	"""
-	f = open(fname, m)
-	try:
-		txt = f.read()
-	finally:
-		f.close()
+
+	if sys.hexversion > 0x3000000 and not 'b' in m:
+		m += 'b'
+		f = open(fname, m)
+		try:
+			txt = f.read()
+		finally:
+			f.close()
+		txt = txt.decode(encoding)
+	else:
+		f = open(fname, m)
+		try:
+			txt = f.read()
+		finally:
+			f.close()
 	return txt
 
-def h_file(filename):
+def writef(fname, data, m='w', encoding='ISO8859-1'):
+	"""
+	Write an entire file from a string, use this function instead of os.open() whenever possible.
+
+	In practice the wrapper node.write(..) should be preferred to this function::
+
+		def build(ctx):
+			from waflib import Utils
+			txt = Utils.writef(self.path.make_node('i_like_kittens').abspath(), 'some data')
+			self.path.make_node('i_like_kittens').write('some data')
+
+	:type  fname: string
+	:param fname: Path to file
+	:type   data: string
+	:param  data: The contents to write to the file
+	:type  m: string
+	:param m: Open mode
+	:type encoding: string
+	:param encoding: encoding value, only used for python 3
+	"""
+	if sys.hexversion > 0x3000000 and not 'b' in m:
+		data = data.encode(encoding)
+		m += 'b'
+	f = open(fname, m)
+	try:
+		f.write(data)
+	finally:
+		f.close()
+
+def h_file(fname):
 	"""
 	Compute a hash value for a file by using md5. This method may be replaced by
 	a faster version if necessary. The following uses the file size and the timestamp value::
 
 		import stat
 		from waflib import Utils
-		def h_file(filename):
-			st = os.stat(filename)
+		def h_file(fname):
+			st = os.stat(fname)
 			if stat.S_ISDIR(st[stat.ST_MODE]): raise IOError('not a file')
 			m = Utils.md5()
 			m.update(str(st.st_mtime))
 			m.update(str(st.st_size))
-			m.update(filename)
+			m.update(fname)
 			return m.digest()
 		Utils.h_file = h_file
 
-	:type filename: string
-	:param filename: path to the file to hash
+	:type fname: string
+	:param fname: path to the file to hash
 	:return: hash of the file contents
 	"""
-	f = open(filename, 'rb')
+	f = open(fname, 'rb')
 	m = md5()
 	try:
-		while filename:
-			filename = f.read(100000)
-			m.update(filename)
-	except:
+		while fname:
+			fname = f.read(200000)
+			m.update(fname)
+	finally:
 		f.close()
 	return m.digest()
 
+if hasattr(os, 'O_NOINHERIT'):
+	def readf_win32(f, m='r', encoding='ISO8859-1'):
+		flags = os.O_NOINHERIT | os.O_RDONLY
+		if 'b' in m:
+			flags |= os.O_BINARY
+		if '+' in m:
+			flags |= os.O_RDWR
+		try:
+			fd = os.open(f, flags)
+		except OSError:
+			raise IOError('Cannot read from %r' % f)
+
+		if sys.hexversion > 0x3000000 and not 'b' in m:
+			m += 'b'
+			f = os.fdopen(fd, m)
+			try:
+				txt = f.read()
+			finally:
+				f.close()
+			txt = txt.decode(encoding)
+		else:
+			f = os.fdopen(fd, m)
+			try:
+				txt = f.read()
+			finally:
+				f.close()
+		return txt
+
+	def writef_win32(f, data, m='w', encoding='ISO8859-1'):
+		if sys.hexversion > 0x3000000 and not 'b' in m:
+			data = data.encode(encoding)
+			m += 'b'
+		flags = os.O_CREAT | os.O_TRUNC | os.O_WRONLY | os.O_NOINHERIT
+		if 'b' in m:
+			flags |= os.O_BINARY
+		if '+' in m:
+			flags |= os.O_RDWR
+		try:
+			fd = os.open(f, flags)
+		except OSError:
+			raise IOError('Cannot write to %r' % f)
+		f = os.fdopen(fd, m)
+		try:
+			f.write(data)
+		finally:
+			f.close()
+
+	def h_file_win32(fname):
+		try:
+			fd = os.open(fname, os.O_BINARY | os.O_RDONLY | os.O_NOINHERIT)
+		except OSError:
+			raise IOError('Cannot read from %r' % fname)
+		f = os.fdopen(fd, 'rb')
+		m = md5()
+		try:
+			while fname:
+				fname = f.read(200000)
+				m.update(fname)
+		finally:
+			f.close()
+		return m.digest()
+
+	# replace the default functions
+	readf_old = readf
+	writef_old = writef
+	h_file_old = h_file
+	readf = readf_win32
+	writef = writef_win32
+	h_file = h_file_win32
+
 try:
 	x = ''.encode('hex')
-except:
+except LookupError:
 	import binascii
 	def to_hex(s):
 		ret = binascii.hexlify(s)
@@ -196,28 +302,29 @@ if is_win32:
 	def listdir_win32(s):
 		"""
 		List the contents of a folder in a portable manner.
+		On Win32, return the list of drive letters: ['C:', 'X:', 'Z:']
 
 		:type s: string
-		:param s: a string, which can be empty on Windows for listing the drive letters
+		:param s: a string, which can be empty on Windows
 		"""
 		if not s:
 			try:
 				import ctypes
-			except:
+			except ImportError:
 				# there is nothing much we can do
 				return [x + ':\\' for x in list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')]
 			else:
 				dlen = 4 # length of "?:\\x00"
 				maxdrives = 26
 				buf = ctypes.create_string_buffer(maxdrives * dlen)
-				ndrives = ctypes.windll.kernel32.GetLogicalDriveStringsA(maxdrives, ctypes.byref(buf))
-				return [ buf.raw[4*i:4*i+3].decode("ascii") for i in range(int(ndrives/dlen)) ]
+				ndrives = ctypes.windll.kernel32.GetLogicalDriveStringsA(maxdrives*dlen, ctypes.byref(buf))
+				return [ str(buf.raw[4*i:4*i+2].decode('ascii')) for i in range(int(ndrives/dlen)) ]
 
 		if len(s) == 2 and s[1] == ":":
 			s += os.sep
 
 		if not os.path.isdir(s):
-			e = OSError()
+			e = OSError('%s is not a directory' % s)
 			e.errno = errno.ENOENT
 			raise e
 		return os.listdir(s)
@@ -468,6 +575,10 @@ def unversioned_sys_platform():
 		elif s in ('SunOS', 'Solaris'):
 			return 'sunos'
 		else: s = s.lower()
+	
+	# powerpc == darwin for our purposes
+	if s == 'powerpc':
+		return 'darwin'
 	if s == 'win32' or s.endswith('os2') and s != 'sunos2': return s
 	return re.split('\d+$', s)[0]
 
@@ -515,7 +626,7 @@ if is_win32:
 		hack into the shutil module to fix the problem
 		"""
 		old(src, dst)
-		shutil.copystat(src, src)
+		shutil.copystat(src, dst)
 	setattr(shutil, 'copy2', copy2)
 
 if os.name == 'java':

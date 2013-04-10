@@ -60,15 +60,27 @@ class xsubpp(Task.Task):
 def check_perl_version(self, minver=None):
 	"""
 	Check if Perl is installed, and set the variable PERL.
+	minver is supposed to be a tuple
 	"""
 	res = True
-
-	if not getattr(Options.options, 'perlbinary', None):
-		perl = self.find_program('perl', var='PERL')
-		if not perl:
-			return False
+	
+	if minver:
+		cver = '.'.join(map(str,minver))
 	else:
-		self.env['PERL'] = perl = Options.options.perlbinary
+		cver = ''
+
+	self.start_msg('Checking for minimum perl version %s' % cver)
+
+	perl = getattr(Options.options, 'perlbinary', None)
+
+	if not perl:
+		perl = self.find_program('perl', var='PERL')
+	
+	if not perl:
+		self.end_msg("Perl not found", color="YELLOW")
+		return False
+	
+	self.env['PERL'] = perl
 
 	version = self.cmd_and_log([perl, "-e", 'printf \"%vd\", $^V'])
 	if not version:
@@ -79,11 +91,7 @@ def check_perl_version(self, minver=None):
 		if ver < minver:
 			res = False
 
-	if minver is None:
-		cver = ""
-	else:
-		cver = ".".join(map(str,minver))
-	self.msg('Checking for perl version', cver)
+	self.end_msg(version, color=res and "GREEN" or "YELLOW")
 	return res
 
 @conf
@@ -101,7 +109,7 @@ def check_perl_module(self, module):
 	self.start_msg('perl module %s' % module)
 	try:
 		r = self.cmd_and_log(cmd)
-	except:
+	except Exception:
 		self.end_msg(False)
 		return None
 	self.end_msg(r or True)

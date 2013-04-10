@@ -18,13 +18,14 @@ Note that the configuration may compile C# snippets::
 	}'''
 	def configure(conf):
 		conf.check(features='cs', fragment=FRAG, compile_filename='test.cs', gen='test.exe',
-			type='exe', csflags=['-pkg:gtk-sharp-2.0'], msg='Checking for Gtksharp support')
+			bintype='exe', csflags=['-pkg:gtk-sharp-2.0'], msg='Checking for Gtksharp support')
 """
 
 from waflib import Utils, Task, Options, Logs, Errors
 from waflib.TaskGen import before_method, after_method, feature
 from waflib.Tools import ccroot
 from waflib.Configure import conf
+import os, tempfile
 
 ccroot.USELIB_VARS['cs'] = set(['CSFLAGS', 'ASSEMBLIES', 'RESOURCES'])
 ccroot.lib_patterns['csshlib'] = ['%s']
@@ -44,10 +45,11 @@ def apply_cs(self):
 			no_nodes.append(x)
 	self.source = no_nodes
 
-	bintype = getattr(self, 'type', 'exe')
+	bintype = getattr(self, 'bintype', self.gen.endswith('.dll') and 'library' or 'exe')
 	self.cs_task = tsk = self.create_task('mcs', cs_nodes, self.path.find_or_declare(self.gen))
 	tsk.env.CSTYPE = '/target:%s' % bintype
-	tsk.env.OUT    = '/out:%s' % tsk.outputs[0].abspath()
+	tsk.env.OUT = '/out:%s' % tsk.outputs[0].abspath()
+	self.env.append_value('CSFLAGS', '/platform:%s' % getattr(self, 'platform', 'anycpu'))
 
 	inst_to = getattr(self, 'install_path', bintype=='exe' and '${BINDIR}' or '${LIBDIR}')
 	if inst_to:
@@ -62,8 +64,8 @@ def use_cs(self):
 	C# applications honor the **use** keyword::
 
 		def build(bld):
-			bld(features='cs', source='My.cs', type='library', gen='my.dll', name='mylib')
-			bld(features='cs', source='Hi.cs', includes='.', type='exe', gen='hi.exe', use='mylib', name='hi')
+			bld(features='cs', source='My.cs', bintype='library', gen='my.dll', name='mylib')
+			bld(features='cs', source='Hi.cs', includes='.', bintype='exe', gen='hi.exe', use='mylib', name='hi')
 	"""
 	names = self.to_list(getattr(self, 'use', []))
 	get = self.bld.get_tgen_by_name
@@ -71,7 +73,7 @@ def use_cs(self):
 		try:
 			y = get(x)
 		except Errors.WafError:
-			self.cs_task.env.append_value('CSFLAGS', '/reference:%s' % x)
+			self.env.append_value('CSFLAGS', '/reference:%s' % x)
 			continue
 		y.post()
 
@@ -80,7 +82,7 @@ def use_cs(self):
 			self.bld.fatal('cs task has no link task for use %r' % self)
 		self.cs_task.dep_nodes.extend(tsk.outputs) # dependency
 		self.cs_task.set_run_after(tsk) # order (redundant, the order is infered from the nodes inputs/outputs)
-		self.cs_task.env.append_value('CSFLAGS', '/reference:%s' % tsk.outputs[0].abspath())
+		self.env.append_value('CSFLAGS', '/reference:%s' % tsk.outputs[0].abspath())
 
 @feature('cs')
 @after_method('apply_cs', 'use_cs')
@@ -89,7 +91,7 @@ def debug_cs(self):
 	The C# targets may create .mdb or .pdb files::
 
 		def build(bld):
-			bld(features='cs', source='My.cs', type='library', gen='my.dll', csdebug='full')
+			bld(features='cs', source='My.cs', bintype='library', gen='my.dll', csdebug='full')
 			# csdebug is a value in [True, 'full', 'pdbonly']
 	"""
 	csdebug = getattr(self, 'csdebug', self.env.CSDEBUG)
@@ -113,7 +115,7 @@ def debug_cs(self):
 		val = ['/debug+', '/debug:full']
 	else:
 		val = ['/debug-']
-	self.cs_task.env.append_value('CSFLAGS', val)
+	self.env.append_value('CSFLAGS', val)
 
 
 class mcs(Task.Task):
@@ -122,6 +124,48 @@ class mcs(Task.Task):
 	"""
 	color   = 'YELLOW'
 	run_str = '${MCS} ${CSTYPE} ${CSFLAGS} ${ASS_ST:ASSEMBLIES} ${RES_ST:RESOURCES} ${OUT} ${SRC}'
+
+	def exec_command(self, cmd, **kw):
+		bld = self.generator.bld
+
+		try:
+			if not kw.get('cwd', None):
+				kw['cwd'] = bld.cwd
+		except AttributeError:
+			bld.cwd = kw['cwd'] = bld.variant_dir
+
+		try:
+			tmp = None
+			if isinstance(cmd, list) and len(' '.join(cmd)) >= 8192:
+				program = cmd[0] #unquoted program name, otherwise exec_command will fail
+				cmd = [self.quote_response_command(x) for x in cmd]
+				(fd, tmp) = tempfile.mkstemp()
+				os.write(fd, '\r\n'.join(i.replace('\\', '\\\\') for i in cmd[1:]).encode())
+				os.close(fd)
+				cmd = [program, '@' + tmp]
+			# no return here, that's on purpose
+			ret = self.generator.bld.exec_command(cmd, **kw)
+		finally:
+			if tmp:
+				try:
+					os.remove(tmp)
+				except OSError:
+					pass # anti-virus and indexers can keep the files open -_-
+		return ret
+
+	def quote_response_command(self, flag):
+		# /noconfig is not allowed when using response files
+		if flag.lower() == '/noconfig':
+			return ''
+
+		if flag.find(' ') > -1:
+			for x in ('/r:', '/reference:', '/resource:', '/lib:', '/out:'):
+				if flag.startswith(x):
+					flag = '%s"%s"' % (x, flag[len(x):])
+					break
+			else:
+				flag = '"%s"' % flag
+		return flag
 
 def configure(conf):
 	"""
@@ -165,7 +209,7 @@ def read_csshlib(self, name, paths=[]):
 
 		def build(bld):
 			bld.read_csshlib('ManagedLibrary.dll', paths=[bld.env.mylibrarypath])
-			bld(features='cs', source='Hi.cs', type='exe', gen='hi.exe', use='ManagedLibrary.dll')
+			bld(features='cs', source='Hi.cs', bintype='exe', gen='hi.exe', use='ManagedLibrary.dll')
 
 	:param name: Name of the library
 	:type name: string
