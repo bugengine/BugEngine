@@ -50,7 +50,6 @@ private:
     LPDIRECT3D9             m_directx;
     LPDIRECT3DDEVICE9       m_device;
     D3DCAPS9                m_caps;
-    CGcontext               m_context;
     u64                     m_threadId;
     mutable DeviceState     m_deviceState;
 public:

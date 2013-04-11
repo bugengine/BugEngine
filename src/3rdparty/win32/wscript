@@ -1,3 +1,4 @@
+import os
 
 def options(opt):
 	pass
@@ -10,4 +11,4 @@ def build(bld):
 							'shell32', 'ole32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32', 'winmm',
 							'userenv', 'ws2_32'],
 							includes=[os.path.join('src', '3rdparty', 'win32', 'api-win32')])
-	bld.features.add('GUI')
+	bld.features.append('GUI')

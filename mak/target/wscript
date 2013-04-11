@@ -13,11 +13,12 @@ def add_build_command(toolchain, optim):
 
 @conf
 def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
+	toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
 	original_env = self.env
+	original_env.TOOLCHAIN=toolchain
 	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
 	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
 	original_env.DEFINES.append('BE_PLATFORM=%s'%platform)
-	toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
 	for optim in self.env.ALL_VARIANTS:
 		env = original_env.derive()
 		self.setenv(toolchain+'-'+optim, env)
@@ -42,7 +43,6 @@ def configure(conf):
 		pprint('BLUE', '_'*40)
 		pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
 		#conf.recurse('../../extra/%s'%extra)
-		pass
 	for target in conf.path.listdir():
 		if target != 'wscript':
 			pprint('BLUE', '_'*40)
@@ -54,13 +54,13 @@ def configure(conf):
 def build(bld):
 	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
 		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
-	if os.path.isdir(bld.env.VALID_PLATFORMS[0]):
+	if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
 		bld.recurse(bld.env.VALID_PLATFORMS[0])
 
 def plugins(bld):
 	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
 		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
-	if os.path.isdir(bld.env.VALID_PLATFORMS[0]):
+	if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
 		bld.recurse(bld.env.VALID_PLATFORMS[0])
 
 from waflib import ConfigSet
