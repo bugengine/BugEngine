@@ -10,6 +10,25 @@ def set_windows_options(self):
 @conf
 def set_windows_msvc_options(self):
 	self.env.append_unique('LIB', ['advapi32', 'userenv'])
+	self.env.CFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+	self.env.CFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+	self.env.CXXFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+	self.env.CXXFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+
+	self.env.CFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
+	self.env.CXXFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
+	self.env.LINKFLAGS_debug = ['/DEBUG']
+	self.env.ARFLAGS_debug = []
+
+	self.env.CFLAGS_profile = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	self.env.CXXFLAGS_profile = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG']
+	self.env.ARFLAGS_profile = ['/LTCG']
+
+	self.env.CFLAGS_final = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG']
+	self.env.ARFLAGS_final = ['/LTCG']
 
 @conf
 def set_windows_gcc_options(self):

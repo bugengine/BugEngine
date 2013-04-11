@@ -8,6 +8,7 @@
 #include    <resource/loader.hh>
 #include    <bugengine/scriptengine.hh>
 #include    <plugin/plugin.hh>
+#include    <filesystem/folder.script.hh>
 
 namespace BugEngine
 {

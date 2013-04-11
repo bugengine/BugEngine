@@ -24,19 +24,17 @@ def filter_sources(self):
 			for a in architectures:
 				add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
 		node = file.parent
-		while node and node != self.path:
+		while add_platform and add_arch and node and node != self.path:
 			if node.name.startswith('platform='):
 				add_platform = False
 				platforms = node.name[9:].split(',')
 				for p in platforms:
 					add_platform = add_platform or p in self.env.VALID_PLATFORMS
-				if not add_platform: break
-			if node.name.startswith('arch='):
-				add_platform = False
+			elif node.name.startswith('arch='):
+				add_arch = False
 				architectures = node.name[5:].split(',')
 				for a in architectures:
 					add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
-				if not add_arch: break
 			node = node.parent
 		if add_platform and add_arch:
 			sources.append(file)
