@@ -1,10 +1,10 @@
 from waflib.Configure import conf
 from waflib.TaskGen import feature, extension
-from waflib import Node, Errors, Utils
+from waflib import Node, Errors, Utils, Task, Options
 import os, sys
 
 
-def module(bld, name, depends, features):
+def module(bld, name, depends, features, use_master, warnings):
 	archs = bld.env.VALID_ARCHITECTURES
 	platforms = bld.env.VALID_PLATFORMS
 	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
@@ -14,26 +14,35 @@ def module(bld, name, depends, features):
 	sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
 	sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
 	all_sources = source_node.ant_glob(['**'])
-	api = source_node.make_node('api')
-	include = source_node.make_node('include')
-	lib_paths = [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific]
-	if os.path.isfile(os.path.join(api.abspath(), name.split('.')[-1], 'stdafx.h')):
+	api = [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+	include = [i for i in [source_node.make_node('include')] + [source_node.make_node('include.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+	lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+
+	if api and os.path.isfile(os.path.join(api[0].path_from(bld.srcnode), name.split('.')[-1], 'stdafx.h')):
 		pchstop = '%s/%s'%(name.split('.')[-1], 'stdafx.h')
-	elif os.path.isfile(os.path.join(include.abspath(), 'stdafx.h')):
+	elif include and os.path.isfile(os.path.join(include[0].path_from(bld.srcnode), 'stdafx.h')):
 		pchstop = 'stdafx.h'
 	else:
 		pchstop = None
 
+	if use_master:
+		features = features + ['master']
+	if warnings:
+		uselib = ['warnall', bld.env.VARIANT]
+	else:
+		uselib = ['warnnone', bld.env.VARIANT]
+
 	return bld(
 		target = name,
 		use = depends,
+		uselib = uselib,
 		features = features,
-		defines = ['building_%s' % name.split('.')[-1]],
+		defines = ['building_%s' % name.split('.')[-1], 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
-		includes = [api.path_from(bld.path), include.path_from(bld.path)],
+		includes = api+include+['.'],
 		libs = [],
 		lib_paths = lib_paths,
-		export_includes = [source_node.make_node('api').path_from(bld.path)],
+		export_includes = api,
 		frameworks = [],
 		source = sources,
 		pchstop = pchstop,
@@ -41,70 +50,75 @@ def module(bld, name, depends, features):
 
 @conf
 def external(bld, name):
-	bld.recurse('src/%s' % name.replace('.', '/'))
+	bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/')))
+	return name
 
 @conf
-def thirdparty(bld, name, depends=[], libs=[], lib_paths = [], frameworks=[], includes=[], defines=[]):
-	m = module(bld, name, depends, ['bugengine_fake_lib'])
-	if m:
-		m.libs = libs
-		m.frameworks = frameworks
-		m.export_includes = includes
-		m.export_defines = defines
-		m.lib_paths += lib_paths
-	return m
+def thirdparty(bld, name, libs=[], lib_paths=[], frameworks=[], includes=[], defines=[], use_master=True, warnings=True):
+	archs = bld.env.VALID_ARCHITECTURES
+	platforms = bld.env.VALID_PLATFORMS
+	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
+	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
+
+	lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+	includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+
+	bld.env['DEFINES_%s' % name] = defines
+	bld.env['INCLUDES_%s' % name] = includes
+	bld.env['FRAMEWORK_%s' % name] = frameworks
+	bld.env['LIBPATH_%s' % name] = lib_paths
+	bld.env['LIB_%s' % name] = libs
 
 @conf
-def library(bld, name, depends=[], features=[], platforms=[]):
+def library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx'])
+	return module(bld, name, depends, ['cxx', 'cxxobjects'], use_master, warnings)
 
 @conf
-def static_library(bld, name, depends=[], features=[], platforms=[]):
+def static_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxstlib'])
+	return module(bld, name, depends, ['cxx', 'cxxstlib'], use_master, warnings)
 
 @conf
-def shared_library(bld, name, depends=[], features=[], platforms=[]):
+def shared_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib'])
+	return module(bld, name, depends, ['cxx', 'cxxshlib'], use_master, warnings)
 
 @conf
-def engine(bld, name, depends=[], features=[], platforms=[]):
+def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxprogram'])
+	return module(bld, name, depends, ['cxx', 'cxxprogram'], use_master, warnings)
 
 @conf
-def game(bld, name, depends=[], features=[], platforms=[]):
+def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'])
+	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
 
 @conf
-def plugin(bld, name, depends=[], features=[], platforms=[]):
+def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'])
-
-@feature('plugin')
-def plugin_feature(task):
-	pass
-
-@feature('game')
-def game_feature(task):
-	pass
+	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
 
 def options(opt):
+	gr = opt.get_option_group('build and install options')
+	gr.add_option(	'--nomaster',
+					action = 'store_true',
+					default = False,
+					dest = 'nomaster',
+					help = 'build without master files')
+
 	opt.bugenginenode = opt.path.parent
 	opt.recurse('host')
 	opt.recurse('compiler')
@@ -143,45 +157,108 @@ def plugins(bld):
 
 
 
-SYSTEM_LIB_PATHS = ['/usr/lib64', '/usr/lib', '/usr/local/lib64', '/usr/local/lib']
-lib_patterns = ['lib%s.a', '%s.lib']
-
 @feature('*')
 def check_use_taskgens(self):
 	"""
-	Checks all names in 'use' are valid task generators
+	Checks all names in 'use' are valid task generators, or move them to uselib
 	"""
 	use = getattr(self, 'use', [])
 	for name in use:
 		if name not in self.env.ALL_VARIANTS:
-			self.bld.get_tgen_by_name(name)
+			try:
+				y = self.bld.get_tgen_by_name(name)
+			except:
+				try:
+					self.uselib.append(name)
+				except AttributeError:
+					self.uselib = [name]
 
-@feature('bugengine_fake_lib')
-def process_3rdparty_lib(self):
-	"""
-	Find the location of a foreign library. Used by :py:class:`waflib.Tools.ccroot.read_shlib` and :py:class:`waflib.Tools.ccroot.read_stlib`.
-	"""
-	nodes = []
-
-	for name in self.libs:
-		node = None
-		names = [x % name for x in lib_patterns]
-		for x in self.lib_paths + [self.path] + SYSTEM_LIB_PATHS:
-			print(x)
-			if not isinstance(x, Node.Node):
-				x = self.bld.root.find_node(x) or self.path.find_node(x)
-				if not x:
-					continue
-			for y in names:
-				node = x.find_node(y)
-				if node:
-					node.sig = Utils.h_file(node.abspath())
-					break
-			else:
-				continue
-			break
+@feature('cxx')
+def set_building_name_inherits(self):
+	seen = set([])
+	use = getattr(self, 'use', [])[:]
+	while (use):
+		x = use.pop()
+		try:
+			y = self.bld.get_tgen_by_name(x)
+		except:
+			pass
 		else:
-			raise Errors.WafError('%s: could not find library %r' % (self.name, name))
-		nodes.append(node)
-	self.link_task = self.create_task('fake_stlib', [], nodes)
-	self.target = self.name
+			if 'cxxobjects' in y.features:
+				use += getattr(y, 'use', [])
+				self.env.DEFINES.append('building_%s' % y.target.split('.')[-1])
+
+
+@feature('plugin')
+def plugin_feature(task):
+	pass
+
+@feature('game')
+def game_feature(task):
+	pass
+
+@feature('cxxobjects')
+def objects_feature(task):
+	pass
+
+
+from waflib.Tools import c,cxx
+
+def create_master_file(task):
+	with open(task.outputs[0].abspath(), 'w') as f:
+		for src in task.inputs:
+			f.write('#include "%s"\n' % src.path_from(task.generator.bld.bldnode).replace('\\','/'))
+def master_sig_deps(task):
+	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
+		task.m.update(f)
+		task.m.update(b';')
+MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
+MasterTask.sig_explicit_deps = master_sig_deps
+
+@extension('.c')
+def c_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		try:
+			mastertask_c = self.mastertasks_c[-1]
+			if len(mastertask_c.inputs) <= 20:
+				mastertask_c.set_inputs([node])
+			else:
+				output = self.path.find_or_declare(self.target+'-c-%d-master.c' % len(self.mastertasks_c))
+				mastertask_c = self.create_task('master', [node], [output])
+				self.mastertasks_c.append(mastertask_c)
+				self.create_compiled_task('c', output)
+		except:
+			output = self.path.find_or_declare(self.target+'-c-0-master.c')
+			mastertask_c = self.create_task('master', [node], [output])
+			self.mastertasks_c = [mastertask_c]
+			self.create_compiled_task('c', output)
+	else:
+		self.create_compiled_task('c', node)
+
+@extension('.cc', '.cxx', '.cpp')
+def cc_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		if node.name.endswith('-instances.cc'):
+			try:
+				self.instancetask_cxx.set_inputs([node])
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-instances-master.cc')
+				self.instancetask_cxx = self.create_task('master', [node], [output])
+				self.create_compiled_task('cxx', output)
+		else:
+			try:
+				mastertask_cxx = self.mastertasks_cxx[-1]
+				if len(mastertask_cxx.inputs) <= 20:
+					mastertask_cxx.set_inputs([node])
+				else:
+					output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
+					mastertask_cxx = self.create_task('master', [node], [output])
+					self.mastertasks_cxx.append(mastertask_cxx)
+					self.create_compiled_task('cxx', output)
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
+				mastertask_cxx = self.create_task('master', [node], [output])
+				self.mastertasks_cxx = [mastertask_cxx]
+				self.create_compiled_task('cxx', output)
+	else:
+		self.create_compiled_task('cxx', node)

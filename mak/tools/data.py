@@ -27,10 +27,9 @@ def datagen(self, node):
 	outs.append(node.change_ext('-instances.cc'))
 	tsk = self.create_task('datagen', node, outs)
 	tsk.path = self.bld.variant_dir
-	tsk.env.detach()
-	category = self.target.split('.')[0]
-	if category == 'plugin' or category == 'game':
-		tsk.env.PLUGIN = self.name.replace('.', '_')
+	#tsk.env.detach()
+	if 'plugin' in self.features:
+		tsk.env.PLUGIN = self.target.replace('.', '_')
 	else:
 		tsk.env.PLUGIN = 'game'
 	tsk.env.PCH = self.pchstop

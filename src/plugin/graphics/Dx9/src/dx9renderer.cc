@@ -44,7 +44,6 @@ Dx9Renderer::Dx9Renderer(const Plugin::Context& context)
 ,   m_dummyParams(defaultParams(m_dummyWindow))
 ,   m_directx(Direct3DCreate9(D3D_SDK_VERSION))
 ,   m_device(0)
-,   m_context(cgCreateContext())
 ,   m_threadId(Thread::currentId())
 ,   m_deviceState(DeviceLost)
 {

@@ -32,6 +32,7 @@ typedef u8                      byte;
 # pragma warning(error:4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'
 # pragma warning(disable:4530)  // C++ exception handler used, but unwind semantics are not enabled
 # pragma warning(disable:4100)  // unreferenced formal parameter
+# pragma warning(disable:4702)  // unreachable code
 #endif
 #pragma warning(disable:4355)   // this used in base member initialization list
 #pragma warning(disable:4127)   // conditional expression is constant
