@@ -1,0 +1,46 @@
+# set MacOS specific options
+
+import os
+from waflib import Context, Errors
+from waflib.Logs import info,warn,pprint
+from waflib.TaskGen import feature, before_method, after_method
+
+def options(opt):
+	opt.add_option( '--macosx-sdk',
+					action='store',
+					default='',
+					dest='macosx_sdk',
+					help='Version of the MacOS X SDK to target')
+
+def configure(conf):
+	seen = set([])
+	for version, config in conf.env.MSVC_INSTALLED_VERSIONS:
+		version_name, version_number = version.split()
+		if version_name in ['intel', 'wsdk', 'msvc', 'winphone']:
+			for target_arch, infos in config:
+				if (target_arch, version) in seen:
+					continue
+				seen.add((target_arch, version))
+				arch, (bindir, libdir, includedir) = infos
+				toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.env.MSVC_VERSIONS = [version]
+					conf.env.MSVC_TARGETS = [target_arch]
+					conf.load('msvc')
+					conf.set_windows_options()
+					conf.set_windows_msvc_options()
+					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+
+def build(bld):
+	bld.platforms.append(bld.external('3rdparty.cocoa').target)
+
+def plugins(bld):
+	pass
+

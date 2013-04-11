@@ -107,6 +107,7 @@ def game_feature(task):
 def options(opt):
 	opt.bugenginenode = opt.path.parent
 	opt.recurse('host')
+	opt.recurse('compiler')
 	opt.recurse('source')
 	opt.recurse('target')
 	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
@@ -116,6 +117,7 @@ def configure(conf):
 	conf.bugenginenode = conf.path.parent
 	conf.recurse('checks')
 	conf.recurse('host')
+	conf.recurse('compiler')
 	conf.recurse('source')
 	conf.recurse('target')
 
