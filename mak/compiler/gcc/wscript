@@ -1,0 +1,177 @@
+from waflib.Configure import conf
+import os
+
+
+@conf
+def parse_gcc_target(conf, target):
+	for gccname,aname in conf.gcc_architectures:
+		if target.find(gccname) != -1:
+				return aname
+
+
+@conf
+def get_native_icc_target(conf, icc):
+	cmd = [icc, '-V']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')
+	target = os.uname()[0].lower()
+	arch = 'x86'
+	version = None
+	for line in out:
+		words = line.split()
+		while len(words):
+			if words[0] == 'Intel(R)' and words[1] == '64':
+				arch = 'amd64'
+			if words[0] == 'ID:':
+				if words[1].startswith('m_cproc_'):
+					version = words[1][10:].split('.')[0]
+			if words[0] == 'Version':
+				version = words[1].split('.')[0]
+			words = words[1:]
+	return (target+'-'+arch, version)
+
+
+
+@conf
+def get_native_clang_target(conf, clang):
+	cmd = [clang, '-v']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')
+	target = None
+	version = None
+
+	for line in out:
+		if line.startswith('Target:'):
+			target = line.split()[1]
+		if line.find('clang version ') != -1:
+			line = line.split()
+			while line[0] != 'clang' and line[1] != 'version':
+				line = line[1:]
+			version = line[2].split('-')[0]
+	print (target, version)
+	return (target, version)
+
+
+def add_ld_so(conf, filename, paths):
+	f = open(file, 'r')
+	for line in f:
+		line = line.strip()
+		if not line:
+			continue
+		elif line.startswith('#'):
+			continue
+		elif line.startswith('include'):
+			continue
+		elif os.path.isdir(line):
+			paths.add(line)
+
+@conf
+def detect_gcc_from_path(conf, path, seen):
+	for subdir in ['', 'lib/gcc', 'gcc']:
+		libdir = os.path.join(path, subdir)
+		if not os.path.isdir(libdir):
+			continue
+		for target in os.listdir(libdir):
+			if not os.path.isdir(os.path.join(libdir, target)):
+				continue
+			if target in ['.svn', '.cvs']:
+				continue
+			for version in os.listdir(os.path.join(libdir, target)):
+				if not os.path.isdir(os.path.join(libdir, target, version)):
+					continue
+				if version in ['.svn', '.cvs']:
+					continue
+				if os.path.islink(os.path.join(libdir, target, version)):
+					continue
+				if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
+					continue
+				arch = conf.parse_gcc_target(target) or 'unknown'
+				if libdir.find('llvm') != -1:
+					gcc, gxx = 'llvm-gcc', 'llvm-g++'
+				else:
+					gcc, gxx = 'gcc', 'g++'
+				if (gcc, gxx, version, target, arch) not in seen:
+					seen.append((gcc, gxx, version, target, arch))
+					conf.env['GCC_TARGETS'].append((version, libdir, target, arch, gcc, gxx))
+
+@conf
+def detect_gcc(conf):
+	compilers_gcc_found = []
+	bindirs = os.environ['PATH'].split(':')
+	paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
+	paths = set([path for path in paths if os.path.isdir(path)])
+	for bindir in bindirs:
+		try:
+			for f in os.listdir(os.path.join(bindir, '..')):
+				libdir = os.path.normpath(os.path.join(bindir, '..', f, 'lib'))
+				if os.path.isdir(libdir):
+					paths.add(libdir)
+		except OSError:
+			pass
+
+	if os.path.isfile('/etc/ld.so.conf'):
+		add_ld_so(conf, '/etc/ld.so.conf', paths)
+	if os.path.isdir('/etc/ld.so.conf.d'):
+		for f in os.listdir('/etc/ld.so.conf.d'):
+			add_ld_so(conf, '/etc/ld.so.conf.d/'+f, paths)
+
+	for path in paths:
+		for lib in os.listdir(path):
+			if lib.startswith('gcc'):
+				conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
+	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
+
+	for dir in paths or [i for i in os.environ['PATH'].split(':') if i not in paths]:
+		if conf.find_program('icc', var='ICC', path_list=[dir], mandatory=False, silent = True):
+			toolchaindir = os.path.split(conf.env.ICC)[0]
+			target, version = conf.get_native_icc_target(conf.env.ICC)
+			arch = conf.parse_gcc_target(target) or 'unknown'
+			conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
+			del conf.env['ICC']
+
+	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
+		toolchaindir = os.path.split(conf.env.CLANG)[0]
+		target, version = conf.get_native_clang_target(conf.env.CLANG)
+		arch = conf.parse_gcc_target(target) or 'unknown'
+		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'clang', 'clang++'))
+		del conf.env['CLANG']
+
+
+def options(opt):
+	pass
+
+def configure(conf):
+	archs = getattr(conf, 'gcc_architectures', [])
+	conf.gcc_architectures = archs + [
+		('i686-w64', 'amd64'),
+		('i386', 'x86'),
+		('i486', 'x86'),
+		('i586', 'x86'),
+		('i686', 'x86'),
+		('arm-eabi', 'arm'),
+		('arm', 'arm'),
+		('mipsel', 'mips'),
+		('mips', 'mips'),
+		('x86_64', 'amd64'),
+		('x86', 'x86'),
+		('amd64', 'amd64'),
+		('powerpc', 'powerpc'),
+		('mingw32', 'x86'),
+	]
+
+	conf.detect_gcc()
+
