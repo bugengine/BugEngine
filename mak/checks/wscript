@@ -69,7 +69,8 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRAR
 			libpath=libpath,
 			code=code,
 			includepath=includepath,
-			use=['debug'])
+			use=['debug'],
+			envname=self.env.TOOLCHAIN)
 	except self.errors.ConfigurationError:
 		pass
 	else:
@@ -96,7 +97,8 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 			libpath=libpath,
 			code='\n'.join(["#include <%s>"%h for h in headername]) + '\n' + code,
 			includepath=includepath,
-			use=['debug'])
+			use=['debug'],
+			envname=self.env.TOOLCHAIN)
 	except self.errors.ConfigurationError as e:
 		pass
 	else:
@@ -126,7 +128,8 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], code=U
 			includepath=includepath,
 			sdk='',
 			version='',
-			use=['debug'])
+			use=['debug'],
+			envname=self.env.TOOLCHAIN)
 	except self.errors.ConfigurationError as e:
 		pass
 	else:
@@ -146,7 +149,8 @@ def check_sdk(self, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE)
 		includepath=includepath,
 		sdk=sdk,
 		version=version,
-		use=['debug'])
+		use=['debug'],
+		envname=self.env.TOOLCHAIN)
 
 
 def configure(conf):
