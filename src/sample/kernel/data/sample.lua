@@ -1,5 +1,5 @@
-kernel = plugin("samples.kernel")
-_3d = plugin("graphics.3d")
+kernel = plugin("sample.kernel")
+_3d = plugin("plugin.graphics.3d")
 
 tokens={}
 BugEngine.help(BugEngine.World)

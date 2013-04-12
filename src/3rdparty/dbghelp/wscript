@@ -1,9 +1,11 @@
+import os
 
 def options(opt):
 	pass
 
 def setup(conf):
-	pass
+	conf.check_lib(['psapi', 'dbghelp', 'version'], var='PSAPI', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])
 
 def build(bld):
-	bld.thirdparty('3rdparty.dbghelp', libs=['psapi', 'dbghelp', 'version'])
+	if bld.env.PSAPI:
+		bld.thirdparty('3rdparty.dbghelp', libs=bld.env.PSAPI)

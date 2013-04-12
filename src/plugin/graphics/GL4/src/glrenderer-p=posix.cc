@@ -201,7 +201,7 @@ GLWindow::Context::~Context()
 GLRenderer::GLRenderer(const Plugin::Context& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general(), static_cast<PlatformData*>(getPlatformData())))
-    ,   m_openCLScheduler("kernel.opencl.opengl", context)
+    ,   m_openCLScheduler("plugin.kernel.opencl_gl", context)
 {
 }
 

@@ -40,14 +40,14 @@ def filter_sources(self):
 			sources.append(file)
 	self.source = sources
 
-@extension('.ico', '.pkg', '.lua')
-def ignore_source(self, node):
-	pass
+@extension('.pkg', '.lua')
+def install_data(self, node):
+	data_node = self.bld.bugenginenode.make_node('src/%s/data' % self.target.replace('.', '/'))
+	self.bld.install_as(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_DATADIR, node.path_from(data_node)), node)
 
 @extension('.dll', '.so')
 def install_binary(self, node):
-	#self.bld.install_as(node, binary)
-	pass
+	self.bld.install_as(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_RUNBINDIR), node)
 
 def options(opt):
 	pass

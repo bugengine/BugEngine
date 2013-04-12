@@ -5,6 +5,8 @@
 #include    <core/environment.hh>
 #include    <userenv.h>
 
+typedef BOOL (WINAPI *GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);
+
 namespace BugEngine
 {
 
@@ -21,7 +23,13 @@ Environment::Environment()
     GetUserName(profile, &size);
     m_user = profile;
     size = sizeof(profile);
-    GetUserProfileDirectory(token, profile, &size);
+    HMODULE h = LoadLibraryA("userenv.dll");
+    if (h != 0)
+    {
+        GetUserProfileDirectoryFunction function = (GetUserProfileDirectoryFunction)GetProcAddress(h, "GetUserProfileDirectoryA");
+        (*function)(token, profile, &size);
+        FreeLibrary(h);
+    }
     m_homeDirectory = profile;
     m_homeDirectory.push_back(istring("bugengine"));
 }
@@ -41,7 +49,7 @@ void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
-    m_game = istring("bugeditor.main");
+    m_game = istring("sample.kernel");
     do
     {
         if (exe[s] == '\\' || exe[s] == '/')
@@ -63,7 +71,7 @@ void Environment::init(int argc, const char *argv[])
         m_game = argv[arg];
     }
 
-    SetDllDirectoryA((getDataDirectory()+ipath("plugins")).str().name);
+    SetDllDirectoryA((getDataDirectory()+ipath("plugin")).str().name);
 }
 
     size_t Environment::getProcessorCount() const
