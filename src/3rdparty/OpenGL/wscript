@@ -6,7 +6,7 @@ def setup(conf):
 	if 'darwin' in conf.env.PLATFORM:
 		conf.check_framework('OpenGL', var='GLFramework')
 	else:
-		conf.check_lib('OpenGL32', var='OpenGL') or conf.check_lib('GL', var='OpenGL')
+		conf.check_lib(['OpenGL32', 'gdi32'], var='OpenGL') or conf.check_lib('GL', var='OpenGL')
 
 def build(bld):
 	if bld.env.GLFramework or bld.env.OpenGL or bld.env.PROJECTS:

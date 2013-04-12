@@ -47,7 +47,7 @@ private:
 
 
 KernelObject::KernelObject(const inamespace& name)
-    :   m_kernel(name, "kernels")
+    :   m_kernel(name, "kernel")
     ,   m_entryPoint(m_kernel.getSymbol<KernelMain>("_kmain"))
     ,   m_task(scoped< Task::Task<CPUKernelTask> >::create(Arena::task(), istring(name.str().name), Colors::make(231, 231, 231, 0), CPUKernelTask(this), Scheduler::Immediate))
     ,   m_callback(scoped<Callback>::create(Arena::task()))

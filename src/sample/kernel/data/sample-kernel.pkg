@@ -1,7 +1,5 @@
-plugin samples.kernel;
-plugin scripting.lua;
-
-
+load sample.kernel;
+load plugin.scripting.lua;
 
 luascript = scripting.lua.LuaScript
 (

@@ -1,5 +1,5 @@
 from waflib.Configure import conf
-from waflib.TaskGen import feature, extension
+from waflib.TaskGen import feature, extension, before_method, after_method
 from waflib import Node, Errors, Utils, Task, Options
 import os, sys
 
@@ -9,7 +9,7 @@ def module(bld, name, depends, features, use_master, warnings):
 	platforms = bld.env.VALID_PLATFORMS
 	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
 
-	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', '.so', '.dll', '.plist', '.png']
+	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', 'so', 'dll', 'plist', 'png', 'pkg', 'lua']
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
 	sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
 	sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
@@ -31,6 +31,23 @@ def module(bld, name, depends, features, use_master, warnings):
 		uselib = ['warnall', bld.env.VARIANT]
 	else:
 		uselib = ['warnnone', bld.env.VARIANT]
+
+	if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
+		kernelspath = source_node.make_node('kernels')
+		for kernel in kernelspath.listdir():
+			kernelpath = kernelspath.make_node(kernel)
+			kernelsources = kernelpath.ant_glob(['**'])
+			for toolchain in bld.env.KERNEL_TOOLCHAINS:
+				env = bld.all_envs[toolchain]
+				bld(
+					target = name + '.' + kernel,
+					features = ['cxx', 'cxxshlib', 'kernel'],
+					uselib = ['warnall', bld.env.VARIANT],
+					includes = api+include+['.'],
+					source = kernelsources,
+					env = env.derive(),
+					use = depends + [name],
+					install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_KERNELDIR))
 
 	return bld(
 		target = name,
@@ -95,21 +112,27 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxprogram'], use_master, warnings)
+	m = module(bld, name, depends, ['cxx', 'cxxprogram'], use_master, warnings)
+	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
+	return m
 
 @conf
 def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
+	m = module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
+	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	return m
 
 @conf
 def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
+	m = module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
+	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	return m
 
 def options(opt):
 	gr = opt.get_option_group('build and install options')
@@ -199,6 +222,10 @@ def game_feature(task):
 def objects_feature(task):
 	pass
 
+@feature('kernel')
+@after_method('process_use')
+def remove_link_libs(task):
+	pass
 
 from waflib.Tools import c,cxx
 

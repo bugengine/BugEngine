@@ -12,8 +12,8 @@ namespace BugEngine
 
 KernelSample::KernelSample(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
-    ,   m_packageManager("scripting.package", pluginContext())
-    ,   m_lua("scripting.lua", pluginContext())
+    ,   m_packageManager("plugin.scripting.package", pluginContext())
+    ,   m_lua("plugin.scripting.lua", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-kernel.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);
