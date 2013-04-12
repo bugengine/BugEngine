@@ -81,7 +81,7 @@ int beMain(int argc, const char *argv[])
     {
         BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::Arena::debug()));
         BugEngine::Plugin::Plugin<minitl::pointer> platformAssert(
-                BugEngine::inamespace("debug.assert"),
+                BugEngine::inamespace("plugin.debug.assert"),
                 BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
         ref<BugEngine::DiskFolder>::create(
                 BugEngine::Arena::general(),

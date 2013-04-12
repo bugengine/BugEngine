@@ -12,10 +12,10 @@ namespace BugEngine
 {
 
 KernelSampleTask::KernelSampleTask(const BugEngine::Kernel::Product< A >& in1, const BugEngine::Kernel::Product< B >& out1)
-    :   KernelDescription("samples.kernel.add")
+    :   KernelDescription("sample.kernel.add")
     ,   m_input1(in1)
     ,   m_input2(out1)
-    ,   m_kernelTask(scoped<Task::KernelTask>::create(Arena::general(), "samples.kernel.add", Colors::Red::Red, Scheduler::High, this, makeParameters()))
+    ,   m_kernelTask(scoped<Task::KernelTask>::create(Arena::general(), "sample.kernel.add", Colors::Red::Red, Scheduler::High, this, makeParameters()))
     ,   m_chainInput1(in1.producer, m_kernelTask->startCallback())
     ,   m_chainInput2(out1.producer, m_kernelTask->startCallback())
     ,   output(out1.stream, m_kernelTask)

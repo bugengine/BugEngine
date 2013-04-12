@@ -77,10 +77,10 @@ def build(bld):
 	bld.plugin('plugin.graphics.GLES2',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.OpenGLES2'], features=['OpenGLES2', 'GUI'])
 
 	bld.external('3rdparty.scintilla')
-	bld.plugin('game.bugeditor.ui',				['engine.bugengine', '3rdparty.scintilla'], platforms=['pc'])
-	bld.game('game.bugeditor.main',				['engine.bugengine', 'game.bugeditor.ui', 'plugin.scripting.package'], platforms=['pc'])
+	bld.plugin('tool.bugeditor.ui',				['engine.bugengine', '3rdparty.scintilla'], platforms=['pc'])
+	bld.game('tool.bugeditor.main',				['engine.bugengine', 'game.bugeditor.ui', 'plugin.scripting.package'], platforms=['pc'])
 
-	bld.game('game.samples.kernel',				['engine.bugengine', 'plugin.scripting.package'])
+	bld.game('sample.kernel',				['engine.bugengine', 'plugin.scripting.package'])
 
 	bld.recurse('mak', name='plugins', once=False)
 

@@ -97,7 +97,7 @@ extern "C" int be_package_wrap()
 true                                    { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
 false                                   { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
 import                                  { update(be_package_leng); return KW_import; }
-plugin                                  { update(be_package_leng); return KW_plugin; }
+load                                    { update(be_package_leng); return KW_plugin; }
 namespace                               { update(be_package_leng); return KW_namespace; }
 zip                                     { update(be_package_leng); return KW_zip; }
 ->                                      { update(be_package_leng); return KW_notify; }

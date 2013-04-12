@@ -140,7 +140,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general()))
     ,   m_openGLMemoryProvider(scoped<GLMemoryProvider>::create(Arena::general()))
-    ,   m_openCLScheduler("kernel.opencl_gl", context)
+    ,   m_openCLScheduler("plugin.kernel.opencl_gl", context)
 {
     [NSOpenGLContext clearCurrentContext];
 }

@@ -7,9 +7,18 @@ from waflib.TaskGen import feature, before_method, after_method
 def set_windows_options(self):
 	self.env.VALID_PLATFORMS = ['windows', 'pc']
 
+	self.env.DEPLOY_BINDIR = ''
+	self.env.DEPLOY_RUNBINDIR = ''
+	self.env.DEPLOY_LIBDIR = 'lib'
+	self.env.DEPLOY_INCLUDEDIR = 'include'
+	self.env.DEPLOY_DATADIR = 'data'
+	self.env.DEPLOY_PLUGINDIR = 'data/plugin'
+	self.env.DEPLOY_KERNELDIR = 'data/kernel'
+
 @conf
 def set_windows_msvc_options(self):
-	self.env.append_unique('LIB', ['advapi32', 'userenv'])
+	self.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
+	self.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
 	self.env.CFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
 	self.env.CFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
 	self.env.CXXFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
@@ -32,7 +41,7 @@ def set_windows_msvc_options(self):
 
 @conf
 def set_windows_gcc_options(self):
-	self.env.append_unique('LIB', ['advapi32', 'userenv'])
+	pass
 
 
 def options(opt):
@@ -57,6 +66,7 @@ def configure(conf):
 					conf.load('msvc')
 					conf.set_windows_options()
 					conf.set_windows_msvc_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
 					conf.variant = ''
 					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
