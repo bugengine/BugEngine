@@ -2,7 +2,6 @@ kernel = plugin("sample.kernel")
 _3d = plugin("plugin.graphics.3d")
 
 tokens={}
-BugEngine.help(BugEngine.World)
 
 storage = kernel.KernelStorage()
 sample = kernel.KernelSampleTask(storage.A, storage.B)
