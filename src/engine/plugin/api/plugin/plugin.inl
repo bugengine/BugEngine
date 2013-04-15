@@ -76,7 +76,7 @@ namespace BugEngine { namespace Plugin
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     :   m_name(pluginName)
-    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugins"))
+    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugin"))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
