@@ -52,16 +52,18 @@ def configure(conf):
 
 
 def build(bld):
-	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
-		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
-	if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
-		bld.recurse(bld.env.VALID_PLATFORMS[0])
+	if bld.env.VALID_PLATFORMS:
+		if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
+			bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
+		if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
+			bld.recurse(bld.env.VALID_PLATFORMS[0])
 
 def plugins(bld):
-	if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
-		bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
-	if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
-		bld.recurse(bld.env.VALID_PLATFORMS[0])
+	if bld.env.VALID_PLATFORMS:
+		if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
+			bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
+		if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
+			bld.recurse(bld.env.VALID_PLATFORMS[0])
 
 from waflib import ConfigSet
 try:

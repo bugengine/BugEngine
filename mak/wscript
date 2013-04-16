@@ -148,6 +148,7 @@ def options(opt):
 	opt.recurse('target')
 	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
 		opt.recurse('../src/3rdparty/%s'%third_party)
+	opt.load('visualstudio', tooldir=['mak/tools'])
 
 def configure(conf):
 	conf.bugenginenode = conf.path.parent
@@ -162,7 +163,7 @@ def setup(conf):
 
 def build(bld):
 	bld.bugenginenode = bld.path.parent
-	if bld.variant == '':
+	if bld.variant == '' and not bld.env.PROJECTS:
 		raise Errors.WafError('Call %s %s %s:toolchain:variant, with toolchain in\n\t%s\nvariant in\n\t%s' %
 								(sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
 	bld.platforms = []

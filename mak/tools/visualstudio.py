@@ -1,12 +1,118 @@
-from waflib import Context, Build, TaskGen
+from waflib import Context, Build, TaskGen, Logs
 import os
-import mak
-from mak.tools.IDE.vstudio import solution,vcproj,vcxproj
+from xml.dom.minidom import Document
+import string
+
+try:
+	import hashlib
+	createMd5=hashlib.md5
+except:
+	import md5
+	createMd5=md5.new
+
+def _hexdigest(s):
+	"""Return a string as a string of hex characters.
+	"""
+	# NOTE:  This routine is a method in the Python 2.0 interface
+	# of the native md5 module, but we want SCons to operate all
+	# the way back to at least Python 1.5.2, which doesn't have it.
+	h = string.hexdigits
+	r = ''
+	for c in s:
+		try:
+			i = ord(c)
+		except:
+			i = c
+		r = r + h[(i >> 4) & 0xF] + h[i & 0xF]
+	return r
+
+def generateGUID(name):
+	"""This generates a dummy GUID for the sln file to use.  It is
+	based on the MD5 signatures of the sln filename plus the name of
+	the project.  It basically just needs to be unique, and not
+	change with each invocation."""
+	d = _hexdigest(createMd5(str(name).encode()).digest()).upper()
+	# convert most of the signature to GUID form (discard the rest)
+	d = "{" + d[:8] + "-" + d[8:12] + "-" + d[12:16] + "-" + d[16:20] + "-" + d[20:32] + "}"
+	return d
+
+
+
+class XmlFile:
+	def __init__(self):
+		self.document = Document()
+
+	def _add(self, node, child_node, value = None):
+		def setAttributes(node, attrs):
+			for k, v in attrs.items():
+				node.setAttribute(k, v)
+		el = self.document.createElement(child_node)
+		if (value):
+			if type(value) == type(str()):
+				el.appendChild(self.document.createTextNode(value))
+			elif type(value) == type(dict()):
+				setAttributes(el, value)
+		node.appendChild(el)
+		return el
+
+	def write(self, node):
+		try:
+			xml = node.read()
+		except IOError:
+			xml = ''
+		newxml = self.document.toxml()
+		if xml != newxml:
+			Logs.pprint('NORMAL', 'writing %s' % node.name)
+			node.write(newxml)
+
+class Solution:
+	def __init__(self, appname, version, version_number, version_name, use_folders):
+		pass
+
+	def write(self, node):
+		pass
+
+class VCproj:
+	extensions = ['vcproj']
+	def __init__(self, task_gen, version, version_project):
+		self.vcproj = XmlFile()
+
+	def write(self, node):
+		self.vcproj.write(node)
+
+class VCxproj:
+	extensions = ['vcxproj', 'vcxproj.filters']
+	def __init__(self, task_gen, version, version_project):
+		self.vcxproj = XmlFile()
+		self.vcxfilters = XmlFile()
+		self.guid = generateGUID(task_gen.target)
+		project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+		configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
+				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
+				self.vcxproj._add(config, 'Platform', 'Win32')
+		globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
+		self.vcxproj._add(globals, 'ProjectGUID', self.guid)
+		self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
+		self.vcxproj._add(globals, 'RootNamespace', task_gen.target)
+		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
+		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
+		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
+		self.vcxproj._add(configuration)
+		project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':version_project[0], 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+
+	def write(self, node):
+		self.vcxproj.write(node)
+		self.vcxfilters.write(node.change_ext('.%s'%self.__class__.extensions[1]))
+
+
 
 class vs2003(Build.BuildContext):
 	cmd = 'vs2003'
 	fun = 'build'
-	version = (('Visual Studio .NET 2003', '8.00', False), (vcproj.VCproj, '7.10'))
+	version = (('Visual Studio .NET 2003', '8.00', False), (VCproj, '7.10'))
 
 	def execute(self):
 		"""
@@ -16,32 +122,22 @@ class vs2003(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
+		self.env.TOOLCHAIN = "$(Platform)"
+		self.env.VARIANT = "$(Configuration)"
 		self.recurse([self.run_dir])
 
 		version = self.__class__.cmd
 		version_name, version_number, folders = self.__class__.version[0]
 		klass, version_project = self.__class__.version[1]
+
 		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 
-		node = self.srcnode.make_node(appname+'.'+self.__class__.cmd+'.sln')
+		solution_node = self.srcnode.make_node(appname+'.'+version+'.sln')
 		projects = self.srcnode.make_node('.build').make_node(version)
 		projects.mkdir()
 
 
-		s = solution.Solution(appname, node.abspath(), version, version_number, version_name, folders)
-		s.writeHeader()
-
-		project_list = []
-		allplatforms = []
-		for i in self.env.ALL_VARIANTS:
-			env = self.all_envs[i]
-			allplatforms.append((i, mak.module.coptions()))
-		for name,action in [('update projects', self.__class__.cmd)]:
-			node = projects.make_node("%s%s" % (name, klass.extensions[0]))
-			project = klass(node.path_from(self.srcnode), name, '', version, version_project, action, self.all_envs)
-			project.writeHeader(allplatforms, self.game.name)
-			project.writeFooter()
-			project_list.append((project, node))
+		solution = Solution(appname, version, version_number, version_name, folders)
 
 		for g in self.groups:
 			for tg in g:
@@ -49,58 +145,47 @@ class vs2003(Build.BuildContext):
 					continue
 				tg.post()
 
-				allplatforms = []
-				for i in self.env.ALL_VARIANTS:
-					env = self.all_envs[i]
-					options = tg.options[i]
-					allplatforms.append((i, options))
+				node = projects.make_node("%s.%s" % (tg.target, klass.extensions[0]))
+				project = klass(tg, version, version_project)
+				project.write(node)
 
-				node = projects.make_node("%s.%s%s" % (tg.category, tg.name, klass.extensions[0]))
-				project = klass(node.path_from(self.srcnode), tg.name, tg.category, version, version_project, tg.type, self.all_envs)
-				project.writeHeader(allplatforms, self.game.name)
-				project.addDirectory(tg.sourcetree)
-				project.writeFooter()
-				project_list.append((project, node))
-
-		for project, node in project_list:
-			s.addProject(project, node.path_from(self.srcnode))
-		s.writeFooter(self.env.ALL_VARIANTS)
+		solution.write(solution_node)
 
 class vs2005(vs2003):
 	cmd = 'vs2005'
 	fun = 'build'
-	version =	(('Visual Studio 2005', '9.00', True),(vcproj.VCproj, '8.00'))
+	version =	(('Visual Studio 2005', '9.00', True),(VCproj, '8.00'))
 
 class vs2005e(vs2003):
 	cmd = 'vs2005e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2005', '9.00', False),(vcproj.VCproj, '8.00'))
+	version =	(('Visual C++ Express 2005', '9.00', False),(VCproj, '8.00'))
 
 
 class vs2008(vs2003):
 	cmd = 'vs2008'
 	fun = 'build'
-	version =	(('Visual Studio 2008', '10.00', True),(vcproj.VCproj, '9.00'))
+	version =	(('Visual Studio 2008', '10.00', True),(VCproj, '9.00'))
 
 class vs2008e(vs2003):
 	cmd = 'vs2008e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2008', '10.00', False),(vcproj.VCproj, '9.00'))
+	version =	(('Visual C++ Express 2008', '10.00', False),(VCproj, '9.00'))
 
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
-	version =	(('Visual Studio 2010', '11.00', True),(vcxproj.VCxproj, ('4.0','10.0')))
+	version =	(('Visual Studio 2010', '11.00', True),(VCxproj, ('4.0','10.0')))
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
-	version =	(('Visual C++ Express 2010', '11.00', False),(vcxproj.VCxproj, ('4.0','10.0')))
+	version =	(('Visual C++ Express 2010', '11.00', False),(VCxproj, ('4.0','10.0')))
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	version =	(('Visual Studio 11', '12.00', True),(vcxproj.VCxproj, ('4.5','11.0')))
+	version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
 
 class vs2012(vs11):
 	cmd = 'vs2012'
@@ -109,7 +194,7 @@ class vs2012(vs11):
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
-	version =	(('Visual C++ Express 11', '12.00', False),(vcxproj.VCxproj, ('4.5','11.0')))
+	version =	(('Visual C++ Express 11', '12.00', False),(VCxproj, ('4.5','11.0')))
 
 class vs2012e(vs11e):
 	cmd = 'vs2012e'
