@@ -36,7 +36,29 @@ def generateGUID(name):
 	d = "{" + d[:8] + "-" + d[8:12] + "-" + d[12:16] + "-" + d[16:20] + "-" + d[20:32] + "}"
 	return d
 
+def gather_includes_defines(task_gen):
+	defines = getattr(task_gen, 'defines', [])
+	includes = getattr(task_gen, 'includes', [])
+	seen = []
+	use = getattr(task_gen, 'use', [])[:]
+	while use:
+		name = use.pop()
+		if name not in seen:
+			try:
+				t = task_gen.bld.get_tgen_by_name(name)
+			except:
+				pass
+			else:
+				use = use + getattr(t, 'use', [])
+				includes = includes + getattr(t, 'includes ', [])
+				defines = defines + getattr(t, 'defines ', [])
+	return includes, defines
 
+def path_from(path, bld):
+	if isinstance(path, str):
+		return path
+	else:
+		return '$(SolutionDir)%s' % path.path_from(bld.srcnode)
 
 class XmlFile:
 	def __init__(self):
@@ -69,6 +91,9 @@ class Solution:
 	def __init__(self, appname, version, version_number, version_name, use_folders):
 		pass
 
+	def add(self, task_gen, project):
+		pass
+
 	def write(self, node):
 		pass
 
@@ -91,7 +116,7 @@ class VCxproj:
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
-				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
+				self.vcxproj._add(config, 'Configuration', '%s/%s' % (toolchain, variant))
 				self.vcxproj._add(config, 'Platform', 'Win32')
 		globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
 		self.vcxproj._add(globals, 'ProjectGUID', self.guid)
@@ -100,7 +125,27 @@ class VCxproj:
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
-		self.vcxproj._add(configuration)
+		self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
+		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)build\\$(Configuration)\\')
+		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir)build\\$(Configuration)\\')
+		self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
+
+		includes, defines = gather_includes_defines(task_gen)
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s/%s'" % (toolchain, variant)})
+				self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf install:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
+				self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s install:%s:%s --targets=%s' % (toolchain, variant, toolchain, variant, task_gen.target))
+				self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
+				if 'cxxprogram' in task_gen.features:
+					self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+				self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
+				self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
+		files = self.vcxproj._add(project, 'ItemGroup')
+		for file in getattr(task_gen, 'all_sources', []) or getattr(task_gen, 'source', []):
+			self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % file.path_from(task_gen.bld.srcnode)})
+		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
 		project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':version_project[0], 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
 
 	def write(self, node):
@@ -148,6 +193,7 @@ class vs2003(Build.BuildContext):
 				node = projects.make_node("%s.%s" % (tg.target, klass.extensions[0]))
 				project = klass(tg, version, version_project)
 				project.write(node)
+				solution.add(tg, project)
 
 		solution.write(solution_node)
 
