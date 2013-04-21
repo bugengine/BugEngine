@@ -6,6 +6,7 @@ from waflib.TaskGen import feature, before_method, after_method
 @conf
 def set_windows_options(self):
 	self.env.VALID_PLATFORMS = ['windows', 'pc']
+	self.env.LINK_WITH_PROGRAM = True
 
 	self.env.DEPLOY_BINDIR = ''
 	self.env.DEPLOY_RUNBINDIR = ''

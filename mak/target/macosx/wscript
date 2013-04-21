@@ -1,9 +1,68 @@
-# set MacOS specific options
+# set MacOS X specific options
 
 import os
-from waflib import Context, Errors
+from waflib import Context, Errors, Logs, Utils
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Configure import conf
+
+
+@conf
+def set_macosx_options(self):
+	self.env.VALID_PLATFORMS = ['macosx', 'darwin']
+
+	appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+	self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
+	self.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+	self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+	self.env.DEPLOY_LIBDIR = 'lib'
+	self.env.DEPLOY_INCLUDEDIR = 'include'
+	self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'Contents', 'share')
+	self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'plugin')
+	self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'kernel')
+
+	from waflib import Options
+	sdks = []
+	seen = []
+	for path in Options.options.xcode_sdks.split(','):
+		for sdk_relative_path in [os.path.join('Platforms', 'MacOSX.platform', 'Developer', 'SDKs'), 'SDKs']:
+			sdks_path = os.path.join(path, sdk_relative_path)
+			try:
+				sdk_list = os.listdir(sdks_path)
+			except OSError:
+				pass
+			else:
+				for sdk in sdk_list:
+					sdk_name,_ = os.path.splitext(sdk)
+					if sdk.startswith('MacOSX'):
+						sdk_version = sdk_name[6:]
+						if sdk_version not in seen:
+							seen.append(sdk_version)
+							sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
+
+	sdks.sort(key = lambda x: x[0])
+	for sdk, sdk_path in sdks:
+		if Options.options.macosx_sdk and not sdk.startswith(Options.options.macosx_sdk):
+			continue
+		try:
+			self.check_sdk(sdk_path, '-mmacosx-version-min=%s'%sdk)
+			break
+		except Errors.WafError:
+			continue
+	else:
+		raise Errors.WafError('Could not find any suitable SDK')
+
+	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
+	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
+	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+
+@conf
+def set_macosx_clang_options(self, arch):
+	self.env.CFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
+	self.env.CXXFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
+	self.env.LINKFLAGS = ['-arch', arch]
+	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 def options(opt):
 	opt.add_option( '--macosx-sdk',
@@ -14,32 +73,40 @@ def options(opt):
 
 def configure(conf):
 	seen = set([])
-	for version, config in conf.env.MSVC_INSTALLED_VERSIONS:
-		version_name, version_number = version.split()
-		if version_name in ['intel', 'wsdk', 'msvc', 'winphone']:
-			for target_arch, infos in config:
-				if (target_arch, version) in seen:
-					continue
-				seen.add((target_arch, version))
-				arch, (bindir, libdir, includedir) = infos
-				toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
-				env = conf.env.derive()
-				conf.setenv(toolchain, env)
-				try:
-					conf.env.MSVC_VERSIONS = [version]
-					conf.env.MSVC_TARGETS = [target_arch]
-					conf.load('msvc')
-					conf.set_windows_options()
-					conf.set_windows_msvc_options()
-					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+	supported_architectures = {
+		'x86':		'x86',
+		'i386':		'x86',
+		'x86_64':	'amd64',
+		'x64':		'amd64',
+		'amd64':	'amd64',
+		'ppc':		'powerpc',
+		'powerpc':	'powerpc',
+		'ppc64':	'powerpc64',
+		'powerpc64':'powerpc64',
+	}
+	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		if target.find('darwin') != -1 and supported_architectures.has_key(arch):
+			real_arch = supported_architectures[arch]
+			toolchain = '%s-%s-%s-%s'%('macosx', arch, 'clang', version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			try:
+				conf.load_clang(directory)
+				conf.set_macosx_clang_options(arch)
+				conf.set_macosx_options()
+				conf.add_toolchain('macosx', arch, 'clang', version, real_arch)
+				conf.variant = ''
+				Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+			except Errors.WafError as e:
+				conf.variant = ''
+				Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+			except Exception as e:
+				conf.variant = ''
+				Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+				raise
 
 def build(bld):
-	bld.platforms.append(bld.external('3rdparty.cocoa').target)
+	bld.platforms.append(bld.external('3rdparty.cocoa'))
 
 def plugins(bld):
 	pass

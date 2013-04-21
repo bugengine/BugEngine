@@ -150,8 +150,10 @@ def check_sdk(self, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE)
 		sdk=sdk,
 		version=version,
 		use=['debug'],
+		errmsg='not usable',
 		envname=self.env.TOOLCHAIN)
 
 
 def configure(conf):
 	pass
+
