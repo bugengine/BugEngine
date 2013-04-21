@@ -4,11 +4,39 @@ import os
 
 
 
+
+
+def allarchs(arch):
+	if arch == 'x86':
+		return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
+	elif arch == 'amd64':
+		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
+	elif arch == 'arm':
+		return [([], 'arm')]
+	elif arch == 'mips':
+		return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
+	elif arch == 'mips64':
+		return [(['-m32'], 'mips'), (['-m64'], 'mips64')]
+	elif arch == 'mipsel':
+		return [(['-m64'], 'mipsel64'), (['-m32'], 'mipsel')]
+	elif arch == 'mipsel64':
+		return [(['-m32'], 'mipsel'), (['-m64'], 'mipsel64')]
+	elif arch == 'powerpc' or arch == 'ppc':
+		return [(['-m64'], arch+'64'), (['-m32'], arch)]
+	elif arch == 'powerpc64' or arch == 'ppc64':
+		return [(['-m32'], arch[:-2]), (['-m64'], arch)]
+	elif arch == 'spu':
+		return [[], 'spu']
+	else:
+		warn('unknown architecture : %s' % arch)
+		return [([], arch)]
+
+
 @conf
 def parse_gcc_target(conf, target):
 	for gccname,aname in conf.gcc_architectures:
 		if target.find(gccname) != -1:
-				return aname
+			return aname
 
 
 @conf
@@ -40,33 +68,6 @@ def get_native_icc_target(conf, icc):
 	return (target+'-'+arch, version)
 
 
-
-@conf
-def get_native_clang_target(conf, clang):
-	cmd = [clang, '-v']
-	try:
-		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-		out = p.communicate()[1]
-	except:
-		return (None, None)
-
-	if not isinstance(out, str):
-		out = out.decode(sys.stdout.encoding)
-	out = out.split('\n')
-	target = None
-	version = None
-
-	for line in out:
-		if line.startswith('Target:'):
-			target = line.split()[1]
-		if line.find('clang version ') != -1:
-			line = line.split()
-			while line[0] != 'clang' and line[1] != 'version':
-				line = line[1:]
-			version = line[2].split('-')[0]
-	return (target, version)
-
-
 def add_ld_so(conf, filename, paths):
 	f = open(file, 'r')
 	for line in f:
@@ -79,6 +80,40 @@ def add_ld_so(conf, filename, paths):
 			continue
 		elif os.path.isdir(line):
 			paths.add(line)
+
+@conf
+def detect_gcc_archs_from_path(conf, name, libdir, gcc, gxx, version, target, arch):
+	bindir = os.path.normpath(os.path.join(libdir, '..', '..', 'bin'))
+	versionsmall = '.'.join(version.split('.')[0:2])
+	versionverysmall = ''.join(version.split('.')[0:2])
+
+	cc = cxx = None
+	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall]:
+		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False, silent=True)
+		if cc:
+			break
+	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
+		cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False, silent=True)
+		if cxx:
+			break
+
+	del conf.env['CC']
+	del conf.env['CXX']
+
+	if cc and cxx:
+		found = False
+		for gcc_option, gcc_arch in allarchs(arch):
+			cmd = [cc] + gcc_option + ['-dM', '-E', '-']
+			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+			p.stdin.write('\n'.encode())
+			out = p.communicate()[0]
+			if p.returncode != 0:
+				continue
+			found = True
+			conf.env.GCC_TARGETS.append((name, bindir, cc, cxx, version, target, gcc_arch, gcc_option))
+		if not found:
+			conf.env.GCC_TARGETS.append((name, bindir, cc, cxx, version, target, arch, []))
+
 
 @conf
 def detect_gcc_from_path(conf, path, seen):
@@ -103,11 +138,13 @@ def detect_gcc_from_path(conf, path, seen):
 				arch = conf.parse_gcc_target(target) or 'unknown'
 				if libdir.find('llvm') != -1:
 					gcc, gxx = 'llvm-gcc', 'llvm-g++'
+					name = 'llvm'
 				else:
 					gcc, gxx = 'gcc', 'g++'
+					name = 'gcc'
 				if (gcc, gxx, version, target, arch) not in seen:
+					conf.detect_gcc_archs_from_path(name, libdir, gcc, gxx, version, target, arch)
 					seen.append((gcc, gxx, version, target, arch))
-					conf.env.GCC_TARGETS.append((version, libdir, target, arch, gcc, gxx))
 
 @conf
 def detect_gcc(conf):
@@ -137,47 +174,11 @@ def detect_gcc(conf):
 				conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
 	conf.env.GCC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
 
-	for dir in paths or [i for i in os.environ['PATH'].split(':') if i not in paths]:
-		if conf.find_program('icc', var='ICC', path_list=[dir], mandatory=False, silent = True):
-			toolchaindir = os.path.split(conf.env.ICC)[0]
-			target, version = conf.get_native_icc_target(conf.env.ICC)
-			arch = conf.parse_gcc_target(target) or 'unknown'
-			conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'icc', 'icpc'))
-			del conf.env['ICC']
-
-	if conf.find_program('clang', var='CLANG', mandatory=False, silent = True):
-		toolchaindir = os.path.split(conf.env.CLANG)[0]
-		target, version = conf.get_native_clang_target(conf.env.CLANG)
-		arch = conf.parse_gcc_target(target) or 'unknown'
-		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'clang', 'clang++'))
-		del conf.env['CLANG']
-
-
-def allarchs(arch):
-	if arch == 'x86':
-		return [('-m64', 'amd64'), ('-m32', 'x86')]
-	elif arch == 'amd64':
-		return [('-m32', 'x86'), ('-m64', 'amd64')]
-	elif arch == 'arm':
-		return [('', 'arm')]
-	elif arch == 'mips':
-		return [('-m64', 'mips64'), ('-m32', 'mips')]
-	elif arch == 'mips64':
-		return [('-m32', 'mips'), ('-m64', 'mips64')]
-	elif arch == 'mipsel':
-		return [('-m64', 'mipsel64'), ('-m32', 'mipsel')]
-	elif arch == 'mipsel64':
-		return [('-m32', 'mipsel'), ('-m64', 'mipsel64')]
-	elif arch == 'powerpc' or arch == 'ppc':
-		return [('-m64', arch+'64'), ('-m32', arch)]
-	elif arch == 'powerpc64' or arch == 'ppc64':
-		return [('-m32', arch[:-2]), ('-m64', arch)]
-	elif arch == 'spu':
-		return ['', 'spu']
-	else:
-		warn('unknown architecture : %s' % arch)
-		return [('', arch)]
-
+@conf
+def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
+	self.env.CC = gcc
+	self.env.CXX = gxx
+	self.load('gcc gxx')
 
 def options(opt):
 	pass

@@ -9,7 +9,7 @@ from waflib.Configure import conf
 
 @conf
 def set_macosx_options(self):
-	self.env.VALID_PLATFORMS = ['macosx', 'darwin']
+	self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
 
 	appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 	self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
@@ -17,9 +17,9 @@ def set_macosx_options(self):
 	self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
 	self.env.DEPLOY_LIBDIR = 'lib'
 	self.env.DEPLOY_INCLUDEDIR = 'include'
-	self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'Contents', 'share')
-	self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'plugin')
-	self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'kernel')
+	self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
+	self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'plugin')
+	self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'kernel')
 
 	from waflib import Options
 	sdks = []
@@ -41,7 +41,7 @@ def set_macosx_options(self):
 							sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
 	sdks.sort(key = lambda x: x[0])
-	for sdk, sdk_path in sdks:
+	for sdk, sdk_path in sdks[::-1]:
 		if Options.options.macosx_sdk and not sdk.startswith(Options.options.macosx_sdk):
 			continue
 		try:
@@ -55,6 +55,15 @@ def set_macosx_options(self):
 	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+
+@conf
+def set_macosx_gcc_options(self, arch):
+	self.env.CFLAGS = ['-fPIC', '-fvisibility=hidden']
+	self.env.CXXFLAGS = ['-fPIC', '-fvisibility=hidden']
+	self.env.LINKFLAGS = []
+	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+
 
 @conf
 def set_macosx_clang_options(self, arch):
@@ -84,6 +93,27 @@ def configure(conf):
 		'ppc64':	'powerpc64',
 		'powerpc64':'powerpc64',
 	}
+	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+		if target.find('darwin') != -1 and supported_architectures.has_key(arch):
+			real_arch = supported_architectures[arch]
+			toolchain = '%s-%s-%s-%s'%('macosx', arch, name, version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			try:
+				conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+				conf.set_macosx_gcc_options(arch)
+				conf.set_macosx_options()
+				conf.add_toolchain('macosx', arch, name, version, real_arch)
+				conf.variant = ''
+				Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+			except Errors.WafError as e:
+				conf.variant = ''
+				Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+			except Exception as e:
+				conf.variant = ''
+				Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+				raise
+
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if target.find('darwin') != -1 and supported_architectures.has_key(arch):
 			real_arch = supported_architectures[arch]
@@ -110,4 +140,13 @@ def build(bld):
 
 def plugins(bld):
 	pass
+
+@feature('cshlib', 'cxxshlib')
+@after_method('apply_link')
+def set_osx_shlib_name(self):
+	if 'macosx' in self.env.VALID_PLATFORMS:
+		if 'plugin' in self.features:
+			self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
+		elif 'kernel' in self.features:
+			self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
 
