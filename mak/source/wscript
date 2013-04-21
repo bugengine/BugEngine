@@ -1,4 +1,5 @@
 import os
+from waflib import Task, Options
 from waflib.TaskGen import taskgen_method, before_method, after_method, feature, extension
 
 @taskgen_method
@@ -45,9 +46,13 @@ def install_data(self, node):
 	data_node = self.bld.bugenginenode.make_node('src/%s/data' % self.target.replace('.', '/'))
 	self.bld.install_as(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_DATADIR, node.path_from(data_node)), node)
 
+@extension('.plist')
+def install_plist(self, node):
+	self.bld.install_files(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_ROOTDIR), node)
+
 @extension('.dll', '.so')
 def install_binary(self, node):
-	self.bld.install_as(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_RUNBINDIR), node)
+	self.bld.install_files(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_RUNBINDIR), node)
 
 def options(opt):
 	pass
@@ -59,4 +64,68 @@ def configure(conf):
 
 def build(bld):
 	pass
+
+
+from waflib.Tools import c,cxx
+
+def create_master_file(task):
+	with open(task.outputs[0].abspath(), 'w') as f:
+		for src in task.inputs:
+			f.write('#include "%s"\n' % src.path_from(task.generator.bld.bldnode).replace('\\','/'))
+def master_sig_deps(task):
+	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
+		task.m.update(f)
+		task.m.update(b';')
+MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
+MasterTask.sig_explicit_deps = master_sig_deps
+
+@extension('.c')
+def c_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		try:
+			mastertask_c = self.mastertasks_c[-1]
+			if len(mastertask_c.inputs) <= 20:
+				mastertask_c.set_inputs([node])
+			else:
+				output = self.path.find_or_declare(self.target+'-c-%d-master.c' % len(self.mastertasks_c))
+				mastertask_c = self.create_task('master', [node], [output])
+				self.mastertasks_c.append(mastertask_c)
+				self.create_compiled_task('c', output)
+		except:
+			output = self.path.find_or_declare(self.target+'-c-0-master.c')
+			mastertask_c = self.create_task('master', [node], [output])
+			self.mastertasks_c = [mastertask_c]
+			self.create_compiled_task('c', output)
+	else:
+		self.create_compiled_task('c', node)
+
+@extension('.cc', '.cxx', '.cpp')
+def cc_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		if node.name.endswith('-instances.cc'):
+			try:
+				self.instancetask_cxx.set_inputs([node])
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-instances-master.cc')
+				self.instancetask_cxx = self.create_task('master', [node], [output])
+				self.create_compiled_task('cxx', output)
+		else:
+			try:
+				mastertask_cxx = self.mastertasks_cxx[-1]
+				if len(mastertask_cxx.inputs) <= 20:
+					mastertask_cxx.set_inputs([node])
+				else:
+					output = self.path.find_or_declare(self.target+'-cxx-%d-master.cc' % len(self.mastertasks_cxx))
+					mastertask_cxx = self.create_task('master', [node], [output])
+					self.mastertasks_cxx.append(mastertask_cxx)
+					self.create_compiled_task('cxx', output)
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-0-master.cc')
+				mastertask_cxx = self.create_task('master', [node], [output])
+				self.mastertasks_cxx = [mastertask_cxx]
+				self.create_compiled_task('cxx', output)
+	else:
+		self.create_compiled_task('cxx', node)
+
+
 

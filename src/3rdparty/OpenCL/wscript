@@ -4,9 +4,9 @@ def options(opt):
 	pass
 
 def setup(conf):
-	if 'darwin' in conf.env.PLATFORM:
-		conf.check_framework('OpenCL', var='CLFramework')
-		conf.find_program('openclc', mandatory=False)
+	if 'darwin' in conf.env.VALID_PLATFORMS:
+		if conf.check_framework('OpenCL', var='CLFramework'):
+			conf.find_program('openclc', mandatory=False)
 	else:
 		conf.check_lib('OpenCL', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])
 

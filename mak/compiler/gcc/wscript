@@ -1,5 +1,7 @@
+from waflib import Utils
 from waflib.Configure import conf
 import os
+
 
 
 @conf
@@ -62,7 +64,6 @@ def get_native_clang_target(conf, clang):
 			while line[0] != 'clang' and line[1] != 'version':
 				line = line[1:]
 			version = line[2].split('-')[0]
-	print (target, version)
 	return (target, version)
 
 
@@ -106,11 +107,12 @@ def detect_gcc_from_path(conf, path, seen):
 					gcc, gxx = 'gcc', 'g++'
 				if (gcc, gxx, version, target, arch) not in seen:
 					seen.append((gcc, gxx, version, target, arch))
-					conf.env['GCC_TARGETS'].append((version, libdir, target, arch, gcc, gxx))
+					conf.env.GCC_TARGETS.append((version, libdir, target, arch, gcc, gxx))
 
 @conf
 def detect_gcc(conf):
 	compilers_gcc_found = []
+	conf.env.GCC_TARGETS = []
 	bindirs = os.environ['PATH'].split(':')
 	paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
 	paths = set([path for path in paths if os.path.isdir(path)])
@@ -133,7 +135,7 @@ def detect_gcc(conf):
 		for lib in os.listdir(path):
 			if lib.startswith('gcc'):
 				conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
-	conf.env['GCC_TARGETS'].sort(key= lambda x: (x[2], x[3], x[0]))
+	conf.env.GCC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
 
 	for dir in paths or [i for i in os.environ['PATH'].split(':') if i not in paths]:
 		if conf.find_program('icc', var='ICC', path_list=[dir], mandatory=False, silent = True):
@@ -149,6 +151,32 @@ def detect_gcc(conf):
 		arch = conf.parse_gcc_target(target) or 'unknown'
 		conf.env['GCC_TARGETS'].append((version, toolchaindir, target, arch, 'clang', 'clang++'))
 		del conf.env['CLANG']
+
+
+def allarchs(arch):
+	if arch == 'x86':
+		return [('-m64', 'amd64'), ('-m32', 'x86')]
+	elif arch == 'amd64':
+		return [('-m32', 'x86'), ('-m64', 'amd64')]
+	elif arch == 'arm':
+		return [('', 'arm')]
+	elif arch == 'mips':
+		return [('-m64', 'mips64'), ('-m32', 'mips')]
+	elif arch == 'mips64':
+		return [('-m32', 'mips'), ('-m64', 'mips64')]
+	elif arch == 'mipsel':
+		return [('-m64', 'mipsel64'), ('-m32', 'mipsel')]
+	elif arch == 'mipsel64':
+		return [('-m32', 'mipsel'), ('-m64', 'mipsel64')]
+	elif arch == 'powerpc' or arch == 'ppc':
+		return [('-m64', arch+'64'), ('-m32', arch)]
+	elif arch == 'powerpc64' or arch == 'ppc64':
+		return [('-m32', arch[:-2]), ('-m64', arch)]
+	elif arch == 'spu':
+		return ['', 'spu']
+	else:
+		warn('unknown architecture : %s' % arch)
+		return [('', arch)]
 
 
 def options(opt):

@@ -1,0 +1,86 @@
+from waflib import Utils
+from waflib.Configure import conf
+import os
+
+all_clang_archs = [
+	'x86', 'i386',
+	'x86_64', 'amd64', 'x64',
+	'arm',
+	'ppc', 'powerpc',
+	'ppc64', 'powerpc64',
+	'mips', 'mipsel'
+]
+
+@conf
+def find_clang_archs(self, clang):
+	result = []
+	for arch in all_clang_archs:
+		filename = os.path.join(self.bldnode.abspath(), 'main.c')
+		with open(filename, 'w') as f:
+			f.write('int main(int, const char**) { return 0; }')
+			cmd = [clang, '-arch', arch, '-c', filename]
+			try:
+				p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+				p.stdin.write('\n'.encode())
+				out = p.communicate()[0]
+			except Exception as e:
+				print(e)
+				continue
+			else:
+				if p.returncode == 0:
+					result.append(arch)
+	return result
+
+
+@conf
+def get_native_clang_target(conf, clang):
+	cmd = [clang, '-v']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		out = p.communicate()[1]
+	except:
+		return (None, None)
+
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding)
+	out = out.split('\n')
+	target = None
+	version = None
+
+	for line in out:
+		if line.startswith('Target:'):
+			target = line.split()[1]
+		if line.find('clang version ') != -1:
+			line = line.split()
+			while line[0] != 'clang' and line[1] != 'version':
+				line = line[1:]
+			version = line[2].split('-')[0]
+	return (target, version)
+
+
+@conf
+def detect_clang(conf):
+	bindirs = os.environ['PATH'].split(':')
+	conf.env.CLANG_TARGETS = []
+
+	for path in bindirs:
+		if conf.find_program('clang', var='CLANG', path_list=[path], mandatory=False, silent = True):
+			toolchaindir = os.path.split(conf.env.CLANG)[0]
+			target, version = conf.get_native_clang_target(conf.env.CLANG)
+			for arch in conf.find_clang_archs(conf.env.CLANG):
+				conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
+			del conf.env['CLANG']
+
+@conf
+def load_clang(conf, directory):
+	conf.find_program('clang', var='CC', path_list=[directory], silent=True)
+	conf.find_program('clang++', var='CXX', path_list=[directory], silent=True)
+	conf.load('gcc gxx')
+
+def options(opt):
+	pass
+
+def configure(conf):
+	conf.detect_clang()
+
+
