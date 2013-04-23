@@ -5,10 +5,11 @@ import os
 
 
 USE_LIBRARY_CODE="""
+%(include)s
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-int main(int argc, char *argv[]) { return 0; }
+int main(int argc, char *argv[]) {%(function)s return 0; }
 """
 
 USE_SDK_CODE="""
@@ -40,6 +41,7 @@ def link_framework_test(self):
 	env = self.env.derive()
 	env.detach()
 	env.FRAMEWORK = self.frameworks
+	env.append_unique('CXXFLAGS', ['-F%s' % f for f in self.frameworks])
 	if self.sdk:
 		env.append_unique('CXXFLAGS', ['-isysroot', self.sdk])
 		env.append_unique('LINKFLAGS', ['-isysroot', self.sdk, '-L%s/usr/lib'%self.sdk])
@@ -50,7 +52,7 @@ def link_framework_test(self):
 
 
 @conf
-def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], functions=[], code=USE_LIBRARY_CODE):
 	def cut(string):
 		if len(string) > 19:
 			return string[0:17]+'...'
@@ -67,7 +69,10 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], code=USE_LIBRAR
 			msg='check for libraries %s' %cut(','.join(libname)),
 			libname=libname,
 			libpath=libpath,
-			code=code,
+			code=code % {
+					'include': '\n'.join(['#include <%s>'%i for i in includes]),
+					'function': '\n'.join(['(void)&%s;'%f for f in functions])
+				},
 			includepath=includepath,
 			use=['debug'],
 			envname=self.env.TOOLCHAIN)
@@ -106,7 +111,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 	return self.env[var]
 
 @conf
-def check_framework(self, frameworks, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+def check_framework(self, frameworks, var='', libpath=[], includepath=[], includes=[], functions=[], code=USE_LIBRARY_CODE):
 	def cut(string):
 		if len(string) > 19:
 			return string[0:17]+'...'
@@ -124,7 +129,10 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], code=U
 			libname=[],
 			frameworks=frameworks,
 			libpath=libpath,
-			code=code,
+			code=code % {
+					'include': '\n'.join(['#include <%s>'%i for i in includes]),
+					'function': '\n'.join(['(void)&%s;'%f for f in functions])
+				},
 			includepath=includepath,
 			sdk='',
 			version='',
