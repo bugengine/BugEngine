@@ -2,8 +2,8 @@ from waflib.TaskGen import feature
 from waflib.Configure import conf
 from waflib import Context, TaskGen, Build
 import os, sys, random, time
-import mak
 from xml.dom.minidom import Document
+
 
 x = 2000
 y = 10500999
@@ -239,18 +239,24 @@ class PBXGroup(XCodeNode):
 		self.children = []
 		self.name = name
 		self.sourceTree = sourcetree
+		self._groups = {}
 
-	def add(self, sourcetree, path):
-		for name,dir in sourcetree.directories.items():
-			group = PBXGroup(name)
-			self.children.append(group)
-			group.add(dir, os.path.join(path, dir.prefix))
-		for file in sourcetree.files:
-			if not file.generated():
-				ref = PBXFileReference(file.filename, os.path.join(path, file.filename))
-				self.children.append(ref)
-				file.ref = ref
+	def add_group(self, group):
+		self._groups[group.name] = group
+		self.children.append(group)
 		self.sort()
+		return group
+
+	def add(self, root_node, source_node):
+		for f in source_node.listdir():
+			if os.path.isdir(os.path.join(source_node.abspath(), f)):
+				try:
+					g = self[f]
+				except KeyError:
+					g = self.add_group(PBXGroup(f))
+				g.add(root_node, source_node.make_node(f))
+		self.sort()
+		return []
 
 	def sort(self):
 		self.children.sort(key = lambda x: x.__class__.sort_prefix+x.name)
@@ -269,27 +275,24 @@ class PBXBuildFile(XCodeNode):
 
 # Targets
 class PBXLegacyTarget(XCodeNode):
-	def __init__(self, toolchain, action, target=''):
+	def __init__(self, action, target=''):
 		XCodeNode.__init__(self)
 		self.buildConfigurationList = XCConfigurationList([
 			XCBuildConfiguration('debug', {}),
 			XCBuildConfiguration('profile', {}),
 			XCBuildConfiguration('final', {}),
 			])
-		if not toolchain:
-			self.buildArgumentsString = "%s %s%s-${CONFIG}" % (sys.argv[0], action)
-		else:
-			self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
+		self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
 		self.buildPhases = []
 		self.buildToolPath = sys.executable
 		self.buildWorkingDirectory = ""
 		self.dependencies = []
-		self.name = toolchain or action
+		self.name = action
 		self.productName = target or action
 		self.passBuildSettingsInEnvironment = 0
 
 class PBXShellScriptBuildPhase(XCodeNode):
-	def __init__(self, action, toolchain):
+	def __init__(self, action):
 		XCodeNode.__init__(self)
 		self.buildActionMask = 2147483647
 		self.files = []
@@ -297,22 +300,14 @@ class PBXShellScriptBuildPhase(XCodeNode):
 		self.outputPaths = []
 		self.runOnlyForDeploymentPostProcessing = 0
 		self.shellPath = "/bin/sh"
-		self.shellScript = "%s %s %s%s" % (sys.executable, sys.argv[0], action,  toolchain)
+		self.shellScript = "%s %s %s" % (sys.executable, sys.argv[0], action)
 
 class PBXSourcesBuildPhase(XCodeNode):
-	def __init__(self, target):
+	def __init__(self, files):
 		XCodeNode.__init__(self)
 		self.buildActionMask = 2147483647
 		self.runOnlyForDeploymentPostProcessing = 0
-		self.files = []
-		self.addFiles(target.sourcetree)
-
-	def addFiles(self, sources):
-		for name, tree in sources.directories.items():
-			self.addFiles(tree)
-		for file in sources.files:
-			if not file.generated():
-				self.files.append(PBXBuildFile(file))
+		self.files = [PBXBuildFIle(file) for file in files]
 
 class PBXNativeTarget(XCodeNode):
 	def __init__(self, name, product, productType, build, configs):
@@ -336,11 +331,10 @@ def macarch(arch, is64):
 		return 'armv6'
 	elif arch == 'x86':
 		return 'i386'
-	elif arch == 'ppc':
-		if is64:
-			return 'ppc64'
-		else:
-			return 'ppc'
+	elif arch == 'powerpc64':
+		return 'ppc64'
+	elif arch == 'powerpc':
+		return 'ppc'
 	else:
 		return arch
 
@@ -364,11 +358,6 @@ class PBXProject(XCodeNode):
 		self._output2 = PBXGroup('Dummies')
 		self.mainGroup.children.append(self._output)
 		self._output.children.append(self._output2)
-		self._groups = {}
-		for i in ['3rdparty', 'engine', 'game', 'plugin']:
-			g = PBXGroup(i)
-			self._groups[i] = g
-			self.mainGroup.children.append(g)
 
 	def write(self, file):
 		w = file.write
@@ -387,113 +376,51 @@ class PBXProject(XCodeNode):
 		w("}\n")
 
 	def add(self, bld, p, schemes, schememanagement):
-		names = p.name.split('.')
-		group = PBXGroup(names[-1])
-		group.add(p.sourcetree, p.sourcetree.prefix)
-		g = self._groups[p.category]
-		for subname in names[:-1]:
+		names = p.target.split('.')
+		group = self.mainGroup
+		for name in names:
 			try:
-				g = g[subname]
+				group = group[name]
 			except KeyError:
-				newgroup = PBXGroup(subname)
-				g.children.append(newgroup)
-				g.sort()
-				g = newgroup
-		g.children.append(group)
-		g.sort()
-		if p.type == 'waf':
-			appname = getattr(Context.g_module, 'APPNAME', 'noname')
-			for toolchain in bld.env.ALL_VARIANTS:
-				if toolchain.endswith('-debug'):
-					env = bld.all_envs[toolchain]
-					toolchain = toolchain[:-6]
-					if env.ABI == 'mach_o':
-						debug = XCBuildConfiguration('debug', {
-								'PRODUCT_NAME':appname,
-								'BUILT_PRODUCTS_DIR': env.PREFIX,
-								'CONFIGURATION_BUILD_DIR': env.PREFIX,
-								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
-								'SDKROOT': env.SDKROOT,
-								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
-						profile = XCBuildConfiguration('profile', {
-								'PRODUCT_NAME':appname,
-								'BUILT_PRODUCTS_DIR' :env.PREFIX.replace(toolchain+'-debug', toolchain+'-profile'),
-								'CONFIGURATION_BUILD_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-profile'),
-								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
-								'SDKROOT': env.SDKROOT,
-								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
-						final = XCBuildConfiguration('final', {
-								'PRODUCT_NAME':appname,
-								'BUILT_PRODUCTS_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-final'),
-								'CONFIGURATION_BUILD_DIR': env.PREFIX.replace(toolchain+'-debug', toolchain+'-final'),
-								'ARCHS':macarch(env.ARCHITECTURE, env.LP64),
-								'SDKROOT': env.SDKROOT,
-								'SUPPORTED_PLATFORMS': env.SUPPORTEDPLATFORMS})
-						build = PBXShellScriptBuildPhase('install_', toolchain+'-${CONFIG}')
-						target = PBXNativeTarget(
-								toolchain,
-								PBXFileReference(appname, appname+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
-								"com.apple.product-type.application",
-								build,
-								[debug, profile, final])
-						self.targets.append(target)
-						self._output.children.append(target.productReference)
-						scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
-					else:
-						target = PBXLegacyTarget(toolchain, 'install_', p.name)
-						self.targets.append(target)
-						scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
-					scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
-					schememanagement.add(scheme)
-		else:
-			includes=set([])
-			defines = set([])
-			for config in bld.env.ALL_VARIANTS:
-				env = bld.all_envs[config]
-				options = p.options[config]
-				for i in options.includedir:
-					if i not in includes:
-						includes.add(i)
-				for d in env.DEFINES:
-					if d not in defines:
-						defines.add(d)
-			debug = XCBuildConfiguration('debug', {
-					'PRODUCT_NAME': p.target,
-					'ARCHS':['i386'],
-					'SDKROOT': 'macosx',
-					'SUPPORTED_PLATFORMS': 'macosx',
-					'HEADER_SEARCH_PATHS': [i for i in includes],
-					'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]})
-			profile = XCBuildConfiguration('profile', {
-					'PRODUCT_NAME': p.target,
-					'ARCHS':['i386'],
-					'SDKROOT': 'macosx',
-					'SUPPORTED_PLATFORMS': 'macosx',
-					'HEADER_SEARCH_PATHS': [i for i in includes],
-					'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]})
-			final = XCBuildConfiguration('final', {
-					'PRODUCT_NAME': p.target,
-					'ARCHS':['i386'],
-					'SDKROOT': 'macosx',
-					'SUPPORTED_PLATFORMS': 'macosx',
-					'HEADER_SEARCH_PATHS': [i for i in includes],
-					'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]})
-			buildPhase = PBXSourcesBuildPhase(p)
-			target = PBXNativeTarget(
-					p.target,
-					PBXFileReference(p.target, 'lib%s.a'%p.target, 'archive.ar', 'BUILT_PRODUCTS_DIR'),
-					"com.apple.product-type.library.static",
-					buildPhase,
-					[debug, profile, final])
-			self._output2.children.append(target.productReference)
-			self.targets.append(target)
-			scheme = XCodeScheme(target._id, p.target, 'lib%s.a'%p.target, schemes.project_name, True)
-			schememanagement.add(scheme)
+				group = group.add_group(PBXGroup(name))
+
+		source_nodes = getattr(p, 'source_nodes', [])
+		sources = []
+		for source_node in source_nodes:
+			sources += group.add(bld.path, source_node)
+
+
+		includes=set([])
+		defines = set([])
+		for toolchain in bld.env.ALL_TOOLCHAINS:
+			env = bld.all_envs[toolchain]
+			includes = []
+			defines = []
+		variants = []
+		for variant in bld.env.ALL_VARIANTS:
+			variants.append(XCBuildConfiguration(variant, {
+				'PRODUCT_NAME': p.target,
+				'ARCHS':['i386'],
+				'SDKROOT': 'macosx',
+				'SUPPORTED_PLATFORMS': 'macosx',
+				'HEADER_SEARCH_PATHS': [i for i in includes],
+				'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]}))
+		buildPhase = PBXSourcesBuildPhase(sources)
+		target = PBXNativeTarget(
+				'index.'+p.target,
+				PBXFileReference(p.target, 'lib%s.a'%p.target, 'archive.ar', 'BUILT_PRODUCTS_DIR'),
+				"com.apple.product-type.library.static",
+				buildPhase,
+				variants)
+		self._output2.children.append(target.productReference)
+		self.targets.append(target)
+		scheme = XCodeScheme(target._id, 'index.'+p.target, 'lib%s.a'%p.target, schemes.project_name, True)
+		schememanagement.add(scheme)
 
 
 
-class xcode3(Build.BuildContext):
-	cmd = 'xcode3'
+class xcode(Build.BuildContext):
+	cmd = 'xcode'
 	fun = 'build'
 	version = ('Xcode 3.1', 45)
 
@@ -505,6 +432,15 @@ class xcode3(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
+		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
+		self.env.VARIANT = '$(CONFIG)'
+		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
+		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
+		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
+		self.env.DEPLOY_INCLUDEDIR = '$(DEPLOY_INCLUDEDIR)'
+		self.env.DEPLOY_DATADIR = '$(DEPLOY_DATADIR)'
+		self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
+		self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
 		self.recurse([self.run_dir])
 		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 		import getpass
@@ -529,6 +465,36 @@ class xcode3(Build.BuildContext):
 					continue
 				tg.post()
 				p.add(self, tg, schemes, schememanagement)
+
+
+		for toolchain in self.env.ALL_TOOLCHAINS:
+			env = self.all_envs['%s'%(toolchain)]
+			if env.ABI == 'mach_o':
+				variants = []
+				for variant in self.env.ALL_VARIANTS:
+					variants.append(XCBuildConfiguration(variant, {
+								'PRODUCT_NAME':appname,
+								'BUILT_PRODUCTS_DIR': 'build/%s-%s'%(toolchain, variant),
+								'CONFIGURATION_BUILD_DIR':  'build/%s-%s'%(toolchain, variant),
+								'ARCHS':macarch(env.VALID_ARCHITECTURES[0], env.LP64),
+								'SDKROOT': env.XCODE_SDKROOT,
+								'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
+				build = PBXShellScriptBuildPhase('install:'+toolchain+':${CONFIG}')
+				target = PBXNativeTarget(
+								toolchain,
+								PBXFileReference(appname, appname+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
+								"com.apple.product-type.application",
+								build,
+								variants)
+				p.targets.append(target)
+				self._output.children.append(target.productReference)
+				scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
+			else:
+				target = PBXLegacyTarget(toolchain, 'install:%s:$(CONFIG)'%toolchain)
+				p.targets.append(target)
+				scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
+				scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
+				schememanagement.add(scheme)
 
 		schememanagement.write(schemes.make_node('xcschememanagement.plist'))
 		node = project.make_node('project.pbxproj')

@@ -184,6 +184,7 @@ def options(opt):
 	pass
 
 def configure(conf):
+	conf.start_msg('Looking for gcc compilers')
 	archs = getattr(conf, 'gcc_architectures', [])
 	conf.gcc_architectures = archs + [
 		('i686-w64', 'amd64'),
@@ -203,4 +204,5 @@ def configure(conf):
 	]
 
 	conf.detect_gcc()
+	conf.end_msg('done')
 
