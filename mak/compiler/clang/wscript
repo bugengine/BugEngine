@@ -64,12 +64,15 @@ def detect_clang(conf):
 	conf.env.CLANG_TARGETS = []
 
 	for path in bindirs:
-		if conf.find_program('clang', var='CLANG', path_list=[path], mandatory=False, silent = True):
+		clang =  conf.find_program('clang', var='CLANG', path_list=[path], mandatory=False, silent = True)
+		clangxx = conf.find_program('clang++', var='CLANGXX', path_list=[path], mandatory=False, silent = True)
+		if clang and clangxx:
 			toolchaindir = os.path.split(conf.env.CLANG)[0]
 			target, version = conf.get_native_clang_target(conf.env.CLANG)
 			for arch in conf.find_clang_archs(conf.env.CLANG):
 				conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
-			del conf.env['CLANG']
+		del conf.env['CLANG']
+		del conf.env['CLANGXX']
 
 @conf
 def load_clang(conf, directory):
@@ -81,6 +84,8 @@ def options(opt):
 	pass
 
 def configure(conf):
+	conf.start_msg('Looking for clang compilers')
 	conf.detect_clang()
+	conf.end_msg('done')
 
 

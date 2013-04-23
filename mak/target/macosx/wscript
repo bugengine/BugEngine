@@ -11,6 +11,10 @@ from waflib.Configure import conf
 def set_macosx_options(self):
 	self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
 
+	self.env.XCODE_SDKROOT = 'macosx'
+	self.env.XCODE_ABI = 'mach_o'
+	self.env.XCODE_SUPPORTEDPLATFORMS = 'macosx'
+
 	appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 	self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
 	self.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
@@ -94,46 +98,56 @@ def configure(conf):
 		'powerpc64':'powerpc64',
 	}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
-		if target.find('darwin') != -1 and supported_architectures.has_key(arch):
+		position = target.find('darwin')
+		if position != -1 and supported_architectures.has_key(arch):
+			os = 'macosx'
+			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = supported_architectures[arch]
-			toolchain = '%s-%s-%s-%s'%('macosx', arch, name, version)
-			env = conf.env.derive()
-			conf.setenv(toolchain, env)
-			try:
-				conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
-				conf.set_macosx_gcc_options(arch)
-				conf.set_macosx_options()
-				conf.add_toolchain('macosx', arch, name, version, real_arch)
-				conf.variant = ''
-				Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-			except Errors.WafError as e:
-				conf.variant = ''
-				Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-			except Exception as e:
-				conf.variant = ''
-				Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-				raise
+			toolchain = '%s-%s-%s-%s'%(os, real_arch, name, version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.set_macosx_gcc_options(arch)
+					conf.set_macosx_options()
+					conf.add_toolchain(os, real_arch, name, version, real_arch)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
-		if target.find('darwin') != -1 and supported_architectures.has_key(arch):
+		position = target.find('darwin')
+		if position != -1 and supported_architectures.has_key(arch):
+			os = 'macosx'
+			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = supported_architectures[arch]
-			toolchain = '%s-%s-%s-%s'%('macosx', arch, 'clang', version)
-			env = conf.env.derive()
-			conf.setenv(toolchain, env)
-			try:
-				conf.load_clang(directory)
-				conf.set_macosx_clang_options(arch)
-				conf.set_macosx_options()
-				conf.add_toolchain('macosx', arch, 'clang', version, real_arch)
-				conf.variant = ''
-				Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-			except Errors.WafError as e:
-				conf.variant = ''
-				Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-			except Exception as e:
-				conf.variant = ''
-				Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-				raise
+			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_clang(directory)
+					conf.set_macosx_clang_options(arch)
+					conf.set_macosx_options()
+					conf.add_toolchain(os, real_arch, 'clang', version, real_arch)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.cocoa'))
