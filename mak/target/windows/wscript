@@ -1,7 +1,7 @@
 from waflib import Errors, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
-
+import os
 
 @conf
 def set_windows_options(self):

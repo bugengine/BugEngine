@@ -88,14 +88,27 @@ class XmlFile:
 			node.write(newxml)
 
 class Solution:
-	def __init__(self, appname, version, version_number, version_name, use_folders):
-		pass
+	def __init__(self, bld, appname, version_number, version_name, use_folders):
+		self.header = 'Microsoft Visual Studio Solution File, Format Version %s\n# %s' % (version_number, version_name)
+		self.projects = []
+		self.project_configs = []
+		self.configs = ['%s|%s = %s|%s'%(v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS]
 
-	def add(self, task_gen, project):
-		pass
+	def add(self, task_gen, project, project_path, build = False):
+		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\nEndProject' % (task_gen.target, project_path, project.guid))
+		project_config = ['%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		project_config += ['%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		self.project_configs += project_config
 
 	def write(self, node):
-		pass
+		newsolution = '%s\n%s\nGlobal\nGlobalSection(SolutionConfiguration) = preSolution\n%s\nEndGlobalSection\nGlobalSection(ProjectConfigurationPlatforms) = postSolution\n%s\nEndGlobalSection\nEndGlobal\n' % (self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\n'.join(self.project_configs))
+		try:
+			solution = node.read()
+		except IOError:
+			solution = ''
+		if solution != newsolution:
+			Logs.pprint('NORMAL', 'writing %s' % node.name)
+			node.write(newsolution)
 
 class VCproj:
 	extensions = ['vcproj']
@@ -116,7 +129,7 @@ class VCxproj:
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
-				self.vcxproj._add(config, 'Configuration', '%s/%s' % (toolchain, variant))
+				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
 				self.vcxproj._add(config, 'Platform', 'Win32')
 		globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
 		self.vcxproj._add(globals, 'ProjectGUID', self.guid)
@@ -134,14 +147,22 @@ class VCxproj:
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
-				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s/%s'" % (toolchain, variant)})
-				self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf install:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
-				self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s install:%s:%s --targets=%s' % (toolchain, variant, toolchain, variant, task_gen.target))
-				self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
-				if 'cxxprogram' in task_gen.features:
-					self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
-				self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
-				self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+				for var in ['Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir']:
+					self.vcxproj._add(properties, var, env[var.upper()])
+				command = getattr(task_gen, 'command', '')
+				if command:
+					command = command % {'toolchain':toolchain, 'variant':variant}
+					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf %s' % (command))
+				else:
+					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf install:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
+					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s install:%s:%s --targets=%s' % (toolchain, variant, toolchain, variant, task_gen.target))
+					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
+					if 'cxxprogram' in task_gen.features:
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
+					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
 		files = self.vcxproj._add(project, 'ItemGroup')
 		for file in getattr(task_gen, 'all_sources', []) or getattr(task_gen, 'source', []):
 			self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % file.path_from(task_gen.bld.srcnode)})
@@ -169,6 +190,17 @@ class vs2003(Build.BuildContext):
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.TOOLCHAIN = "$(Platform)"
 		self.env.VARIANT = "$(Configuration)"
+
+		self.env.VARIANT = '$(Variant)'
+		self.env.TOOLCHAIN = '$(Toolchain)'
+		self.env.DEPLOY_BINDIR = '$(Deploy_BinDir)'
+		self.env.DEPLOY_RUNBINDIR = '$(Deploy_RunBinDir)'
+		self.env.DEPLOY_LIBDIR = '$(Deploy_LibDir)'
+		self.env.DEPLOY_INCLUDEDIR = '$(Deploy_IncludeDir)'
+		self.env.DEPLOY_DATADIR = '$(Deploy_DataDir)'
+		self.env.DEPLOY_PLUGINDIR = '$(Deploy_PluginDir)'
+		self.env.DEPLOY_KERNELDIR = '$(Deploy_KernelDir)'
+
 		self.recurse([self.run_dir])
 
 		version = self.__class__.cmd
@@ -182,7 +214,19 @@ class vs2003(Build.BuildContext):
 		projects.mkdir()
 
 
-		solution = Solution(appname, version, version_number, version_name, folders)
+		solution = Solution(self, appname, version_number, version_name, folders)
+
+		for target, command, do_build in [('build.reconfigure', 'reconfigure', False), ('build.%s'%version, version, False), ('build.all', 'build:%(toolchain)s:%(variant)s', True)]:
+			task_gen = lambda: None
+			task_gen.target = target
+			task_gen.command = command
+			task_gen.bld = self
+			task_gen.all_sources = []
+			task_gen.features = []
+			node = projects.make_node("%s.%s" % (target, klass.extensions[0]))
+			project = klass(task_gen, version, version_project)
+			project.write(node)
+			solution.add(task_gen, project, node.path_from(self.srcnode), do_build)
 
 		for g in self.groups:
 			for tg in g:
@@ -193,7 +237,7 @@ class vs2003(Build.BuildContext):
 				node = projects.make_node("%s.%s" % (tg.target, klass.extensions[0]))
 				project = klass(tg, version, version_project)
 				project.write(node)
-				solution.add(tg, project)
+				solution.add(tg, project, node.path_from(self.srcnode))
 
 		solution.write(solution_node)
 

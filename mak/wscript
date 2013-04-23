@@ -239,7 +239,10 @@ def remove_link_libs(task):
 				pass
 
 from waflib import Configure, Options, Errors
-import cPickle as pickle
+try:
+	import cPickle as pickle
+except:
+	import pickle
 
 class ConfigurationContext(Configure.ConfigurationContext):
 	cmd ='configure'
@@ -251,8 +254,12 @@ class ConfigurationContext(Configure.ConfigurationContext):
 		self.store_options()
 
 	def store_options(self):
+		Options.options.path = os.environ['PATH']
+		Options.options.include = os.environ.get('INCLUDE', '')
+		Options.options.libpath = os.environ.get('LIBPATH', '')
+		Options.options.lib = os.environ.get('LIB', '')
 		node = self.bldnode.make_node('options.pickle')
-		pickle.dump(Options.options, open(node.abspath(), 'wb'))
+		pickle.dump(Options.options, open(node.abspath(), 'wb'), protocol = 2)
 
 from waflib import Configure
 class ReconfigurationContext(Configure.ConfigurationContext):
@@ -269,6 +276,11 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 		try:
 			node = self.bldnode.make_node('options.pickle')
 			Options.options = pickle.load(open(node.abspath(), 'rb'))
+			os.environ['PATH'] = self.environ['PATH'] = Options.options.path
+			os.environ['LIBPATH'] = self.environ['LIBPATH'] = Options.options.libpath
+			os.environ['LIB'] = self.environ['LIB'] = Options.options.lib
+			os.environ['INCLUDE'] = self.environ['INCLUDE'] = Options.options.include
+
 		except IOError:
 			raise Errors.WafError('Option file not found; configure the project first')
 
