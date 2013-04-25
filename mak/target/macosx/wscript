@@ -56,6 +56,8 @@ def set_macosx_options(self):
 	else:
 		raise Errors.WafError('Could not find any suitable SDK')
 
+	self.env.MACOSX_SDK = sdk
+	self.env.XCODE_SDK_PATH = sdk_path
 	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
@@ -112,7 +114,9 @@ def configure(conf):
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_macosx_gcc_options(arch)
 					conf.set_macosx_options()
-					conf.add_toolchain(os, real_arch, name, version, real_arch)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK, real_arch, name, version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.add_toolchain(os+conf.env.MACOSX_SDK, real_arch, name, version, real_arch)
 					conf.variant = ''
 					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:
@@ -138,7 +142,9 @@ def configure(conf):
 					conf.load_clang(directory)
 					conf.set_macosx_clang_options(arch)
 					conf.set_macosx_options()
-					conf.add_toolchain(os, real_arch, 'clang', version, real_arch)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK, real_arch, 'clang', version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.add_toolchain(os+conf.env.MACOSX_SDK, real_arch, 'clang', version, real_arch)
 					conf.variant = ''
 					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:

@@ -85,14 +85,14 @@ bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
         }
     }
     be_assert(sc->m_scheduler->m_runningTasks > 0, "running task count should be more than 1");
-    return --sc->m_scheduler->m_runningTasks == 0;
+    return sc->m_scheduler->signalTaskDone();
 }
 
 intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
 {
     Worker* w = reinterpret_cast<Worker*>(p1);
     TaskScheduler* sc = reinterpret_cast<TaskScheduler*>(p2);
-    while (sc->m_scheduler->m_running)
+    while (sc->m_scheduler->isRunning())
     {
         if (sc->m_synchro.wait() == Threads::Waitable::Finished)
         {

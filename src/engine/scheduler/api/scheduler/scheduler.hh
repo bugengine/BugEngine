@@ -82,6 +82,9 @@ public:
     void mainThreadJoin();
     void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
     void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
+
+    bool isRunning() const;
+    bool signalTaskDone();
 };
 
 template< typename T >

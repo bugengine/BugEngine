@@ -197,6 +197,7 @@ class PBXFileReference(XCodeNode):
 	def __init__(self, name, path, filetype = '', sourcetree = "SOURCE_ROOT"):
 		XCodeNode.__init__(self)
 		self.fileEncoding = 4
+		self._parse = False
 		if not filetype:
 			_, ext = os.path.splitext(name)
 			if ext == '.h':
@@ -248,15 +249,21 @@ class PBXGroup(XCodeNode):
 		return group
 
 	def add(self, root_node, source_node):
+		result = []
 		for f in source_node.listdir():
-			if os.path.isdir(os.path.join(source_node.abspath(), f)):
+			fullname = os.path.join(source_node.abspath(), f)
+			if os.path.isdir(fullname):
 				try:
 					g = self[f]
 				except KeyError:
 					g = self.add_group(PBXGroup(f))
-				g.add(root_node, source_node.make_node(f))
+				result += g.add(root_node, source_node.make_node(f))
+			else:
+				f = PBXFileReference(f, os.path.join(source_node.path_from(root_node), f))
+				self.children.append(f)
+				result.append(f)
 		self.sort()
-		return []
+		return result
 
 	def sort(self):
 		self.children.sort(key = lambda x: x.__class__.sort_prefix+x.name)
@@ -271,7 +278,7 @@ class PBXGroup(XCodeNode):
 class PBXBuildFile(XCodeNode):
 	def __init__(self, file):
 		XCodeNode.__init__(self)
-		self.fileRef = file.ref
+		self.fileRef = file
 
 # Targets
 class PBXLegacyTarget(XCodeNode):
@@ -307,7 +314,7 @@ class PBXSourcesBuildPhase(XCodeNode):
 		XCodeNode.__init__(self)
 		self.buildActionMask = 2147483647
 		self.runOnlyForDeploymentPostProcessing = 0
-		self.files = [PBXBuildFIle(file) for file in files]
+		self.files = [PBXBuildFile(file) for file in files]
 
 class PBXNativeTarget(XCodeNode):
 	def __init__(self, name, product, productType, build, configs):
@@ -324,7 +331,7 @@ class PBXNativeTarget(XCodeNode):
 
 # Root project object
 
-def macarch(arch, is64):
+def macarch(arch):
 	if arch == 'amd64':
 		return 'x86_64'
 	elif arch == 'arm':
@@ -376,26 +383,47 @@ class PBXProject(XCodeNode):
 		w("}\n")
 
 	def add(self, bld, p, schemes, schememanagement):
+		def get_include_path(i):
+			if isinstance(i, str):
+				return i
+			else:
+				return i.path_from(bld.srcnode)
 		names = p.target.split('.')
-		group = self.mainGroup
-		for name in names:
-			try:
-				group = group[name]
-			except KeyError:
-				group = group.add_group(PBXGroup(name))
-
-		source_nodes = getattr(p, 'source_nodes', [])
 		sources = []
-		for source_node in source_nodes:
-			sources += group.add(bld.path, source_node)
+		if 'kernel' not in p.features:
+			group = self.mainGroup
+			for name in names:
+				try:
+					group = group[name]
+				except KeyError:
+					group = group.add_group(PBXGroup(name))
+
+			source_nodes = getattr(p, 'source_nodes', [])
+			for source_node in source_nodes:
+				sources += group.add(bld.path, source_node)
 
 
-		includes=set([])
-		defines = set([])
+		includes = set(getattr(p, 'includes', []))
+		defines = set(getattr(p, 'defines', []))
+		task_gens = getattr(p, 'use', [])[:]
+		seen = set([])
+		while task_gens:
+			name = task_gens.pop()
+			if name not in seen:
+				try:
+					task_gen = bld.get_tgen_by_name(name)
+				except:
+					continue
+				seen.add(name)
+				task_gens += getattr(task_gen, 'use', [])
+				includes.union(getattr(task_gen, 'export_includes', []))
+				defines.union(getattr(task_gen, 'export_defines', []))
+
+
 		for toolchain in bld.env.ALL_TOOLCHAINS:
 			env = bld.all_envs[toolchain]
-			includes = []
-			defines = []
+			includes.union(env.INCLUDES)
+			defines.union(env.DEFINES)
 		variants = []
 		for variant in bld.env.ALL_VARIANTS:
 			variants.append(XCBuildConfiguration(variant, {
@@ -403,7 +431,7 @@ class PBXProject(XCodeNode):
 				'ARCHS':['i386'],
 				'SDKROOT': 'macosx',
 				'SUPPORTED_PLATFORMS': 'macosx',
-				'HEADER_SEARCH_PATHS': [i for i in includes],
+				'HEADER_SEARCH_PATHS': [get_include_path(i) for i in includes],
 				'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]}))
 		buildPhase = PBXSourcesBuildPhase(sources)
 		target = PBXNativeTarget(
@@ -434,6 +462,7 @@ class xcode(Build.BuildContext):
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
 		self.env.VARIANT = '$(CONFIG)'
+		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
 		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
@@ -469,14 +498,14 @@ class xcode(Build.BuildContext):
 
 		for toolchain in self.env.ALL_TOOLCHAINS:
 			env = self.all_envs['%s'%(toolchain)]
-			if env.ABI == 'mach_o':
+			if env.XCODE_ABI == 'mach_o':
 				variants = []
 				for variant in self.env.ALL_VARIANTS:
 					variants.append(XCBuildConfiguration(variant, {
-								'PRODUCT_NAME':appname,
+								'PRODUCT_NAME': appname,
 								'BUILT_PRODUCTS_DIR': 'build/%s-%s'%(toolchain, variant),
 								'CONFIGURATION_BUILD_DIR':  'build/%s-%s'%(toolchain, variant),
-								'ARCHS':macarch(env.VALID_ARCHITECTURES[0], env.LP64),
+								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,
 								'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
 				build = PBXShellScriptBuildPhase('install:'+toolchain+':${CONFIG}')
@@ -487,7 +516,7 @@ class xcode(Build.BuildContext):
 								build,
 								variants)
 				p.targets.append(target)
-				self._output.children.append(target.productReference)
+				p._output.children.append(target.productReference)
 				scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
 			else:
 				target = PBXLegacyTarget(toolchain, 'install:%s:$(CONFIG)'%toolchain)
