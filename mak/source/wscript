@@ -71,7 +71,7 @@ from waflib.Tools import c,cxx
 def create_master_file(task):
 	with open(task.outputs[0].abspath(), 'w') as f:
 		for src in task.inputs:
-			f.write('#include "%s"\n' % src.path_from(task.generator.bld.bldnode).replace('\\','/'))
+			f.write('#include "%s"\n' % src.abspath().replace('\\','/'))
 def master_sig_deps(task):
 	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
 		task.m.update(f)
