@@ -142,6 +142,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 		pass
 	else:
 		self.env[var] = frameworks
+		self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
 	return self.env[var]
 
 @conf

@@ -316,11 +316,15 @@ class PBXSourcesBuildPhase(XCodeNode):
 		self.runOnlyForDeploymentPostProcessing = 0
 		self.files = [PBXBuildFile(file) for file in files]
 
+class PBXFrameworksBuildPhase(PBXSourcesBuildPhase):
+	def __init__(self, frameworks):
+		PBXSourcesBuildPhase.__init__(self, frameworks)
+
 class PBXNativeTarget(XCodeNode):
 	def __init__(self, name, product, productType, build, configs):
 		XCodeNode.__init__(self)
 		self.buildConfigurationList = XCConfigurationList(configs)
-		self.buildPhases = [build]
+		self.buildPhases = build
 		self.buildRules = []
 		self.dependencies = []
 		self.name = name
@@ -347,7 +351,7 @@ def macarch(arch):
 
 
 class PBXProject(XCodeNode):
-	def __init__(self, name, version):
+	def __init__(self, name, version, builder):
 		XCodeNode.__init__(self)
 		self.buildConfigurationList = XCConfigurationList([
 			XCBuildConfiguration('debug', {'BUILT_OUTPUTS_DIR':'build', 'CONFIG':'debug'}),
@@ -357,6 +361,8 @@ class PBXProject(XCodeNode):
 		self.compatibilityVersion = version[0]
 		self.hasScannedForEncodings = 1;
 		self.mainGroup = PBXGroup(name)
+		self._mainGroup = PBXGroup(name)
+		self.mainGroup.children.append(self._mainGroup)
 		self.projectRoot = ""
 		self.projectDirPath = ""
 		self.targets = []
@@ -365,6 +371,26 @@ class PBXProject(XCodeNode):
 		self._output2 = PBXGroup('Dummies')
 		self.mainGroup.children.append(self._output)
 		self._output.children.append(self._output2)
+		self._frameworks = PBXGroup('Frameworks')
+		self.mainGroup.children.append(self._frameworks)
+		self._frameworks_seen = {}
+		self._frameworks_files = []
+		for env_name in builder.env.ALL_TOOLCHAINS:
+			env = builder.all_envs[env_name]
+			if env.XCODE_FRAMEWORKS:
+				try:
+					seen,group = self._frameworks_seen[env.MACOSX_SDK]
+				except:
+					seen = []
+					group = PBXGroup(env.MACOSX_SDK)
+					self._frameworks.children.append(group)
+					self._frameworks_seen[env.MACOSX_SDK] = (seen, group)
+				for f in env.XCODE_FRAMEWORKS:
+					if f not in seen:
+						seen.append(f)
+						file = PBXFileReference('%s.framework'%f, os.path.join(env.XCODE_SDK_PATH, 'System', 'Library', 'Frameworks', '%s.framework'%f), 'wrapper.framework', '<absolute>')
+						self._frameworks_files.append(file)
+						group.children.append(file)
 
 	def write(self, file):
 		w = file.write
@@ -391,7 +417,7 @@ class PBXProject(XCodeNode):
 		names = p.target.split('.')
 		sources = []
 		if 'kernel' not in p.features:
-			group = self.mainGroup
+			group = self._mainGroup
 			for name in names:
 				try:
 					group = group[name]
@@ -401,7 +427,6 @@ class PBXProject(XCodeNode):
 			source_nodes = getattr(p, 'source_nodes', [])
 			for source_node in source_nodes:
 				sources += group.add(bld.path, source_node)
-
 
 		includes = set(getattr(p, 'includes', []))
 		defines = set(getattr(p, 'defines', []))
@@ -434,11 +459,12 @@ class PBXProject(XCodeNode):
 				'HEADER_SEARCH_PATHS': [get_include_path(i) for i in includes],
 				'GCC_PREPROCESSOR_DEFINITIONS': [d for d in defines]}))
 		buildPhase = PBXSourcesBuildPhase(sources)
+		frameworkPhase = PBXFrameworksBuildPhase(self._frameworks_files)
 		target = PBXNativeTarget(
 				'index.'+p.target,
 				PBXFileReference(p.target, 'lib%s.a'%p.target, 'archive.ar', 'BUILT_PRODUCTS_DIR'),
 				"com.apple.product-type.library.static",
-				buildPhase,
+				[buildPhase, frameworkPhase],
 				variants)
 		self._output2.children.append(target.productReference)
 		self.targets.append(target)
@@ -484,7 +510,7 @@ class xcode(Build.BuildContext):
 		schemes = userdata.make_node('xcschemes')
 		schemes.mkdir()
 		schemes.project_name = project.name
-		p = PBXProject(appname, self.__class__.version)
+		p = PBXProject(appname, self.__class__.version, self)
 
 		schememanagement = XCodeSchemeList()
 
@@ -513,7 +539,7 @@ class xcode(Build.BuildContext):
 								toolchain,
 								PBXFileReference(appname, appname+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
 								"com.apple.product-type.application",
-								build,
+								[build],
 								variants)
 				p.targets.append(target)
 				p._output.children.append(target.productReference)

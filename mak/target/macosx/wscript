@@ -56,7 +56,7 @@ def set_macosx_options(self):
 	else:
 		raise Errors.WafError('Could not find any suitable SDK')
 
-	self.env.MACOSX_SDK = sdk
+	self.env.MACOSX_SDK = 'MacOSX%s'%sdk
 	self.env.XCODE_SDK_PATH = sdk_path
 	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])

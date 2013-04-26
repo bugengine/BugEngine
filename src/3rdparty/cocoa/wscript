@@ -3,9 +3,10 @@ def options(opt):
 	pass
 
 def setup(conf):
-	pass
+	if 'darwin' in conf.env.VALID_PLATFORMS:
+		conf.check_framework(['Cocoa'], var='FRAMEWORK_COCOA')
 
 def build(bld):
-	bld.thirdparty('3rdparty.cocoa', frameworks=['Cocoa'])
+	bld.thirdparty('3rdparty.cocoa', frameworks=bld.env.FRAMEWORK_COCOA)
 	bld.features.append('GUI')
 
