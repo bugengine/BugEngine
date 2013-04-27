@@ -6,4 +6,4 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.static_library('3rdparty.lua')
+	bld.static_library('3rdparty.lua').defines.append('LUA_LIB')
