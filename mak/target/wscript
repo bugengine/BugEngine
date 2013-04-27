@@ -18,7 +18,7 @@ def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
 	original_env.TOOLCHAIN=toolchain
 	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
 	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
-	original_env.DEFINES.append('BE_PLATFORM=%s'%platform)
+	original_env.DEFINES.append('BE_PLATFORM=%s'%original_env.VALID_PLATFORMS[0])
 	for optim in self.env.ALL_VARIANTS:
 		env = original_env.derive()
 		self.setenv(toolchain+'-'+optim, env)
