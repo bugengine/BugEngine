@@ -101,7 +101,7 @@ def configure(conf):
 	}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
-		if position != -1 and supported_architectures.has_key(arch):
+		if position != -1 and arch in supported_architectures:
 			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = supported_architectures[arch]
@@ -129,7 +129,7 @@ def configure(conf):
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		position = target.find('darwin')
-		if position != -1 and supported_architectures.has_key(arch):
+		if position != -1 and arch in supported_architectures:
 			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = supported_architectures[arch]
