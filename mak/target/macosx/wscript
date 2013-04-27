@@ -114,9 +114,10 @@ def configure(conf):
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_macosx_gcc_options(arch)
 					conf.set_macosx_options()
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK, real_arch, name, version)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
-					conf.add_toolchain(os+conf.env.MACOSX_SDK, real_arch, name, version, real_arch)
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, real_arch)
 					conf.variant = ''
 					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:
@@ -142,9 +143,10 @@ def configure(conf):
 					conf.load_clang(directory)
 					conf.set_macosx_clang_options(arch)
 					conf.set_macosx_options()
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK, real_arch, 'clang', version)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())
-					conf.add_toolchain(os+conf.env.MACOSX_SDK, real_arch, 'clang', version, real_arch)
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch)
 					conf.variant = ''
 					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:
