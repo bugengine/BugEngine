@@ -50,9 +50,8 @@ float Timer::now()
     if (info.denom == 0)
     {
         mach_timebase_info(&info);
-        info.denom *= 1000000;
     }
-    return ((float)(mach_absolute_time()-s_base))*info.numer/info.denom;
+    return (float)((mach_absolute_time()-s_base)*info.numer/info.denom) / 1000000.0f;
 }
 
 }

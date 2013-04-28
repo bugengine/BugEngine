@@ -55,11 +55,17 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
+    int result;
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
-    int result = dispatch_semaphore_wait(reinterpret_cast<dispatch_semaphore_t>(m_data), DISPATCH_TIME_FOREVER);
+    result = dispatch_semaphore_wait(reinterpret_cast<dispatch_semaphore_t>(m_data), DISPATCH_TIME_FOREVER);
 #else
-    int result = MPWaitOnSemaphore(*(MPSemaphoreID*)m_data, kDurationForever);
+    do
+    {
+        result = MPWaitOnSemaphore(*(MPSemaphoreID*)m_data, kDurationForever);
+    }
+    while (result == -1);
 #endif
+
     if (result == 0)
     {
         return Finished;
@@ -67,7 +73,6 @@ Threads::Waitable::WaitResult Semaphore::wait()
     else
     {
         be_error("MPWaitOnSemaphore returned %d" | result);
-        be_notreached();
         return Abandoned;
     }
 }
