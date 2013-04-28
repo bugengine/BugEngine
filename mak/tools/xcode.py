@@ -529,8 +529,8 @@ class xcode(Build.BuildContext):
 				for variant in self.env.ALL_VARIANTS:
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
-								'BUILT_PRODUCTS_DIR': 'build/%s-%s'%(toolchain, variant),
-								'CONFIGURATION_BUILD_DIR':  'build/%s-%s'%(toolchain, variant),
+								'BUILT_PRODUCTS_DIR': 'build/%s/%s'%(toolchain, variant),
+								'CONFIGURATION_BUILD_DIR':  'build/%s/%s'%(toolchain, variant),
 								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,
 								'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
