@@ -1,7 +1,7 @@
 # set MacOS X specific options
 
 import os
-from waflib import Context, Errors, Logs, Utils
+from waflib import Context, Errors, Utils
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
@@ -64,18 +64,64 @@ def set_macosx_options(self):
 
 @conf
 def set_macosx_gcc_options(self, arch):
-	self.env.CFLAGS = ['-fPIC', '-fvisibility=hidden']
-	self.env.CXXFLAGS = ['-fPIC', '-fvisibility=hidden']
-	self.env.LINKFLAGS = []
+	v = self.env
+	v.CFLAGS = ['-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = ['-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = []
+	v.CXXFLAGS_cxxshlib = []
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
 	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 
 @conf
 def set_macosx_clang_options(self, arch):
-	self.env.CFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	self.env.CXXFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	self.env.LINKFLAGS = ['-arch', arch]
+	v = self.env
+	v.CFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = ['-arch', arch]
+	v.CXXFLAGS_cxxshlib = []
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
 	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
@@ -119,13 +165,13 @@ def configure(conf):
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, real_arch)
 					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:
 					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
 					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					pprint('RED', '%s failed: %s' % (toolchain, e))
 					raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
@@ -148,13 +194,13 @@ def configure(conf):
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch)
 					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 				except Errors.WafError as e:
 					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
 					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					pprint('RED', '%s failed: %s' % (toolchain, e))
 					raise
 
 def build(bld):

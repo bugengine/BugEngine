@@ -51,10 +51,15 @@ def get_native_clang_target(conf, clang):
 		if line.startswith('Target:'):
 			target = line.split()[1]
 		if line.find('clang version ') != -1:
-			line = line.split()
-			while line[0] != 'clang' and line[1] != 'version':
-				line = line[1:]
-			version = line[2].split('-')[0]
+			words = line.split()
+			while words[0] != 'clang' and words[1] != 'version':
+				words.pop(0)
+			version = words[2].split('-')[0]
+		if line.find('Apple LLVM version ') != -1:
+			words = line.split()
+			while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
+				words.pop(0)
+			version = words[3].split('-')[0]
 	return (target, version)
 
 
