@@ -35,7 +35,7 @@ static inline MD5 digest(const minitl::Allocator::Block<T>& block)
 namespace minitl
 {
 
-static char hex(unsigned char value)
+static inline char hex(unsigned char value)
 {
     return value >= 10 ? value-10+'a' : value + '0';
 }

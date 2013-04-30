@@ -30,19 +30,20 @@ def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
 	self.env.append_unique('ALL_ARCHITECTURES', [a for a in original_env.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
 
 def options(opt):
-	for extra in opt.path.parent.parent.make_node('extra').listdir():
-		#opt.recurse('../../extra/%s'%extra)
-		pass
+	for extra in opt.bugenginenode.make_node('extra').listdir():
+		if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
+			opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
 	for target in opt.path.listdir():
 		if target != 'wscript':
 			opt.recurse(target)
 
 def configure(conf):
 	conf.env.ALL_VARIANTS = ['debug', 'profile', 'final']
-	for extra in conf.path.parent.parent.make_node('extra').listdir():
-		pprint('BLUE', '_'*40)
-		pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
-		#conf.recurse('../../extra/%s'%extra)
+	for extra in conf.bugenginenode.make_node('extra').listdir():
+		if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
+			pprint('BLUE', '_'*40)
+			pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
+			conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
 	for target in conf.path.listdir():
 		if target != 'wscript':
 			pprint('BLUE', '_'*40)
@@ -53,8 +54,8 @@ def configure(conf):
 
 def build(bld):
 	if bld.env.VALID_PLATFORMS:
-		if os.path.isdir('../../extra/%s'%bld.env.VALID_PLATFORMS[0]):
-			bld.recurse('../../extra/%s'%bld.env.VALID_PLATFORMS[0])
+		if os.path.isdir(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0])):
+			bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0]))
 		if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
 			bld.recurse(bld.env.VALID_PLATFORMS[0])
 

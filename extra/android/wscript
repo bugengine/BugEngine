@@ -1,7 +1,6 @@
 # set Android specific options
 
 import os
-import mak
 from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
@@ -73,20 +72,10 @@ def add_android_flags_to_env(conf, variant, arch):
 
 
 def configure(conf):
-	from waflib import Options
-	mak.allplatforms['android'] = ['android']
-	for (version, toolchaindir, target, arch, gcc, gxx) in conf.env['GCC_TARGETS']:
-		if target.find('android') != -1:
-				conf.create_gcc_env(version, toolchaindir, target, 'android', arch, gcc, gxx, add_android_gcc_flags_to_env, add_android_flags_to_env)
-
-def setup(conf):
 	pass
 
 def build(bld):
-	mak.allplatforms['android'] = ['android']
-
-def platformbuild(bld):
-	bld.platforms.append(mak.module.external('stl-gabi++'))
+	pass
 
 def plugins(bld):
 	pass

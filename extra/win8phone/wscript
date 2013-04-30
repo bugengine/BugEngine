@@ -1,12 +1,13 @@
 # set WinRT Phone specific options
 
 import os
-import mak
 from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Configure import conf
 
 # adds MSVC vars to environment
+@conf
 def add_msvc_winprt_to_env(conf, compiler, version, target):
 	conf.env['MSVC_VERSIONS'] = [compiler+' '+version]
 	conf.env['MSVC_TARGETS'] = [target]
@@ -33,7 +34,7 @@ def add_msvc_winprt_to_env(conf, compiler, version, target):
 	conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	conf.env['LINKFLAGS_final'] = ['/DEBUG']
 
-
+@conf
 def add_win32_winprt_flags_to_env(conf, name, arch):
 	conf.env['PLATFORM'] = mak.allplatforms['winprt']
 	conf.env['ABI'] = 'pe'
@@ -61,34 +62,12 @@ def options(opt):
 	pass
 
 def configure(conf):
-	from waflib import Options
-	mak.allplatforms['winprt'] = ['winprt', 'winrt']
-	for (compiler, version, target, platform, tname) in conf.env['MSVC_TARGETS']:
-		if platform == 'winprt':
-			name = '%s-%s-%s-%s' %('winprt', target, compiler, version)
-			conf.setenv(name, conf.env.derive())
-			try:
-				conf.env.ENVNAME = name
-				add_msvc_winprt_to_env(conf, compiler, version, target)
-				add_win32_winprt_flags_to_env(conf, name, tname)
-				conf.recurse(os.path.join('..', '..', 'mak', 'target', 'archs', tname), once=False)
-				conf.recurse(os.path.join('..', '..', 'mak', 'libs'), once=False)
-
-				pprint('GREEN', 'configure for tool %s' % name)
-				conf.variant = ''
-				conf.env['BUILD_VARIANTS'].append(name)
-			except Exception as e:
-				warn('msvc not available: '+str(e))
-				conf.variant = ''
-
+	pass
 
 def setup(conf):
 	pass
 
 def build(bld):
-	mak.allplatforms['winprt'] = ['winprt', 'winrt']
-
-def platformbuild(bld):
 	pass
 
 def plugins(bld):
