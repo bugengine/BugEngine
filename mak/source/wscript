@@ -37,7 +37,7 @@ def filter_sources(self):
 				for a in architectures:
 					add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
 			elif node.parent.name == 'extra' and node.parent.parent == self.path:
-				add_platform == node.name in self.env.VALID_PLATFORMS
+				add_platform = node.name in self.env.VALID_PLATFORMS
 			node = node.parent
 		if add_platform and add_arch:
 			sources.append(file)
