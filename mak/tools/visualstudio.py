@@ -1,5 +1,5 @@
 from waflib import Context, Build, TaskGen, Logs
-import os
+import os, sys
 from xml.dom.minidom import Document
 import string
 
@@ -84,7 +84,7 @@ class XmlFile:
 			xml = ''
 		newxml = self.document.toxml()
 		if xml != newxml:
-			Logs.pprint('NORMAL', 'writing %s' % node.name)
+			Logs.pprint('NORMAL', 'writing %s' % node.abspath())
 			node.write(newxml)
 
 class Solution:
@@ -92,16 +92,47 @@ class Solution:
 		self.header = 'Microsoft Visual Studio Solution File, Format Version %s\n# %s' % (version_number, version_name)
 		self.projects = []
 		self.project_configs = []
-		self.configs = ['%s|%s = %s|%s'%(v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS]
+		self.configs = ['\t\t%s|%s = %s|%s'%(v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS]
+		self.folders = []
+		self.folders_made = {}
+		self.use_folders = use_folders
+
+	def addFolder(self, name):
+		names = name.split('.')[:-1]
+		if names:
+			folder_name = '.'.join(names)
+			try:
+				folder = self.folders_made[folder_name]
+			except KeyError:
+				folder = generateGUID(folder_name)
+				self.folders_made[folder_name] = folder
+				self.projects.append('Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\nEndProject' % (names[-1], names[-1], folder))
+				parent = self.addFolder(folder_name)
+				if parent:
+					self.folders.append((folder, parent))
+			return folder
+		else:
+			return None
+
 
 	def add(self, task_gen, project, project_path, build = False):
-		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\nEndProject' % (task_gen.target, project_path, project.guid))
-		project_config = ['%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
-		project_config += ['%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\nEndProject' % (project.name, project_path, project.guid))
+		project_config = ['\t\t%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
 		self.project_configs += project_config
+		if self.use_folders:
+			parent = self.addFolder(task_gen.target)
+			if parent:
+				self.folders.append((project.guid, parent))
+
 
 	def write(self, node):
-		newsolution = '%s\n%s\nGlobal\nGlobalSection(SolutionConfiguration) = preSolution\n%s\nEndGlobalSection\nGlobalSection(ProjectConfigurationPlatforms) = postSolution\n%s\nEndGlobalSection\nEndGlobal\n' % (self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\n'.join(self.project_configs))
+		nested_projects = ''
+		if self.use_folders:
+			nested_projects = '\tGlobalSection(NestedProjects) = preSolution\n%s\n\tEndGlobalSection\n' % '\n'.join(
+					['\t\t%s = %s' % (project, parent) for project, parent in self.folders]
+				)
+		newsolution = '%s\n%s\nGlobal\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n%s\n\tEndGlobalSection\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n%s\n\tEndGlobalSection\n%sEndGlobal\n' % (self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\n'.join(self.project_configs), nested_projects)
 		try:
 			solution = node.read()
 		except IOError:
@@ -115,14 +146,22 @@ class VCproj:
 	def __init__(self, task_gen, version, version_project):
 		self.vcproj = XmlFile()
 
-	def write(self, node):
-		self.vcproj.write(node)
+	def write(self, nodes):
+		self.vcproj.write(nodes[0])
 
 class VCxproj:
 	extensions = ['vcxproj', 'vcxproj.filters']
-	def __init__(self, task_gen, version, version_project):
+	def __init__(self, task_gen, version, version_project, use_folders):
 		self.vcxproj = XmlFile()
 		self.vcxfilters = XmlFile()
+		if use_folders:
+			self.name = task_gen.target.split('.')[-1]
+		else:
+			self.name = task_gen.target
+		project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+		self.filter_nodes = self.vcxfilters._add(project, 'ItemGroup')
+		self.file_nodes = self.vcxfilters._add(project, 'ItemGroup')
+
 		self.guid = generateGUID(task_gen.target)
 		project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
 		configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
@@ -131,10 +170,18 @@ class VCxproj:
 				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
 				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
 				self.vcxproj._add(config, 'Platform', 'Win32')
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			pgroup = self.vcxproj._add(project, 'PropertyGroup')
+			self.vcxproj._add(pgroup, 'PlatformShortName', toolchain)
+			self.vcxproj._add(pgroup, 'PlatformArchitecture', env.VALID_ARCHITECTURES[0])
+			self.vcxproj._add(pgroup, 'PlatformTarget', toolchain)
+
 		globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
 		self.vcxproj._add(globals, 'ProjectGUID', self.guid)
 		self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
 		self.vcxproj._add(globals, 'RootNamespace', task_gen.target)
+		self.vcxproj._add(globals, 'ProjectName', self.name)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
@@ -154,25 +201,43 @@ class VCxproj:
 				command = getattr(task_gen, 'command', '')
 				if command:
 					command = command % {'toolchain':toolchain, 'variant':variant}
-					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf %s' % (command))
+					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s waf %s' % (sys.executable, command))
 				else:
-					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf install:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
-					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s install:%s:%s --targets=%s' % (toolchain, variant, toolchain, variant, task_gen.target))
-					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && mak\\win32\\bin\\python.exe waf clean:%s:%s --targets=%s' % (toolchain, variant, task_gen.target))
+					self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s waf install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
+					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
+					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
 						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
 		files = self.vcxproj._add(project, 'ItemGroup')
-		for file in getattr(task_gen, 'all_sources', []) or getattr(task_gen, 'source', []):
-			self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % file.path_from(task_gen.bld.srcnode)})
+
+		self.filters = {}
+		for node in getattr(task_gen, 'source_nodes', []):
+			self.add_node(task_gen.bld.srcnode, node, node, files)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
-		project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':version_project[0], 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
 
-	def write(self, node):
-		self.vcxproj.write(node)
-		self.vcxfilters.write(node.change_ext('.%s'%self.__class__.extensions[1]))
+	def write(self, nodes):
+		self.vcxproj.write(nodes[0])
+		self.vcxfilters.write(nodes[1])
 
+	def add_node(self, root_node, project_node, node, files):
+		path = node.abspath()
+		if os.path.isdir(path):
+			if project_node != node:
+				path = node.path_from(root_node)
+				try:
+					filter = self.filters[path]
+				except KeyError:
+					filter = generateGUID(path)
+					n = self.vcxfilters._add(self.filter_nodes, 'Filter', {'Include':node.path_from(project_node)})
+					self.vcxfilters._add(n, 'UniqueIdentifier', filter)
+			for subdir in node.listdir():
+				self.add_node(root_node, project_node, node.make_node(subdir), files)
+		elif os.path.isfile(path):
+			self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node)})
+			n = self.vcxfilters._add(self.file_nodes, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node)})
+			self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node))
 
 
 class vs2003(Build.BuildContext):
@@ -223,10 +288,10 @@ class vs2003(Build.BuildContext):
 			task_gen.bld = self
 			task_gen.all_sources = []
 			task_gen.features = []
-			node = projects.make_node("%s.%s" % (target, klass.extensions[0]))
-			project = klass(task_gen, version, version_project)
-			project.write(node)
-			solution.add(task_gen, project, node.path_from(self.srcnode), do_build)
+			nodes = [projects.make_node("%s.%s" % (target, ext)) for ext in klass.extensions]
+			project = klass(task_gen, version, version_project, folders)
+			project.write(nodes)
+			solution.add(task_gen, project, nodes[0].path_from(self.srcnode), do_build)
 
 		for g in self.groups:
 			for tg in g:
@@ -234,10 +299,10 @@ class vs2003(Build.BuildContext):
 					continue
 				tg.post()
 
-				node = projects.make_node("%s.%s" % (tg.target, klass.extensions[0]))
-				project = klass(tg, version, version_project)
-				project.write(node)
-				solution.add(tg, project, node.path_from(self.srcnode))
+				nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
+				project = klass(tg, version, version_project, folders)
+				project.write(nodes)
+				solution.add(tg, project, nodes[0].path_from(self.srcnode))
 
 		solution.write(solution_node)
 
