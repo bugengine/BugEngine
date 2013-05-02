@@ -35,14 +35,21 @@ SystemAllocator::~SystemAllocator()
 
 void* SystemAllocator::allocate()
 {
-    ++ m_used;
-    void* result = m_head;
-    if (! result)
+    if (m_used < m_capacity)
     {
-        /* TODO */
+        ++ m_used;
+        void* result = m_head;
+        if (! result)
+        {
+            /* TODO */
+        }
+        m_head = m_head->next;
+        return result;
     }
-    m_head = m_head->next;
-    return result;
+    else
+    {
+        return 0;
+    }
 }
 
 void  SystemAllocator::free(void* memory)

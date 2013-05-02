@@ -7,7 +7,7 @@
 
 namespace BugEngine { namespace OpenGL
 {
-    
+
 static const char *toString(Shaders::Semantic semantic)
 {
     switch(semantic)
@@ -114,6 +114,7 @@ GLShaderBuilder::GLShaderBuilder(GLenum shaderType)
     :   m_shaderType(shaderType)
 {
     writeln("#version 140");
+    be_forceuse(m_shaderType);
 }
 
 GLShaderBuilder::~GLShaderBuilder()

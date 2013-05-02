@@ -197,7 +197,7 @@ def build(bld):
 		raise Errors.WafError('Call %s %s %s:toolchain:variant, with toolchain in\n\t%s\nvariant in\n\t%s' %
 								(sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
 	bld.platforms = []
-	bld.features = []
+	bld.features = getattr(bld, 'features', [])
 	bld.bugenginenode = bld.path.parent
 	bld.recurse('host')
 	bld.recurse('source')
