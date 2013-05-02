@@ -18,7 +18,7 @@ def options(opt):
 def set_iphone_options(self, target):
 	self.env.VALID_PLATFORMS = ['iphone', 'darwin']
 
-	self.env.XCODE_SDKROOT = 'iphone'
+	self.env.XCODE_SDKROOT = 'iphoneos'
 	self.env.XCODE_ABI = 'mach_o'
 	self.env.XCODE_SUPPORTEDPLATFORMS = target.lower()
 
