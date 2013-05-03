@@ -251,7 +251,7 @@ def remove_link_libs(task):
 			except:
 				pass
 
-from waflib import Configure, Options, Errors
+from waflib import Configure, Build, ConfigSet, Context, Utils, Options, Errors, Logs
 try:
 	import cPickle as pickle
 except:
@@ -296,4 +296,31 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 
 		except IOError:
 			raise Errors.WafError('Option file not found; configure the project first')
+
+
+def autoreconfigure(execute_method):
+	"""
+	Decorator used to set the commands that can be reconfigured automatically
+	"""
+	def execute(self):
+		env = ConfigSet.ConfigSet()
+		do_config = False
+		env.load(os.path.join(Context.top_dir, Options.lockfile))
+		if env.run_dir != Context.run_dir:
+			do_config = True
+		else:
+			h = 0
+			for f in env['files']:
+				h = hash((h, Utils.readf(f, 'rb')))
+			do_config = h != env.hash
+
+		if do_config:
+			Logs.warn('wscrip files have changed; reconfiguring the project')
+			Options.commands.insert(0, self.cmd)
+			Options.commands.insert(0, 'reconfigure')
+			return
+
+		return execute_method(self)
+	return execute
+Build.BuildContext.execute = autoreconfigure(Build.BuildContext.execute)
 
