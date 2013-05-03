@@ -8,6 +8,5 @@ def setup(conf):
 
 def build(bld):
 	bld.thirdparty('3rdparty.win32', libs= ['kernel32', 'user32', 'advapi32',
-							'ole32', 'oleaut32', 'uuid'],
-							includes=[os.path.join('src', '3rdparty', 'win32', 'api-win32')])
+							'ole32', 'oleaut32', 'uuid'])
 	bld.features.append('GUI')

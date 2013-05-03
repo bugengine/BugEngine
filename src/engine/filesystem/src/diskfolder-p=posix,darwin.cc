@@ -36,6 +36,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     :   m_path(diskpath)
     ,   m_index(0)
 {
+    be_forceuse(m_index);
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
     ipath::Filename pathname = m_path.str();
     m_handle.ptrHandle = opendir(pathname.name);

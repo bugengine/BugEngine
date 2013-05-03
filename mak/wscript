@@ -4,7 +4,7 @@ from waflib import Errors
 import os, sys
 
 
-def module(bld, name, depends, features, use_master, warnings):
+def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	archs = bld.env.VALID_ARCHITECTURES
 	platforms = bld.env.VALID_PLATFORMS
 	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
@@ -24,8 +24,9 @@ def module(bld, name, depends, features, use_master, warnings):
 			extra_source_node = bld.bugenginenode.make_node(path)
 			extras.append(extra_source_node)
 			sources += extra_source_node.ant_glob('src/**/*.%s'%ext for ext in extensions + ['script.hh'])
-			api += [extra_source_node.make_node('api')]
-			include += [extra_source_node.make_node('include')]
+			if platform in platforms:
+				api += [extra_source_node.make_node('api')]
+				include += [extra_source_node.make_node('include')]
 
 
 
@@ -43,22 +44,36 @@ def module(bld, name, depends, features, use_master, warnings):
 	else:
 		uselib = ['warnnone', bld.env.VARIANT]
 
-	if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
-		kernelspath = source_node.make_node('kernels')
-		for kernel in kernelspath.listdir():
-			kernelpath = kernelspath.make_node(kernel)
-			kernelsources = kernelpath.ant_glob(['**'])
-			for toolchain in bld.env.KERNEL_TOOLCHAINS:
-				env = bld.all_envs[toolchain]
-				bld(
-					target = name + '.' + kernel,
-					features = ['cxx', 'cxxshlib', 'kernel'],
-					uselib = ['warnall', bld.env.VARIANT],
-					includes = api+include+[bld.srcnode],
-					source = kernelsources,
-					env = env.derive(),
-					use = depends + [name],
-					install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_KERNELDIR))
+	build = len(valid_platforms) == 0
+	for p in valid_platforms:
+		if p in platforms:
+			build = True
+
+	if build:
+		if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
+			kernelspath = source_node.make_node('kernels')
+			for kernel in kernelspath.listdir():
+				kernelpath = kernelspath.make_node(kernel)
+				kernelsources = kernelpath.ant_glob(['**'])
+				for toolchain in bld.env.KERNEL_TOOLCHAINS:
+					env = bld.all_envs[toolchain]
+					bld(
+						target = name + '.' + kernel,
+						features = ['cxx', 'cxxshlib', 'kernel'],
+						uselib = ['warnall', bld.env.VARIANT],
+						includes = api+include+[bld.srcnode],
+						source = kernelsources,
+						env = env.derive(),
+						use = depends + [name],
+						install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_KERNELDIR))
+	else:
+		sources = []
+		if 'cxxshlib' in features:
+			features.remove('cxxshlib')
+		if 'cxxprogram' in features:
+			features.remove('cxxprogram')
+		if 'cxxstlib' in features:
+			features.remove('cxxstlib')
 
 	return bld(
 		target = name,
@@ -102,28 +117,28 @@ def library(bld, name, depends=[], features=[], platforms=[], use_master=True, w
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxobjects'], use_master, warnings)
+	return module(bld, name, depends, platforms, ['cxx', 'cxxobjects'], use_master, warnings)
 
 @conf
 def static_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxstlib'], use_master, warnings)
+	return module(bld, name, depends, platforms, ['cxx', 'cxxstlib'], use_master, warnings)
 
 @conf
 def shared_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	return module(bld, name, depends, ['cxx', 'cxxshlib'], use_master, warnings)
+	return module(bld, name, depends, platforms, ['cxx', 'cxxshlib'], use_master, warnings)
 
 @conf
 def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
 			return None
-	m = module(bld, name, depends, ['cxx', 'cxxprogram'], use_master, warnings)
+	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
 	return m
 
@@ -132,7 +147,7 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 	for f in features:
 		if f not in bld.features:
 			return None
-	m = module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
+	m = module(bld, name, depends,platforms,  ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
@@ -141,7 +156,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for f in features:
 		if f not in bld.features:
 			return None
-	m = module(bld, name, depends, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
+	m = module(bld, name, depends, platforms, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
@@ -182,7 +197,7 @@ def build(bld):
 		raise Errors.WafError('Call %s %s %s:toolchain:variant, with toolchain in\n\t%s\nvariant in\n\t%s' %
 								(sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
 	bld.platforms = []
-	bld.features = []
+	bld.features = getattr(bld, 'features', [])
 	bld.bugenginenode = bld.path.parent
 	bld.recurse('host')
 	bld.recurse('source')

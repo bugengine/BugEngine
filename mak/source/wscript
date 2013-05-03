@@ -1,6 +1,6 @@
 import os
 from waflib import Task, Options
-from waflib.TaskGen import taskgen_method, before_method, after_method, feature, extension
+from waflib.TaskGen import task_gen, taskgen_method, before_method, after_method, feature, extension
 
 @taskgen_method
 @feature('*')
@@ -37,7 +37,7 @@ def filter_sources(self):
 				for a in architectures:
 					add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
 			elif node.parent.name == 'extra' and node.parent.parent == self.path:
-				add_platform == node.name in self.env.VALID_PLATFORMS
+				add_platform = node.name in self.env.VALID_PLATFORMS
 			node = node.parent
 		if add_platform and add_arch:
 			sources.append(file)
@@ -56,6 +56,9 @@ def install_plist(self, node):
 def install_binary(self, node):
 	self.bld.install_files(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_RUNBINDIR), node)
 
+def rc_hook(self, node):
+	pass
+
 def options(opt):
 	pass
 
@@ -65,7 +68,9 @@ def configure(conf):
 	conf.load('data', tooldir=['mak/tools'])
 
 def build(bld):
-	pass
+	if bld.env.PROJECTS:
+		if not '.rc' in task_gen.mappings:
+			task_gen.mappings['.rc'] = rc_hook
 
 
 from waflib.Tools import c,cxx
@@ -128,6 +133,4 @@ def cc_hook(self, node):
 				self.create_compiled_task('cxx', output)
 	else:
 		self.create_compiled_task('cxx', node)
-
-
 
