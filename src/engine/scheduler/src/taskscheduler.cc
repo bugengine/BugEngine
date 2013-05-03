@@ -84,7 +84,7 @@ bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
             sc->queue(items[i], Scheduler::Immediate);
         }
     }
-    be_assert(sc->m_scheduler->m_runningTasks > 0, "running task count should be more than 1");
+    be_assert(sc->m_scheduler->isRunning(), "running task count should be more than 1");
     return sc->m_scheduler->signalTaskDone();
 }
 

@@ -454,6 +454,7 @@ class PBXProject(XCodeNode):
 			variants.append(XCBuildConfiguration(variant, {
 				'PRODUCT_NAME': p.target,
 				'ARCHS':['i386'],
+				'VALID_ARCHS':['i386'],
 				'SDKROOT': 'macosx',
 				'SUPPORTED_PLATFORMS': 'macosx',
 				'HEADER_SEARCH_PATHS': [get_include_path(i) for i in includes],
@@ -469,6 +470,7 @@ class PBXProject(XCodeNode):
 		self._output2.children.append(target.productReference)
 		self.targets.append(target)
 		scheme = XCodeScheme(target._id, 'index.'+p.target, 'lib%s.a'%p.target, schemes.project_name, True)
+		scheme.write(schemes.make_node('index.%s.xcscheme'%p.target))
 		schememanagement.add(scheme)
 
 
@@ -496,6 +498,7 @@ class xcode(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(DEPLOY_DATADIR)'
 		self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
 		self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
+		self.features = ['GUI']
 		self.recurse([self.run_dir])
 		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
 		import getpass
@@ -532,6 +535,7 @@ class xcode(Build.BuildContext):
 								'BUILT_PRODUCTS_DIR': 'build/%s/%s'%(toolchain, variant),
 								'CONFIGURATION_BUILD_DIR':  'build/%s/%s'%(toolchain, variant),
 								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
+								'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,
 								'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
 				build = PBXShellScriptBuildPhase('install:'+toolchain+':${CONFIG}')
@@ -548,8 +552,8 @@ class xcode(Build.BuildContext):
 				target = PBXLegacyTarget(toolchain, 'install:%s:$(CONFIG)'%toolchain)
 				p.targets.append(target)
 				scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
-				scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
-				schememanagement.add(scheme)
+			scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
+			schememanagement.add(scheme)
 
 		schememanagement.write(schemes.make_node('xcschememanagement.plist'))
 		node = project.make_node('project.pbxproj')
