@@ -138,7 +138,7 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for f in features:
 		if f not in bld.features:
 			return None
-	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram'], use_master, warnings)
+	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
 	return m
 
@@ -177,6 +177,7 @@ def options(opt):
 		opt.recurse('../src/3rdparty/%s'%third_party)
 	opt.load('visualstudio', tooldir=['mak/tools'])
 	opt.load('xcode', tooldir=['mak/tools'])
+	opt.load('netbeans', tooldir=['mak/tools'])
 
 def configure(conf):
 	conf.bugenginenode = conf.path.parent
@@ -247,6 +248,10 @@ def plugin_feature(task):
 
 @feature('game')
 def game_feature(task):
+	pass
+
+@feature('launcher')
+def launcher_feature(task):
 	pass
 
 @feature('cxxobjects')
