@@ -49,6 +49,10 @@ public:
 
     void mainThreadJoin();
     void notifyEnd();
+
+	bool taskDone();
+	bool hasTasks();
+	bool isRunning();
 };
 
 }}
