@@ -99,14 +99,4 @@ void Scheduler::removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
     be_notreached();
 }
 
-bool Scheduler::isRunning() const
-{
-    return m_running;
-}
-
-bool Scheduler::signalTaskDone()
-{
-    return --m_runningTasks == 0;
-}
-
 }
