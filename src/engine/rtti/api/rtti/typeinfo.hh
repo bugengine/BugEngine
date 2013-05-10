@@ -12,7 +12,7 @@ namespace BugEngine
 {
 
 template< typename T >
-BE_EXPORT struct be_typeid
+struct BE_EXPORT be_typeid
 {
     template< typename U > friend struct be_typeid;
 private:
