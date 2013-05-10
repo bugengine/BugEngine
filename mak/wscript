@@ -40,9 +40,9 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	if use_master:
 		features = features + ['master']
 	if warnings:
-		uselib = ['warnall', bld.env.VARIANT]
+		extra_features = ['warnall', bld.env.VARIANT]
 	else:
-		uselib = ['warnnone', bld.env.VARIANT]
+		extra_features = ['warnnone', bld.env.VARIANT]
 
 	build = len(valid_platforms) == 0
 	for p in valid_platforms:
@@ -59,8 +59,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 					env = bld.all_envs[toolchain]
 					bld(
 						target = name + '.' + kernel,
-						features = ['cxx', 'cxxshlib', 'kernel'],
-						uselib = ['warnall', bld.env.VARIANT],
+						features = ['cxx', 'cxxshlib', 'kernel'] + extra_features,
 						includes = api+include+[bld.srcnode],
 						source = kernelsources,
 						env = env.derive(),
@@ -78,8 +77,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	return bld(
 		target = name,
 		use = depends,
-		uselib = uselib,
-		features = features,
+		features = features + extra_features,
 		defines = ['building_%s' % name.split('.')[-1], 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
 		includes = api+include+[bld.srcnode],
@@ -270,6 +268,13 @@ def remove_link_libs(task):
 					task.env.LIB.remove(l)
 			except:
 				pass
+
+for f in ['debug', 'profile', 'final', 'warnall', 'warnnone']:
+	@feature(f)
+	def set_warnall(self):
+		self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
+		self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
+		self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
 
 from waflib import Configure, Build, ConfigSet, Context, Utils, Options, Errors, Logs
 try:

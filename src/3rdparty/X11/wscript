@@ -9,4 +9,4 @@ def setup(conf):
 def build(bld):
 	if bld.env.X11:
 		bld.thirdparty('3rdparty.X11', includes=['/usr/X11R6/include'], libs=bld.env.X11)
-		bld.features.add('GUI')
+		bld.features.append('GUI')

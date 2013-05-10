@@ -28,7 +28,7 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
 #ifdef __llvm__
     stackPointer = (void**)__builtin_frame_address(0);
 #elif defined(__GNUC__)
-# ifdef _X64
+# ifdef _AMD64
     __asm__ volatile ("mov %%rbp, %0" : "=r" (stackPointer));
 # else
     __asm__ volatile ("mov %%ebp, %0" : "=r" (stackPointer));
