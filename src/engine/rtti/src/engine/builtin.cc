@@ -38,8 +38,7 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::regis
     return preklass();
 }
 
-template< >
-BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
+template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::preklass()
 {
     static RTTI::Class s_refcountable = { "refcountable", {0}, {0}, 0, 0, 0, {0}, {0}, {0}, {0}, {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};

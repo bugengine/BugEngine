@@ -17,6 +17,34 @@ def set_windows_options(self):
 	self.env.DEPLOY_KERNELDIR = 'data/kernel'
 
 @conf
+def set_windows_gcc_options(self, options, version):
+	v = self.env
+	v.append_unique('CFLAGS', options)
+	v.append_unique('CXXFLAGS', options)
+	v.append_unique('LINKFLAGS', options)
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedefs']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
+
+
+@conf
 def set_windows_msvc_options(self):
 	self.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
 	self.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
@@ -39,11 +67,6 @@ def set_windows_msvc_options(self):
 	self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG']
 	self.env.ARFLAGS_final = ['/LTCG']
-
-@conf
-def set_windows_gcc_options(self):
-	pass
-
 
 def options(opt):
 	pass
@@ -74,6 +97,31 @@ def configure(conf):
 				except Errors.WafError as e:
 					conf.variant = ''
 					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+
+	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+		position = target.find('mingw')
+		if position != -1:
+			os = 'windows'
+			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.set_windows_gcc_options(options, version)
+					conf.set_windows_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os, arch, name, version, arch)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.win32'))

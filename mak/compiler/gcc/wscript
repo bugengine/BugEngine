@@ -1,4 +1,4 @@
-from waflib import Utils
+from waflib import Utils, Logs
 from waflib.Configure import conf
 import os
 
@@ -23,12 +23,12 @@ def allarchs(arch):
 		return [(['-m32'], 'mipsel'), (['-m64'], 'mipsel64')]
 	elif arch == 'powerpc' or arch == 'ppc':
 		return [(['-m64'], arch+'64'), (['-m32'], arch)]
-	elif arch == 'powerpc64' or arch == 'ppc64':
+	elif arch in ['powerpc64', 'ppc64', 'ppu']:
 		return [(['-m32'], arch[:-2]), (['-m64'], arch)]
 	elif arch == 'spu':
-		return [[], 'spu']
+		return [([], 'spu')]
 	else:
-		warn('unknown architecture : %s' % arch)
+		Logs.warn('unknown architecture : %s' % arch)
 		return [([], arch)]
 
 
@@ -69,7 +69,7 @@ def get_native_icc_target(conf, icc):
 
 
 def add_ld_so(conf, filename, paths):
-	f = open(file, 'r')
+	f = open(filename, 'r')
 	for line in f:
 		line = line.strip()
 		if not line:
@@ -179,6 +179,13 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 	self.env.CC = gcc
 	self.env.CXX = gxx
 	self.load('gcc gxx')
+	if target.find('mingw') != -1:
+		winres = self.find_program(target + '-windres', var='WINRC', path_list=[bindir], mandatory=False)
+		if not winres:
+			winres = self.find_program('windres', var='WINRC', path_list=[bindir], mandatory=False)
+		if not winres:
+			winres = self.find_program('windres', var='WINRC', mandatory=False)
+		self.load('winres')
 
 def options(opt):
 	pass
@@ -201,6 +208,8 @@ def configure(conf):
 		('amd64', 'amd64'),
 		('powerpc', 'powerpc'),
 		('mingw32', 'x86'),
+		('ppu', 'powerpc'),
+		('spu', 'spu')
 	]
 
 	conf.detect_gcc()

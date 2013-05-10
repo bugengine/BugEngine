@@ -63,11 +63,11 @@ def set_macosx_options(self):
 	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
 
 @conf
-def set_macosx_gcc_options(self, arch):
+def set_macosx_gcc_options(self, flags):
 	v = self.env
-	v.CFLAGS = ['-fPIC', '-fvisibility=hidden']
-	v.CXXFLAGS = ['-fPIC', '-fvisibility=hidden']
-	v.LINKFLAGS = []
+	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = flags + []
 	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
@@ -95,11 +95,11 @@ def set_macosx_gcc_options(self, arch):
 
 
 @conf
-def set_macosx_clang_options(self, arch):
+def set_macosx_clang_options(self, flags):
 	v = self.env
-	v.CFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	v.CXXFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	v.LINKFLAGS = ['-arch', arch]
+	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = flags + []
 	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
@@ -134,17 +134,7 @@ def options(opt):
 
 def configure(conf):
 	seen = set([])
-	supported_architectures = {
-		'x86':		'x86',
-		'i386':		'x86',
-		'x86_64':	'amd64',
-		'x64':		'amd64',
-		'amd64':	'amd64',
-		'ppc':		'powerpc',
-		'powerpc':	'powerpc',
-		'ppc64':	'powerpc64',
-		'powerpc64':'powerpc64',
-	}
+	supported_architectures = ['x86', 'i386', 'x86_64', 'x64', 'amd64', 'ppc', 'powerpc', 'ppc64', 'powerpc64']
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
@@ -158,7 +148,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
-					conf.set_macosx_gcc_options(arch)
+					conf.set_macosx_gcc_options(options)
 					conf.set_macosx_options()
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
@@ -175,11 +165,11 @@ def configure(conf):
 					raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		real_arch, flags = arch
 		position = target.find('darwin')
-		if position != -1 and arch in supported_architectures:
+		if position != -1 and real_arch in supported_architectures:
 			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
-			real_arch = supported_architectures[arch]
 			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
 			if toolchain not in seen:
 				seen.add(toolchain)
@@ -187,7 +177,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_clang(directory)
-					conf.set_macosx_clang_options(arch)
+					conf.set_macosx_clang_options(flags)
 					conf.set_macosx_options()
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())

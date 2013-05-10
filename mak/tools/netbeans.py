@@ -1,6 +1,5 @@
 from waflib import TaskGen, Context, Build
 import os, sys
-import mak
 from xml.dom.minidom import Document
 
 def setAttributes(node, attrs):

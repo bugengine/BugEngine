@@ -1,11 +1,151 @@
+# set Linux specific options
+
+import os
+from waflib import Context, Errors, Utils
+from waflib.Logs import info,warn,pprint
+from waflib.TaskGen import feature, before_method, after_method
+from waflib.Configure import conf
+
+
+@conf
+def set_linux_options(self):
+	self.env.VALID_PLATFORMS = ['linux', 'posix', 'pc']
+
+	self.env.DEPLOY_ROOTDIR = ''
+	self.env.DEPLOY_BINDIR = 'bin'
+	self.env.DEPLOY_RUNBINDIR = 'lib'
+	self.env.DEPLOY_LIBDIR = 'lib'
+	self.env.DEPLOY_INCLUDEDIR = 'include'
+	self.env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
+	self.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
+	self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
+
+	self.env.RPATH = '$ORIGIN/../share/bugengine/plugin'
+	self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
+
+@conf
+def set_linux_gcc_options(self, flags, version):
+	v = self.env
+	if float(version.split('.')[0]) >= 4:
+		v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+		v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	else:
+		v.CFLAGS = flags + ['-fPIC']
+		v.CXXFLAGS = flags + ['-fPIC']
+	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E']
+	v.CXXFLAGS_cxxshlib = []
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedefs']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
+
+@conf
+def set_linux_clang_options(self, options, version):
+	v = self.env
+	version = version.split('.')
+	version = float(version[0]) + float(version[1])/10
+	if version >= 3.1:
+		v.CFLAGS = options + ['-fPIC', '-fvisibility=hidden']
+		v.CXXFLAGS = options + ['-fPIC', '-fvisibility=hidden']
+	else:
+		v.CFLAGS = options + ['-fPIC']
+		v.CXXFLAGS = options + ['-fPIC']
+	v.LINKFLAGS = options + ['-rdynamic', '-Wl,-E']
+	v.CXXFLAGS_cxxshlib = []
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
 def options(opt):
 	pass
 
 def configure(conf):
-	pass
+	seen = set([])
+	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+		position = target.find('linux-gnu')
+		if position != -1:
+			os = 'linux'
+			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.set_linux_gcc_options(options, version)
+					conf.set_linux_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os, arch, name, version, arch)
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
+
+	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		arch_name, options = arch
+		target = 'linux'
+		toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
+		if toolchain not in seen:
+			seen.add(toolchain)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			try:
+				conf.load_clang(directory)
+				conf.set_linux_clang_options(options, version)
+				conf.set_linux_options()
+				conf.env.KERNEL_TOOLCHAINS = [toolchain]
+				conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+				conf.variant = ''
+				pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+			except Errors.WafError as e:
+				conf.variant = ''
+				pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+			except Exception as e:
+				conf.variant = ''
+				pprint('RED', '%s failed: %s' % (toolchain, e))
+				raise
 
 def build(bld):
-	bld.platforms.append(bld.external('3rdparty.X11').target)
+	bld.platforms.append(bld.external('3rdparty.X11'))
 
 def plugins(bld):
 	pass

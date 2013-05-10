@@ -117,11 +117,11 @@ def set_iphone_gcc_options(self, arch):
 
 
 @conf
-def set_iphone_clang_options(self, arch):
+def set_iphone_clang_options(self, flags):
 	v = self.env
-	v.CFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	v.CXXFLAGS = ['-arch', arch, '-fPIC', '-fvisibility=hidden']
-	v.LINKFLAGS = ['-arch', arch]
+	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = flags + []
 	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
@@ -151,9 +151,10 @@ def set_iphone_clang_options(self, arch):
 def configure(conf):
 	seen = set([])
 	supported_architectures = {
-		'x86':		('i386', 'iPhoneSimulator'),
-		'i386':		('i386', 'iPhoneSimulator'),
-		'arm':		('armv7', 'iPhoneOS'),
+		'x86':		'iPhoneSimulator',
+		'i386':		'iPhoneSimulator',
+		'arm':		'iPhoneOS',
+		'armv7':	'iPhoneOS',
 	}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
@@ -185,11 +186,12 @@ def configure(conf):
 					raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		real_arch, flags = arch
 		position = target.find('darwin')
-		if position != -1 and arch in supported_architectures:
+		if position != -1 and real_arch in supported_architectures:
 			os = 'iphone'
+			real_os = supported_architectures[real_arch]
 			version = target[position+6:].split('-')[0] + '_' + version
-			real_arch, real_os = supported_architectures[arch]
 			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
 			if toolchain not in seen:
 				seen.add(toolchain)
@@ -197,7 +199,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_clang(directory)
-					conf.set_iphone_clang_options(real_arch)
+					conf.set_iphone_clang_options(flags)
 					conf.set_iphone_options(real_os)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())
