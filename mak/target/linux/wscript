@@ -26,7 +26,9 @@ def set_linux_options(self):
 @conf
 def set_linux_gcc_options(self, flags, version):
 	v = self.env
-	if float(version.split('.')[0]) >= 4:
+	version = version.split('.')
+	version = float(version[0]) + float(version[1])/10
+	if version >= 4:
 		v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	else:
@@ -38,7 +40,9 @@ def set_linux_gcc_options(self, flags, version):
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
 	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedefs']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+	if version >= 4.8:
+		v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
 	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
 	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -121,28 +125,29 @@ def configure(conf):
 					raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
-		arch_name, options = arch
-		target = 'linux'
-		toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
-		if toolchain not in seen:
-			seen.add(toolchain)
-			env = conf.env.derive()
-			conf.setenv(toolchain, env)
-			try:
-				conf.load_clang(directory)
-				conf.set_linux_clang_options(options, version)
-				conf.set_linux_options()
-				conf.env.KERNEL_TOOLCHAINS = [toolchain]
-				conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
-				conf.variant = ''
-				pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-			except Errors.WafError as e:
-				conf.variant = ''
-				pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-			except Exception as e:
-				conf.variant = ''
-				pprint('RED', '%s failed: %s' % (toolchain, e))
-				raise
+		if target.find('linux') != -1:
+			arch_name, options = arch
+			target = 'linux'
+			toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_clang(directory)
+					conf.set_linux_clang_options(options, version)
+					conf.set_linux_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.X11'))
