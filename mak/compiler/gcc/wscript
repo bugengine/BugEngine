@@ -82,24 +82,7 @@ def add_ld_so(conf, filename, paths):
 			paths.add(line)
 
 @conf
-def detect_gcc_archs_from_path(conf, name, libdir, gcc, gxx, version, target, arch):
-	bindir = os.path.normpath(os.path.join(libdir, '..', '..', 'bin'))
-	versionsmall = '.'.join(version.split('.')[0:2])
-	versionverysmall = ''.join(version.split('.')[0:2])
-
-	cc = cxx = None
-	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall]:
-		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False, silent=True)
-		if cc:
-			break
-	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
-		cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False, silent=True)
-		if cxx:
-			break
-
-	del conf.env['CC']
-	del conf.env['CXX']
-
+def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
 	if cc and cxx:
 		found = False
 		for gcc_option, gcc_arch in allarchs(arch):
@@ -116,8 +99,27 @@ def detect_gcc_archs_from_path(conf, name, libdir, gcc, gxx, version, target, ar
 
 
 @conf
+def detect_gcc_archs_from_path(conf, name, bindir, gcc, gxx, version, target, arch):
+	versionsmall = '.'.join(version.split('.')[0:2])
+	versionverysmall = ''.join(version.split('.')[0:2])
+
+	cc = cxx = None
+	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall]:
+		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False, silent=True)
+		if cc:
+			break
+	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
+		cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False, silent=True)
+		if cxx:
+			break
+	del conf.env['CC']
+	del conf.env['CXX']
+	conf.add_all_archs_to_env(name, bindir, cc, cxx, version, target, arch)
+
+
+@conf
 def detect_gcc_from_path(conf, path, seen):
-	for subdir in ['', 'lib/gcc', 'gcc']:
+	for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..')]:
 		libdir = os.path.join(path, subdir)
 		if not os.path.isdir(libdir):
 			continue
@@ -131,10 +133,6 @@ def detect_gcc_from_path(conf, path, seen):
 					continue
 				if version in ['.svn', '.cvs']:
 					continue
-				if os.path.islink(os.path.join(libdir, target, version)):
-					continue
-				if not os.path.isdir(os.path.join(libdir, target, version, 'include')):
-					continue
 				arch = conf.parse_gcc_target(target) or 'unknown'
 				if libdir.find('llvm') != -1:
 					gcc, gxx = 'llvm-gcc', 'llvm-g++'
@@ -142,9 +140,46 @@ def detect_gcc_from_path(conf, path, seen):
 				else:
 					gcc, gxx = 'gcc', 'g++'
 					name = 'gcc'
+				bindir = os.path.normpath(os.path.join(libdir, relative, 'bin'))
 				if (gcc, gxx, version, target, arch) not in seen:
-					conf.detect_gcc_archs_from_path(name, libdir, gcc, gxx, version, target, arch)
+					conf.detect_gcc_archs_from_path(name, bindir, gcc, gxx, version, target, arch)
 					seen.append((gcc, gxx, version, target, arch))
+
+@conf
+def get_native_gcc(conf):
+	import platform
+	if platform.uname()[0].lower() == 'freebsd':
+		gcc = '/usr/bin/gcc'
+		cmd = [gcc, '-v']
+		try:
+			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+			out = p.communicate()[1]
+		except:
+			return (None, None)
+
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+
+		arch = None
+		platform = None
+		version = None
+
+		while out:
+			line = out.pop(0)
+			if line.startswith('Target: '):
+				target = line.split()[1].split('-')
+				arch = target[0]
+				platform = target[2]
+			elif line.startswith('gcc version'):
+				version = line.split()[2]
+		if arch and platform and version:
+			conf.add_all_archs_to_env('gcc', '/usr/bin/', '/usr/bin/gcc', '/usr/bin/g++', version, platform, arch)
+		else:
+			Logs.warn('could not find native GCC for freebsd')
+
+
+
 
 @conf
 def detect_gcc(conf):
@@ -172,6 +207,7 @@ def detect_gcc(conf):
 		for lib in os.listdir(path):
 			if lib.startswith('gcc'):
 				conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
+	conf.get_native_gcc()
 	conf.env.GCC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
 
 @conf

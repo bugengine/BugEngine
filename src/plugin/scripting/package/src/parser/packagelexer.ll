@@ -115,3 +115,10 @@ zip                                     { update(be_package_leng); return KW_zip
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+#ifndef FLEX_BETA
+int be_package_lex_destroy()
+{
+    return 0;
+}
+#endif
