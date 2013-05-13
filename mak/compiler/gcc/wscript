@@ -105,11 +105,11 @@ def detect_gcc_archs_from_path(conf, name, bindir, gcc, gxx, version, target, ar
 
 	cc = cxx = None
 	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall]:
-		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False, silent=True)
+		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False)
 		if cc:
 			break
 	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
-		cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False, silent=True)
+		cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False)
 		if cxx:
 			break
 	del conf.env['CC']

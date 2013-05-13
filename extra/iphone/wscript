@@ -15,7 +15,7 @@ def options(opt):
 
 
 @conf
-def set_iphone_options(self, target):
+def set_iphone_options(self, target, all_sdks):
 	self.env.VALID_PLATFORMS = ['iphone', 'darwin']
 
 	self.env.XCODE_SDKROOT = 'iphoneos'
@@ -35,7 +35,15 @@ def set_iphone_options(self, target):
 	from waflib import Options
 	sdks = []
 	seen = []
-	for path in Options.options.xcode_sdks.split(','):
+	paths = []
+	if all_sdks:
+		paths = Options.options.xcode_sdks.split(',')
+	else:
+		compiler,_ = os.path.split(self.env.CXX[0])
+		while _:
+			compiler,_ = os.path.split(compiler)
+			paths.append(compiler)
+	for path in paths:
 		for sdk_relative_path in [os.path.join('Platforms', '%s.platform'%target, 'Developer', 'SDKs'), 'SDKs']:
 			sdks_path = os.path.join(path, sdk_relative_path)
 			try:
@@ -78,9 +86,10 @@ def set_iphone_gcc_options(self, arch):
 	v.CXXFLAGS_cxxshlib = []
 
 	filename = os.path.join(self.bldnode.abspath(), 'main.c')
+	output = os.path.join(self.bldnode.abspath(), 'main.o')
 	with open(filename, 'w') as f:
 		f.write('int main(int, const char**) { return 0; }')
-		cmd = v.CC + ['-Wp,-imultilib,v7', '-c', filename]
+		cmd = v.CC + ['-Wp,-imultilib,v7', '-c', filename, '-o', output]
 		try:
 			p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 			p.stdin.write('\n'.encode())
@@ -161,7 +170,8 @@ def configure(conf):
 		if position != -1 and arch in supported_architectures:
 			os = 'iphone'
 			version = target[position+6:].split('-')[0] + '_' + version
-			real_arch, real_os = supported_architectures[arch]
+			real_arch = arch
+			real_os = supported_architectures[arch]
 			toolchain = '%s-%s-%s-%s'%(os, real_arch, name, version)
 			if toolchain not in seen:
 				seen.add(toolchain)
@@ -170,7 +180,7 @@ def configure(conf):
 				try:
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_iphone_gcc_options(real_arch)
-					conf.set_iphone_options(real_os)
+					conf.set_iphone_options(real_os, False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
@@ -200,7 +210,7 @@ def configure(conf):
 				try:
 					conf.load_clang(directory)
 					conf.set_iphone_clang_options(flags)
-					conf.set_iphone_options(real_os)
+					conf.set_iphone_options(real_os, True)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
