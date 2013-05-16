@@ -1,7 +1,7 @@
 # set MacOS X specific options
 
 import os
-from waflib import Context, Errors, Utils
+from waflib import Context, Errors, Utils, Task
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
@@ -15,7 +15,7 @@ def set_macosx_options(self, all_sdks):
 	self.env.XCODE_ABI = 'mach_o'
 	self.env.XCODE_SUPPORTEDPLATFORMS = 'macosx'
 
-	appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+	appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 	self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
 	self.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
 	self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
@@ -27,15 +27,7 @@ def set_macosx_options(self, all_sdks):
 
 	from waflib import Options
 	sdks = []
-	seen = []
-	paths = []
-	if all_sdks:
-		paths = Options.options.xcode_sdks.split(',')
-	else:
-		compiler,_ = os.path.split(self.env.CXX[0])
-		while _:
-			compiler,_ = os.path.split(compiler)
-			paths.append(compiler)
+	paths = Options.options.xcode_sdks.split(',')
 	for path in paths:
 		for sdk_relative_path in [os.path.join('Platforms', 'MacOSX.platform', 'Developer', 'SDKs'), 'SDKs']:
 			sdks_path = os.path.join(path, sdk_relative_path)
@@ -47,12 +39,10 @@ def set_macosx_options(self, all_sdks):
 				for sdk in sdk_list:
 					sdk_name,_ = os.path.splitext(sdk)
 					if sdk.startswith('MacOSX'):
-						if not sdk in seen:
-							sdk_version = sdk_name[6:10]
-							seen.append(sdk)
-							sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
+						sdk_version = sdk_name[6:10]
+						sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
-	sdks.sort(key = lambda x: x[0])
+	sdks.sort()
 	for sdk, sdk_path in sdks[::-1]:
 		if Options.options.macosx_sdk and not sdk.startswith(Options.options.macosx_sdk):
 			continue
@@ -187,6 +177,8 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.find_program('dsymutil')
+					conf.find_program('strip')
 					conf.set_macosx_gcc_options(options, real_arch)
 					conf.set_macosx_options(False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
@@ -216,6 +208,8 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_clang(directory)
+					conf.find_program('dsymutil')
+					conf.find_program('strip')
 					conf.set_macosx_clang_options(flags)
 					conf.set_macosx_options(True)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
@@ -247,3 +241,49 @@ def set_osx_shlib_name(self):
 		elif 'kernel' in self.features:
 			self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
 
+
+dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'
+cls = Task.task_factory('dsym', dsym, color='BLUE')
+strip = '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
+cls = Task.task_factory('strip', strip, color='BLUE')
+
+
+@feature('kernel', 'plugin', 'launcher')
+@after_method('apply_link')
+def make_debug_symbols(self):
+	if 'kernel' in self.features:
+		out_path = self.env.DEPLOY_KERNELDIR
+	elif 'plugin' in self.features:
+		out_path = self.env.DEPLOY_PLUGINDIR
+	elif 'launcher' in self.features:
+		out_path = self.env.DEPLOY_BINDIR
+	else:
+		raise Errors.WafError('cxxshlib or cxxprogram needs to be a launcher, plugin or kernel')
+
+	if 'darwin' in self.env.VALID_PLATFORMS and self.env.DSYMUTIL:
+		appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
+		out_node = self.link_task.outputs[0]
+		out_dir = out_node.parent
+		dbg_outdir = out_dir.make_node('dbg').make_node(out_path)
+		dbg_outdir.mkdir()
+		self.link_task.outputs[0] = dbg_outdir.make_node(out_node.name)
+
+		final_outdir = out_dir.make_node(appname+'.app').make_node(out_path)
+		final_outdir.mkdir()
+		self.strip_task = self.create_task('strip', [self.link_task.outputs[0]], [final_outdir.make_node(out_node.name)])
+
+		dsymtask = getattr(self.bld, 'dsym_task', None)
+		if not dsymtask:
+			out_dir = out_dir.make_node(appname+'.app.dSYM').make_node('Contents')
+			out_dir.mkdir()
+			infoplist = out_dir.make_node('Info.plist')
+			dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
+			dsymtask.out_directory = out_dir.make_node('Resources/DWARF')
+			dsymtask.out_directory.mkdir()
+			self.bld.install_as(os.path.join('build', self.bld.env.TOOLCHAIN, self.bld.env.VARIANT, appname+'.app.dSYM', 'Contents', 'Info.plist'), dsymtask.outputs[0])
+		dsymtask.set_inputs(self.link_task.outputs[0])
+		dsymtask.set_outputs(dsymtask.out_directory.make_node(self.link_task.outputs[0].name))
+		self.bld.install_as(os.path.join('build', self.bld.env.TOOLCHAIN, self.bld.env.VARIANT, appname+'.app.dSYM', 'Contents', 'Resources', 'DWARF', out_node.name), dsymtask.outputs[-1])
+		it = getattr(self, 'install_task', None)
+		if it:
+			it.source[0] = self.strip_task.outputs[0]
