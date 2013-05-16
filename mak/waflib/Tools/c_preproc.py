@@ -953,9 +953,9 @@ class c_parser(object):
 					state.pop()
 
 				# skip lines when in a dead 'if' branch, wait for the endif
-				if token[0] != 'e':
-					if skipped in self.state or ignored in self.state:
-						continue
+				#if token[0] != 'e':
+				#	if skipped in self.state or ignored in self.state:
+				#		continue
 
 				if token == 'if':
 					ret = eval_macro(tokenize(line), self.defs)

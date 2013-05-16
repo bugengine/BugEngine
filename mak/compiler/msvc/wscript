@@ -1,0 +1,9 @@
+
+def options(opt):
+	opt.load('msvc')
+
+def configure(conf):
+	conf.start_msg('Looking for msvc compilers')
+	conf.get_msvc_versions()
+	conf.end_msg('done')
+

@@ -77,7 +77,7 @@ class winrc(Task.Task):
 	"""
 	Task for compiling resource files
 	"""
-	run_str = '${WINRC} ${WINRCFLAGS} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${WINRC_TGT_F} ${TGT} ${WINRC_SRC_F} ${SRC}'
+	run_str = '${WINRC} ${WINRCFLAGS} ${RCPATH_ST:RCPATHS} ${DEFINES_ST:DEFINES} ${WINRC_TGT_F} ${TGT} ${WINRC_SRC_F} ${SRC}'
 	color   = 'BLUE'
 
 	def scan(self):
@@ -110,5 +110,9 @@ def configure(conf):
 	if not conf.env.WINRC:
 		conf.fatal('winrc was not found!')
 
+	if v.CC_NAME == 'msvc':
+		v['RCPATH_ST'] = '-I%s'
+	else:
+		v['RCPATH_ST'] = '-I"%s"'
 	v['WINRCFLAGS'] = []
 

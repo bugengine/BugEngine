@@ -9,6 +9,10 @@
 # define BE_COMPILER_INTEL      1
 # define BE_COMPILER_NAME       "intel"
 # include <kernel/compilers/intel.hh>
+#elif defined(__clang__)
+# define BE_COMPILER_CLANG      1
+# define BE_COMPILER_NAME       "clang"
+# include <kernel/compilers/clang.hh>
 #elif defined(_MSC_VER)
 # define BE_COMPILER_MSVC       1
 # define BE_COMPILER_NAME       "msvc"

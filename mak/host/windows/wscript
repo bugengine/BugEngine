@@ -1,11 +1,10 @@
 
 def options(opt):
-	opt.load('msvc')
+	pass
 
 def configure(conf):
 	import os
 	os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
-	conf.get_msvc_versions()
 
 def build(bld):
 	pass

@@ -1,6 +1,6 @@
 from waflib import Utils
 from waflib.Configure import conf
-import os
+import os, sys
 
 all_clang_archs = [
 	('x86', ['x86', 'i386']),
@@ -113,7 +113,7 @@ def get_native_clang_target(conf, clang):
 
 @conf
 def detect_clang(conf):
-	bindirs = os.environ['PATH'].split(':')
+	bindirs = os.environ['PATH'].split(os.pathsep)
 	conf.env.CLANG_TARGETS = []
 
 	for path in bindirs:
@@ -132,10 +132,18 @@ def detect_clang(conf):
 		del conf.env['CLANGXX']
 
 @conf
-def load_clang(conf, directory):
+def load_clang(conf, directory, target = ''):
 	conf.find_program('clang', var='CC', path_list=[directory])
 	conf.find_program('clang++', var='CXX', path_list=[directory])
 	conf.load('gcc gxx')
+	if target.find('mingw') != -1:
+		winres = conf.find_program(target + '-windres', var='WINRC', path_list=[directory], mandatory=False)
+		if not winres:
+			winres = conf.find_program('windres', var='WINRC', path_list=[directory], mandatory=False)
+		if not winres:
+			winres = conf.find_program('windres', var='WINRC', mandatory=False)
+		conf.load('winres')
+
 
 def options(opt):
 	pass

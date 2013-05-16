@@ -490,7 +490,6 @@ def find_program(self, filename, **kw):
 	exts = kw.get('exts', Utils.is_win32 and '.exe,.com,.bat,.cmd' or ',.sh,.pl,.py')
 
 	environ = kw.get('environ', os.environ)
-	silent = kw.get('silent', False)
 
 	ret = ''
 	filename = Utils.to_list(filename)
@@ -532,8 +531,7 @@ def find_program(self, filename, **kw):
 	if not ret and Utils.winreg:
 		ret = Utils.get_registry_app_path(Utils.winreg.HKEY_LOCAL_MACHINE, filename)
 
-	if not silent:
-		self.msg('Checking for program ' + ','.join(filename), ret or False)
+	self.msg('Checking for program ' + ','.join(filename), ret or False)
 	self.to_log('find program=%r paths=%r var=%r -> %r' % (filename, path_list, var, ret))
 
 	if not ret:
