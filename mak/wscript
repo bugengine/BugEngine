@@ -77,7 +77,8 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	return bld(
 		target = name,
 		use = depends,
-		features = features + extra_features,
+		features = features,
+		extra_use = extra_features,
 		defines = ['building_%s' % name.split('.')[-1], 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
 		includes = api+include+[bld.srcnode],
@@ -269,9 +270,9 @@ def remove_link_libs(task):
 			except:
 				pass
 
-for f in ['debug', 'profile', 'final', 'warnall', 'warnnone']:
-	@feature(f)
-	def set_warnall(self):
+@feature('cxx')
+def set_extra_flags(self):
+	for f in getattr(self, 'extra_use', []):
 		self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
 		self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
 		self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])

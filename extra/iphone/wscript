@@ -34,15 +34,7 @@ def set_iphone_options(self, target, all_sdks):
 
 	from waflib import Options
 	sdks = []
-	seen = []
-	paths = []
-	if all_sdks:
-		paths = Options.options.xcode_sdks.split(',')
-	else:
-		compiler,_ = os.path.split(self.env.CXX[0])
-		while _:
-			compiler,_ = os.path.split(compiler)
-			paths.append(compiler)
+	paths = Options.options.xcode_sdks.split(',')
 	for path in paths:
 		for sdk_relative_path in [os.path.join('Platforms', '%s.platform'%target, 'Developer', 'SDKs'), 'SDKs']:
 			sdks_path = os.path.join(path, sdk_relative_path)
@@ -55,11 +47,9 @@ def set_iphone_options(self, target, all_sdks):
 					sdk_name,_ = os.path.splitext(sdk)
 					if sdk.startswith(target):
 						sdk_version = sdk_name[len(target):]
-						if sdk_version not in seen:
-							seen.append(sdk_version)
-							sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
+						sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
-	sdks.sort(key = lambda x: x[0])
+	sdks.sort()
 	for sdk, sdk_path in sdks[::-1]:
 		if Options.options.iphone_sdk and not sdk.startswith(Options.options.iphone_sdk):
 			continue
@@ -179,6 +169,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.find_program('dsymutil')
 					conf.set_iphone_gcc_options(real_arch)
 					conf.set_iphone_options(real_os, False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
@@ -209,6 +200,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_clang(directory)
+					conf.find_program('dsymutil')
 					conf.set_iphone_clang_options(flags)
 					conf.set_iphone_options(real_os, True)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
