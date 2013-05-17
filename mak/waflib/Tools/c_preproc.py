@@ -974,8 +974,7 @@ class c_parser(object):
 					if ve: debug('preproc: include found %s    (%s) ', inc, kind)
 					if kind == '"' or not strict_quotes:
 						self.current_file = self.tryfind(inc)
-						if token == 'import':
-							self.ban_includes.add(self.current_file)
+						self.ban_includes.add(self.current_file)
 				elif token == 'elif':
 					if state[-1] == accepted:
 						state[-1] = skipped

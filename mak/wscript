@@ -116,12 +116,18 @@ def library(bld, name, depends=[], features=[], platforms=[], use_master=True, w
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxobjects'], use_master, warnings)
 
 @conf
 def static_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
+			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxstlib'], use_master, warnings)
 
@@ -130,12 +136,18 @@ def shared_library(bld, name, depends=[], features=[], platforms=[], use_master=
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxshlib'], use_master, warnings)
 
 @conf
 def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
+			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
@@ -146,6 +158,9 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	m = module(bld, name, depends,platforms,  ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
 	return m
@@ -154,6 +169,9 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
+			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
 	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)

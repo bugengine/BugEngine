@@ -248,7 +248,7 @@ strip = '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
 cls = Task.task_factory('strip', strip, color='BLUE')
 
 
-@feature('kernel', 'plugin', 'launcher')
+@feature('cxxshlib', 'cxxprogram', 'cshlib', 'cprogram')
 @after_method('apply_link')
 def make_debug_symbols(self):
 	if 'kernel' in self.features:
@@ -258,7 +258,7 @@ def make_debug_symbols(self):
 	elif 'launcher' in self.features:
 		out_path = self.env.DEPLOY_BINDIR
 	else:
-		raise Errors.WafError('cxxshlib or cxxprogram needs to be a launcher, plugin or kernel')
+		return
 
 	if 'darwin' in self.env.VALID_PLATFORMS and self.env.DSYMUTIL:
 		appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
