@@ -170,6 +170,9 @@ def configure(conf):
 				try:
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.find_program('dsymutil')
+					conf.find_program('strip')
+					if arch in ['arm', 'armv7']:
+						conf.find_program('codesign')
 					conf.set_iphone_gcc_options(real_arch)
 					conf.set_iphone_options(real_os, False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
@@ -201,6 +204,9 @@ def configure(conf):
 				try:
 					conf.load_clang(directory)
 					conf.find_program('dsymutil')
+					conf.find_program('strip')
+					if arch[0] in ['arm', 'armv7']:
+						conf.find_program('codesign')
 					conf.set_iphone_clang_options(flags)
 					conf.set_iphone_options(real_os, True)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
