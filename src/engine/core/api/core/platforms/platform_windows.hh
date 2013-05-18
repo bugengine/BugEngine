@@ -7,6 +7,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#define _WIN32_WINNT 0x0502
 #include <windows.h>
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -52,7 +53,7 @@ static inline void displayError()
 #else
 # include   <malloc.h>
 # define    malloca alloca
-# define    freea(p)
+# define    freea(p)	(void)p
 #endif
 
 /*****************************************************************************/

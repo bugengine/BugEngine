@@ -42,8 +42,8 @@ private:
     }
 public:
     weak() : m_ptr(0) {}
-    weak(T* ptr)
-        : m_ptr(ptr)
+    weak(T* p)
+        : m_ptr(p)
     {
         #if BE_ENABLE_WEAKCHECK
             if (m_ptr) m_ptr->addweak();
