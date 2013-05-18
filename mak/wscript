@@ -256,7 +256,7 @@ def set_building_name_inherits(self):
 		else:
 			if 'cxxobjects' in y.features:
 				use += getattr(y, 'use', [])
-				self.env.DEFINES.append('building_%s' % y.target.split('.')[-1])
+				self.env.append_unique('DEFINES', 'building_%s' % y.target.split('.')[-1])
 
 
 @feature('plugin')
