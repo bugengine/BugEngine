@@ -186,16 +186,16 @@ class VCxproj:
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
 		self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
-		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)build\\$(Configuration)\\')
-		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir)build\\$(Configuration)\\')
 		self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
+		self.vcxproj._add(properties, 'OutDir', '$(SolutionDir)\\')
+		self.vcxproj._add(properties, 'IntDir', '$(SolutionDir)\\.build\\')
 
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
-				for var in ['Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
 							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir']:
 					self.vcxproj._add(properties, var, env[var.upper()])
 				command = getattr(task_gen, 'command', '')
@@ -207,7 +207,7 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
 		files = self.vcxproj._add(project, 'ItemGroup')
@@ -258,6 +258,7 @@ class vs2003(Build.BuildContext):
 
 		self.env.VARIANT = '$(Variant)'
 		self.env.TOOLCHAIN = '$(Toolchain)'
+		self.env.PREFIX = '$(Prefix)'
 		self.env.DEPLOY_BINDIR = '$(Deploy_BinDir)'
 		self.env.DEPLOY_RUNBINDIR = '$(Deploy_RunBinDir)'
 		self.env.DEPLOY_LIBDIR = '$(Deploy_LibDir)'
