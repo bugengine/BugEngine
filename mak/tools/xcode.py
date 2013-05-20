@@ -490,7 +490,7 @@ class xcode(Build.BuildContext):
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
 		self.env.VARIANT = '$(CONFIG)'
-		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_BINDIR)'
+		self.env.PREFIX = '$(PREFIX)'
 		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
 		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
@@ -532,8 +532,8 @@ class xcode(Build.BuildContext):
 				for variant in self.env.ALL_VARIANTS:
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
-								'BUILT_PRODUCTS_DIR': 'build/%s/%s'%(toolchain, variant),
-								'CONFIGURATION_BUILD_DIR':  'build/%s/%s'%(toolchain, variant),
+								'BUILT_PRODUCTS_DIR': env.PREFIX,
+								'CONFIGURATION_BUILD_DIR':  env.PREFIX,
 								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,

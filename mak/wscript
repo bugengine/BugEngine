@@ -64,7 +64,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 						source = kernelsources,
 						env = env.derive(),
 						use = depends + [name],
-						install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_KERNELDIR))
+						install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_KERNELDIR))
 	else:
 		sources = []
 		if 'cxxshlib' in features:
@@ -150,7 +150,7 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_BINDIR)
 	return m
 
 @conf
@@ -162,7 +162,7 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends,platforms,  ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
 @conf
@@ -174,7 +174,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
 def options(opt):
