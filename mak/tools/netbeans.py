@@ -187,6 +187,7 @@ class netbeans(Build.BuildContext):
 		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
 		self.env.VARIANT = '$(CONFIG)'
 		self.env.PREFIX = '$(PREFIX)'
+		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_ROOTDIR)'
 		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
 		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
