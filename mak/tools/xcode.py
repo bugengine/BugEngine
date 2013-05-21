@@ -491,6 +491,7 @@ class xcode(Build.BuildContext):
 		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
 		self.env.VARIANT = '$(CONFIG)'
 		self.env.PREFIX = '$(PREFIX)'
+		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_ROOTDIR)'
 		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
 		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
@@ -516,6 +517,10 @@ class xcode(Build.BuildContext):
 		p = PBXProject(appname, self.__class__.version, self)
 
 		schememanagement = XCodeSchemeList()
+		for f in schemes.listdir():
+			path = os.path.join(schemes.abspath(), f)
+			if os.path.isfile(path):
+				os.remove(path)
 
 		for g in self.groups:
 			for tg in g:
