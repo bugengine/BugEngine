@@ -187,8 +187,8 @@ class VCxproj:
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
 		self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
 		self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
-		self.vcxproj._add(properties, 'OutDir', '$(SolutionDir)\\')
-		self.vcxproj._add(properties, 'IntDir', '$(SolutionDir)\\.build\\')
+		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)\\')
+		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir)\\.build\\')
 
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
