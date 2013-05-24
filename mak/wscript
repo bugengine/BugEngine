@@ -59,7 +59,8 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 					env = bld.all_envs[toolchain]
 					bld(
 						target = name + '.' + kernel,
-						features = ['cxx', 'cxxshlib', 'kernel'] + extra_features,
+						features = ['cxx', 'cxxshlib', 'kernel'],
+						extra_use = extra_features,
 						includes = api+include+[bld.srcnode],
 						source = kernelsources,
 						env = env.derive(),
