@@ -535,6 +535,7 @@ class xcode(Build.BuildContext):
 			if env.XCODE_ABI == 'mach_o':
 				variants = []
 				for variant in self.env.ALL_VARIANTS:
+					env = self.all_envs['%s-%s'%(toolchain, variant)]
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
 								'BUILT_PRODUCTS_DIR': env.PREFIX,
