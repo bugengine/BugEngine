@@ -133,6 +133,8 @@ def detect_gcc_from_path(conf, path, seen):
 					continue
 				if version in ['.svn', '.cvs']:
 					continue
+				if os.path.islink(os.path.join(libdir, target, version)):
+					continue
 				arch = conf.parse_gcc_target(target) or 'unknown'
 				if libdir.find('llvm') != -1:
 					gcc, gxx = 'llvm-gcc', 'llvm-g++'
