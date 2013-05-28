@@ -23,6 +23,7 @@ def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
 		env = original_env.derive()
 		self.setenv(toolchain+'-'+optim, env)
 		self.env.VARIANT = optim
+		self.env.PREFIX = os.path.join('build', toolchain, optim)
 		add_build_command(toolchain, optim)
 	self.variant = ''
 	self.env.append_unique('ALL_TOOLCHAINS', toolchain)
@@ -49,6 +50,8 @@ def configure(conf):
 			pprint('BLUE', '_'*40)
 			pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
 			conf.recurse(target)
+	conf.env.VALID_PLATFORMS = conf.env.ALL_PLATFORMS
+	conf.env.VALID_RCHITECTURES = conf.env.ALL_ARCHITECTURES
 	conf.env.store('.build/be_toolchains.py')
 
 

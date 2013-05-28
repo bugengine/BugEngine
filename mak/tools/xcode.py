@@ -490,7 +490,8 @@ class xcode(Build.BuildContext):
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
 		self.env.VARIANT = '$(CONFIG)'
-		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_BINDIR)'
+		self.env.PREFIX = '$(PREFIX)'
+		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_ROOTDIR)'
 		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
 		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
 		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
@@ -516,6 +517,10 @@ class xcode(Build.BuildContext):
 		p = PBXProject(appname, self.__class__.version, self)
 
 		schememanagement = XCodeSchemeList()
+		for f in schemes.listdir():
+			path = os.path.join(schemes.abspath(), f)
+			if os.path.isfile(path):
+				os.remove(path)
 
 		for g in self.groups:
 			for tg in g:
@@ -530,10 +535,11 @@ class xcode(Build.BuildContext):
 			if env.XCODE_ABI == 'mach_o':
 				variants = []
 				for variant in self.env.ALL_VARIANTS:
+					env = self.all_envs['%s-%s'%(toolchain, variant)]
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
-								'BUILT_PRODUCTS_DIR': 'build/%s/%s'%(toolchain, variant),
-								'CONFIGURATION_BUILD_DIR':  'build/%s/%s'%(toolchain, variant),
+								'BUILT_PRODUCTS_DIR': env.PREFIX,
+								'CONFIGURATION_BUILD_DIR':  env.PREFIX,
 								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,

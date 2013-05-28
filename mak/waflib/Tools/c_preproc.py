@@ -953,9 +953,9 @@ class c_parser(object):
 					state.pop()
 
 				# skip lines when in a dead 'if' branch, wait for the endif
-				if token[0] != 'e':
-					if skipped in self.state or ignored in self.state:
-						continue
+				#if token[0] != 'e':
+				#	if skipped in self.state or ignored in self.state:
+				#		continue
 
 				if token == 'if':
 					ret = eval_macro(tokenize(line), self.defs)
@@ -974,8 +974,7 @@ class c_parser(object):
 					if ve: debug('preproc: include found %s    (%s) ', inc, kind)
 					if kind == '"' or not strict_quotes:
 						self.current_file = self.tryfind(inc)
-						if token == 'import':
-							self.ban_includes.add(self.current_file)
+						self.ban_includes.add(self.current_file)
 				elif token == 'elif':
 					if state[-1] == accepted:
 						state[-1] = skipped

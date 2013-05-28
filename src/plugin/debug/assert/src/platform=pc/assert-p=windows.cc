@@ -72,7 +72,7 @@ namespace BugEngine { namespace Debug
 
             ref<const Runtime::Module> executable = Runtime::Module::self();
             static weak<const Runtime::Module> last = executable;
-            static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), s_symbols);
+            static ref<const Runtime::SymbolResolver> s_symbols = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(), ref<const Runtime::SymbolResolver>());
             while (last && last->next())
             {
                 last = last->next();

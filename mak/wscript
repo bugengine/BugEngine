@@ -59,12 +59,13 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 					env = bld.all_envs[toolchain]
 					bld(
 						target = name + '.' + kernel,
-						features = ['cxx', 'cxxshlib', 'kernel'] + extra_features,
+						features = ['cxx', 'cxxshlib', 'kernel'],
+						extra_use = extra_features,
 						includes = api+include+[bld.srcnode],
 						source = kernelsources,
 						env = env.derive(),
 						use = depends + [name],
-						install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_KERNELDIR))
+						install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_KERNELDIR))
 	else:
 		sources = []
 		if 'cxxshlib' in features:
@@ -77,7 +78,8 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	return bld(
 		target = name,
 		use = depends,
-		features = features + extra_features,
+		features = features,
+		extra_use = extra_features,
 		defines = ['building_%s' % name.split('.')[-1], 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
 		includes = api+include+[bld.srcnode],
@@ -115,12 +117,18 @@ def library(bld, name, depends=[], features=[], platforms=[], use_master=True, w
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxobjects'], use_master, warnings)
 
 @conf
 def static_library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
 	for f in features:
 		if f not in bld.features:
+			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxstlib'], use_master, warnings)
 
@@ -129,6 +137,9 @@ def shared_library(bld, name, depends=[], features=[], platforms=[], use_master=
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	return module(bld, name, depends, platforms, ['cxx', 'cxxshlib'], use_master, warnings)
 
 @conf
@@ -136,8 +147,11 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_BINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_BINDIR)
 	return m
 
 @conf
@@ -145,8 +159,11 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	m = module(bld, name, depends,platforms,  ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
 @conf
@@ -154,8 +171,11 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for f in features:
 		if f not in bld.features:
 			return None
+	for p in platforms:
+		if p not in bld.env.VALID_PLATFORMS:
+			return None
 	m = module(bld, name, depends, platforms, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
-	m.install_path = os.path.join('build', bld.env.TOOLCHAIN, bld.env.VARIANT, bld.env.DEPLOY_PLUGINDIR)
+	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
 def options(opt):
@@ -237,7 +257,7 @@ def set_building_name_inherits(self):
 		else:
 			if 'cxxobjects' in y.features:
 				use += getattr(y, 'use', [])
-				self.env.DEFINES.append('building_%s' % y.target.split('.')[-1])
+				self.env.append_unique('DEFINES', 'building_%s' % y.target.split('.')[-1])
 
 
 @feature('plugin')
@@ -269,9 +289,9 @@ def remove_link_libs(task):
 			except:
 				pass
 
-for f in ['debug', 'profile', 'final', 'warnall', 'warnnone']:
-	@feature(f)
-	def set_warnall(self):
+@feature('cxx')
+def set_extra_flags(self):
+	for f in getattr(self, 'extra_use', []):
 		self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
 		self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
 		self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])

@@ -42,10 +42,7 @@ typedef u8                      byte;
 
 #define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
 #ifndef BE_STATIC
-# ifdef _WIN32
-#  define BE_EXPORT              __declspec(dllexport)
-#  define BE_IMPORT              __declspec(dllimport)
-# elif __GNUC__ >= 4
+# ifndef _WIN32
 #  define BE_EXPORT              __attribute__ ((visibility("default")))
 #  define BE_IMPORT              __attribute__ ((visibility("default")))
 # else
@@ -59,3 +56,4 @@ typedef u8                      byte;
 
 /*****************************************************************************/
 #endif
+

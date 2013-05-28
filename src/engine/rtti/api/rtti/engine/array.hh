@@ -65,7 +65,7 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
     static RTTI::Method::Overload constructor_overload = {
         {0},
         {0},
-        {&ci, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable},
+        { {&ci}, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable},
         0,
         {0},
         true,
@@ -81,6 +81,7 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
     };
 
     static raw<const RTTI::Method> constructor_ptr = {ci.constructor.set(&constructor)};
+    be_forceuse(constructor_ptr);
 
 
     raw<RTTI::Class> c = { &ci };

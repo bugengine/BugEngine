@@ -6,10 +6,17 @@ import os
 
 USE_LIBRARY_CODE="""
 %(include)s
-#ifdef _WIN32
-__declspec(dllexport)
+#if defined(_WIN32) && !defined(__clang__)
+__declspec(dllexport) int be_test()
+{
+	return 0;
+}
 #endif
-int main(int argc, char *argv[]) {%(function)s return 0; }
+int main(int argc, char *argv[])
+{
+	%(function)s
+	return 0;
+}
 """
 
 USE_SDK_CODE="""
