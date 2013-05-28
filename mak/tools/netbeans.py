@@ -2,6 +2,25 @@ from waflib import TaskGen, Context, Build
 import os, sys
 from xml.dom.minidom import Document
 
+
+def gather_includes_defines(task_gen):
+	defines = getattr(task_gen, 'defines', [])
+	includes = getattr(task_gen, 'includes', [])
+	seen = []
+	use = getattr(task_gen, 'use', [])[:]
+	while use:
+		name = use.pop()
+		if name not in seen:
+			try:
+				t = task_gen.bld.get_tgen_by_name(name)
+			except:
+				pass
+			else:
+				use = use + getattr(t, 'use', [])
+				includes = includes + getattr(t, 'includes ', [])
+				defines = defines + getattr(t, 'defines ', [])
+	return includes, defines
+
 def setAttributes(node, attrs):
 	for k, v in attrs.items():
 		node.setAttribute(k, v)
@@ -16,12 +35,17 @@ def add(doc, parent, tag, value = None):
 	parent.appendChild(el)
 	return el
 
+class nb_folder:
+	def __init__(self, name, document, xml):
+		self.xml = add(document, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
+		self.subfolders = {}
+
 class netbeans(Build.BuildContext):
 	cmd		= 'netbeans'
 	fun		= 'build'
 	version	= 79
 
-	def generateProjectXml(self, appname, confs):
+	def generateProjectXml(self, appname, bld):
 		doc = Document()
 		doc.encoding = "UTF-8"
 		project = add(doc, doc, 'project', {'xmlns': "http://www.netbeans.org/ns/project/1"})
@@ -39,40 +63,56 @@ class netbeans(Build.BuildContext):
 			sourceRootList = add(doc, data, 'sourceRootList')
 			sourceRoot = add(doc, sourceRootList, 'sourceRootElem', '.')
 			confList = add(doc, data, 'confList')
-			for i in confs:
-				elem = add(doc, confList, 'confElem')
-				add(doc, elem, 'name', i)
-				add(doc, elem, 'type', '0')
+			for t in bld.env.ALL_TOOLCHAINS:
+				for v in bld.env.ALL_VARIANTS:
+					elem = add(doc, confList, 'confElem')
+					add(doc, elem, 'name', '%s:%s' % (t, v))
+					add(doc, elem, 'type', '0')
 		return doc
 
-	def addSourceTree(self, doc, xml, folder, prefix):
-		for subname, subdir in folder.directories.items():
-			f = add(doc, xml, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
-			self.addSourceTree(doc, f, subdir, os.path.join(prefix, subdir.prefix))
-		for source in folder.files:
-			if not source.generated():
-				add(doc, xml, 'itemPath', os.path.join(prefix, source.filename))
+	def add_folder(self, name, doc, folder):
+		if name not in folder.subfolders:
+			folder.subfolders[name] = nb_folder(name, doc, folder.xml)
+		return folder.subfolders[name]
 
-	def generateConfigurationsXml(self, sources, configurations, bld, out):
+	def add(self, doc, folder, node):
+		if os.path.isdir(node.abspath()):
+			if node.name not in folder.subfolders:
+				folder.subfolders[node.name] = nb_folder(node.name, doc, folder.xml)
+			f = folder.subfolders[node.name]
+			for child in node.listdir():
+				self.add(doc, f, node.make_node(child))
+		else:
+			add(doc, folder.xml, 'itemPath', node.abspath())
+
+	def generateConfigurationsXml(self, task_gens, bld, out):
 		doc = Document()
 		doc.encoding = "UTF-8"
 		cd = add(doc, doc, 'configurationDescriptor', {'version':'%i'%self.__class__.version})
 		lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
-		categories = {}
-		for i in ['3rdparty', 'engine', 'game', 'plugin']:
-			categories[i] = (add(doc, lf, 'logicalFolder', {'name': i, 'displayName': i, 'projectFiles': 'true'}), {})
-		for project, category, source, options in sources:
-			f, subs = categories[category]
-			project = project.split('.')
-			for subname in project:
-				try:
-					f, subs = subs[subname]
-				except KeyError:
-					f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
-					subs[subname] = (f, {})
-					f, subs = subs[subname]
-			f.setAttribute('displayName', '['+project[-1]+']')
-			self.addSourceTree(doc, f, source, source.prefix)
+		self.subfolders = {}
+		options = []
+		for task_gen in task_gens:
+			options.append(gather_includes_defines(task_gen))
+			path = task_gen.target.split('.')
+			root_folder = self
+			root_folder.xml = lf
+			for p in path[:-1]:
+				root_folder = self.add_folder(p, doc, root_folder)
+			for node in task_gen.source_nodes:
+				self.add(doc, root_folder, node)
+
+			#f, subs = categories[category]
+			#project = project.split('.')
+			#for subname in project:
+			#	try:
+			#		f, subs = subs[subname]
+			#	except KeyError:
+			#		f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
+			#		subs[subname] = (f, {})
+			#		f, subs = subs[subname]
+			#f.setAttribute('displayName', '['+project[-1]+']')
+			#self.addSourceTree(doc, f, source, source.prefix)
 		impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
 		add(doc, impfiles, 'itemPath', sys.argv[0])
 		#add(doc, cd, 'sourceFolderFilter')
@@ -81,58 +121,58 @@ class netbeans(Build.BuildContext):
 		add(doc, srl, 'Elem', './build/')
 		add(doc, cd, 'projectmakefile', sys.argv[0])
 		confs = add(doc, cd, 'confs')
-		for c in configurations:
-			env = bld.all_envs[c]
-			conf = add(doc, confs, 'conf', { 'name': c, 'type': '0' })
-			toolsSet = add(doc, conf, 'toolsSet')
-			if self.__class__.version >= 70:
-				add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
-			else:
-				add(doc, toolsSet, 'developmentServer', 'localhost')
-			add(doc, toolsSet, 'compilerSet', 'default')
-			if self.__class__.version < 70:
-				add(doc, toolsSet, 'platform', '4')
-			mtype = add(doc, conf, 'makefileType')
-			mtool = add(doc, mtype, 'makeTool')
-			add(doc, mtool, 'buildCommandWorkingDir', '.')
-			add(doc, mtool, 'buildCommand', 'python waf install_%s'%c)
-			add(doc, mtool, 'cleanCommand', 'python waf clean_%s'%c)
-			if env.ABI == 'mach_o' and False:
-				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
-			else:
-				add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY['prefix'], env.DEPLOY['bin'], env.program_PATTERN%out))
-			if self.__class__.version >= 70:
-				ctool = add(doc, mtool, 'cTool')
-				cincdir = add(doc, ctool, 'incDir')
-				cdefines = add(doc, ctool, 'preprocessorList')
-				cctool = add(doc, mtool, 'ccTool')
-				ccincdir = add(doc, cctool, 'incDir')
-				ccdefines = add(doc, cctool, 'preprocessorList')
-			else:
-				ctool = add(doc, mtool, 'cCompilerTool')
-				cincdir = add(doc, ctool, 'includeDirectories')
-				cdefines = add(doc, ctool, 'preprocessorList')
-				cctool = add(doc, mtool, 'ccCompilerTool')
-				ccincdir = add(doc, cctool, 'includeDirectories')
-				ccdefines = add(doc, cctool, 'preprocessorList')
-			add(doc, mtype, 'requiredProjects')
-			includes=set([])
-			defines = set([])
-			for d in ['be_api(x)=', 'BE_EXPORT=']:
-				add(doc, cdefines, 'Elem', d)
-				add(doc, ccdefines, 'Elem', d)
-			for project, category, source, options in sources:
-				options = options[c]
-				for i in options.includedir:
-					if i not in includes:
-						includes.add(i)
-						add(doc, cincdir, 'directoryPath', i)
-						add(doc, ccincdir, 'directoryPath', i)
-				for d in env.DEFINES:
-					if d not in defines:
-						defines.add(d)
-						add(doc, cdefines, 'Elem', d)
-						add(doc, ccdefines, 'Elem', d)
+		for toolchain in bld.env.ALL_TOOLCHAINS:
+			for variant in bld.env.ALL_VARIANTS:
+				env = bld.all_envs['%s-%s' % (toolchain, variant)]
+				conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
+				toolsSet = add(doc, conf, 'toolsSet')
+				if self.__class__.version >= 70:
+					add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
+				else:
+					add(doc, toolsSet, 'developmentServer', 'localhost')
+				add(doc, toolsSet, 'compilerSet', 'default')
+				if self.__class__.version < 70:
+					add(doc, toolsSet, 'platform', '4')
+				mtype = add(doc, conf, 'makefileType')
+				mtool = add(doc, mtype, 'makeTool')
+				add(doc, mtool, 'buildCommandWorkingDir', '.')
+				add(doc, mtool, 'buildCommand', 'python waf install:%s:%s'%(toolchain, variant))
+				add(doc, mtool, 'cleanCommand', 'python waf clean:%s:%s'%(toolchain, variant))
+				if env.ABI == 'mach_o':
+					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+				else:
+					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
+				if self.__class__.version >= 70:
+					ctool = add(doc, mtool, 'cTool')
+					cincdir = add(doc, ctool, 'incDir')
+					cdefines = add(doc, ctool, 'preprocessorList')
+					cctool = add(doc, mtool, 'ccTool')
+					ccincdir = add(doc, cctool, 'incDir')
+					ccdefines = add(doc, cctool, 'preprocessorList')
+				else:
+					ctool = add(doc, mtool, 'cCompilerTool')
+					cincdir = add(doc, ctool, 'includeDirectories')
+					cdefines = add(doc, ctool, 'preprocessorList')
+					cctool = add(doc, mtool, 'ccCompilerTool')
+					ccincdir = add(doc, cctool, 'includeDirectories')
+					ccdefines = add(doc, cctool, 'preprocessorList')
+				add(doc, mtype, 'requiredProjects')
+				includes=set([])
+				defines = set([])
+				for d in ['be_api(x)=', 'BE_EXPORT='] + env.DEFINES:
+					add(doc, cdefines, 'Elem', d)
+					add(doc, ccdefines, 'Elem', d)
+				for tg_includes, tg_defines in options:
+					for i in tg_includes:
+						if i not in includes:
+							includes.add(i)
+							add(doc, cincdir, 'directoryPath', i)
+							add(doc, ccincdir, 'directoryPath', i)
+					for d in tg_defines:
+						if d not in tg_defines:
+							defines.add(d)
+							add(doc, cdefines, 'Elem', d)
+							add(doc, ccdefines, 'Elem', d)
 
 		return doc
 
@@ -144,6 +184,17 @@ class netbeans(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
+		self.env.TOOLCHAIN = '$(TOOLCHAIN)'
+		self.env.VARIANT = '$(CONFIG)'
+		self.env.PREFIX = '$(PREFIX)'
+		self.env.DEPLOY_ROOTDIR = '$(DEPLOY_ROOTDIR)'
+		self.env.DEPLOY_BINDIR = '$(DEPLOY_BINDIR)'
+		self.env.DEPLOY_RUNBINDIR = '$(DEPLOY_RUNBINDIR)'
+		self.env.DEPLOY_LIBDIR = '$(DEPLOY_LIBDIR)'
+		self.env.DEPLOY_INCLUDEDIR = '$(DEPLOY_INCLUDEDIR)'
+		self.env.DEPLOY_DATADIR = '$(DEPLOY_DATADIR)'
+		self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
+		self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
 		self.recurse([self.run_dir])
 
 
@@ -153,17 +204,22 @@ class netbeans(Build.BuildContext):
 		project = path.make_node('project.xml')
 		confs = path.make_node('configurations.xml')
 		deps = []
+		out = None
 
 		for g in self.groups:
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
-				deps.append((tg.name, tg.category, tg.sourcetree, tg.options))
+				if not 'kernel' in tg.features:
+					deps.append(tg)
+				if 'launcher' in tg.features:
+					out = tg
 
-		p = self.generateProjectXml(appname, self.env['ALL_VARIANTS'])
+
+		p = self.generateProjectXml(appname, self)
 		project.write(p.toxml())
-		c = self.generateConfigurationsXml(deps, self.env['ALL_VARIANTS'], self, self.game.name)
+		c = self.generateConfigurationsXml(deps, self, out)
 		confs.write(c.toxml())
 
 

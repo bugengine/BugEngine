@@ -18,7 +18,7 @@
 # else
 #  error Architecture not implemented on MSVC
 # endif
-#elif defined(BE_COMPILER_INTEL) || defined(BE_COMPILER_GCC)
+#elif defined(BE_COMPILER_INTEL) || defined(BE_COMPILER_GCC) || defined(BE_COMPILER_CLANG)
 # if defined(_X86) || defined(_AMD64)
 #  include <kernel/gcc/x86/interlocked.inl>
 # elif defined(_POWERPC)

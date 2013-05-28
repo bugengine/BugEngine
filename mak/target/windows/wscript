@@ -3,6 +3,7 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
 
+
 @conf
 def set_windows_options(self):
 	self.env.VALID_PLATFORMS = ['windows', 'pc']
@@ -19,13 +20,45 @@ def set_windows_options(self):
 @conf
 def set_windows_gcc_options(self, options, version):
 	v = self.env
+	version = version.split('.')
+	version = float(version[0]) + float(version[1])/10
 	v.append_unique('CFLAGS', options)
 	v.append_unique('CXXFLAGS', options)
 	v.append_unique('LINKFLAGS', options)
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
 	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedefs']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
+	if version >= 4.8:
+		v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
+
+
+@conf
+def set_windows_clang_options(self, options, version):
+	v = self.env
+	v.append_unique('CFLAGS', options + ['-mwindows'])
+	v.append_unique('CXXFLAGS', options + ['-mwindows'])
+	v.append_unique('LINKFLAGS', options + ['-mwindows', '-Wl,--export-all-symbols'])
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
 
 	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
 	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -123,6 +156,33 @@ def configure(conf):
 					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
 					raise
 
+	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		if target.find('win32') != -1 or target.find('mingw') != -1:
+			arch_name, options = arch
+			os = 'windows'
+			toolchain = '%s-%s-%s-%s'%(os, arch_name, 'clang', version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_clang(directory, target)
+					conf.set_windows_clang_options(options, version)
+					conf.set_windows_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os, arch_name, 'clang', version, arch_name)
+					conf.variant = ''
+					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
+
+
+
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.win32'))
 	bld.platforms.append(bld.external('3rdparty.dbghelp'))
@@ -130,10 +190,10 @@ def build(bld):
 def plugins(bld):
 	pass
 
+
 @feature('cprogram', 'cxxprogram')
 @after_method('apply_link')
 @before_method('apply_implib')
 def apply_implib_program(self):
 	self.apply_implib()
-
 

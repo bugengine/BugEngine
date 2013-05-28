@@ -14,9 +14,13 @@ __int64  __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest, __int64 E
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
-#if _MSC_VER > 1400
+#if _MSC_VER >= 1400
 # pragma intrinsic(_InterlockedCompareExchange64)
 #else
+# define WIN32_LEAN_AND_MEAN
+# define NOMINMAX
+# define _WIN32_WINNT 0x0502
+# include <windows.h>
 # define _InterlockedCompareExchange64 InterlockedCompareExchange64
 #endif
 }
