@@ -59,7 +59,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 					env = bld.all_envs[toolchain]
 					bld(
 						target = name + '.' + kernel,
-						features = ['cxx', 'cxxshlib', 'kernel'],
+						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
 						includes = api+include+[bld.srcnode],
 						source = kernelsources,
@@ -162,7 +162,7 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
-	m = module(bld, name, depends,platforms,  ['cxx', 'cxxshlib', 'plugin', 'game'], use_master, warnings)
+	m = module(bld, name, depends,platforms,  ['cxx', bld.env.STATIC and 'cxxobejcts' or 'cxxshlib', 'plugin', 'game'], use_master, warnings)
 	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
@@ -174,7 +174,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
-	m = module(bld, name, depends, platforms, ['cxx', 'cxxshlib', 'plugin'], use_master, warnings)
+	m = module(bld, name, depends, platforms, ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'], use_master, warnings)
 	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
@@ -258,6 +258,35 @@ def set_building_name_inherits(self):
 			if 'cxxobjects' in y.features:
 				use += getattr(y, 'use', [])
 				self.env.append_unique('DEFINES', 'building_%s' % y.target.split('.')[-1])
+
+
+@feature('plugin', 'kernel')
+@before_method('process_use')
+def reverse_static_dependencies_1(self):
+	if self.env.STATIC:
+		for d in self.use:
+			try:
+				task_gen = self.bld.get_tgen_by_name(d)
+				if 'launcher' in task_gen.features:
+					self.use.remove(d)
+					self.includes += task_gen.includes
+					self.use += task_gen.use
+			except:
+				pass
+
+@feature('plugin', 'kernel')
+@before_method('process_use')
+@after_method('reverse_static_dependencies_1')
+def reverse_static_dependencies_2(self):
+	if self.env.STATIC:
+		for d in self.use:
+			try:
+				task_gen = self.bld.get_tgen_by_name(d)
+				if 'launcher' in task_gen.features:
+					task_gen.use.append(self.target)
+			except:
+				pass
+
 
 
 @feature('plugin')

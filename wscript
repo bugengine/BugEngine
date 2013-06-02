@@ -68,7 +68,7 @@ def build(bld):
 	bld.plugin('plugin.kernel.opencl',			['engine.bugengine', '3rdparty.OpenCL'], features=['OpenCL'])
 
 	bld.plugin('plugin.graphics.nullrender',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2', 'plugin.graphics.shadermodel3', 'plugin.graphics.shadermodel4'])
-	bld.library('plugin.graphics.windowing',	['engine.bugengine', 'plugin.graphics.3d'], features=['GUI'])
+	bld.plugin('plugin.graphics.windowing',		['engine.bugengine', 'plugin.graphics.3d'], features=['GUI'])
 	bld.plugin('plugin.graphics.GL4',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.OpenGL'], features=['OpenGL', 'GUI'])
 	bld.plugin('plugin.kernel.opencl_gl',		['engine.bugengine', 'plugin.graphics.GL4', '3rdparty.OpenGL', '3rdparty.OpenCL', 'plugin.kernel.opencl'], features=['OpenGL', 'OpenCL', 'GUI'])
 	bld.plugin('plugin.graphics.Dx9',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX9'], features=['DirectX9', 'GUI'])

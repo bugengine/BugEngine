@@ -25,7 +25,7 @@ struct ShaderExtensions
     typedef void        (APIENTRY *glCompileShaderARBProc)(GLhandleARB);
     typedef void        (APIENTRY *glGetObjectParameterivARBProc)(GLhandleARB, GLenum, GLint*);
     typedef void        (APIENTRY *glGetInfoLogARBProc)(GLhandleARB, GLsizei, GLsizei*, GLcharARB*);
-    
+
     const glCreateProgramObjectARBProc  glCreateProgram;
     const glDeleteProgramObjectARBProc  glDeleteProgram;
     const glAttachObjectARBProc         glAttachShader;
