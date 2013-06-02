@@ -6,7 +6,7 @@
 
 extern"C"
 {
-#include    <md5.h>
+#include    <md5/md5.h>
 }
 
 namespace BugEngine

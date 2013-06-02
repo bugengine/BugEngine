@@ -109,9 +109,9 @@ void  Allocator::free(const void* pointer)
 
 const char*  Allocator::strdup(const char* src)
 {
-    size_t s = strlen(src);
+    size_t s = std::strlen(src);
     char *result = static_cast<char*>(internalAlloc(s+1, 1));
-    strcpy(result, src);
+    std::strcpy(result, src);
     return result;
 }
 

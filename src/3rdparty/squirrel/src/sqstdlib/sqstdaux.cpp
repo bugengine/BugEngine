@@ -1,7 +1,7 @@
 /* see copyright notice in squirrel.h */
 #include <squirrel.h>
 #include <sqstdaux.h>
-#include <cassert>
+#include <assert.h>
 
 void sqstd_printcallstack(HSQUIRRELVM v)
 {

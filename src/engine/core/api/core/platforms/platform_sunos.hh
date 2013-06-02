@@ -13,6 +13,8 @@
 #include    <stdlib.h>
 #include    <alloca.h>
 #include    <malloc.h>
+#include    <string.h>
+#include    <stdio.h>
 #define     malloca     alloca
 #define     freea(p)    (void)p
 #define     DIRENT_H    <dirent.h>

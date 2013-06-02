@@ -1,6 +1,6 @@
 /* see copyright notice in squirrel.h */
 #include <squirrel.h>
-#include <cstring>
+#include <string.h>
 #include <ctype.h>
 #include <setjmp.h>
 #include "sqstdstring.h"

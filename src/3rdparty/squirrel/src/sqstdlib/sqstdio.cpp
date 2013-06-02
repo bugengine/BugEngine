@@ -1,6 +1,6 @@
 /* see copyright notice in squirrel.h */
 #include <new>
-#include <cstdio>
+#include <stdio.h>
 #include <squirrel.h>
 #include <sqstdio.h>
 #include "sqstdstream.h"
