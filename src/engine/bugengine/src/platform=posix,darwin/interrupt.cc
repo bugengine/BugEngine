@@ -12,7 +12,7 @@ namespace BugEngine
 
 static Application* s_application = 0;
 
-static void signalHandler(int /*signal*/)
+extern "C" void signalHandler(int /*signal*/)
 {
     be_info("interrupted");
     if (s_application)
