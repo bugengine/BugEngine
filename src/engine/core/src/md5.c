@@ -31,7 +31,7 @@
  **********************************************************************
  */
 
-#include "md5.h"
+#include "md5/md5.h"
 
 /* forward declaration */
 static void Transform (UINT4 *buf, UINT4 *in);

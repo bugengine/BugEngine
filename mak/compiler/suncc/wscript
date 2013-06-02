@@ -25,9 +25,13 @@ def get_native_suncc_target(conf, suncc):
 	for line in out:
 		words = line.split()
 		if len(words) > 5:
-			if words[0] == 'cc:' and words[1] == 'Sun' and words[2] == 'Ceres':
-				version = words[4]
-				target,arch = words[5].split('_')
+			if words[0] == 'cc:' and words[1] == 'Sun':
+				if words[2] == 'C':
+					version = words[3]
+					target,arch = words[4].split('_')
+				else:
+					version = words[4]
+					target,arch = words[5].split('_')
 	return [(os.path.split(suncc)[0], target, a, version) for a in all_suncc_archs(arch)]
 
 
@@ -47,7 +51,6 @@ def detect_suncc(conf):
 def load_suncc(self, bindir):
 	self.find_program('suncc', var='CC', path_list=[bindir])
 	self.find_program('sunCC', var='CXX', path_list=[bindir])
-	print self.env.CXX
 	self.load('suncc suncxx')
 
 def options(opt):
