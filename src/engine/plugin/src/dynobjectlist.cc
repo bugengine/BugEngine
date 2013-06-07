@@ -24,7 +24,6 @@ DynamicObjectList::DynamicObjectList(const char* name)
     ,   m_name(name)
 {
     be_info("Registering built-in dynamic object %s" | name);
-    printf("%s\n", name);
     s_dynamicObjectRoot = this;
 }
 
@@ -52,7 +51,6 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
 
 bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer value)
 {
-    printf("%s\n", name);
     for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
     {
         if (m_symbols[i].name == 0)
