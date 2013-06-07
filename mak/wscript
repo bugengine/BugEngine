@@ -61,6 +61,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 						target = name + '.' + kernel,
 						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
+						defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
 						includes = api+include+[bld.srcnode],
 						source = kernelsources,
 						env = env.derive(),
@@ -150,7 +151,7 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
-	m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
+	m = module(bld, name, depends, platforms, bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
 	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_BINDIR)
 	return m
 
@@ -162,7 +163,7 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
-	m = module(bld, name, depends,platforms,  ['cxx', bld.env.STATIC and 'cxxobejcts' or 'cxxshlib', 'plugin', 'game'], use_master, warnings)
+	m = module(bld, name, depends,platforms,  ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'], use_master, warnings)
 	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
 	return m
 
@@ -262,31 +263,14 @@ def set_building_name_inherits(self):
 
 @feature('plugin', 'kernel')
 @before_method('process_use')
-def reverse_static_dependencies_1(self):
+def static_dependencies(self):
 	if self.env.STATIC:
-		for d in self.use:
-			try:
-				task_gen = self.bld.get_tgen_by_name(d)
-				if 'launcher' in task_gen.features:
-					self.use.remove(d)
-					self.includes += task_gen.includes
-					self.use += task_gen.use
-			except:
-				pass
-
-@feature('plugin', 'kernel')
-@before_method('process_use')
-@after_method('reverse_static_dependencies_1')
-def reverse_static_dependencies_2(self):
-	if self.env.STATIC:
-		for d in self.use:
-			try:
-				task_gen = self.bld.get_tgen_by_name(d)
-				if 'launcher' in task_gen.features:
-					task_gen.use.append(self.target)
-			except:
-				pass
-
+		try:
+			launcher = self.bld.launcher_static
+		except:
+			launcher = self.bld.launcher_static = self.bld(target='bugengine', features=['cxx', 'cxxprogram'], use = [])
+			launcher.install_path = os.path.join(self.bld.env.PREFIX, self.bld.env.DEPLOY_BINDIR)
+		launcher.use.append(self.target)
 
 
 @feature('plugin')
