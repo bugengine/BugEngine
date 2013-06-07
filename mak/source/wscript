@@ -60,7 +60,7 @@ def rc_hook(self, node):
 	pass
 
 def options(opt):
-	opt.load('data', tooldir=['mak/tools'])
+	pass
 
 def configure(conf):
 	conf.load('flex', tooldir=['mak/tools'])
