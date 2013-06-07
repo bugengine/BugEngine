@@ -15,12 +15,7 @@ ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
-def options(opt):
-	#opt.start_msg('compiling C++ parser')
-	from mak import ddf
-	#opt.end_msg('done')
-
-extension('.h', '.hh', '.hxx')
+@extension('.h', '.hh', '.hxx')
 def datagen(self, node):
 	outs = []
 	outs.append(node.change_ext('.cc'))
