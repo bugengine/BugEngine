@@ -17,7 +17,7 @@ namespace BugEngine
 
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory("share/bugengine")
+,   m_dataDirectory(ipath("share/bugengine"))
 ,   m_game("")
 ,   m_user(getenv("USER"))
 {
