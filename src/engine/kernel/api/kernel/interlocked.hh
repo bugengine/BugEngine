@@ -89,15 +89,15 @@ public:
         :   m_value((typename impl::value_t)(t))
     {
     }
-    operator const T*() const                       { return static_cast<T*>(m_value); }
-    operator T*()                                   { return static_cast<T*>(m_value); }
-    T* operator->()                                 { return static_cast<T*>(m_value); }
-    const T* operator->() const                     { return static_cast<T*>(m_value); }
+    operator const T*() const                       { return reinterpret_cast<T*>(m_value); }
+    operator T*()                                   { return reinterpret_cast<T*>(m_value); }
+    T* operator->()                                 { return reinterpret_cast<T*>(m_value); }
+    const T* operator->() const                     { return reinterpret_cast<T*>(m_value); }
 
-    T* operator=(T* value)                          { return static_cast<T*>(impl::set_and_fetch((value_t*)&m_value, (value_t)value)); }
-    T* exchange(T* value)                           { return static_cast<T*>(impl::fetch_and_set((value_t*)&m_value, (value_t)value)); }
+    T* operator=(T* value)                          { return reinterpret_cast<T*>(impl::set_and_fetch((value_t*)&m_value, (value_t)value)); }
+    T* exchange(T* value)                           { return reinterpret_cast<T*>(impl::fetch_and_set((value_t*)&m_value, (value_t)value)); }
 
-    T* setConditional(T* value, T* condition)       { return static_cast<T*>(impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition)); }
+    T* setConditional(T* value, T* condition)       { return reinterpret_cast<T*>(impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition)); }
 };
 
 template< typename T >
