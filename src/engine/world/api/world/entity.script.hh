@@ -14,9 +14,9 @@ struct be_api(WORLD) Entity
     const u32 id;
 
 
-    bool operator ==(const Entity& other) const { return id == other.id; }
-    bool operator !=(const Entity& other) const { return id != other.id; }
-    bool operator < (const Entity& other) const { return id < other.id; }
+    bool operator ==(const Entity other) const { return id == other.id; }
+    bool operator !=(const Entity other) const { return id != other.id; }
+    bool operator < (const Entity other) const { return id < other.id; }
 };
 
 }}
