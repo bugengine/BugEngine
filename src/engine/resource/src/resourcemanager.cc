@@ -18,6 +18,7 @@ ResourceManager::LoaderInfo::LoaderInfo()
 ResourceManager::ResourceManager()
     :   m_loaders(Arena::resource(), 1024)
     ,   m_tickets(Arena::resource())
+    ,   m_watches(Arena::resource())
 {
 }
 
@@ -97,15 +98,27 @@ void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Descri
         description->unload(*it);
     }
     description->unhook();
+
+    for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    {
+        if (it->resource == description)
+        {
+            it->outdated = true;
+            it->file = weak<const File>();
+            it->resource = weak<const Description>();
+        }
+    }
 }
 
 void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file)
 {
     Ticket ticket;
     ticket.loader = loader;
+    ticket.file = file;
     ticket.resource = description;
     ticket.ticket = file->beginRead(0, 0, Arena::temporary());
     ticket.progress = 0;
+    ticket.outdated = false;
     m_tickets.push_back(ticket);
 }
 
@@ -122,6 +135,8 @@ size_t ResourceManager::updateTickets()
         else if (it->ticket->done())
         {
             it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer);
+            it->ticket = ref<const File::Ticket>();
+            m_watches.push_back(*it);
             it = m_tickets.erase(it);
         }
         else if (it->ticket->processed != it->progress)
@@ -135,7 +150,30 @@ size_t ResourceManager::updateTickets()
             ++it;
         }
     }
+
+    for (minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end(); /*nothing*/)
+    {
+        if (it->outdated)
+        {
+            it = m_watches.erase(it);
+        }
+        else if (it->file->isDeleted())
+        {
+            be_info("todo: file deleted, remove resource");
+            it = m_watches.erase(it);
+        }
+        else if (it->file->hasChanged())
+        {
+            be_info("todo: file changed, reload resource");
+            it = m_watches.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
     return ticketCount;
 }
+
 
 }}

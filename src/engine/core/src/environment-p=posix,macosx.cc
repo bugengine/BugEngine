@@ -3,7 +3,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <unistd.h>
+#include    <unistd.h> 
 #if !defined(BE_PLATFORM_LINUX) && !defined(BE_PLATFORM_SUN)
 # include   <sys/types.h>
 # include   <sys/sysctl.h>

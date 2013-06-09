@@ -49,6 +49,7 @@ File::Ticket::~Ticket()
 File::File(Media media, u64 size)
     :   m_media(media)
     ,   m_size(size)
+    ,   m_state(0)
 {
 }
 
@@ -97,6 +98,29 @@ void File::writeBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to fill buffer of another file");
     doWriteBuffer(ticket);
+}
+
+static const u32 s_dirtyFlag = 0x1;
+static const u32 s_deletedFlag = 0x2;
+
+bool File::hasChanged() const
+{
+    return (m_state & s_dirtyFlag) != 0;
+}
+
+bool File::isDeleted() const
+{
+    return (m_state & s_deletedFlag) != 0;
+}
+
+void File::notifyChanged()
+{
+    m_state |= s_dirtyFlag;
+}
+
+void File::notifyDeleted()
+{
+    m_state |= s_deletedFlag;
 }
 
 }

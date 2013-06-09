@@ -11,8 +11,11 @@
 namespace BugEngine
 {
 
+class Folder;
+
 class be_api(FILESYSTEM) File : public minitl::refcountable
 {
+    friend class Folder;
 public:
     class Ticket;
     friend class Ticket;
@@ -38,6 +41,7 @@ public:
 private:
     const Media     m_media;
     u64             m_size;
+    u32             m_state;
 protected:
     File(Media media, u64 size);
 public:
@@ -75,9 +79,15 @@ public:
 
     void fillBuffer(weak<Ticket> ticket) const;
     void writeBuffer(weak<Ticket> ticket) const;
+
+    bool hasChanged() const;
+    bool isDeleted() const;
 private:
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;
+private:
+    void notifyChanged();
+    void notifyDeleted();
 };
 
 }

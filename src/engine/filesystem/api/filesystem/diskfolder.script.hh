@@ -9,17 +9,33 @@
 namespace BugEngine
 {
 
+class FileSystemWatch;
+
 class be_api(FILESYSTEM) DiskFolder : public Folder
 {
+public:
+    class Watch : public minitl::refcountable
+    {
+        friend class FileSystemWatch;
+    private:
+        u8  m_state;
+    public:
+        Watch();
+        ~Watch();
+
+        bool isDirty() const;
+        bool isDirtyRecursive() const;
+    };
 private:
     union Handle
     {
         void*   ptrHandle;
         u64     intHandle;
     };
-    ipath   m_path;
-    Handle  m_handle;
-    u32     m_index;
+    ipath       m_path;
+    Handle      m_handle;
+    u32         m_index;
+    ref<Watch>  m_watch;
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
 published:

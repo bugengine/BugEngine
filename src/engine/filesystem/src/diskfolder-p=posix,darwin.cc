@@ -3,6 +3,7 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
+#include    <filesystemwatch.hh>
 #include    <sys/types.h>
 #include    <sys/stat.h>
 #include    DIRENT_H
@@ -35,9 +36,13 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
     ,   m_index(0)
+    ,   m_watch(FileSystemWatch::watchDirectory(diskpath))
 {
     be_forceuse(m_index);
-    if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
+    if(createPolicy != Folder::CreateNone)
+    {
+        createDirectory(diskpath, createPolicy);
+    }
     ipath::Filename pathname = m_path.str();
     m_handle.ptrHandle = opendir(pathname.name);
     if (!m_handle.ptrHandle)
@@ -54,7 +59,9 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
 DiskFolder::~DiskFolder()
 {
     if (m_handle.ptrHandle)
+    {
         closedir((DIR*)m_handle.ptrHandle);
+    }
 }
 
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
