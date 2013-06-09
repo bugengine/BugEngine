@@ -29,13 +29,16 @@ private:
     struct Ticket
     {
         weak<ILoader>           loader;
-        weak<const Description>    resource;
+        weak<const Description> resource;
+        weak<const File>        file;
         ref<const File::Ticket> ticket;
         u32                     progress;
+        bool                    outdated;
     };
 private:
     minitl::array<LoaderInfo>   m_loaders;
     minitl::vector<Ticket>      m_tickets;
+    minitl::vector<Ticket>      m_watches;
 private:
     LoaderInfo& getLoaderInfo(raw<const RTTI::Class> classinfo);
 public:

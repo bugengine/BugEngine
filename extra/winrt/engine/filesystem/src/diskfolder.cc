@@ -4,6 +4,7 @@
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
 #include    <win32/file.hh>
+#include    <filesystemwatch.hh>
 
 
 namespace BugEngine
@@ -18,12 +19,12 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    //ipath::Filename pathname = path.str();
 }
 
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
     ,   m_index(0)
+    ,   m_watch()
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
 

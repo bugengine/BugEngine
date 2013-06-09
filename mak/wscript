@@ -9,7 +9,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	platforms = bld.env.VALID_PLATFORMS
 	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
 
-	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', 'so', 'dll', 'plist', 'png', 'pkg', 'lua']
+	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', 'm', 'mm', 'so', 'dll', 'plist', 'png', 'pkg', 'lua']
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
 	sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
 	sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])

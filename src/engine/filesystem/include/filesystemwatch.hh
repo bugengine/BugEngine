@@ -4,27 +4,26 @@
 #ifndef BE_FILESYSTEM_FILESYSTEMWATCH_HH_
 #define BE_FILESYSTEM_FILESYSTEMWATCH_HH_
 /*****************************************************************************/
-#include    <filesystem/file.script.hh>
-#include    <filesystem/folder.script.hh>
+#include    <filesystem/diskfolder.script.hh>
 
-namespace BugEngine { namespace Watch
+namespace BugEngine
 {
 
 class FileSystemWatch
 {
-public:
-    class Watch : public minitl::refcountable
-    {
-
-    };
+private:
+    class FileSystemWatchProcessQueue;
+    scoped<FileSystemWatchProcessQueue> m_queue;
+private:
     FileSystemWatch();
     ~FileSystemWatch();
 
-    ref<Watch> watchDirectory(const ipath& folder);
-    ref<Watch> watchFile(const ifilename& file);
+    static BE_EXPORT FileSystemWatch s_fileSystemWatch;
+public:
+    static ref<DiskFolder::Watch> watchDirectory(const ipath& folder);
 };
 
-}}
+}
 
 /*****************************************************************************/
 #endif
