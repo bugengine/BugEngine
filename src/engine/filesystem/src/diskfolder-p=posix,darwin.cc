@@ -36,7 +36,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
     ,   m_index(0)
-    ,   m_watch(FileSystemWatch::watchDirectory(diskpath))
+    ,   m_watch(FileSystemWatch::watchDirectory(this, diskpath))
 {
     be_forceuse(m_index);
     if(createPolicy != Folder::CreateNone)

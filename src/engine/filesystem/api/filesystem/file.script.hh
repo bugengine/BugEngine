@@ -43,7 +43,7 @@ private:
     u64             m_size;
     u32             m_state;
 protected:
-    File(Media media, u64 size);
+    File(Media media, u64 size, bool reloadable);
 public:
     ~File();
 public:
@@ -82,6 +82,7 @@ public:
 
     bool hasChanged() const;
     bool isDeleted() const;
+    bool isReloadable() const;
 private:
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;

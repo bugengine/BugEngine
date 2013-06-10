@@ -20,7 +20,7 @@ private:
 
     static BE_EXPORT FileSystemWatch s_fileSystemWatch;
 public:
-    static ref<DiskFolder::Watch> watchDirectory(const ipath& folder);
+    static ref<DiskFolder::Watch> watchDirectory(weak<DiskFolder> folder, const ipath& path);
 };
 
 }

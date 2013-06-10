@@ -16,15 +16,11 @@ class be_api(FILESYSTEM) DiskFolder : public Folder
 public:
     class Watch : public minitl::refcountable
     {
-        friend class FileSystemWatch;
     private:
-        u8  m_state;
+        weak<DiskFolder>  m_folder;
     public:
-        Watch();
+        Watch(weak<DiskFolder> folder);
         ~Watch();
-
-        bool isDirty() const;
-        bool isDirtyRecursive() const;
     };
 private:
     union Handle

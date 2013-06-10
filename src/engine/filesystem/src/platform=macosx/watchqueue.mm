@@ -2,38 +2,16 @@
    see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <filesystemwatch.hh>
-#include    <core/threads/thread.hh>
-#include    <core/environment.hh>
-#include    <kernel/interlocked.hh>
+#include    <macosx/watchqueue.hh>
 
+#include    <macosx/watch.hh>
+#include    <macosx/watchpoint.hh>
+
+#include    <core/environment.hh>
 #include    <Foundation/Foundation.h>
-#include    <CoreFoundation/CoreFoundation.h>
-#include    <CoreServices/CoreServices.h>
 
 namespace BugEngine
 {
-
-class FileSystemWatch::FileSystemWatchProcessQueue : public minitl::pointer
-{
-private:
-    CFStringRef m_Path;
-    Thread m_thread;
-    iptr<CFRunLoopRef> m_runLoop;
-private:
-    static intptr_t runFileSystemWatch(intptr_t p1, intptr_t p2);
-    static void onFileSsystemEvent(ConstFSEventStreamRef streamRef,
-                                   void *clientCallBackInfo,
-                                   size_t numEvents,
-                                   void *eventPaths,
-                                   const FSEventStreamEventFlags eventFlags[],
-                                   const FSEventStreamEventId eventIds[]);
-public:
-    FileSystemWatchProcessQueue();
-    ~FileSystemWatchProcessQueue();
-
-    ref<DiskFolder::Watch> addFolder(const ipath& path);
-};
 
 static CFStringRef getApplicationDirectory()
 {
@@ -70,8 +48,6 @@ intptr_t FileSystemWatch::FileSystemWatchProcessQueue::runFileSystemWatch(intptr
     CFRetain(runLoop);
     watch->m_runLoop = &runLoop;
 
-    printf("watching path %s", Environment::getEnvironment().getDataDirectory().str().name);
-
     FSEventStreamContext context = { 0, (void*)watch, NULL, NULL, NULL };
     FSEventStreamRef eventStream = FSEventStreamCreate(kCFAllocatorDefault, &FileSystemWatchProcessQueue::onFileSsystemEvent, &context, CFArrayCreate(kCFAllocatorDefault, (const void**)&watch->m_Path, 1, 0), kFSEventStreamEventIdSinceNow, 3.0, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(eventStream, runLoop, kCFRunLoopCommonModes);
@@ -96,30 +72,30 @@ void FileSystemWatch::FileSystemWatchProcessQueue::onFileSsystemEvent(ConstFSEve
     const char** eventPathsC = (const char**)eventPaths;
     for (size_t i = 0; i < eventCount; ++i)
     {
-        be_info("Got filesystem event on object %s" | eventPathsC[i]);
+        ipath path(eventPathsC[i]);
+        weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPoint(path);
+        if (point)
+        {
+            be_info("refreshing path %s" | path);
+            point->signalDirty();
+        }
     }
 }
 
-ref<DiskFolder::Watch> FileSystemWatch::FileSystemWatchProcessQueue::addFolder(const BugEngine::ipath &path)
+ref<DiskFolder::Watch> FileSystemWatch::FileSystemWatchProcessQueue::addFolder(weak<DiskFolder> folder, const BugEngine::ipath &path)
 {
-    be_forceuse(path);
-    return ref<DiskFolder::Watch>::create(Arena::filesystem());
-}
+    ipath absolutePath("");
+    if (path[0] != istring(""))
+    {
+        char prefixBuffer[PATH_MAX+1];
+        char* prefix = getcwd(prefixBuffer, PATH_MAX);
+        absolutePath += ipath(prefix);
+    }
+    absolutePath += path;
 
-FileSystemWatch::FileSystemWatch()
-    :   m_queue(scoped<FileSystemWatchProcessQueue>::create(BugEngine::Arena::filesystem()))
-{
+    weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPointOrCreate(path);
+    ref<DiskFolder::Watch> result = ref<FileSystem::DiskWatch>::create(Arena::filesystem(), folder, point);
+    return result;
 }
-
-FileSystemWatch::~FileSystemWatch()
-{
-}
-
-ref<DiskFolder::Watch> FileSystemWatch::watchDirectory(const BugEngine::ipath &folder)
-{
-    return s_fileSystemWatch.m_queue->addFolder(folder);
-}
-
-FileSystemWatch FileSystemWatch::s_fileSystemWatch;
 
 }
