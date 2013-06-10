@@ -10,7 +10,7 @@ namespace BugEngine
 {
 
 PosixFile::PosixFile(ifilename file, Media media, u64 size)
-    :   File(media, size)
+    :   File(media, size, true)
     ,   m_file(file)
 {
 }

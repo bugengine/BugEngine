@@ -9,7 +9,7 @@ namespace BugEngine
 {
 
 Win32File::Win32File(ifilename file, Media media, u64 size)
-    :   File(media, size)
+    :   File(media, size, false)
     ,   m_file(file)
 {
 }

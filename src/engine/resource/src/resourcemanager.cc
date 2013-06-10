@@ -106,6 +106,7 @@ void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Descri
             it->outdated = true;
             it->file = weak<const File>();
             it->resource = weak<const Description>();
+            it->loader = weak<ILoader>();
         }
     }
 }

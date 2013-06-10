@@ -3,13 +3,14 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
+#include    <filesystemwatch.hh>
 
 
 namespace BugEngine
 {
 
-DiskFolder::Watch::Watch()
-    :   m_state(0)
+DiskFolder::Watch::Watch(weak<DiskFolder> folder)
+    :   m_folder(folder)
 {
 }
 

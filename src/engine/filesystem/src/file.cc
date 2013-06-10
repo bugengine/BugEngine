@@ -46,10 +46,13 @@ File::Ticket::~Ticket()
     f->decref();
 }
 
-File::File(Media media, u64 size)
+static const u32 s_dirtyFlag = 0x1;
+static const u32 s_deletedFlag = 0x2;
+static const u32 s_reloadableFlag = 0x4;
+File::File(Media media, u64 size, bool reloadable)
     :   m_media(media)
     ,   m_size(size)
-    ,   m_state(0)
+    ,   m_state(reloadable ? s_reloadableFlag : 0)
 {
 }
 
@@ -99,9 +102,6 @@ void File::writeBuffer(weak<Ticket> ticket) const
     be_assert(ticket->file == this, "trying to fill buffer of another file");
     doWriteBuffer(ticket);
 }
-
-static const u32 s_dirtyFlag = 0x1;
-static const u32 s_deletedFlag = 0x2;
 
 bool File::hasChanged() const
 {
