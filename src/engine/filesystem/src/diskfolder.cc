@@ -18,4 +18,9 @@ DiskFolder::Watch::~Watch()
 {
 }
 
+void DiskFolder::Watch::signal()
+{
+    m_folder->onChanged();
+}
+
 }

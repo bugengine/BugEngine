@@ -21,7 +21,10 @@ public:
     public:
         Watch(weak<DiskFolder> folder);
         ~Watch();
+
+        void signal();
     };
+    friend class Watch;
 private:
     union Handle
     {
@@ -34,6 +37,7 @@ private:
     ref<Watch>  m_watch;
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
+    void onChanged();
 published:
     DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive, Folder::CreatePolicy createPolicy = Folder::CreateOne);
     ~DiskFolder();
