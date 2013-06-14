@@ -38,7 +38,6 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
         }
         if (!nextChild)
         {
-            be_debug("creating watch point node %s" | path[i]);
             ref<WatchPoint> newChild = ref<WatchPoint>::create(Arena::filesystem());
             result->m_children.push_back(minitl::make_pair(path[i], newChild));
             nextChild = newChild;
