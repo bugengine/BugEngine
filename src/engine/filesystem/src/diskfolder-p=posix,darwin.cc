@@ -58,17 +58,21 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
 
 DiskFolder::~DiskFolder()
 {
+    ScopedCriticalSection lock(m_lock);
     if (m_handle.ptrHandle)
     {
         closedir((DIR*)m_handle.ptrHandle);
+        m_handle.ptrHandle = 0;
     }
 }
 
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     Folder::doRefresh(scanPolicy);
+    Folder::ScanPolicy newPolicy = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
     if (m_handle.ptrHandle)
     {
+        ScopedCriticalSection lock(m_lock);
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
@@ -88,32 +92,14 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             }
             else if (s.st_mode & S_IFDIR)
             {
-                for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
-                {
-                    if (it->first == name)
-                    {
-                        continue;
-                    }
-                }
-                m_folders.push_back(
-                        minitl::make_pair(
-                                name,
-                                ref<DiskFolder>::create(
-                                        Arena::filesystem(),
-                                        m_path+ipath(name),
-                                        scanPolicy == Folder::ScanRecursive?Folder::ScanRecursive : Folder::ScanNone,
-                                        Folder::CreateNone
-                                    )));
+                ref<DiskFolder> newFolder = ref<DiskFolder>::create(Arena::filesystem(), p, newPolicy, Folder::CreateNone);
+                m_folders.push_back(minitl::make_pair(name, newFolder));
             }
             else
             {
-                m_files.push_back(minitl::make_pair(
-                    name,
-                    ref<PosixFile>::create(
-                            Arena::filesystem(),
-                            m_path+ifilename(name),
-                            File::Media(File::Media::Disk, s.st_dev, s.st_ino),
-                            s.st_size)));
+                File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
+                ref<File> newFile = ref<PosixFile>::create(Arena::filesystem(), ipath(m_path) + ifilename(name), media, s.st_size, s.st_mtime);
+                m_files.push_back(minitl::make_pair(name, newFile));
             }
         }
     }
@@ -137,11 +123,14 @@ weak<File> DiskFolder::createFile(const istring& name)
         return ref<File>();
     }
 
+    ScopedCriticalSection lock(m_lock);
     ref<File> result = ref<PosixFile>::create(
                 Arena::filesystem(),
                 m_path+ifilename(name),
                 File::Media(File::Media::Disk, s.st_dev, s.st_ino),
-                s.st_size);
+                s.st_size,
+                s.st_mtime);
+
     for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
     {
         if (it->first == name)
@@ -152,6 +141,73 @@ weak<File> DiskFolder::createFile(const istring& name)
     }
     m_files.push_back(minitl::make_pair(name, result));
     return result;
+}
+
+void DiskFolder::onChanged()
+{
+    if (m_handle.ptrHandle)
+    {
+        ScopedCriticalSection lock(m_lock);
+        rewinddir((DIR*)m_handle.ptrHandle);
+        while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
+        {
+            if (d->d_name[0] == '.' && d->d_name[1] == 0)
+                continue;
+            if (d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0)
+                continue;
+            istring name = d->d_name;
+            ipath p = m_path;
+            p.push_back(name);
+            ipath::Filename filename = p.str();
+            struct stat s;
+            int result = stat(filename.name, &s);
+            if (result != 0)
+            {
+                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno) | errno);
+            }
+            else if (s.st_mode & S_IFDIR)
+            {
+                /* TODO: deleted folder */
+                bool exists = false;
+
+                for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+                {
+                    if (it->first == name)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                {
+                    be_info("new folder: %s" | p);
+                    ref<DiskFolder> newFolder = ref<DiskFolder>::create(Arena::filesystem(), p, Folder::ScanNone, Folder::CreateNone);
+                    m_folders.push_back(minitl::make_pair(name, newFolder));
+                }
+            }
+            else
+            {
+                /* TODO: deleted file */
+                bool exists = false;
+
+                for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+                {
+                    if (it->first == name)
+                    {
+                        be_checked_cast<PosixFile>(it->second)->refresh(s.st_mtime);
+                        exists = true;
+                    }
+                }
+                if (!exists)
+                {
+                    be_info("new file: %s" | p);
+                    File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
+                    ref<File> newFile = ref<PosixFile>::create(Arena::filesystem(), ipath(m_path) + ifilename(name), media, s.st_size, s.st_mtime);
+                    m_files.push_back(minitl::make_pair(name, newFile));
+                }
+            }
+        }
+    }
 }
 
 }

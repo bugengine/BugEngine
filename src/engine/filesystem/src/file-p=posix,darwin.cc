@@ -9,9 +9,10 @@
 namespace BugEngine
 {
 
-PosixFile::PosixFile(ifilename file, Media media, u64 size)
+PosixFile::PosixFile(ifilename file, Media media, u64 size, time_t modifiedTime)
     :   File(media, size, true)
     ,   m_file(file)
+    ,   m_modifiedTime(modifiedTime)
 {
 }
 
@@ -104,6 +105,15 @@ void PosixFile::doWriteBuffer(weak<Ticket> ticket) const
     }
     fflush(f);
     fclose(f);
+}
+
+void PosixFile::refresh(time_t modifiedTime)
+{
+    if (modifiedTime != m_modifiedTime)
+    {
+        m_modifiedTime = modifiedTime;
+        File::notifyChanged();
+    }
 }
 
 }

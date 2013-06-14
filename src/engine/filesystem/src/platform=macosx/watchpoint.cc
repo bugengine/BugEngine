@@ -3,10 +3,12 @@
 
 #include    <filesystem/stdafx.h>
 #include    <macosx/watchpoint.hh>
+#include    <core/threads/criticalsection.hh>
 
 namespace BugEngine { namespace FileSystem
 {
 
+CriticalSection s_lock;
 ref<WatchPoint> WatchPoint::s_root = ref<WatchPoint>::create(Arena::filesystem());
 
 WatchPoint::WatchPoint()
@@ -25,6 +27,7 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
     for (size_t i = 0; i < path.size(); ++i)
     {
         weak<WatchPoint> nextChild;
+        ScopedCriticalSection lock(s_lock);
         for (ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
         {
             if (it->first == path[i])
@@ -35,6 +38,7 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
         }
         if (!nextChild)
         {
+            be_debug("creating watch point node %s" | path[i]);
             ref<WatchPoint> newChild = ref<WatchPoint>::create(Arena::filesystem());
             result->m_children.push_back(minitl::make_pair(path[i], newChild));
             nextChild = newChild;
@@ -50,6 +54,7 @@ weak<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
     for (size_t i = 0; i < path.size(); ++i)
     {
         weak<WatchPoint> nextChild;
+        ScopedCriticalSection lock(s_lock);
         for (ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
         {
             if (it->first == path[i])
@@ -72,11 +77,13 @@ weak<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
 
 void WatchPoint::addWatch(weak<DiskFolder::Watch> watch)
 {
+    ScopedCriticalSection lock(s_lock);
     m_watches.push_back(watch);
 }
 
 void WatchPoint::removeWatch(weak<DiskFolder::Watch> watch)
 {
+    ScopedCriticalSection lock(s_lock);
     for (WatchVector::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {
         if (*it == watch)
@@ -90,9 +97,10 @@ void WatchPoint::removeWatch(weak<DiskFolder::Watch> watch)
 
 void WatchPoint::signalDirty()
 {
+    ScopedCriticalSection lock(s_lock);
     for (WatchVector::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {
-        //it->setDirty();
+        (*it)->signal();
     }
 }
 

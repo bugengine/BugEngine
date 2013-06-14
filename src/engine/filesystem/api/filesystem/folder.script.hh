@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <core/string/istring.hh>
 #include    <filesystem/file.script.hh>
+#include    <core/threads/criticalsection.hh>
 
 namespace BugEngine
 {
@@ -13,6 +14,7 @@ namespace BugEngine
 class be_api(FILESYSTEM) Folder : public minitl::refcountable
 {
 protected:
+    CriticalSection                                         m_lock;
     minitl::vector< minitl::pair<istring, ref<File> > >     m_files;
     minitl::vector< minitl::pair<istring, ref<Folder> > >   m_folders;
     minitl::vector< minitl::pair<istring, ref<Folder> > >   m_mounts;

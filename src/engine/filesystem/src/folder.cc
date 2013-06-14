@@ -12,7 +12,8 @@ namespace BugEngine
 
 
 Folder::Folder()
-    :   m_files(Arena::filesystem())
+    :   m_lock()
+    ,   m_files(Arena::filesystem())
     ,   m_folders(Arena::filesystem())
     ,   m_mounts(Arena::filesystem())
     ,   m_upToDate(false)
@@ -25,6 +26,7 @@ Folder::~Folder()
 
 weak<File> Folder::openFile(istring name)
 {
+    ScopedCriticalSection lock(m_lock);
     for (minitl::vector< minitl::pair< istring, ref<File> > >::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
     {
         if (it->first == name)
@@ -56,6 +58,7 @@ weak<File> Folder::openFile(ifilename name)
 
 weak<Folder> Folder::openFolder(istring name)
 {
+    ScopedCriticalSection lock(m_lock);
     for (minitl::vector< minitl::pair< istring, ref<Folder> > >::const_iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
@@ -92,6 +95,7 @@ weak<Folder> Folder::openFolder(ipath name)
 
 void Folder::mount(istring name, ref<Folder> folder)
 {
+    ScopedCriticalSection lock(m_lock);
     for (minitl::vector< minitl::pair< istring, ref<Folder> > >::const_iterator it = m_folders.begin(); it != m_folders.end(); ++it)
     {
         if (it->first == name)
@@ -134,6 +138,7 @@ void Folder::mount(ipath name, ref<Folder> folder)
 
 void Folder::umount(istring name)
 {
+    ScopedCriticalSection lock(m_lock);
     for (minitl::vector< minitl::pair< istring, ref<Folder> > >::iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
@@ -180,6 +185,7 @@ void Folder::doRefresh(ScanPolicy scanPolicy)
 {
     if (scanPolicy == Folder::ScanRecursive)
     {
+        ScopedCriticalSection lock(m_lock);
         for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
         {
             it->second->refresh(scanPolicy);
@@ -187,7 +193,5 @@ void Folder::doRefresh(ScanPolicy scanPolicy)
     }
 
 }
-
-
 
 }

@@ -86,7 +86,7 @@ public:
 private:
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;
-private:
+protected:
     void notifyChanged();
     void notifyDeleted();
 };

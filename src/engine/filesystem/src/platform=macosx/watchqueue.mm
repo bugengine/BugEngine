@@ -93,7 +93,8 @@ ref<DiskFolder::Watch> FileSystemWatch::FileSystemWatchProcessQueue::addFolder(w
     }
     absolutePath += path;
 
-    weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPointOrCreate(path);
+    weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPointOrCreate(absolutePath);
+    be_assert(point == FileSystem::WatchPoint::getWatchPoint(absolutePath), ":(");
     ref<DiskFolder::Watch> result = ref<FileSystem::DiskWatch>::create(Arena::filesystem(), folder, point);
     return result;
 }
