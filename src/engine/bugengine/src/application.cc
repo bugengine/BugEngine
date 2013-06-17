@@ -108,6 +108,12 @@ void Application::load(weak<const Resource::Description> world, Resource::Resour
     resource.setRefHandle(ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask));
 }
 
+void Application::reload(weak<const Resource::Description> /*oldWorld*/, weak<const Resource::Description> newWorld, Resource::Resource& resource)
+{
+    unload(resource);
+    load(newWorld, resource);
+}
+
 void Application::unload(Resource::Resource& resource)
 {
     m_worldCount--;

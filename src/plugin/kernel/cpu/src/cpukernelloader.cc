@@ -24,6 +24,14 @@ void CPUKernelLoader::load(weak<const Resource::Description> kernelDescription, 
     resource.setRefHandle(ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel::KernelDescription>(kernelDescription)->name()));
 }
 
+void CPUKernelLoader::reload(weak<const Resource::Description> /*oldKernelDescription*/,
+                             weak<const Resource::Description> newKernelDescription,
+                             Resource::Resource& resource)
+{
+    unload(resource);
+    load(newKernelDescription, resource);
+}
+
 void CPUKernelLoader::unload(Resource::Resource& resource)
 {
     resource.clearRefHandle();

@@ -23,6 +23,14 @@ void OpenCLKernelLoader::load(weak<const Resource::Description> kernelDescriptio
     //resource.setRefHandle(ref<KernelObject>::create(Arena::task(), be_checked_cast<const Kernel>(kernelDescription)->name()));
 }
 
+void OpenCLKernelLoader::reload(weak<const Resource::Description> /*oldKernelDescription*/,
+                                weak<const Resource::Description> newKernelDescription,
+                                Resource::Resource& resource)
+{
+    unload(resource);
+    load(newKernelDescription, resource);
+}
+
 void OpenCLKernelLoader::unload(Resource::Resource& resource)
 {
     resource.clearRefHandle();

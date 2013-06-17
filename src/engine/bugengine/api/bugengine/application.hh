@@ -54,6 +54,7 @@ private:
     void updateResources();
 private:
     virtual void load(weak<const Resource::Description> scene, Resource::Resource& resource) override;
+    virtual void reload(weak<const Resource::Description> oldScene, weak<const Resource::Description> newScene, Resource::Resource& resource) override;
     virtual void unload(Resource::Resource& resource) override;
 private:
     void registerInterruptions();

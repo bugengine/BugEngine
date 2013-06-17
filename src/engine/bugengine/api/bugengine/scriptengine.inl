@@ -34,6 +34,14 @@ void ScriptEngine<T>::load(weak<const Resource::Description> script, Resource::R
 }
 
 template< typename T >
+void ScriptEngine<T>::reload(weak<const Resource::Description> /*oldScript*/, weak<const Resource::Description> newScript, Resource::Resource& resource)
+{
+    unloadScript(resource);
+    be_assert(be_checked_cast<const Script>(newScript)->m_file, "can't open script: file not found");
+    m_manager->addTicket(this, newScript, be_checked_cast<const Script>(newScript)->m_file);
+}
+
+template< typename T >
 void ScriptEngine<T>::unload(Resource::Resource& resource)
 {
     unloadScript(resource);

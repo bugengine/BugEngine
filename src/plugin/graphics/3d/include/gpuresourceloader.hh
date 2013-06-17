@@ -27,6 +27,7 @@ public:
     ~GPUResourceLoader();
 protected:
     virtual void load(weak<const Resource::Description> description, Resource::Resource& resource) override;
+    virtual void reload(weak<const Resource::Description> oldDescription, weak<const Resource::Description> newDescription, Resource::Resource& resource) override;
     virtual void unload(Resource::Resource& handle) override;
     void flush();
 };

@@ -17,6 +17,9 @@ public:
     ~CPUKernelLoader();
 
     virtual void load(weak<const Resource::Description> kernelDescription, Resource::Resource& resource) override;
+    virtual void reload(weak<const Resource::Description> oldKernelDescription,
+                        weak<const Resource::Description> newKernelDescription,
+                         Resource::Resource& resource) override;
     virtual void unload(Resource::Resource& resource) override;
 };
 

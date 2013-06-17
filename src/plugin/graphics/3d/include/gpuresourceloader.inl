@@ -31,6 +31,13 @@ void GPUResourceLoader<R>::load(weak<const Resource::Description> description, R
 }
 
 template< typename R >
+void GPUResourceLoader<R>::reload(weak<const Resource::Description> /*oldDescription*/, weak<const Resource::Description> newDescription, Resource::Resource& resource)
+{
+    unload(resource);
+    load(newDescription, resource);
+}
+
+template< typename R >
 void GPUResourceLoader<R>::unload(Resource::Resource& resource)
 {
     weak<IGPUResource> gpuResource = resource.getRefHandle<IGPUResource>();
