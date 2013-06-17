@@ -152,7 +152,8 @@ size_t ResourceManager::updateTickets()
         }
     }
 
-    for (minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end(); /*nothing*/)
+    minitl::vector<Ticket> updatedTickets(Arena::temporary());
+    for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); /*nothing*/)
     {
         if (it->outdated)
         {
@@ -165,7 +166,7 @@ size_t ResourceManager::updateTickets()
         }
         else if (it->file->hasChanged())
         {
-            be_info("todo: file changed, reload resource");
+            updatedTickets.push_back(*it);
             it = m_watches.erase(it);
         }
         else
@@ -173,6 +174,12 @@ size_t ResourceManager::updateTickets()
             ++it;
         }
     }
+
+    for (minitl::vector<Ticket>::iterator it = updatedTickets.begin(); it != updatedTickets.end(); ++it)
+    {
+        it->loader->reload(it->resource, it->resource, it->resource->getResourceForWriting(it->loader));
+    }
+
     return ticketCount;
 }
 

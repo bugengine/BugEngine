@@ -24,6 +24,7 @@ protected:
     ~ILoader();
 
     virtual void load(weak<const Description> description, Resource& resource) = 0;
+    virtual void reload(weak<const Description> oldDescription, weak<const Description> newDescription, Resource& resource) = 0;
     virtual void unload(Resource& resource) = 0;
 
     virtual void onTicketUpdated(weak<const Description> /*description*/, Resource& /*resource*/, const minitl::Allocator::Block<u8>& /*buffer*/, u32 /*progress*/) { }
