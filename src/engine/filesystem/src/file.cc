@@ -46,13 +46,10 @@ File::Ticket::~Ticket()
     f->decref();
 }
 
-static const u32 s_dirtyFlag = 0x1;
-static const u32 s_deletedFlag = 0x2;
-static const u32 s_reloadableFlag = 0x4;
-File::File(Media media, u64 size, bool reloadable)
+File::File(Media media, u64 size, u64 fileState)
     :   m_media(media)
     ,   m_size(size)
-    ,   m_state(reloadable ? s_reloadableFlag : 0)
+    ,   m_state(fileState)
 {
 }
 
@@ -103,24 +100,30 @@ void File::writeBuffer(weak<Ticket> ticket) const
     doWriteBuffer(ticket);
 }
 
-bool File::hasChanged() const
+u64 File::getState() const
 {
-    return (m_state & s_dirtyFlag) != 0;
+    return m_state;
 }
 
 bool File::isDeleted() const
 {
-    return (m_state & s_deletedFlag) != 0;
+    return m_state == ~(u64)0;
 }
 
-void File::notifyChanged()
+void File::refresh(u64 fileSize, u64 fileState)
 {
-    m_state |= s_dirtyFlag;
-}
-
-void File::notifyDeleted()
-{
-    m_state |= s_deletedFlag;
+    if (fileSize != m_size || fileState != m_state)
+    {
+        m_size = fileSize;
+        if (fileState != m_state)
+        {
+            m_state = fileState;
+        }
+        else
+        {
+            m_state++;
+        }
+    }
 }
 
 }

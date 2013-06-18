@@ -38,12 +38,12 @@ public:
         {
         }
     };
-private:
+protected:
     const Media     m_media;
     u64             m_size;
-    u32             m_state;
+    u64             m_state;
 protected:
-    File(Media media, u64 size, bool reloadable);
+    File(Media media, u64 size, u64 state);
 public:
     ~File();
 public:
@@ -80,15 +80,14 @@ public:
     void fillBuffer(weak<Ticket> ticket) const;
     void writeBuffer(weak<Ticket> ticket) const;
 
-    bool hasChanged() const;
+    u64 getState() const;
     bool isDeleted() const;
     bool isReloadable() const;
 private:
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;
 protected:
-    void notifyChanged();
-    void notifyDeleted();
+    void refresh(u64 fileSize, u64 state);
 };
 
 }

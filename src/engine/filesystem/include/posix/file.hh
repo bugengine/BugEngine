@@ -14,12 +14,11 @@ class PosixFile : public File
 {
 private:
     ifilename   m_file;
-    time_t      m_modifiedTime;
 public:
     PosixFile(ifilename file, File::Media media, u64 size, time_t modifiedTime);
     ~PosixFile();
 
-    void refresh(time_t modifiedTime);
+    void refresh(u64 size, time_t modifiedTime);
 private:
     virtual void doFillBuffer(weak<File::Ticket> ticket) const override;
     virtual void doWriteBuffer(weak<Ticket> ticket) const;

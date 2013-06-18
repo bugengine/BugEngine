@@ -30,32 +30,32 @@ template< typename T >
 void ScriptEngine<T>::load(weak<const Resource::Description> script, Resource::Resource& /*resource*/)
 {
     be_assert(be_checked_cast<const Script>(script)->m_file, "can't open script: file not found");
-    m_manager->addTicket(this, script, be_checked_cast<const Script>(script)->m_file);
+    m_manager->addTicket(this, script, be_checked_cast<const Script>(script)->m_file, ILoader::LoadFirstTime);
 }
 
 template< typename T >
-void ScriptEngine<T>::reload(weak<const Resource::Description> /*oldScript*/, weak<const Resource::Description> newScript, Resource::Resource& resource)
+void ScriptEngine<T>::reload(weak<const Resource::Description> /*oldScript*/, weak<const Resource::Description> newScript, Resource::Resource& /*resource*/)
 {
-    unloadScript(resource);
     be_assert(be_checked_cast<const Script>(newScript)->m_file, "can't open script: file not found");
-    m_manager->addTicket(this, newScript, be_checked_cast<const Script>(newScript)->m_file);
+    m_manager->addTicket(this, newScript, be_checked_cast<const Script>(newScript)->m_file, ILoader::LoadReload);
 }
 
 template< typename T >
-void ScriptEngine<T>::unload(Resource::Resource& resource)
-{
-    unloadScript(resource);
-}
-
-template< typename T >
-void ScriptEngine<T>::unloadScript(Resource::Resource& /*resource*/)
+void ScriptEngine<T>::unload(Resource::Resource& /*resource*/)
 {
 }
 
 template< typename T >
-void ScriptEngine<T>::onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer)
+void ScriptEngine<T>::onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer, ILoader::LoadType type)
 {
-    runBuffer(be_checked_cast<const T>(script), resource, buffer);
+    if (type == ILoader::LoadReload)
+    {
+        reloadBuffer(be_checked_cast<const T>(script), resource, buffer);
+    }
+    else
+    {
+        runBuffer(be_checked_cast<const T>(script), resource, buffer);
+    }
 }
 
 }
