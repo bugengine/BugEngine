@@ -413,4 +413,15 @@ void Context::runBuffer(weak<const LuaScript> /*script*/, Resource::Resource& /*
     be_assert(result == 0, lua_tostring(m_state, -1));
 }
 
+void Context::reloadBuffer(weak<const LuaScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
+{
+    int result;
+    result = luaL_loadbuffer(m_state, (const char *) block.data(), be_checked_numcast<size_t > (block.count()), 0);
+    if (result == 0)
+    {
+        result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
+    }
+    be_assert(result == 0, lua_tostring(m_state, -1));
+}
+
 }}

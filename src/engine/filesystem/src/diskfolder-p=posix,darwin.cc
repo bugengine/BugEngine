@@ -194,7 +194,7 @@ void DiskFolder::onChanged()
                 {
                     if (it->first == name)
                     {
-                        be_checked_cast<PosixFile>(it->second)->refresh(s.st_mtime);
+                        be_checked_cast<PosixFile>(it->second)->refresh(s.st_size, s.st_mtime);
                         exists = true;
                     }
                 }

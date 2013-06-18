@@ -41,6 +41,18 @@ void PackageLoader::runBuffer(weak<const Package> /*script*/, Resource::Resource
     package->createObjects(m_manager);
 }
 
+void PackageLoader::reloadBuffer(weak<const Package> /*script*/, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer)
+{
+    MD5 md5 = digest(buffer);
+    be_info("md5 sum of package: %s" | md5);
+    ref<PackageBuilder::Nodes::Package> newPackage = m_packageBuilder->createPackage(buffer);
+    weak<PackageBuilder::Nodes::Package> oldPackage = resource.getRefHandle<PackageBuilder::Nodes::Package>();
+    newPackage->diffFromPackage(oldPackage, m_manager);
+    oldPackage = weak<PackageBuilder::Nodes::Package>();
+    resource.clearRefHandle();
+    resource.setRefHandle(newPackage);
+}
+
 void PackageLoader::unloadScript(Resource::Resource& resource)
 {
     resource.getRefHandle<PackageBuilder::Nodes::Package>()->deleteObjects(m_manager);

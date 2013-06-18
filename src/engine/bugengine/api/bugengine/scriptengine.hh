@@ -21,13 +21,13 @@ public:
 protected:
     ScriptEngine(minitl::Allocator& arena, weak<Resource::ResourceManager> manager);
     virtual void runBuffer(weak<const T> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) = 0;
-    virtual void unloadScript(Resource::Resource& resource);
+    virtual void reloadBuffer(weak<const T> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) = 0;
 
 private:
     virtual void load(weak<const Resource::Description> script, Resource::Resource& resource) override;
     virtual void reload(weak<const Resource::Description> oldScript, weak<const Resource::Description> newScript, Resource::Resource& resource) override;
     virtual void unload(Resource::Resource& handle) override;
-    virtual void onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
+    virtual void onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer, ILoader::LoadType type) override;
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

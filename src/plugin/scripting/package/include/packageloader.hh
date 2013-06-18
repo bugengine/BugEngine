@@ -26,6 +26,7 @@ public:
     ~PackageLoader();
 private:
     virtual void runBuffer(weak<const Package> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
+    virtual void reloadBuffer(weak<const Package> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
     virtual void unloadScript(Resource::Resource& handle) override;
 };
 

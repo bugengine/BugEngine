@@ -10,6 +10,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/typeinfo.hh>
 #include    <resource/description.script.hh>
+#include    <resource/loader.hh>
 #include    <filesystem/file.script.hh>
 
 namespace BugEngine { namespace Resource
@@ -32,7 +33,9 @@ private:
         weak<const Description> resource;
         weak<const File>        file;
         ref<const File::Ticket> ticket;
+        u64                     fileState;
         u32                     progress;
+        ILoader::LoadType       type;
         bool                    outdated;
     };
 private:
@@ -57,7 +60,7 @@ public:
     template< typename T > void unload(weak<T> resource)            { unload(be_typeid<T>::klass(), resource); }
     template< typename T > void unload(ref<T> resource)             { unload(be_typeid<T>::klass(), resource); }
 
-    void addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file);
+    void addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file, ILoader::LoadType type);
     size_t updateTickets();
 };
 

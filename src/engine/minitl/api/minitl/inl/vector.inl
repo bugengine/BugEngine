@@ -471,6 +471,14 @@ void                                                vector<T>::reserve(size_type
     }
 }
 
+template< typename T >
+void swap(vector<T>& t1, vector<T>& t2)
+{
+    t1.m_memory.swap(t2.m_memory);
+    swap(t1.m_end, t2.m_end);
+    swap(t1.m_capacity, t2.m_capacity);
+}
+
 }
 
 /*****************************************************************************/

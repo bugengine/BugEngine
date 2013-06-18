@@ -11,8 +11,16 @@ namespace minitl
 {
 
 template< typename T >
+class vector;
+
+template< typename T >
+void swap(vector<T>& t1, vector<T>& t2);
+
+template< typename T >
 class vector
 {
+    template< typename U >
+    friend void swap(vector<U>& t1, vector<U>& t2);
 private:
     template< typename POLICY >
     class base_iterator;

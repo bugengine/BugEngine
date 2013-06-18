@@ -6,3 +6,5 @@ luascript = plugin.scripting.lua.LuaScript
 	script = <sample.lua>;
 )
 
+
+

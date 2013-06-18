@@ -57,6 +57,7 @@ public:
 
     void createObjects(weak<Resource::ResourceManager> manager);
     void deleteObjects(weak<Resource::ResourceManager> manager);
+    void diffFromPackage(weak<Package> previous, weak<Resource::ResourceManager> manager);
 };
 
 }}}
