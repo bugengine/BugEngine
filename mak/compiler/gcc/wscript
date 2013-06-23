@@ -193,9 +193,9 @@ def detect_gcc(conf):
 	for bindir in bindirs:
 		try:
 			for f in os.listdir(os.path.join(bindir, '..')):
-				libdir = os.path.normpath(os.path.join(bindir, '..', f, 'lib'))
-				if os.path.isdir(libdir):
-					paths.add(libdir)
+				subdirs = os.listdir(os.path.join(bindir, '..', f))
+				if 'lib' in subdirs:
+					paths.add(os.path.normpath(os.path.join(bindir, '..', f, 'lib')))
 		except OSError:
 			pass
 
