@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <macosx/watch.hh>
-#include    <macosx/watchpoint.hh>
+#include    <watch.hh>
+#include    <watchpoint.hh>
 
 namespace BugEngine { namespace FileSystem
 {

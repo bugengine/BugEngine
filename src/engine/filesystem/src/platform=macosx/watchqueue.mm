@@ -4,8 +4,8 @@
 #include    <filesystem/stdafx.h>
 #include    <macosx/watchqueue.hh>
 
-#include    <macosx/watch.hh>
-#include    <macosx/watchpoint.hh>
+#include    <watch.hh>
+#include    <watchpoint.hh>
 
 #include    <core/environment.hh>
 #include    <Foundation/Foundation.h>

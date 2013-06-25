@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <macosx/watchpoint.hh>
+#include    <watchpoint.hh>
 #include    <core/threads/criticalsection.hh>
 
 namespace BugEngine { namespace FileSystem
@@ -24,7 +24,7 @@ WatchPoint::~WatchPoint()
 weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
 {
     weak<WatchPoint> result(s_root);
-    for (size_t i = 0; i < path.size(); ++i)
+    for (u32 i = 0; i < path.size(); ++i)
     {
         weak<WatchPoint> nextChild;
         ScopedCriticalSection lock(s_lock);
@@ -50,7 +50,7 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
 weak<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
 {
     weak<WatchPoint> result(s_root);
-    for (size_t i = 0; i < path.size(); ++i)
+    for (u32 i = 0; i < path.size(); ++i)
     {
         weak<WatchPoint> nextChild;
         ScopedCriticalSection lock(s_lock);
