@@ -4,8 +4,8 @@
 #include    <filesystem/stdafx.h>
 #include    <filesystemwatch.hh>
 
-#include    <macosx/watch.hh>
-#include    <macosx/watchpoint.hh>
+#include    <watch.hh>
+#include    <watchpoint.hh>
 #include    <macosx/watchqueue.hh>
 
 namespace BugEngine

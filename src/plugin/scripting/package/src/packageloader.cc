@@ -53,10 +53,4 @@ void PackageLoader::reloadBuffer(weak<const Package> /*script*/, Resource::Resou
     resource.setRefHandle(newPackage);
 }
 
-void PackageLoader::unloadScript(Resource::Resource& resource)
-{
-    resource.getRefHandle<PackageBuilder::Nodes::Package>()->deleteObjects(m_manager);
-    resource.clearRefHandle();
-}
-
 }}

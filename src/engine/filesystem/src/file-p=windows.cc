@@ -2,14 +2,14 @@
    see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <win32/file.hh>
+#include    <windows/file.hh>
 
 
 namespace BugEngine
 {
 
-Win32File::Win32File(ifilename file, Media media, u64 size)
-    :   File(media, size, false)
+Win32File::Win32File(ifilename file, Media media, u64 size, u64 timestamp)
+    :   File(media, size, timestamp)
     ,   m_file(file)
 {
 }
@@ -129,6 +129,11 @@ void Win32File::doWriteBuffer(weak<Ticket> ticket) const
         }
         CloseHandle(h);
     }
+}
+
+void Win32File::refresh(u64 size, u64 timestamp)
+{
+    File::refresh(size, timestamp);
 }
 
 }

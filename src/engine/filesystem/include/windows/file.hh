@@ -14,8 +14,10 @@ class Win32File : public File
 private:
     ifilename m_file;
 public:
-    Win32File(ifilename file, File::Media media, u64 size);
+    Win32File(ifilename file, File::Media media, u64 size, u64 timestamp);
     ~Win32File();
+
+    void refresh(u64 size, u64 timestamp);
 private:
     void doFillBuffer(weak<File::Ticket> ticket) const override;
     virtual void doWriteBuffer(weak<Ticket> ticket) const override;

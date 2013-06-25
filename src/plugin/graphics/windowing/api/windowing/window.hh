@@ -12,7 +12,7 @@ namespace BugEngine { namespace Windowing
 
 class Renderer;
 
-class Window : public IRenderTarget
+class be_api(WINDOWING) Window : public IRenderTarget
 {
 public:
     class PlatformWindow;

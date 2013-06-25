@@ -96,6 +96,7 @@ class Solution:
 		self.folders = []
 		self.folders_made = {}
 		self.use_folders = use_folders
+		self.master = ''
 
 	def addFolder(self, name):
 		names = name.split('.')[:-1]
@@ -114,11 +115,18 @@ class Solution:
 		else:
 			return None
 
+	def get_dependency(self):
+		if self.master:
+			return "	ProjectSection(ProjectDependencies) = postProject\n		%s = %s\n	EndProjectSection\n" % (self.master, self.master)
+		else:
+			return ''
 
 	def add(self, task_gen, project, project_path, build = False):
-		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\nEndProject' % (project.name, project_path, project.guid))
+		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
 		project_config = ['\t\t%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
-		project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		if build:
+			self.master = project.guid
+			project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
 		self.project_configs += project_config
 		if self.use_folders:
 			parent = self.addFolder(task_gen.target)
@@ -208,8 +216,8 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
 						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
-					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines))
-					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes]))
+					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
+					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
 		files = self.vcxproj._add(project, 'ItemGroup')
 
 		self.filters = {}
@@ -282,7 +290,7 @@ class vs2003(Build.BuildContext):
 
 		solution = Solution(self, appname, version_number, version_name, folders)
 
-		for target, command, do_build in [('build.reconfigure', 'reconfigure', False), ('build.%s'%version, version, False), ('build.all', 'build:%(toolchain)s:%(variant)s', True)]:
+		for target, command, do_build in [('build.reconfigure', 'reconfigure', False), ('build.%s'%version, version, False), ('build.all', 'install:%(toolchain)s:%(variant)s', True)]:
 			task_gen = lambda: None
 			task_gen.target = target
 			task_gen.command = command
