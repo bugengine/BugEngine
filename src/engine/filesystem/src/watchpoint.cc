@@ -11,9 +11,17 @@ namespace BugEngine { namespace FileSystem
 CriticalSection s_lock;
 ref<WatchPoint> WatchPoint::s_root = ref<WatchPoint>::create(Arena::filesystem());
 
+WatchPoint::WatchPoint(weak<WatchPoint> parent)
+    :   m_watches(Arena::filesystem())
+    ,   m_children(Arena::filesystem())
+    ,   m_parent(parent)
+{
+}
+
 WatchPoint::WatchPoint()
     :   m_watches(Arena::filesystem())
     ,   m_children(Arena::filesystem())
+    ,   m_parent()
 {
 }
 
@@ -38,7 +46,7 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
         }
         if (!nextChild)
         {
-            ref<WatchPoint> newChild = ref<WatchPoint>::create(Arena::filesystem());
+            ref<WatchPoint> newChild = ref<WatchPoint>::create(Arena::filesystem(), result);
             result->m_children.push_back(minitl::make_pair(path[i], newChild));
             nextChild = newChild;
         }
@@ -96,8 +104,12 @@ void WatchPoint::removeWatch(weak<DiskFolder::Watch> watch)
 
 void WatchPoint::signalDirty()
 {
-    ScopedCriticalSection lock(s_lock);
-    for (WatchVector::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    WatchVector v(Arena::temporary());
+    {
+        ScopedCriticalSection lock(s_lock);
+        v = m_watches;
+    }
+    for (WatchVector::iterator it = v.begin(); it != v.end(); ++it)
     {
         (*it)->signal();
     }

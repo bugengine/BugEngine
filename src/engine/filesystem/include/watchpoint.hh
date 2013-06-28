@@ -14,10 +14,12 @@ class WatchPoint : public minitl::refcountable
 private:
     typedef minitl::vector< weak<DiskFolder::Watch> >                   WatchVector;
     typedef minitl::vector< minitl::pair<istring, ref<WatchPoint> > >   ChildrenVector;
-    WatchVector     m_watches;
-    ChildrenVector  m_children;
+    WatchVector         m_watches;
+    ChildrenVector      m_children;
+    weak<WatchPoint>    m_parent;
 public:
     WatchPoint();
+    WatchPoint(weak<WatchPoint> parent);
     ~WatchPoint();
 public:
     static weak<WatchPoint> getWatchPointOrCreate(const ipath& path);

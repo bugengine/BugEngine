@@ -226,11 +226,11 @@ void Package::deleteObjects(weak<Resource::ResourceManager> manager)
 void Package::diffFromPackage(weak<Package> previous, weak<Resource::ResourceManager> manager)
 {
     minitl::swap(previous->m_values, m_values);
-    for(size_t i = 0; i < m_nodes.size(); ++i)
-    {
-        be_forceuse(manager);
-        be_forceuse(previous);
-    }
+    //for(size_t i = 0; i < m_nodes.size(); ++i)
+    //{
+    //    be_forceuse(manager);
+    //    be_forceuse(previous);
+    //}
 }
 
 }}}
