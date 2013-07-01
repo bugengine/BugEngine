@@ -4,7 +4,6 @@
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
 #include    <win32/file.hh>
-#include    <filesystemwatch.hh>
 
 
 namespace BugEngine
