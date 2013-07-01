@@ -11,10 +11,12 @@ namespace BugEngine { namespace FileSystem
 CriticalSection s_lock;
 ref<WatchPoint> WatchPoint::s_root = ref<WatchPoint>::create(Arena::filesystem());
 
+
 WatchPoint::WatchPoint(weak<WatchPoint> parent)
     :   m_watches(Arena::filesystem())
     ,   m_children(Arena::filesystem())
     ,   m_parent(parent)
+    ,   m_recursiveWatchCount(0)
 {
 }
 
@@ -22,6 +24,7 @@ WatchPoint::WatchPoint()
     :   m_watches(Arena::filesystem())
     ,   m_children(Arena::filesystem())
     ,   m_parent()
+    ,   m_recursiveWatchCount(0)
 {
 }
 
@@ -29,12 +32,12 @@ WatchPoint::~WatchPoint()
 {
 }
 
-weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
+ref<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
 {
-    weak<WatchPoint> result(s_root);
+    ref<WatchPoint> result(s_root);
     for (u32 i = 0; i < path.size(); ++i)
     {
-        weak<WatchPoint> nextChild;
+        ref<WatchPoint> nextChild;
         ScopedCriticalSection lock(s_lock);
         for (ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
         {
@@ -55,12 +58,12 @@ weak<WatchPoint> WatchPoint::getWatchPointOrCreate(const ipath& path)
     return result;
 }
 
-weak<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
+ref<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
 {
-    weak<WatchPoint> result(s_root);
+    ref<WatchPoint> result(s_root);
     for (u32 i = 0; i < path.size(); ++i)
     {
-        weak<WatchPoint> nextChild;
+        ref<WatchPoint> nextChild;
         ScopedCriticalSection lock(s_lock);
         for (ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
         {
@@ -82,13 +85,18 @@ weak<WatchPoint> WatchPoint::getWatchPoint(const ipath& path)
     return result;
 }
 
-void WatchPoint::addWatch(weak<DiskFolder::Watch> watch)
+void WatchPoint::addWatch(weak<Folder::Watch> watch)
 {
     ScopedCriticalSection lock(s_lock);
     m_watches.push_back(watch);
+
+    for (weak<WatchPoint> p = this; p; p = p->m_parent)
+    {
+        p->m_recursiveWatchCount++;
+    }
 }
 
-void WatchPoint::removeWatch(weak<DiskFolder::Watch> watch)
+void WatchPoint::removeWatch(weak<Folder::Watch> watch)
 {
     ScopedCriticalSection lock(s_lock);
     for (WatchVector::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
@@ -96,6 +104,12 @@ void WatchPoint::removeWatch(weak<DiskFolder::Watch> watch)
         if (*it == watch)
         {
             m_watches.erase(it);
+
+            for (weak<WatchPoint> p = this; p; p = p->m_parent)
+            {
+                p->m_recursiveWatchCount--;
+            }
+
             return;
         }
     }
@@ -113,6 +127,28 @@ void WatchPoint::signalDirty()
     {
         (*it)->signal();
     }
+}
+
+void WatchPoint::cleanupTree()
+{
+    ScopedCriticalSection lock(s_lock);
+    for (ChildrenVector::iterator it = m_children.begin(); it != m_children.end(); )
+    {
+        if (it->second->m_recursiveWatchCount == 0)
+        {
+            it = m_children.erase(it);
+        }
+        else
+        {
+            it->second->cleanupTree();
+            ++it;
+        }
+    }
+}
+
+void WatchPoint::cleanup()
+{
+    s_root->cleanupTree();
 }
 
 }}

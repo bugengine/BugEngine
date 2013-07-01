@@ -126,6 +126,7 @@ void Application::updateResources()
     if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
+        m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {

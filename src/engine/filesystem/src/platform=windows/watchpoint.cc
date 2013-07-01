@@ -2,14 +2,11 @@
    see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <filesystemwatch.hh>
-#include    <watch.hh>
 #include    <watchpoint.hh>
-#include    <minitl/vector.hh>
-#include    <kernel/interlocked_stack.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace FileSystem
 {
+
 
 #define MS_VC_EXCEPTION 0x406D1388
 #pragma pack(push,8)
@@ -22,8 +19,6 @@ struct THREADNAME_INFO
 };
 #pragma pack(pop)
 
-class WatchThread;
-
 class WatchRequest : public minitl::istack<WatchRequest>::node
 {
     friend class WatchThread;
@@ -34,11 +29,11 @@ public:
         Remove
     };
 private:
-    RequestType                     m_type;
-    ipath                           m_path;
-    weak<FileSystem::WatchPoint>    m_watchpoint;
+    RequestType     m_type;
+    ipath           m_path;
+    ref<WatchPoint> m_watchpoint;
 public:
-    WatchRequest(RequestType type, const ipath& path, weak<FileSystem::WatchPoint> watchpoint)
+    WatchRequest(RequestType type, const ipath& path, ref<WatchPoint> watchpoint)
         :   m_type(type)
         ,   m_path(path)
         ,   m_watchpoint(watchpoint)
@@ -61,7 +56,7 @@ public:
     WatchThread();
     ~WatchThread();
 
-    bool add(const ipath& path, weak<FileSystem::WatchPoint> watchpoint);
+    bool add(const ipath& path, ref<FileSystem::WatchPoint> watchpoint);
 };
 
 static void setThreadName(const istring& name)
@@ -110,12 +105,14 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
             else
             {
                 DWORD flags = FILE_NOTIFY_CHANGE_FILE_NAME
-                            | FILE_NOTIFY_CHANGE_DIR_NAME
-                            | FILE_NOTIFY_CHANGE_ATTRIBUTES
-                            | FILE_NOTIFY_CHANGE_SIZE
-                            | FILE_NOTIFY_CHANGE_LAST_WRITE;
+                    | FILE_NOTIFY_CHANGE_DIR_NAME
+                    | FILE_NOTIFY_CHANGE_ATTRIBUTES
+                    | FILE_NOTIFY_CHANGE_SIZE
+                    | FILE_NOTIFY_CHANGE_LAST_WRITE;
                 HANDLE handle = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
                 watchThread->m_watches.push_back(minitl::make_pair(handle, request->m_watchpoint));
+                request->~WatchRequest();
+                //Arena::temporary().free(request);
             }
         }
         else if (result >= WAIT_OBJECT_0 + 1 && result <= WAIT_OBJECT_0 + watchThread->m_watches.size())
@@ -124,8 +121,25 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
             watchThread->m_watches[index].second->signalDirty();
             FindNextChangeNotification(watchThread->m_watches[index].first);
         }
+        else if (result >= WAIT_ABANDONED_0 + 1 && result <= WAIT_ABANDONED_0 + watchThread->m_watches.size())
+        {
+            be_notreached();
+            int index = result - WAIT_ABANDONED_0 - 1;
+            FindNextChangeNotification(watchThread->m_watches[index].first);
+        }
         else
         {
+            char *errorMessage = 0;
+            int errorCode = ::GetLastError();
+            FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL,
+                errorCode,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                reinterpret_cast<LPSTR>(&errorMessage),
+                0,
+                NULL);
+            be_error("file watch wait interrupted: %s" | errorMessage);
+            ::LocalFree(errorMessage);
             be_notreached();
         }
     }
@@ -153,7 +167,7 @@ WatchThread::~WatchThread()
     }
 }
 
-bool WatchThread::add(const ipath& path, weak<FileSystem::WatchPoint> watchpoint)
+bool WatchThread::add(const ipath& path, ref<FileSystem::WatchPoint> watchpoint)
 {
     if (m_watchCount < s_maximumWatchCount)
     {
@@ -169,67 +183,33 @@ bool WatchThread::add(const ipath& path, weak<FileSystem::WatchPoint> watchpoint
     }
 }
 
-class FileSystemWatch::FileSystemWatchProcessQueue : public minitl::pointer
-{
-private:
-    CriticalSection                     m_lock;
-    minitl::vector< ref<WatchThread> >  m_threads;
-public:
-    FileSystemWatchProcessQueue();
-    ~FileSystemWatchProcessQueue();
 
-    ref<DiskFolder::Watch> watchDirectory(weak<DiskFolder> folder, const BugEngine::ipath& path);
-};
-
-FileSystemWatch::FileSystemWatchProcessQueue::FileSystemWatchProcessQueue()
-    :   m_threads(Arena::filesystem())
+ref<Folder::Watch> WatchPoint::addWatch(weak<DiskFolder> folder, const BugEngine::ipath& path)
 {
-}
+    static minitl::vector< ref<WatchThread> >   s_threads(Arena::filesystem());
 
-FileSystemWatch::FileSystemWatchProcessQueue::~FileSystemWatchProcessQueue()
-{
-}
-
-ref<DiskFolder::Watch> FileSystemWatch::FileSystemWatchProcessQueue::watchDirectory(weak<DiskFolder> folder, const BugEngine::ipath& path)
-{
-    ScopedCriticalSection lock(m_lock);
-    weak<FileSystem::WatchPoint> watchpoint = FileSystem::WatchPoint::getWatchPoint(path);
+    ref<WatchPoint> watchpoint = getWatchPoint(path);
     if (!watchpoint)
     {
-       watchpoint = FileSystem::WatchPoint::getWatchPointOrCreate(path);
-       bool added = false;
-       for (minitl::vector< ref<WatchThread> >::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
-       {
-           if ((*it)->add(path, watchpoint))
-           {
-               added = true;
-               break;
-           }
-       }
-       if (!added)
-       {
-           ref<WatchThread> newThread = ref<WatchThread>::create(Arena::filesystem());
-           newThread->add(path, watchpoint);
-           m_threads.push_back(newThread);
-       }
+        watchpoint = getWatchPointOrCreate(path);
+        bool found = false;
+        for (minitl::vector< ref<WatchThread> >::iterator it = s_threads.begin(); it != s_threads.end(); ++it)
+        {
+            if ((*it)->add(path, watchpoint))
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            ref<WatchThread> thread = ref<WatchThread>::create(Arena::filesystem());
+            thread->add(path, watchpoint);
+        }
     }
-    return ref<FileSystem::DiskWatch>::create(Arena::filesystem(), folder, watchpoint);
+    ref<DiskFolder::Watch> result = ref<DiskFolder::Watch>::create(Arena::filesystem(), folder, watchpoint);
+    watchpoint->addWatch(result);
+    return result;
 }
 
-FileSystemWatch::FileSystemWatch()
-    :   m_queue(scoped<FileSystemWatchProcessQueue>::create(BugEngine::Arena::filesystem()))
-{
-}
-
-FileSystemWatch::~FileSystemWatch()
-{
-}
-
-ref<DiskFolder::Watch> FileSystemWatch::watchDirectory(weak<DiskFolder> folder, const BugEngine::ipath& path)
-{
-    return s_fileSystemWatch.m_queue->watchDirectory(folder, path);
-}
-
-FileSystemWatch FileSystemWatch::s_fileSystemWatch;
-
-}
+}}
