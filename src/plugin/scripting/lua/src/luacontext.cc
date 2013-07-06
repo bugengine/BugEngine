@@ -402,6 +402,10 @@ Context::~Context()
     lua_close(m_state);
 }
 
+void Context::unload(Resource::Resource& /*handle*/)
+{
+}
+
 void Context::runBuffer(weak<const LuaScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
 {
     int result;
