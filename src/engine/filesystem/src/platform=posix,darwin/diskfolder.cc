@@ -3,7 +3,7 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
-#include    <filesystemwatch.hh>
+#include    <watchpoint.hh>
 #include    <sys/types.h>
 #include    <sys/stat.h>
 #include    DIRENT_H
@@ -51,7 +51,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     }
     else
     {
-        m_watch = FileSystemWatch::watchDirectory(this, diskpath);
+        m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
     }
 
     if (scanPolicy != Folder::ScanNone)
