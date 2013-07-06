@@ -208,7 +208,6 @@ ref<Folder::Watch> WatchPoint::addWatch(weak<DiskFolder> folder, const BugEngine
         }
     }
     ref<DiskFolder::Watch> result = ref<DiskFolder::Watch>::create(Arena::filesystem(), folder, watchpoint);
-    watchpoint->addWatch(result);
     return result;
 }
 
