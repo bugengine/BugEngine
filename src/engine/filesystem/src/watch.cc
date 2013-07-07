@@ -1,23 +1,26 @@
+
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
-   see LICENSE for detail */
+ see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <watch.hh>
-#include    <watchpoint.hh>
+#include    <filesystem/folder.script.hh>
 
-namespace BugEngine { namespace FileSystem
+
+namespace BugEngine
 {
 
-DiskWatch::DiskWatch(weak<DiskFolder> folder, weak<WatchPoint> watchPoint)
-    :   DiskFolder::Watch(folder)
-    ,   m_watchPoint(watchPoint)
+Folder::Watch::Watch(weak<Folder> folder)
+    :   m_folder(folder)
 {
-    m_watchPoint->addWatch(this);
 }
 
-DiskWatch::~DiskWatch()
+Folder::Watch::~Watch()
 {
-    m_watchPoint->removeWatch(this);
 }
 
-}}
+void Folder::Watch::signal()
+{
+    m_folder->onChanged();
+}
+
+}

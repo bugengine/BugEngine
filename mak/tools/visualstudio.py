@@ -363,3 +363,14 @@ class vs11e(vs2003):
 class vs2012e(vs11e):
 	cmd = 'vs2012e'
 	fun = 'build'
+
+class vs2013e(vs2003):
+	cmd = 'vs2013e'
+	fun = 'build'
+	version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('12.0','12.0')))
+
+class vs2013(vs2003):
+	cmd = 'vs2013'
+	fun = 'build'
+	version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('12.0','12.0')))
+

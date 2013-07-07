@@ -41,11 +41,6 @@ void ScriptEngine<T>::reload(weak<const Resource::Description> /*oldScript*/, we
 }
 
 template< typename T >
-void ScriptEngine<T>::unload(Resource::Resource& /*resource*/)
-{
-}
-
-template< typename T >
 void ScriptEngine<T>::onTicketLoaded(weak<const Resource::Description> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer, ILoader::LoadType type)
 {
     if (type == ILoader::LoadReload)
