@@ -14,16 +14,7 @@ class FileSystemWatch;
 class be_api(FILESYSTEM) DiskFolder : public Folder
 {
 public:
-    class Watch : public minitl::refcountable
-    {
-    private:
-        weak<DiskFolder>  m_folder;
-    public:
-        Watch(weak<DiskFolder> folder);
-        ~Watch();
-
-        void signal();
-    };
+    class Watch;
     friend class Watch;
 private:
     union Handle
@@ -31,13 +22,13 @@ private:
         void*   ptrHandle;
         u64     intHandle;
     };
-    ipath       m_path;
-    Handle      m_handle;
-    u32         m_index;
-    ref<Watch>  m_watch;
+    ipath               m_path;
+    Handle              m_handle;
+    u32                 m_index;
+    ref<Folder::Watch>  m_watch;
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
-    void onChanged();
+    void onChanged() override;
 published:
     DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive, Folder::CreatePolicy createPolicy = Folder::CreateOne);
     ~DiskFolder();

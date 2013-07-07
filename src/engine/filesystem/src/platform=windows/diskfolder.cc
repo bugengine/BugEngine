@@ -3,7 +3,7 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
-#include    <filesystemwatch.hh>
+#include    <watchpoint.hh>
 #include    <windows/file.hh>
 
 
@@ -43,6 +43,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
                 0,
                 NULL);
             be_info("Directory %s could not be created: error code %d (%s)" | path | err | errorMessage);
+            ::LocalFree(errorMessage);
         }
     }
 
@@ -53,7 +54,7 @@ static i_u32 s_diskIndex = i_u32::Zero;
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
     ,   m_index(s_diskIndex++)
-    ,   m_watch(FileSystemWatch::watchDirectory(this, diskpath))
+    ,   m_watch()
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
     ipath::Filename pathname = m_path.str();
@@ -77,6 +78,10 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
             NULL);
         be_info("Directory %s could not be opened: (%d) %s" | diskpath | errorCode | errorMessage);
         ::LocalFree(errorMessage);
+    }
+    else
+    {
+        m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
     }
 
     if (scanPolicy != Folder::ScanNone)
