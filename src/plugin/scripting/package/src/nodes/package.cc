@@ -212,7 +212,7 @@ void Package::createObjects(weak<Resource::ResourceManager> manager)
 
 void Package::deleteObjects(weak<Resource::ResourceManager> manager)
 {
-    for(size_t i =m_values.size(); i > 0; --i)
+    for(size_t i = m_values.size(); i > 0; --i)
     {
         if (m_values.back().isA(be_typeid<const Resource::Description>::type()))
         {
