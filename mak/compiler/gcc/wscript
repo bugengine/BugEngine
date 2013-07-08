@@ -39,35 +39,6 @@ def parse_gcc_target(conf, target):
 			return aname
 
 
-@conf
-def get_native_icc_target(conf, icc):
-	cmd = [icc, '-V']
-	try:
-		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-		out = p.communicate()[1]
-	except:
-		return (None, None)
-
-	if not isinstance(out, str):
-		out = out.decode(sys.stdout.encoding)
-	out = out.split('\n')
-	target = os.uname()[0].lower()
-	arch = 'x86'
-	version = None
-	for line in out:
-		words = line.split()
-		while len(words):
-			if words[0] == 'Intel(R)' and words[1] == '64':
-				arch = 'amd64'
-			if words[0] == 'ID:':
-				if words[1].startswith('m_cproc_'):
-					version = words[1][10:].split('.')[0]
-			if words[0] == 'Version':
-				version = words[1].split('.')[0]
-			words = words[1:]
-	return (target+'-'+arch, version)
-
-
 def add_ld_so(conf, filename, paths):
 	f = open(filename, 'r')
 	for line in f:
@@ -186,7 +157,6 @@ def get_native_gcc(conf):
 @conf
 def detect_gcc(conf):
 	compilers_gcc_found = []
-	conf.env.GCC_TARGETS = []
 	bindirs = os.environ['PATH'].split(os.pathsep)
 	paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
 	paths = set([path for path in paths if os.path.isdir(path)])
@@ -210,7 +180,7 @@ def detect_gcc(conf):
 			if lib.startswith('gcc'):
 				conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
 	conf.get_native_gcc()
-	conf.env.GCC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
+
 
 @conf
 def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
@@ -250,6 +220,8 @@ def configure(conf):
 		('spu', 'spu')
 	]
 
+	conf.env.GCC_TARGETS = []
 	conf.detect_gcc()
+	conf.env.GCC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
 	conf.end_msg('done')
 
