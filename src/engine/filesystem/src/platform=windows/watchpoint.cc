@@ -112,7 +112,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
                 HANDLE handle = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
                 watchThread->m_watches.push_back(minitl::make_pair(handle, request->m_watchpoint));
                 request->~WatchRequest();
-                //Arena::temporary().free(request);
+                Arena::temporary().free(request);
             }
         }
         else if (result >= WAIT_OBJECT_0 + 1 && result <= WAIT_OBJECT_0 + watchThread->m_watches.size())
