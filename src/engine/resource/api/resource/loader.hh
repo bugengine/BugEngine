@@ -17,17 +17,17 @@ class be_api(RESOURCE) ILoader : public minitl::refcountable
     friend class ResourceManager;
     friend class Description;
     BE_NOCOPY(ILoader);
-protected:
-    const u32   m_id;
-protected:
-    ILoader();
-    ~ILoader();
-
+public:
     enum LoadType
     {
         LoadFirstTime,
         LoadReload
     };
+protected:
+    const u32   m_id;
+protected:
+    ILoader();
+    ~ILoader();
 
     virtual void load(weak<const Description> description, Resource& resource) = 0;
     virtual void reload(weak<const Description> oldDescription, weak<const Description> newDescription, Resource& resource) = 0;
