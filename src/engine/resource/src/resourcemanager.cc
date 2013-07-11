@@ -102,12 +102,12 @@ void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Descript
 
 void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Description> description)
 {
+    description->unhook();
     LoaderInfo& info = getLoaderInfo(classinfo);
     for (minitl::vector< weak<ILoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
         description->unload(*it);
     }
-    description->unhook();
 
     for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {

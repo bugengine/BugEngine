@@ -27,13 +27,13 @@ public:
     void signalDirty();
 
     static ref<Folder::Watch> addWatch(weak<DiskFolder> folder, const ipath& path);
+    static ref<WatchPoint> getWatchPoint(const ipath& path);
 private:
     void addWatch(weak<Folder::Watch> watch);
     void removeWatch(weak<Folder::Watch> watch);
     void cleanupTree();
 
     static ref<WatchPoint> getWatchPointOrCreate(const ipath& path);
-    static ref<WatchPoint> getWatchPoint(const ipath& path);
     static void cleanup();
     static ref<WatchPoint> s_root;
 };
