@@ -13,6 +13,7 @@ DiskFolder::Watch::Watch(weak<DiskFolder> folder, weak<FileSystem::WatchPoint> w
     :   Folder::Watch(folder)
     ,   m_watchPoint(watchPoint)
 {
+    m_watchPoint->addWatch(this);
 }
 
 DiskFolder::Watch::~Watch()
