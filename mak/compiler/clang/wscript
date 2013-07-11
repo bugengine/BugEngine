@@ -153,4 +153,5 @@ def configure(conf):
 	conf.detect_clang()
 	conf.end_msg('done')
 
-
+def build(bld):
+	pass

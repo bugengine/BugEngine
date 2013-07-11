@@ -196,4 +196,3 @@ def plugins(bld):
 @before_method('apply_implib')
 def apply_implib_program(self):
 	self.apply_implib()
-
