@@ -253,3 +253,5 @@ def configure(conf):
 	conf.detect_gcc()
 	conf.end_msg('done')
 
+def build(bld):
+	pass

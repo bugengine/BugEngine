@@ -9,3 +9,8 @@ def configure(conf):
 		if path != 'wscript':
 			conf.recurse(path)
 
+def build(bld):
+	for path in bld.path.listdir():
+		if path != 'wscript':
+			bld.recurse(path)
+
