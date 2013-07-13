@@ -6,7 +6,8 @@ from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
 
 def options(opt):
-	opt.add_option( '--android-sdk',
+	gr = opt.get_option_group('SDK paths and options')
+	gr.add_option( '--android-sdk',
 					action='store',
 					default='',
 					dest='android_sdk',

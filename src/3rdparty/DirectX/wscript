@@ -28,7 +28,8 @@ def options(opt):
 	except:
 		pass
 	dx_sdks.sort(key=lambda x: x[0])
-	opt.add_option( '--directx-sdk',
+	gr = opt.get_option_group('SDK paths and options')
+	gr.add_option( '--directx-sdk',
 				action='store',
 				default=dx_sdks and dx_sdks[-1][1] or '',
 				dest='dx_sdk',
