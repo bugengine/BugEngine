@@ -3,11 +3,17 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
-#include    <win32/file.hh>
+#include    <watchpoint.hh>
+#include    <windows/file.hh>
 
 
 namespace BugEngine
 {
+
+static u64 getTimeStamp(FILETIME time)
+{
+    return u64(time.dwLowDateTime) + (u64(time.dwHighDateTime) << 32);
+}
 
 static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 {
@@ -37,6 +43,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
                 0,
                 NULL);
             be_info("Directory %s could not be created: error code %d (%s)" | path | err | errorMessage);
+            ::LocalFree(errorMessage);
         }
     }
 
@@ -47,6 +54,7 @@ static i_u32 s_diskIndex = i_u32::Zero;
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)
     ,   m_index(s_diskIndex++)
+    ,   m_watch()
 {
     if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
     ipath::Filename pathname = m_path.str();
@@ -70,6 +78,10 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
             NULL);
         be_info("Directory %s could not be opened: (%d) %s" | diskpath | errorCode | errorMessage);
         ::LocalFree(errorMessage);
+    }
+    else
+    {
+        m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
     }
 
     if (scanPolicy != Folder::ScanNone)
@@ -116,7 +128,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     u64 size = data.nFileSizeHigh;
                     size <<= 32;
                     size += data.nFileSizeLow;
-                    m_files.push_back(minitl::make_pair(name, ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size)));
+                    ref<Win32File> newFile = ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size, getTimeStamp(data.ftLastWriteTime));
+                    m_files.push_back(minitl::make_pair(name, newFile));
                 }
             } while (FindNextFile(h, &data));
             FindClose(h);
@@ -174,7 +187,8 @@ weak<File> DiskFolder::createFile(const istring& name)
                     Arena::filesystem(),
                     m_path+ifilename(name),
                     File::Media(File::Media::Disk, m_index, 0),
-                    0);
+                    0,
+                    getTimeStamp(data.ftLastWriteTime));
         for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
         {
             if (it->first == name)
@@ -185,6 +199,68 @@ weak<File> DiskFolder::createFile(const istring& name)
         }
         m_files.push_back(minitl::make_pair(name, result));
         return result;
+    }
+}
+
+void DiskFolder::onChanged()
+{
+    if (m_handle.ptrHandle)
+    {
+        WIN32_FIND_DATA data;
+        ifilename::Filename pathname = (m_path+ifilename("*")).str();
+        HANDLE h = FindFirstFile(pathname.name, &data);
+        if (h != INVALID_HANDLE_VALUE)
+        {
+            do
+            {
+                if (data.cFileName[0] == '.' && data.cFileName[1] == 0)
+                    continue;
+                if (data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0)
+                    continue;
+                istring name = data.cFileName;
+                if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    bool exists = false;
+                    for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+                    {
+                        if (it->first == name)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists)
+                    {
+                        m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), Folder::ScanNone, Folder::CreateNone)));
+                    }
+                }
+                else
+                {
+                    bool exists = false;
+                    for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+                    {
+                        if (it->first == name)
+                        {
+                            exists = true;
+                            u64 size = data.nFileSizeHigh;
+                            size <<= 32;
+                            size += data.nFileSizeLow;
+                            be_checked_cast<Win32File>(it->second)->refresh(size, getTimeStamp(data.ftLastWriteTime));
+                            break;
+                        }
+                    }
+                    if (!exists)
+                    {
+                        u64 size = data.nFileSizeHigh;
+                        size <<= 32;
+                        size += data.nFileSizeLow;
+                        ref<Win32File> newFile = ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size, getTimeStamp(data.ftLastWriteTime));
+                        m_files.push_back(minitl::make_pair(name, newFile));
+                    }
+                }
+            } while (FindNextFile(h, &data));
+            FindClose(h);
+        }
     }
 }
 

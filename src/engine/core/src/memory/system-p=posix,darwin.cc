@@ -39,7 +39,7 @@ byte* SystemAllocator::platformReserve(u32 size)
 
 void SystemAllocator::platformCommit(byte* ptr, u32 begin, u32 end)
 {
-    be_assert((uintptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
+    be_assert((intptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
     be_assert(begin % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | begin | s_pageSize);
     be_assert(end % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | end | s_pageSize);
     int failed = mprotect((char*)ptr + begin + s_cacheAhead, end-begin, PROT_READ|PROT_WRITE);
@@ -49,7 +49,7 @@ void SystemAllocator::platformCommit(byte* ptr, u32 begin, u32 end)
 
 void  SystemAllocator::platformRelease(byte* ptr, u32 begin, u32 end)
 {
-    be_assert((uintptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
+    be_assert((intptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
     be_assert(begin % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | begin | s_pageSize);
     be_assert(end % s_pageSize == 0, "offset %d is not aligned on a page boundary (page size = %d)" | end | s_pageSize);
     int failed = mprotect((char*)ptr + begin + s_cacheAhead, end-begin, PROT_NONE);
@@ -59,7 +59,7 @@ void  SystemAllocator::platformRelease(byte* ptr, u32 begin, u32 end)
 
 void  SystemAllocator::platformFree(byte* ptr, u32 size)
 {
-    be_assert((uintptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
+    be_assert((intptr_t)ptr % s_pageSize == 0, "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | s_pageSize);
     be_assert(size % s_pageSize == 0, "size %p is not aligned on a page boundary (page size = %d)" | size | s_pageSize);
     int failed;
 #if !BE_ENABLE_MEMORY_DEBUGGING

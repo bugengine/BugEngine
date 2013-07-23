@@ -212,7 +212,7 @@ void Package::createObjects(weak<Resource::ResourceManager> manager)
 
 void Package::deleteObjects(weak<Resource::ResourceManager> manager)
 {
-    for(size_t i =m_values.size(); i > 0; --i)
+    for(size_t i = m_values.size(); i > 0; --i)
     {
         if (m_values.back().isA(be_typeid<const Resource::Description>::type()))
         {
@@ -223,14 +223,14 @@ void Package::deleteObjects(weak<Resource::ResourceManager> manager)
 }
 
 
-void Package::diffFromPackage(weak<Package> previous, weak<Resource::ResourceManager> manager)
+void Package::diffFromPackage(weak<Package> previous, weak<Resource::ResourceManager> /*manager*/)
 {
     minitl::swap(previous->m_values, m_values);
-    for(size_t i = 0; i < m_nodes.size(); ++i)
-    {
-        be_forceuse(manager);
-        be_forceuse(previous);
-    }
+    //for(size_t i = 0; i < m_nodes.size(); ++i)
+    //{
+    //    be_forceuse(manager);
+    //    be_forceuse(previous);
+    //}
 }
 
 }}}

@@ -1,24 +1,24 @@
+
 /* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
  see LICENSE for detail */
 
 #include    <filesystem/stdafx.h>
-#include    <filesystem/diskfolder.script.hh>
-#include    <filesystemwatch.hh>
+#include    <filesystem/folder.script.hh>
 
 
 namespace BugEngine
 {
 
-DiskFolder::Watch::Watch(weak<DiskFolder> folder)
+Folder::Watch::Watch(weak<Folder> folder)
     :   m_folder(folder)
 {
 }
 
-DiskFolder::Watch::~Watch()
+Folder::Watch::~Watch()
 {
 }
 
-void DiskFolder::Watch::signal()
+void Folder::Watch::signal()
 {
     m_folder->onChanged();
 }

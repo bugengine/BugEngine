@@ -144,7 +144,8 @@ def set_macosx_clang_options(self, flags):
 	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 def options(opt):
-	opt.add_option( '--macosx-sdk',
+	gr = opt.get_option_group('SDK paths and options')
+	gr.add_option( '--macosx-sdk',
 					action='store',
 					default='',
 					dest='macosx_sdk',

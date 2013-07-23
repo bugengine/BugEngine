@@ -61,4 +61,6 @@ def configure(conf):
 	conf.detect_suncc()
 	conf.end_msg('done')
 
+def build(bld):
+	pass
 

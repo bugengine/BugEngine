@@ -1,6 +1,9 @@
+from waflib.TaskGen import feature, before_method, after_method
 
 def options(opt):
-	opt.load('msvc')
+	# The options for MSVC are not used, we scan the results 
+	#opt.load('msvc')
+	pass
 
 def configure(conf):
 	conf.start_msg('Looking for msvc compilers')
@@ -10,3 +13,14 @@ def configure(conf):
 		pass
 	conf.end_msg('done')
 
+def build(bld):
+	pass
+
+@feature('c', 'cxx')
+@after_method('process_source')
+def apply_pdb_flag(self):
+	if self.env.CC_NAME == 'msvc':
+		for task in getattr(self, 'compiled_tasks', []):
+			if task:
+				task.env.append_unique('CFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
+				task.env.append_unique('CXXFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
