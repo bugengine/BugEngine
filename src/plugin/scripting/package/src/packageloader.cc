@@ -32,6 +32,15 @@ PackageLoader::~PackageLoader()
 {
 }
 
+void PackageLoader::unload(Resource::Resource& handle)
+{
+    {
+        weak<PackageBuilder::Nodes::Package> package = handle.getRefHandle<PackageBuilder::Nodes::Package>();
+        package->deleteObjects(m_manager);
+    }
+    handle.clearRefHandle();
+}
+
 void PackageLoader::runBuffer(weak<const Package> /*script*/, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer)
 {
     MD5 md5 = digest(buffer);
@@ -51,12 +60,6 @@ void PackageLoader::reloadBuffer(weak<const Package> /*script*/, Resource::Resou
     oldPackage = weak<PackageBuilder::Nodes::Package>();
     resource.clearRefHandle();
     resource.setRefHandle(newPackage);
-}
-
-void PackageLoader::unloadScript(Resource::Resource& resource)
-{
-    resource.getRefHandle<PackageBuilder::Nodes::Package>()->deleteObjects(m_manager);
-    resource.clearRefHandle();
 }
 
 }}

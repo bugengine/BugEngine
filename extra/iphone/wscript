@@ -7,7 +7,8 @@ from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
 
 def options(opt):
-	opt.add_option( '--iphone-sdk',
+	gr = opt.get_option_group('SDK paths and options')
+	gr.add_option( '--iphone-sdk',
 					action='store',
 					default='',
 					dest='iphone_sdk',

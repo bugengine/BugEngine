@@ -19,6 +19,18 @@ protected:
     minitl::vector< minitl::pair<istring, ref<Folder> > >   m_folders;
     minitl::vector< minitl::pair<istring, ref<Folder> > >   m_mounts;
     bool                                                    m_upToDate;
+public:
+    class Watch : public minitl::refcountable
+    {
+    private:
+        weak<Folder>  m_folder;
+    public:
+        Watch(weak<Folder> folder);
+        ~Watch();
+
+        void signal();
+    };
+    friend class Watch;
 protected:
     Folder();
     ~Folder();
@@ -37,6 +49,7 @@ published:
     };
 protected:
     virtual void    doRefresh(ScanPolicy scanPolicy) = 0;
+    virtual void    onChanged() = 0;
     void            refresh(ScanPolicy scanPolicy);
 published:
     weak<File>      openFile(istring name);

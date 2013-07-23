@@ -59,6 +59,16 @@ void ResourceManager::attach(raw<const RTTI::Class> classinfo, weak<ILoader> loa
 
 void ResourceManager::detach(raw<const RTTI::Class> classinfo, weak<const ILoader> loader)
 {
+    for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    {
+        if (it->loader == loader)
+        {
+            it->outdated = true;
+            it->file = weak<const File>();
+            it->resource = weak<const Description>();
+            it->loader = weak<ILoader>();
+        }
+    }
     LoaderInfo& info = getLoaderInfo(classinfo);
     for (minitl::vector< weak<ILoader> >::iterator it = info.loaders.begin(); it != info.loaders.end();)
     {
@@ -92,12 +102,12 @@ void ResourceManager::load(raw<const RTTI::Class> classinfo, weak<const Descript
 
 void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Description> description)
 {
+    description->unhook();
     LoaderInfo& info = getLoaderInfo(classinfo);
     for (minitl::vector< weak<ILoader> >::const_iterator it = info.loaders.begin(); it != info.loaders.end(); ++it)
     {
         description->unload(*it);
     }
-    description->unhook();
 
     for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {

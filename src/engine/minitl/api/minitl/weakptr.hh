@@ -111,13 +111,20 @@ struct hash< weak<T> >
 {
     u32 operator()(weak<T> t)
     {
-        return u32(uintptr_t(t.operator->()));
+        return u32(intptr_t(t.operator->()));
     }
     bool operator()(weak<T> t1, weak<T> t2)
     {
         return t1 == t2;
     }
 };
+
+template< u16 SIZE > class format;
+template< typename T, u16 SIZE >
+const format<SIZE>& operator|(const format<SIZE>& format, weak<T> t)
+{
+    return format | t.operator->();
+}
 
 }
 

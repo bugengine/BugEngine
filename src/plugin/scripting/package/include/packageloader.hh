@@ -25,9 +25,9 @@ public:
     PackageLoader(const Plugin::Context& context);
     ~PackageLoader();
 private:
+    virtual void unload(Resource::Resource& handle) override;
     virtual void runBuffer(weak<const Package> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
     virtual void reloadBuffer(weak<const Package> script, Resource::Resource& resource, const minitl::Allocator::Block<u8>& buffer) override;
-    virtual void unloadScript(Resource::Resource& handle) override;
 };
 
 }}
