@@ -2,6 +2,10 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, extension, before_method, after_method
 import os
 
+def safe_name(name):
+	name = name.replace('-', '_')
+	name = name.replace('+', 'x')
+	return name
 
 def options(opt):
 	gr = opt.get_option_group('build and install options')
@@ -28,8 +32,15 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 
 	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', 'm', 'mm', 'so', 'dll', 'plist', 'png', 'pkg', 'lua']
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
-	sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
-	sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
+	try:
+		sources = source_node.ant_glob(['%s/**/*.%s'%(s,ext) for s in ['src', 'bin', 'data'] for ext in extensions])
+	except OSError:
+		sources = []
+	try:
+		sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
+	except OSError:
+		pass
+
 	api = [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
 	include = [i for i in [source_node.make_node('include')] + [source_node.make_node('include.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
 	lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
@@ -98,7 +109,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 		use = depends,
 		features = features,
 		extra_use = extra_features,
-		defines = ['building_%s' % name.split('.')[-1], 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
+		defines = ['building_%s' % safe_name(name.split('.')[-1]), 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
 		includes = api+include+[bld.srcnode],
 		libs = [],
@@ -111,7 +122,10 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 
 @conf
 def external(bld, name):
-	bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/')))
+	if os.path.isfile(os.path.join(bld.path.abspath(), name.replace('.', '/'), 'wscript')):
+		bld.recurse(os.path.join(name.replace('.', '/')))
+	else:
+		bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/')))
 	return name
 
 @conf

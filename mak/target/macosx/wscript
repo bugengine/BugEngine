@@ -61,6 +61,40 @@ def set_macosx_options(self, all_sdks):
 	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
 
 @conf
+def set_macosx_icc_options(self, flags, arch):
+	v = self.env
+	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+	v.LINKFLAGS = flags + []
+	v.CXXFLAGS_cxxshlib = []
+
+
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
+	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+
+
+
+@conf
 def set_macosx_gcc_options(self, flags, arch):
 	v = self.env
 	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
@@ -165,6 +199,37 @@ def configure(conf):
 		'ppc64' : 'ppc64',
 		'powerpc64' : 'ppc64'
 	}
+	for name, bindir, icc, ixx, version, target, arch, options in conf.env.ICC_TARGETS:
+		position = target.find('darwin')
+		if position != -1 and arch in supported_architectures:
+			os = 'macosx'
+			version = target[position+6:].split('-')[0] + '_' + version
+			real_arch = supported_architectures[arch]
+			toolchain = '%s-%s-%s-%s'%(os, real_arch, name, version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_icc(bindir, icc, ixx, version, target, arch, options)
+					conf.find_program('dsymutil')
+					conf.find_program('strip')
+					conf.set_macosx_icc_options(options, real_arch)
+					conf.set_macosx_options(False)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
+
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:

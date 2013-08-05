@@ -29,33 +29,66 @@
 #include <stdlib.h>
 #include <new>
 
-// FIXME: need to handle exceptions
-void*
-operator new(std::size_t size) throw (/*std::bad_alloc*/)
-{
-  void* ptr = malloc(size);
-#if 0
-  if (ptr == NULL)
-    throw std::bad_alloc();
-#endif
-  return ptr;
+using std::new_handler;
+namespace {
+  new_handler cur_handler;
 }
 
-void*
-operator new[](std::size_t size) throw(/*std::bad_alloc*/)
-{
+namespace std {
+
+#if !defined(GABIXX_LIBCXX)
+  const nothrow_t nothrow = {};
+#endif  // !defined(GABIXX_LIBCXX)
+
+  bad_alloc::bad_alloc() throw() {
+  }
+
+  bad_alloc::~bad_alloc() throw() {
+  }
+
+  const char* bad_alloc::what() const throw() {
+    return "std::bad_alloc";
+  }
+
+  new_handler set_new_handler(new_handler next_handler) throw() {
+    new_handler old_handler = cur_handler;
+    cur_handler = next_handler;
+    return old_handler;
+  }
+
+} // namespace std
+
+__attribute__ ((weak))
+void* operator new(std::size_t size) throw(std::bad_alloc) {
+  void* space;
+  do {
+    space = malloc(size);
+    if (space) {
+      return space;
+    }
+    new_handler handler = cur_handler;
+    if (handler == NULL) {
+      throw std::bad_alloc();
+    }
+    handler();
+  } while (space == 0);
+}
+
+__attribute__ ((weak))
+void* operator new(std::size_t size, const std::nothrow_t& no) throw() {
+  try {
     return ::operator new(size);
+  } catch (const std::bad_alloc&) {
+    return 0;
+  }
 }
 
-
-void*
-operator new(std::size_t size, const std::nothrow_t&) throw()
-{
-    return malloc(size);
+__attribute__ ((weak))
+void* operator new[](std::size_t size) throw(std::bad_alloc) {
+  return ::operator new(size);
 }
 
-void*
-operator new[](std::size_t size, const std::nothrow_t& nt) throw()
-{
-    return ::operator new(size, nt);
+__attribute__ ((weak))
+void* operator new[](std::size_t size, const std::nothrow_t& no) throw() {
+  return ::operator new(size, no);
 }

@@ -7,6 +7,8 @@
 
 #define BE_PLATFORM_NAME       Android
 #define BE_PLATFORM_ANDROID    1
+#define BE_PLATFORM_LINUX      1
+#define BE_PLATFORM_POSIX      1
 
 #include <malloc.h>
 #define malloca     alloca
