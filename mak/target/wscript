@@ -39,19 +39,30 @@ def options(opt):
 	for target in opt.path.listdir():
 		if target != 'wscript':
 			opt.recurse(target)
+	opt.add_option( '--platforms',
+					action='append',
+					default=[],
+					dest='platforms',
+					help='Paths of the different XCode SDKs')
+
+
 
 def configure(conf):
 	conf.env.ALL_VARIANTS = ['debug', 'profile', 'final']
+	from waflib import Options
+	platforms = Options.options.platforms
 	for extra in conf.bugenginenode.make_node('extra').listdir():
-		if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
-			pprint('BLUE', '_'*40)
-			pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
-			conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
+		if not platforms or extra in platforms:
+			if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
+				pprint('BLUE', '_'*40)
+				pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
+				conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
 	for target in conf.path.listdir():
-		if target != 'wscript':
-			pprint('BLUE', '_'*40)
-			pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
-			conf.recurse(target)
+		if not platforms or extra in platforms:
+			if target != 'wscript':
+				pprint('BLUE', '_'*40)
+				pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
+				conf.recurse(target)
 	conf.env.VALID_PLATFORMS = conf.env.ALL_PLATFORMS
 	conf.env.VALID_RCHITECTURES = conf.env.ALL_ARCHITECTURES
 	conf.env.store('.build/be_toolchains.py')

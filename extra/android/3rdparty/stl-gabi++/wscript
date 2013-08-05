@@ -1,6 +1,3 @@
-import mak
-from mak import module
-import os
 
 def options(opt):
 	pass
@@ -9,4 +6,4 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.m['stl-gabi++'] = module.static_library( 'stl-gabi++', [], '3rdparty', platforms=['android'])
+	stdcpp = bld.static_library('3rdparty.stl-gabi++', warnings=False)

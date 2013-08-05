@@ -34,6 +34,11 @@
 //
 #ifndef __GABIXX_TYPEINFO__
 #define __GABIXX_TYPEINFO__
+
+#if  !defined(GABIXX_LIBCXX)
+
+#include <exception>
+
 namespace std
 {
   // Defintion of type_info based on example in C++ ABI section 2.9.3
@@ -55,8 +60,10 @@ namespace std
     before(const type_info &ti) const;
 
     // Return name of type.
-    const char*
-    name() const { return __type_name; }
+    const char* name() const {
+      // Compatible with GNU
+      return (__type_name[0] == '*') ? __type_name + 1 : __type_name;
+    }
 
   private:
     // Assignment of type_info is not allowed.
@@ -69,6 +76,23 @@ namespace std
     const char *__type_name;
   };
 
+
+  class bad_cast : public exception {
+  public:
+    bad_cast() throw();
+    virtual ~bad_cast() throw();
+    virtual const char* what() const throw();
+  };
+
+  class bad_typeid : public exception {
+  public:
+    bad_typeid() throw();
+    virtual ~bad_typeid() throw();
+    virtual const char* what() const throw();
+  };
+
 } // namespace std
+
+#endif  // !defined(GABIXX_LIBCXX)
 
 #endif // _GABIXX_TYPEINFO_
