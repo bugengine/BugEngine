@@ -68,7 +68,9 @@ void* operator new(std::size_t size) throw(std::bad_alloc) {
     }
     new_handler handler = cur_handler;
     if (handler == NULL) {
+#if __EXCEPTIONS
       throw std::bad_alloc();
+#endif
     }
     handler();
   } while (space == 0);
@@ -76,11 +78,15 @@ void* operator new(std::size_t size) throw(std::bad_alloc) {
 
 __attribute__ ((weak))
 void* operator new(std::size_t size, const std::nothrow_t& no) throw() {
+#if __EXCEPTIONS
   try {
+#endif
     return ::operator new(size);
+#if __EXCEPTIONS
   } catch (const std::bad_alloc&) {
     return 0;
   }
+#endif
 }
 
 __attribute__ ((weak))
