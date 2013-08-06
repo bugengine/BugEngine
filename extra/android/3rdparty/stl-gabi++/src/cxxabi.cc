@@ -166,11 +166,15 @@ namespace __cxxabiv1 {
     __cxa_exception *exc = static_cast<__cxa_exception*>(thrown_exception)-1;
 
     if (exc->exceptionDestructor) {
+#if __EXCEPTIONS
       try {
+#endif
         exc->exceptionDestructor(thrown_exception);
+#if __EXCEPTIONS
       } catch (...) {
         fatalError("Exception destructor has thrown!");
       }
+#endif
     }
 
     free(exc);

@@ -65,24 +65,31 @@ def find_android_sdk(path, arch):
 
 @conf
 def set_android_gcc_options(conf, options, arch):
-	conf.env.append_unique('CFLAGS', ['-fPIC'])
-	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+	conf.env.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
 	conf.env.append_unique('LINKFLAGS', [])
-	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('LINKFLAGS_cprogram', ['-shared'])
+	conf.env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
+	conf.env.cprogram_PATTERN = 'lib%s.so'
+	conf.env.cxxprogram_PATTERN = 'lib%s.so'
 	conf.env.CFLAGS_cxxshlib = []
 	conf.env.CXXFLAGS_cxxshlib = []
 
+	if arch.startswith('arm'):
+		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+
 @conf
-def set_android_clang_options(conf, flags):
+def set_android_clang_options(conf, flag, archs):
 	conf.env.append_unique('CFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', flags+[])
-	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
 	conf.env.CFLAGS_cxxshlib = []
 	conf.env.CXXFLAGS_cxxshlib = []
 
+	if arch.startswith('arm'):
+		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 @conf
 def set_android_options(conf, arch):
 	conf.env.VALID_PLATFORMS = ['android', 'posix']
@@ -119,7 +126,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_clang(directory)
-					conf.set_android_clang_options(flags)
+					conf.set_android_clang_options(flags, real_arch)
 					conf.set_android_options(real_arch)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())

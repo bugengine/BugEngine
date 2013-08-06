@@ -119,12 +119,16 @@ namespace std {
   }
 
   void terminate() {
+#if __EXCEPTIONS
     try {
+#endif
       current_terminate_fn();
       abort();
+#if __EXCEPTIONS
     } catch (...) {
       abort();
     }
+#endif
   }
 
   unexpected_handler get_unexpected() {
