@@ -1,0 +1,13 @@
+
+def options(opt):
+	pass
+
+def setup(conf):
+	pass
+
+def build(bld):
+	if bld.env.VARIANT == 'debug':
+		debug = ['Py_DEBUG=1']
+	else:
+		debug = []
+	bld.shared_library('3rdparty.python3', bld.platforms + ['3rdparty.zlib'], warnings=False, use_master=False).defines += ['Py_NO_ENABLE_SHARED=1', 'Py_BUILD_CORE=1', 'VERSION=L"3.3"', 'PREFIX=L""'] + debug
