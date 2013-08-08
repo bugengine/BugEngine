@@ -43,7 +43,7 @@ def options(opt):
 					action='append',
 					default=[],
 					dest='platforms',
-					help='Paths of the different XCode SDKs')
+					help='List of platform to configure for')
 
 
 

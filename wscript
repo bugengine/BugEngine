@@ -43,6 +43,7 @@ def build(bld):
 
 	bld.external('3rdparty.lua')
 	bld.external('3rdparty.squirrel')
+	bld.external('3rdparty.python3')
 
 	bld.plugin('plugin.debug.runtime',			['engine.bugengine'])
 	bld.plugin('plugin.debug.assert',			['engine.bugengine', 'plugin.debug.runtime'])
