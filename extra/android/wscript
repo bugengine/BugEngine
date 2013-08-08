@@ -80,7 +80,7 @@ def set_android_gcc_options(conf, options, arch):
 		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 
 @conf
-def set_android_clang_options(conf, flag, archs):
+def set_android_clang_options(conf, flags, arch):
 	conf.env.append_unique('CFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', flags+[])
