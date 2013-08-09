@@ -139,7 +139,7 @@ class XCodeNode:
 			result = result + "\t\t}"
 			return result
 		elif isinstance(value, str):
-			return "\"%s\"" % value
+			return "\"%s\"" % value.replace('"', '\\"')
 		elif isinstance(value, list):
 			result = "(\n"
 			for i in value:
@@ -250,19 +250,24 @@ class PBXGroup(XCodeNode):
 
 	def add(self, root_node, source_node):
 		result = []
-		for f in source_node.listdir():
-			fullname = os.path.join(source_node.abspath(), f)
-			if os.path.isdir(fullname):
-				try:
-					g = self[f]
-				except KeyError:
-					g = self.add_group(PBXGroup(f))
-				result += g.add(root_node, source_node.make_node(f))
-			else:
-				f = PBXFileReference(f, os.path.join(source_node.path_from(root_node), f))
-				self.children.append(f)
-				result.append(f)
-		self.sort()
+		try:
+			l = source_node.listdir()
+		except OSError:
+			pass
+		else:
+			for f in l:
+				fullname = os.path.join(source_node.abspath(), f)
+				if os.path.isdir(fullname):
+					try:
+						g = self[f]
+					except KeyError:
+						g = self.add_group(PBXGroup(f))
+					result += g.add(root_node, source_node.make_node(f))
+				else:
+					f = PBXFileReference(f, os.path.join(source_node.path_from(root_node), f))
+					self.children.append(f)
+					result.append(f)
+			self.sort()
 		return result
 
 	def sort(self):

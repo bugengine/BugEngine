@@ -204,7 +204,7 @@ class VCxproj:
 				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
 				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
-							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir']:
+							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
 					self.vcxproj._add(properties, var, env[var.upper()])
 				command = getattr(task_gen, 'command', '')
 				if command:
@@ -267,6 +267,7 @@ class vs2003(Build.BuildContext):
 		self.env.VARIANT = '$(Variant)'
 		self.env.TOOLCHAIN = '$(Toolchain)'
 		self.env.PREFIX = '$(Prefix)'
+		self.env.DEPLOY_ROOTDIR = '$(Deploy_RootDir)'
 		self.env.DEPLOY_BINDIR = '$(Deploy_BinDir)'
 		self.env.DEPLOY_RUNBINDIR = '$(Deploy_RunBinDir)'
 		self.env.DEPLOY_LIBDIR = '$(Deploy_LibDir)'
