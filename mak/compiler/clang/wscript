@@ -1,4 +1,4 @@
-from waflib import Utils
+from waflib import Utils, Logs
 from waflib.Configure import conf
 import os, sys
 
@@ -14,7 +14,7 @@ all_clang_archs = [
 	('mipsel64', ['mips64el', 'mipsel64']),
 ]
 def expand_clang_archs(arch):
-	if arch in ('x86', 'i686', 'i386'):
+	if arch in ('x86', 'i686', 'i586', 'i486', 'i386'):
 		return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
 	elif arch in ('amd64', 'x64', 'x86_64'):
 		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
