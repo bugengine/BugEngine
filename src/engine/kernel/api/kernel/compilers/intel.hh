@@ -73,8 +73,13 @@ typedef u8                      byte;
 # pragma warning(disable:4251)
 # pragma warning(disable:4355)   // this used in base member initialization list
 # pragma warning(disable:4290)   // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-# pragma warning(disable:4481)   // use of "override" extension
 # pragma warning(disable:4127)
+
+#if _MSC_VER >= 1400
+# pragma warning(disable:4481)   // use of "override" extension
+#else
+# define override
+#endif
 
 # ifndef _CRT_SECURE_NO_WARNINGS
 #  define _CRT_SECURE_NO_WARNINGS 1
