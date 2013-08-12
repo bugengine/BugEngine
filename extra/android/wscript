@@ -14,6 +14,12 @@ def options(opt):
 					dest='android_sdk',
 					help='Version of the Android SDK to target')
 
+def get_android_arch(arch):
+	archs = {
+		'mipsel': 'mips',
+	}
+	return archs.get(arch, arch)
+
 def find_android_gcc_toolchain(path, arch):
 	try:
 		path,bin = os.path.split(path)
@@ -42,6 +48,7 @@ def find_android_gcc_toolchain(path, arch):
 
 
 def find_android_sdk(path, arch):
+	arch = get_android_arch(arch)
 	try:
 		path,_ = os.path.split(path)
 		while _:
