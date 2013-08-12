@@ -6,7 +6,7 @@
 /*****************************************************************************/
 #include <kernel/compilers.hh>
 
-#if defined(BE_COMPILER_MSVC)
+#if defined(BE_COMPILER_MSVC) || (defined(BE_COMPILER_INTEL) && defined(_WIN32))
 # if defined(_X86)
 #  include <kernel/msvc/x86/interlocked.inl>
 # elif defined(_AMD64)
