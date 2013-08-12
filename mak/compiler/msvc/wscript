@@ -6,6 +6,7 @@ def options(opt):
 	from waflib.Tools import msvc
 
 def configure(conf):
+	from waflib.Tools import msvc
 	conf.start_msg('Looking for msvc compilers')
 	try:
 		conf.get_msvc_versions()

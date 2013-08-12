@@ -7,7 +7,7 @@ def setup(conf):
 	if 'darwin' in conf.env.VALID_PLATFORMS:
 		conf.check_framework('OpenAL', var='ALFramework')
 	else:
-		conf.check_lib('OpenAL', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])
+		conf.check_lib('openal', var='OpenAL', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])
 
 def build(bld):
 	if bld.env.ALFramework or  bld.env.OpenAL or bld.env.PROJECTS:

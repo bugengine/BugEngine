@@ -30,11 +30,11 @@ def set_linux_suncc_options(conf, arch):
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
 		v.append_unique('CFLAGS', ['-m32', '-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
 		v.append_unique('CXXFLAGS', ['-m32', os.path.join(conf.bugenginenode.abspath(), 'mak/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
-		v.append_unique('LINKFLAGS', ['-m32', '-L/usr/lib/i386-linux-gnu'])
+		v.append_unique('LINKFLAGS', ['-m32', '-L/lib/i386-linux-gnu', '-L/usr/lib/i386-linux-gnu'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
 		v.append_unique('CFLAGS', ['-m64', '-I/usr/include/x86_64-linux-gnu'])
 		v.append_unique('CXXFLAGS', ['-m64', os.path.join(conf.bugenginenode.abspath(), 'mak/suncc/interlocked-a=amd64.il'), '-I/usr/include/x86_64-linux-gnu'])
-		v.append_unique('LINKFLAGS', ['-m64', '-L/usr/lib/x86_64-linux-gnu'])
+		v.append_unique('LINKFLAGS', ['-m64', '-L/lib/x86_64-linux-gnu', '-L/usr/lib/x86_64-linux-gnu'])
 	v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4'])
 	v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=%all'])
@@ -63,7 +63,7 @@ def set_linux_suncc_options(conf, arch):
 	v['LINKFLAGS_final'] = ['-g']
 
 @conf
-def set_linux_icc_options(self, flags, version):
+def set_linux_icc_options(self, flags, version, arch):
 	v = self.env
 	version = float(version)
 	if version >= 11:
@@ -72,8 +72,10 @@ def set_linux_icc_options(self, flags, version):
 	else:
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
-	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E']
+	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E', '-static-libgcc', '-static-intel']
 	v.CXXFLAGS_cxxshlib = []
+	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
+		v.append_unique('LINKFLAGS', ['-L/lib/i386-linux-gnu', '-L/usr/lib/i386-linux-gnu'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -208,7 +210,7 @@ def configure(conf):
 				conf.setenv(toolchain, env)
 				try:
 					conf.load_icc(bindir, gcc, gxx, version, target, arch, options)
-					conf.set_linux_icc_options(options, version)
+					conf.set_linux_icc_options(options, version, arch)
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch, name, version, arch)

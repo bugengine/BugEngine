@@ -4,6 +4,7 @@ import os
 from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Configure import conf
 
 def options(opt):
 	gr = opt.get_option_group('SDK paths and options')
@@ -13,70 +14,171 @@ def options(opt):
 					dest='android_sdk',
 					help='Version of the Android SDK to target')
 
-def find_android_sdk(gcc):
+def get_android_arch(arch):
+	archs = {
+		'mipsel': 'mips',
+	}
+	return archs.get(arch, arch)
+
+def find_android_gcc_toolchain(path, arch):
 	try:
-		path = gcc[0]
-		for i in range(1,7):
-			path = os.path.split(path)[0]
-		path = os.path.join(path, 'platforms')
-		sdks = sorted(os.listdir(path), key = lambda x: int(x.split('-')[1]))
-		sdk = sdks[-1]
-		from waflib import Options
-		favorite_sdk = Options.options.android_sdk
-		if favorite_sdk:
-			if 'android-%s'%favorite_sdk in sdks:
-				sdk = 'android-%s'%favorite_sdk
-			else:
-				warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
-		return os.path.join(path, sdk)
+		path,bin = os.path.split(path)
+		path,host = os.path.split(path)
+		path,prebuilt = os.path.split(path)
+		path,toolchain = os.path.split(path)
+		path,_ = os.path.split(path)
+		while _:
+			toolchain_dir = os.path.join(path, 'toolchains')
+			if os.path.isdir(toolchain_dir):
+				all_toolchains = os.listdir(toolchain_dir)
+				valid_toolchains = [t for t in all_toolchains if t.startswith('%s-'%arch)]
+				valid_gcc_toolchains = []
+				for t in valid_toolchains:
+					if os.path.isdir(os.path.join(toolchain_dir, t, 'prebuilt', host)):
+						for bindir in os.listdir(os.path.join(toolchain_dir, t, 'prebuilt', host)):
+							if os.path.isdir(os.path.join(toolchain_dir, t, 'prebuilt', host, bindir, 'bin')):
+								valid_gcc_toolchains.append((t, bindir))
+				if valid_gcc_toolchains:
+					selected_toolchain, bindir = valid_gcc_toolchains[-1]
+					return os.path.join(toolchain_dir, selected_toolchain, 'prebuilt', host), bindir
+			path,_ = os.path.split(path)
+	except Exception as e:
+		print(e)
+	return None,None
+
+
+def find_android_sdk(path, arch):
+	arch = get_android_arch(arch)
+	try:
+		path,_ = os.path.split(path)
+		while _:
+			platforms = os.path.join(path, 'platforms')
+			if os.path.isdir(platforms):
+				all_sdks = [p for p in os.listdir(platforms) if os.path.isdir(os.path.join(platforms, p, 'arch-%s'%arch))]
+				if all_sdks:
+					sdks = sorted(all_sdks, key = lambda x: int(x.split('-')[1]))
+					sdk = sdks[-1]
+					from waflib import Options
+					favorite_sdk = Options.options.android_sdk
+					if favorite_sdk:
+						if 'android-%s'%favorite_sdk in sdks:
+							sdk = 'android-%s'%favorite_sdk
+						else:
+							warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
+					return os.path.join(platforms, sdk, 'arch-%s'%arch), sdk.split('-')[1]
+			path,_ = os.path.split(path)
 	except Exception as e:
 		print(e)
 
-
-def add_android_gcc_flags_to_env(conf):
-	conf.env.append_unique('CFLAGS', ['-fPIC'])
-	conf.env.append_unique('CXXFLAGS', ['-fPIC'])
+@conf
+def set_android_gcc_options(conf, options, arch):
+	conf.env.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
+	conf.env.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
 	conf.env.append_unique('LINKFLAGS', [])
-	conf.env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-	conf.env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+	conf.env.append_unique('LINKFLAGS_cprogram', ['-shared'])
+	conf.env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
+	conf.env.cprogram_PATTERN = 'lib%s.so'
+	conf.env.cxxprogram_PATTERN = 'lib%s.so'
+	conf.env.CFLAGS_cxxshlib = []
+	conf.env.CXXFLAGS_cxxshlib = []
 
-def add_android_flags_to_env(conf, variant, arch):
-	conf.env['PLATFORM'] = mak.allplatforms['android']
+	if arch.startswith('arm'):
+		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 
-	if arch == 'arm':
-		conf.env.append_unique('CFLAGS', ['-mthumb', '-march=armv7'])
-		conf.env.append_unique('CXXFLAGS', ['-mthumb', '-march=armv7'])
-		conf.env.append_unique('LINKFLAGS', ['-mthumb', '-march=armv7'])
+@conf
+def set_android_clang_options(conf, flags, arch):
+	conf.env.append_unique('CFLAGS', flags+['-fPIC'])
+	conf.env.append_unique('CXXFLAGS', flags+['-fPIC'])
+	conf.env.append_unique('LINKFLAGS', flags+[])
+	conf.env.CFLAGS_cxxshlib = []
+	conf.env.CXXFLAGS_cxxshlib = []
 
-	sdk_path = find_android_sdk(conf.env.CC)
-	sdk_path = os.path.join(sdk_path, 'arch-%s'%arch)
+	if arch.startswith('arm'):
+		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+@conf
+def set_android_options(conf, arch):
+	conf.env.VALID_PLATFORMS = ['android', 'posix']
+	try:
+		sdk, version = find_android_sdk(conf.env.CC[0], arch)
+		conf.env.ANDROID_SDK = version
+	except Exception as e:
+		raise Errors.WafError(str(e))
+	conf.env.DEPLOY_ROOTDIR = ''
+	conf.env.DEPLOY_BINDIR = 'bin'
+	conf.env.DEPLOY_RUNBINDIR = 'bin'
+	conf.env.DEPLOY_LIBDIR = 'lib'
+	conf.env.DEPLOY_INCLUDEDIR = 'include'
+	conf.env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
+	conf.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
+	conf.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
 
-	conf.env.append_unique('CFLAGS', ['-std=c99', '--sysroot=%s'%sdk_path])
-	conf.env.append_unique('CXXFLAGS', ['--sysroot=%s'%sdk_path, '-I%s'%'../../../extra/android/3rdparty/stl-gabi++/api'])
-	conf.env.append_unique('LINKFLAGS', ['--sysroot=%s'%sdk_path])
-	conf.env['library_PATTERN'] = '%s.a'
-	conf.env['shlib_PATTERN']   = '%s.so'
-	conf.env['program_PATTERN'] = '%s'
-
-	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_android', 'ANDROID', '_ANDROID', '_ANDROID_', '__ANDROID__'])
-	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', variant))
-	conf.env['DEPLOY']			= { 'prefix':	getattr(Context.g_module, 'APPNAME', 'noname'),
-									'bin':		'',
-									'etc':		'',
-									'runbin':	'',
-									'api':		'include',
-									'lib':		'lib',
-									'data':		os.path.join('share', 'bugengine'),
-									'plugin':	os.path.join('share', 'bugengine', 'plugins'),
-									'kernel':	os.path.join('share', 'bugengine', 'kernels')}
-	conf.env['KERNELS'] = [conf.env.ENVNAME]
-
+	conf.env.append_unique('CFLAGS', ['--sysroot', sdk])
+	conf.env.append_unique('CXXFLAGS', ['--sysroot', sdk])
+	conf.env.append_unique('LINKFLAGS', ['--sysroot', sdk])
 
 def configure(conf):
-	pass
+	seen = set([])
+	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		real_arch, flags = arch
+		gcc, triple = find_android_gcc_toolchain(directory, real_arch)
+		if gcc:
+			flags = ['-gcc-toolchain', gcc, '-target', triple]
+			os = 'android'
+			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_clang(directory)
+					conf.set_android_clang_options(flags, real_arch)
+					conf.set_android_options(real_arch)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
+
+	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+		position = target.find('android')
+		if position != -1:
+			os = 'android'
+			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			if toolchain not in seen:
+				seen.add(toolchain)
+				env = conf.env.derive()
+				conf.setenv(toolchain, env)
+				try:
+					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
+					conf.set_android_gcc_options(options, arch)
+					conf.set_android_options(arch)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, arch, name, version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch)
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+				except Exception as e:
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
+					raise
+
 
 def build(bld):
-	pass
+	bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
 
 def plugins(bld):
 	pass
