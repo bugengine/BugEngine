@@ -77,8 +77,10 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 		super(ReconfigurationContext, self).__init__(**kw)
 
 	def execute(self):
+		opt = Options.options
 		self.restore_options()
 		super(ReconfigurationContext, self).execute()
+		Options.options = opt
 
 	def restore_options(self):
 		self.init_dirs()
@@ -107,8 +109,11 @@ def autoreconfigure(execute_method):
 		else:
 			h = 0
 			for f in env['files']:
-				h = hash((h, Utils.readf(f, 'rb')))
-			do_config = h != env.hash
+				try:
+					h = hash((h, Utils.readf(f, 'rb')))
+				except IOError:
+					do_config = True
+			do_config = do_config or (h != env.hash)
 
 		if do_config:
 			Logs.warn('wscrip files have changed; reconfiguring the project')
