@@ -69,7 +69,7 @@ def find_clang_archs(self, clang):
 				try:
 					p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 					p.stdin.write('\n'.encode())
-					out = p.communicate()[0]
+					out,err = p.communicate()
 				except Exception as e:
 					print(e)
 					continue

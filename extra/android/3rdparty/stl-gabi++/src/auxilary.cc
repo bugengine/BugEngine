@@ -1,4 +1,4 @@
-// Copyright (C) 2011 The Android Open Source Project
+// Copyright (C) 2012 The Android Open Source Project
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,19 +24,21 @@
 // LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
-//
-// fundamental_type_info.cc: Methods for __fundamental_type_info.
 
 #include <cxxabi.h>
 
-namespace __cxxabiv1
-{
-  __fundamental_type_info::~__fundamental_type_info()
-  {
+namespace __cxxabiv1 {
+
+  extern "C" void __cxa_bad_cast() {
+#if __EXCEPTIONS
+    throw std::bad_cast();
+#endif
   }
 
-  bool __fundamental_type_info::can_catch(const __shim_type_info* thrown_type,
-                                          void*& adjustedPtr) const {
-    return *this == *thrown_type;
+  extern "C" void __cxa_bad_typeid() {
+#if __EXCEPTIONS
+    throw std::bad_typeid();
+#endif
   }
+
 } // namespace __cxxabiv1

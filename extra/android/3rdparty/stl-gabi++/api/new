@@ -30,19 +30,32 @@
 #ifndef __GABIXX_NEW__
 #define __GABIXX_NEW__
 
+#if !defined(GABIXX_LIBCXX)
+
 #include <cstddef>
+#include <exception>
 
 namespace std
 {
   struct nothrow_t {};
   extern const nothrow_t nothrow;
   typedef void (*new_handler)();
+
+class bad_alloc : public exception {
+public:
+  bad_alloc() throw();
+  virtual ~bad_alloc() throw();
+  virtual const char* what() const throw();
+};
+
+typedef void (*new_handler)();
+new_handler set_new_handler(new_handler) throw();
+
 }
 
-// FIXME: Need to handle exceptions.
-void* operator new(std::size_t size) throw(/*std::bad_alloc*/);
+void* operator new(std::size_t size) throw(std::bad_alloc);
 void* operator new(std::size_t size, const std::nothrow_t&) throw();
-void* operator new[](std::size_t size) throw(/*std::bad_alloc*/);
+void* operator new[](std::size_t size) throw(std::bad_alloc);
 void* operator new[](std::size_t size, const std::nothrow_t&) throw();
 
 void  operator delete[](void* ptr) throw();
@@ -54,5 +67,7 @@ inline void* operator new(std::size_t, void* p) throw() { return p; }
 inline void* operator new[](std::size_t, void* p) throw() { return p; }
 inline void  operator delete(void*, void*) throw() {}
 inline void  operator delete[](void*, void*) throw() {}
+
+#endif // !defined(GABIXX_LIBCXX)
 
 #endif // __GABIXX_NEW__
