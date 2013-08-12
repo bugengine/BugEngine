@@ -3,7 +3,7 @@ from waflib.TaskGen import feature, before_method, after_method
 def options(opt):
 	# The options for MSVC are not used, we scan the results 
 	#opt.load('msvc')
-	pass
+	from waflib.Tools import msvc
 
 def configure(conf):
 	conf.start_msg('Looking for msvc compilers')

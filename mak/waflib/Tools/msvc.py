@@ -84,7 +84,7 @@ all_msvc_platforms = [ ('x64', 'amd64'), ('x86', 'x86'), ('ia64', 'ia64'), ('x86
 all_wince_platforms = [ ('armv4', 'arm'), ('armv4i', 'arm'), ('mipsii', 'mips'), ('mipsii_fp', 'mips'), ('mipsiv', 'mips'), ('mipsiv_fp', 'mips'), ('sh4', 'sh'), ('x86', 'cex86') ]
 """List of wince platforms"""
 
-all_icl_platforms = [ ('intel64', 'amd64'), ('em64t', 'amd64'), ('ia32', 'x86'), ('Itanium', 'ia64')]
+all_icl_platforms = [ ('intel64', 'intel64','amd64'), ('em64t_native', 'intel64', 'amd64'), ('em64t', 'intel64', 'amd64'), ('ia32e', 'ia32_intel64', 'amd64'), ('ia32', 'ia32','x86'), ('Itanium', 'ia32_ia64', 'ia64')]
 """List of icl platforms"""
 
 def options(opt):
@@ -94,7 +94,7 @@ def options(opt):
 def setup_msvc(conf, versions, arch = False):
 	platforms = getattr(Options.options, 'msvc_targets', '').split(',')
 	if platforms == ['']:
-		platforms=Utils.to_list(conf.env['MSVC_TARGETS']) or [i for i,j in all_msvc_platforms+all_icl_platforms+all_wince_platforms]
+		platforms=Utils.to_list(conf.env['MSVC_TARGETS']) or [i for i,j,k in all_msvc_platforms+all_icl_platforms+all_wince_platforms]
 	desired_versions = getattr(Options.options, 'msvc_version', '').split(',')
 	if desired_versions == ['']:
 		desired_versions = conf.env['MSVC_VERSIONS'] or [v for v,_ in versions][::-1]
@@ -395,6 +395,7 @@ def gather_icl_versions(conf, versions):
 	:type versions: list
 	"""
 	version_pattern = re.compile('^...?.?\....?.?')
+	version_pattern_2 = re.compile('^..')
 	try:
 		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Compilers\\C++')
 	except WindowsError:
@@ -410,24 +411,27 @@ def gather_icl_versions(conf, versions):
 			break
 		index = index + 1
 		if not version_pattern.match(version):
-			continue
+			if not version_pattern_2.match(version):
+				continue
+			else:
+				version_name = version[0]+'.'+version[1]
+		else:
+			version_name = version[0:2] + '.' + version[2]
 		targets = []
-		for target,arch in all_icl_platforms:
+		for target,flag,arch in all_icl_platforms:
 			try:
-				if target=='intel64': targetDir='EM64T_NATIVE'
-				else: targetDir=target
-				Utils.winreg.OpenKey(all_versions,version+'\\'+targetDir)
-				icl_version=Utils.winreg.OpenKey(all_versions,version)
+				icl_version = Utils.winreg.OpenKey(all_versions,version+'\\'+target)
 				path,type=Utils.winreg.QueryValueEx(icl_version,'ProductDir')
 				batch_file=os.path.join(path,'bin','iclvars.bat')
 				if os.path.isfile(batch_file):
 					try:
-						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,batch_file))))
-					except conf.errors.ConfigurationError:
+						targets.append((target,(arch,conf.get_msvc_version('intel',version,flag,batch_file))))
+					except conf.errors.ConfigurationError as e:
+						print(version_name, target, e)
 						pass
-			except WindowsError:
+			except WindowsError as e:
 				pass
-		for target,arch in all_icl_platforms:
+		for target,flag,arch in all_icl_platforms:
 			try:
 				icl_version = Utils.winreg.OpenKey(all_versions, version+'\\'+target)
 				path,type = Utils.winreg.QueryValueEx(icl_version,'ProductDir')
@@ -439,8 +443,7 @@ def gather_icl_versions(conf, versions):
 						pass
 			except WindowsError:
 				continue
-		major = version[0:2]
-		versions.append(('intel ' + major, targets))
+		versions.append(('intel ' + version_name, targets))
 
 @conf
 def gather_intel_composer_versions(conf, versions):
@@ -458,41 +461,29 @@ def gather_intel_composer_versions(conf, versions):
 			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Intel\\Suites')
 		except WindowsError:
 			return
-	index = 0
-	while 1:
-		try:
-			version = Utils.winreg.EnumKey(all_versions, index)
-		except WindowsError:
-			break
-		index = index + 1
-		if not version_pattern.match(version):
-			continue
+
+	def find_intel_compilers(reg, version_name):
 		targets = []
-		for target,arch in all_icl_platforms:
-			try:
-				if target=='intel64': targetDir='EM64T_NATIVE'
-				else: targetDir=target
+		try:
+			icl_version = Utils.winreg.OpenKey(reg, 'C++')
+			path,type=Utils.winreg.QueryValueEx(icl_version, 'ProductDir')
+			batch_file=os.path.join(path,'bin','iclvars.bat')
+		except WindowsError:
+			return
+		if os.path.isfile(batch_file):
+			for target,flag,arch in all_icl_platforms:
 				try:
-					defaults = Utils.winreg.OpenKey(all_versions,version+'\\Defaults\\C++\\'+targetDir)
+					Utils.winreg.OpenKey(icl_version, target)
 				except WindowsError:
-					if targetDir=='EM64T_NATIVE':
-						defaults = Utils.winreg.OpenKey(all_versions,version+'\\Defaults\\C++\\EM64T')
-					else:
-						raise WindowsError
-				uid,type = Utils.winreg.QueryValueEx(defaults, 'SubKey')
-				Utils.winreg.OpenKey(all_versions,version+'\\'+uid+'\\C++\\'+targetDir)
-				icl_version=Utils.winreg.OpenKey(all_versions,version+'\\'+uid+'\\C++')
-				path,type=Utils.winreg.QueryValueEx(icl_version,'ProductDir')
-				batch_file=os.path.join(path,'bin','iclvars.bat')
-				if os.path.isfile(batch_file):
-					try:
-						targets.append((target,(arch,conf.get_msvc_version('intel',version,target,batch_file))))
-					except conf.errors.ConfigurationError as e:
-						pass
+					continue
+				try:
+					targets.append((target,(arch,conf.get_msvc_version('intel',version_name,flag,batch_file))))
+				except conf.errors.ConfigurationError as e:
+					pass
 				# The intel compilervar_arch.bat is broken when used with Visual Studio Express 2012
 				# http://software.intel.com/en-us/forums/topic/328487
 				compilervars_warning_attr = '_compilervars_warning_key'
-				if version[0:2] == '13' and getattr(conf, compilervars_warning_attr, True):
+				if version_name[0:2] == '13' and getattr(conf, compilervars_warning_attr, True):
 					setattr(conf, compilervars_warning_attr, False)
 					patch_url = 'http://software.intel.com/en-us/forums/topic/328487'
 					compilervars_arch = os.path.join(path, 'bin', 'compilervars_arch.bat')
@@ -501,13 +492,36 @@ def gather_intel_composer_versions(conf, versions):
 					if (r'if exist "%VS110COMNTOOLS%..\IDE\VSWinExpress.exe"' in Utils.readf(compilervars_arch) and
 						not os.path.exists(vs_express_path) and not os.path.exists(dev_env_path)):
 						Logs.warn(('The Intel compilervar_arch.bat only checks for one Visual Studio SKU '
-						           '(VSWinExpress.exe) but it does not seem to be installed at %r. '
-						           'The intel command line set up will fail to configure unless the file %r'
-						           'is patched. See: %s') % (vs_express_path, compilervars_arch, patch_url))
+								   '(VSWinExpress.exe) but it does not seem to be installed at %r. '
+								   'The intel command line set up will fail to configure unless the file %r'
+								   'is patched. See: %s') % (vs_express_path, compilervars_arch, patch_url))
+		versions.append(('intel ' + version_name[0:4], targets))
+
+	def find_intel_subversions(reg, version_name):
+		index = 0
+		while 1:
+			try:
+				version = Utils.winreg.EnumKey(reg, index)
 			except WindowsError:
-				pass
-		major = version[0:2]
-		versions.append(('intel ' + major, targets))
+				break
+			index = index + 1
+			subversion_reg = Utils.winreg.OpenKey(reg, version)
+			find_intel_compilers(subversion_reg, version_name)
+
+	def find_intel_versions(reg):
+		index = 0
+		while 1:
+			try:
+				version = Utils.winreg.EnumKey(reg, index)
+			except WindowsError:
+				break
+			index = index + 1
+			if not version_pattern.match(version):
+				continue
+			version_reg = Utils.winreg.OpenKey(reg, version)
+			find_intel_subversions(version_reg, version)
+
+	find_intel_versions(all_versions)
 
 @conf
 def get_msvc_versions(conf):

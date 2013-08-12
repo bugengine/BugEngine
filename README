@@ -6,37 +6,44 @@
 Supported platforms
 ----------------------
 
-The following platforms are currently tested and known to build & work :
-- win32 with GCC 4.3/4.4/4.5/4.6/4.7
-- win32 with visual studio 2005/2008/2010/2012 and express editions
-- win32 with command line MSVC compiler (eg Windows SDK) up till Visual Studio 2012
+The following platforms are currently tested and known to build & work:
+Win32 (Windows 7 and Windows 8): You will need a properly configured compiler
+* Visual Studio: from 2003 to 2013
+* gcc: MingW32
+* clang: a properly cofigured CLang with MingW (3.2 and 3.4 tested)
+* Intel compiler: version 12 and 13 should work.
 
-- linux x86/amd64 with GCC 4.1 to 4.7 (older versions probably work as well)
-- linux powerpc (G5) with GCC 4.1 to 4.7 (older versions probably work as well)
-- linux x86/amd64 with sunCC
-- linux x86/amd64 with clang 2.9 to 4.0
+Linux:
+* gcc
+* suncc
+* clang
+* intel compilers
 
-- MacOS X 10.4 to 10.8 (ppc/ppc64 and x86/amd64) with GCC 4.0 or 4.2, llvm or clang (depending on XCode)
+MacOS X:
+* gcc (and llvm-gcc)
+* clang
+* intel compilers
 
-- OpenSolaris/Solaris 10 with GCC
-- OpenSolaris/Solaris 10 with SunCC
-- FreeBSD with GCC (all versions from 3.4 to 4.7)
+FreeBSD:
+* gcc
+* clang
 
-- iPhone (iOS 4) with gcc 4.0/4.2
+Solaris:
+* gcc
+* suncc
 
 
 
 Building
 -----------
 
-The requirements for building BugEngine are quite low:
-You need one of the supported compilers installed and working
-You need python installed (tested with python 2.4, 2.5, 2.6 and 3.1)
-You need Flex and Bison (for windows they are included)
+You need one of the supported compilers installed and working (see above)
+You need python installed (tested with python 2.6 and above)
+You need Flex and Bison (for windows they are included in mak/win32)
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC 2003, 2005, 2008, 2010, 2012
-including express versions, XCode, Eclipse, NetBeans and QtCreator
+waf can also be used to generate projects for MSVC 2003 and above,
+including express versions, XCode, NetBeans
 
 
 Configuring
@@ -44,49 +51,21 @@ Configuring
 
 In the root folder of the project, run
 > python waf configure
-it will detect all the supported toolchains and try and pick the best one.
-The last line in the output sums up which version and compiler was picked as a default.
-You can choose manually which toolchain(s) will be the default one with the --toolchains option.
-The format of the toolchain is variant-platform-architecture-compiler-version
-where variant is one of the build variants in debug, profile, final
-platform is the name of the platform in linux, win32, freebsd, osx, sunos...
-architecture is the name of the CPU architecture in x86, amd64, x64 (alias for amd64), ppc, ppc64, arm...
-compiler is the name of the compiler in msvc, wsdk (windows sdk), clang, gcc, icc, opencc, suncc...
-version is the version of the compiler, it depends on the compiler
-it can be 4.1 or 4.4.1 for GCC, 8.0 or 9.0 for MSVC, the version of the windows SDK for the command line, etc
-
-The argument expected by the --toolchains parameter is a list of regular expressions :
-> python waf configure --toolchains=.*-gcc-.*
-will select all toolchains with GCC
-> python waf configure --toolchains=debug-msvc-win32-.*-10.0,debug-gcc-win32-x86-4.4
-will pick all compilers available for visual studio 2010 (probably x86 and amd64) and GCC 4.4
-
-the default toolchains are used only when no toolchain is specified during build; if a toolchain
-is manually specified during build, then the default toolchains are ignored.
-
-
-Discovering
-..............
-
-The project trys to automatically find the compilers and you usually don't need to
-specify a path or anything. This is more comfortable on Win32 where you
-don't need to set the MSVC environment for the project to build.
-Waf will automatically detect which compilers are installed and configure them properly,
-even if visual studio was not installed in the default path.
+it will detect all the supported toolchains that it can find:
+* GCC, sunCC and clang should be in the path (except for MacOSX, where they are shipped with Xcode)
+* on Windows, MSVC, intel compilers and Platform SDK are detected automatically
+use
+> python waf --help
+to print a list of options.
 
 
 Building from the command line
 .................................
 
 when you have decided which compiler to use, you can build & "install" by running
-> python waf install
-It should build all source files, compile all libs and a sample executable
-and move them to a folder specific to the toolchain.
-For building for a specific platform, use
-> python waf install_(toolchain)
-see the configuration paragraph for the format of the toolchain arument.
-For instance,
-> python waf install_debug-linux-x86-suncc-5.10
+> python waf install:platform-architecture-compiler-version:variant
+To list all supported combinations, run
+> python waf build
 
 
 
@@ -94,8 +73,8 @@ Bulding with IDEs
 ....................
 
 The other way of building is to create projects for the supported IDEs and build from the IDE
-the supported IDEs at the moment are Visual Studio 2002 to 2012 in their complete or
-express editions, XCode, and NetBeans, and there is limited support for Eclipse and QtCreator.
+the supported IDEs at the moment are Visual Studio 2003 to 2013 in their complete or
+express editions, XCode, and NetBeans.
 To generate the project files, configure the project (which toolchain is selected doesn't
 actually matter) and run
 > python waf [ide-list]
@@ -111,7 +90,7 @@ projects and solutions for Visual Studio 2010.
 You don't need to have these installed to generate the projects, you just need them to actually
 open the projects.
 
-In most IDE, you will be able to pick which toolchain to ue with the "target" or "platform" setting
+In most IDE, you will be able to pick which toolchain to use with the "target" or "platform" setting
 of the IDE.
 
 
