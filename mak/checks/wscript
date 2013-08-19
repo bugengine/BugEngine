@@ -87,6 +87,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
 		pass
 	else:
 		self.env[var] = libname
+		self.detected += libname
 	return self.env[var]
 
 @conf
@@ -150,6 +151,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 	else:
 		self.env[var] = frameworks
 		self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
+		self.detected += frameworks
 	return self.env[var]
 
 @conf

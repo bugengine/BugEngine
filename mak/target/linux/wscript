@@ -184,8 +184,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_suncc(directory)
 					conf.set_linux_suncc_options(arch)
+					conf.end_msg('done')
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(target, arch, 'suncc', version, arch)
@@ -209,8 +211,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_icc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_linux_icc_options(options, version, arch)
+					conf.end_msg('done')
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch, name, version, arch)
@@ -234,8 +238,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_linux_gcc_options(options, version)
+					conf.end_msg('done')
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch, name, version, arch)
@@ -259,8 +265,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.set_linux_clang_options(options, version)
+					conf.end_msg('done')
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
