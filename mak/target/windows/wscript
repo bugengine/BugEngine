@@ -120,11 +120,13 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.env.MSVC_VERSIONS = [version]
 					conf.env.MSVC_TARGETS = [target_arch]
 					conf.load('msvc')
-					conf.set_windows_options()
 					conf.set_windows_msvc_options()
+					conf.end_msg('done')
+					conf.set_windows_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
 					conf.variant = ''
@@ -143,8 +145,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_windows_gcc_options(options, version)
+					conf.end_msg('done')
 					conf.set_windows_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch, name, version, arch)
@@ -168,8 +172,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory, target)
 					conf.set_windows_clang_options(options, version)
+					conf.end_msg('done')
 					conf.set_windows_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch_name, 'clang', version, arch_name)

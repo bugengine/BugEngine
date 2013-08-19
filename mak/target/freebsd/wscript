@@ -111,8 +111,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_freebsd_gcc_options(options, version)
+					conf.end_msg('done')
 					conf.set_freebsd_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(os, arch, name, version, arch)
@@ -136,8 +138,10 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.set_freebsd_clang_options(options, version)
+					conf.end_msg('done')
 					conf.set_freebsd_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)

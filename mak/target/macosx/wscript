@@ -43,6 +43,7 @@ def set_macosx_options(self, all_sdks):
 						sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
 	sdks.sort()
+	self.start_msg('Looking for SDK')
 	for sdk, sdk_path in sdks[::-1]:
 		if Options.options.macosx_sdk and not sdk.startswith(Options.options.macosx_sdk):
 			continue
@@ -52,9 +53,11 @@ def set_macosx_options(self, all_sdks):
 		except Errors.WafError:
 			continue
 	else:
+		self.end_msg('none', color='RED')
 		raise Errors.WafError('Could not find any suitable SDK')
 
 	self.env.MACOSX_SDK = os.path.splitext(os.path.basename(sdk_path))[0]
+	self.end_msg(self.env.MACOSX_SDK)
 	self.env.XCODE_SDK_PATH = sdk_path
 	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
@@ -211,10 +214,12 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_icc(bindir, icc, ixx, version, target, arch, options)
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_icc_options(options, real_arch)
+					conf.end_msg('done')
 					conf.set_macosx_options(False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
@@ -242,10 +247,12 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_gcc_options(options, real_arch)
+					conf.end_msg('done')
 					conf.set_macosx_options(False)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
@@ -273,10 +280,12 @@ def configure(conf):
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
 				try:
+					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_clang_options(flags)
+					conf.end_msg('done')
 					conf.set_macosx_options(True)
 					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
 					conf.setenv(toolchain, conf.env.derive())

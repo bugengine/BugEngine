@@ -26,8 +26,11 @@ def configure(conf):
 	conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 
 def setup(conf):
+	conf.detected = []
+	conf.start_msg("Checking libraries")
 	for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
 		conf.recurse('../src/3rdparty/%s'%third_party, name='setup', once=False)
+	conf.end_msg(', '.join(conf.detected) or False)
 
 def build(bld):
 	bld.bugenginenode = bld.path.parent
