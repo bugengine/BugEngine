@@ -114,19 +114,25 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_freebsd_gcc_options(options, version)
-					conf.end_msg('done')
-					conf.set_freebsd_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os, arch, name, version, arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_freebsd_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os, arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if target.find('freebsd') != -1:
@@ -141,19 +147,25 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.set_freebsd_clang_options(options, version)
-					conf.end_msg('done')
-					conf.set_freebsd_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_freebsd_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.X11'))

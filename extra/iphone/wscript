@@ -179,21 +179,26 @@ def configure(conf):
 					if arch in ['arm', 'armv7']:
 						conf.find_program('codesign')
 					conf.set_iphone_gcc_options(real_arch)
-					conf.end_msg('done')
-					conf.set_iphone_options(real_os, False)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version, real_arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_iphone_options(real_os, False)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version, real_arch)
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		real_arch, flags = arch
@@ -215,21 +220,26 @@ def configure(conf):
 					if arch[0] in ['arm', 'armv7']:
 						conf.find_program('codesign')
 					conf.set_iphone_clang_options(flags)
-					conf.end_msg('done')
-					conf.set_iphone_options(real_os, True)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version, real_arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_iphone_options(real_os, True)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version, real_arch)
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.cocoa'))
