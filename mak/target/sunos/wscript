@@ -143,19 +143,25 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_sunos_gcc_options(options, version)
+				except Exception as e:
+					conf.end_msg(e, color='RED')
+					raise
+				else:
 					conf.end_msg('done')
 					conf.set_sunos_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os, arch, name, version, arch)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-				except Exception as e:
-					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-					raise
+					try:
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os, arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if target.find('solaris') != -1:
@@ -170,19 +176,26 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.set_sunos_clang_options(options, version)
-					conf.end_msg('done')
-					conf.set_sunos_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_sunos_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 	for directory, target, arch, version in conf.env.SUNCC_TARGETS:
 		if target.find('SunOS') != -1:
@@ -196,19 +209,26 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_suncc(directory)
 					conf.set_sunos_suncc_options(arch)
-					conf.end_msg('done')
-					conf.set_sunos_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(target, arch, 'suncc', version, arch)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_sunos_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(target, arch, 'suncc', version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 
 def build(bld):

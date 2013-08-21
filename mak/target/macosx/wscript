@@ -219,21 +219,28 @@ def configure(conf):
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_icc_options(options, real_arch)
-					conf.end_msg('done')
-					conf.set_macosx_options(False)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_macosx_options(False)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
@@ -252,21 +259,27 @@ def configure(conf):
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_gcc_options(options, real_arch)
-					conf.end_msg('done')
-					conf.set_macosx_options(False)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_macosx_options(False)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		real_arch, flags = arch
@@ -285,21 +298,27 @@ def configure(conf):
 					conf.find_program('dsymutil')
 					conf.find_program('strip')
 					conf.set_macosx_clang_options(flags)
-					conf.end_msg('done')
-					conf.set_macosx_options(True)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_macosx_options(True)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.cocoa'))

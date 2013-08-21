@@ -110,7 +110,7 @@ def configure(conf):
 	seen = set([])
 	for version, config in conf.env.MSVC_INSTALLED_VERSIONS:
 		version_name, version_number = version.split()
-		if version_name in ['intel', 'wsdk', 'msvc', 'winphone']:
+		if version_name in ['intel', 'wsdk', 'msvc']:
 			for target_arch, infos in config:
 				if (target_arch, version) in seen:
 					continue
@@ -125,15 +125,26 @@ def configure(conf):
 					conf.env.MSVC_TARGETS = [target_arch]
 					conf.load('msvc')
 					conf.set_windows_msvc_options()
+				except Exception as e:
+					conf.end_msg(e, color='RED')
+					raise
+				else:
 					conf.end_msg('done')
-					conf.set_windows_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					try:
+						conf.set_windows_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('mingw')
@@ -148,19 +159,25 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_windows_gcc_options(options, version)
-					conf.end_msg('done')
-					conf.set_windows_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os, arch, name, version, arch)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_windows_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os, arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if target.find('win32') != -1 or target.find('mingw') != -1:
@@ -175,19 +192,25 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory, target)
 					conf.set_windows_clang_options(options, version)
-					conf.end_msg('done')
-					conf.set_windows_options()
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os, arch_name, 'clang', version, arch_name)
-					conf.variant = ''
-					Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_windows_options()
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os, arch_name, 'clang', version, arch_name)
+					except Errors.WafError as e:
+						conf.variant = ''
+						Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 
 

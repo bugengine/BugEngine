@@ -138,21 +138,27 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
 					conf.set_android_clang_options(flags, real_arch)
-					conf.end_msg('done')
-					conf.set_android_options(real_arch)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_android_options(real_arch)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('android')
@@ -167,21 +173,27 @@ def configure(conf):
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 					conf.set_android_gcc_options(options, arch)
-					conf.end_msg('done')
-					conf.set_android_options(arch)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, arch, name, version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch)
-					conf.variant = ''
-					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
+					conf.end_msg(e, color='RED')
 					raise
+				else:
+					conf.end_msg('done')
+					try:
+						conf.set_android_options(arch)
+						toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, arch, name, version)
+						conf.setenv(toolchain, conf.env.derive())
+						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch)
+					except Errors.WafError as e:
+						conf.variant = ''
+						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+					except Exception as e:
+						conf.variant = ''
+						pprint('RED', '%s failed: %s' % (toolchain, e))
+						raise
+					else:
+						conf.variant = ''
+						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 
 def build(bld):
