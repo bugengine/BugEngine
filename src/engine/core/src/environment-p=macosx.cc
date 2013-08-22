@@ -5,6 +5,8 @@
 #include    <core/environment.hh>
 #include    <sys/types.h>
 #include    <sys/sysctl.h>
+#include    <stdio.h>
+#include    <errno.h>
 
 
 namespace BugEngine
