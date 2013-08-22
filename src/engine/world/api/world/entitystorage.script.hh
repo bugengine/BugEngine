@@ -20,18 +20,20 @@ class be_api(WORLD) EntityStorage : public minitl::refcountable
 private:
     struct Bucket
     {
-        u64 componentMask;
+        u64 acceptMask;
+        u64 rejectMask;
         u32* indices;
 
         Bucket();
+        Bucket(u64 acceptMask, u64 rejectMask);
         ~Bucket();
     };
     struct ComponentGroup
     {
         u64 componentMask;
-        minitl::array<EntityStorage::Bucket> m_bucket;
+        minitl::array<EntityStorage::Bucket> buckets;
 
-        ComponentGroup();
+        ComponentGroup(u64 mask);
         ~ComponentGroup();
     };
     struct EntityInfo;
@@ -50,6 +52,7 @@ private:
     void start();
     EntityInfo& getEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
+    ComponentGroup& getComponentGroup(u32 index);
 private: // friend World
     Entity spawn();
     void unspawn(Entity e);

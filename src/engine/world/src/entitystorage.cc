@@ -12,6 +12,16 @@ namespace BugEngine { namespace World
 {
 
 EntityStorage::Bucket::Bucket()
+:   acceptMask(0)
+,   rejectMask(0)
+,   indices(0)
+{
+}
+
+EntityStorage::Bucket::Bucket(u64 acceptMask, u64 rejectMask)
+:   acceptMask(acceptMask)
+,   rejectMask(rejectMask)
+,   indices(0)
 {
 }
 
@@ -19,9 +29,11 @@ EntityStorage::Bucket::~Bucket()
 {
 }
 
-EntityStorage::ComponentGroup::ComponentGroup()
-:   m_bucket(Arena::game(), 0)
+EntityStorage::ComponentGroup::ComponentGroup(u64 mask)
+:   componentMask(mask)
+,   buckets(Arena::game(), 1)
 {
+    buckets[0] = Bucket(mask, 0);
 }
 
 EntityStorage::ComponentGroup::~ComponentGroup()
@@ -82,6 +94,9 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType)
 {
     be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
     m_componentTypes.push_back(componentType);
+    u32 index = m_componentTypes.size() - 1;
+    u64 mask = u64(1) << index;
+    m_componentGroups.push_back(ComponentGroup(mask));
 }
 
 u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
@@ -170,8 +185,15 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
     be_forceuse(c);
     u32 componentIndex = indexOf(componentType);
     be_assert_recover(componentIndex != u32(-1), "component type %s is not a registered component of entoty storage" | componentType->fullname(), return);
-    u64 mask = 1;
-    mask <<= componentIndex;
+    /*ComponentGroup& group = */getComponentGroup(componentIndex);
+    u64 mask = u64(1) << componentIndex;
+    for (u32 i = 0; i < m_componentGroups.size(); i++)
+    {
+        if (mask & m_componentGroups[i].componentMask)
+        {
+            break;
+        }
+    }
     be_assert_recover((info.mask & mask) == 0, "entity %d already has a component %s" | e.id | componentType->fullname(), return);
     info.mask |= mask;
 }
@@ -198,11 +220,22 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
     mask <<= componentIndex;
     return (info.mask & mask) != 0;
 }
-/*
-ComponentGroup& EntityStorage::getComponentGroup(u64 mask)
+
+EntityStorage::ComponentGroup& EntityStorage::getComponentGroup(u32 componentIndex)
 {
-    
+    u64 mask = u64(1) << componentIndex;
+    for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
+         it != m_componentGroups.end();
+         ++it)
+    {
+        if ((it->componentMask & mask) == mask)
+        {
+            return *it;
+        }
+    }
+    be_notreached();
+    return m_componentGroups.front();
 }
-*/
+
 
 }}
