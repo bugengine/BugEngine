@@ -297,6 +297,7 @@ class vs2003(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(Deploy_DataDir)'
 		self.env.DEPLOY_PLUGINDIR = '$(Deploy_PluginDir)'
 		self.env.DEPLOY_KERNELDIR = '$(Deploy_KernelDir)'
+		self.features = ['GUI']
 
 		self.recurse([self.run_dir])
 
@@ -330,6 +331,7 @@ class vs2003(Build.BuildContext):
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
+				print(tg.target)
 
 				nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
 				project = klass(tg, version, version_project, folders)

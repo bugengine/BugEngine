@@ -143,6 +143,12 @@ def thirdparty(bld, name, libs=[], lib_paths=[], frameworks=[], includes=[], def
 	bld.env['FRAMEWORK_%s' % name] = frameworks
 	bld.env['LIBPATH_%s' % name] = lib_paths
 	bld.env['LIB_%s' % name] = libs
+	if bld.env.PROJECTS:
+		bld(
+			target=name,
+			includes=includes,
+			defines=defines,
+			source_nodes=[source_node])
 
 @conf
 def library(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
