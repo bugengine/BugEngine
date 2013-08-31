@@ -121,6 +121,7 @@ class Solution:
 		else:
 			return ''
 
+
 	def add(self, task_gen, project, project_path, build = False):
 		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
 		project_config = ['\t\t%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
@@ -216,6 +217,27 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
 						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+					elif 'game' in task_gen.features:
+						deps = task_gen.use[:]
+						seen = set([])
+						program = None
+						while (deps):
+							dep = deps.pop()
+							if dep not in seen:
+									seen.add(dep)
+									try:
+										task_dep = task_gen.bld.get_tgen_by_name(dep)
+										deps += getattr(task_dep, 'use', [])
+										if 'cxxprogram' in task_dep.features:
+											program = task_dep
+									except:
+										pass
+						if program:
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
+							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
+						else:
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
 		files = self.vcxproj._add(project, 'ItemGroup')
