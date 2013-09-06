@@ -14,15 +14,16 @@ namespace BugEngine { namespace World
 EntityStorage::Bucket::Bucket()
 :   acceptMask(0)
 ,   rejectMask(0)
-,   indices(0)
+,   componentCounts(0)
 {
 }
 
-EntityStorage::Bucket::Bucket(u64 acceptMask, u64 rejectMask)
+EntityStorage::Bucket::Bucket(u32 componentCount, u64 acceptMask, u64 rejectMask)
 :   acceptMask(acceptMask)
 ,   rejectMask(rejectMask)
-,   indices(0)
+,   componentCounts()
 {
+    be_forceuse(componentCount);
 }
 
 EntityStorage::Bucket::~Bucket()
@@ -33,7 +34,7 @@ EntityStorage::ComponentGroup::ComponentGroup(u64 mask)
 :   componentMask(mask)
 ,   buckets(Arena::game(), 1)
 {
-    buckets[0] = Bucket(mask, 0);
+    buckets[0] = Bucket(1, mask, 0);
 }
 
 EntityStorage::ComponentGroup::~ComponentGroup()
@@ -41,15 +42,17 @@ EntityStorage::ComponentGroup::~ComponentGroup()
 }
 
 
+
+
 struct EntityStorage::EntityInfo
 {
     union
     {
         u32 next;
-        u32 bucket;
+        u32 index;
     };
-    u32 index;
-    u64 mask;
+    u32 mask1;
+    u64 mask2;
 };
 
 static const u32 s_usedBit = 0x80000000;
@@ -109,6 +112,11 @@ u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
         }
     }
     return (u32) -1;
+}
+
+void EntityStorage::finalize()
+{
+    
 }
 
 void EntityStorage::start()
