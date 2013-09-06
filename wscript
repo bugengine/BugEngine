@@ -80,7 +80,7 @@ def build(bld):
 	bld.plugin('tool.bugeditor.ui',				['engine.bugengine', '3rdparty.scintilla'], platforms=['pc'])
 	bld.game('tool.bugeditor.main',				['engine.bugengine', 'game.bugeditor.ui', 'plugin.scripting.package'], platforms=['pc'])
 
-	bld.game('sample.kernel',				['engine.bugengine', 'plugin.scripting.package'])
+	bld.game('sample.kernel',					['engine.bugengine', 'plugin.scripting.package'])
 
 	bld.recurse('mak', name='plugins', once=False)
 
