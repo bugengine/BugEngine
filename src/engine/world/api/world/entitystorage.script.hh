@@ -22,10 +22,10 @@ private:
     {
         u64 acceptMask;
         u64 rejectMask;
-        u32* indices;
+        u32* componentCounts;
 
         Bucket();
-        Bucket(u64 acceptMask, u64 rejectMask);
+        Bucket(u32 componentCount, u64 acceptMask, u64 rejectMask);
         ~Bucket();
     };
     struct ComponentGroup
@@ -67,6 +67,7 @@ protected:
 
     void registerType(raw<const RTTI::Class> componentType);
     u32 indexOf(raw<const RTTI::Class> componentType) const;
+    void finalize();
 };
 
 }}
