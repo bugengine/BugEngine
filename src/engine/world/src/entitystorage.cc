@@ -51,8 +51,8 @@ struct EntityStorage::EntityInfo
         u32 next;
         u32 index;
     };
-    u32 mask1;
-    u64 mask2;
+    u32 bucket;
+    u64 mask;
 };
 
 static const u32 s_usedBit = 0x80000000;
@@ -116,7 +116,6 @@ u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
 
 void EntityStorage::finalize()
 {
-    
 }
 
 void EntityStorage::start()
@@ -155,7 +154,7 @@ Entity EntityStorage::spawn()
         for (u32 i = 0; i < m_bufferCapacity; ++i)
         {
             buffer[i].next = index + i + 1;
-            buffer[i].index = 0;
+            buffer[i].bucket = 0;
             buffer[i].mask = 0;
         }
         buffer[m_bufferCapacity-1].next = (1 + bufferIndex) << 16;
@@ -168,8 +167,8 @@ Entity EntityStorage::spawn()
     EntityInfo& entityInfo = getEntityInfo(e);
     be_assert((entityInfo.index & s_usedBit) == 0, "Entity %s is already in use; entity buffer inconsistent" | e.id);
     m_freeEntityId = entityInfo.next;
-    entityInfo.bucket = 0;
     entityInfo.index = s_usedBit;
+    entityInfo.bucket = 0;
     entityInfo.mask = 0;
     ++ m_entityCount;
     return e;
@@ -180,7 +179,7 @@ void EntityStorage::unspawn(Entity e)
     EntityInfo& info = getEntityInfo(e);
     // unspawn components
     info.next = m_freeEntityId;
-    info.index = 0;
+    info.bucket = 0;
     info.mask = 0;
     m_freeEntityId = e.id;
     -- m_entityCount;

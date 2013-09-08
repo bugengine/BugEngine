@@ -8,8 +8,10 @@
 namespace minitl
 {
 
+
+
 template< u32 BITS >
-class bitset
+be_align(1) class bitset
 {
 private:
     enum
@@ -18,7 +20,7 @@ private:
         Bytes = (BITS+7)/8,
         Words = (BITS+31)/32
     };
-    u32 m_bits[Words];
+    u8 m_bytes[Bytes];
     struct bit
     {
         bitset<BITS>    owner;

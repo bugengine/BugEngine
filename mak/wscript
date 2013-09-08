@@ -15,6 +15,7 @@ def options(opt):
 	opt.load('visualstudio', tooldir=['mak/tools'])
 	opt.load('xcode', tooldir=['mak/tools'])
 	opt.load('netbeans', tooldir=['mak/tools'])
+	opt.load('eclipse', tooldir=['mak/tools'])
 
 def configure(conf):
 	conf.bugenginenode = conf.path.parent
@@ -70,6 +71,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
 		Options.options.include = os.environ.get('INCLUDE', '')
 		Options.options.libpath = os.environ.get('LIBPATH', '')
 		Options.options.lib = os.environ.get('LIB', '')
+		Options.options.pwd = os.environ.get('PWD', '')
 		node = self.bldnode.make_node('options.pickle')
 		pickle.dump(Options.options, open(node.abspath(), 'wb'), protocol = 2)
 
@@ -94,7 +96,7 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 			os.environ['LIBPATH'] = self.environ['LIBPATH'] = Options.options.libpath
 			os.environ['LIB'] = self.environ['LIB'] = Options.options.lib
 			os.environ['INCLUDE'] = self.environ['INCLUDE'] = Options.options.include
-
+			os.environ['PWD'] = self.environ['PWD'] = Options.options.pwd
 		except IOError:
 			raise Errors.WafError('Option file not found; configure the project first')
 
@@ -119,7 +121,7 @@ def autoreconfigure(execute_method):
 			do_config = do_config or (h != env.hash)
 
 		if do_config:
-			Logs.warn('wscrip files have changed; reconfiguring the project')
+			Logs.warn('wscript files have changed; reconfiguring the project')
 			Options.commands.insert(0, self.cmd)
 			Options.commands.insert(0, 'reconfigure')
 			return

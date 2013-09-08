@@ -1095,6 +1095,7 @@ int				btSoftBody::generateBendingConstraints(int distance,Material* mat)
 		delete[] adj;		
 		return(nlinks);
 	}
+#undef IDX
 	return(0);
 }
 
