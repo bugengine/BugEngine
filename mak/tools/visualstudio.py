@@ -36,6 +36,11 @@ def generateGUID(name):
 	d = "{" + d[:8] + "-" + d[8:12] + "-" + d[12:16] + "-" + d[16:20] + "-" + d[20:32] + "}"
 	return d
 
+def unique(seq):
+	seen = set()
+	seen_add = seen.add
+	return [ x for x in seq if x not in seen and not seen_add(x)]
+
 def gather_includes_defines(task_gen):
 	defines = getattr(task_gen, 'defines', [])
 	includes = getattr(task_gen, 'includes', [])
@@ -52,7 +57,7 @@ def gather_includes_defines(task_gen):
 				use = use + getattr(t, 'use', [])
 				includes = includes + getattr(t, 'includes ', [])
 				defines = defines + getattr(t, 'defines ', [])
-	return includes, defines
+	return unique(includes), unique(defines)
 
 def path_from(path, bld):
 	if isinstance(path, str):
@@ -239,6 +244,7 @@ class VCxproj:
 						else:
 							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
+					includes += ['%s/usr/include'%sysroot for sysroot in env.SYSROOT]
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
 		files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -283,8 +289,6 @@ class vs2003(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
-		self.env.TOOLCHAIN = "$(Platform)"
-		self.env.VARIANT = "$(Configuration)"
 
 		self.env.VARIANT = '$(Variant)'
 		self.env.TOOLCHAIN = '$(Toolchain)'
@@ -305,7 +309,7 @@ class vs2003(Build.BuildContext):
 		version_name, version_number, folders = self.__class__.version[0]
 		klass, version_project = self.__class__.version[1]
 
-		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
 		solution_node = self.srcnode.make_node(appname+'.'+version+'.sln')
 		projects = self.srcnode.make_node('.build').make_node(version)

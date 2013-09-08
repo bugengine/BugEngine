@@ -7,7 +7,7 @@ def setup(conf):
 	pass
 
 def build(bld):
-	mak = bld(target = 'engine.build', source = [])
+	mak = bld(target = 'build.mak', source = [])
 	def add_files(p, path):
 		pass
 	add_files(mak, bld.bugenginenode.make_node('mak'))

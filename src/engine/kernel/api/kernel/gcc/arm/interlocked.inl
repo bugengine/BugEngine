@@ -106,7 +106,7 @@ struct InterlockedType<4>
         typedef long        value_t;
         typedef value_t     tag_t;
         
-        BE_SET_ALIGNMENT(4) value_t     m_value;
+        __attribute__ ((aligned(4))) value_t     m_value;
 
         tagged_t(long value = 0)
             :   m_value(value)

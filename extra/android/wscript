@@ -117,6 +117,7 @@ def set_android_options(conf, arch):
 	conf.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
 	conf.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
 
+	conf.env.SYSROOT = [sdk]
 	conf.env.append_unique('CFLAGS', ['--sysroot', sdk])
 	conf.env.append_unique('CXXFLAGS', ['--sysroot', sdk])
 	conf.env.append_unique('LINKFLAGS', ['--sysroot', sdk])
