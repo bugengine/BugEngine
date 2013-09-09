@@ -155,6 +155,6 @@ bool	btSubsimplexConvexCast::calcTimeOfImpact(
 	return true;
 }
 
-
+#undef MAX_ITERATIONS
 
 

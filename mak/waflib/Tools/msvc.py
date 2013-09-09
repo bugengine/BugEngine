@@ -971,6 +971,7 @@ def exec_response_command(self, cmd, **kw):
 			os.close(fd)
 			cmd = [program, '@' + tmp]
 		# no return here, that's on purpose
+		kw['skipline'] = os.path.split(cmd[0])[1].lower() in ['cl.exe']
 		ret = self.generator.bld.exec_command(cmd, **kw)
 	finally:
 		if tmp:

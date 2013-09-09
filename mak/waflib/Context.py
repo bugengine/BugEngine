@@ -326,6 +326,11 @@ class Context(ctx):
 			kw['stdout'] = subprocess.PIPE
 		if 'stderr' not in kw:
 			kw['stderr'] = subprocess.PIPE
+		if 'skipline' in kw:
+			skipline = kw['skipline']
+			del kw['skipline']
+		else:
+			skipline = False
 
 		try:
 			if kw['stdout'] or kw['stderr']:
@@ -344,7 +349,9 @@ class Context(ctx):
 			if self.logger:
 				self.logger.debug('out: %s' % out)
 			else:
-				sys.stdout.write(out)
+				if skipline and not ret:
+					out = out[1+out.find('\n'):]
+				sys.stdout.write(out.replace('\r\n', '\n'))
 		if err:
 			if not isinstance(err, str):
 				err = err.decode(sys.stdout.encoding or 'iso8859-1')
