@@ -90,17 +90,17 @@ def set_windows_msvc_options(self):
 
 	self.env.CFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	self.env.CXXFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
-	self.env.LINKFLAGS_debug = ['/DEBUG']
+	self.env.LINKFLAGS_debug = ['/DEBUG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_debug = []
 
 	self.env.CFLAGS_profile = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	self.env.CXXFLAGS_profile = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG']
+	self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_profile = ['/LTCG']
 
 	self.env.CFLAGS_final = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG']
+	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_final = ['/LTCG']
 
 def options(opt):
