@@ -5,7 +5,7 @@ from waflib.TaskGen import feature
 from waflib.Configure import conf
 from waflib import TaskGen, Context, Build
 import os, sys
-from xml.dom.minidom import Document
+from minixml import XmlNode, XmlDocument
 
 oe_cdt = 'org.eclipse.cdt'
 cdt_mk = oe_cdt + '.make.core'
@@ -17,29 +17,37 @@ def unique(seq):
 	seen_add = seen.add
 	return [x for x in seq if x not in seen and not seen_add(x)]
 
+
 def gather_includes_defines(task_gen):
-	defines = getattr(task_gen, 'defines', [])
-	includes = getattr(task_gen, 'includes', [])
-	seen = []
-	use = getattr(task_gen, 'use', [])[:]
-	while use:
-		name = use.pop()
-		if name not in seen:
-			try:
-				t = task_gen.bld.get_tgen_by_name(name)
-			except:
-				pass
-			else:
-				use = use + getattr(t, 'use', [])
-				includes = includes + getattr(t, 'includes ', [])
-				defines = defines + getattr(t, 'defines ', [])
+	def gather_includes_defines_recursive(task_gen):
+		try:
+			return task_gen.bug_eclipse_cache
+		except AttributeError:
+			includes = getattr(task_gen, 'export_includes', [])
+			defines = getattr(task_gen, 'export_defines', [])
+			use = getattr(task_gen, 'use', [])
+			for task_name in use:
+				try:
+					t = task_gen.bld.get_tgen_by_name(name)
+				except:
+					pass
+				else:
+					use_includes, use_defines = gather_includes_defines_recursive(t)
+					includes += use_includes
+					defines += use_defines
+			task_gen.bug_eclipse_cache = (includes, defines)
+			return task_gen.bug_eclipse_cache
+
+	includes, defines = gather_includes_defines_recursive(task_gen)
+	includes += getattr(task_gen, 'includes', [])
+	defines += getattr(task_gen, 'defines', [])
 	return unique(includes), unique(defines)
 
 def path_from(path, bld):
 	if isinstance(path, str):
 		return path
 	else:
-		return '$(SolutionDir)%s' % path.path_from(bld.srcnode)
+		return 'PROJECT_LOC:/' + path.path_from(bld.srcnode)
 
 
 
@@ -88,318 +96,271 @@ class eclipse(Build.BuildContext):
 		@param workspace_includes Optional project includes to prevent
 			"Unresolved Inclusion" errors in the Eclipse editor
 		"""
-		project = self.impl_create_project(sys.executable, sys.argv[0], appname)
-		self.srcnode.make_node('.project').write(project.toxml())
+		self.impl_create_project(self.srcnode.make_node('.project'), sys.executable, sys.argv[0], appname)
+		self.impl_create_cproject(self.srcnode.make_node('.cproject'), sys.executable, sys.argv[0], appname)
+		self.impl_create_pydevproject(self.srcnode.make_node('.pydevproject'), appname, sys.path, [])
 
-		project = self.impl_create_cproject(sys.executable, sys.argv[0], appname)
-		self.srcnode.make_node('.cproject').write(project.toxml())
+	def impl_create_project(self, node, executable, waf, appname):
+		with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
+			with XmlNode(doc, 'projectDescription') as projectDescription:
+				XmlNode(projectDescription, 'name', appname).close()
+				XmlNode(projectDescription, 'comment').close()
+				XmlNode(projectDescription, 'projects').close()
+				with XmlNode(projectDescription, 'buildSpec') as buildSpec :
+					with XmlNode(buildSpec, 'buildCommand') as buildCommand:
+						XmlNode(buildCommand, 'name', oe_cdt + '.managedbuilder.core.genmakebuilder').close()
+						XmlNode(buildCommand, 'triggers', 'clean,full,incremental,').close()
+						XmlNode(buildCommand, 'arguments').close()
+				with XmlNode(projectDescription, 'natures') as natures:
+					nature_list = """
+						core.ccnature
+						managedbuilder.core.ScannerConfigNature
+						managedbuilder.core.managedBuildNature
+						core.cnature
+						org.python.pydev.pythonNature
+					""".split()
+					for n in nature_list:
+						XmlNode(natures, 'nature', oe_cdt + '.' + n).close()
+				with XmlNode(projectDescription, 'linkedResources') as resources:
+					def createProjectFolder(name, element, seen):
+						name = name.split('.')
+						path = ''
+						for n in name:
+							path = path + '/' + n
+							if path not in seen:
+								seen.add(path)
+								with XmlNode(element, 'link') as link:
+									XmlNode(link, 'name', path).close()
+									XmlNode(link, 'type', '2')
+									XmlNode(link, 'locationURI', 'virtual:/virtual')
+						return path[1:]
+					seen = set([])
+					for g in self.groups:
+						for tg in g:
+							if not isinstance(tg, TaskGen.task_gen):
+								continue
+							tg.post()
 
-		project = self.impl_create_pydevproject(appname, sys.path, [])
-		self.srcnode.make_node('.pydevproject').write(project.toxml())
+							name = createProjectFolder(tg.name, resources, seen)
+							for node in getattr(tg, 'source_nodes', []):
+								self.addSourceTree(resources, node, name, os.path.join('PROJECT_LOC', node.path_from(self.srcnode)))
 
-	def impl_create_project(self, executable, waf, appname):
-		doc = Document()
-		projectDescription = doc.createElement('projectDescription')
-		self.add(doc, projectDescription, 'name', appname)
-		self.add(doc, projectDescription, 'comment')
-		self.add(doc, projectDescription, 'projects')
-		buildSpec = self.add(doc, projectDescription, 'buildSpec')
-		buildCommand = self.add(doc, buildSpec, 'buildCommand')
-		self.add(doc, buildCommand, 'name', oe_cdt + '.managedbuilder.core.genmakebuilder')
-		self.add(doc, buildCommand, 'triggers', 'clean,full,incremental,')
-		arguments = self.add(doc, buildCommand, 'arguments')
-		# the default make-style targets are overwritten by the .cproject values
-		#dictionaries = {
-		#		cdt_mk + '.append_environment': 'true',
-		#		cdt_mk + '.contents': cdt_mk + '.activeConfigSettings',
-		#		cdt_mk + '.enableAutoBuild': 'false',
-		#		cdt_mk + '.autoBuildTarget': '"%s" install:%s' % (waf, self.env['VALID_TOOLCHAINS'][0]),
-		#		cdt_mk + '.enableCleanBuild': 'true',
-		#		cdt_mk + '.cleanBuildTarget': '"%s" clean:%s' % (waf, self.env['VALID_TOOLCHAINS'][0]),
-		#		cdt_mk + '.enableFullBuild': 'true',
-		#		cdt_mk + '.fullBuildTarget': '"%s" install:%s' % (waf, self.env['VALID_TOOLCHAINS'][0]),
-		#		cdt_mk + '.useDefaultBuildCmd': 'false',
-		#		cdt_mk + '.buildCommand': executable
-		#		}
-		#for k, v in dictionaries.items():
-		#	self.addDictionary(doc, arguments, k, v)
+				with XmlNode(projectDescription, 'filteredResources') as filters:
+					with XmlNode(filters, 'filter') as filter:
+						XmlNode(filter, 'id', '1321206201691').close()
+						XmlNode(filter, 'name').close()
+						XmlNode(filter, 'type', '30').close()
+						with XmlNode(filter, 'matcher') as matcher:
+							XmlNode(matcher, 'id', 'org.eclipse.ui.ide.multiFilter').close()
+							XmlNode(matcher, 'arguments', '1.0-name-matches-false-false-*').close()
 
-		natures = self.add(doc, projectDescription, 'natures')
-		nature_list = """
-			core.ccnature
-			managedbuilder.core.ScannerConfigNature
-			managedbuilder.core.managedBuildNature
-			core.cnature
-		""".split()
-		for n in nature_list:
-			self.add(doc, natures, 'nature', oe_cdt + '.' + n)
-
-		self.add(doc, natures, 'nature', 'org.python.pydev.pythonNature')
-
-		resources = self.add(doc, projectDescription, 'linkedResources')
-		seen = {}
-		def createProjectFolder(name, element, seen):
-			name = name.split('.')
-			path = ''
-			for n in name:
-				path = path + '/' + n
-				try:
-					element, seen = seen[n]
-				except KeyError:
-					seen[n] = (self.add(doc, element, 'link'), {})
-					element, seen = seen[n]
-					self.add(doc, element, 'name', path)
-					self.add(doc, element, 'type', '2')
-					self.add(doc, element, 'locationURI', 'virtual:/virtual')
-			return element, path[1:]
-		for g in self.groups:
-			for tg in g:
-				if not isinstance(tg, TaskGen.task_gen):
-					continue
-				tg.post()
-
-				element, name = createProjectFolder(tg.name, resources, seen)
-
-				for node in getattr(tg, 'source_nodes', []):
-					self.addSourceTree(doc, element, node, name, os.path.join('PROJECT_LOC', node.path_from(self.srcnode)))
-
-		filters = self.add(doc, projectDescription, 'filteredResources')
-		filter = self.add(doc, filters, 'filter')
-		self.add(doc, filter, 'id', '1321206201691')
-		self.add(doc, filter, 'name')
-		self.add(doc, filter, 'type', '30')
-		matcher = self.add(doc, filter, 'matcher')
-		self.add(doc, matcher, 'id', 'org.eclipse.ui.ide.multiFilter')
-		self.add(doc, matcher, 'arguments', '1.0-name-matches-false-false-*')
-
-		doc.appendChild(projectDescription)
-		return doc
-
-	def addSourceTree(self, doc, element, node, folder, path):
+	def addSourceTree(self, element, node, folder, path):
 		abspath = node.abspath()
-		link = self.add(doc, element, 'link')
-		self.add(doc, link, 'name', folder)
 		if os.path.isdir(abspath):
-			self.add(doc, link, 'type', '2')
-			self.add(doc, link, 'locationURI', 'virtual:/virtual')
+			with XmlNode(element, 'link') as link:
+				XmlNode(link, 'name', folder).close()
+				XmlNode(link, 'type', '2').close()
+				XmlNode(link, 'locationURI', 'virtual:/virtual').close()
 			for n in node.listdir():
-				self.addSourceTree(doc, element, node.make_node(n), folder+'/'+n, os.path.join(path, n))
+				self.addSourceTree(element, node.make_node(n), folder+'/'+n, os.path.join(path, n))
 		else:
-			self.add(doc, link, 'type', '1')
-			self.add(doc, link, 'locationURI', path.replace('\\', '/'))
+			with XmlNode(element, 'link') as link:
+				XmlNode(link, 'name', folder).close()
+				XmlNode(link, 'type', '1').close()
+				XmlNode(link, 'locationURI', path.replace('\\', '/')).close()
 
 
 
 
-	def impl_create_cproject(self, executable, waf, appname):
+	def impl_create_cproject(self, node, executable, waf, appname):
 		source_dirs = []
-		doc = Document()
-		doc.encoding = "UTF-8"
-		doc.appendChild(doc.createProcessingInstruction('fileVersion', '4.0.0'))
+		with XmlDocument(open(node.abspath(), 'w'), 'UTF-8', [('fileVersion', '4.0.0')]) as doc:
+			with XmlNode(doc, 'cproject') as cproject:
+				count = 0
+				with XmlNode(cproject, 'storageModule',	{'moduleId': cdt_core + '.settings'}) as rootStorageModule:
+					for toolchain in self.env.ALL_TOOLCHAINS:
+						for variant in self.env.ALL_VARIANTS:
+							env = self.all_envs['%s-%s'%(toolchain, variant)]
+							count = count+1
+							cconf_id = cdt_core + '.default.config.%d'%count
+							with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
+								with XmlNode(cconf, 'storageModule',
+										{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
+										'id': cconf_id,
+										'moduleId': cdt_core + '.settings',
+										'name': toolchain+':'+variant}) as storageModule:
+									XmlNode(storageModule, 'externalSettings').close()
+									with XmlNode(storageModule, 'extensions') as extensions:
+										extension_list = """
+											VCErrorParser
+											GmakeErrorParser
+											GCCErrorParser
+											GASErrorParser
+											GLDErrorParser
+											CWDLocator
+										""".split()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'}).close()
+										for e in extension_list:
+											XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'}).close()
 
-		cproject = doc.createElement('cproject')
-		count = 0
-		rootStorageModule = self.add(doc, cproject, 'storageModule',
-				{'moduleId': cdt_core + '.settings'})
+								with XmlNode(cconf, 'storageModule', {'moduleId': 'cdtBuildSystem', 'version': '4.0.0'}) as storageModule:
+									with XmlNode(storageModule, 'configuration',
+												{	'artifactName': appname,
+													'buildProperties': '',
+													'description': '',
+													'id': cconf_id,
+													'name': toolchain+':'+variant,
+													'parent': cdt_bld + '.prefbase.cfg'}) as config:
+										count = count+1
+										with XmlNode(config, 'folderInfo',
+															{'id': cconf_id+'.%d'%count, 'resourcePath': '', 'name': ''}) as folderInfo:
+											count = count+1
+											with XmlNode(folderInfo, 'toolChain',
+													{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+														'name': 'No ToolChain',
+														'resourceTypeBasedDiscovery': 'false',
+														'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
+												count = count+1
+												XmlNode(toolChain, 'targetPlatform',
+														{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
+															'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''}).close()
+												waf_build = '"%s" install:%s:%s'%(waf, toolchain, variant)
+												waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, variant)
+												count = count+1
+												XmlNode(toolChain, 'builder',
+																{	'autoBuildTarget': waf_build,
+																	'command': executable,
+																	'enableAutoBuild': 'false',
+																	'cleanBuildTarget': waf_clean,
+																	'id': cdt_bld + '.settings.default.builder.%d'%count,
+																	'incrementalBuildTarget': waf_build,
+																	'keepEnvironmentInBuildfile': 'false',
+																	'managedBuildOn': 'false',
+																	'name': 'Gnu Make Builder',
+																	'superClass': cdt_bld + '.settings.default.builder'}).close()
+												count = count+1
+												XmlNode(toolChain, 'tool',
+																{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
+																	'name': "holder for library settings",
+																	'superClass': cdt_bld + '.settings.holder.libs'}).close()
+												for tool_name in ("Assembly", "GNU C++", "GNU C"):
+													count = count+1
+													with XmlNode(toolChain, 'tool',
+																				{	'id': cdt_bld + '.settings.holder.%d'%count,
+																					'name': tool_name,
+																					'superClass': cdt_bld + '.settings.holder'}) as tool:
+														count = count+1
+														with XmlNode(tool, 'option',
+																	{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
+																		'superClass': cdt_bld + '.settings.holder.incpaths',
+																		'valueType': 'includePath'}) as includes:
+															for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
+																XmlNode(includes, 'listOptionValue', {'builtin': 'true', 'value': i}).close()
+														count = count+1
+														with XmlNode(tool, 'option',
+																	{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
+																		'superClass': cdt_bld + '.settings.holder.symbols',
+																		'valueType': 'definedSymbols'}) as defines:
+															for i in env.DEFINES:
+																XmlNode(defines, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
+														count = count+1
+														XmlNode(tool, 'inputType',
+																{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+																	'superClass': cdt_bld + '.settings.holder.inType'}).close()
+											count = count+1
+										for g in self.groups:
+											for tg in g:
+												if not isinstance(tg, TaskGen.task_gen):
+													continue
+												task_includes, task_defines = gather_includes_defines(tg)
+												task_includes = [path_from(i, self) for i in task_includes]
+												with XmlNode(config, 'folderInfo',
+																	{'id': cconf_id+'.%d'%count, 'resourcePath': '/' + tg.name.replace('.', '/'), 'name': ''}) as folderInfo:
+													count = count+1
+													with XmlNode(folderInfo, 'toolChain',
+																	{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+																		'name': 'No ToolChain',
+																		'unusedChidlren': '',
+																		'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
+														count = count+1
+														XmlNode(toolChain, 'tool',
+																			{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
+																				'name': "holder for library settings",
+																				'superClass': cdt_bld + '.settings.holder.libs'}).close()
+														for tool_name in ("Assembly", "GNU C++", "GNU C"):
+															count = count+1
+															with XmlNode(toolChain, 'tool',
+																						{	'id': cdt_bld + '.settings.holder.%d'%count,
+																							'name': tool_name,
+																							'superClass': cdt_bld + '.settings.holder'}) as tool:
+																count = count+1
+																with XmlNode(tool, 'option',
+																			{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
+																				'superClass': cdt_bld + '.settings.holder.incpaths',
+																				'valueType': 'includePath'}) as includes:
+																	for i in task_includes:
+																		XmlNode(includes, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
+																count = count+1
+																with XmlNode(tool, 'option',
+																			{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
+																				'superClass': cdt_bld + '.settings.holder.symbols',
+																				'valueType': 'definedSymbols'}) as defines:
+																	for i in task_defines:
+																		XmlNode(defines, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
+																count = count+1
+																XmlNode(tool, 'inputType',
+																		{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+																			'superClass': cdt_bld + '.settings.holder.inType'}).close()
+								XmlNode(cconf, 'storageModule', {'moduleId': 'org.eclipse.cdt.core.externalSettings'}).close()
 
-		for toolchain in self.env.ALL_TOOLCHAINS:
-			for variant in self.env.ALL_VARIANTS:
-				count = count+1
-				cconf_id = cdt_core + '.default.config.%d'%count
-				cconf = self.add(doc, rootStorageModule, 'cconfiguration', {'id':cconf_id})
+				with XmlNode(cproject, 'storageModule',
+									{	'moduleId': 'cdtBuildSystem',
+										'version': '4.0.0'}) as storageModule:
+					XmlNode(storageModule, 'project', {'id': '%s.null.0'%appname, 'name': appname}).close()
 
-				storageModule = self.add(doc, cconf, 'storageModule',
-						{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
-						'id': cconf_id,
-						'moduleId': cdt_core + '.settings',
-						'name': toolchain+':'+variant})
-				self.add(doc, storageModule, 'externalSettings')
+				with XmlNode(cproject, 'storageModule', {'moduleId': cdt_mk + '.buildtargets'}) as storageModule:
+					with XmlNode(storageModule, 'buildTargets') as buildTargets:
+						def addTargetWrap(name, runAll):
+							return self.addTarget(buildTargets, executable, name, '"%s" %s'%(waf, name), runAll)
+						addTargetWrap('reconfigure', True)
+						addTargetWrap('eclipse', False)
 
-				extensions = self.add(doc, storageModule, 'extensions')
-				extension_list = """
-					VCErrorParser
-					GmakeErrorParser
-					GCCErrorParser
-					GASErrorParser
-					GLDErrorParser
-					CWDLocator
-				""".split()
-				ext = self.add(doc, extensions, 'extension',
-							{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'})
-				ext = self.add(doc, extensions, 'extension',
-							{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'})
-				ext = self.add(doc, extensions, 'extension',
-							{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'})
-				for e in extension_list:
-					ext = self.add(doc, extensions, 'extension',
-							{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'})
-
-				storageModule = self.add(doc, cconf, 'storageModule',
-						{'moduleId': 'cdtBuildSystem', 'version': '4.0.0'})
-				config = self.add(doc, storageModule, 'configuration',
-							{	'artifactName': appname,
-								'buildProperties': '',
-								'description': '',
-								'id': cconf_id,
-								'name': toolchain+':'+variant,
-								'parent': cdt_bld + '.prefbase.cfg'})
-				count = count+1
-				folderInfo = self.add(doc, config, 'folderInfo',
-									{'id': cconf_id+'.%d'%count, 'resourcePath': '', 'name': ''})
-				count = count+1
-				toolChain = self.add(doc, folderInfo, 'toolChain',
-						{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-							'name': 'No ToolChain',
-							'resourceTypeBasedDiscovery': 'false',
-							'superClass': cdt_bld + '.prefbase.toolchain'})
-
-				count = count+1
-				targetPlatform = self.add(doc, toolChain, 'targetPlatform',
-						{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
-							'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''})
-
-				waf_build = '"%s" install:%s:%s'%(waf, toolchain, variant)
-				waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, variant)
-				count = count+1
-				builder = self.add(doc, toolChain, 'builder',
-								{	'autoBuildTarget': waf_build,
-									'command': executable,
-									'enableAutoBuild': 'false',
-									'cleanBuildTarget': waf_clean,
-									'id': cdt_bld + '.settings.default.builder.%d'%count,
-									'incrementalBuildTarget': waf_build,
-									'keepEnvironmentInBuildfile': 'false',
-									'managedBuildOn': 'false',
-									'name': 'Gnu Make Builder',
-									'superClass': cdt_bld + '.settings.default.builder'})
-				count = count+1
-				tool = self.add(doc, toolChain, 'tool',
-								{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-									'name': "holder for library settings",
-									'superClass': cdt_bld + '.settings.holder.libs'})
-
-				env = self.all_envs['%s-%s'%(toolchain, variant)]
-
-				count = count+1
-				folderInfo = self.add(doc, config, 'folderInfo',
-									{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''})
-				count = count+1
-				toolChain = self.add(doc, folderInfo, 'toolChain',
-						{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-							'name': 'No ToolChain',
-							'unusedChidlren': '',
-							'superClass': cdt_bld + '.prefbase.toolchain'})
-				count = count+1
-				tool = self.add(doc, toolChain, 'tool',
-								{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-									'name': "holder for library settings",
-									'superClass': cdt_bld + '.settings.holder.libs'})
-				for tool_name in ("Assembly", "GNU C++", "GNU C"):
-					count = count+1
-					tool = self.add(doc, toolChain, 'tool',
-							{	'id': cdt_bld + '.settings.holder.%d'%count,
-								'name': tool_name,
-								'superClass': cdt_bld + '.settings.holder'})
-					count = count+1
-					includes = self.add(doc, tool, 'option',
-							{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
-								'superClass': cdt_bld + '.settings.holder.incpaths',
-								'valueType': 'includePath'})
-					for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
-						self.add(doc, includes, 'listOptionValue', {'builtin': 'false', 'value': i})
-					count = count+1
-					defines = self.add(doc, tool, 'option',
-							{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
-								'superClass': cdt_bld + '.settings.holder.symbols',
-								'valueType': 'definedSymbols'})
-					for i in env.DEFINES:
-						self.add(doc, defines, 'listOptionValue', {'builtin': 'false', 'value': i})
-					count = count+1
-					defines = self.add(doc, tool, 'option',
-							{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-								'superClass': cdt_bld + '.settings.holder.inType'})
-
-					input = self.add(doc, tool, 'inputType',
-							{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-								'superClass': cdt_bld + '.settings.holder.inType'})
-				storageModule = self.add(doc, cconf, 'storageModule',
-									{'moduleId': 'org.eclipse.cdt.core.externalSettings'})
-
-		storageModule = self.add(doc, cproject, 'storageModule',
-							{	'moduleId': 'cdtBuildSystem',
-								'version': '4.0.0'})
-
-		project = self.add(doc, storageModule, 'project',
-					{'id': '%s.null.0'%appname, 'name': appname})
-
-		storageModule = self.add(doc, cproject, 'storageModule',
-							{'moduleId': cdt_mk + '.buildtargets'})
-		buildTargets = self.add(doc, storageModule, 'buildTargets')
-		def addTargetWrap(name, runAll):
-			return self.addTarget(doc, buildTargets, executable, name,
-							'"%s" %s'%(waf, name), runAll)
-		addTargetWrap('reconfigure', True)
-		addTargetWrap('eclipse', False)
-
-		doc.appendChild(cproject)
-		return doc
-
-	def impl_create_pydevproject(self, appname, system_path, user_path):
+	def impl_create_pydevproject(self, node, appname, system_path, user_path):
 		# create a pydevproject file
-		doc = Document()
-		doc.appendChild(doc.createProcessingInstruction('eclipse-pydev', 'version="1.0"'))
-		pydevproject = doc.createElement('pydev_project')
-		prop = self.add(doc, pydevproject,
-						'pydev_property',
-						'python %d.%d'%(sys.version_info[0], sys.version_info[1]))
-		prop.setAttribute('name', 'org.python.pydev.PYTHON_PROJECT_VERSION')
-		prop = self.add(doc, pydevproject, 'pydev_property', 'Default')
-		prop.setAttribute('name', 'org.python.pydev.PYTHON_PROJECT_INTERPRETER')
-		# add waf's paths
-		wafadmin = [p for p in system_path if p.find('wafadmin') != -1]
-		if wafadmin:
-			prop = self.add(doc, pydevproject, 'pydev_pathproperty',
-					{'name':'org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH'})
-			for i in wafadmin:
-				self.add(doc, prop, 'path', i)
-		if user_path:
-			prop = self.add(doc, pydevproject, 'pydev_pathproperty',
-					{'name':'org.python.pydev.PROJECT_SOURCE_PATH'})
-			for i in user_path:
-				self.add(doc, prop, 'path', '/'+appname+'/'+i)
+		with XmlDocument(open(node.abspath(), 'w'), 'UTF-8', [('eclipse-pydev', 'version="1.0"')]) as doc:
+			with XmlNode(doc, 'pydev_project') as pydevproject:
+				XmlNode(pydevproject, 'pydev_property',
+						'python %d.%d'%(sys.version_info[0], sys.version_info[1]), {'name': 'org.python.pydev.PYTHON_PROJECT_VERSION'}).close()
+				XmlNode(pydevproject, 'pydev_property', 'Default', {'name': 'org.python.pydev.PYTHON_PROJECT_INTERPRETER'}).close()
+				# add waf's paths
+				wafadmin = [p for p in system_path if p.find('wafadmin') != -1]
+				if wafadmin:
+					with XmlNode(pydevproject, 'pydev_pathproperty',
+							{'name':'org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH'}) as prop:
+						for i in wafadmin:
+							XmlNode(prop, 'path', i).close()
+				if user_path:
+					with XmlNode(pydevproject, 'pydev_pathproperty',
+							{'name':'org.python.pydev.PROJECT_SOURCE_PATH'}) as prop:
+						for i in user_path:
+							XmlNode(prop, 'path', '/'+appname+'/'+i).close()
 
-		doc.appendChild(pydevproject)
-		return doc
 
-	def addDictionary(self, doc, parent, k, v):
-		dictionary = self.add(doc, parent, 'dictionary')
-		self.add(doc, dictionary, 'key', k)
-		self.add(doc, dictionary, 'value', v)
-		return dictionary
-
-	def addTarget(self, doc, buildTargets, executable, name, buildTarget, runAllBuilders=True):
-		target = self.add(doc, buildTargets, 'target',
+	def addTarget(self, buildTargets, executable, name, buildTarget, runAllBuilders=True):
+		with XmlNode(buildTargets, 'target',
 						{	'name': name,
 							'path': '',
-							'targetID': oe_cdt + '.build.MakeTargetBuilder'})
-		self.add(doc, target, 'buildCommand', executable)
-		self.add(doc, target, 'buildArguments', None)
-		self.add(doc, target, 'buildTarget', buildTarget)
-		self.add(doc, target, 'stopOnError', 'true')
-		self.add(doc, target, 'useDefaultCommand', 'false')
-		self.add(doc, target, 'runAllBuilders', str(runAllBuilders).lower())
-
-	def add(self, doc, parent, tag, value = None):
-		el = doc.createElement(tag)
-		if (value):
-			if type(value) == type(str()):
-				el.appendChild(doc.createTextNode(value))
-			elif type(value) == type(dict()):
-				self.setAttributes(el, value)
-		parent.appendChild(el)
-		return el
-
-	def setAttributes(self, node, attrs):
-		for k, v in attrs.items():
-			node.setAttribute(k, v)
+							'targetID': oe_cdt + '.build.MakeTargetBuilder'}) as target:
+			XmlNode(target, 'buildCommand', executable).close()
+			XmlNode(target, 'buildArguments', None).close()
+			XmlNode(target, 'buildTarget', buildTarget).close()
+			XmlNode(target, 'stopOnError', 'true').close()
+			XmlNode(target, 'useDefaultCommand', 'false').close()
+			XmlNode(target, 'runAllBuilders', str(runAllBuilders).lower()).close()
 
