@@ -17,39 +17,41 @@ def unique(seq):
 	seen_add = seen.add
 	return [x for x in seq if x not in seen and not seen_add(x)]
 
+def path_from(path, task_gen, appname):
+	if isinstance(path, str):
+		return path
+	else:
+		for node in task_gen.source_nodes:
+			if path.is_child_of(node):
+				return '${workspace_loc:/%s/%s/%s}' % (appname, task_gen.name.replace('.', '/'), path.path_from(node).replace('\\', '/'))
+		else:
+			return node.abspath()
 
-def gather_includes_defines(task_gen):
+
+def gather_includes_defines(task_gen, appname):
 	def gather_includes_defines_recursive(task_gen):
 		try:
 			return task_gen.bug_eclipse_cache
 		except AttributeError:
 			includes = getattr(task_gen, 'export_includes', [])
 			defines = getattr(task_gen, 'export_defines', [])
+			includes = [path_from(i, task_gen, appname) for i in includes]
 			use = getattr(task_gen, 'use', [])
 			for task_name in use:
 				try:
-					t = task_gen.bld.get_tgen_by_name(name)
+					t = task_gen.bld.get_tgen_by_name(task_name)
 				except:
 					pass
 				else:
 					use_includes, use_defines = gather_includes_defines_recursive(t)
-					includes += use_includes
-					defines += use_defines
+					includes = includes+use_includes
+					defines = defines+use_defines
 			task_gen.bug_eclipse_cache = (includes, defines)
 			return task_gen.bug_eclipse_cache
-
 	includes, defines = gather_includes_defines_recursive(task_gen)
-	includes += getattr(task_gen, 'includes', [])
-	defines += getattr(task_gen, 'defines', [])
+	includes = includes + [path_from(i, task_gen, appname) for i in getattr(task_gen, 'includes', [])]
+	defines = defines + getattr(task_gen, 'defines', [])
 	return unique(includes), unique(defines)
-
-def path_from(path, bld):
-	if isinstance(path, str):
-		return path
-	else:
-		return 'PROJECT_LOC:/' + path.path_from(bld.srcnode)
-
-
 
 class eclipse(Build.BuildContext):
 	cmd = 'eclipse'
@@ -74,6 +76,7 @@ class eclipse(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(Deploy_DataDir)'
 		self.env.DEPLOY_PLUGINDIR = '$(Deploy_PluginDir)'
 		self.env.DEPLOY_KERNELDIR = '$(Deploy_KernelDir)'
+		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
@@ -139,8 +142,6 @@ class eclipse(Build.BuildContext):
 						for tg in g:
 							if not isinstance(tg, TaskGen.task_gen):
 								continue
-							tg.post()
-
 							name = createProjectFolder(tg.name, resources, seen)
 							for node in getattr(tg, 'source_nodes', []):
 								self.addSourceTree(resources, node, name, os.path.join('PROJECT_LOC', node.path_from(self.srcnode)))
@@ -219,7 +220,7 @@ class eclipse(Build.BuildContext):
 													'parent': cdt_bld + '.prefbase.cfg'}) as config:
 										count = count+1
 										with XmlNode(config, 'folderInfo',
-															{'id': cconf_id+'.%d'%count, 'resourcePath': '', 'name': ''}) as folderInfo:
+															{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''}) as folderInfo:
 											count = count+1
 											with XmlNode(folderInfo, 'toolChain',
 													{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
@@ -278,8 +279,7 @@ class eclipse(Build.BuildContext):
 											for tg in g:
 												if not isinstance(tg, TaskGen.task_gen):
 													continue
-												task_includes, task_defines = gather_includes_defines(tg)
-												task_includes = [path_from(i, self) for i in task_includes]
+												task_includes, task_defines = gather_includes_defines(tg, appname)
 												with XmlNode(config, 'folderInfo',
 																	{'id': cconf_id+'.%d'%count, 'resourcePath': '/' + tg.name.replace('.', '/'), 'name': ''}) as folderInfo:
 													count = count+1

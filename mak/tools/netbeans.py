@@ -195,6 +195,7 @@ class netbeans(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(DEPLOY_DATADIR)'
 		self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
 		self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
+		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
 
