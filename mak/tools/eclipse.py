@@ -261,8 +261,9 @@ class eclipse(Build.BuildContext):
 																	{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
 																		'superClass': cdt_bld + '.settings.holder.incpaths',
 																		'valueType': 'includePath'}) as includes:
-															for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
-																XmlNode(includes, 'listOptionValue', {'builtin': 'true', 'value': i}).close()
+															pass
+															#for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
+															#	XmlNode(includes, 'listOptionValue', {'builtin': 'true', 'value': i}).close()
 														count = count+1
 														with XmlNode(tool, 'option',
 																	{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
