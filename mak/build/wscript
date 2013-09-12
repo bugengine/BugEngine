@@ -53,8 +53,12 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 			extras.append(extra_source_node)
 			sources += extra_source_node.ant_glob('src/**/*.%s'%ext for ext in extensions + ['script.hh'])
 			if platform in platforms:
-				api += [extra_source_node.make_node('api')]
-				include += [extra_source_node.make_node('include')]
+				n = extra_source_node.make_node('api')
+				if os.path.isdir(n.abspath()):
+					api += [n]
+				n = extra_source_node.make_node('include')
+				if os.path.isdir(n.abspath()):
+					include += [n]
 
 
 
@@ -90,7 +94,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
 						defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
-						includes = api+include+[bld.srcnode],
+						includes = api+include,
 						source = kernelsources,
 						env = env.derive(),
 						use = depends + [name],
@@ -111,7 +115,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 		extra_use = extra_features,
 		defines = ['building_%s' % safe_name(name.split('.')[-1]), 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
 		export_defines = [],
-		includes = api+include+[bld.srcnode],
+		includes = api+include,
 		libs = [],
 		lib_paths = lib_paths,
 		export_includes = api,

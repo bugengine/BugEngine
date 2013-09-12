@@ -1,4 +1,11 @@
 
+def xmlify(s):
+	s = s.replace("&", "&amp;") # do this first
+	s = s.replace("'", "&apos;")
+	s = s.replace('"', "&quot;")
+	return s
+
+
 class XmlNode:
 	def __init__(self, parent, name, text='', attributes = None):
 		assert(not parent.closed)
@@ -32,9 +39,9 @@ class XmlNode:
 		if isinstance(text, dict):
 			indent = self.indent + 4
 			for key, value in text.items():
-				self.file.write('\n%s%s="%s"' % (' '*indent, key, value))
+				self.file.write('\n%s%s="%s"' % (' '*indent, key, xmlify(value)))
 		elif isinstance(text, str) and text:
-			self.file.write('>%s</%s>\n' % (text, self.name))
+			self.file.write('>%s</%s>\n' % (xmlify(text), self.name))
 			assert(self.parent.current == self)
 			self.parent.current = None
 			self.closed = True
