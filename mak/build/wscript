@@ -1,6 +1,10 @@
 from waflib.Configure import conf
 from waflib.TaskGen import feature, extension, before_method, after_method
 import os
+from waflib.Tools import c, cxx
+
+c.cshlib.inst_to = ''
+cxx.cxxshlib.inst_to = ''
 
 def safe_name(name):
 	name = name.replace('-', '_')
@@ -8,6 +12,7 @@ def safe_name(name):
 	return name
 
 def options(opt):
+	opt.add_option('--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler')
 	gr = opt.get_option_group('build and install options')
 	gr.add_option(	'--nomaster',
 					action = 'store_true',
@@ -140,6 +145,7 @@ def thirdparty(bld, name, libs=[], lib_paths=[], frameworks=[], includes=[], def
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
 
 	lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+	bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
 	includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
 
 	bld.env['DEFINES_%s' % name] = defines
@@ -147,6 +153,9 @@ def thirdparty(bld, name, libs=[], lib_paths=[], frameworks=[], includes=[], def
 	bld.env['FRAMEWORK_%s' % name] = frameworks
 	bld.env['LIBPATH_%s' % name] = lib_paths
 	bld.env['LIB_%s' % name] = libs
+	for bin_path in bin_paths:
+		for bin in bin_path.listdir():
+			bld.install_as(os.path.join(bld.env.PREFIX, bld.env.DEPLOY_RUNBINDIR, bin), bin_path.make_node(bin))
 	if bld.env.PROJECTS:
 		bld(
 			target=name,

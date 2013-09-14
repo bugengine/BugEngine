@@ -119,6 +119,7 @@ def configure(conf):
 				toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.env.MSVC_VERSIONS = [version]
@@ -155,6 +156,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
@@ -188,6 +190,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory, target)
@@ -226,4 +229,5 @@ def plugins(bld):
 @after_method('apply_link')
 @before_method('apply_implib')
 def apply_implib_program(self):
-	self.apply_implib()
+	if self.env.DEST_OS == 'win32':
+		self.apply_implib()

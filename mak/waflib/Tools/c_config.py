@@ -1081,15 +1081,15 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 		# The names given to DEST_OS must match what Utils.unversioned_sys_platform() returns.
 		if not conf.env.DEST_OS:
 			conf.env.DEST_OS = ''
-		for i in MACRO_TO_DESTOS:
-			if isD(i):
-				conf.env.DEST_OS = MACRO_TO_DESTOS[i]
-				break
-		else:
-			if isD('__APPLE__') and isD('__MACH__'):
-				conf.env.DEST_OS = 'darwin'
-			elif isD('__unix__'): # unix must be tested last as it's a generic fallback
-				conf.env.DEST_OS = 'generic'
+			for i in MACRO_TO_DESTOS:
+				if isD(i):
+					conf.env.DEST_OS = MACRO_TO_DESTOS[i]
+					break
+			else:
+				if isD('__APPLE__') and isD('__MACH__'):
+					conf.env.DEST_OS = 'darwin'
+				elif isD('__unix__'): # unix must be tested last as it's a generic fallback
+					conf.env.DEST_OS = 'generic'
 
 		if isD('__ELF__'):
 			conf.env.DEST_BINFMT = 'elf'

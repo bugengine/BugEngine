@@ -124,42 +124,45 @@ def set_android_options(conf, arch):
 
 def configure(conf):
 	seen = set([])
+	android_archs = ['arm', 'mipsel', 'x86']
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		real_arch, flags = arch
-		gcc, triple = find_android_gcc_toolchain(directory, real_arch)
-		if gcc:
-			flags = ['-gcc-toolchain', gcc, '-target', triple]
-			os = 'android'
-			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
-			if toolchain not in seen:
-				seen.add(toolchain)
-				env = conf.env.derive()
-				conf.setenv(toolchain, env)
-				try:
-					conf.start_msg('Setting up compiler')
-					conf.load_clang(directory)
-					conf.set_android_clang_options(flags, real_arch)
-				except Exception as e:
-					conf.end_msg(e, color='RED')
-					raise
-				else:
-					conf.end_msg('done')
+		for real_arch in android_archs:
+			gcc, triple = find_android_gcc_toolchain(directory, real_arch)
+			if gcc:
+				flags = ['-gcc-toolchain', gcc, '-target', triple]
+				os = 'android'
+				toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
+				if toolchain not in seen:
+					seen.add(toolchain)
+					env = conf.env.derive()
+					conf.setenv(toolchain, env)
+					env.DEST_OS = 'android'
 					try:
-						conf.set_android_options(real_arch)
-						toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
-						conf.setenv(toolchain, conf.env.derive())
-						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
-					except Errors.WafError as e:
-						conf.variant = ''
-						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+						conf.start_msg('Setting up compiler')
+						conf.load_clang(directory)
+						conf.set_android_clang_options(flags, real_arch)
 					except Exception as e:
-						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
+						conf.end_msg(e, color='RED')
 						raise
 					else:
-						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+						conf.end_msg('done')
+						try:
+							conf.set_android_options(real_arch)
+							toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
+							conf.setenv(toolchain, conf.env.derive())
+							conf.env.KERNEL_TOOLCHAINS = [toolchain]
+							conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
+						except Errors.WafError as e:
+							conf.variant = ''
+							pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+						except Exception as e:
+							conf.variant = ''
+							pprint('RED', '%s failed: %s' % (toolchain, e))
+							raise
+						else:
+							conf.variant = ''
+							pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('android')
@@ -170,6 +173,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'android'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
