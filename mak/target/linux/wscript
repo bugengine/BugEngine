@@ -183,6 +183,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'linux'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_suncc(directory)
@@ -216,6 +217,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'linux'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_icc(bindir, gcc, gxx, version, target, arch, options)
@@ -249,6 +251,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'linux'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
@@ -282,6 +285,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'linux'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)

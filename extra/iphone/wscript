@@ -171,6 +171,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'darwin'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
@@ -212,6 +213,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'darwin'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory)
