@@ -261,9 +261,8 @@ class eclipse(Build.BuildContext):
 																	{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
 																		'superClass': cdt_bld + '.settings.holder.incpaths',
 																		'valueType': 'includePath'}) as includes:
-															pass
-															#for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
-															#	XmlNode(includes, 'listOptionValue', {'builtin': 'true', 'value': i}).close()
+															for i in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES:
+																XmlNode(includes, 'listOptionValue', {'builtin': 'true', 'value': i}).close()
 														count = count+1
 														with XmlNode(tool, 'option',
 																	{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
@@ -305,8 +304,9 @@ class eclipse(Build.BuildContext):
 																			{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
 																				'superClass': cdt_bld + '.settings.holder.incpaths',
 																				'valueType': 'includePath'}) as includes:
-																	for i in task_includes:
-																		XmlNode(includes, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
+																	pass
+																	#for i in task_includes:
+																	#	XmlNode(includes, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
 																count = count+1
 																with XmlNode(tool, 'option',
 																			{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
