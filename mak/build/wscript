@@ -31,9 +31,11 @@ def options(opt):
 					help = 'build completely dynamic executable: All engine components, plugins, samples and kernels will be built as shared objects')
 
 def module(bld, name, depends, valid_platforms, features, use_master, warnings):
-	archs = bld.env.VALID_ARCHITECTURES
 	platforms = bld.env.VALID_PLATFORMS
-	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
+	build = len(valid_platforms) == 0
+	for p in valid_platforms:
+		if p in platforms:
+			build = True
 
 	extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'll', 'yy', 'm', 'mm', 'so', 'dll', 'plist', 'png', 'pkg', 'lua']
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
@@ -46,26 +48,18 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	except OSError:
 		pass
 
-	api = [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	include = [i for i in [source_node.make_node('include')] + [source_node.make_node('include.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-
 	extras = []
 	for platform in bld.bugenginenode.make_node('extra').listdir():
 		path = os.path.join('extra', platform, '/'.join(name.split('.')))
 		if os.path.isdir(path):
 			extra_source_node = bld.bugenginenode.make_node(path)
-			extras.append(extra_source_node)
+			extras.append((platform, extra_source_node))
 			sources += extra_source_node.ant_glob('src/**/*.%s'%ext for ext in extensions + ['script.hh'])
-			if platform in platforms:
-				n = extra_source_node.make_node('api')
-				if os.path.isdir(n.abspath()):
-					api += [n]
-				n = extra_source_node.make_node('include')
-				if os.path.isdir(n.abspath()):
-					include += [n]
 
 
+	api = [i for i in [source_node.make_node('api')] if os.path.isdir(i.abspath())]
+	include = [i for i in [source_node.make_node('include')] if os.path.isdir(i.abspath())]
+	lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] if os.path.isdir(i.abspath())]
 
 	if api and os.path.isfile(os.path.join(api[0].path_from(bld.srcnode), name.split('.')[-1], 'stdafx.h')):
 		pchstop = '%s/%s'%(name.split('.')[-1], 'stdafx.h')
@@ -77,57 +71,80 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 	if use_master:
 		features = features + ['master']
 	if warnings:
-		extra_features = ['warnall', bld.env.VARIANT]
+		extra_features = ['warnall', bld.__class__.optim]
 	else:
-		extra_features = ['warnnone', bld.env.VARIANT]
+		extra_features = ['warnnone', bld.__class__.optim]
 
-	build = len(valid_platforms) == 0
-	for p in valid_platforms:
-		if p in platforms:
-			build = True
 
-	if build:
-		if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
-			kernelspath = source_node.make_node('kernels')
-			for kernel in kernelspath.listdir():
-				kernelpath = kernelspath.make_node(kernel)
-				kernelsources = kernelpath.ant_glob(['**'])
-				for toolchain in bld.env.KERNEL_TOOLCHAINS:
-					env = bld.all_envs[toolchain]
-					bld(
-						target = name + '.' + kernel,
-						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
-						extra_use = extra_features,
-						defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
-						includes = api+include,
-						source = kernelsources,
-						env = env.derive(),
-						use = depends + [name],
-						install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_KERNELDIR))
-	else:
-		sources = []
-		if 'cxxshlib' in features:
-			features.remove('cxxshlib')
-		if 'cxxprogram' in features:
-			features.remove('cxxprogram')
-		if 'cxxstlib' in features:
-			features.remove('cxxstlib')
+	result = []
+	sub_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
+	internal_deps = []
+	for env in sub_envs:
+		archs = env.VALID_ARCHITECTURES
+		platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
 
-	return bld(
-		target = name,
-		use = depends,
-		features = features,
-		extra_use = extra_features,
-		defines = ['building_%s' % safe_name(name.split('.')[-1]), 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
-		export_defines = [],
-		includes = api+include,
-		libs = [],
-		lib_paths = lib_paths,
-		export_includes = api,
-		frameworks = [],
-		source = sources,
-		pchstop = pchstop,
-		source_nodes = [source_node] + extras)
+		platform_api = [i for i in [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		platform_include = [i for i in [source_node.make_node('include.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		platform_lib_paths = [i for i in [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+
+		for platform, extra_source_node in extras:
+			if platform in platforms:
+				n = extra_source_node.make_node('api')
+				if os.path.isdir(n.abspath()):
+					api += [n]
+				n = extra_source_node.make_node('include')
+				if os.path.isdir(n.abspath()):
+					include += [n]
+
+		target_prefix = env.ENV_PREFIX or ''
+		if build:
+			if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
+				kernelspath = source_node.make_node('kernels')
+				for kernel in kernelspath.listdir():
+					kernelpath = kernelspath.make_node(kernel)
+					kernelsources = kernelpath.ant_glob(['**'])
+					for toolchain in bld.env.KERNEL_TOOLCHAINS:
+						env = bld.all_envs[toolchain].derive()
+						bld(
+							target = target_prefix + name + '.' + kernel,
+							features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
+							extra_use = extra_features,
+							defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
+							includes = api + platform_api + include + platform_include,
+							source = kernelsources,
+							env = env.derive(),
+							use = [target_prefix + d for d in depends] + [target_prefix + name],
+							install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
+		else:
+			sources = []
+			if 'cxxshlib' in features:
+				features.remove('cxxshlib')
+			if 'cxxprogram' in features:
+				features.remove('cxxprogram')
+			if 'cxxstlib' in features:
+				features.remove('cxxstlib')
+		result.append(bld(
+			env = env.derive(),
+			target = target_prefix + name,
+			target_name = name,
+			use = [target_prefix + d for d in depends],
+			features = features,
+			extra_use = extra_features,
+			defines = ['building_%s' % safe_name(name.split('.')[-1]), 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name],
+			export_defines = [],
+			includes = api + platform_api + include + platform_include,
+			libs = [],
+			lib_paths = lib_paths,
+			export_includes = api + platform_api,
+			frameworks = [],
+			source = sources,
+			pchstop = pchstop,
+			source_nodes = [source_node] + extras))
+		if target_prefix:
+			internal_deps.append(target_prefix + name)
+	if internal_deps:
+		bld(target=name, use=internal_deps)
+	return result
 
 @conf
 def external(bld, name):
@@ -139,26 +156,28 @@ def external(bld, name):
 
 @conf
 def thirdparty(bld, name, libs=[], lib_paths=[], frameworks=[], includes=[], defines=[], use_master=True, warnings=True):
-	archs = bld.env.VALID_ARCHITECTURES
-	platforms = bld.env.VALID_PLATFORMS
-	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
-	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
+	sub_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
+	for env in sub_envs:
+		archs = env.VALID_ARCHITECTURES
+		platforms = env.VALID_PLATFORMS
+		platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
+		source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
 
-	lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
 
-	bld.env['DEFINES_%s' % name] = defines
-	bld.env['INCLUDES_%s' % name] = includes
-	bld.env['FRAMEWORK_%s' % name] = frameworks
-	bld.env['LIBPATH_%s' % name] = lib_paths
-	bld.env['LIB_%s' % name] = libs
-	for bin_path in bin_paths:
-		for bin in bin_path.listdir():
-			bld.install_as(os.path.join(bld.env.PREFIX, bld.env.DEPLOY_RUNBINDIR, bin), bin_path.make_node(bin))
+		target_name = (env.ENV_PREFIX or '') + name
+		env['DEFINES_%s' % target_name] = defines
+		env['INCLUDES_%s' % target_name] = includes
+		env['FRAMEWORK_%s' % target_name] = frameworks
+		env['LIBPATH_%s' % target_name] = lib_paths
+		env['LIB_%s' % target_name] = libs
+		for bin_path in bin_paths:
+			for bin in bin_path.listdir():
+				bld.install_as(os.path.join(env.PREFIX, bld.__class__.optim, env.DEPLOY_RUNBINDIR, bin), bin_path.make_node(bin))
 	if bld.env.PROJECTS:
-		bld(
-			target=name,
+		bld(target=name,
 			includes=includes,
 			defines=defines,
 			source_nodes=[source_node])
@@ -206,7 +225,8 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		bld.launcher_name = name
 	else:
 		m = module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], use_master, warnings)
-		m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_BINDIR)
+		for r in m:
+			r.install_path = os.path.join(r.env.PREFIX, bld.__class__.optim, r.env.DEPLOY_BINDIR)
 	return m
 
 @conf
@@ -218,7 +238,8 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends,platforms,  ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'], use_master, warnings)
-	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
+	for r in m:
+		r.install_path = os.path.join(r.env.PREFIX, bld.__class__.optim, r.env.DEPLOY_PLUGINDIR)
 	return m
 
 @conf
@@ -230,7 +251,8 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	m = module(bld, name, depends, platforms, ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'], use_master, warnings)
-	m.install_path = os.path.join(bld.env.PREFIX, bld.env.DEPLOY_PLUGINDIR)
+	for r in m:
+		r.install_path = os.path.join(r.env.PREFIX, bld.__class__.optim, r.env.DEPLOY_PLUGINDIR)
 	return m
 
 def build(bld):
@@ -243,14 +265,13 @@ def check_use_taskgens(self):
 	"""
 	use = getattr(self, 'use', [])
 	for name in use:
-		if name not in self.env.ALL_VARIANTS:
+		try:
+			y = self.bld.get_tgen_by_name(name)
+		except:
 			try:
-				y = self.bld.get_tgen_by_name(name)
-			except:
-				try:
-					self.uselib.append(name)
-				except AttributeError:
-					self.uselib = [name]
+				self.uselib.append(name)
+			except AttributeError:
+				self.uselib = [name]
 
 @feature('cxx')
 def set_building_name_inherits(self):
@@ -281,7 +302,7 @@ def static_dependencies(self):
 																real_target=self.bld.launcher_name,
 																features=['cxx', 'cxxprogram', 'launcher', 'launcher_static'],
 																use = [])
-			launcher_task.install_path = os.path.join(self.bld.env.PREFIX, self.bld.env.DEPLOY_BINDIR)
+			launcher_task.install_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, self.bld.env.DEPLOY_BINDIR)
 		self.bld.launcher_static.use.append(self.target)
 
 @feature('launcher_static')

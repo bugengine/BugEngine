@@ -6,4 +6,5 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.static_library('3rdparty.squirrel', bld.platforms, warnings=False).defines.append('_BSD_SOURCE')
+	for squirrel in bld.static_library('3rdparty.squirrel', bld.platforms, warnings=False):
+		squirrel.defines.append('_BSD_SOURCE')
