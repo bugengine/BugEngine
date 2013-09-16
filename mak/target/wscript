@@ -4,33 +4,35 @@ from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallCo
 from waflib.Configure import conf
 
 
-def add_build_command(toolchain, optim):
+def add_build_command(toolchain, optimisation):
 	for command in (BuildContext, CleanContext, InstallContext, UninstallContext, ListContext):
 		name = command.__name__.replace('Context','').lower()
 		class Command(command):
-			cmd = name + ':' + toolchain + ':' + optim
-			variant = toolchain + '-' + optim
+			optim = optimisation
+			cmd = name + ':' + toolchain + ':' + optimisation
+			variant = toolchain
+
+			def get_variant_dir(self):
+				return os.path.join(self.out_dir, self.variant, self.optim)
+			variant_dir = property(get_variant_dir, None)
 
 @conf
 def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
 	toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
-	original_env = self.env
-	original_env.TOOLCHAIN=toolchain
+	e = self.env
+	e.TOOLCHAIN=toolchain
 	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
 	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
-	original_env.DEFINES.append('BE_PLATFORM=platform_%s'%original_env.VALID_PLATFORMS[0])
-	if original_env.STATIC:
-		original_env.DEFINES.append('BE_STATIC=1')
+	e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
+	e.PREFIX = os.path.join('build', toolchain)
+	if e.STATIC:
+		e.DEFINES.append('BE_STATIC=1')
 	for optim in self.env.ALL_VARIANTS:
-		env = original_env.derive()
-		self.setenv(toolchain+'-'+optim, env)
-		self.env.VARIANT = optim
-		self.env.PREFIX = os.path.join('build', toolchain, optim)
 		add_build_command(toolchain, optim)
 	self.variant = ''
 	self.env.append_unique('ALL_TOOLCHAINS', toolchain)
-	self.env.append_unique('ALL_PLATFORMS', [p for p in original_env.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
-	self.env.append_unique('ALL_ARCHITECTURES', [a for a in original_env.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
+	self.env.append_unique('ALL_PLATFORMS', [p for p in e.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
+	self.env.append_unique('ALL_ARCHITECTURES', [a for a in e.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
 
 def options(opt):
 	for extra in opt.bugenginenode.make_node('extra').listdir():

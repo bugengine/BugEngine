@@ -16,7 +16,7 @@ def set_windows_options(self):
 	self.env.DEPLOY_DATADIR = 'data'
 	self.env.DEPLOY_PLUGINDIR = 'data/plugin'
 	self.env.DEPLOY_KERNELDIR = 'data/kernel'
-	
+
 	self.env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
 
 @conf
