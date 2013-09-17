@@ -52,7 +52,7 @@ struct InterlockedType<4>
         typedef __attribute__ ((aligned(4))) i32         value_t;
         typedef __attribute__ ((aligned(4))) i32         counter_t;
         typedef counter_t    tag_t;
-        __attribute__ ((aligned(8)))) struct
+        __attribute__ ((aligned(8))) struct
         {
             volatile counter_t   tag;
             volatile value_t     value;

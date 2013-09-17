@@ -49,6 +49,8 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/grammar/value.py'),
 		self.path.find_or_declare('mak/cpp/grammar/skip.py'),
 		]
-	self.source.append(outs[0])
-	self.source.append(outs[1])
+	try:
+		self.out_sources += outs
+	except:
+		self.out_sources = outs[:]
 
