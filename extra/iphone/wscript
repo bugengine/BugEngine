@@ -16,7 +16,7 @@ def options(opt):
 
 
 @conf
-def set_iphone_options(self, target, all_sdks):
+def set_iphone_options(self, target, all_sdks, sdk_hint):
 	self.env.VALID_PLATFORMS = ['iphone', 'darwin']
 
 	self.env.XCODE_SDKROOT = 'iphoneos'
@@ -53,7 +53,8 @@ def set_iphone_options(self, target, all_sdks):
 	sdks.sort()
 	self.start_msg('Looking for SDK')
 	for sdk, sdk_path in sdks[::-1]:
-		if Options.options.iphone_sdk and not sdk.startswith(Options.options.iphone_sdk):
+		sdk_hint = sdk_hint or Options.options.iphone_sdk
+		if sdk_hint and not sdk.startswith(sdk_hint):
 			continue
 		try:
 			self.check_sdk(sdk_path, '-miphoneos-version-min=%s'%sdk)
@@ -70,6 +71,7 @@ def set_iphone_options(self, target, all_sdks):
 	self.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+	return sdk
 
 @conf
 def set_iphone_gcc_options(self, arch):
@@ -152,17 +154,27 @@ def set_iphone_clang_options(self, flags):
 
 
 def configure(conf):
-	seen = set([])
 	supported_architectures = {
 		'x86':		'iPhoneSimulator',
 		'i386':		'iPhoneSimulator',
 		'arm':		'iPhoneOS',
 		'armv7':	'iPhoneOS',
 	}
+	os = 'iphone'
+	gcc_versions = {}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
-			os = 'iphone'
+			try:
+				gcc_versions[(name, version)].append((name, bindir, gcc, gxx, version, target, arch, options))
+			except KeyError:
+				gcc_versions[(name, version)] = [(name, bindir, gcc, gxx, version, target, arch, options)]
+	for key, gcc_arch_list in gcc_versions.items():
+		iphone_toolchains = []
+		iphone_archs = []
+		seen = set([])
+		sdk_number = ''
+		for name, bindir, gcc, gxx, version, target, arch, options in gcc_arch_list:
 			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = arch
 			real_os = supported_architectures[arch]
@@ -186,13 +198,11 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_iphone_options(real_os, False)
+						sdk_number = conf.set_iphone_options(real_os, False, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
 						conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, name, version, real_arch)
-						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -200,11 +210,34 @@ def configure(conf):
 						conf.variant = ''
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
+					else:
+						iphone_toolchains.append(toolchain)
+						iphone_archs.append(arch)
+						conf.variant = ''
+		if iphone_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(iphone_archs), name, version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['iphone', 'darwin']
+			conf.env.SUB_TOOLCHAINS = iphone_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
+	clang_versions = {}
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		real_arch, flags = arch
 		position = target.find('darwin')
 		if position != -1 and real_arch in supported_architectures:
+			try:
+				clang_versions[version].append((version, directory, target, real_arch, flags))
+			except KeyError:
+				clang_versions[version] = [(version, directory, target, real_arch, flags)]
+	for key, clang_arch_list in clang_versions.items():
+		iphone_toolchains = []
+		iphone_archs = []
+		seen = set([])
+		sdk_number = ''
+		for version, directory, target, real_arch, flags in clang_arch_list:
 			os = 'iphone'
 			real_os = supported_architectures[real_arch]
 			version = target[position+6:].split('-')[0] + '_' + version
@@ -228,13 +261,11 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_iphone_options(real_os, True)
+						sdk_number = conf.set_iphone_options(real_os, True, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
 						conf.add_toolchain(os+conf.env.MACOSX_SDK[len(real_os):], real_arch, 'clang', version, real_arch)
-						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -242,6 +273,19 @@ def configure(conf):
 						conf.variant = ''
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
+					else:
+						iphone_toolchains.append(toolchain)
+						iphone_archs.append(real_arch)
+						conf.variant = ''
+		if iphone_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(iphone_archs), 'clang', version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['iphone', 'darwin']
+			conf.env.SUB_TOOLCHAINS = iphone_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.cocoa'))
