@@ -17,12 +17,28 @@ def add_build_command(toolchain, optimisation):
 			variant_dir = property(get_variant_dir, None)
 
 @conf
-def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
+def add_toolchain(self, platform, compiler_arch, compiler, version, arch, add=True):
 	toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
 	e = self.env
 	e.TOOLCHAIN=toolchain
 	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
 	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
+	e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
+	e.PREFIX = os.path.join('build', toolchain)
+	if e.STATIC:
+		e.DEFINES.append('BE_STATIC=1')
+	if add:
+		for optim in self.env.ALL_VARIANTS:
+			add_build_command(toolchain, optim)
+		self.variant = ''
+		self.env.append_unique('ALL_TOOLCHAINS', toolchain)
+		self.env.append_unique('ALL_PLATFORMS', [p for p in e.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
+		self.env.append_unique('ALL_ARCHITECTURES', [a for a in e.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
+
+@conf
+def add_multiarch_toolchain(self, toolchain):
+	e = self.env
+	e.TOOLCHAIN=toolchain
 	e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
 	e.PREFIX = os.path.join('build', toolchain)
 	if e.STATIC:
@@ -33,6 +49,7 @@ def add_toolchain(self, platform, compiler_arch, compiler, version, arch):
 	self.env.append_unique('ALL_TOOLCHAINS', toolchain)
 	self.env.append_unique('ALL_PLATFORMS', [p for p in e.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
 	self.env.append_unique('ALL_ARCHITECTURES', [a for a in e.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
+
 
 def options(opt):
 	for extra in opt.bugenginenode.make_node('extra').listdir():

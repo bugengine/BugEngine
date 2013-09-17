@@ -47,7 +47,7 @@ def find_android_gcc_toolchain(path, arch):
 	return None,None
 
 
-def find_android_sdk(path, arch):
+def find_android_sdk(path, arch, hint):
 	arch = get_android_arch(arch)
 	try:
 		path,_ = os.path.split(path)
@@ -59,13 +59,13 @@ def find_android_sdk(path, arch):
 					sdks = sorted(all_sdks, key = lambda x: int(x.split('-')[1]))
 					sdk = sdks[-1]
 					from waflib import Options
-					favorite_sdk = Options.options.android_sdk
+					favorite_sdk = Options.options.android_sdk or hint
 					if favorite_sdk:
 						if 'android-%s'%favorite_sdk in sdks:
 							sdk = 'android-%s'%favorite_sdk
 						else:
 							warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
-					return os.path.join(platforms, sdk, 'arch-%s'%arch), sdk.split('-')[1]
+					return os.path.join(platforms, sdk, 'arch-%s'%arch), sdk.split('-')[1], 
 			path,_ = os.path.split(path)
 	except Exception as e:
 		print(e)
@@ -77,6 +77,8 @@ def set_android_gcc_options(conf, options, arch):
 	conf.env.append_unique('LINKFLAGS', [])
 	conf.env.append_unique('LINKFLAGS_cprogram', ['-shared'])
 	conf.env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
+	conf.env.append_unique('CFLAGS_nowarning', ['-w'])
+	conf.env.append_unique('CXXFLAGS_nowarning', ['-w'])
 	conf.env.cprogram_PATTERN = 'lib%s.so'
 	conf.env.cxxprogram_PATTERN = 'lib%s.so'
 	conf.env.CFLAGS_cxxshlib = []
@@ -88,9 +90,12 @@ def set_android_gcc_options(conf, options, arch):
 
 @conf
 def set_android_clang_options(conf, flags, arch):
+	conf.env.DEST_BINFMT = 'elf'
 	conf.env.append_unique('CFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('CXXFLAGS', flags+['-fPIC'])
 	conf.env.append_unique('LINKFLAGS', flags+[])
+	conf.env.append_unique('CFLAGS_nowarning', ['-w'])
+	conf.env.append_unique('CXXFLAGS_nowarning', ['-w'])
 	conf.env.CFLAGS_cxxshlib = []
 	conf.env.CXXFLAGS_cxxshlib = []
 
@@ -98,11 +103,11 @@ def set_android_clang_options(conf, flags, arch):
 		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 @conf
-def set_android_options(conf, arch):
+def set_android_options(conf, arch, sdk_hint):
 	conf.env.VALID_PLATFORMS = ['android', 'posix']
 	try:
 		conf.start_msg('Looking for SDK')
-		sdk, version = find_android_sdk(conf.env.CC[0], arch)
+		sdk, version = find_android_sdk(conf.env.CC[0], arch, sdk_hint)
 		conf.env.ANDROID_SDK = version
 	except Exception as e:
 		conf.end_msg('none', color='RED')
@@ -124,14 +129,17 @@ def set_android_options(conf, arch):
 
 def configure(conf):
 	seen = set([])
-	android_archs = ['arm', 'mipsel', 'x86']
+	android_clang_archs = ['arm', 'mipsel', 'x86']
+	os = 'android'
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
+		android_toolchains = []
+		android_archs = []
 		real_arch, flags = arch
-		for real_arch in android_archs:
+		sdk_number = ''
+		for real_arch in android_clang_archs:
 			gcc, triple = find_android_gcc_toolchain(directory, real_arch)
 			if gcc:
 				flags = ['-gcc-toolchain', gcc, '-target', triple]
-				os = 'android'
 				toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
 				if toolchain not in seen:
 					seen.add(toolchain)
@@ -148,11 +156,13 @@ def configure(conf):
 					else:
 						conf.end_msg('done')
 						try:
-							conf.set_android_options(real_arch)
+							conf.set_android_options(real_arch, sdk_number)
 							toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, real_arch, 'clang', version)
 							conf.setenv(toolchain, conf.env.derive())
 							conf.env.KERNEL_TOOLCHAINS = [toolchain]
-							conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch)
+							conf.env.ENV_PREFIX = real_arch
+							conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch, False)
+							sdk_number = conf.env.ANDROID_SDK
 						except Errors.WafError as e:
 							conf.variant = ''
 							pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -161,13 +171,32 @@ def configure(conf):
 							pprint('RED', '%s failed: %s' % (toolchain, e))
 							raise
 						else:
+							android_toolchains.append(toolchain)
+							android_archs.append(real_arch)
 							conf.variant = ''
-							pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+		if android_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), 'clang', version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['android', 'posix']
+			conf.env.SUB_TOOLCHAINS = android_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
+	gcc_targets = {}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('android')
 		if position != -1:
-			os = 'android'
+			try:
+				gcc_targets['%s-%s' % (name, version)].append((name, bindir, gcc, gxx, version, target, arch, options))
+			except KeyError:
+				gcc_targets['%s-%s' % (name, version)] = [(name, bindir, gcc, gxx, version, target, arch, options)]
+	for gcc_version, gcc_variables in gcc_targets.items():
+		seen = set([])
+		android_toolchains = []
+		android_archs = []
+		sdk_number = ''
+		for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
 			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
 			if toolchain not in seen:
 				seen.add(toolchain)
@@ -184,11 +213,12 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_android_options(arch)
+						conf.set_android_options(arch, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, arch, name, version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch)
+						conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch, False)
+						sdk_number = conf.env.ANDROID_SDK
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -197,8 +227,18 @@ def configure(conf):
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
+						android_toolchains.append(toolchain)
+						android_archs.append(arch)
 						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+		if android_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), name, version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['android', 'posix']
+			conf.env.SUB_TOOLCHAINS = android_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 
 def build(bld):
