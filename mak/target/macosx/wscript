@@ -8,9 +8,11 @@ from waflib.Configure import conf
 
 
 @conf
-def set_macosx_options(self, all_sdks):
-	self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
+def set_macosx_options(self, all_sdks, sdk_number):
+	from waflib import Options
+	sdk_number = sdk_number or Options.options.macosx_sdk
 
+	self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
 	self.env.XCODE_SDKROOT = 'macosx'
 	self.env.XCODE_ABI = 'mach_o'
 	self.env.XCODE_SUPPORTEDPLATFORMS = 'macosx'
@@ -25,7 +27,6 @@ def set_macosx_options(self, all_sdks):
 	self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'plugin')
 	self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'kernel')
 
-	from waflib import Options
 	sdks = []
 	paths = Options.options.xcode_sdks.split(',')
 	for path in paths:
@@ -45,7 +46,7 @@ def set_macosx_options(self, all_sdks):
 	sdks.sort()
 	self.start_msg('Looking for SDK')
 	for sdk, sdk_path in sdks[::-1]:
-		if Options.options.macosx_sdk and not sdk.startswith(Options.options.macosx_sdk):
+		if sdk_number and not sdk.startswith(sdk_number):
 			continue
 		try:
 			self.check_sdk(sdk_path, '-mmacosx-version-min=%s'%sdk)
@@ -62,6 +63,7 @@ def set_macosx_options(self, all_sdks):
 	self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path])
 	self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+	return sdk
 
 @conf
 def set_macosx_icc_options(self, flags, arch):
@@ -202,9 +204,21 @@ def configure(conf):
 		'ppc64' : 'ppc64',
 		'powerpc64' : 'ppc64'
 	}
+
+	icc_versions = {}
 	for name, bindir, icc, ixx, version, target, arch, options in conf.env.ICC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
+			try:
+				icc_versions[(name, version)].append((name, bindir, icc, ixx, version, target, arch, options))
+			except KeyError:
+				icc_versions[(name, version)] = [(name, bindir, icc, ixx, version, target, arch, options)]
+	for key, icc_arch_list in icc_versions.items():
+		macosx_toolchains = []
+		macosx_archs = []
+		seen = set([])
+		sdk_number = ''
+		for name, bindir, icc, ixx, version, target, arch, options in icc_arch_list:
 			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
 			real_arch = supported_architectures[arch]
@@ -226,11 +240,11 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_macosx_options(False)
+						sdk_number = conf.set_macosx_options(False, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch, False)
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -239,15 +253,36 @@ def configure(conf):
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
+						macosx_toolchains.append(toolchain)
+						macosx_archs.append(real_arch)
 						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+		if macosx_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(macosx_archs), name, version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['macosx', 'darwin']
+			conf.env.SUB_TOOLCHAINS = macosx_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 
+
+	gcc_versions = {}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
-			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
+			try:
+				gcc_versions[(name, version)].append((name, bindir, gcc, gxx, version, target, arch, options))
+			except KeyError:
+				gcc_versions[(name, version)] = [(name, bindir, gcc, gxx, version, target, arch, options)]
+	for key, gcc_arch_list in gcc_versions.items():
+		macosx_toolchains = []
+		macosx_archs = []
+		seen = set([])
+		sdk_number = ''
+		for name, bindir, gcc, gxx, version, target, arch, options in gcc_arch_list:
+			os = 'macosx'
 			real_arch = supported_architectures[arch]
 			toolchain = '%s-%s-%s-%s'%(os, real_arch, name, version)
 			if toolchain not in seen:
@@ -267,11 +302,11 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_macosx_options(False)
+						sdk_number = conf.set_macosx_options(False, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch)
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch, False)
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -280,15 +315,35 @@ def configure(conf):
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
+						macosx_toolchains.append(toolchain)
+						macosx_archs.append(real_arch)
 						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+		if macosx_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(macosx_archs), name, version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['macosx', 'darwin']
+			conf.env.SUB_TOOLCHAINS = macosx_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
+	clang_versions = {}
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		real_arch, flags = arch
 		position = target.find('darwin')
 		if position != -1 and real_arch in supported_architectures:
-			os = 'macosx'
 			version = target[position+6:].split('-')[0] + '_' + version
+			try:
+				clang_versions[version].append((version, directory, target, real_arch, flags))
+			except KeyError:
+				clang_versions[version] = [(version, directory, target, real_arch, flags)]
+	for key, clang_arch_list in clang_versions.items():
+		macosx_toolchains = []
+		macosx_archs = []
+		seen = set([])
+		sdk_number = ''
+		for version, directory, target, real_arch, flags in clang_arch_list:
+			os = 'macosx'
 			toolchain = '%s-%s-%s-%s'%(os, real_arch, 'clang', version)
 			if toolchain not in seen:
 				seen.add(toolchain)
@@ -307,11 +362,11 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_macosx_options(True)
+						sdk_number = conf.set_macosx_options(True, sdk_number)
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch)
+						conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, 'clang', version, real_arch, False)
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -320,8 +375,18 @@ def configure(conf):
 						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
+						macosx_toolchains.append(toolchain)
+						macosx_archs.append(real_arch)
 						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+		if macosx_toolchains:
+			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(macosx_archs), 'clang', version)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			conf.env.VALID_PLATFORMS = ['macosx', 'darwin']
+			conf.env.SUB_TOOLCHAINS = macosx_toolchains
+			conf.add_multiarch_toolchain(toolchain)
+			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.cocoa'))
