@@ -43,6 +43,7 @@ class nb_folder:
 class netbeans(Build.BuildContext):
 	cmd		= 'netbeans'
 	fun		= 'build'
+	optim	= 'debug'
 	version	= 79
 
 	def generateProjectXml(self, appname, bld):

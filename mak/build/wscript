@@ -152,7 +152,7 @@ def module(bld, name, depends, valid_platforms, features, use_master, warnings):
 			source = sources[:],
 			pchstop = pchstop,
 			preprocess = preprocess,
-			source_nodes = [source_node] + extras))
+			source_nodes = [source_node] + [e for _, e in extras]))
 		if target_prefix:
 			internal_deps.append(target_prefix + name)
 	if internal_deps:

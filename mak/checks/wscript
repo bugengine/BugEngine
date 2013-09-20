@@ -155,8 +155,18 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 	return self.env[var]
 
 @conf
-def check_sdk(self, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
+def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
+	env = self.env
+	env.detach()
+	env.CXX = compiler
+	env.LINK_CXX = compiler
+	env.CXXFLAGS = flags
+	env.LINKFLAGS = flags
+	env.CXX_TGT_F = ['-c', '-o']
+	env.CXXLNK_TGT_F = ['-o']
+
 	self.check(
+		env=env,
 		compile_filename=[],
 		features='link_framework',
 		msg='check for SDK %s' %os.path.split(sdk)[1],
