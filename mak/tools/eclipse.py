@@ -56,6 +56,7 @@ def gather_includes_defines(task_gen, appname):
 class eclipse(Build.BuildContext):
 	cmd = 'eclipse'
 	fun = 'build'
+	optim = 'debug'
 
 	def execute(self):
 		"""

@@ -279,6 +279,7 @@ class VCxproj:
 class vs2003(Build.BuildContext):
 	cmd = 'vs2003'
 	fun = 'build'
+	optim = 'debug'
 	version = (('Visual Studio .NET 2003', '8.00', False), (VCproj, '7.10'))
 
 	def execute(self):

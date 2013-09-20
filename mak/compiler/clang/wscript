@@ -6,6 +6,7 @@ all_clang_archs = [
 	('x86', ['x86', 'i386']),
 	('amd64', ['x86_64', 'amd64', 'x64']),
 	('arm', ['armv7']),
+	('arm64', ['arm64']),
 	('ppc', ['ppc', 'powerpc']),
 	('ppc64', ['ppc64', 'powerpc64']),
 	('mips', ['mips']),
@@ -20,6 +21,8 @@ def expand_clang_archs(arch):
 		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
 	elif arch == 'arm':
 		return [([], 'armv7')]
+	elif arch == 'arm64':
+		return [(['-miphoneos-version-min=7.0'], 'arm64')]
 	elif arch == 'mips':
 		return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
 	elif arch == 'mips64':
@@ -68,7 +71,6 @@ def find_clang_archs(self, clang):
 				cmd = [clang, '-arch', arch, '-c', filename, '-o', output]
 				try:
 					p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-					p.stdin.write('\n'.encode())
 					out,err = p.communicate()
 				except Exception as e:
 					print(e)
@@ -77,6 +79,14 @@ def find_clang_archs(self, clang):
 					if p.returncode == 0:
 						result.append((arch_name, ['-arch', arch]))
 						break
+					else:
+						if not isinstance(err, str):
+							err = err.encode()
+						if err.find('invalid arch name') == -1:
+							if err.find('No available targets are compatible') == -1:
+								result.append((arch_name, ['-arch', arch]))
+								break
+
 	return result
 
 

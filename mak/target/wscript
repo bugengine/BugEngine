@@ -24,10 +24,10 @@ def add_toolchain(self, platform, compiler_arch, compiler, version, arch, add=Tr
 	self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
 	self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
 	e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
-	e.PREFIX = os.path.join('build', toolchain)
 	if e.STATIC:
 		e.DEFINES.append('BE_STATIC=1')
 	if add:
+		e.PREFIX = os.path.join('build', toolchain)
 		for optim in self.env.ALL_VARIANTS:
 			add_build_command(toolchain, optim)
 		self.variant = ''
@@ -77,7 +77,7 @@ def configure(conf):
 				pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
 				conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
 	for target in conf.path.listdir():
-		if not platforms or extra in platforms:
+		if not platforms or target in platforms:
 			if target != 'wscript':
 				pprint('BLUE', '_'*40)
 				pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')

@@ -341,18 +341,20 @@ class PBXNativeTarget(XCodeNode):
 # Root project object
 
 def macarch(arch):
-	if arch == 'amd64':
-		return 'x86_64'
-	elif arch == 'arm':
-		return 'armv6'
-	elif arch == 'x86':
-		return 'i386'
-	elif arch == 'powerpc64':
-		return 'ppc64'
-	elif arch == 'powerpc':
-		return 'ppc'
+	arch_map = {
+		'amd64': 'x86_64',
+		'arm': 'armv6',
+		'x86': 'i386',
+		'i486': 'i386',
+		'i586': 'i386',
+		'i686': 'i386',
+		'powerpc64': 'ppc64',
+		'powerpc': 'ppc'
+	}
+	if isinstance(arch, list):
+		return [macarch(a) for a in arch]
 	else:
-		return arch
+		return arch_map.get(arch, arch)
 
 
 class PBXProject(XCodeNode):
@@ -483,6 +485,7 @@ class PBXProject(XCodeNode):
 class xcode(Build.BuildContext):
 	cmd = 'xcode'
 	fun = 'build'
+	optim = 'debug'
 	version = ('Xcode 3.1', 45)
 
 	def execute(self):
@@ -536,11 +539,10 @@ class xcode(Build.BuildContext):
 
 
 		for toolchain in self.env.ALL_TOOLCHAINS:
-			env = self.all_envs['%s'%(toolchain)]
+			env = self.all_envs[toolchain]
 			if env.XCODE_ABI == 'mach_o':
 				variants = []
 				for variant in self.env.ALL_VARIANTS:
-					env = self.all_envs['%s-%s'%(toolchain, variant)]
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
 								'BUILT_PRODUCTS_DIR': env.PREFIX,
