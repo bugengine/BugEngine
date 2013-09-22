@@ -52,13 +52,14 @@ def add_multiarch_toolchain(self, toolchain):
 
 
 def options(opt):
+	gr = opt.add_option_group('configure options')
 	for extra in opt.bugenginenode.make_node('extra').listdir():
 		if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
 			opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
 	for target in opt.path.listdir():
 		if target != 'wscript':
 			opt.recurse(target)
-	opt.add_option( '--platforms',
+	gr.add_option( '--platforms',
 					action='append',
 					default=[],
 					dest='platforms',

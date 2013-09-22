@@ -173,6 +173,7 @@ def configure(conf):
 		'x86':		'iPhoneSimulator',
 		'i386':		'iPhoneSimulator',
 		'x86_64':	'iPhoneSimulator',
+		'amd64':	'iPhoneSimulator',
 		'arm':		'iPhoneOS',
 		'armv7':	'iPhoneOS',
 		'arm64':	'iPhoneOS',
@@ -227,6 +228,9 @@ def configure(conf):
 		iphone_archs = []
 		iphone_os = set([])
 		name, bindir, version, check_multilib, load_compiler, set_iphone_compiler_options = key
+		if (name, version) in seen:
+			continue
+		seen.add((name, version))
 		for compiler in compiler_list:
 			check_multilib(conf, compiler)
 		try:
@@ -235,44 +239,40 @@ def configure(conf):
 			continue
 		for name, bindir, gcc, gxx, version, target, arch, real_os, options in compiler_list:
 			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
-			if toolchain not in seen:
-				seen.add(toolchain)
-				env = conf.env.derive()
-				conf.setenv(toolchain, env)
-				env.DEST_OS = 'darwin'
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			env.DEST_OS = 'darwin'
+			try:
+				conf.start_msg('Setting up compiler')
+				load_compiler(conf, compiler)
+				if arch in ['arm', 'armv7', 'arm64']:
+					conf.find_program('codesign')
+				set_iphone_compiler_options(conf, options, arch)
+			except Exception as e:
+				conf.end_msg(e, color='RED')
+				raise
+			else:
+				conf.end_msg('done')
 				try:
-					conf.start_msg('Setting up compiler')
-					load_compiler(conf, compiler)
-					conf.find_program('dsymutil')
-					conf.find_program('strip')
-					if arch in ['arm', 'armv7', 'arm64']:
-						conf.find_program('codesign')
-					set_iphone_compiler_options(conf, options, arch)
+					conf.set_iphone_options([real_os])
+					conf.set_iphone_sdk_options(real_os, sdk_name, sdk_path)
+					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], arch, name, version)
+					conf.setenv(toolchain, conf.env.derive())
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.env.ENV_PREFIX = arch
+					conf.add_toolchain(os+sdk_name, arch, name, version, arch, False)
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.end_msg(e, color='RED')
+					conf.variant = ''
+					pprint('RED', '%s failed: %s' % (toolchain, e))
 					raise
 				else:
-					conf.end_msg('done')
-					try:
-						conf.set_iphone_options([real_os])
-						conf.set_iphone_sdk_options(real_os, sdk_name, sdk_path)
-						toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], arch, name, version)
-						conf.setenv(toolchain, conf.env.derive())
-						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.env.ENV_PREFIX = arch
-						conf.add_toolchain(os+sdk_name, arch, name, version, arch, False)
-					except Errors.WafError as e:
-						conf.variant = ''
-						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-					except Exception as e:
-						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
-						raise
-					else:
-						iphone_toolchains.append(toolchain)
-						iphone_archs.append(arch)
-						iphone_os.add(real_os)
-						conf.variant = ''
+					iphone_toolchains.append(toolchain)
+					iphone_archs.append(arch)
+					iphone_os.add(real_os)
+					conf.variant = ''
 		if iphone_toolchains:
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_name, ','.join(iphone_archs), name, version)
 			env = conf.env.derive()
@@ -280,9 +280,11 @@ def configure(conf):
 			conf.set_iphone_options(iphone_os)
 			conf.env.SUB_TOOLCHAINS = iphone_toolchains
 			conf.env.VALID_ARCHITECTURES = [iphone_archs]
+			conf.find_program('dsymutil')
+			conf.find_program('strip')
+			conf.find_program('lipo')
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-
 
 
 def build(bld):
@@ -291,7 +293,7 @@ def build(bld):
 def plugins(bld):
 	pass
 
-@feature('cshlib', 'cxxshlib')
+@feature('cxxshlib', 'cshlib')
 @after_method('apply_link')
 def set_iphone_shlib_name(self):
 	if 'iphone' in self.env.VALID_PLATFORMS:

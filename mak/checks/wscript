@@ -1,4 +1,4 @@
-from waflib import Utils
+from waflib import Utils, ConfigSet
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
@@ -156,8 +156,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 
 @conf
 def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
-	env = self.env
-	env.detach()
+	env = ConfigSet.ConfigSet()
 	env.CXX = compiler
 	env.LINK_CXX = compiler
 	env.CXXFLAGS = flags
@@ -179,6 +178,7 @@ def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], c
 		version=version,
 		use=['debug'],
 		errmsg='not usable',
+		compiler=compiler,
 		envname=self.env.TOOLCHAIN)
 
 

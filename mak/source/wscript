@@ -53,7 +53,7 @@ def install_data(self, node):
 
 @extension('.plist')
 def install_plist(self, node):
-	self.bld.install_files(os.path.join('build', self.env.TOOLCHAIN, self.env.VARIANT, self.env.DEPLOY_ROOTDIR), node)
+	self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR), node)
 
 @extension('.dll', '.so')
 def install_binary(self, node):

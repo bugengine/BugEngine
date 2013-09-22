@@ -7,6 +7,7 @@ def setup(conf):
 
 
 def build(bld):
-	if bld.env.X11:
-		bld.thirdparty('3rdparty.X11', includes=['/usr/X11R6/include'], libs=bld.env.X11)
-		bld.features.append('GUI')
+	for env in bld.multiarch_envs:
+		if env.X11:
+			bld.thirdparty('3rdparty.X11', env, includes=['/usr/X11R6/include'], libs=env.X11)
+			env.append_unique('FEATURES', ['GUI'])

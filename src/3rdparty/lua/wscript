@@ -6,5 +6,4 @@ def setup(conf):
 	pass
 
 def build(bld):
-	for lua in bld.static_library('3rdparty.lua', warnings=False):
-		lua.defines.append('LUA_LIB')
+	bld.static_library('3rdparty.lua', extra_defines=['LUA_LIB'], warnings=False)
