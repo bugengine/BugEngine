@@ -55,6 +55,12 @@
 #  define   BE_32
 # endif
 
+/* ARM 64bits *****************/
+#elif defined(_ARM64)
+# define    BE_64
+# define    BE_LITTLEENDIAN
+
+
 #else
 # error "unknown arch"
 #endif

@@ -460,7 +460,7 @@ class PBXProject(XCodeNode):
 		for variant in bld.env.ALL_VARIANTS:
 			variants.append(XCBuildConfiguration(variant, {
 				'PRODUCT_NAME': p.target,
-				'ARCHS':['i386'],
+				#'ARCHS':['i386'],
 				'VALID_ARCHS':['i386'],
 				'SDKROOT': 'macosx',
 				'SUPPORTED_PLATFORMS': 'macosx',
@@ -479,6 +479,7 @@ class PBXProject(XCodeNode):
 		scheme = XCodeScheme(target._id, 'index.'+p.target, 'lib%s.a'%p.target, schemes.project_name, True)
 		scheme.write(schemes.make_node('index.%s.xcscheme'%p.target))
 		schememanagement.add(scheme)
+		return 'index.%s.xcscheme'%p.target
 
 
 
@@ -524,18 +525,14 @@ class xcode(Build.BuildContext):
 		schemes.project_name = project.name
 		p = PBXProject(appname, self.__class__.version, self)
 
+		valid_schemes = set([])
 		schememanagement = XCodeSchemeList()
-		for f in schemes.listdir():
-			path = os.path.join(schemes.abspath(), f)
-			if os.path.isfile(path):
-				os.remove(path)
-
 		for g in self.groups:
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
-				p.add(self, tg, schemes, schememanagement)
+				valid_schemes.add(p.add(self, tg, schemes, schememanagement))
 
 
 		for toolchain in self.env.ALL_TOOLCHAINS:
@@ -545,8 +542,8 @@ class xcode(Build.BuildContext):
 				for variant in self.env.ALL_VARIANTS:
 					variants.append(XCBuildConfiguration(variant, {
 								'PRODUCT_NAME': appname,
-								'BUILT_PRODUCTS_DIR': env.PREFIX,
-								'CONFIGURATION_BUILD_DIR':  env.PREFIX,
+								'BUILT_PRODUCTS_DIR': os.path.join(env.PREFIX, variant),
+								'CONFIGURATION_BUILD_DIR':  os.path.join(env.PREFIX, variant),
 								'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
 								'SDKROOT': env.XCODE_SDKROOT,
@@ -567,9 +564,19 @@ class xcode(Build.BuildContext):
 				scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
 			scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
 			schememanagement.add(scheme)
+			valid_schemes.add('%s.xcscheme'%toolchain)
+		for n in schemes.listdir():
+			if n not in valid_schemes:
+				schemes.make_node(n).delete()
 
 		schememanagement.write(schemes.make_node('xcschememanagement.plist'))
 		node = project.make_node('project.pbxproj')
 		p.write(open(node.abspath(), 'w'))
 
+
+class xcode5(xcode):
+	cmd = 'xcode5'
+	fun = 'build'
+	optim = 'debug'
+	version = ('Xcode 3.2', 46)
 

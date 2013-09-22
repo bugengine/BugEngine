@@ -15,10 +15,12 @@ def setup(conf):
 		functions=['clGetDeviceInfo'])
 
 def build(bld):
-	if bld.env.CLFramework or bld.env.OpenCL or bld.env.PROJECTS:
-		bld.thirdparty('3rdparty.OpenCL',
-			libs=bld.env.OpenCL,
-			includes=[bld.path.find_node('api')],
-			frameworks=bld.env.CLFramework)
-		bld.features.append('OpenCL')
+	for env in bld.multiarch_envs:
+		if env.CLFramework or env.OpenCL or bld.env.PROJECTS:
+			bld.thirdparty('3rdparty.OpenCL',
+				env,
+				libs=env.OpenCL,
+				includes=[bld.path.find_node('api')],
+				frameworks=env.CLFramework)
+			env.append_unique('FEATURES', ['OpenCL'])
 

@@ -7,12 +7,14 @@
 
 #define be_alignof(t)           __alignof__(t)
 #if defined(_X86)||defined(_AMD64)
-# define be_break()              __asm("int3")
+# define be_break()             __asm("int3")
 #elif defined(_POWERPC)
-# define be_break()              __asm("trap")
+# define be_break()             __asm("trap")
 #elif defined(_MIPS)
-# define be_break()              __asm("break")
+# define be_break()             __asm("break")
 #elif defined(_ARM)
+# define be_break()             
+#elif defined(_ARM64)
 # define be_break()
 #else
 # error "Breakpoint not supported on this platform"

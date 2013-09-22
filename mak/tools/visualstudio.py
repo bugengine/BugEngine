@@ -221,7 +221,7 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					elif 'game' in task_gen.features:
 						deps = task_gen.use[:]
 						seen = set([])
@@ -238,11 +238,11 @@ class VCxproj:
 									except:
 										pass
 						if program:
-							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
 							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
 							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
 						else:
-							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
 					includes += ['%s/usr/include'%sysroot for sysroot in env.SYSROOT]
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))

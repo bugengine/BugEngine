@@ -25,6 +25,8 @@
 #  include <kernel/gcc/ppc/interlocked.inl>
 # elif defined(_ARM)
 #  include <kernel/gcc/arm/interlocked.inl>
+# elif defined(_ARM64)
+#  include <kernel/gcc/arm64/interlocked.inl>
 # elif defined(_MIPS)
 #  include <kernel/gcc/mips/interlocked.inl>
 # else

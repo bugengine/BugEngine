@@ -140,9 +140,9 @@ class netbeans(Build.BuildContext):
 				add(doc, mtool, 'buildCommand', 'python waf install:%s:%s'%(toolchain, variant))
 				add(doc, mtool, 'cleanCommand', 'python waf clean:%s:%s'%(toolchain, variant))
 				if env.ABI == 'mach_o':
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, variant, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 				else:
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
+					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
 				if self.__class__.version >= 70:
 					ctool = add(doc, mtool, 'cTool')
 					cincdir = add(doc, ctool, 'incDir')

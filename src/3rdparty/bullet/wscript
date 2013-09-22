@@ -6,7 +6,10 @@ def setup(conf):
 	pass
 
 def build(bld):
-	for bullet in bld.static_library('3rdparty.bullet', bld.platforms, warnings=False):
-		bullet.defines.append('BT_NO_PROFILE')
-		bullet.includes.append(bld.path.make_node('src').abspath())
-		bullet.export_includes.append(bld.path.make_node('src').abspath())
+	bld.static_library(
+		'3rdparty.bullet',
+		bld.platforms,
+		extra_includes=[bld.path.make_node('src')],
+		extra_public_includes=[bld.path.make_node('src')],
+		extra_defines=['BT_NO_PROFILE'],
+		warnings=False)
