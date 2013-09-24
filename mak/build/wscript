@@ -54,6 +54,11 @@ def module(bld, name, depends,
 		node = source_node.make_node(p)
 		if os.path.isdir(node.abspath()):
 			deploy_directory(bld, bld.env, node, '', e)
+		for tp in platforms:
+			node = source_node.make_node(p+'.'+tp)
+			if os.path.isdir(node.abspath()):
+				deploy_directory(bld, bld.env, node, '', e)
+
 
 	compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
 	preprocess_extensions = ['yy', 'll', 'plist']
@@ -222,12 +227,13 @@ def external(bld, name):
 def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[], defines=[], use_master=True, warnings=True):
 	archs = env.VALID_ARCHITECTURES
 	platforms = env.VALID_PLATFORMS
-	platform_specific = archs + platforms + ['%s.%s'%(p,a) for p in platforms for a in archs]
+	platform_specific = platforms
+	arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
 
-	lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
-	includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+	lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
+	bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
+	includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
 
 	target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
 	target_name = target_prefix + name
@@ -237,8 +243,12 @@ def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[]
 	env['LIBPATH_%s' % target_name] = lib_paths
 	env['LIB_%s' % target_name] = libs
 	for bin_path in bin_paths:
-		for bin in bin_path.listdir():
-			bld.install_as(os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_RUNBINDIR, bin), bin_path.make_node(bin))
+		deploy_directory(bld, bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+	if name not in bld.env.THIRDPARTIES_FIRST:
+		bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+		for bin_path in bin_paths:
+			deploy_directory(bld, bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+		bld.env.append_unique('THIRDPARTIES_FIRST', name)
 	if bld.env.PROJECTS:
 		bld(target=name,
 			includes=includes,
@@ -387,14 +397,23 @@ def static_dependencies(self):
 def rename_executable(self):
 	self.target = self.real_target
 
+@feature('kernel')
+@after_method('apply_link')
+def install_kernel(self):
+	if not self.env.ENV_PREFIX: #no multiarch
+		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), self.link_task.outputs)
 
 @feature('plugin')
-def plugin_feature(task):
-	pass
+@after_method('apply_link')
+def install_plugin(self):
+	if ('cshlib' in self.features) or ('cxxshlib' in self.features):
+		if not self.env.ENV_PREFIX: #no multiarch
+			self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR), self.link_task.outputs)
 
 @feature('game')
-def game_feature(task):
-	pass
+@after_method('apply_link')
+def install_game(self):
+	pass #also plugin
 
 @feature('launcher')
 def launcher_feature(task):
@@ -403,6 +422,12 @@ def launcher_feature(task):
 @feature('cxxobjects')
 def objects_feature(task):
 	pass
+
+@feature('cprogram', 'cxxprogram')
+@after_method('apply_link')
+def install_program(self):
+	if not self.env.ENV_PREFIX: #no multiarch
+		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), self.link_task.outputs)
 
 @feature('kernel', 'plugin')
 @after_method('process_use')
