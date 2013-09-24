@@ -79,11 +79,13 @@ const DynamicObjectList::SymbolPointer* DynamicObjectList::findSymbolInternal(co
 
 DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const ipath& objectPath)
 {
+    be_forceuse(objectPath);
     return (Handle)DynamicObjectList::findDynamicObject(objectName.str().name);
 }
 
 void DynamicObject::unload(Handle handle)
 {
+    be_forceuse(handle);
 }
 
 void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)

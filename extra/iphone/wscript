@@ -170,13 +170,13 @@ def set_iphone_clang_options(self, flags, arch):
 
 def configure(conf):
 	supported_architectures = {
-		'x86':		'iPhoneSimulator',
-		'i386':		'iPhoneSimulator',
-		'x86_64':	'iPhoneSimulator',
-		'amd64':	'iPhoneSimulator',
-		'arm':		'iPhoneOS',
-		'armv7':	'iPhoneOS',
-		'arm64':	'iPhoneOS',
+		'x86':		('i386', 'iPhoneSimulator'),
+		'i386':		('i386', 'iPhoneSimulator'),
+		'arm':		('armv7', 'iPhoneOS'),
+		'armv7':	('armv7', 'iPhoneOS'),
+		'x86_64':	('x86_64', 'iPhoneSimulator'),
+		'amd64':	('x86_64', 'iPhoneSimulator'),
+		'arm64':	('arm64', 'iPhoneOS'),
 	}
 	os = 'iphone'
 
@@ -191,20 +191,22 @@ def configure(conf):
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
+			real_arch, os_name = supported_architectures[arch]
 			version = target[position+6:].split('-')[0] + '_' + version
 			key = (name, bindir, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
-			compiler = (name, bindir, gcc, gxx, version, target, arch, supported_architectures[arch], options)
+			compiler = (name, bindir, gcc, gxx, version, target, real_arch, os_name, options)
 			try:
 				compiler_versions[key].append(compiler)
 			except KeyError:
 				compiler_versions[key] = [compiler]
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
-		real_arch, flags = arch
+		arch, flags = arch
 		position = target.find('darwin')
-		if position != -1 and real_arch in supported_architectures:
+		if position != -1 and arch in supported_architectures:
+			real_arch, os_name = supported_architectures[arch]
 			version = target[position+6:].split('-')[0] + '_' + version
 			key = ('clang', directory, version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
-			compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, supported_architectures[real_arch], flags)
+			compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, os_name, flags)
 			try:
 				compiler_versions[key].append(compiler)
 			except KeyError:
@@ -223,7 +225,20 @@ def configure(conf):
 			return key, x[1]
 		else:
 			return key, ''
-	for key, compiler_list in sorted(compiler_versions.items(), key=lambda x: (get_version(x[0][2]), x[0][0])):
+	for key, all_toolchains in sorted(compiler_versions.items(), key=lambda x: (get_version(x[0][2]), x[0][0])):
+		compiler_archs = {}
+		compiler_list = []
+		for c in all_toolchains:
+			compiler_archs[c[6]] = c
+		if 'i386' in compiler_archs and 'armv7' in compiler_archs:
+			compiler_list.append(compiler_archs['i386'])
+			compiler_list.append(compiler_archs['armv7'])
+		if 'x86_64' in compiler_archs and 'arm64' in compiler_archs:
+			compiler_list.append(compiler_archs['x86_64'])
+			compiler_list.append(compiler_archs['arm64'])
+		if not compiler_list:
+			continue
+
 		iphone_toolchains = []
 		iphone_archs = []
 		iphone_os = set([])
