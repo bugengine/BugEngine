@@ -9,6 +9,7 @@
 namespace BugEngine
 {
 
+
 be_tag(Index(BugEngine::RTTI::ClassType_String + (0 << 16)))
 struct istring
 {

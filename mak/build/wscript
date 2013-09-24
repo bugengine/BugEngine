@@ -1,5 +1,6 @@
+from waflib import Task, Options
 from waflib.Configure import conf
-from waflib.TaskGen import feature, extension, before_method, after_method
+from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
 from waflib.Tools import c, cxx
 
@@ -47,20 +48,35 @@ def module(bld, name, depends,
 			build = True
 
 	source_node = bld.bugenginenode.make_node('src/%s' % name.replace('.', '/'))
+	for p,e in [
+			('data', 'DEPLOY_DATADIR'),
+			('bin', 'DEPLOY_RUNBINDIR')]:
+		node = source_node.make_node(p)
+		if os.path.isdir(node.abspath()):
+			deploy_directory(bld, bld.env, node, '', e)
+
 	compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
 	preprocess_extensions = ['yy', 'll', 'plist']
 	try:
 		sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in compile_extensions])
-		preprocess_sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in preprocess_extensions])
 	except OSError:
 		sources = []
+	try:
+		preprocess_sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in preprocess_extensions])
+	except OSError:
 		preprocess_sources = []
 	try:
-		preprocess_sources += source_node.ant_glob(['%s/**/*.script.hh'%s for s in ['api', 'include']])
+		preprocess_sources += source_node.ant_glob(['api/**/*.script.hh'])
+	except OSError:
+		pass
+	try:
+		preprocess_sources += source_node.ant_glob(['include/**/*.script.hh'])
 	except OSError:
 		pass
 
 	extras = []
+	if bld.env.STATIC:
+		extra_defines = extra_defines + ['BE_STATIC=1']
 	for platform in bld.bugenginenode.make_node('extra').listdir():
 		path = os.path.join('extra', platform, '/'.join(name.split('.')))
 		if os.path.isdir(path):
@@ -117,7 +133,7 @@ def module(bld, name, depends,
 
 
 	if build and not bld.env.PROJECTS:
-		preprocess = bld(name + '.preprocess',
+		preprocess = bld(target = name + '.preprocess',
 			features= ['plugin'] if 'plugin' in features else [],
 			target_name = name,
 			pchstop = pchstop,
@@ -184,6 +200,15 @@ def module(bld, name, depends,
 	if internal_deps:
 		bld(target=name, features=['multiarch'], use=internal_deps)
 	return result
+
+def deploy_directory(bld, env, node, local_path, env_variable):
+	target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
+	for n in node.listdir():
+		sn = node.make_node(n)
+		if os.path.isdir(sn.abspath()):
+			deploy_directory(bld, env, sn, os.path.join(local_path, n), env_variable)
+		else:
+			bld.install_as(os.path.join(target_path, n), sn)
 
 @conf
 def external(bld, name):
@@ -295,7 +320,6 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		features, [], [], [], [], use_master, warnings)
 
 def build(bld):
-	from waflib import Options
 	bld.env.STATIC = bld.env.STATIC or Options.options.static
 	bld.original_env = bld.env
 	bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
@@ -338,14 +362,14 @@ def set_building_name_inherits(self):
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
-	if self.env.STATIC:
-		bld = self.bld
-		try:
-			launcher_tasks = bld.launcher_static
-		except AttributeError:
-			sub_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
-			bld.launcher_static = []
-			for env in sub_envs:
+	if self.bld.env.STATIC:
+		if 'cxx' in self.features:
+			bld = self.bld
+			launcher_tasks = getattr(bld, 'launcher_static', {})
+			try:
+				launcher_task = launcher_tasks[self.env.TOOLCHAIN]
+			except KeyError:
+				env = self.env
 				target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
 				launcher_task = self.bld(env=env.derive(),
 										name=target_prefix+bld.launcher_name+'.static',
@@ -353,10 +377,9 @@ def static_dependencies(self):
 										real_target=target_prefix+bld.launcher_name,
 										features=['cxx', 'cxxprogram', 'launcher', 'launcher_static'],
 										use = [])
-				launcher_task.install_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, env.DEPLOY_BINDIR)
-				bld.launcher_static.append(launcher_task)
-			launcher_tasks = bld.launcher_static
-		for launcher_task in launcher_tasks:
+				launcher_tasks[env.TOOLCHAIN] = launcher_task
+			bld.launcher_static = launcher_tasks
+
 			launcher_task.use.append(self.target)
 
 @feature('launcher_static')
@@ -412,5 +435,109 @@ def set_extra_flags(self):
 def gather_extra_source(self):
 	preprocess = getattr(self, 'preprocess', None)
 	if preprocess:
+		preprocess.post()
 		self.source += getattr(preprocess, 'out_sources', [])
 
+@taskgen_method
+@feature('*')
+@before_method('process_source')
+def filter_sources(self):
+	self.objc = False
+	self.source = self.to_nodes(getattr(self, 'source', []))
+	sources = []
+	for file in self.source:
+		basename,ext = os.path.splitext(file.name)
+		add_platform = True
+		add_arch = True
+		platform = file.name.find('-p=')
+		if platform != -1:
+			add_platform = False
+			platforms = basename[platform+3:].split(',')
+			for p in platforms:
+				add_platform = add_platform or p in self.env.VALID_PLATFORMS
+		arch = file.name.find('-a=')
+		if arch != -1:
+			add_arch = False
+			architectures = basename[arch+3:].split(',')
+			for a in architectures:
+				add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+		node = file.parent
+		while add_platform and add_arch and node and node != self.path:
+			if node.name.startswith('platform='):
+				add_platform = False
+				platforms = node.name[9:].split(',')
+				for p in platforms:
+					add_platform = add_platform or p in self.env.VALID_PLATFORMS
+			elif node.name.startswith('arch='):
+				add_arch = False
+				architectures = node.name[5:].split(',')
+				for a in architectures:
+					add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+			elif node.parent.name == 'extra' and node.parent.parent == self.path:
+				add_platform = node.name in self.env.VALID_PLATFORMS
+			node = node.parent
+		if add_platform and add_arch:
+			sources.append(file)
+			if ext in ['.m', '.mm']:
+				self.objc = True
+	self.source = sources
+
+
+def create_master_file(task):
+	with open(task.outputs[0].abspath(), 'w') as f:
+		for src in task.inputs:
+			f.write('#include "%s"\n' % src.path_from(task.generator.bld.bugenginenode).replace('\\','/'))
+def master_sig_deps(task):
+	for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
+		task.m.update(f)
+		task.m.update(b';')
+MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
+MasterTask.sig_explicit_deps = master_sig_deps
+
+@extension('.c', '.m')
+def c_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		try:
+			mastertask_c = self.mastertasks_c[-1]
+			if len(mastertask_c.inputs) <= 20:
+				mastertask_c.set_inputs([node])
+			else:
+				output = self.path.find_or_declare(self.target+'-c-%d-master.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c'))
+				mastertask_c = self.create_task('master', [node], [output])
+				self.mastertasks_c.append(mastertask_c)
+				self.create_compiled_task('c', output)
+		except:
+			output = self.path.find_or_declare(self.target+'-c-0-master.%s' % (self.objc and 'm' or 'c'))
+			mastertask_c = self.create_task('master', [node], [output])
+			self.mastertasks_c = [mastertask_c]
+			self.create_compiled_task('c', output)
+	else:
+		self.create_compiled_task('c', node)
+
+@extension('.cc', '.cxx', '.cpp', '.mm')
+def cc_hook(self, node):
+	if 'master' in self.features and not Options.options.nomaster:
+		if node.name.endswith('-instances.cc'):
+			try:
+				self.instancetask_cxx.set_inputs([node])
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-instances-master.%s' % (self.objc and 'mm' or 'cc'))
+				self.instancetask_cxx = self.create_task('master', [node], [output])
+				self.create_compiled_task('cxx', output)
+		else:
+			try:
+				mastertask_cxx = self.mastertasks_cxx[-1]
+				if len(mastertask_cxx.inputs) <= 20:
+					mastertask_cxx.set_inputs([node])
+				else:
+					output = self.path.find_or_declare(self.target+'-cxx-%d-master.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc'))
+					mastertask_cxx = self.create_task('master', [node], [output])
+					self.mastertasks_cxx.append(mastertask_cxx)
+					self.create_compiled_task('cxx', output)
+			except:
+				output = self.path.find_or_declare(self.target+'-cxx-0-master.%s' % (self.objc and 'mm' or 'cc'))
+				mastertask_cxx = self.create_task('master', [node], [output])
+				self.mastertasks_cxx = [mastertask_cxx]
+				self.create_compiled_task('cxx', output)
+	else:
+		self.create_compiled_task('cxx', node)
