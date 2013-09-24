@@ -193,7 +193,7 @@ def configure(conf):
 		if position != -1 and arch in supported_architectures:
 			real_arch, os_name = supported_architectures[arch]
 			version = target[position+6:].split('-')[0] + '_' + version
-			key = (name, bindir, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
+			key = (name, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
 			compiler = (name, bindir, gcc, gxx, version, target, real_arch, os_name, options)
 			try:
 				compiler_versions[key].append(compiler)
@@ -204,8 +204,7 @@ def configure(conf):
 		position = target.find('darwin')
 		if position != -1 and arch in supported_architectures:
 			real_arch, os_name = supported_architectures[arch]
-			version = target[position+6:].split('-')[0] + '_' + version
-			key = ('clang', directory, version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
+			key = ('clang', version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
 			compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, os_name, flags)
 			try:
 				compiler_versions[key].append(compiler)
@@ -225,7 +224,7 @@ def configure(conf):
 			return key, x[1]
 		else:
 			return key, ''
-	for key, all_toolchains in sorted(compiler_versions.items(), key=lambda x: (get_version(x[0][2]), x[0][0])):
+	for key, all_toolchains in sorted(compiler_versions.items(), key=lambda x: (x[0][0], get_version(x[0][1]))):
 		compiler_archs = {}
 		compiler_list = []
 		for c in all_toolchains:
@@ -242,14 +241,14 @@ def configure(conf):
 		iphone_toolchains = []
 		iphone_archs = []
 		iphone_os = set([])
-		name, bindir, version, check_multilib, load_compiler, set_iphone_compiler_options = key
+		name, version, check_multilib, load_compiler, set_iphone_compiler_options = key
 		if (name, version) in seen:
 			continue
 		seen.add((name, version))
 		for compiler in compiler_list:
 			check_multilib(conf, compiler)
 		try:
-			sdk_name, sdk_path = conf.get_iphone_sdk_version((key[0], key[2]), compiler_list)
+			sdk_name, sdk_path = conf.get_iphone_sdk_version((key[0], key[1]), compiler_list)
 		except Errors.WafError:
 			continue
 		for name, bindir, gcc, gxx, version, target, arch, real_os, options in compiler_list:

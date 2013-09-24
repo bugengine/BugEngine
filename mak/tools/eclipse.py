@@ -21,11 +21,11 @@ def path_from(path, task_gen, appname):
 	if isinstance(path, str):
 		return path
 	else:
-		for node in task_gen.source_nodes:
+		for node in getattr(task_gen, 'source_nodes', []):
 			if path.is_child_of(node):
 				return '${workspace_loc:/%s/%s/%s}' % (appname, task_gen.name.replace('.', '/'), path.path_from(node).replace('\\', '/'))
 		else:
-			return node.abspath()
+			return path.abspath()
 
 
 def gather_includes_defines(task_gen, appname):
@@ -143,9 +143,10 @@ class eclipse(Build.BuildContext):
 						for tg in g:
 							if not isinstance(tg, TaskGen.task_gen):
 								continue
-							name = createProjectFolder(tg.name, resources, seen)
-							for node in getattr(tg, 'source_nodes', []):
-								self.addSourceTree(resources, node, name, os.path.join('PROJECT_LOC', node.path_from(self.srcnode)))
+							if not 'kernel' in tg.features:
+								name = createProjectFolder(tg.name, resources, seen)
+								for node in getattr(tg, 'source_nodes', []):
+									self.addSourceTree(resources, node, name, os.path.join('PROJECT_LOC', node.path_from(self.srcnode)))
 
 				with XmlNode(projectDescription, 'filteredResources') as filters:
 					with XmlNode(filters, 'filter') as filter:
@@ -181,8 +182,8 @@ class eclipse(Build.BuildContext):
 				count = 0
 				with XmlNode(cproject, 'storageModule',	{'moduleId': cdt_core + '.settings'}) as rootStorageModule:
 					for toolchain in self.env.ALL_TOOLCHAINS:
+						env = self.all_envs[toolchain]
 						for variant in self.env.ALL_VARIANTS:
-							env = self.all_envs['%s-%s'%(toolchain, variant)]
 							count = count+1
 							cconf_id = cdt_core + '.default.config.%d'%count
 							with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
@@ -279,6 +280,8 @@ class eclipse(Build.BuildContext):
 										for g in self.groups:
 											for tg in g:
 												if not isinstance(tg, TaskGen.task_gen):
+													continue
+												if 'kernel' in tg.features:
 													continue
 												task_includes, task_defines = gather_includes_defines(tg, appname)
 												with XmlNode(config, 'folderInfo',

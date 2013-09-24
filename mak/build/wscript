@@ -128,7 +128,8 @@ def module(bld, name, depends,
 						use = [target_prefix + d for d in depends] + [target_prefix + name])
 						#install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
 					kernels.append(target_prefix + name + '.' + kernel)
-				internal_kernels.append((kernel, kernels))
+				if target_prefix:
+					internal_kernels.append((kernel, kernels))
 
 
 
@@ -194,8 +195,8 @@ def module(bld, name, depends,
 			source_nodes = [source_node] + [e for _, e in extras]))
 		if target_prefix:
 			internal_deps.append(target_prefix + name)
-	if internal_kernels:
-		for kernel, kernel_deps in internal_kernels:
+	for kernel, kernel_deps in internal_kernels:
+		if kernel_deps:
 			bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
 	if internal_deps:
 		bld(target=name, features=['multiarch'], use=internal_deps)
