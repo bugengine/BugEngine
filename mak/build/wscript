@@ -402,14 +402,14 @@ def rename_executable(self):
 @after_method('apply_link')
 def install_kernel(self):
 	if not self.env.ENV_PREFIX: #no multiarch
-		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), self.link_task.outputs)
+		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, self.bld.env.DEPLOY_KERNELDIR), self.link_task.outputs)
 
 @feature('plugin')
 @after_method('apply_link')
 def install_plugin(self):
 	if ('cshlib' in self.features) or ('cxxshlib' in self.features):
 		if not self.env.ENV_PREFIX: #no multiarch
-			self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR), self.link_task.outputs)
+			self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, self.bld.env.DEPLOY_PLUGINDIR), self.link_task.outputs)
 
 @feature('game')
 @after_method('apply_link')
@@ -424,11 +424,11 @@ def launcher_feature(task):
 def objects_feature(task):
 	pass
 
-@feature('cprogram', 'cxxprogram')
+@feature('launcher')
 @after_method('apply_link')
 def install_program(self):
 	if not self.env.ENV_PREFIX: #no multiarch
-		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), self.link_task.outputs)
+		self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, self.bld.env.DEPLOY_BINDIR), self.link_task.outputs)
 
 @feature('kernel', 'plugin')
 @after_method('process_use')
