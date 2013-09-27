@@ -123,9 +123,11 @@ class netbeans(Build.BuildContext):
 		add(doc, cd, 'projectmakefile', sys.argv[0])
 		confs = add(doc, cd, 'confs')
 		for toolchain in bld.env.ALL_TOOLCHAINS:
-			env = bld.all_envs[toolchain]
-			if env.SUB_TOOLCHAINS:
-				env = bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			bld_env = bld.all_envs[toolchain]
+			if bld_env.SUB_TOOLCHAINS:
+				env = bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+			else:
+				env = bld_env
 			for variant in bld.env.ALL_VARIANTS:
 				conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
 				toolsSet = add(doc, conf, 'toolsSet')
@@ -142,9 +144,9 @@ class netbeans(Build.BuildContext):
 				add(doc, mtool, 'buildCommand', 'python waf install:%s:%s'%(toolchain, variant))
 				add(doc, mtool, 'cleanCommand', 'python waf clean:%s:%s'%(toolchain, variant))
 				if env.ABI == 'mach_o':
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, variant, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+					add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 				else:
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
+					add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
 				if self.__class__.version >= 70:
 					ctool = add(doc, mtool, 'cTool')
 					cincdir = add(doc, ctool, 'incDir')
