@@ -23,7 +23,9 @@ def allarchs(arch):
 		return [(['-m32'], 'mipsel'), (['-m64'], 'mipsel64')]
 	elif arch == 'powerpc' or arch == 'ppc':
 		return [(['-m64'], arch+'64'), (['-m32'], arch)]
-	elif arch in ['powerpc64', 'ppc64', 'ppu']:
+	elif arch in ['ppu']:
+		return [(['-m32'], arch), (['-m64'], arch+'64')]
+	elif arch in ['powerpc64', 'ppc64']:
 		return [(['-m32'], arch[:-2]), (['-m64'], arch)]
 	elif arch == 'spu':
 		return [([], 'spu')]

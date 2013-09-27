@@ -206,8 +206,8 @@ class VCxproj:
 
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
-				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
 				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
 							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
