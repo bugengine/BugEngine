@@ -426,7 +426,7 @@ def launcher_feature(task):
 def objects_feature(task):
 	pass
 
-@feature('cprogram', 'cxxprogram')
+@feature('launcher')
 @after_method('apply_link')
 def install_program(self):
 	if self.bld.is_install:
