@@ -113,6 +113,7 @@ def set_android_options(conf, arch, sdk_hint):
 		conf.end_msg('none', color='RED')
 		raise Errors.WafError(str(e))
 	conf.end_msg(sdk)
+	conf.env.cxxprogram_PATTERN = '%s'
 	conf.env.DEPLOY_ROOTDIR = ''
 	conf.env.DEPLOY_BINDIR = 'bin'
 	conf.env.DEPLOY_RUNBINDIR = 'bin'

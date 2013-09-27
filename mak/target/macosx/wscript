@@ -278,7 +278,8 @@ def configure(conf):
 			sdk_name, sdk_path = conf.get_macosx_sdk_version((key[0], key[1]), compiler_list)
 		except Errors.WafError:
 			continue
-		for name, bindir, gcc, gxx, version, target, arch, real_arch, options in compiler_list:
+		for compiler in compiler_list:
+			name, bindir, gcc, gxx, version, target, arch, real_arch, options = compiler
 			os = 'macosx'
 			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
 			env = conf.env.derive()

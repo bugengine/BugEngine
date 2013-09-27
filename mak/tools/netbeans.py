@@ -123,8 +123,10 @@ class netbeans(Build.BuildContext):
 		add(doc, cd, 'projectmakefile', sys.argv[0])
 		confs = add(doc, cd, 'confs')
 		for toolchain in bld.env.ALL_TOOLCHAINS:
+			env = bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = bld.all_envs[env.SUB_TOOLCHAINS[0]]
 			for variant in bld.env.ALL_VARIANTS:
-				env = bld.all_envs['%s-%s' % (toolchain, variant)]
 				conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
 				toolsSet = add(doc, conf, 'toolsSet')
 				if self.__class__.version >= 70:
