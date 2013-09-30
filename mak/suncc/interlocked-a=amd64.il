@@ -19,12 +19,12 @@
 .end
 
 .inline set_conditional_32, 0
-		mov         %edx,   %eax
+        mov         %edx,   %eax
  lock;  cmpxchg     %esi,   (%rdi)
 .end
 
 .inline set_conditional_64, 0
-		mov         %rdx,   %rax
+        mov         %rdx,   %rax
  lock;  cmpxchg     %rsi,   (%rdi)
 .end
 
@@ -34,14 +34,14 @@
 / tag = rcx
 / lock;  cmpxchg16b  (%r8)
 .inline set_conditional_128, 0
-		mov         %rbx,   %r9
+        mov         %rbx,   %r9
         mov         %rdx,   %rax
-		mov         %rcx,   %rdx
-		mov         %rcx,   %rbx
-		mov         %rdi,   %r8
-		mov         %rsi,   %rcx
-		inc         %rbx
-	.byte 0xF0,0x49,0x0F,0xC7,0x08
+        mov         %rcx,   %rdx
+        mov         %rcx,   %rbx
+        mov         %rdi,   %r8
+        mov         %rsi,   %rcx
+        inc         %rbx
+        .byte 0xF0,0x49,0x0F,0xC7,0x08
         setz        %al
-		mov         %r9,    %rbx
+        mov         %r9,    %rbx
 .end
