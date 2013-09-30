@@ -200,7 +200,6 @@ def options(opt):
 					help='Version of the MacOS X SDK to target')
 
 def configure(conf):
-	seen = set([])
 	supported_architectures ={
 		'x86' : 'i686',
 		'i386' : 'i686',
@@ -282,6 +281,9 @@ def configure(conf):
 			name, bindir, gcc, gxx, version, target, arch, real_arch, options = compiler
 			os = 'macosx'
 			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			if toolchain in seen:
+				continue
+			seen.add(toolchain)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'darwin'
