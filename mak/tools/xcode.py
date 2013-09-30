@@ -559,7 +559,7 @@ class xcode(Build.BuildContext):
 				p._output.children.append(target.productReference)
 				scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
 			else:
-				target = PBXLegacyTarget(toolchain, 'install:%s:$(CONFIG)'%toolchain)
+				target = PBXLegacyTarget('install:%s:$(CONFIG)'%toolchain, toolchain)
 				p.targets.append(target)
 				scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
 			scheme.write(schemes.make_node('%s.xcscheme'%toolchain))
