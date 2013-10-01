@@ -208,9 +208,6 @@ def module(bld, name, depends,
 	return result
 
 def deploy_directory(bld, env, node, local_path, env_variable):
-	print(env_variable)
-	print(bld.env.PREFIX)
-	print(env[env_variable])
 	target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
 	for n in node.listdir():
 		sn = node.make_node(n)

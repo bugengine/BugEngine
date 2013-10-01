@@ -223,6 +223,7 @@ def configure(conf):
 						toolchain = '%s-%s-%s-%s'%(os+conf.env.ANDROID_SDK, arch, name, version)
 						conf.setenv(toolchain, conf.env.derive())
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
+						conf.env.ENV_PREFIX = arch
 						conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch, False)
 						sdk_number = conf.env.ANDROID_SDK
 					except Errors.WafError as e:
