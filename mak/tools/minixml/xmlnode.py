@@ -29,17 +29,17 @@ class XmlNode:
 	def __exit__(self, type, value, traceback):
 		if not self.closed:
 			self.close()
-		
+
 	def open(self, text, attributes):
-		self.file.write('%s<%s' % (' '*self.indent, self.name))
+		self.file.write('%s<%s' % ('\t'*self.indent, self.name))
 		if attributes:
 			indent = self.indent + 4
 			for key, value in attributes.items():
-				self.file.write('\n%s%s="%s"' % (' '*indent, key, value))
+				self.file.write(' %s="%s"' % (key, value))
 		if isinstance(text, dict):
 			indent = self.indent + 4
 			for key, value in text.items():
-				self.file.write('\n%s%s="%s"' % (' '*indent, key, xmlify(value)))
+				self.file.write(' %s="%s"' % (key, xmlify(value)))
 		elif isinstance(text, str) and text:
 			self.file.write('>%s</%s>\n' % (xmlify(text), self.name))
 			assert(self.parent.current == self)
@@ -49,7 +49,7 @@ class XmlNode:
 		else:
 			assert(not text)
 			assert(not attributes)
-			
+
 	def close(self):
 		if not self.closed:
 			assert(self.parent.current == self)
@@ -58,7 +58,7 @@ class XmlNode:
 				self.file.write(' />\n')
 			else:
 				self.file.write('%s</%s>\n' % (' '*self.indent, self.name))
-			
+
 	def begin(self):
 		self.file.write('>\n')
 		self.empty = False

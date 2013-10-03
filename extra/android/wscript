@@ -180,6 +180,7 @@ def configure(conf):
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
+			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
@@ -236,6 +237,7 @@ def configure(conf):
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
+			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))

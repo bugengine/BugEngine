@@ -197,11 +197,58 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 			winres = self.find_program('windres', var='WINRC', mandatory=False)
 		self.load('winres')
 
+	cmd = [self.env.CC, '-x', 'c++', '-Wp,-v', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[1]
+	except:
+		print('could not retrieve system includes')
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)
+			if line.startswith('#include <...>'):
+				while out:
+					path = out.pop(0).strip()
+					if path.startswith('End of search list'):
+						break
+					self.env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
+
+	cmd = [self.env.CC, '-x', 'c++', '-dM', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[0]
+	except:
+		print('could not retrieve system defines')
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)[8:].strip()
+			if line:
+				space = line.find(' ')
+				if space != -1:
+					define = line[:space]
+					value = line[space+1:]
+					if define in self.env.useful_defines:
+						self.env.append_unique('SYSTEM_DEFINES', ['%s=%s'%(define, value)])
+				else:
+					if line in self.env.useful_defines:
+						self.env.append_unique('SYSTEM_DEFINES', [line])
+
+
+
 def options(opt):
 	pass
 
 def configure(conf):
 	conf.start_msg('Looking for gcc compilers')
+	conf.env.append_unique('useful_defines', ['__clang__', '__GNUC__', '__GNUG__'])
 	archs = getattr(conf, 'gcc_architectures', [])
 	conf.gcc_architectures = archs + [
 		('i686-w64', 'amd64'),

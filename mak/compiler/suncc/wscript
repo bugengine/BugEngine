@@ -58,6 +58,7 @@ def options(opt):
 
 def configure(conf):
 	conf.start_msg('Looking for suncc compilers')
+	conf.env.append_unique('useful_defines', ['__SUNPRO_CC'])
 	conf.detect_suncc()
 	conf.end_msg('done')
 

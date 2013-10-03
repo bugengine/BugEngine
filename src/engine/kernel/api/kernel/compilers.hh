@@ -26,7 +26,7 @@
 # define BE_COMPILER_NAME       "suncc"
 # include <kernel/compilers/suncc.hh>
 #else
-# error unsupported compiler
+//# error unsupported compiler
 # include <kernel/compilers/syntax.hh>
 #endif
 
