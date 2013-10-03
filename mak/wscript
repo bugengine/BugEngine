@@ -46,8 +46,8 @@ def build(bld):
 	bld.recurse('target')
 
 def plugins(bld):
-	bld.recurse('host')
-	bld.recurse('target')
+	bld.recurse('host', name='plugins')
+	bld.recurse('target', name='plugins')
 
 
 from waflib import Configure, Build, ConfigSet, Context, Utils, Options, Logs
