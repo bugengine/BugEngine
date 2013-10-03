@@ -207,6 +207,8 @@ class VCxproj:
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
 				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
@@ -336,7 +338,6 @@ class vs2003(Build.BuildContext):
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 				tg.post()
-				print(tg.target)
 
 				nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
 				project = klass(tg, version, version_project, folders)
