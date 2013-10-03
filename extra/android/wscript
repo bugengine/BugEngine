@@ -3,7 +3,6 @@
 import os
 from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
-from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
 
 def options(opt):
@@ -183,6 +182,7 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
+			conf.load('javaw')
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
@@ -242,6 +242,7 @@ def configure(conf):
 			env = conf.env.derive()
 			conf.set_android_options()
 			conf.setenv(toolchain, env)
+			conf.load('javaw')
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
@@ -253,5 +254,6 @@ def build(bld):
 	bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
 
 def plugins(bld):
-	pass
+	bld.recurse('engine/launcher')
+
 
