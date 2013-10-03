@@ -1,0 +1,16 @@
+from waflib.TaskGen import feature, before_method, after_method, extension
+
+@extension('.xml')
+def deploy_manifest(self, node):
+	if self.env.VALID_PLATFORMS[0] == 'android':
+		self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR), [node])
+
+def build(bld):
+	source_node = bld.path.make_node('src')
+	sources = source_node.ant_glob('*.*')
+	launcher = bld(target = 'launcher',
+				   category = 'engine/launcher',
+				   features=['javac'],
+				   source_nodes = [source_node])
+
+
