@@ -155,13 +155,13 @@ def load_clang(conf, directory, target = ''):
 			winres = conf.find_program('windres', var='WINRC', mandatory=False)
 		conf.load('winres')
 
-	cmd = [conf.env.CC, '-x', 'c++', '-Wp,-v', '-E', '-']
+	cmd = conf.env.CC + ['-x', 'c++', '-Wp,-v', '-E', '-']
 	try:
 		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 		p.stdin.write('\n'.encode())
 		out = p.communicate()[1]
-	except:
-		print('could not retrieve system includes')
+	except Exception as e:
+		print('could not retrieve system includes: %s' % str(e))
 	else:
 		if not isinstance(out, str):
 			out = out.decode(sys.stdout.encoding)
@@ -175,13 +175,13 @@ def load_clang(conf, directory, target = ''):
 						break
 					conf.env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
 
-	cmd = [conf.env.CC, '-x', 'c++', '-dM', '-E', '-']
+	cmd = conf.env.CC + ['-x', 'c++', '-dM', '-E', '-']
 	try:
 		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
 		p.stdin.write('\n'.encode())
 		out = p.communicate()[0]
-	except:
-		print('could not retrieve system defines')
+	except Exception as e:
+		print('could not retrieve system defines: %s' % str(e))
 	else:
 		if not isinstance(out, str):
 			out = out.decode(sys.stdout.encoding)
