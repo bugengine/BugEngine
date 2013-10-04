@@ -130,6 +130,7 @@ def set_android_clang_options(conf, flags, arch):
 def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
 	conf.env.VALID_PLATFORMS = ['android', 'posix']
 	conf.env.ANDROID_SDK = sdk_version
+	conf.env.append_unique('CLASSPATH', [os.path.join(sdk_path, 'android.jar')])
 
 	ndk_path = os.path.join(ndk_path, 'arch-%s'%get_android_arch(arch))
 	conf.env.SYSROOT = [ndk_path]
@@ -188,6 +189,7 @@ def configure(conf):
 			env.DEST_OS = 'android'
 			try:
 				conf.start_msg('Setting up compiler')
+				conf.find_program(triple+'-ar', var='AR')
 				conf.load_clang(directory)
 				conf.set_android_clang_options(flags, real_arch)
 			except Exception as e:
@@ -218,6 +220,8 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
+			conf.set_android_options()
+			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
@@ -283,8 +287,9 @@ def configure(conf):
 		if android_toolchains:
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), name, version)
 			env = conf.env.derive()
-			conf.set_android_options()
 			conf.setenv(toolchain, env)
+			conf.set_android_options()
+			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
