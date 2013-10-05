@@ -1,16 +1,90 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
+from waflib import Context, Task, Node
+import os
 
-@extension('.xml')
-def deploy_manifest(self, node):
-	if self.env.VALID_PLATFORMS[0] == 'android':
-		self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR), [node])
+DEX_RE = '**/*.class'
+
+class dex_create(Task.Task):
+	"""
+	Create a dex file
+	"""
+	color   = 'GREEN'
+	run_str = '${JAVA} -jar ${DEX} ${DEXCREATE} ${DEX_TGT_PATTERN:OUTPUT_FILES} ${DEXOPTS} ${INPUT_FILES}'
+
+	def runnable_status(self):
+		"""
+		Wait for dependent tasks to be executed, then read the
+		files to update the list of inputs.
+		"""
+		for t in self.run_after:
+			if not t.hasrun:
+				return Task.ASK_LATER
+		if not self.inputs:
+			global DEX_RE
+			try:
+				self.inputs = [x for x in self.basedir.ant_glob(DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
+				self.env.INPUT_FILES = [x.path_from(self.basedir) for x in self.inputs]
+				self.env.OUTPUT_FILES = [x.path_from(self.basedir) for x in self.outputs]
+			except Exception:
+				raise Errors.WafError('Could not find the basedir %r for %r' % (self.basedir, self))
+
+		return super(dex_create, self).runnable_status()
+
+@feature('aapt_resource')
+def aapt_resource(self):
+	self.resource_task = tsk = self.create_task('aapt_resource', self.resource.ant_glob('**/*'), [self.destfile])
+	tsk.env.MANIFEST = self.manifest.abspath()
+	tsk.env.RESOURCE_PATH = self.resource.abspath()
+
+@feature('dex')
+@after_method('apply_java')
+@before_method('process_source')
+def dex_files(self):
+	"""
+	Create a dex task. There can be only one dex task by task generator.
+	"""
+	destfile = self.destfile
+	dexopts = getattr(self, 'dexopts', [])
+	basedir = self.basedir
+
+	self.dex_task = tsk = self.create_task('dex_create')
+	if not isinstance(destfile, Node.Node):
+		destfile = self.path.find_or_declare(destfile)
+	if not destfile:
+		self.bld.fatal('invalid destfile %r for %r' % (destfile, self))
+	tsk.set_outputs(destfile)
+	tsk.basedir = basedir
+	tsk.cwd = basedir.abspath()
+
+	if getattr(self, 'javac_task', None):
+		tsk.set_run_after(self.javac_task)
 
 def build(bld):
+	bld.env.DEX = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\lib\\dx.jar'
+	bld.env.DEXCREATE = '--dex'
+	bld.env.DEX_TGT_PATTERN = '--output=%s'
+
+	bld.env.AAPT = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\aapt.exe'
+	bld.env.AAPT_FLAGS = ['-f', '-I', os.path.join(bld.env.ANDROID_SDK_PATH, 'android.jar')]
+	bld.env.AAPT_SOURCE_PATTERN = '-S %s'
+
 	source_node = bld.path.make_node('src')
-	sources = source_node.ant_glob('*.*')
+	resource_node = bld.path.make_node('res')
 	launcher = bld(target = 'launcher',
 				   category = 'engine/launcher',
-				   features=['javac'],
-				   source_nodes = [source_node])
+				   features=['cxx', 'javac', 'dex'],
+				   source_nodes = [source_node, resource_node],
+				   destfile='classes.dex',
+				   outdir=source_node,
+				   basedir=source_node)
+
+	resources = bld(target = 'resource',
+				   category = 'engine/launcher',
+				   features=['aapt_resource'],
+				   resource=resource_node,
+				   destfile=bld.bldnode.find_or_declare('resources.apk'),
+				   manifest=source_node.make_node('AndroidManifest.xml'))
+	outdir = os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR)
+	bld.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
 
 

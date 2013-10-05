@@ -84,7 +84,7 @@ class eclipse(Build.BuildContext):
 		self.create_cproject(appname)
 
 
-		settings = self.srcnode.find_or_declare('mak/eclipse/')
+		settings = self.srcnode.find_or_declare('mak/tools/eclipse')
 		out = self.srcnode.make_node('.settings')
 		out.mkdir()
 		for f in settings.listdir():

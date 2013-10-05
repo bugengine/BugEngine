@@ -20,6 +20,10 @@ Environment::Environment()
     m_homeDirectory.push_back(".bugengine");
 }
 
+Environment::~Environment()
+{
+}
+
 void Environment::init(int argc, const char *argv[])
 {
     m_game = istring("sample.kernel");
@@ -50,16 +54,6 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
-}
-
-Environment::~Environment()
-{
-}
-
-Environment& Environment::getEnvironment()
-{
-    static Environment s_environment;
-    return s_environment;
 }
 
 }

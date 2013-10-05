@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.gl2jni;
+package com.bugengine;
 
-// Wrapper for native library
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.WindowManager;
 
-public class GL2JNILib {
+import java.io.File;
 
-     static {
-         System.loadLibrary("gl2jni");
-     }
 
-    /**
-     * @param width the current view width
-     * @param height the current view height
-     */
-     public static native void init(int width, int height);
-     public static native void step();
+public class BugEngineActivity extends Activity {
+
+    BugEngineView mView;
+
+    @Override protected void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mView = new BugEngineView(getApplication());
+        setContentView(mView);
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        mView.onPause();
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        mView.onResume();
+    }
 }
