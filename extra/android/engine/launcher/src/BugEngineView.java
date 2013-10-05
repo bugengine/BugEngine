@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gl2jni;
+package com.bugengine;
 /*
  * Copyright (C) 2008 The Android Open Source Project
  *
@@ -64,16 +64,16 @@ import javax.microedition.khronos.opengles.GL10;
  *   that matches it exactly (with regards to red/green/blue/alpha channels
  *   bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
  */
-class GL2JNIView extends GLSurfaceView {
-    private static String TAG = "GL2JNIView";
+class BugEngineView extends GLSurfaceView {
+    private static String TAG = "BugEngineView";
     private static final boolean DEBUG = false;
 
-    public GL2JNIView(Context context) {
+    public BugEngineView(Context context) {
         super(context);
         init(false, 0, 0);
     }
 
-    public GL2JNIView(Context context, boolean translucent, int depth, int stencil) {
+    public BugEngineView(Context context, boolean translucent, int depth, int stencil) {
         super(context);
         init(translucent, depth, stencil);
     }
@@ -325,11 +325,11 @@ class GL2JNIView extends GLSurfaceView {
 
     private static class Renderer implements GLSurfaceView.Renderer {
         public void onDrawFrame(GL10 gl) {
-            GL2JNILib.step();
+            BugEngineLib.step();
         }
 
         public void onSurfaceChanged(GL10 gl, int width, int height) {
-            GL2JNILib.init(width, height);
+            BugEngineLib.init(width, height);
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {

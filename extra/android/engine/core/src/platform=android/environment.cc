@@ -4,36 +4,50 @@
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
 #include    <unistd.h>
-#include    <sys/types.h>
-#include    <sys/sysctl.h>
-#include    <errno.h>
+#include    <cerrno>
+#include    <cstdio>
+
+
 
 namespace BugEngine
 {
 
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory("share/bugengine")
-,   m_game("sample.kernel")
+,   m_dataDirectory(ipath("data"))
+,   m_game("")
 ,   m_user(getenv("USER"))
 {
     m_homeDirectory.push_back(".bugengine");
 }
 
+Environment::~Environment()
+{
+}
+
 void Environment::init(int argc, const char *argv[])
 {
-    char* path = strdup(argv[0]);
-    char* filename = path;
-    char* lastSlash = path;
-    for (filename = path; *filename; ++filename)
+    m_game = istring("sample.kernel");
+    const char* filename = argv[0];
+    while (*filename != 0)
     {
-        if (*filename == '/')
-            lastSlash = filename;
+        filename++;
     }
-    *lastSlash = 0;
-    filename = lastSlash + 1;
-    chdir(path);
-    for( int arg = 1; arg < argc; arg++ )
+    while (*filename != '/' && filename != argv[0])
+    {
+        filename--;
+    }
+    filename--;
+    while (*filename != '/' && filename != argv[0])
+    {
+        filename--;
+    }
+    ipath rootdir = ipath(argv[0], filename);
+    for (u32 i = 0; i < rootdir.size(); ++i)
+    {
+        chdir(rootdir[i].c_str());
+    }
+    for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
         {
@@ -41,14 +55,6 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
-    m_dataDirectory = ipath(argv[0], filename);
-    m_dataDirectory += "share";
-    m_dataDirectory += "bugengine";
-    free(path);
-}
-
-Environment::~Environment()
-{
 }
 
 size_t Environment::getProcessorCount() const

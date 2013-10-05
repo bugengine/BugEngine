@@ -8,7 +8,6 @@ def options(opt):
 	opt.recurse('build')
 	opt.recurse('host')
 	opt.recurse('compiler')
-	opt.recurse('source')
 	opt.recurse('target')
 	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
 		opt.recurse('../src/3rdparty/%s'%third_party)
@@ -22,8 +21,11 @@ def configure(conf):
 	conf.recurse('checks')
 	conf.recurse('host')
 	conf.recurse('compiler')
-	conf.recurse('source')
 	conf.recurse('target')
+	conf.load('flex', tooldir=['mak/tools'])
+	conf.load('bison', tooldir=['mak/tools'])
+	conf.load('data', tooldir=['mak/tools'])
+
 	conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 
 def setup(conf):
@@ -42,8 +44,13 @@ def build(bld):
 	bld.bugenginenode = bld.path.parent
 	bld.recurse('build')
 	bld.recurse('host')
-	bld.recurse('source')
 	bld.recurse('target')
+
+	if bld.env.PROJECTS:
+		def rc_hook(self, node):
+			pass
+		if not '.rc' in task_gen.mappings:
+			task_gen.mappings['.rc'] = rc_hook
 
 def plugins(bld):
 	bld.recurse('host', name='plugins')

@@ -4,6 +4,7 @@ import os
 from waflib import Context, Errors
 from waflib.Logs import info,warn,pprint
 from waflib.Configure import conf
+from waflib.TaskGen import feature
 
 def options(opt):
 	gr = opt.get_option_group('SDK paths and options')
@@ -18,6 +19,14 @@ def get_android_arch(arch):
 		'mipsel': 'mips',
 	}
 	return archs.get(arch, arch)
+
+def get_target_folder(arch):
+	archs = {
+		'mipsel': 'mips',
+		'x86': 'x86',
+		'arm': 'armeabi-v7a'
+	}
+	return archs[arch]
 
 def find_android_gcc_toolchain(path, arch):
 	try:
@@ -96,17 +105,32 @@ def find_android_sdk(ndk_path, sdk_path, archs):
 
 @conf
 def set_android_gcc_options(conf, options, arch):
-	conf.env.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
-	conf.env.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
-	conf.env.append_unique('LINKFLAGS', [])
-	conf.env.append_unique('LINKFLAGS_cprogram', ['-shared'])
-	conf.env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
-	conf.env.append_unique('CFLAGS_nowarning', ['-w'])
-	conf.env.append_unique('CXXFLAGS_nowarning', ['-w'])
-	conf.env.cprogram_PATTERN = 'lib%s.so'
-	conf.env.cxxprogram_PATTERN = 'lib%s.so'
-	conf.env.CFLAGS_cxxshlib = []
-	conf.env.CXXFLAGS_cxxshlib = []
+	v = conf.env
+	v.DEST_BINFMT = 'elf'
+	v.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
+	v.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
+	v.append_unique('LINKFLAGS', ['-Wl,-z,defs'])
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
 
 	if arch.startswith('arm'):
 		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
@@ -114,22 +138,42 @@ def set_android_gcc_options(conf, options, arch):
 
 @conf
 def set_android_clang_options(conf, flags, arch):
-	conf.env.DEST_BINFMT = 'elf'
-	conf.env.append_unique('CFLAGS', flags+['-fPIC'])
-	conf.env.append_unique('CXXFLAGS', flags+['-fPIC'])
-	conf.env.append_unique('LINKFLAGS', flags+[])
-	conf.env.append_unique('CFLAGS_nowarning', ['-w'])
-	conf.env.append_unique('CXXFLAGS_nowarning', ['-w'])
-	conf.env.CFLAGS_cxxshlib = []
-	conf.env.CXXFLAGS_cxxshlib = []
+	v = conf.env
+	v.DEST_BINFMT = 'elf'
+	v.append_unique('CFLAGS', flags+['-fPIC'])
+	v.append_unique('CXXFLAGS', flags+['-fPIC'])
+	v.append_unique('LINKFLAGS', flags+['-Wl,-z,defs'])
+
+	v.CFLAGS_warnnone = ['-w']
+	v.CXXFLAGS_warnnone = ['-w']
+	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+
+	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.LINKFLAGS_debug = ['-pipe', '-g']
+
+	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_profile = ['-pipe', '-g']
+
+	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+	v.LINKFLAGS_final = ['-pipe', '-g']
+
+	v.CFLAGS_cxxshlib = []
+	v.CXXFLAGS_cxxshlib = []
 
 	if arch.startswith('arm'):
 		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
 @conf
 def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
-	conf.env.VALID_PLATFORMS = ['android', 'posix']
 	conf.env.ANDROID_SDK = sdk_version
+	conf.env.ANDROID_SDK_PATH = sdk_path
 	conf.env.append_unique('CLASSPATH', [os.path.join(sdk_path, 'android.jar')])
 
 	ndk_path = os.path.join(ndk_path, 'arch-%s'%get_android_arch(arch))
@@ -139,16 +183,25 @@ def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
 	conf.env.append_unique('LINKFLAGS', ['--sysroot', ndk_path])
 
 @conf
-def set_android_options(conf):
-	conf.env.cxxprogram_PATTERN = '%s'
-	conf.env.DEPLOY_ROOTDIR = ''
-	conf.env.DEPLOY_BINDIR = 'bin'
-	conf.env.DEPLOY_RUNBINDIR = 'bin'
-	conf.env.DEPLOY_LIBDIR = 'lib'
+def set_android_options(conf, arch):
+	conf.env.VALID_PLATFORMS = ['android']
+	appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
+	conf.env.cxxprogram_PATTERN = 'lib%s.so'
+	conf.env.append_unique('LINKFLAGS_cprogram', ['-shared'])
+	conf.env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
+	conf.env.LINK_WITH_PROGRAM = True
+	conf.env.CFLAGS_cxxshlib = []
+	conf.env.CXXFLAGS_cxxshlib = []
+
+	#conf.env.append_unique('LINKFLAGS', ['--no-allow-shlib-undefined'])
+	conf.env.DEPLOY_ROOTDIR = appname
+	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_LIBDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_INCLUDEDIR = 'include'
-	conf.env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
-	conf.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
-	conf.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
+	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'data')
+	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 
 def configure(conf):
 	seen = set([])
@@ -199,7 +252,7 @@ def configure(conf):
 				conf.end_msg('done')
 				try:
 					conf.set_android_sdk_options(real_arch, ndk_path, sdk_path, sdk_version)
-					conf.set_android_options()
+					conf.set_android_options(real_arch)
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.env.ENV_PREFIX = real_arch
@@ -220,9 +273,8 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
-			conf.set_android_options()
+			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
-			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
@@ -267,7 +319,7 @@ def configure(conf):
 				conf.end_msg('done')
 				try:
 					conf.set_android_sdk_options(arch, ndk_path, sdk_path, sdk_version)
-					conf.set_android_options()
+					conf.set_android_options(arch)
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.env.ENV_PREFIX = arch
@@ -288,9 +340,8 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
-			conf.set_android_options()
+			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
-			conf.env.VALID_PLATFORMS = ['android', 'posix']
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.add_multiarch_toolchain(toolchain)
@@ -304,4 +355,13 @@ def build(bld):
 def plugins(bld):
 	bld.recurse('engine/launcher')
 
+
+@feature('multiarch')
+def apply_multiarch_android(self):
+	if 'android' in self.env.VALID_PLATFORMS:
+		for tg_name in self.use:
+			task_gen = self.bld.get_tgen_by_name(tg_name)
+			if 'cxxshlib' in task_gen.features or 'cxxprogram' in task_gen.features:
+				outdir = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_BINDIR)
+				self.bld.install_files(outdir, task_gen.link_task.outputs)
 
