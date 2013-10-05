@@ -277,6 +277,9 @@ def configure(conf):
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
+			conf.find_program('jarsigner', var='JARSIGNER')
+			key_debug = conf.path.make_node('debug.keystore')
+			conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
@@ -344,6 +347,9 @@ def configure(conf):
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
+			conf.find_program('jarsigner', var='JARSIGNER')
+			key_debug = conf.path.make_node('debug.keystore')
+			conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 

@@ -1,8 +1,59 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
-from waflib import Context, Task, Node
+from waflib import Context, Logs, Task, Node, Build, Utils, Errors
 import os
 
 DEX_RE = '**/*.class'
+
+def build_file_list(node, path = ''):
+	if os.path.isdir(node.abspath()):
+		result = []
+		for n in node.listdir():
+			result += build_file_list(node.make_node(n), os.path.join(path, n))
+		return result
+	else:
+		return [path]
+
+def post_run(bld):
+	destination_directory = bld.srcnode.make_node(os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR))
+	appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
+	package_name = appname + '.apk'
+	Logs.pprint('GREEN', 'Packaging application %s'%package_name)
+	original = bld.bldnode.make_node('resources.apk')
+	destination = bld.bldnode.make_node('package.apk')
+	files = build_file_list(destination_directory)
+	destination.write(original.read())
+	command = [bld.env.AAPT, 'add', destination.abspath()] + files
+	p = Utils.subprocess.Popen(command,
+			cwd=destination_directory.abspath(),
+			stdin=Utils.subprocess.PIPE,
+			stdout=Utils.subprocess.PIPE,
+			stderr=Utils.subprocess.PIPE)
+	out = p.communicate()[0]
+	if p.returncode != 0:
+		print(out.decode('utf-8'))
+		raise Errors.WafError('failed to create Android package')
+
+	command = [bld.env.JARSIGNER] + bld.env.JARSIGNER_FLAGS + [
+		'-signedjar',
+		destination_directory.parent.make_node(package_name).abspath(),
+		destination.abspath(),
+		'androiddebugkey']
+	p = Utils.subprocess.Popen(command,
+			stdin=Utils.subprocess.PIPE,
+			stdout=Utils.subprocess.PIPE,
+			stderr=Utils.subprocess.PIPE)
+	out = p.communicate()[0]
+	if p.returncode != 0:
+		print(out.decode('utf-8'))
+		raise Errors.WafError('failed to sign Android package')
+
+
+class aapt_create(Task.Task):
+	"""
+	Create an apk file
+	"""
+	color   = 'PINK'
+	run_str = '${AAPT} package ${AAPT_FLAGS} -M ${MANIFEST} -S ${RESOURCE_PATH}'
 
 class dex_create(Task.Task):
 	"""
@@ -22,7 +73,7 @@ class dex_create(Task.Task):
 		if not self.inputs:
 			global DEX_RE
 			try:
-				self.inputs = [x for x in self.basedir.ant_glob(DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
+				self.inputs = [x for x in self.outdir.ant_glob(DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
 				self.env.INPUT_FILES = [x.path_from(self.basedir) for x in self.inputs]
 				self.env.OUTPUT_FILES = [x.path_from(self.basedir) for x in self.outputs]
 			except Exception:
@@ -32,7 +83,7 @@ class dex_create(Task.Task):
 
 @feature('aapt_resource')
 def aapt_resource(self):
-	self.resource_task = tsk = self.create_task('aapt_resource', self.resource.ant_glob('**/*'), [self.destfile])
+	self.resource_task = tsk = self.create_task('aapt_create', self.resource.ant_glob('**/*'), [self.destfile])
 	tsk.env.MANIFEST = self.manifest.abspath()
 	tsk.env.RESOURCE_PATH = self.resource.abspath()
 
@@ -46,6 +97,7 @@ def dex_files(self):
 	destfile = self.destfile
 	dexopts = getattr(self, 'dexopts', [])
 	basedir = self.basedir
+	outdir = self.outdir
 
 	self.dex_task = tsk = self.create_task('dex_create')
 	if not isinstance(destfile, Node.Node):
@@ -54,19 +106,21 @@ def dex_files(self):
 		self.bld.fatal('invalid destfile %r for %r' % (destfile, self))
 	tsk.set_outputs(destfile)
 	tsk.basedir = basedir
-	tsk.cwd = basedir.abspath()
+	tsk.outdir = outdir
+	tsk.cwd = outdir.abspath()
 
 	if getattr(self, 'javac_task', None):
 		tsk.set_run_after(self.javac_task)
 
 def build(bld):
+	if bld.is_install == Build.INSTALL:
+		bld.add_post_fun(post_run)
 	bld.env.DEX = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\lib\\dx.jar'
 	bld.env.DEXCREATE = '--dex'
 	bld.env.DEX_TGT_PATTERN = '--output=%s'
 
 	bld.env.AAPT = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\aapt.exe'
 	bld.env.AAPT_FLAGS = ['-f', '-I', os.path.join(bld.env.ANDROID_SDK_PATH, 'android.jar')]
-	bld.env.AAPT_SOURCE_PATTERN = '-S %s'
 
 	source_node = bld.path.make_node('src')
 	resource_node = bld.path.make_node('res')
@@ -75,8 +129,8 @@ def build(bld):
 				   features=['cxx', 'javac', 'dex'],
 				   source_nodes = [source_node, resource_node],
 				   destfile='classes.dex',
-				   outdir=source_node,
-				   basedir=source_node)
+				   outdir=source_node.find_or_declare('jar'),
+				   basedir=source_node.find_or_declare('jar'))
 
 	resources = bld(target = 'resource',
 				   category = 'engine/launcher',
