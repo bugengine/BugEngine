@@ -109,7 +109,7 @@ def set_android_gcc_options(conf, options, arch):
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
 	v.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
-	v.append_unique('LINKFLAGS', ['-Wl,-z,defs'])
+	v.append_unique('LINKFLAGS', ['-Wl,-z,defs', '-landroid', '-llog'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -142,7 +142,7 @@ def set_android_clang_options(conf, flags, arch):
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', flags+['-fPIC'])
 	v.append_unique('CXXFLAGS', flags+['-fPIC'])
-	v.append_unique('LINKFLAGS', flags+['-Wl,-z,defs'])
+	v.append_unique('LINKFLAGS', flags+['-Wl,-z,defs', '-landroid', '-llog'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -203,12 +203,32 @@ def set_android_options(conf, arch):
 	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 
+def get_tools_paths(android_path):
+	return [os.path.split(android_path)[0], os.path.join(os.path.split(os.path.split(android_path)[0])[0], 'platform-tools')]
+
+def get_build_tool_path(android_path):
+	sdk_tools_path = os.path.join(os.path.split(os.path.split(android_path)[0])[0], 'build-tools')
+	sdk_tools = sorted(os.listdir(sdk_tools_path), key = lambda x: float(x.split('-')[1]))
+	sdk_tool = sdk_tools[-1]
+	return os.path.join(sdk_tools_path, sdk_tool)
+
 def configure(conf):
 	seen = set([])
 	android_clang_archs = ['arm', 'mipsel', 'x86']
-	os = 'android'
 	conf.load('javaw')
-	adb = conf.find_program('adb')
+	conf.find_program('jarsigner', var='JARSIGNER')
+	key_debug = conf.path.make_node('debug.keystore')
+	conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
+	android = conf.find_program('android')
+	sdk_tools_paths = get_tools_paths(android)
+	sdk_build_tool_path = get_build_tool_path(android)
+	adb = conf.find_program('adb', path_list=sdk_tools_paths)
+	conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
+	conf.env.DEXCREATE = '--dex'
+	conf.env.DEX_TGT_PATTERN = '--output=%s'
+	conf.find_program('aapt', path_list=[sdk_build_tool_path])
+
+	os_name = 'android'
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if version in seen: continue
 		seen.add(version)
@@ -236,7 +256,7 @@ def configure(conf):
 
 		for gcc, triple, real_arch in compilers:
 			flags = ['-gcc-toolchain', gcc, '-target', triple]
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_version, real_arch, 'clang', version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_version, real_arch, 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'android'
@@ -256,7 +276,7 @@ def configure(conf):
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.env.ENV_PREFIX = real_arch
-					conf.add_toolchain(os+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch, False)
+					conf.add_toolchain(os_name+conf.env.ANDROID_SDK, real_arch, 'clang', version, real_arch, False)
 					sdk_number = conf.env.ANDROID_SDK
 				except Errors.WafError as e:
 					conf.variant = ''
@@ -270,16 +290,14 @@ def configure(conf):
 					android_archs.append(real_arch)
 					conf.variant = ''
 		if android_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), 'clang', version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_number, ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
-			conf.find_program('jarsigner', var='JARSIGNER')
-			key_debug = conf.path.make_node('debug.keystore')
-			conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
+			conf.env.AAPT_FLAGS = ['-f', '-I', os.path.join(conf.env.ANDROID_SDK_PATH, 'android.jar')]
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
@@ -307,7 +325,7 @@ def configure(conf):
 
 		for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
 			if arch not in archs: continue
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_version, arch, name, version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_version, arch, name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'android'
@@ -326,7 +344,7 @@ def configure(conf):
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.env.ENV_PREFIX = arch
-					conf.add_toolchain(os+conf.env.ANDROID_SDK, arch, name, version, arch, False)
+					conf.add_toolchain(os_name+conf.env.ANDROID_SDK, arch, name, version, arch, False)
 					sdk_number = conf.env.ANDROID_SDK
 				except Errors.WafError as e:
 					conf.variant = ''
@@ -340,16 +358,14 @@ def configure(conf):
 					android_archs.append(arch)
 					conf.variant = ''
 		if android_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_number, ','.join(android_archs), name, version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_number, ','.join(android_archs), name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
-			conf.find_program('jarsigner', var='JARSIGNER')
-			key_debug = conf.path.make_node('debug.keystore')
-			conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
+			conf.env.AAPT_FLAGS = ['-f', '-I', os.path.join(conf.env.ANDROID_SDK_PATH, 'android.jar')]
 			conf.add_multiarch_toolchain(toolchain)
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 

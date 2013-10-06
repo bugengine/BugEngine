@@ -1,4 +1,4 @@
-from waflib import Errors
+from waflib import Errors, TaskGen
 import os, sys
 
 
@@ -49,8 +49,8 @@ def build(bld):
 	if bld.env.PROJECTS:
 		def rc_hook(self, node):
 			pass
-		if not '.rc' in task_gen.mappings:
-			task_gen.mappings['.rc'] = rc_hook
+		if not '.rc' in TaskGen.task_gen.mappings:
+			TaskGen.task_gen.mappings['.rc'] = rc_hook
 
 def plugins(bld):
 	bld.recurse('host', name='plugins')

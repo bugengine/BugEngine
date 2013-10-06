@@ -5,7 +5,6 @@
 #include    <bugengine/application.hh>
 
 #include    <core/environment.hh>
-#include    <core/threads/thread.hh>
 #include    <filesystem/diskfolder.script.hh>
 #include    <scheduler/scheduler.hh>
 #include    <resource/resourcemanager.hh>
@@ -17,6 +16,8 @@
 
 #include    <minitl/hash_map.hh>
 #include    <rtti/engine/array.hh>
+
+
 namespace
 {
     class FileLogListener : public BugEngine::ILogListener

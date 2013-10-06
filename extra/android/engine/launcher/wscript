@@ -53,7 +53,7 @@ class aapt_create(Task.Task):
 	Create an apk file
 	"""
 	color   = 'PINK'
-	run_str = '${AAPT} package ${AAPT_FLAGS} -M ${MANIFEST} -S ${RESOURCE_PATH}'
+	run_str = '${AAPT} package ${AAPT_FLAGS} -M ${MANIFEST} -S ${RESOURCE_PATH} -F ${TGT}'
 
 class dex_create(Task.Task):
 	"""
@@ -78,7 +78,6 @@ class dex_create(Task.Task):
 				self.env.OUTPUT_FILES = [x.path_from(self.basedir) for x in self.outputs]
 			except Exception:
 				raise Errors.WafError('Could not find the basedir %r for %r' % (self.basedir, self))
-
 		return super(dex_create, self).runnable_status()
 
 @feature('aapt_resource')
@@ -115,12 +114,6 @@ def dex_files(self):
 def build(bld):
 	if bld.is_install == Build.INSTALL:
 		bld.add_post_fun(post_run)
-	bld.env.DEX = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\lib\\dx.jar'
-	bld.env.DEXCREATE = '--dex'
-	bld.env.DEX_TGT_PATTERN = '--output=%s'
-
-	bld.env.AAPT = 'C:\\Shell\\opt\\android-sdk\\sdk\\build-tools\\android-4.3\\aapt.exe'
-	bld.env.AAPT_FLAGS = ['-f', '-I', os.path.join(bld.env.ANDROID_SDK_PATH, 'android.jar')]
 
 	source_node = bld.path.make_node('src')
 	resource_node = bld.path.make_node('res')
