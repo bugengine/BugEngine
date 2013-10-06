@@ -329,6 +329,7 @@ class BugEngineView extends GLSurfaceView {
         }
 
         public void onSurfaceChanged(GL10 gl, int width, int height) {
+            System.loadLibrary("engine.bugengine");
             BugEngineLib.init(width, height);
         }
 

@@ -7,12 +7,6 @@
 namespace BugEngine
 {
 
-static Application* s_application = 0;
-
-extern "C" void signalHandler(int /*signal*/)
-{
-}
-
 void Application::registerInterruptions()
 {
 }
