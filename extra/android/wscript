@@ -1,18 +1,42 @@
 # set Android specific options
 
 import os
-from waflib import Context, Errors
+from waflib import Context, Errors, Options
 from waflib.Logs import info,warn,pprint
 from waflib.Configure import conf
 from waflib.TaskGen import feature
 
 def options(opt):
 	gr = opt.get_option_group('SDK paths and options')
+
+	sdk_path = ''
+	ndk_path = ''
+	path_list = os.environ.get('PATH', '').split(os.pathsep)
+	for path in path_list:
+			for ext in ['.cmd', '.sh', '.bat', '']:
+				p = os.path.join(path, 'android'+ext)
+				if os.path.isfile(p):
+					sdk_path = os.path.dirname(path)
+				p = os.path.join(path, 'ndk-build'+ext)
+				if os.path.isfile(p):
+					ndk_path = path
+
+
 	gr.add_option( '--android-sdk',
 					action='store',
 					default='',
 					dest='android_sdk',
 					help='Version of the Android SDK to target')
+	gr.add_option( '--android-sdk-path',
+					action='store',
+					default=sdk_path,
+					dest='android_sdk_path',
+					help='Path to the root of the Android SDK')
+	gr.add_option( '--android-ndk-path',
+					action='store',
+					default=ndk_path,
+					dest='android_ndk_path',
+					help='Path to the root of the Android NDK')
 
 def get_android_arch(arch):
 	archs = {
@@ -208,24 +232,39 @@ def set_android_options(conf, arch):
 	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 
 def get_tools_paths(android_path):
-	return [os.path.split(android_path)[0], os.path.join(os.path.split(os.path.split(android_path)[0])[0], 'platform-tools')]
+	return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
 
 def get_build_tool_path(android_path):
-	sdk_tools_path = os.path.join(os.path.split(os.path.split(android_path)[0])[0], 'build-tools')
+	sdk_tools_path = os.path.join(android_path, 'build-tools')
 	sdk_tools = sorted(os.listdir(sdk_tools_path), key = lambda x: float(x.split('-')[1]))
 	sdk_tool = sdk_tools[-1]
 	return os.path.join(sdk_tools_path, sdk_tool)
 
+def host_configure(conf):
+	path = os.environ['PATH']
+	ndk_path = Options.options.android_ndk_path
+	compiler_paths = []
+	toolchains_path = os.path.join(ndk_path, 'toolchains')
+	for toolchain in os.listdir(toolchains_path):
+		toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
+		if os.path.isdir(toolchain_path):
+			for platform in os.listdir(toolchain_path):
+				compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
+	os.environ['PATH'] = os.pathsep.join([path]+compiler_paths)
+
 def configure(conf):
+	if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
+		return
+
 	seen = set([])
 	android_clang_archs = ['arm', 'mipsel', 'x86']
 	conf.load('javaw')
 	conf.find_program('jarsigner', var='JARSIGNER')
 	key_debug = conf.path.make_node('debug.keystore')
 	conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
-	android = conf.find_program('android')
-	sdk_tools_paths = get_tools_paths(android)
-	sdk_build_tool_path = get_build_tool_path(android)
+
+	sdk_build_tool_path = get_build_tool_path(Options.options.android_sdk_path)
+	sdk_tools_paths = get_tools_paths(Options.options.android_sdk_path)
 	adb = conf.find_program('adb', path_list=sdk_tools_paths)
 	conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
 	conf.env.DEXCREATE = '--dex'
@@ -235,7 +274,6 @@ def configure(conf):
 	os_name = 'android'
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if version in seen: continue
-		seen.add(version)
 
 		android_toolchains = []
 		android_archs = []
@@ -250,6 +288,7 @@ def configure(conf):
 		if not compilers:
 			continue
 
+		seen.add(version)
 		try:
 			conf.start_msg('Looking for SDK')
 			ndk_path, sdk_path, sdk_version = find_android_sdk(directory, adb, archs)

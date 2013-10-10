@@ -168,6 +168,9 @@ def set_iphone_clang_options(self, flags, arch):
 	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 
+def host_configure(conf):
+	pass
+
 def configure(conf):
 	supported_architectures = {
 		'x86':		('i386', 'iPhoneSimulator'),
