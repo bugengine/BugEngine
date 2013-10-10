@@ -132,8 +132,8 @@ def set_android_gcc_options(conf, options, arch):
 	v = conf.env
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', ['-fPIC'])
-	v.append_unique('CXXFLAGS', ['-fPIC'])
-	v.append_unique('LINKFLAGS', ['-Wl,-z,defs', '-landroid', '-llog'])
+	v.append_unique('CXXFLAGS', ['-fPIC', '-fno-rtti', '-fno-exceptions'])
+	v.append_unique('LINKFLAGS', ['-Wl,-z,defs', '-llog'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -146,12 +146,12 @@ def set_android_gcc_options(conf, options, arch):
 	v.LINKFLAGS_debug = ['-pipe', '-g']
 
 	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3']
 	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v.LINKFLAGS_profile = ['-pipe', '-g']
 
 	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3']
 	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v.LINKFLAGS_final = ['-pipe', '-g']
 
@@ -167,7 +167,7 @@ def set_android_clang_options(conf, flags, arch):
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', flags+['-fPIC'])
 	v.append_unique('CXXFLAGS', flags+['-fPIC'])
-	v.append_unique('LINKFLAGS', flags+['-Wl,-z,defs', '-landroid', '-llog'])
+	v.append_unique('LINKFLAGS', flags+['-Wl,-z,defs', '-llog'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -241,16 +241,17 @@ def get_build_tool_path(android_path):
 	return os.path.join(sdk_tools_path, sdk_tool)
 
 def host_configure(conf):
-	path = os.environ['PATH']
 	ndk_path = Options.options.android_ndk_path
-	compiler_paths = []
-	toolchains_path = os.path.join(ndk_path, 'toolchains')
-	for toolchain in os.listdir(toolchains_path):
-		toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
-		if os.path.isdir(toolchain_path):
-			for platform in os.listdir(toolchain_path):
-				compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
-	os.environ['PATH'] = os.pathsep.join([path]+compiler_paths)
+	if ndk_path:
+		path = os.environ['PATH']
+		compiler_paths = []
+		toolchains_path = os.path.join(ndk_path, 'toolchains')
+		for toolchain in os.listdir(toolchains_path):
+			toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
+			if os.path.isdir(toolchain_path):
+				for platform in os.listdir(toolchain_path):
+					compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
+		os.environ['PATH'] = os.pathsep.join([path]+compiler_paths)
 
 def configure(conf):
 	if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
