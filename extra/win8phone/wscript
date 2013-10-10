@@ -61,6 +61,9 @@ def add_win32_winprt_flags_to_env(conf, name, arch):
 def options(opt):
 	pass
 
+def host_configure(conf):
+	pass
+
 def configure(conf):
 	pass
 

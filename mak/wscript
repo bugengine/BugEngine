@@ -20,6 +20,11 @@ def configure(conf):
 	conf.bugenginenode = conf.path.parent
 	conf.recurse('checks')
 	conf.recurse('host')
+	extra = conf.bugenginenode.make_node('extra')
+	for e in extra.listdir():
+		directory = extra.make_node(e).abspath()
+		if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
+			conf.recurse(extra.make_node(e).abspath(), name='host_configure')
 	conf.recurse('compiler')
 	conf.recurse('target')
 	conf.load('flex', tooldir=['mak/tools'])
