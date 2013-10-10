@@ -117,16 +117,14 @@ def build(bld):
 
 	source_node = bld.path.make_node('src')
 	resource_node = bld.path.make_node('res')
-	launcher = bld(target = 'launcher',
-				   category = 'engine/launcher',
+	launcher = bld(target = 'android.launcher',
 				   features=['cxx', 'javac', 'dex'],
 				   source_nodes = [source_node, resource_node],
 				   destfile='classes.dex',
 				   outdir=source_node.find_or_declare('jar'),
 				   basedir=source_node.find_or_declare('jar'))
 
-	resources = bld(target = 'resource',
-				   category = 'engine/launcher',
+	resources = bld(target = 'android.resource',
 				   features=['aapt_resource'],
 				   resource=resource_node,
 				   destfile=bld.bldnode.find_or_declare('resources.apk'),

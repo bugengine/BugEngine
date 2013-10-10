@@ -383,6 +383,9 @@ def static_dependencies(self):
 			except KeyError:
 				env = self.env
 				target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+				launcher_multiarch = getattr(bld, 'launcher_static_multiarch', None)
+				if not launcher_multiarch and target_prefix:
+					launcher_multiarch = bld.launcher_static_multiarch = bld(target=bld.launcher_name+'.static', features=['multiarch'], use=[])
 				launcher_task = self.bld(env=env.derive(),
 										name=target_prefix+bld.launcher_name+'.static',
 										target=target_prefix+bld.launcher_name+'.static',
@@ -390,6 +393,8 @@ def static_dependencies(self):
 										features=['cxx', 'cxxprogram', 'launcher', 'launcher_static'],
 										use = [])
 				launcher_tasks[env.TOOLCHAIN] = launcher_task
+				if launcher_multiarch:
+					launcher_multiarch.use.append(launcher_task.target)
 			bld.launcher_static = launcher_tasks
 
 			launcher_task.use.append(self.target)

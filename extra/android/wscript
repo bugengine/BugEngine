@@ -107,8 +107,8 @@ def find_android_sdk(ndk_path, sdk_path, archs):
 def set_android_gcc_options(conf, options, arch):
 	v = conf.env
 	v.DEST_BINFMT = 'elf'
-	v.append_unique('CFLAGS', ['-fPIC', '-fno-exceptions'])
-	v.append_unique('CXXFLAGS', ['-fPIC', '-fno-exceptions'])
+	v.append_unique('CFLAGS', ['-fPIC'])
+	v.append_unique('CXXFLAGS', ['-fPIC'])
 	v.append_unique('LINKFLAGS', ['-Wl,-z,defs', '-landroid', '-llog'])
 
 	v.CFLAGS_warnnone = ['-w']
@@ -133,8 +133,9 @@ def set_android_gcc_options(conf, options, arch):
 
 
 	if arch.startswith('arm'):
-		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
-		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
 
 @conf
 def set_android_clang_options(conf, flags, arch):
@@ -168,8 +169,10 @@ def set_android_clang_options(conf, flags, arch):
 	v.CXXFLAGS_cxxshlib = []
 
 	if arch.startswith('arm'):
-		conf.env.append_unique('CFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
-		conf.env.append_unique('CXXFLAGS', ['-march=armv7', '-mfpu=neon', '-mthumb'])
+		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
+
 @conf
 def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
 	conf.env.ANDROID_SDK = sdk_version
@@ -192,6 +195,7 @@ def set_android_options(conf, arch):
 	conf.env.LINK_WITH_PROGRAM = True
 	conf.env.CFLAGS_cxxshlib = []
 	conf.env.CXXFLAGS_cxxshlib = []
+	conf.env.STATIC = True
 
 	#conf.env.append_unique('LINKFLAGS', ['--no-allow-shlib-undefined'])
 	conf.env.DEPLOY_ROOTDIR = appname
@@ -199,7 +203,7 @@ def set_android_options(conf, arch):
 	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 	conf.env.DEPLOY_LIBDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_INCLUDEDIR = 'include'
-	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'data')
+	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'assets')
 	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 
@@ -383,6 +387,7 @@ def apply_multiarch_android(self):
 	if 'android' in self.env.VALID_PLATFORMS:
 		for tg_name in self.use:
 			task_gen = self.bld.get_tgen_by_name(tg_name)
+			task_gen.post()
 			if 'cxxshlib' in task_gen.features or 'cxxprogram' in task_gen.features:
 				outdir = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_BINDIR)
 				self.bld.install_files(outdir, task_gen.link_task.outputs)
