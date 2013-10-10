@@ -6,17 +6,18 @@
 #include    <unistd.h>
 #include    <cerrno>
 #include    <cstdio>
-
+#include    <cstdlib>
+#include    <cstring>
 
 
 namespace BugEngine
 {
 
 Environment::Environment()
-:   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory(ipath("data"))
+:   m_homeDirectory("/data/data/com.bugengine")
+,   m_dataDirectory(ipath("apk:"))
 ,   m_game("")
-,   m_user(getenv("USER"))
+,   m_user("android")
 {
     m_homeDirectory.push_back(".bugengine");
 }
