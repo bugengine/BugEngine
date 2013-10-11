@@ -33,7 +33,7 @@ def get_native_icc_target(conf, icc):
 
 @conf
 def detect_icc(conf):
-	bindirs = os.environ['PATH'].split(os.pathsep)
+	bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
 	for bindir in bindirs:
 		icc = conf.find_program('icc', path_list=[bindir], mandatory=False)
 		icpc = conf.find_program('icpc', path_list=[bindir], mandatory=False)

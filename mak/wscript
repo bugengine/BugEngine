@@ -5,16 +5,18 @@ import os, sys
 def options(opt):
 	gr = opt.add_option_group('SDK paths and options')
 	opt.bugenginenode = opt.path.parent
+
+	opt.load('visualstudio', tooldir=['mak/tools'])
+	opt.load('xcode', tooldir=['mak/tools'])
+	opt.load('netbeans', tooldir=['mak/tools'])
+	opt.load('eclipse', tooldir=['mak/tools'])
+
 	opt.recurse('build')
 	opt.recurse('host')
 	opt.recurse('compiler')
 	opt.recurse('target')
 	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
 		opt.recurse('../src/3rdparty/%s'%third_party)
-	opt.load('visualstudio', tooldir=['mak/tools'])
-	opt.load('xcode', tooldir=['mak/tools'])
-	opt.load('netbeans', tooldir=['mak/tools'])
-	opt.load('eclipse', tooldir=['mak/tools'])
 
 def configure(conf):
 	conf.bugenginenode = conf.path.parent

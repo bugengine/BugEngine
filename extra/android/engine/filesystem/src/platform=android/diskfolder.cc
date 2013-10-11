@@ -11,9 +11,9 @@
 #include    <stdio.h>
 #include    <posix/file.hh>
 #include    <android/assetfile.hh>
-#include    <android/asset_manager.h>
+#include    <unzip.h>
 
-extern BE_IMPORT AAssetManager* s_assetManager;
+extern BE_IMPORT const char* s_packagePath;
 
 namespace BugEngine
 {
@@ -55,17 +55,13 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
         {
             be_error("Could not open directory %s: %s" | diskpath | strerror(errno));
         }
-        else
-        {
-            m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
-        }
     }
     else
     {
         ipath package_path = m_path;
         package_path.pop_front();
         be_info("%s" | package_path);
-        m_handle.ptrHandle = AAssetManager_openDir(s_assetManager, package_path.str().name);
+        m_handle.ptrHandle = 0;
         if (!m_handle.ptrHandle)
         {
             be_error("Could not open directory %s" | m_path);
@@ -93,7 +89,6 @@ DiskFolder::~DiskFolder()
     {
         if (m_handle.ptrHandle)
         {
-            AAssetDir_close((AAssetDir*)m_handle.ptrHandle);
             m_handle.ptrHandle = 0;
         }
     }
@@ -140,11 +135,6 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
         }
         else
         {
-            AAssetDir_rewind((AAssetDir*)m_handle.ptrHandle);
-            while(const char *filename = AAssetDir_getNextFileName((AAssetDir*)m_handle.ptrHandle))
-            {
-                be_info(filename);
-            }
         }
     }
 }

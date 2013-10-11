@@ -1,16 +1,39 @@
 # set Android specific options
 
-import os
-from waflib import Context, Errors, Options
+import os, sys
+from waflib import Context, Errors, Options, Utils
 from waflib.Logs import info,warn,pprint
 from waflib.Configure import conf
 from waflib.TaskGen import feature
+
+def get_android_version(sdk_version):
+	versions = {
+		'1': '1.0',
+		'2': '1.1',
+		'3': '1.5',
+		'4': '1.6',
+		'5': '2.0',
+		'6': '2.0.1',
+		'7': '2.1',
+		'8': '2.2',
+		'9': '2.3.2',
+		'10': '2.3.7',
+		'11': '3.0',
+		'12': '3.1',
+		'13': '3.2',
+		'14': '4.0',
+		'15': '4.0.3',
+		'16': '4.1',
+		'17': '4.2',
+		'18': '4.3',
+	}
+	return versions.get(sdk_version, sdk_version)
 
 def options(opt):
 	gr = opt.get_option_group('SDK paths and options')
 
 	sdk_path = ''
-	ndk_path = ''
+	ndk_path = []
 	path_list = os.environ.get('PATH', '').split(os.pathsep)
 	for path in path_list:
 			for ext in ['.cmd', '.sh', '.bat', '']:
@@ -19,7 +42,7 @@ def options(opt):
 					sdk_path = os.path.dirname(path)
 				p = os.path.join(path, 'ndk-build'+ext)
 				if os.path.isfile(p):
-					ndk_path = path
+					ndk_path.append(path)
 
 
 	gr.add_option( '--android-sdk',
@@ -34,9 +57,26 @@ def options(opt):
 					help='Path to the root of the Android SDK')
 	gr.add_option( '--android-ndk-path',
 					action='store',
-					default=ndk_path,
+					default=','.join(ndk_path),
 					dest='android_ndk_path',
 					help='Path to the root of the Android NDK')
+
+	visualstudio = sys.modules['visualstudio']
+	for config, versions in (
+			('10.0_Config', [visualstudio.vs2010]),
+			('11.0_Config', [visualstudio.vs2012, visualstudio.vs11]),
+			('12.0_Config', [visualstudio.vs2013]),
+		):
+		try:
+			try:
+				key = Utils.winreg.OpenKey(Utils.winreg.HKEY_CURRENT_USER, 'SOFTWARE\\Wow6432node\\Microsoft\\VisualStudio\\%s\\InstalledProducts\\AndroidPackage' % config)
+			except WindowsError:
+				key = Utils.winreg.OpenKey(Utils.winreg.HKEY_CURRENT_USER, 'SOFTWARE\\Microsoft\\VisualStudio\\%s\\InstalledProducts\\AndroidPackage' % config)
+		except WindowsError:
+			pass
+		else:
+			for kls in versions:
+				kls.platforms.append('Tegra-Android')
 
 def get_android_arch(arch):
 	archs = {
@@ -128,41 +168,50 @@ def find_android_sdk(ndk_path, sdk_path, archs):
 				sdk.split('-')[1])
 
 @conf
-def set_android_gcc_options(conf, options, arch):
+def set_android_gcc_options(conf, options, arch, version):
 	v = conf.env
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', ['-fPIC'])
-	v.append_unique('CXXFLAGS', ['-fPIC', '-fno-rtti', '-fno-exceptions'])
+	v.append_unique('CXXFLAGS', ['-fPIC'])
 	v.append_unique('LINKFLAGS', ['-Wl,-z,defs', '-llog'])
+
+	version = version.split('.')
+	version = float(version[0]) + float(version[1])/10
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
 	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedef', '-Wno-unused-variable']
+	if version >= 4.8:
+		v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
 	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG', '-fno-exceptions']
 	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
 	v.LINKFLAGS_debug = ['-pipe', '-g']
 
 	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v.LINKFLAGS_profile = ['-pipe', '-g']
 
 	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3']
+	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
 	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
 	v.LINKFLAGS_final = ['-pipe', '-g']
 
 
+	if arch.startswith('x86'):
+		conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
+		conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
+		conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
 	if arch.startswith('arm'):
-		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
-		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
 		conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
 
 @conf
-def set_android_clang_options(conf, flags, arch):
+def set_android_clang_options(conf, flags, arch, version):
 	v = conf.env
 	v.DEST_BINFMT = 'elf'
 	v.append_unique('CFLAGS', flags+['-fPIC'])
@@ -192,10 +241,15 @@ def set_android_clang_options(conf, flags, arch):
 	v.CFLAGS_cxxshlib = []
 	v.CXXFLAGS_cxxshlib = []
 
+	if arch.startswith('x86'):
+		conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
+		conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
+		conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
 	if arch.startswith('arm'):
-		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
-		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=neon'])
+		conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
+		conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
 		conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
+
 
 @conf
 def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
@@ -221,15 +275,16 @@ def set_android_options(conf, arch):
 	conf.env.CXXFLAGS_cxxshlib = []
 	conf.env.STATIC = True
 
-	#conf.env.append_unique('LINKFLAGS', ['--no-allow-shlib-undefined'])
+	conf.env.MS_PROJECT_PLATFORM = 'Tegra-Android'
+
 	conf.env.DEPLOY_ROOTDIR = appname
-	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
-	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
+	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
 	conf.env.DEPLOY_LIBDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_INCLUDEDIR = 'include'
 	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'assets')
-	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
-	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
+	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'libs', get_target_folder(arch))
 
 def get_tools_paths(android_path):
 	return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
@@ -241,17 +296,17 @@ def get_build_tool_path(android_path):
 	return os.path.join(sdk_tools_path, sdk_tool)
 
 def host_configure(conf):
-	ndk_path = Options.options.android_ndk_path
-	if ndk_path:
-		path = os.environ['PATH']
+	ndk_paths = Options.options.android_ndk_path.split(',')
+	if ndk_paths:
 		compiler_paths = []
-		toolchains_path = os.path.join(ndk_path, 'toolchains')
-		for toolchain in os.listdir(toolchains_path):
-			toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
-			if os.path.isdir(toolchain_path):
-				for platform in os.listdir(toolchain_path):
-					compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
-		os.environ['PATH'] = os.pathsep.join([path]+compiler_paths)
+		for ndk_path in ndk_paths:
+			toolchains_path = os.path.join(ndk_path, 'toolchains')
+			for toolchain in os.listdir(toolchains_path):
+				toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
+				if os.path.isdir(toolchain_path):
+					for platform in os.listdir(toolchain_path):
+						compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
+		conf.env.append_unique('EXTRA_PATH', compiler_paths)
 
 def configure(conf):
 	if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
@@ -300,15 +355,15 @@ def configure(conf):
 
 		for gcc, triple, real_arch in compilers:
 			flags = ['-gcc-toolchain', gcc, '-target', triple]
-			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_version, real_arch, 'clang', version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_version), real_arch, 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'android'
 			try:
 				conf.start_msg('Setting up compiler')
-				conf.find_program(triple+'-ar', var='AR')
+				conf.find_program(triple+'-ar', var='AR', path_list=[os.path.join(gcc, 'bin')])
 				conf.load_clang(directory)
-				conf.set_android_clang_options(flags, real_arch)
+				conf.set_android_clang_options(flags, real_arch, version)
 			except Exception as e:
 				conf.end_msg(e, color='RED')
 				raise
@@ -334,7 +389,7 @@ def configure(conf):
 					android_archs.append(real_arch)
 					conf.variant = ''
 		if android_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_number, ','.join(android_archs), 'clang', version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_number), ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.set_android_options('arm')
@@ -369,14 +424,14 @@ def configure(conf):
 
 		for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
 			if arch not in archs: continue
-			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_version, arch, name, version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_version), arch, name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'android'
 			try:
 				conf.start_msg('Setting up compiler')
 				conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
-				conf.set_android_gcc_options(options, arch)
+				conf.set_android_gcc_options(options, arch, version)
 			except Exception as e:
 				conf.end_msg(e, color='RED')
 				raise
@@ -402,7 +457,7 @@ def configure(conf):
 					android_archs.append(arch)
 					conf.variant = ''
 		if android_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_number, ','.join(android_archs), name, version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_number), ','.join(android_archs), name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.set_android_options('arm')

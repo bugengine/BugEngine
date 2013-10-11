@@ -129,10 +129,14 @@ class Solution:
 
 	def add(self, task_gen, project, project_path, build = False):
 		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
-		project_config = ['\t\t%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
-		if build:
-			self.master = project.guid
-			project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		project_config = []
+		for t in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[t]
+			platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
+			project_config += ['\t\t%s.%s|%s.ActiveCfg = %s-%s|%s'%(project.guid, v, t, t, v, platform) for v in task_gen.bld.env.ALL_VARIANTS]
+			if build:
+				self.master = project.guid
+				project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|%s'%(project.guid, v, t, t, v, platform) for v in task_gen.bld.env.ALL_VARIANTS]
 		self.project_configs += project_config
 		if self.use_folders:
 			parent = self.addFolder(task_gen.target)
@@ -180,10 +184,11 @@ class VCxproj:
 		project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
 		configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
 				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
-				self.vcxproj._add(config, 'Platform', 'Win32')
+				self.vcxproj._add(config, 'Platform', task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM))
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			env = task_gen.bld.all_envs[toolchain]
 			pgroup = self.vcxproj._add(project, 'PropertyGroup')
@@ -283,6 +288,10 @@ class vs2003(Build.BuildContext):
 	fun = 'build'
 	optim = 'debug'
 	version = (('Visual Studio .NET 2003', '8.00', False), (VCproj, '7.10'))
+	platforms = ['Win32', 'x64']
+
+	def get_platform(self, platform_name):
+		return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]
 
 	def execute(self):
 		"""
@@ -337,12 +346,13 @@ class vs2003(Build.BuildContext):
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
-				tg.post()
+				if not 'kernel' in tg.features:
+					tg.post()
 
-				nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
-				project = klass(tg, version, version_project, folders)
-				project.write(nodes)
-				solution.add(tg, project, nodes[0].path_from(self.srcnode))
+					nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
+					project = klass(tg, version, version_project, folders)
+					project.write(nodes)
+					solution.add(tg, project, nodes[0].path_from(self.srcnode))
 
 		solution.write(solution_node)
 
@@ -350,58 +360,70 @@ class vs2005(vs2003):
 	cmd = 'vs2005'
 	fun = 'build'
 	version =	(('Visual Studio 2005', '9.00', True),(VCproj, '8.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2005e(vs2003):
 	cmd = 'vs2005e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2005', '9.00', False),(VCproj, '8.00'))
+	platforms = ['Win32', 'x64']
 
 
 class vs2008(vs2003):
 	cmd = 'vs2008'
 	fun = 'build'
 	version =	(('Visual Studio 2008', '10.00', True),(VCproj, '9.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2008e(vs2003):
 	cmd = 'vs2008e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2008', '10.00', False),(VCproj, '9.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
 	version =	(('Visual Studio 2010', '11.00', True),(VCxproj, ('4.0','10.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2010', '11.00', False),(VCxproj, ('4.0','10.0')))
+	platforms = ['Win32', 'x64']
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
 	version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2012(vs11):
 	cmd = 'vs2012'
 	fun = 'build'
+	platforms = ['Win32', 'x64']
 
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
 	version =	(('Visual C++ Express 11', '12.00', False),(VCxproj, ('4.5','11.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2012e(vs11e):
 	cmd = 'vs2012e'
 	fun = 'build'
+	platforms = ['Win32', 'x64']
 
 class vs2013e(vs2003):
 	cmd = 'vs2013e'
 	fun = 'build'
 	version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('12.0','12.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2013(vs2003):
 	cmd = 'vs2013'
 	fun = 'build'
 	version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('12.0','12.0')))
+	platforms = ['Win32', 'x64']
 

@@ -6,14 +6,9 @@
 #include    <jni.h>
 #include    <core/threads/thread.hh>
 #include    <android/log.h>
-#include    <android/asset_manager.h>
-#include    <android/asset_manager_jni.h>
 
-#define  LOG_TAG    "BugEngine"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-
-BE_EXPORT AAssetManager* s_assetManager = 0;
+BE_EXPORT const char* s_packagePath = 0;
+BE_EXPORT const char* s_dataDirectory = 0;
 
 int beMain(int argc, const char *argv[]);
 
@@ -65,9 +60,10 @@ extern "C"
 }
 
 static BugEngine::Thread* s_mainThread;
-JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_initialize(JNIEnv* env, jobject /*obj*/,  jobject assetManager)
+JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_initialize(JNIEnv* env, jobject /*obj*/,  jstring packagePath, jstring dataDirectory)
 {
-    s_assetManager = AAssetManager_fromJava(env, assetManager);
+    s_packagePath = env->GetStringUTFChars(packagePath, 0);
+    s_dataDirectory = env->GetStringUTFChars(dataDirectory, 0);
 }
 
 JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* /*env*/, jobject /*obj*/,  jint width, jint height)
