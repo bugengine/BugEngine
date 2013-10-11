@@ -46,6 +46,7 @@ typedef u8                      byte;
 #define BE_NOINLINE             __declspec(noinline)
 #define BE_ALWAYSINLINE         __forceinline
 #define BE_SELECTOVERLOAD(o)    (o)
+#define BE_SUPPORTS_EXCEPTIONS  1
 
 #ifndef BE_STATIC
 # define BE_EXPORT              __declspec(dllexport)

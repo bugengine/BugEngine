@@ -124,7 +124,7 @@ def get_native_clang_target(conf, clang):
 
 @conf
 def detect_clang(conf):
-	bindirs = os.environ['PATH'].split(os.pathsep)
+	bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
 	conf.env.CLANG_TARGETS = []
 
 	for path in bindirs:

@@ -60,6 +60,7 @@ typedef u8                      byte;
 # define BE_NOINLINE            __declspec(noinline)
 # define BE_ALWAYSINLINE        inline
 # define BE_SELECTOVERLOAD(o)   
+#define BE_SUPPORTS_EXCEPTIONS  1
 
 # pragma warning(disable:4275)
 # ifdef NDEBUG

@@ -23,7 +23,7 @@ def exec_command_flex(self, *k, **kw):
 				carry = ''
 			k = [lst]
 	env = os.environ.copy()
-	env['PATH'] = os.path.split(k[0][0])[0]+':'+env['PATH']
+	env['PATH'] = os.path.split(k[0][0])[0]+os.pathsep+env.get('PATH', '')
 	kw['env'] = env
 
 	return self.generator.bld.exec_command(*k, **kw)

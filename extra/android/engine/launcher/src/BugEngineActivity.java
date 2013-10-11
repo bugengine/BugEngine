@@ -16,7 +16,9 @@ public class BugEngineActivity extends Activity
     {
         super.onCreate(icicle);
 
-        BugEngineLib.initialize(getAssets());
+        String apkPath = getApplicationInfo().sourceDir;
+        String dataPath = getApplicationInfo().dataDir;
+        BugEngineLib.initialize(apkPath, dataPath);
         mView = new BugEngineView(getApplication());
         setContentView(mView);
     }
