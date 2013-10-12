@@ -70,9 +70,9 @@ def options(opt):
 		try:
 			try:
 				key = Utils.winreg.OpenKey(Utils.winreg.HKEY_CURRENT_USER, 'SOFTWARE\\Wow6432node\\Microsoft\\VisualStudio\\%s\\InstalledProducts\\AndroidPackage' % config)
-			except WindowsError:
+			except:
 				key = Utils.winreg.OpenKey(Utils.winreg.HKEY_CURRENT_USER, 'SOFTWARE\\Microsoft\\VisualStudio\\%s\\InstalledProducts\\AndroidPackage' % config)
-		except WindowsError:
+		except:
 			pass
 		else:
 			for kls in versions:

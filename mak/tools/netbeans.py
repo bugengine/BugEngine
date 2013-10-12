@@ -2,6 +2,11 @@ from waflib import TaskGen, Context, Build
 import os, sys
 from xml.dom.minidom import Document
 
+def relpath(i, node):
+	if isinstance(i, str):
+		return i
+	else:
+		return i.path_from(node)
 
 def gather_includes_defines(task_gen):
 	defines = getattr(task_gen, 'defines', [])
@@ -100,7 +105,7 @@ class netbeans(Build.BuildContext):
 			root_folder.xml = lf
 			for p in path[:-1]:
 				root_folder = self.add_folder(p, doc, root_folder)
-			for node in task_gen.source_nodes:
+			for node in getattr(task_gen, 'source_nodes', []):
 				self.add(doc, root_folder, node)
 
 			#f, subs = categories[category]
@@ -128,6 +133,11 @@ class netbeans(Build.BuildContext):
 				env = bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
 			else:
 				env = bld_env
+			platform_defines = env.SYSTEM_DEFINES
+			platform_includes = env.SYSTEM_INCLUDES
+			platform_includes += [os.path.join(i, 'usr', 'include') for i in env.SYSROOT]
+			options.append((platform_includes, platform_defines))
+
 			for variant in bld.env.ALL_VARIANTS:
 				conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
 				toolsSet = add(doc, conf, 'toolsSet')
@@ -169,6 +179,7 @@ class netbeans(Build.BuildContext):
 					add(doc, ccdefines, 'Elem', d)
 				for tg_includes, tg_defines in options:
 					for i in tg_includes:
+						i = relpath(i, bld.srcnode)
 						if i not in includes:
 							includes.add(i)
 							add(doc, cincdir, 'directoryPath', i)
