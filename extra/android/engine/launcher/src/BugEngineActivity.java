@@ -18,7 +18,7 @@ public class BugEngineActivity extends Activity
 
         String apkPath = getApplicationInfo().sourceDir;
         String dataPath = getApplicationInfo().dataDir;
-        BugEngineLib.initialize(apkPath, dataPath);
+        BugEngineLib.setPaths(apkPath, dataPath);
         mView = new BugEngineView(getApplication());
         setContentView(mView);
     }

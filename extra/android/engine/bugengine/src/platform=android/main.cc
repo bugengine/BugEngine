@@ -54,23 +54,23 @@ static intptr_t android_main(intptr_t /*width*/, intptr_t /*height*/)
 
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_initialize(JNIEnv* env, jobject obj, jobject assetManager);
-    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* env, jobject obj, jint width, jint height);
-    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_step(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass cls, jstring packagePath, jstring dataDirectory);
+    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* env, jclass cls, jint width, jint height);
+    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_step(JNIEnv* env, jclass cls);
 }
 
 static BugEngine::Thread* s_mainThread;
-JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_initialize(JNIEnv* env, jobject /*obj*/,  jstring packagePath, jstring dataDirectory)
+JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass /*cls*/, jstring packagePath, jstring dataDirectory)
 {
     s_packagePath = env->GetStringUTFChars(packagePath, 0);
     s_dataDirectory = env->GetStringUTFChars(dataDirectory, 0);
 }
 
-JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* /*env*/, jobject /*obj*/,  jint width, jint height)
+JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* /*env*/, jclass /*cls*/, jint width, jint height)
 {
     s_mainThread = new BugEngine::Thread("android_main", &BugEngine::Android::android_main, width, height);
 }
 
-JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_step(JNIEnv* /*env*/, jobject /*obj*/)
+JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_step(JNIEnv* /*env*/, jclass /*cls*/)
 {
 }
