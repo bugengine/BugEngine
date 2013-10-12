@@ -278,13 +278,13 @@ def set_android_options(conf, arch):
 	conf.env.MS_PROJECT_PLATFORM = 'Tegra-Android'
 
 	conf.env.DEPLOY_ROOTDIR = appname
-	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
-	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
+	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 	conf.env.DEPLOY_LIBDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_INCLUDEDIR = 'include'
 	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'assets')
-	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'libs', get_target_folder(arch))
-	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'libs', get_target_folder(arch))
+	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
 
 def get_tools_paths(android_path):
 	return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]

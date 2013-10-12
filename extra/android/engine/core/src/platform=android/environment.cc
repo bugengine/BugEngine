@@ -15,7 +15,7 @@ namespace BugEngine
 
 Environment::Environment()
 :   m_homeDirectory("/data/data/com.bugengine")
-,   m_dataDirectory(ipath("apk:"))
+,   m_dataDirectory(ipath("apk:/assets"))
 ,   m_game("")
 ,   m_user("android")
 {

@@ -23,7 +23,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
     be_assert (policy != Folder::CreateNone, "invalid policy given to createDirectory");
     if (policy == Folder::CreateRecursive)
     {
-        ipath parent = path;
+        BugEngine::ipath parent = path;
         parent.pop_back();
         createDirectory(parent, policy);
     }
@@ -60,11 +60,12 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     {
         ipath package_path = m_path;
         package_path.pop_front();
-        be_info("%s" | package_path);
-        m_handle.ptrHandle = 0;
+        zlib_filefunc_def_s defs;
+        fill_fopen_filefunc(&defs);
+        m_handle.ptrHandle = unzOpen2(s_packagePath, &defs);
         if (!m_handle.ptrHandle)
         {
-            be_error("Could not open directory %s" | m_path);
+            be_error("Could not open directory %s/" | m_path);
         }
     }
 
@@ -89,6 +90,7 @@ DiskFolder::~DiskFolder()
     {
         if (m_handle.ptrHandle)
         {
+            unzClose(m_handle.ptrHandle);
             m_handle.ptrHandle = 0;
         }
     }
@@ -135,6 +137,16 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
         }
         else
         {
+            if (unzGoToFirstFile(m_handle.ptrHandle) == UNZ_OK)
+            {
+                do
+                {
+                    unz_file_info info;
+                    char filename[4096];
+                    unzGetCurrentFileInfo(m_handle.ptrHandle, &info, filename, sizeof(filename), 0, 0, 0, 0);
+                    be_info(filename);
+                } while (unzGoToNextFile(m_handle.ptrHandle) == UNZ_OK);
+            }
         }
     }
 }
