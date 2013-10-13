@@ -291,7 +291,7 @@ def get_tools_paths(android_path):
 
 def get_build_tool_path(android_path):
 	sdk_tools_path = os.path.join(android_path, 'build-tools')
-	sdk_tools = sorted(os.listdir(sdk_tools_path), key = lambda x: float(x.split('-')[1]))
+	sdk_tools = sorted(os.listdir(sdk_tools_path))
 	sdk_tool = sdk_tools[-1]
 	return os.path.join(sdk_tools_path, sdk_tool)
 
