@@ -24,28 +24,53 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
 {
     /* state of the previous read */
     static const unz_file_pos* s_currentFile = 0;
-    static u8 s_buffer[1024];
-    static u32 s_leftBytes = 0;
-    static u32 s_leftBytesOffset = 0;
-    static u32 s_fileOffset = 0;
+    static i64 s_fileOffset = 0;
 
 
     be_assert(ticket->file == this, "trying to read wrong file");
-    if (s_currentFile != &m_filePos)
+    if (s_currentFile != &m_filePos || s_fileOffset > ticket->offset)
     {
         s_currentFile = &m_filePos;
         s_fileOffset = 0;
-        s_leftBytes = 0;
+        unzCloseCurrentFile(m_handle);
         int result = unzGoToFilePos(m_handle, &m_filePos);
         be_assert(result == UNZ_OK, "could not go to file %s" | m_file);
+        result = unzOpenCurrentFile(m_handle);
+        be_assert(result == UNZ_OK, "could not open file %s" | m_file);
     }
-    u8* destination = ticket->buffer.begin();
-    if (s_leftBytes)
+
+    while (s_fileOffset < ticket->offset)
     {
-        memcpy(destination, s_buffer + s_leftBytesOffset, s_leftBytes);
-        destination += s_leftBytes;
-        ticket->processed += s_leftBytes;
+        u8 buffer[4096];
+        i64 bytesToRead = minitl::min<i64>(4096, ticket->offset-s_fileOffset);
+        i64 read = unzReadCurrentFile(m_handle, buffer, be_checked_numcast<unsigned int>(bytesToRead));
+        s_fileOffset += read;
     }
+
+    be_assert(ticket->buffer.byteCount() > ticket->total, "buffer is not long enough to read entire file; "
+            "buffer size is %d, requires %d bytes" | ticket->buffer.byteCount() | ticket->total);
+    u8* buffer = ticket->buffer.begin();
+    while (!ticket->done())
+    {
+        i64 bytesToRead = ticket->total - ticket->processed;
+        i64 bytesRead = unzReadCurrentFile(m_handle, buffer, bytesToRead);
+        if (bytesRead > 0)
+        {
+            ticket->processed += bytesRead;
+            buffer += bytesRead;
+        }
+        else
+        {
+            be_error("error %d while reading from file %s" | bytesRead | m_file);
+        }
+    }
+
+    if (unzeof(m_handle))
+    {
+        s_fileOffset = 0;
+        s_currentFile = 0;
+    }
+
     be_info("file reading %s not implemented yet" | m_file);
 }
 
