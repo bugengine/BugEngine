@@ -8,7 +8,7 @@ def build_file_list(node, path = ''):
 	if os.path.isdir(node.abspath()):
 		result = []
 		for n in node.listdir():
-			result += build_file_list(node.make_node(n), os.path.join(path, n))
+			result += build_file_list(node.make_node(n), (path+'/'+n) if path else n)
 		return result
 	else:
 		return [path]
