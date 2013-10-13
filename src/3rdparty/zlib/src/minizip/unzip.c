@@ -1359,7 +1359,7 @@ extern int ZEXPORT unzGoToFilePos64(unzFile file, const unz64_file_pos* file_pos
 
 extern int ZEXPORT unzGoToFilePos(
     unzFile file,
-    unz_file_pos* file_pos)
+    const unz_file_pos* file_pos)
 {
     unz64_file_pos file_pos64;
     if (file_pos == NULL)
