@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __pbase_type_info::~__pbase_type_info()
   {
   }
@@ -101,4 +102,5 @@ namespace __cxxabiv1
       return __pointee->can_catch(thrown_type->__pointee, adjustedPtr);
     }
   }
+#endif
 } // namespace __cxxabiv1

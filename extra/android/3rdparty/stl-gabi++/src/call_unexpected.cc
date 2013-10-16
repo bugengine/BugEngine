@@ -70,7 +70,7 @@
 #include "helper_func_internal.h"
 
 namespace __cxxabiv1 {
-
+#if __GXX_RTTI
 #ifdef __arm__
 extern "C" enum type_match_result {
   ctm_failed = 0,
@@ -344,5 +344,5 @@ void unexpected_helper(std::unexpected_handler u_handler) {
     terminate_helper(t_handler);
   }
 #endif // __arm__
-
+#endif
 } // namespace __cxxabiv1

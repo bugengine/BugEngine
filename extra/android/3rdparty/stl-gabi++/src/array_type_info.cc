@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __array_type_info::~__array_type_info()
   {
   }
@@ -40,4 +41,5 @@ namespace __cxxabiv1
     // Thrown array will be decayed to pointer, we cannot convert it back
     return false;
   }
+#endif
 } // namespace __cxxabiv1
