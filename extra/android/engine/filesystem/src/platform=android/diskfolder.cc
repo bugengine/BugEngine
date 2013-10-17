@@ -222,7 +222,7 @@ weak<File> DiskFolder::createFile(const istring& name)
     }
     else
     {
-        be_warning("can't create new file: read-only APK filesystem");
+        be_error("can't create new file: read-only APK filesystem");
         return weak<File>();
     }
 }
