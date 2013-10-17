@@ -1,52 +1,8 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
-from waflib import Context, Logs, Task, Node, Build, Utils, Errors
+from waflib import Context, Task, Node, Utils, Errors
 import os
 
 DEX_RE = '**/*.class'
-
-def build_file_list(node, path = ''):
-	if os.path.isdir(node.abspath()):
-		result = []
-		for n in node.listdir():
-			result += build_file_list(node.make_node(n), (path+'/'+n) if path else n)
-		return result
-	else:
-		return [path]
-
-def post_run(bld):
-	destination_directory = bld.srcnode.make_node(os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR))
-	appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
-	package_name = appname + '.apk'
-	Logs.pprint('GREEN', 'Packaging application %s'%package_name)
-	original = bld.bldnode.make_node('resources.apk')
-	destination = bld.bldnode.make_node('package.apk')
-	files = build_file_list(destination_directory)
-	destination.write(original.read())
-	command = [bld.env.AAPT, 'add', destination.abspath()] + files
-	p = Utils.subprocess.Popen(command,
-			cwd=destination_directory.abspath(),
-			stdin=Utils.subprocess.PIPE,
-			stdout=Utils.subprocess.PIPE,
-			stderr=Utils.subprocess.PIPE)
-	out = p.communicate()[0]
-	if p.returncode != 0:
-		print(out.decode('utf-8'))
-		raise Errors.WafError('failed to create Android package')
-
-	command = [bld.env.JARSIGNER] + bld.env.JARSIGNER_FLAGS + [
-		'-signedjar',
-		destination_directory.parent.make_node(package_name).abspath(),
-		destination.abspath(),
-		'androiddebugkey']
-	p = Utils.subprocess.Popen(command,
-			stdin=Utils.subprocess.PIPE,
-			stdout=Utils.subprocess.PIPE,
-			stderr=Utils.subprocess.PIPE)
-	out = p.communicate()[0]
-	if p.returncode != 0:
-		print(out.decode('utf-8'))
-		raise Errors.WafError('failed to sign Android package')
-
 
 class aapt_create(Task.Task):
 	"""
@@ -85,6 +41,15 @@ def aapt_resource(self):
 	self.resource_task = tsk = self.create_task('aapt_create', self.resource.ant_glob('**/*'), [self.destfile])
 	tsk.env.MANIFEST = self.manifest.abspath()
 	tsk.env.RESOURCE_PATH = self.resource.abspath()
+	tsk.dep_nodes = [self.manifest]
+	nodes = [self.resource]
+	while nodes:
+		node = nodes.pop()
+		if os.path.isdir(node.abspath()):
+			nodes.extend([node.make_node(i) for i in node.listdir()])
+		else:
+			tsk.dep_nodes.append(node)
+	
 
 @feature('dex')
 @after_method('apply_java')
@@ -112,9 +77,6 @@ def dex_files(self):
 		tsk.set_run_after(self.javac_task)
 
 def build(bld):
-	if bld.is_install == Build.INSTALL:
-		bld.add_post_fun(post_run)
-
 	source_node = bld.path.make_node('src')
 	resource_node = bld.path.make_node('res')
 	launcher = bld(target = 'engine.android.launcher',
@@ -124,11 +86,12 @@ def build(bld):
 				   outdir=source_node.find_or_declare('jar'),
 				   basedir=source_node.find_or_declare('jar'))
 
+	manifest = bld.path.parent.parent.make_node('AndroidManifest.xml')
 	resources = bld(target = 'engine.android.resource',
 				   features=['aapt_resource'],
 				   resource=resource_node,
 				   destfile=bld.bldnode.find_or_declare('resources.apk'),
-				   manifest=source_node.make_node('AndroidManifest.xml'))
+				   manifest=manifest)
 	outdir = os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR)
 	bld.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
 
