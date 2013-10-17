@@ -1,0 +1,13 @@
+﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema Include="$(VCTargetsPath)\Platforms\$(Platform)\Props\android_project_items_schema.xml"/>
+    <PropertyPageSchema Include="$(VCTargetsPath)\Platforms\$(Platform)\Props\android_dirs.xml" />
+    <PropertyPageSchema Include="$(VCTargetsPath)\Platforms\$(Platform)\Props\android_general_make.xml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(VCTargetsPath)\Platforms\$(Platform)\Props\android_general_ps.xml">
+      <Context>PropertySheet</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Condition="Exists('$(VCTargetsPath)$(LangID)\debugger_general.xml')" Include="$(VCTargetsPath)$(LangID)\debugger_general.xml" />
+  </ItemGroup>
+</Project>

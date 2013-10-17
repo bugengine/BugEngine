@@ -1,10 +1,54 @@
 # set Android specific options
 
 import os, sys
-from waflib import Context, Errors, Options, Utils
+from waflib import Context, Errors, Options, Utils, Build, Logs
 from waflib.Logs import info,warn,pprint
 from waflib.Configure import conf
 from waflib.TaskGen import feature
+
+def build_file_list(node, path = ''):
+	if os.path.isdir(node.abspath()):
+		result = []
+		for n in node.listdir():
+			result += build_file_list(node.make_node(n), (path+'/'+n) if path else n)
+		return result
+	else:
+		return [path]
+
+def post_run(bld):
+	destination_directory = bld.srcnode.make_node(os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR))
+	appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
+	package_name = appname + '.apk'
+	Logs.pprint('GREEN', 'Packaging application %s'%package_name)
+	original = bld.bldnode.make_node('resources.apk')
+	destination = bld.bldnode.make_node('package.apk')
+	files = build_file_list(destination_directory)
+	destination.write(original.read())
+	command = [bld.env.AAPT, 'add', destination.abspath()] + files
+	p = Utils.subprocess.Popen(command,
+			cwd=destination_directory.abspath(),
+			stdin=Utils.subprocess.PIPE,
+			stdout=Utils.subprocess.PIPE,
+			stderr=Utils.subprocess.PIPE)
+	out = p.communicate()[0]
+	if p.returncode != 0:
+		print(out.decode('utf-8'))
+		raise Errors.WafError('failed to create Android package')
+
+	command = [bld.env.JARSIGNER] + bld.env.JARSIGNER_FLAGS + [
+		'-signedjar',
+		destination_directory.parent.make_node(package_name).abspath(),
+		destination.abspath(),
+		'androiddebugkey']
+	p = Utils.subprocess.Popen(command,
+			stdin=Utils.subprocess.PIPE,
+			stdout=Utils.subprocess.PIPE,
+			stderr=Utils.subprocess.PIPE)
+	out = p.communicate()[0]
+	if p.returncode != 0:
+		print(out.decode('utf-8'))
+		raise Errors.WafError('failed to sign Android package')
+
 
 def get_android_version(sdk_version):
 	versions = {
@@ -29,6 +73,7 @@ def get_android_version(sdk_version):
 	}
 	return versions.get(sdk_version, sdk_version)
 
+has_tegra_support = False
 def options(opt):
 	gr = opt.get_option_group('SDK paths and options')
 
@@ -76,7 +121,9 @@ def options(opt):
 			pass
 		else:
 			for kls in versions:
+				global has_tegra_support
 				kls.platforms.append('Tegra-Android')
+				has_tegra_support = True
 
 def get_android_arch(arch):
 	archs = {
@@ -255,8 +302,12 @@ def set_android_clang_options(conf, flags, arch, version):
 def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
 	conf.env.ANDROID_SDK = sdk_version
 	conf.env.ANDROID_SDK_PATH = sdk_path
+	conf.env.ANDROID_NDK_PATH = ndk_path
 	conf.env.append_unique('CLASSPATH', [os.path.join(sdk_path, 'android.jar')])
 
+	if not os.path.isfile(os.path.join(ndk_path, '..', '..', 'prebuilt', 'android-%s'%get_android_arch(arch), 'gdbserver', 'gdbserver')):
+		raise Errors.WafError('could not find gdbserver for architecture %s' % get_android_arch(arch))
+	conf.env.NDK_GDBSERVER = os.path.join(ndk_path, '..', '..', 'prebuilt', 'android-%s'%get_android_arch(arch), 'gdbserver', 'gdbserver')
 	ndk_path = os.path.join(ndk_path, 'arch-%s'%get_android_arch(arch))
 	conf.env.SYSROOT = [ndk_path]
 	conf.env.append_unique('CFLAGS', ['--sysroot', ndk_path])
@@ -275,7 +326,28 @@ def set_android_options(conf, arch):
 	conf.env.CXXFLAGS_cxxshlib = []
 	conf.env.STATIC = True
 
-	conf.env.MS_PROJECT_PLATFORM = 'Tegra-Android'
+	if has_tegra_support:
+		conf.env.MS_PROJECT_PLATFORM = 'Tegra-Android'
+		ndk = os.path.basename(conf.env.ANDROID_NDK_PATH)
+		conf.env.MS_PROJECT_VARIABLES = [
+				('AndroidMinAPI', 'android-%s'%conf.env.ANDROID_SDK),
+				('AndroidTargetAPI', 'android-%s'%conf.env.ANDROID_SDK),
+				('AndroidMaxAPI', ''),
+				('AndroidArch', 'armv7-a'),
+				('OverrideAPKPath', '$(OutDir)$(Deploy_RootDir).apk'),
+				('BuildXmlPath', '$(SolutionDir)extra\\android'),
+				('AdditionalLibraryDirectories', ';'.join(['$(OutDir)$(Deploy_RootDir).dbg\\%s\\' % a for a in ['arm', 'mipsel', 'x86']] + ['$(AdditionalLibraryDirectories)'])),
+				('DebuggerFlavor', 'AndroidDebugger'),
+				('NdkPlatforms', '%s;%s' % (ndk,ndk)),
+				('AndroidManifestPath', '$(SolutionDir)extra\\android\\AndroidManifest.xml')
+			]
+		conf.env.MS_PROJECT_IMPORT_PROPS = [
+				#'$(VCTargetsPath)\\Platforms\\Tegra-Android\\Microsoft.Cpp.Tegra-Android.props'
+			]
+		conf.env.MS_PROJECT_IMPORT_TARGETS = [
+				'$(SolutionDir)\\extra\\android\\Nvidia.Cpp.Tegra-Android.DebugOnly.targets',
+				'$(VCTargetsPath)\Platforms\$(Platform)\ImportAfter\*.targets'
+			]
 
 	conf.env.DEPLOY_ROOTDIR = appname
 	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
@@ -368,6 +440,7 @@ def configure(conf):
 			try:
 				conf.start_msg('Setting up compiler')
 				conf.find_program(triple+'-ar', var='AR', path_list=[os.path.join(gcc, 'bin')])
+				conf.find_program(triple+'-strip', var='STRIP', path_list=[os.path.join(gcc, 'bin')])
 				conf.load_clang(directory)
 				conf.set_android_clang_options(flags, real_arch, version)
 			except Exception as e:
@@ -398,8 +471,8 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_number), ','.join(android_archs), 'clang', version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
-			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
+			conf.set_android_options('arm')
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.env.AAPT_FLAGS = ['-f', '-I', os.path.join(conf.env.ANDROID_SDK_PATH, 'android.jar')]
@@ -430,12 +503,15 @@ def configure(conf):
 
 		for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
 			if arch not in archs: continue
+			triple = '-'.join(os.path.basename(gcc).split('-')[0:3])
 			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_version), arch, name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			env.DEST_OS = 'android'
 			try:
 				conf.start_msg('Setting up compiler')
+				conf.find_program(triple+'-ar', var='AR', path_list=[bindir])
+				conf.find_program(triple+'-strip', var='STRIP', path_list=[bindir])
 				conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
 				conf.set_android_gcc_options(options, arch, version)
 			except Exception as e:
@@ -466,8 +542,8 @@ def configure(conf):
 			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_number), ','.join(android_archs), name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
-			conf.set_android_options('arm')
 			conf.set_android_sdk_options('arm', ndk_path, sdk_path, sdk_version)
+			conf.set_android_options('arm')
 			conf.env.VALID_ARCHITECTURES = android_archs
 			conf.env.SUB_TOOLCHAINS = android_toolchains
 			conf.env.AAPT_FLAGS = ['-f', '-I', os.path.join(conf.env.ANDROID_SDK_PATH, 'android.jar')]
@@ -477,6 +553,11 @@ def configure(conf):
 
 
 def build(bld):
+	if bld.is_install == Build.INSTALL:
+		bld.add_post_fun(post_run)
+		for envname in bld.env.SUB_TOOLCHAINS:
+			env = bld.all_envs[envname]
+			bld.do_install(env.NDK_GDBSERVER, os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'))
 	bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
 
 def plugins(bld):
@@ -490,6 +571,11 @@ def apply_multiarch_android(self):
 			task_gen = self.bld.get_tgen_by_name(tg_name)
 			task_gen.post()
 			if 'cxxshlib' in task_gen.features or 'cxxprogram' in task_gen.features:
+				dbg_node = task_gen.link_task.outputs[0]
+				out_node = dbg_node.parent.find_or_declare('stripped/%s'%dbg_node.name)
+				strip_task = task_gen.create_task('strip', [dbg_node], [out_node])
 				outdir = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_BINDIR)
-				self.bld.install_files(outdir, task_gen.link_task.outputs)
+				outdir_dbg = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_ROOTDIR+'.dbg', task_gen.env.ENV_PREFIX)
+				self.bld.install_files(outdir, out_node)
+				self.bld.install_files(outdir_dbg, dbg_node)
 

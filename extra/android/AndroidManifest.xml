@@ -21,7 +21,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bugengine">
     <application
-            android:label="@string/bugengine_activity">
+            android:label="@string/bugengine_activity"
+			android:debuggable="true">
         <activity android:name="BugEngineActivity"
                 android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             	android:launchMode="singleTask"
