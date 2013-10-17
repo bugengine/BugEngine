@@ -156,7 +156,7 @@ struct InterlockedType<4>
             : "r"(v), "r"(p)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
 
-        return !(result&2);  
+        return !(result);  
     }
 };
 
