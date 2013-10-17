@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __function_type_info::~__function_type_info()
   {
   }
@@ -40,4 +41,5 @@ namespace __cxxabiv1
     // Thrown function will be converted to pointer, cannot convert it back
     return false;
   }
+#endif
 } // namespace __cxxabiv1

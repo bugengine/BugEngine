@@ -47,17 +47,19 @@
 #include <stdio.h>
 
 namespace __cxxabiv1 {
-
+#if __GXX_RTTI
   const __shim_type_info* getTypePtr(uint64_t ttypeIndex,
                                      const uint8_t* classInfo,
                                      uint8_t ttypeEncoding,
                                      _Unwind_Exception* unwind_exception);
+#endif
 
   void call_terminate(_Unwind_Exception* unwind_exception) {
     __cxa_begin_catch(unwind_exception);  // terminate is also a handler
     std::terminate();
   }
 
+#if __GXX_RTTI
   // Boring stuff which has lots of encode/decode details
   void scanEHTable(ScanResultInternal& results,
                    _Unwind_Action actions,
@@ -510,6 +512,7 @@ namespace __cxxabiv1 {
                                         const ScanResultInternal& results) {}
 
 #endif // __arm__
+#endif
 
   void fatalError(const char* message) {
 
