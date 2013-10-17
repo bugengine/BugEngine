@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __si_class_type_info::~__si_class_type_info()
   {
   }
@@ -44,4 +45,5 @@ namespace __cxxabiv1
 
     return __base_type->walk_to(base_type, adjustedPtr, info);
   }
+#endif
 } // namespace __cxxabiv1
