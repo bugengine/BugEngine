@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __class_type_info::~__class_type_info()
   {
   }
@@ -88,4 +89,5 @@ namespace __cxxabiv1
       premier_flags = p->__flags;
     }
   }
+#endif
 } // namespace __cxxabiv1

@@ -31,6 +31,7 @@
 
 namespace __cxxabiv1
 {
+#if __GXX_RTTI
   __pointer_type_info::~__pointer_type_info()
   {
   }
@@ -54,4 +55,5 @@ namespace __cxxabiv1
 
     return false; // Have not decided. Need to recursively call.
   }
+#endif
 } // namespace __cxxabiv1
