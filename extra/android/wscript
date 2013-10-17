@@ -363,9 +363,12 @@ def get_tools_paths(android_path):
 
 def get_build_tool_path(android_path):
 	sdk_tools_path = os.path.join(android_path, 'build-tools')
-	sdk_tools = sorted(os.listdir(sdk_tools_path))
-	sdk_tool = sdk_tools[-1]
-	return os.path.join(sdk_tools_path, sdk_tool)
+	if os.path.isdir(sdk_tools_path):
+		sdk_tools = sorted(os.listdir(sdk_tools_path))
+		if sdk_tools:
+			sdk_tool = sdk_tools[-1]
+			return os.path.join(sdk_tools_path, sdk_tool)
+	raise Errors.WafError('Android build-tools not installed')
 
 def host_configure(conf):
 	ndk_paths = Options.options.android_ndk_path.split(',')
@@ -386,18 +389,21 @@ def configure(conf):
 
 	seen = set([])
 	android_clang_archs = ['arm', 'mipsel', 'x86']
-	conf.load('javaw')
-	conf.find_program('jarsigner', var='JARSIGNER')
-	key_debug = conf.path.make_node('debug.keystore')
-	conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
+	try:
+		conf.load('javaw')
+		conf.find_program('jarsigner', var='JARSIGNER')
+		key_debug = conf.path.make_node('debug.keystore')
+		conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
 
-	sdk_build_tool_path = get_build_tool_path(Options.options.android_sdk_path)
-	sdk_tools_paths = get_tools_paths(Options.options.android_sdk_path)
-	adb = conf.find_program('adb', path_list=sdk_tools_paths)
-	conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
-	conf.env.DEXCREATE = '--dex'
-	conf.env.DEX_TGT_PATTERN = '--output=%s'
-	conf.find_program('aapt', path_list=[sdk_build_tool_path])
+		sdk_build_tool_path = get_build_tool_path(Options.options.android_sdk_path)
+		sdk_tools_paths = get_tools_paths(Options.options.android_sdk_path)
+		adb = conf.find_program('adb', path_list=sdk_tools_paths)
+		conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
+		conf.env.DEXCREATE = '--dex'
+		conf.env.DEX_TGT_PATTERN = '--output=%s'
+		conf.find_program('aapt', path_list=[sdk_build_tool_path])
+	except Errors.WafError:
+		return
 
 	os_name = 'android'
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:

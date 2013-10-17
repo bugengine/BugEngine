@@ -50,6 +50,7 @@
 
 namespace __cxxabiv1 {
 
+#if __GXX_RTTI
   /*
    * Personality Routine
    */
@@ -125,4 +126,5 @@ namespace __cxxabiv1 {
     return _URC_FATAL_PHASE1_ERROR;
   }
 
+#endif
 }  // namespace __cxxabiv1
