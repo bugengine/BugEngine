@@ -203,22 +203,46 @@ class VCxproj:
 		self.vcxproj._add(globals, 'ProjectName', self.name)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			for prop in env.MS_PROJECT_IMPORT_PROPS:
+				for variant in task_gen.bld.env.ALL_VARIANTS:
+					self.vcxproj._add(project, 'Import', {
+						'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+						'Project': prop})
+
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+				for var in ['Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
+					self.vcxproj._add(properties, var, env[var.upper()])
+				self.vcxproj._add(properties, 'Variant', variant)
+
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
 		self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
 		self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
-		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)\\')
-		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir)\\.build\\')
+		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)build\\$(Toolchain)\\$(Variant)\\')
+		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir).build\\')
 
-		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			env = task_gen.bld.all_envs[toolchain]
 			if env.SUB_TOOLCHAINS:
 				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
-				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
-							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
-					self.vcxproj._add(properties, var, env[var.upper()])
+				for var,value in env.MS_PROJECT_VARIABLES:
+					self.vcxproj._add(properties, var, value)
+
+
+		includes, defines = gather_includes_defines(task_gen)
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
 				command = getattr(task_gen, 'command', '')
 				if command:
 					command = command % {'toolchain':toolchain, 'variant':variant}
@@ -228,7 +252,7 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					elif 'game' in task_gen.features:
 						deps = task_gen.use[:]
 						seen = set([])
@@ -245,11 +269,11 @@ class VCxproj:
 									except:
 										pass
 						if program:
-							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
 							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
 							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
 						else:
-							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
 					includes += ['%s/usr/include'%sysroot for sysroot in env.SYSROOT]
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
@@ -259,6 +283,15 @@ class VCxproj:
 		for node in getattr(task_gen, 'source_nodes', []):
 			self.add_node(task_gen.bld.srcnode, node, node, files)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			for target in env.MS_PROJECT_IMPORT_TARGETS:
+				for variant in task_gen.bld.env.ALL_VARIANTS:
+					self.vcxproj._add(project, 'Import', {
+						'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+						'Project': target})
 
 	def write(self, nodes):
 		self.vcxproj.write(nodes[0])
@@ -396,7 +429,8 @@ class vs2010e(vs2003):
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
+	#TODO: folders
+	version =	(('Visual Studio 11', '12.00', False),(VCxproj, ('4.5','11.0')))
 	platforms = ['Win32', 'x64']
 
 class vs2012(vs11):

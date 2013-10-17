@@ -47,11 +47,13 @@ struct InterlockedType<4>
         value_t temp, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     ldaxr   %0, [%5]\n"
                 "       add     %2, %0, %4\n"
                 "       stxr    %w1, %w2, [%5]\n"
                 "       cmp             %1, #0\n"
                 "       b.ne            1b\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(old),"=&r"(flag),"=&r"(temp),"+m"(*p)
             : "r"(incr), "r"(p)
@@ -67,10 +69,12 @@ struct InterlockedType<4>
         value_t prev, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     ldaxr   %0, [%3]\n"
                 "       stxr    %w1, %w4, [%3]\n"
                 "       cmp             %1, #0\n"
                 "       b.ne            1b\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(prev),"=&r"(flag), "+m"(*p)
             : "r"(p), "r"(v)
@@ -82,12 +86,14 @@ struct InterlockedType<4>
         value_t result, old;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     mov             %0, #2\n"       /* store a flag */
                 "       ldaxr   %1, [%3]\n"             /* get original */
                 "       teq             %1, %4\n"       /* see if match */
                 "       stxr.eq %w0, %w5, [%3]\n"         /* store new one if matched */
                 "       teq             %0, #1\n"
                 "       beq             1b\n"           /* if update failed, repeat */
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v)
@@ -129,6 +135,7 @@ struct InterlockedType<4>
         value_t result;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "       ldaxr   %0, [%1]\n"
                 AO_THUMB_RESTORE_MODE
             : "=r"(result)
@@ -143,6 +150,7 @@ struct InterlockedType<4>
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
                 "       strex %0, %2, [%3]\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "+m"(*p)
             : "r"(v), "r"(p)
@@ -162,11 +170,13 @@ struct InterlockedType<8>
         value_t temp, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     ldaxr   %x0, [%5]\n"
                 "       add     %x2, %x0, %x4\n"
                 "       stlxr    %w1, %x2, [%5]\n"
                 "       cmp             %w1, #0\n"
                 "       b.ne            1b\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(old),"=&r"(flag),"=&r"(temp),"+m"(*p)
             : "r"(incr), "r"(p)
@@ -182,10 +192,12 @@ struct InterlockedType<8>
         value_t prev, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     ldaxr    %x0, [%3]\n"
                 "       stlxr    %w1, %x4, [%3]\n"
                 "       cmp             %w1, #0\n"
                 "       b.ne             1b\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(prev),"=&r"(flag), "+m"(*p)
             : "r"(p), "r"(v)
@@ -197,12 +209,14 @@ struct InterlockedType<8>
         value_t result, old;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "1:     mov             %w0, #2\n"       /* store a flag */
                 "       ldaxr    %x1, [%3]\n"             /* get original */
                 "       teq             %x1, %x4\n"       /* see if match */
                 "       stlxr.eq %w0, %x5, [%3]\n"         /* store new one if matched */
                 "       cmp             %w0, #1\n"
                 "       b.eq             1b\n"           /* if update failed, repeat */
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v)
@@ -244,6 +258,7 @@ struct InterlockedType<8>
         value_t result;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
+                "       dmb\n"
                 "       ldaxr   %x0, [%1]\n"
                 AO_THUMB_RESTORE_MODE
             : "=r"(result)
@@ -258,6 +273,7 @@ struct InterlockedType<8>
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
                 "       stlxr  %w0, %x2, [%3]\n"
+                "       dmb\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "+m"(*p)
             : "r"(v), "r"(p)
