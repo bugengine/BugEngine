@@ -184,9 +184,9 @@ def set_android_gcc_options(conf, options, arch, version):
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
 	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-local-typedef', '-Wno-unused-variable']
+	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unused-variable']
 	if version >= 4.8:
-		v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
+		v.append_unique('CXXFLAGS_warnall', ['-Wno-unused-local-typedefs'])
 
 	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
 	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG', '-fno-exceptions']
