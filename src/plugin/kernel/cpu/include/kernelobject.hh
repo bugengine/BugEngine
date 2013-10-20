@@ -37,9 +37,9 @@ struct CPUKernelTask
         }
     };
 
-    inline CPUKernelTask(weak<KernelObject> object);
-    inline Range prepare();
-    inline void operator()(const Range& range) const;
+    CPUKernelTask(weak<KernelObject> object);
+    Range prepare();
+    void operator()(const Range& range) const;
 };
 
 class KernelObject : public minitl::refcountable
