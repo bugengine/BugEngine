@@ -16,7 +16,7 @@ def build(bld):
 				   resource=resource_node,
 				   destfile=bld.bldnode.find_or_declare('resources.apk'),
 				   manifest=manifest)
-	outdir = os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR)
+	outdir = os.path.join(bld.env.PREFIX, bld.optim)
 	bld.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
 
 
