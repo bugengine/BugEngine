@@ -1,54 +1,10 @@
 # set Android specific options
 
 import os, sys
-from waflib import Context, Errors, Options, Utils, Build, Logs
+from waflib import Context, Errors, Options, Utils, Logs
 from waflib.Logs import info,warn,pprint
 from waflib.Configure import conf
 from waflib.TaskGen import feature
-
-def build_file_list(node, path = ''):
-	if os.path.isdir(node.abspath()):
-		result = []
-		for n in node.listdir():
-			result += build_file_list(node.make_node(n), (path+'/'+n) if path else n)
-		return result
-	else:
-		return [path]
-
-def post_run(bld):
-	destination_directory = bld.srcnode.make_node(os.path.join(bld.env.PREFIX, bld.optim, bld.env.DEPLOY_ROOTDIR))
-	appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
-	package_name = appname + '.apk'
-	Logs.pprint('GREEN', 'Packaging application %s'%package_name)
-	original = bld.bldnode.make_node('resources.apk')
-	destination = bld.bldnode.make_node('package.apk')
-	files = build_file_list(destination_directory)
-	destination.write(original.read())
-	command = [bld.env.AAPT, 'add', destination.abspath()] + files
-	p = Utils.subprocess.Popen(command,
-			cwd=destination_directory.abspath(),
-			stdin=Utils.subprocess.PIPE,
-			stdout=Utils.subprocess.PIPE,
-			stderr=Utils.subprocess.PIPE)
-	out = p.communicate()[0]
-	if p.returncode != 0:
-		print(out.decode('utf-8'))
-		raise Errors.WafError('failed to create Android package')
-
-	command = [bld.env.JARSIGNER] + bld.env.JARSIGNER_FLAGS + [
-		'-signedjar',
-		destination_directory.parent.make_node(package_name).abspath(),
-		destination.abspath(),
-		'androiddebugkey']
-	p = Utils.subprocess.Popen(command,
-			stdin=Utils.subprocess.PIPE,
-			stdout=Utils.subprocess.PIPE,
-			stderr=Utils.subprocess.PIPE)
-	out = p.communicate()[0]
-	if p.returncode != 0:
-		print(out.decode('utf-8'))
-		raise Errors.WafError('failed to sign Android package')
-
 
 def get_android_version(sdk_version):
 	versions = {
@@ -303,11 +259,11 @@ def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
 	conf.env.ANDROID_SDK = sdk_version
 	conf.env.ANDROID_SDK_PATH = sdk_path
 	conf.env.ANDROID_NDK_PATH = ndk_path
+	conf.env.ANDROID_ARCH = get_android_arch(arch)
 	conf.env.append_unique('CLASSPATH', [os.path.join(sdk_path, 'android.jar')])
 
 	if not os.path.isfile(os.path.join(ndk_path, '..', '..', 'prebuilt', 'android-%s'%get_android_arch(arch), 'gdbserver', 'gdbserver')):
 		raise Errors.WafError('could not find gdbserver for architecture %s' % get_android_arch(arch))
-	conf.env.NDK_GDBSERVER = os.path.join(ndk_path, '..', '..', 'prebuilt', 'android-%s'%get_android_arch(arch), 'gdbserver', 'gdbserver')
 	ndk_path = os.path.join(ndk_path, 'arch-%s'%get_android_arch(arch))
 	conf.env.SYSROOT = [ndk_path]
 	conf.env.append_unique('CFLAGS', ['--sysroot', ndk_path])
@@ -350,13 +306,13 @@ def set_android_options(conf, arch):
 			]
 
 	conf.env.DEPLOY_ROOTDIR = appname
-	conf.env.DEPLOY_BINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
-	conf.env.DEPLOY_RUNBINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_BINDIR = os.path.join('lib', get_target_folder(arch))
+	conf.env.DEPLOY_RUNBINDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_LIBDIR = os.path.join('lib', get_target_folder(arch))
 	conf.env.DEPLOY_INCLUDEDIR = 'include'
-	conf.env.DEPLOY_DATADIR = os.path.join(appname, 'assets')
-	conf.env.DEPLOY_PLUGINDIR = os.path.join(appname, 'lib', get_target_folder(arch))
-	conf.env.DEPLOY_KERNELDIR = os.path.join(appname, 'lib', get_target_folder(arch))
+	conf.env.DEPLOY_DATADIR = os.path.join('assets')
+	conf.env.DEPLOY_PLUGINDIR = os.path.join('lib', get_target_folder(arch))
+	conf.env.DEPLOY_KERNELDIR = os.path.join('lib', get_target_folder(arch))
 
 def get_tools_paths(android_path):
 	return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
@@ -394,11 +350,13 @@ def configure(conf):
 		conf.find_program('jarsigner', var='JARSIGNER')
 		key_debug = conf.path.make_node('debug.keystore')
 		conf.env.JARSIGNER_FLAGS = ['-keystore', key_debug.abspath(), '-storepass', 'android', '-keypass', 'android']
+		conf.env.JARSIGNER_KEY = 'androiddebugkey'
 
 		sdk_build_tool_path = get_build_tool_path(Options.options.android_sdk_path)
 		sdk_tools_paths = get_tools_paths(Options.options.android_sdk_path)
 		adb = conf.find_program('adb', path_list=sdk_tools_paths)
 		conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
+		conf.find_program('zipalign', var='ZIPALIGN', path_list = sdk_tools_paths)
 		conf.env.DEXCREATE = '--dex'
 		conf.env.DEX_TGT_PATTERN = '--output=%s'
 		conf.find_program('aapt', path_list=[sdk_build_tool_path])
@@ -551,13 +509,8 @@ def configure(conf):
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 
-
 def build(bld):
-	if bld.is_install == Build.INSTALL:
-		bld.add_post_fun(post_run)
-		for envname in bld.env.SUB_TOOLCHAINS:
-			env = bld.all_envs[envname]
-			bld.do_install(env.NDK_GDBSERVER, os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'))
+	bld.recurse('tasks')
 	bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
 
 def plugins(bld):
@@ -577,5 +530,5 @@ def apply_multiarch_android(self):
 				outdir = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_BINDIR)
 				outdir_dbg = os.path.join(self.bld.env.PREFIX, self.bld.optim, task_gen.env.DEPLOY_ROOTDIR+'.dbg', task_gen.env.ENV_PREFIX)
 				self.bld.install_files(outdir, out_node)
-				self.bld.install_files(outdir_dbg, dbg_node)
+				self.bld.install_files(outdir_dbg, dbg_node, package=False)
 
