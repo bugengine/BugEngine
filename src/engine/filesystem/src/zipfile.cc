@@ -37,6 +37,7 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         be_assert(result == UNZ_OK, "could not go to file %s" | m_file);
         result = unzOpenCurrentFile(m_handle);
         be_assert(result == UNZ_OK, "could not open file %s" | m_file);
+        be_forceuse(result);
     }
 
     while (s_fileOffset < ticket->offset)

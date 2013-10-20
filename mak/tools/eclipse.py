@@ -117,6 +117,7 @@ class eclipse(Build.BuildContext):
 						XmlNode(buildCommand, 'arguments').close()
 				with XmlNode(projectDescription, 'natures') as natures:
 					nature_list = """
+						com.android.ide.eclipse.adt.AndroidNature
 						core.ccnature
 						managedbuilder.core.ScannerConfigNature
 						managedbuilder.core.managedBuildNature
@@ -194,6 +195,8 @@ class eclipse(Build.BuildContext):
 									'id': cconf_id,
 									'moduleId': cdt_core + '.settings',
 									'name': toolchain}) as storageModule:
+								with XmlNode(storageModule, 'macros') as macros:
+									XmlNode(macros, 'stringMacro', {'name': 'VARIANT', 'type': 'VALUE_TEXT', 'value': 'debug'}).close()
 								XmlNode(storageModule, 'externalSettings').close()
 								with XmlNode(storageModule, 'extensions') as extensions:
 									extension_list = """
