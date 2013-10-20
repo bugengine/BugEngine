@@ -1,4 +1,4 @@
-from waflib import Task, Options
+from waflib import Task, Options, Build, Task
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -10,6 +10,31 @@ c.cshlib.inst_to = ''
 cxx.cxxshlib.inst_to = ''
 c.cstlib.inst_to = ''
 cxx.cxxstlib.inst_to = ''
+
+def to_string(self):
+	bld = self.generator.bld
+	tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs])
+	return '(%s) %s\n' % (self.__class__.__name__.replace('_task', ''), tgt_str)
+Task.Task.__str__ = to_string
+
+
+old_log_display = Task.Task.log_display
+def log_display(self, bld):
+	if not Options.options.silent:
+		old_log_display(self, bld)
+Task.Task.log_display = log_display
+
+
+for command in ['build', 'clean', 'install']:
+	class BuildWrapperAll(Build.BuildContext):
+		cmd = '%s:all'%command
+		def execute(self):
+			self.restore()
+			if not self.all_envs:
+				self.load_envs()
+			for toolchain in self.env.ALL_TOOLCHAINS:
+				for variant in self.env.ALL_VARIANTS:
+					Options.commands.append('%s:%s:%s'%(command, toolchain, variant))
 
 def safe_name(name):
 	name = name.replace('-', '_')
@@ -34,6 +59,11 @@ def options(opt):
 					default = False,
 					dest = 'dynamic',
 					help = 'build completely dynamic executable: All engine components, plugins, samples and kernels will be built as shared objects')
+	gr.add_option(	'--silent',
+					action = 'store_true',
+					default = False,
+					dest = 'silent',
+					help = 'do not print build log from Waf')
 
 def module(bld, name, depends,
 		valid_platforms, features,
