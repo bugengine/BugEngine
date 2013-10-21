@@ -12,7 +12,7 @@
 namespace BugEngine
 {
 
-class KernelStorage : public World::EntityStorageFactory< COMPONENT_LIST_2(A, 16, B, 16) >
+class KernelStorage : public World::EntityStorageFactory< COMPONENT_LIST_2((A, 16), (B, 16)) >
 {
 published:
     KernelStorage();
