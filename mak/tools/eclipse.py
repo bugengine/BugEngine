@@ -80,16 +80,51 @@ class eclipse(Build.BuildContext):
 		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
+		self.settings = self.srcnode.make_node('.settings')
+		self.settings.mkdir()
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 		self.create_cproject(appname)
 
 
 		settings = self.srcnode.find_or_declare('mak/tools/eclipse')
-		out = self.srcnode.make_node('.settings')
-		out.mkdir()
 		for f in settings.listdir():
 			n = settings.find_or_declare(f)
-			out.make_node(f).write(n.read())
+			self.settings.make_node(f).write(n.read())
+
+		for toolchain in self.env.ALL_TOOLCHAINS:
+			env = self.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+			for variant in self.env.ALL_VARIANTS:
+				node = self.settings.make_node('%s-%s.launch' % (toolchain, variant))
+				with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
+					with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
+						XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()
+						with XmlNode(launchConfig, 'listAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}) as soLibList:
+							pass
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_NAME', 'value': 'gdb'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_ON_FORK', 'value': 'false'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.GDB_INIT', 'value': '.gdbinit'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.NON_STOP', 'value': 'false'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.REVERSE', 'value': 'false'}).close()
+						XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.cdt.dsf.gdb.SOLIB_PATH'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.TRACEPOINT_MODE', 'value': 'TP_NORMAL_ONLY'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.UPDATE_THREADLIST_ON_SUSPEND', 'value': 'false'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.internal.ui.launching.LocalApplicationCDebuggerTab.DEFAULTS_SET', 'value': 'true'}).close()
+						XmlNode(launchConfig, 'intAttribute', {'key':'org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR', 'value': '2'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.COREFILE_PATH', 'value': ''}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_ID', 'value': 'gdb'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_START_MODE', 'value': 'run'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN', 'value': 'true'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL', 'value': 'main'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_NAME', 'value': ''}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_ATTR', 'value': 'BugEngine'}).close()
+						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR', 'value': 'true'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR', 'value': toolchain}).close()
+						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}) as resourcePaths:
+							XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'})
+						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}) as resourceTypes:
+							XmlNode(resourceTypes, 'listEntry', {'value': '4'})
 
 
 	def create_cproject(self, appname):
