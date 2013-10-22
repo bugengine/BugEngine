@@ -97,7 +97,7 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType)
 {
     be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
     m_componentTypes.push_back(componentType);
-    u32 index = m_componentTypes.size() - 1;
+    u32 index = be_checked_numcast<u32>(m_componentTypes.size()) - 1;
     u64 mask = u64(1) << index;
     m_componentGroups.push_back(ComponentGroup(mask));
 }
