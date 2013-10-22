@@ -80,16 +80,16 @@ class eclipse(Build.BuildContext):
 		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
-		self.settings = self.srcnode.make_node('.settings')
-		self.settings.mkdir()
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
-		self.create_cproject(appname)
 
-
+		self.settings = self.srcnode.make_node('.settings')
+		setting_files = []
+		self.settings.mkdir()
 		settings = self.srcnode.find_or_declare('mak/tools/eclipse')
 		for f in settings.listdir():
 			n = settings.find_or_declare(f)
 			self.settings.make_node(f).write(n.read())
+			setting_files.append(f)
 
 		for toolchain in self.env.ALL_TOOLCHAINS:
 			env = self.all_envs[toolchain]
@@ -97,6 +97,7 @@ class eclipse(Build.BuildContext):
 				env = self.all_envs[env.SUB_TOOLCHAINS[0]]
 			for variant in self.env.ALL_VARIANTS:
 				node = self.settings.make_node('%s-%s.launch' % (toolchain, variant))
+				setting_files.append(node.name)
 				with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
 					with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
 						XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()
@@ -122,9 +123,16 @@ class eclipse(Build.BuildContext):
 						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR', 'value': 'true'}).close()
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR', 'value': toolchain}).close()
 						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}) as resourcePaths:
-							XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'})
+							XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'}).close()
 						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}) as resourceTypes:
-							XmlNode(resourceTypes, 'listEntry', {'value': '4'})
+							XmlNode(resourceTypes, 'listEntry', {'value': '4'}).close()
+
+		for s in self.settings.listdir():
+			if s not in setting_files:
+				file = self.settings.make_node(s)
+				file.delete()
+
+		self.create_cproject(appname)
 
 
 	def create_cproject(self, appname):
@@ -162,6 +170,7 @@ class eclipse(Build.BuildContext):
 					for n in nature_list:
 						XmlNode(natures, 'nature', oe_cdt + '.' + n).close()
 				with XmlNode(projectDescription, 'linkedResources') as resources:
+					self.addSourceTree(resources, self.settings, '.settings', os.path.join('PROJECT_LOC', self.settings.path_from(self.srcnode)))
 					def createProjectFolder(name, element, seen):
 						name = name.split('.')
 						path = ''

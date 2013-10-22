@@ -57,7 +57,7 @@ class XmlNode:
 			if self.empty:
 				self.file.write(' />\n')
 			else:
-				self.file.write('%s</%s>\n' % (' '*self.indent, self.name))
+				self.file.write('%s</%s>\n' % ('\t'*self.indent, self.name))
 
 	def begin(self):
 		self.file.write('>\n')
