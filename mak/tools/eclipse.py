@@ -82,6 +82,15 @@ class eclipse(Build.BuildContext):
 
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
+		launch = []
+		for g in self.groups:
+			for tg in g:
+				if 'launcher' in tg.features:
+					launcher = tg
+					launch.append(tg)
+				if 'game' in tg.features:
+					launch.append(tg)
+
 		self.settings = self.srcnode.make_node('.settings')
 		setting_files = []
 		self.settings.mkdir()
@@ -91,19 +100,25 @@ class eclipse(Build.BuildContext):
 			self.settings.make_node(f).write(n.read())
 			setting_files.append(f)
 
-		for toolchain in self.env.ALL_TOOLCHAINS:
-			env = self.all_envs[toolchain]
-			if env.SUB_TOOLCHAINS:
-				env = self.all_envs[env.SUB_TOOLCHAINS[0]]
-			for variant in self.env.ALL_VARIANTS:
-				node = self.settings.make_node('%s-%s.launch' % (toolchain, variant))
+		for launch_tg in launch:
+			for toolchain in self.env.ALL_TOOLCHAINS:
+				env = self.all_envs[toolchain]
+				if env.SUB_TOOLCHAINS:
+					sub_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+				node = self.settings.make_node('%s-%s.launch' % (launch_tg.target, toolchain))
 				setting_files.append(node.name)
+				#if env.XCODE_ABI == 'mach_o':
+				#	program = os.path.join(env.PREFIX, '$VARIANT', appname+'.app')
+				#	argument = launch_tg.target
+				#else:
+				program = os.path.join(env.PREFIX, 'debug', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%launcher.target)
+				argument = launcher.target if launcher != launch_tg else ''
 				with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
 					with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
 						XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()
 						with XmlNode(launchConfig, 'listAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}) as soLibList:
 							pass
-						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_NAME', 'value': 'gdb'}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_NAME', 'value': env.GDB or 'gdb'}).close()
 						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_ON_FORK', 'value': 'false'}).close()
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.GDB_INIT', 'value': '.gdbinit'}).close()
 						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.NON_STOP', 'value': 'false'}).close()
@@ -118,7 +133,8 @@ class eclipse(Build.BuildContext):
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_START_MODE', 'value': 'run'}).close()
 						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN', 'value': 'true'}).close()
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL', 'value': 'main'}).close()
-						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_NAME', 'value': ''}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_ARGUMENTS', 'value': argument}).close()
+						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_NAME', 'value': program}).close()
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_ATTR', 'value': 'BugEngine'}).close()
 						XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR', 'value': 'true'}).close()
 						XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR', 'value': toolchain}).close()
@@ -126,6 +142,10 @@ class eclipse(Build.BuildContext):
 							XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'}).close()
 						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}) as resourceTypes:
 							XmlNode(resourceTypes, 'listEntry', {'value': '4'}).close()
+						with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.ui.favoriteGroups'}) as resourceTypes:
+							XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.profile'}).close()
+							XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.debug'}).close()
+							XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.run'}).close()
 
 		for s in self.settings.listdir():
 			if s not in setting_files:
