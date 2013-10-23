@@ -1,7 +1,7 @@
 # set MacOS X specific options
 
 import os
-from waflib import Context, Errors, Utils, Task
+from waflib import Context, Errors, Utils, Task, Options
 from waflib.Logs import info,warn,pprint
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Configure import conf
@@ -49,7 +49,6 @@ def check_multilib_other(self, compiler):
 
 @conf
 def get_macosx_sdk_version(self, name, compiler_list):
-	from waflib import Options
 	sdk_number = Options.options.macosx_sdk
 	sdks = []
 	paths = Options.options.xcode_sdks.split(',')
@@ -279,8 +278,8 @@ def configure(conf):
 			continue
 		for compiler in compiler_list:
 			name, bindir, gcc, gxx, version, target, arch, real_arch, options = compiler
-			os = 'macosx'
-			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			os_name = 'macosx'
+			toolchain = '%s-%s-%s-%s'%(os_name, arch, name, version)
 			if toolchain in seen:
 				continue
 			seen.add(toolchain)
@@ -299,11 +298,11 @@ def configure(conf):
 				try:
 					conf.set_macosx_options()
 					conf.set_macosx_sdk_options(sdk_name, sdk_path)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], real_arch, name, version)
+					toolchain = '%s-%s-%s-%s'%(os_name+conf.env.MACOSX_SDK[6:], real_arch, name, version)
 					conf.setenv(toolchain, conf.env.derive())
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
 					conf.env.ENV_PREFIX = real_arch
-					conf.add_toolchain(os+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch, False)
+					conf.add_toolchain(os_name+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch, False)
 				except Errors.WafError as e:
 					conf.variant = ''
 					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -316,7 +315,7 @@ def configure(conf):
 					macosx_archs.append(real_arch)
 					conf.variant = ''
 		if macosx_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_name, ','.join(macosx_archs), name, version)
+			toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_name, ','.join(macosx_archs), name, version)
 			env = conf.env.derive()
 			conf.setenv(toolchain, env)
 			conf.set_macosx_options()
@@ -326,6 +325,7 @@ def configure(conf):
 			conf.find_program('dsymutil')
 			conf.find_program('strip')
 			conf.find_program('lipo')
+			conf.find_program('gdb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')])
 			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
