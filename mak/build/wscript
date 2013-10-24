@@ -489,6 +489,7 @@ def remove_link_libs(task):
 				pass
 
 @feature('cxx')
+@before_method('process_source')
 def set_extra_flags(self):
 	for f in getattr(self, 'extra_use', []):
 		self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
