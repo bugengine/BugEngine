@@ -5,6 +5,7 @@
 #define BE_MINITL_FORMAT_H_
 /*****************************************************************************/
 #include    <minitl/allocator.hh>
+#include    <string.h>
 
 namespace minitl
 {
