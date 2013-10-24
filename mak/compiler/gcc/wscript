@@ -118,7 +118,6 @@ def detect_gcc_from_path(conf, path, seen):
 				bindir = os.path.normpath(os.path.join(libdir, relative, 'bin'))
 				if (gcc, gxx, version, target, arch) not in seen:
 					conf.detect_gcc_archs_from_path(name, bindir, gcc, gxx, version, target, arch)
-					seen.append((gcc, gxx, version, target, arch))
 
 @conf
 def get_native_gcc(conf):
