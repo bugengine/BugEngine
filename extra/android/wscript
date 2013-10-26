@@ -332,11 +332,12 @@ def host_configure(conf):
 		compiler_paths = []
 		for ndk_path in ndk_paths:
 			toolchains_path = os.path.join(ndk_path, 'toolchains')
-			for toolchain in os.listdir(toolchains_path):
-				toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
-				if os.path.isdir(toolchain_path):
-					for platform in os.listdir(toolchain_path):
-						compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
+			if os.path.isdir(toolchains_path):
+				for toolchain in os.listdir(toolchains_path):
+					toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
+					if os.path.isdir(toolchain_path):
+						for platform in os.listdir(toolchain_path):
+							compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
 		conf.env.append_unique('EXTRA_PATH', compiler_paths)
 
 def configure(conf):

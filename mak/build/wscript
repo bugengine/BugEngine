@@ -11,18 +11,33 @@ cxx.cxxshlib.inst_to = ''
 c.cstlib.inst_to = ''
 cxx.cxxstlib.inst_to = ''
 
+old_log_display = Task.Task.log_display
+old_exec_command = Task.Task.exec_command
+
 def to_string(self):
 	bld = self.generator.bld
 	tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs])
 	return '(%s) %s\n' % (self.__class__.__name__.replace('_task', ''), tgt_str)
-Task.Task.__str__ = to_string
 
 
-old_log_display = Task.Task.log_display
 def log_display(self, bld):
 	if not Options.options.silent:
 		old_log_display(self, bld)
+def filter(lines):
+	result = []
+	for line in lines:
+		i1 = line.find('skipping incompatible ')
+		i2 = line.find('when searching for')
+		if i1 == -1 or i2 == -1:
+			result.append(line)
+	return result
+def exec_command(self, cmd, **kw):
+	kw['filter'] = filter
+	return old_exec_command(self, cmd, **kw)
+
+Task.Task.__str__ = to_string
 Task.Task.log_display = log_display
+Task.Task.exec_command = exec_command
 
 
 for command in ['build', 'clean', 'install']:

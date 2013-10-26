@@ -971,7 +971,14 @@ def exec_response_command(self, cmd, **kw):
 			os.close(fd)
 			cmd = [program, '@' + tmp]
 		# no return here, that's on purpose
-		kw['skipline'] = os.path.split(cmd[0])[1].lower() in ['cl.exe']
+		def filter_msvc(exe, lines):
+			exe = os.path.split(exe)[1].lower()
+			if exe == 'cl.exe':
+				lines.pop(0)
+			elif exe == 'link.exe':
+				lines.pop(0)
+			return lines
+		kw['filter'] = filter_msvc
 		ret = self.generator.bld.exec_command(cmd, **kw)
 	finally:
 		if tmp:
