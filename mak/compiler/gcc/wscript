@@ -11,6 +11,8 @@ def allarchs(arch):
 		return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
 	elif arch == 'amd64':
 		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
+	elif arch == 'arm64':
+		return [([], 'arm64')]
 	elif arch == 'arm':
 		return [([], 'arm')]
 	elif arch == 'mips':
@@ -39,20 +41,6 @@ def parse_gcc_target(conf, target):
 	for gccname,aname in conf.gcc_architectures:
 		if target.find(gccname) != -1:
 			return aname
-
-
-def add_ld_so(conf, filename, paths):
-	f = open(filename, 'r')
-	for line in f:
-		line = line.strip()
-		if not line:
-			continue
-		elif line.startswith('#'):
-			continue
-		elif line.startswith('include'):
-			continue
-		elif os.path.isdir(line):
-			paths.add(line)
 
 @conf
 def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
@@ -118,7 +106,6 @@ def detect_gcc_from_path(conf, path, seen):
 				bindir = os.path.normpath(os.path.join(libdir, relative, 'bin'))
 				if (gcc, gxx, version, target, arch) not in seen:
 					conf.detect_gcc_archs_from_path(name, bindir, gcc, gxx, version, target, arch)
-					seen.append((gcc, gxx, version, target, arch))
 
 @conf
 def get_native_gcc(conf):
@@ -170,13 +157,7 @@ def detect_gcc(conf):
 					paths.add(os.path.normpath(os.path.join(bindir, '..', f, 'lib')))
 		except OSError:
 			pass
-
-	if os.path.isfile('/etc/ld.so.conf'):
-		add_ld_so(conf, '/etc/ld.so.conf', paths)
-	if os.path.isdir('/etc/ld.so.conf.d'):
-		for f in os.listdir('/etc/ld.so.conf.d'):
-			add_ld_so(conf, '/etc/ld.so.conf.d/'+f, paths)
-
+	paths = paths.union(conf.env.SYSTEM_LIB_PATHS)
 	for path in paths:
 		for lib in os.listdir(path):
 			if lib.startswith('gcc'):
@@ -270,7 +251,8 @@ def configure(conf):
 		('powerpc', 'powerpc'),
 		('mingw32', 'x86'),
 		('ppu', 'powerpc'),
-		('spu', 'spu')
+		('spu', 'spu'),
+		('aarch64', 'arm64')
 	]
 
 	conf.env.GCC_TARGETS = []

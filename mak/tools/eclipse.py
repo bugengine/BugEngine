@@ -209,120 +209,96 @@ class eclipse(Build.BuildContext):
 						env = self.all_envs[toolchain]
 						if env.SUB_TOOLCHAINS:
 							sub_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
-						#for variant in self.env.ALL_VARIANTS:
-						count = count+1
-						cconf_id = cdt_core + '.default.config.%d'%count
+						for variant in self.env.ALL_VARIANTS:
+							count = count+1
+							cconf_id = cdt_core + '.default.config.%d'%count
 
 
-						for launch_tg in self.launch:
-							node = self.settings.make_node('%s-%s.launch' % (launch_tg.target, toolchain))
-							setting_files.append(node.name)
-							program = os.path.join('${project_loc}', env.PREFIX, 'debug', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % self.launcher.target)
-							argument = launch_tg.target if self.launcher != launch_tg else ''
-							with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
-								with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
-									XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()
-									with XmlNode(launchConfig, 'listAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}) as soLibList:
-										pass
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_NAME', 'value': env.GDB or 'gdb'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_ON_FORK', 'value': 'false'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.GDB_INIT', 'value': '.gdbinit'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.NON_STOP', 'value': 'false'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.REVERSE', 'value': 'false'}).close()
-									XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.cdt.dsf.gdb.SOLIB_PATH'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.TRACEPOINT_MODE', 'value': 'TP_NORMAL_ONLY'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.UPDATE_THREADLIST_ON_SUSPEND', 'value': 'false'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.internal.ui.launching.LocalApplicationCDebuggerTab.DEFAULTS_SET', 'value': 'true'}).close()
-									XmlNode(launchConfig, 'intAttribute', {'key':'org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR', 'value': '2'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.COREFILE_PATH', 'value': ''}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_ID', 'value': 'gdb'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_START_MODE', 'value': 'run'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN', 'value': 'true'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL', 'value': 'main'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_ARGUMENTS', 'value': argument}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_NAME', 'value': program}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_ATTR', 'value': 'BugEngine'}).close()
-									XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR', 'value': 'false'}).close()
-									XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR', 'value': cconf_id}).close()
-									with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}) as resourcePaths:
-										XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'}).close()
-									with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}) as resourceTypes:
-										XmlNode(resourceTypes, 'listEntry', {'value': '4'}).close()
-									with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.ui.favoriteGroups'}) as resourceTypes:
-										XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.profile'}).close()
-										XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.debug'}).close()
-										XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.run'}).close()
+							for launch_tg in self.launch:
+								node = self.settings.make_node('%s-%s-%s.launch' % (launch_tg.target, toolchain, variant))
+								setting_files.append(node.name)
+								program = os.path.join('${project_loc}', env.PREFIX, 'debug', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % self.launcher.target)
+								argument = launch_tg.target if self.launcher != launch_tg else ''
+								with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
+									with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
+										XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()
+										with XmlNode(launchConfig, 'listAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}) as soLibList:
+											pass
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_NAME', 'value': env.GDB or 'gdb'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.DEBUG_ON_FORK', 'value': 'false'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.GDB_INIT', 'value': '.gdbinit'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.NON_STOP', 'value': 'false'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.REVERSE', 'value': 'false'}).close()
+										XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.cdt.dsf.gdb.SOLIB_PATH'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.dsf.gdb.TRACEPOINT_MODE', 'value': 'TP_NORMAL_ONLY'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.UPDATE_THREADLIST_ON_SUSPEND', 'value': 'false'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.dsf.gdb.internal.ui.launching.LocalApplicationCDebuggerTab.DEFAULTS_SET', 'value': 'true'}).close()
+										XmlNode(launchConfig, 'intAttribute', {'key':'org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR', 'value': '2'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.COREFILE_PATH', 'value': ''}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_ID', 'value': 'gdb'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_START_MODE', 'value': 'run'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN', 'value': 'true'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL', 'value': 'main'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_ARGUMENTS', 'value': argument}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROGRAM_NAME', 'value': program}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_ATTR', 'value': 'BugEngine'}).close()
+										XmlNode(launchConfig, 'booleanAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR', 'value': 'false'}).close()
+										XmlNode(launchConfig, 'stringAttribute', {'key':'org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR', 'value': cconf_id}).close()
+										with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}) as resourcePaths:
+											XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'}).close()
+										with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}) as resourceTypes:
+											XmlNode(resourceTypes, 'listEntry', {'value': '4'}).close()
+										with XmlNode(launchConfig, 'listAttribute', {'key':'org.eclipse.debug.ui.favoriteGroups'}) as resourceTypes:
+											XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.profile'}).close()
+											XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.debug'}).close()
+											XmlNode(resourceTypes, 'listEntry', {'value': 'org.eclipse.debug.ui.launchGroup.run'}).close()
 
 
-						with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
-							with XmlNode(cconf, 'storageModule',
-									{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
-									'id': cconf_id,
-									'moduleId': cdt_core + '.settings',
-									'name': toolchain}) as storageModule:
-								with XmlNode(storageModule, 'macros') as macros:
-									XmlNode(macros, 'stringMacro', {'name': 'VARIANT', 'type': 'VALUE_TEXT', 'value': 'debug'}).close()
-								XmlNode(storageModule, 'externalSettings').close()
-								with XmlNode(storageModule, 'extensions') as extensions:
-									extension_list = """
-										VCErrorParser
-										GmakeErrorParser
-										GCCErrorParser
-										GASErrorParser
-										GLDErrorParser
-										CWDLocator
-									""".split()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'}).close()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'}).close()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'}).close()
-									for e in extension_list:
+							with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
+								with XmlNode(cconf, 'storageModule',
+										{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
+										'id': cconf_id,
+										'moduleId': cdt_core + '.settings',
+										'name': toolchain}) as storageModule:
+									with XmlNode(storageModule, 'macros') as macros:
+										XmlNode(macros, 'stringMacro', {'name': 'VARIANT', 'type': 'VALUE_TEXT', 'value': 'debug'}).close()
+									XmlNode(storageModule, 'externalSettings').close()
+									with XmlNode(storageModule, 'extensions') as extensions:
+										extension_list = """
+											VCErrorParser
+											GmakeErrorParser
+											GCCErrorParser
+											GASErrorParser
+											GLDErrorParser
+											CWDLocator
+										""".split()
 										XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'}).close()
+													{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'}).close()
+										for e in extension_list:
+											XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'}).close()
 
-							with XmlNode(cconf, 'storageModule', {'moduleId': 'cdtBuildSystem', 'version': '4.0.0'}) as storageModule:
-								with XmlNode(storageModule, 'configuration',
-											{	'artifactName': appname,
-												'buildProperties': '',
-												'description': '',
-												'id': cconf_id,
-												'name': toolchain,
-												'parent': cdt_bld + '.prefbase.cfg'}) as config:
-									count = count+1
-									with XmlNode(config, 'folderInfo',
-														{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''}) as folderInfo:
+								with XmlNode(cconf, 'storageModule', {'moduleId': 'cdtBuildSystem', 'version': '4.0.0'}) as storageModule:
+									with XmlNode(storageModule, 'configuration',
+												{	'artifactName': appname,
+													'buildProperties': '',
+													'description': '',
+													'id': cconf_id,
+													'name': toolchain+':'+variant,
+													'parent': cdt_bld + '.prefbase.cfg'}) as config:
 										count = count+1
-										with XmlNode(folderInfo, 'toolChain',
-												{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-													'name': 'No ToolChain',
-													'resourceTypeBasedDiscovery': 'false',
-													'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
+										with XmlNode(config, 'folderInfo',
+															{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''}) as folderInfo:
 											count = count+1
-											XmlNode(toolChain, 'targetPlatform',
-													{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
-														'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''}).close()
-											waf_build = '"%s" install:%s:%s'%(waf, toolchain, '${VARIANT}')
-											waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, '${VARIANT}')
-											count = count+1
-											XmlNode(toolChain, 'builder',
-															{	'autoBuildTarget': waf_build,
-																'command': executable,
-																'enableAutoBuild': 'false',
-																'cleanBuildTarget': waf_clean,
-																'id': cdt_bld + '.settings.default.builder.%d'%count,
-																'incrementalBuildTarget': waf_build,
-																'keepEnvironmentInBuildfile': 'false',
-																'managedBuildOn': 'false',
-																'name': 'Gnu Make Builder',
-																'superClass': cdt_bld + '.settings.default.builder'}).close()
-											count = count+1
-											XmlNode(toolChain, 'tool',
-															{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-																'name': "holder for library settings",
-																'superClass': cdt_bld + '.settings.holder.libs'}).close()
-											for tool_name in ("Assembly", "GNU C++", "GNU C"):
+											with XmlNode(folderInfo, 'toolChain',
+													{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+														'name': 'No ToolChain',
+														'resourceTypeBasedDiscovery': 'false',
+														'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
 												count = count+1
 												with XmlNode(toolChain, 'tool',
 														{	'id': cdt_bld + '.settings.holder.%d'%count,
@@ -372,6 +348,7 @@ class eclipse(Build.BuildContext):
 															value = ''
 														with XmlNode(resource, 'entry', {'kind': 'macro', 'name': define, 'value': value}) as entry:
 															XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
+
 				with XmlNode(cproject, 'storageModule',
 									{	'moduleId': 'cdtBuildSystem',
 										'version': '4.0.0'}) as storageModule:

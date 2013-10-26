@@ -20,6 +20,8 @@ def set_linux_options(self):
 	self.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
 	self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
 
+	self.env.LIBPATH += self.env.SYSTEM_LIB_PATHS
+
 	self.env.RPATH = '$ORIGIN/../share/bugengine/plugin'
 	self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
@@ -30,11 +32,11 @@ def set_linux_suncc_options(conf, arch):
 	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
 		v.append_unique('CFLAGS', ['-m32', '-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
 		v.append_unique('CXXFLAGS', ['-m32', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
-		v.append_unique('LINKFLAGS', ['-m32', '-L/lib/i386-linux-gnu', '-L/usr/lib/i386-linux-gnu'])
+		v.append_unique('LINKFLAGS', ['-m32'])
 	elif arch in ['x86_64', 'x64', 'amd64']:
 		v.append_unique('CFLAGS', ['-m64', '-I/usr/include/x86_64-linux-gnu'])
 		v.append_unique('CXXFLAGS', ['-m64', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il'), '-I/usr/include/x86_64-linux-gnu'])
-		v.append_unique('LINKFLAGS', ['-m64', '-L/lib/x86_64-linux-gnu', '-L/usr/lib/x86_64-linux-gnu'])
+		v.append_unique('LINKFLAGS', ['-m64'])
 	v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4'])
 	v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=%all'])
@@ -74,8 +76,6 @@ def set_linux_icc_options(self, flags, version, arch):
 		v.CXXFLAGS = flags + ['-fPIC']
 	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E', '-static-libgcc', '-static-intel']
 	v.CXXFLAGS_cxxshlib = []
-	if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
-		v.append_unique('LINKFLAGS', ['-L/lib/i386-linux-gnu', '-L/usr/lib/i386-linux-gnu'])
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -190,7 +190,6 @@ def configure(conf):
 					conf.set_linux_suncc_options(arch)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					conf.end_msg('done')
 					try:
@@ -202,7 +201,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -224,7 +222,6 @@ def configure(conf):
 					conf.set_linux_icc_options(options, version, arch)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					conf.end_msg('done')
 					try:
@@ -236,7 +233,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -258,7 +254,6 @@ def configure(conf):
 					conf.set_linux_gcc_options(options, version)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					try:
 						conf.end_msg('done')
@@ -270,7 +265,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -292,7 +286,6 @@ def configure(conf):
 					conf.set_linux_clang_options(options, version)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					try:
 						conf.end_msg('done')
@@ -304,7 +297,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
