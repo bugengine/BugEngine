@@ -39,12 +39,6 @@ Environment::~Environment()
     SetDllDirectoryA(NULL);
 }
 
-Environment& Environment::getEnvironment()
-{
-    static Environment s_environment;
-    return s_environment;
-}
-
 void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];
@@ -74,7 +68,7 @@ void Environment::init(int argc, const char *argv[])
     SetDllDirectoryA((getDataDirectory()+ipath("plugin")).str().name);
 }
 
-    size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount() const
 {
     SYSTEM_INFO i;
     GetSystemInfo(&i);

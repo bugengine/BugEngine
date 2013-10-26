@@ -44,11 +44,13 @@ def big_bison(self, node):
 			outs.append(node.change_ext('.h'))
 
 	tsk = self.create_task('bison', node, outs)
-	tsk.set_outputs(outs)
 	tsk.cwd = node.parent.get_bld().abspath()
 
 	# and the c/cxx file must be compiled too
-	self.source.append(outs[0])
+	try:
+		self.out_sources.append(outs[0])
+	except:
+		self.out_sources = [outs[0]]
 
 def configure(conf):
 	bison = conf.find_program('bison', var='BISON', mandatory=True)

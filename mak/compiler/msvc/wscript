@@ -8,6 +8,7 @@ def options(opt):
 def configure(conf):
 	from waflib.Tools import msvc
 	conf.start_msg('Looking for msvc compilers')
+	conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__clang__', '_MSC_VER'])
 	try:
 		conf.get_msvc_versions()
 	except:

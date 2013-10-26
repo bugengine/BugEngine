@@ -29,7 +29,7 @@
 # define BE_ENABLE_LOGGING              1
 # define BE_ENABLE_MEMORY_TRACKING      1
 # define BE_ENABLE_MEMORY_DEBUGGING     1
-# define BE_ENABLE_EXCEPTIONS           1
+# define BE_ENABLE_EXCEPTIONS           BE_SUPPORTS_EXCEPTIONS
 # define BE_ENABLE_COMPONENT_DEBUGGING  1
 #else
 # define BE_ENABLE_ASSERT               0

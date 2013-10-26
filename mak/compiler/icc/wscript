@@ -33,7 +33,7 @@ def get_native_icc_target(conf, icc):
 
 @conf
 def detect_icc(conf):
-	bindirs = os.environ['PATH'].split(os.pathsep)
+	bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
 	for bindir in bindirs:
 		icc = conf.find_program('icc', path_list=[bindir], mandatory=False)
 		icpc = conf.find_program('icpc', path_list=[bindir], mandatory=False)
@@ -55,6 +55,7 @@ def options(opt):
 
 def configure(conf):
 	conf.start_msg('Looking for intel compilers')
+	conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER'])
 	conf.env.ICC_TARGETS = []
 	conf.detect_icc()
 	conf.env.ICC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))

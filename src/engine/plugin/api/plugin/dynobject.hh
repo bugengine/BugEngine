@@ -12,6 +12,12 @@ namespace BugEngine { namespace Plugin
 class be_api(PLUGIN) DynamicObject
 {
 private:
+    template< typename T >
+    union Symbol
+    {
+        void* pointer;
+        T* symbol;
+    };
     typedef void*   Handle;
 private:
     Handle          m_handle;
@@ -29,8 +35,9 @@ public:
     template< typename T >
     T* getSymbol(const istring& name) const
     {
-        void* symbol = getSymbolInternal(m_handle, name);
-        return *(T**)&symbol;
+        Symbol<T> s;
+        s.pointer = getSymbolInternal(m_handle, name);
+        return s.symbol;
     }
 };
 

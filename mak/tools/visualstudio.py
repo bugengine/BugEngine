@@ -36,6 +36,11 @@ def generateGUID(name):
 	d = "{" + d[:8] + "-" + d[8:12] + "-" + d[12:16] + "-" + d[16:20] + "-" + d[20:32] + "}"
 	return d
 
+def unique(seq):
+	seen = set()
+	seen_add = seen.add
+	return [ x for x in seq if x not in seen and not seen_add(x)]
+
 def gather_includes_defines(task_gen):
 	defines = getattr(task_gen, 'defines', [])
 	includes = getattr(task_gen, 'includes', [])
@@ -52,7 +57,7 @@ def gather_includes_defines(task_gen):
 				use = use + getattr(t, 'use', [])
 				includes = includes + getattr(t, 'includes ', [])
 				defines = defines + getattr(t, 'defines ', [])
-	return includes, defines
+	return unique(includes), unique(defines)
 
 def path_from(path, bld):
 	if isinstance(path, str):
@@ -121,12 +126,17 @@ class Solution:
 		else:
 			return ''
 
+
 	def add(self, task_gen, project, project_path, build = False):
 		self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
-		project_config = ['\t\t%s.%s|%s.ActiveCfg = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
-		if build:
-			self.master = project.guid
-			project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|Win32'%(project.guid, v, t, t, v) for v in task_gen.bld.env.ALL_VARIANTS for t in task_gen.bld.env.ALL_TOOLCHAINS]
+		project_config = []
+		for t in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[t]
+			platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
+			project_config += ['\t\t%s.%s|%s.ActiveCfg = %s-%s|%s'%(project.guid, v, t, t, v, platform) for v in task_gen.bld.env.ALL_VARIANTS]
+			if build:
+				self.master = project.guid
+				project_config += ['\t\t%s.%s|%s.Build.0 = %s-%s|%s'%(project.guid, v, t, t, v, platform) for v in task_gen.bld.env.ALL_VARIANTS]
 		self.project_configs += project_config
 		if self.use_folders:
 			parent = self.addFolder(task_gen.target)
@@ -174,10 +184,11 @@ class VCxproj:
 		project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
 		configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
 				self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
-				self.vcxproj._add(config, 'Platform', 'Win32')
+				self.vcxproj._add(config, 'Platform', task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM))
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			env = task_gen.bld.all_envs[toolchain]
 			pgroup = self.vcxproj._add(project, 'PropertyGroup')
@@ -192,20 +203,46 @@ class VCxproj:
 		self.vcxproj._add(globals, 'ProjectName', self.name)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			for prop in env.MS_PROJECT_IMPORT_PROPS:
+				for variant in task_gen.bld.env.ALL_VARIANTS:
+					self.vcxproj._add(project, 'Import', {
+						'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+						'Project': prop})
+
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+				for var in ['Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
+					self.vcxproj._add(properties, var, env[var.upper()])
+				self.vcxproj._add(properties, 'Variant', variant)
+
 		configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
 		self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
 		self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
-		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)\\')
-		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir)\\.build\\')
+		self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)build\\$(Toolchain)\\$(Variant)\\')
+		self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir).build\\')
+
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			for variant in task_gen.bld.env.ALL_VARIANTS:
+				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+				for var,value in env.MS_PROJECT_VARIABLES:
+					self.vcxproj._add(properties, var, value)
+
 
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
 			for variant in task_gen.bld.env.ALL_VARIANTS:
-				env = task_gen.bld.all_envs['%s-%s'%(toolchain, variant)]
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
-				for var in ['Prefix', 'Variant', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
-							'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
-					self.vcxproj._add(properties, var, env[var.upper()])
 				command = getattr(task_gen, 'command', '')
 				if command:
 					command = command % {'toolchain':toolchain, 'variant':variant}
@@ -215,8 +252,30 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+					elif 'game' in task_gen.features:
+						deps = task_gen.use[:]
+						seen = set([])
+						program = None
+						while (deps):
+							dep = deps.pop()
+							if dep not in seen:
+									seen.add(dep)
+									try:
+										task_dep = task_gen.bld.get_tgen_by_name(dep)
+										deps += getattr(task_dep, 'use', [])
+										if 'cxxprogram' in task_dep.features:
+											program = task_dep
+									except:
+										pass
+						if program:
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
+							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
+						else:
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
+					includes += ['%s/usr/include'%sysroot for sysroot in env.SYSROOT]
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
 		files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -224,6 +283,15 @@ class VCxproj:
 		for node in getattr(task_gen, 'source_nodes', []):
 			self.add_node(task_gen.bld.srcnode, node, node, files)
 		self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
+		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			for target in env.MS_PROJECT_IMPORT_TARGETS:
+				for variant in task_gen.bld.env.ALL_VARIANTS:
+					self.vcxproj._add(project, 'Import', {
+						'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+						'Project': target})
 
 	def write(self, nodes):
 		self.vcxproj.write(nodes[0])
@@ -251,7 +319,12 @@ class VCxproj:
 class vs2003(Build.BuildContext):
 	cmd = 'vs2003'
 	fun = 'build'
+	optim = 'debug'
 	version = (('Visual Studio .NET 2003', '8.00', False), (VCproj, '7.10'))
+	platforms = ['Win32', 'x64']
+
+	def get_platform(self, platform_name):
+		return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]
 
 	def execute(self):
 		"""
@@ -261,8 +334,6 @@ class vs2003(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
-		self.env.TOOLCHAIN = "$(Platform)"
-		self.env.VARIANT = "$(Configuration)"
 
 		self.env.VARIANT = '$(Variant)'
 		self.env.TOOLCHAIN = '$(Toolchain)'
@@ -275,6 +346,7 @@ class vs2003(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(Deploy_DataDir)'
 		self.env.DEPLOY_PLUGINDIR = '$(Deploy_PluginDir)'
 		self.env.DEPLOY_KERNELDIR = '$(Deploy_KernelDir)'
+		self.features = ['GUI']
 
 		self.recurse([self.run_dir])
 
@@ -282,7 +354,7 @@ class vs2003(Build.BuildContext):
 		version_name, version_number, folders = self.__class__.version[0]
 		klass, version_project = self.__class__.version[1]
 
-		appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
 		solution_node = self.srcnode.make_node(appname+'.'+version+'.sln')
 		projects = self.srcnode.make_node('.build').make_node(version)
@@ -307,12 +379,13 @@ class vs2003(Build.BuildContext):
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
-				tg.post()
+				if not 'kernel' in tg.features:
+					tg.post()
 
-				nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
-				project = klass(tg, version, version_project, folders)
-				project.write(nodes)
-				solution.add(tg, project, nodes[0].path_from(self.srcnode))
+					nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
+					project = klass(tg, version, version_project, folders)
+					project.write(nodes)
+					solution.add(tg, project, nodes[0].path_from(self.srcnode))
 
 		solution.write(solution_node)
 
@@ -320,58 +393,71 @@ class vs2005(vs2003):
 	cmd = 'vs2005'
 	fun = 'build'
 	version =	(('Visual Studio 2005', '9.00', True),(VCproj, '8.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2005e(vs2003):
 	cmd = 'vs2005e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2005', '9.00', False),(VCproj, '8.00'))
+	platforms = ['Win32', 'x64']
 
 
 class vs2008(vs2003):
 	cmd = 'vs2008'
 	fun = 'build'
 	version =	(('Visual Studio 2008', '10.00', True),(VCproj, '9.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2008e(vs2003):
 	cmd = 'vs2008e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2008', '10.00', False),(VCproj, '9.00'))
+	platforms = ['Win32', 'x64']
 
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
 	version =	(('Visual Studio 2010', '11.00', True),(VCxproj, ('4.0','10.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2010', '11.00', False),(VCxproj, ('4.0','10.0')))
+	platforms = ['Win32', 'x64']
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
+	#TODO: folders
+	version =	(('Visual Studio 11', '12.00', False),(VCxproj, ('4.5','11.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2012(vs11):
 	cmd = 'vs2012'
 	fun = 'build'
+	platforms = ['Win32', 'x64']
 
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
 	version =	(('Visual C++ Express 11', '12.00', False),(VCxproj, ('4.5','11.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2012e(vs11e):
 	cmd = 'vs2012e'
 	fun = 'build'
+	platforms = ['Win32', 'x64']
 
 class vs2013e(vs2003):
 	cmd = 'vs2013e'
 	fun = 'build'
 	version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('12.0','12.0')))
+	platforms = ['Win32', 'x64']
 
 class vs2013(vs2003):
 	cmd = 'vs2013'
 	fun = 'build'
 	version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('12.0','12.0')))
+	platforms = ['Win32', 'x64']
 

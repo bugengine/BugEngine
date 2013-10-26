@@ -21,12 +21,6 @@ Environment::~Environment()
 {
 }
 
-Environment& Environment::getEnvironment()
-{
-    static Environment s_environment;
-    return s_environment;
-}
-
 void Environment::init(int argc, const char *argv[])
 {
     const char *exe = argv[0];

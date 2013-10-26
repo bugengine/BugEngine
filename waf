@@ -161,5 +161,9 @@ sys.path.insert(0, wafdir)
 if __name__ == '__main__':
 	#import waflib.extras.compat15#PRELUDE
 	from waflib import Scripting
-	Scripting.waf_entry_point(cwd, VERSION, wafdir)
+	if '--profile' in sys.argv:
+		import cProfile
+		cProfile.run('Scripting.waf_entry_point(cwd, VERSION, wafdir)')
+	else:
+		Scripting.waf_entry_point(cwd, VERSION, wafdir)
 

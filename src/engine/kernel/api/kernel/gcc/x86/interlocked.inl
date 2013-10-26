@@ -15,7 +15,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef BE_SET_ALIGNMENT(4) i32 value_t;
+    typedef __attribute__ ((aligned(4))) i32 value_t;
     static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         value_t old;
@@ -54,10 +54,10 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef BE_SET_ALIGNMENT(4) i32         value_t;
-        typedef BE_SET_ALIGNMENT(4) i32         counter_t;
+        typedef __attribute__ ((aligned(4))) i32         value_t;
+        typedef __attribute__ ((aligned(4))) i32         counter_t;
         typedef tagged_t    tag_t;
-        BE_SET_ALIGNMENT(8) struct
+        __attribute__ ((aligned(8))) struct
         {
             counter_t   tag;
             value_t     value;
@@ -125,7 +125,7 @@ struct InterlockedType<2> : public InterlockedType<4>
 template<>
 struct InterlockedType<8>
 {
-    typedef BE_SET_ALIGNMENT(8) i64 value_t;
+    typedef __attribute__ ((aligned(8))) i64 value_t;
     static inline value_t fetch_and_add(value_t *p, value_t incr)
     {
         value_t old;
@@ -183,10 +183,10 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef BE_SET_ALIGNMENT(8) i64         value_t;
-        typedef BE_SET_ALIGNMENT(8) i64         counter_t;
+        typedef __attribute__ ((aligned(8))) i64         value_t;
+        typedef __attribute__ ((aligned(8))) i64         counter_t;
         typedef tagged_t    tag_t;
-        BE_SET_ALIGNMENT(16) struct
+        __attribute__ ((aligned(16))) struct
         {
             counter_t   tag;
             value_t     value;

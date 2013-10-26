@@ -2,6 +2,11 @@ from waflib import TaskGen, Context, Build
 import os, sys
 from xml.dom.minidom import Document
 
+def relpath(i, node):
+	if isinstance(i, str):
+		return i
+	else:
+		return i.path_from(node)
 
 def gather_includes_defines(task_gen):
 	defines = getattr(task_gen, 'defines', [])
@@ -43,6 +48,7 @@ class nb_folder:
 class netbeans(Build.BuildContext):
 	cmd		= 'netbeans'
 	fun		= 'build'
+	optim	= 'debug'
 	version	= 79
 
 	def generateProjectXml(self, appname, bld):
@@ -99,7 +105,7 @@ class netbeans(Build.BuildContext):
 			root_folder.xml = lf
 			for p in path[:-1]:
 				root_folder = self.add_folder(p, doc, root_folder)
-			for node in task_gen.source_nodes:
+			for node in getattr(task_gen, 'source_nodes', []):
 				self.add(doc, root_folder, node)
 
 			#f, subs = categories[category]
@@ -122,8 +128,17 @@ class netbeans(Build.BuildContext):
 		add(doc, cd, 'projectmakefile', sys.argv[0])
 		confs = add(doc, cd, 'confs')
 		for toolchain in bld.env.ALL_TOOLCHAINS:
+			bld_env = bld.all_envs[toolchain]
+			if bld_env.SUB_TOOLCHAINS:
+				env = bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+			else:
+				env = bld_env
+			platform_defines = env.SYSTEM_DEFINES
+			platform_includes = env.SYSTEM_INCLUDES
+			platform_includes += [os.path.join(i, 'usr', 'include') for i in env.SYSROOT]
+			options.append((platform_includes, platform_defines))
+
 			for variant in bld.env.ALL_VARIANTS:
-				env = bld.all_envs['%s-%s' % (toolchain, variant)]
 				conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
 				toolsSet = add(doc, conf, 'toolsSet')
 				if self.__class__.version >= 70:
@@ -139,9 +154,9 @@ class netbeans(Build.BuildContext):
 				add(doc, mtool, 'buildCommand', 'python waf install:%s:%s'%(toolchain, variant))
 				add(doc, mtool, 'cleanCommand', 'python waf clean:%s:%s'%(toolchain, variant))
 				if env.ABI == 'mach_o':
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+					add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
 				else:
-					add(doc, mtool, 'executablePath', os.path.join(env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
+					add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
 				if self.__class__.version >= 70:
 					ctool = add(doc, mtool, 'cTool')
 					cincdir = add(doc, ctool, 'incDir')
@@ -164,6 +179,7 @@ class netbeans(Build.BuildContext):
 					add(doc, ccdefines, 'Elem', d)
 				for tg_includes, tg_defines in options:
 					for i in tg_includes:
+						i = relpath(i, bld.srcnode)
 						if i not in includes:
 							includes.add(i)
 							add(doc, cincdir, 'directoryPath', i)
@@ -195,6 +211,7 @@ class netbeans(Build.BuildContext):
 		self.env.DEPLOY_DATADIR = '$(DEPLOY_DATADIR)'
 		self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
 		self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
+		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
 

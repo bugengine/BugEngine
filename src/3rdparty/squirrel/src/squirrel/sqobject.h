@@ -266,7 +266,7 @@ struct SQObjectPtr : public SQObject
 	{
 		__Release(_type ,_unVal);
 		_type = OT_NULL;
-		_unVal.raw = NULL;
+		_unVal.raw = 0;
 	}
 	private:
 		SQObjectPtr(const SQChar *){} //safety

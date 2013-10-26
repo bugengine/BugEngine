@@ -1,28 +1,38 @@
-from waflib import Errors
+from waflib import Errors, TaskGen
 import os, sys
 
 
 def options(opt):
 	gr = opt.add_option_group('SDK paths and options')
 	opt.bugenginenode = opt.path.parent
-	opt.recurse('build')
-	opt.recurse('host')
-	opt.recurse('compiler')
-	opt.recurse('source')
-	opt.recurse('target')
-	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
-		opt.recurse('../src/3rdparty/%s'%third_party)
+
 	opt.load('visualstudio', tooldir=['mak/tools'])
 	opt.load('xcode', tooldir=['mak/tools'])
 	opt.load('netbeans', tooldir=['mak/tools'])
+	opt.load('eclipse', tooldir=['mak/tools'])
+
+	opt.recurse('build')
+	opt.recurse('host')
+	opt.recurse('compiler')
+	opt.recurse('target')
+	for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
+		opt.recurse('../src/3rdparty/%s'%third_party)
 
 def configure(conf):
 	conf.bugenginenode = conf.path.parent
 	conf.recurse('checks')
 	conf.recurse('host')
+	extra = conf.bugenginenode.make_node('extra')
+	for e in extra.listdir():
+		directory = extra.make_node(e).abspath()
+		if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
+			conf.recurse(extra.make_node(e).abspath(), name='host_configure')
 	conf.recurse('compiler')
-	conf.recurse('source')
 	conf.recurse('target')
+	conf.load('flex', tooldir=['mak/tools'])
+	conf.load('bison', tooldir=['mak/tools'])
+	conf.load('data', tooldir=['mak/tools'])
+
 	conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 
 def setup(conf):
@@ -38,16 +48,20 @@ def build(bld):
 		raise Errors.WafError('Call %s %s %s:toolchain:variant, with toolchain in\n\t%s\nvariant in\n\t%s' %
 								(sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
 	bld.platforms = []
-	bld.features = getattr(bld, 'features', [])
 	bld.bugenginenode = bld.path.parent
 	bld.recurse('build')
 	bld.recurse('host')
-	bld.recurse('source')
 	bld.recurse('target')
 
+	if bld.env.PROJECTS:
+		def rc_hook(self, node):
+			pass
+		if not '.rc' in TaskGen.task_gen.mappings:
+			TaskGen.task_gen.mappings['.rc'] = rc_hook
+
 def plugins(bld):
-	bld.recurse('host')
-	bld.recurse('target')
+	bld.recurse('host', name='plugins')
+	bld.recurse('target', name='plugins')
 
 
 from waflib import Configure, Build, ConfigSet, Context, Utils, Options, Logs
@@ -70,6 +84,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
 		Options.options.include = os.environ.get('INCLUDE', '')
 		Options.options.libpath = os.environ.get('LIBPATH', '')
 		Options.options.lib = os.environ.get('LIB', '')
+		Options.options.pwd = os.environ.get('PWD', '')
 		node = self.bldnode.make_node('options.pickle')
 		pickle.dump(Options.options, open(node.abspath(), 'wb'), protocol = 2)
 
@@ -94,7 +109,7 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 			os.environ['LIBPATH'] = self.environ['LIBPATH'] = Options.options.libpath
 			os.environ['LIB'] = self.environ['LIB'] = Options.options.lib
 			os.environ['INCLUDE'] = self.environ['INCLUDE'] = Options.options.include
-
+			os.environ['PWD'] = self.environ['PWD'] = Options.options.pwd
 		except IOError:
 			raise Errors.WafError('Option file not found; configure the project first')
 
@@ -119,7 +134,7 @@ def autoreconfigure(execute_method):
 			do_config = do_config or (h != env.hash)
 
 		if do_config:
-			Logs.warn('wscrip files have changed; reconfiguring the project')
+			Logs.warn('wscript files have changed; reconfiguring the project')
 			Options.commands.insert(0, self.cmd)
 			Options.commands.insert(0, 'reconfigure')
 			return

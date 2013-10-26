@@ -11,7 +11,7 @@ from waflib import Task
 def scan(self):
 	return ([], [])
 
-ddf = '%s ../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
+ddf = '%s ../../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
@@ -24,7 +24,7 @@ def datagen(self, node):
 	tsk.path = self.bld.variant_dir
 	#tsk.env.detach()
 	if 'plugin' in self.features:
-		tsk.env.PLUGIN = self.target.replace('.', '_')
+		tsk.env.PLUGIN = self.target_name.replace('.', '_')
 	else:
 		tsk.env.PLUGIN = 'game'
 	tsk.env.PCH = self.pchstop
@@ -49,6 +49,8 @@ def datagen(self, node):
 		self.path.find_or_declare('mak/cpp/grammar/value.py'),
 		self.path.find_or_declare('mak/cpp/grammar/skip.py'),
 		]
-	self.source.append(outs[0])
-	self.source.append(outs[1])
+	try:
+		self.out_sources += outs
+	except:
+		self.out_sources = outs[:]
 

@@ -3,15 +3,14 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <unistd.h>
-
 
 namespace BugEngine
 {
 
-size_t Environment::getProcessorCount() const
+Environment& Environment::getEnvironment()
 {
-    return sysconf(_SC_NPROCESSORS_ONLN);
+    static Environment s_environment;
+    return s_environment;
 }
 
 }

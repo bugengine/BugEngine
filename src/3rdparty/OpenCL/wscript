@@ -8,10 +8,19 @@ def setup(conf):
 		if conf.check_framework('OpenCL', var='CLFramework', includes=['OpenCL/opencl.h'], functions=['clGetDeviceInfo']):
 			conf.find_program('openclc', mandatory=False)
 	else:
-		conf.check_lib('OpenCL', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES], includes=['CL/cl.h'], functions=['clGetDeviceInfo'])
+		conf.check_lib('OpenCL',
+		libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES],
+		includes=['CL/cl.h'],
+		includepath=[os.path.join(conf.path.abspath(), 'api')],
+		functions=['clGetDeviceInfo'])
 
 def build(bld):
-	if bld.env.CLFramework or bld.env.OpenCL or bld.env.PROJECTS:
-		bld.thirdparty('3rdparty.OpenCL', libs=bld.env.OpenCL, frameworks=bld.env.CLFramework)
-		bld.features.append('OpenCL')
+	for env in bld.multiarch_envs:
+		if env.CLFramework or env.OpenCL or bld.env.PROJECTS:
+			bld.thirdparty('3rdparty.OpenCL',
+				env,
+				libs=env.OpenCL,
+				includes=[bld.path.find_node('api')],
+				frameworks=env.CLFramework)
+			env.append_unique('FEATURES', ['OpenCL'])
 
