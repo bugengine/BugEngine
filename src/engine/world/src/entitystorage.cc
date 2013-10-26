@@ -14,15 +14,16 @@ namespace BugEngine { namespace World
 EntityStorage::Bucket::Bucket()
 :   acceptMask(0)
 ,   rejectMask(0)
-,   indices(0)
+,   componentCounts(0)
 {
 }
 
-EntityStorage::Bucket::Bucket(u64 acceptMask, u64 rejectMask)
+EntityStorage::Bucket::Bucket(u32 componentCount, u64 acceptMask, u64 rejectMask)
 :   acceptMask(acceptMask)
 ,   rejectMask(rejectMask)
-,   indices(0)
+,   componentCounts()
 {
+    be_forceuse(componentCount);
 }
 
 EntityStorage::Bucket::~Bucket()
@@ -33,7 +34,7 @@ EntityStorage::ComponentGroup::ComponentGroup(u64 mask)
 :   componentMask(mask)
 ,   buckets(Arena::game(), 1)
 {
-    buckets[0] = Bucket(mask, 0);
+    buckets[0] = Bucket(1, mask, 0);
 }
 
 EntityStorage::ComponentGroup::~ComponentGroup()
@@ -41,14 +42,16 @@ EntityStorage::ComponentGroup::~ComponentGroup()
 }
 
 
+
+
 struct EntityStorage::EntityInfo
 {
     union
     {
         u32 next;
-        u32 bucket;
+        u32 index;
     };
-    u32 index;
+    u32 bucket;
     u64 mask;
 };
 
@@ -94,7 +97,7 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType)
 {
     be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
     m_componentTypes.push_back(componentType);
-    u32 index = m_componentTypes.size() - 1;
+    u32 index = be_checked_numcast<u32>(m_componentTypes.size()) - 1;
     u64 mask = u64(1) << index;
     m_componentGroups.push_back(ComponentGroup(mask));
 }
@@ -109,6 +112,10 @@ u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
         }
     }
     return (u32) -1;
+}
+
+void EntityStorage::finalize()
+{
 }
 
 void EntityStorage::start()
@@ -147,7 +154,7 @@ Entity EntityStorage::spawn()
         for (u32 i = 0; i < m_bufferCapacity; ++i)
         {
             buffer[i].next = index + i + 1;
-            buffer[i].index = 0;
+            buffer[i].bucket = 0;
             buffer[i].mask = 0;
         }
         buffer[m_bufferCapacity-1].next = (1 + bufferIndex) << 16;
@@ -160,8 +167,8 @@ Entity EntityStorage::spawn()
     EntityInfo& entityInfo = getEntityInfo(e);
     be_assert((entityInfo.index & s_usedBit) == 0, "Entity %s is already in use; entity buffer inconsistent" | e.id);
     m_freeEntityId = entityInfo.next;
-    entityInfo.bucket = 0;
     entityInfo.index = s_usedBit;
+    entityInfo.bucket = 0;
     entityInfo.mask = 0;
     ++ m_entityCount;
     return e;
@@ -172,7 +179,7 @@ void EntityStorage::unspawn(Entity e)
     EntityInfo& info = getEntityInfo(e);
     // unspawn components
     info.next = m_freeEntityId;
-    info.index = 0;
+    info.bucket = 0;
     info.mask = 0;
     m_freeEntityId = e.id;
     -- m_entityCount;

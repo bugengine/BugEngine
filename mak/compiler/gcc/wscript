@@ -25,7 +25,9 @@ def allarchs(arch):
 		return [(['-m32'], 'mipsel'), (['-m64'], 'mipsel64')]
 	elif arch == 'powerpc' or arch == 'ppc':
 		return [(['-m64'], arch+'64'), (['-m32'], arch)]
-	elif arch in ['powerpc64', 'ppc64', 'ppu']:
+	elif arch in ['ppu']:
+		return [(['-m32'], arch), (['-m64'], arch+'64')]
+	elif arch in ['powerpc64', 'ppc64']:
 		return [(['-m32'], arch[:-2]), (['-m64'], arch)]
 	elif arch == 'spu':
 		return [([], 'spu')]
@@ -118,7 +120,6 @@ def detect_gcc_from_path(conf, path, seen):
 				bindir = os.path.normpath(os.path.join(libdir, relative, 'bin'))
 				if (gcc, gxx, version, target, arch) not in seen:
 					conf.detect_gcc_archs_from_path(name, bindir, gcc, gxx, version, target, arch)
-					seen.append((gcc, gxx, version, target, arch))
 
 @conf
 def get_native_gcc(conf):
@@ -159,7 +160,7 @@ def get_native_gcc(conf):
 @conf
 def detect_gcc(conf):
 	compilers_gcc_found = []
-	bindirs = os.environ['PATH'].split(os.pathsep)
+	bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
 	paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
 	paths = set([path for path in paths if os.path.isdir(path)])
 	for bindir in bindirs:
@@ -188,6 +189,10 @@ def detect_gcc(conf):
 def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 	self.env.CC = gcc
 	self.env.CXX = gxx
+	if not self.env.AR:
+		self.find_program(target + '-ar', var='AR', path_list=[bindir], mandatory=False)
+	if not self.env.AR:
+		self.find_program('ar', var='AR', path_list=[bindir], mandatory=False)
 	self.load('gcc gxx')
 	if target.find('mingw') != -1:
 		winres = self.find_program(target + '-windres', var='WINRC', path_list=[bindir], mandatory=False)
@@ -197,11 +202,58 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 			winres = self.find_program('windres', var='WINRC', mandatory=False)
 		self.load('winres')
 
+	cmd = self.env.CC + ['-x', 'c++', '-Wp,-v', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[1]
+	except Exception as e:
+		print('could not retrieve system includes: %s' % str(e))
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)
+			if line.startswith('#include <...>'):
+				while out:
+					path = out.pop(0).strip()
+					if path.startswith('End of search list'):
+						break
+					self.env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
+
+	cmd = self.env.CC + ['-x', 'c++', '-dM', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[0]
+	except Exception as e:
+		print('could not retrieve system defines: %s' % str(e))
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)[8:].strip()
+			if line:
+				space = line.find(' ')
+				if space != -1:
+					define = line[:space]
+					value = line[space+1:]
+					if define in self.env.useful_defines:
+						self.env.append_unique('SYSTEM_DEFINES', ['%s=%s'%(define, value)])
+				else:
+					if line in self.env.useful_defines:
+						self.env.append_unique('SYSTEM_DEFINES', [line])
+
+
+
 def options(opt):
 	pass
 
 def configure(conf):
 	conf.start_msg('Looking for gcc compilers')
+	conf.env.append_unique('useful_defines', ['__clang__', '__GNUC__', '__GNUG__'])
 	archs = getattr(conf, 'gcc_architectures', [])
 	conf.gcc_architectures = archs + [
 		('i686-w64', 'amd64'),

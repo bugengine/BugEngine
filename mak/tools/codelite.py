@@ -88,6 +88,7 @@ class Workspace (XmlFile):
 class codelite(Build.BuildContext):
 	cmd = 'codelite'
 	fun = 'build'
+	optim = 'debug'
 
 	def execute(self):
 		"""

@@ -51,12 +51,6 @@ Environment::~Environment()
 {
 }
 
-Environment& Environment::getEnvironment()
-{
-    static Environment s_environment;
-    return s_environment;
-}
-
 size_t Environment::getProcessorCount() const
 {
     return sysconf(_SC_NPROCESSORS_ONLN);

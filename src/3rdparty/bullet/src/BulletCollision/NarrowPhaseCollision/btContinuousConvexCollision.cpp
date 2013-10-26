@@ -241,3 +241,4 @@ bool	btContinuousConvexCollision::calcTimeOfImpact(
 
 }
 
+#undef MAX_ITERATIONS

@@ -16,7 +16,7 @@ def set_windows_options(self):
 	self.env.DEPLOY_DATADIR = 'data'
 	self.env.DEPLOY_PLUGINDIR = 'data/plugin'
 	self.env.DEPLOY_KERNELDIR = 'data/kernel'
-	
+
 	self.env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
 
 @conf
@@ -90,17 +90,17 @@ def set_windows_msvc_options(self):
 
 	self.env.CFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
 	self.env.CXXFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
-	self.env.LINKFLAGS_debug = ['/DEBUG']
+	self.env.LINKFLAGS_debug = ['/DEBUG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_debug = []
 
 	self.env.CFLAGS_profile = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	self.env.CXXFLAGS_profile = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG']
+	self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_profile = ['/LTCG']
 
 	self.env.CFLAGS_final = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
 	self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG']
+	self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
 	self.env.ARFLAGS_final = ['/LTCG']
 
 def options(opt):
@@ -119,6 +119,7 @@ def configure(conf):
 				toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.env.MSVC_VERSIONS = [version]
@@ -155,6 +156,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
@@ -188,6 +190,7 @@ def configure(conf):
 				seen.add(toolchain)
 				env = conf.env.derive()
 				conf.setenv(toolchain, env)
+				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
 					conf.load_clang(directory, target)
@@ -226,4 +229,5 @@ def plugins(bld):
 @after_method('apply_link')
 @before_method('apply_implib')
 def apply_implib_program(self):
-	self.apply_implib()
+	if self.env.DEST_OS == 'win32':
+		self.apply_implib()

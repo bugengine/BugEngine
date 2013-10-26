@@ -12,13 +12,16 @@
 #include <string.h>
 
 #define lstrlib_c
+#ifndef LUA_LIB
 #define LUA_LIB
+#endif
 
 #include "lua.h"
 
 #include "lauxlib.h"
 #include "lualib.h"
 
+#undef LUA_LIB
 
 /*
 ** maximum number of captures that a pattern can do during

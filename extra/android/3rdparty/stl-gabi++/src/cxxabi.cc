@@ -130,8 +130,10 @@ namespace {
 
 
 namespace __cxxabiv1 {
+#if __GXX_RTTI
   __shim_type_info::~__shim_type_info() {
   }
+#endif
 
   extern "C" void __cxa_pure_virtual() {
     fatalError("Pure virtual function called!");

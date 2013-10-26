@@ -25,14 +25,14 @@ protected:
     {
         registerTypes(m_list);
     }
-    template< typename T, typename TAIL >
-    void registerTypes(const ComponentList<T, TAIL>& list)
+    template< typename T, u32 COUNT, typename TAIL >
+    void registerTypes(const ComponentList<T, COUNT, TAIL>& list)
     {
         registerType(be_typeid<T>::klass());
-        registerTypes(static_cast<const ComponentList<typename TAIL::Type, typename TAIL::Tail>&>(list));
+        registerTypes(static_cast<const ComponentList<typename TAIL::Type, TAIL::Count, typename TAIL::Tail>&>(list));
     }
-    template< typename T >
-    void registerTypes(const ComponentList<T, void>& /*list*/)
+    template< typename T, u32 COUNT >
+    void registerTypes(const ComponentList<T, COUNT, void>& /*list*/)
     {
         registerType(be_typeid<T>::klass());
     }
@@ -42,13 +42,13 @@ public:
     {
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
-        return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<T, typename COMPONENT_LIST::Type, typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+        return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<T, typename COMPONENT_LIST::Type, COMPONENT_LIST::Count, typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
     }
     static raw<const RTTI::Property> s_properties;
 };
 
 template< typename COMPONENT_LIST >
-raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST>::s_properties = { &Helper::PropertyInfo<EntityStorageFactory<COMPONENT_LIST>, typename COMPONENT_LIST::Type, typename COMPONENT_LIST::Tail>::s_property };
+raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST>::s_properties = { &Helper::PropertyInfo<EntityStorageFactory<COMPONENT_LIST>, typename COMPONENT_LIST::Type, COMPONENT_LIST::Count, typename COMPONENT_LIST::Tail>::s_property };
 
 }}
 

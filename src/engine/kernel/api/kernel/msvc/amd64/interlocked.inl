@@ -32,7 +32,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef BE_SET_ALIGNMENT(4) long value_t;
+    typedef __declspec(align(4)) long value_t;
     typedef long incr_t;
     static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
     {
@@ -67,7 +67,7 @@ struct InterlockedType<2> : public InterlockedType<4>
 template<>
 struct InterlockedType<8>
 {
-    typedef BE_SET_ALIGNMENT(8) long long value_t;
+    typedef __declspec(align(8)) long long value_t;
     typedef long long incr_t;
     static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
     {
@@ -95,15 +95,15 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef BE_SET_ALIGNMENT(8) long long   value_t;
-        typedef BE_SET_ALIGNMENT(8) long long   counter_t;
+        typedef __declspec(align(8)) long long   value_t;
+        typedef __declspec(align(8)) long long   counter_t;
     #ifdef TAG_LONG
         typedef tagged_t    tag_t;
     #else
         typedef counter_t   tag_t;
     #endif
-        BE_SET_ALIGNMENT(16)    volatile counter_t   m_tag;
-        BE_SET_ALIGNMENT(8)     volatile value_t     m_value;
+        __declspec(align(16))   volatile counter_t   m_tag;
+        __declspec(align(8))    volatile value_t     m_value;
         tagged_t(value_t value = 0)
             :   m_tag(0)
             ,   m_value(value)

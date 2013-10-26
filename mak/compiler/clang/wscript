@@ -6,6 +6,7 @@ all_clang_archs = [
 	('x86', ['x86', 'i386']),
 	('amd64', ['x86_64', 'amd64', 'x64']),
 	('arm', ['armv7']),
+	('arm64', ['arm64']),
 	('ppc', ['ppc', 'powerpc']),
 	('ppc64', ['ppc64', 'powerpc64']),
 	('mips', ['mips']),
@@ -20,6 +21,8 @@ def expand_clang_archs(arch):
 		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
 	elif arch == 'arm':
 		return [([], 'armv7')]
+	elif arch == 'arm64':
+		return [(['-miphoneos-version-min=7.0'], 'arm64')]
 	elif arch == 'mips':
 		return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
 	elif arch == 'mips64':
@@ -68,7 +71,6 @@ def find_clang_archs(self, clang):
 				cmd = [clang, '-arch', arch, '-c', filename, '-o', output]
 				try:
 					p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-					p.stdin.write('\n'.encode())
 					out,err = p.communicate()
 				except Exception as e:
 					print(e)
@@ -77,6 +79,15 @@ def find_clang_archs(self, clang):
 					if p.returncode == 0:
 						result.append((arch_name, ['-arch', arch]))
 						break
+					else:
+						if not isinstance(err, str):
+							err = err.encode()
+						if err.find('invalid arch name') == -1:
+							if err.find('No available targets are compatible') == -1:
+								if err.find('not using the clang compiler') == -1:
+									result.append((arch_name, ['-arch', arch]))
+									break
+
 	return result
 
 
@@ -113,7 +124,7 @@ def get_native_clang_target(conf, clang):
 
 @conf
 def detect_clang(conf):
-	bindirs = os.environ['PATH'].split(os.pathsep)
+	bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
 	conf.env.CLANG_TARGETS = []
 
 	for path in bindirs:
@@ -145,12 +156,59 @@ def load_clang(conf, directory, target = ''):
 			winres = conf.find_program('windres', var='WINRC', mandatory=False)
 		conf.load('winres')
 
+	cmd = conf.env.CC + ['-x', 'c++', '-Wp,-v', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[1]
+	except Exception as e:
+		print('could not retrieve system includes: %s' % str(e))
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)
+			if line.startswith('#include <...>'):
+				while out:
+					path = out.pop(0).strip()
+					if path.startswith('End of search list'):
+						break
+					conf.env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
+
+	cmd = conf.env.CC + ['-x', 'c++', '-dM', '-E', '-']
+	try:
+		p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+		p.stdin.write('\n'.encode())
+		out = p.communicate()[0]
+	except Exception as e:
+		print('could not retrieve system defines: %s' % str(e))
+	else:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding)
+		out = out.split('\n')
+		while out:
+			line = out.pop(0)[8:].strip()
+			if line:
+				space = line.find(' ')
+				if space != -1:
+					define = line[:space]
+					value = line[space+1:]
+					if define in conf.env.useful_defines:
+						conf.env.append_unique('SYSTEM_DEFINES', ['%s=%s'%(define, value)])
+				else:
+					if line in conf.env.useful_defines:
+						conf.env.append_unique('SYSTEM_DEFINES', [line])
+
+
+
 
 def options(opt):
 	pass
 
 def configure(conf):
 	conf.start_msg('Looking for clang compilers')
+	conf.env.append_unique('useful_defines', ['__clang__', '__GNUC__', '__GNUG__'])
 	conf.detect_clang()
 	conf.end_msg('done')
 

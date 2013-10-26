@@ -8,7 +8,6 @@
 #include    <minitl/hash_map.hh>
 #include    <cstring>
 
-
 namespace BugEngine
 {
 
@@ -290,7 +289,10 @@ igenericnamespace::igenericnamespace(const char *str, const char* sep)
 :   m_namespace()
 ,   m_size(0)
 {
-    parse(str, str+strlen(str), sep, m_namespace, m_size);
+    if (str)
+    {
+        parse(str, str+strlen(str), sep, m_namespace, m_size);
+    }
 }
 
 u32 igenericnamespace::size() const

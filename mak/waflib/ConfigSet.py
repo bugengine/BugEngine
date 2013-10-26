@@ -12,6 +12,10 @@ The values put in :py:class:`ConfigSet` must be lists
 import copy, re, os
 from waflib import Logs, Utils
 re_imp = re.compile('^(#)*?([^#=]*?)\ =\ (.*?)$', re.M)
+try:
+	import cPickle as pickle
+except:
+	import pickle
 
 class ConfigSet(object):
 	"""
@@ -274,15 +278,16 @@ class ConfigSet(object):
 			os.makedirs(os.path.split(filename)[0])
 		except OSError:
 			pass
-
-		buf = []
 		merged_table = self.get_merged_dict()
-		keys = list(merged_table.keys())
-		keys.sort()
-		for k in keys:
-			if k != 'undo_stack':
-				buf.append('%s = %r\n' % (k, merged_table[k]))
-		Utils.writef(filename, ''.join(buf))
+		with open(filename, 'wb') as f:
+			pickle.dump(merged_table, f, protocol=pickle.HIGHEST_PROTOCOL)
+		#buf = []
+		#keys = list(merged_table.keys())
+		#keys.sort()
+		#for k in keys:
+		#	if k != 'undo_stack':
+		#		buf.append('%s = %r\n' % (k, merged_table[k]))
+		#Utils.writef(filename, ''.join(buf))
 
 	def load(self, filename):
 		"""
@@ -291,11 +296,13 @@ class ConfigSet(object):
 		:param filename: file to use
 		:type filename: string
 		"""
-		tbl = self.table
-		code = Utils.readf(filename, m='rU')
-		for m in re_imp.finditer(code):
-			g = m.group
-			tbl[g(2)] = eval(g(3))
+		with open(filename, 'rb') as f:
+			self.table = pickle.load(f)
+		#tbl = self.table
+		#code = Utils.readf(filename, m='rU')
+		#for m in re_imp.finditer(code):
+		#	g = m.group
+		#	tbl[g(2)] = eval(g(3))
 		Logs.debug('env: %s' % str(self.table))
 
 	def update(self, d):

@@ -39,6 +39,7 @@
 
 namespace std
 {
+#if __GXX_RTTI
   type_info::~type_info()
   {
   }
@@ -75,4 +76,5 @@ namespace std
   }
 
 #endif // !defined(GABIXX_LIBCXX)
+#endif
 } // end namespace std

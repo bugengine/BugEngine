@@ -37,6 +37,8 @@ u64 Timer::tick()
     return(result);
 #elif defined(_ARM)
     return 0;
+#elif defined(_ARM64)
+    return 0;
 #else
 # error "Architecture not supported"
     return 0;

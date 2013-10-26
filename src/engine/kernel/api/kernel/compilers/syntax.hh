@@ -26,8 +26,8 @@ typedef unsigned long int   intptr_t;
 #define BE_NOINLINE
 #define BE_ALWAYSINLINE
 #define BE_SELECTOVERLOAD(o)
+#define BE_SUPPORTS_EXCEPTIONS  1
 
-#define BE_SET_ALIGNMENT(n)
 #define BE_EXPORT
 #define BE_IMPORT
 

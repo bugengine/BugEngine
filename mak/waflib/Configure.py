@@ -266,7 +266,14 @@ class ConfigurationContext(Context.Context):
 	def store(self):
 		"""Save the config results into the cache file"""
 		n = self.cachedir.make_node('build.config.py')
-		n.write('version = 0x%x\ntools = %r\n' % (Context.HEXVERSION, self.tools))
+		try:
+			import cPickle as pickle
+		except:
+			import pickle
+		with open(n.abspath(), 'wb') as f:
+			v = {'version': Context.HEXVERSION, 'tools': self.tools}
+			pickle.dump(v, f, pickle.HIGHEST_PROTOCOL)
+		#n.write('version = 0x%x\ntools = %r\n' % (Context.HEXVERSION, self.tools))
 
 		if not self.all_envs:
 			self.fatal('nothing to store in the configuration context!')

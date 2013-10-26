@@ -7,12 +7,14 @@
 
 #define be_alignof(t)           __alignof__(t)
 #if defined(_X86)||defined(_AMD64)
-# define be_break()              __asm("int3")
+# define be_break()             __asm("int3")
 #elif defined(_POWERPC)
-# define be_break()              __asm("trap")
+# define be_break()             __asm("trap")
 #elif defined(_MIPS)
-# define be_break()              __asm("break")
+# define be_break()             __asm("break")
 #elif defined(_ARM)
+# define be_break()             
+#elif defined(_ARM64)
 # define be_break()
 #else
 # error "Breakpoint not supported on this platform"
@@ -39,8 +41,8 @@ typedef u8                      byte;
 #define BE_NOINLINE             __attribute__((noinline))
 #define BE_ALWAYSINLINE         __attribute__((always_inline))
 #define BE_SELECTOVERLOAD(o)    
+#define BE_SUPPORTS_EXCEPTIONS  __EXCEPTIONS
 
-#define BE_SET_ALIGNMENT(n)     __attribute__ ((aligned(n)))
 #ifndef BE_STATIC
 # ifndef _WIN32
 #  define BE_EXPORT              __attribute__ ((visibility("default")))

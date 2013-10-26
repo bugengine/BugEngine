@@ -39,6 +39,7 @@
 
 namespace
 {
+#if __GXX_RTTI
   // Adjust a pointer by an offset.
 
   const void*
@@ -270,6 +271,7 @@ namespace __cxxabiv1
 #define DYNAMIC_CAST_NOT_PUBLIC_BASE -2
 #define DYNAMIC_CAST_MULTIPLE_PUBLIC_NONVIRTUAL_BASE -3
 
+#if __GXX_RTTI
   /* v: source address to be adjusted; nonnull, and since the
    *    source object is polymorphic, *(void**)v is a virtual pointer.
    * src: static type of the source object.
@@ -353,4 +355,6 @@ namespace __cxxabiv1
       walk_object(most_derived_object, most_derived_class_type_info, v, src);
     return v_object == v ? t_object : NULL;
   }
+#endif
+#endif
 } // namespace __cxxabiv1
