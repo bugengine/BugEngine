@@ -195,6 +195,12 @@ class eclipse(Build.BuildContext):
 
 	def impl_create_cproject(self, node, executable, waf, appname, setting_files):
 		source_dirs = []
+
+		setting_node = self.settings.make_node('language.settings.xml')
+		setting_files.append(setting_node.name)
+		setting = XmlDocument(open(setting_node.abspath(), 'w'), 'UTF-8', [('fileVersion', '4.0.0')])
+		cproject_setting = XmlNode(setting, 'project')
+
 		with XmlDocument(open(node.abspath(), 'w'), 'UTF-8', [('fileVersion', '4.0.0')]) as doc:
 			with XmlNode(doc, 'cproject') as cproject:
 				count = 0
@@ -336,53 +342,36 @@ class eclipse(Build.BuildContext):
 													XmlNode(tool, 'inputType',
 															{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
 																'superClass': cdt_bld + '.settings.holder.inType'}).close()
-										count = count+1
-									for g in self.groups:
-										for tg in g:
-											if not isinstance(tg, TaskGen.task_gen):
-												continue
-											if 'kernel' in tg.features:
-												continue
-											task_includes, task_defines = gather_includes_defines(tg, appname)
-											with XmlNode(config, 'folderInfo',
-																{'id': cconf_id+'.%d'%count, 'resourcePath': '/' + tg.name.replace('.', '/'), 'name': ''}) as folderInfo:
-												count = count+1
-												with XmlNode(folderInfo, 'toolChain',
-																{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-																	'name': 'No ToolChain',
-																	'unusedChidlren': '',
-																	'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
-													count = count+1
-													XmlNode(toolChain, 'tool',
-																		{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-																			'name': "holder for library settings",
-																			'superClass': cdt_bld + '.settings.holder.libs'}).close()
-													for tool_name in ("Assembly", "GNU C++", "GNU C"):
-														count = count+1
-														with XmlNode(toolChain, 'tool',
-																					{	'id': cdt_bld + '.settings.holder.%d'%count,
-																						'name': tool_name,
-																						'superClass': cdt_bld + '.settings.holder'}) as tool:
-															count = count+1
-															with XmlNode(tool, 'option',
-																		{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
-																			'superClass': cdt_bld + '.settings.holder.incpaths',
-																			'valueType': 'includePath'}) as includes:
-																for i in  env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES: # + task_includes
-																	XmlNode(includes, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
-															count = count+1
-															with XmlNode(tool, 'option',
-																		{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
-																			'superClass': cdt_bld + '.settings.holder.symbols',
-																			'valueType': 'definedSymbols'}) as defines:
-																for i in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
-																	XmlNode(defines, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
-															count = count+1
-															XmlNode(tool, 'inputType',
-																	{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-																		'superClass': cdt_bld + '.settings.holder.inType'}).close()
+											count = count+1
 							XmlNode(cconf, 'storageModule', {'moduleId': 'org.eclipse.cdt.core.externalSettings'}).close()
-
+						with XmlNode(cproject_setting, 'configuration', {'id':cconf_id}) as cconf_setting:
+							with XmlNode(cconf_setting, 'extension', {'point': 'org.eclipse.cdt.core.LanguageSettingsProvider'}) as extension:
+								XmlNode(extension, 'provider-reference', {'id': 'org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider', 'ref': 'shared-provider'}).close()
+								with XmlNode(extension, 'provider', {'class': 'org.eclipse.cdt.core.language.settings.providers.LanguageSettingsGenericProvider',
+																	'id': 'org.eclipse.cdt.ui.UserLanguageSettingsProvider',
+																	'name': 'CDT User Setting Entries',
+																	'prefer-non-shared': 'true',
+																	'store-entries-with-project': 'true'}) as provider:
+									with XmlNode(provider, 'language', {'id': 'org.eclipse.cdt.core.g++'}) as language:
+										for g in self.groups:
+											for tg in g:
+												if not isinstance(tg, TaskGen.task_gen):
+													continue
+												if 'kernel' in tg.features:
+													continue
+												task_includes, task_defines = gather_includes_defines(tg, appname)
+												with XmlNode(language, 'resource', {'project-relative-path': '/' + tg.name.replace('.', '/')}) as resource:
+													for include in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES + task_includes:
+														with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
+															XmlNode(entry, 'flag', {'value': 'BUILTIN|LOCAL|VALUE_FILESYSTEM_PATH'}).close()
+													for d in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
+														try:
+															define, value = d.split('=')
+														except:
+															define = d
+															value = ''
+														with XmlNode(resource, 'entry', {'kind': 'macro', 'name': define, 'value': value}) as entry:
+															XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
 				with XmlNode(cproject, 'storageModule',
 									{	'moduleId': 'cdtBuildSystem',
 										'version': '4.0.0'}) as storageModule:
@@ -394,6 +383,9 @@ class eclipse(Build.BuildContext):
 							return self.addTarget(buildTargets, executable, name, '"%s" %s'%(waf, name), runAll)
 						addTargetWrap('reconfigure', True)
 						addTargetWrap('eclipse', False)
+
+		cproject_setting.close()
+		setting.close()
 
 
 	def impl_create_pydevproject(self, node, appname, system_path, user_path):
