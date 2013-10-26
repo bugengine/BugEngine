@@ -250,143 +250,108 @@ class eclipse(Build.BuildContext):
 						env = self.all_envs[toolchain]
 						if env.SUB_TOOLCHAINS:
 							env = self.all_envs[env.SUB_TOOLCHAINS[0]]
-						#for variant in self.env.ALL_VARIANTS:
-						count = count+1
-						cconf_id = cdt_core + '.default.config.%d'%count
-						with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
-							with XmlNode(cconf, 'storageModule',
-									{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
-									'id': cconf_id,
-									'moduleId': cdt_core + '.settings',
-									'name': toolchain}) as storageModule:
-								with XmlNode(storageModule, 'macros') as macros:
-									XmlNode(macros, 'stringMacro', {'name': 'VARIANT', 'type': 'VALUE_TEXT', 'value': 'debug'}).close()
-								XmlNode(storageModule, 'externalSettings').close()
-								with XmlNode(storageModule, 'extensions') as extensions:
-									extension_list = """
-										VCErrorParser
-										GmakeErrorParser
-										GCCErrorParser
-										GASErrorParser
-										GLDErrorParser
-										CWDLocator
-									""".split()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'}).close()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'}).close()
-									XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'}).close()
-									for e in extension_list:
+						for variant in self.env.ALL_VARIANTS:
+							count = count+1
+							cconf_id = cdt_core + '.default.config.%d'%count
+							with XmlNode(rootStorageModule, 'cconfiguration', {'id':cconf_id}) as cconf:
+								with XmlNode(cconf, 'storageModule',
+										{'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
+										'id': cconf_id,
+										'moduleId': cdt_core + '.settings',
+										'name': toolchain+':'+variant}) as storageModule:
+									XmlNode(storageModule, 'externalSettings').close()
+									with XmlNode(storageModule, 'extensions') as extensions:
+										extension_list = """
+											VCErrorParser
+											GmakeErrorParser
+											GCCErrorParser
+											GASErrorParser
+											GLDErrorParser
+											CWDLocator
+										""".split()
 										XmlNode(extensions, 'extension',
-												{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'}).close()
+													{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.PE', 'point':cdt_core + '.BinaryParser'}).close()
+										XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.MachO64', 'point':cdt_core + '.BinaryParser'}).close()
+										for e in extension_list:
+											XmlNode(extensions, 'extension',
+													{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'}).close()
 
-							with XmlNode(cconf, 'storageModule', {'moduleId': 'cdtBuildSystem', 'version': '4.0.0'}) as storageModule:
-								with XmlNode(storageModule, 'configuration',
-											{	'artifactName': appname,
-												'buildProperties': '',
-												'description': '',
-												'id': cconf_id,
-												'name': toolchain,
-												'parent': cdt_bld + '.prefbase.cfg'}) as config:
-									count = count+1
-									with XmlNode(config, 'folderInfo',
-														{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''}) as folderInfo:
+								with XmlNode(cconf, 'storageModule', {'moduleId': 'cdtBuildSystem', 'version': '4.0.0'}) as storageModule:
+									with XmlNode(storageModule, 'configuration',
+												{	'artifactName': appname,
+													'buildProperties': '',
+													'description': '',
+													'id': cconf_id,
+													'name': toolchain+':'+variant,
+													'parent': cdt_bld + '.prefbase.cfg'}) as config:
 										count = count+1
-										with XmlNode(folderInfo, 'toolChain',
-												{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-													'name': 'No ToolChain',
-													'resourceTypeBasedDiscovery': 'false',
-													'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
+										with XmlNode(config, 'folderInfo',
+															{'id': cconf_id+'.%d'%count, 'resourcePath': '/', 'name': ''}) as folderInfo:
 											count = count+1
-											XmlNode(toolChain, 'targetPlatform',
-													{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
-														'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''}).close()
-											waf_build = '"%s" install:%s:%s'%(waf, toolchain, '${VARIANT}')
-											waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, '${VARIANT}')
-											count = count+1
-											XmlNode(toolChain, 'builder',
-															{	'autoBuildTarget': waf_build,
-																'command': executable,
-																'enableAutoBuild': 'false',
-																'cleanBuildTarget': waf_clean,
-																'id': cdt_bld + '.settings.default.builder.%d'%count,
-																'incrementalBuildTarget': waf_build,
-																'keepEnvironmentInBuildfile': 'false',
-																'managedBuildOn': 'false',
-																'name': 'Gnu Make Builder',
-																'superClass': cdt_bld + '.settings.default.builder'}).close()
-											count = count+1
-											XmlNode(toolChain, 'tool',
-															{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-																'name': "holder for library settings",
-																'superClass': cdt_bld + '.settings.holder.libs'}).close()
-											for tool_name in ("Assembly", "GNU C++", "GNU C"):
+											with XmlNode(folderInfo, 'toolChain',
+													{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
+														'name': 'No ToolChain',
+														'resourceTypeBasedDiscovery': 'false',
+														'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
 												count = count+1
-												with XmlNode(toolChain, 'tool',
-														{	'id': cdt_bld + '.settings.holder.%d'%count,
-															'name': tool_name,
-															'superClass': cdt_bld + '.settings.holder'}) as tool:
-													count = count+1
-													XmlNode(tool, 'option',
-															{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
-																'superClass': cdt_bld + '.settings.holder.incpaths',
-																	'valueType': 'includePath'}).close()
-													count = count+1
-													XmlNode(tool, 'option',
-															{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
-																'superClass': cdt_bld + '.settings.holder.symbols',
-																'valueType': 'definedSymbols'}).close()
-													count = count+1
-													XmlNode(tool, 'inputType',
-															{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-																'superClass': cdt_bld + '.settings.holder.inType'}).close()
-										count = count+1
-									for g in self.groups:
-										for tg in g:
-											if not isinstance(tg, TaskGen.task_gen):
-												continue
-											if 'kernel' in tg.features:
-												continue
-											task_includes, task_defines = gather_includes_defines(tg, appname)
-											with XmlNode(config, 'folderInfo',
-																{'id': cconf_id+'.%d'%count, 'resourcePath': '/' + tg.name.replace('.', '/'), 'name': ''}) as folderInfo:
+												XmlNode(toolChain, 'targetPlatform',
+														{	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
+															'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''}).close()
+												waf_build = '"%s" install:%s:%s'%(waf, toolchain, variant)
+												waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, variant)
 												count = count+1
-												with XmlNode(folderInfo, 'toolChain',
-																{	'id': cdt_bld + '.prefbase.toolchain.%d'%count,
-																	'name': 'No ToolChain',
-																	'unusedChidlren': '',
-																	'superClass': cdt_bld + '.prefbase.toolchain'}) as toolChain:
+												XmlNode(toolChain, 'builder',
+																{	'autoBuildTarget': waf_build,
+																	'command': executable,
+																	'enableAutoBuild': 'false',
+																	'cleanBuildTarget': waf_clean,
+																	'id': cdt_bld + '.settings.default.builder.%d'%count,
+																	'incrementalBuildTarget': waf_build,
+																	'keepEnvironmentInBuildfile': 'false',
+																	'managedBuildOn': 'false',
+																	'name': 'Gnu Make Builder',
+																	'superClass': cdt_bld + '.settings.default.builder'}).close()
+												count = count+1
+												XmlNode(toolChain, 'tool',
+																{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
+																	'name': "holder for library settings",
+																	'superClass': cdt_bld + '.settings.holder.libs'}).close()
+												for tool_name in ("Assembly", "GNU C++", "GNU C"):
 													count = count+1
-													XmlNode(toolChain, 'tool',
-																		{	'id': cdt_bld + '.settings.holder.libs.%d'%count,
-																			'name': "holder for library settings",
-																			'superClass': cdt_bld + '.settings.holder.libs'}).close()
-													for tool_name in ("Assembly", "GNU C++", "GNU C"):
+													with XmlNode(toolChain, 'tool',
+															{	'id': cdt_bld + '.settings.holder.%d'%count,
+																'name': tool_name,
+																'superClass': cdt_bld + '.settings.holder'}) as tool:
 														count = count+1
-														with XmlNode(toolChain, 'tool',
-																					{	'id': cdt_bld + '.settings.holder.%d'%count,
-																						'name': tool_name,
-																						'superClass': cdt_bld + '.settings.holder'}) as tool:
-															count = count+1
-															with XmlNode(tool, 'option',
-																		{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
-																			'superClass': cdt_bld + '.settings.holder.incpaths',
-																			'valueType': 'includePath'}) as includes:
-																for i in  env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES: # + task_includes
-																	XmlNode(includes, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
-															count = count+1
-															with XmlNode(tool, 'option',
-																		{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
-																			'superClass': cdt_bld + '.settings.holder.symbols',
-																			'valueType': 'definedSymbols'}) as defines:
-																for i in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
-																	XmlNode(defines, 'listOptionValue', {'builtin': 'false', 'value': i}).close()
-															count = count+1
-															XmlNode(tool, 'inputType',
-																	{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
-																		'superClass': cdt_bld + '.settings.holder.inType'}).close()
-							XmlNode(cconf, 'storageModule', {'moduleId': 'org.eclipse.cdt.core.externalSettings'}).close()
+														XmlNode(tool, 'option',
+																{	'id': cdt_bld + '.settings.holder.incpaths.%d'%count,
+																	'superClass': cdt_bld + '.settings.holder.incpaths',
+																		'valueType': 'includePath'}).close()
+														count = count+1
+														XmlNode(tool, 'option',
+																{	'id': cdt_bld + '.settings.holder.symbols.%d'%count,
+																	'superClass': cdt_bld + '.settings.holder.symbols',
+																	'valueType': 'definedSymbols'}).close()
+														count = count+1
+														XmlNode(tool, 'inputType',
+																{	'id': cdt_bld + '.settings.holder.inType.%d'%count,
+																	'superClass': cdt_bld + '.settings.holder.inType'}).close()
+											count = count+1
+										for g in self.groups:
+											for tg in g:
+												if not isinstance(tg, TaskGen.task_gen):
+													continue
+												if 'kernel' in tg.features:
+													continue
+												task_includes, task_defines = gather_includes_defines(tg, appname)
+												for i in  env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES + task_includes:
+													pass
+												for d in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
+													pass
+								XmlNode(cconf, 'storageModule', {'moduleId': 'org.eclipse.cdt.core.externalSettings'}).close()
 
 				with XmlNode(cproject, 'storageModule',
 									{	'moduleId': 'cdtBuildSystem',

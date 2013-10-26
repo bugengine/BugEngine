@@ -25,6 +25,11 @@ static inline void displayError()
     MessageBox(0, msg, "Win32 error", MB_OK);
     ::LocalFree(msg);
 }
+
+extern "C" inline int isatty(int /*fd*/)
+{
+    return 0;
+}
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif
