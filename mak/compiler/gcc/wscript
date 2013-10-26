@@ -11,6 +11,8 @@ def allarchs(arch):
 		return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
 	elif arch == 'amd64':
 		return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
+	elif arch == 'arm64':
+		return [([], 'arm64')]
 	elif arch == 'arm':
 		return [([], 'arm')]
 	elif arch == 'mips':
@@ -217,7 +219,8 @@ def configure(conf):
 		('powerpc', 'powerpc'),
 		('mingw32', 'x86'),
 		('ppu', 'powerpc'),
-		('spu', 'spu')
+		('spu', 'spu'),
+		('aarch64', 'arm64')
 	]
 
 	conf.env.GCC_TARGETS = []

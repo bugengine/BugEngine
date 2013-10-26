@@ -189,7 +189,6 @@ def configure(conf):
 					conf.set_linux_suncc_options(arch)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					conf.end_msg('done')
 					try:
@@ -201,7 +200,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -222,7 +220,6 @@ def configure(conf):
 					conf.set_linux_icc_options(options, version, arch)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					conf.end_msg('done')
 					try:
@@ -234,7 +231,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -255,7 +251,6 @@ def configure(conf):
 					conf.set_linux_gcc_options(options, version)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					try:
 						conf.end_msg('done')
@@ -267,7 +262,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
@@ -288,7 +282,6 @@ def configure(conf):
 					conf.set_linux_clang_options(options, version)
 				except Exception as e:
 					conf.end_msg(e, color='RED')
-					raise
 				else:
 					try:
 						conf.end_msg('done')
@@ -300,7 +293,6 @@ def configure(conf):
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 					except Exception as e:
 						conf.variant = ''
-						pprint('RED', '%s failed: %s' % (toolchain, e))
 						raise
 					else:
 						conf.variant = ''
