@@ -14,4 +14,7 @@ class XmlDocument:
 		return self
 
 	def __exit__(self, type, value, traceback):
+		self.close()
+
+	def close(self):
 		self.file.close()
