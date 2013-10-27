@@ -210,6 +210,8 @@ class eclipse(Build.BuildContext):
 						env = self.all_envs[toolchain]
 						if env.SUB_TOOLCHAINS:
 							sub_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+						else:
+							sub_env = env
 						for variant in self.env.ALL_VARIANTS:
 							count = count+1
 							cconf_id = cdt_core + '.default.config.%d'%count
