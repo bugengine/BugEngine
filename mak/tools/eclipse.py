@@ -20,13 +20,13 @@ def unique(seq):
 
 def path_from(path, task_gen, appname):
 	if isinstance(path, str):
-		return path
+		return (('BUILTIN'), path)
 	else:
 		for node in getattr(task_gen, 'source_nodes', []):
 			if path.is_child_of(node):
-				return '/%s/%s/%s' % (appname, task_gen.name.replace('.', '/'), path.path_from(node).replace('\\', '/'))
+				return (('RESOLVED', 'VALUE_WORKSPACE_PATH'), '/%s/%s/%s' % (appname, task_gen.name.replace('.', '/'), path.path_from(node).replace('\\', '/')))
 		else:
-			return path.abspath()
+			return (('BUILTIN'), path.abspath())
 
 
 def gather_includes_defines(task_gen, appname):
@@ -325,34 +325,37 @@ class eclipse(Build.BuildContext):
 																		'name': tool_name,
 																		'superClass': 'cdt.managedbuild.tool.gnu.%s.compiler.base'%id_name}).close()
 							XmlNode(cconf, 'storageModule', {'moduleId': 'org.eclipse.cdt.core.externalSettings'}).close()
-						with XmlNode(cproject_setting, 'configuration', {'id':cconf_id, 'name':toolchain+':'+variant}) as cconf_setting:
-							with XmlNode(cconf_setting, 'extension', {'point': 'org.eclipse.cdt.core.LanguageSettingsProvider'}) as extension:
-								XmlNode(extension, 'provider-reference', {'id': 'org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProviderorg.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider', 'ref': 'shared-provider'}).close()
-								with XmlNode(extension, 'provider', {'class': 'org.eclipse.cdt.core.language.settings.providers.LanguageSettingsGenericProvider',
-																	'id': 'org.eclipse.cdt.ui.UserLanguageSettingsProvider',
-																	'name': 'CDT User Setting Entries',
-																	'prefer-non-shared': 'true',
-																	'store-entries-with-project': 'true'}) as provider:
-									with XmlNode(provider, 'language', {'id': 'org.eclipse.cdt.core.g++'}) as language:
-										for g in self.groups:
-											for tg in g:
-												if not isinstance(tg, TaskGen.task_gen):
-													continue
-												if 'kernel' in tg.features:
-													continue
-												task_includes, task_defines = gather_includes_defines(tg, appname)
-												with XmlNode(language, 'resource', {'project-relative-path': '/' + tg.name.replace('.', '/')}) as resource:
-													for include in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES + task_includes:
-														with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
-															XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
-													for d in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
-														try:
-															define, value = d.split('=')
-														except:
-															define = d
-															value = ''
-														with XmlNode(resource, 'entry', {'kind': 'macro', 'name': define, 'value': value}) as entry:
-															XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
+							with XmlNode(cproject_setting, 'configuration', {'id':cconf_id, 'name':toolchain+':'+variant}) as cconf_setting:
+								with XmlNode(cconf_setting, 'extension', {'point': 'org.eclipse.cdt.core.LanguageSettingsProvider'}) as extension:
+									XmlNode(extension, 'provider-reference', {'id': 'org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider', 'ref': 'shared-provider'}).close()
+									with XmlNode(extension, 'provider', {'class': 'org.eclipse.cdt.core.language.settings.providers.LanguageSettingsGenericProvider',
+																		'id': 'org.eclipse.cdt.ui.UserLanguageSettingsProvider',
+																		'name': 'CDT User Setting Entries',
+																		'prefer-non-shared': 'true',
+																		'store-entries-with-project': 'true'}) as provider:
+										with XmlNode(provider, 'language', {'id': 'org.eclipse.cdt.core.g++'}) as language:
+											for g in self.groups:
+												for tg in g:
+													if not isinstance(tg, TaskGen.task_gen):
+														continue
+													if 'kernel' in tg.features:
+														continue
+													task_includes, task_defines = gather_includes_defines(tg, appname)
+													with XmlNode(language, 'resource', {'project-relative-path': tg.name.replace('.', '/')}) as resource:
+														for include in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES: # + task_includes:
+															with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
+																XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
+														for flags, include in task_includes:
+															with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
+																XmlNode(entry, 'flag', {'value': '|'.join(flags)}).close()
+														for d in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
+															try:
+																define, value = d.split('=')
+															except:
+																define = d
+																value = ''
+															with XmlNode(resource, 'entry', {'kind': 'macro', 'name': define, 'value': value}) as entry:
+																XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
 
 				with XmlNode(cproject, 'storageModule',
 									{	'moduleId': 'cdtBuildSystem',
