@@ -20,13 +20,9 @@ def unique(seq):
 
 def path_from(path, task_gen, appname):
 	if isinstance(path, str):
-		return (('BUILTIN'), path)
+		return (('BUILTIN'), path.replace('\\', '/'))
 	else:
-		for node in getattr(task_gen, 'source_nodes', []):
-			if path.is_child_of(node):
-				return (('RESOLVED', 'VALUE_WORKSPACE_PATH'), '/%s/%s/%s' % (appname, task_gen.name.replace('.', '/'), path.path_from(node).replace('\\', '/')))
-		else:
-			return (('BUILTIN'), path.abspath())
+		return (('BUILTIN'), '%s' % (path.abspath().replace('\\', '/')))
 
 
 def gather_includes_defines(task_gen, appname):
@@ -342,13 +338,13 @@ class eclipse(Build.BuildContext):
 														continue
 													task_includes, task_defines = gather_includes_defines(tg, appname)
 													with XmlNode(language, 'resource', {'project-relative-path': tg.name.replace('.', '/')}) as resource:
-														for include in env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in env.SYSROOT] + env.SYSTEM_INCLUDES: # + task_includes:
+														for include in sub_env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT] + sub_env.SYSTEM_INCLUDES:
 															with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
 																XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
 														for flags, include in task_includes:
 															with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
 																XmlNode(entry, 'flag', {'value': '|'.join(flags)}).close()
-														for d in task_defines + env.DEFINES + env.SYSTEM_DEFINES:
+														for d in task_defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES:
 															try:
 																define, value = d.split('=')
 															except:
