@@ -5,7 +5,7 @@ import os
 
 
 @conf
-def set_windows_options(self):
+def set_windows_options(self, arch):
 	self.env.VALID_PLATFORMS = ['windows', 'pc']
 	self.env.LINK_WITH_PROGRAM = True
 
@@ -16,6 +16,13 @@ def set_windows_options(self):
 	self.env.DEPLOY_DATADIR = 'data'
 	self.env.DEPLOY_PLUGINDIR = 'data/plugin'
 	self.env.DEPLOY_KERNELDIR = 'data/kernel'
+
+	if arch == 'arm':
+		self.env.MS_PROJECT_PLATFORM = 'ARM'
+	elif arch in ['x64', 'x86_64', 'amd64']:
+		self.env.MS_PROJECT_PLATFORM = 'x64'
+	else:
+		self.env.MS_PROJECT_PLATFORM = 'Win32'
 
 	self.env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
 
@@ -132,7 +139,7 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_windows_options()
+						conf.set_windows_options(arch)
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
 						conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
 					except Errors.WafError as e:
@@ -167,7 +174,7 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_windows_options()
+						conf.set_windows_options(arch)
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
 						conf.add_toolchain(os, arch, name, version, arch)
 					except Errors.WafError as e:
@@ -201,7 +208,7 @@ def configure(conf):
 				else:
 					conf.end_msg('done')
 					try:
-						conf.set_windows_options()
+						conf.set_windows_options(arch)
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
 						conf.add_toolchain(os, arch_name, 'clang', version, arch_name)
 					except Errors.WafError as e:
