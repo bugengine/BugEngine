@@ -1,7 +1,15 @@
 from waflib import Context, Build, TaskGen, Logs
 import os, sys
 from xml.dom.minidom import Document
+from minixml import XmlNode, XmlDocument
 import string
+try:
+	import cStringIO as StringIO
+except ImportError:
+	try:
+		import io as StringIO
+	except ImportError:
+		import StringIO
 
 try:
 	import hashlib
@@ -159,13 +167,121 @@ class Solution:
 			Logs.pprint('NORMAL', 'writing %s' % node.name)
 			node.write(newsolution)
 
+
+class VcprojNode:
+	def __init__(self, name):
+		self.subs = {}
+		self.files = []
+
+	def add(self, node):
+		if os.path.isdir(node.abspath()):
+			try:
+				sub = self.subs[node.name]
+			except KeyError:
+				sub = self.subs[node.name] = VcprojNode(node.name)
+			for f in node.listdir():
+				sub.add(node.make_node(f))
+		else:
+			self.files.append(node)
+
+	def write(self, xml, src_node):
+		for name, sub in sorted(self.subs.items(), key = lambda x: x[0]):
+			with XmlNode(xml, 'Filter', {'Name': name}) as filter:
+				sub.write(filter, src_node)
+		for file in sorted(self.files, key = lambda x: x.name):
+			XmlNode(xml, 'File', {'RelativePath': '$(SolutionDir)%s'%file.path_from(src_node)}).close()
+
 class VCproj:
 	extensions = ['vcproj']
-	def __init__(self, task_gen, version, version_project):
-		self.vcproj = XmlFile()
+	def __init__(self, task_gen, version, version_project, use_folders):
+		if use_folders:
+			self.name = task_gen.target.split('.')[-1]
+		else:
+			self.name = task_gen.target
+		self.guid = generateGUID(task_gen.target)
+		self.vcproj = XmlDocument(StringIO.StringIO(), 'UTF-8')
+		with XmlNode(self.vcproj, 'VisualStudioProject',
+						{'ProjectType': 'Visual C++',
+						'Version': version_project,
+						'Name': self.name,
+						'ProjectGUID': self.guid,
+						'RootNamespace': task_gen.target,
+						'Keyword': 'Win32Proj'}) as project:
+			with XmlNode(project, 'Platforms') as platforms:
+				for p in task_gen.bld.__class__.platforms:
+					XmlNode(platforms, 'Platform', {'Name': p}).close()
+			with XmlNode(project, 'Configurations') as configurations:
+				includes, defines = gather_includes_defines(task_gen)
+				for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+					env = task_gen.bld.all_envs[toolchain]
+					if env.SUB_TOOLCHAINS:
+						sub_env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+					else:
+						sub_env = env
+					for variant in task_gen.bld.env.ALL_VARIANTS:
+						platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
+						with XmlNode(configurations, 'Configuration',
+											{'Name': '%s-%s|%s'%(toolchain, variant, platform),
+											'OutputDirectory': '$(SolutionDir)build/%s/%s/' % (toolchain, variant),
+											'IntermediateDirectory': '$(SolutionDir)build/%s/%s/' % (toolchain, variant),
+											'ConfigurationType': '0',
+											'CharacterSet': '2'}) as configuration:
+							tool = {'Name': 'VCNMakeTool'}
+							command = getattr(task_gen, 'command', '')
+							if command:
+								command = command % {'toolchain':toolchain, 'variant':variant}
+								tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s waf %s' % (sys.executable, command)
+							else:
+								tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s waf install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
+								tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
+								tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s waf clean:%s:%s instal:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target)
+							if 'cxxprogram' in task_gen.features:
+								tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+							elif 'game' in task_gen.features:
+								deps = task_gen.use[:]
+								seen = set([])
+								program = None
+								while (deps):
+									dep = deps.pop()
+									if dep not in seen:
+											seen.add(dep)
+											try:
+												task_dep = task_gen.bld.get_tgen_by_name(dep)
+												deps += getattr(task_dep, 'use', [])
+												if 'cxxprogram' in task_dep.features:
+													program = task_dep
+											except:
+												pass
+								if program:
+									tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target)
+									debug_command = '$(NMakeOutput)'
+									debug_command_arguments = task_gen.target
+								else:
+									tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+							if float(version_project) >= 8:
+								tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
+								tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(i, 'usr', 'include') for i in sub_env.SYSROOT]])
+							XmlNode(configuration, 'Tool', tool).close()
+			XmlNode(project, 'References').close()
+			with XmlNode(project, 'Files') as files:
+				n = VcprojNode('root')
+				for node in getattr(task_gen, 'source_nodes', []):
+					if os.path.isdir(node.abspath()):
+						for sub_node in node.listdir():
+							n.add(node.make_node(sub_node))
+				n.write(files, task_gen.bld.srcnode)
+			XmlNode(project, 'Globals').close()
 
 	def write(self, nodes):
-		self.vcproj.write(nodes[0])
+		content = self.vcproj.file.getvalue()
+		try:
+			original = nodes[0].read()
+			if original != content:
+				Logs.pprint('NORMAL', 'writing %s' % nodes[0].abspath())
+				nodes[0].write(content)
+		except Exception:
+			nodes[0].write(content)
+		self.vcproj.close()
 
 class VCxproj:
 	extensions = ['vcxproj', 'vcxproj.filters']
@@ -241,6 +357,10 @@ class VCxproj:
 		includes, defines = gather_includes_defines(task_gen)
 		for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
 			env = task_gen.bld.all_envs[toolchain]
+			if env.SUB_TOOLCHAINS:
+				sub_env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+			else:
+				sub_env = env
 			for variant in task_gen.bld.env.ALL_VARIANTS:
 				properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
 				command = getattr(task_gen, 'command', '')
@@ -252,7 +372,7 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
 					elif 'game' in task_gen.features:
 						deps = task_gen.use[:]
 						seen = set([])
@@ -269,14 +389,14 @@ class VCxproj:
 									except:
 										pass
 						if program:
-							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target))
 							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
 							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
 						else:
-							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%task_gen.target))
-					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + env.DEFINES))
-					includes += ['%s/usr/include'%sysroot for sysroot in env.SYSROOT]
-					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + env.INCLUDES))
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
+					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
+					includes += ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT]
+					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
 		files = self.vcxproj._add(project, 'ItemGroup')
 
 		self.filters = {}
@@ -406,58 +526,58 @@ class vs2008(vs2003):
 	cmd = 'vs2008'
 	fun = 'build'
 	version =	(('Visual Studio 2008', '10.00', True),(VCproj, '9.00'))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2008e(vs2003):
 	cmd = 'vs2008e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2008', '10.00', False),(VCproj, '9.00'))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2010(vs2003):
 	cmd = 'vs2010'
 	fun = 'build'
 	version =	(('Visual Studio 2010', '11.00', True),(VCxproj, ('4.0','10.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2010e(vs2003):
 	cmd = 'vs2010e'
 	fun = 'build'
 	version =	(('Visual C++ Express 2010', '11.00', False),(VCxproj, ('4.0','10.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'Itanium']
 
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
 	#TODO: folders
 	version =	(('Visual Studio 11', '12.00', False),(VCxproj, ('4.5','11.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2012(vs11):
 	cmd = 'vs2012'
 	fun = 'build'
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs11e(vs2003):
 	cmd = 'vs11e'
 	fun = 'build'
 	version =	(('Visual C++ Express 11', '12.00', False),(VCxproj, ('4.5','11.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2012e(vs11e):
 	cmd = 'vs2012e'
 	fun = 'build'
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2013e(vs2003):
 	cmd = 'vs2013e'
 	fun = 'build'
 	version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('12.0','12.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2013(vs2003):
 	cmd = 'vs2013'
 	fun = 'build'
 	version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('12.0','12.0')))
-	platforms = ['Win32', 'x64']
+	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
