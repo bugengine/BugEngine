@@ -451,7 +451,7 @@ def configure(conf):
 		android_archs = []
 
 		compilers = []
-		archs = [x[6] for x in gcc_variables if x[6] in android_clang_archs]
+		archs = set([x[6] for x in gcc_variables if x[6] in android_clang_archs])
 		try:
 			conf.start_msg('Looking for SDK')
 			ndk_path, sdk_path, sdk_version = find_android_sdk(gcc_variables[0][1], adb, archs)
@@ -460,8 +460,11 @@ def configure(conf):
 			continue
 		conf.end_msg(sdk_version)
 
+		seen = set([])
 		for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
 			if arch not in archs: continue
+			if arch in seen: continue
+			seen.add(arch)
 			triple = '-'.join(os.path.basename(gcc).split('-')[0:3])
 			toolchain = '%s%s-%s-%s-%s'%(os_name, get_android_version(sdk_version), arch, name, version)
 			env = conf.env.derive()
