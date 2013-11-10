@@ -4,6 +4,7 @@
 #ifndef BE_WORLD_ENTITYSTORAGE_SCRIPT_HH_
 #define BE_WORLD_ENTITYSTORAGE_SCRIPT_HH_
 /*****************************************************************************/
+#include    <world/stdafx.h>
 #include    <world/entity.script.hh>
 #include    <scheduler/task/itask.hh>
 #include    <core/memory/allocators/system.hh>
@@ -65,7 +66,7 @@ protected:
 
     weak<Task::ITask>   initialTask() const;
 
-    void registerType(raw<const RTTI::Class> componentType);
+    void registerType(raw<const RTTI::Class> componentType, u32 maximumCount);
     u32 indexOf(raw<const RTTI::Class> componentType) const;
     void finalize();
 };

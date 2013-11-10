@@ -23,7 +23,7 @@ def to_string(self):
 def log_display(self, bld):
 	if not Options.options.silent:
 		old_log_display(self, bld)
-def filter(lines):
+def filter(exe, lines):
 	result = []
 	for line in lines:
 		i1 = line.find('skipping incompatible ')

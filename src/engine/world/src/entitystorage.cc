@@ -93,9 +93,10 @@ weak<Task::ITask> EntityStorage::initialTask() const
     return m_task;
 }
 
-void EntityStorage::registerType(raw<const RTTI::Class> componentType)
+void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 maximumCount)
 {
     be_assert(indexOf(componentType) == (u32)-1, "component type %s is registered twice" | componentType->fullname());
+    be_info("component %s: reserving space for %d" | componentType->name | maximumCount);
     m_componentTypes.push_back(componentType);
     u32 index = be_checked_numcast<u32>(m_componentTypes.size()) - 1;
     u64 mask = u64(1) << index;

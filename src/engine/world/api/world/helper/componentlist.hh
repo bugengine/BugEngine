@@ -68,22 +68,22 @@ struct ProductGetter<T, T, COUNT, TAIL>
 
 
 template< typename LIST, typename T = typename LIST::Type, u32 COUNT = LIST::Count, typename TAIL = typename LIST::Tail >
-struct PropertyInfo
+struct ComponentListPropertyInfo
 {
     static const RTTI::Property s_property;
 };
 
 template< typename LIST, typename T, u32 COUNT >
-struct PropertyInfo<LIST, T, COUNT, void>
+struct ComponentListPropertyInfo<LIST, T, COUNT, void>
 {
     static const RTTI::Property s_property;
 };
 
 template< typename LIST, typename T, u32 COUNT, typename TAIL >
-const RTTI::Property PropertyInfo<LIST, T, COUNT, TAIL>::s_property =
+const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, TAIL>::s_property =
 {
     {0},
-    {&PropertyInfo<LIST, typename TAIL::Type, TAIL::Count, typename TAIL::Tail>::s_property},
+    {&ComponentListPropertyInfo<LIST, typename TAIL::Type, TAIL::Count, typename TAIL::Tail>::s_property},
     be_typeid<T>::klass()->name,
     be_typeid<LIST>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
@@ -91,7 +91,7 @@ const RTTI::Property PropertyInfo<LIST, T, COUNT, TAIL>::s_property =
 };
 
 template< typename LIST, typename T, u32 COUNT >
-const RTTI::Property PropertyInfo<LIST, T, COUNT, void>::s_property =
+const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, void>::s_property =
 {
     {0},
     be_typeid<EntityStorage>::klass()->properties,
@@ -99,24 +99,6 @@ const RTTI::Property PropertyInfo<LIST, T, COUNT, void>::s_property =
     be_typeid<LIST>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
     &LIST::template getProduct<T>
-};
-
-template< typename T, typename T2, u32 COUNT, typename TAIL, u32 INDEX >
-struct IndexOfType
-{
-    enum { Index = IndexOfType<T, typename TAIL::Type, TAIL::Count, typename TAIL::Tail, TAIL::Index >::Index };
-};
-
-template< typename T, u32 COUNT, typename TAIL, u32 INDEX >
-struct IndexOfType<T, T, COUNT, TAIL, INDEX>
-{
-    enum { Index = INDEX };
-};
-
-template< typename T, typename LIST >
-struct IndexOf
-{
-    enum { Index = IndexOfType<T, typename LIST::Type, LIST::Count, typename LIST::Tail, LIST::Index >::Index };
 };
 
 }}}

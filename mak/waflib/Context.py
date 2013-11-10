@@ -351,7 +351,7 @@ class Context(ctx):
 			else:
 				out = out.replace('\r\n', '\n').split('\n')
 				if filter and ret == 0:
-					out = filter(out)
+					out = filter(cmd[0], out)
 				sys.stdout.write('\n'.join(out))
 		if err:
 			if not isinstance(err, str):
@@ -361,7 +361,7 @@ class Context(ctx):
 			else:
 				err = err.replace('\r\n', '\n').split('\n')
 				if filter and ret == 0:
-					err = filter(err)
+					err = filter(cmd[0], err)
 				sys.stderr.write('\n'.join(err))
 
 		return ret

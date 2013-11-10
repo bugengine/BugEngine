@@ -10,14 +10,17 @@
 #include    <world/helper/outputstream.hh>
 #include    <world/helper/componentlist.hh>
 #include    <world/helper/componentbitset.hh>
+#include    <world/helper/partitionlist.hh>
+#include    <world/helper/partition.hh>
 
 namespace BugEngine { namespace World
 {
 
-template< typename COMPONENT_LIST >
+template< typename COMPONENT_LIST, typename PARTITION_LIST >
 class EntityStorageFactory : public EntityStorage
 {
     COMPONENT_LIST m_list;
+    PARTITION_LIST m_partitions;
 protected:
     EntityStorageFactory()
         :   EntityStorage()
@@ -28,13 +31,13 @@ protected:
     template< typename T, u32 COUNT, typename TAIL >
     void registerTypes(const ComponentList<T, COUNT, TAIL>& list)
     {
-        registerType(be_typeid<T>::klass());
+        registerType(be_typeid<T>::klass(), COUNT);
         registerTypes(static_cast<const ComponentList<typename TAIL::Type, TAIL::Count, typename TAIL::Tail>&>(list));
     }
     template< typename T, u32 COUNT >
     void registerTypes(const ComponentList<T, COUNT, void>& /*list*/)
     {
-        registerType(be_typeid<T>::klass());
+        registerType(be_typeid<T>::klass(), COUNT);
     }
 public:
     template< typename T >
@@ -47,16 +50,22 @@ public:
     static raw<const RTTI::Property> s_properties;
 };
 
-template< typename COMPONENT_LIST >
-raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST>::s_properties = { &Helper::PropertyInfo<EntityStorageFactory<COMPONENT_LIST>, typename COMPONENT_LIST::Type, COMPONENT_LIST::Count, typename COMPONENT_LIST::Tail>::s_property };
+template< typename COMPONENT_LIST, typename PARTITION_LIST >
+raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties =
+{
+    &Helper::ComponentListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+    typename COMPONENT_LIST::Type,
+    COMPONENT_LIST::Count,
+    typename COMPONENT_LIST::Tail>::s_property
+};
 
 }}
 
 namespace BugEngine
 {
 
-template< typename COMPONENT_LIST >
-struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST> >
+template< typename COMPONENT_LIST, typename PARTITION_LIST >
+struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
 {
     static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
     static inline raw<RTTI::Class> preklass()
@@ -70,7 +79,7 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST> >
             0,
             RTTI::ClassType_Object,
             {0},
-            World::EntityStorageFactory<COMPONENT_LIST>::s_properties,
+            World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties,
             be_typeid<World::EntityStorage>::klass()->methods,
             be_typeid<World::EntityStorage>::klass()->objects,
             {0},

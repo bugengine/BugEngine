@@ -236,7 +236,7 @@ class VCproj:
 								tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
 								tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s waf clean:%s:%s instal:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target)
 							if 'cxxprogram' in task_gen.features:
-								tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+								tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
 							elif 'game' in task_gen.features:
 								deps = task_gen.use[:]
 								seen = set([])
@@ -253,11 +253,11 @@ class VCproj:
 											except:
 												pass
 								if program:
-									tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target)
+									tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target)
 									debug_command = '$(NMakeOutput)'
 									debug_command_arguments = task_gen.target
 								else:
-									tool['Output'] = os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+									tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
 							if float(version_project) >= 8:
 								tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
 								tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(i, 'usr', 'include') for i in sub_env.SYSROOT]])
@@ -372,7 +372,7 @@ class VCxproj:
 					self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, toolchain, variant, task_gen.target))
 					self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s waf clean:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target))
 					if 'cxxprogram' in task_gen.features:
-						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
+						self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
 					elif 'game' in task_gen.features:
 						deps = task_gen.use[:]
 						seen = set([])
@@ -389,11 +389,11 @@ class VCxproj:
 									except:
 										pass
 						if program:
-							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target))
+							self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target))
 							self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
 							self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
 						else:
-							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)%s' % env.PREFIX, env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
+							self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
 					self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
 					includes += ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT]
 					self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
