@@ -311,8 +311,7 @@ extern "C" int luaPlugin(lua_State* state)
     int n = lua_gettop(state); /* number of arguments */
     if (n != 1)
     {
-        /* error */
-        return 0;
+        return luaL_error(state, "plugin method expects one argument; got %d", n);
     }
     const char *pluginName = lua_tostring(state, -1);
     void* userdata = lua_newuserdata(state, sizeof (Plugin::Plugin<void>));
@@ -322,9 +321,32 @@ extern "C" int luaPlugin(lua_State* state)
     return 1;
 }
 
+extern "C" int luaGet(lua_State* state)
+{
+    int n = lua_gettop(state); /* number of arguments */
+    if (n != 2)
+    {
+        return luaL_error(state, "getattr method expects two arguments; got %d", n);
+    }
+    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 2, LUA_TSTRING);
+
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
+    const char *name = lua_tostring(state, -1);
+    RTTI::Value v = (*userdata)[name];
+    if (!v)
+    {
+        lua_pushnil(state);
+        return 1;
+    }
+    Context::push(state, v);
+    return 1;
+}
+
 static const luaL_Reg base_funcs[] = {
     {"print", luaPrint},
     {"plugin", luaPlugin},
+    {"getattr", luaGet},
     {NULL, NULL}
 };
 

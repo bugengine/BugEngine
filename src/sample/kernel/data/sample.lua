@@ -4,7 +4,7 @@ _3d = plugin("plugin.graphics.3d")
 tokens={}
 
 storage = kernel.KernelStorage()
-sample = kernel.KernelSampleTask(storage.A, storage.B)
+sample = kernel.KernelSampleTask(getattr(storage, "A+B").A, getattr(storage, "A+B").B)
 tokens['sample'] = resources:load(sample)
 world = BugEngine.World.World(storage, {sample.output})
 tokens['world'] = resources:load(world)
