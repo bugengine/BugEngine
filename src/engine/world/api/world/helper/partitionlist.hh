@@ -30,7 +30,6 @@ private:
     PartitionList& operator=(const PartitionList& other);
 };
 
-
 template< typename T >
 struct PartitionList<T, void>
 {
@@ -40,13 +39,51 @@ struct PartitionList<T, void>
     PartitionList()
     {
     }
+private:
+    PartitionList(const PartitionList& other);
+    PartitionList& operator=(const PartitionList& other);
 };
-
 
 namespace Helper
 {
 
+template< typename LIST, typename T, typename TAIL >
+struct PartitionListPropertyInfo
+{
+    static const RTTI::Property s_property;
+};
+
+template< typename LIST, typename T >
+struct PartitionListPropertyInfo<LIST, T, void>
+{
+    static const RTTI::Property s_property;
+};
+
+template< typename LIST, typename T, typename TAIL >
+const RTTI::Property PartitionListPropertyInfo<LIST, T, TAIL>::s_property =
+{
+    {0},
+    {&PartitionListPropertyInfo<LIST, typename TAIL::Type, typename TAIL::Tail>::s_property},
+    T::name(),
+    be_typeid<LIST>::type(),
+    be_typeid< const T& >::type(),
+    0
+};
+
+template< typename LIST, typename T >
+const RTTI::Property PartitionListPropertyInfo<LIST, T, void>::s_property =
+{
+    {0},
+    be_typeid<EntityStorage>::klass()->properties,
+    T::name(),
+    be_typeid<LIST>::type(),
+    be_typeid< const T& >::type(),
+    0
+};
+
 }}}
+
+
 
 #define PARTITION_LIST_1(T1)                                                                                           \
     ::BugEngine::World::PartitionList< T1, void >

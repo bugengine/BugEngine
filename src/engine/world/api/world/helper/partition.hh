@@ -22,11 +22,31 @@ struct Partition : public TAIL
         :   TAIL()
     {
     }
+
+    static const istring name();
+    static const RTTI::Property s_properties;
 private:
     Partition(const Partition& other);
     Partition& operator=(const Partition& other);
 };
 
+
+template< typename T, typename TAIL >
+const istring Partition<T, TAIL>::name()
+{
+    return istring(minitl::format<4096u>("%s+%s") | be_typeid<T>::klass()->name | Partition<typename TAIL::Type, typename TAIL::Tail>::name());
+}
+
+template< typename T, typename TAIL >
+const RTTI::Property Partition<T, TAIL>::s_properties =
+{
+    {0},
+    {&Partition<typename TAIL::Type, typename TAIL::Tail>::s_properties},
+    be_typeid<T>::klass()->name,
+    be_typeid<T>::type(),
+    be_typeid< const Kernel::Product<T>& >::type(),
+    0
+};
 
 template< typename T >
 struct Partition<T, void>
@@ -37,6 +57,29 @@ struct Partition<T, void>
     Partition()
     {
     }
+    static const istring name();
+    static const RTTI::Property s_properties;
+private:
+    Partition(const Partition& other);
+    Partition& operator=(const Partition& other);
+};
+
+
+template< typename T >
+const istring Partition<T, void>::name()
+{
+    return be_typeid<T>::klass()->name;
+};
+
+template< typename T >
+const RTTI::Property Partition<T, void>::s_properties =
+{
+    {0},
+    {0},
+    be_typeid<T>::klass()->name,
+    be_typeid<T>::type(),
+    be_typeid< const Kernel::Product<T>& >::type(),
+    0
 };
 
 
@@ -45,6 +88,43 @@ namespace Helper
 
 }}}
 
+
+namespace BugEngine
+{
+
+template< typename T, typename TAIL >
+struct be_typeid< World::Partition<T, TAIL> >
+{
+    static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
+    static inline raw<RTTI::Class> preklass()
+    {
+        static RTTI::Class s_class =
+        {
+            istring("Partition"),
+            {0},
+            be_typeid<void>::klass(),
+            0,
+            0,
+            RTTI::ClassType_Object,
+            {0},
+            {&World::Partition<T, TAIL>::s_properties},
+            be_typeid<void>::klass()->methods,
+            be_typeid<void>::klass()->objects,
+            {0},
+            {0},
+            0,
+            0
+        };
+        raw<RTTI::Class> result = { &s_class };
+        return result;
+    }
+    static inline raw<const RTTI::Class> klass()
+    {
+        return preklass();
+    }
+};
+
+}
 
 #define PARTITION_1(T1)                                                                                                \
     ::BugEngine::World::Partition< T1, void >

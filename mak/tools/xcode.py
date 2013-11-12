@@ -418,9 +418,9 @@ class PBXProject(XCodeNode):
 	def add(self, bld, p, schemes, schememanagement):
 		def get_include_path(i):
 			if isinstance(i, str):
-				return i
+				return '$(SOURCE_ROOT)/'+i
 			else:
-				return i.path_from(bld.srcnode)
+				return '$(SOURCE_ROOT)/'+i.path_from(bld.srcnode)
 		names = p.target.split('.')
 		sources = []
 		if 'kernel' not in p.features:
@@ -460,7 +460,7 @@ class PBXProject(XCodeNode):
 		for variant in bld.env.ALL_VARIANTS:
 			variants.append(XCBuildConfiguration(variant, {
 				'PRODUCT_NAME': p.target,
-				#'ARCHS':['i386'],
+				'ARCHS':['i386'],
 				'VALID_ARCHS':['i386'],
 				'SDKROOT': 'macosx',
 				'SUPPORTED_PLATFORMS': 'macosx',
