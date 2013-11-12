@@ -35,7 +35,7 @@
  */
 
 #include <cstddef>
-#include <string.h>
+#include "string.h"
 
 extern "C++" {
 

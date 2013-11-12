@@ -7,6 +7,7 @@
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <world/helper/outputstream.hh>
+#include    <world/helper/partitionlist.hh>
 
 
 namespace BugEngine { namespace World
@@ -67,7 +68,7 @@ struct ProductGetter<T, T, COUNT, TAIL>
 
 
 
-template< typename LIST, typename T = typename LIST::Type, u32 COUNT = LIST::Count, typename TAIL = typename LIST::Tail >
+template< typename LIST, typename T , u32 COUNT, typename TAIL >
 struct ComponentListPropertyInfo
 {
     static const RTTI::Property s_property;
@@ -94,7 +95,7 @@ template< typename LIST, typename T, u32 COUNT >
 const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, void>::s_property =
 {
     {0},
-    be_typeid<EntityStorage>::klass()->properties,
+    {&PartitionListPropertyInfo<LIST, typename LIST::FactoryPartitionList::Type, typename LIST::FactoryPartitionList::Tail>::s_property},
     be_typeid<T>::klass()->name,
     be_typeid<LIST>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),

@@ -10,8 +10,6 @@
 #include    <world/helper/outputstream.hh>
 #include    <world/helper/componentlist.hh>
 #include    <world/helper/componentbitset.hh>
-#include    <world/helper/partitionlist.hh>
-#include    <world/helper/partition.hh>
 
 namespace BugEngine { namespace World
 {
@@ -19,6 +17,10 @@ namespace BugEngine { namespace World
 template< typename COMPONENT_LIST, typename PARTITION_LIST >
 class EntityStorageFactory : public EntityStorage
 {
+public:
+    typedef COMPONENT_LIST FactoryComponentList;
+    typedef PARTITION_LIST FactoryPartitionList;
+private:
     COMPONENT_LIST m_list;
     PARTITION_LIST m_partitions;
 protected:
@@ -54,9 +56,9 @@ template< typename COMPONENT_LIST, typename PARTITION_LIST >
 raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties =
 {
     &Helper::ComponentListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-    typename COMPONENT_LIST::Type,
-    COMPONENT_LIST::Count,
-    typename COMPONENT_LIST::Tail>::s_property
+                                       typename COMPONENT_LIST::Type,
+                                       COMPONENT_LIST::Count,
+                                       typename COMPONENT_LIST::Tail>::s_property
 };
 
 }}
