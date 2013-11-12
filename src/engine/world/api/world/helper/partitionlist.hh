@@ -20,9 +20,9 @@ struct PartitionList : public TAIL
     typedef T Type;
     typedef TAIL Tail;
     T m_partition;
-    PartitionList()
-        :   TAIL()
-        ,   m_partition()
+    PartitionList(weak<Task::ITask> task)
+        :   TAIL(task)
+        ,   m_partition(task)
     {
     }
 private:
@@ -36,7 +36,9 @@ struct PartitionList<T, void>
     enum { Index = 0 };
     typedef T Type;
     typedef void Tail;
-    PartitionList()
+    T m_partition;
+    PartitionList(weak<Task::ITask> task)
+        :   m_partition(task)
     {
     }
 private:
@@ -46,6 +48,26 @@ private:
 
 namespace Helper
 {
+
+
+template< typename T, typename T2, typename TAIL >
+struct PartitionGetter
+{
+    static const T& getPartition(const PartitionList<T2, TAIL>& list)
+    {
+        return PartitionGetter<T, typename TAIL::Type, typename TAIL::Tail>::getPartition(list);
+    }
+};
+
+template< typename T, typename TAIL >
+struct PartitionGetter<T, T, TAIL>
+{
+    static const T& getPartition(const PartitionList<T, TAIL>& list)
+    {
+        return list.m_partition;
+    }
+};
+
 
 template< typename LIST, typename T, typename TAIL >
 struct PartitionListPropertyInfo
@@ -67,7 +89,7 @@ const RTTI::Property PartitionListPropertyInfo<LIST, T, TAIL>::s_property =
     T::name(),
     be_typeid<LIST>::type(),
     be_typeid< const T& >::type(),
-    0
+    &LIST::template getPartition<T>
 };
 
 template< typename LIST, typename T >
@@ -78,7 +100,7 @@ const RTTI::Property PartitionListPropertyInfo<LIST, T, void>::s_property =
     T::name(),
     be_typeid<LIST>::type(),
     be_typeid< const T& >::type(),
-    0
+    &LIST::template getPartition<T>
 };
 
 }}}
