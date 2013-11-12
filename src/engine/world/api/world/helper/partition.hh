@@ -13,18 +13,52 @@ namespace BugEngine { namespace World
 {
 
 template< typename T, typename TAIL >
+struct Partition;
+
+namespace Helper
+{
+
+template< typename T, typename T2, typename TAIL >
+struct PartitionProductGetter
+{
+    static const Kernel::Product<T>& getProduct(const Partition<T2, TAIL>& partition)
+    {
+        return PartitionProductGetter<T, typename TAIL::Type, typename TAIL::Tail>::getProduct(partition);
+    }
+};
+
+template< typename T, typename TAIL >
+struct PartitionProductGetter<T, T, TAIL>
+{
+    static const Kernel::Product<T>& getProduct(const Partition<T, TAIL>& partition)
+    {
+        return partition.stream.product;
+    }
+};
+
+}
+
+template< typename T, typename TAIL >
 struct Partition : public TAIL
 {
     enum { Index = TAIL::Index+1 };
     typedef T Type;
     typedef TAIL Tail;
-    Partition()
-        :   TAIL()
+    const OutputStream<T> stream;
+    Partition(weak<Task::ITask> task)
+        :   TAIL(task)
+        ,   stream(task)
     {
     }
 
     static const istring name();
-    static const RTTI::Property s_properties;
+    template< typename T2 >
+    static RTTI::Value getProduct(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        const Partition* partition = static_cast<const Partition*>(from);
+        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionProductGetter<T2, T, Tail>::getProduct(*partition)));
+    }
 private:
     Partition(const Partition& other);
     Partition& operator=(const Partition& other);
@@ -37,28 +71,25 @@ const istring Partition<T, TAIL>::name()
     return istring(minitl::format<4096u>("%s+%s") | be_typeid<T>::klass()->name | Partition<typename TAIL::Type, typename TAIL::Tail>::name());
 }
 
-template< typename T, typename TAIL >
-const RTTI::Property Partition<T, TAIL>::s_properties =
-{
-    {0},
-    {&Partition<typename TAIL::Type, typename TAIL::Tail>::s_properties},
-    be_typeid<T>::klass()->name,
-    be_typeid<T>::type(),
-    be_typeid< const Kernel::Product<T>& >::type(),
-    0
-};
-
 template< typename T >
 struct Partition<T, void>
 {
     enum { Index = 0 };
     typedef T Type;
     typedef void Tail;
-    Partition()
+    const OutputStream<T> stream;
+    Partition(weak<Task::ITask> task)
+        :   stream(task)
     {
     }
     static const istring name();
-    static const RTTI::Property s_properties;
+    template< typename T2 >
+    static RTTI::Value getProduct(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        const Partition* partition = static_cast<const Partition*>(from);
+        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionProductGetter<T2, T, Tail>::getProduct(*partition)));
+    }
 private:
     Partition(const Partition& other);
     Partition& operator=(const Partition& other);
@@ -71,20 +102,42 @@ const istring Partition<T, void>::name()
     return be_typeid<T>::klass()->name;
 };
 
-template< typename T >
-const RTTI::Property Partition<T, void>::s_properties =
+namespace Helper
+{
+
+template< typename PARTITION, typename T, typename TAIL >
+struct PartitionPropertyInfo
+{
+    static const RTTI::Property s_property;
+};
+
+template< typename PARTITION, typename T >
+struct PartitionPropertyInfo<PARTITION, T, void>
+{
+    static const RTTI::Property s_property;
+};
+
+template< typename PARTITION, typename T, typename TAIL >
+const RTTI::Property PartitionPropertyInfo<PARTITION, T, TAIL>::s_property =
+{
+    {0},
+    {&PartitionPropertyInfo<PARTITION, typename TAIL::Type, typename TAIL::Tail>::s_property},
+    be_typeid<T>::klass()->name,
+    be_typeid<PARTITION>::type(),
+    be_typeid< const Kernel::Product<T>& >::type(),
+    &PARTITION::template getProduct<T>
+};
+
+template< typename PARTITION, typename T >
+const RTTI::Property PartitionPropertyInfo<PARTITION, T, void>::s_property =
 {
     {0},
     {0},
     be_typeid<T>::klass()->name,
-    be_typeid<T>::type(),
+    be_typeid<PARTITION>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
-    0
+    &PARTITION::template getProduct<T>
 };
-
-
-namespace Helper
-{
 
 }}}
 
@@ -107,7 +160,7 @@ struct be_typeid< World::Partition<T, TAIL> >
             0,
             RTTI::ClassType_Object,
             {0},
-            {&World::Partition<T, TAIL>::s_properties},
+            {&World::Helper::PartitionPropertyInfo< World::Partition<T, TAIL>, T, TAIL >::s_property},
             be_typeid<void>::klass()->methods,
             be_typeid<void>::klass()->objects,
             {0},

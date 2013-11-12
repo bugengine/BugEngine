@@ -27,6 +27,7 @@ protected:
     EntityStorageFactory()
         :   EntityStorage()
         ,   m_list(initialTask())
+        ,   m_partitions(initialTask())
     {
         registerTypes(m_list);
     }
@@ -48,6 +49,13 @@ public:
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<T, typename COMPONENT_LIST::Type, COMPONENT_LIST::Count, typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+    }
+    template< typename T >
+    static RTTI::Value getPartition(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
+        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<T, typename PARTITION_LIST::Type, typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
     static raw<const RTTI::Property> s_properties;
 };
