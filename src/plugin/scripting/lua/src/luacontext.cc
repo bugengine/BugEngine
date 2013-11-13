@@ -343,10 +343,25 @@ extern "C" int luaGet(lua_State* state)
     return 1;
 }
 
+extern "C" int luaGetType(lua_State* state)
+{
+    int n = lua_gettop(state); /* number of arguments */
+    if (n != 1)
+    {
+        return luaL_error(state, "getattr method expects one argument; got %d", n);
+    }
+    Context::checkArg(state, 1, "BugEngine.Object");
+
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
+    Context::push(state, RTTI::Value(userdata->type()));
+    return 1;
+}
+
 static const luaL_Reg base_funcs[] = {
     {"print", luaPrint},
     {"plugin", luaPlugin},
     {"getattr", luaGet},
+    {"gettype", luaGetType},
     {NULL, NULL}
 };
 
