@@ -37,7 +37,7 @@ KernelSampleTask::~KernelSampleTask()
 
 minitl::array< weak<const Kernel::IStream> > KernelSampleTask::makeParameters() const
 {
-    minitl::array< weak<const Kernel::IStream> > result(Arena::task(), 2);
+    minitl::array< weak<const Kernel::IStream> > result(Arena::task(), 4);
     result[0] = m_input1.stream;
     result[1] = m_input2.stream;
     result[2] = m_input3.stream;
