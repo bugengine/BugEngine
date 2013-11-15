@@ -29,6 +29,7 @@ protected:
         ,   m_list(initialTask())
         ,   m_partitions(initialTask())
     {
+
         registerTypes(m_list);
     }
     template< typename T, u32 COUNT, typename TAIL >

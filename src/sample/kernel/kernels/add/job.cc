@@ -14,7 +14,9 @@ using namespace Kernel;
 
 #include <components.script.hh>
 
-void kmain(u32 index, const u32 total, in<BugEngine::A> input, inout<BugEngine::B> output)
+void kmain(u32 index, const u32 total,
+           in<BugEngine::A> input,
+            inout<BugEngine::B> output, inout<BugEngine::C> output2, inout<BugEngine::D> output3)
 {
     u32 first = index * input.size() / total;
     u32 last = (index+1) * input.size() / total;
@@ -22,8 +24,12 @@ void kmain(u32 index, const u32 total, in<BugEngine::A> input, inout<BugEngine::
     while(first < last)
     {
         output->value += 2 * input->value;
+        output2->value += 3 * input->value;
+        output3->value += 4 * input->value;
         ++input;
         ++output;
+        ++output2;
+        ++output3;
         ++first;
     }
 }
@@ -40,7 +46,9 @@ _BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[]
 {
     kmain(index, total,
           in<BugEngine::A>((BugEngine::A*)argv[0].begin, (BugEngine::A*)argv[0].end),
-          inout<BugEngine::B>((BugEngine::B*)argv[1].begin, (BugEngine::B*)argv[1].end));
+          inout<BugEngine::B>((BugEngine::B*)argv[1].begin, (BugEngine::B*)argv[1].end),
+          inout<BugEngine::C>((BugEngine::C*)argv[2].begin, (BugEngine::C*)argv[2].end),
+          inout<BugEngine::D>((BugEngine::D*)argv[3].begin, (BugEngine::D*)argv[3].end));
 }
 _BE_REGISTER_PLUGIN(BE_KERNELID, BE_KERNELNAME);
 _BE_REGISTER_METHOD(BE_KERNELID, _kmain);

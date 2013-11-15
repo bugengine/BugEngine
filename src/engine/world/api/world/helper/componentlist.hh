@@ -39,6 +39,7 @@ struct ComponentList<T, COUNT, void>
     typedef void Tail;
     const OutputStream<T> stream;
     ComponentList(weak<Task::ITask> task)
+
         :   stream(task)
     {
     }
