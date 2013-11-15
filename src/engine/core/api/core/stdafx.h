@@ -20,7 +20,9 @@
 #endif
 #define     BE_PROJECT          BE_STRINGIZE(BE_PROJECTCATEGORY) "." BE_STRINGIZE(BE_PROJECTNAME)
 #define     BE_HERE             BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
-
+#define     BE_COMMA3           ,
+#define     BE_COMMA2           BE_COMMA3
+#define     BE_COMMA            BE_COMMA2
 #include    <core/platforms.hh>
 
 #if defined(building_core) || defined(CORE_EXPORTS)
