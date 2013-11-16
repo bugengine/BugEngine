@@ -10,8 +10,6 @@
 #include    <world/helper/outputstream.hh>
 #include    <world/helper/componentlist.hh>
 #include    <world/helper/componentbitset.hh>
-#include    <world/helper/partitionlist.hh>
-#include    <world/helper/partition.hh>
 
 namespace BugEngine { namespace World
 {
@@ -19,13 +17,19 @@ namespace BugEngine { namespace World
 template< typename COMPONENT_LIST, typename PARTITION_LIST >
 class EntityStorageFactory : public EntityStorage
 {
+public:
+    typedef COMPONENT_LIST FactoryComponentList;
+    typedef PARTITION_LIST FactoryPartitionList;
+private:
     COMPONENT_LIST m_list;
     PARTITION_LIST m_partitions;
 protected:
     EntityStorageFactory()
         :   EntityStorage()
         ,   m_list(initialTask())
+        ,   m_partitions(initialTask())
     {
+
         registerTypes(m_list);
     }
     template< typename T, u32 COUNT, typename TAIL >
@@ -47,6 +51,13 @@ public:
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<T, typename COMPONENT_LIST::Type, COMPONENT_LIST::Count, typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
     }
+    template< typename T >
+    static RTTI::Value getPartition(void* from, bool isConst)
+    {
+        be_forceuse(isConst);
+        const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
+        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<T, typename PARTITION_LIST::Type, typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
+    }
     static raw<const RTTI::Property> s_properties;
 };
 
@@ -54,9 +65,9 @@ template< typename COMPONENT_LIST, typename PARTITION_LIST >
 raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties =
 {
     &Helper::ComponentListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-    typename COMPONENT_LIST::Type,
-    COMPONENT_LIST::Count,
-    typename COMPONENT_LIST::Tail>::s_property
+                                       typename COMPONENT_LIST::Type,
+                                       COMPONENT_LIST::Count,
+                                       typename COMPONENT_LIST::Tail>::s_property
 };
 
 }}
