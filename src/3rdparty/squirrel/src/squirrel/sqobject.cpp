@@ -62,7 +62,7 @@ SQInteger SQString::Next(const SQObjectPtr &refpos, SQObjectPtr &outkey, SQObjec
 	SQInteger idx = (SQInteger)TranslateIndex(refpos);
 	while(idx < _len){
 		outkey = (SQInteger)idx;
-		outval = SQInteger(_val[idx]);
+		outval = (SQInteger)((SQUnsignedInteger)_val[idx]);
 		//return idx for the next iteration
 		return ++idx;
 	}
@@ -180,7 +180,7 @@ bool SQGenerator::Resume(SQVM *v,SQObjectPtr &dest)
 	}
 	SQObject _this = _stack._vals[0];
 	v->_stack[v->_stackbase] = type(_this) == OT_WEAKREF ? _weakref(_this)->_obj : _this;
-	//_stack._vals[0] = _null_; // shouldn't do this(better caching the weak ref)
+
 	for(SQInteger n = 1; n<size; n++) {
 		v->_stack[v->_stackbase+n] = _stack._vals[n];
 		_stack._vals[n].Null();
@@ -247,13 +247,17 @@ SQInteger SQFunctionProto::GetLine(SQInstruction *curr)
 			break;
 		}
 	}
-
+	
+	while(mid > 0 && _lineinfos[mid]._op >= op) mid--;
+	
 	line = _lineinfos[mid]._line;
+
 	return line;
 }
 
 SQClosure::~SQClosure()
 {
+	__ObjRelease(_root);
 	__ObjRelease(_env);
 	__ObjRelease(_base);
 	REMOVE_FROM_CHAIN(&_ss(this)->_gc_chain,this);
@@ -278,14 +282,14 @@ bool SafeRead(HSQUIRRELVM v,SQWRITEFUNC read,SQUserPointer up,SQUserPointer dest
 	return true;
 }
 
-bool WriteTag(HSQUIRRELVM v,SQWRITEFUNC write,SQUserPointer up,SQInteger tag)
+bool WriteTag(HSQUIRRELVM v,SQWRITEFUNC write,SQUserPointer up,SQUnsignedInteger32 tag)
 {
 	return SafeWrite(v,write,up,&tag,sizeof(tag));
 }
 
-bool CheckTag(HSQUIRRELVM v,SQWRITEFUNC read,SQUserPointer up,SQInteger tag)
+bool CheckTag(HSQUIRRELVM v,SQWRITEFUNC read,SQUserPointer up,SQUnsignedInteger32 tag)
 {
-	SQInteger t;
+	SQUnsignedInteger32 t;
 	_CHECK_IO(SafeRead(v,read,up,&t,sizeof(t)));
 	if(t != tag){
 		v->Raise_Error(_SC("invalid or corrupted closure stream"));
@@ -296,7 +300,8 @@ bool CheckTag(HSQUIRRELVM v,SQWRITEFUNC read,SQUserPointer up,SQInteger tag)
 
 bool WriteObject(HSQUIRRELVM v,SQUserPointer up,SQWRITEFUNC write,SQObjectPtr &o)
 {
-	_CHECK_IO(SafeWrite(v,write,up,&type(o),sizeof(SQObjectType)));
+	SQUnsignedInteger32 _type = (SQUnsignedInteger32)type(o);
+	_CHECK_IO(SafeWrite(v,write,up,&_type,sizeof(_type)));
 	switch(type(o)){
 	case OT_STRING:
 		_CHECK_IO(SafeWrite(v,write,up,&_string(o)->_len,sizeof(SQInteger)));
@@ -317,8 +322,9 @@ bool WriteObject(HSQUIRRELVM v,SQUserPointer up,SQWRITEFUNC write,SQObjectPtr &o
 
 bool ReadObject(HSQUIRRELVM v,SQUserPointer up,SQREADFUNC read,SQObjectPtr &o)
 {
-	SQObjectType t;
-	_CHECK_IO(SafeRead(v,read,up,&t,sizeof(SQObjectType)));
+	SQUnsignedInteger32 _type;
+	_CHECK_IO(SafeRead(v,read,up,&_type,sizeof(_type)));
+	SQObjectType t = (SQObjectType)_type;
 	switch(t){
 	case OT_STRING:{
 		SQInteger len;
@@ -349,6 +355,8 @@ bool SQClosure::Save(SQVM *v,SQUserPointer up,SQWRITEFUNC write)
 {
 	_CHECK_IO(WriteTag(v,write,up,SQ_CLOSURESTREAM_HEAD));
 	_CHECK_IO(WriteTag(v,write,up,sizeof(SQChar)));
+	_CHECK_IO(WriteTag(v,write,up,sizeof(SQInteger)));
+	_CHECK_IO(WriteTag(v,write,up,sizeof(SQFloat)));
 	_CHECK_IO(_function->Save(v,up,write));
 	_CHECK_IO(WriteTag(v,write,up,SQ_CLOSURESTREAM_TAIL));
 	return true;
@@ -358,10 +366,13 @@ bool SQClosure::Load(SQVM *v,SQUserPointer up,SQREADFUNC read,SQObjectPtr &ret)
 {
 	_CHECK_IO(CheckTag(v,read,up,SQ_CLOSURESTREAM_HEAD));
 	_CHECK_IO(CheckTag(v,read,up,sizeof(SQChar)));
+	_CHECK_IO(CheckTag(v,read,up,sizeof(SQInteger)));
+	_CHECK_IO(CheckTag(v,read,up,sizeof(SQFloat)));
 	SQObjectPtr func;
 	_CHECK_IO(SQFunctionProto::Load(v,up,read,func));
 	_CHECK_IO(CheckTag(v,read,up,SQ_CLOSURESTREAM_TAIL));
-	ret = SQClosure::Create(_ss(v),_funcproto(func));
+	ret = SQClosure::Create(_ss(v),_funcproto(func),_table(v->_roottable)->GetWeakRef(OT_TABLE));
+	//FIXME: load an root for this closure
 	return true;
 }
 
@@ -576,7 +587,7 @@ void SQClass::Mark(SQCollectable **chain)
 			SQSharedState::MarkObject(_methods[j].val, chain);
 			SQSharedState::MarkObject(_methods[j].attrs, chain);
 		}
-		for(SQUnsignedInteger k =0; k< _metamethods.size(); k++) {
+		for(SQUnsignedInteger k =0; k< MT_LAST; k++) {
 			SQSharedState::MarkObject(_metamethods[k], chain);
 		}
 	END_MARK()
@@ -623,7 +634,7 @@ void SQClosure::Mark(SQCollectable **chain)
 void SQNativeClosure::Mark(SQCollectable **chain)
 {
 	START_MARK()
-		for(SQUnsignedInteger i = 0; i < _outervalues.size(); i++) SQSharedState::MarkObject(_outervalues[i], chain);
+		for(SQUnsignedInteger i = 0; i < _noutervalues; i++) SQSharedState::MarkObject(_outervalues[i], chain);
 	END_MARK()
 }
 
