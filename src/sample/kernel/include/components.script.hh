@@ -19,6 +19,16 @@ be_pod B : public World::Component
     u32 value;
 };
 
+be_pod C : public World::Component
+{
+    u32 value;
+};
+
+be_pod D : public World::Component
+{
+    u32 value;
+};
+
 
 }
 
