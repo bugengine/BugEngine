@@ -3,8 +3,8 @@
 */
 #include "sqpcheader.h"
 #ifndef NO_COMPILER
-#include <stdarg.h>
-#include <setjmp.h>
+#include <cstdarg>
+#include <csetjmp>
 #include "sqopcodes.h"
 #include "sqstring.h"
 #include "sqfuncproto.h"
@@ -489,8 +489,7 @@ public:
 			_fs->SetIntructionParam(jpos, 1, (_fs->GetCurrentPos() - jpos));
 			break;
 			}
-		case TK_IN: BIN_EXP(_OP_EXISTS, &SQCompiler::BitwiseOrExp); break;
-		case TK_INSTANCEOF: BIN_EXP(_OP_INSTANCEOF, &SQCompiler::BitwiseOrExp); break;
+		
 		default:
 			return;
 		}
@@ -534,6 +533,8 @@ public:
 		case _SC('<'): BIN_EXP(_OP_CMP, &SQCompiler::ShiftExp,CMP_L); break;
 		case TK_GE: BIN_EXP(_OP_CMP, &SQCompiler::ShiftExp,CMP_GE); break;
 		case TK_LE: BIN_EXP(_OP_CMP, &SQCompiler::ShiftExp,CMP_LE); break;
+		case TK_IN: BIN_EXP(_OP_EXISTS, &SQCompiler::ShiftExp); break;
+		case TK_INSTANCEOF: BIN_EXP(_OP_INSTANCEOF, &SQCompiler::ShiftExp); break;
 		default: return;	
 		}
 	}
@@ -578,7 +579,7 @@ public:
 		MultExp();
 		for(;;) switch(_token) {
 		case _SC('+'): case _SC('-'):
-			BIN_EXP(ChooseArithOpByToken(_token), &SQCompiler::MultExp,_token); break;
+			BIN_EXP(ChooseArithOpByToken(_token), &SQCompiler::MultExp); break;
 		default: return;
 		}
 	}
@@ -588,7 +589,7 @@ public:
 		PrefixedExpr();
 		for(;;) switch(_token) {
 		case _SC('*'): case _SC('/'): case _SC('%'):
-			BIN_EXP(ChooseArithOpByToken(_token), &SQCompiler::PrefixedExpr,_token); break;
+			BIN_EXP(ChooseArithOpByToken(_token), &SQCompiler::PrefixedExpr); break;
 		default: return;
 		}
 	}
@@ -716,8 +717,8 @@ public:
 
 				switch(_token) {
 					case TK_IDENTIFIER:  id = _fs->CreateString(_lex._svalue);       break;
-					case TK_THIS:        id = _fs->CreateString(_SC("this"));        break;
-					case TK_CONSTRUCTOR: id = _fs->CreateString(_SC("constructor")); break;
+					case TK_THIS:        id = _fs->CreateString(_SC("this"),4);        break;
+					case TK_CONSTRUCTOR: id = _fs->CreateString(_SC("constructor"),11); break;
 				}
 
 				SQInteger pos = -1;
@@ -1147,6 +1148,7 @@ public:
 		_fs->SetIntructionParam(foreachpos + 1, 1, _fs->GetCurrentPos() - foreachpos);
 		END_BREAKBLE_BLOCK(foreachpos - 1);
 		//restore the local variable stack(remove index,val and ref idx)
+		_fs->PopTarget();
 		END_SCOPE();
 	}
 	void SwitchStatement()
@@ -1334,7 +1336,8 @@ public:
 	void FunctionExp(SQInteger ftype,bool lambda = false)
 	{
 		Lex(); Expect(_SC('('));
-		CreateFunction(_null_,lambda);
+		SQObjectPtr dummy;
+		CreateFunction(dummy,lambda);
 		_fs->AddInstruction(_OP_CLOSURE, _fs->PushTarget(), _fs->_functions.size() - 1, ftype == TK_FUNCTION?0:1);
 	}
 	void ClassExp()

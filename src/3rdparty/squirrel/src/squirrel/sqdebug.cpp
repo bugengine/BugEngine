@@ -2,7 +2,7 @@
 	see copyright notice in squirrel.h
 */
 #include "sqpcheader.h"
-#include <stdarg.h>
+#include <cstdarg>
 #include "sqvm.h"
 #include "sqfuncproto.h"
 #include "sqclosure.h"
@@ -18,7 +18,8 @@ SQRESULT sq_getfunctioninfo(HSQUIRRELVM v,SQInteger level,SQFunctionInfo *fi)
 			SQFunctionProto *proto = c->_function;
 			fi->funcid = proto;
 			fi->name = type(proto->_name) == OT_STRING?_stringval(proto->_name):_SC("unknown");
-			fi->source = type(proto->_name) == OT_STRING?_stringval(proto->_sourcename):_SC("unknown");
+			fi->source = type(proto->_sourcename) == OT_STRING?_stringval(proto->_sourcename):_SC("unknown");
+			fi->line = proto->_lineinfos[0]._line;
 			return SQ_OK;
 		}
 	}
@@ -95,7 +96,7 @@ void SQVM::Raise_IdxError(const SQObjectPtr &o)
 void SQVM::Raise_CompareError(const SQObject &o1, const SQObject &o2)
 {
 	SQObjectPtr oval1 = PrintObjVal(o1), oval2 = PrintObjVal(o2);
-	Raise_Error(_SC("comparsion between '%.50s' and '%.50s'"), _stringval(oval1), _stringval(oval2));
+	Raise_Error(_SC("comparison between '%.50s' and '%.50s'"), _stringval(oval1), _stringval(oval2));
 }
 
 

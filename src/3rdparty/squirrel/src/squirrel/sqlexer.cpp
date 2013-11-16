@@ -2,8 +2,8 @@
 	see copyright notice in squirrel.h
 */
 #include "sqpcheader.h"
-#include <ctype.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cstdlib>
 #include "sqtable.h"
 #include "sqstring.h"
 #include "sqcompiler.h"
@@ -71,6 +71,7 @@ void SQLexer::Init(SQSharedState *ss, SQLEXREADFUNC rg, SQUserPointer up,Compile
 	_lasttokenline = _currentline = 1;
 	_currentcolumn = 0;
 	_prevtoken = -1;
+	_reached_eof = SQFalse;
 	Next();
 }
 
@@ -88,6 +89,7 @@ void SQLexer::Next()
 		return;
 	}
 	_currdata = SQUIRREL_EOB;
+	_reached_eof = SQTrue;
 }
 
 const SQChar *SQLexer::Tok2Str(SQInteger tok)
@@ -114,6 +116,10 @@ void SQLexer::LexBlockComment()
 		}
 	}
 }
+void SQLexer::LexLineComment()
+{
+	do { NEXT(); } while (CUR_CHAR != _SC('\n') && (!IS_EOB()));
+}
 
 SQInteger SQLexer::Lex()
 {
@@ -128,6 +134,7 @@ SQInteger SQLexer::Lex()
 			NEXT();
 			_currentcolumn=1;
 			continue;
+		case _SC('#'): LexLineComment(); continue;
 		case _SC('/'):
 			NEXT();
 			switch(CUR_CHAR){
@@ -136,7 +143,7 @@ SQInteger SQLexer::Lex()
 				LexBlockComment();
 				continue;	
 			case _SC('/'):
-				do { NEXT(); } while (CUR_CHAR != _SC('\n') && (!IS_EOB()));
+				LexLineComment();
 				continue;
 			case _SC('='):
 				NEXT();
@@ -269,10 +276,10 @@ SQInteger SQLexer::Lex()
 	return 0;    
 }
 	
-SQInteger SQLexer::GetIDType(SQChar *s)
+SQInteger SQLexer::GetIDType(const SQChar *s,SQInteger len)
 {
 	SQObjectPtr t;
-	if(_keywords->Get(SQString::Create(_sharedstate, s), t)) {
+	if(_keywords->GetStr(s,len, t)) {
 		return SQInteger(_integer(t));
 	}
 	return TK_IDENTIFIER;
@@ -429,7 +436,7 @@ SQInteger SQLexer::ReadNumber()
 	else {
 		APPEND_CHAR((int)firstchar);
 		while (CUR_CHAR == _SC('.') || scisdigit(CUR_CHAR) || isexponent(CUR_CHAR)) {
-            if(CUR_CHAR == _SC('.')) type = TFLOAT;
+            if(CUR_CHAR == _SC('.') || isexponent(CUR_CHAR)) type = TFLOAT;
 			if(isexponent(CUR_CHAR)) {
 				if(type != TFLOAT) Error(_SC("invalid numeric format"));
 				type = TSCIENTIFIC;
@@ -474,7 +481,7 @@ SQInteger SQLexer::ReadID()
 		NEXT();
 	} while(scisalnum(CUR_CHAR) || CUR_CHAR == _SC('_'));
 	TERMINATE_BUFFER();
-	res = GetIDType(&_longstr[0]);
+	res = GetIDType(&_longstr[0],_longstr.size() - 1);
 	if(res == TK_IDENTIFIER || res == TK_CONSTRUCTOR) {
 		_svalue = &_longstr[0];
 	}

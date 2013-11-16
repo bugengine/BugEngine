@@ -288,8 +288,9 @@ SQInteger SQFuncState::TopTarget(){
 }
 SQInteger SQFuncState::PopTarget()
 {
-	SQInteger npos=_targetstack.back();
-	SQLocalVarInfo &t=_vlocals[_targetstack.back()];
+	SQUnsignedInteger npos=_targetstack.back();
+	assert(npos < _vlocals.size());
+	SQLocalVarInfo &t = _vlocals[npos];
 	if(type(t._name)==OT_NULL){
 		_vlocals.pop_back();
 	}
@@ -459,6 +460,7 @@ void SQFuncState::AddInstruction(SQInstruction &i)
 				pi._arg1 = i._arg1;
 				return;
 			}
+			break;
 		case _OP_SET:
 		case _OP_NEWSLOT:
 			if(i._arg0 == i._arg3) {
