@@ -209,8 +209,8 @@ def configure(conf):
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.ICC_TARGETS:
 		position = target.find('linux')
 		if position != -1:
-			os = 'linux'
-			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			os_name = 'linux'
+			toolchain = '%s-%s-%s-%s'%(os_name, arch, name, version)
 			if toolchain not in seen:
 				seen.add(toolchain)
 				env = conf.env.derive()
@@ -227,7 +227,7 @@ def configure(conf):
 					try:
 						conf.set_linux_options()
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os, arch, name, version, arch)
+						conf.add_toolchain(os_name, arch, name, version, arch)
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -241,8 +241,8 @@ def configure(conf):
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
 		position = target.find('linux-gnu')
 		if position != -1:
-			os = 'linux'
-			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+			os_name = 'linux'
+			toolchain = '%s-%s-%s-%s'%(os_name, arch, name, version)
 			if toolchain not in seen:
 				seen.add(toolchain)
 				env = conf.env.derive()
@@ -259,7 +259,7 @@ def configure(conf):
 						conf.end_msg('done')
 						conf.set_linux_options()
 						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(os, arch, name, version, arch)
+						conf.add_toolchain(os_name, arch, name, version, arch)
 					except Errors.WafError as e:
 						conf.variant = ''
 						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -275,32 +275,35 @@ def configure(conf):
 			arch_name, options = arch
 			target = 'linux'
 			toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
-			if toolchain not in seen:
-				seen.add(toolchain)
-				env = conf.env.derive()
-				conf.setenv(toolchain, env)
-				env.DEST_OS = 'linux'
+			if toolchain in seen:
+				continue
+			if not conf.is_clang_working(os.path.join(directory, 'clang'), options):
+				continue
+			seen.add(toolchain)
+			env = conf.env.derive()
+			conf.setenv(toolchain, env)
+			env.DEST_OS = 'linux'
+			try:
+				conf.start_msg('Setting up compiler')
+				conf.load_clang(directory)
+				conf.set_linux_clang_options(options, version)
+			except Exception as e:
+				conf.end_msg(e, color='RED')
+			else:
 				try:
-					conf.start_msg('Setting up compiler')
-					conf.load_clang(directory)
-					conf.set_linux_clang_options(options, version)
+					conf.end_msg('done')
+					conf.set_linux_options()
+					conf.env.KERNEL_TOOLCHAINS = [toolchain]
+					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+				except Errors.WafError as e:
+					conf.variant = ''
+					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
 				except Exception as e:
-					conf.end_msg(e, color='RED')
+					conf.variant = ''
+					raise
 				else:
-					try:
-						conf.end_msg('done')
-						conf.set_linux_options()
-						conf.env.KERNEL_TOOLCHAINS = [toolchain]
-						conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
-					except Errors.WafError as e:
-						conf.variant = ''
-						pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-					except Exception as e:
-						conf.variant = ''
-						raise
-					else:
-						conf.variant = ''
-						pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+					conf.variant = ''
+					pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
 	bld.platforms.append(bld.external('3rdparty.X11'))
