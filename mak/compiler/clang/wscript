@@ -41,6 +41,13 @@ def expand_clang_archs(arch):
 		Logs.warn('unknown architecture : %s' % arch)
 		return [([], arch)]
 
+@conf
+def is_clang_working(conf, clang, options):
+	cmd = [clang, '-x', 'c++', '-E', '-']
+	p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+	p.stdin.write('#include <iostream>\n#include <cstring>\n'.encode())
+	out = p.communicate()[0]
+	return p.returncode == 0
 
 @conf
 def has_arch_flag(self, clang):
