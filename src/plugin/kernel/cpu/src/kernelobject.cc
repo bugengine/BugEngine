@@ -10,6 +10,7 @@ namespace BugEngine
 
 CPUKernelTask::CPUKernelTask(weak<KernelObject> object)
     :   object(object)
+    ,   params()
     ,   splitCount(i_u32::Zero)
 {
 }
