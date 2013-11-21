@@ -47,13 +47,14 @@ private:
     u32                                         m_entityBufferCount;
     const u32                                   m_maxEntityBufferCount;
     const u32                                   m_bufferCapacity;
-    minitl::vector< raw<const RTTI::Class> >    m_componentTypes;
+    minitl::array< raw<const RTTI::Class> >     m_componentTypes;
     minitl::vector<ComponentGroup>              m_componentGroups;
 private:
     void start();
     EntityInfo& getEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
     ComponentGroup& getComponentGroup(u32 index);
+    void registerType(raw<const RTTI::Class> componentType, u32 index, u32 maximumCount);
 private: // friend World
     Entity spawn();
     void unspawn(Entity e);
@@ -61,14 +62,29 @@ private: // friend World
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
 protected:
-    EntityStorage();
+    struct WorldComposition
+    {
+        struct Partition
+        {
+            minitl::array< raw<const RTTI::Class> > components;
+        };
+
+        minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >    components;
+        minitl::vector< Partition >                                     partitions;
+
+        WorldComposition(u32 componentCount)
+            :   components(Arena::temporary(), componentCount)
+            ,   partitions(Arena::temporary())
+        {
+        }
+    };
+protected:
+    EntityStorage(const WorldComposition& composition);
     ~EntityStorage();
 
     weak<Task::ITask>   initialTask() const;
 
-    void registerType(raw<const RTTI::Class> componentType, u32 maximumCount);
     u32 indexOf(raw<const RTTI::Class> componentType) const;
-    void finalize();
 };
 
 }}

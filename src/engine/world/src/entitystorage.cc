@@ -58,7 +58,7 @@ struct EntityStorage::EntityInfo
 static const u32 s_usedBit = 0x80000000;
 static const u32 s_indexMask = 0x7FFFFFFF;
 
-EntityStorage::EntityStorage()
+EntityStorage::EntityStorage(const WorldComposition& composition)
     :   m_task(scoped< Task::Task< Task::MethodCaller<EntityStorage, &EntityStorage::start> > >::create(
                     Arena::task(),
                     "start",
@@ -71,11 +71,15 @@ EntityStorage::EntityStorage()
     ,   m_entityBufferCount(0)
     ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
     ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityInfo))
-    ,   m_componentTypes(Arena::game())
+    ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
 {
     m_entityInfoBuffer[0] = 0;
-    m_componentTypes.reserve(64);
+
+    for (u32 i = 0; i < composition.components.size(); ++i)
+    {
+        registerType(composition.components[i].first, i, composition.components[i].second);
+    }
 }
 
 EntityStorage::~EntityStorage()
@@ -94,13 +98,12 @@ weak<Task::ITask> EntityStorage::initialTask() const
     return m_task;
 }
 
-void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 maximumCount)
+void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 index, u32 maximumCount)
 {
     be_assert(indexOf(componentType) == (u32)-1,
               "component type %s is registered twice" | componentType->fullname());
     be_info("component %s: reserving space for %d" | componentType->name | maximumCount);
-    m_componentTypes.push_back(componentType);
-    u32 index = be_checked_numcast<u32>(m_componentTypes.size()) - 1;
+    m_componentTypes[index] = componentType;
     u64 mask = u64(1) << index;
     m_componentGroups.push_back(ComponentGroup(mask));
 }
@@ -115,10 +118,6 @@ u32 EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
         }
     }
     return (u32) -1;
-}
-
-void EntityStorage::finalize()
-{
 }
 
 void EntityStorage::start()
