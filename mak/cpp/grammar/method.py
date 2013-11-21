@@ -222,10 +222,10 @@ class MethodAttributes(cpp.yacc.Nonterm):
 class Initializers(cpp.yacc.Nonterm):
 	"%nonterm"
 
-	def initializers(self, name, lparen, value, rparen):
-		"%reduce ID LPAREN Value RPAREN"
-	def initializer_list(self, name, lparen, value, rparen, comma, initlist):
-		"%reduce ID LPAREN Value RPAREN COMMA Initializers"
+	def initializers(self, name, lparen, skip, rparen):
+		"%reduce ID LPAREN SkipList RPAREN"
+	def initializer_list(self, name, lparen, skip, rparen, comma, initlist):
+		"%reduce ID LPAREN SkipList RPAREN COMMA Initializers"
 
 
 
