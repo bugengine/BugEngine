@@ -23,25 +23,19 @@ public:
 private:
     COMPONENT_LIST m_list;
     PARTITION_LIST m_partitions;
+private:
+    static EntityStorage::WorldComposition createComposition()
+    {
+        EntityStorage::WorldComposition composition(COMPONENT_LIST::Index + 1);
+        COMPONENT_LIST::addComponent(composition.components);
+        return composition;
+    }
 protected:
     EntityStorageFactory()
-        :   EntityStorage()
+        :   EntityStorage(createComposition())
         ,   m_list(initialTask())
         ,   m_partitions(initialTask())
     {
-
-        registerTypes(m_list);
-    }
-    template< typename T, u32 COUNT, typename TAIL >
-    void registerTypes(const ComponentList<T, COUNT, TAIL>& list)
-    {
-        registerType(be_typeid<T>::klass(), COUNT);
-        registerTypes(static_cast<const ComponentList<typename TAIL::Type, TAIL::Count, typename TAIL::Tail>&>(list));
-    }
-    template< typename T, u32 COUNT >
-    void registerTypes(const ComponentList<T, COUNT, void>& /*list*/)
-    {
-        registerType(be_typeid<T>::klass(), COUNT);
     }
 public:
     template< typename T >

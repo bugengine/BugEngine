@@ -25,6 +25,12 @@ struct ComponentList : public TAIL
         ,   stream(task)
     {
     }
+    static void addComponent(minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
+    {
+        componentList[count].first = be_typeid<T>::klass();
+        componentList[count].second = COUNT;
+        TAIL::addComponent(componentList, count + 1);
+    }
 private:
     ComponentList(const ComponentList& other);
     ComponentList& operator=(const ComponentList& other);
@@ -39,9 +45,13 @@ struct ComponentList<T, COUNT, void>
     typedef void Tail;
     const OutputStream<T> stream;
     ComponentList(weak<Task::ITask> task)
-
         :   stream(task)
     {
+    }
+    static void addComponent(minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
+    {
+        componentList[count].first = be_typeid<T>::klass();
+        componentList[count].second = COUNT;
     }
 };
 
