@@ -549,8 +549,7 @@ class vs2010e(vs2003):
 class vs11(vs2003):
 	cmd = 'vs11'
 	fun = 'build'
-	#TODO: folders
-	version =	(('Visual Studio 11', '12.00', False),(VCxproj, ('4.5','11.0')))
+	version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
 	platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2012(vs11):

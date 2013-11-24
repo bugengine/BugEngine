@@ -8,10 +8,8 @@
 namespace minitl
 {
 
-
-
 template< u32 BITS >
-be_align(1) class bitset
+struct bitset
 {
 private:
     enum
@@ -23,16 +21,16 @@ private:
     u8 m_bytes[Bytes];
     struct bit
     {
-        bitset<BITS>    owner;
+        bitset<BITS>&   owner;
         u32 const       index;
         inline operator bool() const;
-        inline bit& operator=(bool) const;
+        inline bit& operator=(bool);
     };
     friend struct bit;
 public:
     inline bitset();
 
-    inline const bit    operator[](u32 index);
+    inline bit          operator[](u32 index);
     inline bool         operator[](u32 index) const;
 
     inline bitset<BITS>& operator &=(const bitset<BITS>& rhs);
