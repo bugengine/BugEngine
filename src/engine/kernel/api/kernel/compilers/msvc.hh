@@ -34,6 +34,7 @@ typedef u8                      byte;
 # pragma warning(disable:4100)  // unreferenced formal parameter
 # pragma warning(disable:4702)  // unreachable code
 #endif
+#pragma warning(disable:4351)   // new behavior: elements of array '...' will be default initialized
 #pragma warning(disable:4355)   // this used in base member initialization list
 #pragma warning(disable:4127)   // conditional expression is constant
 //#pragma warning(disable:4181)   // qualifier applied to reference type; ignored

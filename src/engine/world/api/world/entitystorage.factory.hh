@@ -9,7 +9,6 @@
 #include    <rtti/typeinfo.hh>
 #include    <world/helper/outputstream.hh>
 #include    <world/helper/componentlist.hh>
-#include    <world/helper/componentbitset.hh>
 
 namespace BugEngine { namespace World
 {
@@ -28,6 +27,8 @@ private:
     {
         EntityStorage::WorldComposition composition(COMPONENT_LIST::Index + 1);
         COMPONENT_LIST::addComponent(composition.components);
+        composition.partitions.reserve(PARTITION_LIST::Index + 1);
+        PARTITION_LIST::addPartition(composition.partitions);
         return composition;
     }
 protected:

@@ -53,7 +53,7 @@ public:
     typename POLICY::difference_type operator-(const base_iterator<POLICY>& other) const
     {
         be_assert_recover(m_owner == other.m_owner, "can't differ between unrelated iterators", return 0);
-        return distance(other.m_iterator, m_iterator);
+        return POLICY::distance(other.m_iterator, m_iterator);
     }
 
     base_iterator<POLICY>& operator++()
@@ -161,6 +161,7 @@ struct vector<T>::iterator_policy
     typedef typename vector<T>::size_type        size_type;
     typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
+    static difference_type distance(pointer begin,pointer end) { return minitl::distance(begin, end); }
 };
 
 template< typename T >
@@ -172,6 +173,7 @@ struct vector<T>::const_iterator_policy
     typedef typename vector<T>::size_type        size_type;
     typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, offset); }
+    static difference_type distance(pointer begin,pointer end) { return minitl::distance(begin, end); }
 };
 
 template< typename T >
@@ -183,6 +185,7 @@ struct vector<T>::reverse_iterator_policy
     typedef typename vector<T>::size_type        size_type;
     typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
+    static difference_type distance(pointer begin,pointer end) { return minitl::distance(end, begin); }
 };
 
 template< typename T >
@@ -194,6 +197,7 @@ struct vector<T>::const_reverse_iterator_policy
     typedef typename vector<T>::size_type        size_type;
     typedef typename vector<T>::difference_type  difference_type;
     static pointer advance(pointer i, ptrdiff_t offset) { return minitl::advance(i, -offset); }
+    static difference_type distance(pointer begin,pointer end) { return minitl::distance(end, begin); }
 };
 
 
@@ -222,7 +226,6 @@ vector<T>::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
     ,   m_capacity(m_memory)
 {
     push_back(first, last);
-
 }
 
 template< typename T >
@@ -298,7 +301,7 @@ typename vector<T>::size_type                vector<T>::size() const
 }
 
 template< typename T >
-bool                                                vector<T>::empty() const
+bool                                         vector<T>::empty() const
 {
     return m_end == m_memory;
 }
@@ -318,7 +321,7 @@ typename vector<T>::const_reference          vector<T>::operator[](size_type i) 
 
 
 template< typename T >
-void                                                vector<T>::push_back(const_reference r)
+void                                         vector<T>::push_back(const_reference r)
 {
     ensure(size() + 1);
     new((void*)m_end) T(r);
@@ -327,7 +330,7 @@ void                                                vector<T>::push_back(const_r
 
 template< typename T >
 template< typename ITERATOR >
-void                                                vector<T>::push_back(ITERATOR first, ITERATOR last)
+void                                         vector<T>::push_back(ITERATOR first, ITERATOR last)
 {
     size_type count = minitl::distance(first, last);
     ensure(size() + count);
@@ -340,7 +343,7 @@ void                                                vector<T>::push_back(ITERATO
 }
 
 template< typename T >
-void                                                vector<T>::pop_back()
+void                                         vector<T>::pop_back()
 {
     m_end = advance_ptr(m_end, -1);
     m_end->~T();
@@ -407,7 +410,7 @@ typename vector<T>::const_reference          vector<T>::back() const
 
 
 template< typename T >
-void                                                vector<T>::resize(size_type size)
+void                                         vector<T>::resize(size_type size)
 {
     size_type s = distance(m_memory.data(), m_end);
     if (size > s)
@@ -428,7 +431,7 @@ void                                                vector<T>::resize(size_type 
 }
 
 template< typename T >
-void                                                vector<T>::clear()
+void                                         vector<T>::clear()
 {
     for (pointer t = m_memory.data(); t != m_end; ++t)
         t->~T();
@@ -436,7 +439,7 @@ void                                                vector<T>::clear()
 }
 
 template< typename T >
-void                                                vector<T>::ensure(size_type size)
+void                                         vector<T>::ensure(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
     if (size > capacity)
@@ -453,7 +456,7 @@ void                                                vector<T>::ensure(size_type 
 }
 
 template< typename T >
-void                                                vector<T>::reserve(size_type size)
+void                                         vector<T>::reserve(size_type size)
 {
     size_type capacity = distance(m_memory.data(), m_capacity);
     if (size > capacity)

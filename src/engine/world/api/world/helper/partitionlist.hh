@@ -25,6 +25,12 @@ struct PartitionList : public TAIL
         ,   m_partition(task)
     {
     }
+    static void addPartition(minitl::vector< minitl::array< raw<const RTTI::Class> > >& partitions)
+    {
+        partitions.push_back(minitl::array< raw<const RTTI::Class> >(Arena::temporary(), T::Index + 1));
+        T::buildList(partitions.back().begin());
+        Tail::addPartition(partitions);
+    }
 private:
     PartitionList(const PartitionList& other);
     PartitionList& operator=(const PartitionList& other);
@@ -40,6 +46,11 @@ struct PartitionList<T, void>
     PartitionList(weak<Task::ITask> task)
         :   m_partition(task)
     {
+    }
+    static void addPartition(minitl::vector< minitl::array< raw<const RTTI::Class> > >& partitions)
+    {
+        partitions.push_back(minitl::array< raw<const RTTI::Class> >(Arena::temporary(), T::Index + 1));
+        T::buildList(partitions.back().begin());
     }
 private:
     PartitionList(const PartitionList& other);
