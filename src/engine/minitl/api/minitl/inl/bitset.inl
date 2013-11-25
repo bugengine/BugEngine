@@ -91,9 +91,9 @@ bool bitset<BITS>::operator !=(const bitset<BITS>& rhs) const
     bool result = true;
     for (u32 i = 0; i < (u32)Bytes-1; ++i)
     {
-        result &= (m_bits[i] != rhs.m_bytes[i]);
+        result &= (m_bytes[i] != rhs.m_bytes[i]);
     }
-    result &= ((m_bits[Bytes-1] & ((1<<BITS%8) - 1)) != (rhs.m_bytes[Bytes-1]) & ((1<<BITS%8) - 1));
+    result &= ((m_bytes[Bytes-1] & ((1<<BITS%8) - 1)) != (rhs.m_bytes[Bytes-1]) & ((1<<BITS%8) - 1));
     return result;
 }
 

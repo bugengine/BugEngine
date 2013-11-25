@@ -32,7 +32,7 @@ private:
     {
         minitl::array<EntityStorage::Bucket> buckets;
         u32* componentCounts;
-        ComponentGroup(u32 componentCount, const minitl::vector<u32>& bucketMasks);
+        ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks);
         ~ComponentGroup();
     };
     struct EntityInfo;
@@ -84,6 +84,7 @@ private:
     const u32                       m_bufferCapacity;
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
+    minitl::vector<u32*>            m_componentCountsList;
 private:
     void start();
     EntityInfo& getEntityInfo(Entity e);

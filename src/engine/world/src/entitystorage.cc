@@ -55,14 +55,18 @@ struct GroupInfo
     {
         if (isCommon(otherGroup.components.begin(), otherGroup.components.end()))
         {
-            for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = otherGroup.components.begin(); component != otherGroup.components.end(); ++component)
+            for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = otherGroup.components.begin();
+                 component != otherGroup.components.end();
+                 ++component)
             {
                 if (find(*component, components.begin(), components.end()) == components.end())
                 {
                     components.push_back(*component);
                 }
             }
-            for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator partition = otherGroup.partitions.begin(); partition != otherGroup.partitions.end(); ++partition)
+            for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator partition = otherGroup.partitions.begin();
+                 partition != otherGroup.partitions.end();
+                  ++partition)
             {
                 partitions.push_back(*partition);
             }
@@ -93,24 +97,19 @@ EntityStorage::Bucket::~Bucket()
 {
 }
 
-EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, const minitl::vector<u32>& bucketMasks)
+EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks)
     :   buckets(Arena::game(), (u32)bucketMasks.size())
-    ,   componentCounts((u32*)Arena::game().alloc(sizeof(u32) * componentCount * bucketMasks.size(), 4))
+    ,   componentCounts(componentCounts)
 {
     u32 index = 0;
     for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
     {
-        /*for (u32 i = 0; i < componentCount; ++i)
-        {
-            componentCounts[componentCount * index + i] = 0;
-        }*/
         buckets[index] = Bucket(componentCounts + componentCount * index, *it);
     }
 }
 
 EntityStorage::ComponentGroup::~ComponentGroup()
 {
-    Arena::game().free(componentCounts);
 }
 
 
@@ -143,6 +142,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityInfo))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
+    ,   m_componentCountsList(Arena::game())
 {
     m_entityInfoBuffer[0] = 0;
     buildGroups(composition);
@@ -156,6 +156,10 @@ EntityStorage::~EntityStorage()
     {
         m_entityAllocator.free(*buffer);
     }
+    for (minitl::vector<u32*>::const_iterator it = m_componentCountsList.begin(); it != m_componentCountsList.end(); ++it)
+    {
+        Arena::game().free(*it);
+    }
     m_entityAllocator.free(m_entityInfoBuffer);
 }
 
@@ -166,11 +170,7 @@ weak<Task::ITask> EntityStorage::initialTask() const
 
 void EntityStorage::buildGroups(const WorldComposition& composition)
 {
-    minitl::vector<GroupInfo> groups(Arena::temporary(), composition.partitions.size());
-    for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator it = composition.partitions.begin(); it != composition.partitions.end(); ++it)
-    {
-        groups.push_back(GroupInfo(*it));
-    }
+    minitl::vector<GroupInfo> groups(Arena::temporary(), composition.partitions.begin(), composition.partitions.end());
 
     if (groups.size() > 1)
     {
@@ -191,19 +191,23 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
     }
 
     u32 groupIndex = 0;
-    for (minitl::vector<GroupInfo>::const_iterator it = groups.begin(); it != groups.end(); ++it, ++groupIndex)
+    for (minitl::vector<GroupInfo>::const_iterator group = groups.begin(); group != groups.end(); ++group, ++groupIndex)
     {
         minitl::vector< raw<const RTTI::Class> > registeredComponents(Arena::temporary());
         char message[1024] = {0};
         u32 componentIndex = 0;
-        for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = it->components.begin(); component != it->components.end(); ++component, ++componentIndex)
+        for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = group->components.begin();
+             component != group->components.end();
+              ++component, ++componentIndex)
         {
             strcat(message, (*component)->name.c_str());
-            if (component != it->components.end())
+            if (component != group->components.end())
             {
                 strcat(message, "+");
             }
-            for (minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >::const_iterator ci = composition.components.begin(); ci != composition.components.end(); ++ci)
+            for (minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >::const_iterator ci = composition.components.begin();
+                 ci != composition.components.end();
+                 ++ci)
             {
                 if (ci->first == *component)
                 {
@@ -212,10 +216,12 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
                 }
             }
         }
-        be_info("Group: %s" | message);
 
+        be_info("Group: %s" | message);
         minitl::vector<u32> masks(Arena::temporary());
-        for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator partition = it->partitions.begin(); partition != it->partitions.end(); ++partition)
+        for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator partition = group->partitions.begin();
+             partition != group->partitions.end();
+             ++partition)
         {
             u32 mask = buildMask(*partition);
             minitl::vector<u32> previousMasks(Arena::temporary(), masks.rbegin(), masks.rend());
@@ -229,12 +235,12 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
             masks.push_back(mask);
         }
 
-        for (minitl::vector<u32>::const_iterator it = masks.begin(); it != masks.end(); ++it)
+        for (minitl::vector<u32>::const_iterator mask = masks.begin(); mask != masks.end(); ++mask)
         {
             message[0] = 0;
             for (u32 i = 0; i < componentIndex; ++i)
             {
-                if (*it & (1 << i))
+                if (*mask & (1 << i))
                 {
                     strcat(message, registeredComponents[i]->name.c_str());
                     strcat(message, "+");
@@ -243,7 +249,9 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
             be_info(" Bucket: %s" | message);
         }
 
-        m_componentGroups.push_back(ComponentGroup(componentIndex, masks));
+        u32* componentCounts = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
+        m_componentCountsList.push_back(componentCounts);
+        m_componentGroups.push_back(ComponentGroup(group->components.size(), componentCounts, masks));
     }
 }
 
