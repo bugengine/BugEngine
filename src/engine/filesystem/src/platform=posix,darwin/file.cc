@@ -9,9 +9,8 @@
 namespace BugEngine
 {
 
-PosixFile::PosixFile(ifilename file, Media media, u64 size, time_t modifiedTime)
-    :   File(media, size, modifiedTime)
-    ,   m_file(file)
+PosixFile::PosixFile(ifilename filename, Media media, u64 size, time_t modifiedTime)
+    :   File(filename, media, size, modifiedTime)
 {
 }
 
@@ -24,13 +23,13 @@ void PosixFile::doFillBuffer(weak<File::Ticket> ticket) const
     static const int g_bufferSize = 1024;
 
     be_assert(ticket->file == this, "trying to read wrong file");
-    ifilename::Filename pathname = m_file.str();
+    ifilename::Filename pathname = m_filename.str();
     FILE* f = fopen(pathname.name, "rb");
     if (!f)
     {
         const char *errorMessage = strerror(errno);
         be_forceuse(errorMessage);
-        be_error("file %s could not be opened: (%d) %s" | m_file | errno | errorMessage);
+        be_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
         ticket->error = true;
     }
     else
@@ -53,7 +52,7 @@ void PosixFile::doFillBuffer(weak<File::Ticket> ticket) const
             data += read;
             if (read == 0)
             {
-                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_file | ticket->processed | ticket->total);
+                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_filename | ticket->processed | ticket->total);
                 ticket->error = true;
             }
         }
@@ -66,13 +65,13 @@ void PosixFile::doWriteBuffer(weak<Ticket> ticket) const
     static const int g_bufferSize = 1024;
 
     be_assert(ticket->file == this, "trying to write to wrong file");
-    ifilename::Filename pathname = m_file.str();
+    ifilename::Filename pathname = m_filename.str();
     FILE* f = fopen(pathname.name, "ab");
     if (!f)
     {
         const char *errorMessage = strerror(errno);
         be_forceuse(errorMessage);
-        be_error("file %s could not be opened: (%d) %s" | m_file | errno | errorMessage);
+        be_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
         ticket->error = true;
     }
     else
@@ -97,7 +96,7 @@ void PosixFile::doWriteBuffer(weak<Ticket> ticket) const
             {
                 const char *errorMessage = strerror(errno);
                 be_forceuse(errorMessage);
-                be_error("could not write part of the buffer to file %s; failed after processing %d bytes out of %d (%s)" | m_file | ticket->processed | ticket->total | errorMessage);
+                be_error("could not write part of the buffer to file %s; failed after processing %d bytes out of %d (%s)" | m_filename | ticket->processed | ticket->total | errorMessage);
                 ticket->error = true;
             }
         }
