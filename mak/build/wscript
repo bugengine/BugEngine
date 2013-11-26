@@ -1,4 +1,4 @@
-from waflib import Task, Options, Build, Task
+from waflib import Task, Options, Build, Task, Utils
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -482,7 +482,7 @@ def objects_feature(task):
 def install_program(self):
 	if self.bld.is_install:
 		if not self.env.ENV_PREFIX: #no multiarch
-			self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), self.link_task.outputs)
+			self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), self.link_task.outputs, chmod=Utils.O755)
 
 @feature('kernel', 'plugin')
 @after_method('process_use')
