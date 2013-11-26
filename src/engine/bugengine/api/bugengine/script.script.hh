@@ -21,6 +21,8 @@ private:
 protected:
     Script(weak<const File> file);
     ~Script();
+public:
+    ifilename getScriptName() const;
 };
 
 }

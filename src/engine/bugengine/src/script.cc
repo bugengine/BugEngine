@@ -16,5 +16,10 @@ Script::~Script()
 {
 }
 
+ifilename Script::getScriptName() const
+{
+    return m_file->getFileName();
+}
+
 }
 

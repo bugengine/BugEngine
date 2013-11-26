@@ -12,8 +12,6 @@ namespace BugEngine
 
 class PosixFile : public File
 {
-private:
-    ifilename   m_file;
 public:
     PosixFile(ifilename file, File::Media media, u64 size, time_t modifiedTime);
     ~PosixFile();
