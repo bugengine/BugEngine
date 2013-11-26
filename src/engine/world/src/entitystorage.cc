@@ -267,7 +267,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
         u32* componentCounts = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
         m_componentCountsList.push_back(componentCounts);
-        m_componentGroups.push_back(ComponentGroup(group->components.size(), componentCounts, masks));
+        m_componentGroups.push_back(ComponentGroup(be_checked_numcast<u32>(group->components.size()), componentCounts, masks));
     }
 }
 
