@@ -46,8 +46,9 @@ File::Ticket::~Ticket()
     f->decref();
 }
 
-File::File(Media media, u64 size, u64 fileState)
-    :   m_media(media)
+File::File(ifilename filename, Media media, u64 size, u64 fileState)
+    :   m_filename(filename)
+    ,   m_media(media)
     ,   m_size(size)
     ,   m_state(fileState)
 {

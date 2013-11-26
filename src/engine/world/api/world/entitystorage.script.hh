@@ -39,28 +39,37 @@ private:
     struct ComponentIndex
     {
         u16 group;
-        u16 index;
+        u8  index;
+        u8  offset;
 
         ComponentIndex()
             :   group((u16)~0)
-            ,   index((u16)~0)
+            ,   index((u8)~0)
+            ,   offset((u8)~0)
         {
         }
-        ComponentIndex(u32 group, u32 index)
+        ComponentIndex(u32 group, u32 index, u32 offset)
             :   group(be_checked_numcast<u16>(group))
-            ,   index(be_checked_numcast<u16>(index))
+            ,   index(be_checked_numcast<u8>(index))
+            ,   offset(be_checked_numcast<u8>(offset))
         {
         }
         operator void*() const
         {
-            return (void*)(group != (u16)~0 || index != (u16)~0);
+            return (void*)(group != (u16)~0 || index != (u8)~0);
         }
         bool operator!() const
         {
-            return group == (u16)~0 && index == (u16)~0;
+            return group == (u16)~0 && index == (u8)~0;
         }
     };
     typedef minitl::pair< raw<const RTTI::Class>, ComponentIndex > ComponentInfo;
+    struct ComponentStorage
+    {
+        void* memory;
+        u32 current;
+        u32 maximum;
+    };
 protected:
     struct WorldComposition
     {
@@ -85,6 +94,7 @@ private:
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
     minitl::vector<u32*>            m_componentCountsList;
+    minitl::array<ComponentStorage> m_components;
 private:
     void start();
     EntityInfo& getEntityInfo(Entity e);
@@ -92,8 +102,8 @@ private:
     ComponentGroup& getComponentGroup(ComponentIndex index);
 
     void buildGroups(const WorldComposition& composition);
-    u32 buildMask(const minitl::array< raw<const RTTI::Class> >& componentList);
-    void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 maximumCount);
+    void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount);
+
 private: // friend World
     Entity spawn();
     void unspawn(Entity e);
@@ -101,11 +111,15 @@ private: // friend World
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex indexOf(raw<const RTTI::Class> componentType) const;
+
 protected:
     EntityStorage(const WorldComposition& composition);
     ~EntityStorage();
 
     weak<Task::ITask>   initialTask() const;
+
+public:
+    u32 buildMask(const minitl::array< raw<const RTTI::Class> >& componentList);
 };
 
 }}
