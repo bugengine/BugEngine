@@ -8,12 +8,11 @@ namespace BugEngine
 {
 
 ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& info, const unz_file_pos& filePos)
-    :   File(File::Media(File::Media::Package, 0, 0), u64(info.uncompressed_size), u64(info.dosDate))
-    ,   m_file(filename)
+    :   File(filename, File::Media(File::Media::Package, 0, 0), u64(info.uncompressed_size), u64(info.dosDate))
     ,   m_handle(handle)
     ,   m_filePos(filePos)
 {
-    be_info("created zip file %s" | m_file);
+    be_info("created zip file %s" | m_filename);
 }
 
 ZipFile::~ZipFile()
@@ -34,9 +33,9 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         s_fileOffset = 0;
         unzCloseCurrentFile(m_handle);
         int result = unzGoToFilePos(m_handle, &m_filePos);
-        be_assert(result == UNZ_OK, "could not go to file %s" | m_file);
+        be_assert(result == UNZ_OK, "could not go to file %s" | m_filename);
         result = unzOpenCurrentFile(m_handle);
-        be_assert(result == UNZ_OK, "could not open file %s" | m_file);
+        be_assert(result == UNZ_OK, "could not open file %s" | m_filename);
         be_forceuse(result);
     }
 
@@ -62,7 +61,7 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         }
         else
         {
-            be_error("error %d while reading from file %s" | bytesRead | m_file);
+            be_error("error %d while reading from file %s" | bytesRead | m_filename);
         }
     }
 
@@ -72,7 +71,7 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         s_currentFile = 0;
     }
 
-    be_info("file reading %s not implemented yet" | m_file);
+    be_info("file reading %s not implemented yet" | m_filename);
 }
 
 void ZipFile::doWriteBuffer(weak<Ticket> ticket) const

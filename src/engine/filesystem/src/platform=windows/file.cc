@@ -8,9 +8,8 @@
 namespace BugEngine
 {
 
-Win32File::Win32File(ifilename file, Media media, u64 size, u64 timestamp)
-    :   File(media, size, timestamp)
-    ,   m_file(file)
+Win32File::Win32File(ifilename filename, Media media, u64 size, u64 timestamp)
+    :   File(filename, media, size, timestamp)
 {
 }
 
@@ -38,7 +37,7 @@ static void setFilePointer(const char *debugName, HANDLE file, i64 wantedOffset)
 void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    ifilename::Filename pathname = m_file.str();
+    ifilename::Filename pathname = m_filename.str();
     HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_READ,
                              FILE_SHARE_READ,
@@ -57,7 +56,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_file | errorCode | errorMessage);
+        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_filename | errorCode | errorMessage);
         ticket->error = true;
         ::LocalFree(errorMessage);
     }
@@ -75,7 +74,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
             ticket->processed += read;
             if (read == 0)
             {
-                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_file | ticket->processed | ticket->total);
+                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_filename | ticket->processed | ticket->total);
                 ticket->error = true;
             }
         }
@@ -86,7 +85,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 void Win32File::doWriteBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    ifilename::Filename pathname = m_file.str();
+    ifilename::Filename pathname = m_filename.str();
     HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_WRITE,
                              0,
@@ -105,7 +104,7 @@ void Win32File::doWriteBuffer(weak<Ticket> ticket) const
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_file | errorCode | errorMessage);
+        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_filename | errorCode | errorMessage);
         ticket->error = true;
         ::LocalFree(errorMessage);
     }
@@ -123,7 +122,7 @@ void Win32File::doWriteBuffer(weak<Ticket> ticket) const
             ticket->processed += written;
             if (written == 0)
             {
-                be_error("could not write part of the buffer to file %s; failed after processing %d bytes out of %d" | m_file | ticket->processed | ticket->total);
+                be_error("could not write part of the buffer to file %s; failed after processing %d bytes out of %d" | m_filename | ticket->processed | ticket->total);
                 ticket->error = true;
             }
         }
