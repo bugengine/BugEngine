@@ -11,8 +11,6 @@ namespace BugEngine
 
 class Win32File : public File
 {
-private:
-    ifilename m_file;
 public:
     Win32File(ifilename file, File::Media media, u64 size, u64 timestamp);
     ~Win32File();

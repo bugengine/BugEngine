@@ -143,9 +143,19 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
     ,   m_componentCountsList(Arena::game())
+    ,   m_components(Arena::game(), composition.components.size())
 {
     m_entityInfoBuffer[0] = 0;
     buildGroups(composition);
+    for (minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >::const_iterator it = composition.components.begin();
+         it != composition.components.end();
+         ++it)
+    {
+        ComponentIndex index = indexOf(it->first);
+        m_components[index.offset + index.index].memory = Arena::game().alloc(it->first->size * it->second);
+        m_components[index.offset + index.index].current = 0;
+        m_components[index.offset + index.index].maximum = 0;
+    }
 }
 
 EntityStorage::~EntityStorage()
@@ -159,6 +169,10 @@ EntityStorage::~EntityStorage()
     for (minitl::vector<u32*>::const_iterator it = m_componentCountsList.begin(); it != m_componentCountsList.end(); ++it)
     {
         Arena::game().free(*it);
+    }
+    for (minitl::array<ComponentStorage>::const_iterator it = m_components.begin(); it != m_components.end(); ++it)
+    {
+        Arena::game().free(it->memory);
     }
     m_entityAllocator.free(m_entityInfoBuffer);
 }
@@ -191,6 +205,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
     }
 
     u32 groupIndex = 0;
+    u32 totalComponents = 0;
     for (minitl::vector<GroupInfo>::const_iterator group = groups.begin(); group != groups.end(); ++group, ++groupIndex)
     {
         minitl::vector< raw<const RTTI::Class> > registeredComponents(Arena::temporary());
@@ -212,10 +227,11 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
                 if (ci->first == *component)
                 {
                     registeredComponents.push_back(*component);
-                    registerType(*component, groupIndex, componentIndex, ci->second);
+                    registerType(*component, groupIndex, componentIndex, totalComponents, ci->second);
                 }
             }
         }
+        totalComponents +=componentIndex;
 
         be_info("Group: %s" | message);
         minitl::vector<u32> masks(Arena::temporary());
@@ -266,13 +282,13 @@ u32 EntityStorage::buildMask(const minitl::array< raw<const RTTI::Class> >& comp
     return result;
 }
 
-void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 maximumCount)
+void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount)
 {
     be_assert(!indexOf(componentType),
               "component type %s is registered twice" | componentType->fullname());
     be_info("component %s: reserving space for %d" | componentType->name | maximumCount);
     m_componentTypes[index].first = componentType;
-    m_componentTypes[index].second = ComponentIndex(group, index);
+    m_componentTypes[index].second = ComponentIndex(group, index, totalIndex);
 }
 
 EntityStorage::ComponentIndex EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
