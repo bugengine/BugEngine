@@ -13,7 +13,6 @@ namespace BugEngine
 class ZipFile : public File
 {
 private:
-    ifilename       m_file;
     unzFile         m_handle;
     unz_file_pos    m_filePos;
 public:

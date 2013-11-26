@@ -39,11 +39,12 @@ public:
         }
     };
 protected:
+    const ifilename m_filename;
     const Media     m_media;
     u64             m_size;
     u64             m_state;
 protected:
-    File(Media media, u64 size, u64 state);
+    File(ifilename filename, Media media, u64 size, u64 state);
 public:
     ~File();
 public:
@@ -83,6 +84,8 @@ public:
     u64 getState() const;
     bool isDeleted() const;
     bool isReloadable() const;
+
+    ifilename getFileName() const { return m_filename; }
 private:
     virtual void doFillBuffer(weak<Ticket> ticket) const = 0;
     virtual void doWriteBuffer(weak<Ticket> ticket) const = 0;

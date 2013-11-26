@@ -8,9 +8,8 @@
 namespace BugEngine
 {
 
-Win32File::Win32File(ifilename file, Media media, u64 size)
-    :   File(media, size, false)
-    ,   m_file(file)
+Win32File::Win32File(ifilename filename, Media media, u64 size)
+    :   File(filename, media, size, false)
 {
 }
 
