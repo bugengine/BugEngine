@@ -21,7 +21,7 @@ template< u32 BITS >
 typename bitset<BITS>::bit bitset<BITS>::operator[](u32 index)
 {
     be_assert(index < BITS, "bit index %d out of range (size: %d)"|index|BITS);
-    bit result = { *this, index };
+    bit result(*this, index);
     return result;
 }
 
