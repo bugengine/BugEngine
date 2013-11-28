@@ -33,6 +33,9 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p);
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE f);
 
+template< typename ITERATOR, typename T >
+ITERATOR find(const T& t, ITERATOR begin, ITERATOR end);
+
 }
 
 #include <minitl/inl/algorithm.inl>

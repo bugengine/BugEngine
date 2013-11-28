@@ -38,6 +38,8 @@ public:
     inline bitset<BITS>& operator ^=(const bitset<BITS>& rhs);
     inline bitset<BITS>  operator ~() const;
 
+    u32 operator()(u32 begin, u32 end) const;
+
     inline bool operator ==(const bitset<BITS>& rhs) const;
     inline bool operator !=(const bitset<BITS>& rhs) const;
 };
