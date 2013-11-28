@@ -117,6 +117,27 @@ typename bitset<BITS>::bit& bitset<BITS>::bit::operator=(bool value)
     return *this;
 }
 
+template< u32 BITS >
+u32 bitset<BITS>::operator ()(u32 begin, u32 end) const
+{
+    be_assert(end - begin < 32, "too many bits to unpack for subset");
+    u32 offset = begin % 8;
+    const u8* bytes = &m_bytes[begin/8];
+    u32 result =  bytes[0] << offset
+                | u32(bytes[1]) >> (8-offset)
+                | u32(bytes[2]) >> (16-offset)
+                | u32(bytes[3]) >> (24-offset)
+                | u32(bytes[4]) >> (32-offset);
+    u32 mask = 1 << (end - begin);
+    mask <<= 1;
+    mask <<= 2;
+    mask <<= 4;
+    mask <<= 8;
+    mask <<= 16;
+    mask = ~mask;
+    return result & mask;
+}
+
 }
 
 /*****************************************************************************/

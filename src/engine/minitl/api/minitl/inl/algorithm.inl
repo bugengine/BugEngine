@@ -32,17 +32,20 @@ void swap(T& a, T& b)
     T c = a; a = b; b = c;
 }
 
+
 template< typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
 {
     for (; first != last; ++first) f(*first);
 }
 
+
 template< typename ITERATOR, typename T >
 void fill(ITERATOR first, ITERATOR last, const T& value)
 {
     for (; first != last; ++first) *first = value;
 }
+
 
 template< typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
@@ -59,6 +62,7 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
     return middle;
 }
 
+
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
@@ -74,6 +78,19 @@ void sort(ITERATOR first, ITERATOR last, COMPARE s)
         sort(t, last, s);
     }
 }
+
+
+template< typename ITERATOR, typename T >
+ITERATOR find(const T& t, ITERATOR begin, ITERATOR end)
+{
+    for (ITERATOR it = begin; it != end; ++it)
+    {
+        if (*it == t)
+            return it;
+    }
+    return end;
+}
+
 
 }
 

@@ -19,57 +19,11 @@ class be_api(WORLD) EntityStorage : public minitl::refcountable
 {
     friend class World;
 private:
-    struct Bucket
-    {
-        u32 acceptMask;
-        u32* componentCounts;
-
-        Bucket();
-        Bucket(u32* componentCounts, u32 acceptMask);
-        ~Bucket();
-    };
-    struct ComponentGroup
-    {
-        minitl::array<EntityStorage::Bucket> buckets;
-        u32* componentCounts;
-        ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks);
-        ~ComponentGroup();
-    };
+    struct ComponentGroup;
     struct EntityInfo;
-    struct ComponentIndex
-    {
-        u16 group;
-        u8  index;
-        u8  offset;
-
-        ComponentIndex()
-            :   group((u16)~0)
-            ,   index((u8)~0)
-            ,   offset((u8)~0)
-        {
-        }
-        ComponentIndex(u32 group, u32 index, u32 offset)
-            :   group(be_checked_numcast<u16>(group))
-            ,   index(be_checked_numcast<u8>(index))
-            ,   offset(be_checked_numcast<u8>(offset))
-        {
-        }
-        operator void*() const
-        {
-            return (void*)(group != (u16)~0 || index != (u8)~0);
-        }
-        bool operator!() const
-        {
-            return group == (u16)~0 && index == (u8)~0;
-        }
-    };
+    struct ComponentIndex;
+    struct ComponentStorage;
     typedef minitl::pair< raw<const RTTI::Class>, ComponentIndex > ComponentInfo;
-    struct ComponentStorage
-    {
-        void* memory;
-        u32 current;
-        u32 maximum;
-    };
 protected:
     struct WorldComposition
     {
