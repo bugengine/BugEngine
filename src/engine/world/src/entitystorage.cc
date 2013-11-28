@@ -71,105 +71,81 @@ struct GroupInfo
 };
 
 
-
-
-struct EntityStorage::ComponentGroup
+EntityStorage::ComponentGroup::Bucket::Bucket()
+    :   acceptMask(0)
+    ,   maskSize(0)
+    ,   componentCounts(0)
 {
-    struct Bucket
-    {
-        u32 acceptMask;
-        u32 maskSize;
-        u32* componentCounts;
+}
 
-        Bucket()
-            :   acceptMask(0)
-            ,   maskSize(0)
-            ,   componentCounts(0)
-        {
-        }
-        Bucket(u32* componentCounts, u32 acceptMask)
-            :   acceptMask(acceptMask)
-            ,   maskSize(bitCount(acceptMask))
-            ,   componentCounts(componentCounts)
-        {
-        }
-    };
-    minitl::array<Bucket> buckets;
-    u32 componentCount;
-    u32* componentCounts;
-    ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks)
-        :   buckets(Arena::game(), (u32)bucketMasks.size())
-        ,   componentCount(componentCount)
-        ,   componentCounts(componentCounts)
-    {
-        u32 index = 0;
-        for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
-        {
-            buckets[index] = Bucket(componentCounts + componentCount * index, *it);
-        }
-    }
-
-    ~ComponentGroup()
-    {
-    }
-
-    minitl::pair<Bucket*, Bucket*> findBuckets(u32 mask1, u32 mask2)
-    {
-        minitl::pair<Bucket*, Bucket*> result;
-        minitl::pair<u32, u32> best;
-        for (Bucket* bucket = buckets.begin(); bucket != buckets.end(); ++bucket)
-        {
-            if ((bucket->acceptMask & mask1) == bucket->acceptMask && bucket->maskSize > best.first)
-            {
-                result.first = bucket;
-                best.first = bucket->maskSize;
-            }
-            if ((bucket->acceptMask & mask2) == bucket->acceptMask && bucket->maskSize > best.second)
-            {
-                result.second = bucket;
-                best.second = bucket->maskSize;
-            }
-        }
-        return result;
-    }
-};
-
-
-struct EntityStorage::ComponentIndex
+EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask)
+    :   acceptMask(acceptMask)
+    ,   maskSize(bitCount(acceptMask))
+    ,   componentCounts(componentCounts)
 {
-    u16 group;
-    u8  index;
-    u8  offset;
+}
 
-    ComponentIndex()
-        :   group((u16)~0)
-        ,   index((u8)~0)
-        ,   offset((u8)~0)
-    {
-    }
-    ComponentIndex(u32 group, u32 index, u32 offset)
-        :   group(be_checked_numcast<u16>(group))
-        ,   index(be_checked_numcast<u8>(index))
-        ,   offset(be_checked_numcast<u8>(offset))
-    {
-    }
-    operator void*() const
-    {
-        return (void*)(group != (u16)~0 || index != (u8)~0);
-    }
-    bool operator!() const
-    {
-        return group == (u16)~0 && index == (u8)~0;
-    }
-};
 
-struct EntityStorage::ComponentStorage
+EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks)
+    :   buckets(Arena::game(), (u32)bucketMasks.size())
+    ,   componentCount(componentCount)
+    ,   componentCounts(componentCounts)
 {
-    void* memory;
-    u32 current;
-    u32 maximum;
-};
+    u32 index = 0;
+    for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
+    {
+        buckets[index] = Bucket(componentCounts + componentCount * index, *it);
+    }
+}
 
+EntityStorage::ComponentGroup::~ComponentGroup()
+{
+}
+
+EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuckets(u32 mask1, u32 mask2)
+{
+    minitl::pair<Bucket*, Bucket*> result;
+    minitl::pair<u32, u32> best;
+    for (Bucket* bucket = buckets.begin(); bucket != buckets.end(); ++bucket)
+    {
+        if ((bucket->acceptMask & mask1) == bucket->acceptMask && bucket->maskSize > best.first)
+        {
+            result.first = bucket;
+            best.first = bucket->maskSize;
+        }
+        if ((bucket->acceptMask & mask2) == bucket->acceptMask && bucket->maskSize > best.second)
+        {
+            result.second = bucket;
+            best.second = bucket->maskSize;
+        }
+    }
+    return result;
+}
+
+
+EntityStorage::ComponentIndex::ComponentIndex()
+    :   group((u16)~0)
+    ,   index((u8)~0)
+    ,   offset((u8)~0)
+{
+}
+
+EntityStorage::ComponentIndex::ComponentIndex(u32 group, u32 index, u32 offset)
+    :   group(be_checked_numcast<u16>(group))
+    ,   index(be_checked_numcast<u8>(index))
+    ,   offset(be_checked_numcast<u8>(offset))
+{
+}
+
+EntityStorage::ComponentIndex::operator void*() const
+{
+    return (void*)(group != (u16)~0 || index != (u8)~0);
+}
+
+bool EntityStorage::ComponentIndex::operator!() const
+{
+    return group == (u16)~0 && index == (u8)~0;
+}
 
 struct EntityStorage::EntityInfo
 {
