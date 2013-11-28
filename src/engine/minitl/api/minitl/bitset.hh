@@ -25,6 +25,12 @@ private:
         u32 const       index;
         inline operator bool() const;
         inline bit& operator=(bool);
+
+        bit(bitset<BITS>& owner, u32 index)
+            :   owner(owner)
+            ,   index(index)
+        {
+        }
     };
     friend struct bit;
 public:
