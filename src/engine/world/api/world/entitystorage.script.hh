@@ -24,20 +24,25 @@ private:
     {
         struct Bucket
         {
+            u32* componentCounts;
             u32 acceptMask;
             u32 maskSize;
-            u32* componentCounts;
+            u32 componentsSize;
 
             Bucket();
-            Bucket(u32* componentCounts, u32 acceptMask);
+            Bucket(u32* componentOffsets, u32 acceptMask, u32 componentsSize);
         };
         typedef minitl::pair<Bucket*, Bucket*> BucketPair;
+
         minitl::array<Bucket> buckets;
         u32 componentCount;
         u32* componentCounts;
-        ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks);
+
+        ComponentGroup(u32 componentCount, u32* componentOffsets, const minitl::vector<u32>& bucketMasks);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
+        void moveUp(Bucket* bucketLow, Bucket* bucketHigh, u32 indexToMove, u32* offsets);
+        void moveDown(Bucket* bucketHigh, Bucket* bucketLow, u32 indexToMove, u32* offsets);
     };
     struct ComponentIndex
     {

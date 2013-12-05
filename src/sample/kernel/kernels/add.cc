@@ -42,7 +42,7 @@ struct Parameter
     void* end;
 };
 
-_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
+_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter* argv)
 {
     kmain(index, total,
           in<BugEngine::A>((BugEngine::A*)argv[0].begin, (BugEngine::A*)argv[0].end),
