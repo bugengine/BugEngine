@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from waflib import Task
-from waflib.TaskGen import feature
+from waflib.TaskGen import feature, before_method
 import os
 import sys
 from waflib import Task
@@ -11,10 +11,11 @@ def scan(self):
 	return ([], [])
 
 kernel = '%s ../../../../mak/kernel.py -o ${TGT[0].abspath()} -D ../../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
-cls = Task.task_factory('kernel', kernel, [], 'PINK')
+cls = Task.task_factory('kernel', kernel, [], 'PINK', ext_out=['.script.hh'])
 cls.scan = scan
 
 @feature('*')
+@before_method('process_source')
 def kernel_generate(self):
 	for kernel, sources in getattr(self, 'kernels', []):
 		out = self.bld.bldnode.make_node(self.target).make_node('%s.script.hh' % kernel)
