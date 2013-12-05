@@ -72,29 +72,31 @@ struct GroupInfo
 
 
 EntityStorage::ComponentGroup::Bucket::Bucket()
-    :   acceptMask(0)
+    :   componentCounts(0)
+    ,   acceptMask(0)
     ,   maskSize(0)
-    ,   componentCounts(0)
+    ,   componentsSize(0)
 {
 }
 
-EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask)
-    :   acceptMask(acceptMask)
+EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask, u32 componentsSize)
+    :   componentCounts(componentCounts),
+        acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
-    ,   componentCounts(componentCounts)
+    ,   componentsSize(componentsSize)
 {
 }
 
 
-EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, u32* componentCounts, const minitl::vector<u32>& bucketMasks)
+EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, u32* componentOffsets, const minitl::vector<u32>& bucketMasks)
     :   buckets(Arena::game(), (u32)bucketMasks.size())
     ,   componentCount(componentCount)
-    ,   componentCounts(componentCounts)
+    ,   componentCounts(componentOffsets)
 {
     u32 index = 0;
     for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
     {
-        buckets[index] = Bucket(componentCounts + componentCount * index, *it);
+        buckets[index] = Bucket(componentCounts + componentCount * index, *it, 0);
     }
 }
 
@@ -120,6 +122,26 @@ EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuc
         }
     }
     return result;
+}
+
+void EntityStorage::ComponentGroup::moveUp(Bucket* bucketLow, Bucket* bucketHigh, u32 indexToMove, u32* offsets)
+{
+    
+    for (Bucket* bucket = bucketLow + 1; bucket != bucketHigh; ++bucket)
+    {
+        be_forceuse(indexToMove);
+        be_forceuse(offsets);
+    }
+}
+
+void EntityStorage::ComponentGroup::moveDown(Bucket* bucketHigh, Bucket* bucketLow, u32 indexToMove, u32* offsets)
+{
+    
+    for (Bucket* bucket = bucketLow + 1; bucket != bucketHigh; ++bucket)
+    {
+        be_forceuse(indexToMove);
+        be_forceuse(offsets);
+    }
 }
 
 
@@ -436,6 +458,14 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
         ComponentGroup::Bucket* bucket = buckets.first;
         be_assert((bucket->acceptMask & maskBefore) == bucket->acceptMask, "found invalid bucket");
         be_assert((bucket->acceptMask & maskAfter) == bucket->acceptMask, "found invalid bucket");
+    }
+    else if (buckets.first < buckets.second)
+    {
+        group.moveUp(buckets.first, buckets.second, 0, 0);
+    }
+    else
+    {
+        group.moveDown(buckets.first, buckets.second, 0, 0);
     }
 
     info.mask[componentIndex.index] = true;

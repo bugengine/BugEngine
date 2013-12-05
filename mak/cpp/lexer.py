@@ -175,6 +175,10 @@ def t_comment_2(t):
 def t_preprocessor(t):
 	r'\#([^\\\n]|(\\.)|(\\\n))*'
 	t.lexer.lineno += t.value.count('\n')
+	if t.value.find('include') != -1:
+		out = getattr(t.lexer, 'output', None)
+		if out:
+			out.write(t.value+'\n')
 
 # Operators
 t_PLUS              = r'\+'

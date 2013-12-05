@@ -164,13 +164,13 @@ def module(bld, name, depends,
 			kernelspath = source_node.make_node('kernels')
 			for kernel in kernelspath.listdir():
 				kernelpath = kernelspath.make_node(kernel)
-				kernelsources = kernelpath.ant_glob(['**'])
+				kernelsources = [kernelpath]
 				kernels = []
 				for env in bld.multiarch_envs:
 					target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
 					bld(
 						env = env.derive(),
-						target = target_prefix + name + '.' + kernel,
+						target = target_prefix + name + '.' + kernel[:kernel.rfind('.')],
 						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
 						defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
@@ -178,9 +178,9 @@ def module(bld, name, depends,
 						source = kernelsources,
 						use = [target_prefix + d for d in depends] + [target_prefix + name])
 						#install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
-					kernels.append(target_prefix + name + '.' + kernel)
+					kernels.append(target_prefix + name + '.' + kernel[:kernel.rfind('.')])
 				if target_prefix:
-					internal_kernels.append((kernel, kernels))
+					internal_kernels.append((kernel[:kernel.rfind('.')], kernels, kernelsources))
 
 
 
@@ -189,7 +189,8 @@ def module(bld, name, depends,
 			features= ['plugin'] if 'plugin' in features else [],
 			target_name = name,
 			pchstop = pchstop,
-			source = preprocess_sources)
+			source = preprocess_sources,
+			kernels = [])
 	else:
 		preprocess = None
 	for env in bld.multiarch_envs:
@@ -246,9 +247,11 @@ def module(bld, name, depends,
 			source_nodes = [source_node] + [e for _, e in extras]))
 		if target_prefix:
 			internal_deps.append(target_prefix + name)
-	for kernel, kernel_deps in internal_kernels:
+	for kernel, kernel_deps, kernel_sources in internal_kernels:
 		if kernel_deps:
 			bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
+		if preprocess:
+			preprocess.kernels.append((kernel, kernel_sources))
 	if internal_deps:
 		bld(target=name, features=['multiarch'], use=internal_deps)
 	return result
@@ -377,6 +380,8 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		features, [], [], [], [], use_master, warnings)
 
 def build(bld):
+	bld.load('data', tooldir=['mak/tools'])
+	bld.load('kernel', tooldir=['mak/tools'])
 	bld.env.STATIC = bld.env.STATIC or Options.options.static
 	bld.original_env = bld.env
 	bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
