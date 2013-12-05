@@ -168,19 +168,22 @@ def module(bld, name, depends,
 				kernels = []
 				for env in bld.multiarch_envs:
 					target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+					kernel_name = kernel[:kernel.rfind('.')]
 					bld(
 						env = env.derive(),
-						target = target_prefix + name + '.' + kernel[:kernel.rfind('.')],
+						target = target_prefix + name + '.' + kernel_name,
 						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
-						defines = ['BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel), 'BE_KERNELNAME=%s.%s'%(name, kernel)],
+						defines = [
+								'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
+								'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
 						includes = api + include,
 						source = kernelsources,
 						use = [target_prefix + d for d in depends] + [target_prefix + name])
 						#install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
-					kernels.append(target_prefix + name + '.' + kernel[:kernel.rfind('.')])
+					kernels.append(target_prefix + name + '.' + kernel_name)
 				if target_prefix:
-					internal_kernels.append((kernel[:kernel.rfind('.')], kernels, kernelsources))
+					internal_kernels.append((kernel_name, kernels, kernelsources))
 
 
 
