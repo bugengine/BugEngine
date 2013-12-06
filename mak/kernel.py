@@ -69,10 +69,23 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 				return lexer.error
 		except:
 			return 1
-		#yacc.dump()
-		#self.root.dump(implementation, instances)
-	return 0
 
+		try:
+			m = yacc.root.members.methods['kmain']
+		except KeyError:
+			raise Exception("could not locate method kmain in kernel")
+		if len(m) > 1:
+			raise Exception("cannot overload metod kmain")
+		m = m[0]
+		arg0 = m.value.args.args[0]
+		if arg0.type != 'u32' and arg0.type != 'const u32':
+			raise Exception("invalid signature for method kmain")
+		arg1 = m.value.args.args[1]
+		if arg1.type != 'u32' and arg1.type != 'const u32':
+			raise Exception("invalid signature for method kmain")
+		for arg in m.value.args.args[2:]:
+			print(arg.name)
+	return 0
 
 if __name__ == '__main__':
 	(options, args) = options.parse_args()
