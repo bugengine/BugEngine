@@ -16,7 +16,9 @@ using namespace Kernel;
 
 void kmain(u32 index, const u32 total,
            in<BugEngine::A> input,
-            inout<BugEngine::B> output, inout<BugEngine::C> output2, inout<BugEngine::D> output3)
+           inout<BugEngine::B> output,
+           inout<BugEngine::C> output2,
+           inout<BugEngine::D> output3)
 {
     u32 first = index * input.size() / total;
     u32 last = (index+1) * input.size() / total;
@@ -42,7 +44,7 @@ struct Parameter
     void* end;
 };
 
-_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter* argv)
+_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])
 {
     kmain(index, total,
           in<BugEngine::A>((BugEngine::A*)argv[0].begin, (BugEngine::A*)argv[0].end),

@@ -22,6 +22,22 @@ class Arg(cpp.yacc.Nonterm):
 		self.tags = tags_left
 		self.tags.tags += tags_right.tags
 
+	def arg_array(self, tags_left, type, id, lbracket, rbracket, tags_right):
+		"%reduce TagsLeft Type ID LBRACKET RBRACKET TagsRight"
+		self.type = type.value + '[]'
+		self.name = id.value
+		self.lineno = id.lineno
+		self.tags = tags_left
+		self.tags.tags += tags_right.tags
+
+	def arg_array_size(self, tags_left, type, id, lbracket, value, rbracket, tags_right):
+		"%reduce TagsLeft Type ID LBRACKET Constant RBRACKET TagsRight"
+		self.type = type.value + '[' + value.value + ']'
+		self.name = id.value
+		self.lineno = id.lineno
+		self.tags = tags_left
+		self.tags.tags += tags_right.tags
+
 	def arg_unnamed(self, tags_left, type, tags_right):
 		"%reduce TagsLeft Type TagsRight"
 		self.type = type.value
