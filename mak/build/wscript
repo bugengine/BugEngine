@@ -159,7 +159,14 @@ def module(bld, name, depends,
 	internal_deps = []
 	internal_kernels = []
 
-	if build:
+
+	if build and not bld.env.PROJECTS:
+		preprocess = bld(target = name + '.preprocess',
+			features= ['plugin'] if 'plugin' in features else [],
+			target_name = name,
+			pchstop = pchstop,
+			source = preprocess_sources,
+			kernels = [])
 		if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
 			kernelspath = source_node.make_node('kernels')
 			for kernel in kernelspath.listdir():
@@ -184,18 +191,10 @@ def module(bld, name, depends,
 					kernels.append(target_prefix + name + '.' + kernel_name)
 				if target_prefix:
 					internal_kernels.append((kernel_name, kernels, kernelsources))
-
-
-
-	if build and not bld.env.PROJECTS:
-		preprocess = bld(target = name + '.preprocess',
-			features= ['plugin'] if 'plugin' in features else [],
-			target_name = name,
-			pchstop = pchstop,
-			source = preprocess_sources,
-			kernels = [])
+				preprocess.kernels.append((kernel_name, kernelsources))
 	else:
 		preprocess = None
+
 	for env in bld.multiarch_envs:
 		exit = False
 		if not env.PROJECTS:
@@ -253,8 +252,6 @@ def module(bld, name, depends,
 	for kernel, kernel_deps, kernel_sources in internal_kernels:
 		if kernel_deps:
 			bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
-		if preprocess:
-			preprocess.kernels.append((kernel, kernel_sources))
 	if internal_deps:
 		bld(target=name, features=['multiarch'], use=internal_deps)
 	return result
