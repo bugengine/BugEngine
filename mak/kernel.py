@@ -26,8 +26,19 @@ global_macro_map = {
 
 def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name=""):
 	with open(output, 'w') as implementation:
+		kernel_name = os.path.splitext(os.path.splitext(os.path.basename(output))[0])[0]
+		fullname = [i.capitalize() for i in name.split('_')] + [kernel_name.capitalize()]
+		implementation.write('/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>\n')
+		implementation.write('   see LICENSE for detail */\n\n')
+		implementation.write('#ifndef BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
+		implementation.write('#define BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
+		implementation.write('/*****************************************************************************/\n')
 		if pch:
 			implementation.write("#include    <%s>\n" % pch)
+		implementation.write('#include    <scheduler/kernel/kernel.script.hh>\n')
+		implementation.write('#include    <scheduler/task/itask.hh>\n')
+		implementation.write('#include    <scheduler/kernel/product.hh>\n')
+
 		lexer = cpp.lex.lex(module=cpp.lexer)
 		lexer.inside = 0
 		lexer.sourcename = source
@@ -85,6 +96,17 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 			raise Exception("invalid signature for method kmain")
 		for arg in m.value.args.args[2:]:
 			print(arg.name)
+
+		implementation.write('\n')
+		for ns in fullname[:-1]:
+			implementation.write('namespace %s { ' % ns)
+		implementation.write('namespace Kernels\n{\n\n')
+		implementation.write('class %s : public BugEngine::Kernel::KernelDescription\n{\n' % fullname[-1])
+		implementation.write('};\n\n')
+		implementation.write('}' * len(fullname))
+		implementation.write('\n\n/*****************************************************************************/\n')
+		implementation.write('#endif\n')
+
 	return 0
 
 if __name__ == '__main__':
