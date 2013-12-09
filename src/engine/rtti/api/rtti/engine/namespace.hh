@@ -17,9 +17,9 @@ namespace BugEngine                                                             
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
-    static RTTI::ObjectInfo s_##plugin##_Namespace_##n_ob =                                                                                     \
-        { be_##plugin##_Namespace()->objects, {0}, #n, RTTI::Value(be_##plugin##_Namespace_##n) };                                              \
-    BE_EXPORT const RTTI::ObjectInfo* s_##plugin##_Namespace_##n##_r = be_##plugin##_Namespace()->objects.set(&s_##plugin##_Namespace_##n_ob);  \
+    static RTTI::ObjectInfo s_##plugin##_Namespace_##n##_ob =                                                                                   \
+        { be_##plugin##_Namespace()->objects, {0}, #n, RTTI::Value(be_##plugin##_Namespace_##n()) };                                            \
+    BE_EXPORT const RTTI::ObjectInfo* s_##plugin##_Namespace_##n##_r = be_##plugin##_Namespace()->objects.set(&s_##plugin##_Namespace_##n##_ob);\
 }
 
 #define BE_REGISTER_NAMESPACE_2_NAMED(plugin, n1, n2)                                                                                           \

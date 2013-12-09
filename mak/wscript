@@ -31,7 +31,6 @@ def configure(conf):
 	conf.recurse('target')
 	conf.load('flex', tooldir=['mak/tools'])
 	conf.load('bison', tooldir=['mak/tools'])
-	conf.load('data', tooldir=['mak/tools'])
 
 	conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 

@@ -4,7 +4,6 @@
 
 #include    <stdafx.h>
 #include    <kernelsample.hh>
-#include    <kerneltask.script.hh>
 #include    <core/environment.hh>
 #include    <filesystem/diskfolder.script.hh>
 

@@ -26,10 +26,11 @@ def create_namespace_file(task):
 			f.write('#include <%s>\n' % pch)
 		f.write('#include <plugin/stdafx.h>\n')
 		f.write('#include <rtti/engine/namespace.hh>\n')
-		namespace = [i.capitalize() for i in task.generator.target.split('.')[:-1]] + ['Kernels']
+		namespace = [i.capitalize() for i in task.generator.target.split('.')[:-1]]
 		for i in range(1, len(namespace)+1):
 			ns = namespace[0:i]
-			f.write('BE_REGISTER_NAMESPACE_%d(%s)\n'%(len(ns), ', '.join(ns)))
+			f.write('BE_REGISTER_NAMESPACE_%d(%s);\n'%(len(ns), ', '.join(ns)))
+		f.write('BE_REGISTER_NAMESPACE_1(Kernels);\n')
 NamespaceTask = Task.task_factory("namespace", create_namespace_file, color='CYAN')
 
 def log_display(self, bld):
@@ -197,7 +198,7 @@ def module(bld, name, depends,
 								'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
 								'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
 						includes = api + include,
-						source = kernelsources,
+						kernel_source = kernelsources,
 						use = [target_prefix + d for d in depends] + [target_prefix + name])
 						#install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
 					kernels.append(target_prefix + name + '.' + kernel_name)
@@ -394,6 +395,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 def build(bld):
 	bld.load('data', tooldir=['mak/tools'])
 	bld.load('kernel', tooldir=['mak/tools'])
+	bld.load('kernel_preprocess', tooldir=['mak/tools'])
 	bld.env.STATIC = bld.env.STATIC or Options.options.static
 	bld.original_env = bld.env
 	bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
