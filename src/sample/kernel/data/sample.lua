@@ -4,7 +4,7 @@ _3d = plugin("plugin.graphics.3d")
 tokens={}
 
 storage = kernel.KernelStorage()
-sample = kernel.KernelSampleTask(
+sample = kernel.Kernels.Add(
     getattr(storage, "A+B").A,
     getattr(storage, "A+B").B,
     getattr(storage, "A+C").C,
