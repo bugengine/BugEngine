@@ -40,23 +40,21 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		kernel_name = os.path.splitext(os.path.splitext(os.path.basename(output))[0])[0]
 		fullname = [i.capitalize() for i in name.split('_')] + [kernel_name.capitalize()]
 		idname = [i for i in name.split('_')] + [kernel_name]
-		implementation.write('/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>\n')
-		implementation.write('   see LICENSE for detail */\n\n')
-		implementation.write('#ifndef BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
-		implementation.write('#define BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
-		implementation.write('/*****************************************************************************/\n')
 		if pch:
 			implementation.write("#include    <%s>\n" % pch)
-		implementation.write('#include    <scheduler/kernel/kernel.script.hh>\n')
-		implementation.write('#include    <scheduler/task/itask.hh>\n')
-		implementation.write('#include    <scheduler/kernel/product.hh>\n')
-		implementation.write('#include    <scheduler/task/kerneltask.hh>\n')
-		implementation.write('#include    <kernel/colors.hh>\n')
+		implementation.write("#define be_api(X)\n")
+		implementation.write("#include    <kernel/compilers.hh>\n")
+		implementation.write("#include    <kernel/simd.hh>\n")
+		implementation.write("#include    <kernel/input.hh>\n")
+		implementation.write("#include    <plugin/dynobjectlist.hh>\n")
+		implementation.write("using namespace Kernel;\n")
+		implementation.write("#define be_tag(x)\n")
+		implementation.write("#define be_product(x)\n")
+		implementation.write("#include \"%s\"\n" % source)
 		lexer = cpp.lex.lex(module=cpp.lexer)
 		lexer.inside = 0
 		lexer.sourcename = source
 		lexer.error = 0
-		lexer.output = implementation
 		yacc = cpp.parser.Parser(output, '', name, source, pch)
 
 		lexer.macro_map = dict(global_macro_map)
@@ -113,55 +111,22 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 			arguments.append((arg.name, type_name, template_name))
 
 		implementation.write('\n')
-		#for ns in fullname[:-1]:
-		#	implementation.write('namespace %s { ' % ns)
-		implementation.write('namespace Kernels\n{\n\n')
-		implementation.write('class %s : public BugEngine::Kernel::KernelDescription\n{\n' % fullname[-1])
-		implementation.write('private:\n')
-		for arg_name, arg_type, input_type in arguments:
-			implementation.write('    BugEngine::Kernel::Product< %s > const m_%s;\n' % (arg_type, arg_name))
-		implementation.write('    scoped< BugEngine::Task::ITask > const m_kernelTask;\n')
-		for arg_name, arg_type, input_type in arguments:
-			if input_type in ['in', 'inout']:
-				implementation.write('    BugEngine::Task::ITask::CallbackConnection const m_%sChain;\n' % (arg_name))
-		implementation.write('private:\n')
-		implementation.write('    minitl::array< weak<const BugEngine::Kernel::IStream> > makeParameters() const\n')
-		implementation.write('    {\n')
-		implementation.write('        minitl::array< weak<const BugEngine::Kernel::IStream> > result(BugEngine::Arena::task(), %d);\n' % len(arguments))
+		implementation.write('struct Parameter\n')
+		implementation.write('{\n')
+		implementation.write('    void* begin;\n')
+		implementation.write('    void* end;\n')
+		implementation.write('};\n')
+		implementation.write('_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total, Parameter argv[])\n')
+		implementation.write('{\n')
+		implementation.write('    kmain(index, total')
 		i = 0
 		for arg_name, arg_type, input_type in arguments:
-			implementation.write('        result[%d] = m_%s.stream;\n' % (i, arg_name))
+			implementation.write(',\n        %s< %s >((%s*)argv[%d].begin, (%s*)argv[%d].end)' % (input_type, arg_type, arg_type, i, arg_type, i))
 			i += 1
-		implementation.write('        return result;\n')
-		implementation.write('    }\n')
-		implementation.write('published:\n')
-		for arg_name, arg_type, input_type in arguments:
-			if input_type in ['out', 'inout']:
-				implementation.write('    BugEngine::Kernel::Product< %s > const %s;\n' % (arg_type, arg_name))
-		implementation.write('published:\n')
-		implementation.write('    %s(' % fullname[-1])
-		implementation.write(', '.join(['const BugEngine::Kernel::Product< %s >& %s'%(arg_type, arg_name) for arg_name, arg_type, input_type in arguments if input_type in ['in', 'inout']]))
-		implementation.write(')\n')
-		implementation.write('        :   KernelDescription("%s")\n        ,   ' % '.'.join(idname))
-		for arg_name, arg_type, input_type in arguments:
-			if input_type in ['in', 'inout']:
-				implementation.write('m_%s(%s)\n        ,   ' % (arg_name, arg_name))
-			else:
-				raise Exception('not implemented')
-		implementation.write('m_kernelTask(scoped<BugEngine::Task::KernelTask>::create(BugEngine::Arena::general(), "%s", BugEngine::Colors::Red::Red, BugEngine::Scheduler::High, this, makeParameters()))' % '.'.join(idname))
-		if arguments:
-			implementation.write('\n        ,   ')
-			implementation.write('\n        ,   '.join(['m_%sChain(%s.producer, m_kernelTask->startCallback())' % (arg_name, arg_name) for arg_name, arg_type, inout_type in arguments if input_type in ['in', 'inout']]))
-		for arg_name, arg_type, input_type in arguments:
-			if input_type == 'inout':
-				implementation.write('\n        ,   %s(%s.stream, m_kernelTask)' % (arg_name, arg_name))
-			elif input_type == 'out':
-				raise Exception('not implemented')
-		implementation.write('\n    {\n    }\n')
-		implementation.write('};\n\n')
-		implementation.write('}')
-		implementation.write('\n\n/*****************************************************************************/\n')
-		implementation.write('#endif\n')
+		implementation.write('\n    );\n')
+		implementation.write('}\n')
+		implementation.write('_BE_REGISTER_PLUGIN(BE_KERNELID, BE_KERNELNAME);\n')
+		implementation.write('_BE_REGISTER_METHOD(BE_KERNELID, _kmain);\n')
 
 	return 0
 
