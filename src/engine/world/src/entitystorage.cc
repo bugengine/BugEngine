@@ -110,12 +110,12 @@ EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuc
     minitl::pair<u32, u32> best;
     for (Bucket* bucket = buckets.begin(); bucket != buckets.end(); ++bucket)
     {
-        if ((bucket->acceptMask & mask1) == bucket->acceptMask && bucket->maskSize > best.first)
+        if ((bucket->acceptMask & mask1) == bucket->acceptMask && bucket->maskSize >= best.first)
         {
             result.first = bucket;
             best.first = bucket->maskSize;
         }
-        if ((bucket->acceptMask & mask2) == bucket->acceptMask && bucket->maskSize > best.second)
+        if ((bucket->acceptMask & mask2) == bucket->acceptMask && bucket->maskSize >= best.second)
         {
             result.second = bucket;
             best.second = bucket->maskSize;
@@ -310,6 +310,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         {
             masks.push_back(1 << i);
         }
+        masks.push_back(0);
 
         for (minitl::vector<u32>::const_iterator mask = masks.begin(); mask != masks.end(); ++mask)
         {
