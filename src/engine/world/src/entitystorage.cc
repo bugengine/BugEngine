@@ -459,6 +459,7 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
         ComponentGroup::Bucket* bucket = buckets.first;
         be_assert((bucket->acceptMask & maskBefore) == bucket->acceptMask, "found invalid bucket");
         be_assert((bucket->acceptMask & maskAfter) == bucket->acceptMask, "found invalid bucket");
+        be_forceuse(bucket);
     }
     else if (buckets.first < buckets.second)
     {
