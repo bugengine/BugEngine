@@ -159,6 +159,7 @@ WatchThread::~WatchThread()
     ReleaseSemaphore(m_semaphore, 1, NULL);
     DWORD result = WaitForSingleObject(m_thread, 2000);
     be_assert(result != WAIT_TIMEOUT, "timed out when waiting for filesystem watch thread");
+    be_forceuse(result);
     CloseHandle(m_thread);
     CloseHandle(m_semaphore);
     for (minitl::vector< minitl::pair<HANDLE, weak<FileSystem::WatchPoint> > >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
