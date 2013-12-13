@@ -519,6 +519,8 @@ def remove_link_libs(task):
 				use += getattr(task_gen, 'use', [])
 				if 'cxxprogram' in task_gen.features:
 					task.env.LIB.remove(os.path.split(task_gen.target)[1])
+					for out in task_gen.link_task.outputs:
+						task.link_task.dep_nodes.remove(out)
 			except Exception:
 				pass
 
