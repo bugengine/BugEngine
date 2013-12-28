@@ -11,6 +11,7 @@
 #define BE_REGISTER_NAMESPACE_1_NAMED(plugin, n)                                                                                                \
 namespace BugEngine                                                                                                                             \
 {                                                                                                                                               \
+    raw<BugEngine::RTTI::Class> be_##plugin##_Namespace();                                                                                      \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n()                                                                                   \
     {                                                                                                                                           \
         static RTTI::Class ci = { #n, {0}, {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };                          \
