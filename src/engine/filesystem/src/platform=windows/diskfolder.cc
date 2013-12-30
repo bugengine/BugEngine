@@ -114,14 +114,14 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 istring name = data.cFileName;
                 if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
-                    for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+                    for (minitl::vector< minitl::tuple<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                     {
                         if (it->first == name)
                         {
                             continue;
                         }
                     }
-                    m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
+                    m_folders.push_back(minitl::make_tuple(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), scanPolicy, Folder::CreateNone)));
                 }
                 else
                 {
@@ -129,7 +129,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     size <<= 32;
                     size += data.nFileSizeLow;
                     ref<Win32File> newFile = ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size, getTimeStamp(data.ftLastWriteTime));
-                    m_files.push_back(minitl::make_pair(name, newFile));
+                    m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             } while (FindNextFile(h, &data));
             FindClose(h);
@@ -189,7 +189,7 @@ weak<File> DiskFolder::createFile(const istring& name)
                     File::Media(File::Media::Disk, m_index, 0),
                     0,
                     getTimeStamp(data.ftLastWriteTime));
-        for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+        for (minitl::vector< minitl::tuple<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
         {
             if (it->first == name)
             {
@@ -197,7 +197,7 @@ weak<File> DiskFolder::createFile(const istring& name)
                 return result;
             }
         }
-        m_files.push_back(minitl::make_pair(name, result));
+        m_files.push_back(minitl::make_tuple(name, result));
         return result;
     }
 }
@@ -221,7 +221,7 @@ void DiskFolder::onChanged()
                 if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     bool exists = false;
-                    for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+                    for (minitl::vector< minitl::tuple<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
                     {
                         if (it->first == name)
                         {
@@ -231,13 +231,13 @@ void DiskFolder::onChanged()
                     }
                     if (!exists)
                     {
-                        m_folders.push_back(minitl::make_pair(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), Folder::ScanNone, Folder::CreateNone)));
+                        m_folders.push_back(minitl::make_tuple(name, ref<DiskFolder>::create(Arena::filesystem(), m_path+ipath(name), Folder::ScanNone, Folder::CreateNone)));
                     }
                 }
                 else
                 {
                     bool exists = false;
-                    for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+                    for (minitl::vector< minitl::tuple<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
                     {
                         if (it->first == name)
                         {
@@ -255,7 +255,7 @@ void DiskFolder::onChanged()
                         size <<= 32;
                         size += data.nFileSizeLow;
                         ref<Win32File> newFile = ref<Win32File>::create(Arena::filesystem(), m_path+ifilename(name), File::Media(File::Media::Disk, m_index, 0), size, getTimeStamp(data.ftLastWriteTime));
-                        m_files.push_back(minitl::make_pair(name, newFile));
+                        m_files.push_back(minitl::make_tuple(name, newFile));
                     }
                 }
             } while (FindNextFile(h, &data));

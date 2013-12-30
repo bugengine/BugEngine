@@ -27,7 +27,7 @@ Folder::~Folder()
 weak<File> Folder::openFile(istring name)
 {
     ScopedCriticalSection lock(m_lock);
-    for (minitl::vector< minitl::pair< istring, ref<File> > >::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<File> > >::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
     {
         if (it->first == name)
             return it->second;
@@ -59,12 +59,12 @@ weak<File> Folder::openFile(ifilename name)
 weak<Folder> Folder::openFolder(istring name)
 {
     ScopedCriticalSection lock(m_lock);
-    for (minitl::vector< minitl::pair< istring, ref<Folder> > >::const_iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::const_iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
             return it->second;
     }
-    for (minitl::vector< minitl::pair< istring, ref<Folder> > >::const_iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::const_iterator it = m_folders.begin(); it != m_folders.end(); ++it)
     {
         if (it->first == name)
             return it->second;
@@ -96,14 +96,14 @@ weak<Folder> Folder::openFolder(ipath name)
 void Folder::mount(istring name, ref<Folder> folder)
 {
     ScopedCriticalSection lock(m_lock);
-    for (minitl::vector< minitl::pair< istring, ref<Folder> > >::const_iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::const_iterator it = m_folders.begin(); it != m_folders.end(); ++it)
     {
         if (it->first == name)
         {
             be_warning("mounting filesystem hides folder %s" | name);
         }
     }
-    for (minitl::vector< minitl::pair< istring, ref<Folder> > >::iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
         {
@@ -112,7 +112,7 @@ void Folder::mount(istring name, ref<Folder> folder)
             return;
         }
     }
-    m_mounts.push_back(minitl::make_pair(name, folder));
+    m_mounts.push_back(minitl::make_tuple(name, folder));
 }
 
 void Folder::mount(ipath name, ref<Folder> folder)
@@ -139,7 +139,7 @@ void Folder::mount(ipath name, ref<Folder> folder)
 void Folder::umount(istring name)
 {
     ScopedCriticalSection lock(m_lock);
-    for (minitl::vector< minitl::pair< istring, ref<Folder> > >::iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
+    for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
         {
@@ -186,7 +186,7 @@ void Folder::doRefresh(ScanPolicy scanPolicy)
     if (scanPolicy == Folder::ScanRecursive)
     {
         ScopedCriticalSection lock(m_lock);
-        for (minitl::vector< minitl::pair<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
+        for (minitl::vector< minitl::tuple<istring, ref<Folder> > >::iterator it = m_folders.begin(); it != m_folders.end(); ++it)
         {
             it->second->refresh(scanPolicy);
         }

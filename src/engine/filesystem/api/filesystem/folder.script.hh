@@ -15,9 +15,9 @@ class be_api(FILESYSTEM) Folder : public minitl::refcountable
 {
 protected:
     CriticalSection                                         m_lock;
-    minitl::vector< minitl::pair<istring, ref<File> > >     m_files;
-    minitl::vector< minitl::pair<istring, ref<Folder> > >   m_folders;
-    minitl::vector< minitl::pair<istring, ref<Folder> > >   m_mounts;
+    minitl::vector< minitl::tuple<istring, ref<File> > >    m_files;
+    minitl::vector< minitl::tuple<istring, ref<Folder> > >  m_folders;
+    minitl::vector< minitl::tuple<istring, ref<Folder> > >  m_mounts;
     bool                                                    m_upToDate;
 public:
     class Watch : public minitl::refcountable

@@ -125,13 +125,13 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 else if (s.st_mode & S_IFDIR)
                 {
                     ref<DiskFolder> newFolder = ref<DiskFolder>::create(Arena::filesystem(), p, newPolicy, Folder::CreateNone);
-                    m_folders.push_back(minitl::make_pair(name, newFolder));
+                    m_folders.push_back(minitl::make_tuple(name, newFolder));
                 }
                 else
                 {
                     File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
                     ref<File> newFile = ref<PosixFile>::create(Arena::filesystem(), ipath(m_path) + ifilename(name), media, s.st_size, s.st_mtime);
-                    m_files.push_back(minitl::make_pair(name, newFile));
+                    m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             }
         }
@@ -154,7 +154,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                         unz_file_pos filePos;
                         unzGetFilePos(m_handle.ptrHandle, &filePos);
                         ifilename filepath = path + ifilename(filename);
-                        m_files.push_back(minitl::make_pair(filename, ref<ZipFile>::create(Arena::filesystem(), m_handle.ptrHandle, filepath, info, filePos)));
+                        m_files.push_back(minitl::make_tuple(filename, ref<ZipFile>::create(Arena::filesystem(), m_handle.ptrHandle, filepath, info, filePos)));
                     }
                     else if (path.size() >= 1)
                     {
@@ -172,7 +172,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     {
                         ipath path = relativePath;
                         path.push_back(*it);
-                        m_folders.push_back(minitl::make_pair(*it, ref<ZipFolder>::create(Arena::filesystem(), m_handle.ptrHandle, path, newPolicy)));
+                        m_folders.push_back(minitl::make_tuple(*it, ref<ZipFolder>::create(Arena::filesystem(), m_handle.ptrHandle, path, newPolicy)));
                     }
                 }
             }
@@ -209,7 +209,7 @@ weak<File> DiskFolder::createFile(const istring& name)
                     s.st_size,
                     s.st_mtime);
 
-        for (minitl::vector< minitl::pair<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
+        for (minitl::vector< minitl::tuple<istring, ref<File> > >::iterator it = m_files.begin(); it != m_files.end(); ++it)
         {
             if (it->first == name)
             {
@@ -217,7 +217,7 @@ weak<File> DiskFolder::createFile(const istring& name)
                 return result;
             }
         }
-        m_files.push_back(minitl::make_pair(name, result));
+        m_files.push_back(minitl::make_tuple(name, result));
         return result;
     }
     else

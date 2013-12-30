@@ -74,7 +74,7 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
         {
             be_notreached();
         }
-        minitl::pair< minitl::hashmap< istring, ref<Namespace> >::iterator, bool > result = m_children.insert(name[0], ref<Namespace>());
+        minitl::tuple< minitl::hashmap< istring, ref<Namespace> >::iterator, bool > result = m_children.insert(name[0], ref<Namespace>());
         if (result.second)
         {
             result.first->second = ref<Namespace>::create(Arena::packageBuilder());

@@ -67,7 +67,7 @@ private:
     size_t                                              m_currentVarying;
     size_t                                              m_currentAttributeToVarying;
     size_t                                              m_currentTemporary;
-    minitl::vector< minitl::pair<istring, istring> >    m_attributeToVarying;
+    minitl::vector< minitl::tuple<istring, istring> >   m_attributeToVarying;
     MemoryStream                                        m_stream;
     i32                                                 m_indent;
     u32                                                 m_counter;

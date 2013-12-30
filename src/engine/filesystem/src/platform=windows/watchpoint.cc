@@ -47,7 +47,7 @@ private:
     static const u32 s_maximumWatchCount = MAXIMUM_WAIT_OBJECTS-1;
     HANDLE                                                                  m_thread;
     HANDLE                                                                  m_semaphore;
-    minitl::vector< minitl::pair<HANDLE, weak<FileSystem::WatchPoint> > >   m_watches;
+    minitl::vector< minitl::tuple<HANDLE, weak<FileSystem::WatchPoint> > >   m_watches;
     minitl::istack<WatchRequest>                                            m_requests;
     u32                                                                     m_watchCount;
 private:
@@ -90,7 +90,9 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
         HANDLE handles[s_maximumWatchCount+1];
         int i = 0;
         handles[i++] = watchThread->m_semaphore;
-        for (minitl::vector<  minitl::pair<HANDLE, weak<FileSystem::WatchPoint> > >::const_iterator it = watchThread->m_watches.begin(); it != watchThread->m_watches.end(); ++it)
+        for (minitl::vector<  minitl::tuple<HANDLE, weak<FileSystem::WatchPoint> > >::const_iterator it = watchThread->m_watches.begin();
+             it != watchThread->m_watches.end();
+             ++it)
         {
             handles[i++] = it->first;
         }
@@ -110,7 +112,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
                     | FILE_NOTIFY_CHANGE_SIZE
                     | FILE_NOTIFY_CHANGE_LAST_WRITE;
                 HANDLE handle = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
-                watchThread->m_watches.push_back(minitl::make_pair(handle, request->m_watchpoint));
+                watchThread->m_watches.push_back(minitl::make_tuple(handle, request->m_watchpoint));
                 request->~WatchRequest();
                 Arena::temporary().free(request);
             }
@@ -162,7 +164,7 @@ WatchThread::~WatchThread()
     be_forceuse(result);
     CloseHandle(m_thread);
     CloseHandle(m_semaphore);
-    for (minitl::vector< minitl::pair<HANDLE, weak<FileSystem::WatchPoint> > >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    for (minitl::vector< minitl::tuple<HANDLE, weak<FileSystem::WatchPoint> > >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {
         FindCloseChangeNotification(it->first);
     }
