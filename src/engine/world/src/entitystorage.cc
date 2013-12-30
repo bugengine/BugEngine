@@ -7,6 +7,7 @@
 #include    <scheduler/task/method.hh>
 #include    <minitl/bitset.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
 #include    <minitl/algorithm.hh>
 
@@ -106,8 +107,8 @@ EntityStorage::ComponentGroup::~ComponentGroup()
 
 EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuckets(u32 mask1, u32 mask2)
 {
-    minitl::pair<Bucket*, Bucket*> result;
-    minitl::pair<u32, u32> best;
+    BucketPair result;
+    minitl::tuple<u32, u32> best;
     for (Bucket* bucket = buckets.begin(); bucket != buckets.end(); ++bucket)
     {
         if ((bucket->acceptMask & mask1) == bucket->acceptMask && bucket->maskSize >= best.first)
@@ -177,6 +178,7 @@ struct EntityStorage::EntityInfo
         u32 index;
     };
     minitl::bitset<96>  mask;
+    u32 componentIndex[1];
 };
 
 static const u32 s_usedBit = 0x80000000;
@@ -190,11 +192,11 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
                     Task::MethodCaller<EntityStorage, &EntityStorage::start>(this)))
     ,   m_freeEntityId(0)
     ,   m_entityAllocator(SystemAllocator::BlockSize_16k, 32)
-    ,   m_entityInfoBuffer((EntityInfo**)m_entityAllocator.allocate())
+    ,   m_entityInfoBuffer((u8**)m_entityAllocator.allocate())
     ,   m_entityCount(0)
     ,   m_entityBufferCount(0)
     ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
-    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityInfo))
+    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage) - 4 * (composition.components.size() - 1))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
     ,   m_componentCountsList(Arena::game())
@@ -202,12 +204,12 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
 {
     m_entityInfoBuffer[0] = 0;
     buildGroups(composition);
-    for (minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >::const_iterator it = composition.components.begin();
+    for (minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >::const_iterator it = composition.components.begin();
          it != composition.components.end();
          ++it)
     {
         ComponentIndex index = indexOf(it->first);
-        m_components[index.offset + index.index].memory = Arena::game().alloc(it->first->size * it->second);
+        m_components[index.offset + index.index].memory = (u8*)Arena::game().alloc(it->first->size * it->second);
         m_components[index.offset + index.index].current = 0;
         m_components[index.offset + index.index].maximum = 0;
     }
@@ -217,7 +219,7 @@ EntityStorage::~EntityStorage()
 {
     be_assert(m_entityCount == 0,
               "%d entities still spawned when deleting world" | m_entityCount);
-    for (EntityInfo** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
+    for (u8** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
     {
         m_entityAllocator.free(*buffer);
     }
@@ -275,7 +277,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
             {
                 strcat(message, "+");
             }
-            for (minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >::const_iterator ci = composition.components.begin();
+            for (minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >::const_iterator ci = composition.components.begin();
                  ci != composition.components.end();
                  ++ci)
             {
@@ -368,6 +370,11 @@ void EntityStorage::start()
 {
 }
 
+u32 EntityStorage::getEntityInfoSize() const
+{
+    return be_checked_numcast<u32>(sizeof(EntityInfo) + sizeof(u32) * (m_componentTypes.size()-1));
+}
+
 EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::Entity e)
 {
     u32 bufferIndex = e.id >> 16;
@@ -376,7 +383,7 @@ EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::Entity
               "Entity %d: invalid block index %d" | e.id | bufferIndex);
     be_assert(bufferOffset < m_bufferCapacity,
               "Entity %d: invalid block offset %d" | e.id | bufferOffset);
-    return m_entityInfoBuffer[bufferIndex][bufferOffset];
+    return *(EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
 }
 
 const EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::Entity e) const
@@ -387,7 +394,7 @@ const EntityStorage::EntityInfo& EntityStorage::getEntityInfo(BugEngine::World::
               "Entity %d: invalid block index %d" | e.id | bufferIndex);
     be_assert(bufferOffset < m_bufferCapacity,
               "Entity %d: invalid block offset %d" | e.id | bufferOffset);
-    return m_entityInfoBuffer[bufferIndex][bufferOffset];
+    return *(const EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
 }
 
 Entity EntityStorage::spawn()
@@ -396,19 +403,26 @@ Entity EntityStorage::spawn()
 
     u32 bufferIndex = e.id >> 16;
     be_assert(bufferIndex <= m_entityBufferCount,
-              "invalid buffer index: %d (range: %d, %d)" | bufferIndex);
+              "invalid buffer index: %d (range: %d, %d)" | bufferIndex | 0 | m_entityBufferCount);
     if (bufferIndex == m_entityBufferCount)
     {
         be_assert(m_entityInfoBuffer[bufferIndex] == 0,
                   "buffer index %d inconsistent" | bufferIndex);
-        EntityInfo* buffer = (EntityInfo*)m_entityAllocator.allocate();
+        u8* buffer = (u8*)m_entityAllocator.allocate();
         u32 index = 1 + (bufferIndex << 16);
+        const u32 infoSize = getEntityInfoSize();
         for (u32 i = 0; i < m_bufferCapacity; ++i)
         {
-            buffer[i].next = index + i + 1;
-            buffer[i].mask = minitl::bitset<96>();
+            EntityInfo& info = *(EntityInfo*)(buffer + i * infoSize);
+            info.next = index + i + 1;
+            info.mask = minitl::bitset<96>();
+            for (u32 j = 0; j < m_componentTypes.size(); ++j)
+            {
+                info.componentIndex[j] = 0;
+            }
         }
-        buffer[m_bufferCapacity-1].next = (1 + bufferIndex) << 16;
+        EntityInfo& info = *(EntityInfo*)(buffer + (m_bufferCapacity-1) * infoSize);
+        info.next = (1 + bufferIndex) << 16;
 
         m_entityInfoBuffer[bufferIndex] = buffer;
         m_entityInfoBuffer[bufferIndex+1] = 0;
@@ -452,13 +466,15 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       return);
 
     u32 maskBefore = info.mask(componentIndex.offset, componentIndex.offset+group.componentCount);
-    u32 maskAfter = maskBefore | (u32)1<<componentIndex.index;
-    minitl::pair<ComponentGroup::Bucket*, ComponentGroup::Bucket*> buckets = group.findBuckets(maskBefore, maskAfter);
+    u32 maskComponent = (u32)1<<componentIndex.offset;
+    u32 maskAfter = maskBefore | maskComponent;
+    minitl::tuple<ComponentGroup::Bucket*, ComponentGroup::Bucket*> buckets = group.findBuckets(maskBefore, maskAfter);
     if (buckets.first == buckets.second)
     {
-        ComponentGroup::Bucket* bucket = buckets.first;
-        be_assert((bucket->acceptMask & maskBefore) == bucket->acceptMask, "found invalid bucket");
-        be_assert((bucket->acceptMask & maskAfter) == bucket->acceptMask, "found invalid bucket");
+        be_assert((buckets.first->acceptMask & maskBefore) == buckets.first->acceptMask, "found invalid bucket");
+        be_assert((buckets.first->acceptMask & maskAfter) == buckets.first->acceptMask, "found invalid bucket");
+        ComponentGroup::Bucket& bucket = group.buckets[group.buckets.size() - 1 - group.componentCount + componentIndex.offset];
+        be_assert(maskComponent == bucket.acceptMask, "got invalid bucket");
         be_forceuse(bucket);
     }
     else if (buckets.first < buckets.second)
@@ -500,6 +516,22 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return false);
     return info.mask[componentIndex.index];
+}
+
+RTTI::Value EntityStorage::getComponent(BugEngine::World::Entity e, raw<const RTTI::Class> componentType) const
+{
+    be_assert(hasComponent(e, componentType),
+              "Entity %s does not have a component of type %s" | e.id | componentType->fullname());
+    const EntityInfo& info = getEntityInfo(e);
+    const ComponentIndex componentTypeIndex = indexOf(componentType);
+    const u32 componentIndex = info.componentIndex[componentTypeIndex.index];
+    const ComponentStorage& storage = m_components[componentTypeIndex.index];
+    be_assert_recover(componentIndex,
+                      "component type %s is not a registered component of entity storage" | componentType->fullname(),
+                      return RTTI::Value());
+    be_assert(componentIndex < storage.current, "component index %d out of range" | componentIndex);
+    return RTTI::Value(RTTI::Type::makeType(componentType, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Const),
+                       storage.memory + componentIndex*componentType->size);
 }
 
 EntityStorage::ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)

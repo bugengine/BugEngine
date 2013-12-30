@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_HASH_MAP_HH_
 #define BE_MINITL_HASH_MAP_HH_
 /*****************************************************************************/
-#include    <minitl/pair.hh>
+#include    <minitl/tuple.hh>
 #include    <minitl/hash.hh>
 #include    <minitl/traits.hh>
 #include    <minitl/iterator.hh>
@@ -29,9 +29,9 @@ public:
     typedef iterator_base<iterator_policy>                  iterator;
     typedef iterator_base<const_iterator_policy>            const_iterator;
 
-    typedef pair<const Key, Value>          value_type;
-    typedef pair<const Key, Value>&         reference;
-    typedef const pair<const Key, Value>&   const_reference;
+    typedef tuple<const Key, Value>         value_type;
+    typedef tuple<const Key, Value>&        reference;
+    typedef const tuple<const Key, Value>&   const_reference;
 private:
     struct empty_item : public intrusive_list<empty_item>::item
     {
@@ -44,7 +44,7 @@ private:
     };
     typedef typename intrusive_list<empty_item>::iterator               list_iterator;
     typedef typename intrusive_list<empty_item>::const_iterator         const_list_iterator;
-    typedef pair<empty_item, list_iterator> index_item;
+    typedef tuple<empty_item, list_iterator> index_item;
 private:
     pool<item>                      m_itemPool;
     intrusive_list<empty_item>      m_items;
@@ -77,8 +77,8 @@ public:
     iterator                erase(iterator it);
     void                    erase(const Key& key);
 
-    pair<iterator, bool>    insert(const Key& k, const Value& value);
-    pair<iterator, bool>    insert(const pair<const Key, Value>& v);
+    tuple<iterator, bool>   insert(const Key& k, const Value& value);
+    tuple<iterator, bool>   insert(const tuple<const Key, Value>& v);
 
     void                    swap(hashmap& other);
 };

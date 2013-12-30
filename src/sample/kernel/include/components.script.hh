@@ -29,6 +29,11 @@ be_pod D : public World::Component
     u32 value;
 };
 
+be_pod E : public World::Component
+{
+    u32 value;
+};
+
 
 }
 

@@ -14,7 +14,7 @@ class WatchPoint : public minitl::refcountable
     friend class DiskFolder::Watch;
 private:
     typedef minitl::vector< weak<Folder::Watch> >                       WatchVector;
-    typedef minitl::vector< minitl::pair<istring, ref<WatchPoint> > >   ChildrenVector;
+    typedef minitl::vector< minitl::tuple<istring, ref<WatchPoint> > >  ChildrenVector;
     WatchVector                 m_watches;
     ChildrenVector              m_children;
     weak<WatchPoint>            m_parent;

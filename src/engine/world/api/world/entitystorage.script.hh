@@ -32,7 +32,7 @@ private:
             Bucket();
             Bucket(u32* componentOffsets, u32 acceptMask, u32 componentsSize);
         };
-        typedef minitl::pair<Bucket*, Bucket*> BucketPair;
+        typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
 
         minitl::array<Bucket> buckets;
         u32 componentCount;
@@ -57,15 +57,15 @@ private:
     };
     struct ComponentStorage
     {
-        void* memory;
+        u8* memory;
         u32 current;
         u32 maximum;
     };
-    typedef minitl::pair< raw<const RTTI::Class>, ComponentIndex > ComponentInfo;
+    typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex > ComponentInfo;
 protected:
     struct WorldComposition
     {
-        minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >    components;
+        minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >    components;
         minitl::vector< minitl::array< raw<const RTTI::Class> > >       partitions;
 
         WorldComposition(u32 componentCount)
@@ -78,7 +78,7 @@ private:
     scoped<Task::ITask>             m_task;
     u32                             m_freeEntityId;
     SystemAllocator                 m_entityAllocator;
-    EntityInfo**                    m_entityInfoBuffer;
+    u8**                            m_entityInfoBuffer;
     u32                             m_entityCount;
     u32                             m_entityBufferCount;
     const u32                       m_maxEntityBufferCount;
@@ -89,6 +89,7 @@ private:
     minitl::array<ComponentStorage> m_components;
 private:
     void start();
+    inline u32 getEntityInfoSize() const;
     EntityInfo& getEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
     ComponentGroup& getComponentGroup(ComponentIndex index);
@@ -102,6 +103,7 @@ private: // friend World
     void addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType);
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
+    RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex indexOf(raw<const RTTI::Class> componentType) const;
 
 protected:

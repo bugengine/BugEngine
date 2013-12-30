@@ -145,7 +145,7 @@ StringCache* StringCache::unique(const char *val)
         (void)(new(cache) StringCache(len));
         strcpy(data, val);
 
-        minitl::pair<StringIndex::iterator,bool> insertresult = g_strings.insert(data, cache);
+        minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(data, cache);
         be_forceuse(insertresult);
         return cache;
     }

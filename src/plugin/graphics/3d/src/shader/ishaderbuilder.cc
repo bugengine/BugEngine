@@ -123,7 +123,7 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
                 m_currentAttributeToVarying++;
                 doAddAttributeDeclaration(nameAttribute, targetStage, type);
                 doAddVaryingDeclaration(nameVarying, targetStage, type);
-                m_attributeToVarying.push_back(minitl::make_pair(nameAttribute, nameVarying));
+                m_attributeToVarying.push_back(minitl::make_tuple(nameAttribute, nameVarying));
             }
         }
     }
@@ -140,7 +140,7 @@ void IShaderBuilder::addAttribute(weak<const Node> node, Stage currentStage, Sta
 
 void IShaderBuilder::forwardAttributes()
 {
-    for (minitl::vector< minitl::pair<istring, istring> >::const_iterator it = m_attributeToVarying.begin(); it != m_attributeToVarying.end(); ++it)
+    for (minitl::vector< minitl::tuple<istring, istring> >::const_iterator it = m_attributeToVarying.begin(); it != m_attributeToVarying.end(); ++it)
     {
         doSaveTo(it->second, it->first);
     }

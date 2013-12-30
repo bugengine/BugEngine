@@ -295,7 +295,7 @@ void hashmap<Key, Value, Hash>::erase(const Key& key)
 }
 
 template< typename Key, typename Value, typename Hash >
-pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& key, const Value& value)
+tuple<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const Key& key, const Value& value)
 {
     u32 hash = Hash()(key);
     list_iterator it = m_index[hash % (m_index.count()-1)].second;
@@ -303,7 +303,7 @@ pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Has
     {
         if (Hash()(static_cast<item*>(it.operator->())->value.first, key))
         {
-            return make_pair(iterator(*this, it), false);
+            return make_tuple(iterator(*this, it), false);
         }
     }
     --it;
@@ -314,12 +314,12 @@ pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Has
         ++it;
     }
     m_count++;
-    item* i = m_itemPool.allocate(make_pair(key, value));
-    return make_pair(iterator(*this, m_items.insert(it, *i)), true);
+    item* i = m_itemPool.allocate(make_tuple(key, value));
+    return make_tuple(iterator(*this, m_items.insert(it, *i)), true);
 }
 
 template< typename Key, typename Value, typename Hash >
-pair<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const pair<const Key, Value>& v)
+tuple<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Hash>::insert(const tuple<const Key, Value>& v)
 {
     return insert(v.first, v.second);
 }

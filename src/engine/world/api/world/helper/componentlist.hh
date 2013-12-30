@@ -25,7 +25,7 @@ struct ComponentList : public TAIL
         ,   stream(task)
     {
     }
-    static void addComponent(minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
+    static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
         componentList[count].first = be_typeid<T>::klass();
         componentList[count].second = COUNT;
@@ -48,7 +48,7 @@ struct ComponentList<T, COUNT, void>
         :   stream(task)
     {
     }
-    static void addComponent(minitl::array< minitl::pair< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
+    static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
         componentList[count].first = be_typeid<T>::klass();
         componentList[count].second = COUNT;

@@ -8,7 +8,8 @@ sample = kernel.Kernels.Add(
     getattr(storage, "A+B").A,
     getattr(storage, "A+B").B,
     getattr(storage, "A+C").C,
-    getattr(storage, "A+D").D)
+    getattr(storage, "A+D+E").D,
+    getattr(storage, "A+D+E").E)
 tokens['sample'] = resources:load(sample)
 world = BugEngine.World.World(storage, {sample.output})
 tokens['world'] = resources:load(world)
@@ -62,6 +63,7 @@ world:addComponent(e13, kernel.D({value = 13}))
 world:addComponent(e14, kernel.D({value = 14}))
 world:addComponent(e15, kernel.C({value = 15}))
 world:addComponent(e15, kernel.D({value = 15}))
+world:addComponent(e15, kernel.E({value = 15}))
 
 
 
@@ -69,10 +71,11 @@ print(world:hasComponent(e7, kernel.A))
 print(world:hasComponent(e7, kernel.B))
 print(world:hasComponent(e7, kernel.C))
 print(world:hasComponent(e7, kernel.D))
-print(world:hasComponent(e16, kernel.A))
-print(world:hasComponent(e16, kernel.B))
-print(world:hasComponent(e16, kernel.C))
-print(world:hasComponent(e16, kernel.D))
+print(world:hasComponent(e15, kernel.A))
+print(world:hasComponent(e15, kernel.B))
+print(world:hasComponent(e15, kernel.C))
+print(world:hasComponent(e15, kernel.D))
+print(world:hasComponent(e15, kernel.E))
 
 world:unspawn(e1)
 world:unspawn(e2)
