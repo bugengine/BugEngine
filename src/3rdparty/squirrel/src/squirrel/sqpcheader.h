@@ -11,6 +11,8 @@
 #include <cstring>
 #include <cassert>
 #include <new>
+using namespace std;
+
 //squirrel stuff
 #include <squirrel.h>
 #include "sqobject.h"

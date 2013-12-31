@@ -2,6 +2,9 @@
 #ifndef _SQSTD_BLOBIMPL_H_
 #define _SQSTD_BLOBIMPL_H_
 
+#include <cstring>
+using namespace std;
+
 struct SQBlob : public SQStream
 {
 	SQBlob(SQInteger size) {

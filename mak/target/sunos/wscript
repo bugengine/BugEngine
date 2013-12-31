@@ -24,8 +24,6 @@ def set_sunos_options(self):
 	self.env.RPATH = '$ORIGIN/../plugin'
 	for i in os.environ['PATH'].split(':'):
 		self.env.append_unique('RPATH', [os.path.join(os.path.dirname(i), 'lib')])
-	self.env.append_unique('CFLAGS', ['-I/usr/include/'])
-	self.env.append_unique('CXXFLAGS', ['-I/usr/include/'])
 	self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
 @conf
@@ -41,7 +39,7 @@ def set_sunos_suncc_options(conf, arch):
 		v.append_unique('LINKFLAGS', ['-m64'])
 	v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
 	v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-	v.append_unique('LINKFLAGS', ['-N', '-lposix4', '-mt', '-znow', '-xldscope=hidden', '-Kpic', '-ldl', '-lm'])
+	v.append_unique('LINKFLAGS', ['-lposix4', '-mt', '-znow', '-xldscope=hidden', '-Kpic', '-ldl', '-lm'])
 
 	v['RPATH_ST'] = '-R%s'
 
