@@ -21,7 +21,6 @@
 #define yynerrs be_package_nerrs
 
 
-#define YYPARSE_PARAM   param
 
 #ifdef _MSC_VER
 # include <malloc.h>
@@ -36,7 +35,7 @@
 
 extern int yylex();
 
-static int yyerror(const char *msg)
+static int yyerror(void*, const char *msg)
 {
     be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
     return 0;
@@ -86,6 +85,7 @@ ref<Entity> s_currentEntity;
 %type   <value_array>   value_array
 
 %start  file
+%parse-param { void*  param }
 
 %destructor { free($$); }                   VAL_STRING VAL_FILENAME TOK_ID fullname
 %destructor { $$->~ref(); free($$); }       value value_zip
