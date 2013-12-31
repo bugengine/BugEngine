@@ -1,8 +1,16 @@
+import os
+
 def options(opt):
 	pass
 
 def configure(conf):
-	pass
+	conf.env.append_unique('INCLUDES', '/usr/X11/include/mesa')
+	try:
+		for gcc_version in os.listdir('/usr/gcc/'):
+			conf.env.append_unique('EXTRA_PATH', os.path.join('/usr', 'gcc', gcc_version, 'bin'))
+	except OSError:
+		pass	
+	
 
 def build(bld):
 	pass

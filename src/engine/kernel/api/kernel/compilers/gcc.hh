@@ -6,8 +6,12 @@
 /*****************************************************************************/
 
 #define be_alignof(t)           __alignof__(t)
-#if defined(_X86)||defined(_AMD64)
-# define be_break()              __asm("int3")
+#if (defined(_X86)||defined(_AMD64))
+# if defined(sun)
+#  define be_break()              __asm("int $3")
+# else
+#  define be_break()              __asm("int3")
+# endif
 #elif defined(_POWERPC)
 # define be_break()              __asm("trap")
 #elif defined(_MIPS)
