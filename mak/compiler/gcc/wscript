@@ -2,10 +2,6 @@ from waflib import Utils, Logs
 from waflib.Configure import conf
 import os, sys
 
-
-
-
-
 def allarchs(arch):
 	if arch == 'x86':
 		return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
@@ -65,7 +61,7 @@ def detect_gcc_archs_from_path(conf, name, bindir, gcc, gxx, version, target, ar
 	versionverysmall = ''.join(version.split('.')[0:2])
 
 	cc = cxx = None
-	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall]:
+	for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
 		cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False)
 		if cc:
 			break

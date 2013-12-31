@@ -83,7 +83,7 @@ def set_sunos_gcc_options(conf, flags, version):
 		v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
 	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+	v.CXXFLAGS_debug = ['-g', '-D_DEBUG']
 	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
 	v.LINKFLAGS_debug = ['-pipe', '-g']
 
