@@ -26,6 +26,9 @@ public:
     {
         minitl::setAssertionCallback(m_previousAssertionCallback);
     }
+private:
+    AssertSetup(const AssertSetup& other);
+    AssertSetup& operator=(const AssertSetup& other);
 public:
     void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
     void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }

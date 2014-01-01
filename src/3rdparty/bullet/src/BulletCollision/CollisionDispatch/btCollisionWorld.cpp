@@ -259,7 +259,90 @@ void	btCollisionWorld::removeCollisionObject(btCollisionObject* collisionObject)
 
 }
 
+struct LocalInfoAdder2 : public btCollisionWorld::RayResultCallback
+{
+	btCollisionWorld::RayResultCallback* m_userCallback;
+	int m_i;
+					
+	LocalInfoAdder2 (int i, btCollisionWorld::RayResultCallback *user)
+		: m_userCallback(user), m_i(i)
+	{ 
+		m_closestHitFraction = m_userCallback->m_closestHitFraction;
+	}
+	virtual bool needsCollision(btBroadphaseProxy* p) const
+	{
+		return m_userCallback->needsCollision(p);
+	}
 
+	virtual btScalar addSingleResult (btCollisionWorld::LocalRayResult &r, bool b)
+	{
+		btCollisionWorld::LocalShapeInfo shapeInfo;
+		shapeInfo.m_shapePart = -1;
+		shapeInfo.m_triangleIndex = m_i;
+		if (r.m_localShapeInfo == NULL)
+			r.m_localShapeInfo = &shapeInfo;
+
+		const btScalar result = m_userCallback->addSingleResult(r, b);
+		m_closestHitFraction = m_userCallback->m_closestHitFraction;
+		return result;
+	}
+};
+				
+
+struct RayTester : btDbvt::ICollide
+{
+	btCollisionObject* m_collisionObject;
+	const btCompoundShape* m_compoundShape;
+	const btTransform& m_colObjWorldTransform;
+	const btTransform& m_rayFromTrans;
+	const btTransform& m_rayToTrans;
+	btCollisionWorld::RayResultCallback& m_resultCallback;
+					
+	RayTester(btCollisionObject* collisionObject,
+			const btCompoundShape* compoundShape,
+			const btTransform& colObjWorldTransform,
+			const btTransform& rayFromTrans,
+			const btTransform& rayToTrans,
+			btCollisionWorld::RayResultCallback& resultCallback):
+		m_collisionObject(collisionObject),
+		m_compoundShape(compoundShape),
+		m_colObjWorldTransform(colObjWorldTransform),
+		m_rayFromTrans(rayFromTrans),
+		m_rayToTrans(rayToTrans),
+		m_resultCallback(resultCallback)
+	{
+						
+	}
+					
+	void Process(int i)
+	{
+		const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(i);
+		const btTransform& childTrans = m_compoundShape->getChildTransform(i);
+		btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
+						
+		// replace collision shape so that callback can determine the triangle
+		btCollisionShape* saveCollisionShape = m_collisionObject->getCollisionShape();
+		m_collisionObject->internalSetTemporaryCollisionShape((btCollisionShape*)childCollisionShape);
+
+		LocalInfoAdder2 my_cb(i, &m_resultCallback);
+
+		btCollisionWorld::rayTestSingle(
+			m_rayFromTrans,
+			m_rayToTrans,
+			m_collisionObject,
+			childCollisionShape,
+			childWorldTrans,
+			my_cb);
+						
+		// restore
+		m_collisionObject->internalSetTemporaryCollisionShape(saveCollisionShape);
+	}
+					
+	void Process(const btDbvtNode* leaf)
+	{
+		Process(leaf->dataAsInt);
+	}
+};
 
 void	btCollisionWorld::rayTestSingle(const btTransform& rayFromTrans,const btTransform& rayToTrans,
 										btCollisionObject* collisionObject,
@@ -437,90 +520,6 @@ void	btCollisionWorld::rayTestSingle(const btTransform& rayFromTrans,const btTra
 			//			BT_PROFILE("rayTestCompound");
 			if (collisionShape->isCompound())
 			{
-				struct LocalInfoAdder2 : public RayResultCallback
-				{
-					RayResultCallback* m_userCallback;
-					int m_i;
-					
-					LocalInfoAdder2 (int i, RayResultCallback *user)
-						: m_userCallback(user), m_i(i)
-					{ 
-						m_closestHitFraction = m_userCallback->m_closestHitFraction;
-					}
-					virtual bool needsCollision(btBroadphaseProxy* p) const
-					{
-						return m_userCallback->needsCollision(p);
-					}
-
-					virtual btScalar addSingleResult (btCollisionWorld::LocalRayResult &r, bool b)
-					{
-						btCollisionWorld::LocalShapeInfo shapeInfo;
-						shapeInfo.m_shapePart = -1;
-						shapeInfo.m_triangleIndex = m_i;
-						if (r.m_localShapeInfo == NULL)
-							r.m_localShapeInfo = &shapeInfo;
-
-						const btScalar result = m_userCallback->addSingleResult(r, b);
-						m_closestHitFraction = m_userCallback->m_closestHitFraction;
-						return result;
-					}
-				};
-				
-				struct RayTester : btDbvt::ICollide
-				{
-					btCollisionObject* m_collisionObject;
-					const btCompoundShape* m_compoundShape;
-					const btTransform& m_colObjWorldTransform;
-					const btTransform& m_rayFromTrans;
-					const btTransform& m_rayToTrans;
-					RayResultCallback& m_resultCallback;
-					
-					RayTester(btCollisionObject* collisionObject,
-							const btCompoundShape* compoundShape,
-							const btTransform& colObjWorldTransform,
-							const btTransform& rayFromTrans,
-							const btTransform& rayToTrans,
-							RayResultCallback& resultCallback):
-						m_collisionObject(collisionObject),
-						m_compoundShape(compoundShape),
-						m_colObjWorldTransform(colObjWorldTransform),
-						m_rayFromTrans(rayFromTrans),
-						m_rayToTrans(rayToTrans),
-						m_resultCallback(resultCallback)
-					{
-						
-					}
-					
-					void Process(int i)
-					{
-						const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(i);
-						const btTransform& childTrans = m_compoundShape->getChildTransform(i);
-						btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
-						
-						// replace collision shape so that callback can determine the triangle
-						btCollisionShape* saveCollisionShape = m_collisionObject->getCollisionShape();
-						m_collisionObject->internalSetTemporaryCollisionShape((btCollisionShape*)childCollisionShape);
-
-						LocalInfoAdder2 my_cb(i, &m_resultCallback);
-
-						rayTestSingle(
-							m_rayFromTrans,
-							m_rayToTrans,
-							m_collisionObject,
-							childCollisionShape,
-							childWorldTrans,
-							my_cb);
-						
-						// restore
-						m_collisionObject->internalSetTemporaryCollisionShape(saveCollisionShape);
-					}
-					
-					void Process(const btDbvtNode* leaf)
-					{
-						Process(leaf->dataAsInt);
-					}
-				};
-				
 				const btCompoundShape* compoundShape = static_cast<const btCompoundShape*>(collisionShape);
 				const btDbvt* dbvt = compoundShape->getDynamicAabbTree();
 

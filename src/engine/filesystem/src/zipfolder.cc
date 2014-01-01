@@ -66,8 +66,8 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 {
                     unz_file_pos filePos;
                     unzGetFilePos(m_handle, &filePos);
-                    ifilename filepath = path + ifilename(filename);
-                    m_files.push_back(minitl::make_tuple(filename, ref<ZipFile>::create(Arena::filesystem(), m_handle, filepath, info, filePos)));
+                    ifilename fullFilePath = path + ifilename(filename);
+                    m_files.push_back(minitl::make_tuple(filename, ref<ZipFile>::create(Arena::filesystem(), m_handle, fullFilePath, info, filePos)));
                 }
                 else if (path.size() >= 1)
                 {

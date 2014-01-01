@@ -70,10 +70,14 @@ static int convertNumberToValue(lua_State *state, int index, const RTTI::Type& t
         switch(type.metaclass->index())
         {
         case 0:
-            be_assert(be_typeid<bool>::klass() == type.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | type.metaclass->fullname() | be_typeid<bool>::klass()->fullname());
-            new (value) RTTI::Value(lua_tonumber(state, index) != 0);
-            return 1;
+            {
+                be_assert(be_typeid<bool>::klass() == type.metaclass,
+                          "mismatching index for class %s: mistaken for %s" | type.metaclass->fullname() | be_typeid<bool>::klass()->fullname());
+                float v = lua_tonumber(state, index);
+                const float g_epsilon = 0.000001f;
+                new (value) RTTI::Value(v > g_epsilon || v < -g_epsilon);
+                return 1;
+            }
         case 1:
             be_assert(be_typeid<u8>::klass() == type.metaclass,
                       "mismatching index for class %s: mistaken for %s" | type.metaclass->fullname() | be_typeid<u8>::klass()->fullname());
@@ -202,9 +206,9 @@ static int convertTableToValue(lua_State *state, int index, const RTTI::Type& ty
             RTTI::Value array = type.metaclass->constructor->doCall(parameters, count);
             new (value) RTTI::Value(array);
         }
-        for (int i = count-1; i >= 0; --i)
+        for (int j = count-1; j >= 0; --j)
         {
-            parameters[i].~Value();
+            parameters[j].~Value();
         }
         freea(parameters);
         return score;
@@ -361,20 +365,20 @@ int call(lua_State* state, raw<const RTTI::Method> method)
     u32 overloadCount = method->overloadCount;
     CallInfo* overloads = (CallInfo*)malloca(overloadCount * minitl::align(sizeof(CallInfo), be_alignof(CallInfo)));
     CallInfo* currentOverload = overloads;
-    raw<const RTTI::Method::Overload> overload = method->overloads;
-    while (overload)
+    raw<const RTTI::Method::Overload> o = method->overloads;
+    while (o)
     {
-        if (overload->parameterCount == nargs)
+        if (o->parameterCount == nargs)
         {
             void* buffer = malloca(nargs * minitl::align(sizeof(RTTI::Value), be_alignof(RTTI::Value)));
-            new (currentOverload) CallInfo(overload, buffer);
+            new (currentOverload) CallInfo(o, buffer);
             currentOverload ++;
         }
         else
         {
             overloadCount --;
         }
-        overload = overload->next;
+        o = o->next;
     }
     CallInfo* callinfo = CallInfo::findOverload(state, overloads, overloadCount);
     if (callinfo)

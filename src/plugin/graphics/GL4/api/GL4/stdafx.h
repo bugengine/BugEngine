@@ -26,7 +26,6 @@
 # endif
 #else
 # include   <GL/gl.h>
-# include   <GL/glx.h>
 # include   <GL4/glext.h>
 #endif
 
