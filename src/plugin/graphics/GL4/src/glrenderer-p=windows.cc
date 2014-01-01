@@ -89,8 +89,8 @@ static HGLRC createGLContext(weak<const GLRenderer> renderer, HDC hdc)
     {
         HWND hwnd = createDummyWnd(renderer);
         HDC dc = GetDC(hwnd);
-        GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
-        SetPixelFormat(dc, pixelFormat, &s_pfd);
+        GLuint pf = ChoosePixelFormat(hdc, &s_pfd);
+        SetPixelFormat(dc, pf, &s_pfd);
 
         // phony context to get the context creation method
         HGLRC glrc = wglCreateContext(dc);

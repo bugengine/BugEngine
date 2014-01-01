@@ -166,7 +166,7 @@ weak<File> DiskFolder::createFile(const istring& name)
     {
         CloseHandle(h);
         WIN32_FIND_DATA data;
-        HANDLE h = FindFirstFile(path.name, &data);
+        h = FindFirstFile(path.name, &data);
         if (h == INVALID_HANDLE_VALUE)
         {
             char *errorMessage = 0;

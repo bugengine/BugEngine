@@ -6,7 +6,7 @@
 /*****************************************************************************/
 
 #define be_alignof(t)           __alignof(t)
-#define be_break()              __asm("int3")
+#define be_break()              /*__asm("int $3")*/
 
 typedef signed __int8           i8;
 typedef signed __int16          i16;
@@ -31,6 +31,10 @@ typedef u8                      byte;
 #pragma warning disable 411     // class X defines no constructor to initialize...
 #pragma warning disable 2304    // explicit constructors
 #pragma warning disable 2289    // signature for copy is Type(const Type&)
+#pragma warning disable 444     // destructor for base class is not virtual
+#pragma warning disable 810     // conversion from X to Y may lose significant bits
+#pragma warning disable 1572    // floating-point equality and inequality comparisons are unreliable
+#pragma warning disable 1419    // external declaration in primary source file
 
 #ifdef NDEBUG
 # pragma warning disable 869
