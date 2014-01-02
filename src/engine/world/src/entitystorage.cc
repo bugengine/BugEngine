@@ -14,6 +14,21 @@
 namespace BugEngine { namespace World
 {
 
+static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type, istring name)
+{
+    raw<const RTTI::Method> method = type->getMethod(name);
+    be_assert_recover(method, "could not locate method \"%s\" for component %s" | name | type->fullname(), return raw<const RTTI::Method::Overload>());
+    for (raw<const RTTI::Method::Overload> overload = method->overloads; overload; overload = overload->next)
+    {
+        if (overload->parameterCount == 1
+         && RTTI::Type::makeType(type, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable).isA(overload->params->type))
+        {
+            return overload;
+        }
+    }
+    return raw<const RTTI::Method::Overload>();
+}
+
 struct GroupInfo
 {
     minitl::vector< raw<const RTTI::Class> >                    components;
@@ -76,28 +91,28 @@ EntityStorage::ComponentGroup::Bucket::Bucket()
     :   componentCounts(0)
     ,   acceptMask(0)
     ,   maskSize(0)
-    ,   componentsSize(0)
 {
 }
 
-EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask, u32 componentsSize)
+EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask)
     :   componentCounts(componentCounts),
         acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
-    ,   componentsSize(componentsSize)
 {
 }
 
 
-EntityStorage::ComponentGroup::ComponentGroup(u32 componentCount, u32* componentOffsets, const minitl::vector<u32>& bucketMasks)
+EntityStorage::ComponentGroup::ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize, u32* componentOffsets, const minitl::vector<u32>& bucketMasks)
     :   buckets(Arena::game(), (u32)bucketMasks.size())
-    ,   componentCount(componentCount)
+    ,   firstComponent(firstComponent)
+    ,   lastComponent(firstComponent + componentCount)
+    ,   componentsTotalSize(componentsTotalSize)
     ,   componentCounts(componentOffsets)
 {
     u32 index = 0;
     for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
     {
-        buckets[index] = Bucket(componentCounts + componentCount * index, *it, 0);
+        buckets[index] = Bucket(componentCounts + componentCount * index, *it);
     }
 }
 
@@ -148,26 +163,26 @@ void EntityStorage::ComponentGroup::moveDown(Bucket* bucketHigh, Bucket* bucketL
 
 EntityStorage::ComponentIndex::ComponentIndex()
     :   group((u16)~0)
-    ,   index((u8)~0)
-    ,   offset((u8)~0)
+    ,   relativeIndex((u8)~0)
+    ,   absoluteIndex((u8)~0)
 {
 }
 
-EntityStorage::ComponentIndex::ComponentIndex(u32 group, u32 index, u32 offset)
+EntityStorage::ComponentIndex::ComponentIndex(u32 group, u32 relativeIndex, u32 absoluteIndex)
     :   group(be_checked_numcast<u16>(group))
-    ,   index(be_checked_numcast<u8>(index))
-    ,   offset(be_checked_numcast<u8>(offset))
+    ,   relativeIndex(be_checked_numcast<u8>(relativeIndex))
+    ,   absoluteIndex(be_checked_numcast<u8>(absoluteIndex))
 {
 }
 
 EntityStorage::ComponentIndex::operator void*() const
 {
-    return (void*)(group != (u16)~0 || index != (u8)~0);
+    return (void*)(group != (u16)~0 || relativeIndex != (u8)~0);
 }
 
 bool EntityStorage::ComponentIndex::operator!() const
 {
-    return group == (u16)~0 && index == (u8)~0;
+    return group == (u16)~0 && relativeIndex == (u8)~0;
 }
 
 struct EntityStorage::EntityInfo
@@ -208,10 +223,11 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
          it != composition.components.end();
          ++it)
     {
-        ComponentIndex index = indexOf(it->first);
-        m_components[index.offset + index.index].memory = (u8*)Arena::game().alloc(it->first->size * it->second);
-        m_components[index.offset + index.index].current = 0;
-        m_components[index.offset + index.index].maximum = 0;
+        ComponentIndex index = getComponentIndex(it->first);
+        be_assert(index, "component %s not registered" | it->first->fullname());
+        m_components[index.absoluteIndex].memory = (u8*)Arena::game().alloc(it->first->size * it->second);
+        m_components[index.absoluteIndex].current = 0;
+        m_components[index.absoluteIndex].maximum = it->second;
     }
 }
 
@@ -266,17 +282,12 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
     for (minitl::vector<GroupInfo>::const_iterator group = groups.begin(); group != groups.end(); ++group, ++groupIndex)
     {
         minitl::vector< raw<const RTTI::Class> > registeredComponents(Arena::temporary());
-        char message[1024] = {0};
         u32 componentIndex = 0;
+        u32 totalSize = 0;
         for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = group->components.begin();
              component != group->components.end();
               ++component, ++componentIndex)
         {
-            strcat(message, (*component)->name.c_str());
-            if (component != group->components.end())
-            {
-                strcat(message, "+");
-            }
             for (minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >::const_iterator ci = composition.components.begin();
                  ci != composition.components.end();
                  ++ci)
@@ -284,13 +295,13 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
                 if (ci->first == *component)
                 {
                     registeredComponents.push_back(*component);
-                    registerType(*component, groupIndex, componentIndex, totalComponents, ci->second);
+                    registerType(*component, groupIndex, componentIndex, totalComponents + componentIndex, ci->second);
+                    totalSize += (*component)->size;
                 }
             }
         }
         totalComponents +=componentIndex;
 
-        be_info("Group: %s" | message);
         minitl::vector<u32> masks(Arena::temporary());
         for (minitl::vector< minitl::array< raw<const RTTI::Class> > >::const_iterator partition = group->partitions.begin();
              partition != group->partitions.end();
@@ -314,23 +325,11 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         }
         masks.push_back(0);
 
-        for (minitl::vector<u32>::const_iterator mask = masks.begin(); mask != masks.end(); ++mask)
-        {
-            message[0] = 0;
-            for (u32 i = 0; i < componentIndex; ++i)
-            {
-                if (*mask & (1 << i))
-                {
-                    strcat(message, registeredComponents[i]->name.c_str());
-                    strcat(message, "+");
-                }
-            }
-            be_info(" Bucket: %s" | message);
-        }
-
         u32* componentCounts = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
         m_componentCountsList.push_back(componentCounts);
-        m_componentGroups.push_back(ComponentGroup(be_checked_numcast<u32>(group->components.size()), componentCounts, masks));
+        u32 componentSize = group->components.size();
+        u32 firstComponent = totalComponents - componentSize;
+        m_componentGroups.push_back(ComponentGroup(firstComponent, componentSize, totalSize, componentCounts, masks));
     }
 }
 
@@ -339,22 +338,34 @@ u32 EntityStorage::buildMask(const minitl::array< raw<const RTTI::Class> >& comp
     u32 result = 0;
     for (minitl::array< raw<const RTTI::Class> >::const_iterator it = componentList.begin(); it != componentList.end(); ++it)
     {
-        ComponentIndex index = indexOf(*it);
-        result |= (u32)1 << index.index;
+        ComponentIndex index = getComponentIndex(*it);
+        result |= (u32)1 << index.relativeIndex;
     }
     return result;
 }
 
-void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount)
+void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group, u32 relativeIndex, u32 absoluteIndex, u32 maximumCount)
 {
-    be_assert(!indexOf(componentType),
+    be_assert(!getComponentIndex(componentType),
               "component type %s is registered twice" | componentType->fullname());
     be_info("component %s: reserving space for %d" | componentType->name | maximumCount);
-    m_componentTypes[index].first = componentType;
-    m_componentTypes[index].second = ComponentIndex(group, index, totalIndex);
+    ComponentInfo& info = m_componentTypes[absoluteIndex];
+    info.first = componentType;
+    info.second = ComponentIndex(group, relativeIndex, absoluteIndex);
+
+    info.third = getMethodFromClass(componentType, "created");
+    if (!info.third)
+    {
+        be_error("component type %s: invalid signature for method \"created\"" | componentType->fullname());
+    }
+    info.fourth = getMethodFromClass(componentType, "destroyed");
+    if (!info.fourth)
+    {
+        be_error("component type %s: invalid signature for method \"destroyed\"" | componentType->fullname());
+    }
 }
 
-EntityStorage::ComponentIndex EntityStorage::indexOf(raw<const RTTI::Class> componentType) const
+EntityStorage::ComponentIndex EntityStorage::getComponentIndex(raw<const RTTI::Class> componentType) const
 {
     for (u32 i = 0; i < m_componentTypes.size(); ++i)
     {
@@ -364,6 +375,19 @@ EntityStorage::ComponentIndex EntityStorage::indexOf(raw<const RTTI::Class> comp
         }
     }
     return ComponentIndex();
+}
+
+const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RTTI::Class> componentType) const
+{
+    for (u32 i = 0; i < m_componentTypes.size(); ++i)
+    {
+        if (m_componentTypes[i].first == componentType)
+        {
+            return m_componentTypes[i];
+        }
+    }
+    be_notreached();
+    return m_componentTypes[0];
 }
 
 void EntityStorage::start()
@@ -456,37 +480,62 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return);
     be_forceuse(c);
-    ComponentIndex componentIndex = indexOf(componentType);
+    const ComponentInfo& componentInfo = getComponentInfo(componentType);
+    ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return);
     ComponentGroup& group = getComponentGroup(componentIndex);
-    be_assert_recover(!info.mask[componentIndex.index],
+    be_assert_recover(!info.mask[componentIndex.absoluteIndex],
                       "entity %d already has a component %s" | e.id | componentType->fullname(),
                       return);
+    ComponentStorage& storage = m_components[componentIndex.absoluteIndex];
+    be_assert_recover(storage.current < storage.maximum,
+                      "component storage for component %s is full" | componentType->fullname(),
+                      return);
 
-    u32 maskBefore = info.mask(componentIndex.offset, componentIndex.offset+group.componentCount);
-    u32 maskComponent = (u32)1<<componentIndex.offset;
+    if (componentInfo.third)
+    {
+        RTTI::Value v(RTTI::Type::makeType(componentType, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Const), (void*)&c);
+        (*componentInfo.third->call)(&v, 1);
+    }
+
+    u32 maskBefore = info.mask(group.firstComponent, group.lastComponent);
+    u32 maskComponent = (u32)1<<componentIndex.relativeIndex;
     u32 maskAfter = maskBefore | maskComponent;
     minitl::tuple<ComponentGroup::Bucket*, ComponentGroup::Bucket*> buckets = group.findBuckets(maskBefore, maskAfter);
     if (buckets.first == buckets.second)
     {
         be_assert((buckets.first->acceptMask & maskBefore) == buckets.first->acceptMask, "found invalid bucket");
         be_assert((buckets.first->acceptMask & maskAfter) == buckets.first->acceptMask, "found invalid bucket");
-        ComponentGroup::Bucket& bucket = group.buckets[group.buckets.size() - 1 - group.componentCount + componentIndex.offset];
+        be_assert((buckets.first->acceptMask & maskComponent) == 0, "found invalid bucket");
+        ComponentGroup::Bucket& bucket = group.buckets[group.buckets.size() - 1 - group.lastComponent + group.firstComponent + componentIndex.relativeIndex];
         be_assert(maskComponent == bucket.acceptMask, "got invalid bucket");
-        be_forceuse(bucket);
-    }
-    else if (buckets.first < buckets.second)
-    {
-        group.moveUp(buckets.first, buckets.second, 0, 0);
+
+        be_info("%s: %d" | componentType->fullname() | bucket.componentCounts[componentIndex.relativeIndex]);
+        u32 componentLocation = bucket.componentCounts[componentIndex.relativeIndex] ++;
+        be_assert(componentLocation == storage.current, "inconsistent storage state for component %s" | componentType->fullname());
+        storage.current ++;
+        info.componentIndex[componentIndex.absoluteIndex] = componentLocation;
+        //memcpy(storage.memory + componentLocation*componentType->size, &c, componentType->size);
     }
     else
     {
-        group.moveDown(buckets.first, buckets.second, 0, 0);
+        u8* backup = (u8*)malloca(group.componentsTotalSize);
+        if (buckets.first < buckets.second)
+        {
+            group.moveUp(buckets.first, buckets.second, 0, 0);
+            info.componentIndex[componentIndex.absoluteIndex] = buckets.first->componentCounts[componentIndex.relativeIndex];
+        }
+        else
+        {
+            group.moveDown(buckets.first, buckets.second, 0, 0);
+            info.componentIndex[componentIndex.absoluteIndex] = buckets.first->componentCounts[componentIndex.relativeIndex];
+        }
+        freea(backup);
     }
 
-    info.mask[componentIndex.index] = true;
+    info.mask[componentIndex.absoluteIndex] = true;
 }
 
 void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentType)
@@ -495,14 +544,14 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return);
-    ComponentIndex componentIndex = indexOf(componentType);
+    ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return);
-    be_assert_recover(info.mask[componentIndex.index],
+    be_assert_recover(info.mask[componentIndex.absoluteIndex],
                       "entity %d does not has a component %s" | e.id | componentType->fullname(),
                       return);
-    info.mask[componentIndex.index] = false;
+    info.mask[componentIndex.absoluteIndex] = false;
 }
 
 bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
@@ -511,11 +560,11 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return false);
-    ComponentIndex componentIndex = indexOf(componentType);
+    ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return false);
-    return info.mask[componentIndex.index];
+    return info.mask[componentIndex.absoluteIndex];
 }
 
 RTTI::Value EntityStorage::getComponent(BugEngine::World::Entity e, raw<const RTTI::Class> componentType) const
@@ -523,9 +572,9 @@ RTTI::Value EntityStorage::getComponent(BugEngine::World::Entity e, raw<const RT
     be_assert(hasComponent(e, componentType),
               "Entity %s does not have a component of type %s" | e.id | componentType->fullname());
     const EntityInfo& info = getEntityInfo(e);
-    const ComponentIndex componentTypeIndex = indexOf(componentType);
-    const u32 componentIndex = info.componentIndex[componentTypeIndex.index];
-    const ComponentStorage& storage = m_components[componentTypeIndex.index];
+    const ComponentIndex componentTypeIndex = getComponentIndex(componentType);
+    const u32 componentIndex = info.componentIndex[componentTypeIndex.absoluteIndex];
+    const ComponentStorage& storage = m_components[componentTypeIndex.absoluteIndex];
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return RTTI::Value());

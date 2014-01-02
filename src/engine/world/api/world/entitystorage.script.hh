@@ -6,6 +6,7 @@
 /*****************************************************************************/
 #include    <world/stdafx.h>
 #include    <world/entity.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 #include    <scheduler/task/itask.hh>
 #include    <core/memory/allocators/system.hh>
 
@@ -27,18 +28,19 @@ private:
             u32* componentCounts;
             u32 acceptMask;
             u32 maskSize;
-            u32 componentsSize;
 
             Bucket();
-            Bucket(u32* componentOffsets, u32 acceptMask, u32 componentsSize);
+            Bucket(u32* componentOffsets, u32 acceptMask);
         };
         typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
 
         minitl::array<Bucket> buckets;
-        u32 componentCount;
+        u32 firstComponent;
+        u32 lastComponent;
+        u32 componentsTotalSize;
         u32* componentCounts;
 
-        ComponentGroup(u32 componentCount, u32* componentOffsets, const minitl::vector<u32>& bucketMasks);
+        ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize, u32* componentOffsets, const minitl::vector<u32>& bucketMasks);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
         void moveUp(Bucket* bucketLow, Bucket* bucketHigh, u32 indexToMove, u32* offsets);
@@ -47,11 +49,11 @@ private:
     struct ComponentIndex
     {
         u16 group;
-        u8  index;
-        u8  offset;
+        u8  relativeIndex;
+        u8  absoluteIndex;
 
         ComponentIndex();
-        ComponentIndex(u32 group, u32 index, u32 offset);
+        ComponentIndex(u32 group, u32 relativeIndex, u32 absoluteIndex);
         operator void*() const;
         bool operator!() const;
     };
@@ -61,7 +63,11 @@ private:
         u32 current;
         u32 maximum;
     };
-    typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex > ComponentInfo;
+    typedef minitl::tuple<
+        raw<const RTTI::Class>,
+        ComponentIndex,
+        raw<const RTTI::Method::Overload>,
+        raw<const RTTI::Method::Overload> > ComponentInfo;
 protected:
     struct WorldComposition
     {
@@ -104,7 +110,8 @@ private: // friend World
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
-    ComponentIndex indexOf(raw<const RTTI::Class> componentType) const;
+    ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
+    const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
 
 protected:
     EntityStorage(const WorldComposition& composition);
