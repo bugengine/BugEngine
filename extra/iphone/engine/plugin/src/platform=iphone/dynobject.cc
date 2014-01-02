@@ -24,11 +24,11 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
     const minitl::format<1024u>& plugingFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | fullPath.name);
+    be_info("loading dynamic object %s (%s)" | pluginName | fullPath.name);
     void* handle = dlopen(fullPath.name, RTLD_NOW|RTLD_GLOBAL);
     if (!handle)
     {
-        be_error(dlerror());
+        be_error("Error loading dynamic object %s: %s" | pluginName | dlerror());
     }
     return handle;
 }

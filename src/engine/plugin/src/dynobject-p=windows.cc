@@ -15,7 +15,7 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
     minitl::format<1024u> plugingFile = minitl::format<1024u>("%s.dll") | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
-    be_info("loading plugin %s (%s)" | pluginName | fullPath.name);
+    be_info("loading dynamic object %s (%s)" | pluginName | fullPath.name);
     HANDLE h = LoadLibrary(fullPath.name);
     if (!h)
     {
@@ -28,7 +28,7 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
             reinterpret_cast<LPSTR>(&errorMessage),
             0,
             NULL);
-        be_error("%s : %s"|pluginName|errorMessage);
+        be_error("Error loading dynamic object %s: %s" | pluginName | errorMessage);
         ::LocalFree(errorMessage);
     }
     return h;
