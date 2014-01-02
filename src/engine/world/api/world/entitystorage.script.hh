@@ -60,6 +60,7 @@ private:
     struct ComponentStorage
     {
         u8* memory;
+        u32* backLink;
         u32 current;
         u32 maximum;
     };

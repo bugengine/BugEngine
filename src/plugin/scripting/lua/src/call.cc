@@ -73,8 +73,8 @@ static int convertNumberToValue(lua_State *state, int index, const RTTI::Type& t
             {
                 be_assert(be_typeid<bool>::klass() == type.metaclass,
                           "mismatching index for class %s: mistaken for %s" | type.metaclass->fullname() | be_typeid<bool>::klass()->fullname());
-                float v = lua_tonumber(state, index);
-                const float g_epsilon = 0.000001f;
+                lua_Number v = lua_tonumber(state, index);
+                const lua_Number g_epsilon = 0.000001f;
                 new (value) RTTI::Value(v > g_epsilon || v < -g_epsilon);
                 return 1;
             }

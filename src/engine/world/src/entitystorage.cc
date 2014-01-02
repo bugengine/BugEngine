@@ -95,8 +95,8 @@ EntityStorage::ComponentGroup::Bucket::Bucket()
 }
 
 EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask)
-    :   componentCounts(componentCounts),
-        acceptMask(acceptMask)
+    :   componentCounts(componentCounts)
+    ,   acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
 {
 }
@@ -226,6 +226,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
         ComponentIndex index = getComponentIndex(it->first);
         be_assert(index, "component %s not registered" | it->first->fullname());
         m_components[index.absoluteIndex].memory = (u8*)Arena::game().alloc(it->first->size * it->second);
+        m_components[index.absoluteIndex].backLink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
         m_components[index.absoluteIndex].current = 0;
         m_components[index.absoluteIndex].maximum = it->second;
     }
@@ -246,6 +247,7 @@ EntityStorage::~EntityStorage()
     for (minitl::array<ComponentStorage>::const_iterator it = m_components.begin(); it != m_components.end(); ++it)
     {
         Arena::game().free(it->memory);
+        Arena::game().free(it->backLink);
     }
     m_entityAllocator.free(m_entityInfoBuffer);
 }
@@ -326,8 +328,12 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         masks.push_back(0);
 
         u32* componentCounts = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
+        for (u32 i = 0; i < componentIndex * masks.size(); ++i)
+        {
+            componentCounts[i] = 0;
+        }
         m_componentCountsList.push_back(componentCounts);
-        u32 componentSize = group->components.size();
+        u32 componentSize = be_checked_numcast<u32>(group->components.size());
         u32 firstComponent = totalComponents - componentSize;
         m_componentGroups.push_back(ComponentGroup(firstComponent, componentSize, totalSize, componentCounts, masks));
     }
@@ -504,7 +510,7 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
     u32 maskComponent = (u32)1<<componentIndex.relativeIndex;
     u32 maskAfter = maskBefore | maskComponent;
     minitl::tuple<ComponentGroup::Bucket*, ComponentGroup::Bucket*> buckets = group.findBuckets(maskBefore, maskAfter);
-    if (buckets.first == buckets.second)
+    if (buckets.first == buckets.second || buckets.first->acceptMask == 0)
     {
         be_assert((buckets.first->acceptMask & maskBefore) == buckets.first->acceptMask, "found invalid bucket");
         be_assert((buckets.first->acceptMask & maskAfter) == buckets.first->acceptMask, "found invalid bucket");
@@ -512,12 +518,17 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
         ComponentGroup::Bucket& bucket = group.buckets[group.buckets.size() - 1 - group.lastComponent + group.firstComponent + componentIndex.relativeIndex];
         be_assert(maskComponent == bucket.acceptMask, "got invalid bucket");
 
-        be_info("%s: %d" | componentType->fullname() | bucket.componentCounts[componentIndex.relativeIndex]);
-        u32 componentLocation = bucket.componentCounts[componentIndex.relativeIndex] ++;
+        u32 componentLocation = bucket.componentCounts[componentIndex.relativeIndex];
         be_assert(componentLocation == storage.current, "inconsistent storage state for component %s" | componentType->fullname());
         storage.current ++;
         info.componentIndex[componentIndex.absoluteIndex] = componentLocation;
-        //memcpy(storage.memory + componentLocation*componentType->size, &c, componentType->size);
+        memcpy(storage.memory + componentLocation*componentType->size, &c, componentType->size);
+        storage.backLink[componentLocation] = e.id;
+        for (ComponentGroup::Bucket* b = &bucket; b != group.buckets.end(); ++b)
+        {
+            be_assert(b->componentCounts[componentIndex.relativeIndex] == componentLocation, "invalid bucket");
+            b->componentCounts[componentIndex.relativeIndex] ++;
+        }
     }
     else
     {
