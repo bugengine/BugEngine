@@ -1,4 +1,4 @@
-/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
 #include    <world/stdafx.h>
@@ -138,26 +138,6 @@ EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuc
         }
     }
     return result;
-}
-
-void EntityStorage::ComponentGroup::moveUp(Bucket* bucketLow, Bucket* bucketHigh, u32 indexToMove, u32* offsets)
-{
-    
-    for (Bucket* bucket = bucketLow + 1; bucket != bucketHigh; ++bucket)
-    {
-        be_forceuse(indexToMove);
-        be_forceuse(offsets);
-    }
-}
-
-void EntityStorage::ComponentGroup::moveDown(Bucket* bucketHigh, Bucket* bucketLow, u32 indexToMove, u32* offsets)
-{
-    
-    for (Bucket* bucket = bucketLow + 1; bucket != bucketHigh; ++bucket)
-    {
-        be_forceuse(indexToMove);
-        be_forceuse(offsets);
-    }
 }
 
 

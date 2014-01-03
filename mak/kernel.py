@@ -40,7 +40,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		kernel_name = os.path.splitext(os.path.splitext(os.path.basename(output))[0])[0]
 		fullname = [i.capitalize() for i in name.split('_')] + [kernel_name.capitalize()]
 		idname = [i for i in name.split('_')] + [kernel_name]
-		implementation.write('/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>\n')
+		implementation.write('/* BugEngine <bugengine.devel@gmail.com> / 2008-2014\n')
 		implementation.write('   see LICENSE for detail */\n\n')
 		implementation.write('#ifndef BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
 		implementation.write('#define BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
