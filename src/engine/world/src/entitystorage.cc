@@ -14,6 +14,38 @@
 namespace BugEngine { namespace World
 {
 
+namespace
+{
+
+struct ComponentOffset
+{
+private:
+    u32 m_buffer;
+public:
+    ComponentOffset()
+        :   m_buffer(0xFFFFFFFF)
+    {
+    }
+    ComponentOffset(u32 bucket, u32 offset)
+    {
+        be_assert(bucket < 0xFF, "bucket out of range");
+        be_assert(offset < 0xFFFFFF, "offset out of range");
+        m_buffer = (bucket << 24) | (offset & 0xFFFFFF);
+    }
+
+    u32 offset() const { return m_buffer & 0xFFFFFF; }
+    u32 bucket() const { return m_buffer >> 24; }    
+};
+
+struct EntityOperation
+{
+    u32 entityId;
+    u32 size;
+    minitl::bitset<96> componentMaskAdd;
+    minitl::bitset<96> componentMaskRemove;
+    u8 componentBuffer[1];
+};
+
 static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type, istring name)
 {
     raw<const RTTI::Method> method = type->getMethod(name);
@@ -86,6 +118,7 @@ struct GroupInfo
     }
 };
 
+}
 
 EntityStorage::ComponentGroup::Bucket::Bucket()
     :   componentCounts(0)
@@ -192,6 +225,8 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_entityBufferCount(0)
     ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
     ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage) - 4 * (composition.components.size() - 1))
+    ,   m_operationBuffer((u8*)m_entityAllocator.allocate())
+    ,   m_endOperation(i_u32::Zero)
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
     ,   m_componentCountsList(Arena::game())
@@ -209,6 +244,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
         m_components[index.absoluteIndex].backLink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
         m_components[index.absoluteIndex].current = 0;
         m_components[index.absoluteIndex].maximum = it->second;
+        m_components[index.absoluteIndex].elementSize = it->first->size;
     }
 }
 
@@ -229,6 +265,7 @@ EntityStorage::~EntityStorage()
         Arena::game().free(it->memory);
         Arena::game().free(it->backLink);
     }
+    m_entityAllocator.free(m_operationBuffer);
     m_entityAllocator.free(m_entityInfoBuffer);
 }
 
@@ -338,14 +375,15 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group
     ComponentInfo& info = m_componentTypes[absoluteIndex];
     info.first = componentType;
     info.second = ComponentIndex(group, relativeIndex, absoluteIndex);
+    info.third = componentType->size;
 
-    info.third = getMethodFromClass(componentType, "created");
-    if (!info.third)
+    info.fourth = getMethodFromClass(componentType, "created");
+    if (!info.fourth)
     {
         be_error("component type %s: invalid signature for method \"created\"" | componentType->fullname());
     }
-    info.fourth = getMethodFromClass(componentType, "destroyed");
-    if (!info.fourth)
+    info.fifth = getMethodFromClass(componentType, "destroyed");
+    if (!info.fifth)
     {
         be_error("component type %s: invalid signature for method \"destroyed\"" | componentType->fullname());
     }
@@ -378,6 +416,8 @@ const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RT
 
 void EntityStorage::start()
 {
+    u8* endBuffer = mergeEntityOperations(m_operationBuffer, m_operationBuffer + m_endOperation);
+    m_endOperation = 0;
 }
 
 u32 EntityStorage::getEntityInfoSize() const
@@ -419,7 +459,7 @@ Entity EntityStorage::spawn()
         be_assert(m_entityInfoBuffer[bufferIndex] == 0,
                   "buffer index %d inconsistent" | bufferIndex);
         u8* buffer = (u8*)m_entityAllocator.allocate();
-        u32 index = 1 + (bufferIndex << 16);
+        u32 index = (bufferIndex << 16);
         const u32 infoSize = getEntityInfoSize();
         for (u32 i = 0; i < m_bufferCapacity; ++i)
         {
@@ -461,70 +501,29 @@ void EntityStorage::unspawn(Entity e)
 
 void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType)
 {
+    be_forceuse(c);
     EntityInfo& info = getEntityInfo(e);
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return);
-    be_forceuse(c);
-    const ComponentInfo& componentInfo = getComponentInfo(componentType);
     ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage" | componentType->fullname(),
                       return);
-    ComponentGroup& group = getComponentGroup(componentIndex);
-    be_assert_recover(!info.mask[componentIndex.absoluteIndex],
-                      "entity %d already has a component %s" | e.id | componentType->fullname(),
+
+    u32 componentSize = m_componentTypes[componentIndex.absoluteIndex].third;
+    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) + componentSize - 1;
+    u32 offset = (m_endOperation += size) - size;
+    be_assert_recover(offset < m_entityAllocator.blockSize(),
+                      "Entity %d: could not add component of type %s: ran out of buffer" | e.id | componentType->fullname(),
                       return);
-    ComponentStorage& storage = m_components[componentIndex.absoluteIndex];
-    be_assert_recover(storage.current < storage.maximum,
-                      "component storage for component %s is full" | componentType->fullname(),
-                      return);
-
-    if (componentInfo.third)
-    {
-        RTTI::Value v(RTTI::Type::makeType(componentType, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Const), (void*)&c);
-        (*componentInfo.third->call)(&v, 1);
-    }
-
-    u32 maskBefore = info.mask(group.firstComponent, group.lastComponent);
-    u32 maskComponent = (u32)1<<componentIndex.relativeIndex;
-    u32 maskAfter = maskBefore | maskComponent;
-    minitl::tuple<ComponentGroup::Bucket*, ComponentGroup::Bucket*> buckets = group.findBuckets(maskBefore, maskAfter);
-    if (buckets.first == buckets.second || buckets.first->acceptMask == 0)
-    {
-        be_assert((buckets.first->acceptMask & maskBefore) == buckets.first->acceptMask, "found invalid bucket");
-        be_assert((buckets.first->acceptMask & maskAfter) == buckets.first->acceptMask, "found invalid bucket");
-        be_assert((buckets.first->acceptMask & maskComponent) == 0, "found invalid bucket");
-        ComponentGroup::Bucket& bucket = group.buckets[group.buckets.size() - 1 - group.lastComponent + group.firstComponent + componentIndex.relativeIndex];
-        be_assert(maskComponent == bucket.acceptMask, "got invalid bucket");
-
-        u32 componentLocation = bucket.componentCounts[componentIndex.relativeIndex];
-        be_assert(componentLocation == storage.current, "inconsistent storage state for component %s" | componentType->fullname());
-        storage.current ++;
-        info.componentIndex[componentIndex.absoluteIndex] = componentLocation;
-        memcpy(storage.memory + componentLocation*componentType->size, &c, componentType->size);
-        storage.backLink[componentLocation] = e.id;
-        for (ComponentGroup::Bucket* b = &bucket; b != group.buckets.end(); ++b)
-        {
-            be_assert(b->componentCounts[componentIndex.relativeIndex] == componentLocation, "invalid bucket");
-            b->componentCounts[componentIndex.relativeIndex] ++;
-        }
-    }
-    else
-    {
-        u8* backup = (u8*)malloca(group.componentsTotalSize);
-        if (buckets.first < buckets.second)
-        {
-            group.moveUp(buckets.first, buckets.second, 0, 0);
-            info.componentIndex[componentIndex.absoluteIndex] = buckets.first->componentCounts[componentIndex.relativeIndex];
-        }
-        else
-        {
-            group.moveDown(buckets.first, buckets.second, 0, 0);
-            info.componentIndex[componentIndex.absoluteIndex] = buckets.first->componentCounts[componentIndex.relativeIndex];
-        }
-        freea(backup);
-    }
+    EntityOperation* buffer = reinterpret_cast<EntityOperation*>(m_operationBuffer + offset);
+    buffer->entityId = e.id;
+    buffer->size = size;
+    buffer->componentMaskAdd = minitl::bitset<96>();
+    buffer->componentMaskRemove = minitl::bitset<96>();
+    buffer->componentMaskAdd[componentIndex.absoluteIndex] = true;
+    memcpy(buffer->componentBuffer, &c, componentSize);
 
     info.mask[componentIndex.absoluteIndex] = true;
 }
@@ -542,6 +541,19 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
     be_assert_recover(info.mask[componentIndex.absoluteIndex],
                       "entity %d does not has a component %s" | e.id | componentType->fullname(),
                       return);
+
+    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) - 1;
+    u32 offset = (m_endOperation += size) - size;
+    be_assert_recover(offset < m_entityAllocator.blockSize(),
+                      "Entity %d: could not add component of type %s: ran out of buffer" | e.id | componentType->fullname(),
+                      return);
+    EntityOperation* buffer = reinterpret_cast<EntityOperation*>(m_operationBuffer + offset);
+    buffer->entityId = e.id;
+    buffer->size = size;
+    buffer->componentMaskAdd = minitl::bitset<96>();
+    buffer->componentMaskRemove = minitl::bitset<96>();
+    buffer->componentMaskRemove[componentIndex.absoluteIndex] = true;
+
     info.mask[componentIndex.absoluteIndex] = false;
 }
 
@@ -581,6 +593,110 @@ EntityStorage::ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex c
     be_assert(componentIndex.group < m_componentGroups.size(),
               "invalid component index given to getComponentGroup");
     return m_componentGroups[componentIndex.group];
+}
+
+void EntityStorage::mergeEntityOperation(u8* source, const u8* merge)
+{
+    EntityOperation* result = reinterpret_cast<EntityOperation*>(source);
+    const EntityOperation* with = reinterpret_cast<const EntityOperation*>(merge);
+
+    u8* buffer = result->componentBuffer;
+    u32 bufferSize = 1 + result->size - (u32)sizeof(EntityOperation);
+    const u8* mergedBuffer = with->componentBuffer;
+    for (u32 i = 0; i < m_componentTypes.size(); ++i)
+    {
+        if (result->componentMaskAdd[i])
+        {
+            be_assert(!with->componentMaskAdd[i],
+                      "Entity %d: adding component %s twice in a frame" | result->entityId | m_componentTypes[i].first->fullname());
+            u32 size = m_componentTypes[i].third;
+            if (with->componentMaskRemove[i])
+            {
+                result->size -= size;
+                bufferSize -= size;
+                memmove(buffer, buffer + size, bufferSize);
+                result->componentMaskAdd[i] = false;
+            }
+            else
+            {
+                buffer += size;
+                bufferSize -= size;
+            }
+        }
+        else if (with->componentMaskAdd[i])
+        {
+            result->componentMaskAdd[i] = true;
+            u32 sizeToMove = m_componentTypes[i].third;
+            if (bufferSize)
+            {
+                memmove(buffer + sizeToMove, buffer, bufferSize);
+            }
+            memcpy(buffer, mergedBuffer, sizeToMove);
+            mergedBuffer += sizeToMove;
+            buffer += sizeToMove;
+            result->size += sizeToMove;
+        }
+        else if (with->componentMaskRemove[i])
+        {
+            be_assert(!result->componentMaskRemove[i],
+                      "Entity %d: adding component %s twice in a frame" | result->entityId | m_componentTypes[i].first->fullname());
+            result->componentMaskRemove[i] = true;
+        }
+    }
+}
+
+void EntityStorage::runEntityOperations(u8* source, u8* end)
+{
+    u32** deltas = (u32**)malloca(sizeof(u32*) * m_componentGroups.size());
+    for (u32 i = 0; i < m_componentGroups.size(); ++i)
+    {
+        deltas[i] = (u32*)malloca(sizeof(u32) * m_componentGroups[i].buckets.size());
+    }
+    u32** groupOperationSize = (u32**)malloca(sizeof(u32*) * m_componentGroups.size());
+    for (u32 i = 0; i < m_componentGroups.size(); ++i)
+    {
+        groupOperationSize[i] = (u32*)malloca(sizeof(u32) * m_componentGroups[i].buckets.size());
+    }
+
+    u8* destination = (u8*)m_entityAllocator.allocate();
+    u8* destinationEnd = destination;
+
+    EntityOperation* result = reinterpret_cast<EntityOperation*>(destinationEnd);
+    for (u8* current = source; current < end; /*nothing*/)
+    {
+        const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
+        current += operation->size;
+        if (operation->entityId != 0xFFFFFFFF)
+        {
+            memcpy(result, operation, operation->size);
+            for (u8* lookup = current; lookup != end; /*nothing*/)
+            {
+                EntityOperation* check = reinterpret_cast<EntityOperation*>(lookup);
+                lookup += check->size;
+                if (check->entityId == operation->entityId)
+                {
+                    check->entityId = 0xFFFFFFFF;
+                    mergeEntityOperation((u8*)result, (u8*)check);
+                }
+            }
+            destinationEnd += result->size;
+            result = reinterpret_cast<EntityOperation*>(destinationEnd);
+        }
+    }
+
+
+
+    m_entityAllocator.free(destination);
+    for (u32 i = be_checked_numcast<u32>(m_componentGroups.size()); i > 0; --i)
+    {
+        freea(groupOperationSize[i-1]);
+    }
+    freea(groupOperationSize);
+    for (u32 i = be_checked_numcast<u32>(m_componentGroups.size()); i > 0; --i)
+    {
+        freea(deltas[i-1]);
+    }
+    freea(deltas);
 }
 
 }}
