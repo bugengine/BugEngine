@@ -1,4 +1,4 @@
-/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
 #ifndef BE_WORLD_ENTITYSTORAGE_SCRIPT_HH_
@@ -43,8 +43,6 @@ private:
         ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize, u32* componentOffsets, const minitl::vector<u32>& bucketMasks);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
-        void moveUp(Bucket* bucketLow, Bucket* bucketHigh, u32 indexToMove, u32* offsets);
-        void moveDown(Bucket* bucketHigh, Bucket* bucketLow, u32 indexToMove, u32* offsets);
     };
     struct ComponentIndex
     {

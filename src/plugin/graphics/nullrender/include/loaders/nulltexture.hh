@@ -1,2 +1,2 @@
-/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */

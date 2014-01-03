@@ -1,7 +1,7 @@
 #!python
 
 
-hHeader = """/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+hHeader = """/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 /* GENERATED FILE! do not edit; see generateShaderTypes.py */
 
@@ -22,7 +22,7 @@ hFooter = """
 #endif
 """
 
-cppHeader = """/* BugEngine / 2008-2012  Nicolas MERCIER <mercier.nicolas@gmail.com>
+cppHeader = """/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 /* GENERATED FILE! do not edit; see generateShaderTypes.py */
 
