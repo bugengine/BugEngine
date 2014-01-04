@@ -44,7 +44,7 @@ struct EntityOperation
     u32 originalMask;
     u32 componentMaskAdd;
     u32 componentMaskRemove;
-    u8 componentBuffer[1];
+    u8 componentBuffer[4];
 };
 
 static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type, istring name)
@@ -185,7 +185,7 @@ void EntityStorage::ComponentGroup::mergeEntityOperation(u8* source, const u8* m
     const EntityOperation* with = reinterpret_cast<const EntityOperation*>(merge);
 
     u8* buffer = result->componentBuffer;
-    u32 bufferSize = 1 + result->size - (u32)sizeof(EntityOperation);
+    u32 bufferSize = 4 + result->size - (u32)sizeof(EntityOperation);
     const u8* mergedBuffer = with->componentBuffer;
     for (u32 i = 0; i < lastComponent-firstComponent; ++i)
     {
@@ -259,6 +259,28 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
                 }
             }
             destinationEnd += result->size;
+            result = reinterpret_cast<EntityOperation*>(destinationEnd);
+        }
+    }
+
+    for (u8* current = buffer; current < destinationEnd; /*nothing*/)
+    {
+        const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
+        current += operation->size;
+        be_info("Entity %d:" | operation->entityId);
+        const u8* buffer = operation->componentBuffer;
+        for (u32 c = 0; c < lastComponent-firstComponent; ++c)
+        {
+            u32 m = 1 << c;
+            if (operation->componentMaskAdd & m)
+            {
+                be_info(" added %s[%d]" | components[c].componentType->fullname() | *reinterpret_cast<const u32*>(buffer));
+                buffer += components[c].componentType->size;
+            }
+            if (operation->componentMaskRemove & m)
+            {
+                be_info(" removed %s" | components[c].componentType->fullname());
+            }
         }
     }
 
@@ -622,9 +644,9 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
     u32 componentSize = group.components[componentIndex.relativeIndex].size;
-    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) + componentSize - 1;
+    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) + componentSize - 4;
     u32 offset = (group.operationOffset += size) - size;
-    be_assert_recover(offset < m_entityAllocator.blockSize(),
+    be_assert_recover(offset < m_operationAllocator->blockSize(),
                       "Entity %d: could not add component of type %s: ran out of buffer" | e.id | componentType->fullname(),
                       return);
     EntityOperation* buffer = reinterpret_cast<EntityOperation*>(group.componentOperations + offset);
@@ -653,9 +675,9 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) - 1;
+    u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) - 4;
     u32 offset = (group.operationOffset += size) - size;
-    be_assert_recover(offset < m_entityAllocator.blockSize(),
+    be_assert_recover(offset < m_operationAllocator->blockSize(),
                       "Entity %d: could not add component of type %s: ran out of buffer" | e.id | componentType->fullname(),
                       return);
     EntityOperation* buffer = reinterpret_cast<EntityOperation*>(group.componentOperations + offset);
