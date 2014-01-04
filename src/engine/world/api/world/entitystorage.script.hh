@@ -32,17 +32,31 @@ private:
             Bucket();
             Bucket(u32* componentOffsets, u32 acceptMask);
         };
+        struct ComponentInfo
+        {
+            raw<const RTTI::Class> componentType;
+            u32 size;
+            raw<const RTTI::Method::Overload> created;
+            raw<const RTTI::Method::Overload> destroyed;
+        };
         typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
 
         minitl::array<Bucket> buckets;
+        minitl::array<ComponentInfo> components;
         u32 firstComponent;
         u32 lastComponent;
         u32 componentsTotalSize;
         u32* componentCounts;
+        u8* componentOperations;
+        i_u32 operationOffset;
 
-        ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize, u32* componentOffsets, const minitl::vector<u32>& bucketMasks);
+        ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize,
+                       u32* componentOffsets, const minitl::vector<u32>& bucketMasks,
+                       u8* operationBuffer);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
+        void runEntityOperations(u8* buffer);
+        void mergeEntityOperation(u8* source, const u8* merge);
     };
     struct ComponentIndex
     {
@@ -65,10 +79,7 @@ private:
     };
     typedef minitl::tuple<
         raw<const RTTI::Class>,
-        ComponentIndex,
-        u32,
-        raw<const RTTI::Method::Overload>,
-        raw<const RTTI::Method::Overload> > ComponentInfo;
+        ComponentIndex > ComponentInfo;
 protected:
     struct WorldComposition
     {
@@ -85,13 +96,12 @@ private:
     scoped<Task::ITask>             m_task;
     u32                             m_freeEntityId;
     SystemAllocator                 m_entityAllocator;
+    SystemAllocator*                m_operationAllocator;
     u8**                            m_entityInfoBuffer;
     u32                             m_entityCount;
     u32                             m_entityBufferCount;
     const u32                       m_maxEntityBufferCount;
     const u32                       m_bufferCapacity;
-    u8* const                       m_operationBuffer;
-    i_u32                           m_endOperation;
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
     minitl::vector<u32*>            m_componentCountsList;
@@ -105,8 +115,6 @@ private:
 
     void buildGroups(const WorldComposition& composition);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount);
-    void runEntityOperations(u8* source, u8* end);
-    void mergeEntityOperation(u8* source, const u8* merge);
 
 private: // friend World
     Entity spawn();
