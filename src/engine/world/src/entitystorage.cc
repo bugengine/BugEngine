@@ -128,8 +128,9 @@ EntityStorage::ComponentGroup::Bucket::Bucket()
 {
 }
 
-EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMask)
+EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32* componentOffsets, u32 acceptMask)
     :   componentCounts(componentCounts)
+    ,   componentOffsets(componentOffsets)
     ,   acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
 {
@@ -137,21 +138,22 @@ EntityStorage::ComponentGroup::Bucket::Bucket(u32* componentCounts, u32 acceptMa
 
 
 EntityStorage::ComponentGroup::ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize,
-                                              u32* componentOffsets, const minitl::vector<u32>& bucketMasks,
-                                              u8* operationBuffer)
+                                              u32* componentCounts,  u32* componentOffsets, 
+                                              const minitl::vector<u32>& bucketMasks, u8* operationBuffer)
     :   buckets(Arena::game(), (u32)bucketMasks.size())
     ,   components(Arena::game(), componentCount)
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + componentCount)
     ,   componentsTotalSize(componentsTotalSize)
     ,   componentCounts(componentOffsets)
+    ,   componentOffsets(componentCounts)
     ,   componentOperations(operationBuffer)
     ,   operationOffset(i_u32::Zero)
 {
     u32 index = 0;
     for (minitl::vector<u32>::const_iterator it = bucketMasks.begin(); it != bucketMasks.end(); ++it, ++index)
     {
-        buckets[index] = Bucket(componentCounts + componentCount * index, *it);
+        buckets[index] = Bucket(componentCounts + componentCount * index, componentOffsets + componentCount * index, *it);
     }
 }
 
@@ -259,10 +261,27 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
                 }
             }
             destinationEnd += result->size;
+
+            u32 componentCount = components.size();
+            u32 maskBefore = operation->originalMask;
+            u32 maskAfter = (maskBefore | operation->componentMaskAdd) & ~operation->componentMaskRemove;
+            BucketPair insertion = findBuckets(maskBefore, maskAfter);
+            u32 remainder = maskBefore & ~insertion.first->acceptMask;
+            if (insertion.first < insertion.second)
+            {
+                const u32* delta = insertion.first->componentOffsets;
+                i32* delta = &deltas[(insertion.first - buckets.begin()) * componentCount];
+                memcpy(delta, , sizeof(i32) * componentCount);
+            }
+            else if (insertion.first > insertion.second)
+            {
+            }
+
             result = reinterpret_cast<EntityOperation*>(destinationEnd);
         }
     }
 
+#if 0
     for (u8* current = buffer; current < destinationEnd; /*nothing*/)
     {
         const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
@@ -283,6 +302,7 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
             }
         }
     }
+#endif
 
     freea(deltas);
 
@@ -345,7 +365,6 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage) - 4 * (composition.components.size() - 1))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
-    ,   m_componentCountsList(Arena::game())
     ,   m_components(Arena::game(), composition.components.size())
 {
     m_entityInfoBuffer[0] = 0;
@@ -372,10 +391,6 @@ EntityStorage::~EntityStorage()
     {
         m_entityAllocator.free(*buffer);
     }
-    for (minitl::vector<u32*>::const_iterator it = m_componentCountsList.begin(); it != m_componentCountsList.end(); ++it)
-    {
-        Arena::game().free(*it);
-    }
     for (minitl::array<ComponentStorage>::const_iterator it = m_components.begin(); it != m_components.end(); ++it)
     {
         Arena::game().free(it->memory);
@@ -384,6 +399,8 @@ EntityStorage::~EntityStorage()
     for (minitl::vector<ComponentGroup>::const_iterator it = m_componentGroups.begin(); it != m_componentGroups.end(); ++it)
     {
         m_operationAllocator->free(it->componentOperations);
+        Arena::game().free(it->componentCounts);
+        Arena::game().free(it->componentOffsets);
     }
     delete m_operationAllocator;
     m_entityAllocator.free(m_entityInfoBuffer);
@@ -418,7 +435,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
     u32 groupIndex = 0;
     u32 totalComponents = 0;
-    m_operationAllocator = new SystemAllocator(SystemAllocator::BlockSize_64k, 1+be_checked_numcast<u32>(groups.size()));
+    m_operationAllocator = new SystemAllocator(SystemAllocator::BlockSize_64k, 2 * be_checked_numcast<u32>(groups.size()));
     m_componentGroups.reserve(groups.size());
     for (minitl::vector<GroupInfo>::const_iterator group = groups.begin(); group != groups.end(); ++group, ++groupIndex)
     {
@@ -465,16 +482,25 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
             masks.push_back(1 << i);
         }
         masks.push_back(0);
-
+        
         u32* componentCounts = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
         for (u32 i = 0; i < componentIndex * masks.size(); ++i)
         {
             componentCounts[i] = 0;
         }
-        m_componentCountsList.push_back(componentCounts);
+        u32* componentOffsets = (u32*)Arena::game().alloc(sizeof(u32) * componentIndex * masks.size());
+        for (u32 i = 0; i < masks.size(); ++i)
+        {
+            u32 m = masks[i];
+            for (u32 j = 0; j < componentIndex; ++j)
+            {
+                componentOffsets[componentIndex*i + j] = m & 0x1;
+                m >>= 1;
+            }
+        }
         u32 componentSize = be_checked_numcast<u32>(group->components.size());
         u32 firstComponent = totalComponents - componentSize;
-        m_componentGroups.push_back(ComponentGroup(firstComponent, componentSize, totalSize, componentCounts, masks, (u8*)m_operationAllocator->allocate()));
+        m_componentGroups.push_back(ComponentGroup(firstComponent, componentSize, totalSize, componentCounts, componentOffsets, masks, (u8*)m_operationAllocator->allocate()));
     }
 
     for (minitl::array<ComponentInfo>::const_iterator it = m_componentTypes.begin(); it != m_componentTypes.end(); ++it)

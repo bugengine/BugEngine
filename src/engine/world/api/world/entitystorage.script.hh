@@ -26,11 +26,12 @@ private:
         struct Bucket
         {
             u32* componentCounts;
+            u32* componentOffsets;
             u32 acceptMask;
             u32 maskSize;
 
             Bucket();
-            Bucket(u32* componentOffsets, u32 acceptMask);
+            Bucket(u32* componentCounts, u32* componentOffsets, u32 acceptMask);
         };
         struct ComponentInfo
         {
@@ -47,12 +48,13 @@ private:
         u32 lastComponent;
         u32 componentsTotalSize;
         u32* componentCounts;
+        u32* componentOffsets;
         u8* componentOperations;
         i_u32 operationOffset;
 
         ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize,
-                       u32* componentOffsets, const minitl::vector<u32>& bucketMasks,
-                       u8* operationBuffer);
+                       u32* componentCounts, u32* componentOffsets,
+                       const minitl::vector<u32>& bucketMasks, u8* operationBuffer);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
         void runEntityOperations(u8* buffer);
@@ -104,7 +106,6 @@ private:
     const u32                       m_bufferCapacity;
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
-    minitl::vector<u32*>            m_componentCountsList;
     minitl::array<ComponentStorage> m_components;
 private:
     void start();
