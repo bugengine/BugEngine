@@ -57,7 +57,7 @@ private:
                        const minitl::vector<u32>& bucketMasks, u8* operationBuffer);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
-        void runEntityOperations(u8* buffer);
+        void runEntityOperations(u8* buffer, u8* componentBuffer);
         void mergeEntityOperation(u8* source, const u8* merge);
     };
     struct ComponentIndex

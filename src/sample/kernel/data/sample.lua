@@ -64,6 +64,7 @@ world:addComponent(e14, kernel.D({value = 414}))
 world:addComponent(e15, kernel.C({value = 315}))
 world:addComponent(e15, kernel.D({value = 415}))
 world:addComponent(e15, kernel.E({value = 515}))
+world:removeComponent(e15, kernel.D)
 
 
 
