@@ -232,7 +232,7 @@ void EntityStorage::ComponentGroup::mergeEntityOperation(u8* source, const u8* m
     }
 }
 
-void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
+void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer, u8* componentBuffer)
 {
     i32* deltas = (i32*)malloca(sizeof(i32) * buckets.size() * components.size());
     memset(deltas, 0, sizeof(i32) * buckets.size() * components.size());
@@ -263,19 +263,24 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
                 }
             }
 
-            u32 maskBefore = operation->originalMask;
-            u32 maskAfter = (maskBefore | operation->componentMaskAdd) & ~operation->componentMaskRemove;
+            u32 maskBefore = result->originalMask;
+            u32 maskAfter = (maskBefore | result->componentMaskAdd) & ~result->componentMaskRemove;
             BucketPair insertion = findBuckets(maskBefore, maskAfter);
-            u32 remainder = maskBefore & ~insertion.first->acceptMask;
-            for (u32 i = 0; i < componentCount; ++i)
+            u32 remainder = maskAfter & ~insertion.second->acceptMask;
+            if (insertion.first != insertion.second)
             {
-                if ((insertion.first->acceptMask >> i) & 0x1)
+                // backup components in buffer
+                be_forceuse(componentBuffer);
+                for (u32 i = 0; i < componentCount; ++i)
                 {
-                    deltas[componentCount * (insertion.first - buckets.begin()) + i] --;
-                }
-                if ((insertion.second->acceptMask >> i) & 0x1)
-                {
-                    deltas[componentCount * (insertion.second - buckets.begin()) + i] ++;
+                    if ((insertion.first->acceptMask >> i) & 0x1)
+                    {
+                        deltas[componentCount * (insertion.first - buckets.begin()) + i] --;
+                    }
+                    if ((insertion.second->acceptMask >> i) & 0x1)
+                    {
+                        deltas[componentCount * (insertion.second - buckets.begin()) + i] ++;
+                    }
                 }
             }
             u32 offset = 0;
@@ -293,7 +298,8 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
             result = reinterpret_cast<EntityOperation*>(destinationEnd);
         }
     }
-    
+
+#if 0
     i32* d = (i32*)malloca(sizeof(i32) * componentCount);
     memset(d, 0, sizeof(i32) * componentCount);
     for (u32 i = 0; i < buckets.size(); ++i)
@@ -308,7 +314,6 @@ void EntityStorage::ComponentGroup::runEntityOperations(u8* buffer)
         be_info("component delta %s: %d" | components[i].componentType->fullname() | d[i]);
     }
     freea(d);
-#if 0
     for (u8* current = buffer; current < destinationEnd; /*nothing*/)
     {
         const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
@@ -597,10 +602,12 @@ const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RT
 void EntityStorage::start()
 {
     u8* buffer = (u8*)m_operationAllocator->allocate();
+    u8* componentBuffer = (u8*)m_operationAllocator->allocate();
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin(); it != m_componentGroups.end(); ++it)
     {
-        it->runEntityOperations(buffer);
+        it->runEntityOperations(buffer, componentBuffer);
     }
+    m_operationAllocator->free(componentBuffer);
     m_operationAllocator->free(buffer);
 }
 
