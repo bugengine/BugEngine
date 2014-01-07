@@ -57,7 +57,7 @@ private:
                        const minitl::vector<u32>& bucketMasks, u8* operationBuffer);
         ~ComponentGroup();
         BucketPair findBuckets(u32 mask1, u32 mask2);
-        void runEntityOperations(u8* buffer, u8* componentBuffer);
+        void runEntityOperations(weak<EntityStorage> storage, u8* buffer, u8* componentBuffer);
         void mergeEntityOperation(u8* source, const u8* merge);
     };
     struct ComponentIndex
@@ -81,7 +81,8 @@ private:
     };
     typedef minitl::tuple<
         raw<const RTTI::Class>,
-        ComponentIndex > ComponentInfo;
+        ComponentIndex,
+        u32 > ComponentInfo;
 protected:
     struct WorldComposition
     {
@@ -94,6 +95,8 @@ protected:
         {
         }
     };
+private:
+    friend struct ComponentGroup;
 private:
     scoped<Task::ITask>             m_task;
     u32                             m_freeEntityId;
@@ -116,6 +119,7 @@ private:
 
     void buildGroups(const WorldComposition& composition);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount);
+    void store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask);
 
 private: // friend World
     Entity spawn();
