@@ -304,7 +304,7 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
                 if (bucket->acceptMask & remainder)
                 {
                     deltas[index*componentCount + offset] ++;
-                    operationSizePerBucket[bucket - buckets.begin()] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4) + components[componentCount].size;
+                    operationSizePerBucket[index] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4) + components[offset].size;
                 }
             }
             be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
