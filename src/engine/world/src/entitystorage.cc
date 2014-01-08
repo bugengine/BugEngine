@@ -44,6 +44,8 @@ struct EntityOperation
     u32 originalMask;
     u32 componentMaskAdd;
     u32 componentMaskRemove;
+    u16 bucketOrigin;
+    u16 bucketDestination;
     u8 componentBuffer[4];
 };
 
@@ -181,7 +183,7 @@ EntityStorage::ComponentGroup::BucketPair EntityStorage::ComponentGroup::findBuc
     return result;
 }
 
-void EntityStorage::ComponentGroup::mergeEntityOperation(u8* source, const u8* merge)
+void EntityStorage::ComponentGroup::mergeEntityOperation(u8* __restrict source, const u8* __restrict merge)
 {
     EntityOperation* result = reinterpret_cast<EntityOperation*>(source);
     const EntityOperation* with = reinterpret_cast<const EntityOperation*>(merge);
@@ -232,7 +234,7 @@ void EntityStorage::ComponentGroup::mergeEntityOperation(u8* source, const u8* m
     }
 }
 
-void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> storage, u8* buffer, u8* componentBuffer)
+void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> storage, u8* __restrict buffer, u8* __restrict componentBuffer)
 {
     i32* deltas = (i32*)malloca(sizeof(i32) * buckets.size() * components.size());
     memset(deltas, 0, sizeof(i32) * buckets.size() * components.size());
@@ -270,10 +272,13 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
             u32 maskAfter = (maskBefore | result->componentMaskAdd) & ~result->componentMaskRemove;
             BucketPair insertion = findBuckets(maskBefore, maskAfter);
             u32 remainder = maskAfter & ~insertion.second->acceptMask;
+            result->bucketOrigin = be_checked_numcast<u16>(insertion.first - buckets.begin());
+            result->bucketDestination = be_checked_numcast<u16>(insertion.second - buckets.begin());
             if (insertion.first != insertion.second)
             {
-                // backup components in buffer
-                be_forceuse(componentBuffer);
+                be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
+                          "ran out of component backup space");
+                storage->store(result->entityId, componentBackup, componentsTotalSize, insertion.first->acceptMask);
                 for (u32 i = 0; i < componentCount; ++i)
                 {
                     if ((insertion.first->acceptMask >> i) & 0x1)
@@ -296,20 +301,20 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
                     operationSizePerBucket[insertion.first - buckets.begin()] += result->size;
                 }
             }
-            u32 offset = 0;
-            for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
+            if (remainder)
             {
-                be_assert(bucket->maskSize == 1, "invalid bucket");
-                u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
-                if (bucket->acceptMask & remainder)
+                u32 offset = 0;
+                for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
                 {
-                    deltas[index*componentCount + offset] ++;
-                    operationSizePerBucket[index] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4) + components[offset].size;
+                    be_assert(bucket->maskSize == 1, "invalid bucket");
+                    u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
+                    if (bucket->acceptMask & remainder)
+                    {
+                        deltas[index*componentCount + offset] ++;
+                        operationSizePerBucket[index] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4) + components[offset].size;
+                    }
                 }
             }
-            be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
-                      "ran out of component backup space");
-            storage->store(result->entityId, componentBackup, componentsTotalSize, insertion.first->acceptMask);
             componentBackup += componentsTotalSize;
 
             destinationEnd += result->size;
@@ -318,7 +323,67 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
     }
 
     /* sort operations per bucket */
+    destination = componentOperations;
 
+    for (u32 i = 1; i < buckets.size(); ++i)
+    {
+        operationSizePerBucket[i] += operationSizePerBucket[i-1];
+    }
+    for (u8* current = destination; current < destinationEnd; /*nothing*/)
+    {
+        const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
+        if (operation->bucketOrigin != operation->bucketDestination)
+        {
+            {
+                u32 sizeRemove = be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
+                memcpy(destination + operationSizePerBucket[operation->bucketOrigin], current, sizeRemove);
+                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
+                remove->componentMaskAdd = 0;
+                remove->size = sizeRemove;
+                operationSizePerBucket[operation->bucketOrigin] += sizeof(EntityOperation) - 4;
+            }
+
+            {
+                memcpy(destination + operationSizePerBucket[operation->bucketDestination], current, operation->size);
+                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
+                remove->componentMaskRemove = 0;
+                remove->size = operation->size;
+                operationSizePerBucket[operation->bucketOrigin] += operation->size;
+            }
+        }
+        u32 remainder = (operation->originalMask | operation->componentMaskAdd) & ~operation->componentMaskRemove;
+        if (remainder)
+        {
+            u32 offset = 0;
+            for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
+            {
+                be_assert(bucket->maskSize == 1, "invalid bucket");
+                u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
+                const u8* componentBuffer = operation->componentBuffer;
+                if (bucket->acceptMask & remainder)
+                {
+                    memcpy(destination + operationSizePerBucket[index], current, sizeof(EntityOperation) - 4);
+                    EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
+                    remove->componentMaskRemove = 0;
+                    remove->size = be_checked_numcast<u32>(sizeof(EntityOperation) - 4 + components[index].size);
+                    operationSizePerBucket[index] += sizeof(EntityOperation) - 4;
+                    memcpy(destination + operationSizePerBucket[index], componentBuffer, components[index].size);
+                    operationSizePerBucket[index] += components[index].size;
+                    componentBuffer += components[index].size;
+                }
+                else if (bucket->acceptMask & operation->componentMaskAdd)
+                {
+                    componentBuffer += components[index].size;
+                }
+            }
+        }
+        current = current + operation->size;
+    }
+
+    for (Bucket* b = buckets.begin(); b != buckets.end(); ++b)
+    {
+        
+    }
 
 
 #if 0
@@ -738,6 +803,8 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
     buffer->originalMask = info.mask(group.firstComponent, group.lastComponent);
     buffer->componentMaskAdd = 1 << componentIndex.relativeIndex;
     buffer->componentMaskRemove = 0;
+    buffer->bucketOrigin = 0;
+    buffer->bucketDestination = 0;
     memcpy(buffer->componentBuffer, &c, componentSize);
 
     info.mask[componentIndex.absoluteIndex] = true;
@@ -769,6 +836,8 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
     buffer->originalMask = info.mask(group.firstComponent, group.lastComponent);
     buffer->componentMaskAdd = 0;
     buffer->componentMaskRemove = 1 << componentIndex.relativeIndex;
+    buffer->bucketOrigin = 0;
+    buffer->bucketDestination = 0;
 
     info.mask[componentIndex.absoluteIndex] = false;
 }
