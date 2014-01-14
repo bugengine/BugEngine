@@ -62,9 +62,10 @@ world:addComponent(e13, kernel.C({value = 313}))
 world:addComponent(e13, kernel.D({value = 413}))
 world:addComponent(e14, kernel.D({value = 414}))
 world:addComponent(e15, kernel.C({value = 315}))
+world:addComponent(e15, kernel.A({value = 115}))
 world:addComponent(e15, kernel.D({value = 415}))
 world:addComponent(e15, kernel.E({value = 515}))
-world:removeComponent(e15, kernel.D)
+-- world:removeComponent(e15, kernel.D)
 
 
 
