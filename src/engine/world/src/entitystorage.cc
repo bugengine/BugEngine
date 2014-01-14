@@ -44,6 +44,7 @@ struct EntityOperation
     u32 originalMask;
     u32 componentMaskAdd;
     u32 componentMaskRemove;
+    u32 componentStorage;
     u16 bucketOrigin;
     u16 bucketDestination;
     u8 componentBuffer[4];
@@ -236,11 +237,18 @@ void EntityStorage::ComponentGroup::mergeEntityOperation(u8* __restrict source, 
 
 void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> storage, u8* __restrict buffer, u8* __restrict componentBuffer)
 {
-    i32* deltas = (i32*)malloca(sizeof(i32) * buckets.size() * components.size());
-    memset(deltas, 0, sizeof(i32) * buckets.size() * components.size());
-    u32* operationSizePerBucket = (u32*)malloca(sizeof(u32) * buckets.size());
-    memset(operationSizePerBucket, 0, sizeof(u32) * buckets.size());
-
+    struct Delta
+    {
+        i32 absoluteOffset;
+        u16 added;
+        u16 removed;
+    };
+    Delta* deltas = (Delta*)malloca(sizeof(Delta) * buckets.size() * components.size());
+    memset(deltas, 0, sizeof(Delta) * buckets.size() * components.size());
+    u32* operationOffsetsPerBucket2 = (u32*)malloca(sizeof(u32) * (buckets.size() + 2));
+    memset(operationOffsetsPerBucket2, 0, sizeof(u32) * (buckets.size() + 2));
+    u32* operationOffsetsPerBucket = operationOffsetsPerBucket2 + 1;
+    u32* operationSizePerBucket = operationOffsetsPerBucket + 1;
     u8* destination = buffer;
     u8* destinationEnd = destination;
 
@@ -271,51 +279,56 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
             u32 maskBefore = result->originalMask;
             u32 maskAfter = (maskBefore | result->componentMaskAdd) & ~result->componentMaskRemove;
             BucketPair insertion = findBuckets(maskBefore, maskAfter);
-            u32 remainder = maskAfter & ~insertion.second->acceptMask;
+            u32 remainderAdd = maskAfter & ~insertion.second->acceptMask;
+            u32 remainderRemoved = result->componentMaskRemove & ~insertion.first->acceptMask;
             result->bucketOrigin = be_checked_numcast<u16>(insertion.first - buckets.begin());
             result->bucketDestination = be_checked_numcast<u16>(insertion.second - buckets.begin());
+            result->componentStorage = be_checked_numcast<u32>(componentBackup - componentBuffer);
+            be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
+                        "ran out of component backup space");
+            componentBackup += storage->store(result->entityId, componentBackup, componentsTotalSize, insertion.first->acceptMask & maskAfter);
+            u32 indexSourceBucket = be_checked_numcast<u32>(insertion.first - buckets.begin());
+            u32 indexDestinationBucket = be_checked_numcast<u32>(insertion.second - buckets.begin());
             if (insertion.first != insertion.second)
             {
-                be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
-                          "ran out of component backup space");
-                storage->store(result->entityId, componentBackup, componentsTotalSize, insertion.first->acceptMask);
                 for (u32 i = 0; i < componentCount; ++i)
                 {
                     if ((insertion.first->acceptMask >> i) & 0x1)
                     {
-                        deltas[componentCount * (insertion.first - buckets.begin()) + i] --;
+                        deltas[componentCount * (insertion.first - buckets.begin()) + i].removed ++;
                     }
                     if ((insertion.second->acceptMask >> i) & 0x1)
                     {
-                        deltas[componentCount * (insertion.second - buckets.begin()) + i] ++;
+                        deltas[componentCount * (insertion.second - buckets.begin()) + i].added ++;
                     }
                 }
-                if (insertion.first < insertion.second)
-                {
-                    operationSizePerBucket[insertion.first - buckets.begin()] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
-                    operationSizePerBucket[insertion.second - buckets.begin()] += result->size;
-                }
-                else
-                {
-                    operationSizePerBucket[insertion.second - buckets.begin()] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
-                    operationSizePerBucket[insertion.first - buckets.begin()] += result->size;
-                }
+                operationSizePerBucket[indexSourceBucket] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
+                operationSizePerBucket[indexDestinationBucket] += result->size;
             }
-            if (remainder)
+            if (remainderAdd)
             {
                 u32 offset = 0;
                 for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
                 {
                     be_assert(bucket->maskSize == 1, "invalid bucket");
                     u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
-                    if (bucket->acceptMask & remainder)
+                    if (bucket->acceptMask & remainderAdd)
                     {
-                        deltas[index*componentCount + offset] ++;
+                        deltas[index*componentCount + offset].added ++;
                         operationSizePerBucket[index] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4) + components[offset].size;
                     }
                 }
             }
-            componentBackup += componentsTotalSize;
+            for (u32 i = remainderRemoved, offset = 0, index = buckets.size() - 1 - components.size();
+                i != 0;
+                i >>=1, offset++, index++)
+            {
+                if (i & 0x1)
+                {
+                    deltas[index*componentCount + offset].added ++;
+                    operationSizePerBucket[index] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
+                }
+            }
 
             destinationEnd += result->size;
             result = reinterpret_cast<EntityOperation*>(destinationEnd);
@@ -328,66 +341,84 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
     for (u32 i = 1; i < buckets.size(); ++i)
     {
         operationSizePerBucket[i] += operationSizePerBucket[i-1];
+        deltas[i].absoluteOffset = deltas[i-1].absoluteOffset + deltas[i].added - deltas[i].removed;
     }
-    for (u8* current = destination; current < destinationEnd; /*nothing*/)
+    for (u8* current = buffer; current < destinationEnd; /*nothing*/)
     {
         const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
         if (operation->bucketOrigin != operation->bucketDestination)
         {
             {
                 u32 sizeRemove = be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
-                memcpy(destination + operationSizePerBucket[operation->bucketOrigin], current, sizeRemove);
-                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
+                memcpy(destination + operationOffsetsPerBucket[operation->bucketOrigin], current, sizeRemove);
+                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[operation->bucketOrigin]);
                 remove->componentMaskAdd = 0;
+                remove->componentMaskRemove = buckets[operation->bucketOrigin].acceptMask;
                 remove->size = sizeRemove;
-                operationSizePerBucket[operation->bucketOrigin] += sizeof(EntityOperation) - 4;
+                operationOffsetsPerBucket[operation->bucketOrigin] += sizeof(EntityOperation) - 4;
             }
 
             {
-                memcpy(destination + operationSizePerBucket[operation->bucketDestination], current, operation->size);
-                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
+                memcpy(destination + operationOffsetsPerBucket[operation->bucketDestination], current, operation->size);
+                EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[operation->bucketDestination]);
+                remove->componentMaskAdd = buckets[operation->bucketDestination].acceptMask;
                 remove->componentMaskRemove = 0;
                 remove->size = operation->size;
-                operationSizePerBucket[operation->bucketOrigin] += operation->size;
+                operationOffsetsPerBucket[operation->bucketDestination] += operation->size;
             }
         }
-        u32 remainder = (operation->originalMask | operation->componentMaskAdd) & ~operation->componentMaskRemove;
-        if (remainder)
+        u32 maskAfter = (operation->originalMask | operation->componentMaskAdd) & ~operation->componentMaskRemove;
+        u32 remainderAdd = maskAfter & ~buckets[operation->bucketDestination].acceptMask;
+        if (remainderAdd)
+        {
+            u32 offset = 0;
+            const u8* componentBuffer = operation->componentBuffer;
+            for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
+            {
+                be_assert(bucket->maskSize == 1, "invalid bucket");
+                u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
+                if (bucket->acceptMask & remainderAdd)
+                {
+                    memcpy(destination + operationOffsetsPerBucket[index], current, sizeof(EntityOperation) - 4);
+                    EntityOperation* operationAdd = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[index]);
+                    operationAdd->componentMaskAdd = bucket->acceptMask;
+                    operationAdd->componentMaskRemove = 0;
+                    operationAdd->size = be_checked_numcast<u32>(sizeof(EntityOperation) - 4 + components[offset].size);
+                    operationOffsetsPerBucket[index] += sizeof(EntityOperation) - 4;
+                    memcpy(destination + operationOffsetsPerBucket[index], componentBuffer, components[offset].size);
+                    operationOffsetsPerBucket[index] += components[offset].size;
+                    componentBuffer += components[offset].size;
+                }
+                else if (bucket->acceptMask & operation->componentMaskAdd)
+                {
+                    componentBuffer += components[offset].size;
+                }
+            }
+        }
+        u32 remainderRemoved = operation->componentMaskRemove & ~buckets[operation->bucketOrigin].acceptMask;
+        if (remainderRemoved)
         {
             u32 offset = 0;
             for (Bucket* bucket = buckets.end() - components.size() - 1; bucket != buckets.end() - 1; ++bucket, ++offset)
             {
                 be_assert(bucket->maskSize == 1, "invalid bucket");
                 u32 index = be_checked_numcast<u32>(bucket - buckets.begin());
-                const u8* componentBuffer = operation->componentBuffer;
-                if (bucket->acceptMask & remainder)
+                if (bucket->acceptMask & remainderRemoved)
                 {
-                    memcpy(destination + operationSizePerBucket[index], current, sizeof(EntityOperation) - 4);
-                    EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationSizePerBucket[operation->bucketOrigin]);
-                    remove->componentMaskRemove = 0;
-                    remove->size = be_checked_numcast<u32>(sizeof(EntityOperation) - 4 + components[index].size);
-                    operationSizePerBucket[index] += sizeof(EntityOperation) - 4;
-                    memcpy(destination + operationSizePerBucket[index], componentBuffer, components[index].size);
-                    operationSizePerBucket[index] += components[index].size;
-                    componentBuffer += components[index].size;
-                }
-                else if (bucket->acceptMask & operation->componentMaskAdd)
-                {
-                    componentBuffer += components[index].size;
+                    memcpy(destination + operationOffsetsPerBucket[index], current, sizeof(EntityOperation) - 4);
+                    EntityOperation* operationRemove = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[index]);
+                    operationRemove->componentMaskAdd = 0;
+                    operationRemove->componentMaskRemove = bucket->acceptMask;
+                    operationRemove->size = be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
+                    operationOffsetsPerBucket[index] += sizeof(EntityOperation) - 4;
                 }
             }
         }
         current = current + operation->size;
     }
 
-    for (Bucket* b = buckets.begin(); b != buckets.end(); ++b)
-    {
-        
-    }
-
-
-#if 0
-    i32* d = (i32*)malloca(sizeof(i32) * componentCount);
+#if 1
+    /*i32* d = (i32*)malloca(sizeof(i32) * componentCount);
     memset(d, 0, sizeof(i32) * componentCount);
     for (u32 i = 0; i < buckets.size(); ++i)
     {
@@ -400,29 +431,36 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
     {
         be_info("component delta %s: %d" | components[i].componentType->fullname() | d[i]);
     }
-    freea(d);
-    for (u8* current = buffer; current < destinationEnd; /*nothing*/)
+    freea(d);*/
+    u32 bucket = 0;
+    for (u8* current = destination; current < destination + operationSizePerBucket[buckets.size()-1]; /*nothing*/)
     {
+        while (operationOffsetsPerBucket2[bucket] == current - destination)
+        {
+            be_info("Bucket %d" | bucket);
+            bucket++;
+        }
         const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
         current += operation->size;
-        be_info("Entity %d:" | operation->entityId);
+        be_info(" Entity %d:" | operation->entityId);
         const u8* buffer = operation->componentBuffer;
         for (u32 c = 0; c < lastComponent-firstComponent; ++c)
         {
             u32 m = 1 << c;
             if (operation->componentMaskAdd & m)
             {
-                be_info(" added %s[%d]" | components[c].componentType->fullname() | *reinterpret_cast<const u32*>(buffer));
+                be_info("  added %s[%d]" | components[c].componentType->fullname() | *reinterpret_cast<const u32*>(buffer));
                 buffer += components[c].componentType->size;
             }
             if (operation->componentMaskRemove & m)
             {
-                be_info(" removed %s" | components[c].componentType->fullname());
+                be_info("  removed %s" | components[c].componentType->fullname());
             }
         }
     }
 #endif
 
+    freea(operationOffsetsPerBucket2);
     freea(deltas);
 
     operationOffset = 0;
@@ -803,6 +841,7 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
     buffer->originalMask = info.mask(group.firstComponent, group.lastComponent);
     buffer->componentMaskAdd = 1 << componentIndex.relativeIndex;
     buffer->componentMaskRemove = 0;
+    buffer->componentStorage = 0;
     buffer->bucketOrigin = 0;
     buffer->bucketDestination = 0;
     memcpy(buffer->componentBuffer, &c, componentSize);
@@ -836,6 +875,7 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
     buffer->originalMask = info.mask(group.firstComponent, group.lastComponent);
     buffer->componentMaskAdd = 0;
     buffer->componentMaskRemove = 1 << componentIndex.relativeIndex;
+    buffer->componentStorage = 0;
     buffer->bucketOrigin = 0;
     buffer->bucketDestination = 0;
 
@@ -880,13 +920,14 @@ EntityStorage::ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex c
     return m_componentGroups[componentIndex.group];
 }
 
-void EntityStorage::store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask)
+u32 EntityStorage::store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask)
 {
+    u32 result = 0;
     Entity e = {entityId};
     const EntityInfo& info = getEntityInfo(e);
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
-                      return);
+                      return result);
     for (u32 c = firstComponent; mask; c++, mask >>= 1)
     {
         if (mask & 1)
@@ -898,8 +939,10 @@ void EntityStorage::store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask
                                 | e.id | m_componentTypes[c].first->fullname() | offset | 0 | m_components[c].current,
                               continue);
             memcpy(buffer, m_components[c].memory + offset, size);
+            result += size;
         }
     }
+    return result;
 }
 
 }}
