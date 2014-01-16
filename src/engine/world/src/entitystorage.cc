@@ -302,8 +302,15 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
                         deltas[componentCount * (insertion.second - buckets.begin()) + i].added ++;
                     }
                 }
-                operationSizePerBucket[indexSourceBucket] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
-                operationSizePerBucket[indexDestinationBucket] += result->size;
+
+                if (insertion.first->acceptMask != 0)
+                {
+                    operationSizePerBucket[indexSourceBucket] += be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
+                }
+                if (insertion.second->acceptMask != 0)
+                {
+                    operationSizePerBucket[indexDestinationBucket] += result->size;
+                }
             }
             if (remainderAdd)
             {
@@ -348,20 +355,25 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
         const EntityOperation* operation = reinterpret_cast<const EntityOperation*>(current);
         if (operation->bucketOrigin != operation->bucketDestination)
         {
+            Bucket& bucketOrigin = buckets[operation->bucketOrigin];
+            Bucket& bucketDestination = buckets[operation->bucketDestination];
+
+            if (bucketOrigin.acceptMask != 0)
             {
                 u32 sizeRemove = be_checked_numcast<u32>(sizeof(EntityOperation) - 4);
                 memcpy(destination + operationOffsetsPerBucket[operation->bucketOrigin], current, sizeRemove);
                 EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[operation->bucketOrigin]);
                 remove->componentMaskAdd = 0;
-                remove->componentMaskRemove = buckets[operation->bucketOrigin].acceptMask;
+                remove->componentMaskRemove = bucketOrigin.acceptMask;
                 remove->size = sizeRemove;
                 operationOffsetsPerBucket[operation->bucketOrigin] += sizeof(EntityOperation) - 4;
             }
 
+            if (bucketDestination.acceptMask != 0)
             {
                 memcpy(destination + operationOffsetsPerBucket[operation->bucketDestination], current, operation->size);
                 EntityOperation* remove = reinterpret_cast<EntityOperation*>(destination + operationOffsetsPerBucket[operation->bucketDestination]);
-                remove->componentMaskAdd = buckets[operation->bucketDestination].acceptMask;
+                remove->componentMaskAdd = bucketDestination.acceptMask;
                 remove->componentMaskRemove = 0;
                 remove->size = operation->size;
                 operationOffsetsPerBucket[operation->bucketDestination] += operation->size;
@@ -417,7 +429,11 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
         current = current + operation->size;
     }
 
-#if 1
+    u32 bucketIndex = 0;
+    for (Bucket* bucket = buckets.begin(); buckets != buckets.end(); ++bucket, ++bucketIndex)
+    {
+    }
+#if 0
     /*i32* d = (i32*)malloca(sizeof(i32) * componentCount);
     memset(d, 0, sizeof(i32) * componentCount);
     for (u32 i = 0; i < buckets.size(); ++i)
