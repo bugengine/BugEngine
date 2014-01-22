@@ -242,9 +242,63 @@ struct EntityStorage::ComponentGroup::Delta
     u16 removed;
 };
 
-void EntityStorage::ComponentGroup::moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations, u32* operationOffsetPerBucket, Delta* deltas)
+void EntityStorage::ComponentGroup::moveComponents(u32 componentIndex,
+                                                   Bucket* first,
+                                                   Bucket* last,
+                                                   u8* __restrict operations,
+                                                   u32* __restrict operationOffsetPerBucket,
+                                                   Delta* deltas)
 {
-    be_forceuse((componentIndex, first, last, operations, operationOffsetPerBucket, deltas));
+    be_info("moving buckets %d - %d" | first - buckets.begin() | last - buckets.begin());
+    u32 componentCount = components.size();
+    Bucket* lowerBound = 0;
+    Bucket* upperBound = 0;
+    for (lowerBound = first; lowerBound < last; ++lowerBound)
+    {
+        minitl::size_type bucketIndex = minitl::distance(first, lowerBound);
+        const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
+        if (delta.added + delta.absoluteOffset > delta.removed)
+        {
+            break;
+        }
+        be_info("Enough space at beginning: moving bucket %d" | bucketIndex);
+    }
+    for (upperBound = last; upperBound > lowerBound; --upperBound)
+    {
+        minitl::size_type bucketIndex = minitl::distance(first, upperBound);
+        const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
+        if (delta.absoluteOffset < 0)
+        {
+            break;
+        }
+        be_info("Enough space at end: moving bucket %d" | bucketIndex);
+    }
+    if (lowerBound == upperBound)
+    {
+        minitl::size_type bucketIndex = minitl::distance(first, upperBound);
+        //const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
+        be_info("Enough space in middle: moving bucket %d" | bucketIndex);
+    }
+    else
+    {
+        for (Bucket* b = lowerBound; b < upperBound; ++b)
+        {
+            minitl::size_type bucketIndex = minitl::distance(first, b);
+            const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
+
+            be_info("Bucket shrinks: moving bucket %d" | bucketIndex);
+            if (delta.added + delta.absoluteOffset <= delta.removed)
+            {
+                moveComponents(componentIndex, lowerBound, b - 1, operations,
+                               &operationOffsetPerBucket[lowerBound - first],
+                               &deltas[(lowerBound - first) * componentCount]);
+                moveComponents(componentIndex, b + 1, upperBound, operations,
+                               &operationOffsetPerBucket[b + 1 - first],
+                               &deltas[(b + 1 - first) * componentCount]);
+                break;
+            }
+        }
+    }
 }
 
 void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> storage, u8* __restrict buffer, u8* __restrict componentBuffer)
@@ -356,9 +410,9 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
         operationSizePerBucket[i] += operationSizePerBucket[i-1];
         for (u32 c = 0; c < componentCount; ++c)
         {
-            deltas[i*componentCount + c].absoluteOffset = deltas[(i-1)*componentCount + c].absoluteOffset
-                                                        + deltas[i*componentCount + c].added
-                                                        - deltas[i*componentCount + c].removed;
+            deltas[i*componentCount + c].absoluteOffset = deltas[(i - 1)*componentCount + c].absoluteOffset
+                                                        + deltas[(i - 1)*componentCount + c].added
+                                                        - deltas[(i - 1)*componentCount + c].removed;
         }
     }
     for (u8* current = buffer; current < destinationEnd; /*nothing*/)
