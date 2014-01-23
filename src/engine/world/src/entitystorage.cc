@@ -243,19 +243,19 @@ struct EntityStorage::ComponentGroup::Delta
 };
 
 void EntityStorage::ComponentGroup::moveComponents(u32 componentIndex,
-                                                   Bucket* first,
-                                                   Bucket* last,
+                                                   Bucket* begin,
+                                                   Bucket* end,
                                                    u8* __restrict operations,
                                                    u32* __restrict operationOffsetPerBucket,
                                                    Delta* deltas)
 {
-    be_info("moving buckets %d - %d" | first - buckets.begin() | last - buckets.begin());
+    be_info("moving buckets %d - %d" | begin - buckets.begin() | end - buckets.begin());
     u32 componentCount = components.size();
     Bucket* lowerBound = 0;
     Bucket* upperBound = 0;
-    for (lowerBound = first; lowerBound < last; ++lowerBound)
+    for (lowerBound = begin; lowerBound < end; ++lowerBound)
     {
-        minitl::size_type bucketIndex = minitl::distance(first, lowerBound);
+        minitl::size_type bucketIndex = minitl::distance(begin, lowerBound);
         const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
         if (delta.added + delta.absoluteOffset > delta.removed)
         {
@@ -263,9 +263,9 @@ void EntityStorage::ComponentGroup::moveComponents(u32 componentIndex,
         }
         be_info("Enough space at beginning: moving bucket %d" | bucketIndex);
     }
-    for (upperBound = last; upperBound > lowerBound; --upperBound)
+    for (upperBound = end-1; upperBound > lowerBound; --upperBound)
     {
-        minitl::size_type bucketIndex = minitl::distance(first, upperBound);
+        minitl::size_type bucketIndex = minitl::distance(begin, upperBound);
         const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
         if (delta.absoluteOffset < 0)
         {
@@ -275,26 +275,26 @@ void EntityStorage::ComponentGroup::moveComponents(u32 componentIndex,
     }
     if (lowerBound == upperBound)
     {
-        minitl::size_type bucketIndex = minitl::distance(first, upperBound);
+        minitl::size_type bucketIndex = minitl::distance(begin, upperBound);
         //const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
         be_info("Enough space in middle: moving bucket %d" | bucketIndex);
     }
     else
     {
-        for (Bucket* b = lowerBound; b < upperBound; ++b)
+        for (Bucket* b = lowerBound+1; b < upperBound; ++b)
         {
-            minitl::size_type bucketIndex = minitl::distance(first, b);
+            minitl::size_type bucketIndex = minitl::distance(begin, b);
             const Delta& delta = deltas[bucketIndex*componentCount + componentIndex];
 
-            be_info("Bucket shrinks: moving bucket %d" | bucketIndex);
             if (delta.added + delta.absoluteOffset <= delta.removed)
             {
-                moveComponents(componentIndex, lowerBound, b - 1, operations,
-                               &operationOffsetPerBucket[lowerBound - first],
-                               &deltas[(lowerBound - first) * componentCount]);
-                moveComponents(componentIndex, b + 1, upperBound, operations,
-                               &operationOffsetPerBucket[b + 1 - first],
-                               &deltas[(b + 1 - first) * componentCount]);
+                be_info("Bucket shrinks: moving bucket %d" | bucketIndex);
+                moveComponents(componentIndex, lowerBound, b, operations,
+                               &operationOffsetPerBucket[lowerBound - begin],
+                               &deltas[(lowerBound - begin) * componentCount]);
+                moveComponents(componentIndex, b + 1, upperBound + 1, operations,
+                               &operationOffsetPerBucket[b + 1 - begin],
+                               &deltas[(b + 1 - begin) * componentCount]);
                 break;
             }
         }
