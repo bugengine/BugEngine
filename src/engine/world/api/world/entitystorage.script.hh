@@ -41,6 +41,7 @@ private:
             raw<const RTTI::Method::Overload> destroyed;
         };
         struct Delta;
+        struct Offset;
         typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
 
         minitl::array<Bucket> buckets;
@@ -60,7 +61,7 @@ private:
         BucketPair findBuckets(u32 mask1, u32 mask2);
         void runEntityOperations(weak<EntityStorage> storage, u8* buffer, u8* componentBuffer);
         void mergeEntityOperation(u8* source, const u8* merge);
-        void moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations, u32* operationOffsetPerBucket, Delta* deltas);
+        void moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations, Offset* operationOffsetPerBucket, Delta* deltas);
     };
     struct ComponentIndex
     {
@@ -112,8 +113,9 @@ private:
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
     minitl::array<ComponentStorage> m_components;
-private:
+published: //TODO
     void start();
+private:
     inline u32 getEntityInfoSize() const;
     EntityInfo& getEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
