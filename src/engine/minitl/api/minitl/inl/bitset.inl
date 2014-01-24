@@ -129,11 +129,11 @@ u32 bitset<BITS>::operator ()(u32 begin, u32 end) const
                 | u32(bytes[3]) << (24-offset)
                 | u32(bytes[4]) << (32-offset);
     u32 mask = 1 << (end - begin);
-    mask <<= 1;
-    mask <<= 2;
-    mask <<= 4;
-    mask <<= 8;
-    mask <<= 16;
+    mask |= mask << 1;
+    mask |= mask << 2;
+    mask |= mask << 4;
+    mask |= mask << 8;
+    mask |= mask << 16;
     mask = ~mask;
     return result & mask;
 }
