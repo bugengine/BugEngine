@@ -360,7 +360,9 @@ void EntityStorage::ComponentGroup::runEntityOperations(weak<EntityStorage> stor
             result->componentStorage = be_checked_numcast<u32>(componentBackup - componentBuffer);
             be_assert(componentBackup + componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
                       "ran out of component backup space");
-            componentBackup += storage->store(result->entityId, componentBackup, firstComponent,
+            Entity e = {result->entityId};
+            const EntityInfo& info = storage->getEntityInfo(e);
+            componentBackup += storage->store(info, componentBackup, firstComponent,
                                               insertion.first->acceptMask & maskAfter);
             u32 indexSourceBucket = be_checked_numcast<u32>(insertion.first - buckets.begin());
             u32 indexDestinationBucket = be_checked_numcast<u32>(insertion.second-buckets.begin());
@@ -945,7 +947,6 @@ void EntityStorage::unspawn(Entity e)
 
 void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType)
 {
-    be_forceuse(c);
     EntityInfo& info = getEntityInfo(e);
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
@@ -1049,11 +1050,9 @@ EntityStorage::ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex c
     return m_componentGroups[componentIndex.group];
 }
 
-u32 EntityStorage::store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask)
+u32 EntityStorage::store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask)
 {
     u32 result = 0;
-    Entity e = {entityId};
-    const EntityInfo& info = getEntityInfo(e);
     be_assert_recover((info.index & s_usedBit) != 0,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return result);
@@ -1069,10 +1068,33 @@ u32 EntityStorage::store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask)
                                 | offset | 0 | m_components[c].current,
                               continue);
             memcpy(buffer, m_components[c].memory + offset, size);
+            buffer += size;
             result += size;
         }
     }
     return result;
+}
+
+void EntityStorage::restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask)
+{
+    be_assert_recover((info.index & s_usedBit) != 0,
+                      "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
+                      return);
+    for (u32 c = firstComponent; mask; c++, mask >>= 1)
+    {
+        if (mask & 1)
+        {
+            u32 size = m_componentTypes[c].third;
+            u32 offset = info.componentIndex[c];
+            be_assert_recover(offset < m_components[c].current,
+                              "entity id %d: component %s index %d out of range (%d-%d)"
+                                | e.id | m_componentTypes[c].first->fullname()
+                                | offset | 0 | m_components[c].current,
+                              continue);
+            memcpy(m_components[c].memory + offset, buffer, size);
+            buffer += size;
+        }
+    }
 }
 
 }}
