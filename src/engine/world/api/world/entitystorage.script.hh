@@ -126,7 +126,8 @@ private:
 
     void buildGroups(const WorldComposition& composition);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount);
-    u32 store(u32 entityId, u8* buffer, u32 firstComponent, u32 mask);
+    u32 store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
+    void restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
 
 private: // friend World
     Entity spawn();
