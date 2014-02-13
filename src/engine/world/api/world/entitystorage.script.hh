@@ -29,6 +29,7 @@ private:
             u32* componentOffsets;
             u32 acceptMask;
             u32 maskSize;
+            u32 firstComponent;
 
             Bucket();
             Bucket(u32* componentCounts, u32* componentOffsets, u32 acceptMask);
@@ -62,7 +63,11 @@ private:
         void runEntityOperations(weak<EntityStorage> storage, u8* buffer, u8* componentBuffer);
         void mergeEntityOperation(u8* source, const u8* merge);
         void moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations,
-                            Offset* operationOffsetPerBucket, Delta* deltas);
+                            Offset* operationOffsetPerBucket, Delta* deltas,
+                            const u8* componentBuffer);
+        void moveBucketComponents(u32 componentIndex, Bucket* bucket,
+                                  u8* operationsRemove, u8* operationsAdd, u8* operationsEnd,
+                                  const u8* componentBuffer);
     };
     struct ComponentIndex
     {
@@ -125,11 +130,12 @@ private:
     ComponentGroup& getComponentGroup(ComponentIndex index);
 
     void buildGroups(const WorldComposition& composition);
-    void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index, u32 totalIndex, u32 maximumCount);
+    void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index,
+                      u32 totalIndex, u32 maximumCount);
     u32 store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
     void restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
 
-private: // friend World
+private: // friend World/ComponentGroup
     Entity spawn();
     void unspawn(Entity e);
     void addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType);
@@ -137,6 +143,8 @@ private: // friend World
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
+    u32 getComponentIndex(Entity e, const ComponentGroup& group,
+                          const ComponentGroup::Bucket& bucket) const;
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
 
 protected:
