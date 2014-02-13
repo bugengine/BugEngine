@@ -20,7 +20,7 @@ struct SortPredicate
         :   m_iterator(it)
     {
     }
-    bool operator()(const typename ITERATOR::value_type& r) { return m_compare(*m_iterator, r); }
+    bool operator()(const ITERATOR& r) { return m_compare(*m_iterator, *r); }
 };
 
 }
@@ -53,7 +53,7 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
     ITERATOR middle = first;
     for ( ; first != last; ++first)
     {
-        if (!p(*first))
+        if (!p(first))
         {
             minitl::swap(*first, *middle);
             ++middle;
@@ -66,7 +66,7 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 template< typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
-    typename ITERATOR::difference_type d = distance(first, last);
+    minitl::difference_type d = distance(first, last);
     if (d > 1)
     {
         ITERATOR reallast = last - 1;
