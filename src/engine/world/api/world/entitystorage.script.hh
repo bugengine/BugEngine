@@ -14,61 +14,16 @@ namespace BugEngine { namespace World
 {
 
 class World;
+class ComponentGroup;
+struct Bucket;
 struct Component;
+struct EntityInfo;
 
 class be_api(WORLD) EntityStorage : public minitl::refcountable
 {
     friend class World;
+    friend class ComponentGroup;
 private:
-    struct EntityInfo;
-    struct ComponentGroup
-    {
-        struct Bucket
-        {
-            u32* componentCounts;
-            u32* componentOffsets;
-            u32 acceptMask;
-            u32 maskSize;
-            u32 firstComponent;
-
-            Bucket();
-            Bucket(u32* componentCounts, u32* componentOffsets, u32 acceptMask);
-        };
-        struct ComponentInfo
-        {
-            raw<const RTTI::Class> componentType;
-            u32 size;
-            raw<const RTTI::Method::Overload> created;
-            raw<const RTTI::Method::Overload> destroyed;
-        };
-        struct Delta;
-        struct Offset;
-        typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
-
-        minitl::array<Bucket> buckets;
-        minitl::array<ComponentInfo> components;
-        u32 firstComponent;
-        u32 lastComponent;
-        u32 componentsTotalSize;
-        u32* componentCounts;
-        u32* componentOffsets;
-        u8* componentOperations;
-        i_u32 operationOffset;
-
-        ComponentGroup(u32 firstComponent, u32 componentCount, u32 componentsTotalSize,
-                       u32* componentCounts, u32* componentOffsets,
-                       const minitl::vector<u32>& bucketMasks, u8* operationBuffer);
-        ~ComponentGroup();
-        BucketPair findBuckets(u32 mask1, u32 mask2);
-        void runEntityOperations(weak<EntityStorage> storage, u8* buffer, u8* componentBuffer);
-        void mergeEntityOperation(u8* source, const u8* merge);
-        void moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations,
-                            Offset* operationOffsetPerBucket, Delta* deltas,
-                            const u8* componentBuffer);
-        void moveBucketComponents(u32 componentIndex, Bucket* bucket,
-                                  u8* operationsRemove, u8* operationsAdd, u8* operationsEnd,
-                                  const u8* componentBuffer);
-    };
     struct ComponentIndex
     {
         u16 group;
@@ -107,8 +62,6 @@ protected:
         }
     };
 private:
-    friend struct ComponentGroup;
-private:
     scoped<Task::ITask>             m_task;
     u32                             m_freeEntityId;
     SystemAllocator                 m_entityAllocator;
@@ -144,9 +97,12 @@ private: // friend World/ComponentGroup
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
     u32 getComponentIndex(Entity e, const ComponentGroup& group,
-                          const ComponentGroup::Bucket& bucket) const;
+                          const Bucket& bucket) const;
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
 
+private:
+    EntityStorage(const EntityStorage& other);
+    EntityStorage& operator=(const EntityStorage& other);
 protected:
     EntityStorage(const WorldComposition& composition);
     ~EntityStorage();

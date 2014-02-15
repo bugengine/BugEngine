@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INL_ITERATORS_INL_
 #define BE_MINITL_CONTAINER_INL_ITERATORS_INL_
 /*****************************************************************************/
+#include    <minitl/assert.hh>
 
 namespace minitl
 {
