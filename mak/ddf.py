@@ -25,7 +25,7 @@ global_macro_map = {
 	"PASCAL": False,
 }
 
-def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name=""):
+def doParse(source, output, macro = [], macrofile = [], pch="", name=""):
 	lexer = cpp.lex.lex(module=cpp.lexer)
 	lexer.inside = 0
 	lexer.sourcename = source
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 			raise Exception("source file and target file are the same: %s" % outputname)
 
 		path = os.path.abspath(os.path.split(sys.argv[0])[0])
-		if doParse(sourcename, outputname, path, options.macro, options.macrofile, options.pch, options.namespace) > 0:
+		if doParse(sourcename, outputname, options.macro, options.macrofile, options.pch, options.namespace) > 0:
 			exit(1)
 	exit(0)
 

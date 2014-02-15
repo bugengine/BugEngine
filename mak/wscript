@@ -128,7 +128,7 @@ def autoreconfigure(execute_method):
 			h = 0
 			for f in env['files']:
 				try:
-					h = hash((h, Utils.readf(f, 'rb')))
+					h = Utils.h_list((h, Utils.readf(f, 'rb')))
 				except IOError:
 					do_config = True
 			do_config = do_config or (h != env.hash)
