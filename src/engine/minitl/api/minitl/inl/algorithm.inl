@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
 #define BE_MINITL_CONTAINER_INL_ALGORITHM_INL_
 /*****************************************************************************/
+#include    <minitl/iterator.hh>
 
 namespace minitl
 {

@@ -3,6 +3,7 @@
 
 #include    <filesystem/stdafx.h>
 #include    <watchpoint.hh>
+#include    <diskwatch.hh>
 
 namespace BugEngine { namespace FileSystem
 {
