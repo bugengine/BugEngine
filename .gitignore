@@ -10,3 +10,4 @@ be_err.txt
 .*project
 .settings
 mak/parsetab
+.tags
