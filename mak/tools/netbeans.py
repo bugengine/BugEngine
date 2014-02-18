@@ -124,10 +124,10 @@ class Netbeans(Build.BuildContext):
 		add(doc, impfiles, 'itemPath', sys.argv[0])
 		#add(doc, cd, 'sourceFolderFilter')
 		srl = add(doc, cd, 'sourceRootList')
-		add(doc, srl, 'Elem', '.')
-		add(doc, srl, 'Elem', './build/')
+		#add(doc, srl, 'Elem', '.')
+		#add(doc, srl, 'Elem', './build/')
 		add(doc, cd, 'projectmakefile', sys.argv[0])
-		add(doc, cd, 'sourcefolderfilter', '^*$')
+		add(doc, cd, 'sourceFolderFilter', '^*$')
 		confs = add(doc, cd, 'confs')
 		for toolchain in bld.env.ALL_TOOLCHAINS:
 			bld_env = bld.all_envs[toolchain]
