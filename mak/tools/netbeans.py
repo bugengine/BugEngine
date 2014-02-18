@@ -1,5 +1,6 @@
 from waflib import TaskGen, Context, Build
-import os, sys
+import os
+import sys
 from xml.dom.minidom import Document
 
 def relpath(i, node):
@@ -40,12 +41,12 @@ def add(doc, parent, tag, value = None):
 	parent.appendChild(el)
 	return el
 
-class nb_folder:
+class NbFolder:
 	def __init__(self, name, document, xml):
 		self.xml = add(document, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
 		self.subfolders = {}
 
-class netbeans(Build.BuildContext):
+class Netbeans(Build.BuildContext):
 	cmd		= 'netbeans'
 	fun		= 'build'
 	optim	= 'debug'
@@ -78,13 +79,13 @@ class netbeans(Build.BuildContext):
 
 	def add_folder(self, name, doc, folder):
 		if name not in folder.subfolders:
-			folder.subfolders[name] = nb_folder(name, doc, folder.xml)
+			folder.subfolders[name] = NbFolder(name, doc, folder.xml)
 		return folder.subfolders[name]
 
 	def add(self, doc, folder, node):
 		if os.path.isdir(node.abspath()):
 			if node.name not in folder.subfolders:
-				folder.subfolders[node.name] = nb_folder(node.name, doc, folder.xml)
+				folder.subfolders[node.name] = NbFolder(node.name, doc, folder.xml)
 			f = folder.subfolders[node.name]
 			for child in node.listdir():
 				self.add(doc, f, node.make_node(child))
@@ -126,6 +127,7 @@ class netbeans(Build.BuildContext):
 		add(doc, srl, 'Elem', '.')
 		add(doc, srl, 'Elem', './build/')
 		add(doc, cd, 'projectmakefile', sys.argv[0])
+		add(doc, cd, 'sourcefolderfilter', '^*$')
 		confs = add(doc, cd, 'confs')
 		for toolchain in bld.env.ALL_TOOLCHAINS:
 			bld_env = bld.all_envs[toolchain]
@@ -240,15 +242,15 @@ class netbeans(Build.BuildContext):
 		confs.write(c.toxml())
 
 
-class netbeans7(netbeans):
+class Netbeans7(Netbeans):
 	cmd = 'netbeans7'
 	fun = 'build'
 
-class netbeans6(netbeans):
+class Netbeans6(Netbeans):
 	cmd		= 'netbeans6'
 	fun		= 'build'
 	version	= 51
 
-class sunstudio(netbeans6):
+class SunStudio(Netbeans6):
 	cmd = 'sunstudio'
 	fun = 'build'
