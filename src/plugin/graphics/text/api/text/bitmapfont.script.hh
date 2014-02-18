@@ -16,11 +16,11 @@ class be_api(TEXT) BitmapFont : public Resource::Description
 {
     friend class BitmapFontManager;
 private:
-    istring const           m_systemFontName;
+    istring const           m_fontSystemName;
     weak<const File> const  m_fontFile;
-public:
-    BitmapFont(const istring& fontname);
-    BitmapFont(weak<const File> file);
+published:
+    BitmapFont(const istring& fontSystemName);
+    BitmapFont(weak<const File> fontFile);
     ~BitmapFont();
 };
 

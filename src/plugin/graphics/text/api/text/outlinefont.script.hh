@@ -16,11 +16,11 @@ class be_api(TEXT) OutlineFont : public Resource::Description
 {
     friend class OutlineFontManager;
 private:
-    istring const           m_systemFontName;
+    istring const           m_fontSystemName;
     weak<const File> const  m_fontFile;
-public:
-    OutlineFont(const istring& fontname);
-    OutlineFont(weak<const File> file);
+published:
+    OutlineFont(const istring& fontSystemName);
+    OutlineFont(weak<const File> fontFile);
     ~OutlineFont();
 };
 

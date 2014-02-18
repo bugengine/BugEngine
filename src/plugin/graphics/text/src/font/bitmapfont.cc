@@ -7,15 +7,15 @@
 namespace BugEngine
 {
 
-BitmapFont::BitmapFont(const istring& fontname)
-    :   m_systemFontName(fontname)
+BitmapFont::BitmapFont(const istring& fontSystemName)
+    :   m_fontSystemName(fontSystemName)
     ,   m_fontFile()
 {
 }
 
-BitmapFont::BitmapFont(weak<const File> file)
-    :   m_systemFontName("")
-    ,   m_fontFile(file)
+BitmapFont::BitmapFont(weak<const File> fontFile)
+    :   m_fontSystemName("")
+    ,   m_fontFile(fontFile)
 {
 }
 

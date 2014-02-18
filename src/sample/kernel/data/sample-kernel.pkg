@@ -8,7 +8,7 @@ luascript = plugin.scripting.lua.LuaScript
 )
 font = plugin.graphics.text.OutlineFont
 (
-	fileName = <DroidSans.ttf>;
+	fontFile = <DroidSans.ttf>;
 )
 
 

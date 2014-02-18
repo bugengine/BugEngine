@@ -7,20 +7,21 @@
 namespace BugEngine
 {
 
-OutlineFont::OutlineFont(const istring& fontname)
-    :   m_systemFontName(fontname)
+OutlineFont::OutlineFont(const istring& fontSystemName)
+    :   m_fontSystemName(fontSystemName)
     ,   m_fontFile()
 {
 }
 
-OutlineFont::OutlineFont(weak<const File> file)
-    :   m_systemFontName("")
-    ,   m_fontFile(file)
+OutlineFont::OutlineFont(weak<const File> fontFile)
+    :   m_fontSystemName("")
+    ,   m_fontFile(fontFile)
 {
 }
 
 OutlineFont::~OutlineFont()
 {
+    
 }
 
 }
