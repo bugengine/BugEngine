@@ -23,10 +23,10 @@ public:
         u64         m_count;
         T*          m_data;
     public:
-        Block(Allocator& allocator, u64 count, u64 alignment = be_alignof(T))
+        Block(Allocator& allocator, u64 count, u64 blockAlignment = 4)
             :   m_allocator(&allocator)
             ,   m_count(count)
-            ,   m_data((T*)allocator.alloc(align(sizeof(T), be_alignof(T))*count, min<u64>(16, alignment)))
+            ,   m_data((T*)allocator.alloc(align(sizeof(T), be_alignof(T))*count, max<u64>(blockAlignment, be_alignof(T))))
         {
         };
         ~Block()
@@ -58,8 +58,9 @@ public:
                 return false;
             }
         }
-        void realloc(u64 count, u64 alignment = min<u64>(16, be_alignof(T)))
+        void realloc(u64 count, u64 blockAlignment = 4)
         {
+            u64 alignment = max<u64>(blockAlignment, be_alignof(T));
             u64 size = align(sizeof(T), be_alignof(T))*count;
             m_count = count;
             m_data = (T*)m_allocator->realloc(m_data, size, alignment);
@@ -78,7 +79,7 @@ protected:
     virtual void  internalFree(const void* pointer) = 0;
     virtual ~Allocator() { }
 public:
-    inline void* alloc(u64 size, u64 alignment = 16);
+    inline void* alloc(u64 size, u64 alignment = 4);
     inline bool  resize(void* ptr, u64 size);
     inline void* realloc(void* ptr, u64 size, u64 alignment);
     inline void  free(const void* pointer);
