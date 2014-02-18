@@ -40,21 +40,30 @@ def build(bld):
 	bld.external('3rdparty.oggvorbis')
 
 	bld.external('3rdparty.bullet')
+	bld.external('3rdparty.freetype')
 
 	bld.external('3rdparty.lua')
 	bld.external('3rdparty.squirrel')
 
-	bld.plugin('plugin.debug.runtime',			['engine.bugengine'])
-	bld.plugin('plugin.debug.assert',			['engine.bugengine', 'plugin.debug.runtime'])
+	bld.plugin('plugin.debug.runtime',
+			   ['engine.bugengine'])
+	bld.plugin('plugin.debug.assert',
+			   ['engine.bugengine', 'plugin.debug.runtime'])
 
-	bld.plugin('plugin.scripting.package',		['engine.bugengine'])
+	bld.plugin('plugin.scripting.package',
+			   ['engine.bugengine'])
 
-	bld.plugin('plugin.physics.bullet',			['engine.bugengine', '3rdparty.bullet'])
+	bld.plugin('plugin.physics.bullet',
+			   ['engine.bugengine', '3rdparty.bullet'])
 
-	bld.plugin('plugin.graphics.3d',			['engine.bugengine'])
-	bld.plugin('plugin.graphics.shadermodel1',	['engine.bugengine', 'plugin.graphics.3d'])
-	bld.plugin('plugin.graphics.shadermodel2',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
-	bld.plugin('plugin.graphics.shadermodel3',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2'])
+	bld.plugin('plugin.graphics.3d',
+			   ['engine.bugengine'])
+	bld.plugin('plugin.graphics.shadermodel1',
+			   ['engine.bugengine', 'plugin.graphics.3d'])
+	bld.plugin('plugin.graphics.shadermodel2',
+			   ['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
+	bld.plugin('plugin.graphics.shadermodel3',
+			   ['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2'])
 	bld.plugin('plugin.graphics.shadermodel4',	['engine.bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2', 'plugin.graphics.shadermodel3'])
 
 	#bld.plugin('plugin.audio.AL',				['engine.bugengine', '3rdparty.OpenAL'])
@@ -75,6 +84,8 @@ def build(bld):
 	#bld.plugin('plugin.graphics.Dx10',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX10'], features=['DirectX10', 'GUI'])
 	#bld.plugin('plugin.graphics.Dx11',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.DirectX11'], features=['DirectX11', 'GUI'])
 	bld.plugin('plugin.graphics.GLES2',			['engine.bugengine', 'plugin.graphics.windowing', '3rdparty.OpenGLES2'], features=['OpenGLES2', 'GUI'])
+
+	bld.plugin('plugin.graphics.text',			['engine.bugengine', 'plugin.graphics.3d', '3rdparty.freetype'])
 
 	bld.external('3rdparty.scintilla')
 	bld.plugin('tool.bugeditor.ui',				['engine.bugengine', '3rdparty.scintilla'], platforms=['pc'])

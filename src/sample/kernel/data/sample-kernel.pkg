@@ -1,10 +1,14 @@
 load sample.kernel;
 load plugin.scripting.lua;
+load plugin.graphics.text;
 
 luascript = plugin.scripting.lua.LuaScript
 (
 	script = <sample.lua>;
 )
-
+font = plugin.graphics.text.OutlineFont
+(
+	fileName = <DroidSans.ttf>;
+)
 
 
