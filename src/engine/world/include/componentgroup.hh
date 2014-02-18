@@ -40,7 +40,7 @@ private:
     struct Delta;
     struct Offset;
     typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
-    
+
     SystemAllocator&                m_operationAllocator;
     minitl::array<Bucket>           m_buckets;
     minitl::array<ComponentInfo>    m_components;

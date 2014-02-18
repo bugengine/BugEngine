@@ -51,7 +51,7 @@ public:
     }
 
     u32 offset() const { return m_buffer & 0xFFFFFF; }
-    u32 bucket() const { return m_buffer >> 24; }    
+    u32 bucket() const { return m_buffer >> 24; }
 };
 
 static inline u32 getFirstBit(u32 mask)

@@ -43,10 +43,7 @@ private:
         u32 maximum;
         u32 elementSize;
     };
-    typedef minitl::tuple<
-        raw<const RTTI::Class>,
-        ComponentIndex,
-        u32 > ComponentInfo;
+    typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex, u32 > ComponentInfo;
 protected:
     struct WorldComposition
     {
@@ -74,7 +71,7 @@ private:
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
     minitl::array<ComponentStorage> m_components;
-published: //TODO
+published: //TODO: just for testing, move back to private
     void start();
 private:
     inline u32 getEntityInfoSize() const;
