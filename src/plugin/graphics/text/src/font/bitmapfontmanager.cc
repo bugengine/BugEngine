@@ -8,8 +8,12 @@
 namespace BugEngine
 {
 
-BitmapFontManager::BitmapFontManager(weak<const FontList> fontList)
-    :   m_fontList(fontList)
+BitmapFontManager::BitmapFontManager(weak<Resource::ResourceManager> manager,
+                                     weak<FreetypeLibrary> freetype,
+                                     weak<const FontList> fontList)
+    :   m_manager(manager)
+    ,   m_freetype(freetype)
+    ,   m_fontList(fontList)
 {
 }
 

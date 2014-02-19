@@ -9,6 +9,7 @@
 #include    <text/text.script.hh>
 #include    <text/outlinefont.script.hh>
 #include    <text/bitmapfont.script.hh>
+#include    <freetypelib.hh>
 #include    <textmanager.hh>
 #include    <outlinefontmanager.hh>
 #include    <bitmapfontmanager.hh>
@@ -18,10 +19,11 @@ namespace BugEngine
 
 TextPlugin::TextPlugin(const Plugin::Context& pluginContext)
     :   m_resourceManager(pluginContext.resourceManager)
+    ,   m_freetypeLibrary(scoped<FreetypeLibrary>::create(Arena::game()))
     ,   m_fontList(scoped<FontList>::create(Arena::game()))
     ,   m_textManager(scoped<TextManager>::create(Arena::game()))
-    ,   m_outlineFontManager(scoped<OutlineFontManager>::create(Arena::game(), m_fontList))
-    ,   m_bitmapFontManager(scoped<BitmapFontManager>::create(Arena::game(), m_fontList))
+    ,   m_outlineFontManager(scoped<OutlineFontManager>::create(Arena::game(), m_resourceManager, m_freetypeLibrary, m_fontList))
+    ,   m_bitmapFontManager(scoped<BitmapFontManager>::create(Arena::game(), m_resourceManager, m_freetypeLibrary, m_fontList))
 {
     m_resourceManager->attach(be_typeid<Text>::klass(), m_textManager);
     m_resourceManager->attach(be_typeid<OutlineFont>::klass(), m_outlineFontManager);

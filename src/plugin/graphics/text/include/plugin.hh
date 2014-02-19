@@ -14,11 +14,13 @@ class TextManager;
 class OutlineFontManager;
 class BitmapFontManager;
 class FontList;
+class FreetypeLibrary;
 
 class TextPlugin : public minitl::pointer
 {
 private:
     weak<Resource::ResourceManager> m_resourceManager;
+    scoped<FreetypeLibrary>         m_freetypeLibrary;
     scoped<FontList>                m_fontList;
     scoped<TextManager>             m_textManager;
     scoped<OutlineFontManager>      m_outlineFontManager;

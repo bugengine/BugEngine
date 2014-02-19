@@ -14,6 +14,7 @@ def build(bld):
 	bld.recurse('mak')
 
 	bld.external('3rdparty.zlib')
+	bld.external('3rdparty.minizip')
 	bld.external('3rdparty.mak')
 
 	bld.library('engine.kernel',				[])
@@ -21,7 +22,7 @@ def build(bld):
 	bld.library('engine.core',					['3rdparty.mak', 'engine.minitl', 'engine.kernel'])
 	bld.library('engine.network',				['engine.core'])
 	bld.library('engine.rtti',					['engine.core', 'engine.network', '3rdparty.zlib'])
-	bld.library('engine.filesystem',			['engine.core', 'engine.rtti'])
+	bld.library('engine.filesystem',			['engine.core', 'engine.rtti', '3rdparty.minizip'])
 	bld.library('engine.resource',				['engine.core', 'engine.rtti', 'engine.filesystem'])
 	bld.library('engine.scheduler',				['engine.core', 'engine.rtti', 'engine.resource'])
 	bld.library('engine.world',					['engine.core', 'engine.rtti', 'engine.resource', 'engine.scheduler'])

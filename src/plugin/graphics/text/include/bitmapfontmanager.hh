@@ -9,14 +9,19 @@
 namespace BugEngine
 {
 
+class FreetypeLibrary;
 class FontList;
 
 class BitmapFontManager : public Resource::ILoader
 {
 private:
-    weak<const FontList>    m_fontList;
+    weak<Resource::ResourceManager> m_manager;
+    weak<FreetypeLibrary>           m_freetype;
+    weak<const FontList>            m_fontList;
 public:
-    BitmapFontManager(weak<const FontList> fontList);
+    BitmapFontManager(weak<Resource::ResourceManager> manager,
+                      weak<FreetypeLibrary> freetype,
+                      weak<const FontList> fontList);
     ~BitmapFontManager();
 
     void load(weak<const Resource::Description> description,
