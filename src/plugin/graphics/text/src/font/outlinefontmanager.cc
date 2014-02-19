@@ -16,12 +16,15 @@ OutlineFontManager::~OutlineFontManager()
 {
 }
 
-void OutlineFontManager::load(weak<const Resource::Description> /*description*/, Resource::Resource& /*resource*/)
+void OutlineFontManager::load(weak<const Resource::Description> /*description*/,
+                              Resource::Resource& /*resource*/)
 {
     be_info("loading outline font");
 }
 
-void OutlineFontManager::reload(weak<const Resource::Description> /*oldDescription*/, weak<const Resource::Description> /*newDescription*/, Resource::Resource& /*resource*/)
+void OutlineFontManager::reload(weak<const Resource::Description> /*oldDescription*/,
+                                weak<const Resource::Description> /*newDescription*/,
+                                Resource::Resource& /*resource*/)
 {
     be_info("reloading outline font");
 }
