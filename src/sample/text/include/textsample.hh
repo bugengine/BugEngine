@@ -7,7 +7,6 @@
 #include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
 #include    <resource/resourcemanager.hh>
-#include    <scheduler/kernel/kernel.script.hh>
 #include    <plugin/plugin.hh>
 #include    <package/package.script.hh>
 
