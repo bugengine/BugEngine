@@ -9,14 +9,19 @@
 namespace BugEngine
 {
 
+class FreetypeLibrary;
 class FontList;
 
 class OutlineFontManager : public Resource::ILoader
 {
 private:
-    weak<const FontList>    m_fontList;
+    weak<Resource::ResourceManager> m_manager;
+    weak<FreetypeLibrary>           m_freetype;
+    weak<const FontList>            m_fontList;
 public:
-    OutlineFontManager(weak<const FontList> fontList);
+    OutlineFontManager(weak<Resource::ResourceManager> manager,
+                       weak<FreetypeLibrary> freetype,
+                       weak<const FontList> fontList);
     ~OutlineFontManager();
 
     void load(weak<const Resource::Description> description,

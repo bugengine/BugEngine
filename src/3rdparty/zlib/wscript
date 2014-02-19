@@ -6,5 +6,6 @@ def setup(conf):
 	pass
 
 def build(bld):
-	bld.static_library('3rdparty.zlib', bld.platforms, use_master = False, warnings=False)
+	bld.shared_library('3rdparty.zlib', bld.platforms, use_master = False, warnings=False,
+					   extra_defines=['ZLIB_DLL'], extra_public_defines=['ZLIB_DLL'])
 

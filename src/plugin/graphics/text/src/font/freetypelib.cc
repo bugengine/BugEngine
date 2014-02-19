@@ -1,0 +1,21 @@
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+   see LICENSE for detail */
+
+#include    <text/stdafx.h>
+#include    <freetypelib.hh>
+
+namespace BugEngine
+{
+
+FreetypeLibrary::FreetypeLibrary()
+{
+    FT_Error error = FT_Init_FreeType(&library);
+    be_assert(!error, "Freetype error %d" | error);
+}
+
+FreetypeLibrary::~FreetypeLibrary()
+{
+    FT_Done_FreeType(library);
+}
+
+}
