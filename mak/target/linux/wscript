@@ -75,7 +75,6 @@ def set_linux_icc_options(self, flags, version, arch):
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
 	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E', '-static-libgcc', '-static-intel']
-	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -111,7 +110,6 @@ def set_linux_gcc_options(self, flags, version):
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
 	v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E']
-	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -148,7 +146,6 @@ def set_linux_clang_options(self, options, version):
 		v.CFLAGS = options + ['-fPIC']
 		v.CXXFLAGS = options + ['-fPIC']
 	v.LINKFLAGS = options + ['-rdynamic', '-Wl,-E']
-	v.CXXFLAGS_cxxshlib = []
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
