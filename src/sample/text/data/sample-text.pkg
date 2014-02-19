@@ -1,0 +1,6 @@
+load plugin.graphics.text;
+
+font = plugin.graphics.text.OutlineFont
+(
+	fontFile = <DroidSans.ttf>;
+)
