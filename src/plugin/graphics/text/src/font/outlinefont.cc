@@ -21,7 +21,6 @@ OutlineFont::OutlineFont(weak<const File> fontFile)
 
 OutlineFont::~OutlineFont()
 {
-    
 }
 
 }
