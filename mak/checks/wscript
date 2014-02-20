@@ -2,7 +2,7 @@ from waflib import Utils, ConfigSet
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
-
+import sys
 
 USE_LIBRARY_CODE="""
 %(include)s
@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 }
 """
 
+
 USE_SDK_CODE="""
 #include <iostream>
 #include <cstdlib>
@@ -29,6 +30,7 @@ int main(int argc, const char *argv[])
 { return EXIT_SUCCESS; }
 """
 
+
 @feature("link_library")
 @before_method("process_source")
 def link_library_test(self):
@@ -37,6 +39,7 @@ def link_library_test(self):
 	bld = self.bld
 	bld(rule=write_test_file, target='main.cc', code=self.code)
 	bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, use=self.use)
+
 
 @feature("link_framework")
 @before_method("process_source")
@@ -90,6 +93,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
 		self.detected += libname
 	return self.env[var]
 
+
 @conf
 def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
 	def cut(string):
@@ -117,6 +121,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 	else:
 		self.env[var] = headername
 	return self.env[var]
+
 
 @conf
 def check_framework(self, frameworks, var='', libpath=[], includepath=[], includes=[], functions=[], code=USE_LIBRARY_CODE):
@@ -154,6 +159,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 		self.detected += frameworks
 	return self.env[var]
 
+
 @conf
 def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
 	env = ConfigSet.ConfigSet()
@@ -180,6 +186,38 @@ def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], c
 		errmsg='not usable',
 		compiler=compiler,
 		envname=self.env.TOOLCHAIN)
+
+
+@conf
+def pkg_config(conf, name, var=''):
+	if not conf.env.PKG_CONFIG:
+		raise WafError('no pkg-config tool found')
+	if not var: var = name
+	command = [conf.env.PKG_CONFIG, name, '--cflags']
+	p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
+	out,err = p.communicate()
+	if p.returncode != 0:
+		if not isinstance(err, str):
+			err = err.decode(sys.stdout.encoding or 'iso8859-1')
+		raise WafError('could not run %s: %s' % (command, err))
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding or 'iso8859-1')
+	cflags = out.split()
+
+	command = [conf.env.PKG_CONFIG, name, '--libs']
+	p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
+	out,err = p.communicate()
+	if p.returncode != 0:
+		if not isinstance(err, str):
+			err = err.decode(sys.stdout.encoding or 'iso8859-1')
+		raise WafError('could not run %s: %s' % (command, err))
+	if not isinstance(out, str):
+		out = out.decode(sys.stdout.encoding or 'iso8859-1')
+	libs = out.split()
+
+	conf.env['CFLAGS_%s'%var] = cflags
+	conf.env['CXXFLAGS_%s'%var] = cflags
+	conf.env['LINKFLAGS_%s'%var] = libs
 
 
 def configure(conf):
