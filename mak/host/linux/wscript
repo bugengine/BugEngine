@@ -24,6 +24,7 @@ def configure(conf):
 		for f in sorted(os.listdir('/etc/ld.so.conf.d')):
 			add_ld_so(conf, '/etc/ld.so.conf.d/'+f, lib_paths)
 	conf.env.SYSTEM_LIB_PATHS = ['/lib', '/usr/lib'] + lib_paths
+	conf.find_program('pkg-config', var='PKG_CONFIG', mandatory=False)
 
 def build(bld):
 	pass
