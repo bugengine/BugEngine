@@ -3,17 +3,10 @@
 
 #include    <shadermodel1/stdafx.h>
 #include    <shadermodel1/float/float.script.hh>
+#include    <3d/shader/ishaderbuilder.hh>
 
 namespace BugEngine { namespace Float { namespace Float
 {
-
-Float::Float()
-{
-}
-
-Float::~Float()
-{
-}
 
 Constant::Constant(float value)
     :   value(value)
@@ -34,12 +27,10 @@ void Constant::buildDeclarations(Shaders::IShaderBuilder& stream,
 }
 
 void Constant::buildDefinitions(Shaders::IShaderBuilder& stream,
-                                Shaders::Stage currentStage,
-                                Shaders::Stage targetStage) const
+                                Shaders::Stage /*currentStage*/,
+                                Shaders::Stage /*targetStage*/) const
 {
-    be_forceuse(stream);
-    be_forceuse(currentStage);
-    be_forceuse(targetStage);
+    stream.write(value);
 }
 
 Varying::Varying()

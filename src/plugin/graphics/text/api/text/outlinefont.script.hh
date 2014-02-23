@@ -16,8 +16,8 @@ class be_api(TEXT) OutlineFont : public Resource::Description
 {
     friend class OutlineFontManager;
 private:
-    istring const           m_fontSystemName;
-    weak<const File> const  m_fontFile;
+    istring const                       m_fontSystemName;
+    weak<const File> const              m_fontFile;
 published:
     OutlineFont(const istring& fontSystemName);
     OutlineFont(weak<const File> fontFile);

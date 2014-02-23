@@ -7,6 +7,7 @@
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/shader/glshaderbuilder.hh>
 #include    <3d/shader/shader.script.hh>
+#include    <3d/shader/node.script.hh>
 
 namespace BugEngine { namespace OpenGL
 {
@@ -49,11 +50,14 @@ static GLenum toGLShaderStage(Shaders::Stage stage)
     }
 }
 
-GLhandleARB GLShaderProgram::build(weak<const ShaderProgramDescription> program, Shaders::Stage stage) const
+GLhandleARB GLShaderProgram::build(weak<const ShaderProgramDescription> program) const
 {
-    GLenum shaderType = toGLShaderStage(stage);
+    be_forceuse(program);
+    toGLShaderStage(Shaders::FragmentStage);
+#if 0
+    //GLenum shaderType = toGLShaderStage(stage);
     GLShaderBuilder builder(shaderType);
-    program->buildSource(builder, stage);
+    program->buildSource(builder);
 
     const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();
     GLhandleARB shader = shaderext.glCreateShader(shaderType);
@@ -81,6 +85,9 @@ GLhandleARB GLShaderProgram::build(weak<const ShaderProgramDescription> program,
     }
 #endif
     return shader;
+#else
+    return 0;
+#endif
 }
 
 void GLShaderProgram::load(weak<const Resource::Description> shaderDescription)
@@ -91,9 +98,9 @@ void GLShaderProgram::load(weak<const Resource::Description> shaderDescription)
     const ShaderExtensions& shaderext = be_checked_cast<const GLRenderer>(m_renderer)->shaderext();
     m_shaderProgram = shaderext.glCreateProgram();
 
-    m_vertexShader = build (program, Shaders::VertexStage);
-    m_geometryShader = build (program, Shaders::GeometryStage);
-    m_fragmentShader = build (program, Shaders::FragmentStage);
+    m_vertexShader = build (program);
+    m_geometryShader = build (program);
+    m_fragmentShader = build (program);
     attach();
     shaderext.glLinkProgram(m_shaderProgram);
 

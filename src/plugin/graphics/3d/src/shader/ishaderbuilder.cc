@@ -175,4 +175,49 @@ void IShaderBuilder::addOperator(weak<const Node> node, Operator op, ValueType t
     }
 }
 
+void IShaderBuilder::write(float value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(float2 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(float3 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(float4 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(int value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(int2 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(int3 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(int4 value)
+{
+    doWrite(value);
+}
+
+void IShaderBuilder::write(bool value)
+{
+    doWrite(value);
+}
+
 }}

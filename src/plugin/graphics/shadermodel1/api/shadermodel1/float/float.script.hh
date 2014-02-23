@@ -5,20 +5,12 @@
 #define BE_SHADERMODEL1_FLOAT_FLOAT_SCRIPT_HH_
 /*****************************************************************************/
 #include    <shadermodel1/stdafx.h>
-#include    <3d/shader/node.script.hh>
+#include    <3d/shader/types.script.hh>
+
 namespace BugEngine { namespace Float { namespace Float
 {
 
-
-class Float : public Shaders::Node
-{
-protected:
-    Float();
-    ~Float();
-};
-
-
-class Constant : public Float
+class Constant : public Shaders::Float
 {
 published:
     const float value;
@@ -35,7 +27,7 @@ private:
 };
 
 
-class Uniform : public Float
+class Uniform : public Shaders::Float
 {
 published:
     const istring name;
@@ -52,7 +44,7 @@ private:
 };
 
 
-class Varying : public Float
+class Varying : public Shaders::Float
 {
 published:
     Varying();

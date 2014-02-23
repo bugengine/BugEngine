@@ -10,13 +10,15 @@ namespace BugEngine { namespace Shaders
 {
 
 class Node;
-class Param;
 class IShaderBuilder;
+class Output;
 
 enum Stage
 {
     VertexStage,
     GeometryStage,
+    TesselationControlStage,
+    TessalationEvaluationStage,
     FragmentStage
 };
 
@@ -25,11 +27,13 @@ enum Stage
 class be_api(_3D) ShaderProgramDescription : public Resource::Description
 {
     BE_NOCOPY(ShaderProgramDescription);
+private:
+    minitl::vector< ref<Shaders::Output> >  m_outputs;
 protected:
-    ShaderProgramDescription();
+    ShaderProgramDescription(minitl::vector< ref<Shaders::Output> > outputs);
     ~ShaderProgramDescription();
 public:
-    virtual void buildSource(Shaders::IShaderBuilder& builder, Shaders::Stage stage) const;
+    virtual void buildSource(Shaders::IShaderBuilder& builder) const;
 };
 
 }

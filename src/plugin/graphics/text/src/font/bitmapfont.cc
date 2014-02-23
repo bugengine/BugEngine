@@ -3,6 +3,7 @@
 
 #include    <text/stdafx.h>
 #include    <text/bitmapfont.script.hh>
+#include    <3d/shader/types.script.hh>
 
 namespace BugEngine
 {

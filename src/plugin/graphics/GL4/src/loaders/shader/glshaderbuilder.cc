@@ -179,4 +179,54 @@ void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::ValueType typ
     writeln((minitl::format<1024u>("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op | op2).c_str());
 }
 
+void GLShaderBuilder::doWrite(float value)
+{
+    write(minitl::format<1024u>("%f") | value);
+}
+
+void GLShaderBuilder::doWrite(float2 value)
+{
+    write(minitl::format<1024u>("vec2(%f, %f)") | value[0] | value[1]);
+}
+
+void GLShaderBuilder::doWrite(float3 value)
+{
+    write(minitl::format<1024u>("vec3(%f, %f, %f)")
+            | value[0] | value[1] | value[2]);
+}
+
+void GLShaderBuilder::doWrite(float4 value)
+{
+    write(minitl::format<1024u>("vec4(%f, %f, %f, %f)")
+            | value[0] | value[1] | value[2] | value[3]);
+}
+
+void GLShaderBuilder::doWrite(int value)
+{
+    write(minitl::format<1024u>("%d") | value);
+}
+
+void GLShaderBuilder::doWrite(int2 value)
+{
+    write(minitl::format<1024u>("ivec2(%d, %d)")
+            | value[0] | value[1]);
+}
+
+void GLShaderBuilder::doWrite(int3 value)
+{
+    write(minitl::format<1024u>("ivec3(%d, %d)")
+            | value[0] | value[1] | value[2]);
+}
+
+void GLShaderBuilder::doWrite(int4 value)
+{
+    write(minitl::format<1024u>("ivec4(%d, %d)")
+            | value[0] | value[1] | value[2] | value[3]);
+}
+
+void GLShaderBuilder::doWrite(bool value)
+{
+    write(value ? "true" : "false");
+}
+
 }}

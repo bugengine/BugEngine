@@ -264,7 +264,7 @@ value_array:
         /*empty*/
         {
             $$ = (minitl::vector< ref<Value> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());		
+            new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());
         }
     |
         value
@@ -302,7 +302,7 @@ value_zip:
 zip_array:
         /* empty */
     |
-        zip_value ';' zip_array 
+        zip_value ';' zip_array
     ;
 
 zip_value:
