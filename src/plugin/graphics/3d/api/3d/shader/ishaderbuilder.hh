@@ -85,6 +85,16 @@ public:
     void end();
     void saveTo(Semantic semantic, weak<const Node> node);
     void addOperator(weak<const Node> node, Operator op, ValueType type, weak<const Node> node1, weak<const Node> node2);
+    void write(float value);
+    void write(float2 value);
+    void write(float3 value);
+    void write(float4 value);
+    void write(int value);
+    void write(int2 value);
+    void write(int3 value);
+    void write(int4 value);
+    void write(bool value);
+
 protected:
     istring referenceNode(weak<const Node> node);
 
@@ -93,6 +103,15 @@ protected:
     virtual void doAddAttributeDeclaration(const istring& name, Stage stage, ValueType type) = 0;
     virtual void doAddMethod(const istring& name) = 0;
     virtual void doEndMethod() = 0;
+    virtual void doWrite(float value) = 0;
+    virtual void doWrite(float2 value) = 0;
+    virtual void doWrite(float3 value) = 0;
+    virtual void doWrite(float4 value) = 0;
+    virtual void doWrite(int value) = 0;
+    virtual void doWrite(int2 value) = 0;
+    virtual void doWrite(int3 value) = 0;
+    virtual void doWrite(int4 value) = 0;
+    virtual void doWrite(bool value) = 0;
 
     virtual void doSaveTo(Semantic semantic, const istring& expr) = 0;
     virtual void doSaveTo(const istring& target, const istring& expr) = 0;

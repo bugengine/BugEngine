@@ -20,7 +20,7 @@ private:
     GLhandleARB m_geometryShader;
     GLhandleARB m_fragmentShader;
 private:
-    GLhandleARB build(weak<const ShaderProgramDescription> program, Shaders::Stage stage) const;
+    GLhandleARB build(weak<const ShaderProgramDescription> program) const;
     void attach();
 public:
     GLShaderProgram(weak<const Resource::Description> shaderDescription, weak<const GLRenderer> renderer);

@@ -26,6 +26,15 @@ private:
     virtual void doAddOperator(Shaders::Operator op, Shaders::ValueType type, const istring& result, const istring& op1, const istring& op2) override;
     virtual void doAddMethod(const istring& name) override;
     virtual void doEndMethod() override;
+    virtual void doWrite(float value) override;
+    virtual void doWrite(float2 value) override;
+    virtual void doWrite(float3 value) override;
+    virtual void doWrite(float4 value) override;
+    virtual void doWrite(int value) override;
+    virtual void doWrite(int2 value) override;
+    virtual void doWrite(int3 value) override;
+    virtual void doWrite(int4 value) override;
+    virtual void doWrite(bool value) override;
     virtual void doSaveTo(Shaders::Semantic semantic, const istring& value) override;
     virtual void doSaveTo(const istring& name, const istring& value) override;
 };
