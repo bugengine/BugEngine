@@ -3,7 +3,7 @@
 
 #ifndef BE_WORLD_HELPER_PARTITION_HH_
 #define BE_WORLD_HELPER_PARTITION_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <world/helper/outputstream.hh>
@@ -210,5 +210,5 @@ struct be_typeid< World::Partition<T, TAIL> >
 
 }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

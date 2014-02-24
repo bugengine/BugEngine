@@ -3,7 +3,7 @@
 
 #ifndef BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
 #define BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
 #include    <resource/resourcemanager.hh>
@@ -18,6 +18,8 @@ class TextSample : public Application
 private:
     Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
     Plugin::Plugin<minitl::pointer>     const   m_textManager;
+    Plugin::Plugin<minitl::pointer>     const   m_3ddx;
+    Plugin::Plugin<minitl::pointer>     const   m_3dgl;
     ref<const Package>                  const   m_mainPackage;
 public:
     TextSample(const Plugin::Context& context);
@@ -30,6 +32,5 @@ public:
 
 }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif
-

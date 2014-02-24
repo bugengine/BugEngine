@@ -3,7 +3,7 @@
 
 #ifndef BE_RTTI_ENGINE_NAMESPACE_HH_
 #define BE_RTTI_ENGINE_NAMESPACE_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
 
@@ -123,7 +123,7 @@ namespace BugEngine                                                             
 #define BE_REGISTER_NAMESPACE_5(n1, n2, n3, n4, n5)                     \
     BE_REGISTER_NAMESPACE_5_(BE_PROJECTID, n1, n2, n3, n4, n5)
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif
 
 

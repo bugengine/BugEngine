@@ -3,7 +3,7 @@
 
 #ifndef BE_WORLD_HELPER_PARTITIONLIST_HH_
 #define BE_WORLD_HELPER_PARTITIONLIST_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <world/helper/outputstream.hh>
@@ -138,5 +138,5 @@ struct MakePartitionList<>
 
 }}
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

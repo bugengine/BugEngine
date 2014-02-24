@@ -3,7 +3,7 @@
 
 #ifndef BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 #define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <plugin/plugin.hh>
 #include    <package/nodes/package.hh>
 #include    <package/nodes/value.hh>
@@ -48,5 +48,5 @@ extern int g_packageColumnAfter;
 extern const minitl::Allocator::Block<u8>* g_buffer;
 extern int g_bufferPosition;
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

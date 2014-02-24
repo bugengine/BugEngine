@@ -3,7 +3,7 @@
 
 #ifndef BE_SCHEDULER_TASL_TASK_INL_
 #define BE_SCHEDULER_TASL_TASK_INL_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/private/taskitem.hh>
 #include    <minitl/typemanipulation.hh>
@@ -35,5 +35,5 @@ void Task< Body >::schedule(weak<Scheduler> sc)
 }}
 
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif
