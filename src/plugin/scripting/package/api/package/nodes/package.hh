@@ -50,7 +50,7 @@ public:
     ref<Object> findByName(istring name) const;
     const RTTI::Value& getValue(weak<const Object> object) const;
 
-    void loadPlugin(inamespace pluginName);
+    void loadPlugin(inamespace plugin, inamespace name);
 
     void binarySave() const;
     void textSave() const;

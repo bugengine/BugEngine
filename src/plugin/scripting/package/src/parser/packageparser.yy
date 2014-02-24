@@ -72,7 +72,7 @@ ref<Entity> s_currentEntity;
 %token  TOK_ID
 %token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN VAL_FILENAME
 
-%token  KW_import KW_plugin KW_namespace KW_zip KW_notify
+%token  KW_import KW_plugin KW_namespace KW_zip KW_notify KW_as
 
 %type   <bValue>        VAL_BOOLEAN
 %type   <iValue>        VAL_INTEGER
@@ -130,7 +130,13 @@ decl_import:
 decl_plugin:
         KW_plugin fullname
             {
-                ((BuildContext*)param)->result->loadPlugin($2);
+                ((BuildContext*)param)->result->loadPlugin($2, $2);
+                free($2);
+            }
+	|
+		KW_plugin fullname KW_as TOK_ID
+            {
+                ((BuildContext*)param)->result->loadPlugin($2, $4);
                 free($2);
             }
         ';'

@@ -156,7 +156,7 @@ const RTTI::Value& Package::getValue(weak<const Object> object) const
     return m_empty;
 }
 
-void Package::loadPlugin(inamespace plugin)
+void Package::loadPlugin(inamespace plugin, inamespace name)
 {
     Plugin::Plugin<void*> p(plugin, Plugin::Plugin<void*>::Preload);
     if (!p)
@@ -166,7 +166,7 @@ void Package::loadPlugin(inamespace plugin)
     else
     {
         m_plugins.push_back(p);
-        m_rootNamespace->add(plugin, RTTI::Value(p.pluginNamespace()));
+        m_rootNamespace->add(name, RTTI::Value(p.pluginNamespace()));
     }
 }
 
