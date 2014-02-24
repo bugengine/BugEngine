@@ -3,7 +3,7 @@
 
 #ifndef BE_KERNEL_MSVC_AMD64_INTERLOCKED_INL_
 #define BE_KERNEL_MSVC_AMD64_INTERLOCKED_INL_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <intrin.h>
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
@@ -150,5 +150,5 @@ struct InterlockedType<8>
 
 #pragma warning(pop)
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

@@ -3,7 +3,7 @@
 
 #ifndef BE_WORLD_ENTITYSTORAGE_FACTORY_HH_
 #define BE_WORLD_ENTITYSTORAGE_FACTORY_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <world/entitystorage.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/typeinfo.hh>
@@ -104,5 +104,5 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
 
 }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

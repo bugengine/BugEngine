@@ -3,7 +3,7 @@
 
 #ifndef BE_MINITL_WEAKPTR_HH_
 #define BE_MINITL_WEAKPTR_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <minitl/refcountable.hh>
 #include    <minitl/scopedptr.hh>
 #include    <minitl/refptr.hh>
@@ -130,5 +130,5 @@ const format<SIZE>& operator|(const format<SIZE>& format, weak<T> t)
 
 #include <minitl/inl/weakptr.inl>
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

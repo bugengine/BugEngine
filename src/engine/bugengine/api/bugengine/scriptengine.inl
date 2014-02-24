@@ -3,7 +3,7 @@
 
 #ifndef BE_BUGENGINE_SCRIPTENGINE_INL_
 #define BE_BUGENGINE_SCRIPTENGINE_INL_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <bugengine/stdafx.h>
 #include    <bugengine/scriptengine.hh>
 #include    <resource/resourcemanager.hh>
@@ -55,5 +55,5 @@ void ScriptEngine<T>::onTicketLoaded(weak<const Resource::Description> script, R
 
 }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

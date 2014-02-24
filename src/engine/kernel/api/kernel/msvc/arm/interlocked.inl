@@ -3,7 +3,7 @@
 
 #ifndef BE_KERNEL_MSVC_ARM_INTERLOCKED_INL_
 #define BE_KERNEL_MSVC_ARM_INTERLOCKED_INL_
-/*****************************************************************************/
+/**************************************************************************************************/
 extern "C"
 {
     long __cdecl _InterlockedCompareExchange(long volatile* dest, long exchange, long comp);
@@ -118,5 +118,5 @@ struct InterlockedType<2> : public InterlockedType<4>
 
 #pragma warning(pop)
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

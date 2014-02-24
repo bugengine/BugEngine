@@ -3,7 +3,7 @@
 
 #ifndef BE_RTTI_TYPEINFO_HH_
 #define BE_RTTI_TYPEINFO_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
 #include    <rtti/classinfo.script.hh>
@@ -147,5 +147,5 @@ const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const 
 
 }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

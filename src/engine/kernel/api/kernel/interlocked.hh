@@ -3,7 +3,7 @@
 
 #ifndef BE_KERNEL_INTERLOCKED_HH_
 #define BE_KERNEL_INTERLOCKED_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include <kernel/compilers.hh>
 
 #if defined(BE_COMPILER_MSVC) || (defined(BE_COMPILER_INTEL) && defined(_WIN32))
@@ -137,5 +137,5 @@ typedef _Kernel::interlocked<i16>    i_i16;
 typedef _Kernel::interlocked<i32>    i_i32;
 typedef _Kernel::interlocked<size_t> i_size_t;
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

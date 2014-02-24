@@ -3,7 +3,7 @@
 
 #ifndef BE_MINITL_ALLOCATOR_HH_
 #define BE_MINITL_ALLOCATOR_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <minitl/stdafx.h>
 #include    <cstring>
 #include    <minitl/algorithm.hh>
@@ -136,6 +136,6 @@ inline void* operator new[](size_t size, minitl::Allocator& allocator, size_t al
 inline void  operator delete[](void* ptr, minitl::Allocator& allocator)                      { allocator.free(ptr); }
 inline void  operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*align*/)    { allocator.free(ptr); }
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif
 

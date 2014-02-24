@@ -3,7 +3,7 @@
 
 #ifndef BE_WORLD_HELPER_COMPONENTLIST_HH_
 #define BE_WORLD_HELPER_COMPONENTLIST_HH_
-/*****************************************************************************/
+/**************************************************************************************************/
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <world/helper/outputstream.hh>
@@ -1185,5 +1185,5 @@ const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, void>::s_property
         T98, T99, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110, T111, T112, T113, T114, T115, T116,\
         T117, T118, T119, T120, T121, T122, T123, T124, T125, T126) >
 
-/*****************************************************************************/
+/**************************************************************************************************/
 #endif

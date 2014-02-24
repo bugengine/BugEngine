@@ -44,7 +44,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		implementation.write('   see LICENSE for detail */\n\n')
 		implementation.write('#ifndef BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
 		implementation.write('#define BE_%s_%s_SCRIPT_HH_\n'%(name.upper(), kernel_name.upper()))
-		implementation.write('/*****************************************************************************/\n')
+		implementation.write('/**************************************************************************************************/\n')
 		if pch:
 			implementation.write("#include    <%s>\n" % pch)
 		implementation.write('#include    <scheduler/kernel/kernel.script.hh>\n')
@@ -160,7 +160,7 @@ def doParse(source, output, temppath, macro = [], macrofile = [], pch="", name="
 		implementation.write('\n    {\n    }\n')
 		implementation.write('};\n\n')
 		implementation.write('}')
-		implementation.write('\n\n/*****************************************************************************/\n')
+		implementation.write('\n\n/**************************************************************************************************/\n')
 		implementation.write('#endif\n')
 
 	return 0
