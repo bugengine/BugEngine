@@ -100,6 +100,7 @@ import                                                  { update(be_package_leng
 load                                                    { update(be_package_leng); return KW_plugin; }
 namespace                                               { update(be_package_leng); return KW_namespace; }
 zip                                                     { update(be_package_leng); return KW_zip; }
+as                                                      { update(be_package_leng); return KW_as; }
 ->                                                      { update(be_package_leng); return KW_notify; }
 [0-9A-Za-z_\-\+\$]*[A-Za-z_\-\+\$]+[0-9A-Za-z_\-\+\$]*  { update(be_package_leng); yylval.sValue = be_strdup(be_package_text); return TOK_ID; }
 \"[^\r\n\"]*\"                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }

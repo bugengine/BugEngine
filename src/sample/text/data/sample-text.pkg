@@ -1,12 +1,12 @@
-load plugin.graphics.text;
-load plugin.graphics.shadermodel1;
+load plugin.graphics.text as text;
+load plugin.graphics.shadermodel1 as sm1;
 
-font = plugin.graphics.text.OutlineFont
+font = text.OutlineFont
 (
 	fontFile = <DroidSans.ttf>;
 )
 
-bgColor = float4
+bgColor = game.float4
 (
     x = 0.0;
     y = 0.0;
@@ -14,7 +14,7 @@ bgColor = float4
     w = 0.0;
 )
 
-fgColor = float4
+fgColor = game.float4
 (
     z = 1.0;
     y = 1.0;
@@ -22,18 +22,18 @@ fgColor = float4
     w = 1.0;
 )
 
-bgColorNode = plugin.graphics.shadermodel1.Float.Float4.Constant
+bgColorNode = sm1.Float.Float4.Constant
 (
     value = bgColor;
 )
 
-fgColorNode = plugin.graphics.shadermodel1.Float.Float4.Constant
+fgColorNode = sm1.Float.Float4.Constant
 (
     value = fgColor;
 )
 
 
-shader = plugin.graphics.text.OutlineShader
+shader = text.OutlineShader
 (
     textColor = fgColorNode;
     backgroundColor = bgColorNode;
