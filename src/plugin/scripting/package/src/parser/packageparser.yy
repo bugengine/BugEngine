@@ -138,20 +138,29 @@ decl_plugin:
             {
                 ((BuildContext*)param)->result->loadPlugin($2, $4);
                 free($2);
+                free($4);
             }
         ';'
     ;
 
 decl_object:
         {
-            ref<Object> newObject = ref<Object>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            ref<Object> newObject = ref<Object>::create(BugEngine::Arena::packageBuilder(),
+                                                        ((BuildContext*)param)->result,
+                                                        g_packageLine+1,
+                                                        g_packageColumnBefore+1,
+                                                        g_packageColumnAfter+1);
             s_currentInstance = newObject;
             ((BuildContext*)param)->result->insertNode(newObject);
         }
         editor_attributes
         TOK_ID '=' fullname
         {
-            ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(),
+                                                                     ((BuildContext*)param)->result,
+                                                                     g_packageLine+1,
+                                                                     g_packageColumnBefore+1,
+                                                                     g_packageColumnAfter+1);
             reference->setName(BugEngine::inamespace($5));
             s_currentInstance->setName($3);
             be_checked_cast<Object>(s_currentInstance)->setMethod(reference);
@@ -214,7 +223,11 @@ value:
         fullname
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            ref<Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            ref<Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(),
+                                                              ((BuildContext*)param)->result,
+                                                              g_packageLine+1,
+                                                              g_packageColumnBefore+1,
+                                                              g_packageColumnAfter+1);
             reference->setName(BugEngine::inamespace($1));
             new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(), reference));
             free($1);
@@ -263,6 +276,42 @@ value:
         value_zip
         {
             $$ = $1;
+        }
+    |
+        '<' VAL_INTEGER ',' VAL_INTEGER '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Int2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
+        }
+    |
+        '<' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
+        }
+    |
+        '<' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
+        }
+    |
+        '<' VAL_FLOAT ',' VAL_FLOAT '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
+        }
+    |
+        '<' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
+        }
+    |
+        '<' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT '>'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
         }
     ;
 
@@ -345,7 +394,11 @@ component_array:
 decl_component:
         fullname
         {
-            ref<Component> component = minitl::ref<Component>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
+            ref<Component> component = minitl::ref<Component>::create(BugEngine::Arena::packageBuilder(),
+                                                                      ((BuildContext*)param)->result,
+                                                                      g_packageLine+1,
+                                                                      g_packageColumnBefore+1,
+                                                                      g_packageColumnAfter+1);
             s_previousInstance = s_currentInstance;
             s_currentInstance = component;
             s_currentEntity->addComponent(component);

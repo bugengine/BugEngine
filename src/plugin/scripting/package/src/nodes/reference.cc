@@ -13,8 +13,8 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-Reference::Reference(weak<Package> owner)
-    :   m_owner(owner)
+Reference::Reference(weak<Package> owner, u32 line, u32 begin, u32 end)
+    :   Node(owner, line, begin, end)
     ,   m_name("")
     ,   m_value()
 {
@@ -29,6 +29,10 @@ void Reference::setName(const inamespace& name)
 {
     m_name = name;
     m_owner->resolveReference(this);
+    if (!m_value && !m_object)
+    {
+        m_owner->error(m_line, minitl::format<1024u>("could not resolve reference: %s") | name);
+    }
 }
 
 RTTI::Value Reference::getValue() const
@@ -48,7 +52,7 @@ RTTI::Value Reference::getValue() const
     }
     else
     {
-        be_notreached();
+        // error was already reported
         return m_value;
     }
 }

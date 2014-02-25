@@ -9,8 +9,8 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-Component::Component(weak<Package> owner)
-:   Instance(owner)
+Component::Component(weak<Package> owner, u32 line, u32 begin, u32 end)
+    :   Instance(owner, line, begin, end)
 {
 }
 

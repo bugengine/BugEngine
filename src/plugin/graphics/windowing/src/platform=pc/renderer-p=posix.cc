@@ -90,7 +90,12 @@ static const char *s_messages[] =
 
 int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* event)
 {
-    be_error("X11 error: %d (%s)"|event->error_code|s_messages[event->error_code]);
+    const u32 size = sizeof(s_messages)/sizeof(s_messages[0]);
+    minitl::format<1024u> errorCode = minitl::format<1024u>("%d") | event->error_code;
+    const char* message = event->error_code < size
+                            ?   s_messages[event->error_code]
+                            :   errorCode.c_str();
+    be_error("X11 error: %d (%s)"|event->error_code | message);
     return 0;
 }
 

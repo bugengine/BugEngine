@@ -92,6 +92,133 @@ RTTI::Value IntValue::as(const RTTI::Type& type) const
 }
 
 
+Int2Value::Int2Value(i64 x, i64 y)
+    :   m_value(make_bigint2(x, y))
+{
+}
+
+Int2Value::~Int2Value()
+{
+}
+
+bool Int2Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<byte2>::type().isA(type)
+        || be_typeid<short2>::type().isA(type)
+        || be_typeid<int2>::type().isA(type)
+        || be_typeid<bigint2>::type().isA(type)
+        || be_typeid<ushort2>::type().isA(type)
+        || be_typeid<uint2>::type().isA(type);
+}
+
+RTTI::Value Int2Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    return RTTI::Value();
+    /*if (be_typeid<byte2>::type().isA(type))
+        return RTTI::Value();
+    if (be_typeid<i16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i16>(m_value));
+    if (be_typeid<i32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i32>(m_value));
+    if (be_typeid<i64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i64>(m_value));
+    if (be_typeid<u8>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u8>(m_value));
+    if (be_typeid<u16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u16>(m_value));
+    if (be_typeid<u32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u32>(m_value));
+    if (be_typeid<u64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u64>(m_value));
+    return RTTI::Value();*/
+}
+
+Int2Value::Int2Value(i64 x, i64 y)
+    :   m_value(make_bigint2(x, y))
+{
+}
+
+Int2Value::~Int2Value()
+{
+}
+
+bool Int2Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<byte2>::type().isA(type)
+        || be_typeid<short2>::type().isA(type)
+        || be_typeid<int2>::type().isA(type)
+        || be_typeid<bigint2>::type().isA(type)
+        || be_typeid<ushort2>::type().isA(type)
+        || be_typeid<uint2>::type().isA(type);
+}
+
+RTTI::Value Int2Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    return RTTI::Value();
+    /*if (be_typeid<byte2>::type().isA(type))
+        return RTTI::Value();
+    if (be_typeid<i16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i16>(m_value));
+    if (be_typeid<i32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i32>(m_value));
+    if (be_typeid<i64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i64>(m_value));
+    if (be_typeid<u8>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u8>(m_value));
+    if (be_typeid<u16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u16>(m_value));
+    if (be_typeid<u32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u32>(m_value));
+    if (be_typeid<u64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u64>(m_value));
+    return RTTI::Value();*/
+}
+
+Int4Value::Int4Value(i64 x, i64 y, i64 z, i64 w)
+    :   m_value(4(x, y, z, w))
+{
+}
+
+Int4Value::~Int4Value()
+{
+}
+
+bool Int4Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<byte4>::type().isA(type)
+        || be_typeid<short4>::type().isA(type)
+        || be_typeid<int4>::type().isA(type)
+        || be_typeid<bigint4>::type().isA(type)
+        || be_typeid<ushort4>::type().isA(type)
+        || be_typeid<uint4>::type().isA(type)
+        || be_typeid<biguint4>::type().isA(type);
+}
+
+RTTI::Value Int4Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    return RTTI::Value();
+    /*if (be_typeid<byte2>::type().isA(type))
+        return RTTI::Value();
+    if (be_typeid<i16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i16>(m_value));
+    if (be_typeid<i32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i32>(m_value));
+    if (be_typeid<i64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<i64>(m_value));
+    if (be_typeid<u8>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u8>(m_value));
+    if (be_typeid<u16>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u16>(m_value));
+    if (be_typeid<u32>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u32>(m_value));
+    if (be_typeid<u64>::type().isA(type))
+        return RTTI::Value(be_checked_numcast<u64>(m_value));
+    return RTTI::Value();*/
+}
+
 
 FloatValue::FloatValue(double value)
     :   m_value(value)
@@ -115,6 +242,72 @@ RTTI::Value FloatValue::as(const RTTI::Type& type) const
         return RTTI::Value((float)m_value);
     else
         return RTTI::Value((double)m_value);
+}
+
+
+
+Float2Value::Float2Value(double x, double y)
+    :   m_value(make_float2((float)x, (float)y))
+{
+}
+
+Float2Value::~Float2Value()
+{
+}
+
+bool Float2Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<float2>::type().isA(type);
+}
+
+RTTI::Value Float2Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from float to %s" | type);
+    return RTTI::Value(m_value);
+}
+
+
+
+Float3Value::Float3Value(double x, double y, double z)
+    :   m_value(make_float3((float)x, (float)y, (float)z))
+{
+}
+
+Float3Value::~Float3Value()
+{
+}
+
+bool Float3Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<float3>::type().isA(type);
+}
+
+RTTI::Value Float3Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from float to %s" | type);
+    return RTTI::Value(m_value);
+}
+
+
+
+Float4Value::Float4Value(double x, double y, double z, double w)
+    :   m_value(make_float4((float)x, (float)y, (float)z, (float)w))
+{
+}
+
+Float4Value::~Float4Value()
+{
+}
+
+bool Float4Value::isCompatible(const RTTI::Type& type) const
+{
+    return be_typeid<float4>::type().isA(type);
+}
+
+RTTI::Value Float4Value::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from float to %s" | type);
+    return RTTI::Value(m_value);
 }
 
 

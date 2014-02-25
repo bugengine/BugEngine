@@ -9,10 +9,10 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-Instance::Instance(weak<Package> owner)
-:   m_owner(owner)
-,   m_name("")
-,   m_parameters(Arena::packageBuilder())
+Instance::Instance(weak<Package> owner, u32 line, u32 begin, u32 end)
+    :   Node(owner, line, begin, end)
+    ,   m_name("")
+    ,   m_parameters(Arena::packageBuilder())
 {
 }
 

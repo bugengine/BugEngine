@@ -21,20 +21,20 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManage
     ,   m_renderSurfaceLoader(scoped< GPUResourceLoader<RenderSurfaceDescription> >::create(Arena::resource(), this))
     ,   m_renderWindowLoader(scoped< GPUResourceLoader<RenderWindowDescription> >::create(Arena::resource(), this))
     ,   m_shaderProgramLoader(scoped< GPUResourceLoader<ShaderProgramDescription> >::create(Arena::resource(), this))
-    ,   m_kernelSort(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchsort"))
-    ,   m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchrender"))
+    //,   m_kernelSort(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchsort"))
+    //,   m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchrender"))
 {
     m_resourceManager->attach(be_typeid<RenderSurfaceDescription>::klass(), m_renderSurfaceLoader);
     m_resourceManager->attach(be_typeid<RenderWindowDescription>::klass(), m_renderWindowLoader);
     m_resourceManager->attach(be_typeid<ShaderProgramDescription>::klass(), m_shaderProgramLoader);
-    m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelSort));
-    m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelRender));
+    //m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelSort));
+    //m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelRender));
 }
 
 IRenderer::~IRenderer()
 {
-    m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelRender));
-    m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelSort));
+    //m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelRender));
+    //m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelSort));
     m_resourceManager->detach(be_typeid<ShaderProgramDescription>::klass(), m_shaderProgramLoader);
     m_resourceManager->detach(be_typeid<RenderWindowDescription>::klass(), m_renderWindowLoader);
     m_resourceManager->detach(be_typeid<RenderSurfaceDescription>::klass(), m_renderSurfaceLoader);

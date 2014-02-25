@@ -66,6 +66,45 @@ public:
 };
 
 
+class Int2Value : public Value
+{
+private:
+    bigint2 m_value;
+public:
+    Int2Value(i64 x, i64 y);
+    ~Int2Value();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class Int3Value : public Value
+{
+private:
+    bigint3 m_value;
+public:
+    Int3Value(i64 x, i64 y, i64 z);
+    ~Int3Value();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class Int4Value : public Value
+{
+private:
+    bigint4 m_value;
+public:
+    Int4Value(i64 x, i64 y, i64 z, i64 w);
+    ~Int4Value();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
 class FloatValue : public Value
 {
 private:
@@ -73,6 +112,45 @@ private:
 public:
     FloatValue(double value);
     ~FloatValue();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class Float2Value : public Value
+{
+private:
+    float2 m_value;
+public:
+    Float2Value(double x, double y);
+    ~Float2Value();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class Float3Value : public Value
+{
+private:
+    float3 m_value;
+public:
+    Float3Value(double x, double y, double z);
+    ~Float3Value();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
+
+class Float4Value : public Value
+{
+private:
+    float4 m_value;
+public:
+    Float4Value(double x, double y, double z, double w);
+    ~Float4Value();
 
     virtual bool        isCompatible(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;

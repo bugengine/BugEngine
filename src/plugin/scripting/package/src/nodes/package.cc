@@ -7,6 +7,8 @@
 #include    <package/nodes/object.hh>
 #include    <resource/resourcemanager.hh>
 
+#include "package/logger.hh"
+
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -86,11 +88,13 @@ void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
 }
 
 
-Package::Package()
-    :   m_plugins(Arena::packageBuilder())
+Package::Package(const ifilename& filename)
+    :   m_filename(filename)
+    ,   m_plugins(Arena::packageBuilder())
     ,   m_rootNamespace(ref<Namespace>::create(Arena::packageBuilder()))
     ,   m_nodes(Arena::packageBuilder())
     ,   m_values(Arena::packageBuilder())
+    ,   m_logger()
 {
     m_rootNamespace->add(inamespace("game"), RTTI::Value(be_game_Namespace()));
 }
@@ -232,5 +236,31 @@ void Package::diffFromPackage(weak<Package> previous, weak<Resource::ResourceMan
     //    be_forceuse(previous);
     //}
 }
+
+const ifilename& Package::filename() const
+{
+    return m_filename;
+}
+
+void Package::info(u32 line, const char* message)
+{
+    m_logger.info(m_filename.str().name, line, message);
+}
+
+void Package::warning(u32 line, const char* message)
+{
+    m_logger.warning(m_filename.str().name, line, message);
+}
+
+void Package::error(u32 line, const char* message)
+{
+    m_logger.error(m_filename.str().name, line, message);
+}
+
+bool Package::success() const
+{
+    return m_logger.success();
+}
+
 
 }}}
