@@ -10,8 +10,8 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-Object::Object(weak<Package> owner)
-    :   Instance(owner)
+Object::Object(weak<Package> owner, u32 line, u32 begin, u32 end)
+    :   Instance(owner, line, begin, end)
     ,   m_method(0)
     ,   m_overloads(Arena::packageBuilder())
 {

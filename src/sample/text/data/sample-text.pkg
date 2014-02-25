@@ -6,36 +6,15 @@ font = text.OutlineFont
 	fontFile = <DroidSans.ttf>;
 )
 
-bgColor = game.float4
-(
-    x = 0.0;
-    y = 0.0;
-    z = 0.0;
-    w = 0.0;
-)
-
-fgColor = game.float4
-(
-    z = 1.0;
-    y = 1.0;
-    z = 1.0;
-    w = 1.0;
-)
-
-bgColorNode = sm1.Float.Float4.Constant
-(
-    value = bgColor;
-)
-
-fgColorNode = sm1.Float.Float4.Constant
-(
-    value = fgColor;
-)
-
-
 shader = text.OutlineShader
 (
-    textColor = fgColorNode;
-    backgroundColor = bgColorNode;
+    textColor = sm1.Float.Float4.Constant
+	(
+		value = <1.0f, 1.0f, 1.0f, 1.0f>;
+	);
+    backgroundColor = sm1.Float.Float4.Constant
+	(
+		value = <1.0f, 1.0f, 1.0f, 1.0f>;
+	);
 )
 

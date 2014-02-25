@@ -1,25 +1,29 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
  see LICENSE for detail */
 
-#ifndef BE_PACKAGE_NODES_COMPONENT_HH_
-#define BE_PACKAGE_NODES_COMPONENT_HH_
+#ifndef BE_PACKAGE_NODES_NODE_HH_
+#define BE_PACKAGE_NODES_NODE_HH_
 /**************************************************************************************************/
-#include    <package/nodes/instance.hh>
-
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-class Component : public Instance
+class Package;
+
+class Node : public minitl::refcountable
 {
-private:
-    void addedParameter(ref<Parameter> parameter) override;
-public:
-    Component(weak<Package> owner, u32 line, u32 begin, u32 end);
-    ~Component();
+protected:
+    weak<Package> const     m_owner;
+    u32 const               m_line;
+    u32 const               m_begin;
+    u32 const               m_end;
+protected:
+    Node(weak<Package> owner, u32 line, u32 begin, u32 end);
+    ~Node();
 };
 
 }}}
 
 /**************************************************************************************************/
 #endif
+

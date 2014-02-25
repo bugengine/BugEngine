@@ -14,7 +14,6 @@
 #include    <cstdio>
 #include    <cstdlib>
 
-#include    <minitl/hash_map.hh>
 #include    <rtti/engine/array.hh>
 
 

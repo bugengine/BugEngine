@@ -24,7 +24,7 @@ private:
     void resolveOverload();
     void addedParameter(ref<Parameter> parameter) override;
 public:
-    Object(weak<Package> owner);
+    Object(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Object();
 
     const RTTI::Method* method() const                          { return m_method; }

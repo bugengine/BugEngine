@@ -31,9 +31,10 @@ PackageBuilder::~PackageBuilder()
 {
 }
 
-ref<Nodes::Package> PackageBuilder::createPackage(const minitl::Allocator::Block<u8>& buffer)
+ref<Nodes::Package> PackageBuilder::createPackage(const ifilename& filename,
+                                                  const minitl::Allocator::Block<u8>& buffer)
 {
-    BuildContext context(buffer, m_dataFolder);
+    BuildContext context(filename, buffer, m_dataFolder);
     be_package_parse(&context);
     return context.result;
 }

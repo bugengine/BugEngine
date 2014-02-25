@@ -16,8 +16,10 @@ static i_u32 s_useCount = i_u32::Zero;
 namespace BugEngine { namespace PackageBuilder
 {
 
-BuildContext::BuildContext(const minitl::Allocator::Block<u8>& buffer, ref<Folder> folder)
-    :   result(ref<Nodes::Package>::create(Arena::packageBuilder()))
+BuildContext::BuildContext(const ifilename& filename,
+                           const minitl::Allocator::Block<u8>& buffer,
+                           ref<Folder> folder)
+    :   result(ref<Nodes::Package>::create(Arena::packageBuilder(), filename))
     ,   folder(folder)
 {
     be_assert(s_useCount++ == 0, "non reentrant parser used by two threads");
