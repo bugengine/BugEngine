@@ -37,7 +37,8 @@ extern int yylex();
 
 static int yyerror(void*, const char *msg)
 {
-    be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
+    ((BugEngine::PackageBuilder::BuildContext*)context)->result->error(g_packageLine+1, msg);
+    //be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
     return 0;
 }
 
@@ -133,6 +134,7 @@ decl_plugin:
                 ((BuildContext*)param)->result->loadPlugin($2, $2);
                 free($2);
             }
+        ';'
 	|
 		KW_plugin fullname KW_as TOK_ID
             {
