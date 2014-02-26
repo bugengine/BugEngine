@@ -111,6 +111,8 @@ def set_iphone_gcc_options(self, flags, arch):
 	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	v.LINKFLAGS = flags + []
 	v.CXXFLAGS_cxxshlib = []
+	v.CFLAGS_exportall = ['-fvisibility=default']
+	v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -143,6 +145,8 @@ def set_iphone_clang_options(self, flags, arch):
 	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	v.LINKFLAGS = flags + []
 	v.CXXFLAGS_cxxshlib = []
+	v.CFLAGS_exportall = ['-fvisibility=default']
+	v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']

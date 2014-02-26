@@ -71,6 +71,8 @@ def set_linux_icc_options(self, flags, version, arch):
 	if version >= 11:
 		v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+		v.CFLAGS_exportall = ['-fvisibility=default']
+		v.CXXFLAGS_exportall = ['-fvisibility=default']
 	else:
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
@@ -106,6 +108,8 @@ def set_linux_gcc_options(self, flags, version):
 	if version >= 4:
 		v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+		v.CFLAGS_exportall = ['-fvisibility=default']
+		v.CXXFLAGS_exportall = ['-fvisibility=default']
 	else:
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
@@ -142,6 +146,8 @@ def set_linux_clang_options(self, options, version):
 	if version >= 3.1:
 		v.CFLAGS = options + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = options + ['-fPIC', '-fvisibility=hidden']
+		v.CFLAGS_exportall = ['-fvisibility=default']
+		v.CXXFLAGS_exportall = ['-fvisibility=default']
 	else:
 		v.CFLAGS = options + ['-fPIC']
 		v.CXXFLAGS = options + ['-fPIC']
