@@ -14,6 +14,10 @@ class Folder;
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
+class Reference;
+class Object;
+
+
 class Value : public minitl::refcountable
 {
 protected:
@@ -26,8 +30,6 @@ public:
 };
 
 
-class Reference;
-
 class ReferenceValue : public Value
 {
 private:
@@ -39,6 +41,20 @@ public:
     virtual bool        isCompatible(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
+
+
+class ObjectValue : public Value
+{
+private:
+    ref<Object> m_value;
+public:
+    ObjectValue(ref<Object> value);
+    ~ObjectValue();
+
+    virtual bool        isCompatible(const RTTI::Type& type) const override;
+    virtual RTTI::Value as(const RTTI::Type& type) const override;
+};
+
 
 class BoolValue : public Value
 {

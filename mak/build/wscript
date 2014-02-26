@@ -98,7 +98,7 @@ def module(bld, name, depends,
 		build_features,
 		extra_includes, extra_defines,
 		extra_public_includes, extra_public_defines,
-		use_master, warnings):
+		use_master, warnings, export_all):
 	platforms = bld.env.VALID_PLATFORMS
 	build = len(valid_platforms) == 0
 	for p in valid_platforms:
@@ -259,6 +259,7 @@ def module(bld, name, depends,
 			source = sources[:],
 			pchstop = pchstop,
 			preprocess = preprocess,
+			export_all=export_all,
 			source_nodes = [source_node] + [e for _, e in extras]))
 		if target_prefix:
 			internal_deps.append(target_prefix + name)
@@ -322,7 +323,7 @@ def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[]
 def library(bld, name, depends=[], features=[], platforms=[],
 		extra_includes=[], extra_defines=[],
 		extra_public_includes=[], extra_public_defines=[],
-		use_master=True, warnings=True):
+		use_master=True, warnings=True, export_all=False):
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
@@ -331,7 +332,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
 		features,
 		extra_includes, extra_defines,
 		extra_public_includes, extra_public_defines,
-		use_master, warnings)
+		use_master, warnings, export_all)
 
 @conf
 def static_library(bld, name, depends=[], features=[], platforms=[],
@@ -346,13 +347,13 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
 		features,
 		extra_includes, extra_defines,
 		extra_public_includes, extra_public_defines,
-		use_master, warnings)
+		use_master, warnings, False)
 
 @conf
 def shared_library(bld, name, depends=[], features=[], platforms=[],
 		extra_includes=[], extra_defines=[],
 		extra_public_includes=[], extra_public_defines=[],
-		use_master=True, warnings=True):
+		use_master=True, warnings=True, export_all=False):
 	for p in platforms:
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
@@ -361,7 +362,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
 		features,
 		extra_includes, extra_defines,
 		extra_public_includes, extra_public_defines,
-		use_master, warnings)
+		use_master, warnings, export_all)
 
 @conf
 def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
@@ -369,10 +370,10 @@ def engine(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 		if p not in bld.env.VALID_PLATFORMS:
 			return None
 	if bld.env.STATIC:
-		module(bld, name, depends, platforms, ['cxx', 'cxxobjects'], features, [], [], [], [], use_master, warnings)
+		module(bld, name, depends, platforms, ['cxx', 'cxxobjects'], features, [], [], [], [], use_master, warnings, False)
 		bld.launcher_name = name
 	else:
-		module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], features, [], [], [], [], use_master, warnings)
+		module(bld, name, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], features, [], [], [], [], use_master, warnings, False)
 
 @conf
 def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
@@ -381,7 +382,7 @@ def game(bld, name, depends=[], features=[], platforms=[], use_master=True, warn
 			return None
 	module(bld, name, depends,platforms,
 		['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
-		features, [], [], [], [], use_master, warnings)
+		features, [], [], [], [], use_master, warnings, False)
 
 @conf
 def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, warnings=True):
@@ -390,7 +391,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], use_master=True, wa
 			return None
 	module(bld, name, depends, platforms,
 		['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
-		features, [], [], [], [], use_master, warnings)
+		features, [], [], [], [], use_master, warnings, False)
 
 def build(bld):
 	bld.load('data', tooldir=['mak/tools'])
@@ -518,6 +519,14 @@ def launcher_feature(task):
 @feature('cxxobjects')
 def objects_feature(task):
 	pass
+
+@feature('cxx')
+@before_method('process_source')
+def process_export_all_flag(self):
+	if getattr(self, 'export_all', False):
+		self.env = self.env.derive()
+		self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
+		self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
 
 @feature('kernel', 'plugin')
 @after_method('process_use')
