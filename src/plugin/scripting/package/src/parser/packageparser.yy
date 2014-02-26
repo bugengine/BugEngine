@@ -35,7 +35,7 @@
 
 extern int yylex();
 
-static int yyerror(void*, const char *msg)
+static int yyerror(void* context, const char *msg)
 {
     ((BugEngine::PackageBuilder::BuildContext*)context)->result->error(g_packageLine+1, msg);
     //be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
@@ -309,37 +309,37 @@ value:
         '(' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
+            new ($$) ref<Value>(ref<Int2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4));
         }
     |
         '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
+            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6));
         }
     |
         '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
+            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
+            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
+            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
+            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8));
         }
     ;
 
