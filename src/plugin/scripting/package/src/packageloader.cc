@@ -36,7 +36,10 @@ void PackageLoader::unload(Resource::Resource& handle)
 {
     {
         weak<PackageBuilder::Nodes::Package> package = handle.getRefHandle<PackageBuilder::Nodes::Package>();
-        package->deleteObjects(m_manager);
+        if (package)
+        {
+            package->deleteObjects(m_manager);
+        }
     }
     handle.clearRefHandle();
 }
@@ -46,9 +49,9 @@ void PackageLoader::runBuffer(weak<const Package> script, Resource::Resource& re
     MD5 md5 = digest(buffer);
     be_info("md5 sum of package: %s" | md5);
     ref<PackageBuilder::Nodes::Package> package = m_packageBuilder->createPackage(script->getScriptName(), buffer);
-    resource.setRefHandle(package);
     if (package->success())
     {
+        resource.setRefHandle(package);
         package->createObjects(m_manager);
     }
 }
