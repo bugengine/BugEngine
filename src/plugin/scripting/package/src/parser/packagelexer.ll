@@ -58,6 +58,11 @@ i64 strToInteger(const char *text, size_t l)
     return negate?-result:result;
 }
 
+double strToDouble(const char *text, size_t /*l*/)
+{
+    return strtod(text, 0);
+}
+
 static void update (int num)
 {
     g_packageColumnBefore = g_packageColumnAfter;
@@ -92,6 +97,11 @@ extern "C" int be_package_wrap()
 %option prefix="be_package_"
 %option nounput
 
+DIGIT         [0-9]
+HEXDIGIT      [0-9A-Fa-f]
+DIGITS        ({DIGIT}+)
+SIGN          ("+"|"-")
+
 %%
 
 true                                                    { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
@@ -106,6 +116,8 @@ as                                                      { update(be_package_leng
 \"[^\r\n\"]*\"                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
 \<[^\r\n\"]*\>                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_FILENAME; }
 -?[0-9]+                                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
+{DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?   |
+"."{DIGITS}([eE]{SIGN}?{DIGITS})?                       { update(be_package_leng); yylval.fValue = strToDouble(be_package_text, be_package_leng); return VAL_FLOAT; }
 "\n"                                                    { newline(); }
 [ \r\t]+                                                { update(be_package_leng); }
 \#[^\n]*\n                                              { update(be_package_leng); }

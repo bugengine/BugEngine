@@ -4,6 +4,7 @@
 #include    <package/stdafx.h>
 #include    <package/nodes/value.hh>
 #include    <package/nodes/reference.hh>
+#include    <package/nodes/object.hh>
 
 #include    <filesystem/folder.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
@@ -108,76 +109,72 @@ bool Int2Value::isCompatible(const RTTI::Type& type) const
         || be_typeid<int2>::type().isA(type)
         || be_typeid<bigint2>::type().isA(type)
         || be_typeid<ushort2>::type().isA(type)
-        || be_typeid<uint2>::type().isA(type);
+        || be_typeid<uint2>::type().isA(type)
+        || be_typeid<biguint2>::type().isA(type);
 }
 
 RTTI::Value Int2Value::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    if (be_typeid<byte2>::type().isA(type))
+        return RTTI::Value(make_byte2(be_checked_numcast<i8>(m_value[0]), be_checked_numcast<i8>(m_value[1])));
+    if (be_typeid<short2>::type().isA(type))
+        return RTTI::Value(make_short2(be_checked_numcast<i16>(m_value[0]), be_checked_numcast<i16>(m_value[1])));
+    if (be_typeid<int2>::type().isA(type))
+        return RTTI::Value(make_int2(be_checked_numcast<i32>(m_value[0]), be_checked_numcast<i32>(m_value[1])));
+    if (be_typeid<bigint2>::type().isA(type))
+        return RTTI::Value(make_bigint2(be_checked_numcast<i64>(m_value[0]), be_checked_numcast<i64>(m_value[1])));
+    if (be_typeid<ushort2>::type().isA(type))
+        return RTTI::Value(make_ushort2(be_checked_numcast<u16>(m_value[0]), be_checked_numcast<u16>(m_value[1])));
+    if (be_typeid<uint2>::type().isA(type))
+        return RTTI::Value(make_uint2(be_checked_numcast<u32>(m_value[0]), be_checked_numcast<u32>(m_value[1])));
+    if (be_typeid<biguint2>::type().isA(type))
+        return RTTI::Value(make_biguint2(be_checked_numcast<u64>(m_value[0]), be_checked_numcast<u64>(m_value[1])));
     return RTTI::Value();
-    /*if (be_typeid<byte2>::type().isA(type))
-        return RTTI::Value();
-    if (be_typeid<i16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i16>(m_value));
-    if (be_typeid<i32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i32>(m_value));
-    if (be_typeid<i64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i64>(m_value));
-    if (be_typeid<u8>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u8>(m_value));
-    if (be_typeid<u16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u16>(m_value));
-    if (be_typeid<u32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u32>(m_value));
-    if (be_typeid<u64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u64>(m_value));
-    return RTTI::Value();*/
 }
 
-Int2Value::Int2Value(i64 x, i64 y)
-    :   m_value(make_bigint2(x, y))
+Int3Value::Int3Value(i64 x, i64 y, i64 z)
+    :   m_value(make_bigint3(x, y, z))
 {
 }
 
-Int2Value::~Int2Value()
+Int3Value::~Int3Value()
 {
 }
 
-bool Int2Value::isCompatible(const RTTI::Type& type) const
+bool Int3Value::isCompatible(const RTTI::Type& type) const
 {
-    return be_typeid<byte2>::type().isA(type)
-        || be_typeid<short2>::type().isA(type)
-        || be_typeid<int2>::type().isA(type)
-        || be_typeid<bigint2>::type().isA(type)
-        || be_typeid<ushort2>::type().isA(type)
-        || be_typeid<uint2>::type().isA(type);
+    return be_typeid<byte3>::type().isA(type)
+        || be_typeid<short3>::type().isA(type)
+        || be_typeid<int3>::type().isA(type)
+        || be_typeid<bigint3>::type().isA(type)
+        || be_typeid<ushort3>::type().isA(type)
+        || be_typeid<uint3>::type().isA(type)
+        || be_typeid<biguint3>::type().isA(type);
 }
 
-RTTI::Value Int2Value::as(const RTTI::Type& type) const
+RTTI::Value Int3Value::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    if (be_typeid<byte3>::type().isA(type))
+        return RTTI::Value(make_byte3(be_checked_numcast<i8>(m_value[0]), be_checked_numcast<i8>(m_value[1]), be_checked_numcast<i8>(m_value[2])));
+    if (be_typeid<short3>::type().isA(type))
+        return RTTI::Value(make_short3(be_checked_numcast<i16>(m_value[0]), be_checked_numcast<i16>(m_value[1]), be_checked_numcast<i16>(m_value[2])));
+    if (be_typeid<int3>::type().isA(type))
+        return RTTI::Value(make_int3(be_checked_numcast<i32>(m_value[0]), be_checked_numcast<i32>(m_value[1]), be_checked_numcast<i32>(m_value[2])));
+    if (be_typeid<bigint3>::type().isA(type))
+        return RTTI::Value(make_bigint3(be_checked_numcast<i64>(m_value[0]), be_checked_numcast<i64>(m_value[1]), be_checked_numcast<i64>(m_value[2])));
+    if (be_typeid<ushort3>::type().isA(type))
+        return RTTI::Value(make_ushort3(be_checked_numcast<u16>(m_value[0]), be_checked_numcast<u16>(m_value[1]), be_checked_numcast<u16>(m_value[2])));
+    if (be_typeid<uint3>::type().isA(type))
+        return RTTI::Value(make_uint3(be_checked_numcast<u32>(m_value[0]), be_checked_numcast<u32>(m_value[1]), be_checked_numcast<u32>(m_value[2])));
+    if (be_typeid<biguint3>::type().isA(type))
+        return RTTI::Value(make_biguint3(be_checked_numcast<u64>(m_value[0]), be_checked_numcast<u64>(m_value[1]), be_checked_numcast<u64>(m_value[2])));
     return RTTI::Value();
-    /*if (be_typeid<byte2>::type().isA(type))
-        return RTTI::Value();
-    if (be_typeid<i16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i16>(m_value));
-    if (be_typeid<i32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i32>(m_value));
-    if (be_typeid<i64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i64>(m_value));
-    if (be_typeid<u8>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u8>(m_value));
-    if (be_typeid<u16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u16>(m_value));
-    if (be_typeid<u32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u32>(m_value));
-    if (be_typeid<u64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u64>(m_value));
-    return RTTI::Value();*/
 }
 
 Int4Value::Int4Value(i64 x, i64 y, i64 z, i64 w)
-    :   m_value(4(x, y, z, w))
+    :   m_value(make_bigint4(x, y, z, w))
 {
 }
 
@@ -199,24 +196,21 @@ bool Int4Value::isCompatible(const RTTI::Type& type) const
 RTTI::Value Int4Value::as(const RTTI::Type& type) const
 {
     be_assert(isCompatible(type), "invalid conversion from int to %s" | type);
+    if (be_typeid<byte4>::type().isA(type))
+        return RTTI::Value(make_byte4(be_checked_numcast<i8>(m_value[0]), be_checked_numcast<i8>(m_value[1]), be_checked_numcast<i8>(m_value[2]), be_checked_numcast<i8>(m_value[3])));
+    if (be_typeid<short4>::type().isA(type))
+        return RTTI::Value(make_short4(be_checked_numcast<i16>(m_value[0]), be_checked_numcast<i16>(m_value[1]), be_checked_numcast<i16>(m_value[2]), be_checked_numcast<i16>(m_value[3])));
+    if (be_typeid<int4>::type().isA(type))
+        return RTTI::Value(make_int4(be_checked_numcast<i32>(m_value[0]), be_checked_numcast<i32>(m_value[1]), be_checked_numcast<i32>(m_value[2]), be_checked_numcast<i32>(m_value[3])));
+    if (be_typeid<bigint4>::type().isA(type))
+        return RTTI::Value(make_bigint4(be_checked_numcast<i64>(m_value[0]), be_checked_numcast<i64>(m_value[1]), be_checked_numcast<i64>(m_value[2]), be_checked_numcast<i64>(m_value[3])));
+    if (be_typeid<ushort4>::type().isA(type))
+        return RTTI::Value(make_ushort4(be_checked_numcast<u16>(m_value[0]), be_checked_numcast<u16>(m_value[1]), be_checked_numcast<u16>(m_value[2]), be_checked_numcast<u16>(m_value[3])));
+    if (be_typeid<uint4>::type().isA(type))
+        return RTTI::Value(make_uint4(be_checked_numcast<u32>(m_value[0]), be_checked_numcast<u32>(m_value[1]), be_checked_numcast<u32>(m_value[2]), be_checked_numcast<u32>(m_value[3])));
+    if (be_typeid<biguint4>::type().isA(type))
+        return RTTI::Value(make_biguint4(be_checked_numcast<u64>(m_value[0]), be_checked_numcast<u64>(m_value[1]), be_checked_numcast<u64>(m_value[2]), be_checked_numcast<u64>(m_value[3])));
     return RTTI::Value();
-    /*if (be_typeid<byte2>::type().isA(type))
-        return RTTI::Value();
-    if (be_typeid<i16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i16>(m_value));
-    if (be_typeid<i32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i32>(m_value));
-    if (be_typeid<i64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<i64>(m_value));
-    if (be_typeid<u8>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u8>(m_value));
-    if (be_typeid<u16>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u16>(m_value));
-    if (be_typeid<u32>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u32>(m_value));
-    if (be_typeid<u64>::type().isA(type))
-        return RTTI::Value(be_checked_numcast<u64>(m_value));
-    return RTTI::Value();*/
 }
 
 
@@ -341,7 +335,6 @@ RTTI::Value StringValue::as(const RTTI::Type& type) const
 
 
 
-
 ReferenceValue::ReferenceValue(ref<const Reference> value)
     :   m_value(value)
 {
@@ -364,6 +357,26 @@ RTTI::Value ReferenceValue::as(const RTTI::Type& type) const
 }
 
 
+ObjectValue::ObjectValue(ref<Object> value)
+    :   m_value(value)
+{
+}
+
+ObjectValue::~ObjectValue()
+{
+}
+
+bool ObjectValue::isCompatible(const RTTI::Type& type) const
+{
+    return m_value->getType().isA(type);
+}
+
+RTTI::Value ObjectValue::as(const RTTI::Type& type) const
+{
+    be_assert(isCompatible(type), "invalid conversion from %s to %s" | m_value->getType() | type);
+    be_forceuse(type);
+    return m_value->create();
+}
 
 
 

@@ -3,18 +3,18 @@ load plugin.graphics.shadermodel1 as sm1;
 
 font = text.OutlineFont
 (
-	fontFile = <DroidSans.ttf>;
+    fontFile = <DroidSans.ttf>;
 )
 
 shader = text.OutlineShader
 (
     textColor = sm1.Float.Float4.Constant
-	(
-		value = <1.0f, 1.0f, 1.0f, 1.0f>;
-	);
+    (
+        value = (0.0, 0.0, 0.0, 1.0);
+    );
     backgroundColor = sm1.Float.Float4.Constant
-	(
-		value = <1.0f, 1.0f, 1.0f, 1.0f>;
-	);
+    (
+        value = (1.0, 1.0, 1.0, 1.0);
+    );
 )
 
