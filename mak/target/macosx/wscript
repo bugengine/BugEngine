@@ -98,8 +98,8 @@ def set_macosx_icc_options(self, flags, arch):
 	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	v.LINKFLAGS = flags + ['-lobjc']
 	v.CXXFLAGS_cxxshlib = []
-
-
+	v.CFLAGS_exportall = ['-fvisibility=default']
+	v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -132,8 +132,8 @@ def set_macosx_gcc_options(self, flags, arch):
 	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	v.LINKFLAGS = flags + ['-lobjc']
 	v.CXXFLAGS_cxxshlib = []
-
-
+	v.CFLAGS_exportall = ['-fvisibility=default']
+	v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -166,6 +166,8 @@ def set_macosx_clang_options(self, flags, arch):
 	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 	v.LINKFLAGS = flags + ['-lobjc']
 	v.CXXFLAGS_cxxshlib = []
+	v.CFLAGS_exportall = ['-fvisibility=default']
+	v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 	v.CFLAGS_warnnone = ['-w']
 	v.CXXFLAGS_warnnone = ['-w']
@@ -368,6 +370,7 @@ def apply_multiarch_darwin(self):
 		inputs = []
 		for tg_name in self.use:
 			task_gen = self.bld.get_tgen_by_name(tg_name)
+			task_gen.post()
 			if getattr(task_gen, 'link_task', None):
 				inputs.append(task_gen.link_task.outputs[0])
 				features += task_gen.features

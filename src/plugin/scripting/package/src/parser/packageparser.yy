@@ -63,8 +63,7 @@ using namespace BugEngine::PackageBuilder;
 using namespace BugEngine::PackageBuilder::Nodes;
 
 
-ref<Instance> s_currentInstance;
-ref<Instance> s_previousInstance;
+minitl::vector< ref<Instance> > s_currentInstance(BugEngine::Arena::packageBuilder());
 ref<ZipValue> s_currentZip;
 ref<Entity> s_currentEntity;
 
@@ -152,7 +151,7 @@ decl_object:
                                                         g_packageLine+1,
                                                         g_packageColumnBefore+1,
                                                         g_packageColumnAfter+1);
-            s_currentInstance = newObject;
+            s_currentInstance.push_back(newObject);
             ((BuildContext*)param)->result->insertNode(newObject);
         }
         editor_attributes
@@ -164,14 +163,14 @@ decl_object:
                                                                      g_packageColumnBefore+1,
                                                                      g_packageColumnAfter+1);
             reference->setName(BugEngine::inamespace($5));
-            s_currentInstance->setName($3);
-            be_checked_cast<Object>(s_currentInstance)->setMethod(reference);
+            s_currentInstance.back()->setName($3);
+            be_checked_cast<Object>(s_currentInstance.back())->setMethod(reference);
         }
         '('
             params
         ')'
         {
-            s_currentInstance.clear();
+            s_currentInstance.pop_back();
             free($3);
             free($5);
         }
@@ -204,7 +203,7 @@ param:
         TOK_ID '=' value ';'
         {
             ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($1), *$3);
-            s_currentInstance->addParameter(parameter);
+            s_currentInstance.back()->addParameter(parameter);
             $3->~ref();
             free($1);
             free($3);
@@ -213,7 +212,7 @@ param:
         TOK_ID ':'  TOK_ID '=' value ';'
         {
             ref<Parameter> parameter = ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($3), *$5);
-            s_currentInstance->addParameter(parameter);
+            s_currentInstance.back()->addParameter(parameter);
             $5->~ref();
             free($1);
             free($3);
@@ -232,6 +231,33 @@ value:
                                                               g_packageColumnAfter+1);
             reference->setName(BugEngine::inamespace($1));
             new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(), reference));
+            free($1);
+        }
+    |
+        fullname
+        '('
+        {
+            ref<Object> newObject = ref<Object>::create(BugEngine::Arena::packageBuilder(),
+                                                        ((BuildContext*)param)->result,
+                                                        g_packageLine+1,
+                                                        g_packageColumnBefore+1,
+                                                        g_packageColumnAfter+1);
+            s_currentInstance.push_back(newObject);
+            ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(),
+                                                                     ((BuildContext*)param)->result,
+                                                                     g_packageLine+1,
+                                                                     g_packageColumnBefore+1,
+                                                                     g_packageColumnAfter+1);
+            reference->setName(BugEngine::inamespace($1));
+            be_checked_cast<Object>(s_currentInstance.back())->setMethod(reference);
+        }
+            params
+        ')'
+        {
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<ObjectValue>::create(BugEngine::Arena::packageBuilder(),
+                                                         be_checked_cast<Object>(s_currentInstance.back())));
+            s_currentInstance.pop_back();
             free($1);
         }
     |
@@ -280,40 +306,40 @@ value:
             $$ = $1;
         }
     |
-        '<' VAL_INTEGER ',' VAL_INTEGER '>'
+        '(' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<Int2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
         }
     |
-        '<' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER '>'
+        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
         }
     |
-        '<' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER '>'
+        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
         }
     |
-        '<' VAL_FLOAT ',' VAL_FLOAT '>'
+        '(' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4))
         }
     |
-        '<' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT '>'
+        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
             new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6))
         }
     |
-        '<' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT '>'
+        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
+            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8))
         }
     ;
 
@@ -401,15 +427,13 @@ decl_component:
                                                                       g_packageLine+1,
                                                                       g_packageColumnBefore+1,
                                                                       g_packageColumnAfter+1);
-            s_previousInstance = s_currentInstance;
-            s_currentInstance = component;
+            s_currentInstance.push_back(component);
             s_currentEntity->addComponent(component);
             free($1);
         }
         '(' params ')'
         {
-            s_currentInstance = s_previousInstance;
-            s_previousInstance = ref<Instance>();
+            s_currentInstance.pop_back();
         }
     ;
 

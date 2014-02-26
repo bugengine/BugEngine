@@ -33,6 +33,8 @@ def set_freebsd_gcc_options(self, flags, version):
 	if version >= 4:
 		v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+		v.CFLAGS_exportall = ['-fvisibility=default']
+		v.CXXFLAGS_exportall = ['-fvisibility=default']
 	else:
 		v.CFLAGS = flags + ['-fPIC']
 		v.CXXFLAGS = flags + ['-fPIC']
@@ -70,6 +72,8 @@ def set_freebsd_clang_options(self, options, version):
 	if version >= 3.1:
 		v.CFLAGS = options + ['-fPIC', '-fvisibility=hidden']
 		v.CXXFLAGS = options + ['-fPIC', '-fvisibility=hidden']
+		v.CFLAGS_exportall = ['-fvisibility=default']
+		v.CXXFLAGS_exportall = ['-fvisibility=default']
 	else:
 		v.CFLAGS = options + ['-fPIC']
 		v.CXXFLAGS = options + ['-fPIC']
