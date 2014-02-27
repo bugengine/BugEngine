@@ -14,6 +14,7 @@ FreetypeFace::FreetypeFace(weak<FreetypeLibrary> freetype, const minitl::Allocat
                                         be_checked_numcast<u32>(buffer.byteCount()),
                                         0,
                                         &face);
+    be_forceuse(error);
     be_assert(!error, "Freetype error %d" | error);
 }
 

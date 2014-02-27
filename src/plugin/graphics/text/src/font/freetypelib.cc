@@ -10,6 +10,7 @@ namespace BugEngine
 FreetypeLibrary::FreetypeLibrary()
 {
     FT_Error error = FT_Init_FreeType(&library);
+    be_forceuse(error);
     be_assert(!error, "Freetype error %d" | error);
 }
 

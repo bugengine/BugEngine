@@ -14,7 +14,10 @@ DynamicObject::DynamicObject(const inamespace& objectName, const ipath& objectPa
 
 DynamicObject::~DynamicObject()
 {
-    unload(m_handle);
+    if(m_handle)
+    {
+        unload(m_handle);
+    }
 }
 
 }}
