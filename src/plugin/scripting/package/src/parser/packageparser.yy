@@ -128,20 +128,18 @@ decl_import:
     ;
 
 decl_plugin:
-        KW_plugin fullname
+        KW_plugin fullname ';'
             {
                 ((BuildContext*)param)->result->loadPlugin($2, $2);
                 free($2);
             }
-        ';'
 	|
-		KW_plugin fullname KW_as TOK_ID
+		KW_plugin fullname KW_as TOK_ID ';'
             {
                 ((BuildContext*)param)->result->loadPlugin($2, $4);
                 free($2);
                 free($4);
             }
-        ';'
     ;
 
 decl_object:
@@ -393,11 +391,11 @@ zip_value:
         {
             s_currentEntity = ref<Entity>::create(BugEngine::Arena::packageBuilder());
             s_currentZip->addEntity(s_currentEntity);
-            free($1);
         }
         '(' component_array ')'
         {
             s_currentEntity = ref<Entity>();
+            free($1);
         }
     |
         TOK_ID '.' TOK_ID '.' TOK_ID KW_notify TOK_ID '.' TOK_ID '.' TOK_ID
@@ -429,11 +427,11 @@ decl_component:
                                                                       g_packageColumnAfter+1);
             s_currentInstance.push_back(component);
             s_currentEntity->addComponent(component);
-            free($1);
         }
         '(' params ')'
         {
             s_currentInstance.pop_back();
+            free($1);
         }
     ;
 
