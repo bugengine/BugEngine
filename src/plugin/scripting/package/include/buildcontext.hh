@@ -21,6 +21,7 @@ union YYSTYPE
     ref<BugEngine::PackageBuilder::Nodes::Object>* object;
     ref<BugEngine::PackageBuilder::Nodes::Component>* component;
     ref<BugEngine::PackageBuilder::Nodes::Entity>* entity;
+    minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Value> >* value_list;
     minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Parameter> >* param_list;
     minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Component> >* component_list;
     minitl::vector< ref<BugEngine::PackageBuilder::Nodes::Entity> >* entity_list;

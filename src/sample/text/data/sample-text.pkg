@@ -10,7 +10,7 @@ shader = text.OutlineShader
 (
     textColor = sm1.Float.Float4.Constant
     (
-        value = (0.0, 0.0, 0.0, 1.0, 0.0);
+        value = (0.0, 0.0, 0.0, 1.0);
     );
     backgroundColor = sm1.Float.Float4.Constant
     (

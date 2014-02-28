@@ -77,12 +77,12 @@ using namespace BugEngine::PackageBuilder::Nodes;
 %type   <sValue>            TOK_ID
 %type   <sValue>            fullname
 %type   <value>             value value_zip
-%type   <value_array>       value_array
+%type   <value_list>        value_array
 %type   <object>            object
 %type   <component>         decl_component
-%type   <component_list>    component_list
-%type   <entity>            decl_entity
-%type   <entity_list>       entity_list
+%type   <component_list>    component_array
+%type   <entity>            zip_value
+%type   <entity_list>       zip_array
 %type   <param>             param
 %type   <param_list>        params
 
@@ -90,8 +90,8 @@ using namespace BugEngine::PackageBuilder::Nodes;
 %parse-param { void*  param }
 
 %destructor { free($$); }                   VAL_STRING VAL_FILENAME TOK_ID fullname
-%destructor { $$->~ref(); free($$); }       value value_zip param object decl_component decl_entity
-%destructor { $$->~vector(); free($$); }    value_array params entity_list component_list
+%destructor { $$->~ref(); free($$); }       value value_zip param object decl_component zip_value
+%destructor { $$->~vector(); free($$); }    value_array params zip_array component_array
 
 %%
 
@@ -123,7 +123,7 @@ decl:
     ;
 
 decl_import:
-        KW_import fullname';'
+        KW_import fullname ';'
         {
             free($2);
         }
@@ -135,8 +135,8 @@ decl_plugin:
                 ((BuildContext*)param)->result->loadPlugin($2, $2);
                 free($2);
             }
-	|
-		KW_plugin fullname KW_as TOK_ID ';'
+    |
+        KW_plugin fullname KW_as TOK_ID ';'
             {
                 ((BuildContext*)param)->result->loadPlugin($2, $4);
                 free($2);
@@ -148,6 +148,8 @@ decl_object:
         editor_attributes
         TOK_ID '=' object
         {
+            (*$4)->setName($2);
+            ((BuildContext*)param)->result->insertNode(*$4);
             $4->~ref();
             free($4);
             free($2);
@@ -183,7 +185,7 @@ params:
         /* empty */
         {
             $$ = (minitl::vector< ref<Parameter> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Parameter> >(Arena::temp());
+            new ($$) minitl::vector< ref<Parameter> >(BugEngine::Arena::temporary());
         }
     ;
 
@@ -225,7 +227,7 @@ value:
         object
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<ObjectValue>::create(BugEngine::Arena::packageBuilder(), $1));
+            new ($$) ref<Value>(ref<ObjectValue>::create(BugEngine::Arena::packageBuilder(), *$1));
             $1->~ref();
             free($1);
         }
@@ -331,10 +333,10 @@ object:
                                                                      g_packageColumnAfter+1);
             for (minitl::vector< ref<Parameter> >::iterator it = $3->begin(); it != $3->end(); ++it)
             {
-                $$->addParameter(*it);
+                (*$$)->addParameter(*it);
             }
             reference->setName(BugEngine::inamespace($1));
-            $$->setMethod(reference);
+            (*$$)->setMethod(reference);
             free($1);
             $3->~vector();
             free($3);
@@ -366,39 +368,40 @@ value_array:
     ;
 
 value_zip:
-        KW_zip
+        KW_zip '(' zip_array ')'
         {
-            $<value>$ = (ref<Value>*)malloc(sizeof(*$<value>$));
-            s_currentZip = ref<ZipValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->result);
-            new ($<value>$) ref<Value>(s_currentZip);
-        }
-        '(' zip_array ')'
-        {
-            $$ = $<value>2;
-            s_currentZip = ref<ZipValue>();
+            $$ = (ref<Value>*)malloc(sizeof(*$$));
+            new ($$) ref<Value>(ref<ZipValue>::create(BugEngine::Arena::packageBuilder(),
+                                                      ((BuildContext*)param)->result));
+            for (minitl::vector< ref<Entity> >::iterator it = $3->begin(); it != $3->end(); ++it)
+            {
+                be_checked_cast<ZipValue>(*$$)->addEntity(*it);
+            }
+            $3->~vector();
+            free($3);
         }
     ;
 
 zip_array:
         /* empty */
+        {
+            $$ = (minitl::vector< ref<Entity> >*)malloc(sizeof(*$$));
+        }
     |
         zip_value ';' zip_array
-    ;
-
-zip_value:
-        TOK_ID '='
         {
-            s_currentEntity = ref<Entity>::create(BugEngine::Arena::packageBuilder());
-            s_currentZip->addEntity(s_currentEntity);
-        }
-        '(' component_array ')'
-        {
-            s_currentEntity = ref<Entity>();
-            free($1);
+            $$ = $3;
+            if ($1)
+            {
+                $$->push_back(*$1);
+                $1->~ref();
+                free($1);
+            }
         }
     |
-        TOK_ID '.' TOK_ID '.' TOK_ID KW_notify TOK_ID '.' TOK_ID '.' TOK_ID
+        TOK_ID '.' TOK_ID '.' TOK_ID KW_notify TOK_ID '.' TOK_ID '.' TOK_ID ';' zip_array
         {
+            $$ = $13;
             free($1);
             free($3);
             free($5);
@@ -408,28 +411,61 @@ zip_value:
         }
     ;
 
+zip_value:
+        TOK_ID '=' '(' component_array ')'
+        {
+            $$ = (ref<Entity>*)malloc(sizeof(*$$));
+            new ($$) ref<Entity>(ref<Entity>::create(BugEngine::Arena::packageBuilder(), $1));
+            for (minitl::vector< ref<Component> >::iterator it = $4->begin(); it != $4->end(); ++it)
+            {
+                (*$$)->addComponent(*it);
+            }
+            $4->~vector();
+            free($4);
+            free($1);
+        }
+    ;
+
 component_array:
         /* empty */
+        {
+            $$ = (minitl::vector< ref<Component> >*)malloc(sizeof(*$$));
+            new ($$) minitl::vector< ref<Component> >(BugEngine::Arena::temporary());
+        }
     |
         decl_component
+        {
+            $$ = (minitl::vector< ref<Component> >*)malloc(sizeof(*$$));
+            new ($$) minitl::vector< ref<Component> >(BugEngine::Arena::temporary());
+            $$->push_back(*$1);
+            $1->~ref();
+            free($1);
+        }
     |
         component_array ',' decl_component
+        {
+            $$ = $1;
+            $$->push_back(*$3);
+            $3->~ref();
+            free($3);
+        }
     ;
 
 decl_component:
-        fullname
+        fullname '(' params ')'
         {
-            ref<Component> component = minitl::ref<Component>::create(BugEngine::Arena::packageBuilder(),
-                                                                      ((BuildContext*)param)->result,
-                                                                      g_packageLine+1,
-                                                                      g_packageColumnBefore+1,
-                                                                      g_packageColumnAfter+1);
-            ((BuildContext*)param)->instances.push_back(component);
-            s_currentEntity->addComponent(component);
-        }
-        '(' params ')'
-        {
-            ((BuildContext*)param)->instances.pop_back();
+            $$ = (ref<Component>*)malloc(sizeof($$));
+            new ($$) ref<Component>(ref<Component>::create(BugEngine::Arena::packageBuilder(),
+                                                           ((BuildContext*)param)->result,
+                                                           g_packageLine+1,
+                                                           g_packageColumnBefore+1,
+                                                           g_packageColumnAfter+1));
+            for (minitl::vector< ref<Parameter> >::iterator it = $3->begin(); it != $3->end(); ++it)
+            {
+                (*$$)->addParameter(*it);
+            }
+            $3->~vector();
+            free($3);
             free($1);
         }
     ;
