@@ -16,11 +16,13 @@ class Entity : public minitl::refcountable
 {
 private:
     minitl::vector< ref<Component> >    m_components;
+    const istring                       m_name;
 public:
-    Entity();
+    Entity(const istring& name);
     ~Entity();
 
     void addComponent(ref<Component> component);
+    const istring& getName() const;
 };
 
 }}}

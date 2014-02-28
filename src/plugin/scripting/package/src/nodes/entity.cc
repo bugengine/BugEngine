@@ -9,8 +9,9 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-Entity::Entity()
+Entity::Entity(const istring& name)
     :   m_components(Arena::packageBuilder())
+    ,   m_name(name)
 {
 }
 
@@ -21,6 +22,11 @@ Entity::~Entity()
 void Entity::addComponent(ref<Component> component)
 {
     m_components.push_back(component);
+}
+
+const istring& Entity::getName() const
+{
+    return m_name;
 }
 
 }}}
