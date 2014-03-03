@@ -9,7 +9,6 @@
 namespace BugEngine { namespace Resource
 {
 
-class ILoader;
 
 struct be_api(RESOURCE) Resource
 {

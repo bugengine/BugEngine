@@ -25,7 +25,7 @@ class KernelDescription;
 
 struct KernelParameter;
 
-class be_api(SCHEDULER) IKernelScheduler : public minitl::pointer
+class be_api(SCHEDULER) IKernelScheduler : public minitl::refcountable
 {
     friend class ::BugEngine::Scheduler;
 protected:

@@ -6,5 +6,4 @@
 #include    <clglkernelscheduler.hh>
 #include    <rtti/classinfo.script.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Kernel::IKernelScheduler, BugEngine::OpenCLOpenGLKernelScheduler);
-
+BE_PLUGIN_REGISTER(BugEngine::OpenCLOpenGLKernelScheduler);

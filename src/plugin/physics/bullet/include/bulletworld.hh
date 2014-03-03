@@ -18,7 +18,7 @@
 namespace BugEngine { namespace Physics { namespace Bullet
 {
 
-class BulletWorld : public minitl::pointer
+class BulletWorld : public minitl::refcountable
 {
 public:
     BulletWorld(const Plugin::Context& context);

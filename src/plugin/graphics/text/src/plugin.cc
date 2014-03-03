@@ -39,9 +39,4 @@ TextPlugin::~TextPlugin()
 
 }
 
-static ref<BugEngine::TextPlugin> create(const BugEngine::Plugin::Context& context)
-{
-    return ref<BugEngine::TextPlugin>::create(BugEngine::Arena::game(), context);
-}
-
-BE_PLUGIN_REGISTER(minitl::pointer, &create);
+BE_PLUGIN_REGISTER(BugEngine::TextPlugin);

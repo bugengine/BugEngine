@@ -6,10 +6,5 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
-static ref<BugEngine::PackageManager::PackageLoader> create(const BugEngine::Plugin::Context& context)
-{
-    return ref<BugEngine::PackageManager::PackageLoader>::create(BugEngine::Arena::game(), context);
-}
-
-BE_PLUGIN_REGISTER(BugEngine::Resource::ILoader, &create);
+BE_PLUGIN_REGISTER(BugEngine::PackageManager::PackageLoader);
 BE_REGISTER_NAMESPACE_2(BugEngine, PackageManager);
