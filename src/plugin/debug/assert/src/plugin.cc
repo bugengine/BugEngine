@@ -12,7 +12,7 @@ minitl::AssertionResult AssertionCallback(const char* file,
                                           int         line,
                                           const char* expr,
                                           const char* message);
-class AssertSetup : public minitl::pointer
+class AssertSetup : public minitl::refcountable
 {
 private:
     minitl::AssertionCallback_t   m_previousAssertionCallback;
@@ -29,12 +29,13 @@ public:
 private:
     AssertSetup(const AssertSetup& other);
     AssertSetup& operator=(const AssertSetup& other);
-public:
-    void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
-    void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
-    void  operator delete(void* memory)              { be_notreached(); ::operator delete(memory); }
 };
 
 }}
 
-BE_PLUGIN_REGISTER(minitl::pointer, BugEngine::Debug::AssertSetup);
+static ref<BugEngine::Debug::AssertSetup> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::Debug::AssertSetup>::create(BugEngine::Arena::game(), context);
+}
+
+BE_PLUGIN_REGISTER(minitl::pointer, &create);

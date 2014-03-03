@@ -5,5 +5,9 @@
 #include    <bulletworld.hh>
 #include    <plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Physics::Bullet::BulletWorld, BugEngine::Physics::Bullet::BulletWorld);
+static ref<BugEngine::Physics::Bullet::BulletWorld> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::Physics::Bullet::BulletWorld>::create(BugEngine::Arena::game(), context);
+}
 
+BE_PLUGIN_REGISTER(BugEngine::Physics::Bullet::BulletWorld, &create);

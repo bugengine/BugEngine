@@ -11,23 +11,23 @@
 namespace BugEngine { namespace Plugin
 {
 
-#define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                                   \
-    namespace BugEngine                                                                                     \
-    {                                                                                                       \
-        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                                  \
-        {                                                                                                   \
-            static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };                          \
-            static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace,               \
-                                      {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };                               \
-            static raw<const RTTI::ObjectInfo> obptr = {((ob.value = RTTI::Value(&ci)), &ob)};              \
-            be_forceuse(obptr);                                                                             \
-            raw<RTTI::Class> ptr = {&ci};                                                                   \
-            return ptr;                                                                                     \
-        }                                                                                                   \
-        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                                  \
-        {                                                                                                   \
-            return be_##name##_Namespace();                                                                 \
-        }                                                                                                   \
+#define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
+    namespace BugEngine                                                                             \
+    {                                                                                               \
+        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                          \
+        {                                                                                           \
+            static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };                  \
+            static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace,       \
+                                      {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };                       \
+            static raw<const RTTI::ObjectInfo> obptr = {((ob.value = RTTI::Value(&ci)), &ob)};      \
+            be_forceuse(obptr);                                                                     \
+            raw<RTTI::Class> ptr = {&ci};                                                           \
+            return ptr;                                                                             \
+        }                                                                                           \
+        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                          \
+        {                                                                                           \
+            return be_##name##_Namespace();                                                         \
+        }                                                                                           \
     }
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                              \
     BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                 \
@@ -45,17 +45,17 @@ namespace BugEngine { namespace Plugin
 #define BE_PLUGIN_NAMESPACE_REGISTER()                                                              \
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID)
 
-#define BE_PLUGIN_REGISTER_NAMED__(name, id, interface, klass)                                      \
+#define BE_PLUGIN_REGISTER_NAMED__(name, id, interface, create)                                     \
     BE_PLUGIN_NAMESPACE_CREATE_(id);                                                                \
     _BE_PLUGIN_EXPORT interface* be_createPlugin (const ::BugEngine::Plugin::Context& context)      \
     {                                                                                               \
-        void* m = ::BugEngine::Arena::general().alloc<klass>();                                     \
-        return new(m) klass(context);                                                               \
+        ref<interface> r = create(context);                                                         \
+        r->addref();                                                                                \
+        return r.operator->()new(m) klass(context);                                                 \
     }                                                                                               \
     _BE_PLUGIN_EXPORT void be_destroyPlugin(klass* cls)                                             \
     {                                                                                               \
-        minitl::checked_destroy(cls);                                                               \
-        ::BugEngine::Arena::general().free(cls);                                                    \
+        cls->decref();                                                                              \
     }                                                                                               \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
     {                                                                                               \
@@ -65,12 +65,12 @@ namespace BugEngine { namespace Plugin
     _BE_REGISTER_METHOD(id, be_createPlugin);                                                       \
     _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                      \
     _BE_REGISTER_METHOD(id, be_pluginNamespace);
-#define BE_PLUGIN_REGISTER_NAMED_(name, id, interface, klass)                                       \
-    BE_PLUGIN_REGISTER_NAMED__(name, id, interface, klass)
-#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                            \
-    BE_PLUGIN_REGISTER_NAMED_(name, name, interface, klass)
-#define BE_PLUGIN_REGISTER(interface, klass)                                                        \
-    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, interface, klass)
+#define BE_PLUGIN_REGISTER_NAMED_(name, id, interface, create)                                      \
+    BE_PLUGIN_REGISTER_NAMED__(name, id, interface, create)
+#define BE_PLUGIN_REGISTER_NAMED(name, interface, create)                                           \
+    BE_PLUGIN_REGISTER_NAMED_(name, name, interface, create)
+#define BE_PLUGIN_REGISTER(interface, create)                                                       \
+    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, interface, create)
 
 
 template< typename T >

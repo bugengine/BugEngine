@@ -29,10 +29,6 @@ private:
     ref<IGPUResource>       create(weak<const RenderWindowDescription> renderWindowDescription) const override;
     ref<IGPUResource>       create(weak<const ShaderProgramDescription> shaderDescription) const override;
     uint2                   getScreenSize() const override;
-public:
-    void* operator new(size_t size, void* where)     { return ::operator new(size, where); }
-    void  operator delete(void* memory, void* where) { ::operator delete(memory, where); }
-    void  operator delete(void* memory)              { be_notreached(); ::operator delete(memory); }
 };
 
 }}

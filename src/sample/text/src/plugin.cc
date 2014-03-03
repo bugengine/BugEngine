@@ -6,4 +6,9 @@
 #include    <plugin/plugin.hh>
 #include    <bugengine/application.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Application, BugEngine::TextSample);
+static ref<BugEngine::TextSample> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::TextSample>::create(BugEngine::Arena::game(), context);
+}
+
+BE_PLUGIN_REGISTER(BugEngine::Application, create);
