@@ -5,4 +5,9 @@
 #include    <glesrenderer.hh>
 #include    <plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::IRenderer, BugEngine::OpenGLES::GLESRenderer);
+static ref<BugEngine::OpenGLES::GLESRenderer> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::OpenGLES::GLESRenderer>::create(BugEngine::Arena::game(), context);
+}
+
+BE_PLUGIN_REGISTER(BugEngine::IRenderer, &create);

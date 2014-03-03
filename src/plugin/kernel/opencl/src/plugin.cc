@@ -6,4 +6,9 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/classinfo.script.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Kernel::IKernelScheduler, BugEngine::OpenCLKernelScheduler);
+static ref<BugEngine::OpenCLKernelScheduler> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::OpenCLKernelScheduler>::create(BugEngine::Arena::game(), context);
+}
+
+BE_PLUGIN_REGISTER(BugEngine::Kernel::IKernelScheduler, &create);

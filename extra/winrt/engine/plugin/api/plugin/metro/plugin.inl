@@ -7,33 +7,6 @@
 #include    <windows.h>
 #include    <winerror.h>
 
-#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)                                                \
-    BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
-    extern "C" BE_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                     \
-    {                                                                                           \
-        return BugEngine::be_##name##_Namespace().operator->();                                 \
-    }
-#define BE_PLUGIN_NAMESPACE_REGISTER_(name)                                                     \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)
-#define BE_PLUGIN_NAMESPACE_REGISTER()                                                          \
-    BE_PLUGIN_NAMESPACE_REGISTER_(BE_PROJECTSHORTNAME)
-
-#define BE_PLUGIN_REGISTER_NAMED(name, interface, klass)                                        \
-    BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name);                                                   \
-    extern "C" BE_EXPORT interface* be_createPlugin (const ::BugEngine::PluginContext& context) \
-    {                                                                                           \
-        void* m = ::BugEngine::Arena::general().alloc<klass>();                                 \
-        return new(m) klass(context);                                                           \
-    }                                                                                           \
-    extern "C" BE_EXPORT void be_destroyPlugin(klass* cls)                                      \
-    {                                                                                           \
-        minitl::checked_destroy(cls);                                                           \
-        ::BugEngine::Arena::general().free(cls);                                                \
-    }
-#define BE_PLUGIN_REGISTER_NAMED_(name, interface, klass)                                       \
-    BE_PLUGIN_REGISTER_NAMED(name, interface, klass)
-#define BE_PLUGIN_REGISTER(interface, klass)                                                    \
-    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTSHORTNAME, interface, klass)
 
 namespace BugEngine
 {

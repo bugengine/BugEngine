@@ -7,5 +7,10 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Resource::ILoader, BugEngine::Lua::Context);
+static ref<BugEngine::Lua::Context> create(const BugEngine::Plugin::Context& context)
+{
+    return ref<BugEngine::Lua::Context>::create(BugEngine::Arena::game(), context);
+}
+
+BE_PLUGIN_REGISTER(BugEngine::Resource::ILoader, &create);
 BE_REGISTER_NAMESPACE_2(BugEngine, Lua);
