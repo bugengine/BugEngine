@@ -5,9 +5,4 @@
 #include    <GL4/glrenderer.hh>
 #include    <plugin/plugin.hh>
 
-static ref<BugEngine::OpenGL::GLRenderer> create(const BugEngine::Plugin::Context& context)
-{
-    return ref<BugEngine::OpenGL::GLRenderer>::create(BugEngine::Arena::game(), context);
-}
-
-BE_PLUGIN_REGISTER(BugEngine::IRenderer, &create);
+BE_PLUGIN_REGISTER(BugEngine::OpenGL::GLRenderer);

@@ -33,9 +33,4 @@ private:
 
 }}
 
-static ref<BugEngine::Debug::AssertSetup> create(const BugEngine::Plugin::Context& context)
-{
-    return ref<BugEngine::Debug::AssertSetup>::create(BugEngine::Arena::game(), context);
-}
-
-BE_PLUGIN_REGISTER(minitl::pointer, &create);
+BE_PLUGIN_REGISTER(BugEngine::Debug::AssertSetup);

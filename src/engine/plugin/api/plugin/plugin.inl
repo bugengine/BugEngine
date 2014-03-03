@@ -45,15 +45,16 @@ namespace BugEngine { namespace Plugin
 #define BE_PLUGIN_NAMESPACE_REGISTER()                                                              \
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID)
 
-#define BE_PLUGIN_REGISTER_NAMED__(name, id, interface, create)                                     \
+#define BE_PLUGIN_REGISTER_NAMED__(name, id, create)                                                \
     BE_PLUGIN_NAMESPACE_CREATE_(id);                                                                \
-    _BE_PLUGIN_EXPORT interface* be_createPlugin (const ::BugEngine::Plugin::Context& context)      \
+    _BE_PLUGIN_EXPORT                                                                               \
+    minitl::refcountable* be_createPlugin (const ::BugEngine::Plugin::Context& context)             \
     {                                                                                               \
-        ref<interface> r = create(context);                                                         \
+        ref<minitl::refcountable> r = (*create)(context);                                           \
         r->addref();                                                                                \
-        return r.operator->()new(m) klass(context);                                                 \
+        return r.operator->();                                                                      \
     }                                                                                               \
-    _BE_PLUGIN_EXPORT void be_destroyPlugin(klass* cls)                                             \
+    _BE_PLUGIN_EXPORT void be_destroyPlugin(minitl::refcountable* cls)                              \
     {                                                                                               \
         cls->decref();                                                                              \
     }                                                                                               \
@@ -65,13 +66,18 @@ namespace BugEngine { namespace Plugin
     _BE_REGISTER_METHOD(id, be_createPlugin);                                                       \
     _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                      \
     _BE_REGISTER_METHOD(id, be_pluginNamespace);
-#define BE_PLUGIN_REGISTER_NAMED_(name, id, interface, create)                                      \
-    BE_PLUGIN_REGISTER_NAMED__(name, id, interface, create)
-#define BE_PLUGIN_REGISTER_NAMED(name, interface, create)                                           \
-    BE_PLUGIN_REGISTER_NAMED_(name, name, interface, create)
-#define BE_PLUGIN_REGISTER(interface, create)                                                       \
-    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, interface, create)
-
+#define BE_PLUGIN_REGISTER_NAMED_(name, id, create)                                                 \
+    BE_PLUGIN_REGISTER_NAMED__(name, id, create)
+#define BE_PLUGIN_REGISTER_NAMED(name, create)                                                      \
+    BE_PLUGIN_REGISTER_NAMED_(name, name, create)
+#define BE_PLUGIN_REGISTER_CREATE(create)                                                           \
+    BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
+#define BE_PLUGIN_REGISTER(klass)                                                                   \
+    static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
+    {                                                                                               \
+        return ref<klass>::create(BugEngine::Arena::game(), context);                               \
+    }                                                                                               \
+    BE_PLUGIN_REGISTER_CREATE(&create)
 
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)

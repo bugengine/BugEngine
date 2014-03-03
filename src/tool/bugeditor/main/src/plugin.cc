@@ -6,8 +6,4 @@
 #include    <plugin/plugin.hh>
 #include    <bugengine/application.hh>
 
-static ref<BugEngine::Editor::Editor> create(const BugEngine::Plugin::Context& context)
-{
-    return ref<BugEngine::Editor::Editor>::create(BugEngine::Arena::game(), context);
-}
-BE_PLUGIN_REGISTER(BugEngine::Application, &create);
+BE_PLUGIN_REGISTER(BugEngine::Editor::Editor);

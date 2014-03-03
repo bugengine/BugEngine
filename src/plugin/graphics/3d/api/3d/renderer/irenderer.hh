@@ -30,7 +30,7 @@ class IGPUResource;
 template< typename R >
 class GPUResourceLoader;
 
-class be_api(_3D) IRenderer : public minitl::pointer
+class be_api(_3D) IRenderer : public minitl::refcountable
 {
     template< typename R >
     friend class GPUResourceLoader;
