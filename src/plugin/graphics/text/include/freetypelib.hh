@@ -5,7 +5,7 @@
 #define BE_TEXT_FREETYPELIB_HH_
 /**************************************************************************************************/
 #include    <ft2build.h>
-#include    <freetype.h>
+#include    FT_FREETYPE_H
 
 namespace BugEngine
 {

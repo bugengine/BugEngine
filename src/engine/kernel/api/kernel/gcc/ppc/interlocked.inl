@@ -75,11 +75,11 @@ struct InterlockedType<4>
     struct tagged_t
     {
         typedef void*   value_t;
-        typedef value_t tag_t;
+        typedef void*   tag_t;
 
         __attribute__ ((aligned(4))) value_t     m_value;
 
-        tagged_t(long value = 0)
+        tagged_t(value_t value = 0)
             :   m_value(value)
         {
         }
@@ -97,7 +97,7 @@ struct InterlockedType<4>
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
-        value_t result;
+        tagged_t::value_t result;
         __asm__ __volatile__ ("  lwsync\n"
                               "  lwarx %0, 0, %1\n"
                           : "=r"(result)
@@ -105,7 +105,7 @@ struct InterlockedType<4>
                           : "cc");
         return result;
     }
-    static inline bool set_conditional(tagged_t *p, value_t v, tagged_t::tag_t& /*condition*/)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& /*condition*/)
     {
         bool result;
         __asm__ __volatile__("  li %0,0\n"
@@ -201,7 +201,7 @@ struct InterlockedType<8>
 
         __attribute__ ((aligned(8))) value_t     m_value;
 
-        tagged_t(long value = 0)
+        tagged_t(value_t value = 0)
         :   m_value(value)
         {
         }
@@ -219,7 +219,7 @@ struct InterlockedType<8>
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
-        value_t result;
+        tagged_t::value_t result;
         __asm__ __volatile__ ("  lwsync\n"
                               "  ldarx %0, 0, %1\n"
                               : "=r"(result)
@@ -227,7 +227,7 @@ struct InterlockedType<8>
                               : "cc");
         return result;
     }
-    static inline bool set_conditional(tagged_t *p, value_t v, tagged_t::tag_t& /*condition*/)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& /*condition*/)
     {
         bool result;
         __asm__ __volatile__("  li %0,0\n"
