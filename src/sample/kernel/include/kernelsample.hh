@@ -14,8 +14,6 @@
 namespace BugEngine
 {
 
-class KernelSampleTask;
-
 class KernelSample : public Application
 {
 private:

@@ -28,7 +28,7 @@ private:
 public:
     pool(Allocator& allocator, u64 capacity, u64 alignment = be_alignof(T));
     ~pool();
-    
+
     T* allocate();
     template< typename T1 >
     T* allocate(const T1& t1);

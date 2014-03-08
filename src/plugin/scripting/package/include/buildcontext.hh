@@ -31,9 +31,7 @@ union YYSTYPE
 
 
 
-namespace BugEngine
-{
-namespace PackageBuilder
+namespace BugEngine { namespace PackageBuilder
 {
 
 struct BuildContext
@@ -47,8 +45,7 @@ struct BuildContext
     ~BuildContext();
 };
 
-}
-}
+}}
 
 extern int g_packageLine;
 extern int g_packageColumnBefore;

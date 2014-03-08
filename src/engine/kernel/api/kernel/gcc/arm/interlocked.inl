@@ -109,9 +109,9 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef long        value_t;
-        typedef value_t     tag_t;
-        
+        typedef void*   value_t;
+        typedef value_t tag_t;
+
         __attribute__ ((aligned(4))) value_t     m_value;
 
         tagged_t(long value = 0)
@@ -156,7 +156,7 @@ struct InterlockedType<4>
             : "r"(v), "r"(p)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
 
-        return !(result);  
+        return !(result);
     }
 };
 

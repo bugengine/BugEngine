@@ -74,8 +74,8 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef long        value_t;
-        typedef value_t     tag_t;
+        typedef void*   value_t;
+        typedef value_t tag_t;
 
         __attribute__ ((aligned(4))) value_t     m_value;
 
@@ -196,7 +196,7 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef long        value_t;
+        typedef void*       value_t;
         typedef value_t     tag_t;
 
         __attribute__ ((aligned(8))) value_t     m_value;
