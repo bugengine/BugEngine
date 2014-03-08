@@ -47,27 +47,63 @@ class interlocked
 {
 private:
     typedef InterlockedType< sizeof(T) >  impl;
-    typedef typename impl::value_t                          value_t;
+    typedef typename impl::value_t        value_t;
 public:
     value_t m_value;
 public:
     static const interlocked<T> Zero;
     static const interlocked<T> One;
 
-    operator T() const                              { return static_cast<T>(m_value); }
-    T operator=(T value)                            { return static_cast<T>(impl::set_and_fetch(&m_value, value)); }
-    T operator=(const interlocked& value)           { return static_cast<T>(impl::set_and_fetch(&m_value, value)); }
-    T exchange(T value)                             { return static_cast<T>(impl::fetch_and_set(&m_value, value)); }
-    T addExchange(T value)                          { return static_cast<T>(impl::fetch_and_add(&m_value, value)); }
+    operator T() const
+    {
+        return static_cast<T>(impl::fetch_and_add(const_cast<value_t*>(&m_value), 0));
+    }
+    T operator=(T value)
+    {
+        return static_cast<T>(impl::set_and_fetch(&m_value, value));
+    }
+    T operator=(const interlocked& value)
+    {
+        return static_cast<T>(impl::set_and_fetch(&m_value, value));
+    }
+    T exchange(T value)
+    {
+        return static_cast<T>(impl::fetch_and_set(&m_value, value));
+    }
+    T addExchange(T value)
+    {
+        return static_cast<T>(impl::fetch_and_add(&m_value, value));
+    }
 
-    T operator++()                                  { return static_cast<T>(impl::fetch_and_add(&m_value, 1)+1); }
-    T operator++(int)                               { return static_cast<T>(impl::fetch_and_add(&m_value, 1)); }
-    T operator+=(T value)                           { return static_cast<T>(impl::fetch_and_add(&m_value, value)+value); }
-    T operator--()                                  { return static_cast<T>(impl::fetch_and_sub(&m_value, 1)-1); }
-    T operator--(int)                               { return static_cast<T>(impl::fetch_and_sub(&m_value, 1)); }
-    T operator-=(T value)                           { return static_cast<T>(impl::fetch_and_sub(&m_value, value)-value); }
+    T operator++()
+    {
+        return static_cast<T>(impl::fetch_and_add(&m_value, 1)+1);
+    }
+    T operator++(int)
+    {
+        return static_cast<T>(impl::fetch_and_add(&m_value, 1));
+    }
+    T operator+=(T value)
+    {
+        return static_cast<T>(impl::fetch_and_add(&m_value, value)+value);
+    }
+    T operator--()
+    {
+        return static_cast<T>(impl::fetch_and_sub(&m_value, 1)-1);
+    }
+    T operator--(int)
+    {
+        return static_cast<T>(impl::fetch_and_sub(&m_value, 1));
+    }
+    T operator-=(T value)
+    {
+        return static_cast<T>(impl::fetch_and_sub(&m_value, value)-value);
+    }
 
-    T setConditional(T value, T condition)          { return static_cast<T>(impl::set_conditional(&m_value, value, condition)); }
+    T setConditional(T value, T condition)
+    {
+        return static_cast<T>(impl::set_conditional(&m_value, value, condition));
+    }
 };
 
 template< typename T >
@@ -91,15 +127,36 @@ public:
         :   m_value((typename impl::value_t)(t))
     {
     }
-    operator const T*() const                       { return reinterpret_cast<T*>(m_value); }
-    operator T*()                                   { return reinterpret_cast<T*>(m_value); }
-    T* operator->()                                 { return reinterpret_cast<T*>(m_value); }
-    const T* operator->() const                     { return reinterpret_cast<T*>(m_value); }
+    operator const T*() const
+    {
+        return reinterpret_cast<T*>(impl::fetch_and_add(const_cast<value_t*>(&m_value), 0));
+    }
+    operator T*()
+    {
+        return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
+    }
+    T* operator->()
+    {
+        return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
+    }
+    const T* operator->() const
+    {
+        return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
+    }
 
-    T* operator=(T* value)                          { return reinterpret_cast<T*>(impl::set_and_fetch((value_t*)&m_value, (value_t)value)); }
-    T* exchange(T* value)                           { return reinterpret_cast<T*>(impl::fetch_and_set((value_t*)&m_value, (value_t)value)); }
+    T* operator=(T* value)
+    {
+        return reinterpret_cast<T*>(impl::set_and_fetch((value_t*)&m_value, (value_t)value));
+    }
+    T* exchange(T* value)
+    {
+        return reinterpret_cast<T*>(impl::fetch_and_set((value_t*)&m_value, (value_t)value));
+    }
 
-    T* setConditional(T* value, T* condition)       { return reinterpret_cast<T*>(impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition)); }
+    T* setConditional(T* value, T* condition)
+    {
+        return reinterpret_cast<T*>(impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition));
+    }
 };
 
 template< typename T >
@@ -107,8 +164,8 @@ class itaggedptr
 {
 private:
     typedef _Kernel::InterlockedType< sizeof(T*) > impl;
-    typedef typename impl::tagged_t                         type_t;
-    typedef typename type_t::value_t                        value_t;
+    typedef typename impl::tagged_t                type_t;
+    typedef typename type_t::value_t               value_t;
 private:
     type_t m_value;
 public:
@@ -116,15 +173,33 @@ public:
         :   m_value((typename type_t::value_t)(t))
     {
     }
-    typedef typename type_t::tag_t                          ticket_t;
+    typedef typename type_t::tag_t                 ticket_t;
 
-    operator const T*() const                       { return reinterpret_cast<T*>(m_value.value()); }
-    operator T*()                                   { return reinterpret_cast<T*>(m_value.value()); }
-    T* operator->()                                 { return reinterpret_cast<T*>(m_value.value()); }
-    const T* operator->() const                     { return reinterpret_cast<T*>(m_value.value()); }
+    operator const T*() const
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    operator T*()
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    T* operator->()
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    const T* operator->() const
+    {
+        return static_cast<T*>(m_value.value());
+    }
 
-    ticket_t getTicket()                              { return impl::get_ticket(m_value); }
-    bool setConditional(T* value, ticket_t& condition){ return impl::set_conditional(&m_value, reinterpret_cast<value_t>(value), condition); }
+    ticket_t getTicket()
+    {
+        return impl::get_ticket(m_value);
+    }
+    bool setConditional(T* value, ticket_t& condition)
+    {
+        return impl::set_conditional(&m_value, reinterpret_cast<value_t>(value), condition);
+    }
 };
 
 

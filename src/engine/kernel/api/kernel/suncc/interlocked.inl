@@ -51,7 +51,7 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef i32         value_t;
+        typedef void*       value_t;
         typedef i32         counter_t;
         typedef tagged_t    tag_t;
         struct
@@ -139,7 +139,7 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef i64         value_t;
+        typedef void*       value_t;
         typedef i64         counter_t;
         typedef tagged_t    tag_t;
         struct

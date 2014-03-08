@@ -95,8 +95,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef __declspec(align(8)) long long   value_t;
-        typedef __declspec(align(8)) long long   counter_t;
+        typedef __declspec(align(8)) void*      value_t;
+        typedef __declspec(align(8)) long long  counter_t;
     #ifdef TAG_LONG
         typedef tagged_t    tag_t;
     #else

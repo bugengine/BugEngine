@@ -54,13 +54,13 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef __attribute__ ((aligned(4))) i32         value_t;
-        typedef __attribute__ ((aligned(4))) i32         counter_t;
+        typedef __attribute__ ((aligned(4))) void*  value_t;
+        typedef __attribute__ ((aligned(4))) i32    counter_t;
         typedef tagged_t    tag_t;
         __attribute__ ((aligned(8))) struct
         {
-            counter_t   tag;
-            value_t     value;
+            counter_t           tag;
+            volatile value_t     value;
         } taggedvalue;
 
         tagged_t(value_t value = 0)
@@ -84,8 +84,15 @@ struct InterlockedType<4>
             taggedvalue.value = other.taggedvalue.value;
             return *this;
         }
-        inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline value_t value()
+        {
+            return taggedvalue.value;
+        }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
@@ -165,7 +172,8 @@ struct InterlockedType<8>
         __asm__ __volatile__ (
                 "lock;  cmpxchg8b %1\n\t"
                  : "=A"(result), "=m"(*p)
-                 : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]), "c"(dst.asI32[1])
+                 : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]),
+                   "b"(dst.asI32[0]), "c"(dst.asI32[1])
                  : "memory", "cc"
 
         );
@@ -183,8 +191,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef __attribute__ ((aligned(8))) i64         value_t;
-        typedef __attribute__ ((aligned(8))) i64         counter_t;
+        typedef __attribute__ ((aligned(8))) void*  value_t;
+        typedef __attribute__ ((aligned(8))) i64    counter_t;
         typedef tagged_t    tag_t;
         __attribute__ ((aligned(16))) struct
         {
@@ -213,8 +221,15 @@ struct InterlockedType<8>
             taggedvalue.value = other.taggedvalue.value;
             return *this;
         }
-        inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline value_t value()
+        {
+            return taggedvalue.value;
+        }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
@@ -229,7 +244,8 @@ struct InterlockedType<8>
                 "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                 "\tsetz %0\n"
                  : "=r"(result), "=m"(*p), "=d"(dummy.taggedvalue.value), "=a"(dummy.taggedvalue.tag)
-                 : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1), "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
+                 : "r"(p), "c"(v), "b"(condition.taggedvalue.tag+1),
+                   "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
                  : "memory", "cc", "r8"
         );
         return result;

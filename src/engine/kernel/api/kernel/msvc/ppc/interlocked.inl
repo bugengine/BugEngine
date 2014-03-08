@@ -55,8 +55,8 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef __declspec(align(4)) long        value_t;
-        typedef __declspec(align(4)) long        counter_t;
+        typedef __declspec(align(4)) void*  value_t;
+        typedef __declspec(align(4)) long   counter_t;
         typedef long incr_t;
         typedef tagged_t    tag_t;
         union

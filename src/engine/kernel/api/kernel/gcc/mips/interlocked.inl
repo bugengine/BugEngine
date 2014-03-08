@@ -49,8 +49,8 @@ struct InterlockedType<4>
 
     struct tagged_t
     {
-        typedef __attribute__ ((aligned(4))) i32         value_t;
-        typedef __attribute__ ((aligned(4))) i32         counter_t;
+        typedef __attribute__ ((aligned(4))) void*  value_t;
+        typedef __attribute__ ((aligned(4))) i32    counter_t;
         typedef counter_t    tag_t;
         __attribute__ ((aligned(8))) struct
         {
@@ -148,8 +148,8 @@ struct InterlockedType<8>
 
     struct tagged_t
     {
-        typedef __attribute__ ((aligned(8))) i64         value_t;
-        typedef __attribute__ ((aligned(8))) i64         counter_t;
+        typedef __attribute__ ((aligned(8))) void*  value_t;
+        typedef __attribute__ ((aligned(8))) i64    counter_t;
         typedef counter_t    tag_t;
         __attribute__ ((aligned(16))) struct
         {
