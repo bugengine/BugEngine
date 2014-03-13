@@ -11,3 +11,5 @@ be_err.txt
 .settings
 mak/parsetab
 .tags
+BugEngine.qtcreator
+.clang_complete
