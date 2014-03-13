@@ -90,10 +90,49 @@ def write_value(node, value, key=''):
 	else:
 		XmlNode(node, 'value', strvalue, attrs).close()
 
+def read_value(node):
+	type = node.attributes['type'].value
+	if type == 'bool':
+		if node.childNodes[0].wholeText == 'true':
+			value = True
+		else:
+			value = False
+	elif type == 'double':
+		value = float(node.childNodes[0].wholeText)
+	elif type == 'int':
+		value = float(node.childNodes[0].wholeText)
+	elif type == 'QByteArray':
+		if node.childNodes:
+			value = bytes(node.childNodes[0].wholeText, 'utf-8')
+		else:
+			value = b''
+	elif type == 'QString':
+		if node.childNodes:
+			value = node.childNodes[0].wholeText
+		else:
+			value = ''
+	elif type == 'QVariantList':
+		value = tuple((read_value(n)[1] for n in node.childNodes if n.nodeType == n.ELEMENT_NODE))
+	elif type == 'QVariantMap':
+		value = list([read_value(n) for n in node.childNodes if n.nodeType == n.ELEMENT_NODE])
+	else:
+		Logs.warn('unknown Qt type: %s' % type)
+		value = None
+	key = node.attributes['key']
+	key = key and key.value or ''
+	return key, value
 
 class QtObject:
 	def load_from_node(self, xml_node):
-		print(xml_node.__class__.__name__)
+		assert(xml_node.nodeName == 'valuemap')
+		for node in xml_node.childNodes:
+			if node.nodeType == node.ELEMENT_NODE:
+				name, value = read_value(node)
+				var_name = name.replace('.', '_')
+				if var_name not in self.__class__.published_vars:
+					Logs.warn('property %s not handled by exporter; dropped' % var_name)
+				else:
+					setattr(self, var_name, value)
 
 	def write(self, xml_node):
 		with XmlNode(xml_node, 'valuemap', [('type', 'QVariantMap')]) as variant_map:
@@ -126,14 +165,25 @@ class QtPlatform(QtObject):
 		'PE_Profile_Name',
 		'PE_Profile_SDK'
 	)
-	def __init__(self, name):
-		self.PE_Profile_AutoDetected = False
-		self.PE_Profile_Data = ()
-		self.PE_Profile_Icon =  ':///Desktop///'
-		self.PE_Profile_Id = self.guid = generateGUID(name)
-		self.PE_Profile_MutableInfo = []
-		self.PE_Profile_Name = name
-		self.PE_Profile_SDK = False
+	def __init__(self, env_name=None, env=None):
+		if env_name:
+			assert(env)
+			self.PE_Profile_AutoDetected = False
+			self.PE_Profile_Data = [
+					('Android.GdbServer.Information', ''),
+					('Debugger.Information', generateGUID('debugger:'+env_name)),
+					('PE.Profile.Device', 'device:%s'%env_name),
+					('PE.Profile.DeviceType', b'Desktop'),
+					('PE.Profile.SysRoot', ''),
+					('PE.Profile.ToolChain', generateGUID('toolchain:'+env_name)),
+					('QtPM4.mkSPecInformation', ''),
+					('QtSupport.QtInformation', 2),
+				]
+			self.PE_Profile_Icon =  ':///Desktop///'
+			self.PE_Profile_Id = self.guid = generateGUID('profile:'+env_name)
+			self.PE_Profile_MutableInfo = ()
+			self.PE_Profile_Name = env.variant
+			self.PE_Profile_SDK = False
 
 
 class QtCreator(Build.BuildContext):
@@ -247,10 +297,17 @@ class QtCreator(Build.BuildContext):
 					else:
 						platform = QtPlatform('')
 						platform.load_from_node(data.getElementsByTagName('valuemap')[0])
+						platform.guid = platform.PE_Profile_Id
 						self.platforms.append((platform.PE_Profile_Name, platform))
 		for env_name in self.env.ALL_TOOLCHAINS:
-			platform = QtPlatform(env_name)
-			self.platforms.append((env_name, platform))
+			env = self.all_envs[env_name]
+			platform = QtPlatform(env_name, env)
+			for p_name, p in self.platforms:
+				if p_name == env_name:
+					# TODO: set some variables here anyway
+					break
+			else:
+				self.platforms.append((env_name, platform))
 		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				profile_index = 0
