@@ -4,8 +4,9 @@
 import os
 import sys
 import string
-from waflib import Context, Build
+from waflib import Context, Build, Logs
 from minixml import XmlDocument, XmlNode
+from xml.dom.minidom import parse
 
 try:
 	import hashlib
@@ -13,6 +14,7 @@ try:
 except:
 	import md5
 	createMd5=md5.new
+
 
 def _hexdigest(s):
 	"""Return a string as a string of hex characters.
@@ -30,6 +32,7 @@ def _hexdigest(s):
 		r = r + h[(i >> 4) & 0xF] + h[i & 0xF]
 	return r
 
+
 def generateGUID(name):
 	"""This generates a dummy GUID for the sln file to use.  It is
 	based on the MD5 signatures of the sln filename plus the name of
@@ -46,11 +49,92 @@ def unique(seq):
 	seen_add = seen.add
 	return [x for x in seq if x not in seen and not seen_add(x)]
 
+
 def path_from(path, base_node):
 	if isinstance(path, str):
 		return path
 	else:
 		return path.path_from(base_node)
+
+
+def write_value(node, value, key=''):
+	def convert_value(v):
+		if isinstance(v, bool):
+			return 'bool', v and 'true' or 'false'
+		elif isinstance(v, float):
+			return 'double', str(v)
+		elif isinstance(v, int):
+			return 'int', str(v)
+		elif isinstance(v, bytes):
+			return 'QByteArray', v.decode('utf-8')
+		elif isinstance(v, str):
+			return 'QString', v
+		elif isinstance(v, tuple):
+			return 'QVariantList', ''
+		elif isinstance(v, list):
+			return 'QVariantMap', ''
+		else:
+			raise Exception('unknown type in a map: %s'%v.__class__.__name__)
+	type, strvalue = convert_value(value)
+	attrs = [('type', type)]
+	if key:
+		attrs.append(('key', key))
+	if isinstance(value, tuple):
+		with XmlNode(node, 'valuelist', strvalue, attrs) as value_list:
+			for v in value:
+				write_value(value_list, v)
+	elif isinstance(value, list):
+		with XmlNode(node, 'valuemap', strvalue, attrs) as value_map:
+			for key, v in value:
+				write_value(value_map, v, key)
+	else:
+		XmlNode(node, 'value', strvalue, attrs).close()
+
+
+class QtObject:
+	def load_from_node(self, xml_node):
+		print(xml_node.__class__.__name__)
+
+	def write(self, xml_node):
+		with XmlNode(xml_node, 'valuemap', [('type', 'QVariantMap')]) as variant_map:
+			for var_name in self.__class__.published_vars:
+				write_value(variant_map, getattr(self, var_name), key=var_name.replace('_', '.'))
+
+
+class QtToolchain(QtObject):
+	def __init__(self):
+		pass
+
+
+class QtDebugger(QtObject):
+	def __init__(self):
+		pass
+
+
+class QtDevice(QtObject):
+	def __init__(self):
+		pass
+
+
+class QtPlatform(QtObject):
+	published_vars = (
+		'PE_Profile_AutoDetected',
+		'PE_Profile_Data',
+		'PE_Profile_Icon',
+		'PE_Profile_Id',
+		'PE_Profile_MutableInfo',
+		'PE_Profile_Name',
+		'PE_Profile_SDK'
+	)
+	def __init__(self, name):
+		self.PE_Profile_AutoDetected = False
+		self.PE_Profile_Data = ()
+		self.PE_Profile_Icon =  ':///Desktop///'
+		self.PE_Profile_Id = self.guid = generateGUID(name)
+		self.PE_Profile_MutableInfo = []
+		self.PE_Profile_Name = name
+		self.PE_Profile_SDK = False
+
 
 class QtCreator(Build.BuildContext):
 	cmd = 'qtcreator'
@@ -61,7 +145,6 @@ class QtCreator(Build.BuildContext):
 		self.restore()
 		if not self.all_envs:
 			self.load_envs()
-		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.PROJECTS=[self.__class__.cmd]
 		self.env.VARIANT = '${Variant}'
 		self.env.TOOLCHAIN = '${Toolchain}'
@@ -77,6 +160,7 @@ class QtCreator(Build.BuildContext):
 		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
+		self.build_platform_list()
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 		self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
 		self.base_node.mkdir()
@@ -94,6 +178,96 @@ class QtCreator(Build.BuildContext):
 				self.write_includes(task_gen, includes)
 				self.write_defines(task_gen, defines)
 				self.write_user(task_gen)
+
+	def get_debugger_id(self, env_name):
+		for debugger_name, debugger in self.debuggers:
+			if env_name == debugger_name:
+				return debugger.id
+
+	def get_toolchain_id(self, env_name):
+		for toolchain_name,toolchain in self.toolchains:
+			if env_name == toolchain_name:
+				return toolchain.id
+
+	def get_device_id(self, env_name):
+		for device_name, device in self.devices:
+			if env_name == device_name:
+				return device.name
+
+	def get_platform_guid(self, env_name):
+		for platform_name, platform in self.platforms:
+			if env_name == platform_name:
+				return platform.guid
+
+	def build_debugger_list(self):
+		self.debuggers = []
+		try:
+			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'debuggers.xml'))
+		except Exception as e:
+			Logs.warn('QtCreator debuggers not found; creating default one')
+		else:
+			pass
+
+	def build_toolchain_list(self):
+		self.toolchains = []
+		try:
+			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'toolchains.xml'))
+		except Exception as e:
+			Logs.warn('QtCreator toolchains not found; creating default one')
+		else:
+			pass
+
+	def build_device_list(self):
+		self.devices = []
+		try:
+			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'devices.xml'))
+		except Exception as e:
+			Logs.warn('QtCreator devices not found; creating default one')
+		else:
+			pass
+
+	def build_platform_list(self):
+		self.build_toolchain_list()
+		self.build_debugger_list()
+		self.build_device_list()
+		self.platforms = []
+		try:
+			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'profiles.xml'))
+		except Exception as e:
+			Logs.warn('QtCreator profiles not found; creating default one')
+		else:
+			for data in document.getElementsByTagName('data'):
+				variable_name = data.getElementsByTagName('variable')[0]
+				variable_name = variable_name.childNodes[0].toxml().strip()
+				if variable_name.startswith('Profile.'):
+					try:
+						variable_index = int(variable_name[8:])
+					except ValueError:
+						pass
+					else:
+						platform = QtPlatform('')
+						platform.load_from_node(data.getElementsByTagName('valuemap')[0])
+						self.platforms.append((platform.PE_Profile_Name, platform))
+		for env_name in self.env.ALL_TOOLCHAINS:
+			platform = QtPlatform(env_name)
+			self.platforms.append((env_name, platform))
+		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+			with XmlNode(document, 'qtcreator') as creator:
+				profile_index = 0
+				for platform_name, platform in self.platforms:
+					with XmlNode(creator, 'data') as data:
+						XmlNode(data, 'variable', 'Profile.%d'%profile_index)
+						platform.write(data)
+					profile_index += 1
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'Profile.Count')
+					XmlNode(data, 'value', str(profile_index), [('type', 'int')])
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'Profile.Default')
+					XmlNode(data, 'value', self.platforms[0][1].guid, [('type', 'QString')])
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'Version')
+					XmlNode(data, 'value', '1', [('type', 'int')])
 
 	def gather_includes_defines(self, task_gen):
 		def gather_includes_defines_recursive(task_gen):
@@ -145,39 +319,6 @@ class QtCreator(Build.BuildContext):
 		self.base_node.make_node('%s.config'%task_gen.target).write('\n'.join(defines))
 
 	def write_user(self, task_gen):
-		def write_value(node, value, key=''):
-			def convert_value(v):
-				if isinstance(v, bool):
-					return 'bool', v and 'true' or 'false'
-				elif isinstance(v, float):
-					return 'double', str(v)
-				elif isinstance(v, int):
-					return 'int', str(v)
-				elif isinstance(v, bytes):
-					return 'QByteArray', v.decode('utf-8')
-				elif isinstance(v, str):
-					return 'QString', v
-				elif isinstance(v, tuple):
-					return 'QVariantList', ''
-				elif isinstance(v, list):
-					return 'QVariantMap', ''
-				else:
-					raise Exception('unknown type in a map: %s'%type(v))
-			type, strvalue = convert_value(value)
-			attrs = [('type', type)]
-			if key:
-				attrs.append(('key', key))
-			if isinstance(value, tuple):
-				with XmlNode(node, 'valuelist', strvalue, attrs) as value_list:
-					for v in value:
-						write_value(value_list, v)
-			elif isinstance(value, list):
-				with XmlNode(node, 'valuemap', strvalue, attrs) as value_map:
-					for key, v in value:
-						write_value(value_map, v, key)
-			else:
-				XmlNode(node, 'value', strvalue, attrs).close()
-
 		node = self.base_node.make_node('%s.creator.user' % task_gen.target)
 		file = open(node.abspath(), 'w')
 		with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorProject')]) as project:
@@ -222,16 +363,17 @@ class QtCreator(Build.BuildContext):
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.PluginSettings').close()
 					write_value(data, [])
 				with XmlNode(qtcreator, 'data') as data:
-					XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.0').close()
-					build_configurations = []
-					build_configuration_index = 0
+					target_index = 0
 					for env_name in self.env.ALL_TOOLCHAINS:
+						XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.%d'%target_index).close()
+						bld_env = self.all_envs[env_name]
+						if bld_env.SUB_TOOLCHAINS:
+							env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+						else:
+							env = bld_env
+						build_configurations = []
+						build_configuration_index = 0
 						for variant in self.env.ALL_VARIANTS:
-							bld_env = self.all_envs[env_name]
-							if bld_env.SUB_TOOLCHAINS:
-								env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
-							else:
-								env = bld_env
 							build_configurations.append((
 								'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
 								[
@@ -326,7 +468,7 @@ class QtCreator(Build.BuildContext):
 					write_value(data, [
 						('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Desktop'),
 						('ProjectExplorer.ProjectConfiguration.DisplayName', 'Desktop'),
-						('ProjectExplorer.ProjectConfiguration.Id', '{fd719de2-edaa-4f39-af33-6b89a122b21a}'),
+						('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
 						('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
 						('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
 						('ProjectExplorer.Target.ActiveRunConfiguration', 0),
@@ -338,9 +480,10 @@ class QtCreator(Build.BuildContext):
 					] + run_configurations + [
 						('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
 					])
+					target_index += 1
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.TargetCount').close()
-					write_value(data, 1)
+					write_value(data, target_index)
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.EnvironmentId').close()
 					write_value(data, b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
