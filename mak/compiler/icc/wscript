@@ -48,6 +48,8 @@ def detect_icc(conf):
 def load_icc(self, bindir, icc, icpc, version, target, arch, options):
 	self.env.CC = icc
 	self.env.CXX = icpc
+	self.env.COMPILER_NAME='icc'
+	self.env.COMPILER_TARGET=target
 	self.load('icc icpc')
 
 def options(opt):
