@@ -8,6 +8,10 @@ from waflib import Context, Build, Logs
 from minixml import XmlDocument, XmlNode
 from xml.dom.minidom import parse
 
+if sys.platform == 'win32':
+	HOME_DIRECTORY=os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
+else:
+	HOME_DIRECTORY=os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'qtcreator')
 try:
 	import hashlib
 	createMd5=hashlib.md5
@@ -332,7 +336,7 @@ class QtCreator(Build.BuildContext):
 	def build_toolchain_list(self):
 		self.toolchains = []
 		try:
-			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'toolchains.xml'))
+			document = parse(os.path.join(HOME_DIRECTORY, 'toolchains.xml'))
 		except Exception as e:
 			Logs.warn('QtCreator toolchains not found; creating default one')
 		else:
@@ -380,7 +384,7 @@ class QtCreator(Build.BuildContext):
 	def build_device_list(self):
 		self.devices = []
 		try:
-			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'devices.xml'))
+			document = parse(os.path.join(HOME_DIRECTORY, 'devices.xml'))
 		except Exception as e:
 			Logs.warn('QtCreator devices not found; creating default one')
 		else:
