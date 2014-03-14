@@ -9,6 +9,7 @@ from waflib.Configure import conf
 
 @conf
 def set_freebsd_options(self):
+	self.env.ABI = 'elf'
 	self.env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
 
 	self.env.DEPLOY_ROOTDIR = ''
@@ -151,7 +152,7 @@ def configure(conf):
 				env.DEST_OS = 'freebsd'
 				try:
 					conf.start_msg('Setting up compiler')
-					conf.load_clang(directory)
+					conf.load_clang(directory, target)
 					conf.set_freebsd_clang_options(options, version)
 				except Exception as e:
 					conf.end_msg(e, color='RED')

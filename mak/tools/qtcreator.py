@@ -15,7 +15,6 @@ except:
 	import md5
 	createMd5=md5.new
 
-
 def _hexdigest(s):
 	"""Return a string as a string of hex characters.
 	"""
@@ -90,6 +89,7 @@ def write_value(node, value, key=''):
 	else:
 		XmlNode(node, 'value', strvalue, attrs).close()
 
+
 def read_value(node):
 	type = node.attributes['type'].value
 	if type == 'bool':
@@ -116,11 +116,14 @@ def read_value(node):
 	elif type == 'QVariantMap':
 		value = list([read_value(n) for n in node.childNodes if n.nodeType == n.ELEMENT_NODE])
 	else:
-		Logs.warn('unknown Qt type: %s' % type)
-		value = None
-	key = node.attributes['key']
-	key = key and key.value or ''
+		Logs.warn('unknown Qt type: %s' % node.toxml())
+		value = ''
+	try:
+		key = node.attributes['key'].value
+	except Exception:
+		key = ''
 	return key, value
+
 
 class QtObject:
 	def load_from_node(self, xml_node):
@@ -141,8 +144,76 @@ class QtObject:
 
 
 class QtToolchain(QtObject):
-	def __init__(self):
-		pass
+	published_vars = (
+		'ProjectExplorer_GccToolChain_Path',
+		'ProjectExplorer_GccToolChain_PlatformCodeGenFlags',
+		'ProjectExplorer_GccToolChain_PlatformLinkerFlags',
+		'ProjectExplorer_GccToolChain_SupportedAbis',
+		'ProjectExplorer_GccToolChain_TargetAbi',
+		'ProjectExplorer_ToolChain_Autodetect',
+		'ProjectExplorer_ToolChain_DisplayName',
+		'ProjectExplorer_ToolChain_Id',
+	)
+
+	def get_architecture(self, env):
+		return (env.ARCH_FAMILY, env.ARCH_LP64 and '64bit' or '32bit')
+
+	def get_platform(self, env):
+		target = env.COMPILER_TARGET
+		supported_os = (
+				'linux',
+				'windows'
+			)
+		supported_platform = (
+				('android', 'android'),
+				('mingw', 'msys'),
+				('msvc-7.0', 'msvc2002'),
+				('msvc-7.1', 'msvc2003'),
+				('msvc-8.0', 'msvc2005'),
+				('msvc-9.0', 'msvc2008'),
+				('msvc-10.0', 'msvc2010'),
+				('msvc-11.0', 'msvc2012'),
+				('msvc-12.0', 'msvc2013'),
+			)
+		for o in supported_os:
+			if target.find(o) != -1:
+				os=o
+				break
+		else:
+			os='unknown'
+		for p, p_name in supported_platform:
+			if target.find(p) != -1:
+				platform=p_name
+				break
+		else:
+			platform='generic'
+		return (os, platform)
+
+	def __init__(self, env_name=None, env=None):
+		if env_name:
+			assert(env)
+			if isinstance(env.CXX, list):
+				self.ProjectExplorer_GccToolChain_Path = env.CXX[0]
+			else:
+				self.ProjectExplorer_GccToolChain_Path = env.CXX
+			arch,variant = self.get_architecture(env)
+			os,platform = self.get_platform(env)
+			abi = '%s-%s-%s-%s-%s'%(
+				arch,
+				os,
+				platform,
+				env.DEST_BINFMT,
+				variant
+			)
+			toolchain_id =  'ProjectExplorer.ToolChain.%s:%s' % (env.COMPILER_NAME.title(), generateGUID('toolchain:%s'%env_name))
+
+			self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = ()
+			self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = ()
+			self.ProjectExplorer_GccToolChain_SupportedAbis = tuple(abi)
+			self.ProjectExplorer_GccToolChain_TargetAbi = abi
+			self.ProjectExplorer_ToolChain_Autodetect = False
+			self.ProjectExplorer_ToolChain_DisplayName = env_name
+			self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
 class QtDebugger(QtObject):
@@ -165,7 +236,7 @@ class QtPlatform(QtObject):
 		'PE_Profile_Name',
 		'PE_Profile_SDK'
 	)
-	def __init__(self, env_name=None, env=None):
+	def __init__(self, env_name=None, env=None, toolchain=None):
 		if env_name:
 			assert(env)
 			self.PE_Profile_AutoDetected = False
@@ -175,14 +246,14 @@ class QtPlatform(QtObject):
 					('PE.Profile.Device', 'device:%s'%env_name),
 					('PE.Profile.DeviceType', b'Desktop'),
 					('PE.Profile.SysRoot', ''),
-					('PE.Profile.ToolChain', generateGUID('toolchain:'+env_name)),
+					('PE.Profile.ToolChain', toolchain),
 					('QtPM4.mkSPecInformation', ''),
 					('QtSupport.QtInformation', 2),
 				]
 			self.PE_Profile_Icon =  ':///Desktop///'
 			self.PE_Profile_Id = self.guid = generateGUID('profile:'+env_name)
 			self.PE_Profile_MutableInfo = ()
-			self.PE_Profile_Name = env.variant
+			self.PE_Profile_Name = env_name
 			self.PE_Profile_SDK = False
 
 
@@ -237,7 +308,7 @@ class QtCreator(Build.BuildContext):
 	def get_toolchain_id(self, env_name):
 		for toolchain_name,toolchain in self.toolchains:
 			if env_name == toolchain_name:
-				return toolchain.id
+				return toolchain.ProjectExplorer_ToolChain_Id
 
 	def get_device_id(self, env_name):
 		for device_name, device in self.devices:
@@ -265,7 +336,46 @@ class QtCreator(Build.BuildContext):
 		except Exception as e:
 			Logs.warn('QtCreator toolchains not found; creating default one')
 		else:
-			pass
+			for data in document.getElementsByTagName('data'):
+				variable_name = data.getElementsByTagName('variable')[0]
+				variable_name = variable_name.childNodes[0].toxml().strip()
+				if variable_name.startswith('ToolChain.'):
+					try:
+						variable_index = int(variable_name[10:])
+					except ValueError:
+						pass
+					else:
+						toolchain = QtToolchain()
+						toolchain.load_from_node(data.getElementsByTagName('valuemap')[0])
+						self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
+		for env_name in self.env.ALL_TOOLCHAINS:
+			bld_env = self.all_envs[env_name]
+			if bld_env.SUB_TOOLCHAINS:
+				env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+			else:
+				env = bld_env
+			toolchain = QtToolchain(env_name, env)
+			for t_name, t in self.toolchains:
+				if t_name == env_name:
+					# TODO: set some variables here anyway
+					break
+			else:
+				self.toolchains.append((env_name, toolchain))
+		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
+			with XmlNode(document, 'qtcreator') as creator:
+				toolchain_index = 0
+				for toolchain_name, toolchain in self.toolchains:
+					with XmlNode(creator, 'data') as data:
+						XmlNode(data, 'variable', 'ToolChain.%d'%toolchain_index)
+						toolchain.write(data)
+					toolchain_index += 1
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'ToolChain.Count')
+					XmlNode(data, 'value', str(toolchain_index), [('type', 'int')])
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'Version')
+					XmlNode(data, 'value', '1', [('type', 'int')])
+
 
 	def build_device_list(self):
 		self.devices = []
@@ -301,14 +411,15 @@ class QtCreator(Build.BuildContext):
 						self.platforms.append((platform.PE_Profile_Name, platform))
 		for env_name in self.env.ALL_TOOLCHAINS:
 			env = self.all_envs[env_name]
-			platform = QtPlatform(env_name, env)
+			toolchain = self.get_toolchain_id(env_name)
+			platform = QtPlatform(env_name, env, toolchain)
 			for p_name, p in self.platforms:
 				if p_name == env_name:
 					# TODO: set some variables here anyway
 					break
 			else:
 				self.platforms.append((env_name, platform))
-		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+		with XmlDocument(open('profiles.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				profile_index = 0
 				for platform_name, platform in self.platforms:
@@ -478,66 +589,66 @@ class QtCreator(Build.BuildContext):
 											bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
 											env.cxxprogram_PATTERN%self.launcher.target),)),
 									('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
-									('ProjectExplorer.ProjectConfiguration.DisplayName', '%s:%s'%(env_name, variant)),
+									('ProjectExplorer.ProjectConfiguration.DisplayName', '%s'%(variant)),
 									('ProjectExplorer.ProjectConfiguration.Id', 'GenericProjectManager.GenericBuildConfiguration')
 								]))
 							build_configuration_index += 1
-					run_configurations = []
-					if 'game' in task_gen.features:
-						run_configurations.append((
-							'ProjectExplorer.Target.RunConfiguration.0', [
-							('Analyzer.Valgrind.AddedSuppressionFiles', ()),
-							('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
-							('Analyzer.Valgrind.Callgrind.CollectSystime', False),
-							('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
-							('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
-							('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
-							('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
-							('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
-							('Analyzer.Valgrind.FilterExternalIssues', True),
-							('Analyzer.Valgrind.LeakCheckOnFinish', 1),
-							('Analyzer.Valgrind.NumCallers', 32),
-							('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
-							('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
-							('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
-							('Analyzer.Valgrind.ShowReachable', False),
-							('Analyzer.Valgrind.TrackOrigins', True),
-							('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
-							('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
-							('PE.EnvironmentAspect.Base', 2),
-							('PE.EnvironmentAspect.Changes', ()),
-							('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
-							('ProjectExplorer.CustomExecutableRunConfiguration.Executable', '${OUT_NAME}'),
-							('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-							('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', '${buildDir}'),
-							('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
-							('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-							('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
-							('RunConfiguration.QmlDebugServerPort', 3768),
-							('RunConfiguration.UseCppDebugger', True),
-							('RunConfiguration.UseCppDebuggerAuto', False),
-							('RunConfiguration.UseMultiProcess', False),
-							('RunConfiguration.UseQmlDebugger', False),
-							('RunConfiguration.UseQmlDebuggerAuto', True),
-						]))
+						run_configurations = []
+						if 'game' in task_gen.features:
+							run_configurations.append((
+								'ProjectExplorer.Target.RunConfiguration.0', [
+								('Analyzer.Valgrind.AddedSuppressionFiles', ()),
+								('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
+								('Analyzer.Valgrind.Callgrind.CollectSystime', False),
+								('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
+								('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
+								('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
+								('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
+								('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
+								('Analyzer.Valgrind.FilterExternalIssues', True),
+								('Analyzer.Valgrind.LeakCheckOnFinish', 1),
+								('Analyzer.Valgrind.NumCallers', 32),
+								('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
+								('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
+								('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
+								('Analyzer.Valgrind.ShowReachable', False),
+								('Analyzer.Valgrind.TrackOrigins', True),
+								('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
+								('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
+								('PE.EnvironmentAspect.Base', 2),
+								('PE.EnvironmentAspect.Changes', ()),
+								('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
+								('ProjectExplorer.CustomExecutableRunConfiguration.Executable', '${OUT_NAME}'),
+								('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
+								('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', '${buildDir}'),
+								('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
+								('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+								('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
+								('RunConfiguration.QmlDebugServerPort', 3768),
+								('RunConfiguration.UseCppDebugger', True),
+								('RunConfiguration.UseCppDebuggerAuto', False),
+								('RunConfiguration.UseMultiProcess', False),
+								('RunConfiguration.UseQmlDebugger', False),
+								('RunConfiguration.UseQmlDebuggerAuto', True),
+							]))
 
 
-					write_value(data, [
-						('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Desktop'),
-						('ProjectExplorer.ProjectConfiguration.DisplayName', 'Desktop'),
-						('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
-						('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
-						('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
-						('ProjectExplorer.Target.ActiveRunConfiguration', 0),
-					] + build_configurations + [
-						('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
-						('ProjectExplorer.Target.DeployConfiguration', []),
-						('ProjectExplorer.Target.DeployConfigurationCount', 0),
-						('ProjectExplorer.Target.PluginSettings', [])
-					] + run_configurations + [
-						('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
-					])
-					target_index += 1
+						write_value(data, [
+							('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Desktop'),
+							('ProjectExplorer.ProjectConfiguration.DisplayName', 'Desktop'),
+							('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
+							('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
+							('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
+							('ProjectExplorer.Target.ActiveRunConfiguration', 0),
+						] + build_configurations + [
+							('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
+							('ProjectExplorer.Target.DeployConfiguration', []),
+							('ProjectExplorer.Target.DeployConfigurationCount', 0),
+							('ProjectExplorer.Target.PluginSettings', [])
+						] + run_configurations + [
+							('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
+						])
+						target_index += 1
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.TargetCount').close()
 					write_value(data, target_index)
