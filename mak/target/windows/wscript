@@ -6,6 +6,7 @@ import os
 
 @conf
 def set_windows_options(self, arch):
+	self.env.ABI = 'pe'
 	self.env.VALID_PLATFORMS = ['windows', 'pc']
 	self.env.LINK_WITH_PROGRAM = True
 
@@ -129,9 +130,7 @@ def configure(conf):
 				env.DEST_OS = 'win32'
 				try:
 					conf.start_msg('Setting up compiler')
-					conf.env.MSVC_VERSIONS = [version]
-					conf.env.MSVC_TARGETS = [target_arch]
-					conf.load('msvc')
+					conf.load_msvc(version, target_arch)
 					conf.set_windows_msvc_options()
 				except Exception as e:
 					conf.end_msg(e, color='RED')

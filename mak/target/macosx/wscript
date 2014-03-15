@@ -9,6 +9,7 @@ from waflib.Configure import conf
 
 @conf
 def set_macosx_options(self):
+	self.env.ABI = 'mach_o'
 	self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
 	self.env.XCODE_SDKROOT = 'macosx'
 	self.env.XCODE_ABI = 'mach_o'
@@ -219,7 +220,7 @@ def configure(conf):
 	def load_icc(conf, compiler):
 		conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
 	def load_clang(conf, compiler):
-		conf.load_clang(compiler[1])
+		conf.load_clang(compiler[1], compiler[5])
 
 	compiler_versions = {}
 	for name, bindir, icc, ixx, version, target, arch, options in conf.env.ICC_TARGETS:
