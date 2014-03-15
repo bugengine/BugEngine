@@ -165,6 +165,8 @@ def detect_gcc(conf):
 def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 	self.env.CC = gcc
 	self.env.CXX = gxx
+	self.env.COMPILER_NAME='gcc'
+	self.env.COMPILER_TARGET=target
 	if not self.env.AR:
 		self.find_program(target + '-ar', var='AR', path_list=[bindir], mandatory=False)
 	if not self.env.AR:

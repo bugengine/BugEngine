@@ -10,6 +10,7 @@ def options(opt):
 	opt.load('xcode', tooldir=['mak/tools'])
 	opt.load('netbeans', tooldir=['mak/tools'])
 	opt.load('eclipse', tooldir=['mak/tools'])
+	opt.load('qtcreator', tooldir=['mak/tools'])
 
 	opt.recurse('build')
 	opt.recurse('host')

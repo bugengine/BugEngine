@@ -1,7 +1,8 @@
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Configure import conf
 
 def options(opt):
-	# The options for MSVC are not used, we scan the results 
+	# The options for MSVC are not used
 	#opt.load('msvc')
 	from waflib.Tools import msvc
 
@@ -14,6 +15,14 @@ def configure(conf):
 	except:
 		pass
 	conf.end_msg('done')
+
+@conf
+def load_msvc(self, version, target_arch):
+	self.env.MSVC_VERSIONS = [version]
+	self.env.MSVC_TARGETS = [target_arch]
+	self.env.COMPILER_NAME='msvc'
+	self.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
+	self.load('msvc')
 
 def build(bld):
 	pass

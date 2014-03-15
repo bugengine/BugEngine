@@ -9,6 +9,7 @@ from waflib.Configure import conf
 
 @conf
 def set_linux_options(self):
+	self.env.ABI = 'elf'
 	self.env.VALID_PLATFORMS = ['linux', 'posix', 'pc']
 
 	self.env.DEPLOY_ROOTDIR = ''
@@ -288,7 +289,7 @@ def configure(conf):
 			env.DEST_OS = 'linux'
 			try:
 				conf.start_msg('Setting up compiler')
-				conf.load_clang(directory)
+				conf.load_clang(directory, target)
 				conf.set_linux_clang_options(options, version)
 			except Exception as e:
 				conf.end_msg(e, color='RED')
