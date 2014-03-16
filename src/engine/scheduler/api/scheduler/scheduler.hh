@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_SCHEDULER_HH_
 #define BE_SCHEDULER_SCHEDULER_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <minitl/array.hh>
 #include    <minitl/pool.hh>
 

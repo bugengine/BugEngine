@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_MSVC_AMD64_INTERLOCKED_INL_
 #define BE_KERNEL_MSVC_AMD64_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 #include    <intrin.h>
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
@@ -126,7 +127,10 @@ struct InterlockedType<8>
             return *this;
         }
         inline value_t value() { return m_value; }
-        inline bool operator==(tagged_t& other) { return m_tag == other.m_tag && m_value == other.m_value; }
+        inline bool operator==(tagged_t& other)
+        {
+            return m_tag == other.m_tag && m_value == other.m_value;
+        }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
@@ -139,9 +143,11 @@ struct InterlockedType<8>
     static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
     {
         #ifdef TAG_LONG
-            return _InterlockedCompareExchange128((volatile i64*)p, v, p->m_tag+1, (i64*)&condition) != 0;
+            return _InterlockedCompareExchange128((volatile i64*)p, v,
+                                                  p->m_tag+1, (i64*)&condition) != 0;
         #else
-            return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1, condition) == condition;
+            return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1,
+                                                    condition) == condition;
         #endif
     }
 };

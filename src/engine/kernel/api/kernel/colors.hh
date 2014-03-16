@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_COLORS_HH_
 #define BE_KERNEL_COLORS_HH_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 #include    <kernel/simd.hh>
 
 namespace BugEngine { namespace Colors

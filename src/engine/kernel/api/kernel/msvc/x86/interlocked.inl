@@ -4,13 +4,15 @@
 #ifndef BE_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
 #define BE_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 extern "C"
 {
 long  __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
 long  __cdecl _InterlockedExchange(long volatile* Target, long Value);
 long  __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
-__int64  __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest, __int64 Exchange, __int64 Comp);
+__int64 __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest,
+                                              __int64 Exchange, __int64 Comp);
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
@@ -106,7 +108,8 @@ struct InterlockedType<4>
     static inline bool set_conditional(tagged_t *p, incr_t v, tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
-        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong) == condition.asLongLong;
+        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,
+                                             condition.asLongLong) == condition.asLongLong;
     /*    bool result;
         _asm
         {

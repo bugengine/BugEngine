@@ -4,6 +4,7 @@
 #ifndef BE_PLUGIN_DYNOBJECTLIST_HH_
 #define BE_PLUGIN_DYNOBJECTLIST_HH_
 /**************************************************************************************************/
+#include    <plugin/stdafx.h>
 
 namespace BugEngine { namespace Plugin
 {

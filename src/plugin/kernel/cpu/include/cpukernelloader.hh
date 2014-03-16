@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_CPU_CPUKERNELLOADER_HH_
 #define BE_KERNEL_CPU_CPUKERNELLOADER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <scheduler/kernel/ikernelloader.hh>
 
 

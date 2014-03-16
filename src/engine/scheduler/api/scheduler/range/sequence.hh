@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_RANGE_SEQUENCE_HH_
 #define BE_SCHEDULER_RANGE_SEQUENCE_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 
 namespace BugEngine { namespace Task
 {

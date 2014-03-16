@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_SUNCC_INTERLOCKED_INL_
 #define BE_KERNEL_SUNCC_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 extern "C" i32 fetch_and_add_32(i32* p, i32 add);
 extern "C" i32 fetch_and_set_32(i32* p, i32 v);
@@ -82,7 +83,11 @@ struct InterlockedType<4>
             return *this;
         }
         inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     #pragma struct_align 8 (tagged_t)
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
@@ -170,7 +175,11 @@ struct InterlockedType<8>
             return *this;
         }
         inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     #pragma struct_align 16 (tagged_t)
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
@@ -179,7 +188,8 @@ struct InterlockedType<8>
     }
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
-        return set_conditional_128((i64*)p, v, condition.taggedvalue.tag, condition.taggedvalue.value);
+        return set_conditional_128((i64*)p, v, condition.taggedvalue.tag,
+                                   condition.taggedvalue.value);
     }
 };
 #endif

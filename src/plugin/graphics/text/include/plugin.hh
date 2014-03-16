@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_TEXTPLUGIN_HH_
 #define BE_TEXT_TEXTPLUGIN_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <minitl/pointer.hh>
 #include    <plugin/plugin.hh>
 

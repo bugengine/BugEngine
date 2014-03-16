@@ -19,6 +19,7 @@
 #define     published           public
 #define     be_tag(v)
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 be_api(RTTI) minitl::Allocator& rtti();
@@ -34,6 +35,7 @@ struct Type;
 class Value;
 
 }}
+#endif
 
 /**************************************************************************************************/
 #endif

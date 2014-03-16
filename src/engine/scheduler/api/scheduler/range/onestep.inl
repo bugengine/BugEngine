@@ -4,6 +4,8 @@
 #ifndef BE_SCHEDULER_RANGE_ONESTEP_INL_
 #define BE_SCHEDULER_RANGE_ONESTEP_INL_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
+#include    <scheduler/range/onestep.hh>
 
 namespace BugEngine { namespace Task
 {

@@ -4,6 +4,7 @@
 #ifndef BE_WINDOWING_WIN32_PLATFORMRENDERER_HH_
 #define BE_WINDOWING_WIN32_PLATFORMRENDERER_HH_
 /**************************************************************************************************/
+#include    <windowing/stdafx.h>
 #include    <core/threads/thread.hh>
 #include    <windows.h>
 

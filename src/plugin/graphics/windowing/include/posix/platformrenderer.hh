@@ -4,6 +4,7 @@
 #ifndef BE_WINDOWING_POSIX_RENDERER_HH_
 #define BE_WINDOWING_POSIX_RENDERER_HH_
 /**************************************************************************************************/
+#include    <windowing/stdafx.h>
 #include    <windowing/renderer.hh>
 #include    <GL/glx.h>
 #include    <X11/Xatom.h>

@@ -4,6 +4,7 @@
 #ifndef BE_LUA_LUASCRIPT_SCRIPT_HH_
 #define BE_LUA_LUASCRIPT_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 

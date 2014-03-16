@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGEBUILDER_HH_
 #define BE_PACKAGE_PACKAGEBUILDER_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/nodes/package.hh>
 
 namespace BugEngine

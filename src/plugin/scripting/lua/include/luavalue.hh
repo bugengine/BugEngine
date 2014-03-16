@@ -4,6 +4,7 @@
 #ifndef BE_LUA_LUAVALUE_HH_
 #define BE_LUA_LUAVALUE_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 
 namespace BugEngine { namespace Lua
 {

@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_VALUE_INL_
 #define BE_RTTI_VALUE_INL_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <minitl/typemanipulation.hh>

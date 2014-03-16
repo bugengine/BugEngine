@@ -4,7 +4,7 @@
 #ifndef BE_MINITL_TYPEMANIPULATION_HH_
 #define BE_MINITL_TYPEMANIPULATION_HH_
 /**************************************************************************************************/
-
+#include    <minitl/stdafx.h>
 
 namespace minitl
 {

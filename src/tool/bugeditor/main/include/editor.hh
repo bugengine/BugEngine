@@ -4,6 +4,7 @@
 #ifndef BE_EDITOR_EDITOR_HH_
 #define BE_EDITOR_EDITOR_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
 #include    <resource/resourcemanager.hh>

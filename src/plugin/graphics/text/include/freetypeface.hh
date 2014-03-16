@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_FREETYPEFACE_HH_
 #define BE_TEXT_FREETYPEFACE_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <ft2build.h>
 #include    <freetype.h>
 #include    <minitl/allocator.hh>

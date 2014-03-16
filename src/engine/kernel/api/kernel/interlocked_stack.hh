@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_INTERLOCKED_STACK_HH_
 #define BE_KERNEL_INTERLOCKED_STACK_HH_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 #include    <kernel/interlocked.hh>
 
 namespace minitl

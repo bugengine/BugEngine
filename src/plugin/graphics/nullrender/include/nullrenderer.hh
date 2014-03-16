@@ -4,6 +4,7 @@
 #ifndef BE_NULLRENDER_RENDERER_HH_
 #define BE_NULLRENDER_RENDERER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <3d/renderer/irenderer.hh>
 #include    <filesystem/folder.script.hh>
 #include    <plugin/plugin.hh>

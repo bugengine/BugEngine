@@ -7,6 +7,9 @@
 
 #include    <kernel/stdafx.h>
 #include    <minitl/stdafx.h>
+
+#ifndef BE_BUILD_KERNEL
+
 #include    <core/preproc.hh>
 
 #define     BE_FILE             __FILE__
@@ -59,6 +62,8 @@ using minitl::byref;
 using minitl::be_checked_cast;
 using minitl::be_const_cast;
 using minitl::be_checked_numcast;
+
+#endif
 
 
 /**************************************************************************************************/

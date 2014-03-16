@@ -4,6 +4,7 @@
 #ifndef BE_RESOURCE_RESOURCE_HH_
 #define BE_RESOURCE_RESOURCE_HH_
 /**************************************************************************************************/
+#include    <resource/stdafx.h>
 #include    <resource/handle.script.hh>
 
 namespace BugEngine { namespace Resource

@@ -4,6 +4,7 @@
 #ifndef BE_BUGENGINE_SCRIPTENGINE_HH_
 #define BE_BUGENGINE_SCRIPTENGINE_HH_
 /**************************************************************************************************/
+#include    <bugengine/stdafx.h>
 #include    <bugengine/script.script.hh>
 #include    <resource/loader.hh>
 
@@ -31,7 +32,7 @@ private:
 
 }
 
-#include <bugengine/scriptengine.inl>
+#include    <bugengine/scriptengine.inl>
 
 /**************************************************************************************************/
 #endif

@@ -4,6 +4,7 @@
 #ifndef BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 #define BE_BUGENGINE_SCRIPT_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <bugengine/stdafx.h>
 #include    <filesystem/file.script.hh>
 #include    <resource/description.script.hh>
 

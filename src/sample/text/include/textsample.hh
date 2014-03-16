@@ -4,6 +4,7 @@
 #ifndef BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
 #define BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <filesystem/folder.script.hh>
 #include    <bugengine/application.hh>
 #include    <resource/resourcemanager.hh>

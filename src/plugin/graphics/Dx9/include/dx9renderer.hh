@@ -4,6 +4,7 @@
 #ifndef BE_DX9_RENDERER_HH_
 #define BE_DX9_RENDERER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <windowing/renderer.hh>
 #include    <plugin/plugin.hh>
 #include    <d3d9.h>

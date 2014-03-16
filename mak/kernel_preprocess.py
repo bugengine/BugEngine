@@ -42,14 +42,11 @@ def doParse(source, output, macro = [], macrofile = [], pch="", name=""):
 		idname = [i for i in name.split('_')] + [kernel_name]
 		if pch:
 			implementation.write("#include    <%s>\n" % pch)
-		implementation.write("#define be_api(X)\n")
 		implementation.write("#include    <kernel/compilers.hh>\n")
 		implementation.write("#include    <kernel/simd.hh>\n")
 		implementation.write("#include    <kernel/input.hh>\n")
 		implementation.write("#include    <plugin/dynobjectlist.hh>\n")
 		implementation.write("using namespace Kernel;\n")
-		implementation.write("#define be_tag(x)\n")
-		implementation.write("#define be_product(x)\n")
 		implementation.write("#include \"%s\"\n" % source)
 		lexer = cpp.lex.lex(module=cpp.lexer)
 		lexer.inside = 0

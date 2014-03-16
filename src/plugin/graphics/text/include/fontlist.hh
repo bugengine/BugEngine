@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_FONTLIST_HH_
 #define BE_TEXT_FONTLIST_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <minitl/pointer.hh>
 
 namespace BugEngine

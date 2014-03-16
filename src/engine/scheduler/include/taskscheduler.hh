@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASKSCHEDULER_HH_
 #define BE_SCHEDULER_TASKSCHEDULER_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <core/threads/thread.hh>
 #include    <core/threads/semaphore.hh>
 #include    <core/threads/event.hh>

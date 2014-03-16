@@ -4,6 +4,7 @@
 #ifndef BE_RESOURCE_ILOADER_HH_
 #define BE_RESOURCE_ILOADER_HH_
 /**************************************************************************************************/
+#include    <resource/stdafx.h>
 #include    <resource/resource.hh>
 #include    <resource/description.script.hh>
 

@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_VECTOR_HH_
 #define BE_MINITL_VECTOR_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/iterator.hh>
 #include    <minitl/allocator.hh>
 

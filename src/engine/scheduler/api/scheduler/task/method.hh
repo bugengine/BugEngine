@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASK_METHOD_HH_
 #define BE_SCHEDULER_TASK_METHOD_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/task/task.hh>
 #include    <scheduler/range/onestep.hh>
 

@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_CPU_KERNELOBJECT_HH_
 #define BE_KERNEL_CPU_KERNELOBJECT_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <plugin/dynobject.hh>
 #include    <scheduler/task/task.hh>
 #include    <scheduler/kernel/imemoryprovider.hh>

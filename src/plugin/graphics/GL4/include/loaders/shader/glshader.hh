@@ -4,6 +4,7 @@
 #ifndef BE_GL4_LOADERS_SHADER_GLSHADER_HH_
 #define BE_GL4_LOADERS_SHADER_GLSHADER_HH_
 /**************************************************************************************************/
+#include    <GL4/stdafx.h>
 #include    <3d/renderer/igpuresource.hh>
 #include    <3d/shader/shader.script.hh>
 

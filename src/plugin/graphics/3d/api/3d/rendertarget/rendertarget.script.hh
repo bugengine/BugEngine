@@ -4,6 +4,7 @@
 #ifndef BE_3D_RENDERTARGET_RENDERTARGET_SCRIPT_HH_
 #define BE_3D_RENDERTARGET_RENDERTARGET_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <resource/description.script.hh>
 
 namespace BugEngine

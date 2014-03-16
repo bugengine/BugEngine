@@ -4,6 +4,8 @@
 #ifndef BE_3D_RENDERER_GPURESOURCELOADER_INL_
 #define BE_3D_RENDERER_GPURESOURCELOADER_INL_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
+#include    <gpuresourceloader.hh>
 #include    <3d/renderer/igpuresource.hh>
 
 namespace BugEngine

@@ -4,7 +4,7 @@
 #ifndef BE_NETWORK_SOCKET_HH_
 #define BE_NETWORK_SOCKET_HH_
 /**************************************************************************************************/
-
+#include    <network/stdafx.h>
 
 namespace BugEngine { namespace Network
 {

@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_GCC_ARM64_INTERLOCKED_INL_
 #define BE_KERNEL_GCC_ARM64_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 /*
  * most implementations here from Hans Boehm's atomic ops

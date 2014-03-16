@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGE_HH_
 #define BE_PACKAGE_PACKAGE_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <core/endianness.hh>
 
 namespace BugEngine { namespace PackageManager

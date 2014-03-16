@@ -4,6 +4,7 @@
 #ifndef BE_DEBUG_RUNTIME_DWARFTYPES_HH_
 #define BE_DEBUG_RUNTIME_DWARFTYPES_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 
 namespace BugEngine { namespace Runtime { namespace Dwarf
 {

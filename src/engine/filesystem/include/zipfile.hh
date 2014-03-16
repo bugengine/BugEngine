@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_ZIPFILE_HH_
 #define BE_FILESYSTEM_ZIPFILE_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/file.script.hh>
 #include    <unzip.h>
 

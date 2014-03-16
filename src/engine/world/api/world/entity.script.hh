@@ -4,7 +4,7 @@
 #ifndef BE_WORLD_ENTITY_SCRIPT_HH_
 #define BE_WORLD_ENTITY_SCRIPT_HH_
 /**************************************************************************************************/
-#include    <kernel/stdafx.h>
+#include    <world/stdafx.h>
 
 namespace BugEngine { namespace World
 {

@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_FILE_FOLDER_SCRIPT_HH_
 #define BE_FILESYSTEM_FILE_FOLDER_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <filesystem/file.script.hh>
 #include    <core/threads/criticalsection.hh>

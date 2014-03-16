@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_ENGINE_NAMESPACE_HH_
 #define BE_RTTI_ENGINE_NAMESPACE_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
 

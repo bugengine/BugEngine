@@ -4,10 +4,10 @@
 #ifndef BE_3D_RENDERER_BUFFER_VERTEXDESC_HH_
 #define BE_3D_RENDERER_BUFFER_VERTEXDESC_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 
 namespace BugEngine
 {
-
 
 enum VertexSemantics
 {

@@ -4,6 +4,7 @@
 #ifndef BE_NULLRENDER_LOADERS_NULLSHADER_HH_
 #define BE_NULLRENDER_LOADERS_NULLSHADER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <3d/renderer/igpuresource.hh>
 #include    <3d/shader/shader.script.hh>
 

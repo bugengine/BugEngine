@@ -4,6 +4,7 @@
 #ifndef BE_SAMPLES_KERNEL_STORAGE_SCRIPT_HH_
 #define BE_SAMPLES_KERNEL_STORAGE_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <world/entitystorage.factory.hh>
 #include    <scheduler/kernel/stream.hh>
 #include    <scheduler/kernel/product.hh>

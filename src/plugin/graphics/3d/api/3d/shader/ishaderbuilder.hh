@@ -4,6 +4,7 @@
 #ifndef BE_3D_SHADER_ISHADERBUILDER_HH_
 #define BE_3D_SHADER_ISHADERBUILDER_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <core/memory/streams.hh>
 #include    <3d/shader/node.script.hh>
 #include    <minitl/hash_map.hh>

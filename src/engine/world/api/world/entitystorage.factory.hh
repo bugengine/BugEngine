@@ -4,6 +4,7 @@
 #ifndef BE_WORLD_ENTITYSTORAGE_FACTORY_HH_
 #define BE_WORLD_ENTITYSTORAGE_FACTORY_HH_
 /**************************************************************************************************/
+#include    <world/stdafx.h>
 #include    <world/entitystorage.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/typeinfo.hh>

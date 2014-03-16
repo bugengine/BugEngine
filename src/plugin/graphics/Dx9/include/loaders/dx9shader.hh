@@ -4,6 +4,7 @@
 #ifndef BE_DX9_LOADERS_DX9SHADER_HH_
 #define BE_DX9_LOADERS_DX9SHADER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <3d/renderer/igpuresource.hh>
 #include    <dx9renderer.hh>
 #include    <d3d9.h>

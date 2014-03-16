@@ -4,7 +4,8 @@
 #ifndef BE_MINITL_REFCOUNTABLE_HH_
 #define BE_MINITL_REFCOUNTABLE_HH_
 /**************************************************************************************************/
-#include   <minitl/pointer.hh>
+#include    <minitl/stdafx.h>
+#include    <minitl/pointer.hh>
 
 namespace minitl
 {

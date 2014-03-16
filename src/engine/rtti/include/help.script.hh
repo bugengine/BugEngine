@@ -4,9 +4,10 @@
 #ifndef BE_RTTI_HELP_SCRIPT_HH_
 #define BE_RTTI_HELP_SCRIPT_HH_
 /**************************************************************************************************/
-#include <rtti/engine/methodinfo.script.hh>
-#include <rtti/engine/propertyinfo.script.hh>
-#include <rtti/classinfo.script.hh>
+#include    <rtti/stdafx.h>
+#include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {

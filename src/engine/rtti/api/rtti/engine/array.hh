@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_ENGINE_ARRAY_HH_
 #define BE_RTTI_ENGINE_ARRAY_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>

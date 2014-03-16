@@ -4,6 +4,7 @@
 #ifndef BE_CORE_RUNTIME_MD5_HH_
 #define BE_CORE_RUNTIME_MD5_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 #include    <minitl/format.hh>
 
 namespace BugEngine

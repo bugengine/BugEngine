@@ -17,10 +17,12 @@
 # define    WORLDEXPORT         BE_IMPORT
 #endif
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 be_api(WORLD) minitl::Allocator& game();
 }}
+#endif
 
 /**************************************************************************************************/
 #endif

@@ -195,6 +195,7 @@ def module(bld, name, depends,
 						features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
 						extra_use = extra_features,
 						defines = [
+								'BE_BUILD_KERNEL=1',
 								'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
 								'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
 						includes = api + include,

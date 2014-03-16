@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_TAGS_EDITOR_SCRIPT_HH_
 #define BE_RTTI_TAGS_EDITOR_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 
 namespace BugEngine { namespace EditHint
 {

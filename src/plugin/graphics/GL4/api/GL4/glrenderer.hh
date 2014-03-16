@@ -4,6 +4,7 @@
 #ifndef BE_GL4_RENDERER_HH_
 #define BE_GL4_RENDERER_HH_
 /**************************************************************************************************/
+#include    <GL4/stdafx.h>
 #include    <plugin/plugin.hh>
 
 namespace BugEngine

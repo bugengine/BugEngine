@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_REFERENCE_HH_
 #define BE_PACKAGE_NODES_REFERENCE_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/nodes/node.hh>
 #include    <minitl/intrusive_list.hh>
 #include    <rtti/value.hh>

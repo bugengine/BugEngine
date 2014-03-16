@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_DISKWATCH_HH_
 #define BE_FILESYSTEM_DISKWATCH_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
 
 namespace BugEngine

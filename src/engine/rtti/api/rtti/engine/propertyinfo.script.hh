@@ -4,7 +4,8 @@
 #ifndef BE_RTTI_ENGINE_PROPERTYINFO_SCRIPT_HH_
 #define BE_RTTI_ENGINE_PROPERTYINFO_SCRIPT_HH_
 /**************************************************************************************************/
-#include   <rtti/typeinfo.script.hh>
+#include    <rtti/stdafx.h>
+#include    <rtti/typeinfo.script.hh>
 
 namespace BugEngine { namespace RTTI
 {

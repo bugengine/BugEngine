@@ -4,6 +4,7 @@
 #ifndef BE_LUA_LUAPLUGIN_HH_
 #define BE_LUA_LUAPLUGIN_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 
 namespace BugEngine { namespace Lua
 {

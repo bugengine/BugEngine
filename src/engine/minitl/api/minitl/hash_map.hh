@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_HASH_MAP_HH_
 #define BE_MINITL_HASH_MAP_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/tuple.hh>
 #include    <minitl/hash.hh>
 #include    <minitl/traits.hh>

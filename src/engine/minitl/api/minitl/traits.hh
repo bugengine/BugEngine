@@ -4,7 +4,8 @@
 #ifndef BE_MINITL_TRAITS_HH_
 #define BE_MINITL_TRAITS_HH_
 /**************************************************************************************************/
-#include <string.h>
+#include    <minitl/stdafx.h>
+#include    <string.h>
 
 namespace minitl
 {

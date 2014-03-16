@@ -4,6 +4,7 @@
 #ifndef BE_3D_RENDERER_IRENDERER_HH_
 #define BE_3D_RENDERER_IRENDERER_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <resource/resourcemanager.hh>
 #include    <3d/renderer/igpuresource.hh>
 #include    <scheduler/scheduler.hh>

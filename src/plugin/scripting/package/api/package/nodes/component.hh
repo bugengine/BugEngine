@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_COMPONENT_HH_
 #define BE_PACKAGE_NODES_COMPONENT_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/nodes/instance.hh>
 
 

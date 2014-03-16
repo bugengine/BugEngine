@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_GCC_PPC_INTERLOCKED_INL_
 #define BE_KERNEL_GCC_PPC_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 namespace _Kernel
 {

@@ -4,6 +4,7 @@
 #ifndef BE_WINDOWING_WIN32_PLATFORMWINDOW_HH_
 #define BE_WINDOWING_WIN32_PLATFORMWINDOW_HH_
 /**************************************************************************************************/
+#include    <windowing/stdafx.h>
 #include    <windows.h>
 
 

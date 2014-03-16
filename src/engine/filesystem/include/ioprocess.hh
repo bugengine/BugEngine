@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_IOPROCESS_HH_
 #define BE_FILESYSTEM_IOPROCESS_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/file.script.hh>
 #include    <core/threads/thread.hh>
 #include    <core/threads/semaphore.hh>

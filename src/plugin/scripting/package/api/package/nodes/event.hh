@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_EVENT_HH_
 #define BE_PACKAGE_NODES_EVENT_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes

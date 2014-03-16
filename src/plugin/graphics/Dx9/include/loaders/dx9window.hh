@@ -4,6 +4,7 @@
 #ifndef BE_DX9_LOADERS_DX9WINDOW_HH_
 #define BE_DX9_LOADERS_DX9WINDOW_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <dx9renderer.hh>
 #include    <windowing/window.hh>
 #include    <d3d9.h>

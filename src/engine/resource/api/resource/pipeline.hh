@@ -4,6 +4,7 @@
 #ifndef BE_RESOURCE_PIPELINE_HH_
 #define BE_RESOURCE_PIPELINE_HH_
 /**************************************************************************************************/
+#include    <resource/stdafx.h>
 #include    <minitl/ptr/refcountable.hh>
 #include    <resource/resourceloader.hh>
 

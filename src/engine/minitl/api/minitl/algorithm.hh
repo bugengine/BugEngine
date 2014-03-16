@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_ALGORITHM_HH_
 #define BE_MINITL_ALGORITHM_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 
 namespace minitl
 {

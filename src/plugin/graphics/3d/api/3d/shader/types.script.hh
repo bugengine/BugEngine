@@ -4,6 +4,7 @@
 #ifndef BE_3D_SHADER_TYPES_SCRIPT_HH_
 #define BE_3D_SHADER_TYPES_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <3d/shader/node.script.hh>
 
 namespace BugEngine { namespace Shaders
