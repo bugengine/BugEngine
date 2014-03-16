@@ -4,6 +4,7 @@
 #ifndef BE_DEBUG_RUNTIME_ELF_HH_
 #define BE_DEBUG_RUNTIME_ELF_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 #include    <runtime/module.hh>
 
 namespace BugEngine { namespace Runtime

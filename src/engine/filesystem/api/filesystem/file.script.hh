@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_FILE_FILE_SCRIPT_HH_
 #define BE_FILESYSTEM_FILE_FILE_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <kernel/interlocked_stack.hh>
 #include    <minitl/intrusive_list.hh>

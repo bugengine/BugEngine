@@ -16,10 +16,12 @@
 # define    SCHEDULEREXPORT     BE_IMPORT
 #endif
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 be_api(SCHEDULER) minitl::Allocator& task();
 }}
+#endif
 
 #define be_product(x)
 

@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_IKERNELSCHEDULER_HH_
 #define BE_SCHEDULER_KERNEL_IKERNELSCHEDULER_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <minitl/array.hh>
 
 namespace BugEngine

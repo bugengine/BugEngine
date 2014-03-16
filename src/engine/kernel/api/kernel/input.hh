@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_INPUT_HH_
 #define BE_KERNEL_INPUT_HH_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 #include    <kernel/compilers.hh>
 
 namespace Kernel

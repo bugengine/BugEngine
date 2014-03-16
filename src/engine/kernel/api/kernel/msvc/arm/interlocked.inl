@@ -4,12 +4,15 @@
 #ifndef BE_KERNEL_MSVC_ARM_INTERLOCKED_INL_
 #define BE_KERNEL_MSVC_ARM_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
+
 extern "C"
 {
-    long __cdecl _InterlockedCompareExchange(long volatile* dest, long exchange, long comp);
-    long long __cdecl _InterlockedCompareExchange64(long long volatile* dest, long long exchange, long long comp);
-    long __cdecl _InterlockedExchange(long volatile* target, long value);
-    long __cdecl _InterlockedExchangeAdd(long volatile * addend, long value);
+long __cdecl _InterlockedCompareExchange(long volatile* dest, long exchange, long comp);
+long long __cdecl _InterlockedCompareExchange64(long long volatile* dest,
+                                                long long exchange, long long comp);
+long __cdecl _InterlockedExchange(long volatile* target, long value);
+long __cdecl _InterlockedExchangeAdd(long volatile * addend, long value);
 }
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
@@ -102,7 +105,8 @@ struct InterlockedType<4>
     static inline bool set_conditional(tagged_t *p, incr_t v, tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
-        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong) == condition.asLongLong;
+        return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,
+                                             condition.asLongLong) == condition.asLongLong;
     }
 };
 template<>

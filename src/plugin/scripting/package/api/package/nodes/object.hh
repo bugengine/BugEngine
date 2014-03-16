@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_OBJECT_HH_
 #define BE_PACKAGE_NODES_OBJECT_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/nodes/instance.hh>
 #include    <package/nodes/overloadmatch.hh>
 

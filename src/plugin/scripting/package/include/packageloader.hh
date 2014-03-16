@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGELOADER_HH_
 #define BE_PACKAGE_PACKAGELOADER_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/package.script.hh>
 #include    <bugengine/scriptengine.hh>
 #include    <plugin/plugin.hh>

@@ -4,6 +4,7 @@
 #ifndef BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
 #define BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
 /**************************************************************************************************/
+#include    <GL4/stdafx.h>
 #include    <3d/renderer/igpuresource.hh>
 
 namespace BugEngine { namespace OpenGL

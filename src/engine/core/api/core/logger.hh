@@ -4,6 +4,7 @@
 #ifndef BE_CORE_LOGGER_HH_
 #define BE_CORE_LOGGER_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <minitl/vector.hh>
 #include    <minitl/tuple.hh>

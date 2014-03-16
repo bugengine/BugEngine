@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_NODES_ZIP_HH_
 #define BE_PACKAGE_NODES_ZIP_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <package/nodes/value.hh>
 #include    <package/nodes/entity.hh>
 

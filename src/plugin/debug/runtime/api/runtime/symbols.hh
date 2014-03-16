@@ -4,6 +4,7 @@
 #ifndef BE_RUNTIME_SYMBOLS_HH_
 #define BE_RUNTIME_SYMBOLS_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 #include    <runtime/callstack.hh>
 
 namespace BugEngine { namespace Runtime

@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_HASH_HH_
 #define BE_MINITL_HASH_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <cstring>
 
 namespace minitl

@@ -4,6 +4,7 @@
 #ifndef BE_CORE_PREPROCESSOR_H_
 #define BE_CORE_PREPROCESSOR_H_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 
 #define     BE_STRINGIZE_IMPL(n)    #n
 #define     BE_STRINGIZE(n)         BE_STRINGIZE_IMPL(n)

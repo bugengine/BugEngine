@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_OUTLINESHADER_SCRIPT_HH_
 #define BE_TEXT_OUTLINESHADER_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <3d/shader/shader.script.hh>
 
 namespace BugEngine

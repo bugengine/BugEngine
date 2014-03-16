@@ -4,6 +4,7 @@
 #ifndef BE_CORE_MEMORY_ALLOCATORS_POOL_HH_
 #define BE_CORE_MEMORY_ALLOCATORS_POOL_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 #include    <minitl/allocator.hh>
 
 namespace BugEngine

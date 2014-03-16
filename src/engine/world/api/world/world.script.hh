@@ -4,6 +4,7 @@
 #ifndef BE_WORLD_WORLD_SCRIPT_HH_
 #define BE_WORLD_WORLD_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <world/stdafx.h>
 #include    <scheduler/task/group.hh>
 #include    <scheduler/kernel/iproduct.script.hh>
 #include    <resource/description.script.hh>

@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_IMEMORYBANK_HH_
 #define BE_SCHEDULER_KERNEL_IMEMORYBANK_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine { namespace Kernel

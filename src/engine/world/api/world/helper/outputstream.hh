@@ -4,6 +4,7 @@
 #ifndef BE_WORLD_HELPER_OUTPUTSTREAM_HH_
 #define BE_WORLD_HELPER_OUTPUTSTREAM_HH_
 /**************************************************************************************************/
+#include    <world/stdafx.h>
 #include    <scheduler/kernel/product.hh>
 
 namespace BugEngine { namespace World

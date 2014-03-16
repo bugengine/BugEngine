@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_OPENCL_CLMEMORYPROVIDER_HH_
 #define BE_KERNEL_OPENCL_CLMEMORYPROVIDER_HH_
 /**************************************************************************************************/
+#include    <opencl/stdafx.h>
 #include    <scheduler/kernel/imemoryprovider.hh>
 
 namespace BugEngine

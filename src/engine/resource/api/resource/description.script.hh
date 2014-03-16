@@ -4,6 +4,7 @@
 #ifndef BE_RESOURCE_DESCRIPTION_SCRIPT_HH_
 #define BE_RESOURCE_DESCRIPTION_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <resource/stdafx.h>
 #include    <minitl/refcountable.hh>
 #include    <minitl/intrusive_list.hh>
 #include    <resource/resource.hh>

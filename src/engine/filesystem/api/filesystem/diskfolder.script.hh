@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_FILE_DISKFOLDER_SCRIPT_HH_
 #define BE_FILESYSTEM_FILE_DISKFOLDER_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/folder.script.hh>
 
 namespace BugEngine

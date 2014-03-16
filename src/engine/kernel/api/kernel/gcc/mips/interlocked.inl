@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_GCC_MIPS_INTERLOCKED_INL_
 #define BE_KERNEL_GCC_MIPS_INTERLOCKED_INL_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 namespace _Kernel
 {
@@ -80,13 +81,18 @@ struct InterlockedType<4>
             return *this;
         }
         inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p.taggedvalue.tag;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
+                                       tagged_t::tag_t& condition)
     {
         if (p->taggedvalue.tag == condition)
         {
@@ -179,13 +185,18 @@ struct InterlockedType<8>
             return *this;
         }
         inline value_t value() { return taggedvalue.value; }
-        inline bool operator==(tagged_t& other) { return (taggedvalue.tag == other.taggedvalue.tag) && (taggedvalue.value == other.taggedvalue.value); }
+        inline bool operator==(tagged_t& other)
+        {
+            return (taggedvalue.tag == other.taggedvalue.tag)
+                && (taggedvalue.value == other.taggedvalue.value);
+        }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t &p)
     {
         return p.taggedvalue.tag;
     }
-    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
+                                       tagged_t::tag_t& condition)
     {
         if (p->taggedvalue.tag == condition)
         {

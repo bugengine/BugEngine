@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_INTERLOCKED_HH_
 #define BE_KERNEL_INTERLOCKED_HH_
 /**************************************************************************************************/
-#include <kernel/compilers.hh>
+#include    <kernel/stdafx.h>
 
 #if defined(BE_COMPILER_MSVC) || (defined(BE_COMPILER_INTEL) && defined(_WIN32))
 # if defined(_X86)

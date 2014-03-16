@@ -4,6 +4,7 @@
 #ifndef BE_NULLRENDER_LOADERS_NULLWINDOW_HH_
 #define BE_NULLRENDER_LOADERS_NULLWINDOW_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <3d/renderer/irendertarget.hh>
 #include    <3d/renderer/irenderer.hh>
 

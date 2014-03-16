@@ -15,6 +15,7 @@
 # define    PACKAGEEXPORT
 #endif
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 
@@ -22,6 +23,7 @@ minitl::Allocator& package();
 minitl::Allocator& packageBuilder();
 
 }}
+#endif
 
 /**************************************************************************************************/
 #endif

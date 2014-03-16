@@ -4,6 +4,7 @@
 #ifndef BE_DEBUG_RUNTIME_DWARF_HH_
 #define BE_DEBUG_RUNTIME_DWARF_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 #include    <runtime/symbols.hh>
 #include    <minitl/hash_map.hh>
 #include    <elf.hh>

@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_RAWPTR_HH_
 #define BE_MINITL_RAWPTR_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 
 namespace minitl
 {

@@ -4,6 +4,7 @@
 #ifndef BE_LUA_CALL_HH_
 #define BE_LUA_CALL_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <rtti/engine/methodinfo.script.hh>
 
 namespace BugEngine { namespace Lua

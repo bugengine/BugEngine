@@ -4,6 +4,7 @@
 #ifndef BE_GL4_EXTENSIONS_HH_
 #define BE_GL4_EXTENSIONS_HH_
 /**************************************************************************************************/
+#include    <GL4/stdafx.h>
 
 namespace BugEngine { namespace OpenGL
 {

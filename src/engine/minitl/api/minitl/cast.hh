@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_CAST_
 #define BE_MINITL_CAST_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/assert.hh>
 #include    <minitl/refptr.hh>
 #include    <minitl/weakptr.hh>

@@ -4,6 +4,7 @@
 #ifndef BE_3D_RENDERER_IGPURESOURCE_HH_
 #define BE_3D_RENDERER_IGPURESOURCE_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <minitl/refcountable.hh>
 #include    <minitl/intrusive_list.hh>
 

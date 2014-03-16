@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_CPU_CPUKERNELSCHEDULER_HH_
 #define BE_KERNEL_CPU_CPUKERNELSCHEDULER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <plugin/plugin.hh>
 

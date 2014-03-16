@@ -4,6 +4,7 @@
 #ifndef BE_CORE_THREADS_EVENT_HH_
 #define BE_CORE_THREADS_EVENT_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 #include    <core/threads/waitable.hh>
 
 namespace BugEngine

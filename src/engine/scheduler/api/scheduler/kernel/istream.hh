@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_ISTREAM_HH_
 #define BE_SCHEDULER_KERNEL_ISTREAM_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/imemorybank.hh>
 #include    <scheduler/task/itask.hh>
 

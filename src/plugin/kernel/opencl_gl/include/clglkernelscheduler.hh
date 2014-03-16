@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_OPENCL_OPENGL_CLGLKERNELSCHEDULER_HH_
 #define BE_KERNEL_OPENCL_OPENGL_CLGLKERNELSCHEDULER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <opencl/clkernelscheduler.hh>
 #include    <plugin/plugin.hh>
 

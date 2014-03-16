@@ -4,6 +4,7 @@
 #ifndef BE_PLUGIN_DYNOBJECT_HH_
 #define BE_PLUGIN_DYNOBJECT_HH_
 /**************************************************************************************************/
+#include    <plugin/stdafx.h>
 #include    <core/string/istring.hh>
 
 namespace BugEngine { namespace Plugin

@@ -4,6 +4,7 @@
 #ifndef BE_RUNTIME_CALLSTACK_HH_
 #define BE_RUNTIME_CALLSTACK_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 
 namespace BugEngine { namespace Runtime
 {

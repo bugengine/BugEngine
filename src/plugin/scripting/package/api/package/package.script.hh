@@ -4,6 +4,7 @@
 #ifndef BE_PACKAGE_PACKAGE_SCRIPT_HH_
 #define BE_PACKAGE_PACKAGE_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <package/stdafx.h>
 #include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 

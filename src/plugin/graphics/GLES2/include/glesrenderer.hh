@@ -4,6 +4,7 @@
 #ifndef BE_GLES2_RENDERER_HH_
 #define BE_GLES2_RENDERER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <plugin/plugin.hh>
 #include    <3d/renderer/irenderer.hh>
 

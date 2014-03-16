@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_REFPTR_HH_
 #define BE_MINITL_REFPTR_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/refcountable.hh>
 
 

@@ -4,8 +4,8 @@
 #ifndef BE_KERNEL_OPENCL_CLKERNELLOADER_HH_
 #define BE_KERNEL_OPENCL_CLKERNELLOADER_HH_
 /**************************************************************************************************/
+#include    <opencl/stdafx.h>
 #include    <scheduler/kernel/ikernelloader.hh>
-
 
 namespace BugEngine
 {

@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_OUTLINEFONT_SCRIPT_HH_
 #define BE_TEXT_OUTLINEFONT_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <filesystem/file.script.hh>
 #include    <resource/description.script.hh>
 

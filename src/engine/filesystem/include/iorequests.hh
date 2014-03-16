@@ -4,6 +4,7 @@
 #ifndef BE_SYSTEM_IOREQUESTS_HH_
 #define BE_SYSTEM_IOREQUESTS_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/file.script.hh>
 
 namespace BugEngine { namespace IOProcess

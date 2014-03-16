@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASK_ITASK_HH_
 #define BE_SCHEDULER_TASK_ITASK_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/scheduler.hh>
 #include    <core/threads/criticalsection.hh>
 #include    <kernel/colors.hh>

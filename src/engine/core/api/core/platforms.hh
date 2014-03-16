@@ -4,6 +4,7 @@
 #ifndef BE_CORE_PLATFORMS_HH_
 #define BE_CORE_PLATFORMS_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 
 #ifndef _WIN32
 # define OutputDebugString(s) printf("%s", s)

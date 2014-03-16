@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASK_KERNELTASK_HH_
 #define BE_SCHEDULER_TASK_KERNELTASK_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/istream.hh>
 

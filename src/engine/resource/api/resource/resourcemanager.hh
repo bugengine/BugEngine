@@ -4,6 +4,7 @@
 #ifndef BE_RESOURCE_RESOURCEMANAGER_HH_
 #define BE_RESOURCE_RESOURCEMANAGER_HH_
 /**************************************************************************************************/
+#include    <resource/stdafx.h>
 #include    <minitl/array.hh>
 #include    <minitl/intrusive_list.hh>
 #include    <minitl/refcountable.hh>

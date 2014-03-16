@@ -15,10 +15,12 @@
 # define    RESOURCEEXPORT      BE_IMPORT
 #endif
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 be_api(RESOURCE) minitl::Allocator& resource();
 }}
+#endif
 
 /**************************************************************************************************/
 #endif

@@ -4,6 +4,7 @@
 #ifndef BE_LUA_CONTEXT_H_
 #define BE_LUA_CONTEXT_H_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <bugengine/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.hh>

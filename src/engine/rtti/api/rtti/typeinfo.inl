@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_TYPEINFO_INL_
 #define BE_RTTI_TYPEINFO_INL_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace RTTI

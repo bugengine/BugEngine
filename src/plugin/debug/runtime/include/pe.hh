@@ -4,7 +4,8 @@
 #ifndef BE_DEBUG_RUNTIME_PE_HH_
 #define BE_DEBUG_RUNTIME_PE_HH_
 /**************************************************************************************************/
-#include <runtime/module.hh>
+#include    <runtime/stdafx.h>
+#include    <runtime/module.hh>
 
 namespace BugEngine { namespace Runtime
 {

@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_FREETYPELIB_HH_
 #define BE_TEXT_FREETYPELIB_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <ft2build.h>
 #include    <freetype.h>
 

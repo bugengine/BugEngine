@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_TEXT_SCRIPT_HH_
 #define BE_TEXT_TEXT_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <resource/description.script.hh>
 
 namespace BugEngine

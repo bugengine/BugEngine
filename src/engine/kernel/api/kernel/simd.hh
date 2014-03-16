@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_SIMD_HH_
 #define BE_KERNEL_SIMD_HH_
 /**************************************************************************************************/
+#include    <kernel/stdafx.h>
 
 namespace _Kernel
 {

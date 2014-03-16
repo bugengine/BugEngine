@@ -1,7 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include <components.script.hh>
+#include    <components.script.hh>
 
 void kmain(u32 index, const u32 total,
            in<BugEngine::A> input,

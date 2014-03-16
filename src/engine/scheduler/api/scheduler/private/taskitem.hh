@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASKITEM_HH_
 #define BE_SCHEDULER_TASKITEM_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/scheduler.hh>
 
 namespace BugEngine { namespace Task

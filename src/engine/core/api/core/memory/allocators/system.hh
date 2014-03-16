@@ -4,6 +4,7 @@
 #ifndef BE_CORE_MEMORY_ALLOCATORS_SYSTEM_HH_
 #define BE_CORE_MEMORY_ALLOCATORS_SYSTEM_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 #include    <minitl/allocator.hh>
 
 namespace BugEngine
@@ -52,4 +53,3 @@ public:
 
 /**************************************************************************************************/
 #endif
-

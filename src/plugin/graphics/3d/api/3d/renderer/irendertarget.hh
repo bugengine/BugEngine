@@ -4,6 +4,7 @@
 #ifndef BE_3D_RENDERER_IRENDERTARGET_HH_
 #define BE_3D_RENDERER_IRENDERTARGET_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <scheduler/task/group.hh>
 #include    <3d/renderer/igpuresource.hh>
 

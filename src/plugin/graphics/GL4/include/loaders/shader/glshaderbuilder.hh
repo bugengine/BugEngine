@@ -4,6 +4,7 @@
 #ifndef BE_GL4_LOADERS_GLSHADERBUILDER_HH_
 #define BE_GL4_LOADERS_GLSHADERBUILDER_HH_
 /**************************************************************************************************/
+#include    <GL4/stdafx.h>
 #include    <3d/shader/ishaderbuilder.hh>
 #include    <3d/shader/shader.script.hh>
 

@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_TASL_TASK_INL_
 #define BE_SCHEDULER_TASL_TASK_INL_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/private/taskitem.hh>
 #include    <minitl/typemanipulation.hh>

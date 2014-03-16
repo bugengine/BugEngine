@@ -4,7 +4,8 @@
 #ifndef BE_3D_RENDERER_GPURESOURCELOADER_HH_
 #define BE_3D_RENDERER_GPURESOURCELOADER_HH_
 /**************************************************************************************************/
-#include <resource/loader.hh>
+#include    <3d/stdafx.h>
+#include    <resource/loader.hh>
 
 namespace BugEngine
 {
@@ -34,7 +35,7 @@ protected:
 
 }
 
-#include <gpuresourceloader.inl>
+#include    <gpuresourceloader.inl>
 
 /**************************************************************************************************/
 #endif

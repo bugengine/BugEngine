@@ -4,6 +4,7 @@
 #ifndef BE_KERNEL_CPU_CPUMEMORYPROVIDER_HH_
 #define BE_KERNEL_CPU_CPUMEMORYPROVIDER_HH_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <scheduler/kernel/imemoryprovider.hh>
 #include    <scheduler/kernel/istream.hh>
 

@@ -4,6 +4,7 @@
 #ifndef BE_WINDOWING_DARWIN_RENDERER_HH_
 #define BE_WINDOWING_DARWIN_RENDERER_HH_
 /**************************************************************************************************/
+#include    <windowing/stdafx.h>
 #include    <windowing/renderer.hh>
 #include    <Cocoa/Cocoa.h>
 

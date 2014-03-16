@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
 #define BE_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <resource/description.script.hh>
 
 namespace BugEngine { namespace Kernel

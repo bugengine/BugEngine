@@ -4,6 +4,7 @@
 #ifndef BE_WINDOWING_RENDERER_HH_
 #define BE_WINDOWING_RENDERER_HH_
 /**************************************************************************************************/
+#include    <windowing/stdafx.h>
 #include    <3d/renderer/irenderer.hh>
 #include    <windowing/window.hh>
 

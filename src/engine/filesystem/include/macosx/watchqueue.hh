@@ -4,6 +4,7 @@
 #ifndef BE_FILESYSTEM_WATCHQUEUE_HH_
 #define BE_FILESYSTEM_WATCHQUEUE_HH_
 /**************************************************************************************************/
+#include    <filesystem/stdafx.h>
 #include    <filesystem/diskfolder.script.hh>
 #include    <watchpoint.hh>
 #include    <core/threads/thread.hh>

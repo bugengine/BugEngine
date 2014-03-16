@@ -4,6 +4,7 @@
 #ifndef BE_3D_SHADER_NODE_SCRIPT_HH_
 #define BE_3D_SHADER_NODE_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <3d/stdafx.h>
 #include    <core/memory/streams.hh>
 #include    <3d/shader/shader.script.hh>
 

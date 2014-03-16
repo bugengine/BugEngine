@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_TYPEINFO_HH_
 #define BE_RTTI_TYPEINFO_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
 #include    <rtti/classinfo.script.hh>

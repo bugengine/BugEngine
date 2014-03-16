@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_INTRUSIVE_LIST_HH_
 #define BE_MINITL_INTRUSIVE_LIST_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/iterator.hh>
 
 namespace minitl

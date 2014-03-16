@@ -4,6 +4,7 @@
 #ifndef BE_TEXT_TEXTMANAGER_HH_
 #define BE_TEXT_TEXTMANAGER_HH_
 /**************************************************************************************************/
+#include    <text/stdafx.h>
 #include    <resource/loader.hh>
 
 namespace BugEngine

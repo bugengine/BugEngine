@@ -193,7 +193,8 @@ param:
         TOK_ID '=' value ';'
         {
             $$ = (ref<Parameter>*)malloc(sizeof(*$$));
-            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($1), *$3));
+            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(),
+                                                           BugEngine::istring($1), *$3));
             $3->~ref();
             free($1);
             free($3);
@@ -202,7 +203,8 @@ param:
         TOK_ID ':'  TOK_ID '=' value ';'
         {
             $$ = (ref<Parameter>*)malloc(sizeof(*$$));
-            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(), BugEngine::istring($3), *$5));
+            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(),
+                                                           BugEngine::istring($3), *$5));
             $5->~ref();
             free($1);
             free($3);
@@ -220,7 +222,8 @@ value:
                                                               g_packageColumnBefore+1,
                                                               g_packageColumnAfter+1);
             reference->setName(BugEngine::inamespace($1));
-            new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(), reference));
+            new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(),
+                                                            reference));
             free($1);
         }
     |
@@ -260,7 +263,8 @@ value:
         VAL_FILENAME
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<FileValue>::create(BugEngine::Arena::packageBuilder(), ((BuildContext*)param)->folder, $1));
+            new ($$) ref<Value>(ref<FileValue>::create(BugEngine::Arena::packageBuilder(),
+                                                       ((BuildContext*)param)->folder, $1));
             free($1);
         }
     |
@@ -286,31 +290,36 @@ value:
         '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6));
+            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(),
+                                                       $2, $4, $6));
         }
     |
         '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8));
+            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(),
+                                                       $2, $4, $6, $8));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4));
+            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(),
+                                                         $2, $4));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6));
+            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(),
+                                                         $2, $4, $6));
         }
     |
         '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
         {
             $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(), $2, $4, $6, $8));
+            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(),
+                                                         $2, $4, $6, $8));
         }
     ;
 

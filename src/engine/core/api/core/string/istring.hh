@@ -4,6 +4,7 @@
 #ifndef BE_CORE_STRING_ISTRING_HH_
 #define BE_CORE_STRING_ISTRING_HH_
 /**************************************************************************************************/
+#include    <core/stdafx.h>
 
 namespace BugEngine
 {

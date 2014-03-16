@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_IKERNELLOADER_HH_
 #define BE_SCHEDULER_KERNEL_IKERNELLOADER_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <resource/loader.hh>
 
 namespace BugEngine { namespace Kernel

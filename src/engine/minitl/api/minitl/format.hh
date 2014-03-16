@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_FORMAT_H_
 #define BE_MINITL_FORMAT_H_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/allocator.hh>
 #include    <string.h>
 

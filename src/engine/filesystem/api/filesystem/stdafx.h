@@ -14,10 +14,12 @@
 # define    FILESYSTEMEXPORT    BE_IMPORT
 #endif
 
+#ifndef BE_BUILD_KERNEL
 namespace BugEngine { namespace Arena
 {
 be_api(FILESYSTEM) minitl::Allocator& filesystem();
 }}
+#endif
 
 /**************************************************************************************************/
 #endif

@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_POOL_
 #define BE_MINITL_POOL_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <kernel/interlocked.hh>
 #include    <kernel/interlocked_stack.hh>
 #include    <minitl/allocator.hh>

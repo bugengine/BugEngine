@@ -4,6 +4,7 @@
 #ifndef BE_RUNTIME_MODULE_HH_
 #define BE_RUNTIME_MODULE_HH_
 /**************************************************************************************************/
+#include    <runtime/stdafx.h>
 #include    <runtime/callstack.hh>
 #include    <runtime/symbols.hh>
 #include    <core/endianness.hh>

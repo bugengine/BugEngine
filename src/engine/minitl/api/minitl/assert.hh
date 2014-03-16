@@ -4,6 +4,7 @@
 #ifndef BE_MINITL_ASSERT_HH_
 #define BE_MINITL_ASSERT_HH_
 /**************************************************************************************************/
+#include    <minitl/stdafx.h>
 #include    <minitl/format.hh>
 #include    <cstdlib>
 

@@ -4,7 +4,8 @@
 #ifndef BE_MINITL_POINTER_HH_
 #define BE_MINITL_POINTER_HH_
 /**************************************************************************************************/
-#include <minitl/allocator.hh>
+#include    <minitl/stdafx.h>
+#include    <minitl/allocator.hh>
 
 namespace minitl
 {

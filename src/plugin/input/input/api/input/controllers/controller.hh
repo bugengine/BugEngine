@@ -4,6 +4,7 @@
 #ifndef BE_INPUT_CONTROLLERS_CONTROLLER_HH_
 #define BE_INPUT_CONTROLLERS_CONTROLLER_HH_
 /**************************************************************************************************/
+#include    <input/stdafx.h>
 
 namespace BugEngine { namespace Input
 {

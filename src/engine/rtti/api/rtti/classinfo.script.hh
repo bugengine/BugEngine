@@ -4,6 +4,7 @@
 #ifndef BE_RTTI_CLASSINFO_SCRIPT_HH_
 #define BE_RTTI_CLASSINFO_SCRIPT_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 #include    <core/md5.hh>
 
 namespace BugEngine { namespace RTTI

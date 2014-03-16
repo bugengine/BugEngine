@@ -4,6 +4,7 @@
 #ifndef BE_PHYSICSBULLET_BULLETWORLD_H_
 #define BE_PHYSICSBULLET_BULLETWORLD_H_
 /**************************************************************************************************/
+#include    <stdafx.h>
 #include    <plugin/plugin.hh>
 
 #ifdef BE_COMPILER_MSVC

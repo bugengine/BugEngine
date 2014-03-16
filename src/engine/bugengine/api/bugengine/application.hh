@@ -4,6 +4,7 @@
 #ifndef BE_BUGENGINE_APPLICATION_HH_
 #define BE_BUGENGINE_APPLICATION_HH_
 /**************************************************************************************************/
+#include    <bugengine/stdafx.h>
 #include    <scheduler/task/group.hh>
 #include    <resource/loader.hh>
 #include    <bugengine/scriptengine.hh>

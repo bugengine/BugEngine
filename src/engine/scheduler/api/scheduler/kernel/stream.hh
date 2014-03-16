@@ -4,6 +4,7 @@
 #ifndef BE_SCHEDULER_KERNEL_STREAM_HH_
 #define BE_SCHEDULER_KERNEL_STREAM_HH_
 /**************************************************************************************************/
+#include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/istream.hh>
 
 namespace BugEngine { namespace Kernel
