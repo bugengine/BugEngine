@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <text/stdafx.h>
 #include    <ft2build.h>
-#include    <freetype.h>
+#include    FT_FREETYPE_H
 #include    <minitl/allocator.hh>
 
 namespace BugEngine
