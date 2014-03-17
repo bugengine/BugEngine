@@ -23,6 +23,7 @@ def load_msvc(self, version, target_arch):
 	self.env.COMPILER_NAME='msvc'
 	self.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
 	self.load('msvc')
+	self.find_program('cdb', mandatory=False)
 
 def build(bld):
 	pass

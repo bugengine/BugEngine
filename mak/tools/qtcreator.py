@@ -19,7 +19,7 @@ except:
 	import md5
 	createMd5=md5.new
 
-if sys.hexversion > 0x300000:
+if sys.hexversion >= 0x3000000:
 	unicode = str
 
 def _hexdigest(s):
@@ -36,7 +36,7 @@ def _hexdigest(s):
 		except:
 			i = c
 		r = r + h[(i >> 4) & 0xF] + h[i & 0xF]
-	return unicode(r)
+	return r
 
 
 def generateGUID(name):
@@ -63,13 +63,6 @@ def path_from(path, base_node):
 		return path.path_from(base_node)
 
 
-def to_bytes(value):
-	if not isinstance(value, bytes):
-		try:
-			return value.decode('utf-8')
-		except AttributeError:
-			return bytes(value, 'utf-8')
-
 def write_value(node, value, key=''):
 	def convert_value(v):
 		if isinstance(v, bool):
@@ -78,9 +71,9 @@ def write_value(node, value, key=''):
 			return 'double', str(v)
 		elif isinstance(v, int):
 			return 'int', str(v)
-		elif isinstance(v, bytes):
+		elif isinstance(v, bytearray):
 			return 'QByteArray', str(v.decode('utf-8'))
-		elif isinstance(v, unicode):
+		elif isinstance(v, unicode) or isinstance(v, str):
 			return 'QString', str(v)
 		elif isinstance(v, tuple):
 			return 'QVariantList', ''
@@ -117,9 +110,9 @@ def read_value(node):
 		value = float(node.childNodes[0].wholeText)
 	elif type == 'QByteArray':
 		if node.childNodes:
-			value = to_bytes(node.childNodes[0].wholeText)
+			value = bytearray(node.childNodes[0].wholeText, 'utf-8')
 		else:
-			value = b''
+			value = bytearray(b'')
 	elif type == 'QString':
 		if node.childNodes:
 			value = node.childNodes[0].wholeText
@@ -166,18 +159,25 @@ class QtToolchain(QtObject):
 		'ProjectExplorer_GccToolChain_PlatformLinkerFlags',
 		'ProjectExplorer_GccToolChain_SupportedAbis',
 		'ProjectExplorer_GccToolChain_TargetAbi',
+		'ProjectExplorer_MsvcToolChain_VarsBat',
+		'ProjectExplorer_MsvcToolChain_VarsBatArg',
+		'ProjectExplorer_MsvcToolChain_SupportedAbi',
+		'ProjectExplorer_CustomToolChain_CompilerPath',
+		'ProjectExplorer_CustomToolChain_Cxx11Flags',
+		'ProjectExplorer_CustomToolChain_ErrorPattern',
+		'ProjectExplorer_CustomToolChain_FileNameCap',
+		'ProjectExplorer_CustomToolChain_HeaderPaths',
+		'ProjectExplorer_CustomToolChain_LineNumberCap',
+		'ProjectExplorer_CustomToolChain_MakePath',
+		'ProjectExplorer_CustomToolChain_MessageCap',
+		'ProjectExplorer_CustomToolChain_Mkspecs',
+		'ProjectExplorer_CustomToolChain_OutputParser',
+		'ProjectExplorer_CustomToolChain_PredefinedMacros',
+		'ProjectExplorer_CustomToolChain_TargetAbi',
 		'ProjectExplorer_ToolChain_Autodetect',
 		'ProjectExplorer_ToolChain_DisplayName',
 		'ProjectExplorer_ToolChain_Id',
 	)
-
-	def get_compiler(self, env):
-		valid_compilers = {
-				'gcc': 'Gcc',
-				'clang': 'Clang',
-				'icc': 'IntelIcc'
-			}
-		return valid_compilers.get(env.COMPILER_NAME, 'Gcc')
 
 	def get_architecture(self, env):
 		return (env.ARCH_FAMILY, env.ARCH_LP64 and '64bit' or '32bit')
@@ -217,10 +217,6 @@ class QtToolchain(QtObject):
 	def __init__(self, env_name=None, env=None):
 		if env_name:
 			assert(env)
-			if isinstance(env.CXX, list):
-				self.ProjectExplorer_GccToolChain_Path = env.CXX[0]
-			else:
-				self.ProjectExplorer_GccToolChain_Path = env.CXX
 			arch,variant = self.get_architecture(env)
 			os,platform = self.get_platform(env)
 			abi = '%s-%s-%s-%s-%s'%(
@@ -230,14 +226,30 @@ class QtToolchain(QtObject):
 				env.DEST_BINFMT,
 				variant
 			)
-			toolchain_id =  'ProjectExplorer.ToolChain.%s:%s' % (self.get_compiler(env), generateGUID('toolchain:%s'%env_name))
 
-			self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = ()
-			self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = ()
-			self.ProjectExplorer_GccToolChain_SupportedAbis = tuple(abi)
-			self.ProjectExplorer_GccToolChain_TargetAbi = abi
+			toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('toolchain:%s'%env_name)
+			if isinstance(env.CXX, list):
+				self.ProjectExplorer_CustomToolChain_CompilerPath = env.CXX[0]
+			else:
+				self.ProjectExplorer_CustomToolChain_CompilerPath = env.CXX
+			self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
+			self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
+			self.ProjectExplorer_CustomToolChain_FileNameCap = 1
+			#TODO
+			self.ProjectExplorer_CustomToolChain_HeaderPaths = ()
+			self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
+			self.ProjectExplorer_CustomToolChain_MakePath = ''
+			self.ProjectExplorer_CustomToolChain_MessageCap = 3
+			self.ProjectExplorer_CustomToolChain_Mkspecs = ''
+			if env.COMPILER_NAME == 'msvc':
+				self.ProjectExplorer_CustomToolChain_OutputParser = 3
+			else:
+				self.ProjectExplorer_CustomToolChain_OutputParser = 1
+			#TODO
+			self.ProjectExplorer_CustomToolChain_PredefinedMacros = ()
+			self.ProjectExplorer_CustomToolChain_TargetAbi = abi
 			self.ProjectExplorer_ToolChain_Autodetect = False
-			self.ProjectExplorer_ToolChain_DisplayName = unicode(env_name)
+			self.ProjectExplorer_ToolChain_DisplayName = env_name
 			self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
@@ -250,14 +262,19 @@ class QtDebugger(QtObject):
 		'EngineType',
 		'Id'
 	)
-	def __init__(self, env_name=None, env=None, abi=None):
+	def __init__(self, env_name=None, env=None, toolchain=None):
 		if env_name:
 			assert(env)
-			assert(abi)
-			self.Abis = tuple(abi)
+			assert(toolchain)
+			if env.COMPILER_NAME == 'msvc':
+				self.Binary = env.CDB or ''
+				self.EngineType = 4
+			else:
+				self.Binary = env.GDB or '/usr/bin/gdb'
+				self.EngineType = 1
+			self.Abis = tuple([toolchain.ProjectExplorer_CustomToolChain_TargetAbi])
 			self.AutoDetected = False
-			self.Binary = env.GDB or '/usr/bin/gdb'
-			self.EngineType = 1
+			self.DisplayName = env_name
 			self.Id = generateGUID('debugger:%s'%env_name)
 
 
@@ -281,19 +298,19 @@ class QtPlatform(QtObject):
 			assert(env)
 			self.PE_Profile_AutoDetected = False
 			self.PE_Profile_Data = [
-					('Android.GdbServer.Information', u''),
+					('Android.GdbServer.Information', ''),
 					('Debugger.Information', debugger),
-					('PE.Profile.Device', u'device:%s'%env_name),
-					('PE.Profile.DeviceType', b'Desktop'),
-					('PE.Profile.SysRoot', u''),
+					('PE.Profile.Device', 'device:%s'%env_name),
+					('PE.Profile.DeviceType', bytearray('Desktop', 'utf-8')),
+					('PE.Profile.SysRoot', ''),
 					('PE.Profile.ToolChain', toolchain),
-					('QtPM4.mkSPecInformation', u''),
+					('QtPM4.mkSPecInformation', ''),
 					('QtSupport.QtInformation', 2),
 				]
-			self.PE_Profile_Icon = u':///Desktop///'
+			self.PE_Profile_Icon = ':///Desktop///'
 			self.PE_Profile_Id = self.guid = generateGUID('profile:'+env_name)
 			self.PE_Profile_MutableInfo = ()
-			self.PE_Profile_Name = unicode(env_name)
+			self.PE_Profile_Name = env_name
 			self.PE_Profile_SDK = False
 
 
@@ -344,7 +361,7 @@ class QtCreator(Build.BuildContext):
 	def load_debugger_list(self):
 		self.debuggers = []
 		try:
-			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'debuggers.xml'))
+			document = parse(os.path.join(HOME_DIRECTORY, 'debuggers.xml'))
 		except Exception as e:
 			Logs.warn('QtCreator debuggers not found; creating default one')
 		else:
@@ -393,7 +410,7 @@ class QtCreator(Build.BuildContext):
 	def load_platform_list(self):
 		self.platforms = []
 		try:
-			document = parse(os.path.join(os.getenv('HOME'), '.config', 'QtProject', 'qtcreator', 'profiles.xml'))
+			document = parse(os.path.join(HOME_DIRECTORY, 'profiles.xml'))
 		except Exception as e:
 			Logs.warn('QtCreator profiles not found; creating default one')
 		else:
@@ -432,11 +449,11 @@ class QtCreator(Build.BuildContext):
 				self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
 			if self.__class__.version[0] == 2:
 				debugger = [
-						('Binary', unicode(env.GDB or '/usr/bin/gdb')),
+						('Binary', '/usr/bin/gdb'),
 						('EngineType', 1),
 					]
 			else:
-				debugger = QtDebugger(env_name, env, toolchain.ProjectExplorer_GccToolChain_TargetAbi)
+				debugger = QtDebugger(env_name, env, toolchain)
 				for d_name, d in self.debuggers:
 					if d_name == debugger.Id:
 						#TODO: set some variables here anyway
@@ -567,14 +584,14 @@ class QtCreator(Build.BuildContext):
 						('EditorConfiguration.CamelCaseNavigation', True),
 						('EditorConfiguration.CodeStyle.0', [
 							('language', 'Cpp'),
-							('value', [('CurrentPreferences', b'CppGlobal')]),
+							('value', [('CurrentPreferences', bytearray(b'CppGlobal'))]),
 						]),
 						('EditorConfiguration.CodeStyle.1', [
 							('language', 'QmlJS'),
-							('value', [('CurrentPreferences', b'QmlJSGlobal')]),
+							('value', [('CurrentPreferences', bytearray(b'QmlJSGlobal'))]),
 						]),
 						('EditorConfiguration.CodeStyle.Count', 2),
-						('EditorConfiguration.Codec', b'UTF-8'),
+						('EditorConfiguration.Codec', bytearray(b'UTF-8')),
 						('EditorConfiguration.ConstrainToolTips', False),
 						('EditorConfiguration.IndentSize',  4),
 						('EditorConfiguration.KeyboardTooltips', False),
@@ -610,37 +627,37 @@ class QtCreator(Build.BuildContext):
 							build_configurations.append((
 								'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
 								[
-									('ProjectExplorer.BuildConfiguration.BuildDirectory', unicode(self.srcnode.abspath())),
-									('GenericProjectManager.GenericBuildConfiguration.BuildDirectory', unicode(self.srcnode.abspath())),
+									('ProjectExplorer.BuildConfiguration.BuildDirectory', self.srcnode.abspath()),
+									('GenericProjectManager.GenericBuildConfiguration.BuildDirectory', self.srcnode.abspath()),
 									('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
 										('ProjectExplorer.BuildStepList.Step.0', [
 											('ProjectExplorer.BuildStep.Enabled', True),
-											('ProjectExplorer.ProcessStep.Arguments', u'waf install:%s:%s'%(env_name, variant)),
-											('ProjectExplorer.ProcessStep.Command', unicode(sys.executable)),
-											('ProjectExplorer.ProcessStep.WorkingDirectory', u'%{buildDir}'),
-											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Waf configuration'),
-											('ProjectExplorer.ProjectConfiguration.DisplayName', u''),
-											('ProjectExplorer.ProjectConfiguration.Id', u'ProjectExplorer.ProcessStep')
+											('ProjectExplorer.ProcessStep.Arguments', 'waf install:%s:%s'%(env_name, variant)),
+											('ProjectExplorer.ProcessStep.Command', sys.executable),
+											('ProjectExplorer.ProcessStep.WorkingDirectory', '%{buildDir}'),
+											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
+											('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+											('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
 										]),
 										('ProjectExplorer.BuildStepList.StepsCount', 1),
-										('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Build'),
-										('ProjectExplorer.ProjectConfiguration.DisplayName', u''),
-										('ProjectExplorer.ProjectConfiguration.Id', u'ProjectExplorer.BuildSteps.Build')
+										('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
+										('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+										('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Build')
 									]),
 									('ProjectExplorer.BuildConfiguration.BuildStepList.1', [
 										('ProjectExplorer.BuildStepList.Step.0', [
 											('ProjectExplorer.BuildStep.Enabled', True),
-											('ProjectExplorer.ProcessStep.Arguments', u'waf clean:%s:%s'%(env_name, variant)),
-											('ProjectExplorer.ProcessStep.Command', unicode(sys.executable)),
-											('ProjectExplorer.ProcessStep.WorkingDirectory', u'%{buildDir}'),
-											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Waf configuration'),
-											('ProjectExplorer.ProjectConfiguration.DisplayName', u''),
-											('ProjectExplorer.ProjectConfiguration.Id', u'ProjectExplorer.ProcessStep')
+											('ProjectExplorer.ProcessStep.Arguments', 'waf clean:%s:%s'%(env_name, variant)),
+											('ProjectExplorer.ProcessStep.Command', sys.executable),
+											('ProjectExplorer.ProcessStep.WorkingDirectory', '%{buildDir}'),
+											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
+											('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+											('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
 										]),
 										('ProjectExplorer.BuildStepList.StepsCount', 1),
-										('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Clean'),
-										('ProjectExplorer.ProjectConfiguration.DisplayName', u''),
-										('ProjectExplorer.ProjectConfiguration.Id', u'ProjectExplorer.BuildSteps.Clean')
+										('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
+										('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+										('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Clean')
 									]),
 									('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
 									('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
@@ -654,9 +671,9 @@ class QtCreator(Build.BuildContext):
 											self.srcnode.abspath(),
 											bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
 											env.cxxprogram_PATTERN%self.launcher.target),)),
-									('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Default'),
-									('ProjectExplorer.ProjectConfiguration.DisplayName', u'%s'%(variant)),
-									('ProjectExplorer.ProjectConfiguration.Id', u'GenericProjectManager.GenericBuildConfiguration')
+									('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
+									('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
+									('ProjectExplorer.ProjectConfiguration.Id', 'GenericProjectManager.GenericBuildConfiguration')
 								]))
 							build_configuration_index += 1
 						run_configurations = []
@@ -679,17 +696,17 @@ class QtCreator(Build.BuildContext):
 								('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
 								('Analyzer.Valgrind.ShowReachable', False),
 								('Analyzer.Valgrind.TrackOrigins', True),
-								('Analyzer.Valgrind.ValgrindExecutable', u'valgrind'),
+								('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
 								('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
 								('PE.EnvironmentAspect.Base', 2),
 								('PE.EnvironmentAspect.Changes', ()),
 								('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
-								('ProjectExplorer.CustomExecutableRunConfiguration.Executable', u'${OUT_NAME}'),
+								('ProjectExplorer.CustomExecutableRunConfiguration.Executable', '${OUT_NAME}'),
 								('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-								('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', u'${buildDir}'),
-								('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', u'Run %s' % task_gen.target),
-								('ProjectExplorer.ProjectConfiguration.DisplayName', u''),
-								('ProjectExplorer.ProjectConfiguration.Id', u'ProjectExplorer.CustomExecutableRunConfiguration'),
+								('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', '${buildDir}'),
+								('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
+								('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+								('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
 								('RunConfiguration.QmlDebugServerPort', 3768),
 								('RunConfiguration.UseCppDebugger', True),
 								('RunConfiguration.UseCppDebuggerAuto', False),
@@ -700,8 +717,8 @@ class QtCreator(Build.BuildContext):
 
 
 						write_value(data, [
-							('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', unicode(env_name)),
-							('ProjectExplorer.ProjectConfiguration.DisplayName', unicode(env_name)),
+							('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
+							('ProjectExplorer.ProjectConfiguration.DisplayName', env_name),
 							('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
 							('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
 							('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
@@ -720,7 +737,7 @@ class QtCreator(Build.BuildContext):
 					write_value(data, target_index)
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.EnvironmentId').close()
-					write_value(data, b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
+					write_value(data, bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}'))
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion').close()
 					write_value(data, self.__class__.version[1])
