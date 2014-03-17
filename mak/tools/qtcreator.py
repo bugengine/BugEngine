@@ -19,6 +19,9 @@ except:
 	import md5
 	createMd5=md5.new
 
+if sys.hexversion > 0x300000:
+	unicode = str
+
 def _hexdigest(s):
 	"""Return a string as a string of hex characters.
 	"""
@@ -62,7 +65,10 @@ def path_from(path, base_node):
 
 def to_bytes(value):
 	if not isinstance(value, bytes):
-		return value.decode('utf-8')
+		try:
+			return value.decode('utf-8')
+		except AttributeError:
+			return bytes(value, 'utf-8')
 
 def write_value(node, value, key=''):
 	def convert_value(v):
@@ -231,13 +237,28 @@ class QtToolchain(QtObject):
 			self.ProjectExplorer_GccToolChain_SupportedAbis = tuple(abi)
 			self.ProjectExplorer_GccToolChain_TargetAbi = abi
 			self.ProjectExplorer_ToolChain_Autodetect = False
-			self.ProjectExplorer_ToolChain_DisplayName = env_name
+			self.ProjectExplorer_ToolChain_DisplayName = unicode(env_name)
 			self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
 class QtDebugger(QtObject):
-	def __init__(self):
-		pass
+	published_vars = (
+		'Abis',
+		'AutoDetected',
+		'Binary',
+		'DisplayName',
+		'EngineType',
+		'Id'
+	)
+	def __init__(self, env_name=None, env=None, abi=None):
+		if env_name:
+			assert(env)
+			assert(abi)
+			self.Abis = tuple(abi)
+			self.AutoDetected = False
+			self.Binary = env.GDB or '/usr/bin/gdb'
+			self.EngineType = 1
+			self.Id = generateGUID('debugger:%s'%env_name)
 
 
 class QtDevice(QtObject):
@@ -277,11 +298,6 @@ class QtPlatform(QtObject):
 
 
 class QtCreator(Build.BuildContext):
-	cmd = 'qtcreator2'
-	fun = 'build'
-	optim = 'debug'
-	version = (2,12)
-
 	def execute(self):
 		self.restore()
 		if not self.all_envs:
@@ -332,7 +348,18 @@ class QtCreator(Build.BuildContext):
 		except Exception as e:
 			Logs.warn('QtCreator debuggers not found; creating default one')
 		else:
-			pass
+			for data in document.getElementsByTagName('data'):
+				variable_name = data.getElementsByTagName('variable')[0]
+				variable_name = variable_name.childNodes[0].toxml().strip()
+				if variable_name.startswith('DebuggerItem.'):
+					try:
+						variable_index = int(variable_name[13:])
+					except ValueError:
+						pass
+					else:
+						debugger = QtDebugger()
+						debugger.load_from_node(data.getElementsByTagName('valuemap')[0])
+						self.debuggers.append((debugger.Id, debugger))
 
 	def load_toolchain_list(self):
 		self.toolchains = []
@@ -409,8 +436,14 @@ class QtCreator(Build.BuildContext):
 						('EngineType', 1),
 					]
 			else:
-				#TODO
-				debugger = ''
+				debugger = QtDebugger(env_name, env, toolchain.ProjectExplorer_GccToolChain_TargetAbi)
+				for d_name, d in self.debuggers:
+					if d_name == debugger.Id:
+						#TODO: set some variables here anyway
+						break
+				else:
+					self.debuggers.append((debugger.Id, debugger))
+				debugger = debugger.Id
 			platform = QtPlatform(env_name, env, toolchain.ProjectExplorer_ToolChain_Id, debugger)
 			for p_name, p in self.platforms:
 				if p_name == env_name:
@@ -418,6 +451,7 @@ class QtCreator(Build.BuildContext):
 					break
 			else:
 				self.platforms.append((env_name, platform))
+
 		with XmlDocument(open('profiles.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				profile_index = 0
@@ -435,6 +469,22 @@ class QtCreator(Build.BuildContext):
 				with XmlNode(creator, 'data') as data:
 					XmlNode(data, 'variable', 'Version')
 					XmlNode(data, 'value', '1', [('type', 'int')])
+
+		with XmlDocument(open('debuggers.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
+			with XmlNode(document, 'qtcreator') as creator:
+				debugger_index = 0
+				for debugger_name, debugger in self.debuggers:
+					with XmlNode(creator, 'data') as data:
+						XmlNode(data, 'variable', 'DebuggerItem.%d'%debugger_index)
+						debugger.write(data)
+					debugger_index += 1
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'DebuggerItem.Count')
+					XmlNode(data, 'value', str(debugger_index), [('type', 'int')])
+				with XmlNode(creator, 'data') as data:
+					XmlNode(data, 'variable', 'Version')
+					XmlNode(data, 'value', '1', [('type', 'int')])
+
 		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				toolchain_index = 0
@@ -675,7 +725,13 @@ class QtCreator(Build.BuildContext):
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion').close()
 					write_value(data, self.__class__.version[1])
 
-class QtCreator3(Build.BuildContext):
+class QtCreator2(QtCreator):
+	cmd = 'qtcreator2'
+	fun = 'build'
+	optim = 'debug'
+	version = (2, 12)
+
+class QtCreator3(QtCreator):
 	cmd = 'qtcreator3'
 	fun = 'build'
 	optim = 'debug'
