@@ -140,13 +140,13 @@ struct InterlockedType<8>
             return p.m_tag;
         #endif
     }
-    static inline bool set_conditional(volatile tagged_t *p, value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         #ifdef TAG_LONG
-            return _InterlockedCompareExchange128((volatile i64*)p, v,
+            return _InterlockedCompareExchange128((volatile i64*)p, (i64)v,
                                                   p->m_tag+1, (i64*)&condition) != 0;
         #else
-            return _InterlockedCompare64Exchange128((volatile i64*)p, v, condition+1,
+            return _InterlockedCompare64Exchange128((volatile i64*)p, (i64)v, condition+1,
                                                     condition) == condition;
         #endif
     }
