@@ -53,6 +53,7 @@ def load_suncc(self, bindir):
 	self.find_program('sunCC', var='CXX', path_list=[bindir])
 	self.env.COMPILER_NAME='suncc'
 	self.env.COMPILER_TARGET=self.env.HOST
+	self.find_program('dbx', var='GDB')
 	self.load('suncc suncxx')
 
 def options(opt):

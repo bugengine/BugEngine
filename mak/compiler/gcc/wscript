@@ -171,6 +171,10 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
 		self.find_program(target + '-ar', var='AR', path_list=[bindir], mandatory=False)
 	if not self.env.AR:
 		self.find_program('ar', var='AR', path_list=[bindir], mandatory=False)
+	if not self.env.GDB:
+		self.find_program(target + '-gdb', var='GDB', path_list=[bindir], mandatory=False)
+	if not self.env.GDB:
+		self.find_program('gdb', var='GDB', path_list=[bindir], mandatory=False)
 	self.load('gcc gxx')
 	if target.find('mingw') != -1:
 		winres = self.find_program(target + '-windres', var='WINRC', path_list=[bindir], mandatory=False)
