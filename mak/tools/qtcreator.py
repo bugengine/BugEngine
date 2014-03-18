@@ -235,8 +235,7 @@ class QtToolchain(QtObject):
 			self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
 			self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
 			self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-			#TODO
-			self.ProjectExplorer_CustomToolChain_HeaderPaths = ()
+			self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(env.INCLUDES + env.SYSTEM_INCLUDES)
 			self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
 			self.ProjectExplorer_CustomToolChain_MakePath = ''
 			self.ProjectExplorer_CustomToolChain_MessageCap = 3
@@ -245,12 +244,14 @@ class QtToolchain(QtObject):
 				self.ProjectExplorer_CustomToolChain_OutputParser = 3
 			else:
 				self.ProjectExplorer_CustomToolChain_OutputParser = 1
-			#TODO
-			self.ProjectExplorer_CustomToolChain_PredefinedMacros = ()
+			self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
 			self.ProjectExplorer_CustomToolChain_TargetAbi = abi
 			self.ProjectExplorer_ToolChain_Autodetect = False
 			self.ProjectExplorer_ToolChain_DisplayName = env_name
 			self.ProjectExplorer_ToolChain_Id = toolchain_id
+
+	def copy_from(self, other):
+		pass
 
 
 class QtDebugger(QtObject):
@@ -266,9 +267,12 @@ class QtDebugger(QtObject):
 		if env_name:
 			assert(env)
 			assert(toolchain)
-			if env.COMPILER_NAME == 'msvc':
-				self.Binary = env.CDB or ''
+			if env.CDB:
+				self.Binary = env.CDB
 				self.EngineType = 4
+			elif env.LLDB:
+				self.Binary = env.LLDB
+				self.EngineType = 2
 			else:
 				self.Binary = env.GDB or '/usr/bin/gdb'
 				self.EngineType = 1
@@ -277,9 +281,15 @@ class QtDebugger(QtObject):
 			self.DisplayName = env_name
 			self.Id = generateGUID('debugger:%s'%env_name)
 
+	def copy_from(self, other):
+		pass
+
 
 class QtDevice(QtObject):
 	def __init__(self):
+		pass
+
+	def copy_from(self, other):
 		pass
 
 
@@ -296,13 +306,14 @@ class QtPlatform(QtObject):
 	def __init__(self, env_name=None, env=None, toolchain=None, debugger=None):
 		if env_name:
 			assert(env)
+			sysroot = env.SYSROOT[0] if env.SYSROOT else ''
 			self.PE_Profile_AutoDetected = False
 			self.PE_Profile_Data = [
 					('Android.GdbServer.Information', ''),
 					('Debugger.Information', debugger),
 					('PE.Profile.Device', 'device:%s'%env_name),
 					('PE.Profile.DeviceType', bytearray('Desktop', 'utf-8')),
-					('PE.Profile.SysRoot', ''),
+					('PE.Profile.SysRoot', sysroot),
 					('PE.Profile.ToolChain', toolchain),
 					('QtPM4.mkSPecInformation', ''),
 					('QtSupport.QtInformation', 2),
@@ -312,6 +323,9 @@ class QtPlatform(QtObject):
 			self.PE_Profile_MutableInfo = ()
 			self.PE_Profile_Name = env_name
 			self.PE_Profile_SDK = False
+
+	def copy_from(self, other):
+		pass
 
 
 class QtCreator(Build.BuildContext):
@@ -443,33 +457,44 @@ class QtCreator(Build.BuildContext):
 			toolchain = QtToolchain(env_name, env)
 			for t_name, t in self.toolchains:
 				if t_name == env_name:
-					# TODO: set some variables here anyway
+					t.copy_from(toolchain)
 					break
 			else:
 				self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
 			if self.__class__.version[0] == 2:
-				debugger = [
-						('Binary', '/usr/bin/gdb'),
+				if env.LLDB:
+					debugger = [
+						('Binary', env.LLDB),
+						('EngineType', 2),
+					]
+				elif env.CDB:
+					debugger = [
+						('Binary', env.CDB),
+						('EngineType', 4),
+					]
+				else:
+					debugger = [
+						('Binary', env.GDB or '/usr/bin/gdb'),
 						('EngineType', 1),
 					]
 			else:
 				debugger = QtDebugger(env_name, env, toolchain)
 				for d_name, d in self.debuggers:
 					if d_name == debugger.Id:
-						#TODO: set some variables here anyway
+						d.copy_from(debugger)
 						break
 				else:
 					self.debuggers.append((debugger.Id, debugger))
 				debugger = debugger.Id
 			platform = QtPlatform(env_name, env, toolchain.ProjectExplorer_ToolChain_Id, debugger)
 			for p_name, p in self.platforms:
-				if p_name == env_name:
-					# TODO: set some variables here anyway
+				if p_name == okatform.PE_Profile_Id:
+					p.copy_from(platform)
 					break
 			else:
 				self.platforms.append((env_name, platform))
 
-		with XmlDocument(open('profiles.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+		with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				profile_index = 0
 				for platform_name, platform in self.platforms:
@@ -487,7 +512,7 @@ class QtCreator(Build.BuildContext):
 					XmlNode(data, 'variable', 'Version')
 					XmlNode(data, 'value', '1', [('type', 'int')])
 
-		with XmlDocument(open('debuggers.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
+		with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				debugger_index = 0
 				for debugger_name, debugger in self.debuggers:
@@ -502,7 +527,7 @@ class QtCreator(Build.BuildContext):
 					XmlNode(data, 'variable', 'Version')
 					XmlNode(data, 'value', '1', [('type', 'int')])
 
-		with XmlDocument(open('toolchains.xml', 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
+		with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
 				toolchain_index = 0
 				for toolchain_name, toolchain in self.toolchains:
@@ -557,15 +582,9 @@ class QtCreator(Build.BuildContext):
 		self.base_node.make_node('%s.files'%task_gen.target).write('\n'.join(file_list))
 
 	def write_includes(self, task_gen, includes):
-		for toolchain in self.env.ALL_TOOLCHAINS:
-			env = self.all_envs[toolchain]
-			includes += env.INCLUDES + env.SYSTEM_INCLUDES
 		self.base_node.make_node('%s.includes'%task_gen.target).write('\n'.join(includes))
 
 	def write_defines(self, task_gen, defines):
-		for toolchain in self.env.ALL_TOOLCHAINS:
-			env = self.all_envs[toolchain]
-			defines += env.DEFINES + env.SYSTEM_DEFINES
 		self.base_node.make_node('%s.config'%task_gen.target).write('\n'.join(defines))
 
 	def write_user(self, task_gen):

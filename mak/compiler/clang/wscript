@@ -154,6 +154,7 @@ def detect_clang(conf):
 def load_clang(conf, directory, target):
 	conf.find_program('clang', var='CC', path_list=[directory])
 	conf.find_program('clang++', var='CXX', path_list=[directory])
+	conf.find_program('lldb', var='LLDB', path_list=[directory], mandatory=False)
 	conf.env.COMPILER_NAME='clang'
 	conf.env.COMPILER_TARGET=target
 	conf.load('gcc gxx')
