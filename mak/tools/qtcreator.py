@@ -23,6 +23,9 @@ except:
 if sys.hexversion >= 0x3000000:
 	unicode = str
 
+VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
+
+
 def _hexdigest(s):
 	"""Return a string as a string of hex characters.
 	"""
@@ -140,46 +143,46 @@ class QtObject:
 			if node.nodeType == node.ELEMENT_NODE:
 				name, value = read_value(node)
 				var_name = name.replace('.', '_')
-				if var_name not in self.__class__.published_vars:
-					Logs.warn('property %s not handled by exporter; dropped' % var_name)
+				for n, u in self.__class__.published_vars:
+					if n == name:
+						break;
 				else:
-					setattr(self, var_name, value)
+					self.__class__.published_vars.append((name, True))
+				setattr(self, var_name, value)
+
+	def copy_from(self, other):
+		for (var_name, user_edit) in self.__class__.published_vars:
+			if user_edit:
+				value = getattr(other, var_name.replace('.', '_'), None)
+				if value:
+					setattr(self, var_name.replace('.', '_'), value)
 
 	def write(self, xml_node):
 		with XmlNode(xml_node, 'valuemap', [('type', 'QVariantMap')]) as variant_map:
-			for var_name in self.__class__.published_vars:
-				value = getattr(self, var_name, None)
+			for (var_name, user_edit) in self.__class__.published_vars:
+				value = getattr(self, var_name.replace('.', '_'), None)
 				if value != None:
-					write_value(variant_map, value, key=var_name.replace('_', '.'))
+					write_value(variant_map, value, key=var_name)
 
 
 class QtToolchain(QtObject):
-	published_vars = (
-		'ProjectExplorer_GccToolChain_Path',
-		'ProjectExplorer_GccToolChain_PlatformCodeGenFlags',
-		'ProjectExplorer_GccToolChain_PlatformLinkerFlags',
-		'ProjectExplorer_GccToolChain_SupportedAbis',
-		'ProjectExplorer_GccToolChain_TargetAbi',
-		'ProjectExplorer_MsvcToolChain_VarsBat',
-		'ProjectExplorer_MsvcToolChain_VarsBatArg',
-		'ProjectExplorer_MsvcToolChain_SupportedAbi',
-		'ProjectExplorer_CustomToolChain_CompilerPath',
-		'ProjectExplorer_CustomToolChain_Cxx11Flags',
-		'ProjectExplorer_CustomToolChain_ErrorPattern',
-		'ProjectExplorer_CustomToolChain_FileNameCap',
-		'ProjectExplorer_CustomToolChain_HeaderPaths',
-		'ProjectExplorer_CustomToolChain_LineNumberCap',
-		'ProjectExplorer_CustomToolChain_MakePath',
-		'ProjectExplorer_CustomToolChain_MessageCap',
-		'ProjectExplorer_CustomToolChain_Mkspecs',
-		'ProjectExplorer_CustomToolChain_OutputParser',
-		'ProjectExplorer_CustomToolChain_PredefinedMacros',
-		'ProjectExplorer_CustomToolChain_TargetAbi',
-		'ProjectExplorer_ToolChain_Autodetect',
-		'ProjectExplorer_ToolChain_DisplayName',
-		'ProjectExplorer_ToolChain_Id',
-		'Qt4ProjectManager_Android_NDK_TC_VERSION',
-	)
+	published_vars = [
+		('ProjectExplorer.CustomToolChain.CompilerPath', False),
+		('ProjectExplorer.CustomToolChain.Cxx11Flags', True),
+		('ProjectExplorer.CustomToolChain.ErrorPattern', False),
+		('ProjectExplorer.CustomToolChain.FileNameCap', False),
+		('ProjectExplorer.CustomToolChain.HeaderPaths', False),
+		('ProjectExplorer.CustomToolChain.LineNumberCap', False),
+		('ProjectExplorer.CustomToolChain.MakePath', True),
+		('ProjectExplorer.CustomToolChain.MessageCap', False),
+		('ProjectExplorer.CustomToolChain.Mkspecs', False),
+		('ProjectExplorer.CustomToolChain.OutputParser', False),
+		('ProjectExplorer.CustomToolChain.PredefinedMacros', False),
+		('ProjectExplorer.CustomToolChain.TargetAbi', False),
+		('ProjectExplorer.ToolChain.Autodetect', False),
+		('ProjectExplorer.ToolChain.DisplayName', True),
+		('ProjectExplorer.ToolChain.Id', False),
+	]
 
 	def get_architecture(self, env):
 		return (env.ARCH_FAMILY, env.ARCH_LP64 and '64bit' or '32bit')
@@ -213,7 +216,7 @@ class QtToolchain(QtObject):
 				platform=p_name
 				break
 		else:
-			platform='generic'
+			platform='unknown'
 		return (os, platform)
 
 	def __init__(self, env_name=None, env=None):
@@ -258,19 +261,16 @@ class QtToolchain(QtObject):
 			self.ProjectExplorer_ToolChain_DisplayName = env_name
 			self.ProjectExplorer_ToolChain_Id = toolchain_id
 
-	def copy_from(self, other):
-		pass
-
 
 class QtDebugger(QtObject):
-	published_vars = (
-		'Abis',
-		'AutoDetected',
-		'Binary',
-		'DisplayName',
-		'EngineType',
-		'Id'
-	)
+	published_vars = [
+		('Abis', False),
+		('AutoDetected', False),
+		('Binary', True),
+		('DisplayName', True),
+		('EngineType', True),
+		('Id', False),
+	]
 	def __init__(self, env_name=None, env=None, toolchain=None):
 		if env_name:
 			assert(env)
@@ -289,28 +289,22 @@ class QtDebugger(QtObject):
 			self.DisplayName = env_name
 			self.Id = generateGUID('debugger:%s'%env_name)
 
-	def copy_from(self, other):
-		pass
-
 
 class QtDevice(QtObject):
 	def __init__(self):
 		pass
 
-	def copy_from(self, other):
-		pass
-
 
 class QtPlatform(QtObject):
-	published_vars = (
-		'PE_Profile_AutoDetected',
-		'PE_Profile_Data',
-		'PE_Profile_Icon',
-		'PE_Profile_Id',
-		'PE_Profile_MutableInfo',
-		'PE_Profile_Name',
-		'PE_Profile_SDK'
-	)
+	published_vars = [
+		('PE.Profile.AutoDetected', False),
+		('PE.Profile.Data', True),
+		('PE.Profile.Icon', True),
+		('PE.Profile.Id', False),
+		('PE.Profile.MutableInfo', True),
+		('PE.Profile.Name', True),
+		('PE.Profile.SDK', False),
+	]
 	def __init__(self, env_name=None, env=None, toolchain=None, debugger=None):
 		if env_name:
 			assert(env)
@@ -338,9 +332,8 @@ class QtPlatform(QtObject):
 			self.PE_Profile_Name = env_name
 			self.PE_Profile_SDK = False
 
-	def copy_from(self, other):
-		pass
-
+def to_var(name):
+	return VAR_PATTERN%name
 
 class QtCreator(Build.BuildContext):
 	def execute(self):
@@ -348,17 +341,17 @@ class QtCreator(Build.BuildContext):
 		if not self.all_envs:
 			self.load_envs()
 		self.env.PROJECTS=[self.__class__.cmd]
-		self.env.VARIANT = '${Variant}'
-		self.env.TOOLCHAIN = '${Toolchain}'
-		self.env.PREFIX = '${Prefix}'
-		self.env.DEPLOY_ROOTDIR = '${Deploy_RootDir}'
-		self.env.DEPLOY_BINDIR = '${Deploy_BinDir}'
-		self.env.DEPLOY_RUNBINDIR = '${Deploy_RunBinDir}'
-		self.env.DEPLOY_LIBDIR = '${Deploy_LibDir}'
-		self.env.DEPLOY_INCLUDEDIR = '${Deploy_IncludeDir}'
-		self.env.DEPLOY_DATADIR = '${Deploy_DataDir}'
-		self.env.DEPLOY_PLUGINDIR = '${Deploy_PluginDir}'
-		self.env.DEPLOY_KERNELDIR = '${Deploy_KernelDir}'
+		self.env.VARIANT = to_var('Variant')
+		self.env.TOOLCHAIN = to_var('Toolchain')
+		self.env.PREFIX = to_var('Prefix')
+		self.env.DEPLOY_ROOTDIR = to_var('Deploy_RootDir')
+		self.env.DEPLOY_BINDIR = to_var('Deploy_BinDir')
+		self.env.DEPLOY_RUNBINDIR = to_var('Deploy_RunBinDir')
+		self.env.DEPLOY_LIBDIR = to_var('Deploy_LibDir')
+		self.env.DEPLOY_INCLUDEDIR = to_var('Deploy_IncludeDir')
+		self.env.DEPLOY_DATADIR = to_var('Deploy_DataDir')
+		self.env.DEPLOY_PLUGINDIR = to_var('Deploy_PluginDir')
+		self.env.DEPLOY_KERNELDIR = to_var('Deploy_KernelDir')
 		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
@@ -398,9 +391,10 @@ class QtCreator(Build.BuildContext):
 			return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
 
 	def get_platform_guid(self, env_name):
+		guid = generateGUID('profile:'+env_name)
 		for platform_name, platform in self.platforms:
-			if env_name == platform_name:
-				return platform.guid
+			if platform_name == guid:
+				return guid
 
 	def load_debugger_list(self):
 		self.debuggers = []
@@ -470,7 +464,7 @@ class QtCreator(Build.BuildContext):
 						platform = QtPlatform('')
 						platform.load_from_node(data.getElementsByTagName('valuemap')[0])
 						platform.guid = platform.PE_Profile_Id
-						self.platforms.append((platform.PE_Profile_Name, platform))
+						self.platforms.append((platform.PE_Profile_Id, platform))
 
 	def build_platform_list(self):
 		self.load_toolchain_list()
@@ -486,8 +480,9 @@ class QtCreator(Build.BuildContext):
 				env = bld_env
 			toolchain = QtToolchain(env_name, env)
 			for t_name, t in self.toolchains:
-				if t_name == env_name:
+				if t_name == toolchain.ProjectExplorer_ToolChain_Id:
 					t.copy_from(toolchain)
+					toolchain = t
 					break
 			else:
 				self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
@@ -522,7 +517,7 @@ class QtCreator(Build.BuildContext):
 					p.copy_from(platform)
 					break
 			else:
-				self.platforms.append((env_name, platform))
+				self.platforms.append((platform.PE_Profile_Id, platform))
 
 		with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
 			with XmlNode(document, 'qtcreator') as creator:
@@ -683,7 +678,7 @@ class QtCreator(Build.BuildContext):
 											('ProjectExplorer.BuildStep.Enabled', True),
 											('ProjectExplorer.ProcessStep.Arguments', 'waf install:%s:%s'%(env_name, variant)),
 											('ProjectExplorer.ProcessStep.Command', sys.executable),
-											('ProjectExplorer.ProcessStep.WorkingDirectory', '%{buildDir}'),
+											('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
 											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
 											('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
 											('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
@@ -698,7 +693,7 @@ class QtCreator(Build.BuildContext):
 											('ProjectExplorer.BuildStep.Enabled', True),
 											('ProjectExplorer.ProcessStep.Arguments', 'waf clean:%s:%s'%(env_name, variant)),
 											('ProjectExplorer.ProcessStep.Command', sys.executable),
-											('ProjectExplorer.ProcessStep.WorkingDirectory', '%{buildDir}'),
+											('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
 											('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
 											('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
 											('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
@@ -750,9 +745,9 @@ class QtCreator(Build.BuildContext):
 								('PE.EnvironmentAspect.Base', 2),
 								('PE.EnvironmentAspect.Changes', ()),
 								('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
-								('ProjectExplorer.CustomExecutableRunConfiguration.Executable', '${OUT_NAME}'),
+								('ProjectExplorer.CustomExecutableRunConfiguration.Executable', to_var('OUT_NAME')),
 								('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-								('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', '${buildDir}'),
+								('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', self.srcnode.abspath()),
 								('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
 								('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
 								('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
