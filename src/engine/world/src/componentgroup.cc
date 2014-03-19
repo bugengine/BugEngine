@@ -633,7 +633,7 @@ void ComponentGroup::runEntityOperations(weak<EntityStorage> storage,
          current < destination + operationSizePerBucket[m_buckets.size()-1].offsetRemoved;
          /*nothing*/)
     {
-        while (operationOffsetsPerBucket[bucket].offsetRemoved == current - destination)
+        while (operationOffsetsPerBucket[bucket].offsetRemoved == u32(current - destination))
         {
             be_info("Bucket %d" | bucket);
             bucket++;

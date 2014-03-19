@@ -67,7 +67,6 @@ struct InterlockedType<4>
     {
         typedef __declspec(align(4)) void*  value_t;
         typedef __declspec(align(4)) long   counter_t;
-        typedef long incr_t;
         typedef tagged_t    tag_t;
         union
         {
@@ -78,12 +77,12 @@ struct InterlockedType<4>
             } taggedvalue;
             __declspec(align(8)) volatile long long asLongLong;
         };
-        tagged_t(incr_t value = 0)
+        tagged_t(value_t value = 0)
         {
             taggedvalue.tag = 0;
             taggedvalue.value = value;
         }
-        tagged_t(incr_t tag, incr_t value)
+        tagged_t(counter_t tag, value_t value)
         {
             taggedvalue.tag = tag;
             taggedvalue.value = value;
@@ -92,7 +91,7 @@ struct InterlockedType<4>
             :   asLongLong(other.asLongLong)
         {
         }
-        inline incr_t value() { return taggedvalue.value; }
+        inline value_t value() { return taggedvalue.value; }
         tagged_t& operator=(const tagged_t& other)
         {
             taggedvalue.tag = other.taggedvalue.tag;
@@ -105,7 +104,7 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline bool set_conditional(tagged_t *p, incr_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,

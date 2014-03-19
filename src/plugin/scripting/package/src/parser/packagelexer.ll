@@ -95,6 +95,7 @@ extern "C" int be_package_wrap()
 %}
 
 %option prefix="be_package_"
+%option never-interactive
 %option nounput
 
 DIGIT         [0-9]
