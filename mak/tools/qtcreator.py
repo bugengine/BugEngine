@@ -178,6 +178,7 @@ class QtToolchain(QtObject):
 		'ProjectExplorer_ToolChain_Autodetect',
 		'ProjectExplorer_ToolChain_DisplayName',
 		'ProjectExplorer_ToolChain_Id',
+		'Qt4ProjectManager_Android_NDK_TC_VERSION',
 	)
 
 	def get_architecture(self, env):
@@ -241,10 +242,16 @@ class QtToolchain(QtObject):
 			self.ProjectExplorer_CustomToolChain_MakePath = ''
 			self.ProjectExplorer_CustomToolChain_MessageCap = 3
 			self.ProjectExplorer_CustomToolChain_Mkspecs = ''
-			if env.COMPILER_NAME == 'msvc':
+			if env.COMPILER_NAME == 'gcc':
+				self.ProjectExplorer_CustomToolChain_OutputParser = 0
+			elif env.COMPILER_NAME == 'clang':
+				self.ProjectExplorer_CustomToolChain_OutputParser = 1
+			elif env.COMPILER_NAME == 'icc':
+				self.ProjectExplorer_CustomToolChain_OutputParser = 2
+			elif env.COMPILER_NAME == 'msvc':
 				self.ProjectExplorer_CustomToolChain_OutputParser = 3
 			else:
-				self.ProjectExplorer_CustomToolChain_OutputParser = 1
+				self.ProjectExplorer_CustomToolChain_OutputParser = 0
 			self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
 			self.ProjectExplorer_CustomToolChain_TargetAbi = abi
 			self.ProjectExplorer_ToolChain_Autodetect = False
@@ -309,15 +316,21 @@ class QtPlatform(QtObject):
 			assert(env)
 			sysroot = env.SYSROOT[0] if env.SYSROOT else ''
 			self.PE_Profile_AutoDetected = False
+			if env.PLATFORM == 'android':
+				device = 'Android Device'
+				device_type = 'Android.Device.Type'
+			else:
+				device = 'Desktop Device'
+				device_type = 'Desktop'
 			self.PE_Profile_Data = [
 					('Android.GdbServer.Information', ''),
 					('Debugger.Information', debugger),
-					('PE.Profile.Device', 'device:%s'%env_name),
-					('PE.Profile.DeviceType', bytearray('Desktop', 'utf-8')),
+					('PE.Profile.Device', device),
+					('PE.Profile.DeviceType', device_type),
 					('PE.Profile.SysRoot', sysroot),
 					('PE.Profile.ToolChain', toolchain),
 					('QtPM4.mkSPecInformation', ''),
-					('QtSupport.QtInformation', 2),
+					('QtSupport.QtInformation', -1),
 				]
 			self.PE_Profile_Icon = ':///Desktop///'
 			self.PE_Profile_Id = self.guid = generateGUID('profile:'+env_name)
