@@ -3,6 +3,7 @@
 
 import os
 import sys
+import re
 import string
 from waflib import Context, Build, Logs
 from minixml import XmlDocument, XmlNode
@@ -348,6 +349,7 @@ class QtCreator(Build.BuildContext):
 		self.features = ['GUI']
 		self.recurse([self.run_dir])
 
+		self.environment_id = self.get_environment_id()
 		self.build_platform_list()
 		appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 		self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
@@ -366,6 +368,21 @@ class QtCreator(Build.BuildContext):
 				self.write_includes(task_gen, includes)
 				self.write_defines(task_gen, defines)
 				self.write_user(task_gen)
+
+	def get_environment_id(self):
+		try:
+			with open(os.path.join(HOME_DIRECTORY, '..', 'QtCreator.ini')) as config:
+				regexp = re.compile(r'Settings\\EnvironmentId=@ByteArray\((.*)\)$')
+				for line in config.readlines():
+					result = regexp.match(line)
+					if result:
+						return bytearray(result.group(1), 'utf-8')
+				else:
+					Logs.warn('QtCreator environment ID not found; creating dummy environment ID')
+					return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
+		except IOError:
+			Logs.warn('QtCreator config not found; creating dummy environment ID')
+			return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
 
 	def get_platform_guid(self, env_name):
 		for platform_name, platform in self.platforms:
@@ -488,7 +505,7 @@ class QtCreator(Build.BuildContext):
 				debugger = debugger.Id
 			platform = QtPlatform(env_name, env, toolchain.ProjectExplorer_ToolChain_Id, debugger)
 			for p_name, p in self.platforms:
-				if p_name == okatform.PE_Profile_Id:
+				if p_name == platform.PE_Profile_Id:
 					p.copy_from(platform)
 					break
 			else:
@@ -756,7 +773,7 @@ class QtCreator(Build.BuildContext):
 					write_value(data, target_index)
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.EnvironmentId').close()
-					write_value(data, bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}'))
+					write_value(data, self.environment_id)
 				with XmlNode(qtcreator, 'data') as data:
 					XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion').close()
 					write_value(data, self.__class__.version[1])
