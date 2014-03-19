@@ -32,24 +32,23 @@ template<>
 struct InterlockedType<4>
 {
     typedef __declspec(align(4)) long value_t;
-    typedef long incr_t;
-    static inline value_t fetch_and_add(volatile value_t *p, incr_t incr)
+    static inline value_t fetch_and_add(volatile value_t *p, value_t incr)
     {
         return _InterlockedExchangeAdd(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t *p, incr_t incr)
+    static inline value_t fetch_and_sub(volatile value_t *p, value_t incr)
     {
         return _InterlockedExchangeAdd(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t *p, incr_t v)
+    static inline value_t fetch_and_set(volatile value_t *p, value_t v)
     {
         return _InterlockedExchange(p, v);
     }
-    static inline value_t set_conditional(volatile value_t *p, incr_t v, incr_t condition)
+    static inline value_t set_conditional(volatile value_t *p, value_t v, value_t condition)
     {
         return _InterlockedCompareExchange(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t *p, incr_t v)
+    static inline value_t set_and_fetch(volatile value_t *p, value_t v)
     {
         _InterlockedExchange(p, v);
         return v;
@@ -60,7 +59,6 @@ struct InterlockedType<4>
     {
         typedef __declspec(align(4)) void*  value_t;
         typedef __declspec(align(4)) long   counter_t;
-        typedef long incr_t;
         typedef tagged_t    tag_t;
         union
         {
@@ -75,12 +73,12 @@ struct InterlockedType<4>
             :   asLongLong(value)
         {
         }
-        tagged_t(incr_t value = 0)
+        tagged_t(value_t value = 0)
         {
             taggedvalue.tag = 0;
             taggedvalue.value = value;
         }
-        tagged_t(incr_t tag, incr_t value)
+        tagged_t(counter_t tag, value_t value)
         {
             taggedvalue.tag = tag;
             taggedvalue.value = value;
@@ -89,7 +87,7 @@ struct InterlockedType<4>
             :   asLongLong(other.asLongLong)
         {
         }
-        inline incr_t value() { return taggedvalue.value; }
+        inline value_t value() { return taggedvalue.value; }
         tagged_t& operator=(const tagged_t& other)
         {
             taggedvalue.tag = other.taggedvalue.tag;
@@ -102,7 +100,7 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline bool set_conditional(tagged_t *p, incr_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,

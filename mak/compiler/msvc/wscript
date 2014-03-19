@@ -1,3 +1,4 @@
+import platform
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
 
@@ -22,7 +23,10 @@ def load_msvc(self, version, target_arch):
 	self.env.MSVC_TARGETS = [target_arch]
 	self.env.COMPILER_NAME='msvc'
 	self.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
-	self.find_program('cdb', mandatory=False)
+	if platform.machine().endswith('64'):
+		self.find_program('cdb64', var='CDB', mandatory=False)
+	else:
+		self.find_program('cdb', var='CDB', mandatory=False)
 	self.load('msvc')
 
 def build(bld):
