@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include    <text/stdafx.h>
 #include    <resource/loader.hh>
+#include    <resource/resourcemanager.hh>
+#include    <freetypelib.hh>
 
 namespace BugEngine
 {
