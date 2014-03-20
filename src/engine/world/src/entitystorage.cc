@@ -34,7 +34,9 @@ struct GroupInfo
     {
         for (IT it =firstComponent; it != lastComponent; ++it)
         {
-            for (ComponentVector::const_iterator it2 = components.begin(); it2 != components.end(); ++it2)
+            for (ComponentVector::const_iterator it2 = components.begin();
+                 it2 != components.end();
+                 ++it2)
             {
                 if (*it == *it2)
                 {
@@ -102,7 +104,8 @@ bool EntityStorage::ComponentIndex::operator!() const
 }
 
 EntityStorage::EntityStorage(const WorldComposition& composition)
-    :   m_task(scoped< Task::Task< Task::MethodCaller<EntityStorage, &EntityStorage::start> > >::create(
+    :   m_task(scoped< Task::Task< Task::MethodCaller<EntityStorage,
+                                                      &EntityStorage::start> > >::create(
                     Arena::task(),
                     "start",
                     Colors::Green::Green,
@@ -114,7 +117,8 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_entityCount(0)
     ,   m_entityBufferCount(0)
     ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
-    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage) - 4 * (composition.components.size() - 1))
+    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage)
+                         - 4 * (composition.components.size() - 1))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
     ,   m_components(Arena::game(), composition.components.size())
@@ -127,8 +131,10 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     {
         ComponentIndex index = getComponentIndex(it->first);
         be_assert(index, "component %s not registered" | it->first->fullname());
-        m_components[index.absoluteIndex].memory = (u8*)Arena::game().alloc(it->first->size * it->second);
-        m_components[index.absoluteIndex].backLink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
+        u8* memory = (u8*)Arena::game().alloc(it->first->size * it->second);
+        m_components[index.absoluteIndex].memory = memory;
+        u32* backlink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
+        m_components[index.absoluteIndex].backLink = backlink;
         m_components[index.absoluteIndex].current = 0;
         m_components[index.absoluteIndex].maximum = it->second;
         m_components[index.absoluteIndex].elementSize = it->first->size;
@@ -167,11 +173,15 @@ weak<Task::ITask> EntityStorage::initialTask() const
 
 void EntityStorage::buildGroups(const WorldComposition& composition)
 {
-    minitl::vector<GroupInfo> groups(Arena::temporary(), composition.partitions.begin(), composition.partitions.end());
+    minitl::vector<GroupInfo> groups(Arena::temporary(),
+                                     composition.partitions.begin(),
+                                     composition.partitions.end());
 
     if (groups.size() > 1)
     {
-        for (minitl::vector<GroupInfo>::reverse_iterator it = groups.rbegin()+1; it != groups.rend(); ++it)
+        for (minitl::vector<GroupInfo>::reverse_iterator it = groups.rbegin()+1;
+             it != groups.rend();
+             ++it)
         {
             for (minitl::vector<GroupInfo>::iterator it2 = it-1; it2 != groups.end(); /*nothing*/)
             {
@@ -189,9 +199,12 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
     u32 groupIndex = 0;
     u32 totalComponents = 0;
-    m_operationAllocator = new SystemAllocator(SystemAllocator::BlockSize_64k, 2*be_checked_numcast<u32>(groups.size()));
+    m_operationAllocator = new SystemAllocator(SystemAllocator::BlockSize_64k,
+                                               2*be_checked_numcast<u32>(groups.size()));
     m_componentGroups.reserve(groups.size());
-    for (minitl::vector<GroupInfo>::const_iterator group = groups.begin(); group != groups.end(); ++group, ++groupIndex)
+    for (minitl::vector<GroupInfo>::const_iterator group = groups.begin();
+         group != groups.end();
+         ++group, ++groupIndex)
     {
         minitl::vector< raw<const RTTI::Class> > registeredComponents(Arena::temporary());
         u32 componentIndex = 0;
@@ -207,7 +220,8 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
                 if (ci->first == *component)
                 {
                     registeredComponents.push_back(*component);
-                    registerType(*component, groupIndex, componentIndex, totalComponents + componentIndex, ci->second);
+                    registerType(*component, groupIndex, componentIndex,
+                                 totalComponents + componentIndex, ci->second);
                     totalSize += (*component)->size;
                 }
             }
@@ -221,7 +235,9 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         {
             u32 mask = buildMask(*partition);
             minitl::vector<u32> previousMasks(Arena::temporary(), masks.rbegin(), masks.rend());
-            for (minitl::vector<u32>::const_iterator m = previousMasks.begin(); m != previousMasks.end(); ++m)
+            for (minitl::vector<u32>::const_iterator m = previousMasks.begin();
+                 m != previousMasks.end();
+                 ++m)
             {
                 if (find(mask | *m, masks.begin(), masks.end()) == masks.end())
                 {
@@ -303,7 +319,9 @@ void EntityStorage::start()
 {
     u8* buffer = (u8*)m_operationAllocator->allocate();
     u8* componentBuffer = (u8*)m_operationAllocator->allocate();
-    for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin(); it != m_componentGroups.end(); ++it)
+    for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
+         it != m_componentGroups.end();
+         ++it)
     {
         it->runEntityOperations(this, buffer, componentBuffer);
     }
@@ -398,11 +416,13 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       return);
     ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
-                      "component type %s is not a registered component of entity storage" | componentType->fullname(),
+                      "component type %s is not a registered component of entity storage"
+                            | componentType->fullname(),
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.addComponent(e, info.mask(group.firstComponent, group.lastComponent), c, componentIndex.relativeIndex);
+    group.addComponent(e, info.mask(group.firstComponent, group.lastComponent),
+                       c, componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = true;
 }
 
@@ -414,14 +434,16 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
                       return);
     ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
-                      "component type %s is not a registered component of entity storage" | componentType->fullname(),
+                      "component type %s is not a registered component of entity storage"
+                            | componentType->fullname(),
                       return);
     be_assert_recover(info.mask[componentIndex.absoluteIndex],
                       "entity %d does not has a component %s" | e.id | componentType->fullname(),
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.removeComponent(e, info.mask(group.firstComponent, group.lastComponent), componentIndex.relativeIndex);
+    u32 mask = info.mask(group.firstComponent, group.lastComponent);
+    group.removeComponent(e, mask, componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = false;
 }
 
@@ -433,7 +455,8 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
                       return false);
     ComponentIndex componentIndex = getComponentIndex(componentType);
     be_assert_recover(componentIndex,
-                      "component type %s is not a registered component of entity storage" | componentType->fullname(),
+                      "component type %s is not a registered component of entity storage"
+                            | componentType->fullname(),
                       return false);
     return info.mask[componentIndex.absoluteIndex];
 }
@@ -447,10 +470,14 @@ RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> compone
     const u32 componentIndex = info.componentIndex[componentTypeIndex.absoluteIndex];
     const ComponentStorage& storage = m_components[componentTypeIndex.absoluteIndex];
     be_assert_recover(componentIndex,
-                      "component type %s is not a registered component of entity storage" | componentType->fullname(),
+                      "component type %s is not a registered component of entity storage"
+                            | componentType->fullname(),
                       return RTTI::Value());
     be_assert(componentIndex < storage.current, "component index %d out of range" | componentIndex);
-    return RTTI::Value(RTTI::Type::makeType(componentType, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Const),
+    return RTTI::Value(RTTI::Type::makeType(componentType,
+                                            RTTI::Type::Value,
+                                            RTTI::Type::Mutable,
+                                            RTTI::Type::Const),
                        storage.memory + componentIndex*componentType->size);
 }
 
@@ -467,7 +494,8 @@ u32 EntityStorage::store(const EntityInfo& info, u8* buffer, u32 firstComponent,
 {
     u32 result = 0;
     be_assert_recover((info.index & s_usedBit) != 0,
-                      "Entity %s is not currently spawned (maybe already unspawned)" | (info.index & s_indexMask),
+                      "Entity %s is not currently spawned (maybe already unspawned)"
+                            | (info.index & s_indexMask),
                       return result);
     for (u32 c = firstComponent; mask; c++, mask >>= 1)
     {
@@ -491,7 +519,8 @@ u32 EntityStorage::store(const EntityInfo& info, u8* buffer, u32 firstComponent,
 void EntityStorage::restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask)
 {
     be_assert_recover((info.index & s_usedBit) != 0,
-                      "Entity %s is not currently spawned (maybe already unspawned)" | (info.index & s_indexMask),
+                      "Entity %s is not currently spawned (maybe already unspawned)"
+                            | (info.index & s_indexMask),
                       return);
     for (u32 c = firstComponent; mask; c++, mask >>= 1)
     {
