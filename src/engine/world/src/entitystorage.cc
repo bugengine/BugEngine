@@ -211,7 +211,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         u32 totalSize = 0;
         for (minitl::vector< raw<const RTTI::Class> >::const_iterator component = group->components.begin();
              component != group->components.end();
-              ++component, ++componentIndex)
+             ++component, ++componentIndex)
         {
             for (WorldComposition::ComponentArray::const_iterator ci = composition.components.begin();
                  ci != composition.components.end();

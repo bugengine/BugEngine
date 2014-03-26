@@ -250,7 +250,7 @@ void ComponentGroup::moveBucketComponents(u32 componentIndex,
                                           u8* __restrict operationsAdd,
                                           u8* __restrict operationsEnd,
                                           const u8* __restrict componentBuffer,
-                                          i32 delta)
+                                          const Delta& delta)
 {
     be_forceuse(componentIndex);
     be_forceuse(bucket);
@@ -259,16 +259,37 @@ void ComponentGroup::moveBucketComponents(u32 componentIndex,
 
     u8* operationsRemoveBuffer = operationsRemove;
     u8* operationsAddBuffer = operationsAdd;
-    //u32 originalDelta = delta;
-    // add components at beginning of delta
-    while(operationsAddBuffer < operationsEnd && delta < 0)
+    i32 offset = delta.absoluteOffset;
+    u32 startIndex = bucket->componentCounts[componentIndex] + delta.absoluteOffset;
+    // add components at beginning of offset
     {
-        EntityOperation* operationAdd = (EntityOperation*)operationsAddBuffer;
-        operationsAddBuffer += operationAdd->size;
-        delta ++;
+        u32 placeIndex = startIndex;
+        while(operationsAddBuffer < operationsEnd && offset < 0)
+        {
+            EntityOperation* operationAdd = (EntityOperation*)operationsAddBuffer;
+            operationsAddBuffer += operationAdd->size;
+            offset ++;
+        }
+    }
+
+    // sort remove operations
+    if (operationsRemoveBuffer != operationsAdd)
+    {
+        minitl::sort((EntityOperationBase*)operationsRemoveBuffer,
+                     (EntityOperationBase*)operationsAdd,
+                     EntitySort());
     }
 
     // move components into delta
+    // consume deleted entities if any
+    if (offset < 0)
+    {
+        // move entities "down"
+    }
+    else if (offset > 0)
+    {
+        // move entities "up"
+    }
 
     // move added components in place of removed ones
     while(operationsRemoveBuffer < operationsAdd && operationsAddBuffer < operationsEnd)
@@ -279,20 +300,20 @@ void ComponentGroup::moveBucketComponents(u32 componentIndex,
         operationsAddBuffer += operationAdd->size;
     }
 
+    // at least one of the added or removed buffers is empty
     // remove remaining components
     if (operationsRemoveBuffer != operationsAdd)
     {
-        minitl::sort((EntityOperationBase*)operationsRemoveBuffer,
-                     (EntityOperationBase*)operationsAdd,
-                     EntitySort());
         /* move entities around */
     }
 
     // add remaining components
     if (operationsAddBuffer != operationsEnd)
     {
-        /* there should be place at the end of the buffer, place them there */
+        /* there is place at the end of the buffer, place them there */
     }
+
+    bucket->componentCounts[componentIndex] += delta.absoluteOffset + delta.added - delta.removed;
 }
 
 void ComponentGroup::moveComponents(u32 componentIndex, Bucket* begin, Bucket* end,
@@ -320,7 +341,7 @@ void ComponentGroup::moveComponents(u32 componentIndex, Bucket* begin, Bucket* e
         u8* operationEndBuffer = operations + operationOffsetEnd.offsetRemoved;
         moveBucketComponents(componentIndex, lowerBound, operationRemoveBuffer,
                              operationAddBuffer, operationEndBuffer, componentBuffer,
-                             delta.absoluteOffset);
+                             delta);
     }
     for (upperBound = end-1; upperBound > lowerBound; --upperBound)
     {
@@ -337,7 +358,7 @@ void ComponentGroup::moveComponents(u32 componentIndex, Bucket* begin, Bucket* e
         u8* operationEndBuffer = operations + operationOffsetEnd.offsetRemoved;
         moveBucketComponents(componentIndex, lowerBound, operationRemoveBuffer,
                              operationAddBuffer, operationEndBuffer, componentBuffer,
-                             delta.absoluteOffset);
+                             delta);
     }
     if (lowerBound == upperBound)
     {
@@ -350,7 +371,7 @@ void ComponentGroup::moveComponents(u32 componentIndex, Bucket* begin, Bucket* e
         u8* operationEndBuffer = operations + operationOffsetEnd.offsetRemoved;
         moveBucketComponents(componentIndex, lowerBound, operationRemoveBuffer,
                              operationAddBuffer, operationEndBuffer, componentBuffer,
-                             delta.absoluteOffset);
+                             delta);
     }
     else
     {
