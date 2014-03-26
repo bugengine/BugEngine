@@ -51,12 +51,14 @@ namespace BugEngine { namespace Plugin
     minitl::refcountable* be_createPlugin (const ::BugEngine::Plugin::Context& context)             \
     {                                                                                               \
         ref<minitl::refcountable> r = (*create)(context);                                           \
-        r->addref();                                                                                \
+        if (r)                                                                                      \
+            r->addref();                                                                            \
         return r.operator->();                                                                      \
     }                                                                                               \
     _BE_PLUGIN_EXPORT void be_destroyPlugin(minitl::refcountable* cls)                              \
     {                                                                                               \
-        cls->decref();                                                                              \
+        if (cls)                                                                                    \
+            cls->decref();                                                                          \
     }                                                                                               \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
     {                                                                                               \

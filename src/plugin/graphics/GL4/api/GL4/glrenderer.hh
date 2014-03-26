@@ -43,6 +43,7 @@ public:
     void                    flush() override;
 public:
     const ShaderExtensions& shaderext() const;
+    bool                    success() const;
 private:
     void                    attachWindow(weak<GLWindow> w) const;
 private:
