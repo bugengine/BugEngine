@@ -200,7 +200,9 @@ GLWindow::Context::~Context()
 
 GLRenderer::GLRenderer(const Plugin::Context& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
-    ,   m_context(scoped<Context>::create(Arena::general(), static_cast<PlatformData*>(getPlatformData())))
+    ,   m_context(Windowing::Renderer::success()
+                    ?   scoped<Context>::create(Arena::general(), static_cast<PlatformData*>(getPlatformData()))
+                    :   scoped<Context>())
     ,   m_openCLScheduler("plugin.kernel.opencl_gl", context)
 {
 }
@@ -225,6 +227,11 @@ const ShaderExtensions& GLRenderer::shaderext() const
 {
     be_assert(m_context, "extensions required before context was created");
     return m_context->shaderext;
+}
+
+bool GLRenderer::success() const
+{
+    return Windowing::Renderer::success() && (m_context != 0);
 }
 
 //------------------------------------------------------------------------

@@ -43,24 +43,29 @@ namespace
 
 PlatformData::PlatformData(::Display* display)
 :   display(display)
-,   fbConfig(selectGLXFbConfig(display, XDefaultScreen(display)))
-,   visual(glXGetVisualFromFBConfig(display, fbConfig))
+,   fbConfig(display ? selectGLXFbConfig(display, XDefaultScreen(display)) : 0)
+,   visual(display ? glXGetVisualFromFBConfig(display, fbConfig) : 0)
 {
 }
 
 Renderer::PlatformRenderer::PlatformRenderer()
 :   m_platformData(XOpenDisplay(0))
-,   m_windowProperty(XInternAtom(m_platformData.display, "BE_WINDOW", False))
+,   m_windowProperty(m_platformData.display
+                        ?   XInternAtom(m_platformData.display, "BE_WINDOW", False)
+                        :   0)
 {
-    XSetErrorHandler(&Renderer::PlatformRenderer::xError);
-    XSync(m_platformData.display, false);
+    if (m_platformData.display)
+    {
+        XSetErrorHandler(&Renderer::PlatformRenderer::xError);
+        XSync(m_platformData.display, false);
+    }
 }
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    XFree(m_platformData.visual);
     if (m_platformData.display)
     {
+        XFree(m_platformData.visual);
         XCloseDisplay(m_platformData.display);
     }
 }
@@ -136,6 +141,11 @@ Renderer::Renderer(minitl::Allocator& arena, weak<Resource::ResourceManager> man
 Renderer::~Renderer()
 {
     flush();
+}
+
+bool Renderer::success() const
+{
+    return m_platformRenderer->m_platformData.display != 0;
 }
 
 uint2 Renderer::getScreenSize() const

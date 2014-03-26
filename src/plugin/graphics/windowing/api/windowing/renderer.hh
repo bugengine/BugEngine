@@ -14,7 +14,7 @@ namespace BugEngine { namespace Windowing
 class Window;
 struct WindowCreationFlags;
 
-	class be_api(WINDOWING) Renderer : public IRenderer
+class be_api(WINDOWING) Renderer : public IRenderer
 {
     friend class Window;
     friend class Window::PlatformWindow;
@@ -33,6 +33,7 @@ public:
 
     uint2           getScreenSize() const override;
     void*           getPlatformData();
+    bool            success() const;
 };
 
 }}
