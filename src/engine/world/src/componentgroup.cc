@@ -123,8 +123,10 @@ Bucket::Bucket(u32* componentCounts, u32 acceptMask)
 }
 
 
-ComponentGroup::ComponentGroup(u32 firstComponent, const minitl::vector< raw<const RTTI::Class> >& componentTypes,
-                               const minitl::vector<u32>& bucketMasks, SystemAllocator& allocator)
+ComponentGroup::ComponentGroup(u32 firstComponent,
+                               const minitl::vector< raw<const RTTI::Class> >& componentTypes,
+                               const minitl::vector<u32>& bucketMasks,
+                               sSystemAllocator& allocator)
     :   m_operationAllocator(allocator)
     ,   m_buckets(Arena::game(), (u32)bucketMasks.size())
     ,   m_components(Arena::game(), (u32)componentTypes.size())
@@ -155,12 +157,14 @@ ComponentGroup::ComponentGroup(u32 firstComponent, const minitl::vector< raw<con
         info.created = getMethodFromClass(*it, "created");
         if (!info.created)
         {
-            be_error("component type %s: invalid signature for method \"created\"" | (*it)->fullname());
+            be_error("component type %s: invalid signature for method \"created\""
+                        | (*it)->fullname());
         }
         info.destroyed = getMethodFromClass(*it, "destroyed");
         if (!info.destroyed)
         {
-            be_error("component type %s: invalid signature for method \"destroyed\"" | (*it)->fullname());
+            be_error("component type %s: invalid signature for method \"destroyed\""
+                        | (*it)->fullname());
         }
 
         m_componentsTotalSize += (*it)->size;
@@ -442,7 +446,8 @@ void ComponentGroup::runEntityOperations(weak<EntityStorage> storage,
             result->bucketOrigin = be_checked_numcast<u16>(insertion.first - m_buckets.begin());
             result->bucketDestination = be_checked_numcast<u16>(insertion.second - m_buckets.begin());
             result->componentStorage = be_checked_numcast<u32>(componentBackup - componentBuffer);
-            be_assert(componentBackup + m_componentsTotalSize < componentBuffer + storage->m_operationAllocator->blockSize(),
+            u8* bufferEnd = componentBuffer + storage->m_operationAllocator->blockSize();
+            be_assert(componentBackup + m_componentsTotalSize < bufferEnd,
                       "ran out of component backup space");
             Entity e = {result->entityId};
             const EntityInfo& info = storage->getEntityInfo(e);
@@ -610,15 +615,18 @@ void ComponentGroup::runEntityOperations(weak<EntityStorage> storage,
         if (remainderRemoved)
         {
             u32 offset = 0;
-            for (Bucket* bucket = m_buckets.end() - componentCount - 1; bucket != m_buckets.end() - 1; ++bucket, ++offset)
+            for (Bucket* bucket = m_buckets.end() - componentCount - 1;
+                 bucket != m_buckets.end() - 1;
+                 ++bucket, ++offset)
             {
                 be_assert(bucket->maskSize == 1, "invalid bucket");
                 u32 index = be_checked_numcast<u32>(bucket - m_buckets.begin());
                 if (bucket->acceptMask & remainderRemoved)
                 {
                     u32& offset = operationSizePerBucket[index].offsetRemoved;
-                    memcpy(destination + offset, current, sizeof(EntityOperationBase));
-                    EntityOperation* operationRemove = reinterpret_cast<EntityOperation*>(destination + offset);
+                    u8* dst = destination + offset;
+                    memcpy(dst, current, sizeof(EntityOperationBase));
+                    EntityOperation* operationRemove = reinterpret_cast<EntityOperation*>(dst);
                     operationRemove->componentMaskAdd = 0;
                     operationRemove->componentMaskRemove = bucket->acceptMask;
                     operationRemove->size = be_checked_numcast<u32>(sizeof(EntityOperationBase));
@@ -669,7 +677,8 @@ void ComponentGroup::runEntityOperations(weak<EntityStorage> storage,
             if (operation->componentMaskAdd & m)
             {
                 be_info("  added %s[%d]"
-                        | m_components[c].componentType->fullname() | *reinterpret_cast<const u32*>(buffer));
+                        | m_components[c].componentType->fullname()
+                        | *reinterpret_cast<const u32*>(buffer));
                 buffer += m_components[c].componentType->size;
             }
             if (operation->componentMaskRemove & m)
@@ -692,7 +701,8 @@ void ComponentGroup::freeBuffers()
     Arena::game().free(m_componentCounts);
 }
 
-void ComponentGroup::addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex)
+void ComponentGroup::addComponent(Entity e, u32 originalMask,
+                                  const Component& c, u32 componentIndex)
 {
     u32 componentSize = m_components[componentIndex].size;
     u32 size = be_checked_numcast<u32>(sizeof(EntityOperation)) + componentSize - 4;
