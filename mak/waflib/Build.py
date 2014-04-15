@@ -331,7 +331,7 @@ class BuildContext(Context.Context):
 		try:
 			waflib.Node.pickle_lock.acquire()
 			waflib.Node.Nod3 = self.node_class
-			x = cPickle.dumps(data, -1)
+			x = cPickle.dumps(data, 2)
 		finally:
 			waflib.Node.pickle_lock.release()
 
