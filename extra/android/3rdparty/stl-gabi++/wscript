@@ -1,9 +1,9 @@
 
 def options(opt):
-	pass
+    pass
 
 def setup(conf):
-	pass
+    pass
 
 def build(bld):
-	stdcpp = bld.static_library('3rdparty.stl-gabi++', warnings=False)
+    stdcpp = bld.static_library('3rdparty.stl-gabi++', warnings=False)
