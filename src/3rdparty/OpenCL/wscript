@@ -1,26 +1,26 @@
 import os
 
 def options(opt):
-	pass
+    pass
 
 def setup(conf):
-	if 'darwin' in conf.env.VALID_PLATFORMS:
-		if conf.check_framework('OpenCL', var='CLFramework', includes=['OpenCL/opencl.h'], functions=['clGetDeviceInfo']):
-			conf.find_program('openclc', mandatory=False)
-	else:
-		conf.check_lib('OpenCL',
-		libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES],
-		includes=['CL/cl.h'],
-		includepath=[os.path.join(conf.path.abspath(), 'api')],
-		functions=['clGetDeviceInfo'])
+    if 'darwin' in conf.env.VALID_PLATFORMS:
+        if conf.check_framework('OpenCL', var='CLFramework', includes=['OpenCL/opencl.h'], functions=['clGetDeviceInfo']):
+            conf.find_program('openclc', mandatory=False)
+    else:
+        conf.check_lib('OpenCL',
+        libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES],
+        includes=['CL/cl.h'],
+        includepath=[os.path.join(conf.path.abspath(), 'api')],
+        functions=['clGetDeviceInfo'])
 
 def build(bld):
-	for env in bld.multiarch_envs:
-		if env.CLFramework or env.OpenCL or bld.env.PROJECTS:
-			bld.thirdparty('3rdparty.OpenCL',
-				env,
-				libs=env.OpenCL,
-				includes=[bld.path.find_node('api')],
-				frameworks=env.CLFramework)
-			env.append_unique('FEATURES', ['OpenCL'])
+    for env in bld.multiarch_envs:
+        if env.CLFramework or env.OpenCL or bld.env.PROJECTS:
+            bld.thirdparty('3rdparty.OpenCL',
+                env,
+                libs=env.OpenCL,
+                includes=[bld.path.find_node('api')],
+                frameworks=env.CLFramework)
+            env.append_unique('FEATURES', ['OpenCL'])
 

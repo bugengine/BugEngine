@@ -1,27 +1,26 @@
 from waflib import Options
 
 def options(opt):
-	gr = opt.add_option_group('configure options')
-	gr.add_option( '--compilers',
-					action='append',
-					default=[],
-					dest='compilers',
-					help='List of compilers to configure for')
-	for path in opt.path.listdir():
-		if path != 'wscript':
-			opt.recurse(path)
+    gr = opt.add_option_group('configure options')
+    gr.add_option( '--compilers',
+                    action='append',
+                    default=[],
+                    dest='compilers',
+                    help='List of compilers to configure for')
+    for path in opt.path.listdir():
+        if path != 'wscript':
+            opt.recurse(path)
 
 def configure(conf):
-	compilers = Options.options.compilers
-	for path in conf.path.listdir():
-		if path != 'wscript':
-			if not compilers or path in compilers:
-				conf.recurse(path)
+    compilers = Options.options.compilers
+    for path in conf.path.listdir():
+        if path != 'wscript':
+            if not compilers or path in compilers:
+                conf.recurse(path)
 
 def build(bld):
-	compilers = Options.options.compilers
-	for path in bld.path.listdir():
-		if path != 'wscript':
-			if not compilers or path in compilers:
-				bld.recurse(path)
-
+    compilers = Options.options.compilers
+    for path in bld.path.listdir():
+        if path != 'wscript':
+            if not compilers or path in compilers:
+                bld.recurse(path)

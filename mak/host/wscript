@@ -3,15 +3,15 @@ import platform
 os_name = platform.uname()[0].lower()
 
 def options(opt):
-	opt.recurse(os_name)
+    opt.recurse(os_name)
 
 def configure(conf):
-	conf.env.HOST = os_name
-	conf.recurse(os_name)
+    conf.env.HOST = os_name
+    conf.recurse(os_name)
 
 def build(bld):
-	bld.recurse(os_name)
+    bld.recurse(os_name)
 
 def plugins(bld):
-	bld.recurse(os_name)
+    bld.recurse(os_name)
 
