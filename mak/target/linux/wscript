@@ -23,7 +23,7 @@ def set_linux_options(self):
 
 	self.env.LIBPATH += self.env.SYSTEM_LIB_PATHS
 
-	self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN'
+	self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN'
 	self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
 @conf
@@ -277,8 +277,8 @@ def configure(conf):
 	for version, directory, target, arch in conf.env.CLANG_TARGETS:
 		if target.find('linux') != -1:
 			arch_name, options = arch
-			target = 'linux'
-			toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
+			os_name = 'linux'
+			toolchain = '%s-%s-%s-%s'%(os_name, arch_name, 'clang', version)
 			if toolchain in seen:
 				continue
 			if not conf.is_clang_working(os.path.join(directory, 'clang'), options):
@@ -298,7 +298,7 @@ def configure(conf):
 					conf.end_msg('done')
 					conf.set_linux_options()
 					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.add_toolchain(target, arch_name, 'clang', version, arch_name)
+					conf.add_toolchain(os_name, arch_name, 'clang', version, arch_name)
 				except Errors.WafError as e:
 					conf.variant = ''
 					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
