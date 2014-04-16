@@ -13,12 +13,21 @@ namespace BugEngine
 inline u32 bitCount(u32 bitMask)
 {
     u32 result = 0;
-    for (u32 i = 0; i < 32; ++i)
+    for (u32 i = 0; i < 32; ++i, bitMask >>= 1)
     {
         result += bitMask & 0x1;
-        bitMask >>= 1;
     }
     return result;
+}
+
+inline u32 getFirstBit(u32 bitMask)
+{
+    for (u32 i = 0; i < 32; ++i, bitMask >>= 1)
+    {
+       if (bitMask & 0x1)
+           return i;
+    }
+    return (u32)-1;
 }
 
 }

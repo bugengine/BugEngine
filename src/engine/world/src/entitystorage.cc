@@ -317,16 +317,12 @@ const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RT
 
 void EntityStorage::start()
 {
-    u8* buffer = (u8*)m_operationAllocator->allocate();
-    u8* componentBuffer = (u8*)m_operationAllocator->allocate();
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
          it != m_componentGroups.end();
          ++it)
     {
-        it->runEntityOperations(this, buffer, componentBuffer);
+        it->runEntityOperations(this);
     }
-    m_operationAllocator->free(componentBuffer);
-    m_operationAllocator->free(buffer);
 }
 
 u32 EntityStorage::getEntityInfoSize() const
