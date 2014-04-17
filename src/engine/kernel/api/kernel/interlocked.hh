@@ -56,7 +56,7 @@ public:
 
     operator T() const
     {
-        return static_cast<T>(impl::fetch_and_add(const_cast<value_t*>(&m_value), 0));
+        return static_cast<T>(m_value);
     }
     T operator=(T value)
     {
