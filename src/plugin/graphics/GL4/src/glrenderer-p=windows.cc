@@ -238,6 +238,11 @@ const ShaderExtensions& GLRenderer::shaderext() const
     return m_context->shaderext;
 }
 
+bool GLRenderer::success() const
+{
+    return Windowing::Renderer::success() && (m_context != 0);
+}
+
 //------------------------------------------------------------------------
 
 GLWindow::GLWindow(weak<const RenderWindowDescription> renderwindow, weak<const GLRenderer> renderer)

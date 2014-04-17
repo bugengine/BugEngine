@@ -152,9 +152,12 @@ def detect_clang(conf):
 
 @conf
 def load_clang(conf, directory, target):
-    conf.find_program('clang', var='CC', path_list=[directory])
-    conf.find_program('clang++', var='CXX', path_list=[directory])
-    conf.find_program('lldb', var='LLDB', path_list=[directory], mandatory=False)
+    directories = [directory, os.path.join(directory, '..', target, 'bin')]
+    conf.find_program('clang', var='CC', path_list=directories)
+    conf.find_program('clang++', var='CXX', path_list=directories, mandatory=False)
+    if not conf.find_program(target+'-ar', var='AR', path_list=directories, mandatory=False):
+        conf.find_program('ar', var='AR', path_list=directories, mandatory=False)
+    conf.find_program('lldb', var='LLDB', path_list=directories, mandatory=False)
     if not conf.find_program(target+'-gdb', var='GDB', path_list=[directory], mandatory=False):
         conf.find_program('gdb', var='GDB', path_list=[directory], mandatory=False)
     conf.env.COMPILER_NAME='clang'
@@ -211,8 +214,6 @@ def load_clang(conf, directory, target):
                 else:
                     if line in conf.env.useful_defines:
                         conf.env.append_unique('SYSTEM_DEFINES', [line])
-
-
 
 
 def options(opt):

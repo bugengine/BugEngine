@@ -104,6 +104,11 @@ Renderer::~Renderer()
 {
 }
 
+bool Renderer::success() const
+{
+    return true;
+}
+
 void Renderer::flush()
 {
     IRenderer::flush();
