@@ -42,10 +42,8 @@ void Environment::init(int argc, const char *argv[])
         filename--;
     }
     ipath rootdir = ipath(argv[0], filename);
-    for (u32 i = 0; i < rootdir.size(); ++i)
-    {
-        chdir(rootdir[i].c_str());
-    }
+    chdir(rootdir.str().name);
+    m_dataDirectory = rootdir + m_dataDirectory;
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
