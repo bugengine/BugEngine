@@ -72,4 +72,9 @@ void Renderer::flush()
     m_platformRenderer->flush();
 }
 
+bool Renderer::success() const
+{
+    return true;
+}
+
 }}
