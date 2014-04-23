@@ -30,13 +30,11 @@ public:
         Remove
     };
 private:
-    RequestType     m_type;
     ipath           m_path;
     ref<WatchPoint> m_watchpoint;
 public:
-    WatchRequest(RequestType type, const ipath& path, ref<WatchPoint> watchpoint)
-        :   m_type(type)
-        ,   m_path(path)
+    WatchRequest(RequestType /*type*/, const ipath& path, ref<WatchPoint> watchpoint)
+        :   m_path(path)
         ,   m_watchpoint(watchpoint)
     {
     }

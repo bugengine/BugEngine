@@ -60,6 +60,7 @@ def build(bld):
 
 	bld.external('3rdparty.lua')
 	bld.external('3rdparty.squirrel')
+	bld.external('3rdparty.python27')
 
 	bld.plugin('plugin.debug.runtime',
 			   ['engine.bugengine'])
@@ -99,6 +100,9 @@ def build(bld):
 			   ['engine.bugengine', '3rdparty.squirrel'])
 	bld.plugin('plugin.input.input',
 			   ['engine.bugengine'])
+	bld.plugin('plugin.scripting.python27',
+			   ['engine.bugengine', '3rdparty.python27'],
+               features=['python27'])
 
 	bld.plugin('plugin.kernel.cpu',
 			   ['engine.bugengine'])

@@ -18,6 +18,7 @@ class TextSample : public Application
 {
 private:
     Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin::Plugin<Resource::ILoader>   const   m_pythonManager;
     Plugin::Plugin<minitl::pointer>     const   m_textManager;
     Plugin::Plugin<minitl::pointer>     const   m_3ddx;
     Plugin::Plugin<minitl::pointer>     const   m_3dgl;

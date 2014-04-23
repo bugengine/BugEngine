@@ -1,5 +1,11 @@
 load plugin.graphics.text as text;
 load plugin.graphics.shadermodel1 as sm1;
+load plugin.scripting.python27 as py;
+
+script = py.PythonScript
+(
+    script = <sample.py>
+)
 
 font = text.OutlineFont
 (
