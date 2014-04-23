@@ -3,8 +3,8 @@
 
 #include    <stdafx.h>
 
-#include    <luacontext.hh>
+#include    <context.hh>
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Lua::Context);
+BE_PLUGIN_REGISTER(BugEngine::Python27::Context);
