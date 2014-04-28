@@ -42,6 +42,7 @@ private:
 private:
     minitl::array<LoaderInfo>   m_loaders;
     minitl::vector<Ticket>      m_tickets;
+    minitl::vector<Ticket>      m_pendingTickets;
     minitl::vector<Ticket>      m_watches;
 private:
     LoaderInfo& getLoaderInfo(raw<const RTTI::Class> classinfo);
