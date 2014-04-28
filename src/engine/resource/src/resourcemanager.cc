@@ -18,6 +18,7 @@ ResourceManager::LoaderInfo::LoaderInfo()
 ResourceManager::ResourceManager()
     :   m_loaders(Arena::resource(), 1024)
     ,   m_tickets(Arena::resource())
+    ,   m_pendingTickets(Arena::resource())
     ,   m_watches(Arena::resource())
 {
 }
@@ -132,37 +133,44 @@ void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> de
     ticket.progress = 0;
     ticket.type = type;
     ticket.outdated = false;
-    m_tickets.push_back(ticket);
+    m_pendingTickets.push_back(ticket);
 }
 
 size_t ResourceManager::updateTickets()
 {
-    size_t ticketCount = m_tickets.size();
-    for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
+    u32 ticketCount = m_tickets.size();
+    do
     {
-        if (it->ticket->error)
+        m_tickets.push_back(m_pendingTickets.begin(), m_pendingTickets.end());
+        ticketCount += m_pendingTickets.size();
+        m_pendingTickets.clear();
+
+        for (minitl::vector< Ticket >::iterator it = m_tickets.begin(); it != m_tickets.end(); /*nothing*/)
         {
-            be_error("resource loading error");
-            it = m_tickets.erase(it);
+            if (it->ticket->error)
+            {
+                be_error("resource loading error");
+                it = m_tickets.erase(it);
+            }
+            else if (it->ticket->done())
+            {
+                it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->type);
+                it->ticket = ref<const File::Ticket>();
+                m_watches.push_back(*it);
+                it = m_tickets.erase(it);
+            }
+            else if (it->ticket->processed != it->progress)
+            {
+                it->progress = it->ticket->processed;
+                it->loader->onTicketUpdated(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->progress, it->type);
+                ++it;
+            }
+            else
+            {
+                ++it;
+            }
         }
-        else if (it->ticket->done())
-        {
-            it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->type);
-            it->ticket = ref<const File::Ticket>();
-            m_watches.push_back(*it);
-            it = m_tickets.erase(it);
-        }
-        else if (it->ticket->processed != it->progress)
-        {
-            it->progress = it->ticket->processed;
-            it->loader->onTicketUpdated(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->progress, it->type);
-            ++it;
-        }
-        else
-        {
-            ++it;
-        }
-    }
+    } while (m_pendingTickets.size() > 0);
 
     minitl::vector<Ticket> updatedTickets(Arena::temporary());
     for (minitl::vector<Ticket>::iterator it = m_watches.begin(); it != m_watches.end(); /*nothing*/)

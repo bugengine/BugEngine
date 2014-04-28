@@ -5,12 +5,16 @@
 #define BE_PYTHON27_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
-#include    <math.h>
+#ifdef _MSC_VER
+# include    <math.h>
+#endif
+
 extern "C"
 {
 #include <Python.h>
 }
+
+#include    <bugengine/stdafx.h>
 
 /**************************************************************************************************/
 #endif

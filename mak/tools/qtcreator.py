@@ -280,7 +280,7 @@ class QtDebugger(QtObject):
                 self.EngineType = 4
             elif env.LLDB:
                 self.Binary = env.LLDB
-                self.EngineType = 2
+                self.EngineType = 256
             else:
                 self.Binary = env.GDB or '/usr/bin/gdb'
                 self.EngineType = 1
@@ -497,7 +497,7 @@ class QtCreator(Build.BuildContext):
                 if env.LLDB:
                     debugger = [
                         ('Binary', env.LLDB),
-                        ('EngineType', 2),
+                        ('EngineType', 256),
                     ]
                 elif env.CDB:
                     debugger = [

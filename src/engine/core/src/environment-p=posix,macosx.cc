@@ -43,7 +43,7 @@ void Environment::init(int argc, const char *argv[])
     }
     ipath rootdir = ipath(argv[0], filename);
     chdir(rootdir.str().name);
-    m_dataDirectory = rootdir + m_dataDirectory;
+    m_dataDirectory = m_dataDirectory;
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')

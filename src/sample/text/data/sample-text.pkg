@@ -4,7 +4,7 @@ load plugin.scripting.python27 as py;
 
 script = py.PythonScript
 (
-    script = <sample.py>
+    script = <sample.py>;
 )
 
 font = text.OutlineFont
