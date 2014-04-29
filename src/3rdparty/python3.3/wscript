@@ -1,0 +1,15 @@
+
+def options(opt):
+    pass
+
+def setup(conf):
+    try:
+        conf.python_config('3.3', var='3rdparty.python33')
+    except Exception:
+        pass
+    else:
+        conf.env.SYSTEM_PYTHON33 = True
+
+def build(bld):
+    if bld.env.SYSTEM_PYTHON33:
+        bld.env.append_unique('FEATURES', ['python3.3'])
