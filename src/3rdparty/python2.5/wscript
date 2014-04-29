@@ -1,0 +1,15 @@
+
+def options(opt):
+    pass
+
+def setup(conf):
+    try:
+        conf.python_config('2.5', var='3rdparty.python25')
+    except Exception:
+        pass
+    else:
+        conf.env.SYSTEM_PYTHON25 = True
+
+def build(bld):
+    if bld.env.SYSTEM_PYTHON25:
+        bld.env.append_unique('FEATURES', ['python2.5'])

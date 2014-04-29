@@ -1,0 +1,15 @@
+
+def options(opt):
+    pass
+
+def setup(conf):
+    try:
+        conf.python_config('3.0', var='3rdparty.python30')
+    except Exception:
+        pass
+    else:
+        conf.env.SYSTEM_PYTHON30 = True
+
+def build(bld):
+    if bld.env.SYSTEM_PYTHON30:
+        bld.env.append_unique('FEATURES', ['python3.0'])
