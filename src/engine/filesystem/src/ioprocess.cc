@@ -46,7 +46,8 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
         case File::Ticket::Read:
             if (!context->m_ioDone)
             {
-                request->buffer.realloc(request->total);
+                request->buffer.realloc(request->total+1);
+				request->buffer[request->total] = 0;
                 request->file->fillBuffer(request);
             }
             break;

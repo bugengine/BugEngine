@@ -138,7 +138,7 @@ void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> de
 
 size_t ResourceManager::updateTickets()
 {
-    u32 ticketCount = m_tickets.size();
+    size_t ticketCount = m_tickets.size();
     do
     {
         m_tickets.push_back(m_pendingTickets.begin(), m_pendingTickets.end());
