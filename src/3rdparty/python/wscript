@@ -1,52 +1,62 @@
+from waflib import Errors, Utils
 from waflib.Configure import conf
 
 @conf
 def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
-    py_config = conf.find_program('python%s-config'%version, var='PYTHON_CONFIG')
-    if not py_config:
-        raise WafError('python-config for python %s not found' % version)
-    del conf.env.PYTHON_CONFIG
-    if not var: var = '3rdparty.python%s'%(version_number)
-    command = [py_config, '--includes']
-    p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
-    out,err = p.communicate()
-    if p.returncode != 0:
-        if not isinstance(err, str):
-            err = err.decode(sys.stdout.encoding or 'iso8859-1')
-        raise WafError('could not run %s: %s' % (command, err))
-    if not isinstance(out, str):
-        out = out.decode(sys.stdout.encoding or 'iso8859-1')
-    includes = out.split()
+    if 'macosx' in conf.env.VALID_PLATFORMS:
+        py_config = conf.find_program('python%s-config'%version, var='PYTHON_CONFIG')
+        if not py_config:
+            raise Errors.WafError('python-config for python %s not found' % version)
+        del conf.env.PYTHON_CONFIG
+        if not var: var = '3rdparty.python%s'%(version_number)
+        command = [py_config, '--includes']
+        p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
+        out,err = p.communicate()
+        if p.returncode != 0:
+            if not isinstance(err, str):
+                err = err.decode(sys.stdout.encoding or 'iso8859-1')
+            raise Errors.WafError('could not run %s: %s' % (command, err))
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding or 'iso8859-1')
+        includes = out.split()
 
-    command = [py_config, '--ldflags']
-    p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
-    out,err = p.communicate()
-    if p.returncode != 0:
-        if not isinstance(err, str):
-            err = err.decode(sys.stdout.encoding or 'iso8859-1')
-        raise WafError('could not run %s: %s' % (command, err))
-    if not isinstance(out, str):
-        out = out.decode(sys.stdout.encoding or 'iso8859-1')
-    ldflags = out.split()
+        command = [py_config, '--ldflags']
+        p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
+        out,err = p.communicate()
+        if p.returncode != 0:
+            if not isinstance(err, str):
+                err = err.decode(sys.stdout.encoding or 'iso8859-1')
+            raise Errors.WafError('could not run %s: %s' % (command, err))
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding or 'iso8859-1')
+        ldflags = out.split()
 
-    conf.env['CFLAGS_%s'%var] = includes
-    conf.env['CXXFLAGS_%s'%var] = includes
-    conf.env['LINKFLAGS_%s'%var] = ldflags
-
+        conf.env['CFLAGS_%s'%var] = includes
+        conf.env['CXXFLAGS_%s'%var] = includes
+        conf.env['LINKFLAGS_%s'%var] = ldflags
+    elif 'posix' in conf.env.VALID_PLATFORMS:
+        raise Errors.WafError('TODO')
+    elif 'windows' in conf.env.VALID_PLATFORMS:
+        conf.recurse('../python%s' % version, name='setup')
+    else:
+        raise Errors.WafError('TODO')
 
 def options(opt):
     pass
 
 def setup(conf):
-    conf.recurse('../python2.5')
-    conf.recurse('../python2.6')
-    conf.recurse('../python2.7')
-    conf.recurse('../python3.0')
-    conf.recurse('../python3.1')
-    conf.recurse('../python3.2')
-    conf.recurse('../python3.3')
-    conf.recurse('../python3.4')
+    for version in ['2.5', '2.6', '2.7', '3.0', '3.1', '3.2', '3.3', '3.4', '3.5']:
+        try:
+            conf.python_config(version)
+        except Errors.WafError:
+            pass
+        else:
+            conf.env.append_unique('PYTHON_VERSIONS', [version])
 
 def build(bld):
-    pass
+    for version in conf.env.PYTHON_VERSIONS:
+        try:
+            bld.recurse('../python%s'%version)
+        except Errors.WafError:
+            pass
