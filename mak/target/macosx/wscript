@@ -329,7 +329,8 @@ def configure(conf):
             conf.find_program('dsymutil')
             conf.find_program('strip')
             conf.find_program('lipo')
-            conf.find_program('gdb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')])
+            conf.find_program('lldb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')], mandatory=False)
+            conf.find_program('gdb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')], mandatory=False)
             pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
