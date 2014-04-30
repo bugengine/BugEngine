@@ -60,7 +60,7 @@ def build(bld):
 
     bld.external('3rdparty.lua')
     bld.external('3rdparty.squirrel')
-    bld.external('3rdparty.python27')
+    bld.external('3rdparty.python')
 
     bld.plugin('plugin.debug.runtime',
                ['engine.bugengine'])
@@ -104,8 +104,7 @@ def build(bld):
         # TODO
         bld.plugin('plugin.scripting.python%s' % version,
                    ['engine.bugengine', '3rdparty.python%s'%version],
-                   path='plugin.scripting.python',
-                   features=['python%s'%version])
+                   path='plugin.scripting.python')
 
     bld.plugin('plugin.kernel.cpu',
                ['engine.bugengine'])

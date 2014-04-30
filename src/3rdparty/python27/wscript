@@ -1,0 +1,11 @@
+
+def options(opt):
+    pass
+
+def setup(conf):
+    pass
+
+def build(bld):
+    if 'windows' in bld.env.VALID_PLATFORMS:
+        bld.thirdparty('3rdparty.python27', bld.env, libs=['python27'], defines=['MS_NO_COREDLL=1'])
+

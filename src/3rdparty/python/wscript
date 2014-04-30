@@ -38,7 +38,7 @@ def python_config(conf, version, var=''):
     elif 'posix' in conf.env.VALID_PLATFORMS:
         raise Errors.WafError('TODO')
     elif 'windows' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s' % version, name='setup')
+        conf.recurse('../python%s' % version_number, name='setup')
     else:
         raise Errors.WafError('TODO')
 
@@ -52,10 +52,11 @@ def setup(conf):
         except Errors.WafError:
             pass
         else:
-            conf.env.append_unique('PYTHON_VERSIONS', [version])
+            conf.env.append_unique('PYTHON_VERSIONS', [version.replace('.', '')])
+            conf.env.append_unique('FEATURES', ['python%s'%version])
 
 def build(bld):
-    for version in conf.env.PYTHON_VERSIONS:
+    for version in bld.env.PYTHON_VERSIONS:
         try:
             bld.recurse('../python%s'%version)
         except Errors.WafError:
