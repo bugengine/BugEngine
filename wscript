@@ -100,11 +100,16 @@ def build(bld):
                ['engine.bugengine', '3rdparty.squirrel'])
     bld.plugin('plugin.input.input',
                ['engine.bugengine'])
-    for version in bld.env.PYTHON_VERSIONS:
-        # TODO
-        bld.plugin('plugin.scripting.python%s' % version,
-                   ['engine.bugengine', '3rdparty.python%s'%version],
-                   path='plugin.scripting.python')
+    if bld.env.PROJECTS:
+        python_deps = ['3rdparty.python%s'%version
+                            for version in ['2.5', '2.6', '2.7', '3.0', '3.1', '3.2', '3.3', '3.4', '3.5']]
+        bld.plugin('plugin.scripting.python',
+                   ['engine.bugengine'] + python_deps)
+    else:
+        for version in bld.env.PYTHON_VERSIONS:
+            bld.plugin('plugin.scripting.python%s' % version,
+                       ['engine.bugengine', '3rdparty.python%s'%version],
+                       path='plugin.scripting.python')
 
     bld.plugin('plugin.kernel.cpu',
                ['engine.bugengine'])

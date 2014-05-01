@@ -7,4 +7,4 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Python27::Context);
+BE_PLUGIN_REGISTER(BugEngine::Python::Context);

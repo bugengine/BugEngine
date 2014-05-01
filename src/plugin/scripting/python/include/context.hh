@@ -12,7 +12,7 @@
 #include    <plugin/plugin.hh>
 #include    <pythonscript.script.hh>
 
-namespace BugEngine { namespace Python27
+namespace BugEngine { namespace Python
 {
 
 class Context : public ScriptEngine<PythonScript>
