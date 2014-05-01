@@ -17,7 +17,7 @@ static minitl::Allocator& python27()
 
 }
 
-namespace Python27
+namespace Python
 {
 
 class PythonGlobalInterpreter
