@@ -11,7 +11,6 @@ def configure(conf):
     conf.recurse('mak')
 
 def build(bld):
-    from waflib import Options
     bld.recurse('mak')
 
     bld.external('3rdparty.zlib')
@@ -103,12 +102,12 @@ def build(bld):
                ['engine.bugengine'])
     if bld.env.PROJECTS:
         python_deps = ['3rdparty.python%s'%version.replace('.', '')
-                            for version in Options.options.python_versions.split(',')]
+                            for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.python',
                    ['engine.bugengine'] + python_deps)
     else:
-        for version in Options.options.python_versions.split(','):
-            bld.plugin('plugin.scripting.python%s' % version.replace('.',''),
+        for version in bld.env.PYTHON_VERSIONS:
+            bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
                        ['engine.bugengine', '3rdparty.python%s'%version.replace('.', '')],
                        path='plugin.scripting.python',
                        features=['python%s'%version])

@@ -88,7 +88,7 @@ def find_clang_archs(self, clang):
                         break
                     else:
                         if not isinstance(err, str):
-                            err = err.encode()
+                            err = err.decode()
                         if err.find('invalid arch name') == -1:
                             if err.find('No available targets are compatible') == -1:
                                 if err.find('not using the clang compiler') == -1:

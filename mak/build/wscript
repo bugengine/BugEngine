@@ -632,24 +632,24 @@ MasterTask.sig_explicit_deps = master_sig_deps
 
 @taskgen_method
 def create_compiled_task(self, name, node):
-	"""
-	Create the compilation task: c, cxx, asm, etc. The output node is created automatically (object file with a typical **.o** extension).
-	The task is appended to the list *compiled_tasks* which is then used by :py:func:`waflib.Tools.ccroot.apply_link`
+    """
+    Create the compilation task: c, cxx, asm, etc. The output node is created automatically (object file with a typical **.o** extension).
+    The task is appended to the list *compiled_tasks* which is then used by :py:func:`waflib.Tools.ccroot.apply_link`
 
-	:param name: name of the task class
-	:type name: string
-	:param node: the file to compile
-	:type node: :py:class:`waflib.Node.Node`
-	:return: The task created
-	:rtype: :py:class:`waflib.Task.Task`
-	"""
-	out = '%s/%s.o' % (self.target, node.name)
-	task = self.create_task(name, node, node.parent.find_or_declare(out))
-	try:
-		self.compiled_tasks.append(task)
-	except AttributeError:
-		self.compiled_tasks = [task]
-	return task
+    :param name: name of the task class
+    :type name: string
+    :param node: the file to compile
+    :type node: :py:class:`waflib.Node.Node`
+    :return: The task created
+    :rtype: :py:class:`waflib.Task.Task`
+    """
+    out = '%s-%s.o' % (node.name, self.target)
+    task = self.create_task(name, node, node.parent.find_or_declare(out))
+    try:
+        self.compiled_tasks.append(task)
+    except AttributeError:
+        self.compiled_tasks = [task]
+    return task
 
 @feature('plugin')
 @before_method('process_source')
