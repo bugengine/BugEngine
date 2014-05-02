@@ -100,6 +100,7 @@ def module(bld, name, module_path, depends,
         extra_public_includes, extra_public_defines,
         use_master, warnings, export_all):
     platforms = bld.env.VALID_PLATFORMS
+    archs = bld.env.ARCHITECTURES
     build = len(valid_platforms) == 0
     for p in valid_platforms:
         if p in platforms:
@@ -116,6 +117,10 @@ def module(bld, name, module_path, depends,
             node = source_node.make_node(p+'.'+tp)
             if os.path.isdir(node.abspath()):
                 deploy_directory(bld, bld.env, node, '', e)
+            for a in archs:
+                node = source_node.make_node(p+'.'+tp+'.'+a)
+                if os.path.isdir(node.abspath()):
+                    deploy_directory(bld, bld.env, node, '', e)
 
 
     compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
@@ -298,6 +303,7 @@ def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[]
 
     lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
     bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
+    data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
     includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
@@ -309,6 +315,8 @@ def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[]
     env['LIB_%s' % target_name] = libs
     for bin_path in bin_paths:
         deploy_directory(bld, bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+    for data_path in data_paths:
+        deploy_directory(bld, bld.env, data_path, '', 'DEPLOY_DATADIR')
     if name not in bld.env.THIRDPARTIES_FIRST:
         bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
         for bin_path in bin_paths:

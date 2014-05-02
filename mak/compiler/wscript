@@ -3,8 +3,8 @@ from waflib import Options
 def options(opt):
     gr = opt.add_option_group('configure options')
     gr.add_option( '--compilers',
-                    action='append',
-                    default=[],
+                    action='store',
+                    default='',
                     dest='compilers',
                     help='List of compilers to configure for')
     for path in opt.path.listdir():
@@ -13,6 +13,7 @@ def options(opt):
 
 def configure(conf):
     compilers = Options.options.compilers
+    compilers = compilers.split(',') if compilers else []
     for path in conf.path.listdir():
         if path != 'wscript':
             if not compilers or path in compilers:
@@ -20,6 +21,7 @@ def configure(conf):
 
 def build(bld):
     compilers = Options.options.compilers
+    compilers = compilers.split(',') if compilers else []
     for path in bld.path.listdir():
         if path != 'wscript':
             if not compilers or path in compilers:
