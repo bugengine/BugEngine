@@ -11,6 +11,7 @@ def python_config(conf, version, var=''):
             raise Errors.WafError('python-config for python %s not found' % version)
         del conf.env.PYTHON_CONFIG
         if not var: var = '3rdparty.python%s'%(version_number)
+        var = (conf.env.ENV_PREFIX + '/') if conf.env.ENV_PREFIX else var
         command = [py_config, '--includes']
         p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
         out,err = p.communicate()
