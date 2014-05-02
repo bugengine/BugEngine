@@ -60,8 +60,8 @@ def options(opt):
         if target != 'wscript':
             opt.recurse(target)
     gr.add_option( '--platforms',
-                    action='append',
-                    default=[],
+                    action='store',
+                    default='',
                     dest='platforms',
                     help='List of platform to configure for')
 
@@ -71,6 +71,8 @@ def configure(conf):
     conf.env.ALL_VARIANTS = ['debug', 'profile', 'final']
     from waflib import Options
     platforms = Options.options.platforms
+    platforms = platforms.split(',') if platforms else []
+    print(platforms)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):

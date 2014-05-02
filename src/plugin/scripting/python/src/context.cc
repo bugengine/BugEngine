@@ -10,6 +10,7 @@ namespace BugEngine
 
 namespace Arena
 {
+
 static minitl::Allocator& python27()
 {
     return script();
@@ -20,14 +21,19 @@ static minitl::Allocator& python27()
 namespace Python
 {
 
+void platformInit();
+
 class PythonGlobalInterpreter
 {
 public:
     PythonGlobalInterpreter()
     {
+        Py_NoSiteFlag = 1;
+        Py_InteractiveFlag = 0;
         Py_InitializeEx(0);
         be_info("python %s" | Py_GetVersion());
         PyEval_InitThreads();
+        platformInit();
         PyEval_ReleaseLock();
     }
     ~PythonGlobalInterpreter()
