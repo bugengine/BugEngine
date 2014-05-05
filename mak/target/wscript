@@ -72,7 +72,6 @@ def configure(conf):
     from waflib import Options
     platforms = Options.options.platforms
     platforms = platforms.split(',') if platforms else []
-    print(platforms)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):

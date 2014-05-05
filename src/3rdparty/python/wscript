@@ -1,6 +1,18 @@
 from waflib import Errors, Utils, Options
 from waflib.Configure import conf
+from waflib.TaskGen import feature, before_method
+import os
 import sys
+
+@feature("check_python")
+@before_method("process_source")
+def check_python_test(self):
+    def write_test_file(task):
+        task.outputs[0].write(task.generator.code)
+    bld = self.bld
+    bld(rule=write_test_file, target='main.cc', code=self.code)
+    bld(features='cxx cxxprogram', source='main.cc', target='app',
+        cxxflags=self.cxxflags, linkflags=self.ldflags)
 
 @conf
 def python_config(conf, version, var=''):
@@ -12,18 +24,10 @@ def python_config(conf, version, var=''):
         del conf.env.PYTHON_CONFIG
         if not var: var = '3rdparty.python%s'%(version_number)
         var = (conf.env.ENV_PREFIX + '/' + var) if conf.env.ENV_PREFIX else var
-        command = [py_config, '--includes']
-        p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
-        out,err = p.communicate()
-        if p.returncode != 0:
-            if not isinstance(err, str):
-                err = err.decode(sys.stdout.encoding or 'iso8859-1')
-            raise Errors.WafError('could not run %s: %s' % (command, err))
-        if not isinstance(out, str):
-            out = out.decode(sys.stdout.encoding or 'iso8859-1')
-        includes = out.split()
 
-        command = [py_config, '--ldflags']
+        includes = ['-I/Library/Frameworks/Python.framework/Versions/%s/Headers' % version]
+
+        command = [py_config, '--libs']
         p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
         out,err = p.communicate()
         if p.returncode != 0:
@@ -32,7 +36,18 @@ def python_config(conf, version, var=''):
             raise Errors.WafError('could not run %s: %s' % (command, err))
         if not isinstance(out, str):
             out = out.decode(sys.stdout.encoding or 'iso8859-1')
-        ldflags = out.split()
+        ldflags = ['-L/Library/Frameworks/Python.framework/Versions/%s/lib/' % version] + out.split()
+
+        conf.check(
+            compile_filename=[],
+            features='check_python',
+            msg='check for python %s'%version,
+            cxxflags=includes,
+            ldflags=ldflags,
+            code="""
+                #include <Python.h>
+                int main() { Py_Initialize(); return 0; }
+            """)
 
         conf.env['CFLAGS_%s'%var] = includes
         conf.env['CXXFLAGS_%s'%var] = includes
@@ -60,6 +75,7 @@ def setup(conf):
             pass
         else:
             conf.env.append_unique('FEATURES', 'python%s'%version)
+            conf.detected.append('Python %s'% version)
 
 def build(bld):
     bld.env.PYTHON_VERSIONS = Options.options.python_versions.split(',')
