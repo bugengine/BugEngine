@@ -7,321 +7,321 @@ from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
 
 def options(opt):
-	gr = opt.get_option_group('SDK paths and options')
-	gr.add_option( '--iphone-sdk',
-					action='store',
-					default='',
-					dest='iphone_sdk',
-					help='Version of the iPhoneOS SDK to target')
+    gr = opt.get_option_group('SDK paths and options')
+    gr.add_option( '--iphone-sdk',
+                    action='store',
+                    default='',
+                    dest='iphone_sdk',
+                    help='Version of the iPhoneOS SDK to target')
 
 def check_iphone_multilib_gcc(self, compiler):
-	flags = compiler[8]
-	arch = compiler[6]
-	filename = os.path.join(self.bldnode.abspath(), 'main.c')
-	output = os.path.join(self.bldnode.abspath(), 'main.o')
-	if arch in ['arm', 'armv7']:
-		with open(filename, 'w') as f:
-			f.write('int main(int, const char**) { return 0; }')
-			cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,v7', '-c', filename, '-o', output]
-			try:
-				p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-				out = p.communicate()[0]
-			except Exception as e:
-				print(e)
-			else:
-				if p.returncode == 0:
-					flags.append('-Wp,-imultilib,v7')
-					flags.append('-Wp,-imultilib,v7')
+    flags = compiler[8]
+    arch = compiler[6]
+    filename = os.path.join(self.bldnode.abspath(), 'main.c')
+    output = os.path.join(self.bldnode.abspath(), 'main.o')
+    if arch in ['arm', 'armv7']:
+        with open(filename, 'w') as f:
+            f.write('int main(int, const char**) { return 0; }')
+            cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,v7', '-c', filename, '-o', output]
+            try:
+                p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+                out = p.communicate()[0]
+            except Exception as e:
+                print(e)
+            else:
+                if p.returncode == 0:
+                    flags.append('-Wp,-imultilib,v7')
+                    flags.append('-Wp,-imultilib,v7')
 
 @conf
 def check_iphone_multilib_other(self, compiler):
-	pass
+    pass
 
 
 @conf
 def get_iphone_sdk_version(self, name, compiler_list):
-	from waflib import Options
-	sdk_number = Options.options.iphone_sdk
-	sdks = []
-	paths = Options.options.xcode_sdks.split(',')
-	for path in paths:
-		for sdk_relative_path in [os.path.join('Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs'), 'SDKs']:
-			sdks_path = os.path.join(path, sdk_relative_path)
-			try:
-				sdk_list = os.listdir(sdks_path)
-			except OSError:
-				continue
-			else:
-				for sdk in sdk_list:
-					sdk_name,_ = os.path.splitext(sdk)
-					if sdk.startswith('iPhoneOS'):
-						sdk_version = sdk_name[len('iPhoneOS'):]
-						sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
+    from waflib import Options
+    sdk_number = Options.options.iphone_sdk
+    sdks = []
+    paths = Options.options.xcode_sdks.split(',')
+    for path in paths:
+        for sdk_relative_path in [os.path.join('Platforms', 'iPhoneOS.platform', 'Developer', 'SDKs'), 'SDKs']:
+            sdks_path = os.path.join(path, sdk_relative_path)
+            try:
+                sdk_list = os.listdir(sdks_path)
+            except OSError:
+                continue
+            else:
+                for sdk in sdk_list:
+                    sdk_name,_ = os.path.splitext(sdk)
+                    if sdk.startswith('iPhoneOS'):
+                        sdk_version = sdk_name[len('iPhoneOS'):]
+                        sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
-	sdks.sort()
-	self.start_msg('Looking for SDK for %s-%s'%name)
-	for sdk, sdk_path in sdks[::-1]:
-		if sdk_number and not sdk.startswith(sdk_number):
-			continue
-		try:
-			for compiler in compiler_list:
-				sdk_path_compiler = sdk_path.replace('/iPhoneOS', '/%s'%compiler[7])
-				self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path_compiler, '-miphoneos-version-min=%s'%sdk)
-			break
-		except Errors.WafError:
-			continue
-	else:
-		self.end_msg('none', color='RED')
-		raise Errors.WafError('Could not find any suitable SDK')
-	self.end_msg(os.path.splitext(os.path.basename(sdk_path))[0])
-	return (sdk, sdk_path)
+    sdks.sort()
+    self.start_msg('Looking for SDK for %s-%s'%name)
+    for sdk, sdk_path in sdks[::-1]:
+        if sdk_number and not sdk.startswith(sdk_number):
+            continue
+        try:
+            for compiler in compiler_list:
+                sdk_path_compiler = sdk_path.replace('/iPhoneOS', '/%s'%compiler[7])
+                self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path_compiler, '-miphoneos-version-min=%s'%sdk)
+            break
+        except Errors.WafError:
+            continue
+    else:
+        self.end_msg('none', color='RED')
+        raise Errors.WafError('Could not find any suitable SDK')
+    self.end_msg(os.path.splitext(os.path.basename(sdk_path))[0])
+    return (sdk, sdk_path)
 
 
 @conf
 def set_iphone_sdk_options(self, target, sdk, sdk_path):
-	sdk_path = sdk_path.replace('/iPhoneOS', '/%s'%target)
-	self.env.MACOSX_SDK = '%s%s'%(target, sdk)
-	self.env.XCODE_SDK_PATH = sdk_path
-	self.env.SYSROOT = [sdk_path]
-	self.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
-	self.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
-	self.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+    sdk_path = sdk_path.replace('/iPhoneOS', '/%s'%target)
+    self.env.MACOSX_SDK = '%s%s'%(target, sdk)
+    self.env.XCODE_SDK_PATH = sdk_path
+    self.env.SYSROOT = [sdk_path]
+    self.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
+    self.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
+    self.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
 
 @conf
 def set_iphone_options(self, targets):
-	self.env.VALID_PLATFORMS = ['iphone', 'darwin']
+    self.env.VALID_PLATFORMS = ['iphone', 'darwin']
 
-	self.env.XCODE_SDKROOT = 'iphoneos'
-	self.env.XCODE_ABI = 'mach_o'
-	self.env.XCODE_SUPPORTEDPLATFORMS = [t.lower() for t in targets]
+    self.env.XCODE_SDKROOT = 'iphoneos'
+    self.env.XCODE_ABI = 'mach_o'
+    self.env.XCODE_SUPPORTEDPLATFORMS = [t.lower() for t in targets]
 
-	appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
-	self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app')
-	self.env.DEPLOY_BINDIR = os.path.join(appname + '.app')
-	self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app')
-	self.env.DEPLOY_LIBDIR = 'lib'
-	self.env.DEPLOY_INCLUDEDIR = 'include'
-	self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'share', 'bugengine')
-	self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'plugin')
-	self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'kernel')
+    appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
+    self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app')
+    self.env.DEPLOY_BINDIR = os.path.join(appname + '.app')
+    self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app')
+    self.env.DEPLOY_LIBDIR = 'lib'
+    self.env.DEPLOY_INCLUDEDIR = 'include'
+    self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'share', 'bugengine')
+    self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'plugin')
+    self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'kernel')
 
 @conf
 def set_iphone_gcc_options(self, flags, arch):
-	v = self.env
-	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-	v.LINKFLAGS = flags + []
-	v.CXXFLAGS_cxxshlib = []
-	v.CFLAGS_exportall = ['-fvisibility=default']
-	v.CXXFLAGS_exportall = ['-fvisibility=default']
+    v = self.env
+    v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+    v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+    v.LINKFLAGS = flags + []
+    v.CXXFLAGS_cxxshlib = []
+    v.CFLAGS_exportall = ['-fvisibility=default']
+    v.CXXFLAGS_exportall = ['-fvisibility=default']
 
-	v.CFLAGS_warnnone = ['-w']
-	v.CXXFLAGS_warnnone = ['-w']
-	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CFLAGS_warnnone = ['-w']
+    v.CXXFLAGS_warnnone = ['-w']
+    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
-	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.LINKFLAGS_debug = ['-pipe', '-g']
+    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.LINKFLAGS_debug = ['-pipe', '-g']
 
-	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.LINKFLAGS_profile = ['-pipe', '-g']
+    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.LINKFLAGS_profile = ['-pipe', '-g']
 
-	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.LINKFLAGS_final = ['-pipe', '-g']
+    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.LINKFLAGS_final = ['-pipe', '-g']
 
-	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+    self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+    self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 
 @conf
 def set_iphone_clang_options(self, flags, arch):
-	v = self.env
-	v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-	v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-	v.LINKFLAGS = flags + []
-	v.CXXFLAGS_cxxshlib = []
-	v.CFLAGS_exportall = ['-fvisibility=default']
-	v.CXXFLAGS_exportall = ['-fvisibility=default']
+    v = self.env
+    v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+    v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
+    v.LINKFLAGS = flags + []
+    v.CXXFLAGS_cxxshlib = []
+    v.CFLAGS_exportall = ['-fvisibility=default']
+    v.CXXFLAGS_exportall = ['-fvisibility=default']
 
-	v.CFLAGS_warnnone = ['-w']
-	v.CXXFLAGS_warnnone = ['-w']
-	v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-	v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CFLAGS_warnnone = ['-w']
+    v.CXXFLAGS_warnnone = ['-w']
+    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
-	v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-	v.LINKFLAGS_debug = ['-pipe', '-g']
+    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
+    v.LINKFLAGS_debug = ['-pipe', '-g']
 
-	v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-	v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.LINKFLAGS_profile = ['-pipe', '-g']
+    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.LINKFLAGS_profile = ['-pipe', '-g']
 
-	v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-	v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-	v.LINKFLAGS_final = ['-pipe', '-g']
+    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
+    v.LINKFLAGS_final = ['-pipe', '-g']
 
-	self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-	self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+    self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+    self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
 
 def host_configure(conf):
-	pass
+    pass
 
 def configure(conf):
-	supported_architectures = {
-		'x86':		('i386', 'iPhoneSimulator'),
-		'i386':		('i386', 'iPhoneSimulator'),
-		'arm':		('armv7', 'iPhoneOS'),
-		'armv7':	('armv7', 'iPhoneOS'),
-		'x86_64':	('x86_64', 'iPhoneSimulator'),
-		'amd64':	('x86_64', 'iPhoneSimulator'),
-		'arm64':	('arm64', 'iPhoneOS'),
-	}
-	os = 'iphone'
+    supported_architectures = {
+        'x86':		('i386', 'iPhoneSimulator'),
+        'i386':		('i386', 'iPhoneSimulator'),
+        'arm':		('armv7', 'iPhoneOS'),
+        'armv7':	('armv7', 'iPhoneOS'),
+        'x86_64':	('x86_64', 'iPhoneSimulator'),
+        'amd64':	('x86_64', 'iPhoneSimulator'),
+        'arm64':	('arm64', 'iPhoneOS'),
+    }
+    os = 'iphone'
 
-	def load_gcc(conf, compiler):
-		conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
-	def load_icc(conf, compiler):
-		conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
-	def load_clang(conf, compiler):
-		conf.load_clang(compiler[1], compiler[5], compiler[7][1])
+    def load_gcc(conf, compiler):
+        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
+    def load_icc(conf, compiler):
+        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
+    def load_clang(conf, compiler):
+        conf.load_clang(compiler[1], compiler[5], compiler[8])
 
-	compiler_versions = {}
-	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
-		position = target.find('darwin')
-		if position != -1 and arch in supported_architectures:
-			real_arch, os_name = supported_architectures[arch]
-			version = target[position+6:].split('-')[0] + '_' + version
-			key = (name, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
-			compiler = (name, bindir, gcc, gxx, version, target, real_arch, os_name, options)
-			try:
-				compiler_versions[key].append(compiler)
-			except KeyError:
-				compiler_versions[key] = [compiler]
-	for version, directory, target, arch in conf.env.CLANG_TARGETS:
-		arch, flags = arch
-		position = target.find('darwin')
-		if position != -1 and arch in supported_architectures:
-			real_arch, os_name = supported_architectures[arch]
-			key = ('clang', version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
-			compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, os_name, flags)
-			try:
-				compiler_versions[key].append(compiler)
-			except KeyError:
-				compiler_versions[key] = [compiler]
+    compiler_versions = {}
+    for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+        position = target.find('darwin')
+        if position != -1 and arch in supported_architectures:
+            real_arch, os_name = supported_architectures[arch]
+            version = target[position+6:].split('-')[0] + '_' + version
+            key = (name, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
+            compiler = (name, bindir, gcc, gxx, version, target, real_arch, os_name, options)
+            try:
+                compiler_versions[key].append(compiler)
+            except KeyError:
+                compiler_versions[key] = [compiler]
+    for version, directory, target, arch in conf.env.CLANG_TARGETS:
+        arch, flags = arch
+        position = target.find('darwin')
+        if position != -1 and arch in supported_architectures:
+            real_arch, os_name = supported_architectures[arch]
+            key = ('clang', version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
+            compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, os_name, flags)
+            try:
+                compiler_versions[key].append(compiler)
+            except KeyError:
+                compiler_versions[key] = [compiler]
 
 
-	seen = set([])
-	def get_version(x):
-		x = x.split('_')
-		key = 0.
-		div = 1.
-		for y in x[0].split('.'):
-			key += float(y) / div
-			div *= 100
-		if len(x) > 1:
-			return key, x[1]
-		else:
-			return key, ''
-	for key, all_toolchains in sorted(compiler_versions.items(), key=lambda x: (x[0][0], get_version(x[0][1]))):
-		compiler_archs = {}
-		compiler_list = []
-		for c in all_toolchains:
-			compiler_archs[c[6]] = c
-		if 'i386' in compiler_archs and 'armv7' in compiler_archs:
-			compiler_list.append(compiler_archs['i386'])
-			compiler_list.append(compiler_archs['armv7'])
-		if 'x86_64' in compiler_archs and 'arm64' in compiler_archs:
-			compiler_list.append(compiler_archs['x86_64'])
-			compiler_list.append(compiler_archs['arm64'])
-		if not compiler_list:
-			continue
+    seen = set([])
+    def get_version(x):
+        x = x.split('_')
+        key = 0.
+        div = 1.
+        for y in x[0].split('.'):
+            key += float(y) / div
+            div *= 100
+        if len(x) > 1:
+            return key, x[1]
+        else:
+            return key, ''
+    for key, all_toolchains in sorted(compiler_versions.items(), key=lambda x: (x[0][0], get_version(x[0][1]))):
+        compiler_archs = {}
+        compiler_list = []
+        for c in all_toolchains:
+            compiler_archs[c[6]] = c
+        if 'i386' in compiler_archs and 'armv7' in compiler_archs:
+            compiler_list.append(compiler_archs['i386'])
+            compiler_list.append(compiler_archs['armv7'])
+        if 'x86_64' in compiler_archs and 'arm64' in compiler_archs:
+            compiler_list.append(compiler_archs['x86_64'])
+            compiler_list.append(compiler_archs['arm64'])
+        if not compiler_list:
+            continue
 
-		iphone_toolchains = []
-		iphone_archs = []
-		iphone_os = set([])
-		name, version, check_multilib, load_compiler, set_iphone_compiler_options = key
-		if (name, version) in seen:
-			continue
-		seen.add((name, version))
-		for compiler in compiler_list:
-			check_multilib(conf, compiler)
-		try:
-			sdk_name, sdk_path = conf.get_iphone_sdk_version((key[0], key[1]), compiler_list)
-		except Errors.WafError:
-			continue
-		for compiler in compiler_list:
-			name, bindir, gcc, gxx, version, target, arch, real_os, options = compiler
-			toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
-			env = conf.env.derive()
-			conf.setenv(toolchain, env)
-			env.DEST_OS = 'darwin'
-			try:
-				conf.start_msg('Setting up compiler')
-				load_compiler(conf, compiler)
-				if arch in ['arm', 'armv7', 'arm64']:
-					conf.find_program('codesign')
-				set_iphone_compiler_options(conf, options, arch)
-			except Exception as e:
-				conf.end_msg(e, color='RED')
-				raise
-			else:
-				conf.end_msg('done')
-				try:
-					conf.set_iphone_options([real_os])
-					conf.set_iphone_sdk_options(real_os, sdk_name, sdk_path)
-					toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], arch, name, version)
-					conf.setenv(toolchain, conf.env.derive())
-					conf.env.KERNEL_TOOLCHAINS = [toolchain]
-					conf.env.ENV_PREFIX = arch
-					conf.add_toolchain(os+sdk_name, arch, name, version, arch, False)
-				except Errors.WafError as e:
-					conf.variant = ''
-					pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-				except Exception as e:
-					conf.variant = ''
-					pprint('RED', '%s failed: %s' % (toolchain, e))
-					raise
-				else:
-					iphone_toolchains.append(toolchain)
-					iphone_archs.append(arch)
-					iphone_os.add(real_os)
-					conf.variant = ''
-		if iphone_toolchains:
-			toolchain = '%s%s-%s-%s-%s'%(os, sdk_name, ','.join(iphone_archs), name, version)
-			env = conf.env.derive()
-			conf.setenv(toolchain, env)
-			conf.set_iphone_options(iphone_os)
-			conf.env.SUB_TOOLCHAINS = iphone_toolchains
-			conf.env.VALID_ARCHITECTURES = [iphone_archs]
-			conf.find_program('dsymutil')
-			conf.find_program('strip')
-			conf.find_program('lipo')
-			conf.add_multiarch_toolchain(toolchain)
-			pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+        iphone_toolchains = []
+        iphone_archs = []
+        iphone_os = set([])
+        name, version, check_multilib, load_compiler, set_iphone_compiler_options = key
+        if (name, version) in seen:
+            continue
+        seen.add((name, version))
+        for compiler in compiler_list:
+            check_multilib(conf, compiler)
+        try:
+            sdk_name, sdk_path = conf.get_iphone_sdk_version((key[0], key[1]), compiler_list)
+        except Errors.WafError:
+            continue
+        for compiler in compiler_list:
+            name, bindir, gcc, gxx, version, target, arch, real_os, options = compiler
+            toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+            env = conf.env.derive()
+            conf.setenv(toolchain, env)
+            env.DEST_OS = 'darwin'
+            try:
+                conf.start_msg('Setting up compiler')
+                load_compiler(conf, compiler)
+                if arch in ['arm', 'armv7', 'arm64']:
+                    conf.find_program('codesign')
+                set_iphone_compiler_options(conf, options, arch)
+            except Exception as e:
+                conf.end_msg(e, color='RED')
+                raise
+            else:
+                conf.end_msg('done')
+                try:
+                    conf.set_iphone_options([real_os])
+                    conf.set_iphone_sdk_options(real_os, sdk_name, sdk_path)
+                    toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], arch, name, version)
+                    conf.setenv(toolchain, conf.env.derive())
+                    conf.env.KERNEL_TOOLCHAINS = [toolchain]
+                    conf.env.ENV_PREFIX = arch
+                    conf.add_toolchain(os+sdk_name, arch, name, version, arch, False)
+                except Errors.WafError as e:
+                    conf.variant = ''
+                    pprint('YELLOW', '%s failed: %s' % (toolchain, e))
+                except Exception as e:
+                    conf.variant = ''
+                    pprint('RED', '%s failed: %s' % (toolchain, e))
+                    raise
+                else:
+                    iphone_toolchains.append(toolchain)
+                    iphone_archs.append(arch)
+                    iphone_os.add(real_os)
+                    conf.variant = ''
+        if iphone_toolchains:
+            toolchain = '%s%s-%s-%s-%s'%(os, sdk_name, ','.join(iphone_archs), name, version)
+            env = conf.env.derive()
+            conf.setenv(toolchain, env)
+            conf.set_iphone_options(iphone_os)
+            conf.env.SUB_TOOLCHAINS = iphone_toolchains
+            conf.env.VALID_ARCHITECTURES = [iphone_archs]
+            conf.find_program('dsymutil')
+            conf.find_program('strip')
+            conf.find_program('lipo')
+            conf.add_multiarch_toolchain(toolchain)
+            pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 
 def build(bld):
-	bld.platforms.append(bld.external('3rdparty.cocoa'))
+    bld.platforms.append(bld.external('3rdparty.cocoa'))
 
 def plugins(bld):
-	pass
+    pass
 
 @feature('cxxshlib', 'cshlib')
 @after_method('apply_link')
 def set_iphone_shlib_name(self):
-	if 'iphone' in self.env.VALID_PLATFORMS:
-		if 'plugin' in self.features:
-			self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
-		elif 'kernel' in self.features:
-			self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
+    if 'iphone' in self.env.VALID_PLATFORMS:
+        if 'plugin' in self.features:
+            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
+        elif 'kernel' in self.features:
+            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
 

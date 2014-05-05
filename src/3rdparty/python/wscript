@@ -12,7 +12,7 @@ def check_python_test(self):
     bld = self.bld
     bld(rule=write_test_file, target='main.cc', code=self.code)
     bld(features='cxx cxxprogram', source='main.cc', target='app',
-        cxxflags=self.cxxflags, linkflags=self.ldflags)
+        cxxflags=self.cxxflags, linkflags=self.ldflags, use=self.use)
 
 @conf
 def python_config(conf, version, var=''):
@@ -47,13 +47,25 @@ def python_config(conf, version, var=''):
             code="""
                 #include <Python.h>
                 int main() { Py_Initialize(); return 0; }
-            """)
+            """,
+            use=[])
 
         conf.env['CFLAGS_%s'%var] = includes
         conf.env['CXXFLAGS_%s'%var] = includes
         conf.env['LINKFLAGS_%s'%var] = ldflags
     elif 'posix' in conf.env.VALID_PLATFORMS:
         conf.pkg_config('python-%s'%version, var=var)
+        conf.check(
+            compile_filename=[],
+            features='check_python',
+            msg='check for python %s'%version,
+            cxxflags=includes,
+            ldflags=ldflags,
+            use=[var],
+            code="""
+                #include <Python.h>
+                int main() { Py_Initialize(); return 0; }
+            """)
     elif 'windows' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s' % version_number, name='setup')
     else:

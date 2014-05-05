@@ -217,11 +217,11 @@ def configure(conf):
     }
 
     def load_gcc(conf, compiler):
-        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
+        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
     def load_icc(conf, compiler):
-        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
+        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
     def load_clang(conf, compiler):
-        conf.load_clang(compiler[1], compiler[5], compiler[7][1])
+        conf.load_clang(compiler[1], compiler[5], compiler[8])
 
     compiler_versions = {}
     for name, bindir, icc, ixx, version, target, arch, options in conf.env.ICC_TARGETS:
