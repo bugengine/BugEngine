@@ -401,7 +401,7 @@ def configure(conf):
 				conf.find_program(triple+'-ar', var='AR', path_list=[os.path.join(gcc, 'bin')])
 				conf.find_program(triple+'-strip', var='STRIP', path_list=[os.path.join(gcc, 'bin')])
 				conf.find_program(triple+'-gdb', var='GDB', path_list=[os.path.join(gcc, 'bin')])
-				conf.load_clang(directory, target)
+				conf.load_clang(directory, target, flags)
 				conf.set_android_clang_options(flags, real_arch, version)
 			except Exception as e:
 				conf.end_msg(e, color='RED')

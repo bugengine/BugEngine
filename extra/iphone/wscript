@@ -193,7 +193,7 @@ def configure(conf):
 	def load_icc(conf, compiler):
 		conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[7])
 	def load_clang(conf, compiler):
-		conf.load_clang(compiler[1], compiler[5])
+		conf.load_clang(compiler[1], compiler[5], compiler[7][1])
 
 	compiler_versions = {}
 	for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:

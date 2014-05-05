@@ -151,7 +151,7 @@ def detect_clang(conf):
     conf.env.CLANG_TARGETS.sort(key = lambda x: x[0])
 
 @conf
-def load_clang(conf, directory, target):
+def load_clang(conf, directory, target, flags):
     directories = [directory, os.path.join(directory, '..', target, 'bin')]
     conf.find_program('clang', var='CC', path_list=directories)
     conf.find_program('clang++', var='CXX', path_list=directories, mandatory=False)
@@ -171,7 +171,7 @@ def load_clang(conf, directory, target):
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
         conf.load('winres')
 
-    cmd = conf.env.CC + ['-x', 'c++', '-Wp,-v', '-E', '-']
+    cmd = conf.env.CC + flags + ['-x', 'c++', '-Wp,-v', '-E', '-']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         p.stdin.write('\n'.encode())
@@ -191,7 +191,7 @@ def load_clang(conf, directory, target):
                         break
                     conf.env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
 
-    cmd = conf.env.CC + ['-x', 'c++', '-dM', '-E', '-']
+    cmd = conf.env.CC + flags + ['-x', 'c++', '-dM', '-E', '-']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         p.stdin.write('\n'.encode())
@@ -214,6 +214,23 @@ def load_clang(conf, directory, target):
                 else:
                     if line in conf.env.useful_defines:
                         conf.env.append_unique('SYSTEM_DEFINES', [line])
+
+    cmd = conf.env.CC + flags + ['-x', 'c++', '-print-search-dirs']
+    try:
+        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+        p.stdin.write('\n'.encode())
+        out = p.communicate()[0]
+    except Exception as e:
+        print('could not retrieve system defines: %s' % str(e))
+    else:
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding)
+        out = out.split('\n')
+        while out:
+            line = out.pop(0)
+            if line and line.startswith('libraries:'):
+                line = line[10:].strip()
+                conf.env.append_unique('SYSTEM_LIBPATHS', line.split(':'))
 
 
 def options(opt):
