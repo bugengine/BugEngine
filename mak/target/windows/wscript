@@ -199,7 +199,7 @@ def configure(conf):
                 env.DEST_OS = 'win32'
                 try:
                     conf.start_msg('Setting up compiler')
-                    conf.load_clang(directory, target)
+                    conf.load_clang(directory, target, options)
                     conf.set_windows_clang_options(options, version)
                 except Exception as e:
                     conf.end_msg(e, color='RED')
