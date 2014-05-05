@@ -289,7 +289,7 @@ def configure(conf):
             env.DEST_OS = 'linux'
             try:
                 conf.start_msg('Setting up compiler')
-                conf.load_clang(directory, target)
+                conf.load_clang(directory, target, options)
                 conf.set_linux_clang_options(options, version)
             except Exception as e:
                 conf.end_msg(e, color='RED')
