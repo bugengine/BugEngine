@@ -59,8 +59,8 @@ def python_config(conf, version, var=''):
             compile_filename=[],
             features='check_python',
             msg='check for python %s'%version,
-            cxxflags=includes,
-            ldflags=ldflags,
+            cxxflags=[],
+            ldflags=[],
             use=[var],
             code="""
                 #include <Python.h>
