@@ -209,6 +209,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
 
 GLRenderer::~GLRenderer()
 {
+    flush();
 }
 
 void GLRenderer::attachWindow(weak<GLWindow> w) const

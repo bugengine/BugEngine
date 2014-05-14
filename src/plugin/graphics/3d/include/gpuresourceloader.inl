@@ -56,6 +56,7 @@ void GPUResourceLoader<R>::flush()
     {
         IGPUResource* resource = m_deleted.back().operator->();
         m_deleted.pop_back();
+        resource->unload();
         resource->decref();
     }
     for (minitl::intrusive_list<IGPUResource>::iterator it = m_pending.begin(); it != m_pending.end(); )
