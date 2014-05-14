@@ -34,10 +34,13 @@ public:
         be_info("python %s" | Py_GetVersion());
         PyEval_InitThreads();
         platformInit();
+        m_mainThread = PyThreadState_Swap(NULL);
         PyEval_ReleaseLock();
     }
     ~PythonGlobalInterpreter()
     {
+        PyEval_AcquireLock();
+        PyThreadState_Swap(m_mainThread);
         Py_Finalize();
     }
     PyThreadState* createInterpreter()
@@ -53,6 +56,8 @@ public:
         Py_EndInterpreter(state);
         PyEval_ReleaseLock();
     }
+private:
+    PyThreadState*  m_mainThread;
 };
 
 static PythonGlobalInterpreter s_interpreter;

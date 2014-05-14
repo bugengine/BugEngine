@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_PYTHON27_CONTEXT_H_
-#define BE_PYTHON27_CONTEXT_H_
+#ifndef BE_PYTHON_CONTEXT_H_
+#define BE_PYTHON_CONTEXT_H_
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <bugengine/scriptengine.hh>
@@ -10,7 +10,7 @@
 #include    <rtti/value.hh>
 #include    <filesystem/file.script.hh>
 #include    <plugin/plugin.hh>
-#include    <pythonscript.script.hh>
+#include    <python/pythonscript.script.hh>
 
 namespace BugEngine { namespace Python
 {

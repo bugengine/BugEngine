@@ -16,6 +16,7 @@ GLESRenderer::GLESRenderer(const Plugin::Context& context)
 
 GLESRenderer::~GLESRenderer()
 {
+    flush();
 }
 
 void GLESRenderer::flush()

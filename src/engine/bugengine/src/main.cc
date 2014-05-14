@@ -53,15 +53,14 @@ namespace
         virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
         {
 #ifdef BE_PLATFORM_WIN32
-            OutputDebugString(filename);
-            OutputDebugString(minitl::format<1024u>("(%d) :") | line);
-            OutputDebugString(logname.c_str());
-            OutputDebugString("\t\t(");
-            OutputDebugString(s_logNames[level]);
-            OutputDebugString(") ");
-            OutputDebugString(msg);
-            if (msg[strlen(msg)-1] != '\n')
-                OutputDebugString("\n");
+            minitl::format<1024u> message = minitl::format<1024u>("%s(%d): %s\t(%s) %s%s")
+                                          | filename
+                                          | line
+                                          | logname.c_str()
+                                          | s_logNames[level]
+                                          | msg
+                                          | (msg[strlen(msg)-1] == '\n' ? "" : "\n");
+            OutputDebugString(message);
 #endif
             fprintf(stderr, "%s(%d) :%s\t\t(%s) %s", filename, line, logname.c_str(), s_logNames[level], msg);
             if (msg[strlen(msg)-1] != '\n')

@@ -25,6 +25,7 @@ NullRenderer::NullRenderer(const Plugin::Context& context)
 
 NullRenderer::~NullRenderer()
 {
+    flush();
 }
 
 ref<IGPUResource> NullRenderer::create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const

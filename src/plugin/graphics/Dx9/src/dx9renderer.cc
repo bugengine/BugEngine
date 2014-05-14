@@ -61,13 +61,11 @@ Dx9Renderer::Dx9Renderer(const Plugin::Context& context)
     d3d_checkResult(m_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE));
 
     m_deviceState = DeviceReady;
-
-    m_device->AddRef();
-    m_directx->AddRef();
 }
 
 Dx9Renderer::~Dx9Renderer()
 {
+    flush();
     DestroyWindow(m_dummyWindow);
 
     if (m_device)
