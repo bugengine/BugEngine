@@ -36,7 +36,8 @@ private:
         ref<const File::Ticket> ticket;
         u64                     fileState;
         u32                     progress;
-        ILoader::LoadType       type;
+        ILoader::FileType       fileType;
+        ILoader::LoadType       loadType;
         bool                    outdated;
     };
 private:
@@ -62,7 +63,8 @@ public:
     template< typename T > void unload(weak<T> resource)            { unload(be_typeid<T>::klass(), resource); }
     template< typename T > void unload(ref<T> resource)             { unload(be_typeid<T>::klass(), resource); }
 
-    void addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file, ILoader::LoadType type);
+    void addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file,
+                   ILoader::FileType fileType, ILoader::LoadType loadType);
     size_t updateTickets();
 };
 

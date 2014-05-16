@@ -21,38 +21,33 @@ static minitl::Allocator& python27()
 namespace Python
 {
 
-void platformInit();
-
 class PythonGlobalInterpreter
 {
 public:
     PythonGlobalInterpreter()
     {
-        Py_NoSiteFlag = 1;
+        Py_NoSiteFlag = 0;
         Py_InteractiveFlag = 0;
         Py_InitializeEx(0);
         be_info("python %s" | Py_GetVersion());
         PyEval_InitThreads();
-        platformInit();
-        m_mainThread = PyThreadState_Swap(NULL);
-        PyEval_ReleaseLock();
+        m_mainThread = PyEval_SaveThread();
     }
     ~PythonGlobalInterpreter()
     {
-        PyEval_AcquireLock();
-        PyThreadState_Swap(m_mainThread);
+        PyEval_AcquireThread(m_mainThread);
         Py_Finalize();
     }
     PyThreadState* createInterpreter()
     {
-        PyEval_AcquireLock();
+        PyEval_AcquireThread(m_mainThread);
         PyThreadState* result = Py_NewInterpreter();
-        PyEval_ReleaseLock();
+        PyEval_ReleaseThread(result);
         return result;
     }
     void destroyInterpreter(PyThreadState* state)
     {
-        PyEval_RestoreThread(state);
+        PyEval_AcquireThread(state);
         Py_EndInterpreter(state);
         PyEval_ReleaseLock();
     }
@@ -75,22 +70,22 @@ Context::~Context()
 
 void Context::unload(Resource::Resource& /*handle*/)
 {
-    PyEval_RestoreThread(m_pythonState);
-    PyEval_SaveThread();
+    PyEval_AcquireThread(m_pythonState);
+    PyEval_ReleaseThread(m_pythonState);
 }
 
 void Context::runBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
 {
-    PyEval_RestoreThread(m_pythonState);
+    PyEval_AcquireThread(m_pythonState);
     PyRun_SimpleString((const char*)block.begin());
-    PyEval_SaveThread();
+    PyEval_ReleaseThread(m_pythonState);
 }
 
 void Context::reloadBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
 {
-    PyEval_RestoreThread(m_pythonState);
+    PyEval_AcquireThread(m_pythonState);
     PyRun_SimpleString((const char*)block.begin());
-    PyEval_SaveThread();
+    PyEval_ReleaseThread(m_pythonState);
 }
 
 }}

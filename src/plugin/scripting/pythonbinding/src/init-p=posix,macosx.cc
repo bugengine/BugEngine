@@ -10,4 +10,8 @@ void platformInit()
 {
 }
 
+void platformSetup()
+{
+}
+
 }}

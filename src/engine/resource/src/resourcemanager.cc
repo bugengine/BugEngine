@@ -122,16 +122,19 @@ void ResourceManager::unload(raw<const RTTI::Class> classinfo, weak<const Descri
     }
 }
 
-void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file, ILoader::LoadType type)
+void ResourceManager::addTicket(weak<ILoader> loader, weak<const Description> description,
+                                weak<const File> file, ILoader::FileType fileType,
+                                ILoader::LoadType loadType)
 {
     Ticket ticket;
     ticket.loader = loader;
     ticket.file = file;
     ticket.resource = description;
-    ticket.ticket = file->beginRead(0, 0, Arena::temporary());
+    ticket.ticket = file->beginRead(0, 0, fileType == ILoader::FileText, Arena::temporary());
     ticket.fileState = file->getState();
     ticket.progress = 0;
-    ticket.type = type;
+    ticket.fileType = fileType;
+    ticket.loadType = loadType;
     ticket.outdated = false;
     m_pendingTickets.push_back(ticket);
 }
@@ -154,7 +157,8 @@ size_t ResourceManager::updateTickets()
             }
             else if (it->ticket->done())
             {
-                it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->type);
+                it->loader->onTicketLoaded(it->resource, it->resource->getResourceForWriting(it->loader),
+                                           it->ticket->buffer, it->loadType);
                 it->ticket = ref<const File::Ticket>();
                 m_watches.push_back(*it);
                 it = m_tickets.erase(it);
@@ -162,7 +166,8 @@ size_t ResourceManager::updateTickets()
             else if (it->ticket->processed != it->progress)
             {
                 it->progress = it->ticket->processed;
-                it->loader->onTicketUpdated(it->resource, it->resource->getResourceForWriting(it->loader), it->ticket->buffer, it->progress, it->type);
+                it->loader->onTicketUpdated(it->resource, it->resource->getResourceForWriting(it->loader),
+                                            it->ticket->buffer, it->progress, it->loadType);
                 ++it;
             }
             else

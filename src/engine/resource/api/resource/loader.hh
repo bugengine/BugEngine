@@ -19,6 +19,11 @@ class be_api(RESOURCE) ILoader : public minitl::refcountable
     friend class Description;
     BE_NOCOPY(ILoader);
 public:
+    enum FileType
+    {
+        FileText,
+        FileBinary
+    };
     enum LoadType
     {
         LoadFirstTime,
@@ -38,13 +43,13 @@ protected:
                                  Resource& /*resource*/,
                                  const minitl::Allocator::Block<u8>& /*buffer*/,
                                  u32 /*progress*/,
-                                 LoadType /*type*/)
+                                 LoadType /*loadType*/)
     {
     }
     virtual void onTicketLoaded(weak<const Description> /*description*/,
                                 Resource& /*resource*/,
                                 const minitl::Allocator::Block<u8>& /*buffer*/,
-                                LoadType /*type*/)
+                                LoadType /*loadType*/)
     {
         be_notreached();
     }

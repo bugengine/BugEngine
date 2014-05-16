@@ -1,0 +1,12 @@
+
+def options(opt):
+    pass
+
+def setup(conf):
+    pass
+
+def build(bld):
+    if 'windows' in bld.env.VALID_PLATFORMS:
+        bld.thirdparty('3rdparty.python26', bld.env, libs=['python26'],
+                       defines=['MS_NO_COREDLL=1', 'Py_ENABLE_SHARED=1'])
+
