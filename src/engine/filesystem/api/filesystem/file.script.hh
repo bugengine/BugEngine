@@ -65,18 +65,20 @@ public:
         const i64                       offset;
         const u32                       total;
         i_bool                          error;
+        bool                            text;
 
         inline bool done() const    { return error || processed == total; }
     public:
-        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size);
-        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, const void* data);
+        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, bool text);
+        Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset, u32 size, bool text, const void* data);
         ~Ticket();
     private:
         Ticket(const Ticket&);
         Ticket& operator=(const Ticket&);
     };
 
-    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, minitl::Allocator& arena = Arena::temporary()) const;
+    ref<const Ticket> beginRead(u32 size = 0, i64 offset = 0, bool text = false,
+                                minitl::Allocator& arena = Arena::temporary()) const;
     ref<const Ticket> beginWrite(const void* data, u32 size, i64 offset = -1);
 
     void fillBuffer(weak<Ticket> ticket) const;

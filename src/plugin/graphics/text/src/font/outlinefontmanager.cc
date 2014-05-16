@@ -30,7 +30,9 @@ void OutlineFontManager::load(weak<const Resource::Description> description,
     be_info("loading outline font");
     if (be_checked_cast<const OutlineFont>(description)->m_fontFile)
     {
-        m_manager->addTicket(this, description, be_checked_cast<const OutlineFont>(description)->m_fontFile, LoadFirstTime);
+        m_manager->addTicket(this, description,
+                             be_checked_cast<const OutlineFont>(description)->m_fontFile,
+                             FileBinary, LoadFirstTime);
     }
     else
     {
@@ -45,7 +47,9 @@ void OutlineFontManager::reload(weak<const Resource::Description> /*oldDescripti
     be_info("reloading outline font");
     if (be_checked_cast<const OutlineFont>(newDescription)->m_fontFile)
     {
-        m_manager->addTicket(this, newDescription, be_checked_cast<const OutlineFont>(newDescription)->m_fontFile, LoadReload);
+        m_manager->addTicket(this, newDescription,
+                             be_checked_cast<const OutlineFont>(newDescription)->m_fontFile,
+                             FileBinary, LoadReload);
     }
     else
     {

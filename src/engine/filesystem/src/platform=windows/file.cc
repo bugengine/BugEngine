@@ -4,7 +4,7 @@
 #include    <filesystem/stdafx.h>
 #include    <windows/file.hh>
 
-
+#include <cstdio>
 namespace BugEngine
 {
 
@@ -63,19 +63,53 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
     else
     {
         static const int s_bufferSize = 1024;
+        static u8 buffer[s_bufferSize];
+        u8* target = ticket->buffer.data();
+        u32 processed = 0;
         setFilePointer(pathname.name, h, ticket->offset);
         for (ticket->processed = 0; !ticket->done(); )
         {
             DWORD read;
-            if (ticket->processed+s_bufferSize > ticket->total)
-                ReadFile (h, ticket->buffer.data()+ticket->processed, be_checked_numcast<u32>(ticket->total - ticket->processed), &read, 0);
+            if (ticket->text)
+            {
+                if (ticket->processed+s_bufferSize > ticket->total)
+                {
+                    ReadFile (h, buffer, be_checked_numcast<u32>(ticket->total - ticket->processed), &read, 0);
+                }
+                else
+                {
+                    ReadFile (h, buffer, s_bufferSize, &read, 0);
+                }
+                for (u32 i = 0; i < read; ++i)
+                {
+                    if (buffer[i] != '\r')
+                    {
+                        target[processed++] = buffer[i];
+                    }
+                }
+            }
             else
-                ReadFile (h, ticket->buffer.data()+ticket->processed, s_bufferSize, &read, 0);
+            {
+                if (ticket->processed+s_bufferSize > ticket->total)
+                {
+                    ReadFile (h, target + ticket->processed,
+                              be_checked_numcast<u32>(ticket->total - ticket->processed), &read, 0);
+                }
+                else
+                {
+                    ReadFile (h, target + ticket->processed, s_bufferSize, &read, 0);
+                }
+            }
             ticket->processed += read;
             if (read == 0)
             {
-                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_filename | ticket->processed | ticket->total);
+                be_error("reached premature end of file in %s after reading %d bytes (offset %d)"
+                       | m_filename | ticket->processed | ticket->total);
                 ticket->error = true;
+            }
+            if (ticket->text && !ticket->error)
+            {
+                target[processed] = 0;
             }
         }
     }
