@@ -5,13 +5,14 @@
 #define BE_PYTHON_PYTHONSCRIPT_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <python/stdafx.h>
+#include <minitl/stdafx.h>
 #include    <bugengine/script.script.hh>
 #include    <rtti/tags/editor.script.hh>
 
 namespace BugEngine
 {
 
-class PythonScript : public Script
+class be_api(PYTHON) PythonScript : public Script
 {
     friend class PackageLoader;
 published:
