@@ -375,6 +375,8 @@ def set_osx_shlib_name(self):
             self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
         elif 'kernel' in self.features:
             self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
+        else:
+            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', self.link_task.outputs[0].name)])
 
 
 dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'

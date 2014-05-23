@@ -60,6 +60,8 @@ def build(bld):
 
     bld.external('3rdparty.lua')
     bld.external('3rdparty.squirrel')
+    bld.external('3rdparty.ncurses')
+    bld.external('3rdparty.tcltk')
     bld.external('3rdparty.python')
 
     bld.plugin('plugin.debug.runtime',

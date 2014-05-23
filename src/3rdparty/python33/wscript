@@ -1,3 +1,4 @@
+from waflib import Errors
 
 def options(opt):
     pass
@@ -5,8 +6,16 @@ def options(opt):
 def setup(conf):
     pass
 
+def setup_python(conf):
+    if 'windows' in conf.env.VALID_PLATFORMS:
+        pass
+    else:
+        raise Errors.WafError('python 3.3 not available')
+
 def build(bld):
     if 'windows' in bld.env.VALID_PLATFORMS:
         bld.thirdparty('3rdparty.python33', bld.env, libs=['python33'],
                        defines=['MS_NO_COREDLL=1', 'Py_ENABLE_SHARED=1'])
+    else:
+        raise Errors.WafError('python not available')
 
