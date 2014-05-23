@@ -25,6 +25,7 @@ def set_macosx_options(self):
     self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'kernel')
 
+
 @conf
 def check_multilib_gcc(self, compiler):
     flags = compiler[8]
@@ -44,13 +45,16 @@ def check_multilib_gcc(self, compiler):
                 if p.returncode == 0:
                     flags.append('-Wp,-imultilib,%s'%arch)
 
+
 @conf
 def check_multilib_other(self, compiler):
     pass
 
+
 @conf
 def get_macosx_sdk_version(self, name, compiler_list):
-    sdk_number = Options.options.macosx_sdk
+    sdk_number_min = Options.options.macosx_sdk_min
+    sdk_number_max = Options.options.macosx_sdk_max
     sdks = []
     paths = Options.options.xcode_sdks.split(',')
     for path in paths:
@@ -69,12 +73,20 @@ def get_macosx_sdk_version(self, name, compiler_list):
 
     sdks.sort()
     self.start_msg('Looking for SDK for %s-%s'%name)
-    for sdk, sdk_path in sdks[::-1]:
-        if sdk_number and not sdk.startswith(sdk_number):
+    for sdk, sdk_path in sdks:
+        bin_paths = []
+        if sdk_number_max and not sdk <= sdk_number_max:
+            continue
+        if sdk_number_min and not sdk >= sdk_number_min:
             continue
         try:
             for compiler in compiler_list:
-                self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path, '-mmacosx-version-min=%s'%sdk)
+                self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path,
+                               '-mmacosx-version-min=%s'%sdk, ['Cocoa'])
+                bin_paths.append(compiler[1])
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')))
             break
         except Errors.WafError:
             continue
@@ -82,7 +94,8 @@ def get_macosx_sdk_version(self, name, compiler_list):
         self.end_msg('none', color='RED')
         raise Errors.WafError('Could not find any suitable SDK')
     self.end_msg(os.path.splitext(os.path.basename(sdk_path))[0])
-    return (sdk, sdk_path)
+    return (sdk, sdk_path, list(set(bin_paths)))
+
 
 @conf
 def set_macosx_sdk_options(self, sdk_version, sdk_path):
@@ -92,6 +105,7 @@ def set_macosx_sdk_options(self, sdk_version, sdk_path):
     self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path])
     self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path])
     self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+
 
 @conf
 def set_macosx_icc_options(self, flags, arch):
@@ -124,7 +138,6 @@ def set_macosx_icc_options(self, flags, arch):
 
     self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
     self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-
 
 
 @conf
@@ -194,13 +207,20 @@ def set_macosx_clang_options(self, flags, arch):
     self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
     self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
 
+
 def options(opt):
     gr = opt.get_option_group('SDK paths and options')
-    gr.add_option( '--macosx-sdk',
+    gr.add_option( '--macosx-sdk-min',
                     action='store',
                     default='',
-                    dest='macosx_sdk',
-                    help='Version of the MacOS X SDK to target')
+                    dest='macosx_sdk_min',
+                    help='Minimum version of the MacOS X SDK to target')
+    gr.add_option( '--macosx-sdk-max',
+                    action='store',
+                    default='',
+                    dest='macosx_sdk_max',
+                    help='Maximum version of the MacOS X SDK to target')
+
 
 def configure(conf):
     supported_architectures ={
@@ -254,7 +274,6 @@ def configure(conf):
             except KeyError:
                 compiler_versions[key] = [compiler]
 
-
     seen = set([])
     def get_version(x):
         x = x.split('_')
@@ -277,7 +296,7 @@ def configure(conf):
         for compiler in compiler_list:
             check_multilib(conf, compiler)
         try:
-            sdk_name, sdk_path = conf.get_macosx_sdk_version((key[0], key[1]), compiler_list)
+            sdk_name, sdk_path, bin_paths = conf.get_macosx_sdk_version((key[0], key[1]), compiler_list)
         except Errors.WafError:
             continue
         for compiler in compiler_list:
@@ -325,20 +344,22 @@ def configure(conf):
             conf.set_macosx_options()
             conf.env.SUB_TOOLCHAINS = macosx_toolchains
             conf.env.VALID_ARCHITECTURES = [macosx_archs]
+            conf.find_program('dsymutil', path_list=bin_paths)
+            conf.find_program('strip', path_list=bin_paths)
+            if not conf.find_program('lipo', path_list=bin_paths, mandatory=False):
+                conf.find_program('lipo')
+            conf.find_program('lldb', path_list=bin_paths, mandatory=False)
+            conf.find_program('gdb', path_list=bin_paths, mandatory=False)
             conf.add_multiarch_toolchain(toolchain)
-            conf.find_program('dsymutil')
-            conf.find_program('strip')
-            conf.find_program('lipo')
-            conf.find_program('lldb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')], mandatory=False)
-            conf.find_program('gdb', path_list=[os.path.join(i, 'usr', 'bin') for i in Options.options.xcode_sdks.split(',')], mandatory=False)
             pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+
 
 def build(bld):
     bld.platforms.append(bld.external('3rdparty.cocoa'))
 
+
 def plugins(bld):
     pass
-
 
 
 @extension('.plist')
