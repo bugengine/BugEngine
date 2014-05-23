@@ -1,3 +1,5 @@
+import os
+from waflib import Errors
 
 def options(opt):
     pass
@@ -5,8 +7,23 @@ def options(opt):
 def setup(conf):
     pass
 
+def setup_python(conf):
+    if 'windows' in conf.env.VALID_PLATFORMS:
+        pass
+    elif 'macosx' in conf.env.VALID_PLATFORMS:
+        pass
+    else:
+        raise Errors.WafError('python not available')
+
 def build(bld):
-    if 'windows' in bld.env.VALID_PLATFORMS:
+    if 'macosx' in bld.env.VALID_PLATFORMS:
+        for env in bld.multiarch_envs:
+            bld.thirdparty('3rdparty.python27', env, libs=['python2.7'],
+                           lib_paths=[os.path.join(bld.path.abspath(), 'bin.macosx')],
+                           defines=['Py_ENABLE_SHARED=1'])
+    elif 'windows' in bld.env.VALID_PLATFORMS:
         bld.thirdparty('3rdparty.python27', bld.env, libs=['python27'],
                        defines=['MS_NO_COREDLL=1', 'Py_ENABLE_SHARED=1'])
+    else:
+        raise Errors.WafError('python not available')
 

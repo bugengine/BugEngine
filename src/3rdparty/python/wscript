@@ -18,42 +18,7 @@ def check_python_test(self):
 def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
     if not var: var = '3rdparty.python%s'%(version_number)
-    if 'macosx' in conf.env.VALID_PLATFORMS:
-        py_config = conf.find_program('python%s-config'%version, var='PYTHON_CONFIG')
-        if not py_config:
-            raise Errors.WafError('python-config for python %s not found' % version)
-        del conf.env.PYTHON_CONFIG
-        var = (conf.env.ENV_PREFIX + '/' + var) if conf.env.ENV_PREFIX else var
-
-        includes = ['-I/Library/Frameworks/Python.framework/Versions/%s/Headers' % version]
-
-        command = [py_config, '--libs']
-        p = Utils.subprocess.Popen(command, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
-        out,err = p.communicate()
-        if p.returncode != 0:
-            if not isinstance(err, str):
-                err = err.decode(sys.stdout.encoding or 'iso8859-1')
-            raise Errors.WafError('could not run %s: %s' % (command, err))
-        if not isinstance(out, str):
-            out = out.decode(sys.stdout.encoding or 'iso8859-1')
-        ldflags = ['-L/Library/Frameworks/Python.framework/Versions/%s/lib/' % version] + out.split()
-
-        conf.check(
-            compile_filename=[],
-            features='check_python',
-            msg='check for python %s'%version,
-            cxxflags=includes,
-            ldflags=ldflags,
-            code="""
-                #include <Python.h>
-                int main() { Py_Initialize(); return 0; }
-            """,
-            use=[])
-
-        conf.env['CFLAGS_%s'%var] = includes
-        conf.env['CXXFLAGS_%s'%var] = includes
-        conf.env['LINKFLAGS_%s'%var] = ldflags
-    elif 'posix' in conf.env.VALID_PLATFORMS:
+    if 'posix' in conf.env.VALID_PLATFORMS:
         conf.pkg_config('python-%s'%version, var=var)
         conf.check(
             compile_filename=[],
@@ -66,8 +31,10 @@ def python_config(conf, version, var=''):
                 #include <Python.h>
                 int main() { Py_Initialize(); return 0; }
             """)
+    elif 'macosx' in conf.env.VALID_PLATFORMS:
+        conf.recurse('../python%s' % version_number, name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s' % version_number, name='setup')
+        conf.recurse('../python%s' % version_number, name='setup_python', once=False)
     else:
         raise Errors.WafError('TODO')
 

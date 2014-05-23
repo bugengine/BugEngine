@@ -72,33 +72,33 @@ def safe_name(name):
 def options(opt):
     opt.add_option('--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler')
     gr = opt.get_option_group('build and install options')
-    gr.add_option(	'--nomaster',
-                    action = 'store_true',
-                    default = False,
-                    dest = 'nomaster',
-                    help = 'build without master files')
-    gr.add_option(	'--static',
-                    action = 'store_true',
-                    default = False,
-                    dest = 'static',
-                    help = 'build completely static executable: All engine components, plugins, samples and kernels will be built into the executable')
-    gr.add_option(	'--dynamic',
-                    action = 'store_true',
-                    default = False,
-                    dest = 'dynamic',
-                    help = 'build completely dynamic executable: All engine components, plugins, samples and kernels will be built as shared objects')
-    gr.add_option(	'--silent',
-                    action = 'store_true',
-                    default = False,
-                    dest = 'silent',
-                    help = 'do not print build log from Waf')
+    gr.add_option('--nomaster',
+                  action = 'store_true',
+                  default = False,
+                  dest = 'nomaster',
+                  help = 'build without master files')
+    gr.add_option('--static',
+                  action = 'store_true',
+                  default = False,
+                  dest = 'static',
+                  help = 'build completely static executable: All engine components, plugins, samples and kernels will be built into the executable')
+    gr.add_option('--dynamic',
+                  action = 'store_true',
+                  default = False,
+                  dest = 'dynamic',
+                  help = 'build completely dynamic executable: All engine components, plugins, samples and kernels will be built as shared objects')
+    gr.add_option('--silent',
+                  action = 'store_true',
+                  default = False,
+                  dest = 'silent',
+                  help = 'do not print build log from Waf')
 
 def module(bld, name, module_path, depends,
-        valid_platforms, features,
-        build_features,
-        extra_includes, extra_defines,
-        extra_public_includes, extra_public_defines,
-        use_master, warnings, export_all):
+           valid_platforms, features,
+           build_features,
+           extra_includes, extra_defines,
+           extra_public_includes, extra_public_defines,
+           use_master, warnings, export_all):
     platforms = bld.env.VALID_PLATFORMS
     archs = bld.env.ARCHITECTURES
     build = len(valid_platforms) == 0
