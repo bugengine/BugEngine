@@ -2,18 +2,14 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <core/environment.hh>
+#include    <context.hh>
 
 namespace BugEngine { namespace Python
 {
 
-void platformInit()
-{
-    be_info(Py_GetPath());
-}
-
-void platformSetup()
+void Context::pythonInitialise()
 {
 }
 
 }}
+

@@ -15,6 +15,7 @@ Environment::Environment()
 ,   m_dataDirectory("")
 ,   m_game("")
 ,   m_user("")
+,   m_programPath(0)
 {
     HANDLE token;
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
@@ -41,6 +42,7 @@ Environment::~Environment()
 
 void Environment::init(int argc, const char *argv[])
 {
+    m_programPath = argv[0];
     const char *exe = argv[0];
     size_t s = strlen(argv[0])-1;
     m_game = istring("sample.kernel");

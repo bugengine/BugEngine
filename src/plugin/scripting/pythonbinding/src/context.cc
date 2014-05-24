@@ -26,10 +26,8 @@ class PythonGlobalInterpreter
 public:
     PythonGlobalInterpreter()
     {
-        Py_NoSiteFlag = 0;
-        Py_InteractiveFlag = 0;
+        Context::pythonInitialise();
         Py_InitializeEx(0);
-        be_info("python %s" | Py_GetVersion());
         PyEval_InitThreads();
         m_mainThread = PyEval_SaveThread();
     }

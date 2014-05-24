@@ -2,16 +2,14 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
+#include    <context.hh>
 
 namespace BugEngine { namespace Python
 {
 
-void platformInit()
-{
-}
-
-void platformSetup()
+void Context::pythonInitialise()
 {
 }
 
 }}
+

@@ -15,7 +15,7 @@
 #elif defined(_ARM)
 # define be_break()             
 #elif defined(_ARM64)
-# define be_break()
+# define be_break()             
 #else
 # error "Breakpoint not supported on this platform"
 # define be_break()
@@ -58,4 +58,3 @@ typedef u8                      byte;
 
 /**************************************************************************************************/
 #endif
-

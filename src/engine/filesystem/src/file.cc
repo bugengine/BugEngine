@@ -73,7 +73,7 @@ ref<const File::Ticket> File::beginRead(u32 size, i64 offset, bool text, minitl:
     {
         be_assert(offset+(i64)m_size+1 >= 0, "reading past end of file");
         be_assert(m_size+offset+size+1 <= m_size, "reading past end of file");
-        s = size ? size : be_checked_numcast<u32>((i64)m_size + offset + text ? 1 : 0);
+        s = size ? size : be_checked_numcast<u32>((i64)m_size + offset + (text ? 1 : 0));
     }
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(arena), this, offset, s, text);
     IOProcess::pushTicket(t);
