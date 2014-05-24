@@ -47,10 +47,11 @@ def link_framework_test(self):
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
     bld = self.bld
-    bld(rule=write_test_file, target='main.cc', code=self.code)
+    bld(rule=write_test_file, target='main.mm', code=self.code)
     env = self.env.derive()
     env.detach()
     env.FRAMEWORK = self.frameworks
+    env.FRAMEWORK_ST = ['-framework']
     env.append_unique('CXXFLAGS', ['-F%s' % f for f in self.frameworks])
     if self.sdk:
         env.append_unique('CXXFLAGS', ['-isysroot', self.sdk])
@@ -58,7 +59,7 @@ def link_framework_test(self):
     if self.version:
         env.append_unique('CXXFLAGS', [self.version])
         env.append_unique('LINKFLAGS', [self.version])
-    bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env, use=self.use)
+    bld(features='cxx cxxprogram', source='main.mm', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env, use=self.use)
 
 
 @conf
@@ -161,7 +162,8 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 
 
 @conf
-def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], code=USE_SDK_CODE):
+def check_sdk(self, compiler, flags, sdk, version,
+              frameworks=[], libpath=[], includepath=[], code=USE_SDK_CODE):
     env = ConfigSet.ConfigSet()
     env.CXX = compiler
     env.LINK_CXX = compiler
@@ -170,13 +172,14 @@ def check_sdk(self, compiler, flags, sdk, version, libpath=[], includepath=[], c
     env.CXX_TGT_F = ['-c', '-o']
     env.CXXLNK_TGT_F = ['-o']
 
+    code = '\n'.join(['#include <%s/%s.h>' % (f, f) for f in frameworks]) + '\n'+ code
     self.check(
         env=env,
         compile_filename=[],
         features='link_framework',
         msg='check for SDK %s' %os.path.split(sdk)[1],
         libname=[],
-        frameworks=[],
+        frameworks=frameworks,
         libpath=libpath,
         code=code,
         includepath=includepath,

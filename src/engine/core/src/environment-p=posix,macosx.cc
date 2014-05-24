@@ -16,12 +16,14 @@ Environment::Environment()
 ,   m_dataDirectory(ipath("share/bugengine"))
 ,   m_game("")
 ,   m_user(getenv("USER"))
+,   m_programPath(0)
 {
     m_homeDirectory.push_back(".bugengine");
 }
 
 Environment::~Environment()
 {
+    Arena::general().free(m_programPath);
 }
 
 void Environment::init(int argc, const char *argv[])
@@ -32,6 +34,33 @@ void Environment::init(int argc, const char *argv[])
     {
         filename++;
     }
+    size_t arglen = filename - argv[0] + 2;
+    char* buffer = 0;
+    char* dest = 0;
+    if (argv[0][0] != '/')
+    {
+        size_t extraLen = 0;
+        do
+        {
+            extraLen += 256;
+            buffer = (char*)Arena::general().realloc(buffer, arglen + extraLen, 4);
+            dest = getcwd(buffer, extraLen);
+        } while (dest == 0 && errno == ERANGE);
+        dest += strlen(dest);
+        if (dest[-1] != '/')
+        {
+            *dest = '/';
+            dest++;
+        }
+    }
+    else
+    {
+        buffer = (char*)Arena::general().alloc(arglen, 4);
+        dest = buffer;
+    }
+    strncpy(dest, argv[0], arglen);
+    m_programPath = buffer;
+
     while (*filename != '/' && filename != argv[0])
     {
         filename--;

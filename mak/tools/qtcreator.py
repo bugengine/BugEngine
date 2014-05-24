@@ -232,7 +232,7 @@ class QtToolchain(QtObject):
                 variant
             )
 
-            toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('toolchain:%s'%env_name)
+            toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             if isinstance(env.CXX, list):
                 self.ProjectExplorer_CustomToolChain_CompilerPath = env.CXX[0]
             else:
@@ -258,7 +258,7 @@ class QtToolchain(QtObject):
             self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
             self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Autodetect = False
-            self.ProjectExplorer_ToolChain_DisplayName = env_name
+            self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:'+env_name
             self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
@@ -286,8 +286,8 @@ class QtDebugger(QtObject):
                 self.EngineType = 1
             self.Abis = tuple([toolchain.ProjectExplorer_CustomToolChain_TargetAbi])
             self.AutoDetected = False
-            self.DisplayName = env_name
-            self.Id = generateGUID('debugger:%s'%env_name)
+            self.DisplayName = 'BugEngine:debugger:'+env_name
+            self.Id = generateGUID('BugEngine:debugger:%s'%env_name)
 
 
 class QtDevice(QtObject):
@@ -334,9 +334,9 @@ class QtPlatform(QtObject):
                 self.PE_Profile_Icon = icon_extra
             else:
                 self.PE_Profile_Icon = ':///Desktop///'
-            self.PE_Profile_Id = self.guid = generateGUID('profile:'+env_name)
+            self.PE_Profile_Id = self.guid = generateGUID('BugEngine:profile:'+env_name)
             self.PE_Profile_MutableInfo = ()
-            self.PE_Profile_Name = env_name
+            self.PE_Profile_Name = 'BugEngine:profile:' + env_name
             self.PE_Profile_SDK = False
 
 def to_var(name):
@@ -398,13 +398,14 @@ class QtCreator(Build.BuildContext):
             return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
 
     def get_platform_guid(self, env_name):
-        guid = generateGUID('profile:'+env_name)
+        guid = generateGUID('BugEngine:profile:'+env_name)
         for platform_name, platform in self.platforms:
             if platform_name == guid:
                 return guid
 
     def load_debugger_list(self):
         self.debuggers = []
+        self.debuggers_to_remove = []
         try:
             document = parse(os.path.join(HOME_DIRECTORY, 'debuggers.xml'))
         except Exception as e:
@@ -422,9 +423,12 @@ class QtCreator(Build.BuildContext):
                         debugger = QtDebugger()
                         debugger.load_from_node(data.getElementsByTagName('valuemap')[0])
                         self.debuggers.append((debugger.Id, debugger))
+                        if debugger.DisplayName.startswith('BugEngine:'):
+                            self.debuggers_to_remove.append(debugger)
 
     def load_toolchain_list(self):
         self.toolchains = []
+        self.toolchains_to_remove = []
         try:
             document = parse(os.path.join(HOME_DIRECTORY, 'toolchains.xml'))
         except Exception as e:
@@ -442,6 +446,8 @@ class QtCreator(Build.BuildContext):
                         toolchain = QtToolchain()
                         toolchain.load_from_node(data.getElementsByTagName('valuemap')[0])
                         self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
+                        if toolchain.ProjectExplorer_ToolChain_DisplayName.startswith('BugEngine:'):
+                            self.toolchains_to_remove.append(toolchain)
 
     def load_device_list(self):
         self.devices = []
@@ -454,6 +460,7 @@ class QtCreator(Build.BuildContext):
 
     def load_platform_list(self):
         self.platforms = []
+        self.platforms_to_remove = []
         try:
             document = parse(os.path.join(HOME_DIRECTORY, 'profiles.xml'))
         except Exception as e:
@@ -472,6 +479,8 @@ class QtCreator(Build.BuildContext):
                         platform.load_from_node(data.getElementsByTagName('valuemap')[0])
                         platform.guid = platform.PE_Profile_Id
                         self.platforms.append((platform.PE_Profile_Id, platform))
+                        if platform.PE_Profile_Name.startswith('BugEngine:'):
+                            self.platforms_to_remove.append(platform)
 
     def build_platform_list(self):
         self.load_toolchain_list()
@@ -490,6 +499,7 @@ class QtCreator(Build.BuildContext):
                 if t_name == toolchain.ProjectExplorer_ToolChain_Id:
                     t.copy_from(toolchain)
                     toolchain = t
+                    self.toolchains_to_remove.remove(t)
                     break
             else:
                 self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
@@ -514,6 +524,7 @@ class QtCreator(Build.BuildContext):
                 for d_name, d in self.debuggers:
                     if d_name == debugger.Id:
                         d.copy_from(debugger)
+                        self.debuggers_to_remove.remove(d)
                         break
                 else:
                     self.debuggers.append((debugger.Id, debugger))
@@ -522,6 +533,7 @@ class QtCreator(Build.BuildContext):
             for p_name, p in self.platforms:
                 if p_name == platform.PE_Profile_Id:
                     p.copy_from(platform)
+                    self.platforms_to_remove.remove(p)
                     break
             else:
                 self.platforms.append((platform.PE_Profile_Id, platform))
@@ -530,10 +542,11 @@ class QtCreator(Build.BuildContext):
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
                 for platform_name, platform in self.platforms:
-                    with XmlNode(creator, 'data') as data:
-                        XmlNode(data, 'variable', 'Profile.%d'%profile_index)
-                        platform.write(data)
-                    profile_index += 1
+                    if platform not in self.platforms_to_remove:
+                        with XmlNode(creator, 'data') as data:
+                            XmlNode(data, 'variable', 'Profile.%d'%profile_index)
+                            platform.write(data)
+                        profile_index += 1
                 with XmlNode(creator, 'data') as data:
                     XmlNode(data, 'variable', 'Profile.Count')
                     XmlNode(data, 'value', str(profile_index), [('type', 'int')])
@@ -548,10 +561,11 @@ class QtCreator(Build.BuildContext):
             with XmlNode(document, 'qtcreator') as creator:
                 debugger_index = 0
                 for debugger_name, debugger in self.debuggers:
-                    with XmlNode(creator, 'data') as data:
-                        XmlNode(data, 'variable', 'DebuggerItem.%d'%debugger_index)
-                        debugger.write(data)
-                    debugger_index += 1
+                    if debugger not in self.debuggers_to_remove:
+                        with XmlNode(creator, 'data') as data:
+                            XmlNode(data, 'variable', 'DebuggerItem.%d'%debugger_index)
+                            debugger.write(data)
+                        debugger_index += 1
                 with XmlNode(creator, 'data') as data:
                     XmlNode(data, 'variable', 'DebuggerItem.Count')
                     XmlNode(data, 'value', str(debugger_index), [('type', 'int')])
@@ -563,10 +577,11 @@ class QtCreator(Build.BuildContext):
             with XmlNode(document, 'qtcreator') as creator:
                 toolchain_index = 0
                 for toolchain_name, toolchain in self.toolchains:
-                    with XmlNode(creator, 'data') as data:
-                        XmlNode(data, 'variable', 'ToolChain.%d'%toolchain_index)
-                        toolchain.write(data)
-                    toolchain_index += 1
+                    if toolchain not in self.toolchains_to_remove:
+                        with XmlNode(creator, 'data') as data:
+                            XmlNode(data, 'variable', 'ToolChain.%d'%toolchain_index)
+                            toolchain.write(data)
+                        toolchain_index += 1
                 with XmlNode(creator, 'data') as data:
                     XmlNode(data, 'variable', 'ToolChain.Count')
                     XmlNode(data, 'value', str(toolchain_index), [('type', 'int')])

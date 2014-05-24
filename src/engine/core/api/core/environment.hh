@@ -15,10 +15,11 @@ private:
     Environment();
     ~Environment();
 private:
-    ipath   m_homeDirectory;
-    ipath   m_dataDirectory;
-    istring m_game;
-    istring m_user;
+    ipath       m_homeDirectory;
+    ipath       m_dataDirectory;
+    istring     m_game;
+    istring     m_user;
+    const char* m_programPath;
 public:
     static Environment& getEnvironment();
 
@@ -29,6 +30,7 @@ public:
     const ipath&    getDataDirectory() const        { return m_dataDirectory; }
     const istring&  getGame() const                 { return m_game; }
     const istring&  getUser() const                 { return m_user; }
+    const char*     getProgramPath() const          { return m_programPath; }
     size_t          getProcessorCount() const;
 };
 

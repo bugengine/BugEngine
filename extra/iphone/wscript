@@ -31,7 +31,7 @@ def check_iphone_multilib_gcc(self, compiler):
             else:
                 if p.returncode == 0:
                     flags.append('-Wp,-imultilib,v7')
-                    flags.append('-Wp,-imultilib,v7')
+
 
 @conf
 def check_iphone_multilib_other(self, compiler):
@@ -64,9 +64,13 @@ def get_iphone_sdk_version(self, name, compiler_list):
         if sdk_number and not sdk.startswith(sdk_number):
             continue
         try:
+            bin_paths = []
             for compiler in compiler_list:
                 sdk_path_compiler = sdk_path.replace('/iPhoneOS', '/%s'%compiler[7])
                 self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path_compiler, '-miphoneos-version-min=%s'%sdk)
+                bin_paths.append(compiler[1])
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', '..', 'usr', 'bin')))
             break
         except Errors.WafError:
             continue
@@ -74,7 +78,7 @@ def get_iphone_sdk_version(self, name, compiler_list):
         self.end_msg('none', color='RED')
         raise Errors.WafError('Could not find any suitable SDK')
     self.end_msg(os.path.splitext(os.path.basename(sdk_path))[0])
-    return (sdk, sdk_path)
+    return (sdk, sdk_path, bin_paths)
 
 
 @conf
@@ -256,7 +260,7 @@ def configure(conf):
         for compiler in compiler_list:
             check_multilib(conf, compiler)
         try:
-            sdk_name, sdk_path = conf.get_iphone_sdk_version((key[0], key[1]), compiler_list)
+            sdk_name, sdk_path, bin_paths = conf.get_iphone_sdk_version((key[0], key[1]), compiler_list)
         except Errors.WafError:
             continue
         for compiler in compiler_list:
@@ -303,9 +307,12 @@ def configure(conf):
             conf.set_iphone_options(iphone_os)
             conf.env.SUB_TOOLCHAINS = iphone_toolchains
             conf.env.VALID_ARCHITECTURES = [iphone_archs]
-            conf.find_program('dsymutil')
-            conf.find_program('strip')
-            conf.find_program('lipo')
+            conf.find_program('dsymutil', path_list=bin_paths)
+            conf.find_program('strip', path_list=bin_paths)
+            if not conf.find_program('lipo', path_list=bin_paths, mandatory=False):
+                conf.find_program('lipo')
+            conf.find_program('lldb', path_list=bin_paths, mandatory=False)
+            conf.find_program('gdb', path_list=bin_paths, mandatory=False)
             conf.add_multiarch_toolchain(toolchain)
             pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
