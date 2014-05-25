@@ -72,14 +72,16 @@ void Context::unload(Resource::Resource& /*handle*/)
     PyEval_ReleaseThread(m_pythonState);
 }
 
-void Context::runBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
+void Context::runBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/,
+                        const minitl::Allocator::Block<u8>& block)
 {
     PyEval_AcquireThread(m_pythonState);
     PyRun_SimpleString((const char*)block.begin());
     PyEval_ReleaseThread(m_pythonState);
 }
 
-void Context::reloadBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/, const minitl::Allocator::Block<u8>& block)
+void Context::reloadBuffer(weak<const PythonScript> /*script*/, Resource::Resource& /*resource*/,
+                           const minitl::Allocator::Block<u8>& block)
 {
     PyEval_AcquireThread(m_pythonState);
     PyRun_SimpleString((const char*)block.begin());
