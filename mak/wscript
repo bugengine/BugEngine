@@ -91,6 +91,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
 
 from waflib import Configure
 class ReconfigurationContext(Configure.ConfigurationContext):
+    "reconfigures the project with the same options as the last call to configure"
     cmd ='reconfigure'
     def __init__(self, **kw):
         super(ReconfigurationContext, self).__init__(**kw)
