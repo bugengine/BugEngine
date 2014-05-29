@@ -199,14 +199,13 @@ def check_sdk(self, compiler, flags, sdk, version,
 
 
 @conf
-def pkg_config(conf, name, var=''):
+def run_pkg_config(conf, name):
     sysroot = conf.env.SYSROOT or ''
     def extend_lib_path(lib_path):
         if lib_path[0] == '=':
             return os.path.join(sysroot, lib_path[1:])
         else:
             return lib_path
-    if not var: var = name
     expand = {}
     configs = {}
     lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib',
@@ -240,8 +239,13 @@ def pkg_config(conf, name, var=''):
             break
     else:
         raise Errors.WafError('No pkg-config file for library %s'%name)
+    return configs.get('Cflags'), configs.get('Libs')
 
 
+@conf
+def pkg_config(conf, name, var=''):
+    if not var: var = name
+    cflags, libs = conf.run_pkg_config(name)
     conf.env['CFLAGS_%s'%var] = configs.get('Cflags', [])
     conf.env['CXXFLAGS_%s'%var] = configs.get('Cflags', [])
     conf.env['LINKFLAGS_%s'%var] = configs.get('Libs', [])

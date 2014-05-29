@@ -5,15 +5,6 @@
 #define BE_PYTHONBINDING_STDAFX_H_
 /**************************************************************************************************/
 
-#ifdef _MSC_VER
-# include    <math.h>
-#endif
-
-extern "C"
-{
-#include <Python.h>
-}
-
 #include    <bugengine/stdafx.h>
 #include    <python/stdafx.h>
 
