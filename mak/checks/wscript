@@ -14,8 +14,7 @@ __declspec(dllexport) int be_test()
 #endif
 int main(int argc, char *argv[])
 {
-    %(function)s
-    return 0;
+    return (long int)%(function)s;
 }
 """
 
@@ -74,6 +73,10 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
     if self.env[var]:
         return
     try:
+        if functions:
+            functions =  '+'.join(['(char*)&%s'%f for f in functions])
+        else:
+            functions = '0'
         self.check(
             compile_filename=[],
             features='link_library',
@@ -82,7 +85,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             libpath=libpath,
             code=code % {
                     'include': '\n'.join(['#include <%s>'%i for i in includes]),
-                    'function': '\n'.join(['(void)&%s;'%f for f in functions])
+                    'function': functions
                 },
             includepath=includepath,
             use=['debug'],
@@ -136,6 +139,10 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
     if self.env[var]:
         return
     try:
+        if functions:
+            functions =  '+'.join(['(char*)&%s'%f for f in functions])
+        else:
+            functions = '0'
         self.check(
             compile_filename=[],
             features='link_framework',
@@ -145,7 +152,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
             libpath=libpath,
             code=code % {
                     'include': '\n'.join(['#include <%s>'%i for i in includes]),
-                    'function': '\n'.join(['(void)&%s;'%f for f in functions])
+                    'function': functions
                 },
             includepath=includepath,
             sdk='',
@@ -202,7 +209,8 @@ def pkg_config(conf, name, var=''):
     if not var: var = name
     expand = {}
     configs = {}
-    lib_paths = conf.env.SYSTEM_LIBPATHS or ['=/usr/lib', '=/usr/local/lib']
+    lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib',
+	                                        '=/usr/libdata', '=/usr/local/libdata']
     lib_paths = [extend_lib_path(l) for l in lib_paths]
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
