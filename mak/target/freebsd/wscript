@@ -21,7 +21,7 @@ def set_freebsd_options(self):
     self.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
 
-    self.env.RPATH = '$ORIGIN/../plugin' #'$ORIGIN/../share/bugengine/plugin'
+    self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
     self.env.append_unique('LIB', ['rt', 'pthread', 'm'])
     self.env.append_unique('INCLUDES', ['/usr/local/include'])
     self.env.append_unique('LIBPATH', ['/usr/local/lib'])
