@@ -811,12 +811,14 @@ class QtCreator(Build.BuildContext):
                     write_value(data, self.__class__.version[1])
 
 class QtCreator2(QtCreator):
+    "creates projects for QtCreator 2.x"
     cmd = 'qtcreator2'
     fun = 'build'
     optim = 'debug'
     version = (2, 12)
 
 class QtCreator3(QtCreator):
+    "creates projects for QtCreator 3.x"
     cmd = 'qtcreator3'
     fun = 'build'
     optim = 'debug'

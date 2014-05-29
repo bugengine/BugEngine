@@ -7,6 +7,7 @@ Supported platforms
 ----------------------
 
 The following platforms are currently tested and known to build & work:
+
 Win32 (Windows 7 and Windows 8): You will need a properly configured compiler
 * Visual Studio: from 2003 to 2013
 * gcc: MingW32
@@ -37,13 +38,12 @@ Solaris:
 Building
 -----------
 
-You need one of the supported compilers installed and working (see above)
+You need one of the supported compilers installed and working
 You need python installed (tested with python 2.6 and above)
 You need Flex and Bison (for windows they are included in mak/win32)
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC 2003 and above,
-including express versions, XCode, NetBeans
+waf can also be used to generate projects for MSVC 2003 and above, including express versions, XCode, NetBeans
 
 
 Configuring
@@ -52,9 +52,10 @@ Configuring
 In the root folder of the project, run
 > python waf configure
 it will detect all the supported toolchains that it can find:
-* GCC, sunCC and clang should be in the path (except for MacOSX, where they are shipped with Xcode)
-* on Windows, MSVC, intel compilers and Platform SDK are detected automatically
-use
+* GCC, sunCC and clang should be in the path (except for MacOSX, where they are shipped with Xcode).
+* on Windows, MSVC, intel compilers and Platform SDK are detected automatically.
+
+Run
 > python waf --help
 to print a list of options.
 
@@ -65,75 +66,25 @@ Building from the command line
 when you have decided which compiler to use, you can build & "install" by running
 > python waf install:platform-architecture-compiler-version:variant
 To list all supported combinations, run
-> python waf build
+> python waf install
 
 
 
 Bulding with IDEs
 ....................
 
-The other way of building is to create projects for the supported IDEs and build from the IDE
-the supported IDEs at the moment are Visual Studio 2003 to 2013 in their complete or
-express editions, XCode, and NetBeans.
-To generate the project files, configure the project (which toolchain is selected doesn't
-actually matter) and run
-> python waf [ide-list]
-where [ide-list] is the list of projects you'd like to generate.
+The other way of building is to create projects for the supported IDEs and build from the IDE.
+The supported IDEs Visual Studio 2003 to 2013 in their complete or express editions, XCode, NetBeans, Eclipse and QtCreator.
+To generate the project files, configure the project and run
+> python waf [IDE] [IDEs...]
 run
 > python waf --help
 to print a list of all supported toolchains and IDE.
 
 For instance,
 > python waf vs2005e vs2010
-will create a set of projects and a solution for Visual Studio 2005 express, and another set of
-projects and solutions for Visual Studio 2010.
-You don't need to have these installed to generate the projects, you just need them to actually
-open the projects.
+will create a set of projects and a solution for Visual Studio 2005 express, and another set of projects and solutions for Visual Studio 2010.
+You don't need to have these installed to generate the projects, you just need them to actually open the projects.
 
-In most IDE, you will be able to pick which toolchain to use with the "target" or "platform" setting
-of the IDE.
-
-
-
-Project architecture
-=======================
-
-Engine
----------
-
-The project contains only two folders at its root; under mak/ are all the python scripts and
-tools that are used to build the project, and under src/ are all the sources.
-src/ contains several folders that are used to sort the subprojects. The categories are
- 3rdparty/ : external libraries (sometimes with sources, sometimes just a set of compile flags or libs)
- engine/ : the main engine source files
- plugin/ : plugins that are built separately from the engine
- game/ : the game projects that use the engine
-
-Each folder can contain several subprojects. The main folder, engine/, contains a lot of different
-subprojects that can depend on each other. Each project has 3 kind of files : sources under the src/
-folder, private headers in the incude/ folder and public headers in the api/ folder.
-The sources are discovered automatically; if a file has a known extension and is in the src/ folder,
-then it will be built and/or added to the projects
-Source files in include/ or api/ are never built.
-Some folders have a special syntax to let the build system know that they are platform or architecture specific;
-sources in the folder platforms=win32/ are built only when the target (and not the host) platform is win32.
-sources in a folder archs=x86/ are only build for x86
-sources in a folder archs=x86,amd64/ are built for these two architectures, but not for powerpc.
-
-
-Editor
----------
-
-The editor is a plugin of the game; it is loaded automatically on startup, and will run with the game code embedded.
-
-
-Static/dynamic builds
-------------------------
-
-The engine can be built either using shared versions of the engine or be statically linked to the engine.
-Both architectures are supported and can be changed by editing the wscript file.
-Shared versions build a little faster and are lighter than the static executables but harder to redistribute.
-On some platforms, only static builds work (when plugins are not available)
-
-
+In most IDE, you will be able to pick which toolchain to use with the "target" or "platform" setting of the IDE.
 
