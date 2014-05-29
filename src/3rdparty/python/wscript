@@ -19,18 +19,24 @@ def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
     if not var: var = '3rdparty.python%s'%(version_number)
     if 'posix' in conf.env.VALID_PLATFORMS:
-        conf.pkg_config('python-%s'%version, var=var)
+        cflags, libs = conf.run_pkg_config('python-%s'%version)
+        conf.env['CFLAGS_%s'%var] = cflags
+        conf.env['CXXFLAGS_%s'%var] = cflags
         conf.check(
             compile_filename=[],
             features='check_python',
             msg='check for python %s'%version,
-            cxxflags=[],
-            ldflags=[],
+            cxxflags=cflags,
+            ldflags=libs,
             use=[var],
             code="""
                 #include <Python.h>
                 int main() { Py_Initialize(); return 0; }
             """)
+        for lib in libs:
+            if lib.startswith('-lpython'):
+                lib_name = lib[2:]
+        conf.env['DEFINES_%s'%var] = ['PYTHON_LIBRARY="%s"'%lib_name]
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s' % version_number, name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
