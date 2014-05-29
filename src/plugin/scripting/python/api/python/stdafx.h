@@ -15,5 +15,13 @@
 # define     PYTHONEXPORT
 #endif
 
+namespace BugEngine { namespace Arena
+{
+
+be_api(PYTHON)
+minitl::Allocator& python();
+
+}}
+
 /**************************************************************************************************/
 #endif
