@@ -30,7 +30,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             {                                                                   \
                 be_error("could not locate function %s in module %s"            \
                             | #f                                                \
-                            | pythonLibraryName ? pythonLibraryName : "root");  \
+                            | (pythonLibraryName ? pythonLibraryName : "root"));\
                 m_status = false;                                               \
             }
         be_get_func(Py_SetPythonHome);
@@ -44,17 +44,17 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseThread);
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
-#       undef be_get_func
-    }
-    if (pythonLibraryName)
-    {
-        initialize();
+#       undef be_get_fun
+        if (m_status && pythonLibraryName)
+        {
+            initialize();
+        }
     }
 }
 
 PythonLibrary::~PythonLibrary()
 {
-    if (m_pythonLibraryName)
+    if (m_status && m_pythonLibraryName)
     {
         finalize();
     }

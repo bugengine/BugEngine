@@ -14,8 +14,8 @@ def setup_python(conf):
 
 def build(bld):
     if 'windows' in bld.env.VALID_PLATFORMS:
-        bld.thirdparty('3rdparty.python34', bld.env, libs=['python34'],
-                       defines=['MS_NO_COREDLL=1', 'Py_ENABLE_SHARED=1'])
+        bld.thirdparty('3rdparty.python34', env,
+                       defines=['PYTHON_LIBRARY="python34"'])
     else:
         raise Errors.WafError('python not available')
 
