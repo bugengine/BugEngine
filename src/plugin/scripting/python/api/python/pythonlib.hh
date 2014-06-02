@@ -51,6 +51,8 @@ private: // friend ThreadLock
     Py_FinalizeFunc             m_Py_Finalize;
     Py_NewInterpreterFunc       m_Py_NewInterpreter;
     Py_EndInterpreterFunc       m_Py_EndInterpreter;
+    Py_GetPathFunc              m_Py_GetPath;
+    Py_GetVersionFunc           m_Py_GetVersion;
     PyEval_InitThreadsFunc      m_PyEval_InitThreads;
     PyEval_SaveThreadFunc       m_PyEval_SaveThread;
     PyEval_AcquireThreadFunc    m_PyEval_AcquireThread;

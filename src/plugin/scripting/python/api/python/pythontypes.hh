@@ -20,6 +20,8 @@ typedef void (*Py_InitializeExFunc)(int initsigs);
 typedef void (*Py_FinalizeFunc)();
 typedef PyThreadState* (*Py_NewInterpreterFunc)();
 typedef void (*Py_EndInterpreterFunc)(PyThreadState* tstate);
+typedef const char* (*Py_GetPathFunc)();
+typedef const char* (*Py_GetVersionFunc)();
 
 typedef void (*PyEval_InitThreadsFunc)();
 typedef PyThreadState* (*PyEval_SaveThreadFunc)();

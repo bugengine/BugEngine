@@ -13,8 +13,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     :   m_pythonLibraryName(pythonLibraryName)
     ,   m_handle(m_pythonLibraryName
                     ?   dlopen(minitl::format<1024u>("lib%s.so") | m_pythonLibraryName,
-                        RTLD_LAZY | RTLD_LOCAL)
-                    :   dlopen(NULL, RTLD_LAZY | RTLD_LOCAL))
+                        RTLD_LAZY | RTLD_GLOBAL)
+                    :   dlopen(NULL, RTLD_LAZY | RTLD_GLOBAL))
     ,   m_status(m_handle != 0)
 {
     if (!m_status)
@@ -38,6 +38,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_Finalize);
         be_get_func(Py_NewInterpreter);
         be_get_func(Py_EndInterpreter);
+        be_get_func(Py_GetPath);
+        be_get_func(Py_GetVersion);
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);
         be_get_func(PyEval_AcquireThread);
