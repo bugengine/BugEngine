@@ -75,17 +75,18 @@ class dex(Task.Task):
 
 @feature('aapt_resource')
 def aapt_resource(self):
-	self.resource_task = tsk = self.create_task('aapt_create', self.resource.ant_glob('**/*'), [self.destfile])
-	tsk.env.MANIFEST = self.manifest.abspath()
-	tsk.env.RESOURCE_PATH = self.resource.abspath()
-	tsk.dep_nodes = [self.manifest]
-	nodes = [self.resource]
-	while nodes:
-		node = nodes.pop()
-		if os.path.isdir(node.abspath()):
-			nodes.extend([node.make_node(i) for i in node.listdir()])
-		else:
-			tsk.dep_nodes.append(node)
+	if 'android' in self.env.VALID_PLATFORMS:
+		self.resource_task = tsk = self.create_task('aapt_create', self.resource.ant_glob('**/*'), [self.destfile])
+		tsk.env.MANIFEST = self.manifest.abspath()
+		tsk.env.RESOURCE_PATH = self.resource.abspath()
+		tsk.dep_nodes = [self.manifest]
+		nodes = [self.resource]
+		while nodes:
+			node = nodes.pop()
+			if os.path.isdir(node.abspath()):
+				nodes.extend([node.make_node(i) for i in node.listdir()])
+			else:
+				tsk.dep_nodes.append(node)
 	
 
 @feature('dex')
@@ -95,23 +96,24 @@ def dex_files(self):
 	"""
 	Create a dex task. There can be only one dex task by task generator.
 	"""
-	destfile = self.destfile
-	dexopts = getattr(self, 'dexopts', [])
-	basedir = self.basedir
-	outdir = self.outdir
+	if 'android' in self.env.VALID_PLATFORMS:
+		destfile = self.destfile
+		dexopts = getattr(self, 'dexopts', [])
+		basedir = self.basedir
+		outdir = self.outdir
 
-	self.dex_task = tsk = self.create_task('dex')
-	if not isinstance(destfile, Node.Node):
-		destfile = self.path.find_or_declare(destfile)
-	if not destfile:
-		self.bld.fatal('invalid destfile %r for %r' % (destfile, self))
-	tsk.set_outputs(destfile)
-	tsk.basedir = basedir
-	tsk.outdir = outdir
-	tsk.cwd = outdir.abspath()
+		self.dex_task = tsk = self.create_task('dex')
+		if not isinstance(destfile, Node.Node):
+			destfile = self.path.find_or_declare(destfile)
+		if not destfile:
+			self.bld.fatal('invalid destfile %r for %r' % (destfile, self))
+		tsk.set_outputs(destfile)
+		tsk.basedir = basedir
+		tsk.outdir = outdir
+		tsk.cwd = outdir.abspath()
 
-	if getattr(self, 'javac_task', None):
-		tsk.set_run_after(self.javac_task)
+		if getattr(self, 'javac_task', None):
+			tsk.set_run_after(self.javac_task)
 
 
 original_install_files = Build.InstallContext.install_files
@@ -173,9 +175,10 @@ def package_file(bld, dest, source):
 
 
 def build(bld):
-	if bld.is_install == Build.INSTALL:
-		bld.__class__.install_files = install_files
-		bld.__class__.install_as = install_as
-		for envname in bld.env.SUB_TOOLCHAINS:
-			env = bld.all_envs[envname]
-			bld.install_as(os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'), bld.path.parent.make_node('prebuilt/%s/gdbserver'%bld.env.ANDROID_ARCH))
+	if 'android' in self.env.VALID_PLATFORMS:
+		if bld.is_install == Build.INSTALL:
+			bld.__class__.install_files = install_files
+			bld.__class__.install_as = install_as
+			for envname in bld.env.SUB_TOOLCHAINS:
+				env = bld.all_envs[envname]
+				bld.install_as(os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'), bld.path.parent.make_node('prebuilt/%s/gdbserver'%bld.env.ANDROID_ARCH))
