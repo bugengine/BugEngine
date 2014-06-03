@@ -39,10 +39,11 @@ def build(bld):
     bld.library('engine.plugin',
                 ['engine.core', 'engine.rtti', 'engine.filesystem',
                  'engine.resource', 'engine.scheduler'])
+    bld.shared_library('engine.bugengine',
+                       ['engine.core', 'engine.rtti', 'engine.scheduler',
+                        'engine.filesystem', 'engine.world', 'engine.plugin'])
 
-    bld.engine('engine.bugengine',
-                ['engine.core', 'engine.rtti', 'engine.scheduler',
-                 'engine.filesystem', 'engine.world', 'engine.plugin'])
+    bld.engine('bugengine', ['engine.bugengine'], path='src.engine.main')
 
     bld.external('3rdparty.DirectX9')
     bld.external('3rdparty.DirectX10')
