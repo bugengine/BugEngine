@@ -12,24 +12,24 @@ def options(opt):
     opt.load('eclipse', tooldir=['mak/tools'])
     opt.load('qtcreator', tooldir=['mak/tools'])
 
-    opt.recurse('build')
-    opt.recurse('host')
-    opt.recurse('compiler')
-    opt.recurse('target')
+    opt.recurse('build.py')
+    opt.recurse('hosts.py')
+    opt.recurse('compilers.py')
+    opt.recurse('targets.py')
     for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
-        opt.recurse('../src/3rdparty/%s'%third_party)
+        opt.recurse('../src/3rdparty/%s/build.py'%third_party)
 
 def configure(conf):
     conf.bugenginenode = conf.path.parent
-    conf.recurse('checks')
-    conf.recurse('host')
+    conf.recurse('checks.py')
+    conf.recurse('hosts.py')
     extra = conf.bugenginenode.make_node('extra')
     for e in extra.listdir():
         directory = extra.make_node(e).abspath()
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             conf.recurse(extra.make_node(e).abspath(), name='host_configure')
-    conf.recurse('compiler')
-    conf.recurse('target')
+    conf.recurse('compilers.py')
+    conf.recurse('targets.py')
     conf.load('flex', tooldir=['mak/tools'])
     conf.load('bison', tooldir=['mak/tools'])
     conf.load('kernel_preprocess', tooldir=['mak/tools'])
@@ -40,7 +40,7 @@ def setup(conf):
     conf.detected = []
     conf.start_msg("Checking libraries")
     for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
-        conf.recurse('../src/3rdparty/%s'%third_party, name='setup', once=False)
+        conf.recurse('../src/3rdparty/%s/build.py'%third_party, name='setup', once=False)
     conf.end_msg(', '.join(conf.detected) or False)
 
 def build(bld):
@@ -50,9 +50,9 @@ def build(bld):
                                 (sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS), '\n\t'.join(bld.env.ALL_VARIANTS)))
     bld.platforms = []
     bld.bugenginenode = bld.path.parent
-    bld.recurse('build')
-    bld.recurse('host')
-    bld.recurse('target')
+    bld.recurse('build.py')
+    bld.recurse('hosts.py')
+    bld.recurse('targets.py')
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
@@ -61,8 +61,8 @@ def build(bld):
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
 def plugins(bld):
-    bld.recurse('host', name='plugins')
-    bld.recurse('target', name='plugins')
+    bld.recurse('hosts.py', name='plugins')
+    bld.recurse('targets.py', name='plugins')
 
 
 from waflib import Configure, Build, ConfigSet, Context, Utils, Options, Logs

@@ -1,8 +1,8 @@
 import os
 
 def build(bld):
-	source_node = bld.path.make_node('src')
-	resource_node = bld.path.make_node('res')
+	source_node = bld.path.make_node('engine/launcher/src')
+	resource_node = bld.path.make_node('engine/launcher/res')
 	launcher = bld(target = 'engine.android.launcher',
 				   features=['cxx', 'javac', 'dex'],
 				   source_nodes = [source_node, resource_node],
@@ -10,7 +10,7 @@ def build(bld):
 				   outdir=source_node.find_or_declare('jar'),
 				   basedir=source_node.find_or_declare('jar'))
 
-	manifest = bld.path.parent.parent.make_node('AndroidManifest.xml')
+	manifest = bld.path.make_node('AndroidManifest.xml')
 	resources = bld(target = 'engine.android.resource',
 				   features=['aapt_resource'],
 				   resource=resource_node,

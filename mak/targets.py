@@ -56,9 +56,9 @@ def options(opt):
     for extra in opt.bugenginenode.make_node('extra').listdir():
         if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
             opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
-    for target in opt.path.listdir():
-        if target != 'wscript':
-            opt.recurse(target)
+    for target in opt.path.make_node('target').listdir():
+        if target.endswith('.py'):
+            opt.recurse('target/%s'%target)
     gr.add_option( '--platforms',
                     action='store',
                     default='',
@@ -78,12 +78,11 @@ def configure(conf):
                 pprint('BLUE', '_'*40)
                 pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
                 conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
-    for target in conf.path.listdir():
-        if not platforms or target in platforms:
-            if target != 'wscript':
-                pprint('BLUE', '_'*40)
-                pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
-                conf.recurse(target)
+    for target in conf.path.make_node('target').listdir():
+        if not platforms or target[:-3] in platforms:
+            pprint('BLUE', '_'*40)
+            pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
+            conf.recurse('target/%s'%target)
     conf.env.VALID_PLATFORMS = conf.env.ALL_PLATFORMS
     conf.env.VALID_RCHITECTURES = conf.env.ALL_ARCHITECTURES
     conf.env.store('.build/be_toolchains.py')
@@ -94,7 +93,7 @@ def build(bld):
         if os.path.isdir(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0])):
             bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0]))
         if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
-            bld.recurse(bld.env.VALID_PLATFORMS[0])
+            bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0])
 
 def plugins(bld):
     if bld.env.VALID_PLATFORMS:
@@ -102,7 +101,7 @@ def plugins(bld):
         if os.path.isdir(extra.abspath()):
             bld.recurse(extra.abspath(), name='plugins')
         if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
-            bld.recurse(bld.env.VALID_PLATFORMS[0], name='plugins')
+            bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0], name='plugins')
 
 from waflib import ConfigSet
 try:
