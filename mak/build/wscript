@@ -370,7 +370,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
         if p not in bld.env.VALID_PLATFORMS:
             return None
     module(bld, name, path, depends, platforms,
-        ['cxx', 'cxxshlib', 'shared_lib'],
+        bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib'],
         features,
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
