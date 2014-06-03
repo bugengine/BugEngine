@@ -133,8 +133,8 @@ def configure(conf):
                     conf.load_msvc(version, target_arch)
                     conf.set_windows_msvc_options()
                 except Exception as e:
+                    conf.variant = ''
                     conf.end_msg(e, color='RED')
-                    raise
                 else:
                     conf.end_msg('done')
                     try:
@@ -168,8 +168,8 @@ def configure(conf):
                     conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
                     conf.set_windows_gcc_options(options, version)
                 except Exception as e:
+                    conf.variant = ''
                     conf.end_msg(e, color='RED')
-                    raise
                 else:
                     conf.end_msg('done')
                     try:
@@ -202,8 +202,8 @@ def configure(conf):
                     conf.load_clang(directory, target, options)
                     conf.set_windows_clang_options(options, version)
                 except Exception as e:
+                    conf.variant = ''
                     conf.end_msg(e, color='RED')
-                    raise
                 else:
                     conf.end_msg('done')
                     try:
