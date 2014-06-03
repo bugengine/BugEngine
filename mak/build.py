@@ -287,10 +287,10 @@ def deploy_directory(bld, env, node, local_path, env_variable):
 
 @conf
 def external(bld, name):
-    if os.path.isfile(os.path.join(bld.path.abspath(), name.replace('.', '/'), 'wscript')):
-        bld.recurse(os.path.join(name.replace('.', '/')))
+    if os.path.isfile(os.path.join(bld.path.abspath(), name.replace('.', '/'), 'build.py')):
+        bld.recurse(os.path.join(name.replace('.', '/'), 'build.py'))
     else:
-        bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/')))
+        bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/'), 'build.py'))
     return name
 
 @conf

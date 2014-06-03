@@ -150,13 +150,13 @@ def build(bld):
                 '3rdparty.DirectX9'],
                features=['DirectX9', 'GUI'])
     #bld.plugin('plugin.graphics.Dx10',
-    #		   ['engine.bugengine', 'plugin.graphics.windowing',
-    #			'3rdparty.DirectX10'],
-    #			features=['DirectX10', 'GUI'])
+    #           ['engine.bugengine', 'plugin.graphics.windowing',
+    #            '3rdparty.DirectX10'],
+    #           features=['DirectX10', 'GUI'])
     #bld.plugin('plugin.graphics.Dx11',
-    #		   ['engine.bugengine', 'plugin.graphics.windowing',
-    #			'3rdparty.DirectX11'],
-    #			features=['DirectX11', 'GUI'])
+    #           ['engine.bugengine', 'plugin.graphics.windowing',
+    #            '3rdparty.DirectX11'],
+    #           features=['DirectX11', 'GUI'])
     bld.plugin('plugin.graphics.GLES2',
                ['engine.bugengine', 'plugin.graphics.windowing',
                 '3rdparty.OpenGLES2'],

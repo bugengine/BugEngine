@@ -519,7 +519,7 @@ def build(bld):
 	bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
 
 def plugins(bld):
-	bld.recurse('engine/launcher')
+	bld.recurse('launcher.py')
 
 
 @feature('multiarch')

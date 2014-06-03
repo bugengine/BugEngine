@@ -175,10 +175,10 @@ def package_file(bld, dest, source):
 
 
 def build(bld):
-	if 'android' in self.env.VALID_PLATFORMS:
+	if 'android' in bld.env.VALID_PLATFORMS:
 		if bld.is_install == Build.INSTALL:
 			bld.__class__.install_files = install_files
 			bld.__class__.install_as = install_as
 			for envname in bld.env.SUB_TOOLCHAINS:
 				env = bld.all_envs[envname]
-				bld.install_as(os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'), bld.path.parent.make_node('prebuilt/%s/gdbserver'%bld.env.ANDROID_ARCH))
+				bld.install_as(os.path.join(bld.env.PREFIX, bld.optim, env.DEPLOY_BINDIR, 'gdbserver'), bld.path.make_node('prebuilt/%s/gdbserver'%bld.env.ANDROID_ARCH))

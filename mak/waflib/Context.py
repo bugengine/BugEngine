@@ -266,7 +266,11 @@ class Context(ctx):
 				# absolute paths only
 				d = os.path.join(self.path.abspath(), d)
 
-			WSCRIPT     = os.path.join(d, WSCRIPT_FILE)
+			WSCRIPT = d
+			if not os.path.isfile(WSCRIPT):
+				WSCRIPT = d+'.py'
+			if not os.path.isfile(WSCRIPT):
+				WSCRIPT = os.path.join(d, WSCRIPT_FILE)
 			WSCRIPT_FUN = WSCRIPT + '_' + (name or self.fun)
 
 			node = self.root.find_node(WSCRIPT_FUN)
