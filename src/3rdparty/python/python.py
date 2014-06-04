@@ -38,9 +38,9 @@ def python_config(conf, version, var=''):
                 lib_name = lib[2:]
         conf.env['DEFINES_%s'%var] = ['PYTHON_LIBRARY="%s"'%lib_name]
     elif 'macosx' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s' % version_number, name='setup_python', once=False)
+        conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s' % version_number, name='setup_python', once=False)
+        conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
     else:
         raise Errors.WafError('TODO')
 
@@ -66,6 +66,6 @@ def build(bld):
     bld.env.PYTHON_VERSIONS = Options.options.python_versions.split(',')
     for version in bld.env.PYTHON_VERSIONS:
         try:
-            bld.recurse('../python%s' % version.replace('.', ''))
+            bld.recurse('../python%s/python%s.py' % (version.replace('.', ''), version.replace('.', '')))
         except:
             pass

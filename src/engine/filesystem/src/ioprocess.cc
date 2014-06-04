@@ -15,7 +15,7 @@ IOContext::IOContext()
     ,   m_ioDone(i_u8::Zero)
     ,   m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast<intptr_t>(this), 0, Thread::Highest)
 {
-};
+}
 
 IOContext::~IOContext()
 {
@@ -46,8 +46,16 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
         case File::Ticket::Read:
             if (!context->m_ioDone)
             {
-                request->buffer.realloc(request->total+1);
-				request->buffer[request->total] = 0;
+                if (request->text)
+                {
+                    request->buffer.realloc(request->total+1);
+                    request->buffer[request->total] = 0;
+                }
+                else
+                {
+                    request->buffer.realloc(request->total);
+                }
+                request->processed = 0;
                 request->file->fillBuffer(request);
             }
             break;

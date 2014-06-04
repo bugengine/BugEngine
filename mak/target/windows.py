@@ -8,7 +8,6 @@ import os
 def set_windows_options(self, arch):
     self.env.ABI = 'pe'
     self.env.VALID_PLATFORMS = ['windows', 'pc']
-    self.env.LINK_WITH_PROGRAM = True
 
     self.env.DEPLOY_BINDIR = ''
     self.env.DEPLOY_RUNBINDIR = ''
@@ -229,11 +228,3 @@ def build(bld):
 
 def plugins(bld):
     pass
-
-
-@feature('cprogram', 'cxxprogram')
-@after_method('apply_link')
-@before_method('apply_implib')
-def apply_implib_program(self):
-    if self.env.DEST_OS == 'win32':
-        self.apply_implib()
