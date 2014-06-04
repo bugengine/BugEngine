@@ -3,6 +3,7 @@
 
 #include    <bugengine/stdafx.h>
 #include    <bugengine/application.hh>
+#include    <bugengine/main.hh>
 
 #include    <core/environment.hh>
 #include    <filesystem/diskfolder.script.hh>

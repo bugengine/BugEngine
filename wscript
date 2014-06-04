@@ -43,7 +43,7 @@ def build(bld):
                        ['engine.core', 'engine.rtti', 'engine.scheduler',
                         'engine.filesystem', 'engine.world', 'engine.plugin'])
 
-    bld.engine('bugengine', ['engine.bugengine'], path='src.engine.main')
+    bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
     bld.external('3rdparty.DirectX9')
     bld.external('3rdparty.DirectX10')
@@ -123,7 +123,7 @@ def build(bld):
     #bld.plugin('plugin.kernel.directcompute',
     #		   ['engine.bugengine'])
     bld.plugin('plugin.kernel.opencl',
-               ['engine.bugengine', '3rdparty.OpenCL'],
+               ['engine.bugengine', '3rdparty.OpenCL', '3rdparty.OpenGL'],
                features=['OpenCL'])
 
     bld.plugin('plugin.graphics.nullrender',

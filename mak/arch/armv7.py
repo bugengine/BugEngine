@@ -1,2 +1,2 @@
 def configure(conf):
-    conf.recurse('../arm', once=False)
+    conf.recurse('arm', once=False)

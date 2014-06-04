@@ -1,2 +1,2 @@
 def configure(conf):
-    conf.recurse('../powerpc', once=False)
+    conf.recurse('powerpc', once=False)

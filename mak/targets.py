@@ -92,7 +92,7 @@ def build(bld):
     if bld.env.VALID_PLATFORMS:
         if os.path.isdir(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0])):
             bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0]))
-        if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
+        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'.py')):
             bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0])
 
 def plugins(bld):
@@ -100,7 +100,7 @@ def plugins(bld):
         extra = bld.bugenginenode.make_node('extra').make_node(bld.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra.abspath()):
             bld.recurse(extra.abspath(), name='plugins')
-        if os.path.isdir(os.path.join(bld.path.abspath(), bld.env.VALID_PLATFORMS[0])):
+        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'.py')):
             bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0], name='plugins')
 
 from waflib import ConfigSet
