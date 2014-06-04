@@ -60,10 +60,23 @@ public:
         }
         void realloc(u64 count, u64 blockAlignment = 4)
         {
-            u64 alignment = max<u64>(blockAlignment, be_alignof(T));
-            u64 size = align(sizeof(T), be_alignof(T))*count;
-            m_count = count;
-            m_data = (T*)m_allocator->realloc(m_data, size, alignment);
+            if (count > m_count)
+            {
+                u64 alignment = max<u64>(blockAlignment, be_alignof(T));
+                u64 size = align(sizeof(T), be_alignof(T))*count;
+                m_count = count;
+                m_data = (T*)m_allocator->realloc(m_data, size, alignment);
+            }
+            else
+            {
+                // shrink does not realloc
+                m_count = count;
+                if (!count)
+                {
+                    m_allocator->free(m_data);
+                    m_data = 0;
+                }
+            }
         }
         void swap(Block<T>& other)
         {

@@ -287,10 +287,12 @@ def deploy_directory(bld, env, node, local_path, env_variable):
 
 @conf
 def external(bld, name):
-    if os.path.isfile(os.path.join(bld.path.abspath(), name.replace('.', '/'), 'build.py')):
-        bld.recurse(os.path.join(name.replace('.', '/'), 'build.py'))
+    namespace = name.split('.')
+    script_file = os.path.join( '/'.join(namespace), '%s.py' % namespace[-1])
+    if os.path.isfile(os.path.join(bld.path.abspath(), script_file)):
+        bld.recurse(script_file)
     else:
-        bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', name.replace('.', '/'), 'build.py'))
+        bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src',  script_file))
     return name
 
 @conf
@@ -548,23 +550,22 @@ def process_export_all_flag(self):
 @feature('kernel', 'plugin')
 @after_method('process_use')
 def remove_link_libs(task):
-    if not task.env.LINK_WITH_PROGRAM:
-        use = getattr(task, 'use', [])[:]
-        seen = set([])
-        while use:
-            u = use.pop()
-            if u in seen:
-                continue
-            seen.add(u)
-            try:
-                task_gen = task.bld.get_tgen_by_name(u)
-                use += getattr(task_gen, 'use', [])
-                if 'cxxprogram' in task_gen.features:
-                    task.env.LIB.remove(os.path.split(task_gen.target)[1])
-                    for out in task_gen.link_task.outputs:
-                        task.link_task.dep_nodes.remove(out)
-            except Exception:
-                pass
+    use = getattr(task, 'use', [])[:]
+    seen = set([])
+    while use:
+        u = use.pop()
+        if u in seen:
+            continue
+        seen.add(u)
+        try:
+            task_gen = task.bld.get_tgen_by_name(u)
+            use += getattr(task_gen, 'use', [])
+            if 'cxxprogram' in task_gen.features:
+                task.env.LIB.remove(os.path.split(task_gen.target)[1])
+                for out in task_gen.link_task.outputs:
+                    task.link_task.dep_nodes.remove(out)
+        except Exception:
+            pass
 
 @feature('cxx')
 @before_method('process_source')

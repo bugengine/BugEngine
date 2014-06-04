@@ -257,7 +257,7 @@ class VCproj:
                                     debug_command = '$(NMakeOutput)'
                                     debug_command_arguments = task_gen.target
                                 else:
-                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher.target)
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
                                 tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(i, 'usr', 'include') for i in sub_env.SYSROOT]])
@@ -374,26 +374,9 @@ class VCxproj:
                     if 'cxxprogram' in task_gen.features:
                         self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
                     elif 'game' in task_gen.features:
-                        deps = task_gen.use[:]
-                        seen = set([])
-                        program = None
-                        while (deps):
-                            dep = deps.pop()
-                            if dep not in seen:
-                                    seen.add(dep)
-                                    try:
-                                        task_dep = task_gen.bld.get_tgen_by_name(dep)
-                                        deps += getattr(task_dep, 'use', [])
-                                        if 'cxxprogram' in task_dep.features:
-                                            program = task_dep
-                                    except:
-                                        pass
-                        if program:
-                            self.vcxproj._add(properties, 'NMakeOutput', os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target))
-                            self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
-                            self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
-                        else:
-                            self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
+                        self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher.target))
+                        self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
+                        self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
                     includes += ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT]
                     self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
@@ -496,6 +479,13 @@ class vs2003(Build.BuildContext):
             project.write(nodes)
             solution.add(task_gen, project, nodes[0].path_from(self.srcnode), do_build)
 
+        self.launcher = None
+        for g in self.groups:
+            for tg in g:
+                if not isinstance(tg, TaskGen.task_gen):
+                    continue
+                if 'launcher' in tg.features:
+                    self.launcher = tg
         for g in self.groups:
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):

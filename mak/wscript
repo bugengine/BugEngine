@@ -17,7 +17,7 @@ def options(opt):
     opt.recurse('compilers.py')
     opt.recurse('targets.py')
     for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
-        opt.recurse('../src/3rdparty/%s/build.py'%third_party)
+        opt.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party))
 
 def configure(conf):
     conf.bugenginenode = conf.path.parent
@@ -40,7 +40,7 @@ def setup(conf):
     conf.detected = []
     conf.start_msg("Checking libraries")
     for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
-        conf.recurse('../src/3rdparty/%s/build.py'%third_party, name='setup', once=False)
+        conf.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party), name='setup', once=False)
     conf.end_msg(', '.join(conf.detected) or False)
 
 def build(bld):
