@@ -4,4 +4,3 @@ def configure(conf):
     conf.env.ARCH_FAMILY = 'mips'
     conf.env.ARCH_LP64 = False
     conf.env.append_unique('DEFINES', ['_MIPS'])
-
