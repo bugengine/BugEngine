@@ -6,7 +6,7 @@
 C/C++/D configuration helpers
 """
 
-import os, re, shlex, sys
+import os, re, shlex, sys, shutil
 from waflib import Build, Utils, Task, Options, Logs, Errors, ConfigSet, Runner
 from waflib.TaskGen import after_method, feature
 from waflib.Configure import conf
@@ -778,6 +778,7 @@ def run_c_code(self, *k, **kw):
 		proj = ConfigSet.ConfigSet()
 		proj['cache_run_c_code'] = ret
 		proj.store(os.path.join(dir, 'cache_run_c_code'))
+	shutil.rmtree(dir)
 
 	return ret
 
