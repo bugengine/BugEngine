@@ -37,6 +37,7 @@ PyThreadState* PythonLibrary::createThread()
 {
     (*m_PyEval_AcquireThread)(m_mainThread);
     PyThreadState* result = (*m_Py_NewInterpreter)();
+    setupPath();
     (*m_PyEval_ReleaseThread)(result);
     return result;
 }

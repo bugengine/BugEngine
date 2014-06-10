@@ -21,6 +21,7 @@ def set_sunos_options(self):
     self.env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
     self.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
+    self.env.pymodule_PATTERN = '%s.so'
 
     self.env.RPATH = '$ORIGIN/../plugin'
     for i in os.environ['PATH'].split(':'):

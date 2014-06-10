@@ -70,4 +70,9 @@ void PythonLibrary::platformInitialize()
 {
 }
 
+void PythonLibrary::setupPath()
+{
+    (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s\""));
+}
+
 }}

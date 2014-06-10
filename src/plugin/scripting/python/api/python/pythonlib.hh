@@ -38,6 +38,7 @@ public:
 
 private:
     void platformInitialize();
+    void setupPath();
 private:
     friend struct ThreadLock;
 private:

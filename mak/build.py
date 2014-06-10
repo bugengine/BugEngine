@@ -93,6 +93,7 @@ def options(opt):
                   dest = 'silent',
                   help = 'do not print build log from Waf')
 
+@conf
 def module(bld, name, module_path, depends,
            valid_platforms, features,
            build_features,
@@ -273,8 +274,10 @@ def module(bld, name, module_path, depends,
         if kernel_deps:
             bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
     if internal_deps:
-        bld(target=name, features=['multiarch'], use=internal_deps)
-    return result
+        multiarch = bld(target=name, features=['multiarch'], use=internal_deps)
+    else:
+        multiarch = None
+    return (result, multiarch)
 
 def deploy_directory(bld, env, node, local_path, env_variable):
     target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
