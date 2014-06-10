@@ -8,6 +8,7 @@ import os
 def set_windows_options(self, arch):
     self.env.ABI = 'pe'
     self.env.VALID_PLATFORMS = ['windows', 'pc']
+    self.env.pymodule_PATTERN = '%s.pyd'
 
     self.env.DEPLOY_BINDIR = ''
     self.env.DEPLOY_RUNBINDIR = ''

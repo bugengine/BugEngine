@@ -111,6 +111,8 @@ def build(bld):
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.python'] + python_deps)
     else:
+        bld.python_module('py_bugengine', ['engine.bugengine'],
+                          path='plugin.scripting.python')
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
                        ['engine.bugengine', 'plugin.scripting.python',
