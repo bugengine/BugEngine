@@ -98,7 +98,7 @@ private: // friend Value
 }
 
 be_api(RTTI) raw<RTTI::Class> be_game_Namespace();
-raw<RTTI::Class> be_game_Namespace_BugEngine();
+be_api(RTTI) raw<RTTI::Class> be_game_Namespace_BugEngine();
 
 }
 

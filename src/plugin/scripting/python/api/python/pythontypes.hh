@@ -11,11 +11,8 @@ extern "C"
 struct PyThreadState;
 struct PyObject;
 struct PyMethodDef;
+struct PyModuleDef;
 
-}
-
-namespace BugEngine { namespace Python
-{
 
 typedef void (*Py_SetPythonHomeFunc)(const char* home);
 typedef void (*Py_InitializeExFunc)(int initsigs);
@@ -24,6 +21,9 @@ typedef PyThreadState* (*Py_NewInterpreterFunc)();
 typedef void (*Py_EndInterpreterFunc)(PyThreadState* tstate);
 typedef const char* (*Py_GetPathFunc)();
 typedef const char* (*Py_GetVersionFunc)();
+typedef PyObject* (*Py_InitModule3Func)(const char* name, PyMethodDef* methods, const char* doc);
+
+typedef PyObject* (*PyModule_Create2Func)(PyModuleDef* module, int apiver);
 
 typedef void (*PyEval_InitThreadsFunc)();
 typedef PyThreadState* (*PyEval_SaveThreadFunc)();
@@ -35,11 +35,10 @@ typedef int (*PyRun_SimpleStringFunc)(const char* command);
 
 typedef PyObject* (*PyCFunction)(PyObject* self, PyObject* args);
 
-}}
-
-
-extern "C"
-{
+typedef int (*visitproc)(PyObject *object, void *arg);
+typedef int (*traverseproc)(PyObject *self, visitproc visit, void *arg);
+typedef int (*inquiry)(PyObject *self);
+typedef void (*freefunc)(void*);
 
 struct PyObject
 {
@@ -49,10 +48,10 @@ struct PyObject
 
 struct PyMethodDef
 {
-    const char* const               name;
-    BugEngine::Python::PyCFunction  method;
-    int                             flags;
-    const char* const               doc;
+    const char* const   name;
+    PyCFunction         method;
+    int                 flags;
+    const char* const   doc;
 };
 
 /* Flag passed to newmethodobject */
@@ -72,6 +71,36 @@ struct PyMethodDef
    method, "__contains__" for example, to coexist with a defined
    slot like sq_contains. */
 #define METH_COEXIST  0x0040
+
+
+struct PyModuleDef_Base
+{
+    PyObject ob_base;
+    PyObject* (*m_init)(void);
+    minitl::size_type m_index;
+    PyObject* m_copy;
+};
+
+#define PyModuleDef_HEAD_INIT { \
+    { 1, NULL },/* ob_base */   \
+    NULL,       /* m_init */    \
+    0,          /* m_index */   \
+    NULL,       /* m_copy */    \
+  }
+
+struct PyModuleDef
+{
+    PyModuleDef_Base m_base;
+    const char* m_name;
+    const char* m_doc;
+    minitl::size_type m_size;
+    PyMethodDef *m_methods;
+    inquiry m_reload;
+    traverseproc m_traverse;
+    inquiry m_clear;
+    freefunc m_free;
+};
+
 
 }
 

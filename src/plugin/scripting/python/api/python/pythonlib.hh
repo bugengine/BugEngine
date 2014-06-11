@@ -24,6 +24,8 @@ public:
     void initialize();
     void finalize();
 
+    int getVersion() const;
+
     PyThreadState* createThread();
     void destroyThread(PyThreadState* threadState);
 
@@ -45,6 +47,7 @@ private:
     const char*                 m_pythonLibraryName;
     void*                       m_handle;
     bool                        m_status;
+    int                         m_version;
     PyThreadState*              m_mainThread;
 private: // friend ThreadLock
     Py_SetPythonHomeFunc        m_Py_SetPythonHome;
@@ -61,6 +64,8 @@ private: // friend ThreadLock
     PyEval_ReleaseLockFunc      m_PyEval_ReleaseLock;
 public:
     PyRun_SimpleStringFunc      m_PyRun_SimpleString;
+    Py_InitModule3Func          m_Py_InitModule3;
+    PyModule_Create2Func        m_PyModule_Create2;
 };
 
 }}
