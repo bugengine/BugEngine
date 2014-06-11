@@ -21,7 +21,10 @@ typedef PyThreadState* (*Py_NewInterpreterFunc)();
 typedef void (*Py_EndInterpreterFunc)(PyThreadState* tstate);
 typedef const char* (*Py_GetPathFunc)();
 typedef const char* (*Py_GetVersionFunc)();
-typedef PyObject* (*Py_InitModule3Func)(const char* name, PyMethodDef* methods, const char* doc);
+typedef PyObject* (*Py_InitModule4Func)(const char* name, PyMethodDef* methods,
+                                        const char* doc, PyObject* self, int apiver);
+typedef PyObject* (*Py_InitModule4_64Func)(const char* name, PyMethodDef* methods,
+                                           const char* doc, PyObject* self, int apiver);
 
 typedef PyObject* (*PyModule_Create2Func)(PyModuleDef* module, int apiver);
 
