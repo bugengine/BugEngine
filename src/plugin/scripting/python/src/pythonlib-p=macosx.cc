@@ -45,7 +45,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        be_get_func_opt(Py_InitModule3);
+        be_get_func_opt(Py_InitModule4);
+        be_get_func_opt(Py_InitModule4_64);
         be_get_func_opt(PyModule_Create2);
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);

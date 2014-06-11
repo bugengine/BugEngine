@@ -64,7 +64,8 @@ private: // friend ThreadLock
     PyEval_ReleaseLockFunc      m_PyEval_ReleaseLock;
 public:
     PyRun_SimpleStringFunc      m_PyRun_SimpleString;
-    Py_InitModule3Func          m_Py_InitModule3;
+    Py_InitModule4Func          m_Py_InitModule4;
+    Py_InitModule4_64Func       m_Py_InitModule4_64;
     PyModule_Create2Func        m_PyModule_Create2;
 };
 
