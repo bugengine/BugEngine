@@ -49,5 +49,9 @@ void PythonLibrary::destroyThread(PyThreadState* threadState)
     (*m_PyEval_ReleaseLock)();
 }
 
+int PythonLibrary::getVersion() const
+{
+    return m_version;
+}
 
 }}

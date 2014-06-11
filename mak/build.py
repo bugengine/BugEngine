@@ -93,6 +93,7 @@ def options(opt):
                   dest = 'silent',
                   help = 'do not print build log from Waf')
 
+
 @conf
 def module(bld, name, module_path, depends,
            valid_platforms, features,
