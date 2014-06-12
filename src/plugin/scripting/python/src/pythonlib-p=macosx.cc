@@ -28,7 +28,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     {
 #       define be_get_func_opt(f)                                               \
             void* tmp##f = dlsym(m_handle, #f);                                 \
-            memcpy(&m_##f, &tmp##f, sizeof(f##Func));
+            memcpy(&m_##f, &tmp##f, sizeof(f##Type));
 #       define be_get_func(f)                                                   \
             be_get_func_opt(f)                                                  \
             if (!m_##f)                                                         \
@@ -54,6 +54,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseThread);
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
+        be_get_func(_Py_NoneStruct);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)
