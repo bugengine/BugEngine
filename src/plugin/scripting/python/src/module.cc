@@ -7,17 +7,8 @@
 
 static ref<BugEngine::Python::PythonLibrary> s_library;
 
-static PyObject* bugengineGet(PyObject* self, PyObject* args)
-{
-    be_forceuse(self);
-    be_forceuse(args);
-    Py_INCREF(s_library->m__Py_NoneStruct);
-    return s_library->m__Py_NoneStruct;
-}
-
 static PyMethodDef s_methods[] =
 {
-    {"__getattr__", bugengineGet, METH_OLDARGS, ""},
     {NULL, NULL, 0, NULL}
 };
 
@@ -41,15 +32,15 @@ extern "C" BE_EXPORT void initpy_bugengine()
     s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
     if (s_library->m_Py_InitModule4)
     {
-        be_assert(sizeof(minitl::size_type) == 4, "python size is 4 but bigengine size is %s"
-                                                 | sizeof(minitl::size_type));
-        (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
+        be_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but BugEngine is 64bits");
+        PyObject* module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
+        be_info("type: %s" | module->py_type->tp_name);
     }
     else if (s_library->m_Py_InitModule4_64)
     {
-        be_assert(sizeof(minitl::size_type) == 8, "python size is 8 but bigengine size is %s"
-                                                 | sizeof(minitl::size_type));
-        (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
+        be_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but BugEngine is 32bits");
+        PyObject* module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
+        be_info("type: %s" | module->py_type->tp_name);
     }
     else
     {

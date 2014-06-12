@@ -59,7 +59,6 @@ struct PyObject
     PyTypeObject*       py_type;
 };
 
-
 struct PyTypeObject
 {
     PyObject            object;
