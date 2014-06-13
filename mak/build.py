@@ -181,12 +181,17 @@ def module(bld, name, module_path, depends,
 
 
     if build and not bld.env.PROJECTS:
-        preprocess = bld(target = name + '.preprocess',
-            features= ['plugin'] if 'plugin' in features else [],
-            target_name = name,
+        preprocess = bld(
+            env=bld.env.derive(),
+            target = name + '.preprocess',
+            features= ['preprocess'],
             pchstop = pchstop,
             source = preprocess_sources,
             kernels = [])
+        if 'plugin' in features:
+            preprocess.env.PLUGIN = name.replace('.', '_')
+        else:
+            preprocess.env.PLUGIN = 'game'
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.listdir():
@@ -196,7 +201,7 @@ def module(bld, name, module_path, depends,
                 for env in bld.multiarch_envs:
                     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
                     kernel_name = kernel[:kernel.rfind('.')]
-                    bld(
+                    t = bld(
                         env = env.derive(),
                         target = target_prefix + name + '.' + kernel_name,
                         features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
@@ -664,7 +669,7 @@ def create_compiled_task(self, name, node):
         self.compiled_tasks = [task]
     return task
 
-@feature('plugin')
+@feature('preprocess')
 @before_method('process_source')
 def create_kernel_namespace(self):
     kernels = getattr(self, 'kernels', [])
