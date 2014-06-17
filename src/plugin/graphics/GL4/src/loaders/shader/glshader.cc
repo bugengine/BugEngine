@@ -15,6 +15,9 @@ namespace BugEngine { namespace OpenGL
 GLShaderProgram::GLShaderProgram(weak<const Resource::Description> shaderDescription, weak<const GLRenderer> renderer)
     :   IGPUResource(shaderDescription, renderer)
     ,   m_shaderProgram(0)
+    ,   m_vertexShader(0)
+    ,   m_geometryShader(0)
+    ,   m_fragmentShader(0)
 {
 }
 
