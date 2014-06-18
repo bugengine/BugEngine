@@ -14,8 +14,9 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     ,   m_handle(m_pythonLibraryName
                     ?   dlopen(minitl::format<1024u>("lib%s.so") | m_pythonLibraryName,
                         RTLD_LAZY | RTLD_GLOBAL)
-                    :   dlopen(NULL, RTLD_LAZY | RTLD_GLOBAL))
-    ,   m_status(m_handle != 0)
+                    :   RTLD_DEFAULT)
+    ,   m_status(dlerror() == 0)
+    ,   m_version(1013)
 {
     if (!m_status)
     {
@@ -23,9 +24,11 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     }
     else
     {
-#       define be_get_func(f)                                                   \
+#       define be_get_func_opt(f)                                               \
             void* tmp##f = dlsym(m_handle, #f);                                 \
-            memcpy(&m_##f, &tmp##f, sizeof(f##Func));                           \
+            memcpy(&m_##f, &tmp##f, sizeof(f##Func));
+#       define be_get_func(f)                                                   \
+            be_get_func_opt(f)                                                  \
             if (!m_##f)                                                         \
             {                                                                   \
                 be_error("could not locate function %s in module %s"            \
@@ -40,6 +43,9 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
+        be_get_func_opt(Py_InitModule4);
+        be_get_func_opt(Py_InitModule4_64);
+        be_get_func_opt(PyModule_Create2);
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);
         be_get_func(PyEval_AcquireThread);
@@ -47,6 +53,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
 #       undef be_get_fun
+#       undef be_get_fun_opt
         if (m_status && pythonLibraryName)
         {
             initialize();
@@ -68,6 +75,22 @@ PythonLibrary::~PythonLibrary()
 
 void PythonLibrary::platformInitialize()
 {
+}
+
+void PythonLibrary::setupPath()
+{
+    const char* programPath = Environment::getEnvironment().getProgramPath();
+    size_t programPathLength = strlen(programPath);
+    minitl::Allocator::Block<char> pythonHome(Arena::python(),
+                                              programPathLength + 1, 1);
+    strcpy(pythonHome.begin(), programPath);
+    char* path = pythonHome.begin();
+    while (*path) path++;
+    while (*path != '/' && *path != '\\' && path != pythonHome.begin()) path--;
+    *path = 0;
+    while (*path != '/' && *path != '\\' && path != pythonHome.begin()) path--;
+    *path = 0;
+    (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s/lib/\")") | pythonHome.data());
 }
 
 }}

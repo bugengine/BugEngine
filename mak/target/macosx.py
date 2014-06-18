@@ -14,6 +14,7 @@ def set_macosx_options(self):
     self.env.XCODE_SDKROOT = 'macosx'
     self.env.XCODE_ABI = 'mach_o'
     self.env.XCODE_SUPPORTEDPLATFORMS = 'macosx'
+    self.env.pymodule_PATTERN = '%s.so'
 
     appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
     self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
