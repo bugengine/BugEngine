@@ -20,6 +20,7 @@ def set_linux_options(self):
     self.env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
     self.env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
+    self.env.pymodule_PATTERN = '%s.so'
 
     self.env.LIBPATH += self.env.SYSTEM_LIB_PATHS
 

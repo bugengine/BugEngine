@@ -93,6 +93,8 @@ def options(opt):
                   dest = 'silent',
                   help = 'do not print build log from Waf')
 
+
+@conf
 def module(bld, name, module_path, depends,
            valid_platforms, features,
            build_features,
@@ -179,12 +181,17 @@ def module(bld, name, module_path, depends,
 
 
     if build and not bld.env.PROJECTS:
-        preprocess = bld(target = name + '.preprocess',
-            features= ['plugin'] if 'plugin' in features else [],
-            target_name = name,
+        preprocess = bld(
+            env=bld.env.derive(),
+            target = name + '.preprocess',
+            features= ['preprocess'],
             pchstop = pchstop,
             source = preprocess_sources,
             kernels = [])
+        if 'plugin' in features:
+            preprocess.env.PLUGIN = name.replace('.', '_')
+        else:
+            preprocess.env.PLUGIN = 'game'
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.listdir():
@@ -194,7 +201,7 @@ def module(bld, name, module_path, depends,
                 for env in bld.multiarch_envs:
                     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
                     kernel_name = kernel[:kernel.rfind('.')]
-                    bld(
+                    t = bld(
                         env = env.derive(),
                         target = target_prefix + name + '.' + kernel_name,
                         features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
@@ -273,8 +280,10 @@ def module(bld, name, module_path, depends,
         if kernel_deps:
             bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
     if internal_deps:
-        bld(target=name, features=['multiarch'], use=internal_deps)
-    return result
+        multiarch = bld(target=name, features=['multiarch'], use=internal_deps)
+    else:
+        multiarch = None
+    return (result, multiarch)
 
 def deploy_directory(bld, env, node, local_path, env_variable):
     target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
@@ -660,7 +669,7 @@ def create_compiled_task(self, name, node):
         self.compiled_tasks = [task]
     return task
 
-@feature('plugin')
+@feature('preprocess')
 @before_method('process_source')
 def create_kernel_namespace(self):
     kernels = getattr(self, 'kernels', [])

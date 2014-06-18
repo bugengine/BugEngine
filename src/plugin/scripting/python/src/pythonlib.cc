@@ -37,6 +37,7 @@ PyThreadState* PythonLibrary::createThread()
 {
     (*m_PyEval_AcquireThread)(m_mainThread);
     PyThreadState* result = (*m_Py_NewInterpreter)();
+    setupPath();
     (*m_PyEval_ReleaseThread)(result);
     return result;
 }
@@ -48,5 +49,9 @@ void PythonLibrary::destroyThread(PyThreadState* threadState)
     (*m_PyEval_ReleaseLock)();
 }
 
+int PythonLibrary::getVersion() const
+{
+    return m_version;
+}
 
 }}
