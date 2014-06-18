@@ -5,11 +5,11 @@
 #include    <core/threads/semaphore.hh>
 #include    <objc/objc.h>
 
-#define USE_DISPATCH_SEMAPHORE __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ >= 50000
+#define USE_DISPATCH_SEMAPHORE (__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ >= 50000)
 #if USE_DISPATCH_SEMAPHORE
 # include   <dispatch/dispatch.h>
 #else
-# include   <pthread.h>
+# include   <semaphore.h>
 #endif
 #include    <stdio.h>
 #include    <errno.h>
@@ -17,21 +17,25 @@
 namespace BugEngine
 {
 
+static int x;
 Semaphore::Semaphore(int initialCount)
 #if USE_DISPATCH_SEMAPHORE
 :   m_data(dispatch_semaphore_create(initialCount))
 #else
-:   m_data(new sem_t)
+:   m_data(sem_open(minitl::format<1024u>("/be_%s") | x++, O_CREAT, 0644, 65535))
 #endif
 {
 #if USE_DISPATCH_SEMAPHORE
     if (!m_data)
 #else
-    if (!sem_init((sem_t*)m_data, initialCount, 65535))
+    if ((sem_t*)m_data == SEM_FAILED)
 #endif
     {
         be_error("Could not initialize semaphore: %s" | strerror(errno));
     }
+#if !USE_DISPATCH_SEMAPHORE
+    release(initialCount);
+#endif
 }
 
 Semaphore::~Semaphore()
@@ -39,7 +43,7 @@ Semaphore::~Semaphore()
 #if USE_DISPATCH_SEMAPHORE
     dispatch_release(reinterpret_cast<dispatch_semaphore_t>(m_data));
 #else
-    sem_destroy((sem_t*)m_data);
+    sem_close((sem_t*)m_data);
 #endif
 }
 
