@@ -68,9 +68,9 @@ def get_iphone_sdk_version(self, name, compiler_list):
             for compiler in compiler_list:
                 sdk_path_compiler = sdk_path.replace('/iPhoneOS', '/%s'%compiler[7])
                 self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path_compiler, '-miphoneos-version-min=%s'%sdk)
-                bin_paths.append(compiler[1])
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', '..', 'usr', 'bin')))
+                bin_paths.append(compiler[1])
             break
         except Errors.WafError:
             continue
@@ -242,11 +242,11 @@ def configure(conf):
         for c in all_toolchains:
             compiler_archs[c[6]] = c
         if 'i386' in compiler_archs and 'armv7' in compiler_archs:
-            compiler_list.append(compiler_archs['i386'])
             compiler_list.append(compiler_archs['armv7'])
+            compiler_list.append(compiler_archs['i386'])
         if 'x86_64' in compiler_archs and 'arm64' in compiler_archs:
-            compiler_list.append(compiler_archs['x86_64'])
             compiler_list.append(compiler_archs['arm64'])
+            compiler_list.append(compiler_archs['x86_64'])
         if not compiler_list:
             continue
 
