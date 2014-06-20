@@ -83,7 +83,7 @@ int beMain(int argc, const char *argv[])
         BugEngine::Plugin::Plugin<minitl::pointer> platformAssert(
                 BugEngine::inamespace("plugin.debug.assert"),
                 BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
-        ref<BugEngine::DiskFolder>::create(
+        ref<BugEngine::DiskFolder> root = ref<BugEngine::DiskFolder>::create(
                 BugEngine::Arena::general(),
                 BugEngine::Environment::getEnvironment().getHomeDirectory(),
                 BugEngine::DiskFolder::ScanRecursive,

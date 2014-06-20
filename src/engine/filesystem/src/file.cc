@@ -3,7 +3,7 @@
 
 #include    <filesystem/stdafx.h>
 #include    <filesystem/file.script.hh>
-#include    <iorequests.hh>
+#include    <ioprocess.hh>
 
 
 namespace BugEngine
@@ -76,7 +76,7 @@ ref<const File::Ticket> File::beginRead(u32 size, i64 offset, bool text, minitl:
         s = size ? size : be_checked_numcast<u32>((i64)m_size + offset + (text ? 1 : 0));
     }
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(arena), this, offset, s, text);
-    IOProcess::pushTicket(t);
+    IOProcess::IOContext::pushTicket(t);
     return t;
 }
 
@@ -87,7 +87,7 @@ ref<const File::Ticket> File::beginWrite(const void* data, u32 size, i64 offset)
     else if (offset < 0)
         be_assert(offset+(i64)m_size+1 >= 0, "writing past end of file");
     ref<Ticket> t = ref<Ticket>::create(ticketPool(), byref(Arena::temporary()), this, offset, size, false, data);
-    IOProcess::pushTicket(t);
+    IOProcess::IOContext::pushTicket(t);
     return t;
 }
 
