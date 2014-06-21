@@ -243,7 +243,8 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
             line = out.pop(0)
             if line and line.startswith('libraries:'):
                 line = line[10:].strip()
-                self.env.append_unique('SYSTEM_LIBPATHS', line.split(':'))
+                self.env.append_unique('SYSTEM_LIBPATHS', line.split(os.pathsep))
+
 
 
 def options(opt):
