@@ -778,7 +778,8 @@ def run_c_code(self, *k, **kw):
 		proj = ConfigSet.ConfigSet()
 		proj['cache_run_c_code'] = ret
 		proj.store(os.path.join(dir, 'cache_run_c_code'))
-	shutil.rmtree(dir)
+		if cachemode != CACHE_RESULTS:
+			shutil.rmtree(dir)
 
 	return ret
 
