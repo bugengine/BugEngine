@@ -229,8 +229,17 @@ def load_clang(conf, directory, target, flags):
         while out:
             line = out.pop(0)
             if line and line.startswith('libraries:'):
+                # clang uses ':' even on windows :-/
                 line = line[10:].strip()
-                conf.env.append_unique('SYSTEM_LIBPATHS', line.split(':'))
+                libs = []
+                try:
+                    while True:
+                        index = line.index(':', 3)
+                        libs.append(line[:index])
+                        line = line[index+1:]
+                except ValueError:
+                    pass
+                conf.env.append_unique('SYSTEM_LIBPATHS', libs)
 
 
 def options(opt):
