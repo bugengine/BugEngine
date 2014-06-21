@@ -4,6 +4,7 @@ from waflib.TaskGen import feature, taskgen_method, extension, before_method, af
 import os
 from waflib.Tools import c, cxx
 
+
 c.cprogram.inst_to = ''
 cxx.cxxprogram.inst_to = ''
 c.cshlib.inst_to = ''
@@ -11,13 +12,16 @@ cxx.cxxshlib.inst_to = ''
 c.cstlib.inst_to = ''
 cxx.cxxstlib.inst_to = ''
 
+
 old_log_display = Task.Task.log_display
 old_exec_command = Task.Task.exec_command
+
 
 def to_string(self):
     bld = self.generator.bld
     tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs])
     return '(%s) %s\n' % (self.__class__.__name__.replace('_task', ''), tgt_str)
+
 
 def create_namespace_file(task):
     with open(task.outputs[0].abspath(), 'w') as f:
@@ -33,9 +37,12 @@ def create_namespace_file(task):
         f.write('BE_REGISTER_NAMESPACE_1(Kernels);\n')
 NamespaceTask = Task.task_factory("namespace", create_namespace_file, color='CYAN')
 
+
 def log_display(self, bld):
     if not Options.options.silent:
         old_log_display(self, bld)
+
+
 def filter(exe, lines):
     result = []
     for line in lines:
@@ -44,9 +51,12 @@ def filter(exe, lines):
         if i1 == -1 or i2 == -1:
             result.append(line)
     return result
+
+
 def exec_command(self, cmd, **kw):
     kw['filter'] = filter
     return old_exec_command(self, cmd, **kw)
+
 
 Task.Task.__str__ = to_string
 Task.Task.log_display = log_display
@@ -64,10 +74,12 @@ for command in ['build', 'clean', 'install']:
                 for variant in self.env.ALL_VARIANTS:
                     Options.commands.append('%s:%s:%s'%(command, toolchain, variant))
 
+
 def safe_name(name):
     name = name.replace('-', '_')
     name = name.replace('+', 'x')
     return name
+
 
 def options(opt):
     opt.add_option('--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler')
@@ -124,6 +136,10 @@ def module(bld, name, module_path, depends,
                 if os.path.isdir(node.abspath()):
                     deploy_directory(bld, bld.env, node, '', e)
 
+    if 'plugin' in features:
+        plugin_name = name.replace('.', '_')
+    else:
+        plugin_name = 'game'
 
     compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
     preprocess_extensions = ['yy', 'll', 'plist']
@@ -174,11 +190,9 @@ def module(bld, name, module_path, depends,
     else:
         extra_features = ['warnnone', bld.__class__.optim]
 
-
     result = []
     internal_deps = []
     internal_kernels = []
-
 
     if build and not bld.env.PROJECTS:
         preprocess = bld(
@@ -188,10 +202,7 @@ def module(bld, name, module_path, depends,
             pchstop = pchstop,
             source = preprocess_sources,
             kernels = [])
-        if 'plugin' in features:
-            preprocess.env.PLUGIN = name.replace('.', '_')
-        else:
-            preprocess.env.PLUGIN = 'game'
+        preprocess.env.PLUGIN = plugin_name
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.listdir():
@@ -213,7 +224,7 @@ def module(bld, name, module_path, depends,
                         includes = api + include,
                         kernel_source = kernelsources,
                         use = [target_prefix + d for d in depends] + [target_prefix + name])
-                        #install_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env.DEPLOY_KERNELDIR))
+                    t.env.PLUGIN = plugin_name
                     kernels.append(target_prefix + name + '.' + kernel_name)
                 if target_prefix:
                     internal_kernels.append((kernel_name, kernels, kernelsources))
@@ -255,7 +266,7 @@ def module(bld, name, module_path, depends,
                 features.remove('cxxprogram')
             if 'cxxstlib' in features:
                 features.remove('cxxstlib')
-        result.append(bld(
+        task_gen = bld(
             env = env.derive(),
             target = target_prefix + name,
             target_name = name,
@@ -273,7 +284,9 @@ def module(bld, name, module_path, depends,
             pchstop = pchstop,
             preprocess = preprocess,
             export_all=export_all,
-            source_nodes = [source_node] + [e for _, e in extras]))
+            source_nodes = [source_node] + [e for _, e in extras])
+        task_gen.env.PLUGIN = plugin_name
+        result.append(task_gen)
         if target_prefix:
             internal_deps.append(target_prefix + name)
     for kernel, kernel_deps, kernel_sources in internal_kernels:
@@ -285,6 +298,7 @@ def module(bld, name, module_path, depends,
         multiarch = None
     return (result, multiarch)
 
+
 def deploy_directory(bld, env, node, local_path, env_variable):
     target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
     for n in node.listdir():
@@ -293,6 +307,7 @@ def deploy_directory(bld, env, node, local_path, env_variable):
             deploy_directory(bld, env, sn, os.path.join(local_path, n), env_variable)
         else:
             bld.install_as(os.path.join(target_path, n), sn)
+
 
 @conf
 def external(bld, name):
@@ -303,6 +318,7 @@ def external(bld, name):
     else:
         bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src',  script_file))
     return name
+
 
 @conf
 def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[], defines=[], use_master=True, warnings=True):
@@ -339,6 +355,7 @@ def thirdparty(bld, name, env, libs=[], lib_paths=[], frameworks=[], includes=[]
             defines=defines,
             source_nodes=[source_node])
 
+
 @conf
 def library(bld, name, depends=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
@@ -354,6 +371,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
         use_master, warnings, export_all)
+
 
 @conf
 def static_library(bld, name, depends=[], features=[], platforms=[],
@@ -371,6 +389,7 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
         extra_public_includes, extra_public_defines,
         use_master, warnings, False)
 
+
 @conf
 def shared_library(bld, name, depends=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
@@ -387,6 +406,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
         extra_public_includes, extra_public_defines,
         use_master, warnings, export_all)
 
+
 @conf
 def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
     if not path: path=name
@@ -401,6 +421,7 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
         module(bld, name, path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], features,
                [], [], [], [], use_master, warnings, False)
 
+
 @conf
 def game(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
     if not path: path=name
@@ -410,6 +431,7 @@ def game(bld, name, depends=[], features=[], platforms=[], path='', use_master=T
     module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
         features, [], [], [], [], use_master, warnings, False)
+
 
 @conf
 def plugin(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
@@ -421,6 +443,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], path='', use_master
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
         features, [], [], [], [], use_master, warnings, False)
 
+
 def build(bld):
     bld.load('data', tooldir=['mak/tools'])
     bld.load('kernel', tooldir=['mak/tools'])
@@ -428,6 +451,7 @@ def build(bld):
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.original_env = bld.env
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
+
 
 @feature('*')
 def check_use_taskgens(self):
@@ -443,6 +467,7 @@ def check_use_taskgens(self):
                 self.uselib.append(name)
             except AttributeError:
                 self.uselib = [name]
+
 
 @feature('cxx')
 def set_building_name_inherits(self):
@@ -492,10 +517,12 @@ def static_dependencies(self):
 
             launcher_task.use.append(self.target)
 
+
 @feature('launcher_static')
 @before_method('apply_link')
 def rename_executable(self):
     self.target = self.real_target
+
 
 @feature('kernel')
 @after_method('apply_link')
@@ -505,6 +532,7 @@ def install_kernel(self):
             self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), [self.link_task.outputs[0]])
             if self.env.CC_NAME == 'msvc':
                 self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), [self.link_task.outputs[1]])
+
 
 @feature('plugin')
 @after_method('apply_link')
@@ -516,6 +544,7 @@ def install_plugin(self):
                 if self.env.CC_NAME == 'msvc':
                     self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR), [self.link_task.outputs[1]])
 
+
 @feature('shared_lib')
 @after_method('apply_link')
 def install_shared_lib(self):
@@ -526,6 +555,7 @@ def install_shared_lib(self):
                 if self.env.CC_NAME == 'msvc':
                     self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR), [self.link_task.outputs[1]])
 
+
 @feature('launcher')
 @after_method('apply_link')
 def install_program(self):
@@ -535,18 +565,22 @@ def install_program(self):
             if self.env.CC_NAME == 'msvc':
                 self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), [self.link_task.outputs[1]])
 
+
 @feature('game')
 @after_method('apply_link')
 def install_game(self):
     pass #also plugin
 
+
 @feature('launcher')
 def launcher_feature(task):
     pass
 
+
 @feature('cxxobjects')
 def objects_feature(task):
     pass
+
 
 @feature('cxx')
 @before_method('process_source')
@@ -555,6 +589,7 @@ def process_export_all_flag(self):
         self.env = self.env.derive()
         self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
         self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
+
 
 @feature('kernel', 'plugin')
 @after_method('process_use')
@@ -576,6 +611,7 @@ def remove_link_libs(task):
         except Exception:
             pass
 
+
 @feature('cxx')
 @before_method('process_source')
 def set_extra_flags(self):
@@ -584,6 +620,7 @@ def set_extra_flags(self):
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
         self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
 
+
 @feature('cxx')
 @before_method('filter_sources')
 def gather_extra_source(self):
@@ -591,6 +628,7 @@ def gather_extra_source(self):
     if preprocess:
         preprocess.post()
         self.source += getattr(preprocess, 'out_sources', [])
+
 
 @taskgen_method
 @feature('*')
@@ -641,12 +679,17 @@ def create_master_file(task):
     with open(task.outputs[0].abspath(), 'w') as f:
         for src in task.inputs:
             f.write('#include "%s"\n' % src.path_from(task.generator.bld.bugenginenode).replace('\\','/'))
+
+
 def master_sig_deps(task):
     for f in sorted([i.srcpath().encode('utf8') for i in task.inputs]):
         task.m.update(f)
         task.m.update(b';')
+
+
 MasterTask = Task.task_factory("master", create_master_file, color='CYAN')
 MasterTask.sig_explicit_deps = master_sig_deps
+
 
 @taskgen_method
 def create_compiled_task(self, name, node):
@@ -669,6 +712,7 @@ def create_compiled_task(self, name, node):
         self.compiled_tasks = [task]
     return task
 
+
 @feature('preprocess')
 @before_method('process_source')
 def create_kernel_namespace(self):
@@ -680,6 +724,7 @@ def create_kernel_namespace(self):
             self.out_sources.append(out)
         except:
             self.out_sources = [out]
+
 
 @extension('.c', '.m')
 def c_hook(self, node):
@@ -700,6 +745,7 @@ def c_hook(self, node):
             self.create_compiled_task('c', output)
     else:
         self.create_compiled_task('c', node)
+
 
 @extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(self, node):
