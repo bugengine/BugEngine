@@ -87,6 +87,7 @@ def get_macosx_sdk_version(self, name, compiler_list):
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr', 'bin')))
                 bin_paths.append(compiler[1])
             break
         except Errors.WafError:
