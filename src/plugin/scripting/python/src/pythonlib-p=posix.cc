@@ -14,7 +14,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     ,   m_handle(m_pythonLibraryName
                     ?   dlopen(minitl::format<1024u>("lib%s.so") | m_pythonLibraryName,
                         RTLD_LAZY | RTLD_GLOBAL)
-                    :   RTLD_DEFAULT)
+                    :   0 /*RTLD_DEFAULT*/)
     ,   m_status(dlerror() == 0)
     ,   m_version(1013)
 {
