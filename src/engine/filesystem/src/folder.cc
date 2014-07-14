@@ -4,12 +4,12 @@
 #include    <filesystem/stdafx.h>
 #include    <filesystem/folder.script.hh>
 #include    <filesystem/file.script.hh>
+#include    <ioprocess.hh>
 
 #include    <core/threads/thread.hh>
 
 namespace BugEngine
 {
-
 
 Folder::Folder()
     :   m_lock()
@@ -18,10 +18,12 @@ Folder::Folder()
     ,   m_mounts(Arena::filesystem())
     ,   m_upToDate(false)
 {
+    IOProcess::IOContext::begin();
 }
 
 Folder::~Folder()
 {
+    IOProcess::IOContext::end();
 }
 
 weak<File> Folder::openFile(istring name)

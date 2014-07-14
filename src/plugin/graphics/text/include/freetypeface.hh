@@ -17,8 +17,6 @@ class FreetypeLibrary;
 class FreetypeFace : public minitl::refcountable
 {
 public:
-    FT_Face face;
-public:
     FreetypeFace(weak<FreetypeLibrary> freetype, const minitl::Allocator::Block<u8>& buffer);
     ~FreetypeFace();
 };
