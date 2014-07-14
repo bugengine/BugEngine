@@ -84,10 +84,10 @@ def get_macosx_sdk_version(self, name, compiler_list):
             for compiler in compiler_list:
                 self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path,
                                '-mmacosx-version-min=%s'%sdk, ['Cocoa'])
-                bin_paths.append(compiler[1])
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')))
+                bin_paths.append(compiler[1])
             break
         except Errors.WafError:
             continue

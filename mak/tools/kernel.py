@@ -22,11 +22,6 @@ def kernel_generate(self):
 		self.source.append(out)
 		tsk = self.create_task('kernel', sources, [out])
 		tsk.path = self.bld.variant_dir
-		#tsk.env.detach()
-		if 'plugin' in self.features:
-			tsk.env.PLUGIN = self.target_name.replace('.', '_')
-		else:
-			tsk.env.PLUGIN = 'game'
 		tsk.env.PCH = self.pchstop
 		tsk.dep_nodes = [
 				self.path.find_or_declare('mak/kernel.py'),

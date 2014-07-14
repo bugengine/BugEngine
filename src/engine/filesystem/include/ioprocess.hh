@@ -12,7 +12,7 @@
 namespace BugEngine { namespace IOProcess
 {
 
-class IOContext
+class IOContext : public minitl::pointer
 {
 private:
     enum { SlotCount = 32 };
@@ -29,7 +29,10 @@ private:
 public:
     IOContext();
     ~IOContext();
-    void pushTicket(ref<File::Ticket> ticket);
+
+    static void pushTicket(ref<File::Ticket> ticket);
+    static void begin();
+    static void end();
 };
 
 }}

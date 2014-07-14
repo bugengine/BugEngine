@@ -36,6 +36,7 @@ void OutlineFontManager::load(weak<const Resource::Description> description,
     }
     else
     {
+        /* load from system font */
         be_unimplemented();
     }
 }
@@ -53,6 +54,7 @@ void OutlineFontManager::reload(weak<const Resource::Description> /*oldDescripti
     }
     else
     {
+        /* load from system font */
         be_unimplemented();
     }
 }

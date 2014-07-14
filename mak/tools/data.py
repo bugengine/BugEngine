@@ -23,11 +23,6 @@ def datagen(self, node):
     outs.append(out_node.change_ext('-instances.cc'))
     tsk = self.create_task('datagen', node, outs)
     tsk.path = self.bld.variant_dir
-    #tsk.env.detach()
-    if 'plugin' in self.features:
-        tsk.env.PLUGIN = self.target_name.replace('.', '_')
-    else:
-        tsk.env.PLUGIN = 'game'
     tsk.env.PCH = self.pchstop
     out_node.parent.mkdir()
     tsk.dep_nodes = [

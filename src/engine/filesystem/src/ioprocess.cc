@@ -7,6 +7,10 @@
 namespace BugEngine { namespace IOProcess
 {
 
+scoped<IOContext> s_context;
+static i_u32 s_contextUseCount;
+
+
 IOContext::IOContext()
     :   m_availableTickets(0)
     ,   m_freeSlots(SlotCount)
@@ -22,6 +26,10 @@ IOContext::~IOContext()
     m_ioDone++;
     m_availableTickets.release(1);
     m_ioThread.wait();
+    for (int i = 0; i < SlotCount; ++i)
+    {
+        m_ticketPool[i] = ref<File::Ticket>();
+    }
 }
 
 intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
@@ -70,15 +78,30 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
     return 0;
 }
 
-
 void IOContext::pushTicket(ref<File::Ticket> ticket)
 {
-    m_freeSlots.wait();
-    u32 slot = m_firstFreeSlot++;
-    be_assert(slot < m_firstUsedSlot + SlotCount, "circular buffer inconsistency");
+    s_context->m_freeSlots.wait();
+    u32 slot = s_context->m_firstFreeSlot++;
+    be_assert(slot < s_context->m_firstUsedSlot + SlotCount, "circular buffer inconsistency");
     slot = slot % SlotCount;
-    m_ticketPool[slot] = ticket;
-    m_availableTickets.release(1);
+    s_context->m_ticketPool[slot] = ticket;
+    s_context->m_availableTickets.release(1);
+}
+
+void IOContext::begin()
+{
+    if (++s_contextUseCount == 1)
+    {
+        s_context.reset(scoped<IOContext>::create(Arena::filesystem()));
+    }
+}
+
+void IOContext::end()
+{
+    if (--s_contextUseCount == 0)
+    {
+        s_context.reset(scoped<IOContext>());
+    }
 }
 
 }}

@@ -22,11 +22,6 @@ def kernel_build_preprocess(self):
 		self.source.append(out)
 		tsk = self.create_task('kernel_preprocess', [kernel_source], [out])
 		tsk.path = self.bld.variant_dir
-		#tsk.env.detach()
-		if 'plugin' in self.features:
-			tsk.env.PLUGIN = [self.target_name.replace('.', '_')]
-		else:
-			tsk.env.PLUGIN = ['game']
 		tsk.dep_nodes = [
 				self.path.find_or_declare('mak/kernel_preprocess.py'),
 				self.path.find_or_declare('mak/cpp/lexer.py'),

@@ -209,36 +209,43 @@ def run_pkg_config(conf, name):
     expand = {}
     configs = {}
     lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib',
-	                                        '=/usr/libdata', '=/usr/local/libdata']
+                                            '=/usr/libdata', '=/usr/local/libdata']
     lib_paths = [extend_lib_path(l) for l in lib_paths]
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
         if os.path.isfile(config_file):
-            with open(config_file, 'r') as config:
-                lines = config.readlines()
-                for line in lines:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    if line[0] == '#':
-                        continue
-                    if line.find('=') != -1:
-                        var_name, value = line.split('=')
-                        value = value.replace('${', '{')
-                        value = value.format(value, **expand)
-                        if value[0] == '"' and value[-1] == '"':
-                            value = value[1:-1]
-                        if var_name == 'prefix':
-                            value = os.path.join(sysroot, value)
-                        expand[var_name] = value
-                    elif line.find(':') != -1:
-                        var_name, value = line.split(':')
-                        value = value.replace('${', '{')
-                        value = value.format(value, **expand)
-                        configs[var_name.strip()] = value.strip().split()
             break
     else:
         raise Errors.WafError('No pkg-config file for library %s'%name)
+
+    if not sysroot:
+        sysroot = os.path.normpath(config_file)
+        sysroot, usr = os.path.split(sysroot)
+        while usr != 'usr' and sysroot:
+            sysroot, usr = os.path.split(sysroot)
+    with open(config_file, 'r') as config:
+        lines = config.readlines()
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            if line[0] == '#':
+                continue
+            if line.find('=') != -1:
+                var_name, value = line.split('=')
+                value = value.replace('${', '{')
+                value = value.format(value, **expand)
+                if value[0] == '"' and value[-1] == '"':
+                    value = value[1:-1]
+                if var_name == 'prefix':
+                    value = os.path.join(sysroot, value[1:])
+                expand[var_name] = value
+            elif line.find(':') != -1:
+                var_name, value = line.split(':')
+                value = value.replace('${', '{')
+                value = value.format(value, **expand)
+                configs[var_name.strip()] = value.strip().split()
+
     return configs.get('Cflags'), configs.get('Libs')
 
 
@@ -249,6 +256,7 @@ def pkg_config(conf, name, var=''):
     conf.env['CFLAGS_%s'%var] = configs.get('Cflags', [])
     conf.env['CXXFLAGS_%s'%var] = configs.get('Cflags', [])
     conf.env['LINKFLAGS_%s'%var] = configs.get('Libs', [])
+
 
 def configure(conf):
     pass
