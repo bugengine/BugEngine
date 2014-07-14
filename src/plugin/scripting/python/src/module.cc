@@ -30,21 +30,21 @@ extern "C" BE_EXPORT void initpy_bugengine()
     /* python 2.x module initialisation */
     be_info("loading module py_bugengine");
     s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
+    PyObject* module;
     if (s_library->m_Py_InitModule4)
     {
         be_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but BugEngine is 64bits");
-        PyObject* module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
-        be_info("type: %s" | module->py_type->tp_name);
+        module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
     }
     else if (s_library->m_Py_InitModule4_64)
     {
         be_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but BugEngine is 32bits");
-        PyObject* module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
-        be_info("type: %s" | module->py_type->tp_name);
+        module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL, s_library->getVersion());
     }
     else
     {
         be_unimplemented();
+        return;
     }
 }
 
@@ -53,5 +53,6 @@ extern "C" BE_EXPORT void PyInit_py_bugengine()
     /* python 3.x module initialisation */
     be_info("loading module py_bugengine");
     s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
-    (*s_library->m_PyModule_Create2)(&s_module, s_library->getVersion());
+    PyObject* module = (*s_library->m_PyModule_Create2)(&s_module, s_library->getVersion());
+    be_forceuse(module);
 }
