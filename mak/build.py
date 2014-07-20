@@ -1,4 +1,4 @@
-from waflib import Task, Options, Build, Task, Utils
+from waflib import Task, Options, Build, Task, Utils, Errors, TaskGen
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -409,17 +409,14 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
 
 @conf
 def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
+    if getattr(bld, 'launcher', None) != None:
+        raise Errors.WafError('Only one engine can be defined')
     if not path: path=name
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
-    if bld.env.STATIC:
-        module(bld, name, path, depends, platforms, ['cxx', 'cxxobjects'], features,
-               [], [], [], [], use_master, warnings, False)
-        bld.launcher_name = name
-    else:
-        module(bld, name, path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'], features,
-               [], [], [], [], use_master, warnings, False)
+    bld.launcher = module(bld, name, path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
+                          features, [], [], [], [], use_master, warnings, False)
 
 
 @conf
@@ -488,34 +485,17 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.target.split('.')[-1])
 
 
-@feature('plugin', 'kernel')
+@feature('launcher')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
     if self.bld.env.STATIC:
-        if 'cxx' in self.features:
-            bld = self.bld
-            launcher_tasks = getattr(bld, 'launcher_static', {})
-            try:
-                launcher_task = launcher_tasks[self.env.TOOLCHAIN]
-            except KeyError:
-                env = self.env
-                target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-                launcher_multiarch = getattr(bld, 'launcher_static_multiarch', None)
-                if not launcher_multiarch and target_prefix:
-                    launcher_multiarch = bld.launcher_static_multiarch = bld(target=bld.launcher_name+'.static', features=['multiarch'], use=[])
-                launcher_task = self.bld(env=env.derive(),
-                                        name=target_prefix+bld.launcher_name+'.static',
-                                        target=target_prefix+bld.launcher_name+'.static',
-                                        real_target=target_prefix+bld.launcher_name,
-                                        features=['cxx', 'cxxprogram', 'launcher', 'launcher_static'],
-                                        use = [])
-                launcher_tasks[env.TOOLCHAIN] = launcher_task
-                if launcher_multiarch:
-                    launcher_multiarch.use.append(launcher_task.target)
-            bld.launcher_static = launcher_tasks
-
-            launcher_task.use.append(self.target)
+        for g in self.bld.groups:
+            for task_gen in g:
+                if not isinstance(task_gen, TaskGen.task_gen):
+                    continue
+                if 'plugin' in task_gen.features and 'cxx' in task_gen.features:
+                    self.use.append(task_gen.target)
 
 
 @feature('launcher_static')
@@ -589,27 +569,6 @@ def process_export_all_flag(self):
         self.env = self.env.derive()
         self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
         self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
-
-
-@feature('kernel', 'plugin')
-@after_method('process_use')
-def remove_link_libs(task):
-    use = getattr(task, 'use', [])[:]
-    seen = set([])
-    while use:
-        u = use.pop()
-        if u in seen:
-            continue
-        seen.add(u)
-        try:
-            task_gen = task.bld.get_tgen_by_name(u)
-            use += getattr(task_gen, 'use', [])
-            if 'cxxprogram' in task_gen.features:
-                task.env.LIB.remove(os.path.split(task_gen.target)[1])
-                for out in task_gen.link_task.outputs:
-                    task.link_task.dep_nodes.remove(out)
-        except Exception:
-            pass
 
 
 @feature('cxx')

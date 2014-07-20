@@ -10,43 +10,68 @@ extern "C"
 
 struct PyThreadState;
 struct PyObject;
+struct PyTypeObject;
 struct PyMethodDef;
 struct PyModuleDef;
 
 
-typedef void (*Py_SetPythonHomeFunc)(const char* home);
-typedef void (*Py_InitializeExFunc)(int initsigs);
-typedef void (*Py_FinalizeFunc)();
-typedef PyThreadState* (*Py_NewInterpreterFunc)();
-typedef void (*Py_EndInterpreterFunc)(PyThreadState* tstate);
-typedef const char* (*Py_GetPathFunc)();
-typedef const char* (*Py_GetVersionFunc)();
-typedef PyObject* (*Py_InitModule4Func)(const char* name, PyMethodDef* methods,
+typedef void (*Py_SetPythonHomeType)(const char* home);
+typedef void (*Py_InitializeExType)(int initsigs);
+typedef void (*Py_FinalizeType)();
+typedef PyThreadState* (*Py_NewInterpreterType)();
+typedef void (*Py_EndInterpreterType)(PyThreadState* tstate);
+typedef const char* (*Py_GetPathType)();
+typedef const char* (*Py_GetVersionType)();
+typedef PyObject* (*Py_InitModule4Type)(const char* name, PyMethodDef* methods,
                                         const char* doc, PyObject* self, int apiver);
-typedef PyObject* (*Py_InitModule4_64Func)(const char* name, PyMethodDef* methods,
+typedef PyObject* (*Py_InitModule4_64Type)(const char* name, PyMethodDef* methods,
                                            const char* doc, PyObject* self, int apiver);
 
-typedef PyObject* (*PyModule_Create2Func)(PyModuleDef* module, int apiver);
+typedef PyObject* (*PyModule_Create2Type)(PyModuleDef* module, int apiver);
 
-typedef void (*PyEval_InitThreadsFunc)();
-typedef PyThreadState* (*PyEval_SaveThreadFunc)();
-typedef void (*PyEval_AcquireThreadFunc)(PyThreadState* tstate);
-typedef void (*PyEval_ReleaseThreadFunc)(PyThreadState* tstate);
-typedef void (*PyEval_ReleaseLockFunc)();
+typedef void (*PyEval_InitThreadsType)();
+typedef PyThreadState* (*PyEval_SaveThreadType)();
+typedef void (*PyEval_AcquireThreadType)(PyThreadState* tstate);
+typedef void (*PyEval_ReleaseThreadType)(PyThreadState* tstate);
+typedef void (*PyEval_ReleaseLockType)();
 
-typedef int (*PyRun_SimpleStringFunc)(const char* command);
+typedef int (*PyRun_SimpleStringType)(const char* command);
 
 typedef PyObject* (*PyCFunction)(PyObject* self, PyObject* args);
 
 typedef int (*visitproc)(PyObject *object, void *arg);
 typedef int (*traverseproc)(PyObject *self, visitproc visit, void *arg);
 typedef int (*inquiry)(PyObject *self);
-typedef void (*freefunc)(void*);
+typedef void (*freefunc)(void *);
+typedef void (*destructor)(PyObject *);
+typedef int (*printfunc)(PyObject *, FILE *, int);
+typedef PyObject *(*getattrfunc)(PyObject *, char *);
+typedef int (*setattrfunc)(PyObject *, char *, PyObject *);
+typedef int (*cmpfunc)(PyObject *, PyObject *);
+typedef PyObject *(*reprfunc)(PyObject *);
+
+
+typedef PyObject* _Py_NoneStructType;
 
 struct PyObject
 {
     minitl::size_type   py_refcount;
-    PyObject*           py_type;
+    PyTypeObject*       py_type;
+};
+
+struct PyTypeObject
+{
+    PyObject            object;
+    const char*         tp_name;
+    minitl::size_type   tp_basicsize;
+    minitl::size_type   tp_itemsize;
+
+    destructor          tp_dealloc;
+    printfunc           tp_print;
+    getattrfunc         tp_getattr;
+    setattrfunc         tp_setattr;
+    cmpfunc             tp_compare;
+    reprfunc            tp_repr;
 };
 
 struct PyMethodDef
@@ -104,7 +129,8 @@ struct PyModuleDef
     freefunc m_free;
 };
 
-
+#define Py_INCREF(pyobject) (++pyobject->py_refcount)
+#define Py_DECREF(pyobject) do { if (--pyobject->py_refcount == 0)  } while (0)
 }
 
 
