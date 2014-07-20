@@ -50,23 +50,24 @@ private:
     int                         m_version;
     PyThreadState*              m_mainThread;
 private: // friend ThreadLock
-    Py_SetPythonHomeFunc        m_Py_SetPythonHome;
-    Py_InitializeExFunc         m_Py_InitializeEx;
-    Py_FinalizeFunc             m_Py_Finalize;
-    Py_NewInterpreterFunc       m_Py_NewInterpreter;
-    Py_EndInterpreterFunc       m_Py_EndInterpreter;
-    Py_GetPathFunc              m_Py_GetPath;
-    Py_GetVersionFunc           m_Py_GetVersion;
-    PyEval_InitThreadsFunc      m_PyEval_InitThreads;
-    PyEval_SaveThreadFunc       m_PyEval_SaveThread;
-    PyEval_AcquireThreadFunc    m_PyEval_AcquireThread;
-    PyEval_ReleaseThreadFunc    m_PyEval_ReleaseThread;
-    PyEval_ReleaseLockFunc      m_PyEval_ReleaseLock;
+    Py_SetPythonHomeType        m_Py_SetPythonHome;
+    Py_InitializeExType         m_Py_InitializeEx;
+    Py_FinalizeType             m_Py_Finalize;
+    Py_NewInterpreterType       m_Py_NewInterpreter;
+    Py_EndInterpreterType       m_Py_EndInterpreter;
+    Py_GetPathType              m_Py_GetPath;
+    Py_GetVersionType           m_Py_GetVersion;
+    PyEval_InitThreadsType      m_PyEval_InitThreads;
+    PyEval_SaveThreadType       m_PyEval_SaveThread;
+    PyEval_AcquireThreadType    m_PyEval_AcquireThread;
+    PyEval_ReleaseThreadType    m_PyEval_ReleaseThread;
+    PyEval_ReleaseLockType      m_PyEval_ReleaseLock;
 public:
-    PyRun_SimpleStringFunc      m_PyRun_SimpleString;
-    Py_InitModule4Func          m_Py_InitModule4;
-    Py_InitModule4_64Func       m_Py_InitModule4_64;
-    PyModule_Create2Func        m_PyModule_Create2;
+    PyRun_SimpleStringType      m_PyRun_SimpleString;
+    Py_InitModule4Type          m_Py_InitModule4;
+    Py_InitModule4_64Type       m_Py_InitModule4_64;
+    PyModule_Create2Type        m_PyModule_Create2;
+    _Py_NoneStructType          m__Py_NoneStruct;
 };
 
 }}
