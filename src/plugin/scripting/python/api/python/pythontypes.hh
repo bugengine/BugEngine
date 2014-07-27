@@ -4,6 +4,7 @@
 #ifndef BE_PYTHON_PYTHONTYPES_HH_
 #define BE_PYTHON_PYTHONTYPES_HH_
 /**************************************************************************************************/
+#include <cstdio>
 
 extern "C"
 {
