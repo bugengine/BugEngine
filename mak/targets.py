@@ -81,7 +81,7 @@ def configure(conf):
     for target in conf.path.make_node('target').listdir():
         if not platforms or target[:-3] in platforms:
             pprint('BLUE', '_'*40)
-            pprint('BLUE', '| '+('configure for target %s'%target).ljust(36)+' |')
+            pprint('BLUE', '| '+('configure for target %s'%target[:-3]).ljust(36)+' |')
             conf.recurse('target/%s'%target)
     conf.env.VALID_PLATFORMS = conf.env.ALL_PLATFORMS
     conf.env.VALID_RCHITECTURES = conf.env.ALL_ARCHITECTURES
