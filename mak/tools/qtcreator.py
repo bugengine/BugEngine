@@ -373,14 +373,19 @@ class QtCreator(Build.BuildContext):
             for task_gen in group:
                 if 'launcher' in task_gen.features:
                     self.launcher = task_gen
+        projects = []
         for group in self.groups:
             for task_gen in group:
-                self.write_project(task_gen)
+                project_file = self.write_project(task_gen)
+                projects.append(project_file)
+                if task_gen == self.launcher:
+                    launcher_project = project_file
                 self.write_files(task_gen)
                 includes, defines = self.gather_includes_defines(task_gen)
                 self.write_includes(task_gen, includes)
                 self.write_defines(task_gen, defines)
                 self.write_user(task_gen)
+        self.write_workspace(projects, appname, launcher_project)
 
     def get_environment_id(self):
         try:
@@ -617,7 +622,9 @@ class QtCreator(Build.BuildContext):
         return unique(includes), unique(defines)
 
     def write_project(self, task_gen):
-        self.base_node.make_node('%s.creator'%task_gen.target).write('[General]')
+        node = self.base_node.make_node('%s.creator'%task_gen.target)
+        node.write('[General]')
+        return node
 
     def write_files(self, task_gen):
         file_list = []
@@ -809,6 +816,56 @@ class QtCreator(Build.BuildContext):
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion').close()
                     write_value(data, self.__class__.version[1])
+
+    def write_workspace(self, projects, appname, launcher):
+        workspace_file = os.path.join(HOME_DIRECTORY, '%s.qws'%appname)
+        try:
+            document = parse(workspace_file)
+        except Exception:
+            with XmlDocument(open(workspace_file, 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorSession')]) as document:
+                with XmlNode(document, 'qtcreator') as creator:
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'Color').close()
+                        XmlNode(data, 'value', '#666666', {'type':'QString'}).close()
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'EditorSettings').close()
+                        XmlNode(data, 'value', '', {'type':'QByteArray'}).close()
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'ProjectDependencies').close()
+                        XmlNode(data, 'valuemap', '', {'type':'QVariantMap'}).close()
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'ProjectList').close()
+                        with XmlNode(data, 'valuelist', '', {'type':'QVariantList'}) as project_list:
+                            for project in projects:
+                                XmlNode(project_list, 'value', project.abspath(), {'type': 'QString'}).close()
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'StartupProject').close()
+                        XmlNode(data, 'value', launcher.abspath(), {'type':'QString'}).close()
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'valueKeys').close()
+                        XmlNode(data, 'valuelist', '', {'type':'QVariantList'}).close()
+        else:
+            new_valuelist = document.createElement('valuelist')
+            new_valuelist.setAttribute('type', 'QVariantList')
+            for project in projects:
+                new_valuelist.appendChild(document.createTextNode('\n   '))
+                project_node = document.createElement('value')
+                project_node.setAttribute('type', 'QString')
+                project_name = document.createTextNode(project.abspath())
+                project_node.appendChild(project_name)
+                new_valuelist.appendChild(project_node)
+            new_valuelist.appendChild(document.createTextNode('\n  '))
+
+            for element in document.getElementsByTagName('variable'):
+                if element.firstChild.nodeType == element.firstChild.TEXT_NODE and element.firstChild.data == 'ProjectList':
+                    data = element.parentNode
+                    old_valuelist = data.getElementsByTagName('valuelist')[0]
+                    data.replaceChild(new_valuelist, old_valuelist)
+            with open(workspace_file, 'w') as new_file:
+                new_file.write(document.toxml())
+
+
+
 
 class QtCreator2(QtCreator):
     "creates projects for QtCreator 2.x"
