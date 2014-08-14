@@ -16,8 +16,8 @@ class copy(Task.Task):
 	Copy file from input to output
 	"""
 	color   = 'PINK'
-	
-	def run(self):
+
+    def run(self):
 		self.outputs[0].write(self.inputs[0].read())
 		return 0
 
@@ -26,7 +26,7 @@ class aapt_package(Task.Task):
 	Store files in an apk file
 	"""
 	color   = 'PINK'
-	
+
 	def run(self):
 		bld = self.generator.bld
 		root = bld.bldnode
@@ -87,7 +87,7 @@ def aapt_resource(self):
 				nodes.extend([node.make_node(i) for i in node.listdir()])
 			else:
 				tsk.dep_nodes.append(node)
-	
+
 
 @feature('dex')
 @after_method('apply_java')
