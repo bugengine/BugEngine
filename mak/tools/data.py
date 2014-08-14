@@ -11,9 +11,14 @@ from waflib import Task
 def scan(self):
     return ([], [])
 
-ddf = '%s ../../../../mak/ddf.py -o ${TGT[0].parent.abspath()} -D ../../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
+ddf = '%s ../../../../mak/ddf.py -o ${TGT[0].parent.abspath()} --doc ${TGT[2].abspath()} -D ../../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
+
+class docgen(Task.Task):
+    def run(self):
+        print('doc')
+        return 0
 
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
@@ -24,6 +29,7 @@ def datagen(self, node):
     tsk = self.create_task('datagen', node, outs)
     tsk.path = self.bld.variant_dir
     tsk.env.PCH = self.pchstop
+    tsk.set_outputs(out_node.change_ext('.doc'))
     out_node.parent.mkdir()
     tsk.dep_nodes = [
             self.path.find_or_declare('mak/ddf.py'),
@@ -51,3 +57,10 @@ def datagen(self, node):
     except:
         self.out_sources = outs[:]
 
+@extension('.doc')
+def docgen(self, node):
+    try:
+        doc_task = self.doc_task
+    except AttrError:
+        doc_task = self.doc_task = self.create_task('docgen', [], [])
+    doc_task.set_inputs([node])
