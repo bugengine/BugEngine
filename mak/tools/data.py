@@ -17,7 +17,6 @@ cls.scan = scan
 
 class docgen(Task.Task):
     def run(self):
-        print('doc')
         return 0
 
 @extension('.h', '.hh', '.hxx')
@@ -26,10 +25,10 @@ def datagen(self, node):
     out_node = node.parent.make_node(self.target).make_node(node.name[:node.name.rfind('.')]+'.cc').get_bld()
     outs.append(out_node)
     outs.append(out_node.change_ext('-instances.cc'))
+    outs.append(out_node.change_ext('.doc'))
     tsk = self.create_task('datagen', node, outs)
     tsk.path = self.bld.variant_dir
     tsk.env.PCH = self.pchstop
-    tsk.set_outputs(out_node.change_ext('.doc'))
     out_node.parent.mkdir()
     tsk.dep_nodes = [
             self.path.find_or_declare('mak/ddf.py'),
@@ -60,7 +59,7 @@ def datagen(self, node):
 @extension('.doc')
 def docgen(self, node):
     try:
-        doc_task = self.doc_task
-    except AttrError:
-        doc_task = self.doc_task = self.create_task('docgen', [], [])
+        doc_task = self.bld.doc_task
+    except AttributeError:
+        doc_task = self.bld.doc_task = self.create_task('docgen', [], [])
     doc_task.set_inputs([node])
