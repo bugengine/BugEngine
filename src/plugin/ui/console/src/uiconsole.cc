@@ -4,10 +4,34 @@
 #include    <console/stdafx.h>
 #include    <console/uiconsole.hh>
 
+#define raw raw2
+#include    <curses.h>
+#undef raw
+
 namespace BugEngine
 {
 
-UIConsole::UIConsole(const Plugin::Context& context)
+struct NCursesInitialisation
+{
+    NCursesInitialisation()
+    {
+        initscr();
+        cbreak();
+        noecho();
+        nonl();
+        intrflush(stdscr, FALSE);
+        keypad(stdscr, TRUE);
+    }
+    ~NCursesInitialisation()
+    {
+        endwin();
+    }
+};
+
+BE_EXPORT NCursesInitialisation s_initialiseCurses;
+
+UIConsole::UIConsole(const Plugin::Context& /*context*/)
+    :   m_uiWidgetManager()
 {
 }
 

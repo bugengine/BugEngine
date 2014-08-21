@@ -8,9 +8,9 @@
 
 
 #if defined(building_console)
-# define    _CONSOLEEXPORT  BE_EXPORT
+# define    CONSOLEEXPORT  BE_EXPORT
 #else
-# define    _CONSOLEEXPORT  BE_IMPORT
+# define    CONSOLEEXPORT  BE_IMPORT
 #endif
 
 /**************************************************************************************************/
