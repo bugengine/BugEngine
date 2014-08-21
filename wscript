@@ -168,6 +168,10 @@ def build(bld):
                ['engine.bugengine', 'plugin.graphics.3d',
                 '3rdparty.freetype', '3rdparty.fontconfig'])
 
+    bld.plugin('plugin.ui.console',
+               ['engine.bugengine', '3rdparty.ncurses'],
+               platforms=['pc'])
+
     bld.external('3rdparty.scintilla')
     bld.plugin('tool.bugeditor.ui',
                ['engine.bugengine', '3rdparty.scintilla'],
@@ -181,7 +185,7 @@ def build(bld):
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
              ['engine.bugengine', 'plugin.scripting.package'])
-    bld.game('help', ['engine.bugengine', 'ncurses'],
+    bld.game('help', ['engine.bugengine', 'plugin.ui.console'],
              path='tool.help', platforms=['pc'])
 
     bld.recurse('mak', name='plugins', once=False)

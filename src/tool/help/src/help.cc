@@ -12,7 +12,6 @@ namespace BugEngine
 Help::Help(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
 {
-    be_info("Help viewer");
 }
 
 Help::~Help()
