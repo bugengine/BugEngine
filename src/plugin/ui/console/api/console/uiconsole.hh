@@ -4,19 +4,19 @@
 #ifndef BE_UI_CONSOLE_UICONSOLE_HH_
 #define BE_UI_CONSOLE_UICONSOLE_HH_
 /**************************************************************************************************/
-#include    <console/stdafx.h>
 #include    <resource/loader.hh>
+#include    <plugin/plugin.hh>
 
 namespace BugEngine
 {
 
-class UIConsole : public minitl::refcountable
+class be_api(CONSOLE) UIConsole : public minitl::refcountable
 {
 private:
-    Plugin::Plugin<Resource::ILoader>   const   m_uiWidgetManager;
+    ref<Resource::ILoader> const    m_uiWidgetManager;
 public:
     UIConsole(const Plugin::Context& context);
-    ~UIConsolee();
+    ~UIConsole();
 };
 
 }
