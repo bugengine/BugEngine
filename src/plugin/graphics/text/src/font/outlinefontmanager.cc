@@ -1,9 +1,11 @@
+
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
 #include    <text/stdafx.h>
 #include    <outlinefontmanager.hh>
 #include    <text/outlinefont.script.hh>
+#include    <fontlist.hh>
 #include    <resource/resourcemanager.hh>
 #include    <freetypelib.hh>
 #include    <freetypeface.hh>
