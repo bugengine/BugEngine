@@ -6,14 +6,10 @@
 /**************************************************************************************************/
 #include    <text/stdafx.h>
 #include    <3d/shader/shader.script.hh>
+#include    <3d/shader/types.script.hh>
 
 namespace BugEngine
 {
-
-namespace Shaders
-{
-class Float4;
-}
 
 class be_api(TEXT) OutlineShader : public ShaderProgramDescription
 {
