@@ -13,7 +13,8 @@ namespace BugEngine
 class be_api(CONSOLE) UIConsole : public minitl::refcountable
 {
 private:
-    ref<Resource::ILoader> const    m_uiWidgetManager;
+    weak<Resource::ResourceManager> const   m_resourceManager;
+    ref<Resource::ILoader> const            m_uiWidgetLoader;
 public:
     UIConsole(const Plugin::Context& context);
     ~UIConsole();
