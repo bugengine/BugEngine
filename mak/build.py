@@ -669,6 +669,7 @@ def create_compiled_task(self, name, node):
         self.compiled_tasks.append(task)
     except AttributeError:
         self.compiled_tasks = [task]
+    print(self.compiled_tasks)
     return task
 
 
