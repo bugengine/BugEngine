@@ -11,7 +11,15 @@ from waflib import Task
 def scan(self):
     return ([], [])
 
-ddf = '%s ../../../../mak/ddf.py -o ${TGT[0].parent.abspath()} --doc ${TGT[2].abspath()} -D ../../../../mak/cpp/macros_ignore --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
+ddf = """
+%s ../../../../mak/ddf.py
+-o ${TGT[0].parent.abspath()}
+--doc ${TGT[2].abspath()}
+-D ../../../../mak/cpp/macros_ignore
+--pch ${PCH}
+--namespace ${PLUGIN}
+${SRC[0].abspath()}
+"""% sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
@@ -52,7 +60,8 @@ class docgen(Task.Task):
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
     outs = []
-    out_node = node.parent.make_node(self.target).make_node(node.name[:node.name.rfind('.')]+'.cc').get_bld()
+    out_node = node.parent.make_node(self.target).make_node(node.name[:node.name.rfind('.')]+'.cc')
+    out_node = out_node.get_bld()
     outs.append(out_node)
     outs.append(out_node.change_ext('-instances.cc'))
     outs.append(out_node.change_ext('.doc'))

@@ -17,8 +17,11 @@ def check_python_test(self):
 
 
 @conf
-def python_module(bld, name, depends, path):
-    module_list, module_multiarch = bld.module(name, path, depends, [],
+def python_module(bld, name, depends, path, platforms=[]):
+    for p in platforms:
+        if p not in bld.env.VALID_PLATFORMS:
+            return
+    module_list, module_multiarch = bld.module(name, path, depends, platforms,
         features=['cxx', 'cxxshlib', 'python_module'],
         build_features=[],
         extra_includes=[], extra_defines=[],
