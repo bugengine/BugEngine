@@ -106,6 +106,8 @@ def get_native_clang_target(conf, clang):
         out = p.communicate()[1]
     except:
         return (None, None)
+    if p.returncode != 0:
+        return (None, None)
 
     if not isinstance(out, str):
         out = out.decode(sys.stdout.encoding)
@@ -140,12 +142,13 @@ def detect_clang(conf):
         if clang and clangxx:
             toolchaindir = os.path.split(conf.env.CLANG)[0]
             target, version = conf.get_native_clang_target(conf.env.CLANG)
-            if conf.has_arch_flag(clang):
-                for arch in conf.find_clang_archs(conf.env.CLANG):
-                    conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
-            else:
-                for arch in conf.find_clang_archs_legacy(conf.env.CLANG, target):
-                    conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
+            if target != None and version != None:
+                if conf.has_arch_flag(clang):
+                    for arch in conf.find_clang_archs(conf.env.CLANG):
+                        conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
+                else:
+                    for arch in conf.find_clang_archs_legacy(conf.env.CLANG, target):
+                        conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
         del conf.env['CLANG']
         del conf.env['CLANGXX']
     conf.env.CLANG_TARGETS.sort(key = lambda x: x[0])

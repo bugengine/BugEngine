@@ -30,7 +30,7 @@ def set_windows_options(self, arch):
 @conf
 def set_windows_gcc_options(self, options, version):
     v = self.env
-    version = version.split('.')
+    version = version.split('-')[0].split('.')
     version = float(version[0]) + float(version[1])/10
     v.append_unique('CFLAGS', options)
     v.append_unique('CXXFLAGS', options)
