@@ -495,7 +495,8 @@ def static_dependencies(self):
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
                 if 'plugin' in task_gen.features and 'cxx' in task_gen.features:
-                    self.use.append(task_gen.target)
+                    if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
+                        self.use.append(task_gen.target)
 
 
 @feature('launcher_static')
@@ -669,7 +670,6 @@ def create_compiled_task(self, name, node):
         self.compiled_tasks.append(task)
     except AttributeError:
         self.compiled_tasks = [task]
-    print(self.compiled_tasks)
     return task
 
 
