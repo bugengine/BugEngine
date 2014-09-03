@@ -11,7 +11,7 @@ namespace BugEngine
 
 class be_api(CONSOLE) UIWidget : public Resource::Description
 {
-public:
+published:
     UIWidget();
     ~UIWidget();
 };

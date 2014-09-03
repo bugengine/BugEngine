@@ -20,10 +20,10 @@ struct NCursesInitialisation
     {
         initscr();
         cbreak();
-        noecho();
         nonl();
         intrflush(stdscr, FALSE);
         keypad(stdscr, TRUE);
+        noecho();
     }
     ~NCursesInitialisation()
     {

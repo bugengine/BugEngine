@@ -7,6 +7,8 @@
 #include    <stdafx.h>
 #include    <bugengine/application.hh>
 #include    <plugin/plugin.hh>
+#include    <resource/loader.hh>
+#include    <package/package.script.hh>
 
 
 namespace BugEngine
@@ -14,6 +16,10 @@ namespace BugEngine
 
 class Help : public Application
 {
+private:
+    Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    ref<const Package>                  const   m_mainPackage;
+
 public:
     Help(const Plugin::Context& context);
     ~Help();
