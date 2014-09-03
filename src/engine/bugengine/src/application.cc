@@ -50,7 +50,7 @@ Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
 ,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
 ,   m_tasks(Arena::task())
 ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
-,   m_forceContinue(m_updateTask, m_worldTask->startCallback())
+,   m_forceContinue()
 ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
 ,   m_resourceLoadingCount(0)
 {
@@ -126,7 +126,6 @@ void Application::updateResources()
     if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
-        m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {

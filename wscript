@@ -187,7 +187,8 @@ def build(bld):
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
              ['engine.bugengine', 'plugin.scripting.package'])
-    bld.game('help', ['engine.bugengine', 'plugin.ui.console'],
+    bld.game('help', ['engine.bugengine', 'plugin.ui.console',
+              'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
 
     bld.recurse('mak', name='plugins', once=False)
