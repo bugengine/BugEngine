@@ -224,7 +224,7 @@ class Netbeans(Build.BuildContext):
         project = path.make_node('project.xml')
         confs = path.make_node('configurations.xml')
         deps = []
-        out = None
+        out = self.launcher[0][0]
 
         for g in self.groups:
             for tg in g:
@@ -233,8 +233,6 @@ class Netbeans(Build.BuildContext):
                 tg.post()
                 if not 'kernel' in tg.features:
                     deps.append(tg)
-                if 'launcher' in tg.features:
-                    out = tg
 
 
         p = self.generateProjectXml(appname, self)

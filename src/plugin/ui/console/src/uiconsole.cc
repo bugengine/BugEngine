@@ -7,31 +7,9 @@
 #include    <window.script.hh>
 #include    <resource/resourcemanager.hh>
 
-#define raw raw2
-#include    <curses.h>
-#undef raw
 
 namespace BugEngine
 {
-
-struct NCursesInitialisation
-{
-    NCursesInitialisation()
-    {
-        initscr();
-        cbreak();
-        nonl();
-        intrflush(stdscr, FALSE);
-        keypad(stdscr, TRUE);
-        noecho();
-    }
-    ~NCursesInitialisation()
-    {
-        endwin();
-    }
-};
-
-BE_EXPORT NCursesInitialisation s_initialiseCurses;
 
 UIConsole::UIConsole(const Plugin::Context& context)
     :   m_resourceManager(context.resourceManager)

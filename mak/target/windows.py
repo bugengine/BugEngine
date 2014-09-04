@@ -57,6 +57,10 @@ def set_windows_gcc_options(self, options, version):
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
+    v.CFLAGS_console = ['-D_CONSOLE=1']
+    v.CXXFLAGS_console = ['-D_CONSOLE=1']
+    v.LINKFLAGS_console = ['-mconsole']
+
 
 
 @conf
@@ -85,6 +89,9 @@ def set_windows_clang_options(self, options, version):
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
+    v.CFLAGS_console = ['-D_CONSOLE=1']
+    v.CXXFLAGS_console = ['-D_CONSOLE=1']
+    v.LINKFLAGS_console = ['-mconsole']
 
 
 @conf
@@ -110,6 +117,11 @@ def set_windows_msvc_options(self):
     self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
     self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
     self.env.ARFLAGS_final = ['/LTCG']
+
+    self.env.CFLAGS_console = ['/D_CONSOLE=1']
+    self.env.CXXFLAGS_console = ['/D_CONSOLE=1']
+    self.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
+
 
 def options(opt):
     pass
@@ -220,7 +232,6 @@ def configure(conf):
                     else:
                         conf.variant = ''
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-
 
 
 def build(bld):

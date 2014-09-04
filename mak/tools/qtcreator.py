@@ -368,17 +368,12 @@ class QtCreator(Build.BuildContext):
         self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
         self.base_node.mkdir()
 
-        self.launcher = None
-        for group in self.groups:
-            for task_gen in group:
-                if 'launcher' in task_gen.features:
-                    self.launcher = task_gen
         projects = []
         for group in self.groups:
             for task_gen in group:
                 project_file = self.write_project(task_gen)
                 projects.append(project_file)
-                if task_gen == self.launcher:
+                if task_gen == self.launcher[0][0]:
                     launcher_project = project_file
                 self.write_files(task_gen)
                 includes, defines = self.gather_includes_defines(task_gen)
@@ -743,7 +738,7 @@ class QtCreator(Build.BuildContext):
                                     ) + ('OUT_NAME=%s' % os.path.join(
                                             self.srcnode.abspath(),
                                             bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
-                                            env.cxxprogram_PATTERN%self.launcher.target),
+                                            env.cxxprogram_PATTERN%self.launcher[0][0].target),
                                          'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),

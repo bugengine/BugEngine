@@ -415,8 +415,11 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
-    bld.launcher = module(bld, name, path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
+    bld.launcher = module(bld, name, path, depends + ['3rdparty.console'], platforms, ['cxx', 'cxxprogram', 'launcher'],
                           features, [], [], [], [], use_master, warnings, False)
+    if 'windows' in bld.env.VALID_PLATFORMS:
+        module(bld, name+'w', path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
+               features, [], [], [], [], use_master, warnings, False)
 
 
 @conf
