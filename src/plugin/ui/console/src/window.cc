@@ -21,15 +21,10 @@ Window::Window(const istring name)
     intrflush(m_window, FALSE);
     keypad(m_window, TRUE);
     noecho();
-
-
 }
 
 Window::~Window()
 {
-    SCREEN* screen = set_term(m_screen);
-    endwin();
-    set_term(screen);
     delscreen(m_screen);
 }
 
