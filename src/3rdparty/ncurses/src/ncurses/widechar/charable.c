@@ -1,3 +1,4 @@
+
 /****************************************************************************
  * Copyright (c) 2003-2005,2008 Free Software Foundation, Inc.              *
  *                                                                          *
@@ -32,6 +33,7 @@
 
 #include <curses.priv.h>
 
+#ifdef NCURSES_WIDECHAR
 MODULE_ID("$Id: charable.c,v 1.5 2008/07/05 20:51:41 tom Exp $")
 
 NCURSES_EXPORT(bool) _nc_is_charable(wchar_t ch)
@@ -78,3 +80,4 @@ NCURSES_EXPORT(wint_t) _nc_to_widechar(int ch)
 #endif
     return result;
 }
+#endif

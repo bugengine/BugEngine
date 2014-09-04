@@ -111,7 +111,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
         if (ticket->text && !ticket->error)
         {
             be_assert(processed + 1 <= ticket->buffer.count(),
-                        "buffer size is %s; bytes processed is %s" | ticket->buffer.count() | processed + 1);
+                      "buffer size is %s; bytes processed is %s" | ticket->buffer.count() | (processed + 1));
             // shrink buffer
             ticket->buffer.realloc(processed + 1);
             target[processed] = 0;
