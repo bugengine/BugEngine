@@ -10,8 +10,13 @@
 #include    <fcntl.h>
 #include    <fstream>
 
-int beMain(int argc, const char *argv[]);
-
+#ifdef _CONSOLE
+extern "C"
+int main(int argc, const char* argv[])
+{
+    return beMain(argc, argv);
+}
+#else
 extern "C"
 int WINAPI WinMain( HINSTANCE /*hInstance*/,
                     HINSTANCE /*hPrevInstance*/,
@@ -44,3 +49,4 @@ int WINAPI WinMain( HINSTANCE /*hInstance*/,
     }
     return beMain(__argc, (const char **)__argv);
 }
+#endif

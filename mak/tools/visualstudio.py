@@ -257,7 +257,7 @@ class VCproj:
                                     debug_command = '$(NMakeOutput)'
                                     debug_command_arguments = task_gen.target
                                 else:
-                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher.target)
+                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target)
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
                                 tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(i, 'usr', 'include') for i in sub_env.SYSROOT]])
@@ -374,7 +374,7 @@ class VCxproj:
                     if 'cxxprogram' in task_gen.features:
                         self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
                     elif 'game' in task_gen.features:
-                        self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher.target))
+                        self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target))
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
@@ -479,13 +479,6 @@ class vs2003(Build.BuildContext):
             project.write(nodes)
             solution.add(task_gen, project, nodes[0].path_from(self.srcnode), do_build)
 
-        self.launcher = None
-        for g in self.groups:
-            for tg in g:
-                if not isinstance(tg, TaskGen.task_gen):
-                    continue
-                if 'launcher' in tg.features:
-                    self.launcher = tg
         for g in self.groups:
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):

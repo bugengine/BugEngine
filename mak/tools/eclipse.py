@@ -84,7 +84,6 @@ class eclipse(Build.BuildContext):
         for g in self.groups:
             for tg in g:
                 if 'launcher' in tg.features:
-                    self.launcher = tg
                     self.launch.append(tg)
                 if 'game' in tg.features:
                     self.launch.append(tg)
@@ -217,8 +216,8 @@ class eclipse(Build.BuildContext):
                             for launch_tg in self.launch:
                                 node = self.settings.make_node('%s-%s-%s.launch' % (launch_tg.target, toolchain, variant))
                                 setting_files.append(node.name)
-                                program = os.path.join('${project_loc}', env.PREFIX, 'debug', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % self.launcher.target)
-                                argument = launch_tg.target if self.launcher != launch_tg else ''
+                                program = os.path.join('${project_loc}', env.PREFIX, 'debug', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % self.launcher[0][0].target)
+                                argument = launch_tg.target if self.launcher[0][0] != launch_tg else ''
                                 with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
                                     with XmlNode(doc, 'launchConfiguration', {'type':'org.eclipse.cdt.launch.applicationLaunchType'}) as launchConfig:
                                         XmlNode(launchConfig, 'booleanAttribute', {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB', 'value': 'true'}).close()

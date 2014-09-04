@@ -45,6 +45,7 @@ def build(bld):
 
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
+    bld.external('3rdparty.console')
     bld.external('3rdparty.DirectX9')
     bld.external('3rdparty.DirectX10')
     bld.external('3rdparty.DirectX11')
