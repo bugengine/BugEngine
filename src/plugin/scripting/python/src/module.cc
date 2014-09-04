@@ -46,6 +46,7 @@ extern "C" BE_EXPORT void initpy_bugengine()
         be_unimplemented();
         return;
     }
+    be_forceuse(module);
 }
 
 extern "C" BE_EXPORT void PyInit_py_bugengine()

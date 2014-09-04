@@ -91,7 +91,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     else
     {
 #   define be_get_func_opt(f)                                               \
-        void* tmp##f = GetProcAddress((HMODULE)m_handle, #f);               \
+        void* tmp##f = reinterpret_cast<void*>(                             \
+                        GetProcAddress((HMODULE)m_handle, #f));             \
         memcpy(&m_##f, &tmp##f, sizeof(f##Type));
 #   define be_get_func(f)                                                   \
         be_get_func_opt(f);                                                 \
