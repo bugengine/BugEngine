@@ -63,9 +63,9 @@ namespace
                                           | (msg[strlen(msg)-1] == '\n' ? "" : "\n");
             OutputDebugString(message);
 #endif
-            fprintf(stderr, "%s(%d) :%s\t\t(%s) %s", filename, line, logname.c_str(), s_logNames[level], msg);
+            fprintf(stdout, "%s(%d) :%s\t\t(%s) %s", filename, line, logname.c_str(), s_logNames[level], msg);
             if (msg[strlen(msg)-1] != '\n')
-                fprintf(stderr, "\n");
+                fprintf(stdout, "\n");
             return true;
         }
     };

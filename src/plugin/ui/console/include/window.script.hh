@@ -1,19 +1,21 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_UI_CONSOLE_UIWIDGET_HH_
-#define BE_UI_CONSOLE_UIWIDGET_HH_
+#ifndef BE_UI_CONSOLE_WINDOW_HH_
+#define BE_UI_CONSOLE_WINDOW_HH_
 /**************************************************************************************************/
 #include    <resource/description.script.hh>
 
 namespace BugEngine
 {
 
-class be_api(CONSOLE) UIWidget : public Resource::Description
+class be_api(CONSOLE) Window : public Resource::Description
 {
 published:
-    UIWidget();
-    ~UIWidget();
+    const istring name;
+published:
+    Window(const istring name);
+    ~Window();
 };
 
 }

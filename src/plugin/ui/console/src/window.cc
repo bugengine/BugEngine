@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <console/stdafx.h>
-#include    <uiwidget.script.hh>
+#include    <window.script.hh>
 
 #define raw raw2
 #include    <curses.h>
@@ -11,11 +11,12 @@
 namespace BugEngine
 {
 
-UIWidget::UIWidget()
+Window::Window(const istring name)
+    :   name(name)
 {
 }
 
-UIWidget::~UIWidget()
+Window::~Window()
 {
 }
 
