@@ -1,8 +1,5 @@
-import os
-
 def options(opt):
 	pass
-
 
 def setup(conf):
 	if 'posix' in conf.env.VALID_PLATFORMS:
@@ -12,7 +9,3 @@ def setup(conf):
 			pass
 		else:
 			conf.env.SYSTEM_FONTCONFIG = True
-
-
-def build(bld):
-	pass

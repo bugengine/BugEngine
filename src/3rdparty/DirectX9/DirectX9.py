@@ -5,5 +5,3 @@ def options(opt):
 def setup(conf):
     conf.recurse('../DirectX/DirectX', name='setup')
 
-def build(bld):
-    bld.recurse('../DirectX/DirectX')

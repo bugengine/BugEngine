@@ -312,7 +312,7 @@ def deploy_directory(bld, env, node, local_path, env_variable):
 @conf
 def external(bld, name):
     namespace = name.split('.')
-    script_file = os.path.join( '/'.join(namespace), '%s.py' % namespace[-1])
+    script_file = os.path.join( '/'.join(namespace), '%s_build.py' % namespace[-1])
     if os.path.isfile(os.path.join(bld.path.abspath(), script_file)):
         bld.recurse(script_file)
     else:
