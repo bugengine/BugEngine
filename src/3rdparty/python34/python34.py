@@ -12,10 +12,3 @@ def setup_python(conf):
     else:
         raise Errors.WafError('python 3.4 not available')
 
-def build(bld):
-    if 'windows' in bld.env.VALID_PLATFORMS:
-        bld.thirdparty('3rdparty.python34', bld.env,
-                       defines=['PYTHON_LIBRARY="python34"'])
-    else:
-        raise Errors.WafError('python not available')
-
