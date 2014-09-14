@@ -19,23 +19,35 @@ class be_api(CONSOLE) Window : public Resource::Description
 {
 published:
     const istring name;
-private:
-    struct ScreenPipe
+public:
+    class CursesWindow : public minitl::refcountable
     {
-        friend class Window;
     private:
-        FILE*   m_fileOutput;
-        FILE*   m_screenStdOut;
+        struct ScreenPipe
+        {
+            friend class CursesWindow;
+        private:
+            FILE*   m_fileOutput;
+            FILE*   m_screenStdOut;
+        public:
+            ScreenPipe();
+            ~ScreenPipe();
+        private:
+            ScreenPipe(const ScreenPipe& other);
+            ScreenPipe& operator=(const ScreenPipe& oher);
+        };
+        ScreenPipe  m_pipe;
+        SCREEN*     m_screen;
     public:
-        ScreenPipe();
-        ~ScreenPipe();
+        CursesWindow();
+        ~CursesWindow();
     };
-    ScreenPipe  m_pipe;
-    SCREEN*     m_screen;
-    WINDOW*     m_window;
 published:
     Window(const istring name);
     ~Window();
+
+public:
+    ref<CursesWindow> create() const;
 };
 
 }

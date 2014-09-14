@@ -8,24 +8,37 @@
 namespace BugEngine
 {
 
-Window::Window(const istring name)
-    :   name(name)
-    ,   m_pipe()
+Window::CursesWindow::CursesWindow()
+    :   m_pipe()
     ,   m_screen(newterm(NULL, m_pipe.m_screenStdOut, stdin))
-    ,   m_window(0)
 {
     set_term(m_screen);
-    m_window = initscr();
     cbreak();
     nonl();
-    intrflush(m_window, FALSE);
-    keypad(m_window, TRUE);
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
     noecho();
+}
+
+Window::CursesWindow::~CursesWindow()
+{
+    set_term(m_screen);
+    endwin();
+    delscreen(m_screen);
+}
+
+Window::Window(const istring name)
+    :   name(name)
+{
 }
 
 Window::~Window()
 {
-    delscreen(m_screen);
+}
+
+ref<Window::CursesWindow> Window::create() const
+{
+    return ref<CursesWindow>::create(Arena::resource());
 }
 
 }

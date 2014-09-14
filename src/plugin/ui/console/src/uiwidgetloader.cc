@@ -24,25 +24,22 @@ UIWidgetLoader::~UIWidgetLoader()
 void UIWidgetLoader::load(weak<const Resource::Description> description, Resource::Resource& resource)
 {
     weak<const Window> window = be_checked_cast<const Window>(description);
-    be_info("loading window \"%s\"" | window->name);
-    be_forceuse(resource);
+    resource.setRefHandle(window->create());
 }
 
 void UIWidgetLoader::reload(weak<const Resource::Description> oldDescription,
                             weak<const Resource::Description> newDescription,
                             Resource::Resource& resource)
 {
-    weak<const Window> window = be_checked_cast<const Window>(oldDescription);
-    be_info("reloading window \"%s\"" | window->name);
     be_forceuse(oldDescription);
-    be_forceuse(newDescription);
-    be_forceuse(resource);
+    weak<const Window> window = be_checked_cast<const Window>(newDescription);
+    resource.clearRefHandle();
+    resource.setRefHandle(window->create());
 }
 
 void UIWidgetLoader::unload(Resource::Resource& resource)
 {
-    be_info("unload");
-    be_forceuse(resource);
+    resource.clearRefHandle();
 }
 
 }
