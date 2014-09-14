@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-Window::ScreenPipe::ScreenPipe()
+Window::CursesWindow::ScreenPipe::ScreenPipe()
 {
     int pipeDescriptors[2];
     int result = pipe(pipeDescriptors);
@@ -19,7 +19,7 @@ Window::ScreenPipe::ScreenPipe()
     m_fileOutput = fdopen(pipeDescriptors[1], "wt");
 }
 
-Window::ScreenPipe::~ScreenPipe()
+Window::CursesWindow::ScreenPipe::~ScreenPipe()
 {
     fclose(m_fileOutput);
     fclose(m_screenStdOut);

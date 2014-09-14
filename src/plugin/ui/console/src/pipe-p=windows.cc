@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-Window::ScreenPipe::ScreenPipe()
+Window::CursesWindow::ScreenPipe::ScreenPipe()
 {
     HANDLE pipeRead, pipeWrite;
     BOOL result = CreatePipe(&pipeRead, &pipeWrite, NULL, 0);
@@ -23,7 +23,7 @@ Window::ScreenPipe::ScreenPipe()
     SetStdHandle(STD_OUTPUT_HANDLE, m_screenStdOut);
 }
 
-Window::ScreenPipe::~ScreenPipe()
+Window::CursesWindow::ScreenPipe::~ScreenPipe()
 {
     fclose(m_fileOutput);
     fclose(m_screenStdOut);
