@@ -35,19 +35,18 @@ def big_bison(self, node):
 
     outs = []
     if node.name.endswith('.yc') or node.name.endswith('.yy'):
-        out_node = node.parent.make_node(self.target).make_node(node.name[:-2]+'cc').get_bld()
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-2]+'cc')
         outs.append(out_node)
         if has_h:
             outs.append(out_node.change_ext('.hh'))
     else:
-        out_node = node.parent.make_node(self.target).make_node(node.name[:-1]+'c').get_bld()
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-1]+'c')
         outs.append(out_node)
         if has_h:
             outs.append(out_node.change_ext('.h'))
 
     tsk = self.create_task('bison', node, outs)
     tsk.cwd = out_node.parent.abspath()
-    out_node.parent.mkdir()
 
     # and the c/cxx file must be compiled too
     try:

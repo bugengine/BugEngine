@@ -326,8 +326,8 @@ class QtPlatform(QtObject):
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
-            icon_path = os.path.join(bld.srcnode.abspath(), 'mak', 'icons', '%s.png'%env.VALID_PLATFORMS[0])
-            icon_extra = os.path.join(bld.srcnode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons', '%s.png'%env.VALID_PLATFORMS[0])
+            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
             elif os.path.isfile(icon_extra):

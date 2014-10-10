@@ -91,7 +91,7 @@ class eclipse(Build.BuildContext):
         self.settings = self.srcnode.make_node('.settings')
         setting_files = []
         self.settings.mkdir()
-        settings = self.srcnode.find_or_declare('mak/tools/eclipse')
+        settings = self.bugenginenode.find_node('mak/tools/eclipse')
         for f in settings.listdir():
             n = settings.find_or_declare(f)
             self.settings.make_node(f).write(n.read())

@@ -421,9 +421,9 @@ def apply_multiarch_darwin(self):
         out_rootnode = self.bld.bldnode.make_node(out_rootdir)
         out_dsymdir = out_rootnode.make_node('Resources/DWARF')
 
-        out_node = self.bld.bldnode.make_node(out_name+'.stripped')
-        out_node_dbg = self.bld.bldnode.make_node(out_name+'.dbg')
-        out_node_full = self.bld.bldnode.make_node(out_name)
+        out_node = self.make_bld_node('.link', None, out_name+'.stripped')
+        out_node_dbg = self.make_bld_node('.link', None, out_name+'.dbg')
+        out_node_full = self.make_bld_node('.link', None, out_name)
 
         self.lipo_task = self.create_task('lipo', inputs, [out_node_full])
         self.strip_task = self.create_task('strip', [out_node_full], [out_node])

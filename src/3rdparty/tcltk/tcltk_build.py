@@ -1,2 +1,2 @@
 def build(bld):
-    bld.thirdparty('3rdparty.tcltk', bld.env)
+    bld.thirdparty('3rdparty.tcltk', '.', bld.env)
