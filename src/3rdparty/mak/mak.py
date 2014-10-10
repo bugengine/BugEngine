@@ -1,5 +1,5 @@
 def options(opt):
-	pass
+    pass
 
 def setup(conf):
-	pass
+    pass

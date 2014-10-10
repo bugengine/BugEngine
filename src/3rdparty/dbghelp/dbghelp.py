@@ -1,7 +1,9 @@
 import os
 
 def options(opt):
-	pass
+    pass
 
 def setup(conf):
-	conf.check_lib(['psapi', 'dbghelp', 'version'], var='PSAPI', libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])
+    conf.check_lib(['psapi', 'dbghelp', 'version'], var='PSAPI',
+                   libpath=[os.path.join(conf.path.abspath(),
+                   'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a)) for a in conf.env.VALID_ARCHITECTURES])

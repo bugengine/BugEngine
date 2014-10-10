@@ -8,6 +8,7 @@ def build(bld):
         for i in include_path.listdir():
             includes.append(include_path.find_node(i))
         bld.static_library('3rdparty.freetype', ['3rdparty.zlib'],
+                           path='.',
                            extra_includes=includes,
                            extra_defines=defines,
                            use_master=False,

@@ -6,11 +6,11 @@ def options(opt):
     gr = opt.add_option_group('SDK paths and options')
     opt.bugenginenode = opt.path.parent
 
-    opt.load('visualstudio', tooldir=['mak/tools'])
-    opt.load('xcode', tooldir=['mak/tools'])
-    opt.load('netbeans', tooldir=['mak/tools'])
-    opt.load('eclipse', tooldir=['mak/tools'])
-    opt.load('qtcreator', tooldir=['mak/tools'])
+    opt.load('visualstudio', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
+    opt.load('xcode', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
+    opt.load('netbeans', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
+    opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
+    opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
 
     opt.recurse('build.py')
     opt.recurse('hosts.py')
@@ -18,6 +18,10 @@ def options(opt):
     opt.recurse('targets.py')
     for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
         opt.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party))
+    option_file = opt.path.parent.find_node('options')
+    if option_file:
+        with open(option_file.abspath(), 'r') as f:
+            opt.parse_args(f.readlines())
 
 def configure(conf):
     conf.bugenginenode = conf.path.parent
@@ -30,9 +34,9 @@ def configure(conf):
             conf.recurse(extra.make_node(e).abspath(), name='host_configure')
     conf.recurse('compilers.py')
     conf.recurse('targets.py')
-    conf.load('flex', tooldir=['mak/tools'])
-    conf.load('bison', tooldir=['mak/tools'])
-    conf.load('kernel_preprocess', tooldir=['mak/tools'])
+    conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
+    conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
+    conf.load('kernel_preprocess', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
 
     conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 

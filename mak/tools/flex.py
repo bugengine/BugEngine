@@ -34,14 +34,12 @@ cls.exec_command = exec_command_flex
 def big_flex(self, node):
     outs = []
     if node.name.endswith('.ll'):
-        out_node = node.parent.make_node(self.target).make_node(node.name[:-2]+'cc').get_bld()
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-2]+'cc')
     else:
-        out_node = node.parent.make_node(self.target).make_node(node.name[:-1]+'c').get_bld()
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-1]+'c')
     outs.append(out_node)
 
     tsk = self.create_task('flex', node, outs)
-    # and the c/cxx file must be compiled too
-    out_node.parent.mkdir()
     try:
         self.out_sources.append(outs[0])
     except:

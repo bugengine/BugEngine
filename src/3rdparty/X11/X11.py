@@ -1,5 +1,5 @@
 def options(opt):
-	pass
+    pass
 
 def setup(conf):
-	conf.check_lib(['X11'])
+    conf.check_lib(['X11'])
