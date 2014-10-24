@@ -26,6 +26,8 @@ def get_android_version(sdk_version):
         '16': '4.1',
         '17': '4.2',
         '18': '4.3',
+		'19': '4.4',
+		'L':  'L'
     }
     return versions.get(sdk_version, sdk_version)
 
@@ -81,19 +83,27 @@ def options(opt):
                 kls.platforms.append('Tegra-Android')
                 has_tegra_support = True
 
+
 def get_android_arch(arch):
     archs = {
         'mipsel': 'mips',
+		'aarch64': 'arm64',
+		'mips64el': 'mips64'
     }
     return archs.get(arch, arch)
+
 
 def get_target_folder(arch):
     archs = {
         'mipsel': 'mips',
         'x86': 'x86',
-        'arm': 'armeabi-v7a'
+        'arm': 'armeabi-v7a',
+		'aarch64': 'arm64-v8a',
+		'mips64el': 'mips64',
+		'x86_64': 'x86_64'
     }
     return archs[arch]
+
 
 def find_android_gcc_toolchain(path, arch):
     try:
@@ -123,6 +133,15 @@ def find_android_gcc_toolchain(path, arch):
 
 
 def find_android_sdk(ndk_path, sdk_path, archs):
+    import re
+    def alphanum_key(s):
+        def tryint(s):
+            try:
+                return int(s)
+            except Exception:
+                return s
+        return [tryint(c) for c in re.split('([0-9]+)', s)]
+
     def all_archs(platform_ndk, platform, archs):
         good = True
         for arch in archs:
@@ -130,12 +149,16 @@ def find_android_sdk(ndk_path, sdk_path, archs):
             good = good and os.path.isdir(os.path.join(platform_ndk, platform, 'arch-%s'%arch))
         return good
     def ndk_of_sdk(sdk, ndks):
-        sdk_number = int(sdk.split('-')[1])
-        ndk_numbers = sorted([int(n.split('-')[1]) for n in ndks])
-        element = ndk_numbers.pop(-1)
-        while element > sdk_number:
+        try:
+            sdk_number = int(sdk.split('-')[1])
+            ndk_numbers = sorted([int(n.split('-')[1]) for n in ndks])
             element = ndk_numbers.pop(-1)
-        return 'android-%d'%element
+            while element > sdk_number:
+                element = ndk_numbers.pop(-1)
+            return 'android-%d'%element
+        except:
+            if sdk in ndks:
+                return sdk
 
     ndk_path,_ = os.path.split(ndk_path)
     while _:
@@ -155,8 +178,9 @@ def find_android_sdk(ndk_path, sdk_path, archs):
                 break
         sdk_path,_ = os.path.split(sdk_path)
     sdk_pairs = [(i, ndk_of_sdk(i, all_ndk_sdks)) for i in all_sdk_sdks]
+    sdk_pairs = [(i, j) for i,j in sdk_pairs if j]
     if sdk_pairs:
-        sdk_pairs = sorted(sdk_pairs, key = lambda x: int(x[0].split('-')[1]))
+        sdk_pairs = sorted(sdk_pairs, key=lambda x: alphanum_key(x[0]))
         sdk,ndk = sdk_pairs[-1]
         from waflib import Options
         favorite_sdk = Options.options.android_sdk
@@ -169,6 +193,7 @@ def find_android_sdk(ndk_path, sdk_path, archs):
         return (os.path.join(platforms_ndk, ndk),
                 os.path.join(platforms_sdk, sdk),
                 sdk.split('-')[1])
+
 
 @conf
 def set_android_gcc_options(conf, options, arch, version):
@@ -212,6 +237,7 @@ def set_android_gcc_options(conf, options, arch, version):
         conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
+
 
 @conf
 def set_android_clang_options(conf, flags, arch, version):
@@ -270,6 +296,7 @@ def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
     conf.env.append_unique('CXXFLAGS', ['--sysroot', ndk_path])
     conf.env.append_unique('LINKFLAGS', ['--sysroot', ndk_path])
 
+
 @conf
 def set_android_options(conf, arch):
     conf.env.VALID_PLATFORMS = ['android']
@@ -314,8 +341,10 @@ def set_android_options(conf, arch):
     conf.env.DEPLOY_PLUGINDIR = os.path.join('lib', get_target_folder(arch))
     conf.env.DEPLOY_KERNELDIR = os.path.join('lib', get_target_folder(arch))
 
+
 def get_tools_paths(android_path):
     return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
+
 
 def get_build_tool_path(android_path):
     sdk_tools_path = os.path.join(android_path, 'build-tools')
@@ -325,6 +354,7 @@ def get_build_tool_path(android_path):
             sdk_tool = sdk_tools[-1]
             return os.path.join(sdk_tools_path, sdk_tool)
     raise Errors.WafError('Android build-tools not installed')
+
 
 def host_configure(conf):
     ndk_paths = Options.options.android_ndk_path.split(',')
@@ -340,12 +370,13 @@ def host_configure(conf):
                             compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
         conf.env.append_unique('EXTRA_PATH', compiler_paths)
 
+
 def configure(conf):
     if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
         return
 
     seen = set([])
-    android_clang_archs = ['arm', 'mipsel', 'x86']
+    android_clang_archs = ['arm', 'mipsel', 'x86', 'aarch64', 'mips64', 'x86_64']
     try:
         conf.load('javaw')
         conf.find_program('jarsigner', var='JARSIGNER')
@@ -357,7 +388,7 @@ def configure(conf):
         sdk_tools_paths = get_tools_paths(Options.options.android_sdk_path)
         adb = conf.find_program('adb', path_list=sdk_tools_paths)
         conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
-        conf.find_program('zipalign', var='ZIPALIGN', path_list = sdk_tools_paths)
+        conf.find_program('zipalign', var='ZIPALIGN', path_list=sdk_tools_paths+[sdk_build_tool_path])
         conf.env.DEXCREATE = '--dex'
         conf.env.DEX_TGT_PATTERN = '--output=%s'
         conf.find_program('aapt', path_list=[sdk_build_tool_path])
@@ -440,6 +471,13 @@ def configure(conf):
             pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
     gcc_targets = {}
+    gcc_archs = { 'arm': 'arm',
+                  'x86': 'x86',
+                  'mipsel': 'mipsel',
+                  'mips64el': 'mips64el',
+                  'mipsel64': 'mips64el',
+                  'arm64': 'aarch64',
+                  'amd64': 'x86_64' }
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
         position = target.find('android')
         if position != -1:
@@ -452,7 +490,7 @@ def configure(conf):
         android_archs = []
 
         compilers = []
-        archs = set([x[6] for x in gcc_variables if x[6] in android_clang_archs])
+        archs = set([gcc_archs[x[6]] for x in gcc_variables if x[6] in gcc_archs])
         try:
             conf.start_msg('Looking for SDK')
             ndk_path, sdk_path, sdk_version = find_android_sdk(gcc_variables[0][1], adb, archs)
