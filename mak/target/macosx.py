@@ -22,9 +22,10 @@ def set_macosx_options(self):
     self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
     self.env.DEPLOY_LIBDIR = 'lib'
     self.env.DEPLOY_INCLUDEDIR = 'include'
-    self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
-    self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'plugin')
-    self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine', 'kernel')
+    share = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
+    self.env.DEPLOY_DATADIR = share
+    self.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
+    self.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
 
 
 @conf
@@ -36,9 +37,12 @@ def check_multilib_gcc(self, compiler):
         output = os.path.join(self.bldnode.abspath(), 'main.o')
         with open(filename, 'w') as f:
             f.write('int main(int, const char**) { return 0; }')
-            cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,%s'%arch, '-c', filename, '-o', output]
+            cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,%s'%arch,
+                   '-c', filename, '-o', output]
             try:
-                p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+                p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
+                                           stdout=Utils.subprocess.PIPE,
+                                           stderr=Utils.subprocess.PIPE)
                 out = p.communicate()[0]
             except Exception as e:
                 print(e)
@@ -59,7 +63,8 @@ def get_macosx_sdk_version(self, name, compiler_list):
     sdks = []
     paths = Options.options.xcode_sdks.split(',')
     for path in paths:
-        for sdk_relative_path in [os.path.join('Platforms', 'MacOSX.platform', 'Developer', 'SDKs'), 'SDKs']:
+        for sdk_relative_path in [os.path.join('Platforms', 'MacOSX.platform', 'Developer', 'SDKs'),
+                                  'SDKs']:
             sdks_path = os.path.join(path, sdk_relative_path)
             try:
                 sdk_list = os.listdir(sdks_path)
@@ -84,10 +89,15 @@ def get_macosx_sdk_version(self, name, compiler_list):
             for compiler in compiler_list:
                 self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path,
                                '-mmacosx-version-min=%s'%sdk, ['Cocoa'])
-                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')))
-                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', 'usr', 'bin')))
-                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')))
-                bin_paths.append(os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr', 'bin')))
+                root_path = os.path.normpath(os.path.join(sdk_path, '..', '..'))
+                bin_paths.append(os.path.join(root_path, 'usr', 'bin'))
+                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', '..', '..',
+                                                               'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', '..', '..',
+                                                               'Toolchains',
+                                                               'XcodeDefault.xctoolchain',
+                                                               'usr', 'bin')))
                 bin_paths.append(compiler[1])
             break
         except Errors.WafError:
@@ -104,9 +114,12 @@ def set_macosx_sdk_options(self, sdk_version, sdk_path):
     self.env.MACOSX_SDK = os.path.splitext(os.path.basename(sdk_path))[0]
     self.env.XCODE_SDK_PATH = sdk_path
     self.env.SYSROOT = [sdk_path]
-    self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path])
-    self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path])
-    self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk_version, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
+    self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
+                                      '-isysroot', sdk_path])
+    self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
+                                        '-isysroot', sdk_path])
+    self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
+                                         '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
 
 
 @conf
@@ -122,7 +135,8 @@ def set_macosx_icc_options(self, flags, arch):
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
+                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -134,7 +148,8 @@ def set_macosx_icc_options(self, flags, arch):
     v.LINKFLAGS_profile = ['-pipe', '-g']
 
     v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                        '-fno-exceptions']
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
@@ -155,7 +170,8 @@ def set_macosx_gcc_options(self, flags, arch):
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
+                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -163,12 +179,14 @@ def set_macosx_gcc_options(self, flags, arch):
     v.LINKFLAGS_debug = ['-pipe', '-g']
 
     v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                          '-fno-exceptions']
     v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_profile = ['-pipe', '-g']
 
     v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                        '-fno-exceptions']
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
@@ -189,7 +207,8 @@ def set_macosx_clang_options(self, flags, arch):
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
+                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -197,12 +216,14 @@ def set_macosx_clang_options(self, flags, arch):
     v.LINKFLAGS_debug = ['-pipe', '-g']
 
     v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                          '-fno-exceptions']
     v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_profile = ['-pipe', '-g']
 
     v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
+    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                        '-fno-exceptions']
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
@@ -239,9 +260,11 @@ def configure(conf):
     }
 
     def load_gcc(conf, compiler):
-        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
+        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5],
+                      compiler[6], compiler[8])
     def load_icc(conf, compiler):
-        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5], compiler[6], compiler[8])
+        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5],
+                      compiler[6], compiler[8])
     def load_clang(conf, compiler):
         conf.load_clang(compiler[1], compiler[5], compiler[8])
 
@@ -250,7 +273,8 @@ def configure(conf):
         position = target.find('darwin')
         if position != -1 and arch in supported_architectures:
             key = (name, version, check_multilib_other, load_icc, set_macosx_icc_options)
-            compiler = (name, bindir, icc, ixx, version, target, arch, supported_architectures[arch], options)
+            compiler = (name, bindir, icc, ixx, version, target, arch,
+                        supported_architectures[arch], options)
             try:
                 compiler_versions[key].append(compiler)
             except KeyError:
@@ -260,7 +284,8 @@ def configure(conf):
         if position != -1 and arch in supported_architectures:
             version = target[position+6:].split('-')[0] + '_' + version
             key = (name, version, check_multilib_gcc, load_gcc, set_macosx_gcc_options)
-            compiler = (name, bindir, gcc, gxx, version, target, arch, supported_architectures[arch], options)
+            compiler = (name, bindir, gcc, gxx, version, target, arch,
+                        supported_architectures[arch], options)
             try:
                 compiler_versions[key].append(compiler)
             except KeyError:
@@ -270,7 +295,8 @@ def configure(conf):
         position = target.find('darwin')
         if position != -1 and real_arch in supported_architectures:
             key = ('clang', version, check_multilib_other, load_clang, set_macosx_clang_options)
-            compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, supported_architectures[real_arch], flags)
+            compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch,
+                        supported_architectures[real_arch], flags)
             try:
                 compiler_versions[key].append(compiler)
             except KeyError:
@@ -288,7 +314,8 @@ def configure(conf):
             return key, x[1]
         else:
             return key, ''
-    for key, compiler_list in sorted(compiler_versions.items(), key=lambda x: (x[0][0], get_version(x[0][1]))):
+    for key, compiler_list in sorted(compiler_versions.items(),
+                                     key=lambda x: (x[0][0], get_version(x[0][1]))):
         macosx_toolchains = []
         macosx_archs = []
         name, version, check_multilib, load_compiler, set_macosx_compiler_options = key
@@ -298,7 +325,8 @@ def configure(conf):
         for compiler in compiler_list:
             check_multilib(conf, compiler)
         try:
-            sdk_name, sdk_path, bin_paths = conf.get_macosx_sdk_version((key[0], key[1]), compiler_list)
+            sdk_name, sdk_path, bin_paths = conf.get_macosx_sdk_version((key[0], key[1]),
+                                                                        compiler_list)
         except Errors.WafError:
             continue
         for compiler in compiler_list:
@@ -323,11 +351,13 @@ def configure(conf):
                 try:
                     conf.set_macosx_options()
                     conf.set_macosx_sdk_options(sdk_name, sdk_path)
-                    toolchain = '%s-%s-%s-%s'%(os_name+conf.env.MACOSX_SDK[6:], real_arch, name, version)
+                    toolchain = '%s-%s-%s-%s'%(os_name+conf.env.MACOSX_SDK[6:], real_arch,
+                                               name, version)
                     conf.setenv(toolchain, conf.env.derive())
                     conf.env.KERNEL_TOOLCHAINS = [toolchain]
                     conf.env.ENV_PREFIX = real_arch
-                    conf.add_toolchain(os_name+conf.env.MACOSX_SDK[6:], real_arch, name, version, arch, False)
+                    conf.add_toolchain(os_name+conf.env.MACOSX_SDK[6:], real_arch, name,
+                                       version, arch, False)
                 except Errors.WafError as e:
                     conf.variant = ''
                     pprint('YELLOW', '%s failed: %s' % (toolchain, e))
@@ -366,7 +396,8 @@ def plugins(bld):
 
 @extension('.plist')
 def install_plist(self, node):
-    self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR), node)
+    self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR),
+                           node)
 
 
 @feature('cshlib', 'cxxshlib')
@@ -374,11 +405,20 @@ def install_plist(self, node):
 def set_osx_shlib_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
         if 'plugin' in self.features:
-            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
+            self.env.append_unique('LINKFLAGS', [
+                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine',
+                                                  'plugin', self.link_task.outputs[0].name)
+                ])
         elif 'kernel' in self.features:
-            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
+            self.env.append_unique('LINKFLAGS', [
+                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine',
+                                                  'kernel', self.link_task.outputs[0].name)
+                ])
         else:
-            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', self.link_task.outputs[0].name)])
+            self.env.append_unique('LINKFLAGS', [
+                    '-install_name', os.path.join('@executable_path',
+                                                  self.link_task.outputs[0].name)
+                ])
 
 
 dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'
@@ -421,21 +461,27 @@ def apply_multiarch_darwin(self):
         out_rootnode = self.bld.bldnode.make_node(out_rootdir)
         out_dsymdir = out_rootnode.make_node('Resources/DWARF')
 
-        out_node = self.make_bld_node('.link', None, out_name+'.stripped')
-        out_node_dbg = self.make_bld_node('.link', None, out_name+'.dbg')
-        out_node_full = self.make_bld_node('.link', None, out_name)
+        out_node = self.make_bld_node('.bin', None, out_name+'.stripped')
+        out_node_dbg = self.make_bld_node('.bin', None, out_name+'.dbg')
+        out_node_full = self.make_bld_node('.bin', None, out_name)
 
         self.lipo_task = self.create_task('lipo', inputs, [out_node_full])
         self.strip_task = self.create_task('strip', [out_node_full], [out_node])
-        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name), out_node, chmod=Utils.O755)
+        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name),
+                            out_node,
+                            chmod=Utils.O755)
 
         dsymtask = getattr(self.bld, 'dsym_task', None)
         if not dsymtask:
             infoplist = self.bld.bldnode.make_node(os.path.join(out_rootdir, 'Info.plist'))
             dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
-            self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, infoplist.path_from(self.bld.bldnode)), infoplist)
+            self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
+                                             infoplist.path_from(self.bld.bldnode)),
+                                infoplist)
 
         dsymtask.set_inputs(out_node_full)
         dsymtask.set_outputs(out_dsymdir.make_node(out_name))
-        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM', 'Contents', 'Resources', 'DWARF', out_name), dsymtask.outputs[-1])
+        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
+                                         'Contents', 'Resources', 'DWARF', out_name),
+                            dsymtask.outputs[-1])
 
