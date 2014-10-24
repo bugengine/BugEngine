@@ -134,9 +134,19 @@ def get_native_clang_target(conf, clang):
 @conf
 def detect_clang(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    libdirs = []
+    for bindir in bindirs:
+        libdir = os.path.join(bindir, '..', 'lib')
+        if os.path.isdir(libdir):
+            for x in os.listdir(libdir):
+                if x.startswith('llvm-'):
+                    b = os.path.join(libdir, x, 'bin')
+                    if os.path.isdir(b):
+                        libdirs.append(b)
+
     conf.env.CLANG_TARGETS = []
 
-    for path in bindirs:
+    for path in libdirs+bindirs:
         clang =  conf.find_program('clang', var='CLANG', path_list=[path], mandatory=False)
         clangxx = conf.find_program('clang++', var='CLANGXX', path_list=[path], mandatory=False)
         if clang and clangxx:
