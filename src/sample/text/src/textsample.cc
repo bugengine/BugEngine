@@ -14,8 +14,8 @@ TextSample::TextSample(const Plugin::Context& context)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
     ,   m_pythonManager("plugin.scripting.python34", pluginContext())
     ,   m_textManager("plugin.graphics.text", pluginContext())
-    ,   m_3ddx("plugin.graphics.nullrender", pluginContext())
-    ,   m_3dgl("plugin.graphics.nullrender", pluginContext())
+    ,   m_3ddx("plugin.graphics.Dx9", pluginContext())
+    ,   m_3dgl("plugin.graphics.GL4", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-text.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);
