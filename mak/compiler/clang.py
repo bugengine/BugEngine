@@ -29,8 +29,8 @@ def expand_clang_archs(arch):
         return [(['-m32'], 'mips'), (['-m64'], 'mips64')]
     elif arch == 'mipsel':
         return [(['-m64'], 'mipsel64'), (['-m32'], 'mipsel')]
-    elif arch == 'mipsel64':
-        return [(['-m32'], 'mipsel'), (['-m64'], 'mipsel64')]
+    elif arch == 'mipsel64' or arch == 'mips64el':
+        return [(['-m32'], 'mipsel'), (['-m64'], arch)]
     elif arch == 'powerpc' or arch == 'ppc':
         return [(['-m64'], arch+'64'), (['-m32'], arch)]
     elif arch == 'powerpc64' or arch == 'ppc64':

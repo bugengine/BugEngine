@@ -27,6 +27,7 @@ def get_android_version(sdk_version):
         '17': '4.2',
         '18': '4.3',
 		'19': '4.4',
+        '21': '5.0',
 		'L':  'L'
     }
     return versions.get(sdk_version, sdk_version)
@@ -118,7 +119,7 @@ def find_android_gcc_toolchain(path, arch):
                 all_toolchains = os.listdir(toolchain_dir)
                 valid_toolchains = [t for t in all_toolchains if t.startswith('%s-'%arch)]
                 valid_gcc_toolchains = []
-                for t in valid_toolchains:
+                for t in sorted(valid_toolchains):
                     if os.path.isdir(os.path.join(toolchain_dir, t, 'prebuilt', host)):
                         for bindir in os.listdir(os.path.join(toolchain_dir, t, 'prebuilt', host)):
                             if os.path.isdir(os.path.join(toolchain_dir, t, 'prebuilt', host, bindir, 'bin')):
@@ -229,7 +230,11 @@ def set_android_gcc_options(conf, options, arch, version):
     v.LINKFLAGS_final = ['-pipe', '-g']
 
 
-    if arch.startswith('x86'):
+    if arch == 'x86_64':
+        conf.env.append_unique('CFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+        conf.env.append_unique('CXXFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+        conf.env.append_unique('LINKFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+    if arch == 'x86':
         conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
         conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
         conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
@@ -270,7 +275,11 @@ def set_android_clang_options(conf, flags, arch, version):
     v.CFLAGS_cxxshlib = []
     v.CXXFLAGS_cxxshlib = []
 
-    if arch.startswith('x86'):
+    if arch == 'x86_64':
+        conf.env.append_unique('CFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+        conf.env.append_unique('CXXFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+        conf.env.append_unique('LINKFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
+    if arch == 'x86':
         conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
         conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
         conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
@@ -376,7 +385,7 @@ def configure(conf):
         return
 
     seen = set([])
-    android_clang_archs = ['arm', 'mipsel', 'x86', 'aarch64', 'mips64', 'x86_64']
+    android_clang_archs = ['arm', 'mipsel', 'x86', 'aarch64', 'mips64el', 'x86_64']
     try:
         conf.load('javaw')
         conf.find_program('jarsigner', var='JARSIGNER')
@@ -501,6 +510,7 @@ def configure(conf):
 
         seen = set([])
         for name, bindir, gcc, gxx, version, target, arch, options in gcc_variables:
+            arch = gcc_archs[arch]
             if arch not in archs: continue
             if arch in seen: continue
             seen.add(arch)
