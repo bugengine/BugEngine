@@ -700,7 +700,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
                                             ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', 'waf install:%s:%s'%(env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Arguments', '%s install:%s:%s'%(sys.argv[0], env_name, variant)),
                                             ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                             ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                             ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
@@ -715,7 +715,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.1', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
                                             ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', 'waf clean:%s:%s'%(env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Arguments', '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
                                             ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                             ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                             ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
