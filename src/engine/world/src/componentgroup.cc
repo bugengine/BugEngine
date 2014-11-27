@@ -17,22 +17,35 @@ namespace BugEngine { namespace World
 namespace
 {
 
-static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type, istring name)
+static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type,
+                                                            istring name)
 {
     raw<const RTTI::Method> method = type->getMethod(name);
     be_assert_recover(method,
                       "could not locate method \"%s\" for component %s" | name | type->fullname(),
                       return raw<const RTTI::Method::Overload>());
-    for (raw<const RTTI::Method::Overload> overload = method->overloads; overload; overload = overload->next)
+    for (raw<const RTTI::Method::Overload> overload = method->overloads;
+         overload;
+         overload = overload->next)
     {
-        RTTI::Type t = RTTI::Type::makeType(type, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-        if (overload->parameterCount == 1 && t.isA(overload->params->type))
+        RTTI::Type componentType = RTTI::Type::makeType(type, RTTI::Type::Value, RTTI::Type::Mutable,
+                                            RTTI::Type::Mutable);
+        if (overload->parameterCount == 2
+         && componentType.isA(overload->params->type)
+         && be_typeid<World&>::type().isA(overload->params->next->type))
         {
             return overload;
         }
     }
+    be_error("%s::%s() overloaded: will not be called by entity manager" | type->fullname() | name);
     return raw<const RTTI::Method::Overload>();
 }
+
+struct EntityOperation
+{
+    u32     maskAdded;
+    u32     maskRemoved;
+};
 
 }
 
@@ -44,7 +57,8 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
     ,   m_buckets(Arena::game(), (u32)bucketMasks.size())
     ,   m_components(Arena::game(), (u32)componentTypes.size())
     ,   m_componentsTotalSize(0)
-    ,   m_componentCounts((u32*)Arena::game().alloc(sizeof(u32)*componentTypes.size()*bucketMasks.size()))
+    ,   m_componentCounts((u32*)Arena::game().alloc(
+                              sizeof(u32)*componentTypes.size()*bucketMasks.size()))
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + (u32)componentTypes.size())
 {
@@ -65,19 +79,8 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
         ComponentInfo& info = m_components[be_checked_numcast<u32>(minitl::distance(begin, it))];
         info.componentType = *it;
         info.created = getMethodFromClass(*it, "created");
-        if (!info.created)
-        {
-            be_error("component type %s: invalid signature for method \"created\""
-                        | (*it)->fullname());
-        }
         info.destroyed = getMethodFromClass(*it, "destroyed");
-        if (!info.destroyed)
-        {
-            be_error("component type %s: invalid signature for method \"destroyed\""
-                        | (*it)->fullname());
-        }
         info.size = (*it)->size;
-
         m_componentsTotalSize += (*it)->size;
     }
 }
@@ -119,10 +122,11 @@ void ComponentGroup::freeBuffers()
 void ComponentGroup::addComponent(Entity e, u32 originalMask,
                                   const Component& c, u32 componentIndex)
 {
+    const ComponentInfo& info = m_components[componentIndex];
+    be_forceuse(info);
     be_forceuse(e);
     be_forceuse(originalMask);
     be_forceuse(c);
-    be_forceuse(componentIndex);
 }
 
 void ComponentGroup::removeComponent(Entity e, u32 originalMask, u32 componentIndex)

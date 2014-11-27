@@ -9,10 +9,12 @@
 namespace BugEngine { namespace World
 {
 
+class World;
+
 struct Component
 {
-    void created()      {}
-    void destroyed()    {}
+    void created(World& world)      { be_forceuse(world); }
+    void destroyed(World& world)    { be_forceuse(world); }
 };
 
 }}
@@ -20,4 +22,3 @@ struct Component
 
 /**************************************************************************************************/
 #endif
-

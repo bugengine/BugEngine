@@ -24,40 +24,40 @@ be_pod A : public World::Component
 {
     u32 value;
 
-    void created();
-    void destroyed();
+    void created(World::World& world);
+    void destroyed(World::World& world);
 };
 
 be_pod B : public World::Component
 {
     u32 value;
 
-    void created();
-    void destroyed();
+    void created(World::World& world);
+    void destroyed(World::World& world);
 };
 
 be_pod C : public World::Component
 {
     u32 value;
 
-    void created();
-    void destroyed();
+    void created(World::World& world);
+    void destroyed(World::World& world);
 };
 
 be_pod D : public World::Component
 {
     u32 value;
 
-    void created();
-    void destroyed();
+    void created(World::World& world);
+    void destroyed(World::World& world);
 };
 
 be_pod E : public World::Component
 {
     u32 value;
 
-    void created();
-    void destroyed();
+    void created(World::World& world);
+    void destroyed(World::World& world);
 };
 
 
