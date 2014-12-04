@@ -104,7 +104,8 @@ struct InterlockedType<4>
     {
         return p;
     }
-    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& condition)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
+                                       const tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,

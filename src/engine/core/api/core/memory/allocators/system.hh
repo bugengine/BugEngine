@@ -6,13 +6,17 @@
 /**************************************************************************************************/
 #include    <core/stdafx.h>
 #include    <minitl/allocator.hh>
+#include    <core/threads/mutex.hh>
 
 namespace BugEngine
 {
 
 /// Allocates regions of memory.
 /**
- * The system allocator allocates blocks of a large size to store contiguous objects.
+ * The system allocator allocates blocks of a large size to store objects contiguously.
+ * On platforms that support it, it uses page allocations.
+ * When all blocks are consumed, the allocator will reserve more memory. When blocks are freed,
+ * the allocator does not return them to the system.
  */
 class be_api(CORE) SystemAllocator
 {
@@ -27,12 +31,13 @@ public:
 private:
     struct Block
     {
-        Block* next;
+        itaggedptr<Block> next;
     };
-    Block*      m_head;
-    u32         m_capacity;
-    u32         m_used;
-    BlockSize   m_blockSize;
+    itaggedptr<Block>   m_head;
+    i_u32               m_capacity;
+    i_u32               m_used;
+    const BlockSize     m_blockSize;
+    Mutex               m_allocLock;
 private:
     u32     platformPageSize();
     byte*   platformReserve(u32 size);

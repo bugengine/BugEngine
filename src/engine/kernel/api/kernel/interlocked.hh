@@ -53,6 +53,11 @@ public:
 public:
     static const interlocked<T> Zero;
     static const interlocked<T> One;
+    static interlocked<T> create(T value)
+    {
+        interlocked<T> result = { value };
+        return result;
+    }
 
     operator T() const
     {
@@ -196,7 +201,7 @@ public:
     {
         return impl::get_ticket(m_value);
     }
-    bool setConditional(T* value, ticket_t& condition)
+    bool setConditional(T* value, const ticket_t& condition)
     {
         return impl::set_conditional(&m_value, reinterpret_cast<value_t>(value), condition);
     }
