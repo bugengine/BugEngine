@@ -144,7 +144,8 @@ struct InterlockedType<4>
             : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
-    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& /*condition*/)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
+                                       const tagged_t::tag_t& /*condition*/)
     {
          long result;
 

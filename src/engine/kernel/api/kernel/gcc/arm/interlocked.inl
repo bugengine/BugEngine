@@ -145,7 +145,7 @@ struct InterlockedType<4>
         return result;
     }
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
-                                       tagged_t::tag_t& /*condition*/)
+                                       const tagged_t::tag_t& /*condition*/)
     {
          long result;
 
