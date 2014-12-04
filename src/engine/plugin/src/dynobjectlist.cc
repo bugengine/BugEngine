@@ -76,6 +76,16 @@ const DynamicObjectList::SymbolPointer* DynamicObjectList::findSymbolInternal(co
     return 0;
 }
 
+void DynamicObjectList::showList()
+{
+    DynamicObjectList* object = s_dynamicObjectRoot;
+    while (object)
+    {
+        be_info("registered built-in plugin %s" | object->m_name);
+        object = object->m_next;
+    }
+}
+
 
 DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const ipath& objectPath)
 {
