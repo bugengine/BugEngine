@@ -4,9 +4,13 @@ import android.content.res.AssetManager;
 
 public class BugEngineLib {
 
-     static
-     {
-         System.loadLibrary("engine.bugengine");
+    static
+    {
+        System.loadLibrary("dl");
+        System.loadLibrary("m");
+        System.loadLibrary("stdc++");
+        System.loadLibrary("log");
+        System.loadLibrary("bugengine");
      }
 
     /**
