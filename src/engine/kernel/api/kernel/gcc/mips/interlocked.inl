@@ -92,7 +92,7 @@ struct InterlockedType<4>
         return p.taggedvalue.tag;
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
-                                       tagged_t::tag_t& condition)
+                                       const tagged_t::tag_t& condition)
     {
         if (p->taggedvalue.tag == condition)
         {
@@ -196,7 +196,7 @@ struct InterlockedType<8>
         return p.taggedvalue.tag;
     }
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
-                                       tagged_t::tag_t& condition)
+                                       const tagged_t::tag_t& condition)
     {
         if (p->taggedvalue.tag == condition)
         {
