@@ -61,8 +61,10 @@ protected:
 private:
     scoped<Task::ITask>             m_task;
     u32                             m_freeEntityId;
-    SystemAllocator                 m_entityAllocator;
-    SystemAllocator*                m_operationAllocator;
+    SystemAllocator                 m_allocator4k;
+    SystemAllocator                 m_allocator16k;
+    SystemAllocator                 m_allocator64k;
+    SystemAllocator                 m_allocator256k;
     u8**                            m_entityInfoBuffer;
     u32                             m_entityCount;
     u32                             m_entityBufferCount;

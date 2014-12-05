@@ -14,10 +14,20 @@
 namespace BugEngine { namespace World
 {
 
-template< typename T, u32 COUNT, typename TAIL >
+
+enum StorageSize
+{
+    StorageSize_4k      = 0,
+    StorageSize_16k     = 1,
+    StorageSize_64k     = 2,
+    StorageSize_256k    = 3
+};
+
+
+template< typename T, StorageSize STORAGE, typename TAIL >
 struct ComponentList : public TAIL
 {
-    enum { Index = TAIL::Index+1, Count = COUNT };
+    enum { Index = TAIL::Index+1, Storage = (u32)STORAGE };
     typedef T Type;
     typedef TAIL Tail;
     const OutputStream<T> stream;
@@ -29,7 +39,7 @@ struct ComponentList : public TAIL
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
         componentList[count].first = be_typeid<T>::klass();
-        componentList[count].second = COUNT;
+        componentList[count].second = STORAGE;
         TAIL::addComponent(componentList, count + 1);
     }
 private:
@@ -38,10 +48,10 @@ private:
 };
 
 
-template< typename T, u32 COUNT >
-struct ComponentList<T, COUNT, void>
+template< typename T, StorageSize STORAGE >
+struct ComponentList<T, STORAGE, void>
 {
-    enum { Index = 0, Count = COUNT };
+    enum { Index = 0, Storage = STORAGE };
     typedef T Type;
     typedef void Tail;
     const OutputStream<T> stream;
@@ -52,7 +62,7 @@ struct ComponentList<T, COUNT, void>
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
         componentList[count].first = be_typeid<T>::klass();
-        componentList[count].second = COUNT;
+        componentList[count].second = STORAGE;
     }
 };
 
@@ -60,19 +70,19 @@ struct ComponentList<T, COUNT, void>
 namespace Helper
 {
 
-template< typename T, typename T2, u32 COUNT, typename TAIL >
+template< typename T, typename T2, StorageSize STORAGE, typename TAIL >
 struct ProductGetter
 {
-    static const Kernel::Product<T>& getProduct(const ComponentList<T2, COUNT, TAIL>& list)
+    static const Kernel::Product<T>& getProduct(const ComponentList<T2, STORAGE, TAIL>& list)
     {
-        return ProductGetter<T, typename TAIL::Type, TAIL::Count, typename TAIL::Tail>::getProduct(list);
+        return ProductGetter<T, typename TAIL::Type, (StorageSize)TAIL::Storage, typename TAIL::Tail>::getProduct(list);
     }
 };
 
-template< typename T, u32 COUNT, typename TAIL >
-struct ProductGetter<T, T, COUNT, TAIL>
+template< typename T, StorageSize STORAGE, typename TAIL >
+struct ProductGetter<T, T, STORAGE, TAIL>
 {
-    static const Kernel::Product<T>& getProduct(const ComponentList<T, COUNT, TAIL>& list)
+    static const Kernel::Product<T>& getProduct(const ComponentList<T, STORAGE, TAIL>& list)
     {
         return list.stream.product;
     }
@@ -80,31 +90,31 @@ struct ProductGetter<T, T, COUNT, TAIL>
 
 
 
-template< typename LIST, typename T , u32 COUNT, typename TAIL >
+template< typename LIST, typename T, StorageSize STORAGE, typename TAIL >
 struct ComponentListPropertyInfo
 {
     static const RTTI::Property s_property;
 };
 
-template< typename LIST, typename T, u32 COUNT >
-struct ComponentListPropertyInfo<LIST, T, COUNT, void>
+template< typename LIST, typename T, StorageSize STORAGE >
+struct ComponentListPropertyInfo<LIST, T, STORAGE, void>
 {
     static const RTTI::Property s_property;
 };
 
-template< typename LIST, typename T, u32 COUNT, typename TAIL >
-const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, TAIL>::s_property =
+template< typename LIST, typename T, StorageSize STORAGE, typename TAIL >
+const RTTI::Property ComponentListPropertyInfo<LIST, T, STORAGE, TAIL>::s_property =
 {
     {0},
-    {&ComponentListPropertyInfo<LIST, typename TAIL::Type, TAIL::Count, typename TAIL::Tail>::s_property},
+    {&ComponentListPropertyInfo<LIST, typename TAIL::Type, (StorageSize)TAIL::Storage, typename TAIL::Tail>::s_property},
     be_typeid<T>::klass()->name,
     be_typeid<LIST>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
     &LIST::template getProduct<T>
 };
 
-template< typename LIST, typename T, u32 COUNT >
-const RTTI::Property ComponentListPropertyInfo<LIST, T, COUNT, void>::s_property =
+template< typename LIST, typename T, StorageSize STORAGE >
+const RTTI::Property ComponentListPropertyInfo<LIST, T, STORAGE, void>::s_property =
 {
     {0},
     {&PartitionListPropertyInfo<LIST, typename LIST::FactoryPartitionList::Type, typename LIST::FactoryPartitionList::Tail>::s_property},

@@ -111,13 +111,15 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
                     Colors::Green::Green,
                     Task::MethodCaller<EntityStorage, &EntityStorage::start>(this)))
     ,   m_freeEntityId(0)
-    ,   m_entityAllocator(SystemAllocator::BlockSize_16k, 32)
-    ,   m_operationAllocator(0)
-    ,   m_entityInfoBuffer((u8**)m_entityAllocator.allocate())
+    ,   m_allocator4k(SystemAllocator::BlockSize_4k, 32)
+    ,   m_allocator16k(SystemAllocator::BlockSize_16k, 32)
+    ,   m_allocator64k(SystemAllocator::BlockSize_64k, 32)
+    ,   m_allocator256k(SystemAllocator::BlockSize_256k, 32)
+    ,   m_entityInfoBuffer((u8**)m_allocator16k.allocate())
     ,   m_entityCount(0)
     ,   m_entityBufferCount(0)
-    ,   m_maxEntityBufferCount(m_entityAllocator.blockSize() / sizeof(EntityInfo*))
-    ,   m_bufferCapacity(m_entityAllocator.blockSize() / sizeof(EntityStorage)
+    ,   m_maxEntityBufferCount(m_allocator16k.blockSize() / sizeof(EntityInfo*))
+    ,   m_bufferCapacity(m_allocator16k.blockSize() / sizeof(EntityStorage)
                          - 4 * (composition.components.size() - 1))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
@@ -147,7 +149,7 @@ EntityStorage::~EntityStorage()
     //          "%d entities still spawned when deleting world" | m_entityCount);
     for (u8** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
     {
-        m_entityAllocator.free(*buffer);
+        m_allocator16k.free(*buffer);
     }
     for (minitl::array<ComponentStorage>::const_iterator it = m_components.begin();
          it != m_components.end();
@@ -162,8 +164,7 @@ EntityStorage::~EntityStorage()
     {
         it->freeBuffers();
     }
-    delete m_operationAllocator;
-    m_entityAllocator.free(m_entityInfoBuffer);
+    m_allocator16k.free(m_entityInfoBuffer);
 }
 
 weak<Task::ITask> EntityStorage::initialTask() const
@@ -199,8 +200,6 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
     u32 groupIndex = 0;
     u32 totalComponents = 0;
-    m_operationAllocator = new SystemAllocator(SystemAllocator::BlockSize_64k,
-                                               2*be_checked_numcast<u32>(groups.size()));
     m_componentGroups.reserve(groups.size());
     for (minitl::vector<GroupInfo>::const_iterator group = groups.begin();
          group != groups.end();
@@ -256,7 +255,7 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         u32 componentTypeCount = be_checked_numcast<u32>(group->components.size());
         u32 componentTupeFirst = totalComponents - componentTypeCount;
         m_componentGroups.push_back(ComponentGroup(componentTupeFirst, group->components,
-                                                   masks, *m_operationAllocator));
+                                                   masks, m_allocator256k));
     }
 }
 
@@ -358,7 +357,7 @@ Entity EntityStorage::spawn()
     {
         be_assert(m_entityInfoBuffer[bufferIndex] == 0,
                   "buffer index %d inconsistent" | bufferIndex);
-        u8* buffer = (u8*)m_entityAllocator.allocate();
+        u8* buffer = (u8*)m_allocator16k.allocate();
         u32 index = (bufferIndex << 16);
         const u32 infoSize = getEntityInfoSize();
         for (u32 i = 0; i < m_bufferCapacity; ++i)
