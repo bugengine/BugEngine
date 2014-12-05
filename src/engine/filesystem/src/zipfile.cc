@@ -70,8 +70,6 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         s_fileOffset = 0;
         s_currentFile = 0;
     }
-
-    be_info("file reading %s not implemented yet" | m_filename);
 }
 
 void ZipFile::doWriteBuffer(weak<Ticket> ticket) const

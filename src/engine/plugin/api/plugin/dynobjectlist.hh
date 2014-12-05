@@ -69,6 +69,7 @@ public:
         }
     }
     static DynamicObjectList* findDynamicObject(const char *name);
+    static void showList();
 };
 
 #define _BE_PLUGIN_EXPORT                   static
