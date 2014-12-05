@@ -14,7 +14,14 @@ namespace BugEngine
 {
 
 class KernelStorage : public World::EntityStorageFactory<
-    COMPONENT_LIST_7((U1, 1), (U2, 1), (A, 12), (B, 16), (C, 12), (D, 32), (E, 3)),
+    COMPONENT_LIST_7(
+        (U1, World::StorageSize_4k),
+        (U2, World::StorageSize_4k),
+        (A, World::StorageSize_4k),
+        (B, World::StorageSize_4k),
+        (C, World::StorageSize_4k),
+        (D, World::StorageSize_4k),
+        (E, World::StorageSize_4k)),
     BugEngine::World::MakePartitionList<
         BugEngine::World::MakePartition<U1, U2>::Result,
         BugEngine::World::MakePartition<A, B>::Result,
