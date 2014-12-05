@@ -491,7 +491,7 @@ def static_dependencies(self):
             for task_gen in g:
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
-                if 'plugin' in task_gen.features and 'cxx' in task_gen.features:
+                if ('plugin' in task_gen.features or 'kernel' in task_gen.features) and 'cxx' in task_gen.features:
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
                         self.use.append(task_gen.target)
 

@@ -6,6 +6,7 @@
 #include    <jni.h>
 #include    <core/threads/thread.hh>
 #include    <android/log.h>
+#include    <plugin/dynobjectlist.hh>
 
 BE_EXPORT const char* s_packagePath = 0;
 BE_EXPORT const char* s_dataDirectory = 0;
@@ -46,6 +47,7 @@ protected:
 static intptr_t android_main(intptr_t /*width*/, intptr_t /*height*/)
 {
     BugEngine::ScopedLogListener android_listener(scoped<AndroidLogListener>::create(BugEngine::Arena::debug()));
+    BugEngine::Plugin::DynamicObjectList::showList();
     const char *args[] = { "BugEngine" };
     return beMain(1, args);
 }
