@@ -52,6 +52,9 @@ public:
     void  free(void* memory);
 
     u32 blockSize() const;
+private:
+    SystemAllocator(const SystemAllocator& other);
+    SystemAllocator& operator=(const SystemAllocator& other);
 };
 
 }

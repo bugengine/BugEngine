@@ -138,7 +138,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
         u32* backlink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
         m_components[index.absoluteIndex].backLink = backlink;
         m_components[index.absoluteIndex].current = 0;
-        m_components[index.absoluteIndex].maximum = it->second;
+        m_components[index.absoluteIndex].allocator = &(&m_allocator4k)[it->second];
         m_components[index.absoluteIndex].elementSize = it->first->size;
     }
 }
@@ -273,11 +273,15 @@ u32 EntityStorage::buildMask(const minitl::array< raw<const RTTI::Class> >& comp
 }
 
 void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group, u32 relativeIndex,
-                                 u32 absoluteIndex, u32 maximumCount)
+                                 u32 absoluteIndex, u32 pageSize)
 {
     be_assert(!getComponentIndex(componentType),
               "component type %s is registered twice" | componentType->fullname());
-    be_info("component %s: reserving space for %d" | componentType->name | maximumCount);
+    be_info("component %s: using %s kB pages" | componentType->name | 1 << (pageSize*2 + 2));
+    SystemAllocator& alloc = (&m_allocator4k)[pageSize];
+    be_assert(alloc.blockSize() == 1 << (pageSize*2 + 12),
+              "invalid allocator for block size %d kB" | 1 << (pageSize*2 + 2));
+    be_forceuse(alloc);
     ComponentInfo& info = m_componentTypes[absoluteIndex];
     info.first = componentType;
     info.second = ComponentIndex(group, relativeIndex, absoluteIndex);
