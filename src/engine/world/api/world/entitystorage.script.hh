@@ -39,8 +39,8 @@ private:
     {
         u8* memory;
         u32* backLink;
+        SystemAllocator* allocator;
         u32 current;
-        u32 maximum;
         u32 elementSize;
     };
     typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex, u32 > ComponentInfo;
@@ -83,7 +83,7 @@ private:
 
     void buildGroups(const WorldComposition& composition);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index,
-                      u32 totalIndex, u32 maximumCount);
+                      u32 totalIndex, u32 pageSize);
     u32 store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
     void restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
 

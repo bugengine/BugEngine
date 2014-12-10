@@ -15,9 +15,9 @@ namespace BugEngine
 
 class KernelStorage : public World::EntityStorageFactory<
     COMPONENT_LIST_7(
-        (U1, World::StorageSize_4k),
-        (U2, World::StorageSize_4k),
-        (A, World::StorageSize_4k),
+        (U1, World::StorageSize_256k),
+        (U2, World::StorageSize_64k),
+        (A, World::StorageSize_16k),
         (B, World::StorageSize_4k),
         (C, World::StorageSize_4k),
         (D, World::StorageSize_4k),

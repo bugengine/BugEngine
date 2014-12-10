@@ -233,14 +233,16 @@ def set_android_gcc_options(conf, options, arch, version):
         conf.env.append_unique('CFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
         conf.env.append_unique('CXXFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
         conf.env.append_unique('LINKFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
-    if arch == 'x86':
+    elif arch == 'x86':
         conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
         conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
         conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-mfpmath=sse', '-m32'])
-    if arch.startswith('arm'):
+    elif arch.startswith('arm'):
         conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
+    else:
+        pass
 
 
 @conf
@@ -278,14 +280,21 @@ def set_android_clang_options(conf, flags, arch, version):
         conf.env.append_unique('CFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
         conf.env.append_unique('CXXFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
         conf.env.append_unique('LINKFLAGS', ['-mstackrealign', '-msse3', '-mfpmath=sse', '-m64'])
-    if arch == 'x86':
+    elif arch == 'x86':
         conf.env.append_unique('CFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
         conf.env.append_unique('CXXFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
         conf.env.append_unique('LINKFLAGS', ['-march=i686', '-mtune=atom', '-mstackrealign', '-msse3', '-m32'])
-    if arch.startswith('arm'):
+    elif arch.startswith('arm'):
         conf.env.append_unique('CFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('CXXFLAGS', ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'])
         conf.env.append_unique('LINKFLAGS', ['-march=armv7-a', '-Wl,--fix-cortex-a8'])
+    elif arch=='mips64el':
+        pass
+        #conf.env.append_unique('CFLAGS', ['-march=mips64r6'])
+        #conf.env.append_unique('CXXFLAGS', ['-march=mips64r6'])
+        #conf.env.append_unique('LINKFLAGS', ['-march=mips64r6'])
+    else:
+        pass
 
 
 @conf
