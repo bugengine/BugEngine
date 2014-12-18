@@ -846,7 +846,7 @@ class QtCreator(Build.BuildContext):
                 new_valuelist.appendChild(document.createTextNode('\n   '))
                 project_node = document.createElement('value')
                 project_node.setAttribute('type', 'QString')
-                project_name = document.createTextNode(project.abspath())
+                project_name = document.createTextNode(project.abspath().replace('\\', '/'))
                 project_node.appendChild(project_name)
                 new_valuelist.appendChild(project_node)
             new_valuelist.appendChild(document.createTextNode('\n  '))
