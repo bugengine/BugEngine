@@ -10,7 +10,7 @@
 #include    <kernel/simd.hh>
 #include    <minitl/features.hh>
 
-#define     be_forceuse(p)  static_cast<void>(p)
+#define     be_forceuse(p)  (static_cast<void>(&p))
 #define     BE_NOCOPY(x)    private: x(const x&); x& operator=(const x&);
 #define     be_api(module)  module##EXPORT
 
