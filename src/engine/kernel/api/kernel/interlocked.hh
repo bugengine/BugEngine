@@ -55,7 +55,7 @@ public:
     static const interlocked<T> One;
     static interlocked<T> create(T value)
     {
-        interlocked<T> result = { value };
+        interlocked<T> result = { value_t(value) };
         return result;
     }
 
