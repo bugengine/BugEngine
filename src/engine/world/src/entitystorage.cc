@@ -133,13 +133,12 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     {
         ComponentIndex index = getComponentIndex(it->first);
         be_assert(index, "component %s not registered" | it->first->fullname());
-        u8* memory = (u8*)Arena::game().alloc(it->first->size * it->second);
-        m_components[index.absoluteIndex].memory = memory;
-        u32* backlink = (u32*)Arena::game().alloc(sizeof(u32) * it->second);
-        m_components[index.absoluteIndex].backLink = backlink;
-        m_components[index.absoluteIndex].current = 0;
-        m_components[index.absoluteIndex].allocator = &(&m_allocator4k)[it->second];
-        m_components[index.absoluteIndex].elementSize = it->first->size;
+        ComponentStorage& storage = m_components[index.absoluteIndex];
+        storage.allocator = &(&m_allocator4k)[it->second];
+        storage.memory = 0;
+        storage.backLink = 0;
+        storage.current = 0;
+        storage.elementSize = it->first->size;
     }
 }
 
@@ -155,8 +154,20 @@ EntityStorage::~EntityStorage()
          it != m_components.end();
          ++it)
     {
-        Arena::game().free(it->memory);
-        Arena::game().free(it->backLink);
+        void* page = it->memory;
+        while(page)
+        {
+            void* dealloc = page;
+            page = *(void**)page;
+            it->allocator->free(dealloc);
+        }
+        page = it->backLink;
+        while(page)
+        {
+            void* dealloc = page;
+            page = *(void**)page;
+            it->allocator->free(dealloc);
+        }
     }
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
          it != m_componentGroups.end();
@@ -278,10 +289,8 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group
     be_assert(!getComponentIndex(componentType),
               "component type %s is registered twice" | componentType->fullname());
     be_info("component %s: using %s kB pages" | componentType->name | 1 << (pageSize*2 + 2));
-    SystemAllocator& alloc = (&m_allocator4k)[pageSize];
-    be_assert(alloc.blockSize() == 1 << (pageSize*2 + 12),
+    be_assert((&m_allocator4k)[pageSize].blockSize() == 1 << (pageSize*2 + 12),
               "invalid allocator for block size %d kB" | 1 << (pageSize*2 + 2));
-    be_forceuse(alloc);
     ComponentInfo& info = m_componentTypes[absoluteIndex];
     info.first = componentType;
     info.second = ComponentIndex(group, relativeIndex, absoluteIndex);
@@ -415,8 +424,7 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.addComponent(e, info.mask(group.firstComponent, group.lastComponent),
-                       c, componentIndex.relativeIndex);
+    group.addComponent(e, c, componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = true;
 }
 
@@ -436,8 +444,7 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    u32 mask = info.mask(group.firstComponent, group.lastComponent);
-    group.removeComponent(e, mask, componentIndex.relativeIndex);
+    group.removeComponent(e, componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = false;
 }
 

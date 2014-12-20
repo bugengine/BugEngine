@@ -38,9 +38,12 @@ private:
     u32                             m_componentsTotalSize;
     u32*                            m_componentCounts;
     u32*                            m_backBuffer;
+    iptr<void>                      m_entityOperation;
 public:
     u32 const                       firstComponent;
     u32 const                       lastComponent;
+private:
+    byte* allocOperation(u32 componentSize);
 public:
     ComponentGroup(u32 firstComponent,
                    const minitl::vector< raw<const RTTI::Class> >& componentTypes,
@@ -60,8 +63,8 @@ public:
                               const u8* componentBuffer,
                               const Delta& delta);
 
-    void addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex);
-    void removeComponent(Entity e, u32 originalMask, u32 componentIndex);
+    void addComponent(Entity e, const Component& c, u32 componentIndex);
+    void removeComponent(Entity e, u32 componentIndex);
 };
 
 }}

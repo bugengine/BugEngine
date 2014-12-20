@@ -43,8 +43,9 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
 
 struct EntityOperation
 {
-    u32     maskAdded;
-    u32     maskRemoved;
+    u32 owner;
+    u32 maskAdded;
+    u32 maskRemoved;
 };
 
 }
@@ -59,6 +60,7 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
     ,   m_componentsTotalSize(0)
     ,   m_componentCounts((u32*)Arena::game().alloc(
                               sizeof(u32)*componentTypes.size()*bucketMasks.size()))
+    ,   m_entityOperation(0)
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + (u32)componentTypes.size())
 {
@@ -119,21 +121,25 @@ void ComponentGroup::freeBuffers()
     Arena::game().free(m_componentCounts);
 }
 
-void ComponentGroup::addComponent(Entity e, u32 originalMask,
-                                  const Component& c, u32 componentIndex)
+void ComponentGroup::addComponent(Entity e, const Component& c, u32 componentIndex)
 {
     const ComponentInfo& info = m_components[componentIndex];
-    be_forceuse(info);
-    be_forceuse(e);
-    be_forceuse(originalMask);
-    be_forceuse(c);
+    byte* operationBuffer = allocOperation(info.size);
+    byte* componentBuffer = operationBuffer + info.size;
+    EntityOperation* operation = reinterpret_cast<EntityOperation*>(operationBuffer);
+    operation->owner = e.id;
+    operation->maskAdded = 1 << componentIndex;
+    operation->maskRemoved = 0;
+    memcpy(componentBuffer, &c, info.size);
 }
 
-void ComponentGroup::removeComponent(Entity e, u32 originalMask, u32 componentIndex)
+void ComponentGroup::removeComponent(Entity e, u32 componentIndex)
 {
-    be_forceuse(e);
-    be_forceuse(originalMask);
-    be_forceuse(componentIndex);
+    byte* operationBuffer = allocOperation(0);
+    EntityOperation* operation = reinterpret_cast<EntityOperation*>(operationBuffer);
+    operation->owner = e.id;
+    operation->maskAdded = 0;
+    operation->maskRemoved = 1 << componentIndex;
 }
 
 
