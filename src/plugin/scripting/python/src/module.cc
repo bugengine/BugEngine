@@ -25,6 +25,16 @@ static PyModuleDef s_module =
     NULL
 };
 
+void setupModule(PyObject* module)
+{
+    PyObject* list = s_library->m_PyList_New(1);
+    PyObject* str = s_library->m_PyString_FromString("bugengine");
+    s_library->m_PyList_SetItem(list, 0, str);
+    Py_DECREF(str);
+    module->py_type->tp_setattr(module, "__path__", list);
+    Py_DECREF(list);
+}
+
 extern "C" BE_EXPORT void initpy_bugengine()
 {
     /* python 2.x module initialisation */
@@ -46,7 +56,7 @@ extern "C" BE_EXPORT void initpy_bugengine()
         be_unimplemented();
         return;
     }
-    be_forceuse(module);
+    setupModule(module);
 }
 
 extern "C" BE_EXPORT void PyInit_py_bugengine()
@@ -55,5 +65,5 @@ extern "C" BE_EXPORT void PyInit_py_bugengine()
     be_info("loading module py_bugengine");
     s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
     PyObject* module = (*s_library->m_PyModule_Create2)(&s_module, s_library->getVersion());
-    be_forceuse(module);
+    setupModule(module);
 }

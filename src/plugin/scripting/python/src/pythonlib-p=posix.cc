@@ -53,6 +53,20 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
         be_get_func(_Py_NoneStruct);
+        be_get_func(PyList_New);
+        be_get_func(PyList_Size);
+        be_get_func(PyList_GetItem);
+        be_get_func(PyList_SetItem);
+        be_get_func(PyList_Insert);
+        be_get_func(PyList_Append);
+        be_get_func(PyList_GetSlice);
+        be_get_func(PyList_SetSlice);
+        be_get_func(PyString_FromString);
+        be_get_func(PyString_FromStringAndSize);
+        be_get_func(PyString_FromFormat);
+        be_get_func(PyString_Size);
+        be_get_func(PyString_AsString);
+        be_get_func(PyString_AsStringAndSize);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)

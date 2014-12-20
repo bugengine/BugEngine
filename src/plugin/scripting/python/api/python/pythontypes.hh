@@ -9,6 +9,11 @@
 extern "C"
 {
 
+#ifdef _LP64
+typedef i64 Py_ssize_t;
+#else
+typedef i64 Py_ssize_t;
+#endif
 struct PyThreadState;
 struct PyObject;
 struct PyTypeObject;
@@ -51,6 +56,21 @@ typedef int (*setattrfunc)(PyObject *, char *, PyObject *);
 typedef int (*cmpfunc)(PyObject *, PyObject *);
 typedef PyObject *(*reprfunc)(PyObject *);
 
+typedef PyObject* (*PyList_NewType)(Py_ssize_t len);
+typedef Py_ssize_t (*PyList_SizeType)(PyObject *list);
+typedef PyObject* (*PyList_GetItemType)(PyObject *list, Py_ssize_t index);
+typedef int (*PyList_SetItemType)(PyObject *list, Py_ssize_t index, PyObject *item);
+typedef int (*PyList_InsertType)(PyObject *list, Py_ssize_t index, PyObject *item);
+typedef int (*PyList_AppendType)(PyObject *list, PyObject *item);
+typedef PyObject* (*PyList_GetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high);
+typedef int (*PyList_SetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high, PyObject *itemlist);
+
+typedef PyObject* (*PyString_FromStringType)(const char *v);
+typedef PyObject* (*PyString_FromStringAndSizeType)(const char *v, Py_ssize_t len);
+typedef PyObject* (*PyString_FromFormatType)(const char *format, ...);
+typedef Py_ssize_t (*PyString_SizeType)(PyObject *string);
+typedef char* (*PyString_AsStringType)(PyObject *string);
+typedef int (*PyString_AsStringAndSizeType)(PyObject *obj, char **buffer, Py_ssize_t *length);
 
 typedef PyObject* _Py_NoneStructType;
 
@@ -131,7 +151,7 @@ struct PyModuleDef
 };
 
 #define Py_INCREF(pyobject) (++pyobject->py_refcount)
-#define Py_DECREF(pyobject) do { if (--pyobject->py_refcount == 0)  } while (0)
+#define Py_DECREF(pyobject) do { if (--pyobject->py_refcount == 0) (void)0; } while (0)
 }
 
 

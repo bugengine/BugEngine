@@ -229,7 +229,8 @@ struct InterlockedType<8>
                               : "cc");
         return result;
     }
-    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& /*condition*/)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
+                                       const tagged_t::tag_t& /*condition*/)
     {
         bool result;
         __asm__ __volatile__("  li %0,0\n"
