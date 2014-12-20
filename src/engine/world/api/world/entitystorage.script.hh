@@ -37,9 +37,9 @@ private:
     };
     struct ComponentStorage
     {
-        u8* memory;
-        u32* backLink;
         SystemAllocator* allocator;
+        byte* memory;
+        byte* backLink;
         u32 current;
         u32 elementSize;
     };
@@ -82,6 +82,7 @@ private:
     ComponentGroup& getComponentGroup(ComponentIndex index);
 
     void buildGroups(const WorldComposition& composition);
+    u32 buildMask(const minitl::array< raw<const RTTI::Class> >& componentList);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index,
                       u32 totalIndex, u32 pageSize);
     u32 store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
@@ -107,9 +108,6 @@ protected:
     ~EntityStorage();
 
     weak<Task::ITask>   initialTask() const;
-
-public:
-    u32 buildMask(const minitl::array< raw<const RTTI::Class> >& componentList);
 };
 
 }}
