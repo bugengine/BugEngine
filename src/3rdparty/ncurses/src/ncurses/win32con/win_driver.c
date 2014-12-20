@@ -670,7 +670,7 @@ drv_init(TERMINAL_CONTROL_BLOCK * TCB)
 	      sizeof(keylist[0]),
 	      rkeycompare);
 
-	a = MapColor(true, COLOR_WHITE) | MapColor(false, COLOR_BLACK);
+    a = MapColor(TRUE, COLOR_WHITE) | MapColor(FALSE, COLOR_BLACK);
 	for (i = 0; i < NUMPAIRS; i++)
 	    PropOf(TCB)->pairs[i] = a;
     }
@@ -690,7 +690,7 @@ drv_initpair(TERMINAL_CONTROL_BLOCK * TCB,
 
     if ((pair > 0) && (pair < NUMPAIRS) && (f >= 0) && (f < 8)
 	&& (b >= 0) && (b < 8)) {
-	PropOf(TCB)->pairs[pair] = MapColor(true, f) | MapColor(false, b);
+    PropOf(TCB)->pairs[pair] = MapColor(TRUE, f) | MapColor(FALSE, b);
     }
 }
 
@@ -956,7 +956,7 @@ drv_twait(TERMINAL_CONTROL_BLOCK * TCB,
 
     memset(&inp_rec, 0, sizeof(inp_rec));
 
-    while (true) {
+    while (TRUE) {
 	GetSystemTimeAsFileTime(&fstart);
 	rc = WaitForSingleObject(TCB->inp, milliseconds);
 	GetSystemTimeAsFileTime(&fend);
