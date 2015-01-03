@@ -142,5 +142,10 @@ void ComponentGroup::removeComponent(Entity e, u32 componentIndex)
     operation->maskRemoved = 1 << componentIndex;
 }
 
+byte* ComponentGroup::allocOperation(u32 componentSize)
+{
+    be_forceuse(componentSize);
+    return 0;
+}
 
 }}
