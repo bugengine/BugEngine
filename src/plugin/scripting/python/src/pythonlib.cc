@@ -54,4 +54,9 @@ int PythonLibrary::getVersion() const
     return m_version;
 }
 
+int PythonLibrary::getApi() const
+{
+    return m_api;
+}
+
 }}

@@ -25,6 +25,7 @@ public:
     void finalize();
 
     int getVersion() const;
+    int getApi() const;
 
     PyThreadState* createThread();
     void destroyThread(PyThreadState* threadState);
@@ -47,6 +48,7 @@ private:
     const char*                     m_pythonLibraryName;
     void*                           m_handle;
     bool                            m_status;
+    int                             m_api;
     int                             m_version;
     PyThreadState*                  m_mainThread;
 private: // friend ThreadLock
@@ -70,6 +72,10 @@ public:
     PyModule_Create2Type            m_PyModule_Create2;
     _Py_NoneStructType              m__Py_NoneStruct;
 
+    PyObject_SetAttrStringType      m_PyObject_SetAttrString;
+    PyObject_GetAttrStringType      m_PyObject_GetAttrString;
+    PyType_ReadyType                m_PyType_Ready;
+
     PyList_NewType                  m_PyList_New;
     PyList_SizeType                 m_PyList_Size;
     PyList_GetItemType              m_PyList_GetItem;
@@ -85,6 +91,10 @@ public:
     PyString_SizeType               m_PyString_Size;
     PyString_AsStringType           m_PyString_AsString;
     PyString_AsStringAndSizeType    m_PyString_AsStringAndSize;
+    
+    PyUnicode_FromStringType         m_PyUnicode_FromString;
+    PyUnicode_FromStringAndSizeType  m_PyUnicode_FromStringAndSize;
+    PyUnicode_FromFormatType         m_PyUnicode_FromFormat;
 };
 
 }}

@@ -82,7 +82,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
                     ? LoadLibraryA(minitl::format<1024u>("%s.dll") | m_pythonLibraryName)
                     : getPythonModuleHandle())
     ,   m_status(m_handle != 0)
-    ,   m_version(1013)
+    ,   m_api(1013)
+    ,   m_version(0)
 {
     if (!m_status)
     {
@@ -110,15 +111,27 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        be_get_func_opt(Py_InitModule4);
-        be_get_func_opt(Py_InitModule4_64);
-        be_get_func_opt(PyModule_Create2);
+        const char* version = (*m_Py_GetVersion());
+        m_version = (version[0]-'0')*10 + (version[2]-'0');
+        if (m_version >= 30)
+        {
+            be_get_func(PyModule_Create2);
+        }
+        else
+        {
+            be_get_func_opt(Py_InitModule4);
+            be_get_func_opt(Py_InitModule4_64);
+        }
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);
         be_get_func(PyEval_AcquireThread);
         be_get_func(PyEval_ReleaseThread);
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
+        be_get_func(_Py_NoneStruct);
+        be_get_func(PyObject_SetAttrString);
+        be_get_func(PyObject_GetAttrString);
+        be_get_func(PyType_Ready);
         be_get_func(PyList_New);
         be_get_func(PyList_Size);
         be_get_func(PyList_GetItem);
@@ -127,13 +140,21 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyList_Append);
         be_get_func(PyList_GetSlice);
         be_get_func(PyList_SetSlice);
-        be_get_func(PyString_FromString);
-        be_get_func(PyString_FromStringAndSize);
-        be_get_func(PyString_FromFormat);
-        be_get_func(PyString_Size);
-        be_get_func(PyString_AsString);
-        be_get_func(PyString_AsStringAndSize);
-        be_get_func(_Py_NoneStruct);
+        if (m_version < 30)
+        {
+            be_get_func(PyString_FromString);
+            be_get_func(PyString_FromStringAndSize);
+            be_get_func(PyString_FromFormat);
+            be_get_func(PyString_Size);
+            be_get_func(PyString_AsString);
+            be_get_func(PyString_AsStringAndSize);
+        }
+        else
+        {
+            be_get_func(PyUnicode_FromString);
+            be_get_func(PyUnicode_FromStringAndSize);
+            be_get_func(PyUnicode_FromFormat);
+        }
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)
