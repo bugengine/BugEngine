@@ -159,6 +159,8 @@ def set_linux_clang_options(self, options, version):
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    if version >= 3.6:
+        v.CXXFLAGS_warnall += ['-Wno-unused-local-typedef']
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
