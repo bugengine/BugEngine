@@ -30,7 +30,7 @@ static PyTypeObject s_bugenginePluginType =
     0,
     0,
     0, /* flags */
-    "BugEngine::Plugin::Plugin",
+    "Wrapper class for the C++ class BugEngine::Plugin::Plugin",
     0,
     0,
     0,
@@ -66,7 +66,10 @@ void PyBugPlugin::registerType(weak<PythonLibrary> library, PyObject* module)
     int result = library->m_PyType_Ready(&s_bugenginePluginType);
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
-    be_forceuse(module);
+    Py_INCREF(&s_bugenginePluginType);
+    result = (*library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_bugenginePluginType);
+    be_assert(result >= 0, "unable to register type");
+    be_forceuse(result);
 }
 
 }}

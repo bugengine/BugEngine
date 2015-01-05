@@ -56,6 +56,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
         }
+        be_get_func(PyModule_AddObject);
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);
         be_get_func(PyEval_AcquireThread);
