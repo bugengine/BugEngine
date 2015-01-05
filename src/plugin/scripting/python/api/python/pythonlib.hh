@@ -70,6 +70,7 @@ public:
     Py_InitModule4Type              m_Py_InitModule4;
     Py_InitModule4_64Type           m_Py_InitModule4_64;
     PyModule_Create2Type            m_PyModule_Create2;
+    PyModule_AddObjectType          m_PyModule_AddObject;
     _Py_NoneStructType              m__Py_NoneStruct;
 
     PyObject_SetAttrStringType      m_PyObject_SetAttrString;

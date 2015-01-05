@@ -38,6 +38,7 @@ typedef PyObject* (*Py_InitModule4_64Type)(const char* name, PyMethodDef* method
                                            const char* doc, PyObject* self, int apiver);
 
 typedef PyObject* (*PyModule_Create2Type)(PyModuleDef* module, int apiver);
+typedef int (*PyModule_AddObjectType)(PyObject* module, const char* name, PyObject* value);
 
 typedef void (*PyEval_InitThreadsType)();
 typedef PyThreadState* (*PyEval_SaveThreadType)();
@@ -68,9 +69,9 @@ typedef int (*printfunc)(PyObject *, FILE*, int);
 typedef int (*cmpfunc)(PyObject*, PyObject*);
 typedef PyObject* (*reprfunc)(PyObject*);
 typedef void (*freefunc)(void*);
-typedef PyObject* (*getattrfunc)(PyObject *, char *);
+typedef PyObject* (*getattrfunc)(PyObject *, const char *);
 typedef PyObject* (*getattrofunc)(PyObject *, PyObject *);
-typedef int (*setattrfunc)(PyObject *, char *, PyObject *);
+typedef int (*setattrfunc)(PyObject *, const char *, PyObject *);
 typedef int (*setattrofunc)(PyObject *, PyObject *, PyObject *);
 typedef Py_hash_t (*hashfunc)(PyObject *);
 typedef PyObject *(*richcmpfunc) (PyObject *, PyObject *, int);
@@ -79,8 +80,8 @@ typedef PyObject *(*iternextfunc) (PyObject *);
 typedef PyObject *(*descrgetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*descrsetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*initproc)(PyObject *, PyObject *, PyObject *);
-typedef PyObject *(*newfunc)(struct _typeobject *, PyObject *, PyObject *);
-typedef PyObject *(*allocfunc)(struct _typeobject *, Py_ssize_t);
+typedef PyObject *(*newfunc)(PyTypeObject*, PyObject *, PyObject *);
+typedef PyObject *(*allocfunc)(PyTypeObject *, Py_ssize_t);
 
 
 typedef int (*PyObject_SetAttrStringType)(PyObject* o, const char* name, PyObject* value);
@@ -236,14 +237,20 @@ struct PyModuleDef
 };
 
 
-#define Py_INCREF(pyobject) (++pyobject->py_refcount)
-#define Py_DECREF(pyobject)                             \
-    do                                                  \
-    {                                                   \
-        if (--pyobject->py_refcount == 0)               \
-        {                                               \
-            pyobject->py_type->tp_dealloc(pyobject);    \
-        }                                               \
+#define Py_INCREF(pyobject)                                                                         \
+    do                                                                                              \
+    {                                                                                               \
+        BugEngine::Python::PyObject* o = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject);  \
+        ++ o->py_refcount;                                                                          \
+    } while (0)
+#define Py_DECREF(pyobject)                                                                         \
+    do                                                                                              \
+    {                                                                                               \
+        BugEngine::Python::PyObject* o = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject);  \
+        if (--o->py_refcount == 0)                                                                  \
+        {                                                                                           \
+            o->py_type->tp_dealloc(o);                                                              \
+        }                                                                                           \
     } while (0)
 
 }}

@@ -17,6 +17,13 @@ struct PyBugObject
     RTTI::Value value;
 
     static void registerType(weak<PythonLibrary> library, PyObject* module);
+
+    static PyObject* create(const RTTI::Value& value);
+    static int init(PyObject* self, PyObject* args, PyObject* kwds);
+    static PyObject* getattr(PyObject* self, const char* name);
+    static int setattr(PyObject* self, const char* name, PyObject* value);
+    static void dealloc(PyObject* self);
+    static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
 };
 
 }}
