@@ -10,7 +10,7 @@
 namespace BugEngine { namespace Python
 {
 
-static ref<BugEngine::Python::PythonLibrary> s_library;
+ref<BugEngine::Python::PythonLibrary> s_library;
 
 static PyMethodDef s_methods[] =
 {
@@ -32,8 +32,8 @@ static PyModuleDef s_module =
 
 void setupModule(PyObject* module)
 {
-    PyBugPlugin::registerType(s_library, module);
-    PyBugObject::registerType(s_library, module);
+    PyBugPlugin::registerType(module);
+    PyBugObject::registerType(module);
 }
 
 }}

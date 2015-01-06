@@ -86,6 +86,9 @@ typedef PyObject *(*allocfunc)(PyTypeObject *, Py_ssize_t);
 
 typedef int (*PyObject_SetAttrStringType)(PyObject* o, const char* name, PyObject* value);
 typedef PyObject* (*PyObject_GetAttrStringType)(PyObject* o, const char* name);
+typedef int (*_PyArg_ParseTuple_SizeTType)(PyObject* args, const char* format, ...);
+typedef int (*_PyArg_ParseTupleAndKeywords_SizeTType)(PyObject* args, PyObject* kw,
+                                                      const char* format, char** kws, ...);
 typedef int (*PyType_ReadyType)(PyTypeObject* type);
 
 typedef PyObject* (*PyList_NewType)(Py_ssize_t len);
