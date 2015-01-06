@@ -29,7 +29,7 @@ static PyTypeObject s_bugengineValueType =
     0,
     0,
     0,
-    0, /* flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
     "Wrapper class for the C++ class BugEngine::RTTI::Value",
     0,
     0,
@@ -95,6 +95,7 @@ void PyBugObject::dealloc(PyObject* self)
     be_forceuse(self);
     PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
     self_->value.~Value();
+    self->py_type->tp_free(self);
 }
 
 PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)

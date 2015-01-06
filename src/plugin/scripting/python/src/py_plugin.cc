@@ -29,7 +29,7 @@ static PyTypeObject s_bugenginePluginType =
     0,
     0,
     0,
-    0, /* flags */
+    Py_TPFLAGS_DEFAULT,
     "Wrapper class for the C++ class BugEngine::Plugin::Plugin",
     0,
     0,
@@ -102,6 +102,7 @@ void PyBugPlugin::dealloc(PyObject* self)
     be_forceuse(self);
     PyBugPlugin* self_ = reinterpret_cast<PyBugPlugin*>(self);
     self_->value.~Plugin();
+    self->py_type->tp_free(self);
 }
 
 void PyBugPlugin::registerType(PyObject* module)
