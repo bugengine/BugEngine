@@ -45,7 +45,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        const char* version = (*m_Py_GetVersion)();
+        const char* version = m_Py_GetVersion();
         m_version = (version[0]-'0')*10 + (version[2]-'0');
         if (m_version >= 30)
         {
