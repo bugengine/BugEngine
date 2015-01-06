@@ -105,13 +105,15 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     return 0;
 }
 
-void PyBugObject::registerType(weak<PythonLibrary> library, PyObject* module)
+void PyBugObject::registerType(PyObject* module)
 {
-    int result = library->m_PyType_Ready(&s_bugengineValueType);
+    int result = s_library->m_PyType_Ready(&s_bugengineValueType);
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
     Py_INCREF(&s_bugengineValueType);
-    result = (*library->m_PyModule_AddObject)(module, "Value", (PyObject*)&s_bugengineValueType);
+    result = (*s_library->m_PyModule_AddObject)(module, "Value", (PyObject*)&s_bugengineValueType);
+    be_assert(result >= 0, "unable to register type");
+    be_forceuse(result);
 }
 
 }}

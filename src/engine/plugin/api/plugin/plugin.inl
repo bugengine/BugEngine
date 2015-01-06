@@ -136,6 +136,7 @@ template< typename T >
 Plugin<T>& Plugin<T>::operator=(Plugin other)
 {
     other.swap(*this);
+    return *this;
 }
 
 template< typename T >

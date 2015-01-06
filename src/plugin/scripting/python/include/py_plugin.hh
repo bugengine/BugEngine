@@ -16,7 +16,13 @@ struct PyBugPlugin
     PyObject                py_object;
     Plugin::Plugin<void>    value;
 
-    static void registerType(weak<PythonLibrary> library, PyObject* module);
+    static void registerType(PyObject* module);
+    
+    static PyObject* create(PyTypeObject* type, PyObject* args, PyObject* kwds);
+    static int init(PyObject* self, PyObject* args, PyObject* kwds);
+    static PyObject* getattr(PyObject* self, const char* name);
+    static int setattr(PyObject* self, const char* name, PyObject* value);
+    static void dealloc(PyObject* self);
 };
 
 }}
