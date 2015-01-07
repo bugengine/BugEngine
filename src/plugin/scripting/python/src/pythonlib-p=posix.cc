@@ -45,7 +45,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        const char* version = (*m_Py_GetVersion)();
+        const char* version = m_Py_GetVersion();
         m_version = (version[0]-'0')*10 + (version[2]-'0');
         if (m_version >= 30)
         {
@@ -92,6 +92,9 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func(PyUnicode_FromStringAndSize);
             be_get_func(PyUnicode_FromFormat);
         }
+        be_get_func(PyBool_FromLong);
+        be_get_func(PyInt_FromLong);
+        be_get_func(PyFloat_FromDouble);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)

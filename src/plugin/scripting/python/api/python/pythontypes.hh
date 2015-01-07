@@ -111,6 +111,9 @@ typedef PyObject* (*PyUnicode_FromStringType)(const char *v);
 typedef PyObject* (*PyUnicode_FromStringAndSizeType)(const char *v, Py_ssize_t len);
 typedef PyObject* (*PyUnicode_FromFormatType)(const char *format, ...);
 
+typedef PyObject* (*PyBool_FromLongType)(long value);
+typedef PyObject* (*PyInt_FromLongType)(long value);
+typedef PyObject* (*PyFloat_FromDoubleType)(double value);
 typedef PyObject* _Py_NoneStructType;
 
 struct PyObject
@@ -124,6 +127,51 @@ struct PyVarObject
     PyObject    object;
     Py_ssize_t  ob_size;
 };
+
+#define Py_TPFLAGS_HAVE_GETCHARBUFFER  (1L<<0)
+#define Py_TPFLAGS_HAVE_SEQUENCE_IN (1L<<1)
+#define Py_TPFLAGS_HAVE_INPLACEOPS (1L<<3)
+#define Py_TPFLAGS_CHECKTYPES (1L<<4)
+#define Py_TPFLAGS_HAVE_RICHCOMPARE (1L<<5)
+#define Py_TPFLAGS_HAVE_WEAKREFS (1L<<6)
+#define Py_TPFLAGS_HAVE_ITER (1L<<7)
+#define Py_TPFLAGS_HAVE_CLASS (1L<<8)
+#define Py_TPFLAGS_HEAPTYPE (1L<<9)
+#define Py_TPFLAGS_BASETYPE (1L<<10)
+#define Py_TPFLAGS_READY (1L<<12)
+#define Py_TPFLAGS_READYING (1L<<13)
+#define Py_TPFLAGS_HAVE_GC (1L<<14)
+
+#define Py_TPFLAGS_HAVE_INDEX (1L<<17)
+#define Py_TPFLAGS_HAVE_VERSION_TAG   (1L<<18)
+#define Py_TPFLAGS_VALID_VERSION_TAG  (1L<<19)
+#define Py_TPFLAGS_IS_ABSTRACT (1L<<20)
+#define Py_TPFLAGS_HAVE_NEWBUFFER (1L<<21)
+
+/* These flags are used to determine if a type is a subclass. */
+#define Py_TPFLAGS_INT_SUBCLASS         (1L<<23)
+#define Py_TPFLAGS_LONG_SUBCLASS        (1L<<24)
+#define Py_TPFLAGS_LIST_SUBCLASS        (1L<<25)
+#define Py_TPFLAGS_TUPLE_SUBCLASS       (1L<<26)
+#define Py_TPFLAGS_STRING_SUBCLASS      (1L<<27)
+#define Py_TPFLAGS_UNICODE_SUBCLASS     (1L<<28)
+#define Py_TPFLAGS_DICT_SUBCLASS        (1L<<29)
+#define Py_TPFLAGS_BASE_EXC_SUBCLASS    (1L<<30)
+#define Py_TPFLAGS_TYPE_SUBCLASS        (1L<<31)
+
+#define Py_TPFLAGS_DEFAULT ( \
+                 Py_TPFLAGS_HAVE_GETCHARBUFFER | \
+                 Py_TPFLAGS_HAVE_SEQUENCE_IN | \
+                 Py_TPFLAGS_HAVE_INPLACEOPS | \
+                 Py_TPFLAGS_HAVE_RICHCOMPARE | \
+                 Py_TPFLAGS_HAVE_WEAKREFS | \
+                 Py_TPFLAGS_HAVE_ITER | \
+                 Py_TPFLAGS_HAVE_CLASS | \
+                 Py_TPFLAGS_HAVE_INDEX | \
+                 0)
+
+
+
 
 struct PyTypeObject
 {
