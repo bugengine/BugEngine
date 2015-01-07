@@ -4,6 +4,7 @@
 #include    <python/stdafx.h>
 #include    <python/pythonlib.hh>
 #include    <py_plugin.hh>
+#include    <py_object.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -84,9 +85,17 @@ int PyBugPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
 
 PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
 {
-    be_forceuse(self);
-    be_forceuse(name);
-    return 0;
+    PyBugPlugin* self_ = reinterpret_cast<PyBugPlugin*>(self);
+    if (self_->value)
+    {
+        RTTI::Value v(self_->value.pluginNamespace());
+        return PyBugObject::create(v[name]);
+    }
+    else
+    {
+        be_notreached();
+        return 0;
+    }
 }
 
 int PyBugPlugin::setattr(PyObject* self, const char* name, PyObject* value)
