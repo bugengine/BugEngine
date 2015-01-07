@@ -98,6 +98,10 @@ public:
     PyUnicode_FromStringType                m_PyUnicode_FromString;
     PyUnicode_FromStringAndSizeType         m_PyUnicode_FromStringAndSize;
     PyUnicode_FromFormatType                m_PyUnicode_FromFormat;
+
+    PyBool_FromLongType                     m_PyBool_FromLong;
+    PyInt_FromLongType                      m_PyInt_FromLong;
+    PyInt_FromLongType                      m_PyFloat_FromDouble;
 };
 
 extern ref<PythonLibrary> s_library;
