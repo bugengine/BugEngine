@@ -100,7 +100,8 @@ public:
     PyUnicode_FromFormatType                m_PyUnicode_FromFormat;
 
     PyBool_FromLongType                     m_PyBool_FromLong;
-    PyInt_FromLongType                      m_PyInt_FromLong;
+    PyLong_FromLongType                     m_PyLong_FromLong;
+    PyLong_FromSsize_tType                  m_PyLong_FromSsize_t;
     PyFloat_FromDoubleType                  m_PyFloat_FromDouble;
 };
 

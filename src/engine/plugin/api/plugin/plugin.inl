@@ -82,6 +82,15 @@ namespace BugEngine { namespace Plugin
     BE_PLUGIN_REGISTER_CREATE(&create)
 
 template< typename T >
+Plugin<T>::Plugin()
+    :   m_name("")
+    ,   m_dynamicObject()
+    ,   m_interface(0)
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
+{
+}
+
+template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     :   m_name(pluginName)
     ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugin"))
@@ -116,9 +125,12 @@ Plugin<T>::~Plugin()
             be_assert(destroy, "could not load method be_destroyPlugin");
             (*destroy)(m_interface);
         }
-        m_dynamicObject->~DynamicObject();
+        if (m_dynamicObject)
+        {
+            m_dynamicObject->~DynamicObject();
+            Arena::general().free(m_dynamicObject);
+        }
         Arena::general().free(m_refCount);
-        Arena::general().free(m_dynamicObject);
     }
 }
 
@@ -151,7 +163,7 @@ void Plugin<T>::swap(Plugin& other)
 template< typename T >
 raw<const RTTI::Class> Plugin<T>::pluginNamespace() const
 {
-    if (*m_dynamicObject)
+    if (m_dynamicObject && *m_dynamicObject)
     {
         GetPluginNamespace* getNamespace = m_dynamicObject->getSymbol<GetPluginNamespace>("be_pluginNamespace");
         if (getNamespace)
