@@ -20,7 +20,7 @@ static PyTypeObject s_bugenginePluginType =
     &PyBugPlugin::getattr,
     &PyBugPlugin::setattr,
     0,
-    0,
+    &PyBugPlugin::repr,
     0,
     0,
     0,
@@ -64,7 +64,7 @@ static PyTypeObject s_bugenginePluginType =
 PyObject* PyBugPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)
 {
     PyBugPlugin* self = reinterpret_cast<PyBugPlugin*>(type->tp_alloc(type, 0));
-    new (&self->value) Plugin::Plugin<void>("", Plugin::Plugin<void>::Preload);
+    new (&self->value) Plugin::Plugin<void>();
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -93,7 +93,7 @@ PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
     }
     else
     {
-        be_notreached();
+        /* TODO: exception */
         return 0;
     }
 }
@@ -104,6 +104,19 @@ int PyBugPlugin::setattr(PyObject* self, const char* name, PyObject* value)
     be_forceuse(name);
     be_forceuse(value);
     return 0;
+}
+
+PyObject* PyBugPlugin::repr(PyObject *self)
+{
+    PyBugPlugin* self_ = reinterpret_cast<PyBugPlugin*>(self);
+    if (s_library->getVersion() >= 3)
+    {
+        return s_library->m_PyUnicode_FromFormat("[plugin %s]", self_->value.name().str().name);
+    }
+    else
+    {
+        return s_library->m_PyString_FromFormat("[plugin %s]", self_->value.name().str().name);
+    }
 }
 
 void PyBugPlugin::dealloc(PyObject* self)

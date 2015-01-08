@@ -48,6 +48,7 @@ private:
 public:
     enum PreloadType { Preload };
 public:
+    Plugin();
     Plugin(const inamespace &pluginName, PreloadType preload);
     Plugin(const inamespace &pluginName, const Context& context);
     Plugin(const Plugin& other);
@@ -56,8 +57,10 @@ public:
 
     Interface* operator->()             { return m_interface; }
     const Interface* operator->() const { return m_interface; }
-    operator const void*() const        { return (const void*)m_dynamicObject; }
-    bool operator!() const              { return !m_dynamicObject; }
+    operator const void*() const        { return m_dynamicObject ?
+                                                m_dynamicObject->operator const void *()
+                                            :   0; }
+    bool operator!() const              { return !m_dynamicObject || !*m_dynamicObject; }
 
     raw<const RTTI::Class> pluginNamespace() const;
     const inamespace& name() const { return m_name; }
