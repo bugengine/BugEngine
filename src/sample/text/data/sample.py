@@ -1,3 +1,5 @@
 import py_bugengine
-print(py_bugengine.Value.__name__)
-print(py_bugengine.Plugin.__name__)
+p = py_bugengine.Plugin('sample.text')
+print(p)
+print(p.BugEngine)
+print(p.BugEngine.BugEngine)
