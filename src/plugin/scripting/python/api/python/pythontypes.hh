@@ -112,7 +112,8 @@ typedef PyObject* (*PyUnicode_FromStringAndSizeType)(const char *v, Py_ssize_t l
 typedef PyObject* (*PyUnicode_FromFormatType)(const char *format, ...);
 
 typedef PyObject* (*PyBool_FromLongType)(long value);
-typedef PyObject* (*PyInt_FromLongType)(long value);
+typedef PyObject* (*PyLong_FromLongType)(long value);
+typedef PyObject* (*PyLong_FromSsize_tType)(Py_ssize_t value);
 typedef PyObject* (*PyFloat_FromDoubleType)(double value);
 typedef PyObject* _Py_NoneStructType;
 

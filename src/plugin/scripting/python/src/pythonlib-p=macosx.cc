@@ -94,7 +94,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func(PyUnicode_FromFormat);
         }
         be_get_func(PyBool_FromLong);
-        be_get_func(PyInt_FromLong);
+        be_get_func(PyLong_FromLong);
+        be_get_func(PyLong_FromSsize_t);
         be_get_func(PyFloat_FromDouble);
 #       undef be_get_fun
 #       undef be_get_fun_opt
