@@ -212,7 +212,7 @@ PyObject* PyBugObject::repr(PyObject *self)
             break;
     }
     const char* access = (v.type().access == RTTI::Type::Const) ? "const " : "";
-    if (s_library->getVersion() >= 3)
+    if (s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat("[%s%s%s%s%s object @0x%p]",
                                                  constness, reference, access,
