@@ -68,7 +68,7 @@ raw<const Method> Class::getMethod(istring name) const
     return m;
 }
 
-Value Class::get(Value& from, istring propname) const
+Value Class::get(Value& from, istring propname, bool& found) const
 {
     static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
     if (from.type().metaclass == s_metaClass)
@@ -78,6 +78,7 @@ Value Class::get(Value& from, istring propname) const
         {
             if (o->name == propname)
             {
+                found = true;
                 return o->value;
             }
             o = o->next;
@@ -87,6 +88,7 @@ Value Class::get(Value& from, istring propname) const
         {
             if (m->name == propname)
             {
+                found = true;
                 return Value(m);
             }
             m = m->next;
@@ -99,6 +101,7 @@ Value Class::get(Value& from, istring propname) const
         {
             if (p->name == propname)
             {
+                found = true;
                 return p->get(from);
             }
             p = p->next;
@@ -111,13 +114,14 @@ Value Class::get(Value& from, istring propname) const
         {
             if (m->name == propname)
             {
+                found = true;
                 return Value(m);
             }
             m = m->next;
         }
     }
 
-    //be_error("unable to access member %s in class %s" | propname | from.type().metaclass->name);
+    found = false;
     return Value();
 }
 

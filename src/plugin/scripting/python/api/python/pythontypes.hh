@@ -117,6 +117,15 @@ typedef PyObject* (*PyLong_FromSsize_tType)(Py_ssize_t value);
 typedef PyObject* (*PyFloat_FromDoubleType)(double value);
 typedef PyObject* _Py_NoneStructType;
 
+typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message);
+typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
+
+
+typedef PyTypeObject** PyExc_ExceptionType;
+typedef PyTypeObject** PyExc_AttributeErrorType;
+typedef PyTypeObject** PyExc_ImportErrorType;
+typedef PyTypeObject** PyExc_IndexErrorType;
+
 struct PyObject
 {
     minitl::size_type   py_refcount;

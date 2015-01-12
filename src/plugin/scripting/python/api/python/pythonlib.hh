@@ -103,6 +103,14 @@ public:
     PyLong_FromLongType                     m_PyLong_FromLong;
     PyLong_FromSsize_tType                  m_PyLong_FromSsize_t;
     PyFloat_FromDoubleType                  m_PyFloat_FromDouble;
+
+    PyErr_SetStringType                     m_PyErr_SetString;
+    PyErr_FormatType                        m_PyErr_Format;
+    
+    PyExc_ExceptionType                     m_PyExc_Exception;
+    PyExc_AttributeErrorType                m_PyExc_AttributeError;
+    PyExc_ImportErrorType                   m_PyExc_ImportError;
+    PyExc_IndexErrorType                    m_PyExc_IndexError;
 };
 
 extern ref<PythonLibrary> s_library;

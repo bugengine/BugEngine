@@ -155,14 +155,17 @@ int PyBugObject::init(PyObject* self, PyObject* args, PyObject* kwds)
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 {
     PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
-    RTTI::Value v = self_->value[name];
-    if (v)
+    bool found;
+    RTTI::Value v = self_->value.type().metaclass->get(self_->value, name, found);
+    if (found)
     {
         return create(v);
     }
     else
     {
-        be_assert(false, "TODO");
+        s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
+                                  "object of type %s has no attrobute %s",
+                                  self_->value.type().name().c_str(), name);
         return NULL;
     }
 }
