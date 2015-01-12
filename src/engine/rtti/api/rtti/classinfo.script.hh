@@ -69,7 +69,7 @@ published:
     Value getTag(const Type& type) const;
     Value getTag(raw<const Class> type) const;
 
-    Value get(Value& from, istring name) const;
+    Value get(Value& from, istring name, bool& found) const;
 
     bool isA(raw<const Class> klass) const;
 

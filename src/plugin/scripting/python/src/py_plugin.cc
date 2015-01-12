@@ -93,7 +93,9 @@ PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
     }
     else
     {
-        /* TODO: exception */
+        s_library->m_PyErr_Format(*s_library->m_PyExc_Exception,
+                                  "while retrieving property %s: plugin %s failed to load",
+                                  name, self_->value.name().str().name);
         return 0;
     }
 }
@@ -121,7 +123,6 @@ PyObject* PyBugPlugin::repr(PyObject *self)
 
 void PyBugPlugin::dealloc(PyObject* self)
 {
-    be_forceuse(self);
     PyBugPlugin* self_ = reinterpret_cast<PyBugPlugin*>(self);
     self_->value.~Plugin();
     self->py_type->tp_free(self);
@@ -131,7 +132,6 @@ void PyBugPlugin::registerType(PyObject* module)
 {
     int result = s_library->m_PyType_Ready(&s_bugenginePluginType);
     be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
     Py_INCREF(&s_bugenginePluginType);
     result = (*s_library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_bugenginePluginType);
     be_assert(result >= 0, "unable to register type");

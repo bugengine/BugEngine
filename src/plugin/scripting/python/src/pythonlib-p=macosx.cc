@@ -97,6 +97,12 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyLong_FromLong);
         be_get_func(PyLong_FromSsize_t);
         be_get_func(PyFloat_FromDouble);
+        be_get_func(PyErr_SetString);
+        be_get_func(PyErr_Format);
+        be_get_func(PyExc_Exception);
+        be_get_func(PyExc_AttributeError);
+        be_get_func(PyExc_ImportError);
+        be_get_func(PyExc_IndexError);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)

@@ -106,7 +106,8 @@ void Value::store(const void* src)
 
 Value Value::operator[](const istring& name)
 {
-    return m_type.metaclass->get(*this, name);
+    bool found;
+    return m_type.metaclass->get(*this, name, found);
 }
 
 Value Value::operator()(Value params[], u32 paramCount)
