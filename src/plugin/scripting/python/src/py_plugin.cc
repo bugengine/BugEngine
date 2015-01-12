@@ -111,9 +111,10 @@ int PyBugPlugin::setattr(PyObject* self, const char* name, PyObject* value)
 PyObject* PyBugPlugin::repr(PyObject *self)
 {
     PyBugPlugin* self_ = reinterpret_cast<PyBugPlugin*>(self);
-    if (s_library->getVersion() >= 3)
+    if (s_library->getVersion() >= 30)
     {
-        return s_library->m_PyUnicode_FromFormat("[plugin %s]", self_->value.name().str().name);
+        PyUnicode_FromFormatType f = s_library->m_PyUnicode_FromFormat;
+        return f("[plugin %s]", self_->value.name().str().name);
     }
     else
     {
