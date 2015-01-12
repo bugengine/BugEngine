@@ -289,7 +289,7 @@ void EntityStorage::registerType(raw<const RTTI::Class> componentType, u32 group
     be_assert(!getComponentIndex(componentType),
               "component type %s is registered twice" | componentType->fullname());
     be_info("component %s: using %s kB pages" | componentType->name | 1 << (pageSize*2 + 2));
-    be_assert((&m_allocator4k)[pageSize].blockSize() == 1 << (pageSize*2 + 12),
+    be_assert((&m_allocator4k)[pageSize].blockSize() == 1u << (pageSize*2 + 12),
               "invalid allocator for block size %d kB" | 1 << (pageSize*2 + 2));
     ComponentInfo& info = m_componentTypes[absoluteIndex];
     info.first = componentType;
