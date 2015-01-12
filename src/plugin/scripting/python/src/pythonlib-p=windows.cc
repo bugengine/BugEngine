@@ -40,10 +40,10 @@ static HMODULE getPythonModuleHandle()
         }
         FreeLibrary(h);
 
-        for (u32 i = 0; i < modules.count(); ++i)
+        for (u64 i = modules.count(); i > 0; --i)
         {
             char filename[1024];
-            DWORD len = GetModuleFileNameA(modules[i], filename, sizeof(filename));
+            DWORD len = GetModuleFileNameA(modules[i-1], filename, sizeof(filename));
             if (len)
             {
                 char *f = filename + len;
@@ -57,7 +57,7 @@ static HMODULE getPythonModuleHandle()
                 }
                 if (strncmp(f, "python", 6) == 0)
                 {
-                    return modules[i];
+                    return modules[i-1];
                 }
             }
             else
@@ -111,7 +111,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        const char* version = (*m_Py_GetVersion());
+        const char* version = m_Py_GetVersion();
         m_version = (version[0]-'0')*10 + (version[2]-'0');
         if (m_version >= 30)
         {
