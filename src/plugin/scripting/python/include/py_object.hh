@@ -19,6 +19,7 @@ struct PyBugObject
     static void registerType(PyObject* module);
 
     static PyObject* create(const RTTI::Value& value);
+    static bool unpack(PyObject* value, const RTTI::Type& desiredType, void* where);
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* getattr(PyObject* self, const char* name);
     static int setattr(PyObject* self, const char* name, PyObject* value);

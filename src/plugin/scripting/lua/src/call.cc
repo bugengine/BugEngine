@@ -319,7 +319,7 @@ CallInfo::~CallInfo()
     }
 }
 
-CallInfo* CallInfo::findOverload(lua_State *state, BugEngine::Lua::CallInfo *overloads, u32 overloadCount)
+CallInfo* CallInfo::findOverload(lua_State *state, CallInfo *overloads, u32 overloadCount)
 {
     u32 nargs = lua_gettop(state) - 1;
     for (u32 arg = 0; arg < nargs; ++arg)
