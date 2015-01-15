@@ -5,6 +5,7 @@
 #include    <python/pythonlib.hh>
 #include    <py_object.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -212,7 +213,7 @@ PyObject* PyBugObject::repr(PyObject *self)
             break;
     }
     const char* access = (v.type().access == RTTI::Type::Const) ? "const " : "";
-    if (s_library->getVersion() >= 3)
+    if (s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat("[%s%s%s%s%s object @0x%p]",
                                                  constness, reference, access,
@@ -230,18 +231,162 @@ PyObject* PyBugObject::repr(PyObject *self)
 
 void PyBugObject::dealloc(PyObject* self)
 {
-    be_forceuse(self);
     PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
     self_->value.~Value();
     self->py_type->tp_free(self);
 }
 
+struct ArgInfo
+{
+    istring const       name;
+    PyTypeObject* const pythonType;
+    RTTI::Type const    bugengineType;
+
+    ArgInfo(PyObject* object);
+    ArgInfo(const istring name, PyObject* object);
+    void unpack(const RTTI::Type& type, RTTI::Value* buffer) const;
+};
+
+static const u32 s_maxDistance = (u32)-1;
+
+static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI::Method::Overload::Parameter> parameters,
+                                                                  const istring name)
+{
+    raw<const RTTI::Method::Overload::Parameter> result = { 0 };
+    for (raw<const RTTI::Method::Overload::Parameter> result = parameters;
+         result && result->name != name;
+         result = result->next)
+    {
+        /* nothing */
+    }
+    return result;
+}
+
+static void unpackValues(raw<const RTTI::Method::Overload> overload, const ArgInfo args[],
+                         u32 unnamedArgCount, RTTI::Value* buffer)
+{
+    raw<const RTTI::Method::Overload::Parameter> p = overload->params;
+    for (u32 i = 0; i < unnamedArgCount; ++i, p = p->next)
+    {
+         args[i].unpack(p->type, &buffer[i]);
+    }
+    for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
+    {
+        raw<const RTTI::Method::Overload::Parameter> namedParameter = findParameter(p, args[i].name);
+        args[i].unpack(namedParameter->type, &buffer[i]);
+    }
+}
+
+static u32 distance(PyTypeObject* pythonType, const RTTI::Type& bugengineType,
+                    const RTTI::Type& desiredType)
+{
+    be_forceuse(pythonType);
+    be_forceuse(bugengineType);
+    be_forceuse(desiredType);
+    return s_maxDistance;
+}
+
+static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u32 unnamedArgCount)
+{
+    raw<const RTTI::Method::Overload::Parameter> param = overload->params;
+    u32 result = 0;
+    for (u32 i = 0; i < unnamedArgCount; ++i)
+    {
+        u32 argDistance = distance(args[i].pythonType, args[i].bugengineType, param->type);
+        result += argDistance;
+        if (argDistance == s_maxDistance)
+        {
+            return s_maxDistance;
+        }
+    }
+    for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
+    {
+        raw<const RTTI::Method::Overload::Parameter> namedParam = findParameter(param, args[i].name);
+        if (namedParam)
+        {
+            u32 argDistance = distance(args[i].pythonType, args[i].bugengineType, param->type);
+            result += argDistance;
+            if (argDistance == s_maxDistance)
+            {
+                return s_maxDistance;
+            }
+        }
+        else
+        {
+            return s_maxDistance;
+        }
+    }
+    return result;
+}
+
+static PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
+{
+    be_forceuse(kwargs);
+    u32 unnamedArgCount = s_library->m_PyList_Size(args);
+    u32 argCount = unnamedArgCount; // + s_library->m_PyDict_Size(kwargs);
+    ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo*));
+    for (u32 i = 0; i < unnamedArgCount; ++i)
+    {
+        new (&argInfos[i]) ArgInfo(s_library->m_PyList_GetItem(args, i));
+    }
+    /* for i until argCount do named args */
+    raw<const RTTI::Method::Overload> o = method->overloads;
+    u32 bestDistance = (u32)-1;
+    raw<const RTTI::Method::Overload> bestOverload = { 0 };
+    while (o)
+    {
+        if (o->parameterCount == argCount)
+        {
+            u32 d = distance(o, argInfos, unnamedArgCount);
+            if (d < bestDistance)
+            {
+                bestDistance = d;
+                bestOverload = o;
+            }
+        }
+        o = o->next;
+    }
+    for (u32 i = argCount; i > 0; --i)
+    {
+        argInfos[i-1].~ArgInfo();
+    }
+    freea(args);
+    if (o)
+    {
+        RTTI::Value* values = (RTTI::Value*)malloca(argCount * sizeof(RTTI::Value));
+        unpackValues(o, argInfos, unnamedArgCount, values);
+        RTTI::Value v = o->call(values, o->parameterCount);
+        for (int i = argCount-1; i >= 0; --i)
+        {
+            values[i].~Value();
+        }
+        freea(values);
+        return PyBugObject::create(v);
+    }
+    else
+    {
+        // TODO: bad arg exception
+        return 0;
+    }
+}
+
 PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    be_forceuse(self);
-    be_forceuse(args);
-    be_forceuse(kwds);
-    return 0;
+    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    static const istring callName("?call");
+    RTTI::Value v(self_->value[callName]);
+    if (!v)
+    {
+        s_library->m_PyErr_Format(*s_library->m_PyExc_Exception,
+                                  "%s object is not callable",
+                                  v.type().name().c_str());
+        return 0;
+    }
+    else
+    {
+        raw<const RTTI::Method> method = v.as< raw<const RTTI::Method> >();
+        return Python::call(method, args, kwds);
+    }
 }
 
 void PyBugObject::registerType(PyObject* module)

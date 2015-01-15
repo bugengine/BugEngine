@@ -14,7 +14,11 @@ Value::Value(const Value& other)
 :   m_type(other.m_type)
 ,   m_reference(other.m_reference)
 {
-    m_ref.m_pointer = other.m_reference ? other.m_ref.m_pointer : (m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0);
+    m_ref.m_pointer = other.m_reference
+            ? other.m_ref.m_pointer
+            : (m_type.size() > sizeof(m_buffer)
+                ? Arena::script().alloc(m_type.size())
+                : 0);
     m_ref.m_deallocate = other.m_reference ? false : (m_ref.m_pointer != 0);
     if (!m_reference)
     {
