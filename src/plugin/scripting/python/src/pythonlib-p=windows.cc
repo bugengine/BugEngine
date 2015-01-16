@@ -143,6 +143,17 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyList_Append);
         be_get_func(PyList_GetSlice);
         be_get_func(PyList_SetSlice);
+        be_get_func(PyTuple_New);
+        be_get_func(PyTuple_Size);
+        be_get_func(PyTuple_GetItem);
+        be_get_func(PyTuple_SetItem);
+        be_get_func(PyTuple_GetSlice);
+        be_get_func(PyDict_New);
+        be_get_func(PyDict_Size);
+        be_get_func(PyDict_GetItem);
+        be_get_func(PyDict_SetItem);
+        be_get_func(PyDict_DelItem);
+        be_get_func(PyDict_Next);
         if (m_version < 30)
         {
             be_get_func(PyString_FromString);
