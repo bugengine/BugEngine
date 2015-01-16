@@ -100,6 +100,19 @@ typedef int (*PyList_AppendType)(PyObject *list, PyObject *item);
 typedef PyObject* (*PyList_GetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high);
 typedef int (*PyList_SetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high, PyObject *itemlist);
 
+typedef PyObject* (*PyTuple_NewType)(Py_ssize_t len);
+typedef Py_ssize_t (*PyTuple_SizeType)(PyObject *tuple);
+typedef PyObject* (*PyTuple_GetItemType)(PyObject *tuple, Py_ssize_t index);
+typedef int (*PyTuple_SetItemType)(PyObject *list, Py_ssize_t index, PyObject *item);
+typedef PyObject* (*PyTuple_GetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high);
+
+typedef PyObject* (*PyDict_NewType)();
+typedef Py_ssize_t (*PyDict_SizeType)(PyObject *dict);
+typedef PyObject* (*PyDict_GetItemType)(PyObject* dict, PyObject* key);
+typedef int (*PyDict_SetItemType)(PyObject* dict, PyObject* key, PyObject* item);
+typedef int (*PyDict_DelItemType)(PyObject* dict, PyObject* key);
+typedef int (*PyDict_NextType)(PyObject* dict, Py_ssize_t* pos, PyObject** key, PyObject** item);
+
 typedef PyObject* (*PyString_FromStringType)(const char *v);
 typedef PyObject* (*PyString_FromStringAndSizeType)(const char *v, Py_ssize_t len);
 typedef PyObject* (*PyString_FromFormatType)(const char *format, ...);

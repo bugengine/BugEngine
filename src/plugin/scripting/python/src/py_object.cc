@@ -239,13 +239,29 @@ void PyBugObject::dealloc(PyObject* self)
 struct ArgInfo
 {
     istring const       name;
+    PyObject* const     arg;
     PyTypeObject* const pythonType;
     RTTI::Type const    bugengineType;
 
     ArgInfo(PyObject* object);
     ArgInfo(const istring name, PyObject* object);
-    void unpack(const RTTI::Type& type, RTTI::Value* buffer) const;
 };
+
+ArgInfo::ArgInfo(PyObject* object)
+    :   name("")
+    ,   arg(object)
+    ,   pythonType(object->py_type)
+    ,   bugengineType()
+{
+}
+
+ArgInfo::ArgInfo(const istring name, PyObject* object)
+    :   name(name)
+    ,   arg(object)
+    ,   pythonType(object->py_type)
+    ,   bugengineType()
+{
+}
 
 static const u32 s_maxDistance = (u32)-1;
 
@@ -262,18 +278,24 @@ static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI
     return result;
 }
 
+static void unpackValue(const ArgInfo& arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_forceuse(arg);
+    new (buffer) RTTI::Value(type, RTTI::Value::Reserve);
+}
+
 static void unpackValues(raw<const RTTI::Method::Overload> overload, const ArgInfo args[],
                          u32 unnamedArgCount, RTTI::Value* buffer)
 {
     raw<const RTTI::Method::Overload::Parameter> p = overload->params;
     for (u32 i = 0; i < unnamedArgCount; ++i, p = p->next)
     {
-         args[i].unpack(p->type, &buffer[i]);
+         unpackValue(args[i], p->type, &buffer[i]);
     }
     for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
     {
         raw<const RTTI::Method::Overload::Parameter> namedParameter = findParameter(p, args[i].name);
-        args[i].unpack(namedParameter->type, &buffer[i]);
+        unpackValue(args[i], namedParameter->type, &buffer[i]);
     }
 }
 
@@ -322,8 +344,8 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
 static PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
 {
     be_forceuse(kwargs);
-    u32 unnamedArgCount = s_library->m_PyList_Size(args);
-    u32 argCount = unnamedArgCount; // + s_library->m_PyDict_Size(kwargs);
+    const u32 unnamedArgCount = s_library->m_PyTuple_Size(args);
+    const u32 argCount = unnamedArgCount + s_library->m_PyDict_Size(kwargs);
     ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo*));
     for (u32 i = 0; i < unnamedArgCount; ++i)
     {
@@ -398,6 +420,11 @@ void PyBugObject::registerType(PyObject* module)
     result = (*s_library->m_PyModule_AddObject)(module, "Value", (PyObject*)&s_bugengineValueType);
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
+    result = (*s_library->m_PyModule_AddObject)(module, "BugEngine",
+                                                create(RTTI::Value(be_game_Namespace())));
+    be_assert(result >= 0, "unable to register type");
+    be_forceuse(result);
+
 }
 
 }}
