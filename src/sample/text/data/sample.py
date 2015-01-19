@@ -1,3 +1,3 @@
 from py_bugengine import BugEngine
 
-BugEngine.help(BugEngine.RTTI.Class)
+BugEngine.help(**{'klass':BugEngine.RTTI.Class})

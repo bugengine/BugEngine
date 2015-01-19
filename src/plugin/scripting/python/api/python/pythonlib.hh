@@ -111,6 +111,10 @@ public:
     PyUnicode_FromStringType                m_PyUnicode_FromString;
     PyUnicode_FromStringAndSizeType         m_PyUnicode_FromStringAndSize;
     PyUnicode_FromFormatType                m_PyUnicode_FromFormat;
+    PyUnicode_AsUTF8Type                    m_PyUnicode_AsUTF8;
+    PyUnicode_AsUTF8StringType              m_PyUnicode_AsUTF8String;
+    PyUnicode_AsASCIIStringType             m_PyUnicode_AsASCIIString;
+    PyBytes_AsStringType                    m_PyBytes_AsString;
 
     PyBool_FromLongType                     m_PyBool_FromLong;
     PyLong_FromLongType                     m_PyLong_FromLong;
