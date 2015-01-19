@@ -123,6 +123,10 @@ typedef int (*PyString_AsStringAndSizeType)(PyObject *obj, char **buffer, Py_ssi
 typedef PyObject* (*PyUnicode_FromStringType)(const char *v);
 typedef PyObject* (*PyUnicode_FromStringAndSizeType)(const char *v, Py_ssize_t len);
 typedef PyObject* (*PyUnicode_FromFormatType)(const char *format, ...);
+typedef char* (*PyUnicode_AsUTF8Type)(PyObject* unicode);
+typedef PyObject* (*PyUnicode_AsASCIIStringType)(PyObject* unicode);
+typedef PyObject* (*PyUnicode_AsUTF8StringType)(PyObject* unicode);
+typedef char* (*PyBytes_AsStringType)(PyObject* bytes);
 
 typedef PyObject* (*PyBool_FromLongType)(long value);
 typedef PyObject* (*PyLong_FromLongType)(long value);
