@@ -36,10 +36,22 @@ static RTTI::Type getTypeFromPyObject(PyObject* object)
     }
 }
 
+static PyTypeObject* getPyTypeFromPyObject(PyObject* object)
+{
+    if (object->py_type == &PyBugObject::s_pyType)
+    {
+        return 0;
+    }
+    else
+    {
+        return object->py_type;
+    }
+}
+
 ArgInfo::ArgInfo(PyObject* object)
     :   name("")
     ,   arg(object)
-    ,   pythonType(object->py_type)
+    ,   pythonType(getPyTypeFromPyObject(object))
     ,   bugengineType(getTypeFromPyObject(object))
 {
 }
@@ -47,7 +59,7 @@ ArgInfo::ArgInfo(PyObject* object)
 ArgInfo::ArgInfo(const istring name, PyObject* object)
     :   name(name)
     ,   arg(object)
-    ,   pythonType(object->py_type)
+    ,   pythonType(getPyTypeFromPyObject(object))
     ,   bugengineType(getTypeFromPyObject(object))
 {
 }
@@ -67,9 +79,39 @@ static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI
 
 static void unpackValue(const ArgInfo& arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
-    be_forceuse(arg);
-    
-    new (buffer) RTTI::Value(type, RTTI::Value::Reserve);
+    if (arg.pythonType)
+    {
+        switch(type.metaclass->type())
+        {
+        case RTTI::ClassType_Array:
+            /* unpack sequences */
+            break;
+        case RTTI::ClassType_Enum:
+        case RTTI::ClassType_Integer:
+            /* unpack integer */
+            break;
+        case RTTI::ClassType_String:
+            break;
+        case RTTI::ClassType_Object:
+        case RTTI::ClassType_Struct:
+        case RTTI::ClassType_Pod:
+            /* unpack object */
+            break;
+        case RTTI::ClassType_Variant:
+            
+        default:
+            be_notreached();
+        }
+    }
+    else
+    {
+        PyBugObject* object = reinterpret_cast<PyBugObject*>(arg.arg);
+        be_assert(type <= object->value.type(),
+                  "incompatible types: %s is not compatible with %s"
+                    | object->value.type().name().c_str()
+                    | type.name().c_str());
+        new (buffer) RTTI::Value(object->value);
+    }
 }
 
 static void unpackValues(raw<const RTTI::Method::Overload> overload, const ArgInfo args[],
