@@ -88,6 +88,19 @@ public:
     PyList_GetSliceType                     m_PyList_GetSlice;
     PyList_SetSliceType                     m_PyList_SetSlice;
 
+    PyTuple_NewType                         m_PyTuple_New;
+    PyTuple_SizeType                        m_PyTuple_Size;
+    PyTuple_GetItemType                     m_PyTuple_GetItem;
+    PyTuple_SetItemType                     m_PyTuple_SetItem;
+    PyTuple_GetSliceType                    m_PyTuple_GetSlice;
+    
+    PyDict_NewType                          m_PyDict_New;
+    PyDict_SizeType                         m_PyDict_Size;
+    PyDict_GetItemType                      m_PyDict_GetItem;
+    PyDict_SetItemType                      m_PyDict_SetItem;
+    PyDict_DelItemType                      m_PyDict_DelItem;
+    PyDict_NextType                         m_PyDict_Next;
+
     PyString_FromStringType                 m_PyString_FromString;
     PyString_FromStringAndSizeType          m_PyString_FromStringAndSize;
     PyString_FromFormatType                 m_PyString_FromFormat;
@@ -98,6 +111,10 @@ public:
     PyUnicode_FromStringType                m_PyUnicode_FromString;
     PyUnicode_FromStringAndSizeType         m_PyUnicode_FromStringAndSize;
     PyUnicode_FromFormatType                m_PyUnicode_FromFormat;
+    PyUnicode_AsUTF8Type                    m_PyUnicode_AsUTF8;
+    PyUnicode_AsUTF8StringType              m_PyUnicode_AsUTF8String;
+    PyUnicode_AsASCIIStringType             m_PyUnicode_AsASCIIString;
+    PyBytes_AsStringType                    m_PyBytes_AsString;
 
     PyBool_FromLongType                     m_PyBool_FromLong;
     PyLong_FromLongType                     m_PyLong_FromLong;
