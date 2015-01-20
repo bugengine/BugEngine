@@ -26,6 +26,7 @@ struct PyBugObject
     static PyObject* repr(PyObject* self);
     static void dealloc(PyObject* self);
     static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
+    static PyTypeObject s_pyType;
 };
 
 }}
