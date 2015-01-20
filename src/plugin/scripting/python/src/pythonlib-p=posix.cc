@@ -25,19 +25,23 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     }
     else
     {
-#       define be_get_func_opt(f)                                               \
-            void* tmp##f = dlsym(m_handle, #f);                                 \
-            memcpy(&m_##f, &tmp##f, sizeof(f##Type));
-#       define be_get_func(f)                                                   \
-            be_get_func_opt(f)                                                  \
-            if (!m_##f)                                                         \
-            {                                                                   \
-                be_error("could not locate function %s in module %s"            \
-                            | #f                                                \
-                            | (pythonLibraryName ? pythonLibraryName : "root"));\
-                m_status = false;                                               \
-            }
-        
+#       define be_get_func_opt(f)                                                   \
+            do {                                                                    \
+                void* tmp = dlsym(m_handle, #f);                                    \
+                memcpy(&m_##f, &tmp, sizeof(f##Type));                              \
+            } while(0)
+#       define be_get_func(f)                                                       \
+            do {                                                                    \
+                be_get_func_opt(f);                                                 \
+                if (!m_##f)                                                         \
+                {                                                                   \
+                    be_error("could not locate function %s in module %s"            \
+                                | #f                                                \
+                                | (pythonLibraryName ? pythonLibraryName : "root"));\
+                    m_status = false;                                               \
+                }                                                                   \
+            } while(0)
+
         be_get_func(Py_SetPythonHome);
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
@@ -77,6 +81,17 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyList_Append);
         be_get_func(PyList_GetSlice);
         be_get_func(PyList_SetSlice);
+        be_get_func(PyTuple_New);
+        be_get_func(PyTuple_Size);
+        be_get_func(PyTuple_GetItem);
+        be_get_func(PyTuple_SetItem);
+        be_get_func(PyTuple_GetSlice);
+        be_get_func(PyDict_New);
+        be_get_func(PyDict_Size);
+        be_get_func(PyDict_GetItem);
+        be_get_func(PyDict_SetItem);
+        be_get_func(PyDict_DelItem);
+        be_get_func(PyDict_Next);
         if (m_version < 30)
         {
             be_get_func(PyString_FromString);
@@ -91,6 +106,11 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func(PyUnicode_FromString);
             be_get_func(PyUnicode_FromStringAndSize);
             be_get_func(PyUnicode_FromFormat);
+            if (m_version >= 33)
+                be_get_func(PyUnicode_AsUTF8);
+            be_get_func(PyUnicode_AsASCIIString);
+            be_get_func(PyUnicode_AsUTF8String);
+            be_get_func(PyBytes_AsString);
         }
         be_get_func(PyBool_FromLong);
         be_get_func(PyLong_FromLong);
