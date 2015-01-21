@@ -174,40 +174,43 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
 PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
 {
     const u32 unnamedArgCount = s_library->m_PyTuple_Size(args);
-    const u32 namedArgCount = s_library->m_PyDict_Size(kwargs);
+    const u32 namedArgCount = kwargs ? s_library->m_PyDict_Size(kwargs) : 0;
     const u32 argCount = unnamedArgCount + namedArgCount;
     ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo*));
     for (u32 i = 0; i < unnamedArgCount; ++i)
     {
-        new (&argInfos[i]) ArgInfo(s_library->m_PyList_GetItem(args, i));
+        new (&argInfos[i]) ArgInfo(s_library->m_PyTuple_GetItem(args, i));
     }
-    Py_ssize_t pos = 0;
-    PyObject* key = 0;
-    PyObject* item = 0;
-    u32 i = 0;
-    while (s_library->m_PyDict_Next(kwargs, &pos, &key, &item))
+    if (kwargs)
     {
-        int version = s_library->getVersion();
-        if (version >= 33)
+        Py_ssize_t pos = 0;
+        PyObject* key = 0;
+        PyObject* item = 0;
+        u32 i = 0;
+        while (s_library->m_PyDict_Next(kwargs, &pos, &key, &item))
         {
-            new (&argInfos[unnamedArgCount+i]) ArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
-        }
-        else if (version >= 30)
-        {
-            PyObject* bytes = s_library->m_PyUnicode_AsASCIIString(key);
-            if (!bytes)
+            int version = s_library->getVersion();
+            if (version >= 33)
             {
-                return 0;
+                new (&argInfos[unnamedArgCount+i]) ArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
             }
-            const char* name = s_library->m_PyBytes_AsString(bytes);
-            new (&argInfos[unnamedArgCount+i]) ArgInfo(name, item);
-            Py_DECREF(bytes);
+            else if (version >= 30)
+            {
+                PyObject* bytes = s_library->m_PyUnicode_AsASCIIString(key);
+                if (!bytes)
+                {
+                    return 0;
+                }
+                const char* name = s_library->m_PyBytes_AsString(bytes);
+                new (&argInfos[unnamedArgCount+i]) ArgInfo(name, item);
+                Py_DECREF(bytes);
+            }
+            else
+            {
+                new (&argInfos[unnamedArgCount+i]) ArgInfo(s_library->m_PyString_AsString(key), item);
+            }
+            ++i;
         }
-        else
-        {
-            new (&argInfos[unnamedArgCount+i]) ArgInfo(s_library->m_PyString_AsString(key), item);
-        }
-        ++i;
     }
     raw<const RTTI::Method::Overload> o = method->overloads;
     u32 bestDistance = (u32)-1;

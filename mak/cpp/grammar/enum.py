@@ -63,6 +63,7 @@ class EnumValueList(cpp.yacc.Nonterm):
 					files[0].write('	::BugEngine::RTTI::Value(%s)\n' % (name))
 				files[0].write('};\n')
 				result = '{&%s}' % new_name
+		return result
 
 class EnumDef(cpp.yacc.Nonterm):
 	"%nonterm"
