@@ -81,7 +81,7 @@ void format<SIZE>::put(const char *value) const
     else
     {
         strncpy(m_firstFormat, value, SIZE-(m_firstFormat-m_buffer));
-        m_firstFormat = m_buffer - SIZE;
+        m_firstFormat = m_buffer + SIZE;
     }
 }
 
