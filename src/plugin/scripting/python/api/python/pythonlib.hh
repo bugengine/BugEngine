@@ -77,6 +77,7 @@ public:
     PyObject_GetAttrStringType              m_PyObject_GetAttrString;
     _PyArg_ParseTuple_SizeTType             m__PyArg_ParseTuple_SizeT;
     _PyArg_ParseTupleAndKeywords_SizeTType  m__PyArg_ParseTupleAndKeywords_SizeT;
+    PyObject_IsTrueType                     m_PyObject_IsTrue;
     PyType_ReadyType                        m_PyType_Ready;
 
     PyList_NewType                          m_PyList_New;

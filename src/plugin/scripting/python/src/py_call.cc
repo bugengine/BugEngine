@@ -32,7 +32,7 @@ static RTTI::Type getTypeFromPyObject(PyObject* object)
     }
     else
     {
-        return RTTI::Type();
+        return be_typeid<void>::type();
     }
 }
 
@@ -135,7 +135,7 @@ static u32 distance(PyTypeObject* pythonType, const RTTI::Type& bugengineType,
     be_forceuse(pythonType);
     be_forceuse(bugengineType);
     be_forceuse(desiredType);
-    return s_maxDistance;
+    return 0; //s_maxDistance;
 }
 
 static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u32 unnamedArgCount)
@@ -230,11 +230,11 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
         argInfos[i-1].~ArgInfo();
     }
     freea(args);
-    if (o)
+    if (bestOverload)
     {
         RTTI::Value* values = (RTTI::Value*)malloca(argCount * sizeof(RTTI::Value));
-        unpackValues(o, argInfos, unnamedArgCount, values);
-        RTTI::Value v = o->call(values, o->parameterCount);
+        unpackValues(bestOverload, argInfos, unnamedArgCount, values);
+        RTTI::Value v = bestOverload->call(values, bestOverload->parameterCount);
         for (int i = argCount-1; i >= 0; --i)
         {
             values[i].~Value();
