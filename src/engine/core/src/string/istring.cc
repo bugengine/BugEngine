@@ -381,7 +381,6 @@ void igenericnamespace::str(char* buffer, char separator, u32 size) const
             strncat(buffer, m_namespace[i].c_str(), size - strlen(buffer) - 1);
         }
     }
-
 }
 
 //-----------------------------------------------------------------------------

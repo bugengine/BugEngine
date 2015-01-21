@@ -191,8 +191,8 @@ private:
 };
 
 
-bool operator==(Type t1, Type t2);
-bool operator<=(Type t1, Type t2);
+be_api(RTTI) bool operator==(Type t1, Type t2);
+be_api(RTTI) bool operator<=(Type t1, Type t2);
 
 }}
 

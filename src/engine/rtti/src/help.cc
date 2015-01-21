@@ -19,16 +19,19 @@ void help(const RTTI::Type& type)
 
 void help(const RTTI::Class& klass)
 {
+    be_info("%s" | klass.name);
     be_forceuse(klass);
 }
 
 void help(const RTTI::Property& property)
 {
+    be_info("%s" | property.name);
     be_forceuse(property);
 }
 
 void help(const RTTI::Method& method)
 {
+    be_info("%s" | method.name);
     be_forceuse(method);
 }
 
@@ -39,6 +42,7 @@ void help(const RTTI::Method::Overload& overload)
 
 void help(const RTTI::Method::Overload::Parameter& parameter)
 {
+    be_info("%s" | parameter.name);
     be_forceuse(parameter);
 }
 

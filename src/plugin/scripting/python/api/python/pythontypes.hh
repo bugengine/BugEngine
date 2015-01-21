@@ -80,6 +80,8 @@ typedef PyObject *(*iternextfunc) (PyObject *);
 typedef PyObject *(*descrgetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*descrsetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*initproc)(PyObject *, PyObject *, PyObject *);
+typedef int (*objobjproc)(PyObject *, PyObject *);
+typedef int (*coercion)(PyObject **, PyObject **);
 typedef PyObject *(*newfunc)(PyTypeObject*, PyObject *, PyObject *);
 typedef PyObject *(*allocfunc)(PyTypeObject *, Py_ssize_t);
 
@@ -90,6 +92,7 @@ typedef int (*_PyArg_ParseTuple_SizeTType)(PyObject* args, const char* format, .
 typedef int (*_PyArg_ParseTupleAndKeywords_SizeTType)(PyObject* args, PyObject* kw,
                                                       const char* format, char** kws, ...);
 typedef int (*PyType_ReadyType)(PyTypeObject* type);
+typedef int (*PyObject_IsTrueType)(PyObject* arg);
 
 typedef PyObject* (*PyList_NewType)(Py_ssize_t len);
 typedef Py_ssize_t (*PyList_SizeType)(PyObject *list);
@@ -202,6 +205,74 @@ struct PyVarObject
 
 struct PyTypeObject
 {
+    struct PyNumberMethods
+    {
+        binaryfunc nb_add;
+        binaryfunc nb_subtract;
+        binaryfunc nb_multiply;
+        binaryfunc nb_divide;
+        binaryfunc nb_remainder;
+        binaryfunc nb_divmod;
+        ternaryfunc nb_power;
+        unaryfunc nb_negative;
+        unaryfunc nb_positive;
+        inquiry nb_bool;
+        inquiry nb_nonzero;
+        unaryfunc nb_invert;
+        binaryfunc nb_lshift;
+        binaryfunc nb_rshift;
+        binaryfunc nb_and;
+        binaryfunc nb_xor;
+        binaryfunc nb_or;
+        coercion nb_coerce;
+        unaryfunc nb_int;
+        unaryfunc nb_long;
+        unaryfunc nb_float;
+        unaryfunc nb_oct;
+        unaryfunc nb_hex;
+
+        binaryfunc nb_inplace_add;
+        binaryfunc nb_inplace_subtract;
+        binaryfunc nb_inplace_multiply;
+        binaryfunc nb_inplace_divide;
+        binaryfunc nb_inplace_remainder;
+        ternaryfunc nb_inplace_power;
+        binaryfunc nb_inplace_lshift;
+        binaryfunc nb_inplace_rshift;
+        binaryfunc nb_inplace_and;
+        binaryfunc nb_inplace_xor;
+        binaryfunc nb_inplace_or;
+
+        /* The following require the Py_TPFLAGS_HAVE_CLASS flag */
+        binaryfunc nb_floor_divide;
+        binaryfunc nb_true_divide;
+        binaryfunc nb_inplace_floor_divide;
+        binaryfunc nb_inplace_true_divide;
+
+        unaryfunc nb_index;
+    };
+    
+    struct PySequenceMethods
+    {
+        lenfunc sq_length;
+        binaryfunc sq_concat;
+        ssizeargfunc sq_repeat;
+        ssizeargfunc sq_item;
+        ssizessizeargfunc sq_slice;
+        ssizeobjargproc sq_ass_item;
+        ssizessizeobjargproc sq_ass_slice;
+        objobjproc sq_contains;
+        binaryfunc sq_inplace_concat;
+        ssizeargfunc sq_inplace_repeat;
+    };
+    
+    struct PyMappingMethods
+    {
+        lenfunc mp_length;
+        binaryfunc mp_subscript;
+        objobjargproc mp_ass_subscript;
+    };
+
     PyVarObject         object;
     const char*         tp_name;
     minitl::size_type   tp_basicsize;
@@ -214,9 +285,9 @@ struct PyTypeObject
     cmpfunc             tp_compare;
     reprfunc            tp_repr;
 
-    void*               tp_as_number;
-    void*               tp_as_sequence;
-    void*               tp_as_mapping;
+    PyNumberMethods*    tp_as_number;
+    PySequenceMethods*  tp_as_sequence;
+    PyMappingMethods*   tp_as_mapping;
 
     hashfunc            tp_hash;
     ternaryfunc         tp_call;
