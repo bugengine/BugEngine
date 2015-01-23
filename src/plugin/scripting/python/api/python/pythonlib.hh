@@ -124,6 +124,7 @@ public:
 
     PyErr_SetStringType                     m_PyErr_SetString;
     PyErr_FormatType                        m_PyErr_Format;
+    PyErr_BadArgumentType                   m_PyErr_BadArgument;
     
     PyExc_ExceptionType                     m_PyExc_Exception;
     PyExc_AttributeErrorType                m_PyExc_AttributeError;

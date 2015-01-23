@@ -139,7 +139,7 @@ typedef PyObject* _Py_NoneStructType;
 
 typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message);
 typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
-
+typedef int (*PyErr_BadArgumentType)();
 
 typedef PyTypeObject** PyExc_ExceptionType;
 typedef PyTypeObject** PyExc_AttributeErrorType;

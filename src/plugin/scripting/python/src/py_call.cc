@@ -64,7 +64,7 @@ ArgInfo::ArgInfo(const istring name, PyObject* object)
 {
 }
 
-static const u32 s_maxDistance = (u32)-1;
+static const u32 s_maxDistance = (u32)RTTI::Type::MaxTypeDistance;
 
 static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI::Method::Overload::Parameter> parameters,
                                                                   const istring name)
@@ -77,6 +77,35 @@ static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI
     return result;
 }
 
+static inline void unpackArray(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackInteger(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackObject(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
 static void unpackValue(const ArgInfo& arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
     if (arg.pythonType)
@@ -84,23 +113,24 @@ static void unpackValue(const ArgInfo& arg, const RTTI::Type& type, RTTI::Value*
         switch(type.metaclass->type())
         {
         case RTTI::ClassType_Array:
-            /* unpack sequences */
+            unpackArray(arg.arg, type, buffer);
             break;
         case RTTI::ClassType_Enum:
         case RTTI::ClassType_Integer:
-            /* unpack integer */
+            unpackInteger(arg.arg, type, buffer);
             break;
         case RTTI::ClassType_String:
+            unpackString(arg.arg, type, buffer);
             break;
         case RTTI::ClassType_Object:
         case RTTI::ClassType_Struct:
         case RTTI::ClassType_Pod:
-            /* unpack object */
+            unpackObject(arg.arg, type, buffer);
             break;
         case RTTI::ClassType_Variant:
-            
         default:
             be_notreached();
+            new (buffer) RTTI::Value();
         }
     }
     else
@@ -132,10 +162,14 @@ static void unpackValues(raw<const RTTI::Method::Overload> overload, const ArgIn
 static u32 distance(PyTypeObject* pythonType, const RTTI::Type& bugengineType,
                     const RTTI::Type& desiredType)
 {
-    be_forceuse(pythonType);
-    be_forceuse(bugengineType);
-    be_forceuse(desiredType);
-    return 0; //s_maxDistance;
+    if (pythonType)
+    {
+        return s_maxDistance;
+    }
+    else
+    {
+        return bugengineType.distance(desiredType);
+    }
 }
 
 static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u32 unnamedArgCount)
@@ -150,6 +184,7 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
         {
             return s_maxDistance;
         }
+        param = param->next;
     }
     for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
     {
@@ -213,7 +248,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
         }
     }
     raw<const RTTI::Method::Overload> o = method->overloads;
-    u32 bestDistance = (u32)-1;
+    u32 bestDistance = s_maxDistance;
     raw<const RTTI::Method::Overload> bestOverload = { 0 };
     while (o)
     {
@@ -228,11 +263,6 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
         }
         o = o->next;
     }
-    for (u32 i = argCount; i > 0; --i)
-    {
-        argInfos[i-1].~ArgInfo();
-    }
-    freea(args);
     if (bestOverload)
     {
         RTTI::Value* values = (RTTI::Value*)malloca(argCount * sizeof(RTTI::Value));
@@ -243,11 +273,21 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
             values[i].~Value();
         }
         freea(values);
+        for (u32 i = argCount; i > 0; --i)
+        {
+            argInfos[i-1].~ArgInfo();
+        }
+        freea(argInfos);
         return PyBugObject::create(v);
     }
     else
     {
-        // TODO: bad arg exception
+        for (u32 i = argCount; i > 0; --i)
+        {
+            argInfos[i-1].~ArgInfo();
+        }
+        freea(argInfos);
+        s_library->m_PyErr_BadArgument();
         return 0;
     }
 }
