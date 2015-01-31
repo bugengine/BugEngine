@@ -19,7 +19,8 @@ struct PyBugObject
     static void registerType(PyObject* module);
 
     static PyObject* create(const RTTI::Value& value);
-    static bool unpack(PyObject* value, const RTTI::Type& desiredType, void* where);
+    static u32 distance(PyObject* object, const RTTI::Type& desiredType);
+    static void unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer);
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* getattr(PyObject* self, const char* name);
     static int setattr(PyObject* self, const char* name, PyObject* value);
@@ -27,6 +28,7 @@ struct PyBugObject
     static void dealloc(PyObject* self);
     static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
     static int nonZero(PyObject* self);
+
     static PyTypeObject s_pyType;
 };
 

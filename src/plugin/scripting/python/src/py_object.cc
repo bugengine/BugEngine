@@ -7,6 +7,7 @@
 #include    <py_call.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -249,7 +250,7 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
     else
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
-                                  "object of type %s has no attrobute %s",
+                                  "%s object has no attribute %s",
                                   self_->value.type().name().c_str(), name);
         return NULL;
     }
@@ -257,10 +258,73 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 
 int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    be_forceuse(self);
-    be_forceuse(name);
-    be_forceuse(value);
-    return 0;
+    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    istring name_(name);
+    raw<const RTTI::Class> metaclass = self_->value.type().metaclass;
+    if (metaclass == be_typeid<const RTTI::Class>::type().metaclass)
+    {
+        const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
+        for (raw<const RTTI::ObjectInfo> ob = klass.objects; ob; ob = ob->next)
+        {
+            if (ob->name == name_)
+            {
+                u32 d = distance(value, ob->value.type());
+                if (d < RTTI::Type::MaxTypeDistance)
+                {
+                    RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+                    unpack(value, ob->value.type(), v);
+                    ob->value = v;
+                    v->~Value();
+                    freea(v);
+                    return 1;
+                }
+                else
+                {
+                    s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                              "%s.%s is of type %s",
+                                              self_->value.type().name().c_str(),
+                                              name, ob->value.type().name().c_str());
+                    return 0;
+                }
+            }
+        }
+        s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
+                                  "%s object has no attribute %s",
+                                  self_->value.type().name().c_str(), name);
+        return 0;
+    }
+    else
+    {
+        raw<const RTTI::Property> prop = metaclass->getProperty(name_);
+        if (!prop)
+        {
+            s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
+                                      "%s object has no attribute %s",
+                                      self_->value.type().name().c_str(), name);
+            return 0;
+        }
+        else
+        {
+            u32 d = distance(value, prop->type);
+            if (d < RTTI::Type::MaxTypeDistance)
+            {
+                RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+                unpack(value, prop->type, v);
+                prop->set(self_->value, *v);
+                v->~Value();
+                freea(v);
+                return 1;
+            }
+            else
+            {
+                s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                          "%s.%s is of type %s",
+                                          self_->value.type().name().c_str(),
+                                          name, prop->type.name());
+                return 0;
+            }
+        }
+    }
 }
 
 PyObject* PyBugObject::repr(PyObject *self)
@@ -383,5 +447,90 @@ void PyBugObject::registerType(PyObject* module)
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
 }
+
+static inline void unpackArray(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_unimplemented();
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackInteger(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_unimplemented();
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_unimplemented();
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+static inline void unpackObject(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+{
+    be_unimplemented();
+    be_forceuse(arg);
+    be_forceuse(type);
+    be_forceuse(buffer);
+}
+
+u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
+{
+    if (object->py_type == &s_pyType)
+    {
+        PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
+        return object_->value.type().distance(desiredType);
+    }
+    else
+    {
+        //be_unimplemented();
+        return RTTI::Type::MaxTypeDistance;
+    }
+}
+
+void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer)
+{
+    if (object->py_type == &s_pyType)
+    {
+        PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
+        be_assert(desiredType <= object_->value.type(),
+                  "incompatible types: %s is not compatible with %s"
+                    | object_->value.type().name().c_str()
+                    | desiredType.name().c_str());
+        new (buffer) RTTI::Value(object_->value);
+    }
+    else
+    {
+        switch(desiredType.metaclass->type())
+        {
+        case RTTI::ClassType_Array:
+            unpackArray(object, desiredType, buffer);
+            break;
+        case RTTI::ClassType_Enum:
+        case RTTI::ClassType_Integer:
+            unpackInteger(object, desiredType, buffer);
+            break;
+        case RTTI::ClassType_String:
+            unpackString(object, desiredType, buffer);
+            break;
+        case RTTI::ClassType_Object:
+        case RTTI::ClassType_Struct:
+        case RTTI::ClassType_Pod:
+            unpackObject(object, desiredType, buffer);
+            break;
+        case RTTI::ClassType_Variant:
+        default:
+            be_notreached();
+            new (buffer) RTTI::Value();
+        }
+    }
+}
+
 
 }}

@@ -29,8 +29,8 @@ help(BugEngine.RTTI.Class)
 help(BugEngine.RTTI.Type)
 help(BugEngine.RTTI.Type.Indirection)
 
-t = BugEngine.RTTI.Type.makeType(BugEngine.RTTI.Class,
-                                 BugEngine.RTTI.Type.Indirection.RawPtr,
-                                 BugEngine.RTTI.Type.Constness.Const,
-                                 BugEngine.RTTI.Type.Constness.Const)
-help(t.metaclass)
+#t = BugEngine.RTTI.Type.makeType(BugEngine.RTTI.Class,
+#                                 BugEngine.RTTI.Type.Indirection.RawPtr,
+#                                 BugEngine.RTTI.Type.Constness.Const,
+#                                 BugEngine.RTTI.Type.Constness.Const)
+#help(t.metaclass)

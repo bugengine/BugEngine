@@ -17,7 +17,7 @@ struct be_api(RTTI) ObjectInfo
     raw<const ObjectInfo> const     next;
     raw<Tag>                        tags;
     istring const                   name;
-    Value                           value;
+    mutable Value                   value;
 };
 
 }}

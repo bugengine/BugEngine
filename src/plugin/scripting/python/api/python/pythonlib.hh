@@ -130,6 +130,7 @@ public:
     PyExc_AttributeErrorType                m_PyExc_AttributeError;
     PyExc_ImportErrorType                   m_PyExc_ImportError;
     PyExc_IndexErrorType                    m_PyExc_IndexError;
+    PyExc_TypeErrorType                     m_PyExc_TypeError;
 };
 
 extern ref<PythonLibrary> s_library;
