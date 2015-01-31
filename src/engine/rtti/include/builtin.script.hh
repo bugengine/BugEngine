@@ -43,58 +43,58 @@ struct Value
 }}
 
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer))
+be_tag(Index(BugEngine::RTTI::ClassType_Number))
 be_pod bool
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (1 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (1 << 16)))
 be_pod u8
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (2 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (2 << 16)))
 be_pod u16
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (3 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (3 << 16)))
 be_pod u32
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (4 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (4 << 16)))
 be_pod u64
 {
 };
 
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (5 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (5 << 16)))
 be_pod i8
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (6 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (6 << 16)))
 be_pod i16
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (7 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (7 << 16)))
 be_pod i32
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (8 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (8 << 16)))
 be_pod i64
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (9 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (9 << 16)))
 be_pod float
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Integer + (10 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number + (10 << 16)))
 be_pod double
 {
 };

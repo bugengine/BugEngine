@@ -4,6 +4,10 @@
 #include    <python/stdafx.h>
 #include    <python/pythonlib.hh>
 #include    <py_object.hh>
+#include    <py_number.hh>
+#include    <py_string.hh>
+#include    <py_array.hh>
+#include    <py_namespace.hh>
 #include    <py_plugin.hh>
 
 
@@ -34,6 +38,10 @@ void setupModule(PyObject* module)
 {
     PyBugPlugin::registerType(module);
     PyBugObject::registerType(module);
+    PyBugNumber::registerType(module);
+    PyBugString::registerType(module);
+    PyBugArray::registerType(module);
+    PyBugNamespace::registerType(module);
 }
 
 }}

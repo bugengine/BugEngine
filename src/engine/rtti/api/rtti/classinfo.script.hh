@@ -25,10 +25,11 @@ enum ClassType
     ClassType_Array     = 4,
     ClassType_Enum      = 5,
     ClassType_String    = 6,
-    ClassType_Integer   = 7,
+    ClassType_Number    = 7,
     ClassType_Variant   = 8
 };
 
+be_tag(Index(ClassType_Namespace))
 struct be_api(RTTI) Class
 {
     friend struct Type;
