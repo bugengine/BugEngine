@@ -44,7 +44,7 @@ published:
         Value getTag(raw<const Class> type) const;
     public:
         Value (*call)(Value* params, u32 nparams);
-        u32 distance(Value* p, u32 nparams) const;
+        u32 distance(Value* p, u32 paramCount) const;
     private:
         Overload& operator=(const Overload&);
     };

@@ -190,6 +190,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyExc_AttributeError);
         be_get_func(PyExc_ImportError);
         be_get_func(PyExc_IndexError);
+        be_get_func(PyExc_TypeError);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)

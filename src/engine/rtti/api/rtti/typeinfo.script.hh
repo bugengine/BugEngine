@@ -168,7 +168,7 @@ struct be_api(RTTI) Type
      */
     enum MaxTypeDistanceType
     {
-        MaxTypeDistance = 1000000 ///< The maximum distance to indicate two types are not compatible
+        MaxTypeDistance = (u32)-1 ///< The maximum distance to indicate two types are not compatible
     };
 
     /// Checks if a type is compatible with another type

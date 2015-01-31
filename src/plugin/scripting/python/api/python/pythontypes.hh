@@ -144,7 +144,8 @@ typedef int (*PyErr_BadArgumentType)();
 typedef PyTypeObject** PyExc_ExceptionType;
 typedef PyTypeObject** PyExc_AttributeErrorType;
 typedef PyTypeObject** PyExc_ImportErrorType;
-typedef PyTypeObject** PyExc_IndexErrorType;
+typedef PyTypeObject** PyExc_IndexErrorType;;
+typedef PyTypeObject** PyExc_TypeErrorType;
 
 struct PyObject
 {

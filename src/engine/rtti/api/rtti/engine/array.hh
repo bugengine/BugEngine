@@ -40,6 +40,13 @@ struct be_typeid< minitl::array<T> >
 };
 
 template< typename T >
+RTTI::Value callSize(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    return RTTI::Value(params[0].as< const minitl::array<T>& >().size());
+}
+
+template< typename T >
 const RTTI::Type be_typeid< minitl::array<T> >::value_type = be_typeid<T>::type();
 template< typename T >
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
@@ -50,12 +57,12 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
         "value_type",
         RTTI::Value(RTTI::Value::ByRef(value_type))
     };
-
     static RTTI::Class ci = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
-        0, 0, RTTI::ClassType_Array, {0}, {0}, {0},
+        0, 0, RTTI::ClassType_Array, {0}, {0},
+        {0},
         {&valueTypeObject},
         {0},
         {0},
