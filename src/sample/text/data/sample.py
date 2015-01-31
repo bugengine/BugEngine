@@ -34,3 +34,5 @@ help(BugEngine.RTTI.Type.Indirection)
 #                                 BugEngine.RTTI.Type.Constness.Const,
 #                                 BugEngine.RTTI.Type.Constness.Const)
 #help(t.metaclass)
+print(BugEngine)
+print(BugEngine.RTTI)

@@ -107,7 +107,7 @@ void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
 void Context::push(lua_State* state, const RTTI::Value& v)
 {
     const RTTI::Type& t = v.type();
-    if (t.metaclass->type() == RTTI::ClassType_Integer)
+    if (t.metaclass->type() == RTTI::ClassType_Number)
     {
         switch(t.metaclass->index())
         {

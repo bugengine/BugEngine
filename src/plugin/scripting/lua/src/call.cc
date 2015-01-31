@@ -65,7 +65,7 @@ static int convertBooleanToValue(lua_State *state, int index, const RTTI::Type& 
 
 static int convertNumberToValue(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
 {
-    if (type.metaclass->type() == RTTI::ClassType_Integer)
+    if (type.metaclass->type() == RTTI::ClassType_Number)
     {
         switch(type.metaclass->index())
         {
