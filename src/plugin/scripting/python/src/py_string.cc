@@ -8,7 +8,50 @@
 namespace BugEngine { namespace Python
 {
 
-static PyTypeObject::PyNumberMethods s_pyTypeStringNumber =
+static PyTypeObject::Py2NumberMethods s_py2StringNumber =
+{
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyBugString::nonZero,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+};
+
+static PyTypeObject::Py3NumberMethods s_py3StringNumber =
 {
     0,
     0,
@@ -20,11 +63,6 @@ static PyTypeObject::PyNumberMethods s_pyTypeStringNumber =
     0,
     0,
     &PyBugString::nonZero,
-    &PyBugString::nonZero,
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,
@@ -63,7 +101,7 @@ PyTypeObject PyBugString::s_pyType =
     0,
     0,
     &PyBugString::repr,
-    &s_pyTypeStringNumber,
+    0,
     0,
     0,
     0,
@@ -126,56 +164,70 @@ PyObject* PyBugString::repr(PyObject *self)
 {
     PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
+    const RTTI::Type t = v.type();
 
-    const char* constness = (v.type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+    const char* constness = (t.constness == RTTI::Type::Const) ? "=" : "";
     const char* reference;
-    const char* closing;
-    switch(v.type().indirection)
+    switch(t.indirection)
     {
         case RTTI::Type::RefPtr:
-            reference = "ref<";
-            closing = ">";
+            reference = "#";
             break;
         case RTTI::Type::WeakPtr:
-            reference = "weak<";
-            closing = ">";
+            reference = "!";
             break;
         case RTTI::Type::RawPtr:
-            reference = "raw<";
-            closing = ">";
+            reference = "@";
             break;
         case RTTI::Type::Value:
             reference = "";
             constness = "";
-            closing = "";
             break;
         default:
-            reference = "??? <";
-            constness = "??? ";
-            closing = ">";
+            reference = "?";
             break;
     }
-    const char* access = (v.type().access == RTTI::Type::Const) ? "const " : "";
-    
-    if (s_library->getVersion() >= 30)
+    const char* access = (t.access == RTTI::Type::Const) ? "=" : "";
+
+    typedef PyObject* (*toStringType)(const char* format, ...);
+    toStringType toString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromFormat
+            :   s_library->m_PyString_FromFormat;
+    switch (t.metaclass->index())
     {
-        return s_library->m_PyUnicode_FromFormat("[%s%s%s%s%s ]",
-                                                 constness, reference, access,
-                                                 v.type().metaclass->name.c_str(),
-                                                 closing, &v);
-    }
-    else
-    {
-        return s_library->m_PyString_FromFormat("[%s%s%s%s%s ]",
-                                                constness, reference, access,
-                                                v.type().metaclass->name.c_str(),
-                                                closing, &v);
+    case 0:
+        be_assert(be_typeid<istring>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<istring>::klass()->fullname());
+        return toString("[%s%s%s\"%s\"]", constness, reference, access,
+                        v.as<istring>().c_str());
+    case 1:
+        be_assert(be_typeid<inamespace>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<inamespace>::klass()->fullname());
+        return toString("[%s%s%s\"%s\"]", constness, reference, access,
+                        v.as<const inamespace&>().str().name);
+    case 2:
+        be_assert(be_typeid<ifilename>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<ifilename>::klass()->fullname());
+        return toString("[%s%s%s\"%s\"]", constness, reference, access,
+                        v.as<const ifilename&>().str().name);
+    case 3:
+        be_assert(be_typeid<ipath>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<ipath>::klass()->fullname());
+        return toString("[%s%s%s\"%s\"]", constness, reference, access,
+                        v.as<const ipath&>().str().name);
+    default:
+        be_unimplemented();
+        return 0;
     }
 }
 
 int PyBugString::nonZero(PyObject *self)
 {
-    PyBugNumber* self_ = reinterpret_cast<PyBugNumber*>(self);
+    PyBugString* self_ = reinterpret_cast<PyBugString*>(self);
     const RTTI::Type t = self_->value.type();
     be_assert(t.metaclass->type() == RTTI::ClassType_String,
               "PyBugString expected string value");
@@ -216,6 +268,10 @@ int PyBugString::nonZero(PyObject *self)
 
 void PyBugString::registerType(PyObject* module)
 {
+    if (s_library->getVersion() >= 30)
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3StringNumber;
+    else
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2StringNumber;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);

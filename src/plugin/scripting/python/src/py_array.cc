@@ -8,7 +8,50 @@
 namespace BugEngine { namespace Python
 {
 
-static PyTypeObject::PyNumberMethods s_pyTypeArrayNumber =
+static PyTypeObject::Py2NumberMethods s_py2ArrayNumber =
+{
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyBugArray::nonZero,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+};
+
+static PyTypeObject::Py3NumberMethods s_py3ArrayNumber =
 {
     0,
     0,
@@ -20,11 +63,6 @@ static PyTypeObject::PyNumberMethods s_pyTypeArrayNumber =
     0,
     0,
     &PyBugArray::nonZero,
-    &PyBugArray::nonZero,
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,
@@ -63,7 +101,7 @@ PyTypeObject PyBugArray::s_pyType =
     0,
     0,
     &PyBugArray::repr,
-    &s_pyTypeArrayNumber,
+    0,
     0,
     0,
     0,
@@ -156,7 +194,7 @@ PyObject* PyBugArray::repr(PyObject *self)
             break;
     }
     const char* access = (v.type().access == RTTI::Type::Const) ? "const " : "";
-    
+
     if (s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat("[%s%s%s%s%s ]",
@@ -192,6 +230,10 @@ int PyBugArray::nonZero(PyObject *self)
 
 void PyBugArray::registerType(PyObject* module)
 {
+    if (s_library->getVersion() >= 30)
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3ArrayNumber;
+    else
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2ArrayNumber;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);

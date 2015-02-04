@@ -2,7 +2,7 @@ import cpp
 
 
 class Template(cpp.yacc.Nonterm):
-	"%nonterm"
+    "%nonterm"
 
-	def template(self, template, lt, SkipListTemplate, gt):
-		"%reduce TEMPLATE LT SkipListTemplate GT"
+    def template(self, template, lt, SkipListTemplate, gt):
+        "%reduce TEMPLATE LT SkipListTemplate GT"

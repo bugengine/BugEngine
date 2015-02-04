@@ -18,7 +18,7 @@ struct OverloadMatch
 {
     friend class Object;
 public:
-    typedef BugEngine::RTTI::Method::Overload::Parameter RTTIParameter;
+    typedef BugEngine::RTTI::Method::Parameter RTTIParameter;
     struct ParameterMatch
     {
         weak<const Parameter>       parameter;

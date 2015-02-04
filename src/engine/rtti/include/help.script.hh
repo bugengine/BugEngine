@@ -17,7 +17,7 @@ void help(const RTTI::Class& klass);
 void help(const RTTI::Property& property);
 void help(const RTTI::Method& method);
 void help(const RTTI::Method::Overload& overload);
-void help(const RTTI::Method::Overload::Parameter& parameter);
+void help(const RTTI::Method::Parameter& parameter);
 void help(const RTTI::Value& v);
 
 }

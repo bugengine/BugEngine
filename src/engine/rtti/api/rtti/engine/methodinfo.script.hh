@@ -56,6 +56,8 @@ published:
     raw<const Method>   call;
     u32                 overloadCount;
     raw<const Overload> overloads;
+public:
+    typedef Overload::Parameter Parameter;
 published:
     Value doCall(Value* params, u32 nparams) const;
 private:

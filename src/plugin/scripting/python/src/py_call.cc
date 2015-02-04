@@ -64,10 +64,10 @@ ArgInfo::ArgInfo(const istring name, PyObject* object)
 {
 }
 
-static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI::Method::Overload::Parameter> parameters,
+static raw<const RTTI::Method::Parameter> findParameter(raw<const RTTI::Method::Parameter> parameters,
                                                                   const istring name)
 {
-    raw<const RTTI::Method::Overload::Parameter> result = { 0 };
+    raw<const RTTI::Method::Parameter> result = { 0 };
     for (result = parameters; result && result->name != name; result = result->next)
     {
         /* nothing */
@@ -78,21 +78,21 @@ static raw<const RTTI::Method::Overload::Parameter> findParameter(raw<const RTTI
 static void unpackValues(raw<const RTTI::Method::Overload> overload, const ArgInfo args[],
                          u32 unnamedArgCount, RTTI::Value* buffer)
 {
-    raw<const RTTI::Method::Overload::Parameter> p = overload->params;
+    raw<const RTTI::Method::Parameter> p = overload->params;
     for (u32 i = 0; i < unnamedArgCount; ++i, p = p->next)
     {
          PyBugObject::unpack(args[i].arg, p->type, &buffer[i]);
     }
     for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
     {
-        raw<const RTTI::Method::Overload::Parameter> namedParameter = findParameter(p, args[i].name);
+        raw<const RTTI::Method::Parameter> namedParameter = findParameter(p, args[i].name);
         PyBugObject::unpack(args[i].arg, namedParameter->type, &buffer[i]);
     }
 }
 
 static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u32 unnamedArgCount)
 {
-    raw<const RTTI::Method::Overload::Parameter> param = overload->params;
+    raw<const RTTI::Method::Parameter> param = overload->params;
     u32 result = 0;
     for (u32 i = 0; i < unnamedArgCount; ++i)
     {
@@ -106,7 +106,7 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
     }
     for (u32 i = unnamedArgCount; i < overload->parameterCount; ++i)
     {
-        raw<const RTTI::Method::Overload::Parameter> namedParam = findParameter(param, args[i].name);
+        raw<const RTTI::Method::Parameter> namedParam = findParameter(param, args[i].name);
         if (namedParam)
         {
             u32 argDistance = PyBugObject::distance(args[i].arg, param->type);
