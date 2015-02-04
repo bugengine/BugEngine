@@ -8,7 +8,50 @@
 namespace BugEngine { namespace Python
 {
 
-static PyTypeObject::PyNumberMethods s_pyTypeNumberNumber =
+static PyTypeObject::Py2NumberMethods s_py2NumberNumber =
+{
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyBugNumber::nonZero,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+};
+
+static PyTypeObject::Py3NumberMethods s_py3NumberNumber =
 {
     0,
     0,
@@ -20,11 +63,6 @@ static PyTypeObject::PyNumberMethods s_pyTypeNumberNumber =
     0,
     0,
     &PyBugNumber::nonZero,
-    &PyBugNumber::nonZero,
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,
@@ -63,7 +101,7 @@ PyTypeObject PyBugNumber::s_pyType =
     0,
     0,
     &PyBugNumber::repr,
-    &s_pyTypeNumberNumber,
+    0,
     0,
     0,
     0,
@@ -251,6 +289,10 @@ int PyBugNumber::nonZero(PyObject *self)
 
 void PyBugNumber::registerType(PyObject* module)
 {
+    if (s_library->getVersion() >= 30)
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3NumberNumber;
+    else
+        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2NumberNumber;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);

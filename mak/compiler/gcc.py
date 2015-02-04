@@ -155,9 +155,12 @@ def detect_gcc(conf):
             pass
     paths = paths.union(conf.env.SYSTEM_LIB_PATHS)
     for path in paths:
-        for lib in os.listdir(path):
-            if lib.startswith('gcc'):
-                conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
+        try:
+            for lib in os.listdir(path):
+                if lib.startswith('gcc'):
+                    conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
+        except OSError:
+            pass
     conf.get_native_gcc()
 
 

@@ -278,11 +278,11 @@ static int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value*
 
 struct CallInfo
 {
-    raw<const RTTI::Method::Overload>               m_overload;
-    raw<const RTTI::Method::Overload::Parameter>    m_currentParameter;
-    u32                                             m_score;
-    RTTI::Value*                                    m_parameters;
-    RTTI::Value*                                    m_nextParameter;
+    raw<const RTTI::Method::Overload>   m_overload;
+    raw<const RTTI::Method::Parameter>  m_currentParameter;
+    u32                                 m_score;
+    RTTI::Value*                        m_parameters;
+    RTTI::Value*                        m_nextParameter;
 
     CallInfo(raw<const RTTI::Method::Overload> overload, void* paramBuffer);
     ~CallInfo();
@@ -449,7 +449,7 @@ int call(lua_State* state, raw<const RTTI::Method> method)
             strcat(errorMessage, "\t");
             strcat(errorMessage, ar.name);
             strcat(errorMessage, "(");
-            raw<const RTTI::Method::Overload::Parameter> parameter = overload->params;
+            raw<const RTTI::Method::Parameter> parameter = overload->params;
             while(parameter)
             {
                 strcat(errorMessage, parameter->type.name().c_str());

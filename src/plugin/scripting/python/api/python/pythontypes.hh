@@ -208,6 +208,10 @@ struct PyTypeObject
 {
     struct PyNumberMethods
     {
+    };
+
+    struct Py2NumberMethods
+    {
         binaryfunc nb_add;
         binaryfunc nb_subtract;
         binaryfunc nb_multiply;
@@ -217,7 +221,7 @@ struct PyTypeObject
         ternaryfunc nb_power;
         unaryfunc nb_negative;
         unaryfunc nb_positive;
-        inquiry nb_bool;
+        unaryfunc nb_absolute;
         inquiry nb_nonzero;
         unaryfunc nb_invert;
         binaryfunc nb_lshift;
@@ -252,7 +256,48 @@ struct PyTypeObject
 
         unaryfunc nb_index;
     };
-    
+
+    struct Py3NumberMethods
+    {
+        binaryfunc nb_add;
+        binaryfunc nb_subtract;
+        binaryfunc nb_multiply;
+        binaryfunc nb_remainder;
+        binaryfunc nb_divmod;
+        ternaryfunc nb_power;
+        unaryfunc nb_negative;
+        unaryfunc nb_positive;
+        unaryfunc nb_absolute;
+        inquiry nb_bool;
+        unaryfunc nb_invert;
+        binaryfunc nb_lshift;
+        binaryfunc nb_rshift;
+        binaryfunc nb_and;
+        binaryfunc nb_xor;
+        binaryfunc nb_or;
+        unaryfunc nb_int;
+        void *nb_reserved;  /* the slot formerly known as nb_long */
+        unaryfunc nb_float;
+
+        binaryfunc nb_inplace_add;
+        binaryfunc nb_inplace_subtract;
+        binaryfunc nb_inplace_multiply;
+        binaryfunc nb_inplace_remainder;
+        ternaryfunc nb_inplace_power;
+        binaryfunc nb_inplace_lshift;
+        binaryfunc nb_inplace_rshift;
+        binaryfunc nb_inplace_and;
+        binaryfunc nb_inplace_xor;
+        binaryfunc nb_inplace_or;
+
+        binaryfunc nb_floor_divide;
+        binaryfunc nb_true_divide;
+        binaryfunc nb_inplace_floor_divide;
+        binaryfunc nb_inplace_true_divide;
+
+        unaryfunc nb_index;
+    };
+
     struct PySequenceMethods
     {
         lenfunc sq_length;
@@ -266,7 +311,7 @@ struct PyTypeObject
         binaryfunc sq_inplace_concat;
         ssizeargfunc sq_inplace_repeat;
     };
-    
+
     struct PyMappingMethods
     {
         lenfunc mp_length;

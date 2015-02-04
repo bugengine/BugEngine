@@ -40,7 +40,7 @@ void help(const RTTI::Method::Overload& overload)
     be_forceuse(overload);
 }
 
-void help(const RTTI::Method::Overload::Parameter& parameter)
+void help(const RTTI::Method::Parameter& parameter)
 {
     be_info("%s" | parameter.name);
     be_forceuse(parameter);
