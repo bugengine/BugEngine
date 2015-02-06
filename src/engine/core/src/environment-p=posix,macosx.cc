@@ -5,6 +5,7 @@
 #include    <core/environment.hh>
 #include    <unistd.h>
 #include    <cerrno>
+#include    <cstdlib>
 #include    <cstdio>
 
 
@@ -81,6 +82,11 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
+}
+
+const char* Environment::getEnvironmentVariable(const char *variable) const
+{
+    return getenv(variable);
 }
 
 }

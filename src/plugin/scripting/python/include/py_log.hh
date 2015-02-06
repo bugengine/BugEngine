@@ -1,24 +1,35 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_PYTHON_PY_STRING_HH_
-#define BE_PYTHON_PY_STRING_HH_
+#ifndef BE_PYTHON_PY_LOG_HH_
+#define BE_PYTHON_PY_LOG_HH_
 /**************************************************************************************************/
 #include    <python/stdafx.h>
-#include    <py_object.hh>
+#include    <python/pythontypes.hh>
+#include    <core/logger.hh>
 
 namespace BugEngine { namespace Python
 {
 
-struct PyBugString : public PyBugObject
+struct PyBugLog
 {
+    enum LogType
+    {
+        logTypeStdOut,
+        logTypeStdErr
+    };
+
+    PyObject    py_object;
+    ref<Logger> logger;
+    LogType     type;
+
     static void registerType(PyObject* module);
-    
-    static PyObject* create(const RTTI::Value &value);
+
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
-    static PyObject* repr(PyObject* self);
-    static PyObject* str(PyObject* self);
-    static int nonZero(PyObject* self);
+    static void dealloc(PyObject* self);
+
+    static PyObject* write(PyObject* self, PyObject* args);
+    static PyObject* flush(PyObject* self, PyObject* args);
 
     static PyTypeObject s_pyType;
 };

@@ -132,9 +132,12 @@ typedef PyObject* (*PyUnicode_AsUTF8StringType)(PyObject* unicode);
 typedef char* (*PyBytes_AsStringType)(PyObject* bytes);
 
 typedef PyObject* (*PyBool_FromLongType)(long value);
-typedef PyObject* (*PyLong_FromLongType)(long value);
-typedef PyObject* (*PyLong_FromSsize_tType)(Py_ssize_t value);
+typedef PyObject* (*PyInt_FromLongType)(long value);
+typedef unsigned long (*PyInt_AsUnsignedLongMaskType)(PyObject* intobject);
+typedef PyObject* (*PyLong_FromUnsignedLongLongType)(unsigned long long value);
+typedef unsigned long long (*PyLong_AsUnsignedLongLongMaskType)(PyObject* longobject);
 typedef PyObject* (*PyFloat_FromDoubleType)(double value);
+typedef double (*PyFloat_AsDoubleType)(PyObject* doubleobject);
 typedef PyObject* _Py_NoneStructType;
 
 typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message);
@@ -146,6 +149,9 @@ typedef PyTypeObject** PyExc_AttributeErrorType;
 typedef PyTypeObject** PyExc_ImportErrorType;
 typedef PyTypeObject** PyExc_IndexErrorType;;
 typedef PyTypeObject** PyExc_TypeErrorType;
+
+typedef PyObject* (*PySys_GetObjectType)(const char* nam);
+typedef int (*PySys_SetObjectType)(const char* name, PyObject* object);
 
 struct PyObject
 {

@@ -115,9 +115,13 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func(PyBytes_AsString);
         }
         be_get_func(PyBool_FromLong);
-        be_get_func(PyLong_FromLong);
-        be_get_func(PyLong_FromSsize_t);
+        if (m_version < 30)
+        {
+            be_get_func(PyInt_AsUnsignedLongMask);
+            be_get_func(PyInt_FromLong);
+        }
         be_get_func(PyFloat_FromDouble);
+        be_get_func(PyFloat_AsDouble);
         be_get_func(PyErr_SetString);
         be_get_func(PyErr_Format);
         be_get_func(PyErr_BadArgument);
@@ -126,6 +130,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyExc_ImportError);
         be_get_func(PyExc_IndexError);
         be_get_func(PyExc_TypeError);
+        be_get_func(PySys_GetObject);
+        be_get_func(PySys_SetObject);
 #       undef be_get_fun
 #       undef be_get_fun_opt
         if (m_status && pythonLibraryName)

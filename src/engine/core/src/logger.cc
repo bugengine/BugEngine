@@ -4,6 +4,7 @@
 
 #include    <core/stdafx.h>
 #include    <core/logger.hh>
+#include    <core/threads/thread.hh>
 
 #include    <minitl/scopedptr.hh>
 
@@ -24,7 +25,7 @@ const char* ILogListener::s_logNames[] =
 Logger::Logger()
 :   m_listeners(Arena::debug())
 ,   m_children(Arena::debug())
-,   m_name("")
+,   m_name("all")
 {
 }
 
@@ -92,15 +93,23 @@ void Logger::removeListener(weak<ILogListener> listener)
 
 bool Logger::log(LogLevel level, const char *filename, int line, const char *msg) const
 {
+    return doLog(level, m_name, filename, line, msg);
+}
+
+bool Logger::doLog(LogLevel level, istring logName, const char *filename, int line,
+                   const char *msg) const
+{
     bool result = false;
-    for (minitl::vector< weak<ILogListener> >::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for (minitl::vector< weak<ILogListener> >::const_iterator it = m_listeners.begin();
+         it != m_listeners.end();
+         ++it)
     {
-        result |= (*it)->log(m_name, level, filename, line, msg);
+        result |= (*it)->log(logName, level, filename, line, Thread::name().c_str(), msg);
     }
 
     if (m_parent)
     {
-        result |= m_parent->log(level, filename, line, msg);
+        result |= m_parent->doLog(level, logName, filename, line, msg);
     }
 
     return result;

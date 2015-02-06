@@ -31,6 +31,7 @@ public:
     const istring&  getGame() const                 { return m_game; }
     const istring&  getUser() const                 { return m_user; }
     const char*     getProgramPath() const          { return m_programPath; }
+    const char*     getEnvironmentVariable(const char* variable) const;
     size_t          getProcessorCount() const;
 };
 

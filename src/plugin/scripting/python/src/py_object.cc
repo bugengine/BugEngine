@@ -380,25 +380,104 @@ void PyBugObject::registerType(PyObject* module)
 
 static inline void unpackArray(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
+    be_assert(type.metaclass->type() == RTTI::ClassType_Array,
+              "expected to unpack Python Number into RTTI::ClassType_Number, got %s"
+              | type.metaclass->name);
     be_unimplemented();
     be_forceuse(arg);
-    be_forceuse(type);
     be_forceuse(buffer);
 }
 
-static inline void unpackInteger(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
-    be_unimplemented();
-    be_forceuse(arg);
-    be_forceuse(type);
-    be_forceuse(buffer);
+    be_assert(type.metaclass->type() == RTTI::ClassType_Number,
+              "expected to unpack Python Number into RTTI::ClassType_Number, got %s"
+              | type.metaclass->name);
+    if (arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
+    {
+        unsigned long value = s_library->m_PyInt_AsUnsignedLongMask(arg);
+        switch(type.metaclass->index())
+        {
+        case 0:
+        {
+            bool v = value ? true : false;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 1:
+        {
+            u8 v = (u8)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 2:
+        {
+            u16 v = (u16)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 3:
+        {
+            u32 v = (u32)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 4:
+        {
+            u64 v = (u64)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 5:
+        {
+            i8 v = (i8)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 6:
+        {
+            i16 v = (i16)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 7:
+        {
+            i32 v = (i32)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 8:
+        {
+            i64 v = (i64)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 9:
+        {
+            float v = (float)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        case 10:
+        {
+            double v = (double)value;
+            new (buffer) RTTI::Value(type, &v);
+            break;
+        }
+        default:
+            be_notreached();
+            new (buffer) RTTI::Value(0);
+        }
+    }
 }
 
 static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
+    be_assert(type.metaclass->type() == RTTI::ClassType_String,
+              "expected to unpack Python Number into RTTI::ClassType_Number, got %s"
+              | type.metaclass->name);
     be_unimplemented();
     be_forceuse(arg);
-    be_forceuse(type);
     be_forceuse(buffer);
 }
 
@@ -417,9 +496,26 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
         PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
         return object_->value.type().distance(desiredType);
     }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS))
+    {
+        return desiredType.metaclass->type() == RTTI::ClassType_Number
+                ?   0
+                :   RTTI::Type::MaxTypeDistance;
+    }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS|Py_TPFLAGS_TUPLE_SUBCLASS))
+    {
+        return desiredType.metaclass->type() == RTTI::ClassType_Array
+                ?   0
+                :   RTTI::Type::MaxTypeDistance;
+    }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS|Py_TPFLAGS_UNICODE_SUBCLASS))
+    {
+        return desiredType.metaclass->type() == RTTI::ClassType_String
+                ?   0
+                :   RTTI::Type::MaxTypeDistance;
+    }
     else
     {
-        //be_unimplemented();
         return RTTI::Type::MaxTypeDistance;
     }
 }
@@ -435,30 +531,22 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::
                     | desiredType.name().c_str());
         new (buffer) RTTI::Value(object_->value);
     }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS))
+    {
+        unpackNumber(object, desiredType, buffer);
+    }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS|Py_TPFLAGS_TUPLE_SUBCLASS))
+    {
+        unpackArray(object, desiredType, buffer);
+    }
+    else if (object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS|Py_TPFLAGS_UNICODE_SUBCLASS))
+    {
+        unpackString(object, desiredType, buffer);
+    }
     else
     {
-        switch(desiredType.metaclass->type())
-        {
-        case RTTI::ClassType_Array:
-            unpackArray(object, desiredType, buffer);
-            break;
-        case RTTI::ClassType_Enum:
-        case RTTI::ClassType_Number:
-            unpackInteger(object, desiredType, buffer);
-            break;
-        case RTTI::ClassType_String:
-            unpackString(object, desiredType, buffer);
-            break;
-        case RTTI::ClassType_Object:
-        case RTTI::ClassType_Struct:
-        case RTTI::ClassType_Pod:
-            unpackObject(object, desiredType, buffer);
-            break;
-        case RTTI::ClassType_Variant:
-        default:
-            be_notreached();
-            new (buffer) RTTI::Value();
-        }
+        be_notreached();
+        new (buffer) RTTI::Value();
     }
 }
 

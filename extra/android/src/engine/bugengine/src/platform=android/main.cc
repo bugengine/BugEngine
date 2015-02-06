@@ -28,7 +28,9 @@ public:
     {
     }
 protected:
-    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char *filename, int line, const char *msg) const
+    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level,
+                     const char *filename, int line,
+                     const char* thread, const char *msg) const
     {
         android_LogPriority s_bugengineToAndroid[logFatal+1] = {
                 ANDROID_LOG_VERBOSE,
@@ -39,7 +41,8 @@ protected:
                 ANDROID_LOG_FATAL
             };
         android_LogPriority p = s_bugengineToAndroid[int(level)];
-        __android_log_print(p, "BugEngine", "%s|%d: [%s] %s", filename, line, logname.c_str(), msg);        
+        __android_log_print(p, "BugEngine", "%s|%d: [%s:%s] %s",
+                            filename, line, thread, logname.c_str(), msg);
         return true;
     }
 };
