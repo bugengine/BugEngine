@@ -1,5 +1,5 @@
 from py_bugengine import BugEngine
-
+print(BugEngine)
 def help(klass):
     print('class %s' % klass.name)
     print('List of methods:')

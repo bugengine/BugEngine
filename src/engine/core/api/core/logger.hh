@@ -31,7 +31,8 @@ class ILogListener : public minitl::refcountable
 protected:
     static be_api(CORE) const char* s_logNames[];
     virtual ~ILogListener() {}
-    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line, const char *msg) const = 0;
+    virtual bool log(const istring& logname, LogLevel level, const char *filename, int line,
+                     const char* thread, const char *msg) const = 0;
 };
 
 class be_api(CORE) Logger : public minitl::refcountable
@@ -58,6 +59,7 @@ public:
 private:
     void addListener(minitl::weak<ILogListener> listener);
     void removeListener(minitl::weak<ILogListener> listener);
+    bool doLog(LogLevel level, istring logName, const char *filename, int line, const char *msg) const;
 };
 
 struct ScopedLogListener

@@ -3,6 +3,7 @@
 
 #include    <python/stdafx.h>
 #include    <python/pythonlib.hh>
+#include    <py_log.hh>
 #include    <py_object.hh>
 #include    <py_number.hh>
 #include    <py_string.hh>
@@ -36,6 +37,7 @@ static PyModuleDef s_module =
 
 void setupModule(PyObject* module)
 {
+    PyBugLog::registerType(module);
     PyBugPlugin::registerType(module);
     PyBugObject::registerType(module);
     PyBugNumber::registerType(module);

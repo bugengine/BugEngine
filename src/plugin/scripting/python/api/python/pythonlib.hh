@@ -118,9 +118,12 @@ public:
     PyBytes_AsStringType                    m_PyBytes_AsString;
 
     PyBool_FromLongType                     m_PyBool_FromLong;
-    PyLong_FromLongType                     m_PyLong_FromLong;
-    PyLong_FromSsize_tType                  m_PyLong_FromSsize_t;
+    PyLong_FromUnsignedLongLongType         m_PyLong_FromUnsignedLongLong;
+    PyLong_AsUnsignedLongLongMaskType       m_PyLong_AsUnsignedLongLongMask;
+    PyInt_FromLongType                      m_PyInt_FromLong;
+    PyInt_AsUnsignedLongMaskType            m_PyInt_AsUnsignedLongMask;
     PyFloat_FromDoubleType                  m_PyFloat_FromDouble;
+    PyFloat_AsDoubleType                    m_PyFloat_AsDouble;
 
     PyErr_SetStringType                     m_PyErr_SetString;
     PyErr_FormatType                        m_PyErr_Format;
@@ -131,6 +134,9 @@ public:
     PyExc_ImportErrorType                   m_PyExc_ImportError;
     PyExc_IndexErrorType                    m_PyExc_IndexError;
     PyExc_TypeErrorType                     m_PyExc_TypeError;
+
+    PySys_GetObjectType                     m_PySys_GetObject;
+    PySys_SetObjectType                     m_PySys_SetObject;
 };
 
 extern ref<PythonLibrary> s_library;

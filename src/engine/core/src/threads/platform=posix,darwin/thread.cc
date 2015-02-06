@@ -32,6 +32,29 @@ public:
     static void* threadWrapper(void* params);
 };
 
+struct ThreadData
+{
+    pthread_key_t key;
+    istring name;
+    ThreadData()
+        :   name("main")
+    {
+        pthread_key_create(&key, 0);
+        pthread_setspecific(key, &name);
+#if BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD
+        pthread_setname_np(pthread_self(), name.c_str());
+#elif BE_PLATFORM_MACOSX
+        pthread_setname_np(name.c_str());
+#endif
+    }
+    ~ThreadData()
+    {
+        pthread_key_delete(key);
+    }
+};
+
+static ThreadData s_data;
+
 Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2)
 :   m_name(name)
 ,   m_function(f)
@@ -49,6 +72,12 @@ Thread::ThreadParams::~ThreadParams()
 void* Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = reinterpret_cast<ThreadParams*>(params);
+    pthread_setspecific(s_data.key, &p->m_name);
+#if BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD
+    pthread_setname_np(pthread_self(), p->m_name.c_str());
+#elif BE_PLATFORM_MACOSX
+    pthread_setname_np(p->m_name.c_str());
+#endif
     be_debug("started thread %s" | p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
     be_info("stopped thread %s" | p->m_name);
@@ -106,7 +135,15 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    return istring(minitl::format<128u>("thread %d") | currentId());
+    istring* name = static_cast<istring*>(pthread_getspecific(s_data.key));
+    if (name)
+    {
+        return *name;
+    }
+    else
+    {
+        return istring(minitl::format<128u>("%d") | currentId());
+    }
 }
 
 void Thread::wait() const

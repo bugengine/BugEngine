@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
 #include    <userenv.h>
+#include    <stdlib.h>
 
 typedef BOOL (WINAPI *GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);
 
@@ -75,6 +76,11 @@ size_t Environment::getProcessorCount() const
     SYSTEM_INFO i;
     GetSystemInfo(&i);
     return i.dwNumberOfProcessors;
+}
+
+const char* Environment::getEnvironmentVariable(const char *variable) const
+{
+    return getenv(variable);
 }
 
 }

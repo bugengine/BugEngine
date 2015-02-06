@@ -106,7 +106,7 @@ PyTypeObject PyBugString::s_pyType =
     0,
     0,
     0,
-    0,
+    &PyBugString::str,
     0,
     0,
     0,
@@ -219,6 +219,44 @@ PyObject* PyBugString::repr(PyObject *self)
                 | be_typeid<ipath>::klass()->fullname());
         return toString("[%s%s%s\"%s\"]", constness, reference, access,
                         v.as<const ipath&>().str().name);
+    default:
+        be_unimplemented();
+        return 0;
+    }
+}
+
+PyObject* PyBugString::str(PyObject *self)
+{
+    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    const RTTI::Value& v = self_->value;
+    const RTTI::Type t = v.type();
+
+    typedef PyObject* (*toStringType)(const char* format);
+    toStringType toString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromString
+            :   s_library->m_PyString_FromString;
+    switch (t.metaclass->index())
+    {
+    case 0:
+        be_assert(be_typeid<istring>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<istring>::klass()->fullname());
+        return toString(v.as<istring>().c_str());
+    case 1:
+        be_assert(be_typeid<inamespace>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<inamespace>::klass()->fullname());
+        return toString(v.as<const inamespace&>().str().name);
+    case 2:
+        be_assert(be_typeid<ifilename>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<ifilename>::klass()->fullname());
+        return toString(v.as<const ifilename&>().str().name);
+    case 3:
+        be_assert(be_typeid<ipath>::klass() == t.metaclass,
+                  "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname()
+                | be_typeid<ipath>::klass()->fullname());
+        return toString(v.as<const ipath&>().str().name);
     default:
         be_unimplemented();
         return 0;
