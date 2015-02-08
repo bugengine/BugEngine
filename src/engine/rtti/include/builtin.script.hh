@@ -1,6 +1,9 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
+#ifndef BE_RTTI_BUILTIN_SCRIPT_HH_
+#define BE_RTTI_BUILTIN_SCRIPT_HH_
+/**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 
@@ -738,4 +741,7 @@ be_pod float4x4
     float4& operator[](u32);
 };
 
+#endif
+
+/**************************************************************************************************/
 #endif

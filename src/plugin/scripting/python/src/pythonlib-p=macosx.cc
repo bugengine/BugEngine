@@ -94,6 +94,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyDict_SetItem);
         be_get_func(PyDict_DelItem);
         be_get_func(PyDict_Next);
+        be_get_func(PyDict_GetItemString);
+        be_get_func(PyDict_SetItemString);
         if (m_version < 30)
         {
             be_get_func(PyString_FromString);
@@ -125,6 +127,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyErr_SetString);
         be_get_func(PyErr_Format);
         be_get_func(PyErr_BadArgument);
+        be_get_func(PyFloat_Type);
         be_get_func(PyExc_Exception);
         be_get_func(PyExc_AttributeError);
         be_get_func(PyExc_ImportError);

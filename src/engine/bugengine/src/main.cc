@@ -16,9 +16,6 @@
 #include    <cstdlib>
 #include    <unistd.h>
 
-#include    <rtti/engine/array.hh>
-
-
 namespace
 {
     class FileLogListener : public BugEngine::ILogListener
@@ -67,6 +64,7 @@ namespace
                                           | msg
                                           | (msg[strlen(msg)-1] == '\n' ? "" : "\n");
             OutputDebugString(message);
+# define isatty(x) 0
 #endif
             static const char* term = BugEngine::Environment::getEnvironment().getEnvironmentVariable("TERM");
             static const char* colors[] = {
@@ -78,6 +76,9 @@ namespace
                 isatty(1) && term ? "\x1b[31m" : "",
                 isatty(1) && term ? "\x1b[35m" : ""
             };
+#ifdef BE_PLATFORM_WIN32
+# undef isatty
+#endif
             const char* color = colors[0];
             switch(level)
             {
