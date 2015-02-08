@@ -65,7 +65,7 @@ ArgInfo::ArgInfo(const istring name, PyObject* object)
 }
 
 static raw<const RTTI::Method::Parameter> findParameter(raw<const RTTI::Method::Parameter> parameters,
-                                                                  const istring name)
+                                                        const istring name)
 {
     raw<const RTTI::Method::Parameter> result = { 0 };
     for (result = parameters; result && result->name != name; result = result->next)
@@ -182,7 +182,6 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
         o = o->next;
     }
 
-    PyObject* result = 0;
     if (bestOverload)
     {
         RTTI::Value* values = (RTTI::Value*)malloca(argCount * sizeof(RTTI::Value));
@@ -193,19 +192,26 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* args, PyObject* kwargs)
             values[i].~Value();
         }
         freea(values);
-        result = PyBugObject::create(v);
+        for (u32 i = argCount; i > 0; --i)
+        {
+            argInfos[i-1].~ArgInfo();
+        }
+        freea(argInfos);
+        return PyBugObject::create(v);
     }
     else
     {
-        s_library->m_PyErr_BadArgument();
+        for (u32 i = argCount; i > 0; --i)
+        {
+            argInfos[i-1].~ArgInfo();
+        }
+        freea(argInfos);
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  "Could not call method %s: "
+                                  "no overlaod could convert all parameters",
+                                  method->name.c_str());
+        return 0;
     }
-
-    for (u32 i = argCount; i > 0; --i)
-    {
-        argInfos[i-1].~ArgInfo();
-    }
-    freea(argInfos);
-    return 0;
 }
 
 }}

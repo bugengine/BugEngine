@@ -101,6 +101,8 @@ public:
     PyDict_SetItemType                      m_PyDict_SetItem;
     PyDict_DelItemType                      m_PyDict_DelItem;
     PyDict_NextType                         m_PyDict_Next;
+    PyDict_GetItemStringType                m_PyDict_GetItemString;
+    PyDict_SetItemStringType                m_PyDict_SetItemString;
 
     PyString_FromStringType                 m_PyString_FromString;
     PyString_FromStringAndSizeType          m_PyString_FromStringAndSize;
@@ -128,7 +130,8 @@ public:
     PyErr_SetStringType                     m_PyErr_SetString;
     PyErr_FormatType                        m_PyErr_Format;
     PyErr_BadArgumentType                   m_PyErr_BadArgument;
-    
+
+    PyFloat_TypeType                        m_PyFloat_Type;
     PyExc_ExceptionType                     m_PyExc_Exception;
     PyExc_AttributeErrorType                m_PyExc_AttributeError;
     PyExc_ImportErrorType                   m_PyExc_ImportError;

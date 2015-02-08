@@ -115,7 +115,8 @@ typedef PyObject* (*PyDict_GetItemType)(PyObject* dict, PyObject* key);
 typedef int (*PyDict_SetItemType)(PyObject* dict, PyObject* key, PyObject* item);
 typedef int (*PyDict_DelItemType)(PyObject* dict, PyObject* key);
 typedef int (*PyDict_NextType)(PyObject* dict, Py_ssize_t* pos, PyObject** key, PyObject** item);
-
+typedef PyObject* (*PyDict_GetItemStringType)(PyObject* dict, const char* key);
+typedef int (*PyDict_SetItemStringType)(PyObject* dict, const char* key, PyObject* value);
 typedef PyObject* (*PyString_FromStringType)(const char *v);
 typedef PyObject* (*PyString_FromStringAndSizeType)(const char *v, Py_ssize_t len);
 typedef PyObject* (*PyString_FromFormatType)(const char *format, ...);
@@ -144,6 +145,7 @@ typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message
 typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
 typedef int (*PyErr_BadArgumentType)();
 
+typedef PyTypeObject* PyFloat_TypeType;
 typedef PyTypeObject** PyExc_ExceptionType;
 typedef PyTypeObject** PyExc_AttributeErrorType;
 typedef PyTypeObject** PyExc_ImportErrorType;
