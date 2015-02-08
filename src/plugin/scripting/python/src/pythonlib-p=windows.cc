@@ -187,6 +187,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func(PyInt_AsUnsignedLongMask);
             be_get_func(PyInt_FromLong);
         }
+        be_get_func(PyLong_AsUnsignedLongLongMask);
+        be_get_func(PyLong_FromUnsignedLongLong);
         be_get_func(PyFloat_FromDouble);
         be_get_func(PyFloat_AsDouble);
         be_get_func(PyErr_SetString);
