@@ -216,7 +216,8 @@ class ClassDef(cpp.yacc.Nonterm):
         files[0].write('	{0},\n')
         files[0].write('	{&%s_constructor},\n' % decl)
         files[0].write('	%s,\n' % 2)
-        files[0].write('	{&%s}\n' % method_name)
+        files[0].write('	{&%s},\n' % method_name)
+        files[0].write('	false\n')
         files[0].write('};\n')
         return '{&%s_constructor}' % decl
 

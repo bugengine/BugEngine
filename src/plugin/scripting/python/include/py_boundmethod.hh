@@ -1,23 +1,30 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_PYTHON_PY_NAMESPACE_HH_
-#define BE_PYTHON_PY_NAMESPACE_HH_
+#ifndef BE_PYTHON_PY_BOUNDMETHOD_HH_
+#define BE_PYTHON_PY_BOUNDMETHOD_HH_
 /**************************************************************************************************/
 #include    <python/stdafx.h>
-#include    <py_object.hh>
+#include    <python/pythontypes.hh>
 
 namespace BugEngine { namespace Python
 {
 
-struct PyBugNamespace : public PyBugObject
+struct PyBugObject;
+
+struct PyBoundMethod
 {
+    PyObject                py_object;
+    raw<const RTTI::Method> method;
+    PyObject*               value;
+
     static void registerType(PyObject* module);
 
-    static PyObject* create(const RTTI::Value &value);
+    static PyObject* create(raw<const RTTI::Method> method, PyBugObject* value);
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
-    static PyObject* getattr(PyObject* self, const char* name);
     static PyObject* repr(PyObject* self);
+    static void dealloc(PyObject* self);
+    static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
 
     static PyTypeObject s_pyType;
 };

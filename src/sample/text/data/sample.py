@@ -26,8 +26,4 @@ def help(klass):
         print(' ', object.name)
         object = object.next
 
-t = BugEngine.RTTI.Type.makeType(BugEngine.RTTI.Class,
-                                 BugEngine.RTTI.Type.Indirection.RawPtr,
-                                 BugEngine.RTTI.Type.Constness.Const,
-                                 BugEngine.RTTI.Type.Constness.Const)
-help(t.metaclass)
+help(BugEngine.RTTI.Class)

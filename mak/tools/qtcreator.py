@@ -740,6 +740,7 @@ class QtCreator(Build.BuildContext):
                                             bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
                                             env.cxxprogram_PATTERN%self.launcher[0][0].target),
                                          'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
+                                         'TERM=xterm',
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),

@@ -81,6 +81,7 @@ published:
 
     raw<const Property> getProperty(istring name) const;
     raw<const Method> getMethod(istring name) const;
+    static Value findClass(inamespace name);
 public:
     typedef void(*EnumerateCallback)(const Value& v);
     enum EnumerateRecursion

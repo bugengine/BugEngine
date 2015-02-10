@@ -407,7 +407,7 @@ class Method(cpp.yacc.Nonterm):
         files[0].write('	0,\n')
         files[0].write('	%s\n' % self.trampoline)
         files[0].write('};\n')
-        return '{&%s}'% (method_name)
+        return '{&%s}'% (method_name), parent and not 'static' in self.value.attributes
 
 
 

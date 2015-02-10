@@ -56,6 +56,7 @@ published:
     raw<const Method>   call;
     u32                 overloadCount;
     raw<const Overload> overloads;
+    bool                instanceMethod;
 public:
     typedef Overload::Parameter Parameter;
 published:

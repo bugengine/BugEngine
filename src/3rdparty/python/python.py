@@ -18,7 +18,11 @@ def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
     if not var: var = '3rdparty.python%s'%(version_number)
     if 'posix' in conf.env.VALID_PLATFORMS:
-        cflags, libs = conf.run_pkg_config('python-%s'%version)
+        try:
+            cflags, libs = conf.run_pkg_config('python-%s'%version)
+        except Errors.WafError as error:
+            cflags = ['-I/usr/include/python%s'%version]
+            libs = ['-lpython%s'%version]
         conf.env['CFLAGS_%s'%var] = cflags
         conf.env['CXXFLAGS_%s'%var] = cflags
         conf.check(

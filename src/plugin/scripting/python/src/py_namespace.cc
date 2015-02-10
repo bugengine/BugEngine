@@ -4,6 +4,7 @@
 #include    <python/stdafx.h>
 #include    <python/pythonlib.hh>
 #include    <py_namespace.hh>
+#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -77,6 +78,21 @@ int PyBugNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
     be_forceuse(args);
     be_forceuse(kwds);
     return 0;
+}
+
+PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
+{
+    PyBugNamespace* self_ = reinterpret_cast<PyBugNamespace*>(self);
+    const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
+    istring name_(name);
+    for (raw<const RTTI::ObjectInfo> o = klass.objects; o; o = o->next)
+    {
+        if (o->name == name_)
+        {
+            return PyBugObject::create(o->value);
+        }
+    }
+    return PyBugObject::getattr(self, name);
 }
 
 PyObject* PyBugNamespace::repr(PyObject *self)

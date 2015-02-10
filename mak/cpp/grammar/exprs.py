@@ -258,7 +258,7 @@ class Exprs(cpp.yacc.Nonterm):
                 overload_ptr = '{0}'
                 index = 0
                 for overload in overloads:
-                    overload_ptr = overload.dump(files, namespace, parent, method_pretty_name, overload_ptr, index)
+                    overload_ptr, is_instance = overload.dump(files, namespace, parent, method_pretty_name, overload_ptr, index)
                     index = index+1
 
                 varname = 's_%s_method' % (method_pretty_name)
@@ -279,7 +279,8 @@ class Exprs(cpp.yacc.Nonterm):
                 files[0].write('	%s,\n' % chain)
                 files[0].write('	{&%s},\n' % varname)
                 files[0].write('	%s,\n' % index)
-                files[0].write('	%s\n' % overload_ptr)
+                files[0].write('	%s,\n' % overload_ptr)
+                files[0].write('	%s\n' % 'true' if is_instance else 'false')
                 files[0].write('};\n')
 
         return objects, (methods, constructor, cast), properties
