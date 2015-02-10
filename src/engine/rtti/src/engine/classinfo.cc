@@ -180,6 +180,17 @@ inamespace Class::fullname() const
     }
 }
 
+
+Value Class::findClass(inamespace name)
+{
+    Value v = Value(raw<const RTTI::Class>(be_game_Namespace()));
+    while (v && name.size())
+    {
+        v = v[name.pop_front()];
+    }
+    return v;
+}
+
 }
 
 raw<RTTI::Class> be_game_Namespace()

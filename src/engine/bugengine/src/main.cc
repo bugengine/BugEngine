@@ -64,7 +64,7 @@ namespace
                                           | msg
                                           | (msg[strlen(msg)-1] == '\n' ? "" : "\n");
             OutputDebugString(message);
-# define isatty(x) 0
+# define isatty(x) 1
 #endif
             static const char* term = BugEngine::Environment::getEnvironment().getEnvironmentVariable("TERM");
             static const char* colors[] = {
@@ -74,7 +74,7 @@ namespace
                 isatty(1) && term ? "\x1b[32m" : "",
                 isatty(1) && term ? "\x1b[33m" : "",
                 isatty(1) && term ? "\x1b[31m" : "",
-                isatty(1) && term ? "\x1b[35m" : ""
+                isatty(1) && term ? "\x1b[1;31m" : ""
             };
 #ifdef BE_PLATFORM_WIN32
 # undef isatty
@@ -108,6 +108,7 @@ namespace
                     colors[1], logname.c_str(), thread, normal,
                     //filename, line,
                     msg);
+            fflush(stdout);
             be_forceuse(filename);
             be_forceuse(line);
             if (msg[strlen(msg)-1] != '\n')

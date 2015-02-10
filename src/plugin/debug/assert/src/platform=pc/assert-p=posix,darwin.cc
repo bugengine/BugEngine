@@ -20,6 +20,8 @@ minitl::AssertionResult AssertionCallback(const char *file,
     fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     fprintf(stderr, "%s\n", message);
 
+    be_fatal("%s:%d Assertion failed: %s\n\t%s" | file | line | expr | message);
+
     Runtime::Callstack::Address address[128];
     size_t result = Runtime::Callstack::backtrace(address, 128, 1);
     Runtime::Symbol s;
