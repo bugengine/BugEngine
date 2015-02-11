@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 
 #include    <luavalue.hh>
-#include    <call.hh>
+#include    <luacall.hh>
 #include    <luacontext.hh>
 #include    <rtti/classinfo.script.hh>
 
@@ -94,9 +94,15 @@ extern "C" int valueGet(lua_State *state)
     if (!v)
     {
         lua_pushnil(state);
-        return 1;
     }
-    Context::push(state, v);
+    else if (v.type().indirection >= RTTI::Type::RawPtr && v.as<const void* const>() == 0)
+    {
+        lua_pushnil(state);
+    }
+    else
+    {
+        Context::push(state, v);
+    }
     return 1;
 }
 

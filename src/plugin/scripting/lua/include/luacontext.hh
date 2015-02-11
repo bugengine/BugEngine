@@ -19,7 +19,6 @@ class Context : public ScriptEngine<LuaScript>
 {
 private:
     lua_State*  m_state;
-    ref<Logger> m_logger;
 public:
     Context(const Plugin::Context& context);
     ~Context();
