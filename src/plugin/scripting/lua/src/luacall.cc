@@ -2,7 +2,7 @@
  see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <call.hh>
+#include    <luacall.hh>
 #include    <luacontext.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>

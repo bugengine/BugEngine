@@ -63,4 +63,10 @@ size_t Environment::getProcessorCount() const
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
+const char* Environment::getEnvironmentVariable(const char* variable) const
+{
+    be_forceuse(variable);
+    return NULL;
+}
+
 }

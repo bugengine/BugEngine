@@ -23,11 +23,27 @@ static minitl::Allocator& lua()
 namespace Lua
 {
 
+static ref<Logger> s_logger(Logger::instance("scripting.lua"));
+
 static const char* s_metaTables[] = {
     "BugEngine.Object",
     "BugEngine.Resource",
     "BugEngine.ResourceManager",
     "BugEngine.Plugin"
+};
+
+static const luaL_Reg loadedlibs[] = {
+  {"_G", luaopen_base},
+  //{LUA_LOADLIBNAME, luaopen_package},
+  {LUA_COLIBNAME, luaopen_coroutine},
+  {LUA_TABLIBNAME, luaopen_table},
+  //{LUA_IOLIBNAME, luaopen_io},
+  //{LUA_OSLIBNAME, luaopen_os},
+  {LUA_STRLIBNAME, luaopen_string},
+  {LUA_BITLIBNAME, luaopen_bit32},
+  {LUA_MATHLIBNAME, luaopen_math},
+  {LUA_DBLIBNAME, luaopen_debug},
+  {NULL, NULL}
 };
 
 void Context::typeError(lua_State* state, int narg, const char* expected, const char* got)
@@ -295,11 +311,11 @@ extern "C" int luaPrint(lua_State *L)
         if (lua_getstack(L, 1, &ar))
         {
             lua_getinfo(L, "Snl", &ar);
-            Logger::root()->log(logInfo, ar.source, ar.currentline, s);
+            s_logger->log(logInfo, ar.source, ar.currentline, s);
         }
         else
         {
-            be_info(s);
+            s_logger->log(logInfo, BE_FILE, BE_LINE, s);
         }
         lua_pop(L, 1); /* pop result */
     }
@@ -386,14 +402,14 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 }
 
 Context::Context(const Plugin::Context& context)
-: ScriptEngine<LuaScript>(Arena::lua(), context.resourceManager)
-, m_state(lua_newstate(&Context::luaAlloc, 0))
+    :   ScriptEngine<LuaScript>(Arena::lua(), context.resourceManager)
+    ,   m_state(lua_newstate(&Context::luaAlloc, 0))
 {
-    luaopen_base(m_state);
-    luaopen_table(m_state);
-    luaopen_string(m_state);
-    luaopen_math(m_state);
-    luaopen_debug(m_state);
+    for (const luaL_Reg* lib = loadedlibs; lib->func; lib++)
+    {
+        luaL_requiref(m_state, lib->name, lib->func, 1);
+        lua_pop(m_state, 1);
+    }
 
     luaL_newmetatable(m_state, "BugEngine.Object");
     lua_pushstring(m_state, "__index");
@@ -419,7 +435,8 @@ Context::Context(const Plugin::Context& context)
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_resourceLoaderMetaTable, 0);
 
-    weak<Resource::ResourceManager>* manager = (weak<Resource::ResourceManager>*)lua_newuserdata(m_state, sizeof(weak<Resource::ResourceManager>));
+    void* udata = lua_newuserdata(m_state, sizeof(weak<Resource::ResourceManager>));
+    weak<Resource::ResourceManager>* manager = (weak<Resource::ResourceManager>*)udata;
     new (manager) weak<Resource::ResourceManager>(context.resourceManager);
     luaL_getmetatable(m_state, "BugEngine.ResourceManager");
     lua_setmetatable(m_state, -2);

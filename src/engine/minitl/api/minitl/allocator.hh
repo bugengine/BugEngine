@@ -26,7 +26,10 @@ public:
         Block(Allocator& allocator, u64 count, u64 blockAlignment = 4)
             :   m_allocator(&allocator)
             ,   m_count(count)
-            ,   m_data((T*)allocator.alloc(align(sizeof(T), be_alignof(T))*count, max<u64>(blockAlignment, be_alignof(T))))
+            ,   m_data(count
+                       ? (T*)allocator.alloc(align(sizeof(T), be_alignof(T))*count,
+                                             max<u64>(blockAlignment, be_alignof(T)))
+                       : 0)
         {
         };
         ~Block()
@@ -140,14 +143,45 @@ T* Allocator::alloc()
 
 #include    <new>
 
-inline void* operator new(size_t size, minitl::Allocator& allocator)                         { return allocator.alloc(size); }
-inline void* operator new(size_t size, minitl::Allocator& allocator, size_t align)           { return allocator.alloc(size, align); }
-inline void  operator delete(void* ptr, minitl::Allocator& allocator)                        { allocator.free(ptr); }
-inline void  operator delete(void* ptr, minitl::Allocator& allocator, size_t /*align*/)      { allocator.free(ptr); }
-inline void* operator new[](size_t size, minitl::Allocator& allocator)                       { return allocator.alloc(size); }
-inline void* operator new[](size_t size, minitl::Allocator& allocator, size_t align)         { return allocator.alloc(size, align); }
-inline void  operator delete[](void* ptr, minitl::Allocator& allocator)                      { allocator.free(ptr); }
-inline void  operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*align*/)    { allocator.free(ptr); }
+inline void* operator new(size_t size, minitl::Allocator& allocator)
+{
+    return allocator.alloc(size);
+}
+
+inline void* operator new(size_t size, minitl::Allocator& allocator, size_t align)
+{
+    return allocator.alloc(size, align);
+}
+
+inline void  operator delete(void* ptr, minitl::Allocator& allocator)
+{
+    allocator.free(ptr);
+}
+
+inline void  operator delete(void* ptr, minitl::Allocator& allocator, size_t /*align*/)
+{
+    allocator.free(ptr);
+}
+
+inline void* operator new[](size_t size, minitl::Allocator& allocator)
+{
+    return allocator.alloc(size);
+}
+
+inline void* operator new[](size_t size, minitl::Allocator& allocator, size_t align)
+{
+    return allocator.alloc(size, align);
+}
+
+inline void  operator delete[](void* ptr, minitl::Allocator& allocator)
+{
+    allocator.free(ptr);
+}
+
+inline void  operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*align*/)
+{
+    allocator.free(ptr);
+}
 
 /**************************************************************************************************/
 #endif
