@@ -21,7 +21,6 @@ struct PyBoundMethod
     static void registerType(PyObject* module);
 
     static PyObject* create(raw<const RTTI::Method> method, PyBugObject* value);
-    static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* repr(PyObject* self);
     static void dealloc(PyObject* self);
     static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);

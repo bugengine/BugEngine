@@ -78,6 +78,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(_PyArg_ParseTupleAndKeywords_SizeT);
         be_get_func(PyObject_IsTrue);
         be_get_func(PyType_Ready);
+        be_get_func(PyType_GenericAlloc);
+        be_get_func(PyType_GenericNew);
         be_get_func(PyList_New);
         be_get_func(PyList_Size);
         be_get_func(PyList_GetItem);

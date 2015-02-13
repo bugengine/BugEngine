@@ -135,9 +135,9 @@ PyTypeObject PyBugObject::s_pyType =
     0,
     0,
     0,
-    &PyBugObject::init,
     0,
     0,
+    &PyBugObject::newinst,
     0,
     0,
     0,
@@ -200,12 +200,13 @@ PyObject* PyBugObject::create(const RTTI::Value& value)
     }
 }
 
-int PyBugObject::init(PyObject* self, PyObject* args, PyObject* kwds)
+PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    be_forceuse(self);
     be_forceuse(args);
     be_forceuse(kwds);
-    return 0;
+    PyBugObject* inst = reinterpret_cast<PyBugObject*>(type->tp_alloc(type, 0));
+    new (&inst->value) RTTI::Value();
+    return inst;
 }
 
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
@@ -768,7 +769,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::
                   "incompatible types: %s is not compatible with %s"
                     | object_->value.type().name().c_str()
                     | desiredType.name().c_str());
-        new (buffer) RTTI::Value(object_->value);
+        new (buffer) RTTI::Value(RTTI::Value::ByRef(object_->value));
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS))
     {
