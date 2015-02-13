@@ -1,4 +1,4 @@
-from py_bugengine import BugEngine
+from py_bugengine import *
 
 def help(klass):
     print('class %s' % klass.name)
@@ -26,4 +26,13 @@ def help(klass):
         print(' ', object.name)
         object = object.next
 
+ns = inamespace("BugEngine")
+print(ns)
+ns.push_back(istring("RTTI"))
+print(ns)
+ns.push_back(istring("Class"))
+print(ns)
+print(ns.pop_back())
+print(ns)
+print(ns.size())
 help(BugEngine.RTTI.Class)

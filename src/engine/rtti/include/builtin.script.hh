@@ -21,16 +21,37 @@ struct istring
 be_tag(Index(BugEngine::RTTI::ClassType_String + (1 << 16)))
 struct inamespace
 {
+published:
+    u32 size() const;
+    const istring& operator[](u32 index) const;
+
+    void push_back(const istring& component);
+    istring pop_back();
+    istring pop_front();
 };
 
 be_tag(Index(BugEngine::RTTI::ClassType_String + (2 << 16)))
 struct ifilename
 {
+published:
+    u32 size() const;
+    const istring& operator[](u32 index) const;
+
+    void push_back(const istring& component);
+    istring pop_back();
+    istring pop_front();
 };
 
 be_tag(Index(BugEngine::RTTI::ClassType_String + (3 << 16)))
 struct ipath
 {
+published:
+    u32 size() const;
+    const istring& operator[](u32 index) const;
+
+    void push_back(const istring& component);
+    istring pop_back();
+    istring pop_front();
 };
 
 }

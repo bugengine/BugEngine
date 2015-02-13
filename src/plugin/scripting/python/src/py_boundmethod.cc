@@ -48,7 +48,7 @@ PyTypeObject PyBoundMethod::s_pyType =
     0,
     0,
     0,
-    &PyBoundMethod::init,
+    0,
     0,
     0,
     0,
@@ -70,14 +70,6 @@ PyObject* PyBoundMethod::create(raw<const RTTI::Method> method, PyBugObject* val
     result->value = reinterpret_cast<PyObject*>(value);
     Py_INCREF(result->value);
     return reinterpret_cast<PyObject*>(result);
-}
-
-int PyBoundMethod::init(PyObject* self, PyObject* args, PyObject* kwds)
-{
-    be_forceuse(self);
-    be_forceuse(args);
-    be_forceuse(kwds);
-    return 0;
 }
 
 PyObject* PyBoundMethod::repr(PyObject *self)

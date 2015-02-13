@@ -100,8 +100,8 @@ PyTypeObject PyBugString<T>::s_pyType =
     0,
     &PyBugString<T>::dealloc,
     0,
-    0,
-    0,
+    &PyBugString<T>::getattr,
+    &PyBugString<T>::setattr,
     0,
     &PyBugString<T>::repr,
     0,
@@ -124,14 +124,14 @@ PyTypeObject PyBugString<T>::s_pyType =
     0,
     0,
     0,
-    0,
+    &PyBugObject::s_pyType,
     0,
     0,
     0,
     0,
     &PyBugString<T>::init,
     0,
-    0,
+    &PyBugString<T>::newinst,
     0,
     0,
     0,
@@ -161,10 +161,49 @@ PyObject* PyBugString<T>::create(const RTTI::Value& value)
 template< typename T >
 int PyBugString<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    /* todo */
-    be_forceuse(self);
-    be_forceuse(args);
     be_forceuse(kwds);
+    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    Py_ssize_t argCount = s_library->m_PyTuple_Size(args);
+    if (argCount == 0)
+    {
+        self_->value = RTTI::Value(T(""));
+    }
+    else if (argCount == 1)
+    {
+        PyObject* arg = s_library->m_PyTuple_GetItem(args, 0);
+        if (arg->py_type == &s_pyType)
+        {
+            self_->value = reinterpret_cast<PyBugString*>(arg)->value;
+        }
+        else if (arg->py_type->tp_flags & Py_TPFLAGS_STRING_SUBCLASS)
+        {
+            const char* value = s_library->m_PyString_AsString(arg);
+            self_->value = RTTI::Value(T(value));
+        }
+        else if (arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
+        {
+
+            if (s_library->getVersion() >= 33)
+            {
+                const char* value = s_library->m_PyUnicode_AsUTF8(arg);
+                self_->value = RTTI::Value(T(value));
+            }
+            else
+            {
+                PyObject* decodedUnicode = s_library->m_PyUnicode_AsUTF8String(arg);
+                const char* value = s_library->m_PyBytes_AsString(decodedUnicode);
+                self_->value = RTTI::Value(T(value));
+                Py_DECREF(decodedUnicode);
+            }
+        }
+        else
+        {
+            s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "Cannot convert from %s to %s",
+                                      arg->py_type->tp_name,
+                                      be_typeid<T>::type().metaclass->name.c_str());
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -229,6 +268,7 @@ void PyBugString<T>::registerType(PyObject* module)
         s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3StringNumber;
     else
         s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2StringNumber;
+    s_pyType.tp_alloc = s_library->m_PyType_GenericAlloc;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
