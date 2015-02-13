@@ -17,6 +17,7 @@ struct PyBugNamespace : public PyBugObject
     static PyObject* create(const RTTI::Value &value);
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* getattr(PyObject* self, const char* name);
+    static int setattr(PyObject* self, const char* name, PyObject* value);
     static PyObject* repr(PyObject* self);
 
     static PyTypeObject s_pyType;

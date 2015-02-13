@@ -147,7 +147,7 @@ PyObject* PyBugArray::create(const RTTI::Value& value)
     be_assert(t.metaclass->type() == RTTI::ClassType_String,
               "PyBugString only accepts String types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    new(&((PyBugString*)result)->value) RTTI::Value(value);
+    new(&((PyBugArray*)result)->value) RTTI::Value(value);
     return result;
 }
 

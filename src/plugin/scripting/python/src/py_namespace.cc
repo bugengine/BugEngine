@@ -18,7 +18,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     &PyBugNamespace::dealloc,
     0,
     &PyBugNamespace::getattr,
-    0,
+    &PyBugNamespace::setattr,
     0,
     &PyBugNamespace::repr,
     0,
@@ -93,6 +93,52 @@ PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
         }
     }
     return PyBugObject::getattr(self, name);
+}
+
+int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
+{
+    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    istring name_(name);
+    const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
+    for (raw<const RTTI::ObjectInfo> ob = klass.objects; ob; ob = ob->next)
+    {
+        if (ob->name == name_)
+        {
+            if (ob->value.type().access != RTTI::Type::Const)
+            {
+                u32 d = distance(value, ob->value.type());
+                if (d < RTTI::Type::MaxTypeDistance)
+                {
+                    RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+                    unpack(value, ob->value.type(), v);
+                    ob->value = *v;
+                    v->~Value();
+                    freea(v);
+                    return 0;
+                }
+                else
+                {
+                    s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                              "%s.%s is of type %s",
+                                              self_->value.type().name().c_str(),
+                                              name, ob->value.type().name().c_str());
+                    return -1;
+                }
+            }
+            else
+            {
+                s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                          "%s.%s is const",
+                                          self_->value.type().name().c_str(),
+                                          name);
+                return -1;
+            }
+        }
+    }
+    s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
+                              "%s object has no attribute %s",
+                              self_->value.type().name().c_str(), name);
+    return -1;
 }
 
 PyObject* PyBugNamespace::repr(PyObject *self)

@@ -10,6 +10,7 @@
 namespace BugEngine { namespace Python
 {
 
+template< typename T >
 struct PyBugString : public PyBugObject
 {
     static void registerType(PyObject* module);
@@ -21,6 +22,8 @@ struct PyBugString : public PyBugObject
     static int nonZero(PyObject* self);
 
     static PyTypeObject s_pyType;
+    static PyTypeObject::Py2NumberMethods s_py2StringNumber;
+    static PyTypeObject::Py3NumberMethods s_py3StringNumber;
 };
 
 }}

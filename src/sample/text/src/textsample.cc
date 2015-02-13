@@ -12,7 +12,7 @@ namespace BugEngine
 TextSample::TextSample(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
-    ,   m_pythonManager("plugin.scripting.python", pluginContext())
+    ,   m_pythonManager("plugin.scripting.python32", pluginContext())
     ,   m_luaManager("plugin.scripting.lua", pluginContext())
     ,   m_textManager("plugin.graphics.text", pluginContext())
     ,   m_3ddx("plugin.graphics.Dx9", pluginContext())

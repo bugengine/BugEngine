@@ -103,27 +103,21 @@ u32 Type::distance(const Type& other) const
 
 minitl::format<1024u> Type::name() const
 {
-    static const char *constnessPrefix[] = {
-        "const ",
+    static const char *constnessString[] = {
+        "=",
         ""
     };
-    static const char* indirectionPrefix[] = {
+    static const char* indirectionString[] = {
         "",
-        "raw<",
-        "weak<",
-        "ref<"
-    };
-    static const char* indirectionSuffix[] = {
-        "",
-        ">",
-        ">",
-        ">"
+        "*",
+        "!",
+        "#"
     };
     return minitl::format<1024u>("%s%s%s%s")
-            | indirectionPrefix[indirection]
-            | constnessPrefix[constness]
-            | metaclass->fullname()
-            | indirectionSuffix[indirection];
+            |   (indirection == Value ? "" : constnessString[constness])
+            |   indirectionString[indirection]
+            |   constnessString[access]
+            |   metaclass->fullname();
 }
 
 bool Type::isA(const Type& other) const
