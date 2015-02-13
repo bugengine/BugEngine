@@ -27,15 +27,17 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     }
     else
     {
-#       define be_get_func_opt(f)                                                   \
+#       define be_get_func_opt(f, dest)                                             \
             do {                                                                    \
                 void* tmp = dlsym(m_handle, #f);                                    \
-                memcpy(&m_##f, &tmp, sizeof(f##Type));                              \
+                memcpy(&m_##dest, &tmp, sizeof(dest##Type));                        \
             } while(0)
-#       define be_get_func(f)                                                       \
+#       define be_get_func_opt(f)                                                   \
+            be_get_func_name_opt(f, f)
+#       define be_get_func(f, dest)                                                 \
             do {                                                                    \
-                be_get_func_opt(f);                                                  \
-                if (!m_##f)                                                         \
+                be_get_func_opt(f, dest);                                           \
+                if (!m_##dest)                                                      \
                 {                                                                   \
                     be_error("could not locate function %s in module %s"            \
                                 | #f                                                \
@@ -43,6 +45,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
                     m_status = false;                                               \
                 }                                                                   \
             } while(0)
+#       define be_get_func(f)                                                       \
+            be_get_func_name(f, f)
         be_get_func(Py_SetPythonHome);
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
@@ -107,13 +111,23 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         else
         {
-            be_get_func(PyUnicode_FromString);
-            be_get_func(PyUnicode_FromStringAndSize);
-            be_get_func(PyUnicode_FromFormat);
+            be_get_func_name_opt(PyUnicode_FromString, PyUnicode_FromString);
+            be_get_func_name_opt(PyUnicodeUCS2_FromString, PyUnicode_FromString);
+            be_get_func_name_opt(PyUnicodeUCS4_FromString, PyUnicode_FromString);
+            be_get_func_name_opt(PyUnicode_FromStringAndSize, PyUnicode_FromStringAndSize);
+            be_get_func_name_opt(PyUnicodeUCS2_FromStringAndSize, PyUnicode_FromStringAndSize);
+            be_get_func_name_opt(PyUnicodeUCS4_FromStringAndSize, PyUnicode_FromStringAndSize);
+            be_get_func_name_opt(PyUnicode_FromFormat, PyUnicode_FromFormat);
+            be_get_func_name_opt(PyUnicodeUCS2_FromFormat, PyUnicode_FromFormat);
+            be_get_func_name_opt(PyUnicodeUCS4_FromFormat, PyUnicode_FromFormat);
+            be_get_func_name_opt(PyUnicode_AsASCIIString, PyUnicode_AsASCIIString);
+            be_get_func_name_opt(PyUnicodeUCS2_AsASCIIString, PyUnicode_AsASCIIString);
+            be_get_func_name_opt(PyUnicodeUCS4_AsASCIIString, PyUnicode_AsASCIIString);
+            be_get_func_name_opt(PyUnicode_AsUTF8String, PyUnicode_AsUTF8String);
+            be_get_func_name_opt(PyUnicodeUCS2_AsUTF8String, PyUnicode_AsUTF8String);
+            be_get_func_name_opt(PyUnicodeUCS4_AsUTF8String, PyUnicode_AsUTF8String);
             if (m_version >= 33)
                 be_get_func(PyUnicode_AsUTF8);
-            be_get_func(PyUnicode_AsASCIIString);
-            be_get_func(PyUnicode_AsUTF8String);
             be_get_func(PyBytes_AsString);
         }
         be_get_func(PyBool_FromLong);

@@ -11,9 +11,8 @@
 namespace BugEngine { namespace Python
 {
 
-struct PyBugObject
+struct PyBugObject : public PyObject
 {
-    PyObject    py_object;
     RTTI::Value value;
 
     static void registerType(PyObject* module);

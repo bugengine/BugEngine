@@ -40,8 +40,21 @@ void setupModule(PyObject* module)
     PyBugLog::registerType(module);
     PyBugPlugin::registerType(module);
     PyBugObject::registerType(module);
-    PyBugNumber::registerType(module);
-    PyBugString::registerType(module);
+    PyBugNumber<bool>::registerType(module);
+    PyBugNumber<u8>::registerType(module);
+    PyBugNumber<u16>::registerType(module);
+    PyBugNumber<u32>::registerType(module);
+    PyBugNumber<u64>::registerType(module);
+    PyBugNumber<i8>::registerType(module);
+    PyBugNumber<i16>::registerType(module);
+    PyBugNumber<i32>::registerType(module);
+    PyBugNumber<i64>::registerType(module);
+    PyBugNumber<float>::registerType(module);
+    PyBugNumber<double>::registerType(module);
+    PyBugString<istring>::registerType(module);
+    PyBugString<inamespace>::registerType(module);
+    PyBugString<ipath>::registerType(module);
+    PyBugString<ifilename>::registerType(module);
     PyBugArray::registerType(module);
     PyBugNamespace::registerType(module);
 }

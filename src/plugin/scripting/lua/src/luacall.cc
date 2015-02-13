@@ -12,6 +12,21 @@ namespace BugEngine { namespace Lua
 
 static int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value);
 
+static int convertNilToValue(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
+{
+    be_forceuse(state);
+    be_forceuse(index);
+    if (type.indirection >= RTTI::Type::RawPtr)
+    {
+        new (value) RTTI::Value(type, RTTI::Value::Reserve);
+        *static_cast<void**>(value->memory()) = 0;
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
 static int convertStringToValue(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
 {
     if (type.metaclass->type() == RTTI::ClassType_String)
@@ -261,6 +276,8 @@ static int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value*
     int t = lua_type(state, index);
     switch (t)
     {
+    case LUA_TNIL:
+        return convertNilToValue(state, index, type, value);
     case LUA_TSTRING:
         return convertStringToValue(state, index, type, value);
     case LUA_TBOOLEAN:
