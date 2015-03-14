@@ -33,6 +33,19 @@ def allarchs(arch):
 
 
 @conf
+def get_gcc_version_float(self, version):
+    version_number = 0.0
+    div = 1.0
+    for i in version.split('.'):
+        try:
+            version_number += float(i)*div
+            div = div*0.1
+        except ValueError:
+            pass
+    return version_number
+
+
+@conf
 def parse_gcc_target(conf, target):
     for gccname,aname in conf.gcc_architectures:
         if target.find(gccname) != -1:

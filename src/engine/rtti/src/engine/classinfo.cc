@@ -12,6 +12,234 @@
 namespace BugEngine { namespace RTTI
 {
 
+const istring Class::nameConstructor()
+{
+    static const istring result = "?new";
+    return result;
+}
+
+const istring Class::nameDestructor()
+{
+    static const istring result = "?del";
+    return result;
+}
+
+const istring Class::nameOperatorCall()
+{
+    static const istring result = "?()";
+    return result;
+}
+
+const istring Class::nameOperatorIndex()
+{
+    static const istring result = "?[]";
+    return result;
+}
+
+const istring Class::nameOperatorLessThan()
+{
+    static const istring result = "?<";
+    return result;
+}
+
+const istring Class::nameOperatorGreaterThan()
+{
+    static const istring result = "?>";
+    return result;
+}
+
+const istring Class::nameOperatorLessThanOrEqual()
+{
+    static const istring result = "?<=";
+    return result;
+}
+
+const istring Class::nameOperatorGreaterThanOrEqual()
+{
+    static const istring result = "?>=";
+    return result;
+}
+
+const istring Class::nameOperatorMultiply()
+{
+    static const istring result = "?*";
+    return result;
+}
+
+const istring Class::nameOperatorDivide()
+{
+    static const istring result = "?*";
+    return result;
+}
+
+const istring Class::nameOperatorModulo()
+{
+    static const istring result = "?%";
+    return result;
+}
+
+const istring Class::nameOperatorAdd()
+{
+    static const istring result = "?+";
+    return result;
+}
+
+const istring Class::nameOperatorSubstract()
+{
+    static const istring result = "?-";
+    return result;
+}
+
+const istring Class::nameOperatorShiftLeft()
+{
+    static const istring result = "?<<";
+    return result;
+}
+
+const istring Class::nameOperatorShiftRight()
+{
+    static const istring result = "?>>";
+    return result;
+}
+
+const istring Class::nameOperatorBitwiseAnd()
+{
+    static const istring result = "?&";
+    return result;
+}
+
+const istring Class::nameOperatorBitwiseOr()
+{
+    static const istring result = "?|";
+    return result;
+}
+
+const istring Class::nameOperatorBitwiseXor()
+{
+    static const istring result = "?^";
+    return result;
+}
+
+const istring Class::nameOperatorBitwiseNot()
+{
+    static const istring result = "?~";
+    return result;
+}
+
+const istring Class::nameOperatorLogicalAnd()
+{
+    static const istring result = "?&&";
+    return result;
+}
+
+const istring Class::nameOperatorLogicalOr()
+{
+    static const istring result = "?||";
+    return result;
+}
+
+const istring Class::nameOperatorLogicalNot()
+{
+    static const istring result = "?!";
+    return result;
+}
+
+const istring Class::nameOperatorEqual()
+{
+    static const istring result = "?==";
+    return result;
+}
+
+const istring Class::nameOperatorNotEqual()
+{
+    static const istring result = "?!=";
+    return result;
+}
+
+const istring Class::nameOperatorAssign()
+{
+    static const istring result = "?=";
+    return result;
+}
+
+const istring Class::nameOperatorMultiplyAssign()
+{
+    static const istring result = "?*=";
+    return result;
+}
+
+const istring Class::nameOperatorDivideAssign()
+{
+    static const istring result = "?/=";
+    return result;
+}
+
+const istring Class::nameOperatorModuloAssign()
+{
+    static const istring result = "?%=";
+    return result;
+}
+
+const istring Class::nameOperatorAddAssign()
+{
+    static const istring result = "?+=";
+    return result;
+}
+
+const istring Class::nameOperatorSubstractAssign()
+{
+    static const istring result = "?-=";
+    return result;
+}
+
+const istring Class::nameOperatorShiftLeftAssign()
+{
+    static const istring result = "?<<=";
+    return result;
+}
+
+const istring Class::nameOperatorShiftRightAssign()
+{
+    static const istring result = "?>>=";
+    return result;
+}
+
+const istring Class::nameOperatorAndAssign()
+{
+    static const istring result = "?&=";
+    return result;
+}
+
+const istring Class::nameOperatorOrAssign()
+{
+    static const istring result = "?|=";
+    return result;
+}
+
+const istring Class::nameOperatorXorAssign()
+{
+    static const istring result = "?^=";
+    return result;
+}
+
+const istring Class::nameOperatorIncrement()
+{
+    static const istring result = "?++";
+    return result;
+}
+
+const istring Class::nameOperatorDecrement()
+{
+    static const istring result = "?--";
+    return result;
+}
+
+const istring Class::nameOperatorGet()
+{
+    static const istring result = "?->";
+    return result;
+}
+
 void Class::copy(const void* src, void* dst) const
 {
     be_assert_recover(copyconstructor, "no copy for type %s" | name, return);
@@ -139,7 +367,7 @@ bool Class::isA(raw<const Class> klass) const
 
 Value Class::getTag(const Type& type) const
 {
-    raw<Tag> tag = tags;
+    raw<const Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())
@@ -180,7 +408,6 @@ inamespace Class::fullname() const
     }
 }
 
-
 Value Class::findClass(inamespace name)
 {
     Value v = Value(raw<const RTTI::Class>(be_game_Namespace()));
@@ -189,6 +416,43 @@ Value Class::findClass(inamespace name)
         v = v[name.pop_front()];
     }
     return v;
+}
+
+void Class::buildCache()
+{
+    constructor.set(0);
+    call.set(0);
+    for (raw<const RTTI::Method> method = methods;
+         method != (parent ? parent->methods
+                           : raw<const RTTI::Method>::null());
+         method = method->next)
+    {
+        if (method->name == nameConstructor())
+        {
+            be_assert(!constructor, "constructor already set for class %s" | fullname());
+            constructor = method;
+        }
+        if (method->name == nameOperatorCall())
+        {
+            be_assert(!call, "call operator already set for class %s" | fullname());
+            call = method;
+        }
+    }
+    for (raw<const RTTI::ObjectInfo> object = objects;
+         object != (parent ? parent->objects : raw<const RTTI::ObjectInfo>::null());
+         object = object->next)
+    {
+        if (object->name == nameConstructor())
+        {
+            be_assert(!constructor, "constructor already set for class %s" | fullname());
+            constructor = object->value.as< const raw<const RTTI::Method> >();
+        }
+        if (object->name == nameOperatorCall())
+        {
+            be_assert(!call, "call operator already set for class %s" | fullname());
+            call = object->value.as< const raw<const RTTI::Method> >();
+        }
+    }
 }
 
 }

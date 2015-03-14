@@ -69,8 +69,7 @@ def set_sunos_suncc_options(conf, arch):
 @conf
 def set_sunos_gcc_options(conf, flags, version):
     v = conf.env
-    version = version.split('.')
-    version = float(version[0]) + float(version[1])/10
+    version_number = conf.get_gcc_version_float(version)
     v.append_unique('CFLAGS', flags + ['-fpic', '-fno-jump-tables'])
     v.append_unique('CXXFLAGS', flags + ['-fpic', '-fno-jump-tables'])
     v.append_unique('LINKFLAGS', flags + ['-static-libgcc', '-lposix4', '-lstdc++'])
@@ -79,7 +78,7 @@ def set_sunos_gcc_options(conf, flags, version):
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
-    if version >= 4.8:
+    if version_number >= 4.8:
         v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']

@@ -260,7 +260,7 @@ class BuildContext(Context.Context):
 		* calling :py:meth:`waflib.Build.BuildContext.post_build` to call user build functions
 		"""
 
-		Logs.info("Waf: Entering directory `%s'" % self.variant_dir)
+		#Logs.info("Waf: Entering directory `%s'" % self.variant_dir)
 		self.recurse([self.run_dir])
 		self.pre_build()
 
@@ -268,7 +268,7 @@ class BuildContext(Context.Context):
 		self.timer = Utils.Timer()
 
 		if self.progress_bar:
-			sys.stderr.write(Logs.colors.cursor_off)
+			sys.stdout.write(Logs.colors.cursor_off)
 		try:
 			self.compile()
 		finally:
@@ -277,8 +277,8 @@ class BuildContext(Context.Context):
 				self.to_log(self.progress_line(c, c, Logs.colors.BLUE, Logs.colors.NORMAL))
 				print('')
 				sys.stdout.flush()
-				sys.stderr.write(Logs.colors.cursor_on)
-			Logs.info("Waf: Leaving directory `%s'" % self.variant_dir)
+				sys.stdout.write(Logs.colors.cursor_on)
+			#Logs.info("Waf: Leaving directory `%s'" % self.variant_dir)
 		self.post_build()
 
 	def restore(self):

@@ -110,7 +110,7 @@ PyTypeObject PyBugArray::s_pyType =
     0,
     0,
     0,
-    Py_TPFLAGS_DEFAULT,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
     "Wrapper class for the C++ BugEngine array types",
     0,
     0,
@@ -126,7 +126,7 @@ PyTypeObject PyBugArray::s_pyType =
     0,
     0,
     0,
-    &PyBugArray::init,
+    0,
     0,
     0,
     0,
@@ -144,20 +144,11 @@ PyTypeObject PyBugArray::s_pyType =
 PyObject* PyBugArray::create(const RTTI::Value& value)
 {
     const RTTI::Type& t = value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_String,
-              "PyBugString only accepts String types");
+    be_assert(t.metaclass->type() == RTTI::ClassType_Array,
+              "PyBugString only accepts Array types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     new(&((PyBugArray*)result)->value) RTTI::Value(value);
     return result;
-}
-
-int PyBugArray::init(PyObject* self, PyObject* args, PyObject* kwds)
-{
-    /* todo */
-    be_forceuse(self);
-    be_forceuse(args);
-    be_forceuse(kwds);
-    return 0;
 }
 
 PyObject* PyBugArray::repr(PyObject *self)

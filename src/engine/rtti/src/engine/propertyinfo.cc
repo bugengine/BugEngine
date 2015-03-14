@@ -25,7 +25,7 @@ void Property::set(Value& from, const Value& value) const
 
 Value Property::getTag(const Type& type) const
 {
-    raw<Tag> tag = tags;
+    raw<const Tag> tag = tags;
     while(tag)
     {
         if (type <= tag->tag.type())

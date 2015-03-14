@@ -22,7 +22,7 @@ published:
         struct be_api(RTTI) Parameter
         {
         published:
-            raw<Tag> const              tags;
+            raw<const Tag> const        tags;
             raw<const Parameter> const  next;
             istring                     name;
             Type                        type;
@@ -33,7 +33,7 @@ published:
             Parameter& operator=(const Parameter&);
         };
     published:
-        raw<Tag> const          tags;
+        raw<const Tag> const    tags;
         raw<const Overload>     next;
         Type                    returnType;
         u32                     parameterCount;
@@ -56,7 +56,6 @@ published:
     raw<const Method>   call;
     u32                 overloadCount;
     raw<const Overload> overloads;
-    bool                instanceMethod;
 public:
     typedef Overload::Parameter Parameter;
 published:

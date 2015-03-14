@@ -13,12 +13,14 @@ def scan(self):
 
 ddf = """
 %s ${DDF}
--o ${TGT[0].parent.abspath()}
---doc ${TGT[2].abspath()}
--D ${MACROS_IGNORE}
+-d ${MACROS_IGNORE}
 --pch ${PCH}
---namespace ${PLUGIN}
+--module ${PLUGIN}
+--tmp ${TMPDIR}
 ${SRC[0].abspath()}
+${TGT[0].abspath()}
+${TGT[1].abspath()}
+${TGT[2].abspath()}
 """% sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
@@ -67,30 +69,11 @@ def datagen(self, node):
     tsk = self.create_task('datagen', node, outs)
     tsk.env.DDF = self.bld.bugenginenode.find_node('mak/ddf.py').abspath()
     tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/cpp/macros_ignore').abspath()
+    tsk.env.TMPDIR = self.bld.bldnode.parent.abspath()
     tsk.path = self.bld.variant_dir
     tsk.env.PCH = self.pchstop
     out_node.parent.mkdir()
-    tsk.dep_nodes = [
-            self.bld.bugenginenode.find_node('mak/ddf.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/lexer.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/parser.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/unit.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/exprs.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/namespace.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/name.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/using.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/tag.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/comment.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/struct.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/enum.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/method.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/variable.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/type.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/template.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/keywords.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/value.py'),
-            self.bld.bugenginenode.find_node('mak/cpp/grammar/skip.py'),
-        ]
+    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/ddf.py')] + self.bld.bugenginenode.find_node('mak/cpp').ant_glob('**/*.py')
     try:
         self.out_sources += outs
     except:

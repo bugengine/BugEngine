@@ -457,7 +457,7 @@ class Context(ctx):
 
 	def to_log(self, msg):
 		"""
-		Log some information to the logger (if present), or to stderr. If the message is empty,
+        Log some information to the logger (if present), or to stdout. If the message is empty,
 		it is not printed::
 
 			def build(bld):
@@ -473,8 +473,8 @@ class Context(ctx):
 		if self.logger:
 			self.logger.info(msg)
 		else:
-			sys.stderr.write(str(msg))
-			sys.stderr.flush()
+			sys.stdout.write(str(msg))
+			sys.stdout.flush()
 
 
 	def msg(self, msg, result, color=None):

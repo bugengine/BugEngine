@@ -15,7 +15,6 @@ struct PyBugArray : public PyBugObject
     static void registerType(PyObject* module);
     
     static PyObject* create(const RTTI::Value &value);
-    static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* repr(PyObject* self);
     static int nonZero(PyObject* self);
 

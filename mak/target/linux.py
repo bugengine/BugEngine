@@ -105,9 +105,8 @@ def set_linux_icc_options(self, flags, version, arch):
 @conf
 def set_linux_gcc_options(self, flags, version):
     v = self.env
-    version = version.split('.')
-    version = float(version[0]) + float(version[1])/10
-    if version >= 4:
+    version_number = self.get_gcc_version_float(version)
+    if version_number >= 4:
         v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
         v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
         v.CFLAGS_exportall = ['-fvisibility=default']
@@ -121,7 +120,7 @@ def set_linux_gcc_options(self, flags, version):
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
-    if version >= 4.8:
+    if version_number >= 4.8:
         v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -285,6 +284,7 @@ def configure(conf):
             if toolchain in seen:
                 continue
             if not conf.is_clang_working(os.path.join(directory, 'clang'), options):
+                pprint('YELLOW', 'clang %s in %s failed' % (version, directory))
                 continue
             seen.add(toolchain)
             env = conf.env.derive()

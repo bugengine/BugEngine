@@ -12,7 +12,7 @@ namespace BugEngine { namespace RTTI
 
 struct be_api(RTTI) Tag
 {
-    raw<Tag> const next;
+    raw<const Tag> const next;
     Value tag;
 };
 

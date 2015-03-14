@@ -1,110 +1,41 @@
-import cpp
+from cpp.tree import Variable
+
+def p_variable_array(p):
+    """
+        variable_array : LEFT_BRACKET value RIGHT_BRACKET
+    """
+    p[0] = '%s%s%s' % (p[1], p[2], p[3])
 
 
-class VariableItem(cpp.yacc.Nonterm):
-    "%nonterm"
+def p_variable_array_list_opt(p):
+    """
+        variable_array_list_opt : variable_array variable_array_list_opt
+                                |
+    """
+    if len(p) > 1:
+        p[0] = '%s%s' % (p[1], p[2])
+    else:
+        p[0] = ''
 
-    def variable(self, type, name):
-        "%reduce Type ID"
-        self.type = type.value
-        self.name = name.value
-        self.lineno = name.lineno
 
-    def method_ptr(self, method_ptr):
-        "%reduce MethodPointer"
-        self.type = method_ptr.type
-        self.name = method_ptr.name
-        self.lineno = method_ptr.lineno
+def p_variable_decl(p):
+    """
+        variable_decl : method_return_type ID variable_array_list_opt
+    """
+    p[0] = Variable(p[2], p[1]+p[3])
 
-class VariableAttributes(cpp.yacc.Nonterm):
-    "%nonterm"
 
-    def variable(self, variable):
-        "%reduce VariableItem"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = set([])
-        self.lineno = variable.lineno
+def p_variable_decl_method(p):
+    """
+        variable_decl : method_return_type LEFT_PARENTHESIS MULTIPLY ID RIGHT_PARENTHESIS LEFT_PARENTHESIS skip_parameters RIGHT_PARENTHESIS
+    """
 
-    def static_variable(self, static, variable):
-        "%reduce STATIC VariableAttributes"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.attributes.add('static')
-        self.lineno = variable.lineno
 
-    def mutable_variable(self, static, variable):
-        "%reduce MUTABLE VariableAttributes"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.attributes.add('mutable')
-        self.lineno = variable.lineno
-
-    def static_variable(self, static, variable):
-        "%reduce EXTERN VariableAttributes"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.attributes.add('extern')
-        self.lineno = variable.lineno
-
-class Variable(cpp.yacc.Nonterm):
-    "%nonterm"
-
-    def variable(self, variable):
-        "%reduce VariableAttributes"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.lineno = variable.lineno
-
-    def variable_array(self, variable, lbracket, value, rbracket):
-        "%reduce VariableAttributes LBRACKET Value RBRACKET"
-        self.type = variable.type + '['+value.value+']'
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.lineno = variable.lineno
-
-    def variable_value(self, variable, eq, value):
-        "%reduce VariableAttributes EQUAL Value"
-        self.type = variable.type
-        self.name = variable.name
-        self.attributes = variable.attributes
-        self.lineno = variable.lineno
-
-    def dump(self, files, namespace, parent, owner, previous_object, previous_property):
-        if parent and not 'static' in self.attributes:
-            tags = self.tags.dump(files, 's_%s_property' % self.name)
-            for name in [self.name] + self.tags.aliases:
-                pretty_name = name.replace('?', '_').replace('#', '_')
-                new_property = 's_%s_property' % pretty_name
-                files[0].write('static const ::BugEngine::RTTI::Property %s =\n' % new_property)
-                files[0].write('{\n')
-                files[0].write('	%s,\n' % tags)
-                files[0].write('	%s,\n' % previous_property)
-                files[0].write('	::BugEngine::istring("%s"),\n' % name)
-                files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % '::'.join(parent))
-                files[0].write('	::BugEngine::be_typeid< %s >::type(),\n' % self.type)
-                files[0].write('	&::BugEngine::RTTI::PropertyHelper< %s, %s, &%s::%s >::get\n' % (self.type, '::'.join(parent), '::'.join(parent), self.name))
-                files[0].write('};\n')
-                previous_property = '{&%s}' % new_property
-        else:
-            tags = self.tags.dump(files, 's_%s_property' % self.name)
-            for name in [self.name] + self.tags.aliases:
-                pretty_name = name.replace('?', '_').replace('#', '_')
-                new_object = 's_%s_property' % pretty_name
-                files[0].write('static const ::BugEngine::RTTI::ObjectInfo %s =\n' % new_object)
-                files[0].write('{\n')
-                files[0].write('	%s,\n' % previous_object)
-                files[0].write('	%s,\n' % tags)
-                files[0].write('	::BugEngine::istring("%s"),\n' % name)
-                if parent:
-                    files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(parent), self.name))
-                else:
-                    files[0].write('	::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s::%s))\n' % ('::'.join(namespace), self.name))
-                files[0].write('};\n')
-                previous_object = '{&%s}' % new_object
-
-        return previous_object, previous_property
+def p_variable_expr(p):
+    """
+        expr : attribute_left_list variable_decl SEMICOLON
+    """
+    if p[2]:
+        p[2].add_attributes(p[1][0])
+        p[2].add_tags(p[1][1])
+    p.parser.stack[-1].add_property(p[2])
