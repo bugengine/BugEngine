@@ -13,8 +13,8 @@ class World;
 
 struct Component
 {
-    void created(World& world)      { be_forceuse(world); }
-    void destroyed(World& world)    { be_forceuse(world); }
+    void created(World& world)      { (void)(world); }
+    void destroyed(World& world)    { (void)(world); }
 };
 
 }}

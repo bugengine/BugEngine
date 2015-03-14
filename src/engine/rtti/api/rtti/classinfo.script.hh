@@ -29,37 +29,65 @@ enum ClassType
     ClassType_Variant   = 8
 };
 
+
 be_tag(Index(ClassType_Namespace))
 struct be_api(RTTI) Class
 {
     friend struct Type;
     friend class Value;
 published:
-
+    static const istring nameConstructor();
+    static const istring nameDestructor();
+    static const istring nameOperatorCall();
+    static const istring nameOperatorIndex();
+    static const istring nameOperatorLessThan();
+    static const istring nameOperatorGreaterThan();
+    static const istring nameOperatorLessThanOrEqual();
+    static const istring nameOperatorGreaterThanOrEqual();
+    static const istring nameOperatorMultiply();
+    static const istring nameOperatorDivide();
+    static const istring nameOperatorModulo();
+    static const istring nameOperatorAdd();
+    static const istring nameOperatorSubstract();
+    static const istring nameOperatorShiftLeft();
+    static const istring nameOperatorShiftRight();
+    static const istring nameOperatorBitwiseAnd();
+    static const istring nameOperatorBitwiseOr();
+    static const istring nameOperatorBitwiseXor();
+    static const istring nameOperatorBitwiseNot();
+    static const istring nameOperatorLogicalAnd();
+    static const istring nameOperatorLogicalOr();
+    static const istring nameOperatorLogicalNot();
+    static const istring nameOperatorEqual();
+    static const istring nameOperatorNotEqual();
+    static const istring nameOperatorAssign();
+    static const istring nameOperatorMultiplyAssign();
+    static const istring nameOperatorDivideAssign();
+    static const istring nameOperatorModuloAssign();
+    static const istring nameOperatorAddAssign();
+    static const istring nameOperatorSubstractAssign();
+    static const istring nameOperatorShiftLeftAssign();
+    static const istring nameOperatorShiftRightAssign();
+    static const istring nameOperatorAndAssign();
+    static const istring nameOperatorOrAssign();
+    static const istring nameOperatorXorAssign();
+    static const istring nameOperatorIncrement();
+    static const istring nameOperatorDecrement();
+    static const istring nameOperatorGet();
+published:
     istring const               name;
-
     raw<const Class> const      owner;
-
     raw<const Class> const      parent;
-
     u32 const                   size;
-
     i32 const                   offset;
-
     u32 const                   id;
-
-    raw<Tag>                    tags;
-
+    raw<const Tag>              tags;
     raw<const Property>         properties;
-
     raw<const Method>           methods;
-
     raw<const ObjectInfo>       objects;
-
     be_tag(Alias("?call"))
     raw<const Method>           constructor;
-
-    raw<const Method>           cast;
+    raw<const Method>           call;
 public:
 
     typedef void (*CopyConstructor)(const void* source, void* destination);
@@ -92,6 +120,7 @@ public:
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
     u32 distance(raw<const Class> other) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
+    void buildCache();
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

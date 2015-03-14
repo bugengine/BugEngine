@@ -30,8 +30,7 @@ def set_windows_options(self, arch):
 @conf
 def set_windows_gcc_options(self, options, version):
     v = self.env
-    version = version.split('-')[0].split('.')
-    version = float(version[0]) + float(version[1])/10
+    version_number = self.get_gcc_version_float(version)
     v.append_unique('CFLAGS', options)
     v.append_unique('CXXFLAGS', options)
     v.append_unique('LINKFLAGS', options)
@@ -39,7 +38,7 @@ def set_windows_gcc_options(self, options, version):
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
-    if version >= 4.8:
+    if version_number >= 4.8:
         v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']

@@ -5,12 +5,7 @@ import os
 from optparse import OptionParser
 
 options = OptionParser()
-options.set_usage('ddf.py [options] file1 [file2... fileN]')
-options.add_option("-o", "--output", dest="file", help="Output file name", default='')
-options.add_option("-d", dest="macro", action="append", help="define <macro> so that it will be removed during parsing")
-options.add_option("-D", dest="macrofile", action="append", help="add the content of <macrofile> to the macros, one macro per line")
-options.add_option("-p", "--pch", dest="pch", help="insert an include for precompiled header at the start of the file")
-options.add_option("-n", "--namespace", dest="namespace", help="namespace root")
+options.set_usage('kernel_preprocess.py input output')
 
 
 global_macro_map = {
@@ -129,20 +124,11 @@ def doParse(source, output, macro = [], macrofile = [], pch="", name=""):
 
 if __name__ == '__main__':
     (options, args) = options.parse_args()
-    if not args:
+    if len(args) != 2:
         options.print_help()
-
-    for arg in args:
-        base,ext = os.path.splitext(arg)
-        path,filename = os.path.split(base)
-        sourcename = arg
-
-        outputname = options.file
-        if os.path.normpath(outputname) == os.path.normpath(sourcename):
-            raise Exception("source file and target file are the same: %s" % outputname)
-
-        path = os.path.abspath(os.path.split(sys.argv[0])[0])
-        if doParse(sourcename, outputname, options.macro, options.macrofile, options.pch, options.namespace) > 0:
-            exit(1)
-    exit(0)
+        exit(1)
+    else:
+        with open(args[1], 'w'):
+            pass
+        exit(0)
 

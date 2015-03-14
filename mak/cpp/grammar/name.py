@@ -1,57 +1,67 @@
-import cpp
+
+def p_name_item_id(p):
+    """
+        name_item : ID
+    """
+    p[0] = p[1]
 
 
-class NameItem(cpp.yacc.Nonterm):
-    "%nonterm"
-    def name_id(self, id):
-        "%reduce ID"
-        self.value = id.value
-        self.lineno = id.lineno
-    #def name_template_class(self, template, id):
-    #	"%reduce TEMPLATE ID"
-    #	self.value = template.value + " " + id.value
-    #	self.lineno = id.lineno
-    def name_typename(self, typename, id):
-        "%reduce TYPENAME ID"
-        self.value = typename.value + " " + id.value
-        self.lineno = id.lineno
-    def name_template(self, id, lt, skip, gt):
-        "%reduce ID LT SkipListTemplate GT"
-        self.value = id.value + " < " + skip.value + " >"
-        self.lineno = id.lineno
+def p_name_item_typename(p):
+    """
+        name_item : TYPENAME ID
+    """
+    p[0] = '%s %s' % (p[1], p[2])
 
-class Namelist(cpp.yacc.Nonterm):
-    "%nonterm"
-    def nameitem(self, name_item):
-        "%reduce NameItem"
-        self.value = name_item.value
-        self.lineno = name_item.lineno
-    def namelist(self, name_list, scope, name_item):
-        "%reduce Namelist SCOPE NameItem"
-        self.value = name_list.value + '::' + name_item.value
-        self.lineno = name_list.lineno
 
-class NamePrecedence(cpp.yacc.Precedence):
-    "%right <ScopePrecedence"
-class Name(cpp.yacc.Nonterm):
-    "%nonterm"
-    def name_absolute(self, scope, name_list):
-        "%reduce SCOPE Namelist [NamePrecedence]"
-        self.value = '::'+name_list.value
-        self.lineno = scope.lineno
-    def name(self, name_list):
-        "%reduce Namelist [NamePrecedence]"
-        self.value = name_list.value
-        self.lineno = name_list.lineno
+def p_name_item_template(p):
+    """
+        name_item : ID LESS_THAN skip_template_args GREATER_THAN
+    """
+    p[0] = '%s%s %s %s' % (p[1], p[2], p[3], p[4])
 
-class NameOpt(cpp.yacc.Nonterm):
-    "%nonterm"
-    def name(self, name):
-        "%reduce Name"
-        self.value = name.value
-        self.lineno = name.lineno
 
-    def empty(self):
-        "%reduce"
-        self.value = ""
-        self.lineno = 0
+def p_name_item_extended(p):
+    """
+        name_item_extended : name_item
+    """
+    p[0] = p[1]
+
+
+def p_name_item_extended_template(p):
+    """
+        name_item_extended : TEMPLATE ID LESS_THAN skip_template_args GREATER_THAN
+    """
+    p[0] = '%s %s%s %s %s' % (p[1], p[2], p[3], p[4], p[5])
+
+
+def p_name_list_extended(p):
+    """
+        name_list_extended : name_item_extended
+                           | name_item_extended SCOPE name_list_extended
+    """
+    if len(p) > 2:
+        p[0] = '%s%s%s' % (p[1], p[2], p[3])
+    else:
+        p[0] = p[1]
+
+
+def p_name_list(p):
+    """
+        name_list : name_item
+                  | name_item SCOPE name_list_extended
+    """
+    if len(p) > 2:
+        p[0] = '%s%s%s' % (p[1], p[2], p[3])
+    else:
+        p[0] = p[1]
+
+
+def p_name(p):
+    """
+        name : name_list
+             | SCOPE name_list
+    """
+    if len(p) > 2:
+        p[0] = '%s%s' % (p[1], p[2])
+    else:
+        p[0] = p[1]

@@ -12,7 +12,7 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 
 Object::Object(weak<Package> owner, u32 line, u32 begin, u32 end)
     :   Instance(owner, line, begin, end)
-    ,   m_method(0)
+    ,   m_method()
     ,   m_overloads(Arena::packageBuilder())
 {
 }
@@ -40,9 +40,9 @@ void Object::setMethod(ref<Reference> reference)
         RTTI::Value call = v[callName];
         if (call)
         {
-            if (call.isA(be_typeid<const RTTI::Method* const>::type()))
+            if (call.isA(be_typeid<raw<const RTTI::Method> const>::type()))
             {
-                m_method = call.as<const RTTI::Method* const>();
+                m_method = call.as<raw<const RTTI::Method> const>();
                 if (m_method)
                 {
                     m_overloads.clear();

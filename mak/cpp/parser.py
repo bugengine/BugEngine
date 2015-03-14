@@ -1,69 +1,50 @@
-import cpp
+from cpp.tokens import tokens
+from cpp import lexer
+from cpp.grammar import *
+from cpp.ply import lex, yacc
+import sys
+try:
+    from cStringIO import StringIO
+except ImportError:
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
 
+def p_error(p):
+    sys.stderr.write("%s:%d: error: Syntax error near unexpected token %s\n" %
+            (p.lexer.source, p.lineno, p.type.lower()))
+    p.lexer.error_count += 1
 
-spec = cpp.yacc.Spec(
-                [
-                    cpp.tokens,
-                    cpp.grammar.unit,
-                    cpp.grammar.exprs,
-                    cpp.grammar.namespace,
-                    cpp.grammar.name,
-                    cpp.grammar.using,
-                    cpp.grammar.tag,
-                    cpp.grammar.comment,
-                    cpp.grammar.struct,
-                    cpp.grammar.enum,
-                    cpp.grammar.method,
-                    cpp.grammar.variable,
-                    cpp.grammar.type,
-                    cpp.grammar.template,
-                    cpp.grammar.keywords,
-                    cpp.grammar.value,
-                    cpp.grammar.skip,
-                ],
-                pickleFile="../../cpp.pickle",
-                logFile="../../cpp.log",
-                graphFile="../../cpp.dot",
-                verbose=False)
+def parse(filename, class_output, instance_output, doc_output, pickle_file,
+          macro_files, precompiled_header, module_name):
+    for f in macro_files or []:
+        with open(f, 'r') as macro_defs:
+            for m in macro_defs.readlines():
+                lexer.lexer.define_macro(m)
+    with open(filename, 'r') as input:
+        lexer.lexer.source = filename
+        lexer.lexer.classes = StringIO()
+        lexer.lexer.instances = StringIO()
+        lexer.lexer.docs = StringIO()
+        parser = yacc.yacc(start='unit', picklefile=pickle_file)
+        parser.source = filename
+        parser.classes = lexer.lexer.classes
+        parser.instances = lexer.lexer.instances
+        parser.docs = lexer.lexer.docs
+        parser.root_namespace = module_name
 
-class Parser(cpp.yacc.Lr):
-    def __init__(self, filename, instancesname, docname, plugin, source, pch):
-        cpp.yacc.Lr.__init__(self, spec)
-        self.filename = filename
-        self.instancesname = instancesname
-        self.doc = docname
-        self.plugin = plugin
-        self.source = source
-        self.pch = pch
+        if precompiled_header:
+            parser.classes.write('#include <%s>\n' % precompiled_header)
+            parser.instances.write('#include <%s>\n' % precompiled_header)
+        parser.classes.write('#include <%s>\n' % filename)
+        parser.instances.write('#include <%s>\n' % filename)
+        parser.parse(input.read(), lexer=lexer.lexer)
 
-
-    def parse(self, input, lexer):
-        lexer.input(input)
-        t=lexer.token()
-        try:
-            while t:
-                tok = cpp.tokens.__dict__[t.type](self)
-                tok.value = t.value
-                tok.lineno = t.lineno
-                self.token(tok)
-                t=lexer.token()
-            self.eoi()
-        except SyntaxError as e:
-            print("%s:%d %s" % (self.source, t.lineno, str(e)))
-            raise
-        except Exception as e:
-            print("%s:%d %s" % (self.source, t.lineno, str(e)))
-            raise
-
-    def dump(self):
-        try:
-            with open(self.filename, 'w') as implementation:
-                with open(self.instancesname, 'w') as instances:
-                    with open(self.doc, 'w') as doc:
-                        if self.pch:
-                            implementation.write("#include    <%s>\n" % self.pch)
-                            instances.write("#include    <%s>\n" % self.pch)
-                        self.root.dump(implementation, instances, doc)
-        except IOError as e:
-            raise Exception("cannot open output file : %s" % str(e))
-
+    with open(class_output, 'w') as classes:
+        classes.write(parser.classes.getvalue())
+    with open(instance_output, 'w') as instances:
+        instances.write(parser.instances.getvalue())
+    with open(doc_output, 'w') as docs:
+        docs.write(parser.docs.getvalue())
+    return lexer.lexer.error_count

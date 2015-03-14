@@ -1,89 +1,116 @@
-import cpp
+
+def p_type_kw(p):
+    """
+        type_kw : INT
+                | SHORT
+                | CHAR
+                | LONG
+                | SIGNED
+                | UNSIGNED
+    """
+    p[0] = p[1]
 
 
-class TypeDef(cpp.yacc.Nonterm):
-    "%nonterm"
-
-    def type_class(self, cls):
-        "%reduce ClassDef"
-        self.value = cls
-        self.lineno = cls.lineno
-
-    def type_enum(self, cls):
-        "%reduce EnumDef"
-        self.value = cls
-        self.lineno = cls.lineno
+def p_type_builtin_list(p):
+    """
+        type_builtin_list : type_kw type_builtin_list
+                          |
+    """
+    if len(p) > 1:
+        p[0] = '%s %s'%(p[1], p[2])
+    else:
+        p[0] = ''
 
 
-
-class TypeDecl(cpp.yacc.Nonterm):
-    "%nonterm"
-
-    def class_declaration(self, type, name):
-        "%reduce CLASS Name"
-        self.lineno = name.lineno
-        self.value = name.value
-
-    def struct_declaration(self, type, name):
-        "%reduce STRUCT Name"
-        self.lineno = name.lineno
-        self.value = name.value
-
-    def union_declaration(self, type, name):
-        "%reduce UNION Name"
-        self.lineno = name.lineno
-        self.value = name.value
-
-    def enum_declaration(self, type, name):
-        "%reduce ENUM Name"
-        self.lineno = name.lineno
-        self.value = name.value
+def p_type_attribute(p):
+    """
+        type_attribute : CONST
+                       | VOLATILE
+    """
+    p[0] = p[1]
 
 
-class TypePart(cpp.yacc.Nonterm):
-    "%nonterm"
-
-    def type_definition(self, type):
-        "%reduce TypeDef"
-        self.lineno = type.lineno
-        self.value = type.value
-
-    def type_declaration(self, type):
-        "%reduce TypeDecl"
-        self.lineno = type.lineno
-        self.value = type.value
-
-    def type_name(self, type):
-        "%reduce Name"
-        self.lineno = type.lineno
-        self.value = type.value
-
-    def type_ptr(self, type, ptr):
-        "%reduce TypePart TIMES"
-        self.lineno = type.lineno
-        self.value = type.value+'*'
-
-    def type_ref(self, type, ref):
-        "%reduce TypePart AND"
-        self.lineno = type.lineno
-        self.value = type.value+'&'
-
-    def type_const(self, type, const):
-        "%reduce TypePart CONST"
-        self.lineno = type.lineno
-        self.value = type.value+' const'
+def p_type_attribute_list(p):
+    """
+        type_attribute_list : type_attribute type_attribute_list
+                            |
+    """
+    if len(p) > 1:
+        p[0] = '%s %s' %(p[1], p[2])
+    else:
+        p[0] = ''
 
 
+def p_type_access(p):
+    """
+        type_access : MULTIPLY
+                    | BITWISE_AND
+    """
+    p[0] = p[1]
 
 
-class Type(cpp.yacc.Nonterm):
-    "%nonterm"
+def p_type_access_list(p):
+    """
+        type_access_list : type_attribute_list type_access type_access_list
+                         | type_attribute_list
+    """
+    if len(p) == 4:
+        p[0] = '%s%s%s' % (p[1], p[2], p[3])
+    else:
+        p[0] = p[1]
 
-    def type(self, part):
-        "%reduce TypePart"
-        self.lineno = part.lineno
-        self.value = part.value
-    def type_const(self, const, part):
-        "%reduce CONST TypePart"
-        self.lineno = part.lineno
-        self.value = "const "+part.value
+
+def p_type(p):
+    """
+        type : name type_access_list
+             | type_declaration type_access_list
+    """
+    p[0] = '%s %s' % (p[1], p[2])
+
+
+def p_type_from_definition(p):
+    """
+        type : type_definition type_access_list
+    """
+    p[0] = '%s %s' % (p[1].cpp_name(), p[2])
+
+
+def p_type_keywords(p):
+    """
+        type : type_kw type_builtin_list type_access_list
+    """
+    p[0] = '%s %s%s' % (p[1], p[2], p[3])
+
+
+def p_type_void(p):
+    """
+        type : VOID type_access type_access_list
+    """
+    p[0] = '%s %s%s' % (p[1], p[2], p[3])
+
+
+def p_type_with_attribute(p):
+    """
+        type : type_attribute type
+    """
+    p[0] = '%s %s' % (p[1], p[2])
+
+
+def p_type_expr_definition(p):
+    """
+        expr : attribute_left_list type_definition SEMICOLON
+    """
+    p[2].add_tags(p[1][1])
+
+
+def p_type_expr_declaration(p):
+    """
+        expr : attribute_left_list type_declaration SEMICOLON
+    """
+
+
+def p_typedef_expr(p):
+    """
+        expr : TYPEDEF type ID SEMICOLON
+             | TYPEDEF method_pointer SEMICOLON
+    """

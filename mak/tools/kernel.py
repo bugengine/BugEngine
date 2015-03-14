@@ -10,7 +10,7 @@ from waflib import Task
 def scan(self):
     return ([], [])
 
-kernel = '%s ${KERNEL_PREPROCESS} -o ${TGT[0].abspath()} -D ${MACROS_IGNORE} --pch ${PCH} --namespace ${PLUGIN} ${SRC[0].abspath()}' % sys.executable.replace('\\', '/')
+kernel = '%s ${KERNEL_PREPROCESS} ${SRC[0].abspath()} ${TGT[0].abspath()}' % sys.executable.replace('\\', '/')
 cls = Task.task_factory('kernel', kernel, [], 'PINK', ext_out=['.script.hh'])
 cls.scan = scan
 
@@ -25,24 +25,5 @@ def kernel_generate(self):
         tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/cpp/macros_ignore').abspath(),
         tsk.path = self.bld.variant_dir
         tsk.env.PCH = self.pchstop
-        tsk.dep_nodes = [
-                self.bld.bugenginenode.find_node('mak/kernel.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/lexer.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/parser.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/unit.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/exprs.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/namespace.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/name.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/using.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/tag.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/comment.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/struct.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/enum.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/method.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/variable.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/type.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/template.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/keywords.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/value.py'),
-                self.bld.bugenginenode.find_node('mak/cpp/grammar/skip.py'),
-            ]
+        mak_node = self.bld.bugenginenode.find_node('mak')
+        tsk.dep_nodes = [mak_node.find_node('kernel.py')]

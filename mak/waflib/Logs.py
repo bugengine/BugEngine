@@ -98,7 +98,7 @@ else:
 			"""
 
 			dummy_lines, cols = struct.unpack("HHHH", \
-			fcntl.ioctl(sys.stderr.fileno(),termios.TIOCGWINSZ , \
+			fcntl.ioctl(sys.stdout.fileno(),termios.TIOCGWINSZ , \
 			struct.pack("HHHH", 0, 0, 0, 0)))[:2]
 			return cols
 		# try the function once to see if it really works
@@ -245,7 +245,7 @@ def init_log():
 	log = logging.getLogger('waflib')
 	log.handlers = []
 	log.filters = []
-	hdlr = logging.StreamHandler()
+	hdlr = logging.StreamHandler(stream=sys.stdout)
 	hdlr.setFormatter(formatter())
 	log.addHandler(hdlr)
 	log.addFilter(log_filter())
@@ -303,5 +303,5 @@ def pprint(col, str, label='', sep='\n'):
 	:param sep: a string to append at the end (line separator)
 	:type sep: string
 	"""
-	sys.stderr.write("%s%s%s %s%s" % (colors(col), str, colors.NORMAL, label, sep))
+	sys.stdout.write("%s%s%s %s%s" % (colors(col), str, colors.NORMAL, label, sep))
 

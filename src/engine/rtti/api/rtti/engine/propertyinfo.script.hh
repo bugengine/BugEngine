@@ -17,11 +17,11 @@ struct be_api(RTTI) Property
 {
     friend class Value;
 published:
-    raw<Tag> const      tags;
-    raw<const Property> next;
-    const istring       name;
-    Type                owner;
-    Type                type;
+    raw<const Tag> const    tags;
+    raw<const Property>     next;
+    const istring           name;
+    Type                    owner;
+    Type                    type;
 
     Value get(Value& from) const;
     void  set(Value& from, const Value& value) const;

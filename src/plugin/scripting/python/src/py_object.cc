@@ -225,15 +225,8 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
     {
         if (m->name == name_)
         {
-            if (m->instanceMethod)
-            {
-                PyObject* result = PyBoundMethod::create(m, self_);
-                return result;
-            }
-            else
-            {
-                return create(RTTI::Value(m));
-            }
+            PyObject* result = PyBoundMethod::create(m, self_);
+            return result;
         }
     }
     s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
@@ -655,9 +648,20 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS|Py_TPFLAGS_TUPLE_SUBCLASS))
     {
-        return desiredType.metaclass->type() == RTTI::ClassType_Array
-                ?   0
-                :   (u32)RTTI::Type::MaxTypeDistance;
+        if (desiredType.metaclass->type() == RTTI::ClassType_Array)
+        {
+            static const istring s_valueTypeName = "value_type";
+            raw<const RTTI::ObjectInfo> valueType = desiredType.metaclass->objects;
+            be_assert(valueType->name ==  "value_type",
+                      "Array class %s needs to specify value type" | desiredType.metaclass->name);
+            const RTTI::Type& subType = valueType->value.as<const RTTI::Type&>();
+            be_forceuse(subType);
+            return 0;
+        }
+        else
+        {
+            return (u32)RTTI::Type::MaxTypeDistance;
+        }
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS|Py_TPFLAGS_UNICODE_SUBCLASS))
     {

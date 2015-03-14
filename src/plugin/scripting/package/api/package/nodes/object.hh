@@ -19,7 +19,7 @@ class Object : public Instance
 private:
     RTTI::Type                          m_objectType;
     ref<Reference>                      m_methodReference;
-    const RTTI::Method*                 m_method;
+    raw<const RTTI::Method>             m_method;
     minitl::vector< OverloadMatch >     m_overloads;
 private:
     void resolveOverload();
@@ -28,7 +28,7 @@ public:
     Object(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Object();
 
-    const RTTI::Method* method() const                          { return m_method; }
+    raw<const RTTI::Method> method() const                      { return m_method; }
     const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
 
     void setMethod(ref<Reference> reference);
