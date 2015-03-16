@@ -41,7 +41,7 @@ struct ThreadData
     {
         pthread_key_create(&key, 0);
         pthread_setspecific(key, &name);
-#if BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD
+#if (BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD) && !BE_COMPILER_SUNCC
         pthread_setname_np(pthread_self(), name.c_str());
 #elif BE_PLATFORM_MACOSX
         pthread_setname_np(name.c_str());
@@ -73,7 +73,7 @@ void* Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = reinterpret_cast<ThreadParams*>(params);
     pthread_setspecific(s_data.key, &p->m_name);
-#if BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD
+#if (BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD) && !BE_COMPILER_SUNCC
     pthread_setname_np(pthread_self(), p->m_name.c_str());
 #elif BE_PLATFORM_MACOSX
     pthread_setname_np(p->m_name.c_str());

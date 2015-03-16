@@ -63,9 +63,8 @@ PyTypeObject PyBugNamespace::s_pyType =
 
 PyObject* PyBugNamespace::create(const RTTI::Value& value)
 {
-    const RTTI::Type& t = value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_Namespace,
-              "PyBugString only accepts Namespace types");
+    be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
+              "PyBugNamespace only accepts Namespace types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     new(&((PyBugNamespace*)result)->value) RTTI::Value(value);
     return result;

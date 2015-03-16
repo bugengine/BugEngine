@@ -34,6 +34,7 @@ def allarchs(arch):
 
 @conf
 def get_gcc_version_float(self, version):
+    version = version.split('-')[0]
     version_number = 0.0
     div = 1.0
     for i in version.split('.'):
