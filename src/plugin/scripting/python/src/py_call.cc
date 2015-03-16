@@ -129,7 +129,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
     const u32 unnamedArgCount = s_library->m_PyTuple_Size(args);
     const u32 namedArgCount = kwargs ? s_library->m_PyDict_Size(kwargs) : 0;
     const u32 argCount = unnamedArgCount + namedArgCount + (self ? 1 : 0);
-    ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo*));
+    ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo));
     u32 i = 0;
     if (self)
     {

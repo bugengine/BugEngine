@@ -143,9 +143,8 @@ PyTypeObject PyBugArray::s_pyType =
 
 PyObject* PyBugArray::create(const RTTI::Value& value)
 {
-    const RTTI::Type& t = value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_Array,
-              "PyBugString only accepts Array types");
+    be_assert(value.type().metaclass->type() == RTTI::ClassType_Array,
+              "PyBugArray only accepts Array types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     new(&((PyBugArray*)result)->value) RTTI::Value(value);
     return result;

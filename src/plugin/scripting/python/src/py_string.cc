@@ -147,12 +147,11 @@ PyTypeObject PyBugString<T>::s_pyType =
 template< typename T >
 PyObject* PyBugString<T>::create(const RTTI::Value& value)
 {
-    const RTTI::Type& t = value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_String,
+    be_assert(value.type().metaclass->type() == RTTI::ClassType_String,
               "PyBugString only accepts String types");
-    be_assert(t.metaclass->index() == be_typeid<T>::type().metaclass->index(),
+    be_assert(value.type().metaclass->index() == be_typeid<T>::type().metaclass->index(),
               "expected %s; got %s" | be_typeid<T>::type().metaclass->name
-                                    | t.metaclass->name);
+                                    | value.type().metaclass->name);
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     new(&((PyBugString<T>*)result)->value) RTTI::Value(value);
     return result;
