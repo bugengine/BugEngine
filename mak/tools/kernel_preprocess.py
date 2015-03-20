@@ -8,7 +8,14 @@ import sys
 from waflib import Task
 
 
-kernel_preprocess = '${KERNEL_PREPROCESS} ${SRC[0].abspath()} ${TGT[0].abspath()}'
+kernel_preprocess = """
+%s ${KERNEL_PREPROCESS}
+-d ${MACROS_IGNORE}
+--module ${PLUGIN}
+--tmp ${TMPDIR}
+${SRC[0].abspath()}
+${TGT[0].abspath()}
+""" % sys.executable.replace('\\', '/')
 cls = Task.task_factory('kernel_preprocess', kernel_preprocess, [], 'PINK')
 
 @feature('kernel')
@@ -19,11 +26,8 @@ def kernel_build_preprocess(self):
         self.source.append(out)
         tsk = self.create_task('kernel_preprocess', [kernel_source], [out])
         tsk.path = self.bld.variant_dir
+        tsk.env.KERNEL_PREPROCESS = self.bld.bugenginenode.find_node('mak/kernel_preprocess.py').abspath()
+        tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/cpp/macros_ignore').abspath()
+        tsk.env.TMPDIR = self.bld.bldnode.parent.abspath()
         tsk.dep_nodes = [self.bld.bugenginenode.find_or_declare('mak/kernel_preprocess.py')]
-
-def configure(conf):
-    conf.env.KERNEL_PREPROCESS = [
-            sys.executable.replace('\\', '/'),
-            conf.bugenginenode.find_node('mak/kernel_preprocess.py').abspath()
-        ]
-
+        tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/cpp').ant_glob('**/*.py')

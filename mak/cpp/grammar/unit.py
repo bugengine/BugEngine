@@ -14,6 +14,6 @@ def p_unit(p):
         unit : unit_start exprs
     """
     assert(len(p.parser.stack) == 1)
-    p.parser.stack[0].dump(p.parser.classes, p.parser.instances)
+    p[0] = p[1]
 
 

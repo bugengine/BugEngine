@@ -21,7 +21,7 @@ ${SRC[0].abspath()}
 ${TGT[0].abspath()}
 ${TGT[1].abspath()}
 ${TGT[2].abspath()}
-"""% sys.executable.replace('\\', '/')
+""" % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
@@ -73,7 +73,8 @@ def datagen(self, node):
     tsk.path = self.bld.variant_dir
     tsk.env.PCH = self.pchstop
     out_node.parent.mkdir()
-    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/ddf.py')] + self.bld.bugenginenode.find_node('mak/cpp').ant_glob('**/*.py')
+    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/ddf.py')]
+    tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/cpp').ant_glob('**/*.py')
     try:
         self.out_sources += outs
     except:

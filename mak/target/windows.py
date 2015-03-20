@@ -31,9 +31,9 @@ def set_windows_options(self, arch):
 def set_windows_gcc_options(self, options, version):
     v = self.env
     version_number = self.get_gcc_version_float(version)
-    v.append_unique('CFLAGS', options)
-    v.append_unique('CXXFLAGS', options)
-    v.append_unique('LINKFLAGS', options)
+    v.append_unique('CFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
+    v.append_unique('CXXFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
+    v.append_unique('LINKFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
@@ -65,9 +65,9 @@ def set_windows_gcc_options(self, options, version):
 @conf
 def set_windows_clang_options(self, options, version):
     v = self.env
-    v.append_unique('CFLAGS', options + ['-mwindows'])
-    v.append_unique('CXXFLAGS', options + ['-mwindows'])
-    v.append_unique('LINKFLAGS', options + ['-mwindows', '-Wl,--export-all-symbols'])
+    v.append_unique('CFLAGS', options)
+    v.append_unique('CXXFLAGS', options)
+    v.append_unique('LINKFLAGS', options + ['-Wl,--export-all-symbols'])
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']

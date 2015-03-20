@@ -1,6 +1,6 @@
 from cpp.ply import lex
 from cpp.tokens import tokens, reserved
-
+import sys
 
 states = (
     ('MACRO', 'exclusive'),
@@ -162,7 +162,7 @@ def t_preprocessor(t):
     r'\#([^\\\n]|(\\.)|(\\\n))*'
     t.lexer.lineno += t.value.count('\n')
     if t.value.find('include') != -1:
-        t.lexer.classes.write(t.value+'\n')
+        t.lexer.includes.append(t.value)
 
 # Operators
 t_ADD                   = r'\+'
@@ -245,6 +245,7 @@ class Lexer(lex.Lexer):
         self.error_count = 0
         self.source = ''
         self.inside = 0
+        self.includes = []
 
     def define_macro(self, name):
         name=name.strip()

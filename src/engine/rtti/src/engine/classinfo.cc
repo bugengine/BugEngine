@@ -301,7 +301,8 @@ Value Class::get(Value& from, istring propname, bool& found) const
     static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
     if (from.type().metaclass == s_metaClass)
     {
-        raw<const ObjectInfo> o = from.as< raw<const Class> >()->objects;
+        raw<const Class> cls = from.as< raw<const Class> >();
+        raw<const ObjectInfo> o = cls->objects;
         while(o)
         {
             if (o->name == propname)
@@ -311,7 +312,7 @@ Value Class::get(Value& from, istring propname, bool& found) const
             }
             o = o->next;
         }
-        raw<const Method> m = from.as< raw<const Class> >()->methods;
+        raw<const Method> m = cls->methods;
         while(m)
         {
             if (m->name == propname)
