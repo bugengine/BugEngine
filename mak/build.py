@@ -775,3 +775,7 @@ def apply_link(self):
     out_node = self.make_bld_node('.bin', None, os.path.join(path, pattern%name))
     self.link_task.set_outputs(out_node)
 
+@feature('cshlib', 'cxxshlib')
+@after_method('apply_link')
+def apply_implib(self):
+    pass

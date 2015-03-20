@@ -249,6 +249,30 @@ class Constructor(Method):
             return []
 
 
+class PodConstructor(Constructor):
+    def __init__(self, owner):
+        super(PodConstructor, self).__init__(owner, owner.name[-1], owner.name[-1], [], [])
+
+    def write_content(self, owner, struct_owner, namespace, definition, instance):
+        pass
+
+    def trampoline_name(self, owner):
+        return '::BugEngine::RTTI::createPod< %s >' % owner.cpp_name()
+
+
+
+class PodConstructorCopy(Constructor):
+    def __init__(self, owner):
+        super(PodConstructorCopy, self).__init__(owner, owner.name[-1], owner.name[-1],
+                                                 [Parameter('const %s&' % owner.cpp_name(), 'other', None)], [])
+
+    def write_content(self, owner, struct_owner, namespace, definition, instance):
+        pass
+
+    def trampoline_name(self, owner):
+        return '::BugEngine::RTTI::createPodCopy< %s >' % owner.cpp_name()
+
+
 class Destructor(Method):
     def __init__(self, name, return_type, parameters, attributes):
         super(Destructor, self).__init__('destroy_%s' % name.strip(), return_type, parameters,
@@ -416,7 +440,7 @@ class Class(Container):
     def __init__(self, name, type, parents):
         super(Class, self).__init__(name)
         self.type = type
-        self.published = type in ('enum', 'be_pod', 'struct')
+        self.published = type in ('enum', 'be_pod', 'struct', 'union')
         for visibility, parent in parents:
             if visibility in ('published', 'public') or (visibility == '' and self.published):
                 self.parent = parent
@@ -428,6 +452,9 @@ class Class(Container):
                 self.parent = ''
         self.methods = []
         self.properties = []
+        if self.type == 'be_pod':
+            self.add_method(PodConstructor(self))
+            self.add_method(PodConstructorCopy(self))
 
     def owner_name(self):
         return '::BugEngine::be_typeid< ::%s >::preklass()' % '::'.join(self.name)
@@ -486,7 +513,7 @@ class Class(Container):
             object.write_content(self, struct_owner or self, namespace, definition, instance)
         for method in self.methods:
             method.write_content(self, struct_owner or self, namespace, definition, instance)
-        if self.type in ('struct', 'be_pod', 'enum'):
+        if self.type in ('struct', 'be_pod', 'enum', 'union'):
             copy       = '&::BugEngine::RTTI::wrapCopy< %s >' % self.name[-1]
             destructor = '&::BugEngine::RTTI::wrapDestroy< %s >' % self.name[-1]
         else:
@@ -518,7 +545,7 @@ class Class(Container):
                 classtype = '::BugEngine::RTTI::ClassType_Object'
             elif self.type == 'struct':
                 classtype = '::BugEngine::RTTI::ClassType_Struct'
-            elif self.type == 'be_pod':
+            elif self.type in ('be_pod', 'union'):
                 classtype = '::BugEngine::RTTI::ClassType_Pod'
             else:
                 classtype = '0'
@@ -548,9 +575,9 @@ class Class(Container):
         else:
             self.typedef(definition)
         if self.parent:
-            next_object = 'be_typeid< %s >::klass()->objects' % self.parent
-            next_method = 'be_typeid< %s >::klass()->methods' % self.parent
-            next_property = 'be_typeid< %s >::klass()->properties' % self.parent
+            next_object = '::BugEngine::be_typeid< %s >::klass()->objects' % self.parent
+            next_method = '::BugEngine::be_typeid< %s >::klass()->methods' % self.parent
+            next_property = '::BugEngine::be_typeid< %s >::klass()->properties' % self.parent
         else:
             next_object = '{0}'
             next_method = '{0}'

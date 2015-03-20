@@ -57,7 +57,7 @@ struct be_typeid< minitl::array<T> >
     static inline raw<const RTTI::Class> klass();
     static inline RTTI::Type  type();
 private:
-    static BE_EXPORT raw<const RTTI::Class> initialisation;
+    static raw<const RTTI::Class> initialisation;
     static raw<const RTTI::Class> registerProperties();
 };
 
@@ -206,7 +206,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 template< typename T >
 RTTI::Type be_typeid< minitl::array<T> >::type()
 {
-    return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
 }

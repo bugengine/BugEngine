@@ -22,31 +22,6 @@ struct THREADNAME_INFO
 #pragma pack(pop)
 
 
-class Thread::ThreadSpecificData
-{
-private:
-    DWORD m_key;
-public:
-    ThreadSpecificData()
-        :   m_key(TlsAlloc())
-    {
-    }
-    ~ThreadSpecificData()
-    {
-        TlsFree(m_key);
-    }
-    void createThreadSpecificData(const Thread::ThreadParams& params)
-    {
-        TlsSetValue(m_key, (void*)&params);
-    }
-    const Thread::ThreadParams& getThreadParams()
-    {
-        return *(const Thread::ThreadParams*)TlsGetValue(m_key);
-    }
-};
-
-Thread::ThreadSpecificData Thread::s_threadData;
-
 class Thread::ThreadParams
 {
     friend class Thread;
@@ -62,6 +37,51 @@ public:
 
     static unsigned long WINAPI threadWrapper(void* params);
 };
+
+
+class Thread::ThreadSpecificData
+{
+private:
+    DWORD m_key;
+public:
+    ThreadSpecificData()
+        :   m_key(TlsAlloc())
+    {
+        if (FAILED(m_key))
+        {
+            be_warning("TLS not available");
+        }
+        static Thread::ThreadParams p("main", 0, 0, 0);
+        createThreadSpecificData(p);
+    }
+    ~ThreadSpecificData()
+    {
+        if (!FAILED(m_key))
+        {
+            TlsFree(m_key);
+        }
+    }
+    void createThreadSpecificData(const Thread::ThreadParams& params)
+    {
+        if (!FAILED(m_key))
+        {
+            TlsSetValue(m_key, (void*)&params);
+        }
+    }
+    const Thread::ThreadParams* getThreadParams()
+    {
+        if (!FAILED(m_key))
+        {
+            return (const Thread::ThreadParams*)TlsGetValue(m_key);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+};
+
+Thread::ThreadSpecificData Thread::s_threadData;
 
 Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2)
 :   m_name(name)
@@ -110,7 +130,6 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 }
 
 
-
 Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
 :   m_params(new ThreadParams(name, f, p1, p2))
 ,   m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, 0, &m_id))
@@ -144,7 +163,8 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    return s_threadData.getThreadParams().m_name;
+    const ThreadParams* params = s_threadData.getThreadParams();
+    return params ? params->m_name : istring("main");
 }
 
 void Thread::wait() const
