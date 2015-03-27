@@ -3,8 +3,8 @@
 
 #include    <stdafx.h>
 
-#include    <python/context.hh>
-#include    <python/pythonlib.hh>
+#include    <pythonlib/context.hh>
+#include    <pythonlib/pythonlib.hh>
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 

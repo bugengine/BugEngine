@@ -93,18 +93,21 @@ def build(bld):
     bld.plugin('plugin.scripting.python',
                ['engine.bugengine'],
                platforms=['pc'])
+    bld.plugin('plugin.scripting.pythonlib',
+               ['engine.bugengine'],
+               platforms=['pc'])
     if bld.env.PROJECTS:
         python_deps = ['3rdparty.python%s'%version.replace('.', '')
                             for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.pythonbinding',
-                   ['engine.bugengine', 'plugin.scripting.python'] + python_deps)
+                   ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
     else:
         bld.python_module('py_bugengine', ['engine.bugengine'],
-                          path='plugin.scripting.python',
+                          path='plugin.scripting.pythonlib',
                           platforms=['pc'])
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
-                       ['engine.bugengine', 'plugin.scripting.python',
+                       ['engine.bugengine', 'plugin.scripting.pythonlib',
                         '3rdparty.python%s'%version.replace('.', '')],
                        path='plugin.scripting.pythonbinding',
                        features=['python%s'%version])
@@ -173,6 +176,8 @@ def build(bld):
     bld.game('sample.kernel',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
+             ['engine.bugengine', 'plugin.scripting.package'])
+    bld.game('sample.python',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('help', ['engine.bugengine', 'plugin.ui.console',
               'plugin.scripting.package'],

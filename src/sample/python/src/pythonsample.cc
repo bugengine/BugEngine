@@ -2,25 +2,23 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <textsample.hh>
+#include    <pythonsample.hh>
 #include    <core/environment.hh>
 #include    <filesystem/diskfolder.script.hh>
 
 namespace BugEngine
 {
 
-TextSample::TextSample(const Plugin::Context& context)
+PythonSample::PythonSample(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
-    ,   m_textManager("plugin.graphics.text", pluginContext())
-    ,   m_3ddx("plugin.graphics.Dx9", pluginContext())
-    ,   m_3dgl("plugin.graphics.GL4", pluginContext())
-    ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-text.pkg"))))
+    ,   m_pythonManager("plugin.scripting.python", pluginContext())
+    ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-python.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);
 }
 
-TextSample::~TextSample()
+PythonSample::~PythonSample()
 {
     pluginContext().resourceManager->unload(m_mainPackage);
 }

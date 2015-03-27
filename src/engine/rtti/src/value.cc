@@ -12,18 +12,13 @@ namespace BugEngine { namespace RTTI
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_reference(other.m_reference)
+,   m_reference(false)
 {
-    m_ref.m_pointer = other.m_reference
-            ? other.m_ref.m_pointer
-            : (m_type.size() > sizeof(m_buffer)
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer)
                 ? Arena::script().alloc(m_type.size())
-                : 0);
-    m_ref.m_deallocate = other.m_reference ? false : (m_ref.m_pointer != 0);
-    if (!m_reference)
-    {
-        m_type.copy(other.memory(), memory());
-    }
+                : 0;
+    m_ref.m_deallocate = (m_ref.m_pointer != 0);
+    m_type.copy(other.memory(), memory());
 }
 
 Value::Value(Type type, void* location)
@@ -56,13 +51,11 @@ Value::~Value()
 
 Value& Value::operator=(const Value& v)
 {
-    if (m_reference)
+    if (v.m_reference)
     {
-        be_assert_recover(m_type.isA(v.m_type), "Value has type %s; unable to copy from type %s" | m_type | v.m_type, return *this);
-        be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
-        void* mem = memory();
-        m_type.destroy(mem);
-        m_type.copy(v.memory(), mem);
+        Value copy(v);
+        this->~Value();
+        new ((void*)this) Value(copy);
         return *this;
     }
     else

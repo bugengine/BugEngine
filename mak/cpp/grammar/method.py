@@ -108,7 +108,10 @@ def p_method_arg_list_end(p):
         method_arg_list : ELLIPSIS
                         |
     """
-    p[0] = []
+    if len(p) > 1:
+        p[0] = [p[1]]
+    else:
+        p[0] = []
 
 
 def p_method_args(p):
