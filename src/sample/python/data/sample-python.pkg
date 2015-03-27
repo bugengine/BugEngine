@@ -1,0 +1,6 @@
+load plugin.scripting.pythonlib as py;
+
+script = py.PythonScript
+(
+    script = <sample.py>;
+)

@@ -1,3 +1,4 @@
+from cpp.tree import Typedef
 
 def p_type_kw(p):
     """
@@ -111,6 +112,10 @@ def p_type_expr_declaration(p):
 
 def p_typedef_expr(p):
     """
-        expr : TYPEDEF type ID SEMICOLON
-             | TYPEDEF method_pointer SEMICOLON
+        expr : attribute_left_list TYPEDEF type ID variable_array_list_opt doc_left SEMICOLON
+             | attribute_left_list TYPEDEF method_pointer doc_left SEMICOLON
     """
+    if len(p) == 8:
+        p[0] = Typedef(p[4], p[3]+p[5])
+        p[0].add_tags(p[1][1])
+        p.parser.stack[-1].add_property(p[0])

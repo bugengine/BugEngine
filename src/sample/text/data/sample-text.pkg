@@ -1,16 +1,5 @@
 load plugin.graphics.text as text;
 load plugin.graphics.shadermodel1 as sm1;
-load plugin.scripting.python as py;
-load plugin.scripting.lua as lua;
-
-script = py.PythonScript
-(
-    script = <sample.py>;
-)
-s = lua.LuaScript
-(
-    script = <sample-text.lua>;
-)
 
 font = text.OutlineFont
 (

@@ -16,22 +16,21 @@ struct Tag;
 struct be_api(RTTI) Method
 {
 published:
-    struct be_api(RTTI) Overload
+    struct be_api(RTTI) Parameter
     {
     published:
-        struct be_api(RTTI) Parameter
-        {
-        published:
-            raw<const Tag> const        tags;
-            raw<const Parameter> const  next;
-            istring                     name;
-            Type                        type;
-        published:
-            Value getTag(const Type& type) const;
-            Value getTag(raw<const Class> type) const;
-        private:
-            Parameter& operator=(const Parameter&);
-        };
+        raw<const Tag> const        tags;
+        raw<const Parameter> const  next;
+        istring                     name;
+        Type                        type;
+    published:
+        Value getTag(const Type& type) const;
+        Value getTag(raw<const Class> type) const;
+    private:
+        Parameter& operator=(const Parameter&);
+    };
+    struct be_api(RTTI) Overload
+    {
     published:
         raw<const Tag> const    tags;
         raw<const Overload>     next;
@@ -56,8 +55,6 @@ published:
     raw<const Method>   call;
     u32                 overloadCount;
     raw<const Overload> overloads;
-public:
-    typedef Overload::Parameter Parameter;
 published:
     Value doCall(Value* params, u32 nparams) const;
 private:

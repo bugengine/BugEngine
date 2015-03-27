@@ -95,6 +95,7 @@ public:
     const CopyConstructor   copyconstructor;
     const Destructor        destructor;
 published:
+    typedef enum ClassType ClassType;
     Value getTag(const Type& type) const;
     Value getTag(raw<const Class> type) const;
 
@@ -120,7 +121,6 @@ public:
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
     u32 distance(raw<const Class> other) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
-    void buildCache();
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

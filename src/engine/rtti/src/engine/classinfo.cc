@@ -419,43 +419,6 @@ Value Class::findClass(inamespace name)
     return v;
 }
 
-void Class::buildCache()
-{
-    constructor.set(0);
-    call.set(0);
-    for (raw<const RTTI::Method> method = methods;
-         method != (parent ? parent->methods
-                           : raw<const RTTI::Method>::null());
-         method = method->next)
-    {
-        if (method->name == nameConstructor())
-        {
-            be_assert(!constructor, "constructor already set for class %s" | fullname());
-            constructor = method;
-        }
-        if (method->name == nameOperatorCall())
-        {
-            be_assert(!call, "call operator already set for class %s" | fullname());
-            call = method;
-        }
-    }
-    for (raw<const RTTI::ObjectInfo> object = objects;
-         object != (parent ? parent->objects : raw<const RTTI::ObjectInfo>::null());
-         object = object->next)
-    {
-        if (object->name == nameConstructor())
-        {
-            be_assert(!constructor, "constructor already set for class %s" | fullname());
-            constructor = object->value.as< const raw<const RTTI::Method> >();
-        }
-        if (object->name == nameOperatorCall())
-        {
-            be_assert(!call, "call operator already set for class %s" | fullname());
-            call = object->value.as< const raw<const RTTI::Method> >();
-        }
-    }
-}
-
 }
 
 raw<RTTI::Class> be_game_Namespace()

@@ -121,31 +121,33 @@ namespace
 
 int beMain(int argc, const char *argv[])
 {
-    BugEngine::Environment::getEnvironment().init(argc, argv);
+    using namespace BugEngine;
+    Environment::getEnvironment().init(argc, argv);
 #if BE_ENABLE_EXCEPTIONS
     try
 #endif
     {
-        BugEngine::ScopedLogListener console(scoped<ConsoleLogListener>::create(BugEngine::Arena::debug()));
-        BugEngine::Plugin::Plugin<minitl::pointer> platformAssert(
-                BugEngine::inamespace("plugin.debug.assert"),
-                BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), ref<BugEngine::Folder>(), weak<BugEngine::Scheduler>()));
-        ref<BugEngine::DiskFolder> root = ref<BugEngine::DiskFolder>::create(
-                BugEngine::Arena::general(),
-                BugEngine::Environment::getEnvironment().getHomeDirectory(),
-                BugEngine::DiskFolder::ScanRecursive,
-                BugEngine::DiskFolder::CreateOne);
-        ref<BugEngine::DiskFolder> home = ref<BugEngine::DiskFolder>::create(
-                BugEngine::Arena::general(),
-                BugEngine::Environment::getEnvironment().getGameHomeDirectory(),
-                BugEngine::DiskFolder::ScanRecursive,
-                BugEngine::DiskFolder::CreateOne);
-        BugEngine::ScopedLogListener file(scoped<FileLogListener>::create(BugEngine::Arena::debug(), home->createFile("log")));
-        be_info("Running %s" | BugEngine::Environment::getEnvironment().getGame());
-        scoped<BugEngine::Scheduler> scheduler = scoped<BugEngine::Scheduler>::create(BugEngine::Arena::task());
-        BugEngine::Plugin::Plugin<BugEngine::Application> app(
-                BugEngine::inamespace(BugEngine::Environment::getEnvironment().getGame()),
-                BugEngine::Plugin::Context(weak<BugEngine::Resource::ResourceManager>(), home, scheduler));
+        ScopedLogListener console(scoped<ConsoleLogListener>::create(Arena::debug()));
+        Plugin::Plugin<minitl::pointer> platformAssert(
+                inamespace("plugin.debug.assert"),
+                Plugin::Context(weak<Resource::ResourceManager>(), ref<Folder>(), weak<Scheduler>()));
+        ref<DiskFolder> root = ref<DiskFolder>::create(
+                Arena::general(),
+                Environment::getEnvironment().getHomeDirectory(),
+                DiskFolder::ScanRecursive,
+                DiskFolder::CreateOne);
+        ref<DiskFolder> home = ref<DiskFolder>::create(
+                Arena::general(),
+                Environment::getEnvironment().getGameHomeDirectory(),
+                DiskFolder::ScanRecursive,
+                DiskFolder::CreateOne);
+        ScopedLogListener file(scoped<FileLogListener>::create(Arena::debug(), home->createFile("log")));
+        be_info("Running %s" | Environment::getEnvironment().getGame());
+        scoped<Scheduler> scheduler = scoped<Scheduler>::create(Arena::task());
+        Plugin::Plugin<Application> app(
+                inamespace(Environment::getEnvironment().getGame()),
+                Plugin::Context(weak<Resource::ResourceManager>(), home, scheduler));
+
         return app->run();
     }
 #if BE_ENABLE_EXCEPTIONS

@@ -1,10 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <python/stdafx.h>
-
 #include    <plugin/plugin.hh>
-#include    <rtti/engine/namespace.hh>
 
 BugEngine::Plugin::Plugin<void> s_pyPlugin;
 static minitl::refcountable* create(const BugEngine::Plugin::Context &context)

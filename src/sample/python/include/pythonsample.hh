@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
-#define BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
+#ifndef BE_SAMPLE_PYTHONSAMPLE_HH_
+#define BE_SAMPLE_PYTHONSAMPLE_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <filesystem/folder.script.hh>
@@ -14,17 +14,15 @@
 namespace BugEngine
 {
 
-class TextSample : public Application
+class PythonSample : public Application
 {
 private:
     Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
-    Plugin::Plugin<minitl::pointer>     const   m_textManager;
-    Plugin::Plugin<minitl::pointer>     const   m_3ddx;
-    Plugin::Plugin<minitl::pointer>     const   m_3dgl;
+    Plugin::Plugin<Resource::ILoader>   const   m_pythonManager;
     ref<const Package>                  const   m_mainPackage;
 public:
-    TextSample(const Plugin::Context& context);
-    ~TextSample();
+    PythonSample(const Plugin::Context& context);
+    ~PythonSample();
 };
 
 }

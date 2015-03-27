@@ -16,8 +16,7 @@ class CppObject:
         return result
 
     def all_names(self):
-        result = [(self.engine_name(), self.short_name().replace('#', '_').replace('?', '_')
-                                                        .replace('"', '_').replace(':', '_'))]
+        result = [(self.engine_name(), self.id())]
         for alias in self.get_tag_list('Alias'):
             result.append(('::BugEngine::istring(%s)' % alias,
                            alias.strip().replace('#', '_').replace('?', '_')
@@ -26,6 +25,9 @@ class CppObject:
 
     def short_name(self):
         return self.name
+
+    def id(self):
+        return self.short_name().replace('#', '_').replace('?', '_').replace('"', '_').replace(':', '_')
 
     def engine_name(self):
         return '::BugEngine::istring("%s")' % self.short_name()
@@ -68,19 +70,25 @@ class Parameter(CppObject):
         self.default_value = default_value
 
     def write(self, next_parameter, method_name, overload_index, definition):
-        tag = self.write_tags('parameter_%s_%d_%d' % (method_name, overload_index,
-                                                      next_parameter[0]),
-                              definition)
-        definition.write('    static const ::BugEngine::RTTI::Method::Overload::Parameter '
-                         's_parameter_%s_%d_%d = {\n'
-                         '       %s,\n'
-                         '       %s,\n'
-                         '       ::BugEngine::istring("%s"),\n'
-                         '       ::BugEngine::be_typeid< %s >::type()\n'
-                         '    };\n' % (method_name, overload_index, next_parameter[0],
-                                       tag, next_parameter[1], self.name, self.type))
-        return (next_parameter[0]+1,
-                '{&s_parameter_%s_%d_%d}' % (method_name, overload_index, next_parameter[0]))
+        if self.type == '...':
+            return (next_parameter[0]+1,
+                    '{&s_parameter_%s_%d_%d}' % (method_name, overload_index, next_parameter[0]),
+                    True)
+        else:
+            tag = self.write_tags('parameter_%s_%d_%d' % (method_name, overload_index,
+                                                          next_parameter[0]),
+                                  definition)
+            definition.write('    static const ::BugEngine::RTTI::Method::Parameter '
+                             's_parameter_%s_%d_%d = {\n'
+                             '       %s,\n'
+                             '       %s,\n'
+                             '       ::BugEngine::istring("%s"),\n'
+                             '       ::BugEngine::be_typeid< %s >::type()\n'
+                             '    };\n' % (method_name, overload_index, next_parameter[0],
+                                           tag, next_parameter[1], self.name, self.type))
+            return (next_parameter[0]+1,
+                    '{&s_parameter_%s_%d_%d}' % (method_name, overload_index, next_parameter[0]),
+                    False)
 
 
 class Method(CppObject):
@@ -145,7 +153,7 @@ class Method(CppObject):
                              '}\n' % self.call(owner, struct_owner))
 
     def write_parameters(self, owner, struct_owner, overload_index, definition):
-        next_parameter = (0, '{0}')
+        next_parameter = (0, '{0}', False)
         param_list = self.parameters
         if struct_owner and not 'static' in self.attributes:
             if 'const' in self.attributes:
@@ -165,10 +173,11 @@ class Method(CppObject):
                          '       ::BugEngine::be_typeid< %s >::type(),\n'
                          '       %d,\n'
                          '       %s,\n'
-                         '       false,\n'
+                         '       %s,\n'
                          '       &%s\n'
                          '    };\n' % (self.name, overload[0], tag, overload[1], self.return_type,
-                                       params[0], params[1], self.trampoline_name(owner)))
+                                       params[0], params[1], params[2] and 'true' or 'false',
+                                       self.trampoline_name(owner)))
         return (overload[0]+1, '{&s_overload_%s_%d}' % (self.name, overload[0]))
 
 
@@ -356,8 +365,8 @@ class Variable(CppObject):
         pass
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
+        tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            tag = self.write_tags('s_object_%s' % alias_cpp, definition)
             definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                              '        %s,\n'
                              '        %s,\n'
@@ -370,8 +379,8 @@ class Variable(CppObject):
         return object_name
 
     def write_property(self, owner, property_name, definition):
+        tag = self.write_tags('s_property_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            tag = self.write_tags('s_property_%s' % alias, definition)
             definition.write('    static ::BugEngine::RTTI::Property s_property_%s = {\n'
                              '        %s,\n'
                              '        %s,\n'
@@ -386,6 +395,35 @@ class Variable(CppObject):
         return property_name
 
 
+class Typedef(CppObject):
+    def __init__(self, name, type):
+        super(Typedef, self).__init__()
+        self.name = name
+        self.type = type
+        self.attributes = ['static']
+
+    def do_typedef(self, names, definition):
+        names = names + [self.name]
+        definition.write('    typedef %s %s;\n' % ('::'.join(names), self.name))
+
+    def write_content(self, owner, struct_owner, namespace, definition, instance):
+        pass
+
+    def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
+        tag = self.write_tags('s_object_%s' % self.id(), definition)
+        for alias, alias_cpp in self.all_names():
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+                             '        %s,\n'
+                             '        %s,\n'
+                             '        ::BugEngine::istring(%s),\n'
+                             '        ::BugEngine::RTTI::Value(\n'
+                             '            ::BugEngine::be_typeid< %s >::type())\n'
+                             '    };\n' % (alias_cpp, object_name, tag,
+                                           alias, self.name))
+            object_name = '{&s_object_%s}' % alias_cpp
+        return object_name
+
+
 class EnumValue(Variable):
     def __init__(self, name, type):
         super(EnumValue, self).__init__(name, type)
@@ -393,8 +431,8 @@ class EnumValue(Variable):
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         n = '%s::%s' % ('::'.join(owner.cpp_name().split('::')[:-1]), self.name)
+        tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            tag = self.write_tags('s_object_%s' % alias_cpp, definition)
             definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                              '        %s,\n'
                              '        %s,\n'
@@ -452,9 +490,10 @@ class Class(Container):
                 self.parent = ''
         self.methods = []
         self.properties = []
+        self.constructor = None
         if self.type == 'be_pod':
-            self.add_method(PodConstructor(self))
-            self.add_method(PodConstructorCopy(self))
+            self.add_constructor(PodConstructor(self))
+            self.add_constructor(PodConstructorCopy(self))
 
     def owner_name(self):
         return '::BugEngine::be_typeid< ::%s >::preklass()' % '::'.join(self.name)
@@ -467,7 +506,9 @@ class Class(Container):
 
     def add_method(self, method):
         if self.published:
-            if 'static' in method.attributes:
+            if isinstance(method, Constructor):
+                self.add_constructor(method)
+            elif 'static' in method.attributes:
                 super(Class, self).add_method(method)
             else:
                 for alias, alias_cpp in method.all_names():
@@ -488,6 +529,13 @@ class Class(Container):
     def add_object(self, o):
         if self.published:
             self.objects.append(o)
+
+    def add_constructor(self, constructor):
+        if not self.constructor:
+            all_names = constructor.all_names()
+            self.constructor = OverloadedMethod(constructor, all_names[0][0], all_names[0][1])
+        else:
+            self.constructor.add_overload(constructor)
 
     def do_typedef(self, names, definition):
         names = names + [self.name[-1]]
@@ -513,6 +561,8 @@ class Class(Container):
             object.write_content(self, struct_owner or self, namespace, definition, instance)
         for method in self.methods:
             method.write_content(self, struct_owner or self, namespace, definition, instance)
+        if self.constructor:
+            self.constructor.write_content(self, struct_owner or self, namespace, definition, instance)
         if self.type in ('struct', 'be_pod', 'enum', 'union'):
             copy       = '&::BugEngine::RTTI::wrapCopy< %s >' % self.name[-1]
             destructor = '&::BugEngine::RTTI::wrapDestroy< %s >' % self.name[-1]
@@ -582,11 +632,17 @@ class Class(Container):
             next_object = '{0}'
             next_method = '{0}'
             next_property = '{0}'
+        if self.constructor:
+            constructor = self.constructor.write_method(self, next_method, definition)
+        else:
+            constructor = '{0}'
         definition.write('    raw< ::BugEngine::RTTI::Class > result = '
                          'preklass_%s();\n' % self.name[-1])
         for object in self.objects[::-1]:
             next_object = object.write_object(self, struct_owner or self, namespace,
                                               next_object, definition, instance)
+            if object is Constructor:
+                constructor = next_object
         for method in self.methods[::-1]:
             next_method = method.write_method(self, next_method, definition)
         for property in self.properties[::-1]:
@@ -595,11 +651,12 @@ class Class(Container):
                          '    result->objects.set(objects.operator->());\n'
                          '    raw<const ::BugEngine::RTTI::Method> methods = %s;\n'
                          '    result->methods.set(methods.operator->());\n'
+                         '    raw<const ::BugEngine::RTTI::Method> constructor = %s;\n'
+                         '    result->constructor.set(constructor.operator->());\n'
                          '    raw<const ::BugEngine::RTTI::Property> properties = %s;\n'
                          '    result->properties.set(properties.operator->());\n'
-                         '    result->buildCache();\n'
                          '    return result;\n'
-                         '}\n' % (next_object, next_method, next_property))
+                         '}\n' % (next_object, next_method, constructor, next_property))
         definition.write('BE_EXPORT raw<const ::BugEngine::RTTI::Class> s_create_%s = '
                          '::BugEngine::be_typeid< %s >::klass();\n' % (self.name[-1],
                                                                        self.cpp_name()))
@@ -665,8 +722,8 @@ class Namespace(Container):
                                  ' %s;\n'
                                  'BE_EXPORT const ::BugEngine::RTTI::ObjectInfo* s_object_set_%s ='
                                  ' %s->objects.set(s_object_ptr_%s.operator->());\n'
-                                 '\n' % (object.short_name(), next_object, object.short_name(),
-                                         self.owner_name(), object.short_name()))
+                                 '\n' % (object.id(), next_object, object.id(),
+                                         self.owner_name(), object.id()))
             definition.write('\n}\n')
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):

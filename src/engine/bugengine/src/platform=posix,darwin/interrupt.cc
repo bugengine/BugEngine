@@ -32,6 +32,8 @@ void Application::registerInterruptions()
     sigaddset(&action.sa_mask, SIGINT);
     action.sa_flags = SA_RESTART;
     sigaction(SIGINT, &action, 0);
+    sigaddset(&action.sa_mask, SIGTERM);
+    sigaction(SIGINT, &action, 0);
 }
 
 void Application::unregisterInterruptions()
