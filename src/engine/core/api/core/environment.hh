@@ -23,6 +23,7 @@ private:
 public:
     static Environment& getEnvironment();
 
+    void init();
     void init(int argc, const char *argv[]);
 
     const ipath&    getHomeDirectory() const        { return m_homeDirectory; }

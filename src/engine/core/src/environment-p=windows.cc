@@ -41,6 +41,15 @@ Environment::~Environment()
     SetDllDirectoryA(NULL);
 }
 
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+void Environment::init()
+{
+    char dllPath[MAX_PATH] = {0};
+    GetModuleFileNameA((HINSTANCE)&__ImageBase, dllPath, sizeof(dllPath));
+    const char* progName = dllPath;
+    init(1, &progName);
+}
+
 void Environment::init(int argc, const char *argv[])
 {
     m_programPath = argv[0];
