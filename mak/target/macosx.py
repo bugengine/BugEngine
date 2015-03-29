@@ -406,19 +406,25 @@ def set_osx_shlib_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
         if 'plugin' in self.features:
             self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine',
-                                                  'plugin', self.link_task.outputs[0].name)
+                    '-install_name', os.path.join('@rpath', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
                 ])
         elif 'kernel' in self.features:
             self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine',
-                                                  'kernel', self.link_task.outputs[0].name)
+                    '-install_name', os.path.join('@rpath', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
                 ])
         else:
             self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@executable_path',
-                                                  self.link_task.outputs[0].name)
+                    '-Wl,-rpath,@loader_path/',
+                    '-install_name', os.path.join('@rpath', self.link_task.outputs[0].name)
                 ])
+
+@feature('cprogram', 'cxxprogram')
+@after_method('apply_link')
+def set_osx_program_name(self):
+    if 'macosx' in self.env.VALID_PLATFORMS:
+        self.env.append_unique('LINKFLAGS', [
+                '-Wl,-rpath,@loader_path/',
+            ])
 
 
 dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'

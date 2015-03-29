@@ -9,7 +9,6 @@
 #include    <cstdio>
 #include    <dlfcn.h>
 
-
 namespace BugEngine
 {
 
@@ -76,14 +75,20 @@ void Environment::init(int argc, const char *argv[])
     {
         filename--;
     }
-    filename--;
+    do
+    {
+        while (*filename == '/') filename--;
+        if (*filename == '.')
+            filename--;
+        else
+            break;
+    } while(1);
     while (*filename != '/' && filename != argv[0])
     {
         filename--;
     }
     ipath rootdir = ipath(argv[0], filename);
     chdir(rootdir.str().name);
-    m_dataDirectory = m_dataDirectory;
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
