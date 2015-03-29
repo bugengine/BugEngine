@@ -149,7 +149,7 @@ public:
 
 extern thread<PythonLibrary> s_library;
 
-be_api(PYTHONLIB) void init2_py_bugengine(bool registerLog);
+be_api(PYTHONLIB) PyObject* init2_py_bugengine(bool registerLog);
 be_api(PYTHONLIB) PyObject* init3_py_bugengine(bool registerLog);
 be_api(PYTHONLIB) ref<PythonLibrary> loadPython(const char* pythonPath);
 be_api(PYTHONLIB) void setCurrentContext(weak<PythonLibrary> library);

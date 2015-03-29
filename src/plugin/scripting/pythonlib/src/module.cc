@@ -62,7 +62,7 @@ static void setupModule(PyObject* module, bool registerLog)
     PyBugNamespace::registerType(module);
 }
 
-void init2_py_bugengine(bool registerLog)
+PyObject* init2_py_bugengine(bool registerLog)
 {
     /* python 2.x module initialisation */
     PyObject* module;
@@ -81,9 +81,10 @@ void init2_py_bugengine(bool registerLog)
     else
     {
         be_unimplemented();
-        return;
+        return 0;
     }
     setupModule(module, registerLog);
+    return module;
 }
 
 PyObject* init3_py_bugengine(bool registerLog)

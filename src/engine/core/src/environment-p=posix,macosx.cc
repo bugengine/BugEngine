@@ -7,10 +7,13 @@
 #include    <cerrno>
 #include    <cstdlib>
 #include    <cstdio>
+#include    <dlfcn.h>
 
 
 namespace BugEngine
 {
+
+BE_EXPORT void* s_dummyData = 0;
 
 Environment::Environment()
 :   m_homeDirectory(getenv("HOME"))
@@ -25,6 +28,13 @@ Environment::Environment()
 Environment::~Environment()
 {
     Arena::general().free(m_programPath);
+}
+
+void Environment::init()
+{
+    Dl_info info;
+    dladdr(&s_dummyData, &info);
+    init(1, &info.dli_fname);
 }
 
 void Environment::init(int argc, const char *argv[])
