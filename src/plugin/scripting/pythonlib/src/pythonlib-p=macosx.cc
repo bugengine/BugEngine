@@ -27,7 +27,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     }
     else
     {
-#       define be_get_func_opt(f, dest)                                             \
+#       define be_get_func_name_opt(f, dest)                                        \
             do {                                                                    \
                 void* tmp = dlsym(m_handle, #f);                                    \
                 if (tmp)                                                            \
@@ -35,9 +35,9 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             } while(0)
 #       define be_get_func_opt(f)                                                   \
             be_get_func_name_opt(f, f)
-#       define be_get_func(f, dest)                                                 \
+#       define be_get_func_name(f, dest)                                            \
             do {                                                                    \
-                be_get_func_opt(f, dest);                                           \
+                be_get_func_name_opt(f, dest);                                      \
                 if (!m_##dest)                                                      \
                 {                                                                   \
                     be_error("could not locate function %s in module %s"            \
@@ -55,7 +55,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_EndInterpreter);
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
-        const char* version = (*m_Py_GetVersion());
+        const char* version = m_Py_GetVersion();
         m_version = (version[0]-'0')*10 + (version[2]-'0');
         if (m_version >= 30)
         {
