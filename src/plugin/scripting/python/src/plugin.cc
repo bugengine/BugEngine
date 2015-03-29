@@ -3,8 +3,21 @@
 
 #include    <plugin/plugin.hh>
 
-BugEngine::Plugin::Plugin<void> s_pyPlugin;
-static minitl::refcountable* create(const BugEngine::Plugin::Context &context)
+class PythonVersion : public minitl::refcountable
+{
+    BugEngine::Plugin::Plugin<minitl::refcountable> m_pyPlugin;
+public:
+    PythonVersion(const BugEngine::Plugin::Plugin<minitl::refcountable>& plugin)
+        :   m_pyPlugin(plugin)
+    {
+    }
+
+    ~PythonVersion()
+    {
+    }
+};
+
+static ref<PythonVersion> create(const BugEngine::Plugin::Context &context)
 {
     static const char* versions[] = {
         "35",
@@ -20,14 +33,14 @@ static minitl::refcountable* create(const BugEngine::Plugin::Context &context)
     {
         minitl::format<1024u> pluginName = minitl::format<1024u>("plugin.scripting.python%s")
                 | versions[i];
-        s_pyPlugin = BugEngine::Plugin::Plugin<void>(pluginName.c_str(), context);
-        if (s_pyPlugin)
+        BugEngine::Plugin::Plugin<minitl::refcountable> p = BugEngine::Plugin::Plugin<minitl::refcountable>(pluginName.c_str(), context);
+        if (p)
         {
             be_info("Loaded Python version %c.%c" | versions[i][0] | versions[i][1]);
-            return static_cast<minitl::refcountable*>(s_pyPlugin.operator->());
+            return ref<PythonVersion>::create(BugEngine::Arena::general(), p);
         }
     }
-    return 0;
+    return ref<PythonVersion>();
 }
 
-BE_PLUGIN_REGISTER_CREATE_RAW(&create);
+BE_PLUGIN_REGISTER_CREATE(&create);

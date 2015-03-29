@@ -39,6 +39,8 @@ typedef PyObject* (*Py_InitModule4_64Type)(const char* name, PyMethodDef* method
 
 typedef PyObject* (*PyModule_Create2Type)(PyModuleDef* module, int apiver);
 typedef int (*PyModule_AddObjectType)(PyObject* module, const char* name, PyObject* value);
+typedef int (*PyImport_AppendInittab2Type)(const char* name, void(*)(void));
+typedef int (*PyImport_AppendInittab3Type)(const char* name, PyObject*(*)(void));
 
 typedef void (*PyEval_InitThreadsType)();
 typedef PyThreadState* (*PyEval_SaveThreadType)();

@@ -6,24 +6,16 @@
 /**************************************************************************************************/
 
 #include    <bugengine/stdafx.h>
+#include    <pythonlib/stdafx.h>
 
 #if defined(building_python) || defined(PYTHON_EXPORTS)
-# define     PYTHONEXPORT          BE_EXPORT
-#elif defined(building_py_bugengine) || defined(PY_BUGENGINE_EXPORTS)
-# define     PYTHONEXPORT          BE_EXPORT
+# define     PYTHONEXPORT           BE_EXPORT
 #elif defined(python_dll)
-# define     PYTHONEXPORT          BE_IMPORT
+# define     PYTHONEXPORT           BE_IMPORT
 #else
 # define     PYTHONEXPORT
 #endif
 
-namespace BugEngine { namespace Arena
-{
-
-be_api(PYTHON)
-minitl::Allocator& python();
-
-}}
 
 /**************************************************************************************************/
 #endif

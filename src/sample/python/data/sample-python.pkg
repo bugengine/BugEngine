@@ -1,4 +1,4 @@
-load plugin.scripting.pythonlib as py;
+load plugin.scripting.python as py;
 
 script = py.PythonScript
 (

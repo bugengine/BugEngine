@@ -12,13 +12,21 @@ namespace BugEngine { namespace RTTI
 
 Value::Value(const Value& other)
 :   m_type(other.m_type)
-,   m_reference(false)
+,   m_reference(other.m_reference)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer)
-                ? Arena::script().alloc(m_type.size())
-                : 0;
-    m_ref.m_deallocate = (m_ref.m_pointer != 0);
-    m_type.copy(other.memory(), memory());
+    if (m_reference)
+    {
+        m_ref.m_pointer = other.m_ref.m_pointer;
+        m_ref.m_deallocate = false;
+    }
+    else
+    {
+        m_ref.m_pointer = m_type.size() > sizeof(m_buffer)
+                 ? Arena::script().alloc(m_type.size())
+                 : 0;
+        m_ref.m_deallocate = (m_ref.m_pointer != 0);
+        m_type.copy(other.memory(), memory());
+    }
 }
 
 Value::Value(Type type, void* location)

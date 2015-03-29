@@ -25,7 +25,7 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
     be_info("loading dynamic object %s (%s)" | pluginName | fullPath.name);
-    void* handle = dlopen(fullPath.name, RTLD_NOW|RTLD_GLOBAL);
+    void* handle = dlopen(fullPath.name, RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
         be_error("Error loading dynamic object %s: %s" | pluginName | dlerror());

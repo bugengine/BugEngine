@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <pythonlib/stdafx.h>
-#include    <pythonlib/pythonscript.script.hh>
+#include    <python/stdafx.h>
+#include    <python/pythonscript.script.hh>
 
 namespace BugEngine
 {

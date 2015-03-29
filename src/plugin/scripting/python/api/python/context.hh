@@ -1,27 +1,25 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_CONTEXT_H_
-#define BE_PYTHONLIB_CONTEXT_H_
+#ifndef BE_PYTHON_CONTEXT_HH_
+#define BE_PYTHON_CONTEXT_HH_
 /**************************************************************************************************/
-#include    <pythonlib/stdafx.h>
+#include    <python/stdafx.h>
 #include    <bugengine/scriptengine.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.hh>
 #include    <filesystem/file.script.hh>
 #include    <plugin/plugin.hh>
-#include    <pythonlib/pythonscript.script.hh>
+#include    <python/pythonscript.script.hh>
 #include    <pythonlib/pythonlib.hh>
 
 namespace BugEngine { namespace Python
 {
 
-class PythonGlobalInterpreter;
-class be_api(PYTHONLIB) Context : public ScriptEngine<PythonScript>
+class be_api(PYTHON) Context : public ScriptEngine<PythonScript>
 {
-    friend class PythonGlobalInterpreter;
 public:
-    Context(const Plugin::Context& context, weak<PythonLibrary> library);
+    Context(const Plugin::Context& context, ref<PythonLibrary> library);
     ~Context();
 
  private:
@@ -32,7 +30,7 @@ public:
                               const minitl::Allocator::Block<u8>& buffer) override;
     static void pythonInitialise();
 private:
-    weak<PythonLibrary> m_library;
+    ref<PythonLibrary>  m_library;
     PyThreadState*      m_pythonState;
 };
 

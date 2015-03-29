@@ -90,24 +90,26 @@ def build(bld):
                ['engine.bugengine', '3rdparty.squirrel'])
     bld.plugin('plugin.input.input',
                ['engine.bugengine'])
+    bld.shared_library('plugin.scripting.pythonlib',
+               ['engine.bugengine'],
+               platforms=['pc'])
     bld.plugin('plugin.scripting.python',
-               ['engine.bugengine'],
+               ['engine.bugengine', 'plugin.scripting.pythonlib'],
                platforms=['pc'])
-    bld.plugin('plugin.scripting.pythonlib',
-               ['engine.bugengine'],
-               platforms=['pc'])
+    bld.python_module('py_bugengine', ['engine.bugengine',
+                                       'plugin.scripting.pythonlib'],
+                      path='plugin.scripting.pythonmodule',
+                      platforms=['pc'])
     if bld.env.PROJECTS:
         python_deps = ['3rdparty.python%s'%version.replace('.', '')
                             for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
     else:
-        bld.python_module('py_bugengine', ['engine.bugengine'],
-                          path='plugin.scripting.pythonlib',
-                          platforms=['pc'])
+
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
-                       ['engine.bugengine', 'plugin.scripting.pythonlib',
+                       ['engine.bugengine', 'plugin.scripting.python',
                         '3rdparty.python%s'%version.replace('.', '')],
                        path='plugin.scripting.pythonbinding',
                        features=['python%s'%version])

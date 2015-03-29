@@ -68,39 +68,12 @@ namespace BugEngine { namespace Plugin
     _BE_REGISTER_METHOD(id, be_createPlugin);                                                       \
     _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                      \
     _BE_REGISTER_METHOD(id, be_pluginNamespace);
-#define BE_PLUGIN_REGISTER_NAMED_RAW__(name, id, create)                                            \
-    BE_PLUGIN_NAMESPACE_CREATE_(id);                                                                \
-    _BE_PLUGIN_EXPORT                                                                               \
-    minitl::refcountable* be_createPlugin (const ::BugEngine::Plugin::Context& context)             \
-    {                                                                                               \
-        minitl::refcountable* r = (*create)(context);                                               \
-        if (r)                                                                                      \
-            r->addref();                                                                            \
-        return r;                                                                                   \
-    }                                                                                               \
-    _BE_PLUGIN_EXPORT void be_destroyPlugin(minitl::refcountable* cls)                              \
-    {                                                                                               \
-        if (cls)                                                                                    \
-            cls->decref();                                                                          \
-    }                                                                                               \
-    _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
-    {                                                                                               \
-        return BugEngine::be_##id##_Namespace().operator->();                                       \
-    }                                                                                               \
-    _BE_REGISTER_PLUGIN(id, name);                                                                  \
-    _BE_REGISTER_METHOD(id, be_createPlugin);                                                       \
-    _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                      \
-    _BE_REGISTER_METHOD(id, be_pluginNamespace);
 #define BE_PLUGIN_REGISTER_NAMED_(name, id, create)                                                 \
     BE_PLUGIN_REGISTER_NAMED__(name, id, create)
-#define BE_PLUGIN_REGISTER_NAMED_RAW_(name, id, create)                                             \
-    BE_PLUGIN_REGISTER_NAMED_RAW__(name, id, create)
 #define BE_PLUGIN_REGISTER_NAMED(name, create)                                                      \
     BE_PLUGIN_REGISTER_NAMED_(name, name, create)
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                           \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
-#define BE_PLUGIN_REGISTER_CREATE_RAW(create)                                                       \
-    BE_PLUGIN_REGISTER_NAMED_RAW_(BE_PROJECTNAME, BE_PROJECTID, create)
 #define BE_PLUGIN_REGISTER(klass)                                                                   \
     static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
     {                                                                                               \
