@@ -4,6 +4,16 @@
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythonlib.hh>
 
+namespace BugEngine { namespace Arena
+{
+
+minitl::Allocator& python()
+{
+    return script();
+}
+
+}}
+
 namespace BugEngine { namespace Python
 {
 
@@ -12,11 +22,13 @@ PythonLibrary::ThreadLock::ThreadLock(weak<PythonLibrary> library, PyThreadState
     ,   m_thread(thread)
 {
     (*m_library->m_PyEval_AcquireThread)(m_thread);
+    setCurrentContext(m_library);
 }
 
 PythonLibrary::ThreadLock::~ThreadLock()
 {
     (*m_library->m_PyEval_ReleaseThread)(m_thread);
+    clearCurrentContext();
 }
 
 void PythonLibrary::initialize()

@@ -3,24 +3,24 @@
 
 #include    <stdafx.h>
 
-#include    <pythonlib/context.hh>
+#include    <python/context.hh>
 #include    <pythonlib/pythonlib.hh>
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
 static minitl::ref<BugEngine::Python::Context> create(const BugEngine::Plugin::Context &context)
 {
-    static ref<BugEngine::Python::PythonLibrary> library =
-                ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), PYTHON_LIBRARY);
-    if (library->operator !())
+    using namespace BugEngine::Python;
+    ref<PythonLibrary> library = loadPython(PYTHON_LIBRARY);
+    if (!library)
     {
-        return minitl::ref<BugEngine::Python::Context>();
+        return minitl::ref<Context>();
     }
     else
     {
-        return minitl::ref<BugEngine::Python::Context>::create(BugEngine::Arena::general(),
-                                                               context,
-                                                               library);
+        return minitl::ref<Context>::create(BugEngine::Arena::general(),
+                                            context,
+                                            library);
     }
 }
 

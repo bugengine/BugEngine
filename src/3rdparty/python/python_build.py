@@ -15,7 +15,8 @@ def python_module(bld, name, depends, path, platforms=[]):
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],
         use_master=True, warnings=True, export_all=False)
-    module_list[0].preprocess.env.PLUGIN = name.replace('.', '_')
+    if module_list[0].preprocess:
+        module_list[0].preprocess.env.PLUGIN = name.replace('.', '_')
     for module in module_list:
         module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN
     if module_multiarch:

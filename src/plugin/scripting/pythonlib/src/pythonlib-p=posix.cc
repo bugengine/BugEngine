@@ -59,11 +59,15 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         if (m_version >= 30)
         {
             be_get_func(PyModule_Create2);
+            be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
         }
         else
         {
+            m_Py_InitModule4 = 0;
+            m_Py_InitModule4_64 = 0;
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
+            be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
         }
         be_get_func(PyModule_AddObject);
         be_get_func(PyEval_InitThreads);
@@ -155,10 +159,6 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PySys_SetObject);
 #       undef be_get_fun
 #       undef be_get_fun_opt
-        if (m_status && pythonLibraryName)
-        {
-            initialize();
-        }
     }
 }
 

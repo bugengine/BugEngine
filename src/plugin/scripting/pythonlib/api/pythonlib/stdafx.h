@@ -9,9 +9,7 @@
 
 #if defined(building_pythonlib) || defined(PYTHONLIB_EXPORTS)
 # define     PYTHONLIBEXPORT        BE_EXPORT
-#elif defined(building_py_bugengine) || defined(PY_BUGENGINE_EXPORTS)
-# define     PYTHONLIBEXPORT        BE_EXPORT
-#elif defined(python_dll)
+#elif defined(pythonlib_dll)
 # define     PYTHONLIBEXPORT        BE_IMPORT
 #else
 # define     PYTHONLIBEXPORT

@@ -15,7 +15,7 @@
 namespace BugEngine { namespace Python
 {
 
-ref<BugEngine::Python::PythonLibrary> s_library;
+thread<PythonLibrary> s_library;
 
 static PyMethodDef s_methods[] =
 {
@@ -35,9 +35,12 @@ static PyModuleDef s_module =
     NULL
 };
 
-void setupModule(PyObject* module)
+static void setupModule(PyObject* module, bool registerLog)
 {
-    PyBugLog::registerType(module);
+    if (registerLog)
+    {
+        PyBugLog::registerType(module);
+    }
     PyBugPlugin::registerType(module);
     PyBugObject::registerType(module);
     PyBugNumber<bool>::registerType(module);
@@ -59,40 +62,84 @@ void setupModule(PyObject* module)
     PyBugNamespace::registerType(module);
 }
 
-}}
-
-extern "C" BE_EXPORT void initpy_bugengine()
+void init2_py_bugengine(bool registerLog)
 {
-    using namespace BugEngine::Python;
     /* python 2.x module initialisation */
-    be_info("loading module py_bugengine (Python 2)");
-    s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
     PyObject* module;
     if (s_library->m_Py_InitModule4)
     {
         be_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but BugEngine is 64bits");
-        module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL, s_library->getApi());
+        module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "",
+                                                NULL, s_library->getApi());
     }
-    else if (s_library->m_Py_InitModule4_64)
+    if (s_library->m_Py_InitModule4_64)
     {
         be_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but BugEngine is 32bits");
-        module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL, s_library->getApi());
+        module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "",
+                                                   NULL, s_library->getApi());
     }
     else
     {
         be_unimplemented();
         return;
     }
-    setupModule(module);
+    setupModule(module, registerLog);
 }
 
-extern "C" BE_EXPORT BugEngine::Python::PyObject* PyInit_py_bugengine()
+PyObject* init3_py_bugengine(bool registerLog)
 {
-    using namespace BugEngine::Python;
     /* python 3.x module initialisation */
-    be_info("loading module py_bugengine (Python 3)");
-    s_library = ref<BugEngine::Python::PythonLibrary>::create(BugEngine::Arena::general(), (const char*)NULL);
     PyObject* module = (*s_library->m_PyModule_Create2)(&s_module, s_library->getApi());
-    setupModule(module);
+    setupModule(module, registerLog);
     return module;
 }
+
+static void init2_py_bugengine_log()
+{
+    be_assert(s_library, "Current Python context not set; call setCurrentContext");
+    init2_py_bugengine(true);
+}
+
+static PyObject* init3_py_bugengine_log()
+{
+    be_assert(s_library, "Current Python context not set; call setCurrentContext");
+    return init3_py_bugengine(true);
+}
+
+static void registerModule()
+{
+    using namespace BugEngine::Python;
+    if (s_library->getVersion() < 30)
+    {
+        s_library->m_PyImport_AppendInittab2("py_bugengine", &init2_py_bugengine_log);
+    }
+    else
+    {
+        s_library->m_PyImport_AppendInittab3("py_bugengine", &init3_py_bugengine_log);
+    }
+}
+
+ref<PythonLibrary> loadPython(const char* pythonPath)
+{
+    ref<PythonLibrary> library = ref<PythonLibrary>::create(Arena::general(), pythonPath);
+    if (library)
+    {
+        setCurrentContext(library);
+        registerModule();
+        library->initialize();
+        clearCurrentContext();
+    }
+    return library;
+}
+
+void setCurrentContext(weak<PythonLibrary> library)
+{
+    s_library = library;
+}
+
+void clearCurrentContext()
+{
+    s_library = 0;
+}
+
+}}

@@ -1,26 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <pythonlib/stdafx.h>
-#include    <pythonlib/context.hh>
+#include    <python/stdafx.h>
+#include    <python/context.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace Python
 {
 
-namespace Arena
-{
-
-minitl::Allocator& python()
-{
-    return script();
-}
-
-}
-
-namespace Python
-{
-
-Context::Context(const Plugin::Context& context, weak<PythonLibrary> library)
+Context::Context(const Plugin::Context& context, ref<PythonLibrary> library)
     :   ScriptEngine<PythonScript>(Arena::python(), context.resourceManager)
     ,   m_library(library)
     ,   m_pythonState(library->createThread())

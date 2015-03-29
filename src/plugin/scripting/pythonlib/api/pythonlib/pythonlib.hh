@@ -7,6 +7,7 @@
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythontypes.hh>
 #include    <plugin/plugin.hh>
+#include    <core/threads/threadlocal.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -30,7 +31,7 @@ public:
     PyThreadState* createThread();
     void destroyThread(PyThreadState* threadState);
 
-    struct ThreadLock
+    struct be_api(PYTHONLIB) ThreadLock
     {
         ThreadLock(weak<PythonLibrary> library, PyThreadState* thread);
         ~ThreadLock();
@@ -71,6 +72,8 @@ public:
     Py_InitModule4_64Type                   m_Py_InitModule4_64;
     PyModule_Create2Type                    m_PyModule_Create2;
     PyModule_AddObjectType                  m_PyModule_AddObject;
+    PyImport_AppendInittab2Type             m_PyImport_AppendInittab2;
+    PyImport_AppendInittab3Type             m_PyImport_AppendInittab3;
     _Py_NoneStructType                      m__Py_NoneStruct;
 
     PyObject_SetAttrStringType              m_PyObject_SetAttrString;
@@ -144,7 +147,13 @@ public:
     PySys_SetObjectType                     m_PySys_SetObject;
 };
 
-extern ref<PythonLibrary> s_library;
+extern thread<PythonLibrary> s_library;
+
+be_api(PYTHONLIB) void init2_py_bugengine(bool registerLog);
+be_api(PYTHONLIB) PyObject* init3_py_bugengine(bool registerLog);
+be_api(PYTHONLIB) ref<PythonLibrary> loadPython(const char* pythonPath);
+be_api(PYTHONLIB) void setCurrentContext(weak<PythonLibrary> library);
+be_api(PYTHONLIB) void clearCurrentContext();
 
 }}
 
