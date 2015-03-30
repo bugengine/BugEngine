@@ -77,18 +77,25 @@ void Environment::init(int argc, const char *argv[])
     }
     do
     {
-        while (*filename == '/') filename--;
-        if (*filename == '.')
+        while (*filename == '/' && filename != argv[0]) filename--;
+        if (*filename == '.' && filename != argv[0])
             filename--;
         else
             break;
     } while(1);
-    while (*filename != '/' && filename != argv[0])
+    if (filename == argv[0])
     {
-        filename--;
+        chdir("..");
     }
-    ipath rootdir = ipath(argv[0], filename);
-    chdir(rootdir.str().name);
+    else
+    {
+        while (*filename != '/' && filename != argv[0])
+        {
+            filename--;
+        }
+        ipath rootdir = ipath(argv[0], filename);
+        chdir(rootdir.str().name);
+    }
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
