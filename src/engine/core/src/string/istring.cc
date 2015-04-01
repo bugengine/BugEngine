@@ -247,7 +247,7 @@ static inline const char* findnext(const char* str, const char *sep, size_t len)
     return result;
 }
 
-static void parse(const char *str, const char *end, const char *sep, istring* buffer, u32& size)
+static void parse(const char *str, const char *end, const char *sep, igenericnamespace& result)
 {
     size_t numsep = strlen(sep);
 
@@ -257,7 +257,7 @@ static void parse(const char *str, const char *end, const char *sep, istring* bu
         while (*ss && ss < end)
         {
             ss = findnext(str, sep, numsep);
-            buffer[size++] = istring(str,ss);
+            result.push_back(istring(str,ss));
             if (*ss) ss++;
             str=ss;
         }
@@ -266,32 +266,80 @@ static void parse(const char *str, const char *end, const char *sep, istring* bu
 }
 
 igenericnamespace::igenericnamespace()
-:   m_namespace()
-,   m_size(0)
+    :   m_namespace((istring*)(m_buffer))
+    ,   m_size(0)
+    ,   m_capacity(MaxNamespaceSize)
 {
+}
+
+igenericnamespace::igenericnamespace(const igenericnamespace& other)
+    :   m_namespace(other.m_capacity > MaxNamespaceSize
+                        ?   (istring*)Arena::string().alloc(other.m_capacity * sizeof(istring))
+                        :   (istring*)(m_buffer))
+    ,   m_size(other.m_size)
+    ,   m_capacity(other.m_capacity)
+{
+    for (u16 i = 0; i < m_size; ++i)
+    {
+        new (&m_namespace[i]) istring(other.m_namespace[i]);
+    }
 }
 
 igenericnamespace::igenericnamespace(const istring& onlycomponent)
-:   m_namespace()
-,   m_size(1)
+    :   m_namespace((istring*)(m_buffer))
+    ,   m_size(1)
+    ,   m_capacity(MaxNamespaceSize)
 {
-    m_namespace[0] = onlycomponent;
+    new (&m_namespace[0]) istring(onlycomponent);
 }
 
 igenericnamespace::igenericnamespace(const char *begin, const char *end, const char* sep)
-:   m_namespace()
-,   m_size(0)
+    :   m_namespace((istring*)(m_buffer))
+    ,   m_size(0)
+    ,   m_capacity(MaxNamespaceSize)
 {
-    parse(begin, end, sep, m_namespace, m_size);
+    parse(begin, end, sep, *this);
 }
 
 igenericnamespace::igenericnamespace(const char *str, const char* sep)
-:   m_namespace()
-,   m_size(0)
+    :   m_namespace((istring*)(m_buffer))
+    ,   m_size(0)
+    ,   m_capacity(MaxNamespaceSize)
 {
     if (str)
     {
-        parse(str, str+strlen(str), sep, m_namespace, m_size);
+        parse(str, str+strlen(str), sep, *this);
+    }
+}
+
+igenericnamespace& igenericnamespace::operator=(const igenericnamespace& other)
+{
+    for (u16 i = 0; i < m_size; ++i)
+    {
+        new (&m_namespace[i]) istring(other.m_namespace[i]);
+    }
+    m_size = 0;
+    if (m_capacity < other.m_size)
+    {
+        grow(other.m_size);
+    }
+    for (u16 i = 0; i < other.m_size; ++i)
+    {
+        new (&m_namespace[i]) istring(other.m_namespace[i]);
+    }
+    m_size = other.m_size;
+    return *this;
+}
+
+igenericnamespace::~igenericnamespace()
+{
+    for (u16 i = 0; i < m_size; ++i)
+    {
+        m_namespace[m_size-i-1].~istring();
+    }
+    if (m_capacity > MaxNamespaceSize)
+    {
+        Arena::string().free(m_namespace);
     }
 }
 
@@ -302,34 +350,42 @@ u32 igenericnamespace::size() const
 
 const istring& igenericnamespace::operator[](u32 index) const
 {
-    be_assert(m_size > index, "index %d out of range %d" | index | m_size);
+    be_assert(index < m_size, "index %d out of range %d" | index | m_size);
     return m_namespace[index];
 }
 
 void igenericnamespace::push_back(const istring& component)
 {
-    be_assert(m_size < MaxNamespaceSize, "index %d too large; max size is %d" | m_size | MaxNamespaceSize);
-    m_namespace[m_size++] = component;
+    if (m_size == m_capacity)
+    {
+        grow(m_capacity * 2);
+    }
+    new (&m_namespace[m_size++]) istring(component);
 }
 
 istring igenericnamespace::pop_back()
 {
+    be_assert_recover(m_size >= 1, "pop_back called on an empty namespace", return istring());
     --m_size;
-    return m_namespace[m_size];
+    istring result = m_namespace[m_size];
+    m_namespace[m_size].~istring();
+    return result;
 }
 
 istring igenericnamespace::pop_front()
 {
-    istring backup = m_namespace[0];
+    be_assert_recover(m_size >= 1, "pop_front called on an empty namespace", return istring());
+    istring result = m_namespace[0];
     for (u32 i = 1; i < m_size; ++i)
         m_namespace[i-1] = m_namespace[i];
     m_size--;
-    return backup;
+    m_namespace[m_size].~istring();
+    return result;
 }
 
 bool igenericnamespace::operator==(const igenericnamespace& other) const
 {
-    if ( this->size() != other.size())
+    if (this->size() != other.size())
         return false;
     for (u32 i = 0; i < other.size(); ++i)
         if (m_namespace[i] != other[i])
@@ -339,7 +395,7 @@ bool igenericnamespace::operator==(const igenericnamespace& other) const
 
 bool igenericnamespace::operator!=(const igenericnamespace& other) const
 {
-    if ( this->size() != other.size())
+    if (this->size() != other.size())
         return true;
     for (u32 i = 0; i < other.size(); ++i)
         if (m_namespace[i] != other[i])
@@ -381,6 +437,24 @@ void igenericnamespace::str(char* buffer, char separator, u32 size) const
             strncat(buffer, m_namespace[i].c_str(), size - strlen(buffer) - 1);
         }
     }
+}
+
+void igenericnamespace::grow(u16 newCapacity)
+{
+    void* newBuffer = Arena::string().alloc(newCapacity * sizeof(istring));
+    istring* newStrings = new (newBuffer) istring[newCapacity];
+    for (u16 i = 0; i < m_size; ++i)
+        newStrings[i] = m_namespace[i];
+    for (u16 i = 0; i < m_size; ++i)
+    {
+        m_namespace[m_size-i-1].~istring();
+    }
+    if (m_capacity > MaxNamespaceSize)
+    {
+        Arena::string().free(m_namespace);
+    }
+    minitl::swap(newStrings, m_namespace);
+    m_capacity = newCapacity;
 }
 
 //-----------------------------------------------------------------------------

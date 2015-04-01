@@ -40,16 +40,22 @@ public:
 class be_api(CORE) igenericnamespace
 {
 public:
-    enum Constants { MaxNamespaceSize = 15 };
+    enum Constants { MaxNamespaceSize = 8 };
 private:
-    istring m_namespace[MaxNamespaceSize];
-    u32     m_size;
+    istring*    m_namespace;
+    char        m_buffer[sizeof(istring) * MaxNamespaceSize];
+    u16         m_size;
+    u16         m_capacity;
+private:
+    void grow(u16 newCapacity);
 protected:
     igenericnamespace();
     explicit igenericnamespace(const istring& onlycomponent);
+    igenericnamespace(const igenericnamespace& other);
     igenericnamespace(const char *str, const char* sep);
     igenericnamespace(const char *begin, const char *end, const char* sep);
-    ~igenericnamespace() {}
+    ~igenericnamespace();
+    igenericnamespace& operator=(const igenericnamespace& other);
     void str(char* buffer, char separator, u32 size) const;
 public:
     u32 size() const;
