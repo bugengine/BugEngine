@@ -85,7 +85,9 @@ void Environment::init(int argc, const char *argv[])
     } while(1);
     if (filename == argv[0])
     {
-        chdir("..");
+        char* wd = get_current_dir_name();
+        m_dataDirectory = ipath(wd) + ipath("..") + m_dataDirectory;
+        free(wd);
     }
     else
     {
@@ -94,7 +96,16 @@ void Environment::init(int argc, const char *argv[])
             filename--;
         }
         ipath rootdir = ipath(argv[0], filename);
-        chdir(rootdir.str().name);
+        if (argv[0][0] != '/')
+        {
+            char* wd = get_current_dir_name();
+            m_dataDirectory = ipath(wd) + rootdir + m_dataDirectory;
+            free(wd);
+        }
+        else
+        {
+            m_dataDirectory = rootdir + m_dataDirectory;
+        }
     }
     for (int arg = 1; arg < argc; arg++)
     {
