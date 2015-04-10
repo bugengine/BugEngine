@@ -39,7 +39,7 @@ public:
 
 class be_api(CORE) igenericnamespace
 {
-public:
+private:
     enum Constants { MaxNamespaceSize = 8 };
 private:
     istring*    m_namespace;
@@ -80,6 +80,7 @@ public:
     {
         char name[MaxPathLength];
     };
+    inamespace();
     explicit inamespace(const istring& onlycomponent);
     inamespace(const char *str);
     ~inamespace() {}
@@ -87,14 +88,14 @@ public:
     inamespace& operator+=(const istring& component);
 
     Path str() const;
-private:
-    inamespace();
 };
 
 be_api(CORE) inamespace operator+(const istring& str1, const istring& str2);
 be_api(CORE) inamespace operator+(const istring& str1, const inamespace& ns2);
 be_api(CORE) inamespace operator+(const inamespace& ns1, const istring& str2);
 be_api(CORE) inamespace operator+(const inamespace& ns1, const inamespace& ns2);
+
+class ipath;
 
 class be_api(CORE) ifilename : public igenericnamespace
 {
@@ -104,13 +105,13 @@ public:
     {
         char name[MaxFilenameLength];
     };
+    ifilename();
     explicit ifilename(const istring& onlycomponent);
     ifilename(const char *str);
+    ifilename(const ipath& path);
     ~ifilename() {}
 
     Filename str() const;
-private:
-    ifilename();
 };
 
 class be_api(CORE) ipath : public igenericnamespace
@@ -122,14 +123,13 @@ public:
         char name[MaxFilenameLength];
     };
     explicit ipath(const istring& onlycomponent);
+    ipath();
     ipath(const char *str);
     ipath(const char *begin, const char *end);
     ~ipath() {}
 
     ipath& operator+=(const ipath& other);
     Filename str() const;
-private:
-    ipath();
 };
 
 be_api(CORE) ipath     operator+(const ipath& path1, const ipath& path2);

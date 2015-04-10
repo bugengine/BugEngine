@@ -52,23 +52,13 @@ void Environment::init()
 
 void Environment::init(int argc, const char *argv[])
 {
-    m_programPath = argv[0];
-    const char *exe = argv[0];
-    size_t s = strlen(argv[0])-1;
-    m_game = istring("sample.kernel");
-    do
-    {
-        if (exe[s] == '\\' || exe[s] == '/')
-            break;
-        s--;
-    }
-    while (s != 0);
-    size_t begin = s;
-    while (exe[s] && exe[s] != '.')
-        s++;
-    m_dataDirectory = ipath(exe, exe+begin);
-    m_dataDirectory.push_back(istring("data"));
-    for( int arg = 1; arg < argc; arg++ )
+    m_game = istring("sample.text");
+    ipath rootPath = canonicalPath(argv[0], "\\/");
+    m_programPath = ifilename(rootPath);
+    rootPath.pop_back();
+    m_dataDirectory = rootPath + m_dataDirectory;
+
+    for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
         {

@@ -314,20 +314,23 @@ igenericnamespace::igenericnamespace(const char *str, const char* sep)
 
 igenericnamespace& igenericnamespace::operator=(const igenericnamespace& other)
 {
-    for (u16 i = 0; i < m_size; ++i)
+    if (&other != this)
     {
-        new (&m_namespace[i]) istring(other.m_namespace[i]);
+        for (u16 i = 0; i < m_size; ++i)
+        {
+            m_namespace[m_size-i-1].~istring();
+        }
+        m_size = 0;
+        if (m_capacity < other.m_size)
+        {
+            grow(other.m_size);
+        }
+        for (u16 i = 0; i < other.m_size; ++i)
+        {
+            new (&m_namespace[i]) istring(other.m_namespace[i]);
+        }
+        m_size = other.m_size;
     }
-    m_size = 0;
-    if (m_capacity < other.m_size)
-    {
-        grow(other.m_size);
-    }
-    for (u16 i = 0; i < other.m_size; ++i)
-    {
-        new (&m_namespace[i]) istring(other.m_namespace[i]);
-    }
-    m_size = other.m_size;
     return *this;
 }
 
@@ -459,6 +462,10 @@ void igenericnamespace::grow(u16 newCapacity)
 
 //-----------------------------------------------------------------------------
 
+inamespace::inamespace()
+{
+}
+
 inamespace::inamespace(const istring& onlycomponent)
 :   igenericnamespace(onlycomponent)
 {
@@ -512,6 +519,10 @@ inamespace::Path inamespace::str() const
 
 //-----------------------------------------------------------------------------
 
+ipath::ipath()
+{
+}
+
 ipath::ipath(const istring& onlycomponent)
 :   igenericnamespace(onlycomponent)
 {
@@ -550,8 +561,17 @@ ipath::Filename ipath::str() const
 
 //-----------------------------------------------------------------------------
 
+ifilename::ifilename()
+{
+}
+
 ifilename::ifilename(const istring& onlycomponent)
 :   igenericnamespace(onlycomponent)
+{
+}
+
+ifilename::ifilename(const ipath& path)
+:   igenericnamespace(path)
 {
 }
 

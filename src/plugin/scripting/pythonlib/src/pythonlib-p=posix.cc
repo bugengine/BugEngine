@@ -180,18 +180,11 @@ void PythonLibrary::platformInitialize()
 
 void PythonLibrary::setupPath()
 {
-    const char* programPath = Environment::getEnvironment().getProgramPath();
-    size_t programPathLength = strlen(programPath);
-    minitl::Allocator::Block<char> pythonHome(Arena::python(),
-                                              programPathLength + 1, 1);
-    strcpy(pythonHome.begin(), programPath);
-    char* path = pythonHome.begin();
-    while (*path) path++;
-    while (*path != '/' && *path != '\\' && path != pythonHome.begin()) path--;
-    *path = 0;
-    while (*path != '/' && *path != '\\' && path != pythonHome.begin()) path--;
-    *path = 0;
-    (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s/lib/\")") | pythonHome.data());
+    ifilename programPath = Environment::getEnvironment().getProgramPath();
+    programPath.pop_back();
+    programPath.pop_back();
+    (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s/lib/\")")
+                             | programPath.str().name);
 }
 
 }}
