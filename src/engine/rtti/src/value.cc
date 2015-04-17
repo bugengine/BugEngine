@@ -59,22 +59,28 @@ Value::~Value()
 
 Value& Value::operator=(const Value& v)
 {
-    if (v.m_reference)
+    if (m_reference)
     {
-        Value copy(v);
-        this->~Value();
-        new ((void*)this) Value(copy);
-        return *this;
+        be_assert_recover(m_type.isA(v.m_type),
+                          "Value has type %s; unable to copy from type %s"
+                          | m_type | v.m_type, return *this);
+        be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
+        void* mem = memory();
+        m_type.destroy(mem);
+        m_type.copy(v.memory(), mem);
     }
     else
     {
         this->~Value();
         new ((void*)this) Value(v);
-        return *this;
     }
+    return *this;
 }
 
-void* Value::unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& obj)
+void* Value::unpackAs(const Type& ti,
+                      ref<minitl::refcountable>& rptr,
+                      weak<minitl::refcountable>& wptr,
+                      minitl::refcountable*& obj)
 {
     be_assert(m_type.isA(ti), "Value has type %s; unable to unbox to type %s" | m_type | ti);
     void* mem = memory();

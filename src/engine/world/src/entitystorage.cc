@@ -78,6 +78,31 @@ struct GroupInfo
 
 }
 
+byte* EntityStorage::ComponentStorage::getElement(u32 index) const
+{
+    u32 pageIndex = index / elementsPerPage;
+    u32 offset = index % elementsPerPage;
+    byte* page = memory;
+    for (; pageIndex > 0; --pageIndex)
+    {
+        page = *(byte**)page;
+    }
+    be_assert(offset * elementSize < allocator->blockSize(), "invalid offset in page");
+    return page + offset * elementSize;
+}
+
+byte* EntityStorage::ComponentStorage::getBacklink(u32 index)
+{
+    u32 pageIndex = index / backlinksPerPage;
+    u32 offset = index % backlinksPerPage;
+    byte* page = memory;
+    for (; pageIndex > 0; --pageIndex)
+    {
+        page = *(byte**)page;
+    }
+    be_assert(offset * sizeof(u32) < allocator->blockSize(), "invalid offset in page");
+    return page + offset * sizeof(u32);
+}
 
 EntityStorage::ComponentIndex::ComponentIndex()
     :   group((u16)~0)
@@ -139,13 +164,13 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
         storage.backLink = 0;
         storage.current = 0;
         storage.elementSize = it->first->size;
+        storage.elementsPerPage = (storage.allocator->blockSize() - sizeof(void*)) / storage.elementSize;
+        storage.backlinksPerPage = (storage.allocator->blockSize() - sizeof(void*)) / sizeof(u32);
     }
 }
 
 EntityStorage::~EntityStorage()
 {
-    //be_assert(m_entityCount == 0,
-    //          "%d entities still spawned when deleting world" | m_entityCount);
     for (u8** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
     {
         m_allocator16k.free(*buffer);
@@ -424,7 +449,8 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.addComponent(e, c, componentIndex.relativeIndex);
+    group.addComponent(e, info.mask(group.firstComponent, group.lastComponent),
+                       c, componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = true;
 }
 
@@ -444,7 +470,8 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.removeComponent(e, componentIndex.relativeIndex);
+    group.removeComponent(e, info.mask(group.firstComponent, group.lastComponent),
+                          componentIndex.relativeIndex);
     info.mask[componentIndex.absoluteIndex] = false;
 }
 
@@ -479,7 +506,7 @@ RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> compone
                                             RTTI::Type::Value,
                                             RTTI::Type::Mutable,
                                             RTTI::Type::Const),
-                       storage.memory + componentIndex*componentType->size);
+                       storage.getElement(componentIndex));
 }
 
 ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)
@@ -489,55 +516,6 @@ ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)
     be_assert(componentIndex.group < m_componentGroups.size(),
               "invalid component index given to getComponentGroup");
     return m_componentGroups[componentIndex.group];
-}
-
-u32 EntityStorage::store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask)
-{
-    u32 result = 0;
-    be_assert_recover((info.index & s_usedBit) != 0,
-                      "Entity %s is not currently spawned (maybe already unspawned)"
-                            | (info.index & s_indexMask),
-                      return result);
-    for (u32 c = firstComponent; mask; c++, mask >>= 1)
-    {
-        if (mask & 1)
-        {
-            u32 size = m_componentTypes[c].third;
-            u32 offset = info.componentIndex[c];
-            be_assert_recover(offset < m_components[c].current,
-                              "entity id %d: component %s index %d out of range (%d-%d)"
-                                | (info.index & s_indexMask) | m_componentTypes[c].first->fullname()
-                                | offset | 0 | m_components[c].current,
-                              continue);
-            memcpy(buffer, m_components[c].memory + offset, size);
-            buffer += size;
-            result += size;
-        }
-    }
-    return result;
-}
-
-void EntityStorage::restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask)
-{
-    be_assert_recover((info.index & s_usedBit) != 0,
-                      "Entity %s is not currently spawned (maybe already unspawned)"
-                            | (info.index & s_indexMask),
-                      return);
-    for (u32 c = firstComponent; mask; c++, mask >>= 1)
-    {
-        if (mask & 1)
-        {
-            u32 size = m_componentTypes[c].third;
-            u32 offset = info.componentIndex[c];
-            be_assert_recover(offset < m_components[c].current,
-                              "entity id %d: component %s index %d out of range (%d-%d)"
-                                | (info.index & s_indexMask) | m_componentTypes[c].first->fullname()
-                                | offset | 0 | m_components[c].current,
-                              continue);
-            memcpy(m_components[c].memory + offset, buffer, size);
-            buffer += size;
-        }
-    }
 }
 
 u32 EntityStorage::getComponentIndex(Entity e, const ComponentGroup& group,
