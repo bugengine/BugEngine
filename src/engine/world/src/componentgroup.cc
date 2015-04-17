@@ -17,6 +17,8 @@ namespace BugEngine { namespace World
 namespace
 {
 
+static const u32 s_invalidEntity = ~(u32)0;
+
 static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Class> type,
                                                             istring name)
 {
@@ -44,8 +46,15 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
 struct EntityOperation
 {
     u32 owner;
-    u32 maskAdded;
-    u32 maskRemoved;
+    u32 maskBefore;
+    u32 maskAfter;
+    u32 size;
+
+    EntityOperation* next()
+    {
+        byte* buffer = reinterpret_cast<byte*>(this);
+        return reinterpret_cast<EntityOperation*>(buffer + size);
+    }
 };
 
 }
@@ -60,7 +69,7 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
     ,   m_componentsTotalSize(0)
     ,   m_componentCounts((u32*)Arena::game().alloc(
                               sizeof(u32)*componentTypes.size()*bucketMasks.size()))
-    ,   m_entityOperation(0)
+    ,   m_entityOperation(new (m_allocator.allocate()) OperationBuffer)
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + (u32)componentTypes.size())
 {
@@ -111,41 +120,202 @@ ComponentGroup::BucketPair ComponentGroup::findBuckets(u32 mask1, u32 mask2)
     return result;
 }
 
+void ComponentGroup::unpackComponents(u32 mask, const byte source[],
+                                      byte target[], const u32 offset[]) const
+{
+    for (u32 c = 0; mask; ++c, mask >>= 1)
+    {
+        if (mask & 1)
+        {
+            const u32 size = m_components[c].size;
+            memcpy(target + offset[c], source, size);
+            source += size;
+        }
+    }
+}
+
+void ComponentGroup::packComponents(u32 mask, const byte source[],
+                                    byte target[], const u32 offset[]) const
+{
+    for (u32 c = 0; mask; ++c, mask >>= 1)
+    {
+        if (mask & 1)
+        {
+            const u32 size = m_components[c].size;
+            memcpy(target, source + offset[c], size);
+            target += size;
+        }
+    }
+}
+
+void ComponentGroup::groupEntityOperations()
+{
+    OperationBuffer* oldBuffer = m_entityOperation;
+    m_entityOperation = new (m_allocator.allocate()) OperationBuffer;
+    minitl::Allocator::Block<byte> componentBuffer(Arena::temporary(), m_componentsTotalSize);
+    minitl::Allocator::Block<u32> componentOffsets(Arena::temporary(), m_components.size());
+    for (u32 o = 0, i = 0; i < m_components.size(); o += m_components[i].size, ++i)
+    {
+        componentOffsets[i] = o;
+    }
+    for (OperationBuffer* b = oldBuffer; b; /* nothing */)
+    {
+        EntityOperation* last = (EntityOperation*)(b->m_data + b->m_used);
+        for (EntityOperation* operation = (EntityOperation*)b->m_data;
+             operation < last;
+             operation = operation->next())
+        {
+            if (operation->owner != s_invalidEntity)
+            {
+                u32 maskBefore = operation->maskBefore;
+                u32 maskAfter = operation->maskAfter;
+                u32 maskChanged = 0;
+                byte* components = ((byte*)operation) + sizeof(EntityOperation);
+                unpackComponents((maskAfter & ~maskBefore)|maskChanged, components,
+                                 componentBuffer.begin(), componentOffsets.begin());
+                for (EntityOperation* sibling = operation->next();
+                     sibling < last;
+                     sibling = sibling->next())
+                {
+                    if (sibling->owner == operation->owner)
+                    {
+                        be_assert(maskAfter == sibling->maskBefore,
+                                  "incorrect sequence of operation");
+                        u32 maskRemoved = maskBefore & ~maskAfter;
+                        u32 maskAdded = sibling->maskAfter & ~maskAfter;
+                        maskChanged &= ~(maskAfter & ~sibling->maskAfter);
+                        maskChanged |= maskRemoved & maskAdded;
+                        maskAfter = sibling->maskAfter;
+                        sibling->owner = s_invalidEntity;
+                        byte* components = (byte*)sibling + sizeof(EntityOperation);
+                        u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
+                        unpackComponents(maskComponents, components,
+                                         componentBuffer.begin(), componentOffsets.begin());
+                    }
+                }
+                for (OperationBuffer* b = m_entityOperation; b; b = b->m_next)
+                {
+                    EntityOperation* last = (EntityOperation*)(b->m_data + b->m_used);
+                    for (EntityOperation* sibling = (EntityOperation*)b->m_data;
+                         sibling < last;
+                         sibling = sibling->next())
+                    {
+                        if (sibling->owner == operation->owner)
+                        {
+                            be_assert(maskAfter == sibling->maskBefore,
+                                      "incorrect sequence of operation");
+                            u32 maskRemoved = maskBefore & ~maskAfter;
+                            u32 maskAdded = sibling->maskAfter & ~maskAfter;
+                            maskChanged &= ~(maskAfter & ~sibling->maskAfter);
+                            maskChanged |= maskRemoved & maskAdded;
+                            maskAfter = sibling->maskAfter;
+                            sibling->owner = s_invalidEntity;
+                            byte* components = (byte*)sibling + sizeof(EntityOperation);
+                            u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
+                            unpackComponents(maskComponents, components,
+                                             componentBuffer.begin(), componentOffsets.begin());
+                        }
+                    }
+                }
+
+                u32 size = 0;
+                for (u32 c = 0, mask = maskAfter & ~maskBefore; mask; ++c, mask >>= 1)
+                {
+                    if (mask & 1)
+                    {
+                        size += m_components[c].size;
+                    }
+                }
+                EntityOperation* newOperation = new (allocOperation(size)) EntityOperation;
+                newOperation->owner = operation->owner;
+                newOperation->maskBefore = maskBefore;
+                newOperation->maskAfter = maskAfter;
+                newOperation->size = sizeof(EntityOperation) + size;
+                packComponents(maskAfter & ~maskBefore, componentBuffer.begin(),
+                               (byte*)newOperation + sizeof(EntityOperation), componentOffsets);
+            }
+        }
+        OperationBuffer* next = b->m_next;
+        b->~OperationBuffer();
+        m_allocator.free(b);
+        b = next;
+    }
+}
+
 void ComponentGroup::runEntityOperations(weak<EntityStorage> storage)
 {
     be_forceuse(storage);
+    groupEntityOperations();
+    OperationBuffer* buffer = m_entityOperation->m_next;
+    while (buffer)
+    {
+        OperationBuffer* dealloc = buffer;
+        buffer = buffer->m_next;
+        dealloc->~OperationBuffer();
+        m_allocator.free(buffer);
+    }
+    m_entityOperation->m_next = 0;
+    m_entityOperation->m_used = 0;
 }
 
 void ComponentGroup::freeBuffers()
 {
     Arena::game().free(m_componentCounts);
+    be_assert(m_entityOperation->m_used == 0 && m_entityOperation->m_next == 0,
+              "Entity operation still in use when ComponentGroup is destroyed");
+    m_entityOperation->~OperationBuffer();
+    m_allocator.free(m_entityOperation);
 }
 
-void ComponentGroup::addComponent(Entity e, const Component& c, u32 componentIndex)
+void ComponentGroup::addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex)
 {
     const ComponentInfo& info = m_components[componentIndex];
     byte* operationBuffer = allocOperation(info.size);
-    byte* componentBuffer = operationBuffer + info.size;
+    byte* componentBuffer = operationBuffer + sizeof(EntityOperation);
     EntityOperation* operation = reinterpret_cast<EntityOperation*>(operationBuffer);
     operation->owner = e.id;
-    operation->maskAdded = 1 << componentIndex;
-    operation->maskRemoved = 0;
+    operation->maskBefore = originalMask;
+    operation->maskAfter = originalMask | (1 << componentIndex);
+    operation->size = static_cast<u32>(sizeof(EntityOperation) + info.size);
     memcpy(componentBuffer, &c, info.size);
 }
 
-void ComponentGroup::removeComponent(Entity e, u32 componentIndex)
+void ComponentGroup::removeComponent(Entity e, u32 originalMask, u32 componentIndex)
 {
     byte* operationBuffer = allocOperation(0);
     EntityOperation* operation = reinterpret_cast<EntityOperation*>(operationBuffer);
     operation->owner = e.id;
-    operation->maskAdded = 0;
-    operation->maskRemoved = 1 << componentIndex;
+    operation->maskBefore = originalMask;
+    operation->maskAfter = originalMask & ~(1 << componentIndex);
+    operation->size = static_cast<u32>(sizeof(EntityOperation));
 }
 
 byte* ComponentGroup::allocOperation(u32 componentSize)
 {
-    be_forceuse(componentSize);
-    return 0;
+    const u32 totalSize = minitl::align(componentSize, sizeof(u32)) + sizeof(EntityOperation);
+    do
+    {
+        OperationBuffer* buffer = m_entityOperation;
+        u32 offset = buffer->m_offset.addExchange(totalSize);
+        if (offset + totalSize + sizeof(OperationBuffer) > m_allocator.blockSize())
+        {
+            OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer;
+            if (buffer->m_next.setConditional(newBuffer, 0) != 0)
+            {
+                newBuffer->~OperationBuffer();
+                m_allocator.free(newBuffer);
+            }
+            else
+            {
+                m_entityOperation = newBuffer;
+            }
+        }
+        else
+        {
+            buffer->m_used += totalSize;
+            return buffer->m_data + offset;
+        }
+    } while (true);
 }
 
 }}

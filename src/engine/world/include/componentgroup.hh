@@ -9,6 +9,7 @@
 #include    <world/component.script.hh>
 #include    <componentbucket.hh>
 #include    <core/memory/allocators/system.hh>
+#include    <core/threads/mutex.hh>
 #include    <minitl/array.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <kernel/interlocked_stack.hh>
@@ -21,6 +22,21 @@ class EntityStorage;
 class ComponentGroup
 {
 private:
+    struct OperationBuffer
+    {
+        iptr<OperationBuffer>   m_next;
+        i_u32                   m_offset;
+        i_u32                   m_used;
+        byte                    m_data[1];
+        OperationBuffer()
+            :   m_next(0)
+            ,   m_offset(i_u32::Zero)
+            ,   m_used(i_u32::Zero)
+            ,   m_data()
+        {
+        }
+    };
+
     struct ComponentInfo
     {
         raw<const RTTI::Class> componentType;
@@ -28,8 +44,6 @@ private:
         raw<const RTTI::Method::Overload> destroyed;
         u32 size;
     };
-    struct Delta;
-    struct Offset;
     typedef minitl::tuple<Bucket*, Bucket*> BucketPair;
 
     SystemAllocator&                m_allocator;
@@ -38,12 +52,16 @@ private:
     u32                             m_componentsTotalSize;
     u32*                            m_componentCounts;
     u32*                            m_backBuffer;
-    iptr<void>                      m_entityOperation;
+    iptr<OperationBuffer>           m_entityOperation;
 public:
     u32 const                       firstComponent;
     u32 const                       lastComponent;
 private:
     byte* allocOperation(u32 componentSize);
+    void packComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
+    void unpackComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
+    void groupEntityOperations();
+    BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
     ComponentGroup(u32 firstComponent,
                    const minitl::vector< raw<const RTTI::Class> >& componentTypes,
@@ -52,19 +70,10 @@ public:
     ~ComponentGroup();
 
     void freeBuffers();
-    BucketPair findBuckets(u32 mask1, u32 mask2);
     void runEntityOperations(weak<EntityStorage> storage);
-    void mergeEntityOperation(u8* source, const u8* merge);
-    void moveComponents(u32 componentIndex, Bucket* first, Bucket* last, u8* operations,
-                        Offset* operationOffsetPerBucket, Delta* deltas,
-                        const u8* componentBuffer);
-    void moveBucketComponents(u32 componentIndex, Bucket* bucket,
-                              u8* operationsRemove, u8* operationsAdd, u8* operationsEnd,
-                              const u8* componentBuffer,
-                              const Delta& delta);
 
-    void addComponent(Entity e, const Component& c, u32 componentIndex);
-    void removeComponent(Entity e, u32 componentIndex);
+    void addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex);
+    void removeComponent(Entity e, u32 originalMask, u32 componentIndex);
 };
 
 }}

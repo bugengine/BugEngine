@@ -42,6 +42,10 @@ private:
         byte* backLink;
         u32 current;
         u32 elementSize;
+        u32 elementsPerPage;
+        u32 backlinksPerPage;
+        byte* getElement(u32 index) const;
+        byte* getBacklink(u32 index);
     };
     typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex, u32 > ComponentInfo;
 protected:
@@ -85,8 +89,6 @@ private:
     u32 buildMask(const minitl::array< raw<const RTTI::Class> >& componentList);
     void registerType(raw<const RTTI::Class> componentType, u32 group, u32 index,
                       u32 totalIndex, u32 pageSize);
-    u32 store(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
-    void restore(const EntityInfo& info, u8* buffer, u32 firstComponent, u32 mask);
 
 private: // friend World/ComponentGroup
     Entity spawn();
