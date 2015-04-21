@@ -158,31 +158,25 @@ struct InterlockedType<8>
     }
     static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
-    #ifdef __PIC__
-        __asm__ __volatile__("push %%rbx\n\t" : : : "esp");
-    #endif
-        value_t result;
         union split {
             i64 asI64;
             i32 asI32[2];
         };
         split dst;
+        split result;
         dst.asI64 = v;
         split src;
         src.asI64 = condition;
 
         __asm__ __volatile__ (
-                "lock;  cmpxchg8b %1\n\t"
-                 : "=A"(result), "=m"(*p)
+                "lock;  cmpxchg8b %2\n\t"
+                 : "=a"(result.asI32[0]), "=d"(result.asI32[1]), "=m"(*p)
                  : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]),
                    "b"(dst.asI32[0]), "c"(dst.asI32[1])
                  : "memory", "cc"
 
         );
-    #ifdef __PIC__
-        __asm__ __volatile__("pop %%rbx\n\t" : : : "esp");
-    #endif
-        return result;
+        return result.asI64;
     }
     static inline value_t set_and_fetch(value_t *p, value_t v)
     {
