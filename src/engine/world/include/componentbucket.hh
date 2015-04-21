@@ -15,9 +15,10 @@ struct Bucket
     u32 acceptMask;
     u32 maskSize;
     u32 firstComponent;
+    u32 componentSize;
 
     Bucket();
-    Bucket(u32* componentCounts, u32 acceptMask);
+    Bucket(u32* componentCounts, u32 acceptMask, u32 componentSize);
 };
 
 }}

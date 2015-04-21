@@ -36,7 +36,7 @@ private:
         {
         }
     };
-
+    struct OperationDelta;
     struct ComponentInfo
     {
         raw<const RTTI::Class> componentType;
@@ -60,7 +60,11 @@ private:
     byte* allocOperation(u32 componentSize);
     void packComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
     void unpackComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
-    void groupEntityOperations();
+    void copyComponents(weak<EntityStorage> storage, u32 owner, byte target[],
+                        u32 mask, const u32 offset[]) const;
+    void groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
+    void sortEntityOperations(const OperationDelta deltas[]);
+    void runEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
     ComponentGroup(u32 firstComponent,

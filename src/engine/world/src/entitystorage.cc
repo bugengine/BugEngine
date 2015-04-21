@@ -8,6 +8,7 @@
 #include    <rtti/value.hh>
 #include    <componentgroup.hh>
 #include    <entityinfo.hh>
+#include    <cstring>
 
 namespace BugEngine { namespace World
 {
@@ -88,7 +89,7 @@ byte* EntityStorage::ComponentStorage::getElement(u32 index) const
         page = *(byte**)page;
     }
     be_assert(offset * elementSize < allocator->blockSize(), "invalid offset in page");
-    return page + offset * elementSize;
+    return page + sizeof(byte*) + offset * elementSize;
 }
 
 byte* EntityStorage::ComponentStorage::getBacklink(u32 index)
@@ -101,7 +102,7 @@ byte* EntityStorage::ComponentStorage::getBacklink(u32 index)
         page = *(byte**)page;
     }
     be_assert(offset * sizeof(u32) < allocator->blockSize(), "invalid offset in page");
-    return page + offset * sizeof(u32);
+    return page + sizeof(byte*) + offset * sizeof(u32);
 }
 
 EntityStorage::ComponentIndex::ComponentIndex()
@@ -164,8 +165,8 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
         storage.backLink = 0;
         storage.current = 0;
         storage.elementSize = it->first->size;
-        storage.elementsPerPage = (storage.allocator->blockSize() - sizeof(void*)) / storage.elementSize;
-        storage.backlinksPerPage = (storage.allocator->blockSize() - sizeof(void*)) / sizeof(u32);
+        storage.elementsPerPage = (storage.allocator->blockSize() - sizeof(byte*)) / storage.elementSize;
+        storage.backlinksPerPage = (storage.allocator->blockSize() - sizeof(byte*)) / sizeof(u32);
     }
 }
 
@@ -487,6 +488,19 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
                             | componentType->fullname(),
                       return false);
     return info.mask[componentIndex.absoluteIndex];
+}
+
+void EntityStorage::copyComponent(Entity e, u32 componentAbsoluteIndex, byte target[]) const
+{
+    const EntityInfo& info = getEntityInfo(e);
+    be_assert_recover(info.mask[componentAbsoluteIndex],
+                      "entity %d does not use component %s"
+                         | e.id | m_componentTypes[componentAbsoluteIndex].first->fullname(),
+                      return);
+    const u32 componentIndex = info.componentIndex[componentAbsoluteIndex];
+    const ComponentStorage& storage = m_components[componentAbsoluteIndex];
+    memcpy(target, storage.getElement(componentIndex),
+           m_componentTypes[componentAbsoluteIndex].third);
 }
 
 RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> componentType) const
