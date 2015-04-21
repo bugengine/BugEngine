@@ -5,7 +5,6 @@ from cpp.ply import lex, yacc
 import sys
 
 def p_error(p):
-    raise('Shit')
     sys.stderr.write("%s:%d: error: Syntax error near unexpected token %s\n" %
             (p.lexer.source, p.lineno, p.type.lower()))
     p.lexer.error_count += 1

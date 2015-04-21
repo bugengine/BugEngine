@@ -80,11 +80,36 @@ def p_method_arg_optional_value(p):
         p[0] = None
 
 
+def p_method_arg_array(p):
+    """
+        method_arg_array : LEFT_BRACKET value RIGHT_BRACKET
+    """
+    p[0] = '%s%s%s' % (p[1], p[2], p[3])
+
+
+def p_method_arg_array_novalue(p):
+    """
+        method_arg_array : LEFT_BRACKET RIGHT_BRACKET
+    """
+    p[0] = '%s%s' % (p[1], p[2])
+
+
+def p_method_arg_optional_array(p):
+    """
+    method_arg_optional_array : method_arg_array method_arg_optional_array
+                              |
+    """
+    if len(p) > 1:
+        p[0] = '%s%s' % (p[1], p[2])
+    else:
+        p[0] = ''
+
+
 def p_method_arg(p):
     """
-        method_arg : tag_list type method_arg_optional_id method_arg_optional_value
+        method_arg : tag_list type method_arg_optional_id method_arg_optional_array method_arg_optional_value
     """
-    p[0] = Parameter(p[2], p[3], p[4])
+    p[0] = Parameter(p[2]+p[4], p[3], p[5])
     p[0].add_tags(p[1])
 
 
