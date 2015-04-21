@@ -101,6 +101,7 @@ private: // friend World/ComponentGroup
     u32 getComponentIndex(Entity e, const ComponentGroup& group,
                           const Bucket& bucket) const;
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
+    void copyComponent(Entity e, u32 componentAbsoluteIndex, byte target[]) const;
 
 private:
     EntityStorage(const EntityStorage& other);

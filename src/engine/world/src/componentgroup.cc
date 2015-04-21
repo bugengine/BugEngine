@@ -59,6 +59,16 @@ struct EntityOperation
 
 }
 
+struct ComponentGroup::OperationDelta
+{
+    u32 added;
+    u32 removed;
+    byte* pageAdd;
+    byte* pageRemove;
+    u32 pageAddOffset;
+    u32 pageRemoveOffset;
+};
+
 ComponentGroup::ComponentGroup(u32 firstComponent,
                                const minitl::vector< raw<const RTTI::Class> >& componentTypes,
                                const minitl::vector<u32>& bucketMasks,
@@ -80,7 +90,15 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
          it != bucketMasks.end();
          ++it, ++index)
     {
-        m_buckets[index] = Bucket(m_componentCounts + count*index, *it);
+        u32 size = 0;
+        for (u32 m = *it, i = 0; m; m >>= 1, ++i)
+        {
+            if (m & 1)
+            {
+                size += componentTypes[i]->size;
+            }
+        }
+        m_buckets[index] = Bucket(m_componentCounts + count*index, *it, size);
     }
     minitl::vector< raw<const RTTI::Class> >::const_iterator begin = componentTypes.begin();
     for (minitl::vector< raw<const RTTI::Class> >::const_iterator it = begin;
@@ -102,7 +120,7 @@ ComponentGroup::~ComponentGroup()
 
 ComponentGroup::BucketPair ComponentGroup::findBuckets(u32 mask1, u32 mask2)
 {
-    BucketPair result;
+    BucketPair result(0, 0);
     minitl::tuple<u32, u32> best;
     for (Bucket* bucket = m_buckets.begin(); bucket != m_buckets.end(); ++bucket)
     {
@@ -148,12 +166,25 @@ void ComponentGroup::packComponents(u32 mask, const byte source[],
     }
 }
 
-void ComponentGroup::groupEntityOperations()
+void ComponentGroup::copyComponents(weak<EntityStorage> storage, u32 owner, byte target[],
+                                    u32 mask, const u32 offset[]) const
+{
+    Entity e = { owner };
+    for (u32 c = 0; mask; ++c, mask >>= 1)
+    {
+        if (mask & 1)
+        {
+            storage->copyComponent(e, c + firstComponent, target + offset[c]);
+        }
+    }
+}
+
+void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[])
 {
     OperationBuffer* oldBuffer = m_entityOperation;
     m_entityOperation = new (m_allocator.allocate()) OperationBuffer;
-    minitl::Allocator::Block<byte> componentBuffer(Arena::temporary(), m_componentsTotalSize);
-    minitl::Allocator::Block<u32> componentOffsets(Arena::temporary(), m_components.size());
+    minitl::Allocator::Block<byte> componentBuffer(Arena::stack(), m_componentsTotalSize);
+    minitl::Allocator::Block<u32> componentOffsets(Arena::stack(), m_components.size());
     for (u32 o = 0, i = 0; i < m_components.size(); o += m_components[i].size, ++i)
     {
         componentOffsets[i] = o;
@@ -218,21 +249,65 @@ void ComponentGroup::groupEntityOperations()
                     }
                 }
 
-                u32 size = 0;
-                for (u32 c = 0, mask = maskAfter & ~maskBefore; mask; ++c, mask >>= 1)
+                minitl::tuple<Bucket*, Bucket*> buckets = findBuckets(maskBefore, maskAfter);
+                if (buckets.first != buckets.second)
                 {
-                    if (mask & 1)
+                    copyComponents(storage, operation->owner, componentBuffer.begin(),
+                                   maskBefore & maskAfter & ~maskChanged, componentOffsets.begin());
+
+                    EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
+                    removeOperation->owner = operation->owner;
+                    removeOperation->maskBefore = buckets.first->acceptMask;
+                    removeOperation->maskAfter = 0;
+                    removeOperation->size = sizeof(EntityOperation);
+                    deltas[buckets.first-m_buckets.begin()].removed++;
+
+                    u32 extraSize = buckets.second->componentSize;
+                    EntityOperation* addOperation = new (allocOperation(extraSize)) EntityOperation;
+                    addOperation->owner = operation->owner;
+                    addOperation->maskBefore = 0;
+                    addOperation->maskAfter = buckets.second->acceptMask;
+                    addOperation->size = sizeof(EntityOperation) + extraSize;
+                    deltas[buckets.second-m_buckets.begin()].added++;
+                    packComponents(addOperation->maskAfter, componentBuffer.begin(),
+                                   (byte*)addOperation + sizeof(EntityOperation), componentOffsets);
+                }
+
+                {
+                    Bucket* componentBucket = m_buckets.end() - m_components.size() - 1;
+                    u32 remainderMaskRemove = maskBefore & ~maskAfter & ~buckets.first->acceptMask;
+                    u32 remainderMaskAdd = maskAfter & ~maskBefore & ~buckets.second->acceptMask;
+                    for (u32 i = 0;
+                         remainderMaskRemove | remainderMaskAdd;
+                         remainderMaskRemove <<= 1, remainderMaskAdd <<= 1, ++i, ++componentBucket)
                     {
-                        size += m_components[c].size;
+                        if (remainderMaskRemove & 1)
+                        {
+                            be_assert(componentBucket->acceptMask == (1<<i),
+                                      "invalid component bucket for component %d" | i);
+                            EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
+                            removeOperation->owner = operation->owner;
+                            removeOperation->maskBefore = buckets.first->acceptMask;
+                            removeOperation->maskAfter = 0;
+                            removeOperation->size = sizeof(EntityOperation);
+                            deltas[componentBucket-m_buckets.begin()].removed++;
+                        }
+                        if (remainderMaskAdd & 1)
+                        {
+                            be_assert(componentBucket->acceptMask == (1<<i),
+                                      "invalid component bucket for component %d" | i);
+                            EntityOperation* addOperation = new (allocOperation(0)) EntityOperation;
+                            addOperation->owner = operation->owner;
+                            addOperation->maskBefore = 0;
+                            addOperation->maskAfter = buckets.second->acceptMask;
+                            addOperation->size = sizeof(EntityOperation) + m_components[i].size;
+                            packComponents(addOperation->maskAfter, componentBuffer.begin(),
+                                           (byte*)addOperation + sizeof(EntityOperation),
+                                           componentOffsets);
+                            deltas[componentBucket-m_buckets.begin()].added++;
+                        }
                     }
                 }
-                EntityOperation* newOperation = new (allocOperation(size)) EntityOperation;
-                newOperation->owner = operation->owner;
-                newOperation->maskBefore = maskBefore;
-                newOperation->maskAfter = maskAfter;
-                newOperation->size = sizeof(EntityOperation) + size;
-                packComponents(maskAfter & ~maskBefore, componentBuffer.begin(),
-                               (byte*)newOperation + sizeof(EntityOperation), componentOffsets);
             }
         }
         OperationBuffer* next = b->m_next;
@@ -240,12 +315,31 @@ void ComponentGroup::groupEntityOperations()
         m_allocator.free(b);
         b = next;
     }
+    be_forceuse(deltas);
+}
+
+void ComponentGroup::sortEntityOperations(const OperationDelta deltas[])
+{
+    be_forceuse(deltas);
 }
 
 void ComponentGroup::runEntityOperations(weak<EntityStorage> storage)
 {
     be_forceuse(storage);
-    groupEntityOperations();
+    {
+        minitl::Allocator::Block<OperationDelta> deltas(Arena::stack(), m_buckets.size());
+        for (u32 i = 0; i < m_buckets.size(); ++i)
+        {
+            deltas[i].added = 0;
+            deltas[i].removed = 0;
+            deltas[i].pageAdd = 0;
+            deltas[i].pageRemove = 0;
+            deltas[i].pageAddOffset = 0;
+            deltas[i].pageRemoveOffset = 0;
+        }
+        groupEntityOperations(storage, deltas.begin());
+        sortEntityOperations(deltas.begin());
+    }
     OperationBuffer* buffer = m_entityOperation->m_next;
     while (buffer)
     {
@@ -297,17 +391,14 @@ byte* ComponentGroup::allocOperation(u32 componentSize)
     {
         OperationBuffer* buffer = m_entityOperation;
         u32 offset = buffer->m_offset.addExchange(totalSize);
-        if (offset + totalSize + sizeof(OperationBuffer) > m_allocator.blockSize())
+        if (offset + totalSize + sizeof(OperationBuffer) > 256) //m_allocator.blockSize())
         {
             OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer;
-            if (buffer->m_next.setConditional(newBuffer, 0) != 0)
+            newBuffer->m_next = buffer;
+            if (m_entityOperation.setConditional(newBuffer, buffer) != buffer)
             {
                 newBuffer->~OperationBuffer();
                 m_allocator.free(newBuffer);
-            }
-            else
-            {
-                m_entityOperation = newBuffer;
             }
         }
         else
