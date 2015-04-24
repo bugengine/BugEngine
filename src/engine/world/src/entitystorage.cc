@@ -79,30 +79,62 @@ struct GroupInfo
 
 }
 
+EntityStorage::ComponentStorage::ComponentStorage(SystemAllocator& allocator, u32 componentSize)
+    :   allocator(allocator)
+    ,   elementCount(0)
+    ,   componentSize(componentSize)
+    ,   elementsPerPage(allocator.blockSize() / componentSize)
+    ,   pages()
+{
+    pages[0] = static_cast<byte*>(allocator.allocate());
+}
+
+EntityStorage::ComponentStorage::~ComponentStorage()
+{
+    for (u32 page = 0; page < 1 + elementCount / elementsPerPage; ++page)
+    {
+        allocator.free(pages[page]);
+    }
+}
+
+void EntityStorage::ComponentStorage::reserve(i32 delta)
+{
+    if (delta > 0)
+    {
+        u32 oldCount = elementCount;
+        elementCount += delta;
+        for (u32 pageIndex = 1 + oldCount / elementsPerPage;
+             pageIndex <= elementCount / elementsPerPage;
+             ++pageIndex)
+        {
+            pages[pageIndex] = static_cast<byte*>(allocator.allocate());
+        }
+    }
+}
+
+void EntityStorage::ComponentStorage::shrink(i32 delta)
+{
+    if (delta < 0)
+    {
+        u32 oldCount = elementCount;
+        elementCount += delta;
+        for (u32 pageIndex = 1 + elementCount / elementsPerPage;
+             pageIndex <= oldCount / elementsPerPage;
+             ++pageIndex)
+        {
+            allocator.free(pages[pageIndex]);
+        }
+    }
+}
+
 byte* EntityStorage::ComponentStorage::getElement(u32 index) const
 {
     u32 pageIndex = index / elementsPerPage;
-    u32 offset = index % elementsPerPage;
-    byte* page = memory;
-    for (; pageIndex > 0; --pageIndex)
-    {
-        page = *(byte**)page;
-    }
-    be_assert(offset * elementSize < allocator->blockSize(), "invalid offset in page");
-    return page + sizeof(byte*) + offset * elementSize;
-}
-
-byte* EntityStorage::ComponentStorage::getBacklink(u32 index)
-{
-    u32 pageIndex = index / backlinksPerPage;
-    u32 offset = index % backlinksPerPage;
-    byte* page = memory;
-    for (; pageIndex > 0; --pageIndex)
-    {
-        page = *(byte**)page;
-    }
-    be_assert(offset * sizeof(u32) < allocator->blockSize(), "invalid offset in page");
-    return page + sizeof(byte*) + offset * sizeof(u32);
+    u32 offset = (index % elementsPerPage) * componentSize;
+    be_assert(offset + componentSize < allocator.blockSize(),
+              "component lies outside of page buffer");
+    byte* page = pages[pageIndex];
+    return page + offset;
 }
 
 EntityStorage::ComponentIndex::ComponentIndex()
@@ -159,14 +191,9 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     {
         ComponentIndex index = getComponentIndex(it->first);
         be_assert(index, "component %s not registered" | it->first->fullname());
-        ComponentStorage& storage = m_components[index.absoluteIndex];
-        storage.allocator = &(&m_allocator4k)[it->second];
-        storage.memory = 0;
-        storage.backLink = 0;
-        storage.current = 0;
-        storage.elementSize = it->first->size;
-        storage.elementsPerPage = (storage.allocator->blockSize() - sizeof(byte*)) / storage.elementSize;
-        storage.backlinksPerPage = (storage.allocator->blockSize() - sizeof(byte*)) / sizeof(u32);
+        ComponentStorage* s = new (m_allocator4k.allocate())
+                ComponentStorage((&m_allocator4k)[it->second], it->first->size);
+        m_components[index.absoluteIndex] = s;
     }
 }
 
@@ -176,24 +203,12 @@ EntityStorage::~EntityStorage()
     {
         m_allocator16k.free(*buffer);
     }
-    for (minitl::array<ComponentStorage>::const_iterator it = m_components.begin();
+    for (minitl::array<ComponentStorage*>::const_iterator it = m_components.begin();
          it != m_components.end();
          ++it)
     {
-        void* page = it->memory;
-        while(page)
-        {
-            void* dealloc = page;
-            page = *(void**)page;
-            it->allocator->free(dealloc);
-        }
-        page = it->backLink;
-        while(page)
-        {
-            void* dealloc = page;
-            page = *(void**)page;
-            it->allocator->free(dealloc);
-        }
+        (*it)->~ComponentStorage();
+        m_allocator4k.free(*it);
     }
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
          it != m_componentGroups.end();
@@ -430,7 +445,7 @@ Entity EntityStorage::spawn()
 void EntityStorage::unspawn(Entity e)
 {
     EntityInfo& info = getEntityInfo(e);
-    // unspawn components
+    // TODO: unspawn components
     info.next = m_freeEntityId;
     info.mask = minitl::bitset<96>();
     m_freeEntityId = e.id;
@@ -498,8 +513,8 @@ void EntityStorage::copyComponent(Entity e, u32 componentAbsoluteIndex, byte tar
                          | e.id | m_componentTypes[componentAbsoluteIndex].first->fullname(),
                       return);
     const u32 componentIndex = info.componentIndex[componentAbsoluteIndex];
-    const ComponentStorage& storage = m_components[componentAbsoluteIndex];
-    memcpy(target, storage.getElement(componentIndex),
+    const ComponentStorage* storage = m_components[componentAbsoluteIndex];
+    memcpy(target, storage->getElement(componentIndex),
            m_componentTypes[componentAbsoluteIndex].third);
 }
 
@@ -510,17 +525,18 @@ RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> compone
     const EntityInfo& info = getEntityInfo(e);
     const ComponentIndex componentTypeIndex = getComponentIndex(componentType);
     const u32 componentIndex = info.componentIndex[componentTypeIndex.absoluteIndex];
-    const ComponentStorage& storage = m_components[componentTypeIndex.absoluteIndex];
+    const ComponentStorage* storage = m_components[componentTypeIndex.absoluteIndex];
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage"
                             | componentType->fullname(),
                       return RTTI::Value());
-    be_assert(componentIndex < storage.current, "component index %d out of range" | componentIndex);
+    be_assert(componentIndex < storage->elementCount,
+              "component index %d out of range" | componentIndex);
     return RTTI::Value(RTTI::Type::makeType(componentType,
                                             RTTI::Type::Value,
                                             RTTI::Type::Mutable,
                                             RTTI::Type::Const),
-                       storage.getElement(componentIndex));
+                       storage->getElement(componentIndex));
 }
 
 ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)
@@ -555,6 +571,16 @@ u32 EntityStorage::getComponentIndex(Entity e, const ComponentGroup& group,
     }
 #endif
     return result;
+}
+
+void EntityStorage::ensure(u32 componentAbsoluteIndex, i32 delta)
+{
+    m_components[componentAbsoluteIndex]->reserve(delta);
+}
+
+void EntityStorage::shrink(u32 componentAbsoluteIndex, i32 delta)
+{
+    m_components[componentAbsoluteIndex]->shrink(delta);
 }
 
 }}

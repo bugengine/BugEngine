@@ -63,8 +63,8 @@ struct ComponentGroup::OperationDelta
 {
     u32 added;
     u32 removed;
-    byte* pageAdd;
-    byte* pageRemove;
+    ComponentGroup::OperationBuffer* pageAdd;
+    ComponentGroup::OperationBuffer* pageRemove;
     u32 pageAddOffset;
     u32 pageRemoveOffset;
 };
@@ -80,6 +80,7 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
     ,   m_componentCounts((u32*)Arena::game().alloc(
                               sizeof(u32)*componentTypes.size()*bucketMasks.size()))
     ,   m_entityOperation(new (m_allocator.allocate()) OperationBuffer)
+    ,   m_entityOperationCurrent(m_entityOperation)
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + (u32)componentTypes.size())
 {
@@ -183,16 +184,17 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
 {
     OperationBuffer* oldBuffer = m_entityOperation;
     m_entityOperation = new (m_allocator.allocate()) OperationBuffer;
+    m_entityOperationCurrent = m_entityOperation;
     minitl::Allocator::Block<byte> componentBuffer(Arena::stack(), m_componentsTotalSize);
     minitl::Allocator::Block<u32> componentOffsets(Arena::stack(), m_components.size());
     for (u32 o = 0, i = 0; i < m_components.size(); o += m_components[i].size, ++i)
     {
         componentOffsets[i] = o;
     }
-    for (OperationBuffer* b = oldBuffer; b; /* nothing */)
+    for (OperationBuffer* buffer = oldBuffer; buffer; /* nothing */)
     {
-        EntityOperation* last = (EntityOperation*)(b->m_data + b->m_used);
-        for (EntityOperation* operation = (EntityOperation*)b->m_data;
+        EntityOperation* last = (EntityOperation*)(buffer->m_data + buffer->m_used);
+        for (EntityOperation* operation = (EntityOperation*)buffer->m_data;
              operation < last;
              operation = operation->next())
         {
@@ -224,10 +226,12 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                                          componentBuffer.begin(), componentOffsets.begin());
                     }
                 }
-                for (OperationBuffer* b = m_entityOperation; b; b = b->m_next)
+                for (OperationBuffer* siblingBuffer = buffer->m_next;
+                     siblingBuffer;
+                     siblingBuffer = siblingBuffer->m_next)
                 {
-                    EntityOperation* last = (EntityOperation*)(b->m_data + b->m_used);
-                    for (EntityOperation* sibling = (EntityOperation*)b->m_data;
+                    EntityOperation* last = (EntityOperation*)(siblingBuffer->m_data + siblingBuffer->m_used);
+                    for (EntityOperation* sibling = (EntityOperation*)siblingBuffer->m_data;
                          sibling < last;
                          sibling = sibling->next())
                     {
@@ -250,6 +254,7 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                 }
 
                 minitl::tuple<Bucket*, Bucket*> buckets = findBuckets(maskBefore, maskAfter);
+                const u32 dummyOffset = m_buckets.end() - m_buckets.begin();
                 if (buckets.first != buckets.second)
                 {
                     copyComponents(storage, operation->owner, componentBuffer.begin(),
@@ -257,18 +262,18 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
 
                     EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
                     removeOperation->owner = operation->owner;
-                    removeOperation->maskBefore = buckets.first->acceptMask;
-                    removeOperation->maskAfter = 0;
+                    removeOperation->maskBefore = buckets.first - m_buckets.begin();
+                    removeOperation->maskAfter = dummyOffset;
                     removeOperation->size = sizeof(EntityOperation);
-                    deltas[buckets.first-m_buckets.begin()].removed++;
+                    deltas[buckets.first - m_buckets.begin()].removed++;
 
                     u32 extraSize = buckets.second->componentSize;
                     EntityOperation* addOperation = new (allocOperation(extraSize)) EntityOperation;
                     addOperation->owner = operation->owner;
-                    addOperation->maskBefore = 0;
-                    addOperation->maskAfter = buckets.second->acceptMask;
+                    addOperation->maskBefore = dummyOffset;
+                    addOperation->maskAfter = buckets.second - m_buckets.begin();
                     addOperation->size = sizeof(EntityOperation) + extraSize;
-                    deltas[buckets.second-m_buckets.begin()].added++;
+                    deltas[buckets.second - m_buckets.begin()].added++;
                     packComponents(addOperation->maskAfter, componentBuffer.begin(),
                                    (byte*)addOperation + sizeof(EntityOperation), componentOffsets);
                 }
@@ -287,69 +292,190 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                                       "invalid component bucket for component %d" | i);
                             EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
                             removeOperation->owner = operation->owner;
-                            removeOperation->maskBefore = buckets.first->acceptMask;
-                            removeOperation->maskAfter = 0;
+                            removeOperation->maskBefore = componentBucket - m_buckets.begin();
+                            removeOperation->maskAfter = dummyOffset;
                             removeOperation->size = sizeof(EntityOperation);
-                            deltas[componentBucket-m_buckets.begin()].removed++;
+                            deltas[componentBucket - m_buckets.begin()].removed++;
                         }
                         if (remainderMaskAdd & 1)
                         {
                             be_assert(componentBucket->acceptMask == (1<<i),
                                       "invalid component bucket for component %d" | i);
-                            EntityOperation* addOperation = new (allocOperation(0)) EntityOperation;
+                            EntityOperation* addOperation = new (allocOperation(m_components[i].size)) EntityOperation;
                             addOperation->owner = operation->owner;
-                            addOperation->maskBefore = 0;
-                            addOperation->maskAfter = buckets.second->acceptMask;
+                            addOperation->maskBefore = dummyOffset;
+                            addOperation->maskAfter = componentBucket - m_buckets.begin();
                             addOperation->size = sizeof(EntityOperation) + m_components[i].size;
                             packComponents(addOperation->maskAfter, componentBuffer.begin(),
                                            (byte*)addOperation + sizeof(EntityOperation),
                                            componentOffsets);
-                            deltas[componentBucket-m_buckets.begin()].added++;
+                            deltas[componentBucket - m_buckets.begin()].added++;
                         }
                     }
                 }
             }
         }
-        OperationBuffer* next = b->m_next;
-        b->~OperationBuffer();
-        m_allocator.free(b);
-        b = next;
+        OperationBuffer* next = buffer->m_next;
+        buffer->~OperationBuffer();
+        m_allocator.free(buffer);
+        buffer = next;
     }
-    be_forceuse(deltas);
 }
 
-void ComponentGroup::sortEntityOperations(const OperationDelta deltas[])
+
+ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationDelta deltas[])
 {
-    be_forceuse(deltas);
+    OperationBuffer* firstBuffer = new (m_allocator.allocate()) OperationBuffer;
+    OperationBuffer* current = firstBuffer;
+    const u32 bufferSpace = m_allocator.blockSize() - sizeof(OperationBuffer) + 1;
+    for (u32 i = 0; i < m_buckets.size(); ++i)
+    {
+        {
+            if (deltas[i].added)
+            {
+                u32 operationAddSize = (u32)sizeof(EntityOperation) + m_buckets[i].componentSize;
+                u32 maxOps = (bufferSpace - current->m_used) / operationAddSize;
+                u32 placedOp = minitl::min(maxOps, deltas[i].added);
+                deltas[i].pageAdd = current;
+                deltas[i].pageAddOffset = current->m_used;
+                current->m_used += placedOp * operationAddSize;
+                for (u32 opCount = placedOp; opCount != deltas[i].added; /*nothing*/)
+                {
+                    OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer;
+                    current->m_next = newBuffer;
+                    current = newBuffer;
+                    u32 maxOps = (bufferSpace - current->m_used) / operationAddSize;
+                    u32 placedOp = minitl::min(maxOps, deltas[i].added-opCount);
+                    current->m_used += placedOp * operationAddSize;
+                    opCount += placedOp;
+                }
+            }
+            else
+            {
+                deltas[i].pageAdd = current;
+                deltas[i].pageAddOffset = current->m_used;
+            }
+        }
+
+        {
+            if (deltas[i].removed)
+            {
+                u32 operationRemoveSize = (u32)sizeof(EntityOperation);
+                u32 maxOps = (bufferSpace - current->m_used) / operationRemoveSize;
+                u32 placedOp = minitl::min(maxOps, deltas[i].removed);
+                deltas[i].pageRemove = current;
+                deltas[i].pageRemoveOffset = current->m_used;
+                current->m_used += placedOp * operationRemoveSize;
+                for (u32 opCount = placedOp; opCount != deltas[i].removed; /*nothing*/)
+                {
+                    OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer;
+                    current->m_next = newBuffer;
+                    current = newBuffer;
+                    u32 maxOps = (bufferSpace - current->m_used) / operationRemoveSize;
+                    u32 placedOp = minitl::min(maxOps, deltas[i].removed-opCount);
+                    current->m_used += placedOp * operationRemoveSize;
+                    opCount += placedOp;
+                }
+            }
+            else
+            {
+                deltas[i].pageRemove = current;
+                deltas[i].pageRemoveOffset = current->m_used;
+            }
+        }
+    }
+
+
+    typedef minitl::tuple<OperationBuffer*, u32> CurrentBufferOffset;
+    minitl::Allocator::Block<CurrentBufferOffset> addOffsets(Arena::stack(), m_buckets.size());
+    minitl::Allocator::Block<CurrentBufferOffset> removeOffsets(Arena::stack(), m_buckets.size());
+    for (u32 i = 0; i < m_buckets.size(); ++i)
+    {
+        be_assert(deltas[i].pageAdd != 0, "invalid page 0x0 for add bucket %d" | i);
+        be_assert(deltas[i].pageRemove != 0, "invalid page 0x0 for remove bucket %d" | i);
+        addOffsets[i].first = deltas[i].pageAdd;
+        addOffsets[i].second = deltas[i].pageAddOffset;
+        removeOffsets[i].first = deltas[i].pageRemove;
+        removeOffsets[i].second = deltas[i].pageRemoveOffset;
+    }
+
+    const u32 dummyOffset = m_buckets.end() - m_buckets.begin();
+    for (OperationBuffer* sourceBuffer = m_entityOperation;
+         sourceBuffer;
+         sourceBuffer = sourceBuffer->m_next)
+    {
+        EntityOperation* last = (EntityOperation*)(sourceBuffer->m_data + sourceBuffer->m_used);
+        for (EntityOperation* operation = (EntityOperation*)sourceBuffer->m_data;
+             operation < last;
+             operation = operation->next())
+        {
+            CurrentBufferOffset& offset = operation->maskBefore == dummyOffset
+                                        ? addOffsets[operation->maskAfter]
+                                        : removeOffsets[operation->maskBefore];
+            u32 size = operation->size;
+            memcpy (offset.first->m_data + offset.second,
+                    operation,
+                    size);
+            offset.second += size;
+            be_assert(offset.second <= offset.first->m_used,
+                      "offsets for bucket is invalid");
+            if (offset.second == offset.first->m_used)
+            {
+                offset.first = offset.first->m_next;
+                offset.second = 0;
+            }
+        }
+    }
+    return firstBuffer;
+}
+
+void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
+                                             const OperationDelta deltas[])
+{
+    minitl::Allocator::Block<i32> offsets(Arena::stack(), m_buckets.size());
+    for (u32 component = 0; component < m_components.size(); ++component)
+    {
+        const u32 mask = 1 << component;
+        memset(offsets.begin(), 0, offsets.byteCount());
+        i32 absoluteOffset = 0;
+        for (u32 bucket = 0; bucket < m_buckets.size(); ++bucket)
+        {
+            if (m_buckets[bucket].acceptMask & mask)
+            {
+                offsets[bucket] = absoluteOffset;
+                absoluteOffset += deltas[bucket].added - deltas[bucket].removed;
+            }
+        }
+        storage->ensure(component + firstComponent, absoluteOffset);
+        storage->shrink(component + firstComponent, absoluteOffset);
+    }
+}
+
+void ComponentGroup::clearBuffers(OperationBuffer *head) const
+{
+    while (head)
+    {
+        OperationBuffer* next = head->m_next;
+        head->~OperationBuffer();
+        m_allocator.free(head);
+        head = next;
+    }
 }
 
 void ComponentGroup::runEntityOperations(weak<EntityStorage> storage)
 {
-    be_forceuse(storage);
-    {
-        minitl::Allocator::Block<OperationDelta> deltas(Arena::stack(), m_buckets.size());
-        for (u32 i = 0; i < m_buckets.size(); ++i)
-        {
-            deltas[i].added = 0;
-            deltas[i].removed = 0;
-            deltas[i].pageAdd = 0;
-            deltas[i].pageRemove = 0;
-            deltas[i].pageAddOffset = 0;
-            deltas[i].pageRemoveOffset = 0;
-        }
-        groupEntityOperations(storage, deltas.begin());
-        sortEntityOperations(deltas.begin());
-    }
-    OperationBuffer* buffer = m_entityOperation->m_next;
-    while (buffer)
-    {
-        OperationBuffer* dealloc = buffer;
-        buffer = buffer->m_next;
-        dealloc->~OperationBuffer();
-        m_allocator.free(buffer);
-    }
+    minitl::Allocator::Block<OperationDelta> deltas(Arena::stack(), m_buckets.size());
+    memset(deltas.begin(), 0, sizeof(OperationDelta) * m_buckets.size());
+    groupEntityOperations(storage, deltas.begin());
+    OperationBuffer* newBuffer = sortEntityOperations(deltas.begin());
+
+    clearBuffers(m_entityOperation->m_next);
     m_entityOperation->m_next = 0;
+    m_entityOperation->m_offset = 0;
     m_entityOperation->m_used = 0;
+    m_entityOperationCurrent = m_entityOperation;
+    executeEntityOperations(storage, deltas.begin());
+    clearBuffers(newBuffer);
 }
 
 void ComponentGroup::freeBuffers()
@@ -361,7 +487,8 @@ void ComponentGroup::freeBuffers()
     m_allocator.free(m_entityOperation);
 }
 
-void ComponentGroup::addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex)
+void ComponentGroup::addComponent(Entity e, u32 originalMask,
+                                  const Component& c, u32 componentIndex)
 {
     const ComponentInfo& info = m_components[componentIndex];
     byte* operationBuffer = allocOperation(info.size);
@@ -389,16 +516,19 @@ byte* ComponentGroup::allocOperation(u32 componentSize)
     const u32 totalSize = minitl::align(componentSize, sizeof(u32)) + sizeof(EntityOperation);
     do
     {
-        OperationBuffer* buffer = m_entityOperation;
+        OperationBuffer* buffer = m_entityOperationCurrent;
         u32 offset = buffer->m_offset.addExchange(totalSize);
         if (offset + totalSize + sizeof(OperationBuffer) > 256) //m_allocator.blockSize())
         {
             OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer;
-            newBuffer->m_next = buffer;
-            if (m_entityOperation.setConditional(newBuffer, buffer) != buffer)
+            if (m_entityOperationCurrent.setConditional(newBuffer, buffer) != buffer)
             {
                 newBuffer->~OperationBuffer();
                 m_allocator.free(newBuffer);
+            }
+            else
+            {
+                buffer->m_next = newBuffer;
             }
         }
         else
