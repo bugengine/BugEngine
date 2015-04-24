@@ -37,16 +37,21 @@ private:
     };
     struct ComponentStorage
     {
-        SystemAllocator* allocator;
-        byte* memory;
-        byte* backLink;
-        u32 current;
-        u32 elementSize;
-        u32 elementsPerPage;
-        u32 backlinksPerPage;
+        SystemAllocator&    allocator;
+        u32                 elementCount;
+        const u32           componentSize;
+        const u32           elementsPerPage;
+        byte*               pages[1];
+
+        ComponentStorage(SystemAllocator& allocator, u32 componentSize);
+        ~ComponentStorage();
         byte* getElement(u32 index) const;
-        byte* getBacklink(u32 index);
+        void reserve(i32 delta);
+        void shrink(i32 delta);
+    private:
+        static const u32    s_maxPageCount;
     };
+
     typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex, u32 > ComponentInfo;
 protected:
     struct WorldComposition
@@ -76,7 +81,7 @@ private:
     const u32                       m_bufferCapacity;
     minitl::array<ComponentInfo>    m_componentTypes;
     minitl::vector<ComponentGroup>  m_componentGroups;
-    minitl::array<ComponentStorage> m_components;
+    minitl::array<ComponentStorage*>m_components;
 published: //TODO: just for testing, move back to private
     void start();
 private:
@@ -100,6 +105,8 @@ private: // friend World/ComponentGroup
     ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
     u32 getComponentIndex(Entity e, const ComponentGroup& group,
                           const Bucket& bucket) const;
+    void ensure(u32 componentAbsoluteIndex, i32 delta);
+    void shrink(u32 componentAbsoluteIndex, i32 delta);
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
     void copyComponent(Entity e, u32 componentAbsoluteIndex, byte target[]) const;
 

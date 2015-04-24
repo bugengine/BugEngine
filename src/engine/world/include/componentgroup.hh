@@ -52,18 +52,21 @@ private:
     u32                             m_componentsTotalSize;
     u32*                            m_componentCounts;
     u32*                            m_backBuffer;
-    iptr<OperationBuffer>           m_entityOperation;
+    OperationBuffer*                m_entityOperation;
+    iptr<OperationBuffer>           m_entityOperationCurrent;
 public:
     u32 const                       firstComponent;
     u32 const                       lastComponent;
 private:
+    void clearBuffers(OperationBuffer* head) const;
     byte* allocOperation(u32 componentSize);
     void packComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
     void unpackComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
     void copyComponents(weak<EntityStorage> storage, u32 owner, byte target[],
                         u32 mask, const u32 offset[]) const;
     void groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
-    void sortEntityOperations(const OperationDelta deltas[]);
+    OperationBuffer* sortEntityOperations(OperationDelta deltas[]);
+    void executeEntityOperations(weak<EntityStorage> storage, const OperationDelta deltas[]);
     void runEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
