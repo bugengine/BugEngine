@@ -212,13 +212,12 @@ struct InterlockedType<8>
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
                 "       dmb sy\n"
-                "1:     mov             %w0, #2\n"       /* store a flag */
-                "       ldaxr    %x1, [%3]\n"             /* get original */
-                "       teq             %x1, %x4\n"       /* see if match */
-                "       stlxr.eq %w0, %x5, [%3]\n"         /* store new one if matched */
-                "       cmp             %w0, #1\n"
-                "       b.eq             1b\n"           /* if update failed, repeat */
-                "       dmb st\n"
+                "1:     ldaxr    %x1, [%3]\n"       /* get original */
+                "       cmp      %x1, %x4\n"        /* see if match */
+                "       b.ne     2f\n"
+                "       stlxr    %w0, %x5, [%3]\n"  /* store new one if matched */
+                "       cbnz     %w0, 1b\n"         /* if update failed, repeat */
+                "2:     dmb st\n"
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v)
@@ -268,7 +267,8 @@ struct InterlockedType<8>
             : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
-    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v, tagged_t::tag_t& /*condition*/)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
+                                       const tagged_t::tag_t& /*condition*/)
     {
          long result;
 
