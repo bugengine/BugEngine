@@ -21,11 +21,11 @@ struct InterlockedType<4>
         value_t old = 0;
         value_t temp;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry%=:\n"
+                              "1:\n"
                               " lwarx  %0, 0, %3\n"
                               " add    %1, %2, %0\n"
                               " stwcx. %1, 0, %3\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
                       : "=&r" (old), "=&r"(temp)
                       : "r" (incr), "r" (p)
@@ -40,10 +40,10 @@ struct InterlockedType<4>
     {
         value_t prev;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry%=:\n"
+                              "1:\n"
                               " lwarx  %0, 0, %2\n"
                               " stwcx. %1, 0, %2\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
                       : "=&r" (prev)
                       : "r" (v), "r" (p)
@@ -54,14 +54,14 @@ struct InterlockedType<4>
     {
         value_t result;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry3%=:\n"
+                              "1:\n"
                               " lwarx  %0, 0, %3\n"
                               " cmpw   %2, %0\n"
-                              " bne-  exit%=\n"
+                              " bne  2f\n"
                               " stwcx. %1, 0, %3\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
-                              "exit%=:\n"
+                              "2:\n"
                       : "=&r" (result)
                       : "r" (v), "r"(condition), "r" (p)
                       : "memory", "cc");
@@ -112,9 +112,9 @@ struct InterlockedType<4>
         bool result;
         __asm__ __volatile__("  li %0,0\n"
                              "  stwcx. %1, 0, %2\n"
-                             "  bne- end%=\n"
+                             "  bne  1f\n"
                              "  li %0,1\n"
-                             "end%=:\n"
+                             "1:\n"
                              "  isync\n"
                           :  "=&r"(result)
                           :  "r"(v), "r"(p)
@@ -144,11 +144,11 @@ struct InterlockedType<8>
         value_t old = 0;
         value_t temp;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry%=:\n"
+                              "1:\n"
                               " ldarx  %0, 0, %3\n"
                               " add    %1, %2, %0\n"
                               " stdcx. %1, 0, %3\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
                               : "=&r" (old), "=&r"(temp)
                               : "r" (incr), "r" (p)
@@ -163,10 +163,10 @@ struct InterlockedType<8>
     {
         value_t prev;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry%=:\n"
+                              "1:\n"
                               " ldarx  %0, 0, %2\n"
                               " stdcx. %1, 0, %2\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
                               : "=&r" (prev)
                               : "r" (v), "r" (p)
@@ -177,14 +177,14 @@ struct InterlockedType<8>
     {
         value_t result;
         __asm__ __volatile__ (" lwsync\n"
-                              "retry3%=:\n"
+                              "1:\n"
                               " ldarx  %0, 0, %3\n"
                               " cmpw   %2, %0\n"
-                              " bne-  exit%=\n"
+                              " bne 2f\n"
                               " stdcx. %1, 0, %3\n"
-                              " bne- retry%=\n"
+                              " bne 1b\n"
                               " isync\n"
-                              "exit%=:\n"
+                              "2:\n"
                               : "=&r" (result)
                               : "r" (v), "r"(condition), "r" (p)
                               : "memory", "cc");
@@ -235,9 +235,9 @@ struct InterlockedType<8>
         bool result;
         __asm__ __volatile__("  li %0,0\n"
                              "  stdcx. %1, 0, %2\n"
-                             "  bne- end%=\n"
+                             "  bne 1f\n"
                              "  li %0,1\n"
-                             "end%=:\n"
+                             "1:\n"
                              "  isync\n"
                              :  "=&r"(result)
                              :  "r"(v), "r"(p)
