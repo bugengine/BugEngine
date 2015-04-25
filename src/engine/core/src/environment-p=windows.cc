@@ -13,7 +13,7 @@ namespace BugEngine
 
 Environment::Environment()
 :   m_homeDirectory("")
-,   m_dataDirectory("")
+,   m_dataDirectory("data")
 ,   m_game("")
 ,   m_user("")
 ,   m_programPath(0)
@@ -28,7 +28,8 @@ Environment::Environment()
     HMODULE h = LoadLibraryA("userenv.dll");
     if (h != 0)
     {
-        GetUserProfileDirectoryFunction function = (GetUserProfileDirectoryFunction)GetProcAddress(h, "GetUserProfileDirectoryA");
+        FARPROC symbol = GetProcAddress(h, "GetUserProfileDirectoryA");
+        GetUserProfileDirectoryFunction function = (GetUserProfileDirectoryFunction)symbol;
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }
