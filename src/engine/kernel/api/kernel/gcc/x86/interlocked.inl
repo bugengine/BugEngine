@@ -21,8 +21,8 @@ struct InterlockedType<4>
     {
         value_t old;
         __asm__ __volatile__ ("lock; xadd %0,%1"
-                      : "=r" (old), "=m" (*p)
-                      : "0" (incr), "m" (*p)
+                      : "=r" (old), "+m" (*p)
+                      : "0" (incr)
                       : "memory");
         return old;
     }
@@ -33,19 +33,20 @@ struct InterlockedType<4>
     static inline value_t fetch_and_set(value_t *p, value_t v)
     {
         __asm__ __volatile__ ("lock; xchg %0, %1"
-                      : "=r" (v), "+m" (*p)
-                      : "0" (v)
+                      : "+r" (v), "+m" (*p)
+                      :
                       : "memory");
         return v;
     }
 
     static inline value_t set_conditional(value_t *p, value_t v, value_t condition)
     {
-        __asm__ __volatile__ ("lock; cmpxchg %1, %2"
-                      : "=r" (v)
-                      : "0" (v), "m" (*(p)), "0"(condition)
+        value_t old;
+        __asm__ __volatile__ ("lock; cmpxchg %2, %1"
+                      : "=a" (old), "+m" (*p)
+                      : "r"(v), "a"(condition)
                       : "memory", "cc");
-        return v;
+        return old;
     }
     static inline value_t set_and_fetch(value_t *p, value_t v)
     {
