@@ -11,14 +11,13 @@ namespace BugEngine { namespace World
 
 struct Bucket
 {
-    u32* componentCounts;
     u32 acceptMask;
     u32 maskSize;
-    u32 firstComponent;
     u32 componentSize;
+    u32 firstEntity;
 
     Bucket();
-    Bucket(u32* componentCounts, u32 acceptMask, u32 componentSize);
+    Bucket(u32 acceptMask, u32 componentSize);
 };
 
 }}

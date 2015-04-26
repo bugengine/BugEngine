@@ -13,7 +13,8 @@ namespace BugEngine { namespace Task
 {
 
 template< typename Body >
-Task< Body >::Task(istring name, color32 color, const Body& body, Scheduler::Priority priority, Scheduler::Affinity affinity)
+Task< Body >::Task(istring name, color32 color, const Body& body,
+                   Scheduler::Priority priority, Scheduler::Affinity affinity)
     :   ITask(name, color, priority, affinity)
     ,   body(body)
     ,   m_taskCount(i_u32::Zero)
@@ -34,7 +35,6 @@ void Task< Body >::schedule(weak<Scheduler> sc)
 }
 
 }}
-
 
 /**************************************************************************************************/
 #endif

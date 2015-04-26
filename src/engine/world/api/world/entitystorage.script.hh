@@ -103,8 +103,6 @@ private: // friend World/ComponentGroup
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
-    u32 getComponentIndex(Entity e, const ComponentGroup& group,
-                          const Bucket& bucket) const;
     void ensure(u32 componentAbsoluteIndex, i32 delta);
     void shrink(u32 componentAbsoluteIndex, i32 delta);
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
