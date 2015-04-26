@@ -375,7 +375,8 @@ void EntityStorage::start()
 
 u32 EntityStorage::getEntityInfoSize() const
 {
-    return be_checked_numcast<u32>(sizeof(EntityInfo) + sizeof(u32) * (m_componentTypes.size()-1));
+    return be_checked_numcast<u32>(sizeof(EntityInfo)
+                                 + sizeof(EntityInfo::BucketInfo) * (m_componentTypes.size()-1));
 }
 
 EntityInfo& EntityStorage::getEntityInfo(Entity e)
@@ -418,10 +419,11 @@ Entity EntityStorage::spawn()
         {
             EntityInfo& info = *(EntityInfo*)(buffer + i * infoSize);
             info.next = index + i + 1;
-            info.mask = minitl::bitset<96>();
-            for (u32 j = 0; j < m_componentTypes.size(); ++j)
+            for (u32 i = 0; i < m_componentTypes.size(); ++i)
             {
-                info.componentIndex[j] = 0;
+                info.buckets[i].group = ~(u16)0;
+                info.buckets[i].bucket = ~(u16)0;
+                info.buckets[i].offset = ~(u32)0;
             }
         }
         EntityInfo& info = *(EntityInfo*)(buffer + (m_bufferCapacity-1) * infoSize);
@@ -436,8 +438,7 @@ Entity EntityStorage::spawn()
     be_assert((entityInfo.index & s_usedBit) == 0,
               "Entity %s is already in use; entity buffer inconsistent" | e.id);
     m_freeEntityId = entityInfo.next;
-    entityInfo.index = s_usedBit;
-    entityInfo.mask = minitl::bitset<96>();
+    entityInfo.index |= s_usedBit;
     ++ m_entityCount;
     return e;
 }
@@ -447,15 +448,21 @@ void EntityStorage::unspawn(Entity e)
     EntityInfo& info = getEntityInfo(e);
     // TODO: unspawn components
     info.next = m_freeEntityId;
-    info.mask = minitl::bitset<96>();
+    for (u32 i = 0; i < m_componentTypes.size(); ++i)
+    {
+        info.buckets[i].group = ~(u16)0;
+        info.buckets[i].bucket = ~(u16)0;
+        info.buckets[i].offset = ~(u32)0;
+    }
     m_freeEntityId = e.id;
     -- m_entityCount;
 }
 
-void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType)
+void EntityStorage::addComponent(Entity e, const Component& component,
+                                 raw<const RTTI::Class> componentType)
 {
     EntityInfo& info = getEntityInfo(e);
-    be_assert_recover((info.index & s_usedBit) != 0,
+    be_assert_recover(info.index & s_usedBit,
                       "Entity %s is not currently spawned (maybe already unspawned)" | e.id,
                       return);
     ComponentIndex componentIndex = getComponentIndex(componentType);
@@ -465,9 +472,18 @@ void EntityStorage::addComponent(Entity e, const Component& c, raw<const RTTI::C
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.addComponent(e, info.mask(group.firstComponent, group.lastComponent),
-                       c, componentIndex.relativeIndex);
-    info.mask[componentIndex.absoluteIndex] = true;
+    u32 mask = 0;
+    for (u32 m = 1, c = group.firstComponent;
+         c <= group.lastComponent;
+         ++c, m <<= 1)
+    {
+        if (info.buckets[c].group != (u16)~0)
+        {
+            mask |= m;
+        }
+    }
+    group.addComponent(e, mask, component, componentIndex.relativeIndex);
+    info.buckets[componentIndex.absoluteIndex].group = componentIndex.group;
 }
 
 void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentType)
@@ -481,14 +497,23 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
                       "component type %s is not a registered component of entity storage"
                             | componentType->fullname(),
                       return);
-    be_assert_recover(info.mask[componentIndex.absoluteIndex],
+    be_assert_recover(info.buckets[componentIndex.absoluteIndex].group != (u16)~0,
                       "entity %d does not has a component %s" | e.id | componentType->fullname(),
                       return);
 
     ComponentGroup& group = m_componentGroups[componentIndex.group];
-    group.removeComponent(e, info.mask(group.firstComponent, group.lastComponent),
-                          componentIndex.relativeIndex);
-    info.mask[componentIndex.absoluteIndex] = false;
+    u32 mask = 0;
+    for (u32 m = 1, c = group.firstComponent;
+         c <= group.lastComponent;
+         ++c, m <<= 1)
+    {
+        if (info.buckets[c].group != (u16)~0)
+        {
+            mask |= m;
+        }
+    }
+    group.removeComponent(e, mask, componentIndex.relativeIndex);
+    info.buckets[componentIndex.absoluteIndex].group = (u16)~0;
 }
 
 bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
@@ -502,17 +527,23 @@ bool EntityStorage::hasComponent(Entity e, raw<const RTTI::Class> componentType)
                       "component type %s is not a registered component of entity storage"
                             | componentType->fullname(),
                       return false);
-    return info.mask[componentIndex.absoluteIndex];
+    return info.buckets[componentIndex.absoluteIndex].group != (u16)~0;
 }
 
 void EntityStorage::copyComponent(Entity e, u32 componentAbsoluteIndex, byte target[]) const
 {
     const EntityInfo& info = getEntityInfo(e);
-    be_assert_recover(info.mask[componentAbsoluteIndex],
+    be_assert_recover(info.buckets[componentAbsoluteIndex].group != (u16)~0,
                       "entity %d does not use component %s"
                          | e.id | m_componentTypes[componentAbsoluteIndex].first->fullname(),
                       return);
-    const u32 componentIndex = info.componentIndex[componentAbsoluteIndex];
+    be_assert_recover(info.buckets[componentAbsoluteIndex].bucket != (u16)~0,
+                      "entity %d has not yet spawned component %s"
+                         | e.id | m_componentTypes[componentAbsoluteIndex].first->fullname(),
+                      return);
+    const Bucket& b = m_componentGroups[info.buckets[componentAbsoluteIndex].group]
+                     .m_buckets[info.buckets[componentAbsoluteIndex].bucket];
+    const u32 componentIndex = b.firstEntity + info.buckets[componentAbsoluteIndex].offset;
     const ComponentStorage* storage = m_components[componentAbsoluteIndex];
     memcpy(target, storage->getElement(componentIndex),
            m_componentTypes[componentAbsoluteIndex].third);
@@ -524,7 +555,9 @@ RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> compone
               "Entity %s does not have a component of type %s" | e.id | componentType->fullname());
     const EntityInfo& info = getEntityInfo(e);
     const ComponentIndex componentTypeIndex = getComponentIndex(componentType);
-    const u32 componentIndex = info.componentIndex[componentTypeIndex.absoluteIndex];
+    const Bucket& b = m_componentGroups[info.buckets[componentTypeIndex.absoluteIndex].group]
+                     .m_buckets[info.buckets[componentTypeIndex.absoluteIndex].bucket];
+    const u32 componentIndex = b.firstEntity + info.buckets[componentTypeIndex.absoluteIndex].offset;
     const ComponentStorage* storage = m_components[componentTypeIndex.absoluteIndex];
     be_assert_recover(componentIndex,
                       "component type %s is not a registered component of entity storage"
@@ -546,31 +579,6 @@ ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)
     be_assert(componentIndex.group < m_componentGroups.size(),
               "invalid component index given to getComponentGroup");
     return m_componentGroups[componentIndex.group];
-}
-
-u32 EntityStorage::getComponentIndex(Entity e, const ComponentGroup& group,
-                                     const Bucket& bucket) const
-{
-    const EntityInfo& info = getEntityInfo(e);
-    u32 index = bucket.firstComponent;
-    u32 result = info.componentIndex[group.firstComponent + index];
-    be_assert(result < bucket.componentCounts[index],
-              "component index %d is not in the bucket"
-                | (group.firstComponent+index));
-#if BE_ENABLE_ASSERT
-    u32 indexInBucket = result - bucket.componentCounts[index];
-    const u32 mask = bucket.acceptMask;
-    for (u32 i = group.firstComponent; i < group.lastComponent; ++i)
-    {
-        if (mask & (1 << (i-group.firstComponent)))
-        {
-            u32 r = info.componentIndex[i];
-            u32 cInBucket = r - bucket.componentCounts[i-group.firstComponent];
-            be_assert(cInBucket == indexInBucket, "inconsistent offset in buffer");
-        }
-    }
-#endif
-    return result;
 }
 
 void EntityStorage::ensure(u32 componentAbsoluteIndex, i32 delta)

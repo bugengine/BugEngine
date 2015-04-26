@@ -23,7 +23,9 @@ private:
     mutable i_u32   m_taskCount;
     mutable i_u32   m_taskCompleted;
 public:
-    Task(istring name, color32 color, const Body& body, Scheduler::Priority priority = Scheduler::Default, Scheduler::Affinity affinity = Scheduler::DontCare);
+    Task(istring name, color32 color, const Body& body,
+         Scheduler::Priority priority = Scheduler::Default,
+         Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual void schedule(weak<Scheduler> sc) override;
 };
 

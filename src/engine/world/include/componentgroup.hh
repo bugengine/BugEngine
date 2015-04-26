@@ -21,6 +21,7 @@ class EntityStorage;
 
 class ComponentGroup
 {
+    friend class EntityStorage;
 private:
     struct OperationBuffer
     {
@@ -50,8 +51,6 @@ private:
     minitl::array<Bucket>           m_buckets;
     minitl::array<ComponentInfo>    m_components;
     u32                             m_componentsTotalSize;
-    u32*                            m_componentCounts;
-    u32*                            m_backBuffer;
     OperationBuffer*                m_entityOperation;
     iptr<OperationBuffer>           m_entityOperationCurrent;
 public:

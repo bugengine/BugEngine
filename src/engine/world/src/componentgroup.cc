@@ -77,16 +77,12 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
     ,   m_buckets(Arena::game(), (u32)bucketMasks.size())
     ,   m_components(Arena::game(), (u32)componentTypes.size())
     ,   m_componentsTotalSize(0)
-    ,   m_componentCounts((u32*)Arena::game().alloc(
-                              sizeof(u32)*componentTypes.size()*bucketMasks.size()))
     ,   m_entityOperation(new (m_allocator.allocate()) OperationBuffer)
     ,   m_entityOperationCurrent(m_entityOperation)
     ,   firstComponent(firstComponent)
     ,   lastComponent(firstComponent + (u32)componentTypes.size())
 {
     u32 index = 0;
-    u32 count = (u32)componentTypes.size();
-    memset(m_componentCounts, 0, sizeof(u32)*count*bucketMasks.size());
     for (minitl::vector<u32>::const_iterator it = bucketMasks.begin();
          it != bucketMasks.end();
          ++it, ++index)
@@ -99,7 +95,7 @@ ComponentGroup::ComponentGroup(u32 firstComponent,
                 size += componentTypes[i]->size;
             }
         }
-        m_buckets[index] = Bucket(m_componentCounts + count*index, *it, size);
+        m_buckets[index] = Bucket(*it, size);
     }
     minitl::vector< raw<const RTTI::Class> >::const_iterator begin = componentTypes.begin();
     for (minitl::vector< raw<const RTTI::Class> >::const_iterator it = begin;
@@ -264,8 +260,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                     removeOperation->owner = operation->owner;
                     removeOperation->maskBefore = buckets.first - m_buckets.begin();
                     removeOperation->maskAfter = dummyOffset;
-                    removeOperation->size = sizeof(EntityOperation);
+                    removeOperation->size = sizeof(EntityOperation) + sizeof(u32);
                     deltas[buckets.first - m_buckets.begin()].removed++;
+                    // TODO: add backlink
 
                     u32 extraSize = buckets.second->componentSize;
                     EntityOperation* addOperation = new (allocOperation(extraSize)) EntityOperation;
@@ -294,8 +291,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                             removeOperation->owner = operation->owner;
                             removeOperation->maskBefore = componentBucket - m_buckets.begin();
                             removeOperation->maskAfter = dummyOffset;
-                            removeOperation->size = sizeof(EntityOperation);
+                            removeOperation->size = sizeof(EntityOperation) + sizeof(u32);
                             deltas[componentBucket - m_buckets.begin()].removed++;
+                            /* TODO: add backlink */
                         }
                         if (remainderMaskAdd & 1)
                         {
@@ -360,7 +358,7 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
         {
             if (deltas[i].removed)
             {
-                u32 operationRemoveSize = (u32)sizeof(EntityOperation);
+                u32 operationRemoveSize = (u32)sizeof(EntityOperation) + sizeof(u32);
                 u32 maxOps = (bufferSpace - current->m_used) / operationRemoveSize;
                 u32 placedOp = minitl::min(maxOps, deltas[i].removed);
                 deltas[i].pageRemove = current;
@@ -480,7 +478,6 @@ void ComponentGroup::runEntityOperations(weak<EntityStorage> storage)
 
 void ComponentGroup::freeBuffers()
 {
-    Arena::game().free(m_componentCounts);
     be_assert(m_entityOperation->m_used == 0 && m_entityOperation->m_next == 0,
               "Entity operation still in use when ComponentGroup is destroyed");
     m_entityOperation->~OperationBuffer();

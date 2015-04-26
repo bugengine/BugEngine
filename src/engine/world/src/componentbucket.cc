@@ -8,20 +8,18 @@ namespace BugEngine { namespace World
 {
 
 Bucket::Bucket()
-    :   componentCounts()
-    ,   acceptMask()
+    :   acceptMask()
     ,   maskSize()
-    ,   firstComponent()
     ,   componentSize()
+    ,   firstEntity()
 {
 }
 
-Bucket::Bucket(u32* componentCounts, u32 acceptMask, u32 componentSize)
-    :   componentCounts(componentCounts)
-    ,   acceptMask(acceptMask)
+Bucket::Bucket(u32 acceptMask, u32 componentSize)
+    :   acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
-    ,   firstComponent(getFirstBit(acceptMask))
     ,   componentSize(componentSize)
+    ,   firstEntity()
 {
 }
 

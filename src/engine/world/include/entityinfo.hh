@@ -17,8 +17,13 @@ struct EntityInfo
         u32 next;
         u32 index;
     };
-    minitl::bitset<96>  mask;
-    u32 componentIndex[1];
+    struct BucketInfo
+    {
+        u16 group;
+        u16 bucket;
+        u32 offset;
+    };
+    BucketInfo  buckets[1];
 };
 
 static const u32 s_usedBit = 0x80000000;
