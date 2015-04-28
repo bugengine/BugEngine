@@ -474,7 +474,7 @@ void EntityStorage::addComponent(Entity e, const Component& component,
     ComponentGroup& group = m_componentGroups[componentIndex.group];
     u32 mask = 0;
     for (u32 m = 1, c = group.firstComponent;
-         c <= group.lastComponent;
+         c < group.lastComponent;
          ++c, m <<= 1)
     {
         if (info.buckets[c].group != (u16)~0)
@@ -504,7 +504,7 @@ void EntityStorage::removeComponent(Entity e, raw<const RTTI::Class> componentTy
     ComponentGroup& group = m_componentGroups[componentIndex.group];
     u32 mask = 0;
     for (u32 m = 1, c = group.firstComponent;
-         c <= group.lastComponent;
+         c < group.lastComponent;
          ++c, m <<= 1)
     {
         if (info.buckets[c].group != (u16)~0)
@@ -579,16 +579,6 @@ ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)
     be_assert(componentIndex.group < m_componentGroups.size(),
               "invalid component index given to getComponentGroup");
     return m_componentGroups[componentIndex.group];
-}
-
-void EntityStorage::ensure(u32 componentAbsoluteIndex, i32 delta)
-{
-    m_components[componentAbsoluteIndex]->reserve(delta);
-}
-
-void EntityStorage::shrink(u32 componentAbsoluteIndex, i32 delta)
-{
-    m_components[componentAbsoluteIndex]->shrink(delta);
 }
 
 }}

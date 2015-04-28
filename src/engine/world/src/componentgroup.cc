@@ -256,7 +256,7 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                     copyComponents(storage, operation->owner, componentBuffer.begin(),
                                    maskBefore & maskAfter & ~maskChanged, componentOffsets.begin());
 
-                    EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
+                    EntityOperation* removeOperation = new (allocOperation(sizeof(u32))) EntityOperation;
                     removeOperation->owner = operation->owner;
                     removeOperation->maskBefore = buckets.first - m_buckets.begin();
                     removeOperation->maskAfter = dummyOffset;
@@ -287,7 +287,7 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                         {
                             be_assert(componentBucket->acceptMask == (1<<i),
                                       "invalid component bucket for component %d" | i);
-                            EntityOperation* removeOperation = new (allocOperation(0)) EntityOperation;
+                            EntityOperation* removeOperation = new (allocOperation(sizeof(u32))) EntityOperation;
                             removeOperation->owner = operation->owner;
                             removeOperation->maskBefore = componentBucket - m_buckets.begin();
                             removeOperation->maskAfter = dummyOffset;
@@ -431,9 +431,11 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                                              const OperationDelta deltas[])
 {
     minitl::Allocator::Block<i32> offsets(Arena::stack(), m_buckets.size());
-    for (u32 component = 0; component < m_components.size(); ++component)
+    for (u32 componentIndex = 0; componentIndex < m_components.size(); ++componentIndex)
     {
-        const u32 mask = 1 << component;
+        u32 absoluteComponentIndex = componentIndex + firstComponent;
+        EntityStorage::ComponentStorage& componentStorage = *storage->m_components[absoluteComponentIndex];
+        const u32 mask = 1 << componentIndex;
         memset(offsets.begin(), 0, offsets.byteCount());
         i32 absoluteOffset = 0;
         for (u32 bucket = 0; bucket < m_buckets.size(); ++bucket)
@@ -444,8 +446,14 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                 absoluteOffset += deltas[bucket].added - deltas[bucket].removed;
             }
         }
-        storage->ensure(component + firstComponent, absoluteOffset);
-        storage->shrink(component + firstComponent, absoluteOffset);
+        if (absoluteOffset > 0)
+        {
+            componentStorage.reserve(absoluteOffset);
+        }
+        if (absoluteOffset < 0)
+        {
+            componentStorage.shrink(absoluteOffset);
+        }
     }
 }
 
