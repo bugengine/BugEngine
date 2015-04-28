@@ -50,6 +50,9 @@ private:
         void shrink(i32 delta);
     private:
         static const u32    s_maxPageCount;
+    private:
+        ComponentStorage(const ComponentStorage& other);
+        ComponentStorage& operator=(const ComponentStorage& other);
     };
 
     typedef minitl::tuple< raw<const RTTI::Class>, ComponentIndex, u32 > ComponentInfo;
@@ -103,8 +106,6 @@ private: // friend World/ComponentGroup
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;
     ComponentIndex getComponentIndex(raw<const RTTI::Class> componentType) const;
-    void ensure(u32 componentAbsoluteIndex, i32 delta);
-    void shrink(u32 componentAbsoluteIndex, i32 delta);
     const ComponentInfo& getComponentInfo(raw<const RTTI::Class> componentType) const;
     void copyComponent(Entity e, u32 componentAbsoluteIndex, byte target[]) const;
 
