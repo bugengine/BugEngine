@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include    <world/stdafx.h>
 #include    <world/entity.script.hh>
+#include    <world/entitystorage.script.hh>
 #include    <world/component.script.hh>
 #include    <componentbucket.hh>
 #include    <core/memory/allocators/system.hh>
@@ -17,27 +18,16 @@
 namespace BugEngine { namespace World
 {
 
-class EntityStorage;
-
 class ComponentGroup
 {
     friend class EntityStorage;
 private:
-    struct OperationBuffer
-    {
-        iptr<OperationBuffer>   m_next;
-        i_u32                   m_offset;
-        i_u32                   m_used;
-        byte                    m_data[1];
-        OperationBuffer()
-            :   m_next(0)
-            ,   m_offset(i_u32::Zero)
-            ,   m_used(i_u32::Zero)
-            ,   m_data()
-        {
-        }
-    };
+    struct EntityOperation;
+    struct EntityOperationRemove;
+    struct EntityOperationRemoveIterator;
+    struct OperationBuffer;
     struct OperationDelta;
+    struct EntityOperationCompare;
     struct ComponentInfo
     {
         raw<const RTTI::Class> componentType;
@@ -66,6 +56,8 @@ private:
     void groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     OperationBuffer* sortEntityOperations(OperationDelta deltas[]);
     void executeEntityOperations(weak<EntityStorage> storage, const OperationDelta deltas[]);
+    void repack(weak<EntityStorage> storage, u32 componentIndex,
+                Bucket& bucket, u32 entityCount, OperationDelta operations, i32 offset) const;
     void runEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
