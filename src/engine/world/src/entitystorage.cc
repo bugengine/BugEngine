@@ -103,8 +103,8 @@ void EntityStorage::ComponentStorage::reserve(i32 delta)
     {
         u32 oldCount = elementCount;
         elementCount += delta;
-        for (u32 pageIndex = 1 + oldCount / elementsPerPage;
-             pageIndex <= elementCount / elementsPerPage;
+        for (u32 pageIndex = (oldCount + elementsPerPage - 1) / elementsPerPage;
+             pageIndex < (elementCount + elementsPerPage - 1) / elementsPerPage;
              ++pageIndex)
         {
             pages[pageIndex] = static_cast<byte*>(allocator.allocate());
@@ -118,8 +118,8 @@ void EntityStorage::ComponentStorage::shrink(i32 delta)
     {
         u32 oldCount = elementCount;
         elementCount += delta;
-        for (u32 pageIndex = 1 + elementCount / elementsPerPage;
-             pageIndex <= oldCount / elementsPerPage;
+        for (u32 pageIndex = 1 + (elementCount + elementsPerPage - 1) / elementsPerPage;
+             pageIndex < (oldCount + elementsPerPage - 1) / elementsPerPage;
              ++pageIndex)
         {
             allocator.free(pages[pageIndex]);
