@@ -1,5 +1,6 @@
 import os
 
+
 def add_ld_so(conf, filename, paths):
     f = open(filename, 'r')
     for line in f:
@@ -13,8 +14,10 @@ def add_ld_so(conf, filename, paths):
         elif os.path.isdir(line):
             paths.append(line)
 
+
 def options(opt):
     pass
+
 
 def configure(conf):
     lib_paths = []
@@ -25,8 +28,10 @@ def configure(conf):
             add_ld_so(conf, '/etc/ld.so.conf.d/'+f, lib_paths)
     conf.env.SYSTEM_LIB_PATHS = ['/lib', '/usr/lib'] + lib_paths
 
+
 def build(bld):
     pass
+
 
 def plugins(bld):
     pass

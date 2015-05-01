@@ -22,8 +22,6 @@ def set_linux_options(self):
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
     self.env.pymodule_PATTERN = '%s.so'
 
-    self.env.LIBPATH += self.env.SYSTEM_LIB_PATHS
-
     self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
     self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
@@ -42,6 +40,7 @@ def set_linux_suncc_options(conf, arch):
     v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
     v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4'])
     v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=%all'])
+    v.append_unique('LIBPATH', v.SYSTEM_LIB_PATHS)
 
     v['RPATH_ST'] = '-R%s'
 
@@ -79,6 +78,7 @@ def set_linux_icc_options(self, flags, version, arch):
         v.CFLAGS = flags + ['-fPIC']
         v.CXXFLAGS = flags + ['-fPIC']
     v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E', '-static-libgcc', '-static-intel']
+    v.append_unique('LIBPATH', v.SYSTEM_LIB_PATHS)
 
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']

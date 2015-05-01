@@ -145,11 +145,18 @@ def detect_clang(conf):
                         libdirs.append(b)
 
     conf.env.CLANG_TARGETS = []
-
+    seen=set([])
     for path in libdirs+bindirs:
         clang =  conf.find_program('clang', var='CLANG', path_list=[path], mandatory=False)
         clangxx = conf.find_program('clang++', var='CLANGXX', path_list=[path], mandatory=False)
         if clang and clangxx:
+            clang = os.path.normpath(os.path.realpath(clang))
+            clangxx = os.path.normpath(os.path.realpath(clangxx))
+            if clang in seen:
+                del conf.env['CLANG']
+                del conf.env['CLANGXX']
+                continue
+            seen.add(clang)
             toolchaindir = os.path.split(conf.env.CLANG)[0]
             target, version = conf.get_native_clang_target(conf.env.CLANG)
             if target != None and version != None:
