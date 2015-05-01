@@ -10,7 +10,7 @@ def allarchs(arch):
     elif arch == 'arm64':
         return [([], 'arm64')]
     elif arch == 'arm':
-        return [([], 'arm')]
+        return [(['-mcpu=cortex-a7', '-mfpu=neon'], 'arm')]
     elif arch == 'mips':
         return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
     elif arch == 'mips64':
@@ -60,7 +60,7 @@ def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
             cmd = [cc] + gcc_option + ['-dM', '-E', '-']
             p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
             p.stdin.write('\n'.encode())
-            out = p.communicate()[0]
+            out,err = p.communicate()
             if p.returncode != 0:
                 continue
             found = True
