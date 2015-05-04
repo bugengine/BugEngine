@@ -86,12 +86,11 @@ EntityStorage::ComponentStorage::ComponentStorage(SystemAllocator& allocator, u3
     ,   elementsPerPage(allocator.blockSize() / componentSize)
     ,   pages()
 {
-    pages[0] = static_cast<byte*>(allocator.allocate());
 }
 
 EntityStorage::ComponentStorage::~ComponentStorage()
 {
-    for (u32 page = 0; page < 1 + elementCount / elementsPerPage; ++page)
+    for (u32 page = 0; page < (elementCount + elementsPerPage - 1) / elementsPerPage; ++page)
     {
         allocator.free(pages[page]);
     }
@@ -181,6 +180,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
                          - 4 * (composition.components.size() - 1))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
+    ,   m_componentBackLinks(Arena::game())
     ,   m_components(Arena::game(), composition.components.size())
 {
     m_entityInfoBuffer[0] = 0;
@@ -203,8 +203,16 @@ EntityStorage::~EntityStorage()
     {
         m_allocator16k.free(*buffer);
     }
+    m_allocator16k.free(m_entityInfoBuffer);
     for (minitl::array<ComponentStorage*>::const_iterator it = m_components.begin();
          it != m_components.end();
+         ++it)
+    {
+        (*it)->~ComponentStorage();
+        m_allocator4k.free(*it);
+    }
+    for (minitl::vector<ComponentStorage*>::const_iterator it = m_componentBackLinks.begin();
+         it != m_componentBackLinks.end();
          ++it)
     {
         (*it)->~ComponentStorage();
@@ -216,7 +224,6 @@ EntityStorage::~EntityStorage()
     {
         it->freeBuffers();
     }
-    m_allocator16k.free(m_entityInfoBuffer);
 }
 
 weak<Task::ITask> EntityStorage::initialTask() const
@@ -308,6 +315,9 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
         u32 componentTupeFirst = totalComponents - componentTypeCount;
         m_componentGroups.push_back(ComponentGroup(componentTupeFirst, group->components,
                                                    masks, m_allocator256k));
+        ComponentStorage* backlink = new (m_allocator4k.allocate()) ComponentStorage(m_allocator4k,
+                                                                                     sizeof(u32));
+        m_componentBackLinks.push_back(backlink);
     }
 }
 
