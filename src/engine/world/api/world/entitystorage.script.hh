@@ -71,20 +71,21 @@ protected:
         }
     };
 private:
-    scoped<Task::ITask>             m_task;
-    u32                             m_freeEntityId;
-    SystemAllocator                 m_allocator4k;
-    SystemAllocator                 m_allocator16k;
-    SystemAllocator                 m_allocator64k;
-    SystemAllocator                 m_allocator256k;
-    u8**                            m_entityInfoBuffer;
-    u32                             m_entityCount;
-    u32                             m_entityBufferCount;
-    const u32                       m_maxEntityBufferCount;
-    const u32                       m_bufferCapacity;
-    minitl::array<ComponentInfo>    m_componentTypes;
-    minitl::vector<ComponentGroup>  m_componentGroups;
-    minitl::array<ComponentStorage*>m_components;
+    scoped<Task::ITask>                 m_task;
+    u32                                 m_freeEntityId;
+    SystemAllocator                     m_allocator4k;
+    SystemAllocator                     m_allocator16k;
+    SystemAllocator                     m_allocator64k;
+    SystemAllocator                     m_allocator256k;
+    u8**                                m_entityInfoBuffer;
+    u32                                 m_entityCount;
+    u32                                 m_entityBufferCount;
+    const u32                           m_maxEntityBufferCount;
+    const u32                           m_bufferCapacity;
+    minitl::array<ComponentInfo>        m_componentTypes;
+    minitl::vector<ComponentGroup>      m_componentGroups;
+    minitl::vector<ComponentStorage*>   m_componentBackLinks;
+    minitl::array<ComponentStorage*>    m_components;
 published: //TODO: just for testing, move back to private
     void start();
 private:
