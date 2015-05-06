@@ -80,19 +80,8 @@ world:addComponent(e17, kernel.B({value = 217}))
 world:addComponent(e17, kernel.C({value = 317}))
 world:addComponent(e17, kernel.D({value = 417}))
 world:addComponent(e17, kernel.E({value = 517}))
-
 storage:start()
-world:removeComponent(e15, kernel.D)
+world:removeComponent(e0, kernel.A)
+world:removeComponent(e1, kernel.A)
+world:removeComponent(e2, kernel.A)
 storage:start()
-
-
-print(world:hasComponent(e7, kernel.A))
-print(world:hasComponent(e7, kernel.B))
-print(world:hasComponent(e7, kernel.C))
-print(world:hasComponent(e7, kernel.D))
-print(world:hasComponent(e15, kernel.A))
-print(world:hasComponent(e15, kernel.B))
-print(world:hasComponent(e15, kernel.C))
-print(world:hasComponent(e15, kernel.D))
-print(world:hasComponent(e15, kernel.E))
-

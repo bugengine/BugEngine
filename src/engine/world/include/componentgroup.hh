@@ -46,6 +46,7 @@ private:
 public:
     u32 const                       firstComponent;
     u32 const                       lastComponent;
+    u32 const                       index;
 private:
     void clearBuffers(OperationBuffer* head) const;
     byte* allocOperation(u32 componentSize);
@@ -58,12 +59,11 @@ private:
     void executeEntityOperations(weak<EntityStorage> storage, const OperationDelta deltas[]);
     void repack(weak<EntityStorage> storage, u32 componentIndex, Bucket& bucket,
                 u32 entityCount, OperationDelta operations, i32 offset) const;
-    void repackIndices(weak<EntityStorage> storage, Bucket& bucket,
-                       u32 entityCount, OperationDelta operations, i32 offset) const;
     void runEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
-    ComponentGroup(u32 firstComponent,
+    ComponentGroup(u32 index,
+                   u32 firstComponent,
                    const minitl::vector< raw<const RTTI::Class> >& componentTypes,
                    const minitl::vector<u32>& bucketMasks,
                    SystemAllocator& allocator);
