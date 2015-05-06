@@ -313,7 +313,8 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
         u32 componentTypeCount = be_checked_numcast<u32>(group->components.size());
         u32 componentTupeFirst = totalComponents - componentTypeCount;
-        m_componentGroups.push_back(ComponentGroup(componentTupeFirst, group->components,
+        m_componentGroups.push_back(ComponentGroup(m_componentGroups.size(), componentTupeFirst,
+                                                   group->components,
                                                    masks, m_allocator256k));
         ComponentStorage* backlink = new (m_allocator4k.allocate()) ComponentStorage(m_allocator4k,
                                                                                      sizeof(u32));
@@ -375,6 +376,8 @@ const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RT
 
 void EntityStorage::start()
 {
+    ComponentStorage* s = m_componentBackLinks[1];
+    be_forceuse(s);
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
          it != m_componentGroups.end();
          ++it)

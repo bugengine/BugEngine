@@ -2,6 +2,7 @@
    see LICENSE for detail */
 
 #include    <components.script.hh>
+#include    <cstdio>
 
 void kmain(u32 index, const u32 total,
            in<BugEngine::A> input,

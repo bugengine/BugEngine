@@ -41,18 +41,21 @@ Application::WorldResource::~WorldResource()
 
 Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
 :   ILoader()
-,   m_dataFolder(dataFolder)
-,   m_resourceManager(scoped<Resource::ResourceManager>::create(Arena::game()))
-,   m_scheduler(scheduler)
-,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
-,   m_cpuKernelScheduler("plugin.kernel.cpu", m_pluginContext)
-,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate", Colors::Yellow::Yellow))
-,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
-,   m_tasks(Arena::task())
-,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
-,   m_forceContinue()
-,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
-,   m_resourceLoadingCount(0)
+    ,   m_dataFolder(dataFolder)
+    ,   m_resourceManager(scoped<Resource::ResourceManager>::create(Arena::game()))
+    ,   m_scheduler(scheduler)
+    ,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
+    ,   m_cpuKernelScheduler("plugin.kernel.cpu", m_pluginContext)
+    ,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate",
+                                                    Colors::Yellow::Yellow))
+    ,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate",
+                                                   Colors::Yellow::Yellow))
+    ,   m_tasks(Arena::task())
+    ,   m_updateLoop(m_updateTask, m_worldTask->startCallback())
+    ,   m_forceContinue()
+    ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
+    ,   m_resourceLoadingCount(0)
+    ,   m_worldCount(0)
 {
     m_resourceManager->attach<World::World>(this);
     addTask(ref< Task::Task< Task::MethodCaller<Application, &Application::updateResources> > >::create(
@@ -104,6 +107,10 @@ int Application::run()
 
 void Application::load(weak<const Resource::Description> world, Resource::Resource& resource)
 {
+    if (m_worldCount == 0)
+    {
+        m_updateLoop = Task::ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
+    }
     m_worldCount++;
     resource.setRefHandle(ref<WorldResource>::create(Arena::resource(), be_checked_cast<const World::World>(world), m_worldTask));
 }
@@ -117,6 +124,10 @@ void Application::reload(weak<const Resource::Description> /*oldWorld*/, weak<co
 void Application::unload(Resource::Resource& resource)
 {
     m_worldCount--;
+    if (m_worldCount == 0)
+    {
+        m_updateLoop = Task::ITask::CallbackConnection();
+    }
     resource.clearRefHandle();
 }
 
@@ -126,7 +137,6 @@ void Application::updateResources()
     if (resourceCount == 0 && m_resourceLoadingCount != 0)
     {
         m_forceContinue = Task::ITask::CallbackConnection();
-        m_updateLoop = Task::ITask::CallbackConnection();
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {
