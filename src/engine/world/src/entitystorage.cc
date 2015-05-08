@@ -176,8 +176,8 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_entityCount(0)
     ,   m_entityBufferCount(0)
     ,   m_maxEntityBufferCount(m_allocator16k.blockSize() / sizeof(EntityInfo*))
-    ,   m_bufferCapacity(m_allocator16k.blockSize() / sizeof(EntityStorage)
-                         - 4 * (composition.components.size() - 1))
+    ,   m_bufferCapacity(m_allocator256k.blockSize()
+                      / (sizeof(EntityInfo) + sizeof(EntityInfo::BucketInfo) * (composition.components.size()-1)))
     ,   m_componentTypes(Arena::game(), composition.components.size())
     ,   m_componentGroups(Arena::game())
     ,   m_componentBackLinks(Arena::game())
@@ -201,7 +201,7 @@ EntityStorage::~EntityStorage()
 {
     for (u8** buffer = m_entityInfoBuffer; *buffer != 0; ++buffer)
     {
-        m_allocator16k.free(*buffer);
+        m_allocator256k.free(*buffer);
     }
     m_allocator16k.free(m_entityInfoBuffer);
     for (minitl::array<ComponentStorage*>::const_iterator it = m_components.begin();
@@ -376,8 +376,6 @@ const EntityStorage::ComponentInfo& EntityStorage::getComponentInfo(raw<const RT
 
 void EntityStorage::start()
 {
-    ComponentStorage* s = m_componentBackLinks[1];
-    be_forceuse(s);
     for (minitl::vector<ComponentGroup>::iterator it = m_componentGroups.begin();
          it != m_componentGroups.end();
          ++it)
@@ -400,9 +398,29 @@ EntityInfo& EntityStorage::getEntityInfo(Entity e)
               "Entity %d: invalid block index %d" | e.id | bufferIndex);
     be_assert(bufferOffset < m_bufferCapacity,
               "Entity %d: invalid block offset %d" | e.id | bufferOffset);
-    return *(EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
+    EntityInfo& info = *(EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
+    be_assert(info.index & s_usedBit,
+              "Entity %d: not spawned" | e.id);
+    be_assert((info.index & s_indexMask) == e.id,
+              "Entity %d: inconsistent buffer" | e.id);
+    return info;
 }
 
+EntityInfo& EntityStorage::getRawEntityInfo(Entity e)
+{
+    u32 bufferIndex = e.id >> 16;
+    u32 bufferOffset = e.id & 0xFFFF;
+    be_assert(bufferIndex < m_entityBufferCount,
+              "Entity %d: invalid block index %d" | e.id | bufferIndex);
+    be_assert(bufferOffset < m_bufferCapacity,
+              "Entity %d: invalid block offset %d" | e.id | bufferOffset);
+    EntityInfo& info = *(EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
+    be_assert(!(info.index & s_usedBit),
+              "Entity %d: already spawned" | e.id);
+    be_assert((info.index & s_indexMask) != e.id,
+              "Entity %d: inconsistent buffer" | e.id);
+    return info;
+}
 const EntityInfo& EntityStorage::getEntityInfo(Entity e) const
 {
     u32 bufferIndex = e.id >> 16;
@@ -411,7 +429,12 @@ const EntityInfo& EntityStorage::getEntityInfo(Entity e) const
               "Entity %d: invalid block index %d" | e.id | bufferIndex);
     be_assert(bufferOffset < m_bufferCapacity,
               "Entity %d: invalid block offset %d" | e.id | bufferOffset);
-    return *(const EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
+    const EntityInfo& info = *(const EntityInfo*)(m_entityInfoBuffer[bufferIndex] + bufferOffset*getEntityInfoSize());
+    be_assert(info.index & s_usedBit,
+              "Entity %d: not spawned" | e.id);
+    be_assert((info.index & s_indexMask) == e.id,
+              "Entity %d: inconsistent buffer" | e.id);
+    return info;
 }
 
 Entity EntityStorage::spawn()
@@ -425,7 +448,7 @@ Entity EntityStorage::spawn()
     {
         be_assert(m_entityInfoBuffer[bufferIndex] == 0,
                   "buffer index %d inconsistent" | bufferIndex);
-        u8* buffer = (u8*)m_allocator16k.allocate();
+        u8* buffer = (u8*)m_allocator256k.allocate();
         u32 index = (bufferIndex << 16);
         const u32 infoSize = getEntityInfoSize();
         for (u32 i = 0; i < m_bufferCapacity; ++i)
@@ -447,11 +470,11 @@ Entity EntityStorage::spawn()
         m_entityBufferCount++;
     }
 
-    EntityInfo& entityInfo = getEntityInfo(e);
+    EntityInfo& entityInfo = getRawEntityInfo(e);
     be_assert((entityInfo.index & s_usedBit) == 0,
               "Entity %s is already in use; entity buffer inconsistent" | e.id);
     m_freeEntityId = entityInfo.next;
-    entityInfo.index |= s_usedBit;
+    entityInfo.index = e.id | s_usedBit;
     ++ m_entityCount;
     return e;
 }
@@ -554,11 +577,20 @@ void EntityStorage::copyComponent(Entity e, u32 componentAbsoluteIndex, byte tar
                       "entity %d has not yet spawned component %s"
                          | e.id | m_componentTypes[componentAbsoluteIndex].first->fullname(),
                       return);
-    const Bucket& b = m_componentGroups[info.buckets[componentAbsoluteIndex].group]
-                     .m_buckets[info.buckets[componentAbsoluteIndex].bucket];
-    const u32 componentIndex = b.firstEntity + info.buckets[componentAbsoluteIndex].offset;
+    const ComponentGroup& group = m_componentGroups[info.buckets[componentAbsoluteIndex].group];
+    const u32 mask = (u32)1 << (componentAbsoluteIndex - group.firstComponent);
+    u32 componentOffset = info.buckets[componentAbsoluteIndex].offset;
+    for (u32 bucketIndex = 0;
+         bucketIndex < info.buckets[componentAbsoluteIndex].bucket;
+         ++bucketIndex)
+    {
+        if (group.m_buckets[bucketIndex].acceptMask & mask)
+        {
+            componentOffset += group.m_buckets[bucketIndex].entityCount;
+        }
+    }
     const ComponentStorage* storage = m_components[componentAbsoluteIndex];
-    memcpy(target, storage->getElement(componentIndex),
+    memcpy(target, storage->getElement(componentOffset),
            m_componentTypes[componentAbsoluteIndex].third);
 }
 
@@ -568,21 +600,26 @@ RTTI::Value EntityStorage::getComponent(Entity e, raw<const RTTI::Class> compone
               "Entity %s does not have a component of type %s" | e.id | componentType->fullname());
     const EntityInfo& info = getEntityInfo(e);
     const ComponentIndex componentTypeIndex = getComponentIndex(componentType);
-    const Bucket& b = m_componentGroups[info.buckets[componentTypeIndex.absoluteIndex].group]
-                     .m_buckets[info.buckets[componentTypeIndex.absoluteIndex].bucket];
-    const u32 componentIndex = b.firstEntity + info.buckets[componentTypeIndex.absoluteIndex].offset;
+    const ComponentGroup& group = m_componentGroups[info.buckets[componentTypeIndex.absoluteIndex].group];
+    const u32 mask = (u32)1 << (componentTypeIndex.relativeIndex);
+    u32 componentOffset = info.buckets[componentTypeIndex.absoluteIndex].offset;
+    for (u32 bucketIndex = 0;
+         bucketIndex < info.buckets[componentTypeIndex.absoluteIndex].bucket;
+         ++bucketIndex)
+    {
+        if (group.m_buckets[bucketIndex].acceptMask & mask)
+        {
+            componentOffset += group.m_buckets[bucketIndex].entityCount;
+        }
+    }
     const ComponentStorage* storage = m_components[componentTypeIndex.absoluteIndex];
-    be_assert_recover(componentIndex,
-                      "component type %s is not a registered component of entity storage"
-                            | componentType->fullname(),
-                      return RTTI::Value());
-    be_assert(componentIndex < storage->elementCount,
-              "component index %d out of range" | componentIndex);
+    be_assert(componentOffset < storage->elementCount,
+              "component index %d out of range" | componentOffset);
     return RTTI::Value(RTTI::Type::makeType(componentType,
                                             RTTI::Type::Value,
                                             RTTI::Type::Mutable,
                                             RTTI::Type::Const),
-                       storage->getElement(componentIndex));
+                       storage->getElement(componentOffset));
 }
 
 ComponentGroup& EntityStorage::getComponentGroup(ComponentIndex componentIndex)

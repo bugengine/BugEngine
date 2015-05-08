@@ -11,7 +11,7 @@ Bucket::Bucket()
     :   acceptMask()
     ,   maskSize()
     ,   componentSize()
-    ,   firstEntity()
+    ,   entityCount()
     ,   firstComponent()
 {
 }
@@ -20,7 +20,7 @@ Bucket::Bucket(u32 acceptMask, u32 componentSize)
     :   acceptMask(acceptMask)
     ,   maskSize(bitCount(acceptMask))
     ,   componentSize(componentSize)
-    ,   firstEntity()
+    ,   entityCount()
     ,   firstComponent(getFirstBit(acceptMask))
 {
 }

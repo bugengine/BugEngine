@@ -91,6 +91,7 @@ published: //TODO: just for testing, move back to private
 private:
     inline u32 getEntityInfoSize() const;
     EntityInfo& getEntityInfo(Entity e);
+    EntityInfo& getRawEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
     ComponentGroup& getComponentGroup(ComponentIndex index);
 
