@@ -14,7 +14,7 @@ struct Bucket
     u32 acceptMask;
     u32 maskSize;
     u32 componentSize;
-    u32 firstEntity;
+    u32 entityCount;
     u32 firstComponent;
 
     Bucket();

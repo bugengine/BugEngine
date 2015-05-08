@@ -44,6 +44,7 @@ published:
     void addComponent(Entity e, const RTTI::Value& v);
     void removeComponent(Entity e, raw<const RTTI::Class> metaclass);
     bool hasComponent(Entity e, raw<const RTTI::Class> metaclass) const;
+    RTTI::Value getComponent(Entity e, raw<const RTTI::Class> metaclass) const;
 published:
     World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> products);
     ~World();

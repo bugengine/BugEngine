@@ -80,5 +80,10 @@ void World::addComponent(Entity e, const RTTI::Value& component)
     addComponent(e, component.as<const Component&>(), component.type().metaclass);
 }
 
+RTTI::Value World::getComponent(Entity e, raw<const RTTI::Class> metaclass) const
+{
+    return m_storage->getComponent(e, metaclass);
+}
+
 }}
 

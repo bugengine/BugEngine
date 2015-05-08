@@ -58,7 +58,7 @@ private:
     OperationBuffer* sortEntityOperations(OperationDelta deltas[]);
     void executeEntityOperations(weak<EntityStorage> storage, const OperationDelta deltas[]);
     void repack(weak<EntityStorage> storage, u32 componentIndex, Bucket& bucket,
-                u32 entityCount, OperationDelta operations, i32 offset) const;
+                u32 firstEntity, u32 firstEntityStorage, OperationDelta operations, i32 offset) const;
     void runEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     BucketPair findBuckets(u32 mask1, u32 mask2);
 public:
