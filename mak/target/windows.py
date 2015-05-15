@@ -31,13 +31,17 @@ def set_windows_options(self, arch):
 def set_windows_gcc_options(self, options, version):
     v = self.env
     version_number = self.get_gcc_version_float(version)
-    v.append_unique('CFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
-    v.append_unique('CXXFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
-    v.append_unique('LINKFLAGS', options + ['-static-libgcc', '-static-libstdc++'])
+    v.append_unique('CFLAGS', options + ['-static-libgcc'])
+    v.append_unique('CXXFLAGS', options + ['-static-libgcc'])
+    v.append_unique('LINKFLAGS', options + ['-static-libgcc'])
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
+    if version_number >= 4.5:
+        v.append_unique('CFLAGS', ['-static-libstdc++'])
+        v.append_unique('CXXFLAGS', ['-static-libstdc++'])
+        v.append_unique('LINKFLAGS', ['-static-libstdc++'])
     if version_number >= 4.8:
         v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
